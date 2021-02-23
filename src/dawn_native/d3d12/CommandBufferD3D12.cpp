@@ -14,17 +14,11 @@
 
 #include "dawn_native/d3d12/CommandBufferD3D12.h"
 
-#include "common/Assert.h"
 #include "dawn_native/BindGroupTracker.h"
-#include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CommandValidation.h"
-#include "dawn_native/Commands.h"
-#include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/d3d12/BindGroupD3D12.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
-#include "dawn_native/d3d12/BufferD3D12.h"
-#include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/ComputePipelineD3D12.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
@@ -32,15 +26,9 @@
 #include "dawn_native/d3d12/QuerySetD3D12.h"
 #include "dawn_native/d3d12/RenderPassBuilderD3D12.h"
 #include "dawn_native/d3d12/RenderPipelineD3D12.h"
-#include "dawn_native/d3d12/SamplerD3D12.h"
-#include "dawn_native/d3d12/SamplerHeapCacheD3D12.h"
 #include "dawn_native/d3d12/ShaderVisibleDescriptorAllocatorD3D12.h"
 #include "dawn_native/d3d12/StagingDescriptorAllocatorD3D12.h"
-#include "dawn_native/d3d12/TextureCopySplitter.h"
-#include "dawn_native/d3d12/TextureD3D12.h"
 #include "dawn_native/d3d12/UtilsD3D12.h"
-
-#include <deque>
 
 namespace dawn_native { namespace d3d12 {
 

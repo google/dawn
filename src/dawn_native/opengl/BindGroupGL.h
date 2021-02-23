@@ -20,7 +20,6 @@
 
 namespace dawn_native { namespace opengl {
 
-    class BindGroupLayout;
     class Device;
 
     MaybeError ValidateGLBindGroupDescriptor(const BindGroupDescriptor* descriptor);

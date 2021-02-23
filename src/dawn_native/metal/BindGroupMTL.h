@@ -20,7 +20,6 @@
 
 namespace dawn_native { namespace metal {
 
-    class BindGroupLayout;
     class Device;
 
     class BindGroup final : public BindGroupBase, public PlacementAllocated {

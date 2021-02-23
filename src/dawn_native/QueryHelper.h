@@ -20,7 +20,6 @@
 namespace dawn_native {
 
     class BufferBase;
-    class DeviceBase;
     class CommandEncoder;
 
     struct TimestampParams {

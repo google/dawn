@@ -27,8 +27,6 @@
 
 namespace dawn_native {
 
-    struct BeginRenderPassCmd;
-
     using QueryAvailabilityMap = std::map<QuerySetBase*, std::vector<bool>>;
 
     class CommandEncoder final : public ObjectBase {

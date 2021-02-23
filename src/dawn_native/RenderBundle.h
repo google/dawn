@@ -28,7 +28,6 @@
 
 namespace dawn_native {
 
-    struct BeginRenderPassCmd;
     struct RenderBundleDescriptor;
     class RenderBundleEncoder;
 

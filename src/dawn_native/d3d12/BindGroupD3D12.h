@@ -25,7 +25,6 @@ namespace dawn_native { namespace d3d12 {
     class Device;
     class SamplerHeapCacheEntry;
     class ShaderVisibleDescriptorAllocator;
-    class StagingDescriptorAllocator;
 
     class BindGroup final : public BindGroupBase, public PlacementAllocated {
       public:

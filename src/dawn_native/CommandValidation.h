@@ -23,9 +23,7 @@
 
 namespace dawn_native {
 
-    class AttachmentState;
     class QuerySetBase;
-    struct BeginRenderPassCmd;
     struct PassResourceUsage;
     struct TexelBlockInfo;
 

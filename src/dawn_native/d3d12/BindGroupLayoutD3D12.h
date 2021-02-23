@@ -26,7 +26,6 @@ namespace dawn_native { namespace d3d12 {
     class BindGroup;
     class CPUDescriptorHeapAllocation;
     class Device;
-    class SamplerHeapCacheEntry;
     class StagingDescriptorAllocator;
 
     class BindGroupLayout final : public BindGroupLayoutBase {

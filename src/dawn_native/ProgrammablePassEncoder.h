@@ -25,7 +25,6 @@
 
 namespace dawn_native {
 
-    class CommandAllocator;
     class DeviceBase;
 
     // Base class for shared functionality between ComputePassEncoder and RenderPassEncoder.

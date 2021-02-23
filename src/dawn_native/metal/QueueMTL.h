@@ -19,7 +19,6 @@
 
 namespace dawn_native { namespace metal {
 
-    class CommandBuffer;
     class Device;
 
     class Queue final : public QueueBase {

@@ -15,24 +15,16 @@
 #ifndef DAWNNATIVE_D3D12_DEVICED3D12_H_
 #define DAWNNATIVE_D3D12_DEVICED3D12_H_
 
-#include "dawn_native/dawn_platform.h"
-
-#include "common/Constants.h"
 #include "common/SerialQueue.h"
-#include "dawn_native/BindingInfo.h"
-#include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/d3d12/CommandRecordingContext.h"
 #include "dawn_native/d3d12/D3D12Info.h"
 #include "dawn_native/d3d12/Forward.h"
-#include "dawn_native/d3d12/ResourceHeapAllocationD3D12.h"
-
-#include <memory>
+#include "dawn_native/d3d12/TextureD3D12.h"
 
 namespace dawn_native { namespace d3d12 {
 
     class CommandAllocatorManager;
-    class DescriptorHeapAllocator;
     class PlatformFunctions;
     class ResidencyManager;
     class ResourceAllocatorManager;

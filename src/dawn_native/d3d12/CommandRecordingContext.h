@@ -15,13 +15,15 @@
 #define DAWNNATIVE_D3D12_COMMANDRECORDINGCONTEXT_H_
 
 #include "dawn_native/Error.h"
-#include "dawn_native/d3d12/TextureD3D12.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 #include <set>
 
 namespace dawn_native { namespace d3d12 {
     class CommandAllocatorManager;
+    class Device;
+    class Heap;
     class Texture;
 
     class CommandRecordingContext {

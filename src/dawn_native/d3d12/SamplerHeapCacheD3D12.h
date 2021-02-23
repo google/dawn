@@ -21,7 +21,6 @@
 #include "dawn_native/d3d12/GPUDescriptorHeapAllocationD3D12.h"
 
 #include <unordered_set>
-#include <vector>
 
 // |SamplerHeapCacheEntry| maintains a cache of sampler descriptor heap allocations.
 // Each entry represents one or more sampler descriptors that co-exist in a CPU and

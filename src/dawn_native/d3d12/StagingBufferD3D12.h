@@ -21,7 +21,6 @@
 
 namespace dawn_native { namespace d3d12 {
 
-    class CommandRecordingContext;
     class Device;
 
     class StagingBuffer : public StagingBufferBase {

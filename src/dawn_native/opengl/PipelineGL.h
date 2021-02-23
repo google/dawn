@@ -29,7 +29,6 @@ namespace dawn_native {
 namespace dawn_native { namespace opengl {
 
     struct OpenGLFunctions;
-    class PersistentPipelineState;
     class PipelineLayout;
     class Sampler;
 

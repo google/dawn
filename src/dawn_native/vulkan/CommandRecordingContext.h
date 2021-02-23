@@ -18,11 +18,7 @@
 
 #include "dawn_native/vulkan/BufferVk.h"
 
-#include <vector>
-
 namespace dawn_native { namespace vulkan {
-    class Buffer;
-
     // Used to track operations that are handled after recording.
     // Currently only tracks semaphores, but may be used to do barrier coalescing in the future.
     struct CommandRecordingContext {

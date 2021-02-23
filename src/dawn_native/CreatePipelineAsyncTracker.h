@@ -25,7 +25,6 @@ namespace dawn_native {
 
     class ComputePipelineBase;
     class DeviceBase;
-    class PipelineBase;
     class RenderPipelineBase;
 
     struct CreatePipelineAsyncTaskBase {
