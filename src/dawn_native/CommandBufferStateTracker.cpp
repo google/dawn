@@ -210,9 +210,10 @@ namespace dawn_native {
         mAspects.reset(VALIDATION_ASPECT_BIND_GROUPS);
     }
 
-    void CommandBufferStateTracker::SetIndexBuffer(wgpu::IndexFormat format) {
+    void CommandBufferStateTracker::SetIndexBuffer(wgpu::IndexFormat format, uint64_t size) {
         mIndexBufferSet = true;
         mIndexFormat = format;
+        mIndexBufferSize = size;
     }
 
     void CommandBufferStateTracker::SetVertexBuffer(VertexBufferSlot slot) {

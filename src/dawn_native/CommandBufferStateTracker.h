@@ -38,11 +38,18 @@ namespace dawn_native {
         void SetComputePipeline(ComputePipelineBase* pipeline);
         void SetRenderPipeline(RenderPipelineBase* pipeline);
         void SetBindGroup(BindGroupIndex index, BindGroupBase* bindgroup);
-        void SetIndexBuffer(wgpu::IndexFormat format);
+        void SetIndexBuffer(wgpu::IndexFormat format, uint64_t size);
         void SetVertexBuffer(VertexBufferSlot slot);
 
         static constexpr size_t kNumAspects = 4;
         using ValidationAspects = std::bitset<kNumAspects>;
+
+        uint64_t GetIndexBufferSize() {
+            return mIndexBufferSize;
+        }
+        wgpu::IndexFormat GetIndexFormat() {
+            return mIndexFormat;
+        }
 
       private:
         MaybeError ValidateOperation(ValidationAspects requiredAspects);
@@ -57,6 +64,7 @@ namespace dawn_native {
         ityp::bitset<VertexBufferSlot, kMaxVertexBuffers> mVertexBufferSlotsUsed;
         bool mIndexBufferSet = false;
         wgpu::IndexFormat mIndexFormat;
+        uint64_t mIndexBufferSize = 0;
 
         PipelineLayoutBase* mLastPipelineLayout = nullptr;
         RenderPipelineBase* mLastRenderPipeline = nullptr;

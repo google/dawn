@@ -15,6 +15,7 @@
 #include "dawn_native/RenderEncoderBase.h"
 
 #include "common/Constants.h"
+#include "common/Log.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CommandValidation.h"
@@ -95,6 +96,14 @@ namespace dawn_native {
                 }
             }
 
+            if (static_cast<uint64_t>(firstIndex) + indexCount >
+                mCommandBufferState.GetIndexBufferSize() /
+                    IndexFormatSize(mCommandBufferState.GetIndexFormat())) {
+                // Index range is out of bounds
+                // Treat as no-op and skip issuing draw call
+                dawn::WarningLog() << "Index range is out of bounds";
+                return {};
+            }
             DrawIndexedCmd* draw = allocator->Allocate<DrawIndexedCmd>(Command::DrawIndexed);
             draw->indexCount = indexCount;
             draw->instanceCount = instanceCount;
@@ -235,7 +244,7 @@ namespace dawn_native {
                 }
             }
 
-            mCommandBufferState.SetIndexBuffer(format);
+            mCommandBufferState.SetIndexBuffer(format, size);
 
             SetIndexBufferCmd* cmd =
                 allocator->Allocate<SetIndexBufferCmd>(Command::SetIndexBuffer);
