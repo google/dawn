@@ -82,6 +82,7 @@ Program& Program::operator=(Program&& program) {
   ast_ = std::move(program.ast_);
   sem_ = std::move(program.sem_);
   symbols_ = std::move(program.symbols_);
+  diagnostics_ = std::move(program.diagnostics_);
   is_valid_ = program.is_valid_;
   return *this;
 }
