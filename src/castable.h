@@ -16,6 +16,7 @@
 #define SRC_CASTABLE_H_
 
 #include <cstdint>
+#include <functional>
 #include <type_traits>
 #include <utility>
 
@@ -48,7 +49,10 @@ class ClassID {
   /// Equality operator
   /// @param rhs the ClassID to compare against
   /// @returns true if this ClassID is equal to `rhs`
-  inline bool operator==(ClassID& rhs) const { return id == rhs.id; }
+  inline bool operator==(const ClassID& rhs) const { return id == rhs.id; }
+
+  /// @return the unique numerical identifier of this ClassID
+  inline uintptr_t ID() const { return id; }
 
  private:
   inline explicit ClassID(uintptr_t v) : id(v) {}
@@ -190,5 +194,21 @@ inline TO* As(FROM* obj) {
 }
 
 }  // namespace tint
+
+namespace std {
+
+/// Custom std::hash specialization for tint::ClassID so ClassID can be used as
+/// keys for std::unordered_map and std::unordered_set.
+template <>
+class hash<tint::ClassID> {
+ public:
+  /// @param id the ClassID to hash
+  /// @return the ClassID's internal numerical identifier
+  inline std::size_t operator()(const tint::ClassID& id) const {
+    return static_cast<std::size_t>(id.ID());
+  }
+};
+
+}  // namespace std
 
 #endif  // SRC_CASTABLE_H_
