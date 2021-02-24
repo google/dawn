@@ -26,9 +26,10 @@
 namespace tint {
 namespace transform {
 
-/// Manager for the provided passes. The passes will be execute in the
-/// appended order. If any pass fails the manager will return immediately and
-/// the error can be retrieved with the error() method.
+/// A collection of Transforms that act as a single Transform.
+/// The inner transforms will execute in the appended order.
+/// If any inner transform fails the manager will return immediately and
+/// the error can be retrieved with the Output's diagnostics.
 class Manager : public Transform {
  public:
   /// Constructor

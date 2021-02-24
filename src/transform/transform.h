@@ -54,9 +54,6 @@ class Transform {
   };
 
   /// Runs the transform on `program`, returning the transformation result.
-  /// @note Users of Tint should register the transform with transform manager
-  /// and invoke its Run(), instead of directly calling the transform's Run().
-  /// Calling Run() directly does not perform program state cleanup operations.
   /// @param program the source program to transform
   /// @returns the transformation result
   virtual Output Run(const Program* program) = 0;
