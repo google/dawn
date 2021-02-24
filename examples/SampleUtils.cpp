@@ -17,6 +17,7 @@
 #include "common/Assert.h"
 #include "common/Log.h"
 #include "common/Platform.h"
+#include "common/SystemUtils.h"
 #include "utils/BackendBinding.h"
 #include "utils/GLFWUtils.h"
 #include "utils/TerribleCommandBuffer.h"
@@ -89,6 +90,10 @@ static utils::TerribleCommandBuffer* c2sBuf = nullptr;
 static utils::TerribleCommandBuffer* s2cBuf = nullptr;
 
 wgpu::Device CreateCppDawnDevice() {
+    if (GetEnvironmentVar("ANGLE_DEFAULT_PLATFORM").empty()) {
+        SetEnvironmentVar("ANGLE_DEFAULT_PLATFORM", "swiftshader");
+    }
+
     glfwSetErrorCallback(PrintGLFWError);
     if (!glfwInit()) {
         return wgpu::Device();
