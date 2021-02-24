@@ -22,28 +22,36 @@
 
 namespace tint {
 
-/// Helper macro to instantiate the ClassID for `CLASS`.
-#define TINT_INSTANTIATE_CLASS_ID(CLASS) \
-  template <>                            \
-  const char ::tint::ClassID::Unique<CLASS>::token = 0
+class ClassID;
+
+/// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
+#define TINT_INSTANTIATE_CLASS_ID(CLASS)                \
+  template <>                                           \
+  const tint::ClassID tint::TypeInfo<CLASS>::class_id { \
+    tint::ClassID::New()                                \
+  }
+
+/// TypeInfo holds type information for the type T.
+/// TINT_INSTANTIATE_CLASS_ID() must be defined in a .cpp file for each type
+/// `T`.
+template <typename T>
+struct TypeInfo {
+  static const ClassID class_id;
+};
 
 /// ClassID represents a unique, comparable identifier for a C++ type.
 class ClassID {
- private:
-  /// Helper template that holds a single static field, which is used by Of()
-  /// to obtain a unique identifier by taking the field's address.
-  template <typename T>
-  struct Unique {
-    static const char token;
-  };
-
  public:
+  /// @returns a new and unique ClassID
+  static inline ClassID New() {
+    static uintptr_t next(0);
+    return ClassID(next++);
+  }
+
   /// @returns the unique ClassID for the type T.
   template <typename T>
-  static ClassID Of() {
-    // Take the address of a static variable to produce a unique identifier for
-    // the type T.
-    return ClassID{reinterpret_cast<uintptr_t>(&Unique<T>::token)};
+  static inline ClassID Of() {
+    return TypeInfo<T>::class_id;
   }
 
   /// Equality operator
@@ -81,7 +89,7 @@ class CastableBase {
 
   /// @returns true if this object is of, or derives from the class `TO`
   template <typename TO>
-  bool Is() const {
+  inline bool Is() const {
     using FROM = CastableBase;
     constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
     constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
@@ -146,13 +154,13 @@ class Castable : public BASE {
   /// @returns true if this object is of, or derives from a class with the
   /// ClassID `id`.
   /// @param id the ClassID to test for
-  bool Is(ClassID id) const override {
+  inline bool Is(ClassID id) const override {
     return ClassID::Of<CLASS>() == id || BASE::Is(id);
   }
 
   /// @returns true if this object is of, or derives from the class `TO`
   template <typename TO>
-  bool Is() const {
+  inline bool Is() const {
     using FROM = Castable;
     constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
     constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
