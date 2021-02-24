@@ -270,6 +270,9 @@ namespace {
                 {{member_transfer_type(member)}}* memberBuffer;
                 SERIALIZE_TRY(buffer->NextN(memberLength, &memberBuffer));
 
+                //* This loop cannot overflow because it iterates up to |memberLength|. Even if
+                //* memberLength were the maximum integer value, |i| would become equal to it just before
+                //* exiting the loop, but not increment past or wrap around.
                 for (decltype(memberLength) i = 0; i < memberLength; ++i) {
                     {{serialize_member(member, "record." + memberName + "[i]", "memberBuffer[i]" )}}
                 }
@@ -371,6 +374,9 @@ namespace {
                 {% if member.annotation == "const*const*" %}
                     {{as_cType(member.type.name)}}** pointerArray;
                     DESERIALIZE_TRY(GetSpace(allocator, memberLength, &pointerArray));
+                    //* This loop cannot overflow because it iterates up to |memberLength|. Even if
+                    //* memberLength were the maximum integer value, |i| would become equal to it just before
+                    //* exiting the loop, but not increment past or wrap around.
                     for (decltype(memberLength) i = 0; i < memberLength; ++i) {
                         pointerArray[i] = &copiedMembers[i];
                     }
@@ -379,6 +385,9 @@ namespace {
                     record->{{memberName}} = copiedMembers;
                 {% endif %}
 
+                //* This loop cannot overflow because it iterates up to |memberLength|. Even if
+                //* memberLength were the maximum integer value, |i| would become equal to it just before
+                //* exiting the loop, but not increment past or wrap around.
                 for (decltype(memberLength) i = 0; i < memberLength; ++i) {
                     {{deserialize_member(member, "memberBuffer[i]", "copiedMembers[i]")}}
                 }
