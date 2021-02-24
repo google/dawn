@@ -84,6 +84,13 @@ class Source {
     /// @param e the range end location
     inline Range(const Location& b, const Location& e) : begin(b), end(e) {}
 
+    /// Return a column-shifted Range
+    /// @param n the number of characters to shift by
+    /// @returns a Range with a #begin and #end column shifted by `n`
+    inline Range operator+(size_t n) const {
+      return Range{{begin.line, begin.column + n}, {end.line, end.column + n}};
+    }
+
     /// The location of the first character in the range.
     Location begin;
     /// The location of one-past the last character in the range.
@@ -125,6 +132,13 @@ class Source {
   /// @returns a Source that points to the end range of this Source.
   inline Source End() const {
     return Source(Range{range.end}, file_path, file_content);
+  }
+
+  /// Return a column-shifted Source
+  /// @param n the number of characters to shift by
+  /// @returns a Source with the range's columns shifted by `n`
+  inline Source operator+(size_t n) const {
+    return Source(range + n, file_path, file_content);
   }
 
   /// range is the span of text this source refers to in #file_path

@@ -15,6 +15,8 @@
 #ifndef SRC_SEMANTIC_MEMBER_ACCESSOR_EXPRESSION_H_
 #define SRC_SEMANTIC_MEMBER_ACCESSOR_EXPRESSION_H_
 
+#include <vector>
+
 #include "src/semantic/expression.h"
 
 namespace tint {
@@ -29,17 +31,24 @@ class MemberAccessorExpression
   /// @param declaration the AST node
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
-  /// @param is_swizzle true if this member access is for a vector swizzle
+  /// @param swizzle if this member access is for a vector swizzle, the swizzle
+  /// indices
   MemberAccessorExpression(ast::Expression* declaration,
                            type::Type* type,
                            Statement* statement,
-                           bool is_swizzle);
+                           std::vector<uint32_t> swizzle);
+
+  /// Destructor
+  ~MemberAccessorExpression() override;
 
   /// @return true if this member access is for a vector swizzle
-  bool IsSwizzle() const { return is_swizzle_; }
+  bool IsSwizzle() const { return !swizzle_.empty(); }
+
+  /// @return the swizzle indices, if this is a vector swizzle
+  const std::vector<uint32_t>& Swizzle() const { return swizzle_; }
 
  private:
-  bool const is_swizzle_;
+  std::vector<uint32_t> const swizzle_;
 };
 
 }  // namespace semantic

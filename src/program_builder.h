@@ -486,7 +486,10 @@ class ProgramBuilder {
 
   /// @param expr the expression
   /// @return expr
-  ast::Expression* Expr(ast::Expression* expr) { return expr; }
+  template <typename T>
+  traits::EnableIfIsType<T, ast::Expression>* Expr(T* expr) {
+    return expr;
+  }
 
   /// @param name the identifier name
   /// @return an ast::IdentifierExpression with the given name
@@ -948,7 +951,7 @@ class ProgramBuilder {
   /// @param idx the index argument for the array accessor expression
   /// @returns a `ast::MemberAccessorExpression` that indexes `obj` with `idx`
   template <typename OBJ, typename IDX>
-  ast::Expression* MemberAccessor(OBJ&& obj, IDX&& idx) {
+  ast::MemberAccessorExpression* MemberAccessor(OBJ&& obj, IDX&& idx) {
     return create<ast::MemberAccessorExpression>(Expr(std::forward<OBJ>(obj)),
                                                  Expr(std::forward<IDX>(idx)));
   }

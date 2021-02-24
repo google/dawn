@@ -91,22 +91,6 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
          stmts->last()->Is<ast::FallthroughStatement>();
 }
 
-uint32_t convert_swizzle_to_index(const std::string& swizzle) {
-  if (swizzle == "r" || swizzle == "x") {
-    return 0;
-  }
-  if (swizzle == "g" || swizzle == "y") {
-    return 1;
-  }
-  if (swizzle == "b" || swizzle == "z") {
-    return 2;
-  }
-  if (swizzle == "a" || swizzle == "w") {
-    return 3;
-  }
-  return 0;
-}
-
 const char* image_format_to_rwtexture_type(type::ImageFormat image_format) {
   switch (image_format) {
     case type::ImageFormat::kRgba8Unorm:
@@ -2084,11 +2068,13 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         out << str_member->offset();
 
       } else if (res_type->Is<type::Vector>()) {
+        auto swizzle = builder_.Sem().Get(mem)->Swizzle();
+
         // TODO(dsinclair): Swizzle stuff
         //
         // This must be a single element swizzle if we've got a vector at this
         // point.
-        if (builder_.Symbols().NameFor(mem->member()->symbol()).size() != 1) {
+        if (swizzle.size() != 1) {
           diagnostics_.add_error(
               "Encountered multi-element swizzle when should have only one "
               "level");
@@ -2098,10 +2084,7 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         // TODO(dsinclair): All our types are currently 4 bytes (f32, i32, u32)
         // so this is assuming 4. This will need to be fixed when we get f16 or
         // f64 types.
-        out << "(4 * "
-            << convert_swizzle_to_index(
-                   builder_.Symbols().NameFor(mem->member()->symbol()))
-            << ")";
+        out << "(4 * " << swizzle[0] << ")";
       } else {
         diagnostics_.add_error("Invalid result type for member accessor: " +
                                res_type->type_name());

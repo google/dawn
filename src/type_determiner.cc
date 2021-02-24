@@ -752,7 +752,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
   auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 
   type::Type* ret = nullptr;
-  bool is_swizzle = false;
+  std::vector<uint32_t> swizzle;
 
   if (auto* ty = data_type->As<type::Struct>()) {
     auto* strct = ty->impl();
@@ -777,9 +777,42 @@ bool TypeDeterminer::DetermineMemberAccessor(
       ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
     }
   } else if (auto* vec = data_type->As<type::Vector>()) {
-    is_swizzle = true;
+    std::string str = builder_->Symbols().NameFor(expr->member()->symbol());
+    auto size = str.size();
+    swizzle.reserve(str.size());
 
-    auto size = builder_->Symbols().NameFor(expr->member()->symbol()).size();
+    for (auto c : str) {
+      switch (c) {
+        case 'x':
+        case 'r':
+          swizzle.emplace_back(0);
+          break;
+        case 'y':
+        case 'g':
+          swizzle.emplace_back(1);
+          break;
+        case 'z':
+        case 'b':
+          swizzle.emplace_back(2);
+          break;
+        case 'w':
+        case 'a':
+          swizzle.emplace_back(3);
+          break;
+        default:
+          diagnostics_.add_error(
+              "invalid vector swizzle character",
+              expr->member()->source().Begin() + swizzle.size());
+          return false;
+      }
+    }
+
+    if (size < 1 || size > 4) {
+      diagnostics_.add_error("invalid vector swizzle size",
+                             expr->member()->source());
+      return false;
+    }
+
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
       ret = vec->type();
@@ -788,15 +821,15 @@ bool TypeDeterminer::DetermineMemberAccessor(
         ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
       }
     } else {
-      // The vector will have a number of components equal to the length of the
-      // swizzle. This assumes the validator will check that the swizzle
+      // The vector will have a number of components equal to the length of
+      // the swizzle. This assumes the validator will check that the swizzle
       // is correct.
       ret = builder_->create<type::Vector>(vec->type(),
                                            static_cast<uint32_t>(size));
     }
   } else {
     diagnostics_.add_error(
-        "v-0007: invalid use of member accessor on a non-vector/non-struct " +
+        "invalid use of member accessor on a non-vector/non-struct " +
             data_type->type_name(),
         expr->source());
     return false;
@@ -804,7 +837,7 @@ bool TypeDeterminer::DetermineMemberAccessor(
 
   builder_->Sem().Add(expr,
                       builder_->create<semantic::MemberAccessorExpression>(
-                          expr, ret, current_statement_, is_swizzle));
+                          expr, ret, current_statement_, std::move(swizzle)));
   SetType(expr, ret);
 
   return true;

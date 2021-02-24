@@ -55,6 +55,7 @@
 #include "src/semantic/call.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/function.h"
+#include "src/semantic/member_accessor_expression.h"
 #include "src/semantic/statement.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
@@ -75,6 +76,7 @@
 #include "src/type/u32_type.h"
 #include "src/type/vector_type.h"
 
+using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
 namespace tint {
@@ -1005,7 +1007,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 
-  auto* mem = MemberAccessor("my_vec", "xy");
+  auto* mem = MemberAccessor("my_vec", "xzyw");
   WrapInFunction(mem);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1013,13 +1015,14 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(mem)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(mem)->As<type::Vector>()->size(), 2u);
+  EXPECT_EQ(TypeOf(mem)->As<type::Vector>()->size(), 4u);
+  EXPECT_THAT(Sem().Get(mem)->Swizzle(), ElementsAre(0, 2, 1, 3));
 }
 
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 
-  auto* mem = MemberAccessor("my_vec", "x");
+  auto* mem = MemberAccessor("my_vec", "b");
   WrapInFunction(mem);
 
   EXPECT_TRUE(td()->Determine()) << td()->error();
@@ -1029,6 +1032,34 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
 
   auto* ptr = TypeOf(mem)->As<type::Pointer>();
   ASSERT_TRUE(ptr->type()->Is<type::F32>());
+  EXPECT_THAT(Sem().Get(mem)->Swizzle(), ElementsAre(2));
+}
+
+TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
+
+  auto* ident = create<ast::IdentifierExpression>(
+      Source{{Source::Location{3, 3}, Source::Location{3, 7}}},
+      Symbols().Register("xyqz"));
+
+  auto* mem = MemberAccessor("my_vec", ident);
+  WrapInFunction(mem);
+
+  EXPECT_FALSE(td()->Determine());
+  EXPECT_EQ(td()->error(), "3:5 error: invalid vector swizzle character");
+}
+
+TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
+
+  auto* ident = create<ast::IdentifierExpression>(
+      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
+      Symbols().Register("zzzzz"));
+  auto* mem = MemberAccessor("my_vec", ident);
+  WrapInFunction(mem);
+
+  EXPECT_FALSE(td()->Determine());
+  EXPECT_EQ(td()->error(), "3:3 error: invalid vector swizzle size");
 }
 
 TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
