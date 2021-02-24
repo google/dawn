@@ -2136,34 +2136,38 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
 Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
   Source source;
   if (match(Token::Type::kBracketLeft, &source)) {
-    auto param = logical_or_expression();
-    if (param.errored)
-      return Failure::kErrored;
-    if (!param.matched)
-      return add_error(peek(), "unable to parse expression inside []");
+    return sync(Token::Type::kBracketRight, [&]() -> Maybe<ast::Expression*> {
+      auto param = logical_or_expression();
+      if (param.errored)
+        return Failure::kErrored;
+      if (!param.matched)
+        return add_error(peek(), "unable to parse expression inside []");
 
-    if (!expect("array accessor", Token::Type::kBracketRight))
-      return Failure::kErrored;
+      if (!expect("array accessor", Token::Type::kBracketRight))
+        return Failure::kErrored;
 
-    return postfix_expr(
-        create<ast::ArrayAccessorExpression>(source, prefix, param.value));
+      return postfix_expr(
+          create<ast::ArrayAccessorExpression>(source, prefix, param.value));
+    });
   }
 
   if (match(Token::Type::kParenLeft, &source)) {
-    ast::ExpressionList params;
+    return sync(Token::Type::kParenRight, [&]() -> Maybe<ast::Expression*> {
+      ast::ExpressionList params;
 
-    auto t = peek();
-    if (!t.IsParenRight() && !t.IsEof()) {
-      auto list = expect_argument_expression_list();
-      if (list.errored)
+      auto t = peek();
+      if (!t.IsParenRight() && !t.IsEof()) {
+        auto list = expect_argument_expression_list();
+        if (list.errored)
+          return Failure::kErrored;
+        params = list.value;
+      }
+
+      if (!expect("call expression", Token::Type::kParenRight))
         return Failure::kErrored;
-      params = list.value;
-    }
 
-    if (!expect("call expression", Token::Type::kParenRight))
-      return Failure::kErrored;
-
-    return postfix_expr(create<ast::CallExpression>(source, prefix, params));
+      return postfix_expr(create<ast::CallExpression>(source, prefix, params));
+    });
   }
 
   if (match(Token::Type::kPeriod)) {
