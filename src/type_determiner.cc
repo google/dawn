@@ -170,8 +170,6 @@ bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
 
 bool TypeDeterminer::DetermineFunction(ast::Function* func) {
   auto* func_info = function_infos_.Create<FunctionInfo>(func);
-  symbol_to_function_[func->symbol()] = func_info;
-  function_to_info_.emplace(func, func_info);
 
   ScopedAssignment<FunctionInfo*> sa(current_function_, func_info);
 
@@ -184,6 +182,12 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
     return false;
   }
   variable_stack_.pop_scope();
+
+  // Register the function information _after_ processing the statements. This
+  // allows us to catch a function calling itself when determining the call
+  // information as this function doesn't exist until it's finished.
+  symbol_to_function_[func->symbol()] = func_info;
+  function_to_info_.emplace(func, func_info);
 
   return true;
 }
@@ -433,8 +437,15 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
 
       auto callee_func_it = symbol_to_function_.find(ident->symbol());
       if (callee_func_it == symbol_to_function_.end()) {
-        diagnostics_.add_error(
-            "v-0006: unable to find called function: " + name, call->source());
+        if (current_function_->declaration->symbol() == ident->symbol()) {
+          diagnostics_.add_error("recursion is not permitted. '" + name +
+                                     "' attempted to call itself.",
+                                 call->source());
+        } else {
+          diagnostics_.add_error(
+              "v-0006: unable to find called function: " + name,
+              call->source());
+        }
         return false;
       }
       auto* callee_func = callee_func_it->second;

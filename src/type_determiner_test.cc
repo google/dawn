@@ -402,6 +402,28 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
             "12:34 error: v-0006: unable to find called function: func");
 }
 
+TEST_F(TypeDeterminerTest, Stmt_Call_recursive) {
+  // fn main() -> void {main(); }
+
+  SetSource(Source::Location{12, 34});
+  auto* call_expr = Call("main");
+  ast::VariableList params0;
+
+  Func("main", params0, ty.f32(),
+       ast::StatementList{
+           create<ast::CallStatement>(call_expr),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_FALSE(td()->Determine());
+
+  EXPECT_EQ(td()->error(),
+            "12:34 error: recursion is not permitted. 'main' attempted to call "
+            "itself.");
+}
+
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
   auto* var = Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(2));
   auto* init = var->constructor();

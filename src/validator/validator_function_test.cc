@@ -175,45 +175,6 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   EXPECT_EQ(v.error(), "12:34 v-0016: function names must be unique 'func'");
 }
 
-TEST_F(ValidateFunctionTest, RecursionIsNotAllowed_Fail) {
-  // fn func() -> void {func(); return; }
-  ast::ExpressionList call_params;
-  auto* call_expr = create<ast::CallExpression>(
-      Source{Source::Location{12, 34}}, Expr("func"), call_params);
-
-  Func("func", ast::VariableList{}, ty.f32(),
-       ast::StatementList{
-           create<ast::CallStatement>(call_expr),
-           create<ast::ReturnStatement>(),
-       },
-       ast::FunctionDecorationList{});
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate()) << v.error();
-  EXPECT_EQ(v.error(), "12:34 v-0004: recursion is not allowed: 'func'");
-}
-
-TEST_F(ValidateFunctionTest, RecursionIsNotAllowedExpr_Fail) {
-  // fn func() -> i32 {var a: i32 = func(); return 2; }
-  ast::ExpressionList call_params;
-  auto* call_expr = create<ast::CallExpression>(
-      Source{Source::Location{12, 34}}, Expr("func"), call_params);
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, call_expr);
-
-  Func("func", ast::VariableList{}, ty.i32(),
-       ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
-           create<ast::ReturnStatement>(Expr(2)),
-       },
-       ast::FunctionDecorationList{});
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate()) << v.error();
-  EXPECT_EQ(v.error(), "12:34 v-0004: recursion is not allowed: 'func'");
-}
-
 TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
   // [[stage(vertex)]]
   // fn vtx_main() -> i32 { return 0; }
