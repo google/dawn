@@ -1075,8 +1075,6 @@ Impl::Impl() {
 
   auto* tex_1d_f32 = sampled_texture(Dim::k1d, f32);
   auto* tex_1d_T = sampled_texture(Dim::k1d, T);
-  auto* tex_1d_array_f32 = sampled_texture(Dim::k1dArray, f32);
-  auto* tex_1d_array_T = sampled_texture(Dim::k1dArray, T);
   auto* tex_2d_f32 = sampled_texture(Dim::k2d, f32);
   auto* tex_2d_T = sampled_texture(Dim::k2d, T);
   auto* tex_2d_array_f32 = sampled_texture(Dim::k2dArray, f32);
@@ -1095,8 +1093,6 @@ Impl::Impl() {
   auto* tex_depth_cube_array = depth_texture(Dim::kCubeArray);
   auto* tex_storage_1d_FT =
       storage_texture(Dim::k1d, OpenNumber::F, OpenType::T);
-  auto* tex_storage_1d_array_FT =
-      storage_texture(Dim::k1dArray, OpenNumber::F, OpenType::T);
   auto* tex_storage_2d_FT =
       storage_texture(Dim::k2d, OpenNumber::F, OpenType::T);
   auto* tex_storage_2d_array_FT =
@@ -1105,8 +1101,6 @@ Impl::Impl() {
       storage_texture(Dim::k3d, OpenNumber::F, OpenType::T);
   auto* tex_storage_ro_1d_FT =
       access_control(ast::AccessControl::kReadOnly, tex_storage_1d_FT);
-  auto* tex_storage_ro_1d_array_FT =
-      access_control(ast::AccessControl::kReadOnly, tex_storage_1d_array_FT);
   auto* tex_storage_ro_2d_FT =
       access_control(ast::AccessControl::kReadOnly, tex_storage_2d_FT);
   auto* tex_storage_ro_2d_array_FT =
@@ -1115,8 +1109,6 @@ Impl::Impl() {
       access_control(ast::AccessControl::kReadOnly, tex_storage_3d_FT);
   auto* tex_storage_wo_1d_FT =
       access_control(ast::AccessControl::kWriteOnly, tex_storage_1d_FT);
-  auto* tex_storage_wo_1d_array_FT =
-      access_control(ast::AccessControl::kWriteOnly, tex_storage_1d_array_FT);
   auto* tex_storage_wo_2d_FT =
       access_control(ast::AccessControl::kWriteOnly, tex_storage_2d_FT);
   auto* tex_storage_wo_2d_array_FT =
@@ -1143,7 +1135,6 @@ Impl::Impl() {
 
   //       name                   return type  parameter types
   Register(I::kTextureDimensions, i32,      {{t, tex_1d_T},                              }); // NOLINT
-  Register(I::kTextureDimensions, i32,      {{t, tex_1d_array_T},                        }); // NOLINT
   Register(I::kTextureDimensions, vec2_i32, {{t, tex_2d_T},                              }); // NOLINT
   Register(I::kTextureDimensions, vec2_i32, {{t, tex_2d_T},                {level, i32}, }); // NOLINT
   Register(I::kTextureDimensions, vec2_i32, {{t, tex_2d_array_T},                        }); // NOLINT
@@ -1165,18 +1156,15 @@ Impl::Impl() {
   Register(I::kTextureDimensions, vec3_i32, {{t, tex_depth_cube_array},                  }); // NOLINT
   Register(I::kTextureDimensions, vec3_i32, {{t, tex_depth_cube_array},    {level, i32}, }); // NOLINT
   Register(I::kTextureDimensions, i32,      {{t, tex_storage_1d_FT},                     }); // NOLINT
-  Register(I::kTextureDimensions, i32,      {{t, tex_storage_1d_array_FT},               }); // NOLINT
   Register(I::kTextureDimensions, vec2_i32, {{t, tex_storage_2d_FT},                     }); // NOLINT
   Register(I::kTextureDimensions, vec2_i32, {{t, tex_storage_2d_array_FT},               }); // NOLINT
   Register(I::kTextureDimensions, vec3_i32, {{t, tex_storage_3d_FT},                     }); // NOLINT
 
-  Register(I::kTextureNumLayers,  i32, {{t, tex_1d_array_T},          });
   Register(I::kTextureNumLayers,  i32, {{t, tex_2d_array_T},          });
   Register(I::kTextureNumLayers,  i32, {{t, tex_cube_array_T},        });
   Register(I::kTextureNumLayers,  i32, {{t, tex_ms_2d_array_T},       });
   Register(I::kTextureNumLayers,  i32, {{t, tex_depth_2d_array},      });
   Register(I::kTextureNumLayers,  i32, {{t, tex_depth_cube_array},    });
-  Register(I::kTextureNumLayers,  i32, {{t, tex_storage_1d_array_FT}, });
   Register(I::kTextureNumLayers,  i32, {{t, tex_storage_2d_array_FT}, });
 
   Register(I::kTextureNumLevels,  i32, {{t, tex_2d_T},             });
@@ -1193,7 +1181,6 @@ Impl::Impl() {
   Register(I::kTextureNumSamples, i32, {{t, tex_ms_2d_array_T}, });
 
   Register(I::kTextureSample, vec4_f32, {{t, tex_1d_f32},           {s, sampler}, {coords, f32},                                              }); // NOLINT
-  Register(I::kTextureSample, vec4_f32, {{t, tex_1d_array_f32},     {s, sampler}, {coords, f32},      {array_index, i32},                     }); // NOLINT
   Register(I::kTextureSample, vec4_f32, {{t, tex_2d_f32},           {s, sampler}, {coords, vec2_f32},                                         }); // NOLINT
   Register(I::kTextureSample, vec4_f32, {{t, tex_2d_f32},           {s, sampler}, {coords, vec2_f32},                     {offset, vec2_i32}, }); // NOLINT
   Register(I::kTextureSample, vec4_f32, {{t, tex_2d_array_f32},     {s, sampler}, {coords, vec2_f32}, {array_index, i32},                     }); // NOLINT
@@ -1250,7 +1237,6 @@ Impl::Impl() {
   Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_cube_array},{s, sampler}, {coords, vec3_f32}, {array_index, i32}, {level, i32},                     }); // NOLINT
 
   Register(I::kTextureStore, void_, {{t, tex_storage_wo_1d_FT},      {coords, i32},                          {value, vec4_T}, }); // NOLINT
-  Register(I::kTextureStore, void_, {{t, tex_storage_wo_1d_array_FT},{coords, i32},      {array_index, i32}, {value, vec4_T}, }); // NOLINT
   Register(I::kTextureStore, void_, {{t, tex_storage_wo_2d_FT},      {coords, vec2_i32},                     {value, vec4_T}, }); // NOLINT
   Register(I::kTextureStore, void_, {{t, tex_storage_wo_2d_array_FT},{coords, vec2_i32}, {array_index, i32}, {value, vec4_T}, }); // NOLINT
   Register(I::kTextureStore, void_, {{t, tex_storage_wo_3d_FT},      {coords, vec3_i32},                     {value, vec4_T}, }); // NOLINT
@@ -1263,7 +1249,6 @@ Impl::Impl() {
   Register(I::kTextureLoad, f32,    {{t, tex_depth_2d},           {coords, vec2_i32},                      {level, i32},                      }); // NOLINT
   Register(I::kTextureLoad, f32,    {{t, tex_depth_2d_array},     {coords, vec2_i32}, {array_index, i32},  {level, i32},                      }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_1d_FT},      {coords, i32},                                                              }); // NOLINT
-  Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_1d_array_FT},{coords, i32},      {array_index, i32},                                     }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_2d_FT},      {coords, vec2_i32},                                                         }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_2d_array_FT},{coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_3d_FT},      {coords, vec3_i32},                                                         }); // NOLINT
@@ -1273,11 +1258,9 @@ Impl::Impl() {
 
   // Overloads added in https://github.com/gpuweb/gpuweb/pull/1301
   Register(I::kTextureLoad, vec4_T, {{t, tex_1d_T},               {coords, i32},                           {level, i32},                      }); // NOLINT
-  Register(I::kTextureLoad, vec4_T, {{t, tex_1d_array_T},         {coords, i32},      {array_index, i32},  {level, i32},                      }); // NOLINT
 
   // Overloads removed in https://github.com/gpuweb/gpuweb/pull/1301
   Register(I::kTextureLoad, vec4_T, {{t, tex_1d_T},               {coords, i32},                                                              }); // NOLINT
-  Register(I::kTextureLoad, vec4_T, {{t, tex_1d_array_T},         {coords, i32},      {array_index, i32},                                     }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_2d_T},               {coords, vec2_i32},                                                         }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_2d_array_T},         {coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_3d_T},               {coords, vec3_i32},                                                         }); // NOLINT

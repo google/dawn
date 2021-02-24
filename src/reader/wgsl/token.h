@@ -284,8 +284,6 @@ class Token {
     kTextureMultisampled2d,
     /// A 'texture_1d'
     kTextureSampled1d,
-    /// A 'texture_1d_array'
-    kTextureSampled1dArray,
     /// A 'texture_2d'
     kTextureSampled2d,
     /// A 'texture_2d_array'
@@ -298,8 +296,6 @@ class Token {
     kTextureSampledCubeArray,
     /// A 'texture_storage_1d'
     kTextureStorage1d,
-    /// A 'texture_storage_1d_array'
-    kTextureStorage1dArray,
     /// A 'texture_storage_2d'
     kTextureStorage2d,
     /// A 'texture_storage_2d_array'
@@ -641,10 +637,6 @@ class Token {
   }
   /// @returns true if token is a 'texture_storage_1d'
   bool IsTextureStorage1d() const { return type_ == Type::kTextureStorage1d; }
-  /// @returns true if token is a 'texture_storage_1d_array'
-  bool IsTextureStorage1dArray() const {
-    return type_ == Type::kTextureStorage1dArray;
-  }
   /// @returns true if token is a 'texture_storage_2d'
   bool IsTextureStorage2d() const { return type_ == Type::kTextureStorage2d; }
   /// @returns true if token is a 'texture_storage_2d_array'
@@ -655,10 +647,6 @@ class Token {
   bool IsTextureStorage3d() const { return type_ == Type::kTextureStorage3d; }
   /// @returns true if token is a 'texture_1d'
   bool IsTextureSampled1d() const { return type_ == Type::kTextureSampled1d; }
-  /// @returns true if token is a 'texture_1d_array'
-  bool IsTextureSampled1dArray() const {
-    return type_ == Type::kTextureSampled1dArray;
-  }
   /// @returns true if token is a 'texture_2d'
   bool IsTextureSampled2d() const { return type_ == Type::kTextureSampled2d; }
   /// @returns true if token is a 'texture_2d_array'

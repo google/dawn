@@ -454,9 +454,6 @@ bool GeneratorImpl::EmitType(type::Type* type) {
       case type::TextureDimension::k1d:
         out_ << "1d";
         break;
-      case type::TextureDimension::k1dArray:
-        out_ << "1d_array";
-        break;
       case type::TextureDimension::k2d:
         out_ << "2d";
         break;

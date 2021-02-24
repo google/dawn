@@ -809,10 +809,6 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
             case type::TextureDimension::k1d:
               num_dimensions = 1;
               break;
-            case type::TextureDimension::k1dArray:
-              num_dimensions = 2;
-              swizzle = ".x";
-              break;
             case type::TextureDimension::k2d:
               num_dimensions = is_ms ? 3 : 2;
               swizzle = is_ms ? ".xy" : "";
@@ -843,10 +839,6 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
             default:
               TINT_ICE(diagnostics_) << "texture dimension is not arrayed";
               return false;
-            case type::TextureDimension::k1dArray:
-              num_dimensions = is_ms ? 3 : 2;
-              swizzle = ".y";
-              break;
             case type::TextureDimension::k2dArray:
               num_dimensions = is_ms ? 4 : 3;
               swizzle = ".z";
@@ -2509,9 +2501,6 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     switch (tex->dim()) {
       case type::TextureDimension::k1d:
         out << "1D";
-        break;
-      case type::TextureDimension::k1dArray:
-        out << "1DArray";
         break;
       case type::TextureDimension::k2d:
         out << (ms ? "2DMS" : "2D");

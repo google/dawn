@@ -92,7 +92,6 @@
 "texture_storage_2d_array"
 "texture_storage_3d"
 "texture_1d"
-"texture_1d_array"
 "texture_2d"
 "texture_2d_array"
 "texture_3d"

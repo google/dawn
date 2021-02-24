@@ -306,7 +306,6 @@ INSTANTIATE_TEST_SUITE_P(
         DimCase{SpvDim3D, false, true, type::TextureDimension::k3d},
         DimCase{SpvDimCube, false, true, type::TextureDimension::kCube},
         // Arrayed
-        DimCase{SpvDim1D, true, true, type::TextureDimension::k1dArray},
         DimCase{SpvDim2D, true, true, type::TextureDimension::k2dArray},
         DimCase{SpvDimCube, true, true, type::TextureDimension::kCubeArray}));
 

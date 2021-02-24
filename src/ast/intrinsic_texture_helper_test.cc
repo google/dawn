@@ -214,16 +214,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           [](ProgramBuilder* b) { return b->ExprList("texture"); },
       },
       {
-          ValidTextureOverload::kDimensions1dArray,
-          "textureDimensions(t : texture_1d_array<f32>) -> i32",
-          TextureKind::kRegular,
-          type::SamplerKind::kSampler,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kF32,
-          "textureDimensions",
-          [](ProgramBuilder* b) { return b->ExprList("texture"); },
-      },
-      {
           ValidTextureOverload::kDimensions2d,
           "textureDimensions(t : texture_2d<f32>) -> vec2<i32>",
           TextureKind::kRegular,
@@ -444,17 +434,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           [](ProgramBuilder* b) { return b->ExprList("texture"); },
       },
       {
-          ValidTextureOverload::kDimensionsStorageRO1dArray,
-          "textureDimensions(t : texture_storage_1d_array<rgba32float>) -> "
-          "i32",
-          ast::AccessControl::kReadOnly,
-          type::ImageFormat::kRgba32Float,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kF32,
-          "textureDimensions",
-          [](ProgramBuilder* b) { return b->ExprList("texture"); },
-      },
-      {
           ValidTextureOverload::kDimensionsStorageRO2d,
           "textureDimensions(t : texture_storage_2d<rgba32float>) -> "
           "vec2<i32>",
@@ -498,17 +477,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           [](ProgramBuilder* b) { return b->ExprList("texture"); },
       },
       {
-          ValidTextureOverload::kDimensionsStorageWO1dArray,
-          "textureDimensions(t : texture_storage_1d_array<rgba32float>) -> "
-          "i32",
-          ast::AccessControl::kWriteOnly,
-          type::ImageFormat::kRgba32Float,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kF32,
-          "textureDimensions",
-          [](ProgramBuilder* b) { return b->ExprList("texture"); },
-      },
-      {
           ValidTextureOverload::kDimensionsStorageWO2d,
           "textureDimensions(t : texture_storage_2d<rgba32float>) -> "
           "vec2<i32>",
@@ -539,16 +507,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           type::TextureDimension::k3d,
           TextureDataType::kF32,
           "textureDimensions",
-          [](ProgramBuilder* b) { return b->ExprList("texture"); },
-      },
-      {
-          ValidTextureOverload::kNumLayers1dArray,
-          "textureNumLayers(t : texture_1d_array<f32>) -> i32",
-          TextureKind::kRegular,
-          type::SamplerKind::kSampler,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kF32,
-          "textureNumLayers",
           [](ProgramBuilder* b) { return b->ExprList("texture"); },
       },
       {
@@ -597,16 +555,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           TextureKind::kDepth,
           type::SamplerKind::kSampler,
           type::TextureDimension::kCubeArray,
-          TextureDataType::kF32,
-          "textureNumLayers",
-          [](ProgramBuilder* b) { return b->ExprList("texture"); },
-      },
-      {
-          ValidTextureOverload::kNumLayersStorageWO1dArray,
-          "textureNumLayers(t : texture_storage_1d_array<rgba32float>) -> i32",
-          ast::AccessControl::kWriteOnly,
-          type::ImageFormat::kRgba32Float,
-          type::TextureDimension::k1dArray,
           TextureDataType::kF32,
           "textureNumLayers",
           [](ProgramBuilder* b) { return b->ExprList("texture"); },
@@ -745,24 +693,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             return b->ExprList("texture",  // t
                                "sampler",  // s
                                1.0f);      // coords
-          },
-      },
-      {
-          ValidTextureOverload::kSample1dArrayF32,
-          "textureSample(t           : texture_1d_array<f32>,\n"
-          "              s           : sampler,\n"
-          "              coords      : f32,\n"
-          "              array_index : i32) -> vec4<f32>",
-          TextureKind::kRegular,
-          type::SamplerKind::kSampler,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kF32,
-          "textureSample",
-          [](ProgramBuilder* b) {
-            return b->ExprList("texture",  // t
-                               "sampler",  // s
-                               1.0f,       // coords
-                               2);         // array_index
           },
       },
       {
@@ -1771,51 +1701,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           },
       },
       {
-          ValidTextureOverload::kLoad1dArrayF32,
-          "textureLoad(t           : texture_1d_array<f32>,\n"
-          "            coords      : i32,\n"
-          "            array_index : i32) -> vec4<f32>",
-          TextureKind::kRegular,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kF32,
-          "textureLoad",
-          [](ProgramBuilder* b) {
-            return b->ExprList("texture",  // t
-                               1,          // coords
-                               2);         // array_index
-          },
-      },
-      {
-          ValidTextureOverload::kLoad1dArrayU32,
-          "textureLoad(t           : texture_1d_array<u32>,\n"
-          "            coords      : i32,\n"
-          "            array_index : i32) -> vec4<u32>",
-          TextureKind::kRegular,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kU32,
-          "textureLoad",
-          [](ProgramBuilder* b) {
-            return b->ExprList("texture",  // t
-                               1,          // coords
-                               2);         // array_index
-          },
-      },
-      {
-          ValidTextureOverload::kLoad1dArrayI32,
-          "textureLoad(t           : texture_1d_array<i32>,\n"
-          "            coords      : i32,\n"
-          "            array_index : i32) -> vec4<i32>",
-          TextureKind::kRegular,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kI32,
-          "textureLoad",
-          [](ProgramBuilder* b) {
-            return b->ExprList("texture",  // t
-                               1,          // coords
-                               2);         // array_index
-          },
-      },
-      {
           ValidTextureOverload::kLoad2dF32,
           "textureLoad(t      : texture_2d<f32>,\n"
           "            coords : vec2<i32>) -> vec4<f32>",
@@ -2250,23 +2135,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           },
       },
       {
-          ValidTextureOverload::kLoadStorageRO1dArrayRgba32float,
-          "textureLoad(t           : "
-          "texture_storage_1d_array<rgba32float>,\n"
-          "            coords      : i32,\n"
-          "            array_index : i32) -> vec4<f32>",
-          ast::AccessControl::kReadOnly,
-          type::ImageFormat::kRgba32Float,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kF32,
-          "textureLoad",
-          [](ProgramBuilder* b) {
-            return b->ExprList("texture",  // t
-                               1,          // coords
-                               2);         // array_index
-          },
-      },
-      {
           ValidTextureOverload::kLoadStorageRO2dRgba8unorm,
           "textureLoad(t           : texture_storage_2d<rgba8unorm>,\n"
           "            coords      : vec2<i32>) -> vec4<f32>",
@@ -2535,24 +2403,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             return b->ExprList("texture",                          // t
                                1,                                  // coords
                                b->vec4<f32>(2.f, 3.f, 4.f, 5.f));  // value
-          },
-      },
-      {
-          ValidTextureOverload::kStoreWO1dArrayRgba32float,
-          "textureStore(t           : texture_storage_1d_array<rgba32float>,\n"
-          "             coords      : i32,\n"
-          "             array_index : i32,\n"
-          "             value       : vec4<T>) -> void",
-          ast::AccessControl::kWriteOnly,
-          type::ImageFormat::kRgba32Float,
-          type::TextureDimension::k1dArray,
-          TextureDataType::kF32,
-          "textureStore",
-          [](ProgramBuilder* b) {
-            return b->ExprList("texture",  // t
-                               1,          // coords
-                               2,          // array_index
-                               b->vec4<f32>(3.f, 4.f, 5.f, 6.f));  // value
           },
       },
       {

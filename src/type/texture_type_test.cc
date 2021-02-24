@@ -25,7 +25,6 @@ using TextureTypeTest = TestHelper;
 TEST_F(TextureTypeTest, IsTextureArray) {
   EXPECT_EQ(false, IsTextureArray(TextureDimension::kNone));
   EXPECT_EQ(false, IsTextureArray(TextureDimension::k1d));
-  EXPECT_EQ(true, IsTextureArray(TextureDimension::k1dArray));
   EXPECT_EQ(false, IsTextureArray(TextureDimension::k2d));
   EXPECT_EQ(true, IsTextureArray(TextureDimension::k2dArray));
   EXPECT_EQ(false, IsTextureArray(TextureDimension::k3d));
@@ -36,7 +35,6 @@ TEST_F(TextureTypeTest, IsTextureArray) {
 TEST_F(TextureTypeTest, NumCoordinateAxes) {
   EXPECT_EQ(0, NumCoordinateAxes(TextureDimension::kNone));
   EXPECT_EQ(1, NumCoordinateAxes(TextureDimension::k1d));
-  EXPECT_EQ(1, NumCoordinateAxes(TextureDimension::k1dArray));
   EXPECT_EQ(2, NumCoordinateAxes(TextureDimension::k2d));
   EXPECT_EQ(2, NumCoordinateAxes(TextureDimension::k2dArray));
   EXPECT_EQ(3, NumCoordinateAxes(TextureDimension::k3d));

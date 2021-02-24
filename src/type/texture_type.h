@@ -26,8 +26,6 @@ enum class TextureDimension {
   kNone = -1,
   /// 1 dimensional texture
   k1d,
-  /// 1 dimenstional array texture
-  k1dArray,
   /// 2 dimensional texture
   k2d,
   /// 2 dimensional array texture
@@ -47,7 +45,7 @@ bool IsTextureArray(TextureDimension dim);
 
 /// Returns the number of axes in the coordinate for a dimensionality.
 ///  None -> 0
-///  1D, 1DArray -> 1
+///  1D -> 1
 ///  2D, 2DArray -> 2
 ///  3D, Cube, CubeArray -> 3
 /// @param dim the TextureDimension to query

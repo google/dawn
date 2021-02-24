@@ -114,7 +114,6 @@ std::string CommonImageTypes() {
 
     ; sampled images
     %f_texture_1d          = OpTypeImage %float 1D   0 0 0 1 Unknown
-    %f_texture_1d_array    = OpTypeImage %float 1D   0 1 0 1 Unknown
     %f_texture_2d          = OpTypeImage %float 2D   0 0 0 1 Unknown
     %f_texture_2d_ms       = OpTypeImage %float 2D   0 0 1 1 Unknown
     %f_texture_2d_array    = OpTypeImage %float 2D   0 1 0 1 Unknown
@@ -125,7 +124,6 @@ std::string CommonImageTypes() {
 
     ; storage images
     %f_storage_1d         = OpTypeImage %float 1D   0 0 0 1 Rg32f
-    %f_storage_1d_array   = OpTypeImage %float 1D   0 1 0 1 Rg32f
     %f_storage_2d         = OpTypeImage %float 2D   0 0 0 1 Rg32f
     %f_storage_2d_array   = OpTypeImage %float 2D   0 1 0 1 Rg32f
     %f_storage_3d         = OpTypeImage %float 3D   0 0 0 1 Rg32f
@@ -133,7 +131,6 @@ std::string CommonImageTypes() {
     ; Now all the same, but for unsigned integer sampled type.
 
     %u_texture_1d          = OpTypeImage %uint  1D   0 0 0 1 Unknown
-    %u_texture_1d_array    = OpTypeImage %uint  1D   0 1 0 1 Unknown
     %u_texture_2d          = OpTypeImage %uint  2D   0 0 0 1 Unknown
     %u_texture_2d_ms       = OpTypeImage %uint  2D   0 0 1 1 Unknown
     %u_texture_2d_array    = OpTypeImage %uint  2D   0 1 0 1 Unknown
@@ -143,7 +140,6 @@ std::string CommonImageTypes() {
     %u_texture_cube_array  = OpTypeImage %uint  Cube 0 1 0 1 Unknown
 
     %u_storage_1d         = OpTypeImage %uint  1D   0 0 0 1 Rg32ui
-    %u_storage_1d_array   = OpTypeImage %uint  1D   0 1 0 1 Rg32ui
     %u_storage_2d         = OpTypeImage %uint  2D   0 0 0 1 Rg32ui
     %u_storage_2d_array   = OpTypeImage %uint  2D   0 1 0 1 Rg32ui
     %u_storage_3d         = OpTypeImage %uint  3D   0 0 0 1 Rg32ui
@@ -151,7 +147,6 @@ std::string CommonImageTypes() {
     ; Now all the same, but for signed integer sampled type.
 
     %i_texture_1d          = OpTypeImage %int  1D   0 0 0 1 Unknown
-    %i_texture_1d_array    = OpTypeImage %int  1D   0 1 0 1 Unknown
     %i_texture_2d          = OpTypeImage %int  2D   0 0 0 1 Unknown
     %i_texture_2d_ms       = OpTypeImage %int  2D   0 0 1 1 Unknown
     %i_texture_2d_array    = OpTypeImage %int  2D   0 1 0 1 Unknown
@@ -161,7 +156,6 @@ std::string CommonImageTypes() {
     %i_texture_cube_array  = OpTypeImage %int  Cube 0 1 0 1 Unknown
 
     %i_storage_1d         = OpTypeImage %int  1D   0 0 0 1 Rg32i
-    %i_storage_1d_array   = OpTypeImage %int  1D   0 1 0 1 Rg32i
     %i_storage_2d         = OpTypeImage %int  2D   0 0 0 1 Rg32i
     %i_storage_2d_array   = OpTypeImage %int  2D   0 1 0 1 Rg32i
     %i_storage_3d         = OpTypeImage %int  3D   0 0 0 1 Rg32i
@@ -171,7 +165,6 @@ std::string CommonImageTypes() {
     %ptr_sampler = OpTypePointer UniformConstant %sampler
 
     %ptr_f_texture_1d          = OpTypePointer UniformConstant %f_texture_1d
-    %ptr_f_texture_1d_array    = OpTypePointer UniformConstant %f_texture_1d_array
     %ptr_f_texture_2d          = OpTypePointer UniformConstant %f_texture_2d
     %ptr_f_texture_2d_ms       = OpTypePointer UniformConstant %f_texture_2d_ms
     %ptr_f_texture_2d_array    = OpTypePointer UniformConstant %f_texture_2d_array
@@ -182,7 +175,6 @@ std::string CommonImageTypes() {
 
     ; storage images
     %ptr_f_storage_1d         = OpTypePointer UniformConstant %f_storage_1d
-    %ptr_f_storage_1d_array   = OpTypePointer UniformConstant %f_storage_1d_array
     %ptr_f_storage_2d         = OpTypePointer UniformConstant %f_storage_2d
     %ptr_f_storage_2d_array   = OpTypePointer UniformConstant %f_storage_2d_array
     %ptr_f_storage_3d         = OpTypePointer UniformConstant %f_storage_3d
@@ -190,7 +182,6 @@ std::string CommonImageTypes() {
     ; Now all the same, but for unsigned integer sampled type.
 
     %ptr_u_texture_1d          = OpTypePointer UniformConstant %u_texture_1d
-    %ptr_u_texture_1d_array    = OpTypePointer UniformConstant %u_texture_1d_array
     %ptr_u_texture_2d          = OpTypePointer UniformConstant %u_texture_2d
     %ptr_u_texture_2d_ms       = OpTypePointer UniformConstant %u_texture_2d_ms
     %ptr_u_texture_2d_array    = OpTypePointer UniformConstant %u_texture_2d_array
@@ -200,7 +191,6 @@ std::string CommonImageTypes() {
     %ptr_u_texture_cube_array  = OpTypePointer UniformConstant %u_texture_cube_array
 
     %ptr_u_storage_1d         = OpTypePointer UniformConstant %u_storage_1d
-    %ptr_u_storage_1d_array   = OpTypePointer UniformConstant %u_storage_1d_array
     %ptr_u_storage_2d         = OpTypePointer UniformConstant %u_storage_2d
     %ptr_u_storage_2d_array   = OpTypePointer UniformConstant %u_storage_2d_array
     %ptr_u_storage_3d         = OpTypePointer UniformConstant %u_storage_3d
@@ -208,7 +198,6 @@ std::string CommonImageTypes() {
     ; Now all the same, but for signed integer sampled type.
 
     %ptr_i_texture_1d          = OpTypePointer UniformConstant %i_texture_1d
-    %ptr_i_texture_1d_array    = OpTypePointer UniformConstant %i_texture_1d_array
     %ptr_i_texture_2d          = OpTypePointer UniformConstant %i_texture_2d
     %ptr_i_texture_2d_ms       = OpTypePointer UniformConstant %i_texture_2d_ms
     %ptr_i_texture_2d_array    = OpTypePointer UniformConstant %i_texture_2d_array
@@ -218,7 +207,6 @@ std::string CommonImageTypes() {
     %ptr_i_texture_cube_array  = OpTypePointer UniformConstant %i_texture_cube_array
 
     %ptr_i_storage_1d         = OpTypePointer UniformConstant %i_storage_1d
-    %ptr_i_storage_1d_array   = OpTypePointer UniformConstant %i_storage_1d_array
     %ptr_i_storage_2d         = OpTypePointer UniformConstant %i_storage_2d
     %ptr_i_storage_2d_array   = OpTypePointer UniformConstant %i_storage_2d_array
     %ptr_i_storage_3d         = OpTypePointer UniformConstant %i_storage_3d
@@ -3810,43 +3798,8 @@ INSTANTIATE_TEST_SUITE_P(
     // is readonly or writeonly.
     SpvParserTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
-        // 1D array storage image
-        {"%float 1D 0 1 0 2 Rgba32f",
-         "%99 = OpImageQuerySize %v2int %im \n"
-         "%98 = OpImageRead %v4float %im %vi12\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __access_control_read_only__storage_texture_1d_array_rgba32float
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_2__i32
-        {
-          TypeConstructor[not set]{
-            __vec_2__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-            Call[not set]{
-              Identifier[not set]{textureNumLayers}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"},
+        // 1D array storage image doesn't exist.
+
         // 2D array storage image
         {"%float 2D 0 1 0 2 Rgba32f",
          "%99 = OpImageQuerySize %v3int %im \n"
@@ -4132,43 +4085,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
 
-        // 1D arrayed
-        {"%float 1D 0 1 0 1 Unknown",
-         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __sampled_texture_1d_array__f32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_2__i32
-        {
-          TypeConstructor[not set]{
-            __vec_2__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
-            }
-            Call[not set]{
-              Identifier[not set]{textureNumLayers}
-              (
-                Identifier[not set]{x_20}
-              )
-            }
-          }
-        }
-      }
-    })"},
+        // There is no 1D array
 
         // 2D array
         {"%float 2D 0 1 0 1 Unknown",
@@ -5530,13 +5447,6 @@ INSTANTIATE_TEST_SUITE_P(
          "bad or unsupported coordinate type for image access: %71 = "
          "OpImageSampleImplicitLod %42 %70 %1",
          {}},
-        {"%float 1D 0 1 0 1 Unknown",  // 1DArray
-         "%result = OpImageSampleImplicitLod "
-         // 1 component, but need 2
-         "%v4float %sampled_image %f1",
-         "image access required 2 coordinate components, but only 1 provided, "
-         "in: %71 = OpImageSampleImplicitLod %42 %70 %12",
-         {}},
         {"%float 2D 0 0 0 1 Unknown",  // 2D
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
@@ -5637,12 +5547,6 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // 1D
         {"%uint 1D 0 0 0 1 Unknown",
-         "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf1234 "
-         "ConstOffset %the_vu12",
-         "ConstOffset is only permitted for 2D, 2D Arrayed, and 3D textures: ",
-         {}},
-        // 1D Array
-        {"%uint 1D 0 1 0 1 Unknown",
          "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf1234 "
          "ConstOffset %the_vu12",
          "ConstOffset is only permitted for 2D, 2D Arrayed, and 3D textures: ",

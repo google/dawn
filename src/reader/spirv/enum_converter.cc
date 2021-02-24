@@ -102,8 +102,6 @@ ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b, ast::StorageClass sc) {
 type::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
   if (arrayed) {
     switch (dim) {
-      case SpvDim1D:
-        return type::TextureDimension::k1dArray;
       case SpvDim2D:
         return type::TextureDimension::k2dArray;
       case SpvDimCube:

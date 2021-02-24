@@ -67,8 +67,6 @@ TypeTextureDimensionToResourceBindingTextureDimension(
   switch (type_dim) {
     case type::TextureDimension::k1d:
       return ResourceBinding::TextureDimension::k1d;
-    case type::TextureDimension::k1dArray:
-      return ResourceBinding::TextureDimension::k1dArray;
     case type::TextureDimension::k2d:
       return ResourceBinding::TextureDimension::k2d;
     case type::TextureDimension::k2dArray:

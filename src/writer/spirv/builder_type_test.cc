@@ -783,24 +783,6 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
 )");
 }
 
-TEST_F(BuilderTest_Type, SampledTexture_Generate_1dArray) {
-  auto* s =
-      create<type::SampledTexture>(type::TextureDimension::k1dArray, ty.f32());
-
-  spirv::Builder& b = Build();
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()),
-            R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 1D 0 1 0 1 Unknown
-)");
-
-  EXPECT_EQ(DumpInstructions(b.capabilities()),
-            R"(OpCapability Sampled1D
-)");
-}
-
 TEST_F(BuilderTest_Type, SampledTexture_Generate_2d) {
   auto* s = create<type::SampledTexture>(type::TextureDimension::k2d, ty.f32());
 
@@ -970,28 +952,6 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Sint) {
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
 %1 = OpTypeImage %2 1D 0 0 0 2 R8i
-)");
-}
-
-TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_array) {
-  auto* subtype =
-      type::StorageTexture::SubtypeFor(type::ImageFormat::kR16Float, Types());
-  auto* s = create<type::StorageTexture>(type::TextureDimension::k1dArray,
-                                         type::ImageFormat::kR16Float, subtype);
-
-  Global("test_var", s, ast::StorageClass::kNone);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 1D 0 1 0 2 R16f
-)");
-
-  EXPECT_EQ(DumpInstructions(b.capabilities()),
-            R"(OpCapability Image1D
-OpCapability StorageImageExtendedFormats
 )");
 }
 

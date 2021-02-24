@@ -1499,7 +1499,6 @@ class Intrinsic_TextureOperation
   type::Type* GetCoordsType(type::TextureDimension dim, type::Type* scalar) {
     switch (dim) {
       case type::TextureDimension::k1d:
-      case type::TextureDimension::k1dArray:
         return scalar;
       case type::TextureDimension::k2d:
       case type::TextureDimension::k2dArray:
@@ -1580,12 +1579,6 @@ INSTANTIATE_TEST_SUITE_P(
                           type::ImageFormat::kR16Sint},
         TextureTestParams{type::TextureDimension::k1d, Texture::kF32,
                           type::ImageFormat::kR8Unorm},
-        TextureTestParams{type::TextureDimension::k1dArray, Texture::kF32,
-                          type::ImageFormat::kR16Float},
-        TextureTestParams{type::TextureDimension::k1dArray, Texture::kI32,
-                          type::ImageFormat::kR16Sint},
-        TextureTestParams{type::TextureDimension::k1dArray, Texture::kF32,
-                          type::ImageFormat::kR8Unorm},
         TextureTestParams{type::TextureDimension::k2d, Texture::kF32,
                           type::ImageFormat::kR16Float},
         TextureTestParams{type::TextureDimension::k2d, Texture::kI32,
@@ -1641,7 +1634,6 @@ INSTANTIATE_TEST_SUITE_P(
     TypeDeterminerTest,
     Intrinsic_SampledTextureOperation,
     testing::Values(TextureTestParams{type::TextureDimension::k1d},
-                    TextureTestParams{type::TextureDimension::k1dArray},
                     TextureTestParams{type::TextureDimension::k2d},
                     TextureTestParams{type::TextureDimension::k2dArray},
                     TextureTestParams{type::TextureDimension::k3d}));
@@ -3168,7 +3160,6 @@ const char* expected_texture_overload(
   using ValidTextureOverload = ast::intrinsic::test::ValidTextureOverload;
   switch (overload) {
     case ValidTextureOverload::kDimensions1d:
-    case ValidTextureOverload::kDimensions1dArray:
     case ValidTextureOverload::kDimensions2d:
     case ValidTextureOverload::kDimensions2dArray:
     case ValidTextureOverload::kDimensions3d:
@@ -3181,23 +3172,19 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kDimensionsDepthCube:
     case ValidTextureOverload::kDimensionsDepthCubeArray:
     case ValidTextureOverload::kDimensionsStorageRO1d:
-    case ValidTextureOverload::kDimensionsStorageRO1dArray:
     case ValidTextureOverload::kDimensionsStorageRO2d:
     case ValidTextureOverload::kDimensionsStorageRO2dArray:
     case ValidTextureOverload::kDimensionsStorageRO3d:
     case ValidTextureOverload::kDimensionsStorageWO1d:
-    case ValidTextureOverload::kDimensionsStorageWO1dArray:
     case ValidTextureOverload::kDimensionsStorageWO2d:
     case ValidTextureOverload::kDimensionsStorageWO2dArray:
     case ValidTextureOverload::kDimensionsStorageWO3d:
       return R"(textureDimensions(texture))";
-    case ValidTextureOverload::kNumLayers1dArray:
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
     case ValidTextureOverload::kNumLayersMultisampled2dArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
     case ValidTextureOverload::kNumLayersDepthCubeArray:
-    case ValidTextureOverload::kNumLayersStorageWO1dArray:
     case ValidTextureOverload::kNumLayersStorageWO2dArray:
       return R"(textureNumLayers(texture))";
     case ValidTextureOverload::kNumLevels2d:
@@ -3225,8 +3212,6 @@ const char* expected_texture_overload(
       return R"(textureDimensions(texture, level))";
     case ValidTextureOverload::kSample1dF32:
       return R"(textureSample(texture, sampler, coords))";
-    case ValidTextureOverload::kSample1dArrayF32:
-      return R"(textureSample(texture, sampler, coords, array_index))";
     case ValidTextureOverload::kSample2dF32:
       return R"(textureSample(texture, sampler, coords))";
     case ValidTextureOverload::kSample2dOffsetF32:
@@ -3333,12 +3318,6 @@ const char* expected_texture_overload(
       return R"(textureLoad(texture, coords))";
     case ValidTextureOverload::kLoad1dI32:
       return R"(textureLoad(texture, coords))";
-    case ValidTextureOverload::kLoad1dArrayF32:
-      return R"(textureLoad(texture, coords, array_index))";
-    case ValidTextureOverload::kLoad1dArrayU32:
-      return R"(textureLoad(texture, coords, array_index))";
-    case ValidTextureOverload::kLoad1dArrayI32:
-      return R"(textureLoad(texture, coords, array_index))";
     case ValidTextureOverload::kLoad2dF32:
       return R"(textureLoad(texture, coords))";
     case ValidTextureOverload::kLoad2dU32:
@@ -3397,8 +3376,6 @@ const char* expected_texture_overload(
       return R"(textureLoad(texture, coords, array_index, level))";
     case ValidTextureOverload::kLoadStorageRO1dRgba32float:
       return R"(textureLoad(texture, coords))";
-    case ValidTextureOverload::kLoadStorageRO1dArrayRgba32float:
-      return R"(textureLoad(texture, coords, array_index))";
     case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
     case ValidTextureOverload::kLoadStorageRO2dRgba8snorm:
     case ValidTextureOverload::kLoadStorageRO2dRgba8uint:
@@ -3422,8 +3399,6 @@ const char* expected_texture_overload(
       return R"(textureLoad(texture, coords))";
     case ValidTextureOverload::kStoreWO1dRgba32float:
       return R"(textureStore(texture, coords, value))";
-    case ValidTextureOverload::kStoreWO1dArrayRgba32float:
-      return R"(textureStore(texture, coords, array_index, value))";
     case ValidTextureOverload::kStoreWO2dRgba32float:
       return R"(textureStore(texture, coords, value))";
     case ValidTextureOverload::kStoreWO2dArrayRgba32float:
@@ -3450,7 +3425,6 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
       default:
         FAIL() << "invalid texture dimensions: " << param.texture_dimension;
       case type::TextureDimension::k1d:
-      case type::TextureDimension::k1dArray:
         EXPECT_EQ(TypeOf(call)->type_name(), ty.i32()->type_name());
         break;
       case type::TextureDimension::k2d:

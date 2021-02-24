@@ -657,8 +657,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kSwitch, source, "switch"};
   if (str == "texture_1d")
     return {Token::Type::kTextureSampled1d, source, "texture_1d"};
-  if (str == "texture_1d_array")
-    return {Token::Type::kTextureSampled1dArray, source, "texture_1d_array"};
   if (str == "texture_2d")
     return {Token::Type::kTextureSampled2d, source, "texture_2d"};
   if (str == "texture_2d_array")
@@ -689,10 +687,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
   }
   if (str == "texture_storage_1d") {
     return {Token::Type::kTextureStorage1d, source, "texture_storage_1d"};
-  }
-  if (str == "texture_storage_1d_array") {
-    return {Token::Type::kTextureStorage1dArray, source,
-            "texture_storage_1d_array"};
   }
   if (str == "texture_storage_2d") {
     return {Token::Type::kTextureStorage2d, source, "texture_storage_2d"};

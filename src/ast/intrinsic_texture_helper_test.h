@@ -38,7 +38,6 @@ std::ostream& operator<<(std::ostream& out, const TextureDataType& ty);
 /// Non-exhaustive list of valid texture overloads
 enum class ValidTextureOverload {
   kDimensions1d,
-  kDimensions1dArray,
   kDimensions2d,
   kDimensions2dLevel,
   kDimensions2dArray,
@@ -60,22 +59,18 @@ enum class ValidTextureOverload {
   kDimensionsDepthCubeArray,
   kDimensionsDepthCubeArrayLevel,
   kDimensionsStorageRO1d,
-  kDimensionsStorageRO1dArray,
   kDimensionsStorageRO2d,
   kDimensionsStorageRO2dArray,
   kDimensionsStorageRO3d,
   kDimensionsStorageWO1d,
-  kDimensionsStorageWO1dArray,
   kDimensionsStorageWO2d,
   kDimensionsStorageWO2dArray,
   kDimensionsStorageWO3d,
-  kNumLayers1dArray,
   kNumLayers2dArray,
   kNumLayersCubeArray,
   kNumLayersMultisampled2dArray,
   kNumLayersDepth2dArray,
   kNumLayersDepthCubeArray,
-  kNumLayersStorageWO1dArray,
   kNumLayersStorageWO2dArray,
   kNumLevels2d,
   kNumLevels2dArray,
@@ -89,7 +84,6 @@ enum class ValidTextureOverload {
   kNumSamplesMultisampled2d,
   kNumSamplesMultisampled2dArray,
   kSample1dF32,
-  kSample1dArrayF32,
   kSample2dF32,
   kSample2dOffsetF32,
   kSample2dArrayF32,
@@ -143,9 +137,6 @@ enum class ValidTextureOverload {
   kLoad1dF32,
   kLoad1dU32,
   kLoad1dI32,
-  kLoad1dArrayF32,
-  kLoad1dArrayU32,
-  kLoad1dArrayI32,
   kLoad2dF32,
   kLoad2dU32,
   kLoad2dI32,
@@ -175,7 +166,6 @@ enum class ValidTextureOverload {
   kLoadDepth2dArrayF32,
   kLoadDepth2dArrayLevelF32,
   kLoadStorageRO1dRgba32float,       // Not permutated for all texel formats
-  kLoadStorageRO1dArrayRgba32float,  // Not permutated for all texel formats
   kLoadStorageRO2dRgba8unorm,
   kLoadStorageRO2dRgba8snorm,
   kLoadStorageRO2dRgba8uint,
@@ -195,7 +185,6 @@ enum class ValidTextureOverload {
   kLoadStorageRO2dArrayRgba32float,  // Not permutated for all texel formats
   kLoadStorageRO3dRgba32float,       // Not permutated for all texel formats
   kStoreWO1dRgba32float,             // Not permutated for all texel formats
-  kStoreWO1dArrayRgba32float,        // Not permutated for all texel formats
   kStoreWO2dRgba32float,             // Not permutated for all texel formats
   kStoreWO2dArrayRgba32float,        // Not permutated for all texel formats
   kStoreWO3dRgba32float,             // Not permutated for all texel formats

@@ -33,9 +33,6 @@ std::ostream& operator<<(std::ostream& out, TextureDimension dim) {
     case TextureDimension::k1d:
       out << "1d";
       break;
-    case TextureDimension::k1dArray:
-      out << "1d_array";
-      break;
     case TextureDimension::k2d:
       out << "2d";
       break;
@@ -57,7 +54,6 @@ std::ostream& operator<<(std::ostream& out, TextureDimension dim) {
 
 bool IsTextureArray(TextureDimension dim) {
   switch (dim) {
-    case TextureDimension::k1dArray:
     case TextureDimension::k2dArray:
     case TextureDimension::kCubeArray:
       return true;
@@ -76,7 +72,6 @@ int NumCoordinateAxes(TextureDimension dim) {
     case TextureDimension::kNone:
       return 0;
     case TextureDimension::k1d:
-    case TextureDimension::k1dArray:
       return 1;
     case TextureDimension::k2d:
     case TextureDimension::k2dArray:

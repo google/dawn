@@ -586,7 +586,6 @@ class InspectorHelper : public ProgramBuilder {
   type::Type* GetCoordsType(type::TextureDimension dim, type::Type* scalar) {
     switch (dim) {
       case type::TextureDimension::k1d:
-      case type::TextureDimension::k1dArray:
         return scalar;
       case type::TextureDimension::k2d:
       case type::TextureDimension::k2dArray:
@@ -2353,10 +2352,6 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
     testing::Values(
         GetSampledTextureTestParams{
-            type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kFloat},
-        GetSampledTextureTestParams{
             type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kFloat},
@@ -2471,18 +2466,6 @@ INSTANTIATE_TEST_SUITE_P(
     InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
     testing::Values(
         GetMultisampledTextureTestParams{
-            type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kFloat},
-        GetMultisampledTextureTestParams{
-            type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kSInt},
-        GetMultisampledTextureTestParams{
-            type::TextureDimension::k1dArray,
-            inspector::ResourceBinding::TextureDimension::k1dArray,
-            inspector::ResourceBinding::SampledKind::kUInt},
-        GetMultisampledTextureTestParams{
             type::TextureDimension::k2dArray,
             inspector::ResourceBinding::TextureDimension::k2dArray,
             inspector::ResourceBinding::SampledKind::kFloat},
@@ -2537,7 +2520,6 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
   type::Type* dim_type = nullptr;
   switch (dim) {
     case type::TextureDimension::k1d:
-    case type::TextureDimension::k1dArray:
       dim_type = ty.i32();
       break;
     case type::TextureDimension::k2d:
@@ -2590,8 +2572,6 @@ INSTANTIATE_TEST_SUITE_P(
         testing::Values(
             std::make_tuple(type::TextureDimension::k1d,
                             ResourceBinding::TextureDimension::k1d),
-            std::make_tuple(type::TextureDimension::k1dArray,
-                            ResourceBinding::TextureDimension::k1dArray),
             std::make_tuple(type::TextureDimension::k2d,
                             ResourceBinding::TextureDimension::k2d),
             std::make_tuple(type::TextureDimension::k2dArray,

@@ -37,8 +37,6 @@ struct ResourceBinding {
     kNone = -1,
     /// 1 dimensional texture
     k1d,
-    /// 1 dimenstional array texture
-    k1dArray,
     /// 2 dimensional texture
     k2d,
     /// 2 dimensional array texture

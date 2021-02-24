@@ -584,7 +584,6 @@ Maybe<type::Type*> ParserImpl::sampler_type() {
 
 // sampled_texture_type
 //  : TEXTURE_SAMPLED_1D
-//  | TEXTURE_SAMPLED_1D_ARRAY
 //  | TEXTURE_SAMPLED_2D
 //  | TEXTURE_SAMPLED_2D_ARRAY
 //  | TEXTURE_SAMPLED_3D
@@ -593,9 +592,6 @@ Maybe<type::Type*> ParserImpl::sampler_type() {
 Maybe<type::TextureDimension> ParserImpl::sampled_texture_type() {
   if (match(Token::Type::kTextureSampled1d))
     return type::TextureDimension::k1d;
-
-  if (match(Token::Type::kTextureSampled1dArray))
-    return type::TextureDimension::k1dArray;
 
   if (match(Token::Type::kTextureSampled2d))
     return type::TextureDimension::k2d;
@@ -626,15 +622,12 @@ Maybe<type::TextureDimension> ParserImpl::multisampled_texture_type() {
 
 // storage_texture_type
 //  : TEXTURE_STORAGE_1D
-//  | TEXTURE_STORAGE_1D_ARRAY
 //  | TEXTURE_STORAGE_2D
 //  | TEXTURE_STORAGE_2D_ARRAY
 //  | TEXTURE_STORAGE_3D
 Maybe<type::TextureDimension> ParserImpl::storage_texture_type() {
   if (match(Token::Type::kTextureStorage1d))
     return type::TextureDimension::k1d;
-  if (match(Token::Type::kTextureStorage1dArray))
-    return type::TextureDimension::k1dArray;
   if (match(Token::Type::kTextureStorage2d))
     return type::TextureDimension::k2d;
   if (match(Token::Type::kTextureStorage2dArray))

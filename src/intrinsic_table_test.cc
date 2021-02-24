@@ -423,7 +423,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
   ASSERT_EQ(result.diagnostics.str(),
             R"(error: no matching call to textureDimensions(bool, bool)
 
-27 candidate functions:
+25 candidate functions:
   textureDimensions(texture : texture_2d<T>, level : i32) -> vec2<i32>
   textureDimensions(texture : texture_2d_array<T>, level : i32) -> vec2<i32>
   textureDimensions(texture : texture_3d<T>, level : i32) -> vec3<i32>
@@ -434,7 +434,6 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
   textureDimensions(texture : texture_depth_cube, level : i32) -> vec3<i32>
   textureDimensions(texture : texture_depth_cube_array, level : i32) -> vec3<i32>
   textureDimensions(texture : texture_1d<T>) -> i32
-  textureDimensions(texture : texture_1d_array<T>) -> i32
   textureDimensions(texture : texture_2d<T>) -> vec2<i32>
   textureDimensions(texture : texture_2d_array<T>) -> vec2<i32>
   textureDimensions(texture : texture_3d<T>) -> vec3<i32>
@@ -447,7 +446,6 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
   textureDimensions(texture : texture_depth_cube) -> vec3<i32>
   textureDimensions(texture : texture_depth_cube_array) -> vec3<i32>
   textureDimensions(texture : texture_storage_1d<F>) -> i32
-  textureDimensions(texture : texture_storage_1d_array<F>) -> i32
   textureDimensions(texture : texture_storage_2d<F>) -> vec2<i32>
   textureDimensions(texture : texture_storage_2d_array<F>) -> vec2<i32>
   textureDimensions(texture : texture_storage_3d<F>) -> vec3<i32>
@@ -462,7 +460,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
       result.diagnostics.str(),
       R"(error: no matching call to textureDimensions(texture_depth_2d, bool)
 
-27 candidate functions:
+25 candidate functions:
   textureDimensions(texture : texture_depth_2d, level : i32) -> vec2<i32>
   textureDimensions(texture : texture_depth_2d) -> vec2<i32>
   textureDimensions(texture : texture_2d<T>, level : i32) -> vec2<i32>
@@ -474,7 +472,6 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
   textureDimensions(texture : texture_depth_cube, level : i32) -> vec3<i32>
   textureDimensions(texture : texture_depth_cube_array, level : i32) -> vec3<i32>
   textureDimensions(texture : texture_1d<T>) -> i32
-  textureDimensions(texture : texture_1d_array<T>) -> i32
   textureDimensions(texture : texture_2d<T>) -> vec2<i32>
   textureDimensions(texture : texture_2d_array<T>) -> vec2<i32>
   textureDimensions(texture : texture_3d<T>) -> vec3<i32>
@@ -486,7 +483,6 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
   textureDimensions(texture : texture_depth_cube) -> vec3<i32>
   textureDimensions(texture : texture_depth_cube_array) -> vec3<i32>
   textureDimensions(texture : texture_storage_1d<F>) -> i32
-  textureDimensions(texture : texture_storage_1d_array<F>) -> i32
   textureDimensions(texture : texture_storage_2d<F>) -> vec2<i32>
   textureDimensions(texture : texture_storage_2d_array<F>) -> vec2<i32>
   textureDimensions(texture : texture_storage_3d<F>) -> vec3<i32>

@@ -39,15 +39,6 @@ TEST_F(ParserImplTest, StorageTextureType_1d) {
   EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, StorageTextureType_1dArray) {
-  auto p = parser("texture_storage_1d_array");
-  auto t = p->storage_texture_type();
-  EXPECT_TRUE(t.matched);
-  EXPECT_FALSE(t.errored);
-  EXPECT_EQ(t.value, type::TextureDimension::k1dArray);
-  EXPECT_FALSE(p->has_error());
-}
-
 TEST_F(ParserImplTest, StorageTextureType_2d) {
   auto p = parser("texture_storage_2d");
   auto t = p->storage_texture_type();

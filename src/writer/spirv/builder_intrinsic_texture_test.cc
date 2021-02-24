@@ -63,29 +63,6 @@ expected_texture_overload_spirv expected_texture_overload(
 OpCapability Sampled1D
 OpCapability ImageQuery
 )"};
-    case ValidTextureOverload::kDimensions1dArray:
-      return {
-          R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeInt 32 1
-%11 = OpTypeVector %9 2
-%13 = OpConstant %9 0
-)",
-          R"(
-%12 = OpLoad %3 %1
-%10 = OpImageQuerySizeLod %11 %12 %13
-%8 = OpCompositeExtract %9 %10 0
-)",
-          R"(
-OpCapability Sampled1D
-OpCapability ImageQuery
-)"};
     case ValidTextureOverload::kDimensions2d:
       return {
           R"(
@@ -550,28 +527,6 @@ OpCapability ImageQuery
 OpCapability Image1D
 OpCapability ImageQuery
 )"};
-    case ValidTextureOverload::kDimensionsStorageRO1dArray:
-      return {
-          R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeInt 32 1
-%11 = OpTypeVector %9 2
-)",
-          R"(
-%12 = OpLoad %3 %1
-%10 = OpImageQuerySize %11 %12
-%8 = OpCompositeExtract %9 %10 0
-)",
-          R"(
-OpCapability Image1D
-OpCapability ImageQuery
-)"};
     case ValidTextureOverload::kDimensionsStorageRO2d:
       return {
           R"(
@@ -654,28 +609,6 @@ OpCapability ImageQuery
 OpCapability Image1D
 OpCapability ImageQuery
 )"};
-    case ValidTextureOverload::kDimensionsStorageWO1dArray:
-      return {
-          R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeInt 32 1
-%11 = OpTypeVector %9 2
-)",
-          R"(
-%12 = OpLoad %3 %1
-%10 = OpImageQuerySize %11 %12
-%8 = OpCompositeExtract %9 %10 0
-)",
-          R"(
-OpCapability Image1D
-OpCapability ImageQuery
-)"};
     case ValidTextureOverload::kDimensionsStorageWO2d:
       return {
           R"(
@@ -736,29 +669,6 @@ OpCapability ImageQuery
 %8 = OpImageQuerySize %9 %11
 )",
           R"(
-OpCapability ImageQuery
-)"};
-
-    case ValidTextureOverload::kNumLayers1dArray:
-      return {R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeInt 32 1
-%11 = OpTypeVector %9 2
-%13 = OpConstant %9 0
-)",
-              R"(
-%12 = OpLoad %3 %1
-%10 = OpImageQuerySizeLod %11 %12 %13
-%8 = OpCompositeExtract %9 %10 1
-)",
-              R"(
-OpCapability Sampled1D
 OpCapability ImageQuery
 )"};
     case ValidTextureOverload::kNumLayers2dArray:
@@ -865,27 +775,6 @@ OpCapability ImageQuery
 )",
               R"(
 OpCapability SampledCubeArray
-OpCapability ImageQuery
-)"};
-    case ValidTextureOverload::kNumLayersStorageWO1dArray:
-      return {R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeInt 32 1
-%11 = OpTypeVector %9 2
-)",
-              R"(
-%12 = OpLoad %3 %1
-%10 = OpImageQuerySize %11 %12
-%8 = OpCompositeExtract %9 %10 1
-)",
-              R"(
-OpCapability Image1D
 OpCapability ImageQuery
 )"};
     case ValidTextureOverload::kNumLayersStorageWO2dArray:
@@ -1127,34 +1016,6 @@ OpCapability ImageQuery
 %11 = OpLoad %3 %1
 %13 = OpSampledImage %12 %11 %10
 %8 = OpImageSampleImplicitLod %9 %13 %14
-)",
-          R"(
-OpCapability Sampled1D
-)"};
-    case ValidTextureOverload::kSample1dArrayF32:
-      return {
-          R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeVector %4 4
-%12 = OpTypeSampledImage %3
-%14 = OpTypeVector %4 2
-%15 = OpConstant %4 1
-%17 = OpTypeInt 32 1
-%18 = OpConstant %17 2
-)",
-          R"(
-%10 = OpLoad %7 %5
-%11 = OpLoad %3 %1
-%13 = OpSampledImage %12 %11 %10
-%16 = OpConvertSToF %4 %18
-%19 = OpCompositeConstruct %14 %15 %16
-%8 = OpImageSampleImplicitLod %9 %13 %19
 )",
           R"(
 OpCapability Sampled1D
@@ -2751,77 +2612,6 @@ OpCapability Sampled1D
           R"(
 OpCapability Sampled1D
 )"};
-    case ValidTextureOverload::kLoad1dArrayF32:
-      return {
-          R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeVector %4 4
-%12 = OpTypeInt 32 1
-%11 = OpTypeVector %12 2
-%13 = OpConstant %12 1
-%14 = OpConstant %12 2
-%15 = OpConstantComposite %11 %13 %14
-)",
-          R"(
-%10 = OpLoad %3 %1
-%8 = OpImageFetch %9 %10 %15
-)",
-          R"(
-OpCapability Sampled1D
-)"};
-    case ValidTextureOverload::kLoad1dArrayU32:
-      return {
-          R"(
-%4 = OpTypeInt 32 0
-%3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeVector %4 4
-%12 = OpTypeInt 32 1
-%11 = OpTypeVector %12 2
-%13 = OpConstant %12 1
-%14 = OpConstant %12 2
-%15 = OpConstantComposite %11 %13 %14
-)",
-          R"(
-%10 = OpLoad %3 %1
-%8 = OpImageFetch %9 %10 %15
-)",
-          R"(
-OpCapability Sampled1D
-)"};
-    case ValidTextureOverload::kLoad1dArrayI32:
-      return {
-          R"(
-%4 = OpTypeInt 32 1
-%3 = OpTypeImage %4 1D 0 1 0 1 Unknown
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeVector %4 4
-%11 = OpTypeVector %4 2
-%12 = OpConstant %4 1
-%13 = OpConstant %4 2
-%14 = OpConstantComposite %11 %12 %13
-)",
-          R"(
-%10 = OpLoad %3 %1
-%8 = OpImageFetch %9 %10 %14
-)",
-          R"(
-OpCapability Sampled1D
-)"};
     case ValidTextureOverload::kLoad2dF32:
       return {
           R"(
@@ -3517,30 +3307,6 @@ OpCapability Sampled1D
           R"(
 OpCapability Image1D
 )"};
-    case ValidTextureOverload::kLoadStorageRO1dArrayRgba32float:
-      return {
-          R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeVector %4 4
-%12 = OpTypeInt 32 1
-%11 = OpTypeVector %12 2
-%13 = OpConstant %12 1
-%14 = OpConstant %12 2
-%15 = OpConstantComposite %11 %13 %14
-)",
-          R"(
-%10 = OpLoad %3 %1
-%8 = OpImageRead %9 %10 %15
-)",
-          R"(
-OpCapability Image1D
-)"};
     case ValidTextureOverload::kLoadStorageRO2dRgba8unorm:
       return {
           R"(
@@ -3979,36 +3745,6 @@ OpCapability StorageImageExtendedFormats
           R"(
 %10 = OpLoad %3 %1
 OpImageWrite %10 %12 %18
-)",
-          R"(
-OpCapability Image1D
-)"};
-    case ValidTextureOverload::kStoreWO1dArrayRgba32float:
-      return {
-          R"(
-%4 = OpTypeFloat 32
-%3 = OpTypeImage %4 1D 0 1 0 2 Rgba32f
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%7 = OpTypeSampler
-%6 = OpTypePointer UniformConstant %7
-%5 = OpVariable %6 UniformConstant
-%9 = OpTypeVoid
-%12 = OpTypeInt 32 1
-%11 = OpTypeVector %12 2
-%13 = OpConstant %12 1
-%14 = OpConstant %12 2
-%15 = OpConstantComposite %11 %13 %14
-%16 = OpTypeVector %4 4
-%17 = OpConstant %4 3
-%18 = OpConstant %4 4
-%19 = OpConstant %4 5
-%20 = OpConstant %4 6
-%21 = OpConstantComposite %16 %17 %18 %19 %20
-)",
-          R"(
-%10 = OpLoad %3 %1
-OpImageWrite %10 %15 %21
 )",
           R"(
 OpCapability Image1D

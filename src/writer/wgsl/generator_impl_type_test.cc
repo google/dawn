@@ -326,7 +326,6 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGenerator_SampledTextureTest,
     testing::Values(
         TextureData{type::TextureDimension::k1d, "texture_1d"},
-        TextureData{type::TextureDimension::k1dArray, "texture_1d_array"},
         TextureData{type::TextureDimension::k2d, "texture_2d"},
         TextureData{type::TextureDimension::k2dArray, "texture_2d_array"},
         TextureData{type::TextureDimension::k3d, "texture_3d"},
@@ -403,10 +402,6 @@ INSTANTIATE_TEST_SUITE_P(
                            type::TextureDimension::k1d,
                            ast::AccessControl::kReadOnly,
                            "[[access(read)]]\ntexture_storage_1d<r8unorm>"},
-        StorageTextureData{
-            type::ImageFormat::kR8Unorm, type::TextureDimension::k1dArray,
-            ast::AccessControl::kReadOnly,
-            "[[access(read)]]\ntexture_storage_1d_array<r8unorm>"},
         StorageTextureData{type::ImageFormat::kR8Unorm,
                            type::TextureDimension::k2d,
                            ast::AccessControl::kReadOnly,
@@ -423,10 +418,6 @@ INSTANTIATE_TEST_SUITE_P(
                            type::TextureDimension::k1d,
                            ast::AccessControl::kWriteOnly,
                            "[[access(write)]]\ntexture_storage_1d<r8unorm>"},
-        StorageTextureData{
-            type::ImageFormat::kR8Unorm, type::TextureDimension::k1dArray,
-            ast::AccessControl::kWriteOnly,
-            "[[access(write)]]\ntexture_storage_1d_array<r8unorm>"},
         StorageTextureData{type::ImageFormat::kR8Unorm,
                            type::TextureDimension::k2d,
                            ast::AccessControl::kWriteOnly,

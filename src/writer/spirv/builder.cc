@@ -2225,10 +2225,6 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
         case type::TextureDimension::k2d:
         case type::TextureDimension::k3d:
           break;  // No swizzle needed
-        case type::TextureDimension::k1dArray:
-          swizzle = {0};   // Strip array index
-          spirv_dims = 2;  // [width, array count]
-          break;
         case type::TextureDimension::kCube:
           swizzle = {0, 1, 1};  // Duplicate height for depth
           spirv_dims = 2;       // [width, height]
@@ -2269,9 +2265,6 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
         default:
           error_ = "texture is not arrayed";
           return false;
-        case type::TextureDimension::k1dArray:
-          spirv_dims = 2;
-          break;
         case type::TextureDimension::k2dArray:
         case type::TextureDimension::kCubeArray:
           spirv_dims = 3;
@@ -2910,15 +2903,13 @@ bool Builder::GenerateTextureType(type::Texture* texture,
                                   const Operand& result) {
   uint32_t array_literal = 0u;
   const auto dim = texture->dim();
-  if (dim == type::TextureDimension::k1dArray ||
-      dim == type::TextureDimension::k2dArray ||
+  if (dim == type::TextureDimension::k2dArray ||
       dim == type::TextureDimension::kCubeArray) {
     array_literal = 1u;
   }
 
   uint32_t dim_literal = SpvDim2D;
-  if (dim == type::TextureDimension::k1dArray ||
-      dim == type::TextureDimension::k1d) {
+  if (dim == type::TextureDimension::k1d) {
     dim_literal = SpvDim1D;
     if (texture->Is<type::SampledTexture>()) {
       push_capability(SpvCapabilitySampled1D);

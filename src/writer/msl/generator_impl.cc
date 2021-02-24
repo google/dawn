@@ -599,7 +599,6 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
           diagnostics_.add_error("texture dimension is kNone");
           return false;
         case type::TextureDimension::k1d:
-        case type::TextureDimension::k1dArray:
           dims = {"width"};
           break;
         case type::TextureDimension::k2d:
@@ -2003,9 +2002,6 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
     switch (tex->dim()) {
       case type::TextureDimension::k1d:
         out_ << "1d";
-        break;
-      case type::TextureDimension::k1dArray:
-        out_ << "1d_array";
         break;
       case type::TextureDimension::k2d:
         out_ << "2d";
