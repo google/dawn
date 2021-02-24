@@ -75,59 +75,6 @@ ident1 //ends with comment
   EXPECT_TRUE(t.IsEof());
 }
 
-TEST_F(LexerTest, StringTest_Parse) {
-  Source::FileContent content(R"(id "this is string content" id2)");
-  Lexer l("test.wgsl", &content);
-
-  auto t = l.next();
-  EXPECT_TRUE(t.IsIdentifier());
-  EXPECT_EQ(t.to_str(), "id");
-  EXPECT_EQ(t.source().range.begin.line, 1u);
-  EXPECT_EQ(t.source().range.begin.column, 1u);
-  EXPECT_EQ(t.source().range.end.line, 1u);
-  EXPECT_EQ(t.source().range.end.column, 3u);
-
-  t = l.next();
-  EXPECT_TRUE(t.IsStringLiteral());
-  EXPECT_EQ(t.to_str(), "this is string content");
-  EXPECT_EQ(t.source().range.begin.line, 1u);
-  EXPECT_EQ(t.source().range.begin.column, 4u);
-  EXPECT_EQ(t.source().range.end.line, 1u);
-  EXPECT_EQ(t.source().range.end.column, 28u);
-
-  t = l.next();
-  EXPECT_TRUE(t.IsIdentifier());
-  EXPECT_EQ(t.to_str(), "id2");
-  EXPECT_EQ(t.source().range.begin.line, 1u);
-  EXPECT_EQ(t.source().range.begin.column, 29u);
-  EXPECT_EQ(t.source().range.end.line, 1u);
-  EXPECT_EQ(t.source().range.end.column, 32u);
-}
-
-TEST_F(LexerTest, StringTest_Unterminated) {
-  Source::FileContent content(R"(id "this is string content)");
-  Lexer l("test.wgsl", &content);
-
-  auto t = l.next();
-  EXPECT_TRUE(t.IsIdentifier());
-  EXPECT_EQ(t.to_str(), "id");
-  EXPECT_EQ(t.source().range.begin.line, 1u);
-  EXPECT_EQ(t.source().range.begin.column, 1u);
-  EXPECT_EQ(t.source().range.end.line, 1u);
-  EXPECT_EQ(t.source().range.end.column, 3u);
-
-  t = l.next();
-  EXPECT_TRUE(t.IsStringLiteral());
-  EXPECT_EQ(t.to_str(), "this is string content");
-  EXPECT_EQ(t.source().range.begin.line, 1u);
-  EXPECT_EQ(t.source().range.begin.column, 4u);
-  EXPECT_EQ(t.source().range.end.line, 1u);
-  EXPECT_EQ(t.source().range.end.column, 27u);
-
-  t = l.next();
-  EXPECT_TRUE(t.IsEof());
-}
-
 struct FloatData {
   const char* input;
   float result;

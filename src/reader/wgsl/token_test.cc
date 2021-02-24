@@ -25,11 +25,6 @@ namespace {
 
 using TokenTest = testing::Test;
 
-TEST_F(TokenTest, ReturnsStr) {
-  Token t(Token::Type::kStringLiteral, Source{}, "test string");
-  EXPECT_EQ(t.to_str(), "test string");
-}
-
 TEST_F(TokenTest, ReturnsF32) {
   Token t1(Source{}, -2.345f);
   EXPECT_EQ(t1.to_f32(), -2.345f);

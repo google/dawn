@@ -52,7 +52,6 @@ class Lexer {
   Token try_ident();
   Token try_integer();
   Token try_punctuation();
-  Token try_string();
 
   Source begin_source() const;
   void end_source(Source&) const;

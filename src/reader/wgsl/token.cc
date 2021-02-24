@@ -29,8 +29,6 @@ std::string Token::TypeToName(Type type) {
       return "kEOF";
     case Token::Type::kIdentifier:
       return "kIdentifier";
-    case Token::Type::kStringLiteral:
-      return "kStringLiteral";
     case Token::Type::kFloatLiteral:
       return "kFloatLiteral";
     case Token::Type::kSintLiteral:

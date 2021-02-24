@@ -63,11 +63,6 @@ Token Lexer::next() {
     return t;
   }
 
-  t = try_string();
-  if (!t.IsUninitialized()) {
-    return t;
-  }
-
   t = try_punctuation();
   if (!t.IsUninitialized()) {
     return t;
@@ -332,29 +327,6 @@ Token Lexer::try_ident() {
   }
 
   return {Token::Type::kIdentifier, source, str};
-}
-
-Token Lexer::try_string() {
-  if (!matches(pos_, R"(")"))
-    return {};
-
-  auto source = begin_source();
-
-  pos_++;
-  auto start = pos_;
-  while (pos_ < len_ && !matches(pos_, R"(")")) {
-    pos_++;
-  }
-  auto end = pos_;
-  if (matches(pos_, R"(")")) {
-    pos_++;
-  }
-  location_.column += (pos_ - start) + 1;
-
-  end_source(source);
-
-  return {Token::Type::kStringLiteral, source,
-          content_->data.substr(start, end - start)};
 }
 
 Token Lexer::try_punctuation() {

@@ -42,8 +42,6 @@ class Token {
 
     /// An identifier
     kIdentifier,
-    /// A string value
-    kStringLiteral,
     /// A float value
     kFloatLiteral,
     /// An signed int value
@@ -381,8 +379,6 @@ class Token {
   bool IsEof() const { return type_ == Type::kEOF; }
   /// @returns true if the token is an identifier
   bool IsIdentifier() const { return type_ == Type::kIdentifier; }
-  /// @returns true if the token is a string
-  bool IsStringLiteral() const { return type_ == Type::kStringLiteral; }
   /// @returns true if the token is a float
   bool IsFloatLiteral() const { return type_ == Type::kFloatLiteral; }
   /// @returns true if the token is an signed int
