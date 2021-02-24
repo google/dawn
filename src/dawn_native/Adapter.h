@@ -40,6 +40,8 @@ namespace dawn_native {
 
         DeviceBase* CreateDevice(const DeviceDescriptor* descriptor = nullptr);
 
+        void ResetInternalDeviceForTesting();
+
         ExtensionsSet GetSupportedExtensions() const;
         bool SupportsAllRequestedExtensions(
             const std::vector<const char*>& requestedExtensions) const;
@@ -56,6 +58,7 @@ namespace dawn_native {
 
         MaybeError CreateDeviceInternal(DeviceBase** result, const DeviceDescriptor* descriptor);
 
+        virtual MaybeError ResetInternalDeviceForTestingImpl();
         InstanceBase* mInstance = nullptr;
         wgpu::BackendType mBackend;
     };

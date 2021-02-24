@@ -91,4 +91,13 @@ namespace dawn_native {
         return {};
     }
 
+    void AdapterBase::ResetInternalDeviceForTesting() {
+        mInstance->ConsumedError(ResetInternalDeviceForTestingImpl());
+    }
+
+    MaybeError AdapterBase::ResetInternalDeviceForTestingImpl() {
+        return DAWN_INTERNAL_ERROR(
+            "ResetInternalDeviceForTesting should only be used with the D3D12 backend.");
+    }
+
 }  // namespace dawn_native

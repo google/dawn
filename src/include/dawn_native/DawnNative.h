@@ -116,6 +116,9 @@ namespace dawn_native {
         // On an error, nullptr is returned.
         WGPUDevice CreateDevice(const DeviceDescriptor* deviceDescriptor = nullptr);
 
+        // Reset the backend device object for testing purposes.
+        void ResetInternalDeviceForTesting();
+
       private:
         AdapterBase* mImpl = nullptr;
     };
