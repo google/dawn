@@ -479,7 +479,7 @@ OpName %7 "a_func"
 %7 = OpFunction %6 None %5
 %8 = OpLabel
 %11 = OpLoad %3 %1
-%9 = OpExtInst %3 %10 Round %11
+%9 = OpExtInst %3 %10 RoundEven %11
 OpReturn
 OpFunctionEnd
 )");
@@ -563,7 +563,7 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                                                        "InverseSqrt"},
                                          IntrinsicData{"log", "Log"},
                                          IntrinsicData{"log2", "Log2"},
-                                         IntrinsicData{"round", "Round"},
+                                         IntrinsicData{"round", "RoundEven"},
                                          IntrinsicData{"sign", "FSign"},
                                          IntrinsicData{"sin", "Sin"},
                                          IntrinsicData{"sinh", "Sinh"},

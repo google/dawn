@@ -271,7 +271,7 @@ INSTANTIATE_TEST_SUITE_P(
                       "metal::reflect"},
         IntrinsicData{IntrinsicType::kReverseBits, ParamType::kU32,
                       "metal::reverse_bits"},
-        IntrinsicData{IntrinsicType::kRound, ParamType::kU32, "metal::round"},
+        IntrinsicData{IntrinsicType::kRound, ParamType::kU32, "metal::rint"},
         IntrinsicData{IntrinsicType::kSelect, ParamType::kF32, "metal::select"},
         IntrinsicData{IntrinsicType::kSign, ParamType::kF32, "metal::sign"},
         IntrinsicData{IntrinsicType::kSin, ParamType::kF32, "metal::sin"},

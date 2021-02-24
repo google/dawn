@@ -266,7 +266,7 @@ uint32_t intrinsic_to_glsl_method(const semantic::Intrinsic* intrinsic) {
     case IntrinsicType::kReflect:
       return GLSLstd450Reflect;
     case IntrinsicType::kRound:
-      return GLSLstd450Round;
+      return GLSLstd450RoundEven;
     case IntrinsicType::kSign:
       return GLSLstd450FSign;
     case IntrinsicType::kSin:

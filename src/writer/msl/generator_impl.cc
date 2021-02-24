@@ -817,7 +817,6 @@ std::string GeneratorImpl::generate_builtin_name(
     case semantic::IntrinsicType::kNormalize:
     case semantic::IntrinsicType::kPow:
     case semantic::IntrinsicType::kReflect:
-    case semantic::IntrinsicType::kRound:
     case semantic::IntrinsicType::kSelect:
     case semantic::IntrinsicType::kSin:
     case semantic::IntrinsicType::kSinh:
@@ -898,6 +897,9 @@ std::string GeneratorImpl::generate_builtin_name(
       break;
     case semantic::IntrinsicType::kReverseBits:
       out += "reverse_bits";
+      break;
+    case semantic::IntrinsicType::kRound:
+      out += "rint";
       break;
     case semantic::IntrinsicType::kSmoothStep:
       out += "smoothstep";
