@@ -396,9 +396,8 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
 
   EXPECT_FALSE(td()->Determine());
 
-  EXPECT_EQ(
-      td()->error(),
-      "12:34 error: v-0006: identifier must be declared before use: func");
+  EXPECT_EQ(td()->error(),
+            "12:34 error: v-0006: unable to find called function: func");
 }
 
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
@@ -690,6 +689,27 @@ TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
+}
+
+TEST_F(TypeDeterminerTest, Expr_DontCall_Function) {
+  Func("func", {}, ty.void_(), {}, {});
+  auto* ident = create<ast::IdentifierExpression>(
+      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
+      Symbols().Register("func"));
+  WrapInFunction(ident);
+
+  EXPECT_FALSE(td()->Determine());
+  EXPECT_EQ(td()->error(), "3:8 error: missing '(' for function call");
+}
+
+TEST_F(TypeDeterminerTest, Expr_DontCall_Intrinsic) {
+  auto* ident = create<ast::IdentifierExpression>(
+      Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
+      Symbols().Register("round"));
+  WrapInFunction(ident);
+
+  EXPECT_FALSE(td()->Determine());
+  EXPECT_EQ(td()->error(), "3:8 error: missing '(' for intrinsic call");
 }
 
 TEST_F(TypeDeterminerTest, Expr_Cast) {

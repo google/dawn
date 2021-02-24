@@ -114,8 +114,18 @@ class Source {
   /// @param content the source file content
   inline Source(const Range& rng,
                 const std::string& path,
-                FileContent* content = nullptr)
+                const FileContent* content = nullptr)
       : range(rng), file_path(path), file_content(content) {}
+
+  /// @returns a Source that points to the begin range of this Source.
+  inline Source Begin() const {
+    return Source(Range{range.begin}, file_path, file_content);
+  }
+
+  /// @returns a Source that points to the end range of this Source.
+  inline Source End() const {
+    return Source(Range{range.end}, file_path, file_content);
+  }
 
   /// range is the span of text this source refers to in #file_path
   Range range;

@@ -406,9 +406,6 @@ bool TypeDeterminer::DetermineBitcast(ast::BitcastExpression* expr) {
 }
 
 bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
-  if (!DetermineResultType(call->func())) {
-    return false;
-  }
   if (!DetermineResultType(call->params())) {
     return false;
   }
@@ -436,8 +433,8 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
 
       auto callee_func_it = symbol_to_function_.find(ident->symbol());
       if (callee_func_it == symbol_to_function_.end()) {
-        diagnostics_.add_error("unable to find called function: " + name,
-                               call->source());
+        diagnostics_.add_error(
+            "v-0006: unable to find called function: " + name, call->source());
         return false;
       }
       auto* callee_func = callee_func_it->second;
@@ -558,14 +555,16 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
 
   auto iter = symbol_to_function_.find(symbol);
   if (iter != symbol_to_function_.end()) {
-    // Identifier is to a function, which has no type (currently).
-    return true;
+    diagnostics_.add_error("missing '(' for function call",
+                           expr->source().End());
+    return false;
   }
 
   std::string name = builder_->Symbols().NameFor(symbol);
   if (MatchIntrinsicType(name) != IntrinsicType::kNone) {
-    // Identifier is to an intrinsic function, which has no type (currently).
-    return true;
+    diagnostics_.add_error("missing '(' for intrinsic call",
+                           expr->source().End());
+    return false;
   }
 
   diagnostics_.add_error(
