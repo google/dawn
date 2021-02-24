@@ -29,8 +29,8 @@ Transform::Output Manager::Run(const Program* program) {
     for (auto& transform : transforms_) {
       auto res = transform->Run(program);
       out.program = std::move(res.program);
-      out.diagnostics.add(std::move(res.diagnostics));
-      if (out.diagnostics.contains_errors()) {
+      out.data.Add(std::move(res.data));
+      if (!out.program.IsValid()) {
         return out;
       }
       program = &out.program;

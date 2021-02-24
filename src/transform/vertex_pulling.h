@@ -136,26 +136,54 @@ using VertexStateDescriptor = std::vector<VertexBufferLayoutDescriptor>;
 /// shader to use.
 class VertexPulling : public Transform {
  public:
+  /// Configuration options for the transform
+  struct Config {
+    /// Constructor
+    Config();
+
+    /// Copy constructor
+    Config(const Config&);
+
+    /// Destructor
+    ~Config();
+
+    /// The entry point to add assignments into
+    std::string entry_point_name;
+
+    /// The vertex state descriptor, containing info about attributes
+    VertexStateDescriptor vertex_state;
+
+    /// The "group" we will put all our vertex buffers into (as storage buffers)
+    /// Default to 4 as it is past the limits of user-accessible groups
+    uint32_t pulling_group = 4u;
+  };
+
   /// Constructor
   VertexPulling();
+
+  /// Constructor
+  /// @param config the configuration options for the transform
+  explicit VertexPulling(const Config& config);
+
   /// Destructor
   ~VertexPulling() override;
 
   /// Sets the vertex state descriptor, containing info about attributes
+  /// [DEPRECATED] Use the VertexPulling(const Config&)
   /// @param vertex_state the vertex state descriptor
   void SetVertexState(const VertexStateDescriptor& vertex_state);
-
   /// Sets the entry point to add assignments into
+  /// [DEPRECATED] Use the VertexPulling(const Config&)
   /// @param entry_point the vertex stage entry point
   void SetEntryPoint(std::string entry_point);
-
   /// Sets the "set" we will put all our vertex buffers into (as storage
   /// buffers)
-  /// DEPRECATED
+  /// [DEPRECATED] Use the VertexPulling(const Config&)
   /// @param number the set number we will use
   void SetPullingBufferBindingSet(uint32_t number);
   /// Sets the "group" we will put all our vertex buffers into (as storage
   /// buffers)
+  /// [DEPRECATED] Use the VertexPulling(const Config&)
   /// @param number the group number we will use
   void SetPullingBufferBindingGroup(uint32_t number);
 
@@ -165,19 +193,8 @@ class VertexPulling : public Transform {
   Output Run(const Program* program) override;
 
  private:
-  struct Config {
-    Config();
-    Config(const Config&);
-    ~Config();
-
-    std::string entry_point_name;
-    VertexStateDescriptor vertex_state;
-    bool vertex_state_set = false;
-    // Default to 4 as it is past the limits of user-accessible groups
-    uint32_t pulling_group = 4u;
-  };
-
   Config cfg;
+  bool vertex_state_set = false;
 
   struct State {
     State(CloneContext& ctx, const Config& c);

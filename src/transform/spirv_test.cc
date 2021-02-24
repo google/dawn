@@ -55,7 +55,7 @@ fn main() -> void {
 
   auto got = Transform<Spirv>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(SpirvTest, HandleSampleMaskBuiltins_FunctionArg) {
@@ -99,7 +99,7 @@ fn main() -> void {
 
   auto got = Transform<Spirv>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

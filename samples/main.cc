@@ -28,8 +28,8 @@
 
 namespace {
 
-[[noreturn]]
-void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
+[[noreturn]] void TintInternalCompilerErrorReporter(
+    const tint::diag::List& diagnostics) {
   auto printer = tint::diag::Printer::create(stderr, true);
   tint::diag::Formatter{}.format(diagnostics, printer.get());
   exit(1);
@@ -569,8 +569,8 @@ int main(int argc, const char** argv) {
   }
 
   auto out = transform_manager.Run(program.get());
-  if (out.diagnostics.contains_errors()) {
-    diag_formatter.format(out.diagnostics, diag_printer.get());
+  if (!out.program.IsValid()) {
+    diag_formatter.format(out.program.Diagnostics(), diag_printer.get());
     return 1;
   }
 

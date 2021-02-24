@@ -30,26 +30,25 @@ TEST_F(VertexPullingTest, Error_NoVertexState) {
 fn main() -> void {}
 )";
 
-  auto* expect = R"(manager().Run() errored:
-error: SetVertexState not called)";
+  auto* expect = "error: SetVertexState not called";
 
   auto got = Transform<VertexPulling>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, Error_NoEntryPoint) {
   auto* src = "";
 
-  auto* expect = R"(manager().Run() errored:
-error: Vertex stage entry point not found)";
+  auto* expect = "error: Vertex stage entry point not found";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState({});
+  VertexPulling::Config cfg;
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
@@ -58,16 +57,16 @@ TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
 fn main() -> void {}
 )";
 
-  auto* expect = R"(manager().Run() errored:
-error: Vertex stage entry point not found)";
+  auto* expect = "error: Vertex stage entry point not found";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState({});
-  transform->SetEntryPoint("_");
+  VertexPulling::Config cfg;
+  cfg.entry_point_name = "_";
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
@@ -76,16 +75,16 @@ TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
 fn main() -> void {}
 )";
 
-  auto* expect = R"(manager().Run() errored:
-error: Vertex stage entry point not found)";
+  auto* expect = "error: Vertex stage entry point not found";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState({});
-  transform->SetEntryPoint("main");
+  VertexPulling::Config cfg;
+  cfg.entry_point_name = "main";
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, BasicModule) {
@@ -109,13 +108,14 @@ fn main() -> void {
 }
 )";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState({});
-  transform->SetEntryPoint("main");
+  VertexPulling::Config cfg;
+  cfg.entry_point_name = "main";
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, OneAttribute) {
@@ -149,14 +149,16 @@ fn main() -> void {
 }
 )";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState(
-      {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
-  transform->SetEntryPoint("main");
+  VertexPulling::Config cfg;
+  cfg.vertex_state = {
+      {{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}};
+  cfg.entry_point_name = "main";
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, OneInstancedAttribute) {
@@ -190,14 +192,16 @@ fn main() -> void {
 }
 )";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState(
-      {{{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}});
-  transform->SetEntryPoint("main");
+  VertexPulling::Config cfg;
+  cfg.vertex_state = {
+      {{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}};
+  cfg.entry_point_name = "main";
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
@@ -231,15 +235,17 @@ fn main() -> void {
 }
 )";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState(
-      {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}});
-  transform->SetPullingBufferBindingSet(5);
-  transform->SetEntryPoint("main");
+  VertexPulling::Config cfg;
+  cfg.vertex_state = {
+      {{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}};
+  cfg.pulling_group = 5;
+  cfg.entry_point_name = "main";
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 // We expect the transform to use an existing builtin variables if it finds them
@@ -285,15 +291,26 @@ fn main() -> void {
 }
 )";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState(
-      {{{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}},
-        {4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 1}}}}});
-  transform->SetEntryPoint("main");
+  VertexPulling::Config cfg;
+  cfg.vertex_state = {{
+      {
+          4,
+          InputStepMode::kVertex,
+          {{VertexFormat::kF32, 0, 0}},
+      },
+      {
+          4,
+          InputStepMode::kInstance,
+          {{VertexFormat::kF32, 0, 1}},
+      },
+  }};
+  cfg.entry_point_name = "main";
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
@@ -332,16 +349,18 @@ fn main() -> void {
 }
 )";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState(
-      {{{16,
-         InputStepMode::kVertex,
-         {{VertexFormat::kF32, 0, 0}, {VertexFormat::kVec4F32, 0, 1}}}}});
-  transform->SetEntryPoint("main");
+  VertexPulling::Config cfg;
+  cfg.vertex_state = {
+      {{16,
+        InputStepMode::kVertex,
+        {{VertexFormat::kF32, 0, 0}, {VertexFormat::kVec4F32, 0, 1}}}}};
+  cfg.entry_point_name = "main";
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(VertexPullingTest, FloatVectorAttributes) {
@@ -389,16 +408,19 @@ fn main() -> void {
 }
 )";
 
-  auto transform = std::make_unique<VertexPulling>();
-  transform->SetVertexState(
-      {{{8, InputStepMode::kVertex, {{VertexFormat::kVec2F32, 0, 0}}},
-        {12, InputStepMode::kVertex, {{VertexFormat::kVec3F32, 0, 1}}},
-        {16, InputStepMode::kVertex, {{VertexFormat::kVec4F32, 0, 2}}}}});
-  transform->SetEntryPoint("main");
+  VertexPulling::Config cfg;
+  cfg.vertex_state = {{
+      {8, InputStepMode::kVertex, {{VertexFormat::kVec2F32, 0, 0}}},
+      {12, InputStepMode::kVertex, {{VertexFormat::kVec3F32, 0, 1}}},
+      {16, InputStepMode::kVertex, {{VertexFormat::kVec4F32, 0, 2}}},
+  }};
+  cfg.entry_point_name = "main";
+
+  auto transform = std::make_unique<VertexPulling>(cfg);
 
   auto got = Transform(src, std::move(transform));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

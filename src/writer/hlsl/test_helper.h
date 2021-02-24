@@ -104,8 +104,8 @@ class TestHelperBase : public BODY, public ProgramBuilder {
     }();
     auto result = transform::Hlsl().Run(program.get());
     [&]() {
-      ASSERT_FALSE(result.diagnostics.contains_errors())
-          << formatter.format(result.diagnostics);
+      ASSERT_TRUE(result.program.IsValid())
+          << formatter.format(result.program.Diagnostics());
     }();
     *program = std::move(result.program);
     gen_ = std::make_unique<GeneratorImpl>(program.get());

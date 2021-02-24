@@ -40,8 +40,8 @@ fn entry() -> void {
 }
 )";
 
-  auto* expect = R"(manager().Run() errored:
-error: First index offset transform has already been applied.)";
+  auto* expect =
+      "error: First index offset transform has already been applied.";
 
   std::vector<std::unique_ptr<transform::Transform>> transforms;
   transforms.emplace_back(std::make_unique<FirstIndexOffset>(0, 0));
@@ -49,7 +49,15 @@ error: First index offset transform has already been applied.)";
 
   auto got = Transform(src, std::move(transforms));
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<FirstIndexOffset::Data>();
+
+  ASSERT_NE(data, nullptr);
+  EXPECT_EQ(data->has_vertex_index, true);
+  EXPECT_EQ(data->has_instance_index, false);
+  EXPECT_EQ(data->first_vertex_offset, 0u);
+  EXPECT_EQ(data->first_index_offset, 0u);
 }
 
 TEST_F(FirstIndexOffsetTest, EmptyModule) {
@@ -58,7 +66,15 @@ TEST_F(FirstIndexOffsetTest, EmptyModule) {
 
   auto got = Transform<FirstIndexOffset>(src, 0, 0);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<FirstIndexOffset::Data>();
+
+  ASSERT_NE(data, nullptr);
+  EXPECT_EQ(data->has_vertex_index, false);
+  EXPECT_EQ(data->has_instance_index, false);
+  EXPECT_EQ(data->first_vertex_offset, 0u);
+  EXPECT_EQ(data->first_index_offset, 0u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
@@ -99,7 +115,15 @@ fn entry() -> void {
 
   auto got = Transform<FirstIndexOffset>(src, 1, 2);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<FirstIndexOffset::Data>();
+
+  ASSERT_NE(data, nullptr);
+  EXPECT_EQ(data->has_vertex_index, true);
+  EXPECT_EQ(data->has_instance_index, false);
+  EXPECT_EQ(data->first_vertex_offset, 0u);
+  EXPECT_EQ(data->first_index_offset, 0u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
@@ -140,7 +164,15 @@ fn entry() -> void {
 
   auto got = Transform<FirstIndexOffset>(src, 1, 7);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<FirstIndexOffset::Data>();
+
+  ASSERT_NE(data, nullptr);
+  EXPECT_EQ(data->has_vertex_index, false);
+  EXPECT_EQ(data->has_instance_index, true);
+  EXPECT_EQ(data->first_vertex_offset, 0u);
+  EXPECT_EQ(data->first_index_offset, 0u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
@@ -187,7 +219,15 @@ fn entry() -> void {
 
   auto got = Transform<FirstIndexOffset>(src, 1, 2);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<FirstIndexOffset::Data>();
+
+  ASSERT_NE(data, nullptr);
+  EXPECT_EQ(data->has_vertex_index, true);
+  EXPECT_EQ(data->has_instance_index, true);
+  EXPECT_EQ(data->first_vertex_offset, 0u);
+  EXPECT_EQ(data->first_index_offset, 4u);
 }
 
 TEST_F(FirstIndexOffsetTest, NestedCalls) {
@@ -236,7 +276,15 @@ fn entry() -> void {
 
   auto got = Transform<FirstIndexOffset>(src, 1, 2);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<FirstIndexOffset::Data>();
+
+  ASSERT_NE(data, nullptr);
+  EXPECT_EQ(data->has_vertex_index, true);
+  EXPECT_EQ(data->has_instance_index, false);
+  EXPECT_EQ(data->first_vertex_offset, 0u);
+  EXPECT_EQ(data->first_index_offset, 0u);
 }
 
 }  // namespace

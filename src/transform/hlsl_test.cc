@@ -52,7 +52,7 @@ fn main() -> void {
 
   auto got = Transform<Hlsl>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(HlslTest, PromoteArrayInitializerToConstVar_ArrayInArray) {
@@ -75,7 +75,7 @@ fn main() -> void {
 
   auto got = Transform<Hlsl>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(HlslTest, PromoteArrayInitializerToConstVar_NoChangeOnArrayVarDecl) {
@@ -92,7 +92,7 @@ const module_arr : array<f32, 4> = array<f32, 4>(0.0, 1.0, 2.0, 3.0);
 
   auto got = Transform<Hlsl>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(HlslTest, PromoteArrayInitializerToConstVar_Bug406) {
@@ -146,7 +146,7 @@ fn main() -> void {
 
   auto got = Transform<Hlsl>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

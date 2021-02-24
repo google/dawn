@@ -57,11 +57,15 @@ static const char kDefaultInstanceIndexName[] = "_tint_pulling_instance_index";
 }  // namespace
 
 VertexPulling::VertexPulling() = default;
+
+VertexPulling::VertexPulling(const Config& config)
+    : cfg(config), vertex_state_set(true) {}
+
 VertexPulling::~VertexPulling() = default;
 
 void VertexPulling::SetVertexState(const VertexStateDescriptor& vertex_state) {
   cfg.vertex_state = vertex_state;
-  cfg.vertex_state_set = true;
+  vertex_state_set = true;
 }
 
 void VertexPulling::SetEntryPoint(std::string entry_point) {
@@ -77,20 +81,20 @@ void VertexPulling::SetPullingBufferBindingSet(uint32_t number) {
 }
 
 Transform::Output VertexPulling::Run(const Program* in) {
+  ProgramBuilder out;
+
   // Check SetVertexState was called
-  if (!cfg.vertex_state_set) {
-    Output out;
-    out.diagnostics.add_error("SetVertexState not called");
-    return out;
+  if (!vertex_state_set) {
+    out.Diagnostics().add_error("SetVertexState not called");
+    return Output(Program(std::move(out)));
   }
 
   // Find entry point
   auto* func = in->AST().Functions().Find(
       in->Symbols().Get(cfg.entry_point_name), ast::PipelineStage::kVertex);
   if (func == nullptr) {
-    Output out;
-    out.diagnostics.add_error("Vertex stage entry point not found");
-    return out;
+    out.Diagnostics().add_error("Vertex stage entry point not found");
+    return Output(Program(std::move(out)));
   }
 
   // TODO(idanr): Need to check shader locations in descriptor cover all
@@ -98,7 +102,6 @@ Transform::Output VertexPulling::Run(const Program* in) {
 
   // TODO(idanr): Make sure we covered all error cases, to guarantee the
   // following stages will pass
-  ProgramBuilder out;
 
   CloneContext ctx(&out, in);
   State state{ctx, cfg};
@@ -123,7 +126,9 @@ Transform::Output VertexPulling::Run(const Program* in) {
 }
 
 VertexPulling::Config::Config() = default;
+
 VertexPulling::Config::Config(const Config&) = default;
+
 VertexPulling::Config::~Config() = default;
 
 VertexPulling::State::State(CloneContext& context, const Config& c)

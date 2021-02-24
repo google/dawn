@@ -45,7 +45,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Nested_Scalar) {
@@ -75,7 +75,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
@@ -97,7 +97,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
@@ -123,7 +123,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
@@ -145,7 +145,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
@@ -167,7 +167,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
@@ -189,7 +189,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
@@ -215,7 +215,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
@@ -237,7 +237,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
@@ -259,7 +259,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
@@ -281,7 +281,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
@@ -307,7 +307,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
@@ -333,7 +333,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
@@ -355,7 +355,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
@@ -377,7 +377,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
@@ -399,7 +399,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
@@ -421,7 +421,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 // TODO(dsinclair): Implement when constant_id exists
@@ -488,7 +488,7 @@ fn f() -> void {
 
   auto got = Transform<BoundArrayAccessors>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 // TODO(dsinclair): Clamp atomics when available.

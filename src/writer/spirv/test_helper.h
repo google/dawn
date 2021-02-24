@@ -81,8 +81,8 @@ class TestHelperBase : public ProgramBuilder, public BASE {
     }();
     auto result = transform::Spirv().Run(program.get());
     [&]() {
-      ASSERT_FALSE(result.diagnostics.contains_errors())
-          << diag::Formatter().format(result.diagnostics);
+      ASSERT_TRUE(result.program.IsValid())
+          << diag::Formatter().format(result.program.Diagnostics());
     }();
     *program = std::move(result.program);
     spirv_builder = std::make_unique<spirv::Builder>(program.get());

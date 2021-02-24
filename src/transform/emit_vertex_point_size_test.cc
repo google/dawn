@@ -54,7 +54,7 @@ fn non_entry_b() -> void {
 
   auto got = Transform<EmitVertexPointSize>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
@@ -87,7 +87,7 @@ fn non_entry_b() -> void {
 
   auto got = Transform<EmitVertexPointSize>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
@@ -113,7 +113,7 @@ fn compute_entry() -> void {
 
   auto got = Transform<EmitVertexPointSize>(src);
 
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace

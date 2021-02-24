@@ -62,6 +62,34 @@ namespace transform {
 ///
 class FirstIndexOffset : public Transform {
  public:
+  /// Data holds information about shader usage and constant buffer offsets.
+  struct Data : public Castable<Data, transform::Data> {
+    /// Constructor
+    /// @param has_vtx_index True if the shader uses vertex_index
+    /// @param has_inst_index True if the shader uses instance_index
+    /// @param first_vtx_offset Offset of first vertex into constant buffer
+    /// @param first_idx_offset Offset of first instance into constant buffer
+    Data(bool has_vtx_index,
+         bool has_inst_index,
+         uint32_t first_vtx_offset,
+         uint32_t first_idx_offset);
+
+    /// Copy constructor
+    Data(const Data&);
+
+    /// Destructor
+    ~Data() override;
+
+    /// True if the shader uses vertex_index
+    bool const has_vertex_index;
+    /// True if the shader uses instance_index
+    bool const has_instance_index;
+    /// Offset of first vertex into constant buffer
+    uint32_t const first_vertex_offset;
+    /// Offset of first instance into constant buffer
+    uint32_t const first_index_offset;
+  };
+
   /// Constructor
   /// @param binding the binding() for firstVertex/Instance uniform
   /// @param group the group() for firstVertex/Instance uniform
@@ -73,15 +101,19 @@ class FirstIndexOffset : public Transform {
   /// @returns the transformation result
   Output Run(const Program* program) override;
 
+  /// [DEPRECATED] - Use Data
   /// @returns whether shader uses vertex_index
   bool HasVertexIndex();
 
+  /// [DEPRECATED] - Use Data
   /// @returns whether shader uses instance_index
   bool HasInstanceIndex();
 
+  /// [DEPRECATED] - Use Data
   /// @returns offset of firstVertex into constant buffer
   uint32_t GetFirstVertexOffset();
 
+  /// [DEPRECATED] - Use Data
   /// @returns offset of firstInstance into constant buffer
   uint32_t GetFirstInstanceOffset();
 

@@ -38,35 +38,59 @@ class TransformTest : public testing::Test {
   /// `transforms`.
   /// @param in the input WGSL source
   /// @param transforms the list of transforms to apply
-  /// @return the transformed WGSL output
-  std::string Transform(
+  /// @return the transformed output
+  Transform::Output Transform(
       std::string in,
       std::vector<std::unique_ptr<transform::Transform>> transforms) {
-    diag::Formatter::Style style;
-    style.print_newline_at_end = false;
-
     Source::File file("test", in);
     auto program = reader::wgsl::Parse(&file);
 
     if (!program.IsValid()) {
-      return diag::Formatter(style).format(program.Diagnostics());
+      return Transform::Output(std::move(program));
     }
 
-    {
-      Manager manager;
-      for (auto& transform : transforms) {
-        manager.append(std::move(transform));
-      }
-      auto result = manager.Run(&program);
+    Manager manager;
+    for (auto& transform : transforms) {
+      manager.append(std::move(transform));
+    }
+    return manager.Run(&program);
+  }
 
-      if (result.diagnostics.contains_errors()) {
-        return "manager().Run() errored:\n" +
-               diag::Formatter(style).format(result.diagnostics);
-      }
-      program = std::move(result.program);
+  /// Transforms and returns the WGSL source `in`, transformed using
+  /// `transform`.
+  /// @param transform the transform to apply
+  /// @param in the input WGSL source
+  /// @return the transformed output
+  Transform::Output Transform(std::string in,
+                              std::unique_ptr<transform::Transform> transform) {
+    std::vector<std::unique_ptr<transform::Transform>> transforms;
+    transforms.emplace_back(std::move(transform));
+    return Transform(std::move(in), std::move(transforms));
+  }
+
+  /// Transforms and returns the WGSL source `in`, transformed using
+  /// a transform of type `TRANSFORM`.
+  /// @param in the input WGSL source
+  /// @param args the TRANSFORM constructor arguments
+  /// @return the transformed output
+  template <typename TRANSFORM, typename... ARGS>
+  Transform::Output Transform(std::string in, ARGS&&... args) {
+    return Transform(std::move(in),
+                     std::make_unique<TRANSFORM>(std::forward<ARGS>(args)...));
+  }
+
+  /// @param output the output of the transform
+  /// @returns the output program as a WGSL string, or an error string if the
+  /// program is not valid.
+  std::string str(const Transform::Output& output) {
+    diag::Formatter::Style style;
+    style.print_newline_at_end = false;
+
+    if (!output.program.IsValid()) {
+      return diag::Formatter(style).format(output.program.Diagnostics());
     }
 
-    writer::wgsl::Generator generator(&program);
+    writer::wgsl::Generator generator(&output.program);
     if (!generator.Generate()) {
       return "WGSL writer failed:\n" + generator.error();
     }
@@ -83,29 +107,6 @@ class TransformTest : public testing::Test {
       return res;
     }
     return "\n" + res + "\n";
-  }
-
-  /// Transforms and returns the WGSL source `in`, transformed using
-  /// `transform`.
-  /// @param transform the transform to apply
-  /// @param in the input WGSL source
-  /// @return the transformed WGSL output
-  std::string Transform(std::string in,
-                        std::unique_ptr<transform::Transform> transform) {
-    std::vector<std::unique_ptr<transform::Transform>> transforms;
-    transforms.emplace_back(std::move(transform));
-    return Transform(std::move(in), std::move(transforms));
-  }
-
-  /// Transforms and returns the WGSL source `in`, transformed using
-  /// a transform of type `TRANSFORM`.
-  /// @param in the input WGSL source
-  /// @param args the TRANSFORM constructor arguments
-  /// @return the transformed WGSL output
-  template <typename TRANSFORM, typename... ARGS>
-  std::string Transform(std::string in, ARGS&&... args) {
-    return Transform(std::move(in),
-                     std::make_unique<TRANSFORM>(std::forward<ARGS>(args)...));
   }
 };
 

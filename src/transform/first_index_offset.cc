@@ -15,6 +15,7 @@
 #include "src/transform/first_index_offset.h"
 
 #include <cassert>
+#include <memory>
 #include <utility>
 
 #include "src/ast/array_accessor_expression.h"
@@ -54,6 +55,8 @@
 #include "src/type/u32_type.h"
 #include "src/type_determiner.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::transform::FirstIndexOffset::Data);
+
 namespace tint {
 namespace transform {
 namespace {
@@ -80,20 +83,34 @@ ast::Variable* clone_variable_with_new_name(CloneContext* ctx,
 
 }  // namespace
 
+FirstIndexOffset::Data::Data(bool has_vtx_index,
+                             bool has_inst_index,
+                             uint32_t first_vtx_offset,
+                             uint32_t first_idx_offset)
+    : has_vertex_index(has_vtx_index),
+      has_instance_index(has_inst_index),
+      first_vertex_offset(first_vtx_offset),
+      first_index_offset(first_idx_offset) {}
+
+FirstIndexOffset::Data::Data(const Data&) = default;
+
+FirstIndexOffset::Data::~Data() = default;
+
 FirstIndexOffset::FirstIndexOffset(uint32_t binding, uint32_t group)
     : binding_(binding), group_(group) {}
 
 FirstIndexOffset::~FirstIndexOffset() = default;
 
 Transform::Output FirstIndexOffset::Run(const Program* in) {
+  ProgramBuilder out;
+
   // First do a quick check to see if the transform has already been applied.
   for (ast::Variable* var : in->AST().GlobalVariables()) {
     if (auto* dec_var = var->As<ast::Variable>()) {
       if (dec_var->symbol() == in->Symbols().Get(kBufferName)) {
-        Output out;
-        out.diagnostics.add_error(
+        out.Diagnostics().add_error(
             "First index offset transform has already been applied.");
-        return out;
+        return Output(Program(std::move(out)));
       }
     }
   }
@@ -101,7 +118,7 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
   Symbol vertex_index_sym;
   Symbol instance_index_sym;
 
-  // Lazilly construct the UniformBuffer on first call to
+  // Lazily construct the UniformBuffer on first call to
   // maybe_create_buffer_var()
   ast::Variable* buffer_var = nullptr;
   auto maybe_create_buffer_var = [&](ProgramBuilder* dst) {
@@ -114,7 +131,6 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
   // add a CreateFirstIndexOffset() statement to each function that uses one of
   // these builtins.
 
-  ProgramBuilder out;
   CloneContext(&out, in)
       .ReplaceAll([&](CloneContext* ctx, ast::Variable* var) -> ast::Variable* {
         for (ast::VariableDecoration* dec : var->decorations()) {
@@ -163,7 +179,10 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
           })
       .Clone();
 
-  return Output(Program(std::move(out)));
+  return Output(
+      Program(std::move(out)),
+      std::make_unique<Data>(has_vertex_index_, has_instance_index_,
+                             vertex_index_offset_, instance_index_offset_));
 }
 
 bool FirstIndexOffset::HasVertexIndex() {

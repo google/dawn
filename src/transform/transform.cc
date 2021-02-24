@@ -19,15 +19,26 @@
 #include "src/clone_context.h"
 #include "src/program_builder.h"
 
+TINT_INSTANTIATE_CLASS_ID(tint::transform::Data);
+
 namespace tint {
 namespace transform {
+
+Data::Data() = default;
+
+Data::Data(const Data&) = default;
+
+Data::~Data() = default;
+
+DataMap::DataMap() = default;
+
+DataMap::DataMap(DataMap&&) = default;
+
+DataMap::~DataMap() = default;
 
 Transform::Output::Output() = default;
 
 Transform::Output::Output(Program&& p) : program(std::move(p)) {}
-
-Transform::Output::Output(Program&& p, diag::List&& d)
-    : program(std::move(p)), diagnostics(std::move(d)) {}
 
 Transform::Transform() = default;
 

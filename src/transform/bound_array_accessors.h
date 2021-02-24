@@ -45,8 +45,7 @@ class BoundArrayAccessors : public Transform {
 
  private:
   ast::ArrayAccessorExpression* Transform(ast::ArrayAccessorExpression* expr,
-                                          CloneContext* ctx,
-                                          diag::List* diags);
+                                          CloneContext* ctx);
 };
 
 }  // namespace transform
