@@ -871,6 +871,7 @@ namespace dawn_native {
                         tint::transform::Manager transformManager;
                         transformManager.append(
                             std::make_unique<tint::transform::EmitVertexPointSize>());
+                        transformManager.append(std::make_unique<tint::transform::Spirv>());
                         DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program));
                     }
 
@@ -1072,6 +1073,7 @@ namespace dawn_native {
         transformManager.append(
             MakeVertexPullingTransform(vertexState, entryPoint, pullingBufferBindingSet));
         transformManager.append(std::make_unique<tint::transform::EmitVertexPointSize>());
+        transformManager.append(std::make_unique<tint::transform::Spirv>());
         if (GetDevice()->IsRobustnessEnabled()) {
             // TODO(enga): Run the Tint BoundArrayAccessors transform instead of the SPIRV Tools
             // one, but it appears to crash after running VertexPulling.

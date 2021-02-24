@@ -47,22 +47,22 @@ namespace dawn_native { namespace vulkan {
     }
 
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
-        DAWN_TRY(InitializeBase(parseResult));
-
         std::vector<uint32_t> spirv;
         const std::vector<uint32_t>* spirvPtr;
+
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
 #ifdef DAWN_ENABLE_WGSL
-            tint::Program program = std::move(*std::move(parseResult->tintProgram).release());
-
             std::ostringstream errorStream;
             errorStream << "Tint SPIR-V writer failure:" << std::endl;
 
             tint::transform::Manager transformManager;
             transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
             transformManager.append(std::make_unique<tint::transform::EmitVertexPointSize>());
+            transformManager.append(std::make_unique<tint::transform::Spirv>());
 
-            DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program));
+            tint::Program program;
+            DAWN_TRY_ASSIGN(program,
+                            RunTransforms(&transformManager, parseResult->tintProgram.get()));
 
             tint::writer::spirv::Generator generator(&program);
             if (!generator.Generate()) {
@@ -72,10 +72,18 @@ namespace dawn_native { namespace vulkan {
 
             spirv = generator.result();
             spirvPtr = &spirv;
+
+            ShaderModuleParseResult transformedParseResult;
+            transformedParseResult.tintProgram =
+                std::make_unique<tint::Program>(std::move(program));
+            transformedParseResult.spirv = spirv;
+
+            DAWN_TRY(InitializeBase(&transformedParseResult));
 #else
             UNREACHABLE();
 #endif
         } else {
+            DAWN_TRY(InitializeBase(parseResult));
             spirvPtr = &GetSpirv();
         }
 
