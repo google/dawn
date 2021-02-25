@@ -46,7 +46,8 @@ namespace dawn_wire { namespace client {
                              WGPUFenceOnCompletionCallback callback,
                              void* userdata) {
         if (client->IsDisconnected()) {
-            return callback(WGPUFenceCompletionStatus_DeviceLost, userdata);
+            callback(WGPUFenceCompletionStatus_DeviceLost, userdata);
+            return;
         }
 
         uint32_t serial = mOnCompletionRequestSerial++;

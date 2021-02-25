@@ -122,6 +122,27 @@ namespace dawn_native {
             return uploadHandle;
         }
 
+        struct SubmittedWorkDone : QueueBase::TaskInFlight {
+            SubmittedWorkDone(WGPUQueueWorkDoneCallback callback, void* userdata)
+                : mCallback(callback), mUserdata(userdata) {
+            }
+            void Finish() override {
+                ASSERT(mCallback != nullptr);
+                mCallback(WGPUQueueWorkDoneStatus_Success, mUserdata);
+                mCallback = nullptr;
+            }
+            void HandleDeviceLoss() override {
+                ASSERT(mCallback != nullptr);
+                mCallback(WGPUQueueWorkDoneStatus_DeviceLost, mUserdata);
+                mCallback = nullptr;
+            }
+            ~SubmittedWorkDone() override = default;
+
+          private:
+            WGPUQueueWorkDoneCallback mCallback = nullptr;
+            void* mUserdata;
+        };
+
         class ErrorQueue : public QueueBase {
           public:
             ErrorQueue(DeviceBase* device) : QueueBase(device, ObjectBase::kError) {
@@ -174,6 +195,26 @@ namespace dawn_native {
 
         fence->SetSignaledValue(signalValue);
         fence->UpdateFenceOnComplete(fence, signalValue);
+    }
+
+    void QueueBase::OnSubmittedWorkDone(uint64_t signalValue,
+                                        WGPUQueueWorkDoneCallback callback,
+                                        void* userdata) {
+        // The error status depends on the type of error so we let the validation function choose it
+        WGPUQueueWorkDoneStatus status;
+        if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(signalValue, &status))) {
+            callback(status, userdata);
+            return;
+        }
+
+        std::unique_ptr<SubmittedWorkDone> task =
+            std::make_unique<SubmittedWorkDone>(callback, userdata);
+
+        // Technically we only need to wait for previously submitted work but OnSubmittedWorkDone is
+        // also used to make sure ALL queue work is finished in tests, so we also wait for pending
+        // commands (this is non-observable outside of tests so it's ok to do deviate a bit from the
+        // spec).
+        TrackTask(std::move(task), GetDevice()->GetPendingCommandSerial());
     }
 
     void QueueBase::TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial) {
@@ -384,6 +425,21 @@ namespace dawn_native {
         if (signalValue <= fence->GetSignaledValue()) {
             return DAWN_VALIDATION_ERROR("Signal value less than or equal to fence signaled value");
         }
+        return {};
+    }
+
+    MaybeError QueueBase::ValidateOnSubmittedWorkDone(uint64_t signalValue,
+                                                      WGPUQueueWorkDoneStatus* status) const {
+        *status = WGPUQueueWorkDoneStatus_DeviceLost;
+        DAWN_TRY(GetDevice()->ValidateIsAlive());
+
+        *status = WGPUQueueWorkDoneStatus_Error;
+        DAWN_TRY(GetDevice()->ValidateObject(this));
+
+        if (signalValue != 0) {
+            return DAWN_VALIDATION_ERROR("SignalValue must currently be 0.");
+        }
+
         return {};
     }
 

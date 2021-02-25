@@ -61,6 +61,11 @@
             { "name": "value", "type": "uint64_t" },
             { "name": "request serial", "type": "uint64_t" }
         ],
+        "queue on submitted work done": [
+            { "name": "queue id", "type": "ObjectId" },
+            { "name": "signal value", "type": "uint64_t" },
+            { "name": "request serial", "type": "uint64_t" }
+        ],
         "queue write buffer internal": [
             {"name": "queue id", "type": "ObjectId" },
             {"name": "buffer id", "type": "ObjectId" },
@@ -120,6 +125,11 @@
         "fence update completed value": [
             { "name": "fence", "type": "ObjectHandle", "handle_type": "fence" },
             { "name": "value", "type": "uint64_t" }
+        ],
+        "queue work done callback": [
+            { "name": "queue", "type": "ObjectHandle", "handle_type": "queue" },
+            { "name": "request serial", "type": "uint64_t" },
+            { "name": "status", "type": "queue work done status" }
         ]
     },
     "special items": {
@@ -140,6 +150,7 @@
             "DeviceSetUncapturedErrorCallback",
             "FenceGetCompletedValue",
             "FenceOnCompletion",
+            "QueueOnSubmittedWorkDone",
             "QueueWriteBuffer",
             "QueueWriteTexture"
         ],

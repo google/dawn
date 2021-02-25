@@ -19,6 +19,47 @@
 
 namespace dawn_wire { namespace client {
 
+    Queue::~Queue() {
+        ClearAllCallbacks(WGPUQueueWorkDoneStatus_Unknown);
+    }
+
+    bool Queue::OnWorkDoneCallback(uint64_t requestSerial, WGPUQueueWorkDoneStatus status) {
+        auto requestIt = mOnWorkDoneRequests.find(requestSerial);
+        if (requestIt == mOnWorkDoneRequests.end()) {
+            return false;
+        }
+
+        // Remove the request data so that the callback cannot be called again.
+        // ex.) inside the callback: if the queue is deleted (when there are multiple queues),
+        // all callbacks reject.
+        OnWorkDoneData request = std::move(requestIt->second);
+        mOnWorkDoneRequests.erase(requestIt);
+
+        request.callback(status, request.userdata);
+        return true;
+    }
+
+    void Queue::OnSubmittedWorkDone(uint64_t signalValue,
+                                    WGPUQueueWorkDoneCallback callback,
+                                    void* userdata) {
+        if (client->IsDisconnected()) {
+            callback(WGPUQueueWorkDoneStatus_DeviceLost, userdata);
+            return;
+        }
+
+        uint32_t serial = mOnWorkDoneSerial++;
+        ASSERT(mOnWorkDoneRequests.find(serial) == mOnWorkDoneRequests.end());
+
+        QueueOnSubmittedWorkDoneCmd cmd;
+        cmd.queueId = this->id;
+        cmd.signalValue = signalValue;
+        cmd.requestSerial = serial;
+
+        mOnWorkDoneRequests[serial] = {callback, userdata};
+
+        client->SerializeCommand(cmd);
+    }
+
     WGPUFence Queue::CreateFence(WGPUFenceDescriptor const* descriptor) {
         auto* allocation = client->FenceAllocator().New(client);
 
@@ -63,6 +104,19 @@ namespace dawn_wire { namespace client {
         cmd.writeSize = writeSize;
 
         client->SerializeCommand(cmd);
+    }
+
+    void Queue::CancelCallbacksForDisconnect() {
+        ClearAllCallbacks(WGPUQueueWorkDoneStatus_DeviceLost);
+    }
+
+    void Queue::ClearAllCallbacks(WGPUQueueWorkDoneStatus status) {
+        for (auto& it : mOnWorkDoneRequests) {
+            if (it.second.callback) {
+                it.second.callback(status, it.second.userdata);
+            }
+        }
+        mOnWorkDoneRequests.clear();
     }
 
 }}  // namespace dawn_wire::client

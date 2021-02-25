@@ -141,6 +141,13 @@ namespace dawn_wire { namespace server {
         uint64_t requestSerial;
     };
 
+    struct QueueWorkDoneUserdata : CallbackUserdata {
+        using CallbackUserdata::CallbackUserdata;
+
+        ObjectHandle queue;
+        uint64_t requestSerial;
+    };
+
     struct CreatePipelineAsyncUserData : CallbackUserdata {
         using CallbackUserdata::CallbackUserdata;
 
@@ -202,6 +209,7 @@ namespace dawn_wire { namespace server {
                                           FenceCompletionUserdata* userdata);
         void OnFenceOnCompletion(WGPUFenceCompletionStatus status,
                                  FenceOnCompletionUserdata* userdata);
+        void OnQueueWorkDone(WGPUQueueWorkDoneStatus status, QueueWorkDoneUserdata* userdata);
         void OnCreateComputePipelineAsyncCallback(WGPUCreatePipelineAsyncStatus status,
                                                   WGPUComputePipeline pipeline,
                                                   const char* message,

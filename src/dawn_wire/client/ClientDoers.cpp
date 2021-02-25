@@ -66,7 +66,6 @@ namespace dawn_wire { namespace client {
         if (buffer == nullptr) {
             return true;
         }
-
         return buffer->OnMapAsyncCallback(requestSerial, status, readInitialDataInfoLength,
                                           readInitialDataInfo);
     }
@@ -88,9 +87,17 @@ namespace dawn_wire { namespace client {
         if (fence == nullptr) {
             return true;
         }
+        return fence->OnCompletionCallback(requestSerial, status);
+    }
 
-        fence->OnCompletionCallback(requestSerial, status);
-        return true;
+    bool Client::DoQueueWorkDoneCallback(Queue* queue,
+                                         uint64_t requestSerial,
+                                         WGPUQueueWorkDoneStatus status) {
+        // The queue might have been deleted or recreated so this isn't an error.
+        if (queue == nullptr) {
+            return true;
+        }
+        return queue->OnWorkDoneCallback(requestSerial, status);
     }
 
     bool Client::DoDeviceCreateComputePipelineAsyncCallback(Device* device,

@@ -40,6 +40,34 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
+    void Server::OnQueueWorkDone(WGPUQueueWorkDoneStatus status, QueueWorkDoneUserdata* data) {
+        ReturnQueueWorkDoneCallbackCmd cmd;
+        cmd.queue = data->queue;
+        cmd.requestSerial = data->requestSerial;
+        cmd.status = status;
+
+        SerializeCommand(cmd);
+    }
+
+    bool Server::DoQueueOnSubmittedWorkDone(ObjectId queueId,
+                                            uint64_t signalValue,
+                                            uint64_t requestSerial) {
+        auto* queue = QueueObjects().Get(queueId);
+        if (queue == nullptr) {
+            return false;
+        }
+
+        auto userdata = MakeUserdata<QueueWorkDoneUserdata>();
+        userdata->queue = ObjectHandle{queueId, queue->generation};
+        userdata->requestSerial = requestSerial;
+
+        mProcs.queueOnSubmittedWorkDone(
+            queue->handle, signalValue,
+            ForwardToServer<decltype(&Server::OnQueueWorkDone)>::Func<&Server::OnQueueWorkDone>(),
+            userdata.release());
+        return true;
+    }
+
     bool Server::DoQueueWriteBufferInternal(ObjectId queueId,
                                             ObjectId bufferId,
                                             uint64_t bufferOffset,

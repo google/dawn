@@ -52,6 +52,16 @@ static void ToMockFenceOnCompletionSucceeds(WGPUFenceCompletionStatus status, vo
     mockFenceOnCompletionCallback = nullptr;
 }
 
+class MockQueueWorkDoneCallback {
+  public:
+    MOCK_METHOD(void, Call, (WGPUQueueWorkDoneStatus status, void* userdata));
+};
+
+static std::unique_ptr<MockQueueWorkDoneCallback> mockQueueWorkDoneCallback;
+static void ToMockQueueWorkDone(WGPUQueueWorkDoneStatus status, void* userdata) {
+    mockQueueWorkDoneCallback->Call(status, userdata);
+}
+
 static const int fakeUserData = 0;
 
 class DeviceLostTest : public DawnTest {
@@ -61,11 +71,13 @@ class DeviceLostTest : public DawnTest {
         DAWN_SKIP_TEST_IF(UsesWire());
         mockDeviceLostCallback = std::make_unique<MockDeviceLostCallback>();
         mockFenceOnCompletionCallback = std::make_unique<MockFenceOnCompletionCallback>();
+        mockQueueWorkDoneCallback = std::make_unique<MockQueueWorkDoneCallback>();
     }
 
     void TearDown() override {
         mockDeviceLostCallback = nullptr;
         mockFenceOnCompletionCallback = nullptr;
+        mockQueueWorkDoneCallback = nullptr;
         DawnTest::TearDown();
     }
 
@@ -471,6 +483,28 @@ TEST_P(DeviceLostTest, FenceOnCompletionBeforeLossFails) {
     ASSERT_DEVICE_ERROR(device.Tick());
 
     EXPECT_EQ(fence.GetCompletedValue(), 2u);
+}
+
+// Test that QueueOnSubmittedWorkDone fails after device is lost.
+TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneFails) {
+    SetCallbackAndLoseForTesting();
+
+    // callback should have device lost status
+    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_DeviceLost, nullptr))
+        .Times(1);
+    ASSERT_DEVICE_ERROR(queue.OnSubmittedWorkDone(0, ToMockQueueWorkDone, nullptr));
+    ASSERT_DEVICE_ERROR(device.Tick());
+}
+
+// Test that QueueOnSubmittedWorkDone when the device is lost after calling OnSubmittedWorkDone
+TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneBeforeLossFails) {
+    // callback should have device lost status
+    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_DeviceLost, nullptr))
+        .Times(1);
+    queue.OnSubmittedWorkDone(0, ToMockQueueWorkDone, nullptr);
+
+    SetCallbackAndLoseForTesting();
+    ASSERT_DEVICE_ERROR(device.Tick());
 }
 
 // Regression test for the Null backend not properly setting the completedSerial when
