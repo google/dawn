@@ -88,6 +88,9 @@ class QueryInternalShaderTests : public DawnTest {};
 TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
+    // TODO(bclayton): DLL symbol linker issue?
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") && IsWindows());
+
     constexpr uint32_t kTimestampCount = 10u;
     // A gpu frequency on Intel D3D12 (ticks/second)
     constexpr uint64_t kGPUFrequency = 12000048u;
