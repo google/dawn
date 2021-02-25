@@ -150,11 +150,6 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
 // It contains a transformation matrix for the VS and the fragment color for the FS.
 // These must result in different register offsets in the native APIs.
 TEST_P(BindGroupTests, ReusedUBO) {
-    // TODO(crbug.com/dawn/571): Fix failures using Tint.
-    // TODO(crbug.com/tint/463): Fix emission of MSL matrices in Tint.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
-                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
@@ -239,10 +234,6 @@ TEST_P(BindGroupTests, ReusedUBO) {
 // shader. In D3D12 for example, these different types of bindings end up in different namespaces,
 // but the register offsets used must match between the shader module and descriptor range.
 TEST_P(BindGroupTests, UBOSamplerAndTexture) {
-    // TODO(crbug.com/dawn/571): Fix failures using Tint.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
-                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
@@ -352,12 +343,6 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
 }
 
 TEST_P(BindGroupTests, MultipleBindLayouts) {
-    // TODO(crbug.com/tint/403):
-    // error: line 74: Expected Result Type to be a scalar type
-    // %44 = OpVectorExtractDynamic %v2float %30 %uint_0_0
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") &&
-                      (IsVulkan() || IsOpenGL() || IsOpenGLES()));
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
