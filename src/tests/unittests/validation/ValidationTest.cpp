@@ -43,6 +43,14 @@ void InitDawnValidationTestEnvironment(int argc, char** argv) {
             gWireTraceDir = argv[i] + argLen;
             continue;
         }
+
+        // Skip over args that look like they're for Googletest.
+        constexpr const char kGtestArgPrefix[] = "--gtest_";
+        if (strncmp(kGtestArgPrefix, argv[i], sizeof(kGtestArgPrefix) - 1) == 0) {
+            continue;
+        }
+
+        dawn::WarningLog() << " Unused argument: " << argv[i];
     }
 }
 
