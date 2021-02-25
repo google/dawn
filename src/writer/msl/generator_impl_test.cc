@@ -58,6 +58,7 @@ TEST_F(MslGeneratorImplTest, Generate) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 kernel void my_func() {
   return;
 }

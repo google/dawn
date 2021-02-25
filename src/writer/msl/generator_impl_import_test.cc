@@ -65,8 +65,7 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   auto* intrinsic = target->As<semantic::Intrinsic>();
   ASSERT_NE(intrinsic, nullptr);
 
-  ASSERT_EQ(gen.generate_builtin_name(intrinsic),
-            std::string("metal::") + param.msl_name);
+  ASSERT_EQ(gen.generate_builtin_name(intrinsic), param.msl_name);
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_SingleParamTest,
@@ -101,7 +100,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_SingleParamTest_IntScalar) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(metal::abs(1))");
+  EXPECT_EQ(gen.result(), R"(abs(1))");
 }
 
 using MslImportData_DualParamTest = TestParamHelper<MslImportData>;
@@ -114,8 +113,7 @@ TEST_P(MslImportData_DualParamTest, FloatScalar) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(),
-            std::string("metal::") + param.msl_name + "(1.0f, 2.0f)");
+  EXPECT_EQ(gen.result(), std::string(param.msl_name) + "(1.0f, 2.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParamTest,
@@ -138,7 +136,7 @@ TEST_P(MslImportData_DualParam_VectorTest, FloatVector) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name +
+  EXPECT_EQ(gen.result(), std::string(param.msl_name) +
                               "(float3(1.0f, 2.0f, 3.0f), "
                               "float3(4.0f, 5.0f, 6.0f))");
 }
@@ -156,7 +154,7 @@ TEST_P(MslImportData_DualParam_Int_Test, IntScalar) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string("metal::") + param.msl_name + "(1, 2)");
+  EXPECT_EQ(gen.result(), std::string(param.msl_name) + "(1, 2)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_DualParam_Int_Test,
@@ -173,8 +171,7 @@ TEST_P(MslImportData_TripleParamTest, FloatScalar) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(),
-            std::string("metal::") + param.msl_name + "(1.0f, 2.0f, 3.0f)");
+  EXPECT_EQ(gen.result(), std::string(param.msl_name) + "(1.0f, 2.0f, 3.0f)");
 }
 INSTANTIATE_TEST_SUITE_P(
     MslGeneratorImplTest,
@@ -195,8 +192,7 @@ TEST_P(MslImportData_TripleParam_Int_Test, IntScalar) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(),
-            std::string("metal::") + param.msl_name + "(1, 2, 3)");
+  EXPECT_EQ(gen.result(), std::string(param.msl_name) + "(1, 2, 3)");
 }
 INSTANTIATE_TEST_SUITE_P(MslGeneratorImplTest,
                          MslImportData_TripleParam_Int_Test,
@@ -213,7 +209,7 @@ TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitCall(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string("metal::determinant(var)"));
+  EXPECT_EQ(gen.result(), std::string("determinant(var)"));
 }
 
 }  // namespace

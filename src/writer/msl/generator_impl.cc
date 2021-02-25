@@ -122,6 +122,7 @@ std::string GeneratorImpl::generate_name(const std::string& prefix) {
 
 bool GeneratorImpl::Generate() {
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
+  out_ << "using namespace metal;" << std::endl;
 
   for (auto* global : program_->AST().GlobalVariables()) {
     auto* sem = program_->Sem().Get(global);
@@ -789,7 +790,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
 
 std::string GeneratorImpl::generate_builtin_name(
     const semantic::Intrinsic* intrinsic) {
-  std::string out = "metal::";
+  std::string out = "";
   switch (intrinsic->Type()) {
     case semantic::IntrinsicType::kAcos:
     case semantic::IntrinsicType::kAll:

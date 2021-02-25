@@ -69,6 +69,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
   void my_func() {
     return;
   }
@@ -90,6 +91,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
   void main_tint_0() {
     return;
   }
@@ -115,6 +117,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
   void my_func(float a, int b) {
     return;
   }
@@ -133,6 +136,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_NoReturn_Void) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 fragment void main_tint_0() {
   return;
 }
@@ -160,6 +164,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct main_in {
   float foo [[user(locn0)]];
 };
@@ -197,6 +202,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_WithInOutVars) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct frag_main_in {
   float foo [[user(locn0)]];
 };
@@ -240,6 +246,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct frag_main_out {
   float depth [[depth(any)]];
 };
@@ -275,6 +282,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_With_Uniform) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 fragment void frag_main(constant float4& coord [[buffer(0)]]) {
   float v = coord.x;
   return;
@@ -316,6 +324,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct Data {
   int a;
   float b;
@@ -361,6 +370,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct Data {
   int a;
   float b;
@@ -411,6 +421,7 @@ TEST_F(
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct ep_1_in {
   float foo [[user(locn0)]];
 };
@@ -465,6 +476,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct ep_1_out {
   float depth [[depth(any)]];
 };
@@ -519,6 +531,7 @@ TEST_F(
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct ep_1_out {
   float depth [[depth(any)]];
 };
@@ -572,6 +585,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 float sub_func(constant float4& coord, float param) {
   return coord.x;
 }
@@ -624,6 +638,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct Data {
   int a;
   float b;
@@ -684,6 +699,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct Data {
   int a;
   float b;
@@ -728,6 +744,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct ep_1_out {
   float bar [[color(1)]];
 };
@@ -756,6 +773,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 kernel void main_tint_0() {
   return;
 }
@@ -780,6 +798,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
   void my_func(float a[5]) {
     return;
   }
@@ -850,6 +869,7 @@ TEST_F(MslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
+using namespace metal;
 struct Data {
   float d;
 };
