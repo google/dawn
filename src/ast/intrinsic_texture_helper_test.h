@@ -137,6 +137,9 @@ enum class ValidTextureOverload {
   kLoad1dF32,
   kLoad1dU32,
   kLoad1dI32,
+  kLoad1dLevelF32,
+  kLoad1dLevelU32,
+  kLoad1dLevelI32,
   kLoad2dF32,
   kLoad2dU32,
   kLoad2dI32,
@@ -165,7 +168,7 @@ enum class ValidTextureOverload {
   kLoadDepth2dLevelF32,
   kLoadDepth2dArrayF32,
   kLoadDepth2dArrayLevelF32,
-  kLoadStorageRO1dRgba32float,       // Not permutated for all texel formats
+  kLoadStorageRO1dRgba32float,  // Not permutated for all texel formats
   kLoadStorageRO2dRgba8unorm,
   kLoadStorageRO2dRgba8snorm,
   kLoadStorageRO2dRgba8uint,

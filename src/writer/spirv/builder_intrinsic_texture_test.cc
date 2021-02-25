@@ -2612,6 +2612,71 @@ OpCapability Sampled1D
           R"(
 OpCapability Sampled1D
 )"};
+    case ValidTextureOverload::kLoad1dLevelF32:
+      return {
+          R"(
+%4 = OpTypeFloat 32
+%3 = OpTypeImage %4 1D 0 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%11 = OpTypeInt 32 1
+%12 = OpConstant %11 1
+%13 = OpConstant %11 3
+)",
+          R"(
+%10 = OpLoad %3 %1
+%8 = OpImageFetch %9 %10 %12 Lod %13
+)",
+          R"(
+OpCapability Sampled1D
+)"};
+    case ValidTextureOverload::kLoad1dLevelU32:
+      return {
+          R"(
+%4 = OpTypeInt 32 0
+%3 = OpTypeImage %4 1D 0 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%11 = OpTypeInt 32 1
+%12 = OpConstant %11 1
+%13 = OpConstant %11 3
+)",
+          R"(
+%10 = OpLoad %3 %1
+%8 = OpImageFetch %9 %10 %12 Lod %13
+)",
+          R"(
+OpCapability Sampled1D
+)"};
+    case ValidTextureOverload::kLoad1dLevelI32:
+      return {
+          R"(
+%4 = OpTypeInt 32 1
+%3 = OpTypeImage %4 1D 0 0 0 1 Unknown
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
+%7 = OpTypeSampler
+%6 = OpTypePointer UniformConstant %7
+%5 = OpVariable %6 UniformConstant
+%9 = OpTypeVector %4 4
+%11 = OpConstant %4 1
+%12 = OpConstant %4 3
+)",
+          R"(
+%10 = OpLoad %3 %1
+%8 = OpImageFetch %9 %10 %11 Lod %12
+)",
+          R"(
+OpCapability Sampled1D
+)"};
     case ValidTextureOverload::kLoad2dF32:
       return {
           R"(

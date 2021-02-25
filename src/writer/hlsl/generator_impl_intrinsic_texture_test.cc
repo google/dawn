@@ -311,6 +311,12 @@ texture_tint_0.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w)
       return R"(texture_tint_0.Load(int2(1, 0)))";
     case ValidTextureOverload::kLoad1dI32:
       return R"(texture_tint_0.Load(int2(1, 0)))";
+    case ValidTextureOverload::kLoad1dLevelF32:
+      return R"(texture_tint_0.Load(int2(1, 0), 3))";
+    case ValidTextureOverload::kLoad1dLevelU32:
+      return R"(texture_tint_0.Load(int2(1, 0), 3))";
+    case ValidTextureOverload::kLoad1dLevelI32:
+      return R"(texture_tint_0.Load(int2(1, 0), 3))";
     case ValidTextureOverload::kLoad2dF32:
       return R"(texture_tint_0.Load(int3(1, 2, 0)))";
     case ValidTextureOverload::kLoad2dU32:

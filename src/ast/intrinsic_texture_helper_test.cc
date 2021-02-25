@@ -1701,6 +1701,51 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           },
       },
       {
+          ValidTextureOverload::kLoad1dLevelF32,
+          "textureLoad(t      : texture_1d<f32>,\n"
+          "            coords : i32,\n"
+          "            level  : i32) -> vec4<f32>",
+          TextureKind::kRegular,
+          type::TextureDimension::k1d,
+          TextureDataType::kF32,
+          "textureLoad",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",  // t
+                               1,          // coords
+                               3);         // level
+          },
+      },
+      {
+          ValidTextureOverload::kLoad1dLevelU32,
+          "textureLoad(t      : texture_1d<u32>,\n"
+          "            coords : i32,\n"
+          "            level  : i32) -> vec4<u32>",
+          TextureKind::kRegular,
+          type::TextureDimension::k1d,
+          TextureDataType::kU32,
+          "textureLoad",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",  // t
+                               1,          // coords
+                               3);         // level
+          },
+      },
+      {
+          ValidTextureOverload::kLoad1dLevelI32,
+          "textureLoad(t      : texture_1d<i32>,\n"
+          "            coords : i32,\n"
+          "            level  : i32) -> vec4<i32>",
+          TextureKind::kRegular,
+          type::TextureDimension::k1d,
+          TextureDataType::kI32,
+          "textureLoad",
+          [](ProgramBuilder* b) {
+            return b->ExprList("texture",  // t
+                               1,          // coords
+                               3);         // level
+          },
+      },
+      {
           ValidTextureOverload::kLoad2dF32,
           "textureLoad(t      : texture_2d<f32>,\n"
           "            coords : vec2<i32>) -> vec4<f32>",

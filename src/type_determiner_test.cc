@@ -3391,6 +3391,12 @@ const char* expected_texture_overload(
       return R"(textureLoad(texture, coords))";
     case ValidTextureOverload::kLoad1dI32:
       return R"(textureLoad(texture, coords))";
+    case ValidTextureOverload::kLoad1dLevelF32:
+      return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoad1dLevelU32:
+      return R"(textureLoad(texture, coords, level))";
+    case ValidTextureOverload::kLoad1dLevelI32:
+      return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoad2dF32:
       return R"(textureLoad(texture, coords))";
     case ValidTextureOverload::kLoad2dU32:

@@ -196,6 +196,12 @@ std::string expected_texture_overload(
       return R"(texture_tint_0.read(1))";
     case ValidTextureOverload::kLoad1dI32:
       return R"(texture_tint_0.read(1))";
+    case ValidTextureOverload::kLoad1dLevelF32:
+      return R"(texture_tint_0.read(1, 3))";
+    case ValidTextureOverload::kLoad1dLevelU32:
+      return R"(texture_tint_0.read(1, 3))";
+    case ValidTextureOverload::kLoad1dLevelI32:
+      return R"(texture_tint_0.read(1, 3))";
     case ValidTextureOverload::kLoad2dF32:
       return R"(texture_tint_0.read(int2(1, 2)))";
     case ValidTextureOverload::kLoad2dU32:
