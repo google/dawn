@@ -237,6 +237,10 @@ namespace dawn_native {
     }
 
     Fence* QueueBase::CreateFence(const FenceDescriptor* descriptor) {
+        // TODO(chromium:1177476): Remove once the deprecation period is finished.
+        GetDevice()->EmitDeprecationWarning(
+            "Fences are deprecated, use Queue::OnSubmittedWorkDone instead.");
+
         if (GetDevice()->ConsumedError(ValidateCreateFence(descriptor))) {
             return Fence::MakeError(GetDevice());
         }

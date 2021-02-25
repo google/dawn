@@ -1080,12 +1080,11 @@ void DawnTestBase::FlushWire() {
 }
 
 void DawnTestBase::WaitForAllOperations() {
-    wgpu::Queue queue = device.GetQueue();
-    wgpu::Fence fence = queue.CreateFence();
-
-    // Force the currently submitted operations to completed.
-    queue.Signal(fence, 1);
-    while (fence.GetCompletedValue() < 1) {
+    bool done = false;
+    device.GetQueue().OnSubmittedWorkDone(
+        0u, [](WGPUQueueWorkDoneStatus, void* userdata) { *static_cast<bool*>(userdata) = true; },
+        &done);
+    while (!done) {
         WaitABit();
     }
 }

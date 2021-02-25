@@ -164,6 +164,11 @@ TEST_P(DeprecationTests, GetDefaultQueueDeprecation) {
     EXPECT_EQ(deprecatedQueue.Get(), queue.Get());
 }
 
+// Test that fences are deprecated.
+TEST_P(DeprecationTests, CreateFence) {
+    EXPECT_DEPRECATION_WARNING(queue.CreateFence());
+}
+
 DAWN_INSTANTIATE_TEST(DeprecationTests,
                       D3D12Backend(),
                       MetalBackend(),

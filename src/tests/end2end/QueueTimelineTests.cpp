@@ -85,7 +85,8 @@ TEST_P(QueueTimelineTests, MapReadSignalOnComplete) {
 
     mMapReadBuffer.MapAsync(wgpu::MapMode::Read, 0, 0, ToMockMapCallback, this);
 
-    wgpu::Fence fence = queue.CreateFence();
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
 
     queue.Signal(fence, 1);
     fence.OnCompletion(1u, ToMockFenceOnCompletion, this);
@@ -119,7 +120,8 @@ TEST_P(QueueTimelineTests, SignalMapReadOnComplete) {
         .Times(1);
     EXPECT_CALL(*mockMapCallback, Call(WGPUBufferMapAsyncStatus_Success, this)).Times(1);
 
-    wgpu::Fence fence = queue.CreateFence();
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
     queue.Signal(fence, 2);
 
     mMapReadBuffer.MapAsync(wgpu::MapMode::Read, 0, 0, ToMockMapCallback, this);
@@ -154,7 +156,8 @@ TEST_P(QueueTimelineTests, SignalOnCompleteMapRead) {
         .Times(1);
     EXPECT_CALL(*mockMapCallback, Call(WGPUBufferMapAsyncStatus_Success, this)).Times(1);
 
-    wgpu::Fence fence = queue.CreateFence();
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
     queue.Signal(fence, 2);
 
     fence.OnCompletion(2u, ToMockFenceOnCompletion, this);
@@ -182,7 +185,8 @@ TEST_P(QueueTimelineTests, SurroundWithFenceSignals) {
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, this + 8))
         .Times(1);
 
-    wgpu::Fence fence = queue.CreateFence();
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
     queue.Signal(fence, 2);
     queue.Signal(fence, 4);
 

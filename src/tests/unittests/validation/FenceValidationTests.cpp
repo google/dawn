@@ -70,13 +70,14 @@ TEST_F(FenceValidationTest, CreationSuccess) {
     {
         wgpu::FenceDescriptor descriptor;
         descriptor.initialValue = 0;
-        queue.CreateFence(&descriptor);
+        EXPECT_DEPRECATION_WARNING(queue.CreateFence(&descriptor));
     }
 }
 
 // Creation succeeds if no descriptor is provided
 TEST_F(FenceValidationTest, DefaultDescriptor) {
-    wgpu::Fence fence = queue.CreateFence();
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
     EXPECT_EQ(fence.GetCompletedValue(), 0u);
 }
 
@@ -85,7 +86,8 @@ TEST_F(FenceValidationTest, GetCompletedValue) {
     {
         wgpu::FenceDescriptor descriptor;
         descriptor.initialValue = 1;
-        wgpu::Fence fence = queue.CreateFence(&descriptor);
+        wgpu::Fence fence;
+        EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence(&descriptor));
         EXPECT_EQ(fence.GetCompletedValue(), 1u);
     }
 }
@@ -99,7 +101,8 @@ TEST_F(FenceValidationTest, OnCompletionImmediate) {
 
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence(&descriptor));
 
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, this + 0))
         .Times(1);
@@ -114,7 +117,8 @@ TEST_F(FenceValidationTest, OnCompletionImmediate) {
 TEST_F(FenceValidationTest, OnCompletionLargerThanSignaled) {
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence(&descriptor));
 
     // Cannot signal for values > signaled value
     EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Error, nullptr))
@@ -137,7 +141,8 @@ TEST_F(FenceValidationTest, GetCompletedValueInsideCallback) {
 
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence(&descriptor));
 
     queue.Signal(fence, 3);
     fence.OnCompletion(2u, ToMockFenceOnCompletion, nullptr);
@@ -152,7 +157,8 @@ TEST_F(FenceValidationTest, GetCompletedValueInsideCallback) {
 TEST_F(FenceValidationTest, GetCompletedValueAfterCallback) {
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence(&descriptor));
 
     queue.Signal(fence, 2);
     fence.OnCompletion(2u, ToMockFenceOnCompletion, nullptr);
@@ -166,7 +172,8 @@ TEST_F(FenceValidationTest, GetCompletedValueAfterCallback) {
 TEST_F(FenceValidationTest, SignalError) {
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence(&descriptor));
 
     // value < fence signaled value
     ASSERT_DEVICE_ERROR(queue.Signal(fence, 0));
@@ -178,7 +185,8 @@ TEST_F(FenceValidationTest, SignalError) {
 TEST_F(FenceValidationTest, SignalSuccess) {
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence(&descriptor));
 
     // Success
     queue.Signal(fence, 2);
@@ -198,7 +206,8 @@ TEST_F(FenceValidationTest, DISABLED_SignalWrongQueue) {
 
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence(&descriptor));
 
     ASSERT_DEVICE_ERROR(queue2.Signal(fence, 2));
 }
@@ -210,7 +219,8 @@ TEST_F(FenceValidationTest, DISABLED_SignalWrongQueueDoesNotUpdateValue) {
 
     wgpu::FenceDescriptor descriptor;
     descriptor.initialValue = 1;
-    wgpu::Fence fence = queue.CreateFence(&descriptor);
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence(&descriptor));
 
     ASSERT_DEVICE_ERROR(queue2.Signal(fence, 2));
 

@@ -149,7 +149,8 @@ TEST_F(ErrorScopeValidationTest, EnclosedQueueSubmit) {
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
 
     queue.Submit(0, nullptr);
-    wgpu::Fence fence = queue.CreateFence();
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
     queue.Signal(fence, 1);
 
     testing::Sequence seq;
@@ -174,7 +175,8 @@ TEST_F(ErrorScopeValidationTest, EnclosedQueueSubmitNested) {
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
 
     queue.Submit(0, nullptr);
-    wgpu::Fence fence = queue.CreateFence();
+    wgpu::Fence fence;
+    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
     queue.Signal(fence, 1);
 
     testing::Sequence seq;

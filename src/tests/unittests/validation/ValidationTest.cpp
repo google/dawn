@@ -131,12 +131,13 @@ void ValidationTest::FlushWire() {
 }
 
 void ValidationTest::WaitForAllOperations(const wgpu::Device& device) {
-    wgpu::Queue queue = device.GetQueue();
-    wgpu::Fence fence = queue.CreateFence();
+    bool done = false;
+    device.GetQueue().OnSubmittedWorkDone(
+        0u, [](WGPUQueueWorkDoneStatus, void* userdata) { *static_cast<bool*>(userdata) = true; },
+        &done);
 
     // Force the currently submitted operations to completed.
-    queue.Signal(fence, 1);
-    while (fence.GetCompletedValue() < 1) {
+    while (!done) {
         device.Tick();
         FlushWire();
     }
