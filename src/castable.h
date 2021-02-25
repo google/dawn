@@ -25,33 +25,39 @@ namespace tint {
 class ClassID;
 
 /// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
-#define TINT_INSTANTIATE_CLASS_ID(CLASS)                \
-  template <>                                           \
-  const tint::ClassID tint::TypeInfo<CLASS>::class_id { \
-    tint::ClassID::New()                                \
-  }
+#define TINT_INSTANTIATE_CLASS_ID(CLASS)             \
+  template <>                                        \
+  const char tint::UniqueToken<CLASS>::token = 0;    \
+  template <>                                        \
+  const uintptr_t tint::TypeInfo<CLASS>::unique_id = \
+      reinterpret_cast<uintptr_t>(&tint::UniqueToken<CLASS>::token)
 
 /// TypeInfo holds type information for the type T.
 /// TINT_INSTANTIATE_CLASS_ID() must be defined in a .cpp file for each type
 /// `T`.
 template <typename T>
 struct TypeInfo {
-  static const ClassID class_id;
+  /// The unique identifier for the type T.
+  static const uintptr_t unique_id;
+};
+
+/// UniqueToken holds a single static const char, which is uniquely declared for
+/// each specialization of the template class.
+/// Use by TINT_INSTANTIATE_CLASS_ID() to generate a unique pointer, which is in
+/// turn used to generate TypeInfo<T>::unique_id.
+template <typename T>
+struct UniqueToken {
+  /// A dummy static variable that is unique for the type T.
+  static const char token;
 };
 
 /// ClassID represents a unique, comparable identifier for a C++ type.
 class ClassID {
  public:
-  /// @returns a new and unique ClassID
-  static inline ClassID New() {
-    static uintptr_t next(0);
-    return ClassID(next++);
-  }
-
   /// @returns the unique ClassID for the type T.
   template <typename T>
   static inline ClassID Of() {
-    return TypeInfo<T>::class_id;
+    return ClassID(TypeInfo<T>::unique_id);
   }
 
   /// Equality operator
