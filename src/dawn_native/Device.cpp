@@ -711,9 +711,10 @@ namespace dawn_native {
         ComputePipelineBase* result = nullptr;
 
         if (IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-            ConsumedError(
-                DAWN_VALIDATION_ERROR("CreateComputePipelineAsync is disallowed because it isn't "
-                                      "completely implemented yet."));
+            callback(WGPUCreatePipelineAsyncStatus_Error, nullptr,
+                     "CreateComputePipelineAsync is disallowed because it isn't completely "
+                     "implemented yet.",
+                     userdata);
             return;
         }
 
@@ -763,9 +764,10 @@ namespace dawn_native {
         RenderPipelineBase* result = nullptr;
 
         if (IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-            ConsumedError(
-                DAWN_VALIDATION_ERROR("CreateRenderPipelineAsync is disallowed because it isn't "
-                                      "completely implemented yet."));
+            callback(WGPUCreatePipelineAsyncStatus_Error, nullptr,
+                     "CreateRenderPipelineAsync is disallowed because it isn't completely "
+                     "implemented yet.",
+                     userdata);
             return;
         }
 

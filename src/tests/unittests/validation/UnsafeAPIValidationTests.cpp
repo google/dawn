@@ -14,6 +14,7 @@
 
 #include "tests/unittests/validation/ValidationTest.h"
 
+#include "tests/MockCallback.h"
 #include "utils/ComboRenderBundleEncoderDescriptor.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
@@ -223,15 +224,13 @@ TEST_F(UnsafeAPIValidationTest, CreateComputePipelineAsyncDisallowed) {
     // Control case: CreateComputePipeline is allowed.
     device.CreateComputePipeline(&desc);
 
+    testing::MockCallback<WGPUCreateComputePipelineAsyncCallback> callback;
+    EXPECT_CALL(callback,
+                Call(WGPUCreatePipelineAsyncStatus_Error, nullptr, testing::NotNull(), this));
     // Error case: CreateComputePipelineAsync is disallowed.
-    ASSERT_DEVICE_ERROR(device.CreateComputePipelineAsync(
-        &desc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
-           const char* message, void* userdata) {
-            // Status can be Error or Unkown (when using the wire).
-            EXPECT_NE(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success, status);
-        },
-        nullptr));
+    device.CreateComputePipelineAsync(&desc, callback.Callback(), callback.MakeUserdata(this));
+
+    WaitForAllOperations(device);
 }
 
 // Check that CreateRenderPipelineAsync is disallowed as part of unsafe APIs
@@ -252,13 +251,11 @@ TEST_F(UnsafeAPIValidationTest, CreateRenderPipelineAsyncDisallowed) {
     // Control case: CreateRenderPipeline is allowed.
     device.CreateRenderPipeline(&desc);
 
+    testing::MockCallback<WGPUCreateRenderPipelineAsyncCallback> callback;
+    EXPECT_CALL(callback,
+                Call(WGPUCreatePipelineAsyncStatus_Error, nullptr, testing::NotNull(), this));
     // Error case: CreateRenderPipelineAsync is disallowed.
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipelineAsync(
-        &desc,
-        [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline returnPipeline,
-           const char* message, void* userdata) {
-            // Status can be Error or Unkown (when using the wire).
-            EXPECT_NE(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_Success, status);
-        },
-        nullptr));
+    device.CreateRenderPipelineAsync(&desc, callback.Callback(), callback.MakeUserdata(this));
+
+    WaitForAllOperations(device);
 }
