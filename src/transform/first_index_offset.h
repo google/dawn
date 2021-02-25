@@ -68,11 +68,11 @@ class FirstIndexOffset : public Transform {
     /// @param has_vtx_index True if the shader uses vertex_index
     /// @param has_inst_index True if the shader uses instance_index
     /// @param first_vtx_offset Offset of first vertex into constant buffer
-    /// @param first_idx_offset Offset of first instance into constant buffer
+    /// @param first_inst_offset Offset of first instance into constant buffer
     Data(bool has_vtx_index,
          bool has_inst_index,
          uint32_t first_vtx_offset,
-         uint32_t first_idx_offset);
+         uint32_t first_inst_offset);
 
     /// Copy constructor
     Data(const Data&);
@@ -87,7 +87,7 @@ class FirstIndexOffset : public Transform {
     /// Offset of first vertex into constant buffer
     uint32_t const first_vertex_offset;
     /// Offset of first instance into constant buffer
-    uint32_t const first_index_offset;
+    uint32_t const first_instance_offset;
   };
 
   /// Constructor

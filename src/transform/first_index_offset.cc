@@ -86,11 +86,11 @@ ast::Variable* clone_variable_with_new_name(CloneContext* ctx,
 FirstIndexOffset::Data::Data(bool has_vtx_index,
                              bool has_inst_index,
                              uint32_t first_vtx_offset,
-                             uint32_t first_idx_offset)
+                             uint32_t first_inst_offset)
     : has_vertex_index(has_vtx_index),
       has_instance_index(has_inst_index),
       first_vertex_offset(first_vtx_offset),
-      first_index_offset(first_idx_offset) {}
+      first_instance_offset(first_inst_offset) {}
 
 FirstIndexOffset::Data::Data(const Data&) = default;
 

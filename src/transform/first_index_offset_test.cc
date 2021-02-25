@@ -57,7 +57,7 @@ fn entry() -> void {
   EXPECT_EQ(data->has_vertex_index, true);
   EXPECT_EQ(data->has_instance_index, false);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_index_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 0u);
 }
 
 TEST_F(FirstIndexOffsetTest, EmptyModule) {
@@ -74,7 +74,7 @@ TEST_F(FirstIndexOffsetTest, EmptyModule) {
   EXPECT_EQ(data->has_vertex_index, false);
   EXPECT_EQ(data->has_instance_index, false);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_index_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 0u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleVertexIndex) {
@@ -123,7 +123,7 @@ fn entry() -> void {
   EXPECT_EQ(data->has_vertex_index, true);
   EXPECT_EQ(data->has_instance_index, false);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_index_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 0u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleInstanceIndex) {
@@ -172,7 +172,7 @@ fn entry() -> void {
   EXPECT_EQ(data->has_vertex_index, false);
   EXPECT_EQ(data->has_instance_index, true);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_index_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 0u);
 }
 
 TEST_F(FirstIndexOffsetTest, BasicModuleBothIndex) {
@@ -227,7 +227,7 @@ fn entry() -> void {
   EXPECT_EQ(data->has_vertex_index, true);
   EXPECT_EQ(data->has_instance_index, true);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_index_offset, 4u);
+  EXPECT_EQ(data->first_instance_offset, 4u);
 }
 
 TEST_F(FirstIndexOffsetTest, NestedCalls) {
@@ -284,7 +284,7 @@ fn entry() -> void {
   EXPECT_EQ(data->has_vertex_index, true);
   EXPECT_EQ(data->has_instance_index, false);
   EXPECT_EQ(data->first_vertex_offset, 0u);
-  EXPECT_EQ(data->first_index_offset, 0u);
+  EXPECT_EQ(data->first_instance_offset, 0u);
 }
 
 }  // namespace
