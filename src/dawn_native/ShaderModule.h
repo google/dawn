@@ -36,7 +36,7 @@ namespace tint {
     class Program;
 
     namespace transform {
-        class Manager;
+        class Transform;
         class VertexPulling;
     }  // namespace transform
 
@@ -76,7 +76,7 @@ namespace dawn_native {
     RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                             const PipelineLayoutBase* layout);
 #ifdef DAWN_ENABLE_WGSL
-    ResultOrError<tint::Program> RunTransforms(tint::transform::Manager* manager,
+    ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
                                                tint::Program* program);
 
     std::unique_ptr<tint::transform::VertexPulling> MakeVertexPullingTransform(
