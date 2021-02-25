@@ -21,9 +21,9 @@ namespace dawn_wire { namespace client {
     {% for command in cmd_records["return command"] %}
         bool Client::Handle{{command.name.CamelCase()}}(DeserializeBuffer* deserializeBuffer) {
             Return{{command.name.CamelCase()}}Cmd cmd;
-            DeserializeResult deserializeResult = cmd.Deserialize(deserializeBuffer, &mAllocator);
+            WireResult deserializeResult = cmd.Deserialize(deserializeBuffer, &mAllocator);
 
-            if (deserializeResult == DeserializeResult::FatalError) {
+            if (deserializeResult == WireResult::FatalError) {
                 return false;
             }
 

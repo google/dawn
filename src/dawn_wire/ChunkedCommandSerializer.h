@@ -32,7 +32,7 @@ namespace dawn_wire {
 
         template <typename Cmd>
         void SerializeCommand(const Cmd& cmd) {
-            SerializeCommand(cmd, 0, [](SerializeBuffer*) { return true; });
+            SerializeCommand(cmd, 0, [](SerializeBuffer*) { return WireResult::Success; });
         }
 
         template <typename Cmd, typename ExtraSizeSerializeFn>
@@ -49,7 +49,8 @@ namespace dawn_wire {
 
         template <typename Cmd>
         void SerializeCommand(const Cmd& cmd, const ObjectIdProvider& objectIdProvider) {
-            SerializeCommand(cmd, objectIdProvider, 0, [](SerializeBuffer*) { return true; });
+            SerializeCommand(cmd, objectIdProvider, 0,
+                             [](SerializeBuffer*) { return WireResult::Success; });
         }
 
         template <typename Cmd, typename ExtraSizeSerializeFn>
@@ -79,10 +80,9 @@ namespace dawn_wire {
                 char* allocatedBuffer = static_cast<char*>(mSerializer->GetCmdSpace(requiredSize));
                 if (allocatedBuffer != nullptr) {
                     SerializeBuffer serializeBuffer(allocatedBuffer, requiredSize);
-                    bool success = true;
-                    success &= SerializeCmd(cmd, requiredSize, &serializeBuffer);
-                    success &= SerializeExtraSize(&serializeBuffer);
-                    if (DAWN_UNLIKELY(!success)) {
+                    WireResult r1 = SerializeCmd(cmd, requiredSize, &serializeBuffer);
+                    WireResult r2 = SerializeExtraSize(&serializeBuffer);
+                    if (DAWN_UNLIKELY(r1 != WireResult::Success || r2 != WireResult::Success)) {
                         mSerializer->OnSerializeError();
                     }
                 }
@@ -94,10 +94,9 @@ namespace dawn_wire {
                 return;
             }
             SerializeBuffer serializeBuffer(cmdSpace.get(), requiredSize);
-            bool success = true;
-            success &= SerializeCmd(cmd, requiredSize, &serializeBuffer);
-            success &= SerializeExtraSize(&serializeBuffer);
-            if (DAWN_UNLIKELY(!success)) {
+            WireResult r1 = SerializeCmd(cmd, requiredSize, &serializeBuffer);
+            WireResult r2 = SerializeExtraSize(&serializeBuffer);
+            if (DAWN_UNLIKELY(r1 != WireResult::Success || r2 != WireResult::Success)) {
                 mSerializer->OnSerializeError();
                 return;
             }

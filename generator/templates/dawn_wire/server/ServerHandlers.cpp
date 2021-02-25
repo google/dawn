@@ -25,13 +25,13 @@ namespace dawn_wire { namespace server {
         //* The generic command handlers
         bool Server::Handle{{Suffix}}(DeserializeBuffer* deserializeBuffer) {
             {{Suffix}}Cmd cmd;
-            DeserializeResult deserializeResult = cmd.Deserialize(deserializeBuffer, &mAllocator
+            WireResult deserializeResult = cmd.Deserialize(deserializeBuffer, &mAllocator
                 {%- if command.may_have_dawn_object -%}
                     , *this
                 {%- endif -%}
             );
 
-            if (deserializeResult == DeserializeResult::FatalError) {
+            if (deserializeResult == WireResult::FatalError) {
                 return false;
             }
 

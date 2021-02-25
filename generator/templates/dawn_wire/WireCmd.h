@@ -17,7 +17,9 @@
 
 #include <dawn/webgpu.h>
 
+#include "dawn_wire/BufferConsumer.h"
 #include "dawn_wire/ObjectType_autogen.h"
+#include "dawn_wire/WireResult.h"
 
 namespace dawn_wire {
 
@@ -43,67 +45,6 @@ namespace dawn_wire {
       ObjectHandle& AssignFrom(const volatile ObjectHandle& rhs);
     };
 
-    enum class DeserializeResult {
-        Success,
-        FatalError,
-    };
-
-    template <typename BufferT>
-    class BufferConsumer {
-      public:
-        BufferConsumer(BufferT* buffer, size_t size) : mBuffer(buffer), mSize(size) {}
-
-        BufferT* Buffer() const { return mBuffer; }
-        size_t AvailableSize() const { return mSize; }
-
-      protected:
-        template <typename T, typename N>
-        DAWN_NO_DISCARD bool NextN(N count, T** data);
-
-        template <typename T>
-        DAWN_NO_DISCARD bool Next(T** data);
-
-        template <typename T>
-        DAWN_NO_DISCARD bool Peek(T** data);
-
-      private:
-        BufferT* mBuffer;
-        size_t mSize;
-    };
-
-    class SerializeBuffer : public BufferConsumer<char> {
-      public:
-        using BufferConsumer::BufferConsumer;
-        using BufferConsumer::NextN;
-        using BufferConsumer::Next;
-    };
-
-    class DeserializeBuffer : public BufferConsumer<const volatile char> {
-      public:
-        using BufferConsumer::BufferConsumer;
-
-        template <typename T, typename N>
-        DAWN_NO_DISCARD DeserializeResult ReadN(N count, const volatile T** data) {
-            return NextN(count, data)
-                ? DeserializeResult::Success
-                : DeserializeResult::FatalError;
-        }
-
-        template <typename T>
-        DAWN_NO_DISCARD DeserializeResult Read(const volatile T** data) {
-            return Next(data)
-                ? DeserializeResult::Success
-                : DeserializeResult::FatalError;
-        }
-
-        template <typename T>
-        DAWN_NO_DISCARD DeserializeResult Peek(const volatile T** data) {
-            return BufferConsumer::Peek(data)
-                ? DeserializeResult::Success
-                : DeserializeResult::FatalError;
-        }
-    };
-
     // Interface to allocate more space to deserialize pointed-to data.
     // nullptr is treated as an error.
     class DeserializeAllocator {
@@ -116,8 +57,8 @@ namespace dawn_wire {
     class ObjectIdResolver {
         public:
             {% for type in by_category["object"] %}
-                virtual DeserializeResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const = 0;
-                virtual DeserializeResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const = 0;
+                virtual WireResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const = 0;
+                virtual WireResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const = 0;
             {% endfor %}
     };
 
@@ -157,7 +98,7 @@ namespace dawn_wire {
 
         //* Serialize the structure and everything it points to into serializeBuffer which must be
         //* big enough to contain all the data (as queried from GetRequiredSize).
-        DAWN_NO_DISCARD bool Serialize(size_t commandSize, SerializeBuffer* serializeBuffer
+        WireResult Serialize(size_t commandSize, SerializeBuffer* serializeBuffer
             {%- if not is_return_command -%}
                 , const ObjectIdProvider& objectIdProvider
             {%- endif -%}
@@ -170,7 +111,7 @@ namespace dawn_wire {
         //* Deserialize returns:
         //*  - Success if everything went well (yay!)
         //*  - FatalError is something bad happened (buffer too small for example)
-        DeserializeResult Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator
+        WireResult Deserialize(DeserializeBuffer* deserializeBuffer, DeserializeAllocator* allocator
             {%- if command.may_have_dawn_object -%}
                 , const ObjectIdResolver& resolver
             {%- endif -%}

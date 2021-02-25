@@ -59,6 +59,8 @@ dawn_component("dawn_wire") {
   configs = [ "${dawn_root}/src/common:dawn_internal" ]
   sources = get_target_outputs(":dawn_wire_gen")
   sources += [
+    "BufferConsumer.h",
+    "BufferConsumer_impl.h",
     "ChunkedCommandHandler.cpp",
     "ChunkedCommandHandler.h",
     "ChunkedCommandSerializer.cpp",
@@ -67,6 +69,7 @@ dawn_component("dawn_wire") {
     "WireClient.cpp",
     "WireDeserializeAllocator.cpp",
     "WireDeserializeAllocator.h",
+    "WireResult.h",
     "WireServer.cpp",
     "client/ApiObjects.h",
     "client/Buffer.cpp",

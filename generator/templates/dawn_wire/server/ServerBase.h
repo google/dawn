@@ -70,20 +70,20 @@ namespace dawn_wire { namespace server {
       private:
         // Implementation of the ObjectIdResolver interface
         {% for type in by_category["object"] %}
-            DeserializeResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {
+            WireResult GetFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {
                 auto data = mKnown{{type.name.CamelCase()}}.Get(id);
                 if (data == nullptr) {
-                    return DeserializeResult::FatalError;
+                    return WireResult::FatalError;
                 }
 
                 *out = data->handle;
-                return DeserializeResult::Success;
+                return WireResult::Success;
             }
 
-            DeserializeResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {
+            WireResult GetOptionalFromId(ObjectId id, {{as_cType(type.name)}}* out) const final {
                 if (id == 0) {
                     *out = nullptr;
-                    return DeserializeResult::Success;
+                    return WireResult::Success;
                 }
 
                 return GetFromId(id, out);

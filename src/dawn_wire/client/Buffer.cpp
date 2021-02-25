@@ -14,6 +14,7 @@
 
 #include "dawn_wire/client/Buffer.h"
 
+#include "dawn_wire/BufferConsumer_impl.h"
 #include "dawn_wire/WireCmd_autogen.h"
 #include "dawn_wire/client/Client.h"
 #include "dawn_wire/client/Device.h"
@@ -77,11 +78,11 @@ namespace dawn_wire { namespace client {
         wireClient->SerializeCommand(
             cmd, writeHandleCreateInfoLength, [&](SerializeBuffer* serializeBuffer) {
                 if (descriptor->mappedAtCreation) {
-                    if (serializeBuffer->AvailableSize() != writeHandleCreateInfoLength) {
-                        return false;
-                    }
+                    char* writeHandleBuffer;
+                    WIRE_TRY(
+                        serializeBuffer->NextN(writeHandleCreateInfoLength, &writeHandleBuffer));
                     // Serialize the WriteHandle into the space after the command.
-                    writeHandle->SerializeCreate(serializeBuffer->Buffer());
+                    writeHandle->SerializeCreate(writeHandleBuffer);
 
                     // Set the buffer state for the mapping at creation. The buffer now owns the
                     // write handle..
@@ -90,7 +91,7 @@ namespace dawn_wire { namespace client {
                     buffer->mMapOffset = 0;
                     buffer->mMapSize = buffer->mSize;
                 }
-                return true;
+                return WireResult::Success;
             });
         return ToAPI(buffer);
     }
@@ -207,22 +208,21 @@ namespace dawn_wire { namespace client {
             cmd.handleCreateInfoLength = request.readHandle->SerializeCreateSize();
             client->SerializeCommand(
                 cmd, cmd.handleCreateInfoLength, [&](SerializeBuffer* serializeBuffer) {
-                    bool success = serializeBuffer->AvailableSize() == cmd.handleCreateInfoLength;
-                    if (success) {
-                        request.readHandle->SerializeCreate(serializeBuffer->Buffer());
-                    }
-                    return success;
+                    char* readHandleBuffer;
+                    WIRE_TRY(serializeBuffer->NextN(cmd.handleCreateInfoLength, &readHandleBuffer));
+                    request.readHandle->SerializeCreate(readHandleBuffer);
+                    return WireResult::Success;
                 });
         } else {
             ASSERT(isWriteMode);
             cmd.handleCreateInfoLength = request.writeHandle->SerializeCreateSize();
             client->SerializeCommand(
                 cmd, cmd.handleCreateInfoLength, [&](SerializeBuffer* serializeBuffer) {
-                    bool success = serializeBuffer->AvailableSize() == cmd.handleCreateInfoLength;
-                    if (success) {
-                        request.writeHandle->SerializeCreate(serializeBuffer->Buffer());
-                    }
-                    return success;
+                    char* writeHandleBuffer;
+                    WIRE_TRY(
+                        serializeBuffer->NextN(cmd.handleCreateInfoLength, &writeHandleBuffer));
+                    request.writeHandle->SerializeCreate(writeHandleBuffer);
+                    return WireResult::Success;
                 });
         }
 
@@ -352,13 +352,13 @@ namespace dawn_wire { namespace client {
 
             client->SerializeCommand(
                 cmd, writeFlushInfoLength, [&](SerializeBuffer* serializeBuffer) {
-                    bool success = serializeBuffer->AvailableSize() == writeFlushInfoLength;
-                    if (success) {
-                        // Serialize flush metadata into the space after the command.
-                        // This closes the handle for writing.
-                        mWriteHandle->SerializeFlush(serializeBuffer->Buffer());
-                    }
-                    return success;
+                    char* writeHandleBuffer;
+                    WIRE_TRY(serializeBuffer->NextN(writeFlushInfoLength, &writeHandleBuffer));
+
+                    // Serialize flush metadata into the space after the command.
+                    // This closes the handle for writing.
+                    mWriteHandle->SerializeFlush(writeHandleBuffer);
+                    return WireResult::Success;
                 });
             mWriteHandle = nullptr;
 
