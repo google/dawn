@@ -88,10 +88,6 @@ class QueryInternalShaderTests : public DawnTest {};
 TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
-    // TODO(crbug.com/tint/255, crbug.com/tint/256, crbug.com/tint/400, crbug.com/tint/417):
-    // There is no builtin support for doing the runtime array.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     constexpr uint32_t kTimestampCount = 10u;
     // A gpu frequency on Intel D3D12 (ticks/second)
     constexpr uint64_t kGPUFrequency = 12000048u;
