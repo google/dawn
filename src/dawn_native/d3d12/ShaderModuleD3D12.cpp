@@ -208,29 +208,29 @@ namespace dawn_native { namespace d3d12 {
         tint::transform::Manager transformManager;
         transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
 
-        tint::transform::FirstIndexOffset* firstOffsetTransform = nullptr;
         if (stage == SingleShaderStage::Vertex) {
-            auto transformer = std::make_unique<tint::transform::FirstIndexOffset>(
+            transformManager.append(std::make_unique<tint::transform::FirstIndexOffset>(
                 layout->GetFirstIndexOffsetShaderRegister(),
-                layout->GetFirstIndexOffsetRegisterSpace());
-            firstOffsetTransform = transformer.get();
-            transformManager.append(std::move(transformer));
+                layout->GetFirstIndexOffsetRegisterSpace()));
         }
 
-        tint::Program program;
-        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, mTintProgram.get()));
+        tint::transform::Transform::Output output = transformManager.Run(mTintProgram.get());
 
-        if (firstOffsetTransform != nullptr) {
-            // Functions are only available after transform has been performed
-            firstOffsetInfo->usesVertexIndex = firstOffsetTransform->HasVertexIndex();
+        tint::Program& program = output.program;
+        if (!program.IsValid()) {
+            auto err = tint::diag::Formatter{}.format(program.Diagnostics());
+            errorStream << "Tint program transform error: " << err << std::endl;
+            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
+        }
+
+        if (auto* data = output.data.Get<tint::transform::FirstIndexOffset::Data>()) {
+            firstOffsetInfo->usesVertexIndex = data->has_vertex_index;
             if (firstOffsetInfo->usesVertexIndex) {
-                firstOffsetInfo->vertexIndexOffset = firstOffsetTransform->GetFirstVertexOffset();
+                firstOffsetInfo->vertexIndexOffset = data->first_vertex_offset;
             }
-
-            firstOffsetInfo->usesInstanceIndex = firstOffsetTransform->HasInstanceIndex();
+            firstOffsetInfo->usesInstanceIndex = data->has_instance_index;
             if (firstOffsetInfo->usesInstanceIndex) {
-                firstOffsetInfo->instanceIndexOffset =
-                    firstOffsetTransform->GetFirstInstanceOffset();
+                firstOffsetInfo->instanceIndexOffset = data->first_instance_offset;
             }
         }
 
