@@ -163,7 +163,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
     pipelineDesc.cVertexState.vertexBufferCount = 1;
     pipelineDesc.cVertexState.cVertexBuffers[0].arrayStride = kComponentsPerVertex * sizeof(float);
     pipelineDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
-    pipelineDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+    pipelineDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     pipelineDesc.cColorStates[0].format = renderPass.colorFormat;
 
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);

@@ -32,9 +32,7 @@ namespace dawn_native {
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
     size_t IndexFormatSize(wgpu::IndexFormat format);
-    uint32_t VertexFormatNumComponents(wgpu::VertexFormat format);
-    size_t VertexFormatComponentSize(wgpu::VertexFormat format);
-    size_t VertexFormatSize(wgpu::VertexFormat format);
+
     bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology);
 
     bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState);

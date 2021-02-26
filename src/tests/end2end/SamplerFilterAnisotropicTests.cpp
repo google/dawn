@@ -71,10 +71,10 @@ class SamplerFilterAnisotropicTest : public DawnTest {
 
         utils::ComboVertexStateDescriptor vertexState;
         vertexState.cVertexBuffers[0].attributeCount = 2;
-        vertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+        vertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
         vertexState.cAttributes[1].shaderLocation = 1;
         vertexState.cAttributes[1].offset = 4 * sizeof(float);
-        vertexState.cAttributes[1].format = wgpu::VertexFormat::Float2;
+        vertexState.cAttributes[1].format = wgpu::VertexFormat::Float32x2;
         vertexState.vertexBufferCount = 1;
         vertexState.cVertexBuffers[0].arrayStride = 6 * sizeof(float);
 

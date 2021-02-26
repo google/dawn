@@ -46,15 +46,15 @@ class VertexStateTest : public DawnTest {
     bool ShouldComponentBeDefault(VertexFormat format, int component) {
         EXPECT_TRUE(component >= 0 && component < 4);
         switch (format) {
-            case VertexFormat::Float4:
-            case VertexFormat::UChar4Norm:
+            case VertexFormat::Float32x4:
+            case VertexFormat::Unorm8x4:
                 return component >= 4;
-            case VertexFormat::Float3:
+            case VertexFormat::Float32x3:
                 return component >= 3;
-            case VertexFormat::Float2:
-            case VertexFormat::UChar2Norm:
+            case VertexFormat::Float32x2:
+            case VertexFormat::Unorm8x2:
                 return component >= 2;
-            case VertexFormat::Float:
+            case VertexFormat::Float32:
                 return component >= 1;
             default:
                 DAWN_UNREACHABLE();
@@ -236,10 +236,10 @@ class VertexStateTest : public DawnTest {
 // Test compilation and usage of the fixture :)
 TEST_P(VertexStateTest, Basic) {
     utils::ComboVertexStateDescriptor vertexState;
-    MakeVertexState({{4 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float4}}}},
+    MakeVertexState({{4 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}},
                     &vertexState);
     wgpu::RenderPipeline pipeline =
-        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
+        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float32x4, InputStepMode::Vertex}});
 
     // clang-format off
     wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
@@ -257,9 +257,9 @@ TEST_P(VertexStateTest, ZeroStride) {
     DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
 
     utils::ComboVertexStateDescriptor vertexState;
-    MakeVertexState({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float4}}}}, &vertexState);
+    MakeVertexState({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}}, &vertexState);
     wgpu::RenderPipeline pipeline =
-        MakeTestPipeline(vertexState, 0, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
+        MakeTestPipeline(vertexState, 0, {{0, VertexFormat::Float32x4, InputStepMode::Vertex}});
 
     wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
         0,
@@ -278,9 +278,10 @@ TEST_P(VertexStateTest, AttributeExpanding) {
     // R32F case
     {
         utils::ComboVertexStateDescriptor vertexState;
-        MakeVertexState({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float}}}}, &vertexState);
+        MakeVertexState({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float32}}}},
+                        &vertexState);
         wgpu::RenderPipeline pipeline =
-            MakeTestPipeline(vertexState, 0, {{0, VertexFormat::Float, InputStepMode::Vertex}});
+            MakeTestPipeline(vertexState, 0, {{0, VertexFormat::Float32, InputStepMode::Vertex}});
 
         wgpu::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3});
         DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
@@ -288,9 +289,10 @@ TEST_P(VertexStateTest, AttributeExpanding) {
     // RG32F case
     {
         utils::ComboVertexStateDescriptor vertexState;
-        MakeVertexState({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float2}}}}, &vertexState);
+        MakeVertexState({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float32x2}}}},
+                        &vertexState);
         wgpu::RenderPipeline pipeline =
-            MakeTestPipeline(vertexState, 0, {{0, VertexFormat::Float2, InputStepMode::Vertex}});
+            MakeTestPipeline(vertexState, 0, {{0, VertexFormat::Float32x2, InputStepMode::Vertex}});
 
         wgpu::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3});
         DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
@@ -298,9 +300,10 @@ TEST_P(VertexStateTest, AttributeExpanding) {
     // RGB32F case
     {
         utils::ComboVertexStateDescriptor vertexState;
-        MakeVertexState({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float3}}}}, &vertexState);
+        MakeVertexState({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float32x3}}}},
+                        &vertexState);
         wgpu::RenderPipeline pipeline =
-            MakeTestPipeline(vertexState, 0, {{0, VertexFormat::Float3, InputStepMode::Vertex}});
+            MakeTestPipeline(vertexState, 0, {{0, VertexFormat::Float32x3, InputStepMode::Vertex}});
 
         wgpu::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3});
         DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{0, &buffer0}});
@@ -313,10 +316,10 @@ TEST_P(VertexStateTest, StrideLargerThanAttributes) {
     DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
 
     utils::ComboVertexStateDescriptor vertexState;
-    MakeVertexState({{8 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float4}}}},
+    MakeVertexState({{8 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}},
                     &vertexState);
     wgpu::RenderPipeline pipeline =
-        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
+        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float32x4, InputStepMode::Vertex}});
 
     // clang-format off
     wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
@@ -334,10 +337,10 @@ TEST_P(VertexStateTest, TwoAttributesAtAnOffsetVertex) {
     MakeVertexState(
         {{8 * sizeof(float),
           InputStepMode::Vertex,
-          {{0, 0, VertexFormat::Float4}, {1, 4 * sizeof(float), VertexFormat::Float4}}}},
+          {{0, 0, VertexFormat::Float32x4}, {1, 4 * sizeof(float), VertexFormat::Float32x4}}}},
         &vertexState);
     wgpu::RenderPipeline pipeline =
-        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
+        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float32x4, InputStepMode::Vertex}});
 
     // clang-format off
     wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
@@ -355,10 +358,10 @@ TEST_P(VertexStateTest, TwoAttributesAtAnOffsetInstance) {
     MakeVertexState(
         {{8 * sizeof(float),
           InputStepMode::Instance,
-          {{0, 0, VertexFormat::Float4}, {1, 4 * sizeof(float), VertexFormat::Float4}}}},
+          {{0, 0, VertexFormat::Float32x4}, {1, 4 * sizeof(float), VertexFormat::Float32x4}}}},
         &vertexState);
     wgpu::RenderPipeline pipeline =
-        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
+        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float32x4, InputStepMode::Instance}});
 
     // clang-format off
     wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
@@ -373,10 +376,11 @@ TEST_P(VertexStateTest, TwoAttributesAtAnOffsetInstance) {
 // Test a pure-instance input state
 TEST_P(VertexStateTest, PureInstance) {
     utils::ComboVertexStateDescriptor vertexState;
-    MakeVertexState({{4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}},
-                    &vertexState);
+    MakeVertexState(
+        {{4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float32x4}}}},
+        &vertexState);
     wgpu::RenderPipeline pipeline =
-        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
+        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float32x4, InputStepMode::Instance}});
 
     // clang-format off
     wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
@@ -396,17 +400,17 @@ TEST_P(VertexStateTest, MixedEverything) {
     MakeVertexState(
         {{12 * sizeof(float),
           InputStepMode::Vertex,
-          {{0, 0, VertexFormat::Float}, {1, 6 * sizeof(float), VertexFormat::Float2}}},
+          {{0, 0, VertexFormat::Float32}, {1, 6 * sizeof(float), VertexFormat::Float32x2}}},
          {10 * sizeof(float),
           InputStepMode::Instance,
-          {{2, 0, VertexFormat::Float3}, {3, 5 * sizeof(float), VertexFormat::Float4}}}},
+          {{2, 0, VertexFormat::Float32x3}, {3, 5 * sizeof(float), VertexFormat::Float32x4}}}},
         &vertexState);
     wgpu::RenderPipeline pipeline =
         MakeTestPipeline(vertexState, 1,
-                         {{0, VertexFormat::Float, InputStepMode::Vertex},
-                          {1, VertexFormat::Float2, InputStepMode::Vertex},
-                          {2, VertexFormat::Float3, InputStepMode::Instance},
-                          {3, VertexFormat::Float4, InputStepMode::Instance}});
+                         {{0, VertexFormat::Float32, InputStepMode::Vertex},
+                          {1, VertexFormat::Float32x2, InputStepMode::Vertex},
+                          {2, VertexFormat::Float32x3, InputStepMode::Instance},
+                          {3, VertexFormat::Float32x4, InputStepMode::Instance}});
 
     // clang-format off
     wgpu::Buffer buffer0 = MakeVertexBuffer<float>({
@@ -429,11 +433,12 @@ TEST_P(VertexStateTest, MixedEverything) {
 TEST_P(VertexStateTest, UnusedVertexSlot) {
     // Instance input state, using slot 1
     utils::ComboVertexStateDescriptor instanceVertexState;
-    MakeVertexState({{0, InputStepMode::Vertex, {}},
-                     {4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}},
-                    &instanceVertexState);
+    MakeVertexState(
+        {{0, InputStepMode::Vertex, {}},
+         {4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float32x4}}}},
+        &instanceVertexState);
     wgpu::RenderPipeline instancePipeline = MakeTestPipeline(
-        instanceVertexState, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
+        instanceVertexState, 1, {{0, VertexFormat::Float32x4, InputStepMode::Instance}});
 
     // clang-format off
     wgpu::Buffer buffer = MakeVertexBuffer<float>({
@@ -469,18 +474,19 @@ TEST_P(VertexStateTest, UnusedVertexSlot) {
 TEST_P(VertexStateTest, MultiplePipelinesMixedVertexState) {
     // Basic input state, using slot 0
     utils::ComboVertexStateDescriptor vertexVertexState;
-    MakeVertexState({{4 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float4}}}},
+    MakeVertexState({{4 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}},
                     &vertexVertexState);
-    wgpu::RenderPipeline vertexPipeline =
-        MakeTestPipeline(vertexVertexState, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
+    wgpu::RenderPipeline vertexPipeline = MakeTestPipeline(
+        vertexVertexState, 1, {{0, VertexFormat::Float32x4, InputStepMode::Vertex}});
 
     // Instance input state, using slot 1
     utils::ComboVertexStateDescriptor instanceVertexState;
-    MakeVertexState({{0, InputStepMode::Instance, {}},
-                     {4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float4}}}},
-                    &instanceVertexState);
+    MakeVertexState(
+        {{0, InputStepMode::Instance, {}},
+         {4 * sizeof(float), InputStepMode::Instance, {{0, 0, VertexFormat::Float32x4}}}},
+        &instanceVertexState);
     wgpu::RenderPipeline instancePipeline = MakeTestPipeline(
-        instanceVertexState, 1, {{0, VertexFormat::Float4, InputStepMode::Instance}});
+        instanceVertexState, 1, {{0, VertexFormat::Float32x4, InputStepMode::Instance}});
 
     // clang-format off
     wgpu::Buffer buffer = MakeVertexBuffer<float>({
@@ -525,10 +531,10 @@ TEST_P(VertexStateTest, LastAllowedVertexBuffer) {
     vertexState.cVertexBuffers[kBufferIndex].attributes = &vertexState.cAttributes[0];
     vertexState.cAttributes[0].shaderLocation = 0;
     vertexState.cAttributes[0].offset = 0;
-    vertexState.cAttributes[0].format = VertexFormat::Float4;
+    vertexState.cAttributes[0].format = VertexFormat::Float32x4;
 
     wgpu::RenderPipeline pipeline =
-        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float4, InputStepMode::Vertex}});
+        MakeTestPipeline(vertexState, 1, {{0, VertexFormat::Float32x4, InputStepMode::Vertex}});
 
     wgpu::Buffer buffer0 = MakeVertexBuffer<float>({0, 1, 2, 3, 1, 2, 3, 4, 2, 3, 4, 5});
     DoTestDraw(pipeline, 1, 1, {DrawVertexBuffer{kMaxVertexBuffers - 1, &buffer0}});
@@ -543,10 +549,10 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
                       InputStepMode::Vertex,
                       {
                           // "****" represents the bytes we'll actually read in the shader.
-                          {0, 0 /* offset */, VertexFormat::Float4},  // |****|----|----|----|
-                          {1, 4 /* offset */, VertexFormat::UInt2},   //      |****|****|
-                          {2, 8 /* offset */, VertexFormat::Half4},   //           |-----****|
-                          {3, 0 /* offset */, VertexFormat::Float},   // |****|
+                          {0, 0 /* offset */, VertexFormat::Float32x4},  // |****|----|----|----|
+                          {1, 4 /* offset */, VertexFormat::Uint32x2},   //      |****|****|
+                          {2, 8 /* offset */, VertexFormat::Float16x4},  //           |-----****|
+                          {3, 0 /* offset */, VertexFormat::Float32},    // |****|
                       }}},
                     &vertexState);
 

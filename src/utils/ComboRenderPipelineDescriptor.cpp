@@ -28,7 +28,7 @@ namespace utils {
         wgpu::VertexAttributeDescriptor vertexAttribute;
         vertexAttribute.shaderLocation = 0;
         vertexAttribute.offset = 0;
-        vertexAttribute.format = wgpu::VertexFormat::Float;
+        vertexAttribute.format = wgpu::VertexFormat::Float32;
         for (uint32_t i = 0; i < kMaxVertexAttributes; ++i) {
             cAttributes[i] = vertexAttribute;
         }

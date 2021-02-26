@@ -73,7 +73,7 @@ class VertexBufferValidationTest : public ValidationTest {
             descriptor.cVertexState.cVertexBuffers[i].attributes =
                 &descriptor.cVertexState.cAttributes[i];
             descriptor.cVertexState.cAttributes[i].shaderLocation = i;
-            descriptor.cVertexState.cAttributes[i].format = wgpu::VertexFormat::Float3;
+            descriptor.cVertexState.cAttributes[i].format = wgpu::VertexFormat::Float32x3;
         }
         descriptor.cVertexState.vertexBufferCount = bufferCount;
 

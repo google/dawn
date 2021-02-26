@@ -20,8 +20,11 @@
 #include "tests/DawnTest.h"
 
 #include "common/Constants.h"
+#include "common/VertexFormatUtils.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
+
+#include <cmath>
 
 class DeprecationTests : public DawnTest {
   protected:
@@ -194,3 +197,79 @@ class BufferCopyViewDeprecationTests : public DeprecationTests {
 
     wgpu::Extent3D copySize = {1, 1, 1};
 };
+
+// Tests that deprecated vertex formats properly raise a deprecation warning when used
+class VertexFormatDeprecationTests : public DeprecationTests {
+  protected:
+    // Runs the test
+    void DoTest(const wgpu::VertexFormat vertexFormat, bool deprecated) {
+        std::string attribute = "[[location(0)]] var<in> a : ";
+        attribute += dawn::GetWGSLVertexFormatType(vertexFormat);
+        attribute += ";";
+
+        std::string attribAccess = dawn::VertexFormatNumComponents(vertexFormat) > 1
+                                       ? "vec4<f32>(a.x, 0.0, 0.0, 1.0)"
+                                       : "vec4<f32>(a, 0.0, 0.0, 1.0)";
+
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, (attribute + R"(
+                [[builtin(position)]] var<out> Position : vec4<f32>;
+
+                [[stage(vertex)]] fn main() -> void {
+                    Position = )" + attribAccess + R"(;
+                    return;
+                }
+            )")
+                                                                                    .c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[location(0)]] var<out> outColor : vec4<f32>;
+
+                [[stage(fragment)]] fn main() -> void {
+                    outColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
+                    return;
+                }
+            )");
+
+        utils::ComboVertexStateDescriptor vertexState;
+        vertexState.vertexBufferCount = 1;
+        vertexState.cVertexBuffers[0].arrayStride = 32;
+        vertexState.cVertexBuffers[0].attributeCount = 1;
+        vertexState.cAttributes[0].format = vertexFormat;
+        vertexState.cAttributes[0].offset = 0;
+        vertexState.cAttributes[0].shaderLocation = 0;
+
+        utils::ComboRenderPipelineDescriptor descriptor(device);
+        descriptor.vertexStage.module = vsModule;
+        descriptor.cFragmentStage.module = fsModule;
+        descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+        descriptor.vertexState = &vertexState;
+        descriptor.cColorStates[0].format = utils::BasicRenderPass::kDefaultColorFormat;
+
+        if (deprecated) {
+            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
+        } else {
+            device.CreateRenderPipeline(&descriptor);
+        }
+    }
+};
+
+TEST_P(VertexFormatDeprecationTests, NewVertexFormats) {
+    // Using the new vertex formats does not emit a warning.
+    for (auto& format : dawn::kAllVertexFormats) {
+        DoTest(format, false);
+    }
+}
+
+TEST_P(VertexFormatDeprecationTests, DeprecatedVertexFormats) {
+    // Using deprecated vertex formats does emit a warning.
+    for (auto& format : dawn::kAllDeprecatedVertexFormats) {
+        DoTest(format, true);
+    }
+}
+
+DAWN_INSTANTIATE_TEST(VertexFormatDeprecationTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      NullBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());

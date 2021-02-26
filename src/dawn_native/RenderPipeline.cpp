@@ -15,6 +15,7 @@
 #include "dawn_native/RenderPipeline.h"
 
 #include "common/BitSetIterator.h"
+#include "common/VertexFormatUtils.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"
@@ -27,10 +28,16 @@ namespace dawn_native {
     namespace {
 
         MaybeError ValidateVertexAttributeDescriptor(
+            DeviceBase* device,
             const VertexAttributeDescriptor* attribute,
             uint64_t vertexBufferStride,
             std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateVertexFormat(attribute->format));
+
+            if (dawn::IsDeprecatedVertexFormat(attribute->format)) {
+                device->EmitDeprecationWarning(
+                    "Vertex formats have changed and the old types will be removed soon.");
+            }
 
             if (attribute->shaderLocation >= kMaxVertexAttributes) {
                 return DAWN_VALIDATION_ERROR("Setting attribute out of bounds");
@@ -38,8 +45,9 @@ namespace dawn_native {
 
             // No underflow is possible because the max vertex format size is smaller than
             // kMaxVertexBufferStride.
-            ASSERT(kMaxVertexBufferStride >= VertexFormatSize(attribute->format));
-            if (attribute->offset > kMaxVertexBufferStride - VertexFormatSize(attribute->format)) {
+            ASSERT(kMaxVertexBufferStride >= dawn::VertexFormatSize(attribute->format));
+            if (attribute->offset >
+                kMaxVertexBufferStride - dawn::VertexFormatSize(attribute->format)) {
                 return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
             }
 
@@ -47,7 +55,8 @@ namespace dawn_native {
             // than kMaxVertexBufferStride.
             ASSERT(attribute->offset < kMaxVertexBufferStride);
             if (vertexBufferStride > 0 &&
-                attribute->offset + VertexFormatSize(attribute->format) > vertexBufferStride) {
+                attribute->offset + dawn::VertexFormatSize(attribute->format) >
+                    vertexBufferStride) {
                 return DAWN_VALIDATION_ERROR("Setting attribute offset out of bounds");
             }
 
@@ -64,6 +73,7 @@ namespace dawn_native {
         }
 
         MaybeError ValidateVertexBufferLayoutDescriptor(
+            DeviceBase* device,
             const VertexBufferLayoutDescriptor* buffer,
             std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateInputStepMode(buffer->stepMode));
@@ -77,7 +87,7 @@ namespace dawn_native {
             }
 
             for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
-                DAWN_TRY(ValidateVertexAttributeDescriptor(&buffer->attributes[i],
+                DAWN_TRY(ValidateVertexAttributeDescriptor(device, &buffer->attributes[i],
                                                            buffer->arrayStride, attributesSetMask));
             }
 
@@ -112,7 +122,7 @@ namespace dawn_native {
 
             uint32_t totalAttributesNum = 0;
             for (uint32_t i = 0; i < descriptor->vertexBufferCount; ++i) {
-                DAWN_TRY(ValidateVertexBufferLayoutDescriptor(&descriptor->vertexBuffers[i],
+                DAWN_TRY(ValidateVertexBufferLayoutDescriptor(device, &descriptor->vertexBuffers[i],
                                                               attributesSetMask));
                 totalAttributesNum += descriptor->vertexBuffers[i].attributeCount;
             }
@@ -210,88 +220,6 @@ namespace dawn_native {
             case wgpu::IndexFormat::Undefined:
                 UNREACHABLE();
         }
-    }
-
-    uint32_t VertexFormatNumComponents(wgpu::VertexFormat format) {
-        switch (format) {
-            case wgpu::VertexFormat::UChar4:
-            case wgpu::VertexFormat::Char4:
-            case wgpu::VertexFormat::UChar4Norm:
-            case wgpu::VertexFormat::Char4Norm:
-            case wgpu::VertexFormat::UShort4:
-            case wgpu::VertexFormat::Short4:
-            case wgpu::VertexFormat::UShort4Norm:
-            case wgpu::VertexFormat::Short4Norm:
-            case wgpu::VertexFormat::Half4:
-            case wgpu::VertexFormat::Float4:
-            case wgpu::VertexFormat::UInt4:
-            case wgpu::VertexFormat::Int4:
-                return 4;
-            case wgpu::VertexFormat::Float3:
-            case wgpu::VertexFormat::UInt3:
-            case wgpu::VertexFormat::Int3:
-                return 3;
-            case wgpu::VertexFormat::UChar2:
-            case wgpu::VertexFormat::Char2:
-            case wgpu::VertexFormat::UChar2Norm:
-            case wgpu::VertexFormat::Char2Norm:
-            case wgpu::VertexFormat::UShort2:
-            case wgpu::VertexFormat::Short2:
-            case wgpu::VertexFormat::UShort2Norm:
-            case wgpu::VertexFormat::Short2Norm:
-            case wgpu::VertexFormat::Half2:
-            case wgpu::VertexFormat::Float2:
-            case wgpu::VertexFormat::UInt2:
-            case wgpu::VertexFormat::Int2:
-                return 2;
-            case wgpu::VertexFormat::Float:
-            case wgpu::VertexFormat::UInt:
-            case wgpu::VertexFormat::Int:
-                return 1;
-        }
-    }
-
-    size_t VertexFormatComponentSize(wgpu::VertexFormat format) {
-        switch (format) {
-            case wgpu::VertexFormat::UChar2:
-            case wgpu::VertexFormat::UChar4:
-            case wgpu::VertexFormat::Char2:
-            case wgpu::VertexFormat::Char4:
-            case wgpu::VertexFormat::UChar2Norm:
-            case wgpu::VertexFormat::UChar4Norm:
-            case wgpu::VertexFormat::Char2Norm:
-            case wgpu::VertexFormat::Char4Norm:
-                return sizeof(char);
-            case wgpu::VertexFormat::UShort2:
-            case wgpu::VertexFormat::UShort4:
-            case wgpu::VertexFormat::UShort2Norm:
-            case wgpu::VertexFormat::UShort4Norm:
-            case wgpu::VertexFormat::Short2:
-            case wgpu::VertexFormat::Short4:
-            case wgpu::VertexFormat::Short2Norm:
-            case wgpu::VertexFormat::Short4Norm:
-            case wgpu::VertexFormat::Half2:
-            case wgpu::VertexFormat::Half4:
-                return sizeof(uint16_t);
-            case wgpu::VertexFormat::Float:
-            case wgpu::VertexFormat::Float2:
-            case wgpu::VertexFormat::Float3:
-            case wgpu::VertexFormat::Float4:
-                return sizeof(float);
-            case wgpu::VertexFormat::UInt:
-            case wgpu::VertexFormat::UInt2:
-            case wgpu::VertexFormat::UInt3:
-            case wgpu::VertexFormat::UInt4:
-            case wgpu::VertexFormat::Int:
-            case wgpu::VertexFormat::Int2:
-            case wgpu::VertexFormat::Int3:
-            case wgpu::VertexFormat::Int4:
-                return sizeof(int32_t);
-        }
-    }
-
-    size_t VertexFormatSize(wgpu::VertexFormat format) {
-        return VertexFormatNumComponents(format) * VertexFormatComponentSize(format);
     }
 
     bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology) {
@@ -431,8 +359,9 @@ namespace dawn_native {
                 mAttributeInfos[location].vertexBufferSlot = typedSlot;
                 mAttributeInfos[location].offset =
                     mVertexState.vertexBuffers[slot].attributes[i].offset;
-                mAttributeInfos[location].format =
-                    mVertexState.vertexBuffers[slot].attributes[i].format;
+
+                mAttributeInfos[location].format = dawn::NormalizeVertexFormat(
+                    mVertexState.vertexBuffers[slot].attributes[i].format);
             }
         }
 

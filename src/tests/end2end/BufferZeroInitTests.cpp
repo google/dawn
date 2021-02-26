@@ -231,7 +231,7 @@ class BufferZeroInitTest : public DawnTest {
         descriptor.cVertexState.vertexBufferCount = vertexBufferCount;
         descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
         descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
-        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
         descriptor.cColorStates[0].format = kColorAttachmentFormat;
         return device.CreateRenderPipeline(&descriptor);
     }

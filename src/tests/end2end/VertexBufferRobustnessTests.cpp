@@ -99,7 +99,7 @@ TEST_P(VertexBufferRobustnessTest, DetectInvalidValues) {
     vertexState.vertexBufferCount = 1;
     vertexState.cVertexBuffers[0].arrayStride = sizeof(float);
     vertexState.cVertexBuffers[0].attributeCount = 1;
-    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float;
+    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float32;
     vertexState.cAttributes[0].offset = 0;
     vertexState.cAttributes[0].shaderLocation = 0;
 
@@ -116,7 +116,7 @@ TEST_P(VertexBufferRobustnessTest, FloatClamp) {
     vertexState.vertexBufferCount = 1;
     vertexState.cVertexBuffers[0].arrayStride = sizeof(float);
     vertexState.cVertexBuffers[0].attributeCount = 1;
-    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float;
+    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float32;
     vertexState.cAttributes[0].offset = 0;
     vertexState.cAttributes[0].shaderLocation = 0;
 
@@ -133,7 +133,7 @@ TEST_P(VertexBufferRobustnessTest, IntClamp) {
     vertexState.vertexBufferCount = 1;
     vertexState.cVertexBuffers[0].arrayStride = sizeof(int32_t);
     vertexState.cVertexBuffers[0].attributeCount = 1;
-    vertexState.cAttributes[0].format = wgpu::VertexFormat::Int;
+    vertexState.cAttributes[0].format = wgpu::VertexFormat::Sint32;
     vertexState.cAttributes[0].offset = 0;
     vertexState.cAttributes[0].shaderLocation = 0;
 
@@ -150,7 +150,7 @@ TEST_P(VertexBufferRobustnessTest, UIntClamp) {
     vertexState.vertexBufferCount = 1;
     vertexState.cVertexBuffers[0].arrayStride = sizeof(uint32_t);
     vertexState.cVertexBuffers[0].attributeCount = 1;
-    vertexState.cAttributes[0].format = wgpu::VertexFormat::UInt;
+    vertexState.cAttributes[0].format = wgpu::VertexFormat::Uint32;
     vertexState.cAttributes[0].offset = 0;
     vertexState.cAttributes[0].shaderLocation = 0;
 
@@ -167,7 +167,7 @@ TEST_P(VertexBufferRobustnessTest, Float2Clamp) {
     vertexState.vertexBufferCount = 1;
     vertexState.cVertexBuffers[0].arrayStride = sizeof(float) * 2;
     vertexState.cVertexBuffers[0].attributeCount = 1;
-    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float2;
+    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
     vertexState.cAttributes[0].offset = 0;
     vertexState.cAttributes[0].shaderLocation = 0;
 
@@ -185,7 +185,7 @@ TEST_P(VertexBufferRobustnessTest, Float3Clamp) {
     vertexState.vertexBufferCount = 1;
     vertexState.cVertexBuffers[0].arrayStride = sizeof(float) * 3;
     vertexState.cVertexBuffers[0].attributeCount = 1;
-    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float3;
+    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x3;
     vertexState.cAttributes[0].offset = 0;
     vertexState.cAttributes[0].shaderLocation = 0;
 
@@ -203,7 +203,7 @@ TEST_P(VertexBufferRobustnessTest, Float4Clamp) {
     vertexState.vertexBufferCount = 1;
     vertexState.cVertexBuffers[0].arrayStride = sizeof(float) * 4;
     vertexState.cVertexBuffers[0].attributeCount = 1;
-    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+    vertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     vertexState.cAttributes[0].offset = 0;
     vertexState.cAttributes[0].shaderLocation = 0;
 

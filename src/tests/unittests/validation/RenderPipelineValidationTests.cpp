@@ -646,7 +646,7 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
     descriptor.cVertexState.vertexBufferCount = 1;
     descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
     descriptor.cVertexState.cVertexBuffers[0].arrayStride = 16;
-    descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+    descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     descriptor.cVertexState.cAttributes[0].offset = 0;
 
     // Success cases, the attribute used by the entryPoint is declared in the pipeline.

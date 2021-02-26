@@ -602,7 +602,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     rpDesc.cVertexState.vertexBufferCount = 1;
     rpDesc.cVertexState.cVertexBuffers[0].arrayStride = kVertexBufferStride;
     rpDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
-    rpDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+    rpDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     rpDesc.cColorStates[0].format = renderPass.colorFormat;
 
     wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
@@ -719,7 +719,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     rpDesc.cVertexState.vertexBufferCount = 1;
     rpDesc.cVertexState.cVertexBuffers[0].arrayStride = kVertexBufferStride;
     rpDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
-    rpDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+    rpDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     rpDesc.cColorStates[0].format = renderPass.colorFormat;
 
     wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);

@@ -190,6 +190,8 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "TypeTraits.h",
       "TypedInteger.h",
       "UnderlyingType.h",
+      "VertexFormatUtils.cpp",
+      "VertexFormatUtils.h",
       "ityp_array.h",
       "ityp_bitset.h",
       "ityp_span.h",
@@ -201,7 +203,10 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
     ]
 
     public_configs = [ ":dawn_internal" ]
-    deps = [ "${dawn_root}/src/dawn:dawn_headers" ]
+    deps = [
+      "${dawn_root}/src/dawn:dawn_headers",
+      "${dawn_root}/src/dawn:dawncpp_headers",
+    ]
     if (dawn_enable_vulkan) {
       public_deps = [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
     }

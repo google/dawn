@@ -72,7 +72,7 @@ class MultisampledSamplingTest : public DawnTest {
             desc.cVertexState.vertexBufferCount = 1;
             desc.cVertexState.cVertexBuffers[0].attributeCount = 1;
             desc.cVertexState.cVertexBuffers[0].arrayStride = 2 * sizeof(float);
-            desc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float2;
+            desc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
 
             desc.cDepthStencilState.format = kDepthFormat;
             desc.cDepthStencilState.depthWriteEnabled = true;

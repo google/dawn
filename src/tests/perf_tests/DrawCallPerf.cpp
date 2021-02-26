@@ -355,7 +355,7 @@ void DrawCallPerf::SetUp() {
     renderPipelineDesc.cVertexState.vertexBufferCount = 1;
     renderPipelineDesc.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
     renderPipelineDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
-    renderPipelineDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
+    renderPipelineDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     renderPipelineDesc.depthStencilState = &renderPipelineDesc.cDepthStencilState;
     renderPipelineDesc.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
     renderPipelineDesc.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
