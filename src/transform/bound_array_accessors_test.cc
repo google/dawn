@@ -218,6 +218,79 @@ fn f() -> void {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(BoundArrayAccessorsTest, Vector_Swizzle_Idx_Scalar) {
+  auto* src = R"(
+var a : vec3<f32>;
+
+fn f() -> void {
+  var b : f32 = a.xy[2];
+}
+)";
+
+  auto* expect = R"(
+var a : vec3<f32>;
+
+fn f() -> void {
+  var b : f32 = a.xy[1];
+}
+)";
+
+  auto got = Transform<BoundArrayAccessors>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BoundArrayAccessorsTest, Vector_Swizzle_Idx_Var) {
+  auto* src = R"(
+var a : vec3<f32>;
+
+var c : u32;
+
+fn f() -> void {
+  var b : f32 = a.xy[c];
+}
+)";
+
+  auto* expect = R"(
+var a : vec3<f32>;
+
+var c : u32;
+
+fn f() -> void {
+  var b : f32 = a.xy[min(u32(c), 1u)];
+}
+)";
+
+  auto got = Transform<BoundArrayAccessors>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+TEST_F(BoundArrayAccessorsTest, Vector_Swizzle_Idx_Expr) {
+  auto* src = R"(
+var a : vec3<f32>;
+
+var c : u32;
+
+fn f() -> void {
+  var b : f32 = a.xy[c + 2 - 3];
+}
+)";
+
+  auto* expect = R"(
+var a : vec3<f32>;
+
+var c : u32;
+
+fn f() -> void {
+  var b : f32 = a.xy[min(u32(((c + 2) - 3)), 1u)];
+}
+)";
+
+  auto got = Transform<BoundArrayAccessors>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
   auto* src = R"(
 var a : vec3<f32>;
