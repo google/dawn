@@ -86,7 +86,9 @@ namespace {
         void WrapSharedHandle(const wgpu::TextureDescriptor* dawnDesc,
                               const D3D11_TEXTURE2D_DESC* baseD3dDescriptor,
                               wgpu::Texture* dawnTexture,
-                              ID3D11Texture2D** d3d11TextureOut) const {
+                              ID3D11Texture2D** d3d11TextureOut,
+                              std::unique_ptr<dawn_native::d3d12::ExternalImageDXGI>*
+                                  externalImageOut = nullptr) const {
             ComPtr<ID3D11Texture2D> d3d11Texture;
             HRESULT hr = mD3d11Device->CreateTexture2D(baseD3dDescriptor, nullptr, &d3d11Texture);
             ASSERT_EQ(hr, S_OK);
@@ -101,19 +103,33 @@ namespace {
                 &sharedHandle);
             ASSERT_EQ(hr, S_OK);
 
-            dawn_native::d3d12::ExternalImageDescriptorDXGISharedHandle externDesc;
-            externDesc.cTextureDescriptor =
+            dawn_native::d3d12::ExternalImageDescriptorDXGISharedHandle externalImageDesc;
+            externalImageDesc.cTextureDescriptor =
                 reinterpret_cast<const WGPUTextureDescriptor*>(dawnDesc);
-            externDesc.sharedHandle = sharedHandle;
-            externDesc.acquireMutexKey = 0;
-            WGPUTexture texture = dawn_native::d3d12::WrapSharedHandle(device.Get(), &externDesc);
+            externalImageDesc.sharedHandle = sharedHandle;
+
+            std::unique_ptr<dawn_native::d3d12::ExternalImageDXGI> externalImage =
+                dawn_native::d3d12::ExternalImageDXGI::Create(device.Get(), &externalImageDesc);
 
             // Now that we've created all of our resources, we can close the handle
             // since we no longer need it.
             ::CloseHandle(sharedHandle);
 
-            *dawnTexture = wgpu::Texture::Acquire(texture);
+            // Cannot access a non-existent external image (ex. validation error).
+            if (externalImage == nullptr) {
+                return;
+            }
+
+            dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+            externalAccessDesc.acquireMutexKey = 0;
+
+            *dawnTexture = wgpu::Texture::Acquire(
+                externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
             *d3d11TextureOut = d3d11Texture.Detach();
+
+            if (externalImageOut != nullptr) {
+                *externalImageOut = std::move(externalImage);
+            }
         }
 
         static constexpr size_t kTestWidth = 10;
@@ -334,15 +350,20 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         hr = dxgiKeyedMutex->ReleaseSync(1);
         ASSERT_EQ(hr, S_OK);
 
-        dawn_native::d3d12::ExternalImageDescriptorDXGISharedHandle externDesc;
-        externDesc.cTextureDescriptor =
+        dawn_native::d3d12::ExternalImageDescriptorDXGISharedHandle externalImageDesc = {};
+        externalImageDesc.sharedHandle = sharedHandle;
+        externalImageDesc.cTextureDescriptor =
             reinterpret_cast<const WGPUTextureDescriptor*>(dawnDescriptor);
-        externDesc.sharedHandle = sharedHandle;
-        externDesc.acquireMutexKey = 1;
-        externDesc.isInitialized = isInitialized;
-        WGPUTexture dawnTexture = dawn_native::d3d12::WrapSharedHandle(device.Get(), &externDesc);
 
-        *dawnTextureOut = wgpu::Texture::Acquire(dawnTexture);
+        std::unique_ptr<dawn_native::d3d12::ExternalImageDXGI> externalImage =
+            dawn_native::d3d12::ExternalImageDXGI::Create(device.Get(), &externalImageDesc);
+
+        dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+        externalAccessDesc.acquireMutexKey = 1;
+        externalAccessDesc.isInitialized = isInitialized;
+
+        *dawnTextureOut = wgpu::Texture::Acquire(
+            externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
         *d3d11TextureOut = d3d11Texture.Detach();
         *dxgiKeyedMutexOut = dxgiKeyedMutex.Detach();
     }
@@ -517,6 +538,51 @@ TEST_P(D3D12SharedHandleUsageTests, UninitializedTextureIsCleared) {
     // Readback the destination texture and ensure it contains the colors we used
     // to clear the source texture on the D3D device.
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), dawnTexture, 0, 0);
+}
+
+// 1. Create an external image from the DX11 texture.
+// 2. Produce two Dawn textures from the external image.
+// 3. Clear each Dawn texture and verify the texture was cleared to a unique color.
+TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    // Create the first Dawn texture then clear it to red.
+    wgpu::Texture texture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    std::unique_ptr<dawn_native::d3d12::ExternalImageDXGI> externalImage;
+    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
+                     &externalImage);
+    {
+        const wgpu::Color solidRed{1.0f, 0.0f, 0.0f, 1.0f};
+        ASSERT_NE(texture.Get(), nullptr);
+        ClearImage(texture.Get(), solidRed);
+
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
+    }
+
+    // Once finished with the first texture, destroy it so we may re-acquire the external image
+    // again.
+    texture.Destroy();
+
+    // Create another Dawn texture then clear it with another color.
+    dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+    externalAccessDesc.acquireMutexKey = 1;
+    externalAccessDesc.isInitialized = true;
+
+    texture =
+        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+
+    // Check again that the new texture is still red
+    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
+
+    // Clear the new texture to blue
+    {
+        const wgpu::Color solidBlue{0.0f, 0.0f, 1.0f, 1.0f};
+        ASSERT_NE(texture.Get(), nullptr);
+        ClearImage(texture.Get(), solidBlue);
+
+        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture.Get(), 0, 0);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(D3D12SharedHandleValidation, D3D12Backend());

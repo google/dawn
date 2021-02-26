@@ -51,6 +51,83 @@ namespace dawn_native { namespace d3d12 {
         : ExternalImageDescriptor(ExternalImageType::DXGISharedHandle) {
     }
 
+    ExternalImageDXGI::ExternalImageDXGI(ComPtr<ID3D12Resource> d3d12Resource,
+                                         const WGPUTextureDescriptor* descriptor)
+        : mD3D12Resource(std::move(d3d12Resource)),
+          mUsage(descriptor->usage),
+          mDimension(descriptor->dimension),
+          mSize(descriptor->size),
+          mFormat(descriptor->format),
+          mMipLevelCount(descriptor->mipLevelCount),
+          mSampleCount(descriptor->sampleCount) {
+        ASSERT(descriptor->nextInChain == nullptr);
+    }
+
+    WGPUTexture ExternalImageDXGI::ProduceTexture(
+        WGPUDevice device,
+        const ExternalImageAccessDescriptorDXGIKeyedMutex* descriptor) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+
+        TextureDescriptor textureDescriptor = {};
+        textureDescriptor.usage = static_cast<wgpu::TextureUsage>(mUsage);
+        textureDescriptor.dimension = static_cast<wgpu::TextureDimension>(mDimension);
+        textureDescriptor.size = {mSize.width, mSize.height, mSize.depth};
+        textureDescriptor.format = static_cast<wgpu::TextureFormat>(mFormat);
+        textureDescriptor.mipLevelCount = mMipLevelCount;
+        textureDescriptor.sampleCount = mSampleCount;
+
+        Ref<TextureBase> texture = backendDevice->CreateExternalTexture(
+            &textureDescriptor, mD3D12Resource, ExternalMutexSerial(descriptor->acquireMutexKey),
+            descriptor->isSwapChainTexture, descriptor->isInitialized);
+        return reinterpret_cast<WGPUTexture>(texture.Detach());
+    }
+
+    // static
+    std::unique_ptr<ExternalImageDXGI> ExternalImageDXGI::Create(
+        WGPUDevice device,
+        const ExternalImageDescriptorDXGISharedHandle* descriptor) {
+        Device* backendDevice = reinterpret_cast<Device*>(device);
+
+        Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource;
+        if (FAILED(backendDevice->GetD3D12Device()->OpenSharedHandle(
+                descriptor->sharedHandle, IID_PPV_ARGS(&d3d12Resource)))) {
+            return nullptr;
+        }
+
+        const TextureDescriptor* textureDescriptor =
+            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+
+        if (backendDevice->ConsumedError(
+                ValidateTextureDescriptor(backendDevice, textureDescriptor))) {
+            return nullptr;
+        }
+
+        if (backendDevice->ConsumedError(
+                ValidateTextureDescriptorCanBeWrapped(textureDescriptor))) {
+            return nullptr;
+        }
+
+        if (backendDevice->ConsumedError(
+                ValidateD3D12TextureCanBeWrapped(d3d12Resource.Get(), textureDescriptor))) {
+            return nullptr;
+        }
+
+        // Shared handle is assumed to support resource sharing capability. The resource
+        // shared capability tier must agree to share resources between D3D devices.
+        const Format* format =
+            backendDevice->GetInternalFormat(textureDescriptor->format).AcquireSuccess();
+        if (format->IsMultiPlanar()) {
+            if (backendDevice->ConsumedError(ValidateD3D12VideoTextureCanBeShared(
+                    backendDevice, D3D12TextureFormat(textureDescriptor->format)))) {
+                return nullptr;
+            }
+        }
+
+        std::unique_ptr<ExternalImageDXGI> result(
+            new ExternalImageDXGI(std::move(d3d12Resource), descriptor->cTextureDescriptor));
+        return result;
+    }
+
     uint64_t SetExternalMemoryReservation(WGPUDevice device,
                                           uint64_t requestedReservationSize,
                                           MemorySegment memorySegment) {
@@ -62,11 +139,18 @@ namespace dawn_native { namespace d3d12 {
 
     WGPUTexture WrapSharedHandle(WGPUDevice device,
                                  const ExternalImageDescriptorDXGISharedHandle* descriptor) {
-        Device* backendDevice = reinterpret_cast<Device*>(device);
-        Ref<TextureBase> texture = backendDevice->WrapSharedHandle(
-            descriptor, descriptor->sharedHandle, ExternalMutexSerial(descriptor->acquireMutexKey),
-            descriptor->isSwapChainTexture);
-        return reinterpret_cast<WGPUTexture>(texture.Detach());
+        std::unique_ptr<ExternalImageDXGI> externalImage =
+            ExternalImageDXGI::Create(device, descriptor);
+        if (externalImage == nullptr) {
+            return nullptr;
+        }
+
+        ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc = {};
+        externalAccessDesc.isInitialized = descriptor->isInitialized;
+        externalAccessDesc.isSwapChainTexture = descriptor->isSwapChainTexture;
+        externalAccessDesc.acquireMutexKey = descriptor->acquireMutexKey;
+
+        return externalImage->ProduceTexture(device, &externalAccessDesc);
     }
 
     AdapterDiscoveryOptions::AdapterDiscoveryOptions(ComPtr<IDXGIAdapter> adapter)

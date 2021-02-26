@@ -19,10 +19,14 @@
 #include <dawn_native/DawnNative.h>
 
 #include <DXGI1_4.h>
+#include <d3d12.h>
 #include <windows.h>
 #include <wrl/client.h>
 
+#include <memory>
+
 struct ID3D12Device;
+struct ID3D12Resource;
 
 namespace dawn_native { namespace d3d12 {
     DAWN_NATIVE_EXPORT Microsoft::WRL::ComPtr<ID3D12Device> GetD3D12Device(WGPUDevice device);
@@ -45,10 +49,46 @@ namespace dawn_native { namespace d3d12 {
         ExternalImageDescriptorDXGISharedHandle();
 
         HANDLE sharedHandle;
+
+        // Warning: depreciated, replaced by ExternalImageAccessDescriptorDXGIKeyedMutex.
         uint64_t acquireMutexKey;
         bool isSwapChainTexture = false;
     };
 
+    struct DAWN_NATIVE_EXPORT ExternalImageAccessDescriptorDXGIKeyedMutex
+        : ExternalImageAccessDescriptor {
+      public:
+        uint64_t acquireMutexKey;
+        bool isSwapChainTexture = false;
+    };
+
+    class DAWN_NATIVE_EXPORT ExternalImageDXGI {
+      public:
+        // Note: SharedHandle must be a handle to a texture object.
+        static std::unique_ptr<ExternalImageDXGI> Create(
+            WGPUDevice device,
+            const ExternalImageDescriptorDXGISharedHandle* descriptor);
+
+        WGPUTexture ProduceTexture(WGPUDevice device,
+                                   const ExternalImageAccessDescriptorDXGIKeyedMutex* descriptor);
+
+      private:
+        ExternalImageDXGI(Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource,
+                          const WGPUTextureDescriptor* descriptor);
+
+        Microsoft::WRL::ComPtr<ID3D12Resource> mD3D12Resource;
+
+        // Contents of WGPUTextureDescriptor are stored individually since the descriptor
+        // could outlive this image.
+        WGPUTextureUsageFlags mUsage;
+        WGPUTextureDimension mDimension;
+        WGPUExtent3D mSize;
+        WGPUTextureFormat mFormat;
+        uint32_t mMipLevelCount;
+        uint32_t mSampleCount;
+    };
+
+    // Warning: depreciated, replaced by ExternalImageDXGI::Create.
     // Note: SharedHandle must be a handle to a texture object.
     DAWN_NATIVE_EXPORT WGPUTexture
     WrapSharedHandle(WGPUDevice device, const ExternalImageDescriptorDXGISharedHandle* descriptor);

@@ -33,16 +33,18 @@ namespace dawn_native { namespace d3d12 {
     MaybeError ValidateD3D12TextureCanBeWrapped(ID3D12Resource* d3d12Resource,
                                                 const TextureDescriptor* descriptor);
     MaybeError ValidateTextureDescriptorCanBeWrapped(const TextureDescriptor* descriptor);
+    MaybeError ValidateD3D12VideoTextureCanBeShared(Device* device, DXGI_FORMAT textureFormat);
 
     class Texture final : public TextureBase {
       public:
         static ResultOrError<Ref<Texture>> Create(Device* device,
                                                   const TextureDescriptor* descriptor);
-        static ResultOrError<Ref<Texture>> Create(Device* device,
-                                                  const ExternalImageDescriptor* descriptor,
-                                                  HANDLE sharedHandle,
-                                                  ExternalMutexSerial acquireMutexKey,
-                                                  bool isSwapChainTexture);
+        static ResultOrError<Ref<Texture>> CreateExternalImage(Device* device,
+                                                               const TextureDescriptor* descriptor,
+                                                               ComPtr<ID3D12Resource> d3d12Texture,
+                                                               ExternalMutexSerial acquireMutexKey,
+                                                               bool isSwapChainTexture,
+                                                               bool isInitialized);
         static ResultOrError<Ref<Texture>> Create(Device* device,
                                                   const TextureDescriptor* descriptor,
                                                   ComPtr<ID3D12Resource> d3d12Texture);
@@ -85,7 +87,7 @@ namespace dawn_native { namespace d3d12 {
 
         MaybeError InitializeAsInternalTexture();
         MaybeError InitializeAsExternalTexture(const TextureDescriptor* descriptor,
-                                               HANDLE sharedHandle,
+                                               ComPtr<ID3D12Resource> d3d12Texture,
                                                ExternalMutexSerial acquireMutexKey,
                                                bool isSwapChainTexture);
         MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture);
