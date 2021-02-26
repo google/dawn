@@ -25,12 +25,19 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
  public:
   ~IntLiteral() override;
 
+  /// @returns the literal value as a u32
+  uint32_t value_as_u32() const { return value_; }
+
  protected:
   /// Constructor
   /// @param source the input source
   /// @param type the type of the literal
-  IntLiteral(const Source& source, type::Type* type);
-};
+  /// @param value value of the literal
+  IntLiteral(const Source& source, type::Type* type, uint32_t value);
+
+ private:
+  uint32_t const value_;
+};  // namespace ast
 
 }  // namespace ast
 }  // namespace tint

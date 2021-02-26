@@ -23,23 +23,23 @@ namespace tint {
 namespace ast {
 
 SintLiteral::SintLiteral(const Source& source, type::Type* type, int32_t value)
-    : Base(source, type), value_(value) {}
+    : Base(source, type, static_cast<uint32_t>(value)) {}
 
 SintLiteral::~SintLiteral() = default;
 
 std::string SintLiteral::to_str(const semantic::Info&) const {
-  return std::to_string(value_);
+  return std::to_string(value());
 }
 
 std::string SintLiteral::name() const {
-  return "__sint" + type()->type_name() + "_" + std::to_string(value_);
+  return "__sint" + type()->type_name() + "_" + std::to_string(value());
 }
 
 SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
   auto* ty = ctx->Clone(type());
-  return ctx->dst->create<SintLiteral>(src, ty, value_);
+  return ctx->dst->create<SintLiteral>(src, ty, value());
 }
 
 }  // namespace ast

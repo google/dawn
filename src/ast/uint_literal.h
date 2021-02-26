@@ -33,7 +33,7 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
   ~UintLiteral() override;
 
   /// @returns the uint literal value
-  uint32_t value() const { return value_; }
+  uint32_t value() const { return value_as_u32(); }
 
   /// @returns the name for this literal. This name is unique to this value.
   std::string name() const override;
@@ -47,9 +47,6 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
   /// @param ctx the clone context
   /// @return the newly cloned node
   UintLiteral* Clone(CloneContext* ctx) const override;
-
- private:
-  uint32_t const value_;
 };
 
 }  // namespace ast

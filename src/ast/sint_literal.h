@@ -33,7 +33,7 @@ class SintLiteral : public Castable<SintLiteral, IntLiteral> {
   ~SintLiteral() override;
 
   /// @returns the int literal value
-  int32_t value() const { return value_; }
+  int32_t value() const { return static_cast<int32_t>(value_as_u32()); }
 
   /// @returns the name for this literal. This name is unique to this value.
   std::string name() const override;
@@ -47,9 +47,6 @@ class SintLiteral : public Castable<SintLiteral, IntLiteral> {
   /// @param ctx the clone context
   /// @return the newly cloned node
   SintLiteral* Clone(CloneContext* ctx) const override;
-
- private:
-  int32_t const value_;
 };
 
 }  // namespace ast
