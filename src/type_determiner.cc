@@ -194,6 +194,12 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
 
 bool TypeDeterminer::DetermineStatements(const ast::BlockStatement* stmts) {
   for (auto* stmt : *stmts) {
+    if (auto* decl = stmt->As<ast::VariableDeclStatement>()) {
+      if (!ValidateVariableDeclStatement(decl)) {
+        return false;
+      }
+    }
+
     if (!DetermineVariableStorageClass(stmt)) {
       return false;
     }
@@ -934,6 +940,28 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
 
   auto* result_type = TypeOf(expr->expr())->UnwrapPtrIfNeeded();
   SetType(expr, result_type);
+  return true;
+}
+
+bool TypeDeterminer::ValidateVariableDeclStatement(
+    const ast::VariableDeclStatement* stmt) {
+  auto* ctor = stmt->variable()->constructor();
+  if (!ctor) {
+    return true;
+  }
+
+  if (auto* sce = ctor->As<ast::ScalarConstructorExpression>()) {
+    auto* lhs_type = stmt->variable()->type()->UnwrapAliasIfNeeded();
+    auto* rhs_type = sce->literal()->type()->UnwrapAliasIfNeeded();
+
+    if (lhs_type != rhs_type) {
+      diagnostics_.add_error(
+          "constructor expression type does not match variable type",
+          stmt->source());
+      return false;
+    }
+  }
+
   return true;
 }
 

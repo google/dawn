@@ -792,7 +792,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
   // func1 { var a : f32 = 3.0; return; }
   auto* var0 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
 
-  auto* var1 = Var("a", ty.void_(), ast::StorageClass::kNone, Expr(1.0f));
+  auto* var1 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(1.0f));
 
   Func("func0", ast::VariableList{}, ty.void_(),
        ast::StatementList{

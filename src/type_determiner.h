@@ -175,6 +175,8 @@ class TypeDeterminer {
   bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
   bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
 
+  bool ValidateVariableDeclStatement(const ast::VariableDeclStatement* stmt);
+
   VariableInfo* CreateVariableInfo(ast::Variable*);
 
   /// @returns the resolved type of the ast::Expression `expr`

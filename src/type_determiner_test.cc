@@ -437,6 +437,52 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
   EXPECT_TRUE(TypeOf(init)->Is<type::I32>());
 }
 
+TEST_F(TypeDeterminerTest, Stmt_VariableDecl_Alias) {
+  auto* my_int = ty.alias("MyInt", ty.i32());
+  auto* var = Var("my_var", my_int, ast::StorageClass::kNone, Expr(2));
+  auto* init = var->constructor();
+
+  auto* decl = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(decl);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+
+  ASSERT_NE(TypeOf(init), nullptr);
+  EXPECT_TRUE(TypeOf(init)->Is<type::I32>());
+}
+
+TEST_F(TypeDeterminerTest, Stmt_VariableDecl_MismatchedTypeScalarConstructor) {
+  u32 unsigned_value = 2u;  // Type does not match variable type
+  auto* var =
+      Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(unsigned_value));
+
+  auto* decl =
+      create<ast::VariableDeclStatement>(Source{{{3, 3}, {3, 22}}}, var);
+  WrapInFunction(decl);
+
+  EXPECT_FALSE(td()->Determine());
+  EXPECT_EQ(
+      td()->error(),
+      R"(3:3 error: constructor expression type does not match variable type)");
+}
+
+TEST_F(TypeDeterminerTest,
+       Stmt_VariableDecl_MismatchedTypeScalarConstructor_Alias) {
+  auto* my_int = ty.alias("MyInt", ty.i32());
+  u32 unsigned_value = 2u;  // Type does not match variable type
+  auto* var =
+      Var("my_var", my_int, ast::StorageClass::kNone, Expr(unsigned_value));
+
+  auto* decl =
+      create<ast::VariableDeclStatement>(Source{{{3, 3}, {3, 22}}}, var);
+  WrapInFunction(decl);
+
+  EXPECT_FALSE(td()->Determine());
+  EXPECT_EQ(
+      td()->error(),
+      R"(3:3 error: constructor expression type does not match variable type)");
+}
+
 TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
   auto* init = Expr(2);
   Global("my_var", ty.i32(), ast::StorageClass::kNone, init);
