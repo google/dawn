@@ -138,15 +138,15 @@ TEST(CloneContext, CloneWithReplacements) {
   // R: Replaceable
 
   ProgramBuilder cloned;
-  auto* cloned_root =
-      CloneContext(&cloned, &original)
-          .ReplaceAll([&](CloneContext* ctx, Replaceable* in) {
-            auto* out = cloned.create<Replacement>("replacement:" + in->name);
-            out->b = cloned.create<Node>("replacement-child:" + in->name);
-            out->c = ctx->Clone(in->a);
-            return out;
-          })
-          .Clone(original_root);
+
+  CloneContext ctx(&cloned, &original);
+  ctx.ReplaceAll([&](Replaceable* in) {
+    auto* out = cloned.create<Replacement>("replacement:" + in->name);
+    out->b = cloned.create<Node>("replacement-child:" + in->name);
+    out->c = ctx.Clone(in->a);
+    return out;
+  });
+  auto* cloned_root = ctx.Clone(original_root);
 
   //                         root
   //        ╭─────────────────┼──────────────────╮

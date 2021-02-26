@@ -64,24 +64,23 @@ Transform::Output EmitVertexPointSize::Run(const Program* in) {
   out.AST().AddGlobalVariable(pointsize_var);
 
   // Add the pointsize assignment statement to the front of all vertex stages.
-  CloneContext(&out, in)
-      .ReplaceAll(
-          [&](CloneContext* ctx, ast::Function* func) -> ast::Function* {
-            if (func->pipeline_stage() != ast::PipelineStage::kVertex) {
-              return nullptr;  // Just clone func
-            }
+  CloneContext ctx(&out, in);
+  ctx.ReplaceAll([&](ast::Function* func) -> ast::Function* {
+    if (func->pipeline_stage() != ast::PipelineStage::kVertex) {
+      return nullptr;  // Just clone func
+    }
 
-            // Build the AST expression & statement for assigning pointsize one.
-            auto* one = out.create<ast::ScalarConstructorExpression>(
-                Source{}, out.create<ast::FloatLiteral>(Source{}, f32, 1.0f));
-            auto* pointsize_ident = out.create<ast::IdentifierExpression>(
-                Source{}, out.Symbols().Register(kPointSizeVar));
-            auto* pointsize_assign = out.create<ast::AssignmentStatement>(
-                Source{}, pointsize_ident, one);
+    // Build the AST expression & statement for assigning pointsize one.
+    auto* one = out.create<ast::ScalarConstructorExpression>(
+        Source{}, out.create<ast::FloatLiteral>(Source{}, f32, 1.0f));
+    auto* pointsize_ident = out.create<ast::IdentifierExpression>(
+        Source{}, out.Symbols().Register(kPointSizeVar));
+    auto* pointsize_assign =
+        out.create<ast::AssignmentStatement>(Source{}, pointsize_ident, one);
 
-            return CloneWithStatementsAtStart(ctx, func, {pointsize_assign});
-          })
-      .Clone();
+    return CloneWithStatementsAtStart(&ctx, func, {pointsize_assign});
+  });
+  ctx.Clone();
 
   return Output(Program(std::move(out)));
 }

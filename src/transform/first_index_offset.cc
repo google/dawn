@@ -131,53 +131,52 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
   // add a CreateFirstIndexOffset() statement to each function that uses one of
   // these builtins.
 
-  CloneContext(&out, in)
-      .ReplaceAll([&](CloneContext* ctx, ast::Variable* var) -> ast::Variable* {
-        for (ast::VariableDecoration* dec : var->decorations()) {
-          if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
-            ast::Builtin blt_type = blt_dec->value();
-            if (blt_type == ast::Builtin::kVertexIndex) {
-              vertex_index_sym = var->symbol();
-              has_vertex_index_ = true;
-              return clone_variable_with_new_name(
-                  ctx, var,
-                  kIndexOffsetPrefix + in->Symbols().NameFor(var->symbol()));
-            } else if (blt_type == ast::Builtin::kInstanceIndex) {
-              instance_index_sym = var->symbol();
-              has_instance_index_ = true;
-              return clone_variable_with_new_name(
-                  ctx, var,
-                  kIndexOffsetPrefix + in->Symbols().NameFor(var->symbol()));
-            }
+  CloneContext ctx(&out, in);
+  ctx.ReplaceAll([&](ast::Variable* var) -> ast::Variable* {
+    for (ast::VariableDecoration* dec : var->decorations()) {
+      if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
+        ast::Builtin blt_type = blt_dec->value();
+        if (blt_type == ast::Builtin::kVertexIndex) {
+          vertex_index_sym = var->symbol();
+          has_vertex_index_ = true;
+          return clone_variable_with_new_name(
+              &ctx, var,
+              kIndexOffsetPrefix + in->Symbols().NameFor(var->symbol()));
+        } else if (blt_type == ast::Builtin::kInstanceIndex) {
+          instance_index_sym = var->symbol();
+          has_instance_index_ = true;
+          return clone_variable_with_new_name(
+              &ctx, var,
+              kIndexOffsetPrefix + in->Symbols().NameFor(var->symbol()));
+        }
+      }
+    }
+    return nullptr;  // Just clone var
+  });
+  ctx.ReplaceAll(  // Note: This happens in the same pass as the rename above
+                   // which determines the original builtin variable names,
+                   // but this should be fine, as variables are cloned first.
+      [&](ast::Function* func) -> ast::Function* {
+        maybe_create_buffer_var(ctx.dst);
+        if (buffer_var == nullptr) {
+          return nullptr;  // no transform need, just clone func
+        }
+        auto* func_sem = in->Sem().Get(func);
+        ast::StatementList statements;
+        for (const auto& data : func_sem->LocalReferencedBuiltinVariables()) {
+          if (data.second->value() == ast::Builtin::kVertexIndex) {
+            statements.emplace_back(
+                CreateFirstIndexOffset(in->Symbols().NameFor(vertex_index_sym),
+                                       kFirstVertexName, buffer_var, ctx.dst));
+          } else if (data.second->value() == ast::Builtin::kInstanceIndex) {
+            statements.emplace_back(CreateFirstIndexOffset(
+                in->Symbols().NameFor(instance_index_sym), kFirstInstanceName,
+                buffer_var, ctx.dst));
           }
         }
-        return nullptr;  // Just clone var
-      })
-      .ReplaceAll(  // Note: This happens in the same pass as the rename above
-                    // which determines the original builtin variable names,
-                    // but this should be fine, as variables are cloned first.
-          [&](CloneContext* ctx, ast::Function* func) -> ast::Function* {
-            maybe_create_buffer_var(ctx->dst);
-            if (buffer_var == nullptr) {
-              return nullptr;  // no transform need, just clone func
-            }
-            auto* func_sem = in->Sem().Get(func);
-            ast::StatementList statements;
-            for (const auto& data :
-                 func_sem->LocalReferencedBuiltinVariables()) {
-              if (data.second->value() == ast::Builtin::kVertexIndex) {
-                statements.emplace_back(CreateFirstIndexOffset(
-                    in->Symbols().NameFor(vertex_index_sym), kFirstVertexName,
-                    buffer_var, ctx->dst));
-              } else if (data.second->value() == ast::Builtin::kInstanceIndex) {
-                statements.emplace_back(CreateFirstIndexOffset(
-                    in->Symbols().NameFor(instance_index_sym),
-                    kFirstInstanceName, buffer_var, ctx->dst));
-              }
-            }
-            return CloneWithStatementsAtStart(ctx, func, statements);
-          })
-      .Clone();
+        return CloneWithStatementsAtStart(&ctx, func, statements);
+      });
+  ctx.Clone();
 
   return Output(
       Program(std::move(out)),

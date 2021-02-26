@@ -113,7 +113,7 @@ Transform::Output VertexPulling::Run(const Program* in) {
   for (auto& replacement : state.location_replacements) {
     ctx.Replace(replacement.from, replacement.to);
   }
-  ctx.ReplaceAll([&](CloneContext*, ast::Function* f) -> ast::Function* {
+  ctx.ReplaceAll([&](ast::Function* f) -> ast::Function* {
     if (f == func) {
       return CloneWithStatementsAtStart(&ctx, f,
                                         {state.CreateVertexPullingPreamble()});

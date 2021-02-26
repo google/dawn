@@ -190,11 +190,13 @@ class CloneContext {
   ast::FunctionList Clone(const ast::FunctionList& v);
 
   /// ReplaceAll() registers `replacer` to be called whenever the Clone() method
-  /// is called with a type that matches (or derives from) the type of the
-  /// second parameter of `replacer`.
+  /// is called with a Cloneable type that matches (or derives from) the type of
+  /// the single parameter of `replacer`.
+  /// The returned Cloneable of `replacer` will be used as the replacement for
+  /// all references to the object that's being cloned. This returned Cloneable
+  /// must be owned by the Program #dst.
   ///
-  /// `replacer` must be function-like with the signature:
-  ///   `T* (CloneContext*, T*)`
+  /// `replacer` must be function-like with the signature: `T* (T*)`
   ///  where `T` is a type deriving from Cloneable.
   ///
   /// If `replacer` returns a nullptr then Clone() will attempt the next
@@ -206,28 +208,29 @@ class CloneContext {
   ///
   /// ```
   ///   // Replace all ast::UintLiterals with the number 42
-  ///   CloneCtx ctx(&out, in)
-  ///     .ReplaceAll([&] (CloneContext* ctx, ast::UintLiteral* l) {
+  ///   CloneCtx ctx(&out, in);
+  ///   ctx.ReplaceAll([&] (ast::UintLiteral* l) {
   ///       return ctx->dst->create<ast::UintLiteral>(
   ///           ctx->Clone(l->source()),
   ///           ctx->Clone(l->type()),
   ///           42);
-  ///     }).Clone();
+  ///     });
+  ///   ctx.Clone();
   /// ```
   ///
   /// @warning The replacement object must be of the correct type for all
   /// references of the original object. A type mismatch will result in an
   /// assertion in debug builds, and undefined behavior in release builds.
   /// @param replacer a function or function-like object with the signature
-  ///        `T* (CloneContext*, T*)`, where `T` derives from Cloneable
+  ///        `T* (T*)`, where `T` derives from Cloneable
   /// @returns this CloneContext so calls can be chained
   template <typename F>
-  CloneContext& ReplaceAll(F replacer) {
-    using TPtr = traits::ParamTypeT<F, 1>;
+  CloneContext& ReplaceAll(F&& replacer) {
+    using TPtr = traits::ParamTypeT<F, 0>;
     using T = typename std::remove_pointer<TPtr>::type;
     transforms_.emplace_back([=](Cloneable* in) {
       auto* in_as_t = in->As<T>();
-      return in_as_t != nullptr ? replacer(this, in_as_t) : nullptr;
+      return in_as_t != nullptr ? replacer(in_as_t) : nullptr;
     });
     return *this;
   }

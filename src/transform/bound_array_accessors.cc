@@ -58,11 +58,11 @@ BoundArrayAccessors::~BoundArrayAccessors() = default;
 
 Transform::Output BoundArrayAccessors::Run(const Program* in) {
   ProgramBuilder out;
-  CloneContext(&out, in)
-      .ReplaceAll([&](CloneContext* ctx, ast::ArrayAccessorExpression* expr) {
-        return Transform(expr, ctx);
-      })
-      .Clone();
+  CloneContext ctx(&out, in);
+  ctx.ReplaceAll([&](ast::ArrayAccessorExpression* expr) {
+    return Transform(expr, &ctx);
+  });
+  ctx.Clone();
   return Output(Program(std::move(out)));
 }
 
