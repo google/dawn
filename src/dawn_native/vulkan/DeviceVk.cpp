@@ -341,9 +341,11 @@ namespace dawn_native { namespace vulkan {
             ASSERT(deviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
                    deviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
                    deviceInfo.HasExt(DeviceExt::_16BitStorage) &&
+                   deviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
                    deviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE);
 
             usedKnobs.shaderFloat16Int8Features.shaderFloat16 = VK_TRUE;
+            usedKnobs._16BitStorageFeatures.storageBuffer16BitAccess = VK_TRUE;
             usedKnobs._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess = VK_TRUE;
 
             featuresChain.Add(&usedKnobs.shaderFloat16Int8Features,
