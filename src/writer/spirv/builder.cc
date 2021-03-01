@@ -2618,12 +2618,13 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
 
     case_ids.push_back(block_id);
     for (auto* selector : item->selectors()) {
-      if (!selector->Is<ast::SintLiteral>()) {
+      auto* int_literal = selector->As<ast::IntLiteral>();
+      if (!int_literal) {
         error_ = "expected integer literal for switch case label";
         return false;
       }
 
-      params.push_back(Operand::Int(selector->As<ast::SintLiteral>()->value()));
+      params.push_back(Operand::Int(int_literal->value_as_u32()));
       params.push_back(Operand::Int(block_id));
     }
   }

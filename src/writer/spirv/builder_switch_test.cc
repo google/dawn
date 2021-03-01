@@ -136,6 +136,81 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
+  // switch(a) {
+  //   case 1u:
+  //     v = 1;
+  //   case 2u:
+  //     v = 2;
+  // }
+
+  auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+  auto* a = Global("a", ty.u32(), ast::StorageClass::kPrivate);
+
+  auto* case_1_body = create<ast::BlockStatement>(
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
+
+  auto* case_2_body = create<ast::BlockStatement>(
+      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
+
+  ast::CaseSelectorList selector_1;
+  selector_1.push_back(Literal(1u));
+
+  ast::CaseSelectorList selector_2;
+  selector_2.push_back(Literal(2u));
+
+  ast::CaseStatementList cases;
+  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
+  cases.push_back(create<ast::CaseStatement>(selector_2, case_2_body));
+
+  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
+
+  WrapInFunction(expr);
+
+  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
+                    ast::FunctionDecorationList{});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_TRUE(b.GenerateSwitchStatement(expr)) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
+OpName %5 "a"
+OpName %10 "a_func"
+%3 = OpTypeInt 32 1
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%7 = OpTypeInt 32 0
+%6 = OpTypePointer Private %7
+%8 = OpConstantNull %7
+%5 = OpVariable %6 Private %8
+%9 = OpTypeFunction %3
+%17 = OpConstant %3 1
+%18 = OpConstant %3 2
+%10 = OpFunction %3 None %9
+%11 = OpLabel
+%13 = OpLoad %7 %5
+OpSelectionMerge %12 None
+OpSwitch %13 %14 1 %15 2 %16
+%15 = OpLabel
+OpStore %1 %17
+OpBranch %12
+%16 = OpLabel
+OpStore %1 %18
+OpBranch %12
+%14 = OpLabel
+OpBranch %12
+%12 = OpLabel
+OpReturn
+OpFunctionEnd
+)");
+}
+
 TEST_F(BuilderTest, Switch_WithDefault) {
   // switch(true) {
   //   default:
