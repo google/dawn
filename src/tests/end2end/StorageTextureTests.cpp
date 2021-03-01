@@ -1060,7 +1060,7 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
 [[group(0), binding(0)]] var Src : texture_2d<u32>;
 [[group(0), binding(1)]] var Dst : [[access(write)]] texture_storage_2d<r32uint>;
 [[stage(compute)]] fn main() -> void {
-  var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
+  var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0), 0);
   srcValue.x = srcValue.x + 1u;
   textureStore(Dst, vec2<i32>(0, 0), srcValue);
 }
