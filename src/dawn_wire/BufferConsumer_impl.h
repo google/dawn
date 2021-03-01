@@ -18,6 +18,7 @@
 #include "dawn_wire/BufferConsumer.h"
 
 #include <limits>
+#include <type_traits>
 
 namespace dawn_wire {
 
