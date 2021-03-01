@@ -1117,6 +1117,22 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
   EXPECT_EQ(td()->error(), "3:5 error: invalid vector swizzle character");
 }
 
+TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
+
+  auto* ident = create<ast::IdentifierExpression>(
+      Source{{Source::Location{3, 3}, Source::Location{3, 7}}},
+      Symbols().Register("rgyw"));
+
+  auto* mem = MemberAccessor("my_vec", ident);
+  WrapInFunction(mem);
+
+  EXPECT_FALSE(td()->Determine());
+  EXPECT_EQ(
+      td()->error(),
+      "3:3 error: invalid mixing of vector swizzle characters rgba with xyzw");
+}
+
 TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 

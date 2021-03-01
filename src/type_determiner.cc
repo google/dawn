@@ -14,6 +14,7 @@
 
 #include "src/type_determiner.h"
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -827,6 +828,21 @@ bool TypeDeterminer::DetermineMemberAccessor(
     if (size < 1 || size > 4) {
       diagnostics_.add_error("invalid vector swizzle size",
                              expr->member()->source());
+      return false;
+    }
+
+    // All characters are valid, check if they're being mixed
+    auto is_rgba = [](char c) {
+      return c == 'r' || c == 'g' || c == 'b' || c == 'a';
+    };
+    auto is_xyzw = [](char c) {
+      return c == 'x' || c == 'y' || c == 'z' || c == 'w';
+    };
+    if (!std::all_of(str.begin(), str.end(), is_rgba) &&
+        !std::all_of(str.begin(), str.end(), is_xyzw)) {
+      diagnostics_.add_error(
+          "invalid mixing of vector swizzle characters rgba with xyzw",
+          expr->member()->source());
       return false;
     }
 
