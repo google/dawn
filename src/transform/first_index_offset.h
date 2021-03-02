@@ -101,45 +101,32 @@ class FirstIndexOffset : public Transform {
   /// @returns the transformation result
   Output Run(const Program* program) override;
 
-  /// [DEPRECATED] - Use Data
-  /// @returns whether shader uses vertex_index
-  bool HasVertexIndex();
-
-  /// [DEPRECATED] - Use Data
-  /// @returns whether shader uses instance_index
-  bool HasInstanceIndex();
-
-  /// [DEPRECATED] - Use Data
-  /// @returns offset of firstVertex into constant buffer
-  uint32_t GetFirstVertexOffset();
-
-  /// [DEPRECATED] - Use Data
-  /// @returns offset of firstInstance into constant buffer
-  uint32_t GetFirstInstanceOffset();
-
  private:
-  /// Adds uniform buffer with firstVertex/Instance to the program builder
-  /// @returns variable of new uniform buffer
-  ast::Variable* AddUniformBuffer(ProgramBuilder* builder);
-  /// Adds constant with modified original_name builtin to func
-  /// @param original_name the name of the original builtin used in function
-  /// @param field_name name of field in firstVertex/Instance buffer
-  /// @param buffer_var variable of firstVertex/Instance buffer
-  /// @param builder the target to contain the new ast nodes
-  ast::VariableDeclStatement* CreateFirstIndexOffset(
-      const std::string& original_name,
-      const std::string& field_name,
-      ast::Variable* buffer_var,
-      ProgramBuilder* builder);
+  struct State {
+    /// Adds uniform buffer with firstVertex/Instance to the program builder
+    /// @returns variable of new uniform buffer
+    ast::Variable* AddUniformBuffer();
+    /// Adds constant with modified original_name builtin to func
+    /// @param original_name the name of the original builtin used in function
+    /// @param field_name name of field in firstVertex/Instance buffer
+    /// @param buffer_var variable of firstVertex/Instance buffer
+    ast::VariableDeclStatement* CreateFirstIndexOffset(
+        const std::string& original_name,
+        const std::string& field_name,
+        ast::Variable* buffer_var);
+
+    ProgramBuilder* const dst;
+    uint32_t const binding;
+    uint32_t const group;
+
+    bool has_vertex_index = false;
+    bool has_instance_index = false;
+    uint32_t vertex_index_offset = 0;
+    uint32_t instance_index_offset = 0;
+  };
 
   uint32_t binding_;
   uint32_t group_;
-
-  bool has_vertex_index_ = false;
-  bool has_instance_index_ = false;
-
-  uint32_t vertex_index_offset_ = 0;
-  uint32_t instance_index_offset_ = 0;
 };
 }  // namespace transform
 }  // namespace tint

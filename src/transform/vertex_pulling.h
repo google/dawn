@@ -159,33 +159,11 @@ class VertexPulling : public Transform {
   };
 
   /// Constructor
-  VertexPulling();
-
-  /// Constructor
   /// @param config the configuration options for the transform
   explicit VertexPulling(const Config& config);
 
   /// Destructor
   ~VertexPulling() override;
-
-  /// Sets the vertex state descriptor, containing info about attributes
-  /// [DEPRECATED] Use the VertexPulling(const Config&)
-  /// @param vertex_state the vertex state descriptor
-  void SetVertexState(const VertexStateDescriptor& vertex_state);
-  /// Sets the entry point to add assignments into
-  /// [DEPRECATED] Use the VertexPulling(const Config&)
-  /// @param entry_point the vertex stage entry point
-  void SetEntryPoint(std::string entry_point);
-  /// Sets the "set" we will put all our vertex buffers into (as storage
-  /// buffers)
-  /// [DEPRECATED] Use the VertexPulling(const Config&)
-  /// @param number the set number we will use
-  void SetPullingBufferBindingSet(uint32_t number);
-  /// Sets the "group" we will put all our vertex buffers into (as storage
-  /// buffers)
-  /// [DEPRECATED] Use the VertexPulling(const Config&)
-  /// @param number the group number we will use
-  void SetPullingBufferBindingGroup(uint32_t number);
 
   /// Runs the transform on `program`, returning the transformation result.
   /// @param program the source program to transform
@@ -194,7 +172,6 @@ class VertexPulling : public Transform {
 
  private:
   Config cfg;
-  bool vertex_state_set = false;
 
   struct State {
     State(CloneContext& ctx, const Config& c);

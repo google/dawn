@@ -24,19 +24,6 @@ namespace {
 
 using VertexPullingTest = TransformTest;
 
-TEST_F(VertexPullingTest, Error_NoVertexState) {
-  auto* src = R"(
-[[stage(vertex)]]
-fn main() -> void {}
-)";
-
-  auto* expect = "error: SetVertexState not called";
-
-  auto got = Transform<VertexPulling>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
 TEST_F(VertexPullingTest, Error_NoEntryPoint) {
   auto* src = "";
 

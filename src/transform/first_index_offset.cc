@@ -115,15 +115,17 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
     }
   }
 
+  State state{&out, binding_, group_};
+
   Symbol vertex_index_sym;
   Symbol instance_index_sym;
 
   // Lazily construct the UniformBuffer on first call to
   // maybe_create_buffer_var()
   ast::Variable* buffer_var = nullptr;
-  auto maybe_create_buffer_var = [&](ProgramBuilder* dst) {
+  auto maybe_create_buffer_var = [&]() {
     if (buffer_var == nullptr) {
-      buffer_var = AddUniformBuffer(dst);
+      buffer_var = state.AddUniformBuffer();
     }
   };
 
@@ -138,13 +140,13 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
         ast::Builtin blt_type = blt_dec->value();
         if (blt_type == ast::Builtin::kVertexIndex) {
           vertex_index_sym = var->symbol();
-          has_vertex_index_ = true;
+          state.has_vertex_index = true;
           return clone_variable_with_new_name(
               &ctx, var,
               kIndexOffsetPrefix + in->Symbols().NameFor(var->symbol()));
         } else if (blt_type == ast::Builtin::kInstanceIndex) {
           instance_index_sym = var->symbol();
-          has_instance_index_ = true;
+          state.has_instance_index = true;
           return clone_variable_with_new_name(
               &ctx, var,
               kIndexOffsetPrefix + in->Symbols().NameFor(var->symbol()));
@@ -157,7 +159,7 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
                    // which determines the original builtin variable names,
                    // but this should be fine, as variables are cloned first.
       [&](ast::Function* func) -> ast::Function* {
-        maybe_create_buffer_var(ctx.dst);
+        maybe_create_buffer_var();
         if (buffer_var == nullptr) {
           return nullptr;  // no transform need, just clone func
         }
@@ -165,66 +167,48 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
         ast::StatementList statements;
         for (const auto& data : func_sem->LocalReferencedBuiltinVariables()) {
           if (data.second->value() == ast::Builtin::kVertexIndex) {
-            statements.emplace_back(
-                CreateFirstIndexOffset(in->Symbols().NameFor(vertex_index_sym),
-                                       kFirstVertexName, buffer_var, ctx.dst));
+            statements.emplace_back(state.CreateFirstIndexOffset(
+                in->Symbols().NameFor(vertex_index_sym), kFirstVertexName,
+                buffer_var));
           } else if (data.second->value() == ast::Builtin::kInstanceIndex) {
-            statements.emplace_back(CreateFirstIndexOffset(
+            statements.emplace_back(state.CreateFirstIndexOffset(
                 in->Symbols().NameFor(instance_index_sym), kFirstInstanceName,
-                buffer_var, ctx.dst));
+                buffer_var));
           }
         }
         return CloneWithStatementsAtStart(&ctx, func, statements);
       });
   ctx.Clone();
 
-  return Output(
-      Program(std::move(out)),
-      std::make_unique<Data>(has_vertex_index_, has_instance_index_,
-                             vertex_index_offset_, instance_index_offset_));
+  return Output(Program(std::move(out)),
+                std::make_unique<Data>(
+                    state.has_vertex_index, state.has_instance_index,
+                    state.vertex_index_offset, state.instance_index_offset));
 }
 
-bool FirstIndexOffset::HasVertexIndex() {
-  return has_vertex_index_;
-}
-
-bool FirstIndexOffset::HasInstanceIndex() {
-  return has_instance_index_;
-}
-
-uint32_t FirstIndexOffset::GetFirstVertexOffset() {
-  assert(has_vertex_index_);
-  return vertex_index_offset_;
-}
-
-uint32_t FirstIndexOffset::GetFirstInstanceOffset() {
-  assert(has_instance_index_);
-  return instance_index_offset_;
-}
-
-ast::Variable* FirstIndexOffset::AddUniformBuffer(ProgramBuilder* dst) {
+ast::Variable* FirstIndexOffset::State::AddUniformBuffer() {
   auto* u32_type = dst->create<type::U32>();
   ast::StructMemberList members;
   uint32_t offset = 0;
-  if (has_vertex_index_) {
+  if (has_vertex_index) {
     ast::StructMemberDecorationList member_dec;
     member_dec.push_back(
         dst->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(dst->create<ast::StructMember>(
         Source{}, dst->Symbols().Register(kFirstVertexName), u32_type,
         std::move(member_dec)));
-    vertex_index_offset_ = offset;
+    vertex_index_offset = offset;
     offset += 4;
   }
 
-  if (has_instance_index_) {
+  if (has_instance_index) {
     ast::StructMemberDecorationList member_dec;
     member_dec.push_back(
         dst->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(dst->create<ast::StructMember>(
         Source{}, dst->Symbols().Register(kFirstInstanceName), u32_type,
         std::move(member_dec)));
-    instance_index_offset_ = offset;
+    instance_index_offset = offset;
     offset += 4;
   }
 
@@ -243,8 +227,8 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ProgramBuilder* dst) {
       false,                                 // is_const
       nullptr,                               // constructor
       ast::VariableDecorationList{
-          dst->create<ast::BindingDecoration>(Source{}, binding_),
-          dst->create<ast::GroupDecoration>(Source{}, group_),
+          dst->create<ast::BindingDecoration>(Source{}, binding),
+          dst->create<ast::GroupDecoration>(Source{}, group),
       });
 
   dst->AST().AddGlobalVariable(idx_var);
@@ -254,11 +238,10 @@ ast::Variable* FirstIndexOffset::AddUniformBuffer(ProgramBuilder* dst) {
   return idx_var;
 }
 
-ast::VariableDeclStatement* FirstIndexOffset::CreateFirstIndexOffset(
+ast::VariableDeclStatement* FirstIndexOffset::State::CreateFirstIndexOffset(
     const std::string& original_name,
     const std::string& field_name,
-    ast::Variable* buffer_var,
-    ProgramBuilder* dst) {
+    ast::Variable* buffer_var) {
   auto* buffer =
       dst->create<ast::IdentifierExpression>(Source{}, buffer_var->symbol());
 

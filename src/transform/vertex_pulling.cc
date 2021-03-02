@@ -56,38 +56,12 @@ static const char kDefaultInstanceIndexName[] = "_tint_pulling_instance_index";
 
 }  // namespace
 
-VertexPulling::VertexPulling() = default;
-
-VertexPulling::VertexPulling(const Config& config)
-    : cfg(config), vertex_state_set(true) {}
+VertexPulling::VertexPulling(const Config& config) : cfg(config) {}
 
 VertexPulling::~VertexPulling() = default;
 
-void VertexPulling::SetVertexState(const VertexStateDescriptor& vertex_state) {
-  cfg.vertex_state = vertex_state;
-  vertex_state_set = true;
-}
-
-void VertexPulling::SetEntryPoint(std::string entry_point) {
-  cfg.entry_point_name = std::move(entry_point);
-}
-
-void VertexPulling::SetPullingBufferBindingGroup(uint32_t number) {
-  cfg.pulling_group = number;
-}
-
-void VertexPulling::SetPullingBufferBindingSet(uint32_t number) {
-  cfg.pulling_group = number;
-}
-
 Transform::Output VertexPulling::Run(const Program* in) {
   ProgramBuilder out;
-
-  // Check SetVertexState was called
-  if (!vertex_state_set) {
-    out.Diagnostics().add_error("SetVertexState not called");
-    return Output(Program(std::move(out)));
-  }
 
   // Find entry point
   auto* func = in->AST().Functions().Find(
