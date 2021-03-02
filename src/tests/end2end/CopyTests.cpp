@@ -1635,6 +1635,11 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
     ASSERT_LE(kDstSize, kTextureBytesPerRowAlignment);
 
     for (wgpu::TextureFormat format : kFormats) {
+        if (HasToggleEnabled("disable_snorm_read") &&
+            (format == wgpu::TextureFormat::RG8Snorm || format == wgpu::TextureFormat::R8Snorm)) {
+            continue;
+        }
+
         for (uint32_t textureDepth = 1; textureDepth < 3; ++textureDepth) {
             const wgpu::Extent3D kUploadSize = {4u, 4u, textureDepth};
 
