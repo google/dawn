@@ -95,8 +95,8 @@ class CopyTextureForBrowserTests : public DawnTest {
                     srcTexCoord.y = size.y - dstTexCoord.y - 1;
                 }
 
-                var srcColor : vec4<f32> = textureLoad(src, srcTexCoord);
-                var dstColor : vec4<f32> = textureLoad(dst, dstTexCoord);
+                var srcColor : vec4<f32> = textureLoad(src, srcTexCoord, 0);
+                var dstColor : vec4<f32> = textureLoad(dst, dstTexCoord, 0);
                 var success : bool = all(srcColor == dstColor);
 
                 var outputIndex : u32 = GlobalInvocationID.y * size.x + GlobalInvocationID.x;
