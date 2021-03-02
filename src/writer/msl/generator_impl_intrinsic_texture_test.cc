@@ -190,17 +190,35 @@ std::string expected_texture_overload(
       return R"(texture_tint_0.sample_compare(sampler_tint_0, float3(1.0f, 2.0f, 3.0f), 4.0f))";
     case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
       return R"(texture_tint_0.sample_compare(sampler_tint_0, float3(1.0f, 2.0f, 3.0f), 4, 5.0f))";
+    case ValidTextureOverload::kLoad1dF32:
+      return R"(texture_tint_0.read(1))";
+    case ValidTextureOverload::kLoad1dU32:
+      return R"(texture_tint_0.read(1))";
+    case ValidTextureOverload::kLoad1dI32:
+      return R"(texture_tint_0.read(1))";
     case ValidTextureOverload::kLoad1dLevelF32:
       return R"(texture_tint_0.read(1, 3))";
     case ValidTextureOverload::kLoad1dLevelU32:
       return R"(texture_tint_0.read(1, 3))";
     case ValidTextureOverload::kLoad1dLevelI32:
       return R"(texture_tint_0.read(1, 3))";
+    case ValidTextureOverload::kLoad2dF32:
+      return R"(texture_tint_0.read(int2(1, 2)))";
+    case ValidTextureOverload::kLoad2dU32:
+      return R"(texture_tint_0.read(int2(1, 2)))";
+    case ValidTextureOverload::kLoad2dI32:
+      return R"(texture_tint_0.read(int2(1, 2)))";
     case ValidTextureOverload::kLoad2dLevelF32:
       return R"(texture_tint_0.read(int2(1, 2), 3))";
     case ValidTextureOverload::kLoad2dLevelU32:
       return R"(texture_tint_0.read(int2(1, 2), 3))";
     case ValidTextureOverload::kLoad2dLevelI32:
+      return R"(texture_tint_0.read(int2(1, 2), 3))";
+    case ValidTextureOverload::kLoad2dArrayF32:
+      return R"(texture_tint_0.read(int2(1, 2), 3))";
+    case ValidTextureOverload::kLoad2dArrayU32:
+      return R"(texture_tint_0.read(int2(1, 2), 3))";
+    case ValidTextureOverload::kLoad2dArrayI32:
       return R"(texture_tint_0.read(int2(1, 2), 3))";
     case ValidTextureOverload::kLoad2dArrayLevelF32:
       return R"(texture_tint_0.read(int2(1, 2), 3, 4))";
@@ -208,6 +226,12 @@ std::string expected_texture_overload(
       return R"(texture_tint_0.read(int2(1, 2), 3, 4))";
     case ValidTextureOverload::kLoad2dArrayLevelI32:
       return R"(texture_tint_0.read(int2(1, 2), 3, 4))";
+    case ValidTextureOverload::kLoad3dF32:
+      return R"(texture_tint_0.read(int3(1, 2, 3)))";
+    case ValidTextureOverload::kLoad3dU32:
+      return R"(texture_tint_0.read(int3(1, 2, 3)))";
+    case ValidTextureOverload::kLoad3dI32:
+      return R"(texture_tint_0.read(int3(1, 2, 3)))";
     case ValidTextureOverload::kLoad3dLevelF32:
       return R"(texture_tint_0.read(int3(1, 2, 3), 4))";
     case ValidTextureOverload::kLoad3dLevelU32:
@@ -226,7 +250,11 @@ std::string expected_texture_overload(
       return R"(texture_tint_0.read(int2(1, 2), 3, 4))";
     case ValidTextureOverload::kLoadMultisampled2dArrayI32:
       return R"(texture_tint_0.read(int2(1, 2), 3, 4))";
+    case ValidTextureOverload::kLoadDepth2dF32:
+      return R"(texture_tint_0.read(int2(1, 2)))";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
+      return R"(texture_tint_0.read(int2(1, 2), 3))";
+    case ValidTextureOverload::kLoadDepth2dArrayF32:
       return R"(texture_tint_0.read(int2(1, 2), 3))";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
       return R"(texture_tint_0.read(int2(1, 2), 3, 4))";

@@ -1241,7 +1241,6 @@ Impl::Impl() {
   Register(I::kTextureStore, void_, {{t, tex_storage_wo_2d_array_FT},{coords, vec2_i32}, {array_index, i32}, {value, vec4_T}, }); // NOLINT
   Register(I::kTextureStore, void_, {{t, tex_storage_wo_3d_FT},      {coords, vec3_i32},                     {value, vec4_T}, }); // NOLINT
 
-  Register(I::kTextureLoad, vec4_T, {{t, tex_1d_T},               {coords, i32},                           {level, i32},                      }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_2d_T},               {coords, vec2_i32},                      {level, i32},                      }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_2d_array_T},         {coords, vec2_i32}, {array_index, i32},  {level, i32},                      }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_3d_T},               {coords, vec3_i32},                      {level, i32},                      }); // NOLINT
@@ -1253,6 +1252,20 @@ Impl::Impl() {
   Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_2d_FT},      {coords, vec2_i32},                                                         }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_2d_array_FT},{coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
   Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_3d_FT},      {coords, vec3_i32},                                                         }); // NOLINT
+
+  // TODO(bclayton): Update the rest of tint to reflect the spec changes made in
+  // https://github.com/gpuweb/gpuweb/pull/1301:
+
+  // Overloads added in https://github.com/gpuweb/gpuweb/pull/1301
+  Register(I::kTextureLoad, vec4_T, {{t, tex_1d_T},               {coords, i32},                           {level, i32},                      }); // NOLINT
+
+  // Overloads removed in https://github.com/gpuweb/gpuweb/pull/1301
+  Register(I::kTextureLoad, vec4_T, {{t, tex_1d_T},               {coords, i32},                                                              }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_2d_T},               {coords, vec2_i32},                                                         }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_2d_array_T},         {coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
+  Register(I::kTextureLoad, vec4_T, {{t, tex_3d_T},               {coords, vec3_i32},                                                         }); // NOLINT
+  Register(I::kTextureLoad, f32,    {{t, tex_depth_2d},           {coords, vec2_i32},                                                         }); // NOLINT
+  Register(I::kTextureLoad, f32,    {{t, tex_depth_2d_array},     {coords, vec2_i32}, {array_index, i32},                                     }); // NOLINT
 
   // clang-format on
 }
