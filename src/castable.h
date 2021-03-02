@@ -22,57 +22,49 @@
 
 namespace tint {
 
-class ClassID;
+namespace detail {
+template <typename T>
+struct TypeInfoOf;
+}  // namespace detail
 
 /// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
-#define TINT_INSTANTIATE_CLASS_ID(CLASS)             \
-  template <>                                        \
-  const char tint::UniqueToken<CLASS>::token = 0;    \
-  template <>                                        \
-  const uintptr_t tint::TypeInfo<CLASS>::unique_id = \
-      reinterpret_cast<uintptr_t>(&tint::UniqueToken<CLASS>::token)
+#define TINT_INSTANTIATE_CLASS_ID(CLASS)                       \
+  template <>                                                  \
+  const tint::TypeInfo tint::detail::TypeInfoOf<CLASS>::info { \
+    &tint::detail::TypeInfoOf<CLASS::TrueBase>::info, #CLASS,  \
+  }
 
-/// TypeInfo holds type information for the type T.
+/// TypeInfo holds type information for a Castable type.
+struct TypeInfo {
+  /// The base class of this type.
+  const TypeInfo* base;
+  /// The type name
+  const char* name;
+
+  /// @param type the test type info
+  /// @returns true if the class with this TypeInfo is of, or derives from the
+  /// class with the given TypeInfo.
+  bool Is(const tint::TypeInfo& type) const;
+
+  /// @returns the static TypeInfo for the type T
+  template <typename T>
+  static const TypeInfo& Of() {
+    return detail::TypeInfoOf<T>::info;
+  }
+};
+
+namespace detail {
+
+/// TypeInfoOf contains a single TypeInfo field for the type T.
 /// TINT_INSTANTIATE_CLASS_ID() must be defined in a .cpp file for each type
 /// `T`.
 template <typename T>
-struct TypeInfo {
-  /// The unique identifier for the type T.
-  static const uintptr_t unique_id;
+struct TypeInfoOf {
+  /// The unique TypeInfo for the type T.
+  static const TypeInfo info;
 };
 
-/// UniqueToken holds a single static const char, which is uniquely declared for
-/// each specialization of the template class.
-/// Use by TINT_INSTANTIATE_CLASS_ID() to generate a unique pointer, which is in
-/// turn used to generate TypeInfo<T>::unique_id.
-template <typename T>
-struct UniqueToken {
-  /// A dummy static variable that is unique for the type T.
-  static const char token;
-};
-
-/// ClassID represents a unique, comparable identifier for a C++ type.
-class ClassID {
- public:
-  /// @returns the unique ClassID for the type T.
-  template <typename T>
-  static inline ClassID Of() {
-    return ClassID(TypeInfo<T>::unique_id);
-  }
-
-  /// Equality operator
-  /// @param rhs the ClassID to compare against
-  /// @returns true if this ClassID is equal to `rhs`
-  inline bool operator==(const ClassID& rhs) const { return id == rhs.id; }
-
-  /// @return the unique numerical identifier of this ClassID
-  inline uintptr_t ID() const { return id; }
-
- private:
-  inline explicit ClassID(uintptr_t v) : id(v) {}
-
-  const uintptr_t id;
-};
+}  // namespace detail
 
 /// CastableBase is the base class for all Castable objects.
 /// It is not encouraged to directly derive from CastableBase without using the
@@ -88,10 +80,8 @@ class CastableBase {
 
   virtual ~CastableBase() = default;
 
-  /// @returns true if this object is of, or derives from a class with the
-  /// ClassID `id`.
-  /// @param id the ClassID to test for
-  virtual bool Is(ClassID id) const;
+  /// @returns the TypeInfo of the object
+  virtual const tint::TypeInfo& TypeInfo() const = 0;
 
   /// @returns true if this object is of, or derives from the class `TO`
   template <typename TO>
@@ -106,7 +96,7 @@ class CastableBase {
       return true;
     }
 
-    return Is(ClassID::Of<TO>());
+    return TypeInfo().Is(TypeInfo::Of<TO>());
   }
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
@@ -157,11 +147,12 @@ class Castable : public BASE {
   /// use Base in the `CLASS` constructor.
   using Base = Castable;
 
-  /// @returns true if this object is of, or derives from a class with the
-  /// ClassID `id`.
-  /// @param id the ClassID to test for
-  inline bool Is(ClassID id) const override {
-    return ClassID::Of<CLASS>() == id || BASE::Is(id);
+  /// A type alias for `BASE`.
+  using TrueBase = BASE;
+
+  /// @returns the TypeInfo of the object
+  const tint::TypeInfo& TypeInfo() const override {
+    return TypeInfo::Of<CLASS>();
   }
 
   /// @returns true if this object is of, or derives from the class `TO`
@@ -177,7 +168,7 @@ class Castable : public BASE {
       return true;
     }
 
-    return Is(ClassID::Of<TO>());
+    return TypeInfo().Is(TypeInfo::Of<TO>());
   }
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
@@ -208,21 +199,5 @@ inline TO* As(FROM* obj) {
 }
 
 }  // namespace tint
-
-namespace std {
-
-/// Custom std::hash specialization for tint::ClassID so ClassID can be used as
-/// keys for std::unordered_map and std::unordered_set.
-template <>
-class hash<tint::ClassID> {
- public:
-  /// @param id the ClassID to hash
-  /// @return the ClassID's internal numerical identifier
-  inline std::size_t operator()(const tint::ClassID& id) const {
-    return static_cast<std::size_t>(id.ID());
-  }
-};
-
-}  // namespace std
 
 #endif  // SRC_CASTABLE_H_

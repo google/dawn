@@ -14,12 +14,23 @@
 
 #include "src/castable.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::CastableBase);
-
 namespace tint {
 
-bool CastableBase::Is(ClassID id) const {
-  return ClassID::Of<CastableBase>() == id;
+/// The unique TypeInfo for the CastableBase type
+/// @return doxygen-thinks-this-static-field-is-a-function :(
+template <>
+const TypeInfo detail::TypeInfoOf<CastableBase>::info{
+    nullptr,
+    "CastableBase",
+};
+
+bool TypeInfo::Is(const TypeInfo& typeinfo) const {
+  for (auto* ti = this; ti != nullptr; ti = ti->base) {
+    if (ti == &typeinfo) {
+      return true;
+    }
+  }
+  return false;
 }
 
 }  // namespace tint

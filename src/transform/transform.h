@@ -67,14 +67,14 @@ class DataMap {
   void Put(std::unique_ptr<T>&& data) {
     static_assert(std::is_base_of<Data, T>::value,
                   "T does not derive from Data");
-    map_[ClassID::Of<T>()] = std::move(data);
+    map_[&TypeInfo::Of<T>()] = std::move(data);
   }
 
   /// @returns a pointer to the Data placed into the DataMap with a call to
   /// Put()
   template <typename T>
   T const* Get() const {
-    auto it = map_.find(ClassID::Of<T>());
+    auto it = map_.find(&TypeInfo::Of<T>());
     if (it == map_.end()) {
       return nullptr;
     }
@@ -102,7 +102,7 @@ class DataMap {
     PutAll(std::forward<Tn>(remainder)...);
   }
 
-  std::unordered_map<ClassID, std::unique_ptr<Data>> map_;
+  std::unordered_map<const TypeInfo*, std::unique_ptr<Data>> map_;
 };
 
 /// Interface for Program transforms

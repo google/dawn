@@ -161,6 +161,7 @@ function(tint_default_compile_options TARGET)
         -Wno-format-pedantic
         -Wno-return-std-move-in-c++11
         -Wno-unknown-warning-option
+        -Wno-undefined-var-template
         -Weverything
       )
     endif()
