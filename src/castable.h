@@ -28,7 +28,7 @@ struct TypeInfoOf;
 }  // namespace detail
 
 /// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
-#define TINT_INSTANTIATE_CLASS_ID(CLASS)                       \
+#define TINT_INSTANTIATE_TYPEINFO(CLASS)                       \
   template <>                                                  \
   const tint::TypeInfo tint::detail::TypeInfoOf<CLASS>::info { \
     &tint::detail::TypeInfoOf<CLASS::TrueBase>::info, #CLASS,  \
@@ -56,7 +56,7 @@ struct TypeInfo {
 namespace detail {
 
 /// TypeInfoOf contains a single TypeInfo field for the type T.
-/// TINT_INSTANTIATE_CLASS_ID() must be defined in a .cpp file for each type
+/// TINT_INSTANTIATE_TYPEINFO() must be defined in a .cpp file for each type
 /// `T`.
 template <typename T>
 struct TypeInfoOf {

@@ -17,7 +17,7 @@
 #include "src/clone_context.h"
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::type::F32);
+TINT_INSTANTIATE_TYPEINFO(tint::type::F32);
 
 namespace tint {
 namespace type {

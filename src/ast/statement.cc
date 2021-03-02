@@ -31,7 +31,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/variable_decl_statement.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::Statement);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::Statement);
 
 namespace tint {
 namespace ast {

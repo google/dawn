@@ -14,7 +14,7 @@
 
 #include "src/ast/literal.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::Literal);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::Literal);
 
 namespace tint {
 namespace ast {

@@ -17,7 +17,7 @@
 #include "src/clone_context.h"
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::type::Sampler);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Sampler);
 
 namespace tint {
 namespace type {

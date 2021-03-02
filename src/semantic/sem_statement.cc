@@ -16,7 +16,7 @@
 
 #include "src/type/type.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::Statement);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::Statement);
 
 namespace tint {
 namespace semantic {

@@ -23,7 +23,7 @@
 #include "src/type/alias_type.h"
 #include "src/type/struct_type.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::Module);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::Module);
 
 namespace tint {
 namespace ast {

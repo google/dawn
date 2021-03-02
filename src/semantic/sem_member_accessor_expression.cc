@@ -14,7 +14,7 @@
 
 #include "src/semantic/member_accessor_expression.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::MemberAccessorExpression);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::MemberAccessorExpression);
 
 namespace tint {
 namespace semantic {

@@ -31,7 +31,7 @@
 #include "src/type/vector_type.h"
 #include "src/type/void_type.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::type::Type);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
 
 namespace tint {
 namespace type {

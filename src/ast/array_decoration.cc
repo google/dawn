@@ -18,7 +18,7 @@
 
 #include "src/ast/stride_decoration.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::ArrayDecoration);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::ArrayDecoration);
 
 namespace tint {
 namespace ast {

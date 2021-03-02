@@ -18,7 +18,7 @@
 
 #include "src/ast/struct_member_offset_decoration.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::StructMemberDecoration);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberDecoration);
 
 namespace tint {
 namespace ast {

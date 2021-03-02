@@ -19,7 +19,7 @@
 #include "src/program.h"
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::Cloneable);
+TINT_INSTANTIATE_TYPEINFO(tint::Cloneable);
 
 namespace tint {
 

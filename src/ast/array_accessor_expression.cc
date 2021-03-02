@@ -17,7 +17,7 @@
 #include "src/clone_context.h"
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::ArrayAccessorExpression);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::ArrayAccessorExpression);
 
 namespace tint {
 namespace ast {

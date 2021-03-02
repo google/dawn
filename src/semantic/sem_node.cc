@@ -14,7 +14,7 @@
 
 #include "src/semantic/node.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::Node);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::Node);
 
 namespace tint {
 namespace semantic {

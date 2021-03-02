@@ -17,7 +17,7 @@
 #include "src/symbol_table.h"
 #include "src/type/type.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::CallTarget);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::CallTarget);
 
 namespace tint {
 namespace semantic {

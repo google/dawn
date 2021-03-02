@@ -21,7 +21,7 @@
 #include "src/program_builder.h"
 #include "src/semantic/variable.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::Variable);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::Variable);
 
 namespace tint {
 namespace ast {

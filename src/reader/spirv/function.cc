@@ -5019,7 +5019,7 @@ FunctionEmitter::FunctionDeclaration::~FunctionDeclaration() = default;
 }  // namespace reader
 }  // namespace tint
 
-TINT_INSTANTIATE_CLASS_ID(tint::reader::spirv::StatementBuilder);
-TINT_INSTANTIATE_CLASS_ID(tint::reader::spirv::SwitchStatementBuilder);
-TINT_INSTANTIATE_CLASS_ID(tint::reader::spirv::IfStatementBuilder);
-TINT_INSTANTIATE_CLASS_ID(tint::reader::spirv::LoopStatementBuilder);
+TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::StatementBuilder);
+TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::SwitchStatementBuilder);
+TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::IfStatementBuilder);
+TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::LoopStatementBuilder);

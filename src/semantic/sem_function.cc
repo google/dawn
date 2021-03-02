@@ -27,7 +27,7 @@
 #include "src/type/storage_texture_type.h"
 #include "src/type/texture_type.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::Function);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::Function);
 
 namespace tint {
 namespace semantic {

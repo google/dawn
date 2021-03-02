@@ -14,7 +14,7 @@
 
 #include "src/semantic/intrinsic.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::Intrinsic);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::Intrinsic);
 
 namespace tint {
 namespace semantic {

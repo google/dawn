@@ -14,7 +14,7 @@
 
 #include "src/semantic/call.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::Call);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::Call);
 
 namespace tint {
 namespace semantic {

@@ -19,7 +19,7 @@
 #include "src/clone_context.h"
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::type::Alias);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Alias);
 
 namespace tint {
 namespace type {

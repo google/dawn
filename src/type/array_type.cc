@@ -22,7 +22,7 @@
 #include "src/program_builder.h"
 #include "src/type/vector_type.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::type::Array);
+TINT_INSTANTIATE_TYPEINFO(tint::type::Array);
 
 namespace tint {
 namespace type {

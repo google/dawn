@@ -55,7 +55,7 @@
 #include "src/type/u32_type.h"
 #include "src/type_determiner.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::transform::FirstIndexOffset::Data);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::Data);
 
 namespace tint {
 namespace transform {

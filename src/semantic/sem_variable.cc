@@ -14,7 +14,7 @@
 
 #include "src/semantic/variable.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::semantic::Variable);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::Variable);
 
 namespace tint {
 namespace semantic {

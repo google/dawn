@@ -14,7 +14,7 @@
 
 #include "src/ast/function_decoration.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::FunctionDecoration);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::FunctionDecoration);
 
 namespace tint {
 namespace ast {

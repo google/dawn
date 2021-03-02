@@ -18,7 +18,7 @@
 #include "src/clone_context.h"
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::StructMember);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMember);
 
 namespace tint {
 namespace ast {

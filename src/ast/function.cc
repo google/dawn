@@ -25,7 +25,7 @@
 #include "src/type/sampled_texture_type.h"
 #include "src/type/texture_type.h"
 
-TINT_INSTANTIATE_CLASS_ID(tint::ast::Function);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::Function);
 
 namespace tint {
 namespace ast {
