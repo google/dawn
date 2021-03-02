@@ -979,23 +979,10 @@ namespace dawn_native { namespace d3d12 {
                             continue;
                         }
 
-                        D3D12_TEXTURE_COPY_LOCATION textureLocation =
-                            ComputeTextureCopyLocationForTexture(this, level, layer, aspect);
-                        for (uint32_t i = 0; i < copySplit.count; ++i) {
-                            Texture2DCopySplit::CopyInfo& info = copySplit.copies[i];
-
-                            D3D12_TEXTURE_COPY_LOCATION bufferLocation =
-                                ComputeBufferLocationForCopyTextureRegion(
-                                    this, ToBackend(uploadHandle.stagingBuffer)->GetResource(),
-                                    info.bufferSize, copySplit.offset, bytesPerRow, aspect);
-                            D3D12_BOX sourceRegion =
-                                ComputeD3D12BoxFromOffsetAndSize(info.bufferOffset, info.copySize);
-
-                            // copy the buffer filled with clear color to the texture
-                            commandList->CopyTextureRegion(
-                                &textureLocation, info.textureOffset.x, info.textureOffset.y,
-                                info.textureOffset.z, &bufferLocation, &sourceRegion);
-                        }
+                        RecordCopyBufferToTextureFromTextureCopySplit(
+                            commandList, copySplit,
+                            ToBackend(uploadHandle.stagingBuffer)->GetResource(), 0, bytesPerRow,
+                            this, level, layer, aspect);
                     }
                 }
             }

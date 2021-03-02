@@ -145,7 +145,7 @@ namespace dawn_native { namespace d3d12 {
     void RecordCopyBufferToTextureFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
                                                        const Texture2DCopySplit& baseCopySplit,
                                                        ID3D12Resource* bufferResource,
-                                                       uint64_t baseOffsetBytes,
+                                                       uint64_t baseOffset,
                                                        uint64_t bufferBytesPerRow,
                                                        Texture* texture,
                                                        uint32_t textureMiplevel,
@@ -155,7 +155,7 @@ namespace dawn_native { namespace d3d12 {
         const D3D12_TEXTURE_COPY_LOCATION textureLocation =
             ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureSlice, aspect);
 
-        const uint64_t offsetBytes = baseCopySplit.offset + baseOffsetBytes;
+        const uint64_t offsetBytes = baseCopySplit.offset + baseOffset;
 
         for (uint32_t i = 0; i < baseCopySplit.count; ++i) {
             const Texture2DCopySplit::CopyInfo& info = baseCopySplit.copies[i];
@@ -176,18 +176,18 @@ namespace dawn_native { namespace d3d12 {
 
     void CopyBufferToTextureWithCopySplit(CommandRecordingContext* commandContext,
                                           const TextureCopy& textureCopy,
-                                          const Extent3D& copySize,
-                                          Texture* texture,
                                           ID3D12Resource* bufferResource,
-                                          const uint64_t offsetBytes,
+                                          const uint64_t offset,
                                           const uint32_t bytesPerRow,
                                           const uint32_t rowsPerImage,
+                                          const Extent3D& copySize,
+                                          Texture* texture,
                                           Aspect aspect) {
         ASSERT(HasOneBit(aspect));
         // See comments in ComputeTextureCopySplits() for more details.
         const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(aspect).block;
         const TextureCopySplits copySplits = ComputeTextureCopySplits(
-            textureCopy.origin, copySize, blockInfo, offsetBytes, bytesPerRow, rowsPerImage);
+            textureCopy.origin, copySize, blockInfo, offset, bytesPerRow, rowsPerImage);
 
         const uint64_t bytesPerSlice = bytesPerRow * rowsPerImage;
 

@@ -417,9 +417,9 @@ namespace dawn_native { namespace d3d12 {
         texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst, range);
 
         // compute the copySplits and record the CopyTextureRegion commands
-        CopyBufferToTextureWithCopySplit(commandContext, *dst, copySizePixels, texture,
-                                         ToBackend(source)->GetResource(), src.offset,
-                                         src.bytesPerRow, src.rowsPerImage, range.aspects);
+        CopyBufferToTextureWithCopySplit(commandContext, *dst, ToBackend(source)->GetResource(),
+                                         src.offset, src.bytesPerRow, src.rowsPerImage,
+                                         copySizePixels, texture, range.aspects);
 
         return {};
     }

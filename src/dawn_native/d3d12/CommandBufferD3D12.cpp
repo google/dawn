@@ -709,9 +709,9 @@ namespace dawn_native { namespace d3d12 {
 
                     // compute the copySplits and record the CopyTextureRegion commands
                     CopyBufferToTextureWithCopySplit(
-                        commandContext, copy->destination, copy->copySize, texture,
-                        buffer->GetD3D12Resource(), copy->source.offset, copy->source.bytesPerRow,
-                        copy->source.rowsPerImage, subresources.aspects);
+                        commandContext, copy->destination, buffer->GetD3D12Resource(),
+                        copy->source.offset, copy->source.bytesPerRow, copy->source.rowsPerImage,
+                        copy->copySize, texture, subresources.aspects);
 
                     break;
                 }
