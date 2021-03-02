@@ -189,13 +189,13 @@ namespace {
             // texture is left uninitialized. This is required for D3D11 and D3D12 interop.
             ComPtr<IDXGIKeyedMutex> dxgiKeyedMutex;
             hr = d3d11Texture.As(&dxgiKeyedMutex);
-            EXPECT_EQ(hr, S_OK);
+            ASSERT_EQ(hr, S_OK);
 
             hr = dxgiKeyedMutex->AcquireSync(0, INFINITE);
-            EXPECT_EQ(hr, S_OK);
+            ASSERT_EQ(hr, S_OK);
 
             hr = dxgiKeyedMutex->ReleaseSync(1);
-            EXPECT_EQ(hr, S_OK);
+            ASSERT_EQ(hr, S_OK);
 
             // Open the DX11 texture in Dawn from the shared handle and return it as a WebGPU
             // texture.
@@ -266,6 +266,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
     wgpu::Texture wgpuTexture;
     CreateVideoTextureForTest(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
                               wgpu::TextureUsage::Sampled, /*isCheckerboard*/ false, &wgpuTexture);
+    ASSERT_NE(wgpuTexture.Get(), nullptr);
 
     wgpu::TextureViewDescriptor viewDesc;
     viewDesc.aspect = wgpu::TextureAspect::Plane0Only;
@@ -318,6 +319,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
     wgpu::Texture wgpuTexture;
     CreateVideoTextureForTest(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
                               wgpu::TextureUsage::Sampled, /*isCheckerboard*/ false, &wgpuTexture);
+    ASSERT_NE(wgpuTexture.Get(), nullptr);
 
     wgpu::TextureViewDescriptor viewDesc;
     viewDesc.aspect = wgpu::TextureAspect::Plane1Only;
@@ -371,6 +373,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
     wgpu::Texture wgpuTexture;
     CreateVideoTextureForTest(wgpu::TextureFormat::R8BG8Biplanar420Unorm,
                               wgpu::TextureUsage::Sampled, /*isCheckerboard*/ true, &wgpuTexture);
+    ASSERT_NE(wgpuTexture.Get(), nullptr);
 
     wgpu::TextureViewDescriptor lumaViewDesc;
     lumaViewDesc.aspect = wgpu::TextureAspect::Plane0Only;
