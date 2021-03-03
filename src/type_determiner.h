@@ -91,7 +91,9 @@ class TypeDeterminer {
     ast::Function* const declaration;
     UniqueVector<VariableInfo*> referenced_module_vars;
     UniqueVector<VariableInfo*> local_referenced_module_vars;
-    UniqueVector<Symbol> ancestor_entry_points;
+
+    // List of transitive calls this function makes
+    UniqueVector<FunctionInfo*> transitive_calls;
   };
 
   /// Structure holding semantic information about an expression.
@@ -118,7 +120,8 @@ class TypeDeterminer {
   /// @param funcs the functions to check
   /// @returns true if the determination was successful
   bool DetermineFunctions(const ast::FunctionList& funcs);
-  /// Determines type information for a function
+  /// Determines type information for a function. Requires all dependency
+  /// (callee) functions to have DetermineFunction() called on them first.
   /// @param func the function to check
   /// @returns true if the determination was successful
   bool DetermineFunction(ast::Function* func);
@@ -162,7 +165,6 @@ class TypeDeterminer {
                             uint32_t* id);
 
   void set_referenced_from_function_if_needed(VariableInfo* var, bool local);
-  void set_entry_points(const Symbol& fn_sym, Symbol ep_sym);
 
   bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
   bool DetermineBinary(ast::BinaryExpression* expr);
@@ -202,9 +204,6 @@ class TypeDeterminer {
   semantic::Statement* current_statement_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
-
-  // Map from caller functions to callee functions.
-  std::unordered_map<Symbol, std::vector<Symbol>> caller_to_callee_;
 };
 
 }  // namespace tint

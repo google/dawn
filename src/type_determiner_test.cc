@@ -3269,6 +3269,53 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   EXPECT_TRUE(ep_2_sem->AncestorEntryPoints().empty());
 }
 
+// Check for linear-time traversal of functions reachable from entry points.
+// See: crbug.com/tint/245
+TEST_F(TypeDeterminerTest, Function_EntryPoints_LinearTime) {
+  // fn lNa() { }
+  // fn lNb() { }
+  // ...
+  // fn l2a() { l3a(); l3b(); }
+  // fn l2b() { l3a(); l3b(); }
+  // fn l1a() { l2a(); l2b(); }
+  // fn l1b() { l2a(); l2b(); }
+  // fn main() { l1a(); l1b(); }
+
+  static constexpr int levels = 64;
+
+  auto fn_a = [](int level) { return "l" + std::to_string(level + 1) + "a"; };
+  auto fn_b = [](int level) { return "l" + std::to_string(level + 1) + "b"; };
+
+  Func(fn_a(levels), {}, ty.void_(), {}, {});
+  Func(fn_b(levels), {}, ty.void_(), {}, {});
+
+  for (int i = levels - 1; i >= 0; i--) {
+    Func(fn_a(i), {}, ty.void_(),
+         {
+             create<ast::CallStatement>(Call(fn_a(i + 1))),
+             create<ast::CallStatement>(Call(fn_b(i + 1))),
+         },
+         {});
+    Func(fn_b(i), {}, ty.void_(),
+         {
+             create<ast::CallStatement>(Call(fn_a(i + 1))),
+             create<ast::CallStatement>(Call(fn_b(i + 1))),
+         },
+         {});
+  }
+
+  Func("main", {}, ty.void_(),
+       {
+           create<ast::CallStatement>(Call(fn_a(0))),
+           create<ast::CallStatement>(Call(fn_b(0))),
+       },
+       {
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  ASSERT_TRUE(td()->Determine()) << td()->error();
+}
+
 using TypeDeterminerTextureIntrinsicTest =
     TypeDeterminerTestWithParam<ast::intrinsic::test::TextureOverloadCase>;
 

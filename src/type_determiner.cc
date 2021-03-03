@@ -137,27 +137,7 @@ bool TypeDeterminer::DetermineInternal() {
     return false;
   }
 
-  // Walk over the caller to callee information and update functions with
-  // which entry points call those functions.
-  for (auto* func : builder_->AST().Functions()) {
-    if (!func->IsEntryPoint()) {
-      continue;
-    }
-    for (const auto& callee : caller_to_callee_[func->symbol()]) {
-      set_entry_points(callee, func->symbol());
-    }
-  }
-
   return true;
-}
-
-void TypeDeterminer::set_entry_points(const Symbol& fn_sym, Symbol ep_sym) {
-  auto* info = symbol_to_function_.at(fn_sym);
-  info->ancestor_entry_points.add(ep_sym);
-
-  for (const auto& callee : caller_to_callee_[fn_sym]) {
-    set_entry_points(callee, ep_sym);
-  }
 }
 
 bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
@@ -439,9 +419,6 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
     }
   } else {
     if (current_function_) {
-      caller_to_callee_[current_function_->declaration->symbol()].push_back(
-          ident->symbol());
-
       auto callee_func_it = symbol_to_function_.find(ident->symbol());
       if (callee_func_it == symbol_to_function_.end()) {
         if (current_function_->declaration->symbol() == ident->symbol()) {
@@ -456,6 +433,13 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
         return false;
       }
       auto* callee_func = callee_func_it->second;
+
+      // Note: Requires called functions to be resolved first.
+      // This is currently guaranteed as functions must be declared before use.
+      current_function_->transitive_calls.add(callee_func);
+      for (auto* transitive_call : callee_func->transitive_calls) {
+        current_function_->transitive_calls.add(transitive_call);
+      }
 
       // We inherit any referenced variables from the callee.
       for (auto* var : callee_func->referenced_module_vars) {
@@ -1004,6 +988,25 @@ void TypeDeterminer::SetType(ast::Expression* expr, type::Type* type) {
 void TypeDeterminer::CreateSemanticNodes() const {
   auto& sem = builder_->Sem();
 
+  // Collate all the 'ancestor_entry_points' - this is a map of function symbol
+  // to all the entry points that transitively call the function.
+  std::unordered_map<Symbol, std::vector<Symbol>> ancestor_entry_points;
+  for (auto* func : builder_->AST().Functions()) {
+    auto it = function_to_info_.find(func);
+    if (it == function_to_info_.end()) {
+      continue;  // Type determination has likely errored. Process what we can.
+    }
+
+    auto* info = it->second;
+    if (!func->IsEntryPoint()) {
+      continue;
+    }
+    for (auto* call : info->transitive_calls) {
+      auto& vec = ancestor_entry_points[call->declaration->symbol()];
+      vec.emplace_back(func->symbol());
+    }
+  }
+
   // Create semantic nodes for all ast::Variables
   for (auto it : variable_to_info_) {
     auto* var = it.first;
@@ -1038,10 +1041,11 @@ void TypeDeterminer::CreateSemanticNodes() const {
   for (auto it : function_to_info_) {
     auto* func = it.first;
     auto* info = it.second;
+
     auto* sem_func = builder_->create<semantic::Function>(
         info->declaration, remap_vars(info->referenced_module_vars),
         remap_vars(info->local_referenced_module_vars),
-        info->ancestor_entry_points);
+        ancestor_entry_points[func->symbol()]);
     func_info_to_sem_func.emplace(info, sem_func);
     sem.Add(func, sem_func);
   }
