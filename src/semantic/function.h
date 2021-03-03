@@ -126,6 +126,11 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns the referenced storage textures
   VariableBindings ReferencedStorageTextureVariables() const;
 
+  /// Retrieves any referenced depth texture variables. Note, the variables
+  /// must be decorated with both binding and group decorations.
+  /// @returns the referenced storage textures
+  VariableBindings ReferencedDepthTextureVariables() const;
+
   /// Retrieves any locally referenced builtin variables
   /// @returns the <variable, decoration> pairs.
   std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>

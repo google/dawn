@@ -22,6 +22,7 @@
 #include "src/ast/variable.h"
 #include "src/ast/variable_decoration.h"
 #include "src/semantic/variable.h"
+#include "src/type/depth_texture_type.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
 #include "src/type/storage_texture_type.h"
@@ -41,6 +42,21 @@ ParameterList GetParameters(ast::Function* ast) {
     parameters.emplace_back(Parameter{param->type(), Parameter::Usage::kNone});
   }
   return parameters;
+}
+
+std::tuple<ast::BindingDecoration*, ast::GroupDecoration*> GetBindingAndGroup(
+    const Variable* var) {
+  ast::BindingDecoration* binding = nullptr;
+  ast::GroupDecoration* group = nullptr;
+  for (auto* deco : var->Declaration()->decorations()) {
+    if (auto* b = deco->As<ast::BindingDecoration>()) {
+      binding = b;
+    }
+    if (auto* s = deco->As<ast::GroupDecoration>()) {
+      group = s;
+    }
+  }
+  return {binding, group};
 }
 
 }  // namespace
@@ -82,13 +98,7 @@ Function::VariableBindings Function::ReferencedUniformVariables() const {
 
     ast::BindingDecoration* binding = nullptr;
     ast::GroupDecoration* group = nullptr;
-    for (auto* deco : var->Declaration()->decorations()) {
-      if (auto* b = deco->As<ast::BindingDecoration>()) {
-        binding = b;
-      } else if (auto* g = deco->As<ast::GroupDecoration>()) {
-        group = g;
-      }
-    }
+    std::tie(binding, group) = GetBindingAndGroup(var);
     if (binding == nullptr || group == nullptr) {
       continue;
     }
@@ -108,13 +118,7 @@ Function::VariableBindings Function::ReferencedStorageBufferVariables() const {
 
     ast::BindingDecoration* binding = nullptr;
     ast::GroupDecoration* group = nullptr;
-    for (auto* deco : var->Declaration()->decorations()) {
-      if (auto* b = deco->As<ast::BindingDecoration>()) {
-        binding = b;
-      } else if (auto* s = deco->As<ast::GroupDecoration>()) {
-        group = s;
-      }
-    }
+    std::tie(binding, group) = GetBindingAndGroup(var);
     if (binding == nullptr || group == nullptr) {
       continue;
     }
@@ -169,13 +173,29 @@ Function::VariableBindings Function::ReferencedStorageTextureVariables() const {
 
     ast::BindingDecoration* binding = nullptr;
     ast::GroupDecoration* group = nullptr;
-    for (auto* deco : var->Declaration()->decorations()) {
-      if (auto* b = deco->As<ast::BindingDecoration>()) {
-        binding = b;
-      } else if (auto* s = deco->As<ast::GroupDecoration>()) {
-        group = s;
-      }
+    std::tie(binding, group) = GetBindingAndGroup(var);
+    if (binding == nullptr || group == nullptr) {
+      continue;
     }
+
+    ret.push_back({var, BindingInfo{binding, group}});
+  }
+  return ret;
+}
+
+Function::VariableBindings Function::ReferencedDepthTextureVariables() const {
+  VariableBindings ret;
+
+  for (auto* var : ReferencedModuleVariables()) {
+    auto* unwrapped_type = var->Declaration()->type()->UnwrapIfNeeded();
+    auto* storage_texture = unwrapped_type->As<type::DepthTexture>();
+    if (storage_texture == nullptr) {
+      continue;
+    }
+
+    ast::BindingDecoration* binding = nullptr;
+    ast::GroupDecoration* group = nullptr;
+    std::tie(binding, group) = GetBindingAndGroup(var);
     if (binding == nullptr || group == nullptr) {
       continue;
     }
@@ -222,14 +242,7 @@ Function::VariableBindings Function::ReferencedSamplerVariablesImpl(
 
     ast::BindingDecoration* binding = nullptr;
     ast::GroupDecoration* group = nullptr;
-    for (auto* deco : var->Declaration()->decorations()) {
-      if (auto* b = deco->As<ast::BindingDecoration>()) {
-        binding = b;
-      }
-      if (auto* s = deco->As<ast::GroupDecoration>()) {
-        group = s;
-      }
-    }
+    std::tie(binding, group) = GetBindingAndGroup(var);
     if (binding == nullptr || group == nullptr) {
       continue;
     }
@@ -259,13 +272,7 @@ Function::VariableBindings Function::ReferencedSampledTextureVariablesImpl(
 
     ast::BindingDecoration* binding = nullptr;
     ast::GroupDecoration* group = nullptr;
-    for (auto* deco : var->Declaration()->decorations()) {
-      if (auto* b = deco->As<ast::BindingDecoration>()) {
-        binding = b;
-      } else if (auto* s = deco->As<ast::GroupDecoration>()) {
-        group = s;
-      }
-    }
+    std::tie(binding, group) = GetBindingAndGroup(var);
     if (binding == nullptr || group == nullptr) {
       continue;
     }

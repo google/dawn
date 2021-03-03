@@ -33,6 +33,7 @@
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
+#include "src/type/depth_texture_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
 #include "src/type/matrix_type.h"
@@ -343,6 +344,7 @@ std::vector<ResourceBinding> Inspector::GetResourceBindings(
                          GetSampledTextureResourceBindings(entry_point));
   AppendResourceBindings(&result,
                          GetMultisampledTextureResourceBindings(entry_point));
+  AppendResourceBindings(&result, GetDepthTextureResourceBindings(entry_point));
 
   return result;
 }
@@ -468,6 +470,35 @@ std::vector<ResourceBinding>
 Inspector::GetWriteOnlyStorageTextureResourceBindings(
     const std::string& entry_point) {
   return GetStorageTextureResourceBindingsImpl(entry_point, false);
+}
+
+std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
+    const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  std::vector<ResourceBinding> result;
+  auto* func_sem = program_->Sem().Get(func);
+  for (auto& ref : func_sem->ReferencedDepthTextureVariables()) {
+    auto* var = ref.first;
+    auto* decl = var->Declaration();
+    auto binding_info = ref.second;
+
+    ResourceBinding entry;
+    entry.resource_type = ResourceBinding::ResourceType::kDepthTexture;
+    entry.bind_group = binding_info.group->value();
+    entry.binding = binding_info.binding->value();
+
+    auto* texture_type = decl->type()->UnwrapIfNeeded()->As<type::Texture>();
+    entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
+        texture_type->dim());
+
+    result.push_back(entry);
+  }
+
+  return result;
 }
 
 ast::Function* Inspector::FindEntryPointByName(const std::string& name) {

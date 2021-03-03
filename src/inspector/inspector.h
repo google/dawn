@@ -104,6 +104,7 @@ struct ResourceBinding {
     kMulitsampledTexture,
     kReadOnlyStorageTexture,
     kWriteOnlyStorageTexture,
+    kDepthTexture,
   };
 
   /// Type of resource that is bound.
@@ -196,6 +197,11 @@ class Inspector {
   /// @param entry_point name of the entry point to get information about.
   /// @returns vector of all of the bindings for write-only storage textures.
   std::vector<ResourceBinding> GetWriteOnlyStorageTextureResourceBindings(
+      const std::string& entry_point);
+
+  /// @param entry_point name of the entry point to get information about.
+  /// @returns vector of all of the bindings for depth textures.
+  std::vector<ResourceBinding> GetDepthTextureResourceBindings(
       const std::string& entry_point);
 
  private:

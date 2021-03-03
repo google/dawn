@@ -463,8 +463,13 @@ class InspectorHelper : public ProgramBuilder {
   /// Adds a depth texture variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
-  void AddDepthTexture(const std::string& name, type::Type* type) {
-    Global(name, type, ast::StorageClass::kUniformConstant);
+  /// @param group the binding/group to use for the depth texture
+  /// @param binding the binding number to use for the depth texture
+  void AddDepthTexture(const std::string& name,
+                       type::Type* type,
+                       uint32_t group,
+                       uint32_t binding) {
+    AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
   }
 
   /// Generates a function that references a specific sampler variable
@@ -759,6 +764,13 @@ class InspectorGetMultisampledTextureResourceBindingsTestWithParam
       public testing::TestWithParam<GetMultisampledTextureTestParams> {};
 class InspectorGetStorageTextureResourceBindingsTest : public InspectorHelper,
                                                        public testing::Test {};
+struct GetDepthTextureTestParams {
+  type::TextureDimension type_dim;
+  inspector::ResourceBinding::TextureDimension inspector_dim;
+};
+class InspectorGetDepthTextureResourceBindingsTestWithParam
+    : public InspectorHelper,
+      public testing::TestWithParam<GetDepthTextureTestParams> {};
 
 typedef std::tuple<type::TextureDimension, ResourceBinding::TextureDimension>
     DimensionParams;
@@ -1428,8 +1440,8 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
 
   auto* cs_depth_texture_type =
       MakeDepthTextureType(type::TextureDimension::k2d);
-  AddDepthTexture("cs_texture", cs_depth_texture_type);
-  AddComparisonSampler("cs_var", 3, 1);
+  AddDepthTexture("cs_texture", cs_depth_texture_type, 3, 1);
+  AddComparisonSampler("cs_var", 3, 2);
   AddGlobalVariable("cs_coords", ty.vec2<f32>());
   AddGlobalVariable("cs_depth", ty.f32());
   MakeComparisonSamplerReferenceBodyFunction(
@@ -1445,7 +1457,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
 
   auto result = inspector.GetResourceBindings("ep_func");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
-  ASSERT_EQ(6u, result.size());
+  ASSERT_EQ(7u, result.size());
 
   EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
             result[0].resource_type);
@@ -1469,12 +1481,17 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   EXPECT_EQ(ResourceBinding::ResourceType::kComparisonSampler,
             result[4].resource_type);
   EXPECT_EQ(3u, result[4].bind_group);
-  EXPECT_EQ(1u, result[4].binding);
+  EXPECT_EQ(2u, result[4].binding);
 
   EXPECT_EQ(ResourceBinding::ResourceType::kSampledTexture,
             result[5].resource_type);
   EXPECT_EQ(2u, result[5].bind_group);
   EXPECT_EQ(0u, result[5].binding);
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kDepthTexture,
+            result[6].resource_type);
+  EXPECT_EQ(3u, result[6].bind_group);
+  EXPECT_EQ(1u, result[6].binding);
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
@@ -2118,7 +2135,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
   auto* depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
-  AddDepthTexture("foo_texture", depth_texture_type);
+  AddDepthTexture("foo_texture", depth_texture_type, 0, 0);
   AddComparisonSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.vec2<f32>());
   AddGlobalVariable("foo_depth", ty.f32());
@@ -2139,7 +2156,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
   auto* depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
-  AddDepthTexture("foo_texture", depth_texture_type);
+  AddDepthTexture("foo_texture", depth_texture_type, 0, 0);
   AddComparisonSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.vec2<f32>());
   AddGlobalVariable("foo_depth", ty.f32());
@@ -2178,7 +2195,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
   auto* depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
-  AddDepthTexture("foo_texture", depth_texture_type);
+  AddDepthTexture("foo_texture", depth_texture_type, 0, 0);
   AddComparisonSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.vec2<f32>());
   AddGlobalVariable("foo_depth", ty.f32());
@@ -2207,7 +2224,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
   auto* depth_texture_type = MakeDepthTextureType(type::TextureDimension::k2d);
-  AddDepthTexture("foo_texture", depth_texture_type);
+  AddDepthTexture("foo_texture", depth_texture_type, 0, 0);
   AddComparisonSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.vec2<f32>());
   AddGlobalVariable("foo_depth", ty.f32());
@@ -2684,6 +2701,51 @@ INSTANTIATE_TEST_SUITE_P(
             std::make_tuple(type::ImageFormat::kRgba32Float,
                             ResourceBinding::ImageFormat::kRgba32Float,
                             ResourceBinding::SampledKind::kFloat))));
+
+TEST_P(InspectorGetDepthTextureResourceBindingsTestWithParam,
+       textureDimensions) {
+  auto* depth_texture_type = MakeDepthTextureType(GetParam().type_dim);
+  AddDepthTexture("dt", depth_texture_type, 0, 0);
+  AddGlobalVariable("dt_level", ty.i32());
+
+  Func("ep", ast::VariableList(), ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(
+               Call("textureDimensions", "dt", "dt_level")),
+       },
+       ast::FunctionDecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetDepthTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kDepthTexture,
+            result[0].resource_type);
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(GetParam().inspector_dim, result[0].dim);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    InspectorGetDepthTextureResourceBindingsTest,
+    InspectorGetDepthTextureResourceBindingsTestWithParam,
+    testing::Values(
+        GetDepthTextureTestParams{
+            type::TextureDimension::k2d,
+            inspector::ResourceBinding::TextureDimension::k2d},
+        GetDepthTextureTestParams{
+            type::TextureDimension::k2dArray,
+            inspector::ResourceBinding::TextureDimension::k2dArray},
+        GetDepthTextureTestParams{
+            type::TextureDimension::kCube,
+            inspector::ResourceBinding::TextureDimension::kCube},
+        GetDepthTextureTestParams{
+            type::TextureDimension::kCubeArray,
+            inspector::ResourceBinding::TextureDimension::kCubeArray}));
 
 }  // namespace
 }  // namespace inspector
