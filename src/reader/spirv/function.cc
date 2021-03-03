@@ -2091,6 +2091,13 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
                              create<ast::IdentifierExpression>(
                                  Source{}, builder_.Symbols().Register(name))};
     }
+    case SpvOpUndef:
+      // Substitute a null value for undef.
+      // This case occurs when OpUndef appears at module scope, as if it were
+      // a constant.
+      return parser_impl_.MakeNullExpression(
+          parser_impl_.ConvertType(inst->type_id()));
+
     default:
       break;
   }
@@ -3294,7 +3301,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
 
   if (opcode == SpvOpUndef) {
     // Replace undef with the null value.
-    return {ast_type, parser_impl_.MakeNullValue(ast_type)};
+    return parser_impl_.MakeNullExpression(ast_type);
   }
 
   if (opcode == SpvOpSelect) {

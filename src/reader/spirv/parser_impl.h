@@ -326,6 +326,11 @@ class ParserImpl : Reader {
   /// @returns a new expression
   ast::Expression* MakeNullValue(type::Type* type);
 
+  /// Make a typed expression for the null value for the given type.
+  /// @param type the AST type
+  /// @returns a new typed expression
+  TypedExpression MakeNullExpression(type::Type* type);
+
   /// Converts a given expression to the signedness demanded for an operand
   /// of the given SPIR-V instruction, if required.  If the instruction assumes
   /// signed integer operands, and `expr` is unsigned, then return an

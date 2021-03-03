@@ -40,6 +40,7 @@ std::string CommonTypes() {
   %int = OpTypeInt 32 1
   %float = OpTypeFloat 32
 
+  %v2bool = OpTypeVector %bool 2
   %v2uint = OpTypeVector %uint 2
   %v2int = OpTypeVector %int 2
   %v2float = OpTypeVector %float 2
@@ -47,6 +48,149 @@ std::string CommonTypes() {
 }
 
 using SpvParserTestMiscInstruction = SpvParserTest;
+
+TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Scalar) {
+  const auto assembly = CommonTypes() + R"(
+     %1 = OpUndef %bool
+     %2 = OpUndef %uint
+     %3 = OpUndef %int
+     %4 = OpUndef %float
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %11 = OpCopyObject %bool %1
+     %12 = OpCopyObject %uint %2
+     %13 = OpCopyObject %int %3
+     %14 = OpCopyObject %float %4
+     OpReturn
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
+              HasSubstr(R"(VariableDeclStatement{
+  VariableConst{
+    x_11
+    none
+    __bool
+    {
+      ScalarConstructor[not set]{false}
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_12
+    none
+    __u32
+    {
+      ScalarConstructor[not set]{0}
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_13
+    none
+    __i32
+    {
+      ScalarConstructor[not set]{0}
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_14
+    none
+    __f32
+    {
+      ScalarConstructor[not set]{0.000000}
+    }
+  }
+})")) << ToString(p->builder(), fe.ast_body());
+}
+
+TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Vector) {
+  const auto assembly = CommonTypes() + R"(
+     %4 = OpUndef %v2bool
+     %1 = OpUndef %v2uint
+     %2 = OpUndef %v2int
+     %3 = OpUndef %v2float
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %14 = OpCopyObject %v2uint %4
+     %11 = OpCopyObject %v2uint %1
+     %12 = OpCopyObject %v2int %2
+     %13 = OpCopyObject %v2float %3
+     OpReturn
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
+              HasSubstr(R"(VariableDeclStatement{
+  VariableConst{
+    x_14
+    none
+    __vec_2__bool
+    {
+      TypeConstructor[not set]{
+        __vec_2__bool
+        ScalarConstructor[not set]{false}
+        ScalarConstructor[not set]{false}
+      }
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_11
+    none
+    __vec_2__u32
+    {
+      TypeConstructor[not set]{
+        __vec_2__u32
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
+      }
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_12
+    none
+    __vec_2__i32
+    {
+      TypeConstructor[not set]{
+        __vec_2__i32
+        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0}
+      }
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_13
+    none
+    __vec_2__f32
+    {
+      TypeConstructor[not set]{
+        __vec_2__f32
+        ScalarConstructor[not set]{0.000000}
+        ScalarConstructor[not set]{0.000000}
+      }
+    }
+  }
+})")) << ToString(p->builder(), fe.ast_body());
+}
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
   const auto assembly = CommonTypes() + R"(

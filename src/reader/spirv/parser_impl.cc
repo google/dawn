@@ -1538,6 +1538,10 @@ ast::Expression* ParserImpl::MakeNullValue(type::Type* type) {
   return nullptr;
 }
 
+TypedExpression ParserImpl::MakeNullExpression(type::Type* type) {
+  return {type, MakeNullValue(type)};
+}
+
 TypedExpression ParserImpl::RectifyOperandSignedness(
     const spvtools::opt::Instruction& inst,
     TypedExpression&& expr) {
