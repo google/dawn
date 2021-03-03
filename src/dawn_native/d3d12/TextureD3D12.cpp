@@ -567,6 +567,11 @@ namespace dawn_native { namespace d3d12 {
 
         device->DeallocateMemory(mResourceAllocation);
 
+        // Now that we've deallocated the memory, the texture is no longer a swap chain texture.
+        // We can set mSwapChainTexture to false to avoid passing a nullptr to
+        // ID3D12SharingContract::Present.
+        mSwapChainTexture = false;
+
         if (mDxgiKeyedMutex != nullptr) {
             mDxgiKeyedMutex->ReleaseSync(uint64_t(mAcquireMutexKey) + 1);
             device->ReleaseKeyedMutexForTexture(std::move(mDxgiKeyedMutex));
