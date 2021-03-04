@@ -225,7 +225,7 @@ namespace dawn_native {
 
             tint::Program program = tint::reader::wgsl::Parse(file);
             if (!program.IsValid()) {
-                auto err = tint::diag::Formatter{}.format(program.Diagnostics());
+                auto err = program.Diagnostics().str();
                 errorStream << "Parser: " << err << std::endl
                             << "Shader: " << std::endl
                             << file->content << std::endl;
@@ -241,7 +241,7 @@ namespace dawn_native {
 
             tint::Program program = tint::reader::spirv::Parse(spirv);
             if (!program.IsValid()) {
-                auto err = tint::diag::Formatter{}.format(program.Diagnostics());
+                auto err = program.Diagnostics().str();
                 errorStream << "Parser: " << err << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
@@ -255,7 +255,7 @@ namespace dawn_native {
 
             tint::Validator validator;
             if (!validator.Validate(program)) {
-                auto err = tint::diag::Formatter{}.format(validator.diagnostics());
+                auto err = validator.diagnostics().str();
                 errorStream << "Validation: " << err << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
@@ -953,8 +953,7 @@ namespace dawn_native {
                                                tint::Program* program) {
         tint::transform::Transform::Output output = transform->Run(program);
         if (!output.program.IsValid()) {
-            std::string err = "Tint program failure: " +
-                              tint::diag::Formatter{}.format(output.program.Diagnostics());
+            std::string err = "Tint program failure: " + output.program.Diagnostics().str();
             return DAWN_VALIDATION_ERROR(err.c_str());
         }
         return std::move(output.program);
