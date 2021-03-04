@@ -2256,32 +2256,34 @@ Maybe<ast::Expression*> ParserImpl::unary_expression() {
 //   | MODULO unary_expression multiplicative_expr
 Expect<ast::Expression*> ParserImpl::expect_multiplicative_expr(
     ast::Expression* lhs) {
-  auto t = peek();
+  while (synchronized_) {
+    auto t = peek();
 
-  ast::BinaryOp op = ast::BinaryOp::kNone;
-  if (t.IsStar())
-    op = ast::BinaryOp::kMultiply;
-  else if (t.IsForwardSlash())
-    op = ast::BinaryOp::kDivide;
-  else if (t.IsMod())
-    op = ast::BinaryOp::kModulo;
-  else
-    return lhs;
+    ast::BinaryOp op = ast::BinaryOp::kNone;
+    if (t.IsStar())
+      op = ast::BinaryOp::kMultiply;
+    else if (t.IsForwardSlash())
+      op = ast::BinaryOp::kDivide;
+    else if (t.IsMod())
+      op = ast::BinaryOp::kModulo;
+    else
+      return lhs;
 
-  auto source = t.source();
-  auto name = t.to_name();
-  next();  // Consume the peek
+    auto source = t.source();
+    auto name = t.to_name();
+    next();  // Consume the peek
 
-  auto rhs = unary_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched) {
-    return add_error(peek(),
-                     "unable to parse right side of " + name + " expression");
+    auto rhs = unary_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched) {
+      return add_error(peek(),
+                       "unable to parse right side of " + name + " expression");
+    }
+
+    lhs = create<ast::BinaryExpression>(source, op, lhs, rhs.value);
   }
-
-  return expect_multiplicative_expr(
-      create<ast::BinaryExpression>(source, op, lhs, rhs.value));
+  return Failure::kErrored;
 }
 
 // multiplicative_expression
@@ -2302,27 +2304,29 @@ Maybe<ast::Expression*> ParserImpl::multiplicative_expression() {
 //   | MINUS multiplicative_expression additive_expr
 Expect<ast::Expression*> ParserImpl::expect_additive_expr(
     ast::Expression* lhs) {
-  auto t = peek();
+  while (synchronized_) {
+    auto t = peek();
 
-  ast::BinaryOp op = ast::BinaryOp::kNone;
-  if (t.IsPlus())
-    op = ast::BinaryOp::kAdd;
-  else if (t.IsMinus())
-    op = ast::BinaryOp::kSubtract;
-  else
-    return lhs;
+    ast::BinaryOp op = ast::BinaryOp::kNone;
+    if (t.IsPlus())
+      op = ast::BinaryOp::kAdd;
+    else if (t.IsMinus())
+      op = ast::BinaryOp::kSubtract;
+    else
+      return lhs;
 
-  auto source = t.source();
-  next();  // Consume the peek
+    auto source = t.source();
+    next();  // Consume the peek
 
-  auto rhs = multiplicative_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched)
-    return add_error(peek(), "unable to parse right side of + expression");
+    auto rhs = multiplicative_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched)
+      return add_error(peek(), "unable to parse right side of + expression");
 
-  return expect_additive_expr(
-      create<ast::BinaryExpression>(source, op, lhs, rhs.value));
+    lhs = create<ast::BinaryExpression>(source, op, lhs, rhs.value);
+  }
+  return Failure::kErrored;
 }
 
 // additive_expression
@@ -2342,33 +2346,36 @@ Maybe<ast::Expression*> ParserImpl::additive_expression() {
 //   | SHIFT_LEFT additive_expression shift_expr
 //   | SHIFT_RIGHT additive_expression shift_expr
 Expect<ast::Expression*> ParserImpl::expect_shift_expr(ast::Expression* lhs) {
-  auto t = peek();
-  auto source = t.source();
+  while (synchronized_) {
+    auto t = peek();
+    auto source = t.source();
 
-  auto* name = "";
-  ast::BinaryOp op = ast::BinaryOp::kNone;
-  if (t.IsShiftLeft()) {
-    next();  // Consume the peek
-    op = ast::BinaryOp::kShiftLeft;
-    name = "<<";
-  } else if (t.IsShiftRight()) {
-    next();  // Consume the peek
-    op = ast::BinaryOp::kShiftRight;
-    name = ">>";
-  } else {
-    return lhs;
-  }
+    auto* name = "";
+    ast::BinaryOp op = ast::BinaryOp::kNone;
+    if (t.IsShiftLeft()) {
+      next();  // Consume the peek
+      op = ast::BinaryOp::kShiftLeft;
+      name = "<<";
+    } else if (t.IsShiftRight()) {
+      next();  // Consume the peek
+      op = ast::BinaryOp::kShiftRight;
+      name = ">>";
+    } else {
+      return lhs;
+    }
 
-  auto rhs = additive_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched) {
-    return add_error(peek(), std::string("unable to parse right side of ") +
-                                 name + " expression");
+    auto rhs = additive_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched) {
+      return add_error(peek(), std::string("unable to parse right side of ") +
+                                   name + " expression");
+    }
+
+    return lhs = create<ast::BinaryExpression>(source, op, lhs, rhs.value);
   }
-  return expect_shift_expr(
-      create<ast::BinaryExpression>(source, op, lhs, rhs.value));
-}  // namespace wgsl
+  return Failure::kErrored;
+}
 
 // shift_expression
 //   : additive_expression shift_expr
@@ -2390,33 +2397,35 @@ Maybe<ast::Expression*> ParserImpl::shift_expression() {
 //   | GREATER_THAN_EQUAL shift_expression relational_expr
 Expect<ast::Expression*> ParserImpl::expect_relational_expr(
     ast::Expression* lhs) {
-  auto t = peek();
-  ast::BinaryOp op = ast::BinaryOp::kNone;
-  if (t.IsLessThan())
-    op = ast::BinaryOp::kLessThan;
-  else if (t.IsGreaterThan())
-    op = ast::BinaryOp::kGreaterThan;
-  else if (t.IsLessThanEqual())
-    op = ast::BinaryOp::kLessThanEqual;
-  else if (t.IsGreaterThanEqual())
-    op = ast::BinaryOp::kGreaterThanEqual;
-  else
-    return lhs;
+  while (synchronized_) {
+    auto t = peek();
+    ast::BinaryOp op = ast::BinaryOp::kNone;
+    if (t.IsLessThan())
+      op = ast::BinaryOp::kLessThan;
+    else if (t.IsGreaterThan())
+      op = ast::BinaryOp::kGreaterThan;
+    else if (t.IsLessThanEqual())
+      op = ast::BinaryOp::kLessThanEqual;
+    else if (t.IsGreaterThanEqual())
+      op = ast::BinaryOp::kGreaterThanEqual;
+    else
+      return lhs;
 
-  auto source = t.source();
-  auto name = t.to_name();
-  next();  // Consume the peek
+    auto source = t.source();
+    auto name = t.to_name();
+    next();  // Consume the peek
 
-  auto rhs = shift_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched) {
-    return add_error(peek(),
-                     "unable to parse right side of " + name + " expression");
+    auto rhs = shift_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched) {
+      return add_error(peek(),
+                       "unable to parse right side of " + name + " expression");
+    }
+
+    lhs = create<ast::BinaryExpression>(source, op, lhs, rhs.value);
   }
-
-  return expect_relational_expr(
-      create<ast::BinaryExpression>(source, op, lhs, rhs.value));
+  return Failure::kErrored;
 }
 
 // relational_expression
@@ -2437,29 +2446,31 @@ Maybe<ast::Expression*> ParserImpl::relational_expression() {
 //   | NOT_EQUAL relational_expression equality_expr
 Expect<ast::Expression*> ParserImpl::expect_equality_expr(
     ast::Expression* lhs) {
-  auto t = peek();
-  ast::BinaryOp op = ast::BinaryOp::kNone;
-  if (t.IsEqualEqual())
-    op = ast::BinaryOp::kEqual;
-  else if (t.IsNotEqual())
-    op = ast::BinaryOp::kNotEqual;
-  else
-    return lhs;
+  while (synchronized_) {
+    auto t = peek();
+    ast::BinaryOp op = ast::BinaryOp::kNone;
+    if (t.IsEqualEqual())
+      op = ast::BinaryOp::kEqual;
+    else if (t.IsNotEqual())
+      op = ast::BinaryOp::kNotEqual;
+    else
+      return lhs;
 
-  auto source = t.source();
-  auto name = t.to_name();
-  next();  // Consume the peek
+    auto source = t.source();
+    auto name = t.to_name();
+    next();  // Consume the peek
 
-  auto rhs = relational_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched) {
-    return add_error(peek(),
-                     "unable to parse right side of " + name + " expression");
+    auto rhs = relational_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched) {
+      return add_error(peek(),
+                       "unable to parse right side of " + name + " expression");
+    }
+
+    lhs = create<ast::BinaryExpression>(source, op, lhs, rhs.value);
   }
-
-  return expect_equality_expr(
-      create<ast::BinaryExpression>(source, op, lhs, rhs.value));
+  return Failure::kErrored;
 }
 
 // equality_expression
@@ -2478,21 +2489,24 @@ Maybe<ast::Expression*> ParserImpl::equality_expression() {
 //   :
 //   | AND equality_expression and_expr
 Expect<ast::Expression*> ParserImpl::expect_and_expr(ast::Expression* lhs) {
-  auto t = peek();
-  if (!t.IsAnd())
-    return lhs;
+  while (synchronized_) {
+    auto t = peek();
+    if (!t.IsAnd())
+      return lhs;
 
-  auto source = t.source();
-  next();  // Consume the peek
+    auto source = t.source();
+    next();  // Consume the peek
 
-  auto rhs = equality_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched)
-    return add_error(peek(), "unable to parse right side of & expression");
+    auto rhs = equality_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched)
+      return add_error(peek(), "unable to parse right side of & expression");
 
-  return expect_and_expr(create<ast::BinaryExpression>(
-      source, ast::BinaryOp::kAnd, lhs, rhs.value));
+    lhs = create<ast::BinaryExpression>(source, ast::BinaryOp::kAnd, lhs,
+                                        rhs.value);
+  }
+  return Failure::kErrored;
 }
 
 // and_expression
@@ -2512,18 +2526,21 @@ Maybe<ast::Expression*> ParserImpl::and_expression() {
 //   | XOR and_expression exclusive_or_expr
 Expect<ast::Expression*> ParserImpl::expect_exclusive_or_expr(
     ast::Expression* lhs) {
-  Source source;
-  if (!match(Token::Type::kXor, &source))
-    return lhs;
+  while (synchronized_) {
+    Source source;
+    if (!match(Token::Type::kXor, &source))
+      return lhs;
 
-  auto rhs = and_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched)
-    return add_error(peek(), "unable to parse right side of ^ expression");
+    auto rhs = and_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched)
+      return add_error(peek(), "unable to parse right side of ^ expression");
 
-  return expect_exclusive_or_expr(create<ast::BinaryExpression>(
-      source, ast::BinaryOp::kXor, lhs, rhs.value));
+    lhs = create<ast::BinaryExpression>(source, ast::BinaryOp::kXor, lhs,
+                                        rhs.value);
+  }
+  return Failure::kErrored;
 }
 
 // exclusive_or_expression
@@ -2543,18 +2560,21 @@ Maybe<ast::Expression*> ParserImpl::exclusive_or_expression() {
 //   | OR exclusive_or_expression inclusive_or_expr
 Expect<ast::Expression*> ParserImpl::expect_inclusive_or_expr(
     ast::Expression* lhs) {
-  Source source;
-  if (!match(Token::Type::kOr))
-    return lhs;
+  while (synchronized_) {
+    Source source;
+    if (!match(Token::Type::kOr))
+      return lhs;
 
-  auto rhs = exclusive_or_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched)
-    return add_error(peek(), "unable to parse right side of | expression");
+    auto rhs = exclusive_or_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched)
+      return add_error(peek(), "unable to parse right side of | expression");
 
-  return expect_inclusive_or_expr(create<ast::BinaryExpression>(
-      source, ast::BinaryOp::kOr, lhs, rhs.value));
+    lhs = create<ast::BinaryExpression>(source, ast::BinaryOp::kOr, lhs,
+                                        rhs.value);
+  }
+  return Failure::kErrored;
 }
 
 // inclusive_or_expression
@@ -2574,21 +2594,24 @@ Maybe<ast::Expression*> ParserImpl::inclusive_or_expression() {
 //   | AND_AND inclusive_or_expression logical_and_expr
 Expect<ast::Expression*> ParserImpl::expect_logical_and_expr(
     ast::Expression* lhs) {
-  auto t = peek();
-  if (!t.IsAndAnd())
-    return lhs;
+  while (synchronized_) {
+    auto t = peek();
+    if (!t.IsAndAnd())
+      return lhs;
 
-  auto source = t.source();
-  next();  // Consume the peek
+    auto source = t.source();
+    next();  // Consume the peek
 
-  auto rhs = inclusive_or_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched)
-    return add_error(peek(), "unable to parse right side of && expression");
+    auto rhs = inclusive_or_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched)
+      return add_error(peek(), "unable to parse right side of && expression");
 
-  return expect_logical_and_expr(create<ast::BinaryExpression>(
-      source, ast::BinaryOp::kLogicalAnd, lhs, rhs.value));
+    lhs = create<ast::BinaryExpression>(source, ast::BinaryOp::kLogicalAnd, lhs,
+                                        rhs.value);
+  }
+  return Failure::kErrored;
 }
 
 // logical_and_expression
@@ -2608,18 +2631,21 @@ Maybe<ast::Expression*> ParserImpl::logical_and_expression() {
 //   | OR_OR logical_and_expression logical_or_expr
 Expect<ast::Expression*> ParserImpl::expect_logical_or_expr(
     ast::Expression* lhs) {
-  Source source;
-  if (!match(Token::Type::kOrOr))
-    return lhs;
+  while (synchronized_) {
+    Source source;
+    if (!match(Token::Type::kOrOr))
+      return lhs;
 
-  auto rhs = logical_and_expression();
-  if (rhs.errored)
-    return Failure::kErrored;
-  if (!rhs.matched)
-    return add_error(peek(), "unable to parse right side of || expression");
+    auto rhs = logical_and_expression();
+    if (rhs.errored)
+      return Failure::kErrored;
+    if (!rhs.matched)
+      return add_error(peek(), "unable to parse right side of || expression");
 
-  return expect_logical_or_expr(create<ast::BinaryExpression>(
-      source, ast::BinaryOp::kLogicalOr, lhs, rhs.value));
+    lhs = create<ast::BinaryExpression>(source, ast::BinaryOp::kLogicalOr, lhs,
+                                        rhs.value);
+  }
+  return Failure::kErrored;
 }
 
 // logical_or_expression
