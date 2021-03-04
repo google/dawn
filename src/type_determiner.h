@@ -65,11 +65,6 @@ class TypeDeterminer {
   /// @returns true if the type determiner was successful
   bool Determine();
 
-  /// @param name the function name to try and match as an intrinsic type.
-  /// @return the semantic::IntrinsicType for the given name. If `name` does not
-  /// match an intrinsic, returns semantic::Intrinsic::kNone
-  static semantic::IntrinsicType MatchIntrinsicType(const std::string& name);
-
  private:
   /// Structure holding semantic information about a variable.
   /// Used to build the semantic::Variable nodes at the end of resolving.

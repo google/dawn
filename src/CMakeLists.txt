@@ -472,6 +472,7 @@ if(${TINT_BUILD_TESTS})
     inspector/inspector_test.cc
     intrinsic_table_test.cc
     program_test.cc
+    semantic/sem_intrinsic_test.cc
     scope_stack_test.cc
     symbol_table_test.cc
     symbol_test.cc

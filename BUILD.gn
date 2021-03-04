@@ -844,6 +844,7 @@ source_set("tint_unittests_core_src") {
     "src/intrinsic_table_test.cc",
     "src/program_builder_test.cc",
     "src/program_test.cc",
+    "src/semantic/sem_intrinsic_test.cc",
     "src/scope_stack_test.cc",
     "src/symbol_table_test.cc",
     "src/symbol_test.cc",

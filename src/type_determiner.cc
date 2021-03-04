@@ -412,7 +412,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
 
   auto name = builder_->Symbols().NameFor(ident->symbol());
 
-  auto intrinsic_type = MatchIntrinsicType(name);
+  auto intrinsic_type = semantic::ParseIntrinsicType(name);
   if (intrinsic_type != IntrinsicType::kNone) {
     if (!DetermineIntrinsicCall(call, intrinsic_type)) {
       return false;
@@ -563,7 +563,7 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   }
 
   std::string name = builder_->Symbols().NameFor(symbol);
-  if (MatchIntrinsicType(name) != IntrinsicType::kNone) {
+  if (semantic::ParseIntrinsicType(name) != IntrinsicType::kNone) {
     diagnostics_.add_error("missing '(' for intrinsic call",
                            expr->source().End());
     return false;
@@ -573,175 +573,6 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
       "v-0006: identifier must be declared before use: " + name,
       expr->source());
   return false;
-}
-
-IntrinsicType TypeDeterminer::MatchIntrinsicType(const std::string& name) {
-  if (name == "abs") {
-    return IntrinsicType::kAbs;
-  } else if (name == "acos") {
-    return IntrinsicType::kAcos;
-  } else if (name == "all") {
-    return IntrinsicType::kAll;
-  } else if (name == "any") {
-    return IntrinsicType::kAny;
-  } else if (name == "arrayLength") {
-    return IntrinsicType::kArrayLength;
-  } else if (name == "asin") {
-    return IntrinsicType::kAsin;
-  } else if (name == "atan") {
-    return IntrinsicType::kAtan;
-  } else if (name == "atan2") {
-    return IntrinsicType::kAtan2;
-  } else if (name == "ceil") {
-    return IntrinsicType::kCeil;
-  } else if (name == "clamp") {
-    return IntrinsicType::kClamp;
-  } else if (name == "cos") {
-    return IntrinsicType::kCos;
-  } else if (name == "cosh") {
-    return IntrinsicType::kCosh;
-  } else if (name == "countOneBits") {
-    return IntrinsicType::kCountOneBits;
-  } else if (name == "cross") {
-    return IntrinsicType::kCross;
-  } else if (name == "determinant") {
-    return IntrinsicType::kDeterminant;
-  } else if (name == "distance") {
-    return IntrinsicType::kDistance;
-  } else if (name == "dot") {
-    return IntrinsicType::kDot;
-  } else if (name == "dpdx") {
-    return IntrinsicType::kDpdx;
-  } else if (name == "dpdxCoarse") {
-    return IntrinsicType::kDpdxCoarse;
-  } else if (name == "dpdxFine") {
-    return IntrinsicType::kDpdxFine;
-  } else if (name == "dpdy") {
-    return IntrinsicType::kDpdy;
-  } else if (name == "dpdyCoarse") {
-    return IntrinsicType::kDpdyCoarse;
-  } else if (name == "dpdyFine") {
-    return IntrinsicType::kDpdyFine;
-  } else if (name == "exp") {
-    return IntrinsicType::kExp;
-  } else if (name == "exp2") {
-    return IntrinsicType::kExp2;
-  } else if (name == "faceForward") {
-    return IntrinsicType::kFaceForward;
-  } else if (name == "floor") {
-    return IntrinsicType::kFloor;
-  } else if (name == "fma") {
-    return IntrinsicType::kFma;
-  } else if (name == "fract") {
-    return IntrinsicType::kFract;
-  } else if (name == "frexp") {
-    return IntrinsicType::kFrexp;
-  } else if (name == "fwidth") {
-    return IntrinsicType::kFwidth;
-  } else if (name == "fwidthCoarse") {
-    return IntrinsicType::kFwidthCoarse;
-  } else if (name == "fwidthFine") {
-    return IntrinsicType::kFwidthFine;
-  } else if (name == "inverseSqrt") {
-    return IntrinsicType::kInverseSqrt;
-  } else if (name == "isFinite") {
-    return IntrinsicType::kIsFinite;
-  } else if (name == "isInf") {
-    return IntrinsicType::kIsInf;
-  } else if (name == "isNan") {
-    return IntrinsicType::kIsNan;
-  } else if (name == "isNormal") {
-    return IntrinsicType::kIsNormal;
-  } else if (name == "ldexp") {
-    return IntrinsicType::kLdexp;
-  } else if (name == "length") {
-    return IntrinsicType::kLength;
-  } else if (name == "log") {
-    return IntrinsicType::kLog;
-  } else if (name == "log2") {
-    return IntrinsicType::kLog2;
-  } else if (name == "max") {
-    return IntrinsicType::kMax;
-  } else if (name == "min") {
-    return IntrinsicType::kMin;
-  } else if (name == "mix") {
-    return IntrinsicType::kMix;
-  } else if (name == "modf") {
-    return IntrinsicType::kModf;
-  } else if (name == "normalize") {
-    return IntrinsicType::kNormalize;
-  } else if (name == "pack4x8snorm") {
-    return IntrinsicType::kPack4x8Snorm;
-  } else if (name == "pack4x8unorm") {
-    return IntrinsicType::kPack4x8Unorm;
-  } else if (name == "pack2x16snorm") {
-    return IntrinsicType::kPack2x16Snorm;
-  } else if (name == "pack2x16unorm") {
-    return IntrinsicType::kPack2x16Unorm;
-  } else if (name == "pack2x16float") {
-    return IntrinsicType::kPack2x16Float;
-  } else if (name == "pow") {
-    return IntrinsicType::kPow;
-  } else if (name == "reflect") {
-    return IntrinsicType::kReflect;
-  } else if (name == "reverseBits") {
-    return IntrinsicType::kReverseBits;
-  } else if (name == "round") {
-    return IntrinsicType::kRound;
-  } else if (name == "select") {
-    return IntrinsicType::kSelect;
-  } else if (name == "sign") {
-    return IntrinsicType::kSign;
-  } else if (name == "sin") {
-    return IntrinsicType::kSin;
-  } else if (name == "sinh") {
-    return IntrinsicType::kSinh;
-  } else if (name == "smoothStep") {
-    return IntrinsicType::kSmoothStep;
-  } else if (name == "sqrt") {
-    return IntrinsicType::kSqrt;
-  } else if (name == "step") {
-    return IntrinsicType::kStep;
-  } else if (name == "tan") {
-    return IntrinsicType::kTan;
-  } else if (name == "tanh") {
-    return IntrinsicType::kTanh;
-  } else if (name == "textureDimensions") {
-    return IntrinsicType::kTextureDimensions;
-  } else if (name == "textureNumLayers") {
-    return IntrinsicType::kTextureNumLayers;
-  } else if (name == "textureNumLevels") {
-    return IntrinsicType::kTextureNumLevels;
-  } else if (name == "textureNumSamples") {
-    return IntrinsicType::kTextureNumSamples;
-  } else if (name == "textureLoad") {
-    return IntrinsicType::kTextureLoad;
-  } else if (name == "textureStore") {
-    return IntrinsicType::kTextureStore;
-  } else if (name == "textureSample") {
-    return IntrinsicType::kTextureSample;
-  } else if (name == "textureSampleBias") {
-    return IntrinsicType::kTextureSampleBias;
-  } else if (name == "textureSampleCompare") {
-    return IntrinsicType::kTextureSampleCompare;
-  } else if (name == "textureSampleGrad") {
-    return IntrinsicType::kTextureSampleGrad;
-  } else if (name == "textureSampleLevel") {
-    return IntrinsicType::kTextureSampleLevel;
-  } else if (name == "trunc") {
-    return IntrinsicType::kTrunc;
-  } else if (name == "unpack4x8snorm") {
-    return IntrinsicType::kUnpack4x8Snorm;
-  } else if (name == "unpack4x8unorm") {
-    return IntrinsicType::kUnpack4x8Unorm;
-  } else if (name == "unpack2x16snorm") {
-    return IntrinsicType::kUnpack2x16Snorm;
-  } else if (name == "unpack2x16unorm") {
-    return IntrinsicType::kUnpack2x16Unorm;
-  } else if (name == "unpack2x16float") {
-    return IntrinsicType::kUnpack2x16Float;
-  }
-  return IntrinsicType::kNone;
 }
 
 bool TypeDeterminer::DetermineMemberAccessor(

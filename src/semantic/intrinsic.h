@@ -16,6 +16,7 @@
 #define SRC_SEMANTIC_INTRINSIC_H_
 
 #include <ostream>
+#include <string>
 
 #include "src/semantic/call_target.h"
 
@@ -108,6 +109,12 @@ enum class IntrinsicType {
   kUnpack2x16Unorm,
   kUnpack2x16Float,
 };
+
+/// Matches the IntrisicType by name
+/// @param name the intrinsic name to parse
+/// @returns the parsed IntrinsicType, or IntrinsicType::kNone if `name` did not
+/// match any intrinsic.
+IntrinsicType ParseIntrinsicType(const std::string& name);
 
 /// @returns the name of the intrinsic function type. The spelling, including
 /// case, matches the name in the WGSL spec.
