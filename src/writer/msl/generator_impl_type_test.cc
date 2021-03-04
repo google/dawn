@@ -56,15 +56,6 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias) {
   EXPECT_EQ(gen.result(), "alias");
 }
 
-TEST_F(MslGeneratorImplTest, EmitType_Alias_NameCollision) {
-  auto* alias = ty.alias("bool", ty.f32());
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(alias, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool_tint_0");
-}
-
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
   auto* arr = ty.array<bool, 4>();
 
@@ -107,15 +98,6 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
   EXPECT_EQ(gen.result(), "bool ary[6][5][4]");
 }
 
-TEST_F(MslGeneratorImplTest, EmitType_Array_NameCollision) {
-  auto* arr = ty.array<bool, 4>();
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(arr, "bool")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool bool_tint_0[4]");
-}
-
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
   auto* arr = ty.array<bool, 4>();
 
@@ -132,15 +114,6 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
 
   ASSERT_TRUE(gen.EmitType(arr, "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[1]");
-}
-
-TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray_NameCollision) {
-  auto* arr = ty.array<bool, 1>();
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(arr, "discard_fragment")) << gen.error();
-  EXPECT_EQ(gen.result(), "bool discard_fragment_tint_0[1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
@@ -242,24 +215,6 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
   float b;
   int8_t pad_2[92];
   float c;
-};
-)");
-}
-
-TEST_F(MslGeneratorImplTest, EmitType_Struct_NameCollision) {
-  auto* str =
-      create<ast::Struct>(ast::StructMemberList{Member("main", ty.i32()),
-                                                Member("float", ty.f32())},
-                          ast::StructDecorationList{});
-
-  auto* s = ty.struct_("S", str);
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(struct S {
-  int main_tint_0;
-  float float_tint_0;
 };
 )");
 }

@@ -43,7 +43,6 @@
 #include "src/scope_stack.h"
 #include "src/semantic/intrinsic.h"
 #include "src/type/struct_type.h"
-#include "src/writer/msl/namer.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -253,10 +252,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if an input or output struct is required.
   bool has_referenced_var_needing_struct(ast::Function* func);
 
-  /// Generates a name for the prefix
-  /// @param prefix the prefix of the name to generate
-  /// @returns the name
-  std::string generate_name(const std::string& prefix);
   /// Handles generating a builtin name
   /// @param intrinsic the semantic info for the intrinsic
   /// @returns the name or "" if not valid
@@ -271,9 +266,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error
   std::string builtin_to_attribute(ast::Builtin builtin) const;
-
-  /// @returns the namer for testing purposes
-  Namer* namer_for_testing() { return &namer_; }
 
  private:
   enum class VarType { kIn, kOut };
@@ -291,7 +283,6 @@ class GeneratorImpl : public TextGenerator {
     return program_->TypeOf(expr);
   }
 
-  Namer namer_;
   ScopeStack<const semantic::Variable*> global_variables_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;

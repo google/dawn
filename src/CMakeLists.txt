@@ -367,8 +367,6 @@ if(${TINT_BUILD_MSL_WRITER})
     writer/msl/generator.h
     writer/msl/generator_impl.cc
     writer/msl/generator_impl.h
-    writer/msl/namer.cc
-    writer/msl/namer.h
   )
 endif()
 
@@ -749,7 +747,6 @@ if(${TINT_BUILD_TESTS})
       writer/msl/generator_impl_type_test.cc
       writer/msl/generator_impl_unary_op_test.cc
       writer/msl/generator_impl_variable_decl_statement_test.cc
-      writer/msl/namer_test.cc
       writer/msl/test_helper.h
     )
   endif()

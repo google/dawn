@@ -34,15 +34,6 @@ TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
   EXPECT_EQ(gen.result(), "foo");
 }
 
-TEST_F(MslGeneratorImplTest, EmitIdentifierExpression_Single_WithCollision) {
-  auto* i = Expr("virtual");
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitExpression(i)) << gen.error();
-  EXPECT_EQ(gen.result(), "virtual_tint_0");
-}
-
 }  // namespace
 }  // namespace msl
 }  // namespace writer

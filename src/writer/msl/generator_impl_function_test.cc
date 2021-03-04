@@ -77,28 +77,6 @@ using namespace metal;
 )");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_Function_Name_Collision) {
-  Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(),
-       },
-       ast::FunctionDecorationList{});
-
-  GeneratorImpl& gen = Build();
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
-
-using namespace metal;
-  void main_tint_0() {
-    return;
-  }
-
-)");
-}
-
 TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   ast::VariableList params;
   params.push_back(Var("a", ty.f32(), ast::StorageClass::kNone));
@@ -137,7 +115,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionDecoration_EntryPoint_NoReturn_Void) {
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-fragment void main_tint_0() {
+fragment void main() {
   return;
 }
 
@@ -173,10 +151,10 @@ struct main_out {
   float bar [[color(1)]];
 };
 
-fragment main_out main_tint_0(main_in tint_in [[stage_in]]) {
-  main_out tint_out = {};
-  tint_out.bar = tint_in.foo;
-  return tint_out;
+fragment main_out main(main_in _tint_in [[stage_in]]) {
+  main_out _tint_out = {};
+  _tint_out.bar = _tint_in.foo;
+  return _tint_out;
 }
 
 )");
@@ -211,10 +189,10 @@ struct frag_main_out {
   float bar [[color(1)]];
 };
 
-fragment frag_main_out frag_main(frag_main_in tint_in [[stage_in]]) {
-  frag_main_out tint_out = {};
-  tint_out.bar = tint_in.foo;
-  return tint_out;
+fragment frag_main_out frag_main(frag_main_in _tint_in [[stage_in]]) {
+  frag_main_out _tint_out = {};
+  _tint_out.bar = _tint_in.foo;
+  return _tint_out;
 }
 
 )");
@@ -252,9 +230,9 @@ struct frag_main_out {
 };
 
 fragment frag_main_out frag_main(float4 coord [[position]]) {
-  frag_main_out tint_out = {};
-  tint_out.depth = coord.x;
-  return tint_out;
+  frag_main_out _tint_out = {};
+  _tint_out.depth = coord.x;
+  return _tint_out;
 }
 
 )");
@@ -431,16 +409,16 @@ struct ep_1_out {
   float val [[color(0)]];
 };
 
-float sub_func_ep_1(thread ep_1_in& tint_in, thread ep_1_out& tint_out, float param) {
-  tint_out.bar = tint_in.foo;
-  tint_out.val = param;
-  return tint_in.foo;
+float sub_func_ep_1(thread ep_1_in& _tint_in, thread ep_1_out& _tint_out, float param) {
+  _tint_out.bar = _tint_in.foo;
+  _tint_out.val = param;
+  return _tint_in.foo;
 }
 
-fragment ep_1_out ep_1(ep_1_in tint_in [[stage_in]]) {
-  ep_1_out tint_out = {};
-  tint_out.bar = sub_func_ep_1(tint_in, tint_out, 1.0f);
-  return tint_out;
+fragment ep_1_out ep_1(ep_1_in _tint_in [[stage_in]]) {
+  ep_1_out _tint_out = {};
+  _tint_out.bar = sub_func_ep_1(_tint_in, _tint_out, 1.0f);
+  return _tint_out;
 }
 
 )");
@@ -486,9 +464,9 @@ float sub_func(float param) {
 }
 
 fragment ep_1_out ep_1() {
-  ep_1_out tint_out = {};
-  tint_out.depth = sub_func(1.0f);
-  return tint_out;
+  ep_1_out _tint_out = {};
+  _tint_out.depth = sub_func(1.0f);
+  return _tint_out;
 }
 
 )");
@@ -536,15 +514,15 @@ struct ep_1_out {
   float depth [[depth(any)]];
 };
 
-float sub_func_ep_1(thread ep_1_out& tint_out, thread float4& coord, float param) {
-  tint_out.depth = coord.x;
+float sub_func_ep_1(thread ep_1_out& _tint_out, thread float4& coord, float param) {
+  _tint_out.depth = coord.x;
   return param;
 }
 
 fragment ep_1_out ep_1(float4 coord [[position]]) {
-  ep_1_out tint_out = {};
-  tint_out.depth = sub_func_ep_1(tint_out, coord, 1.0f);
-  return tint_out;
+  ep_1_out _tint_out = {};
+  _tint_out.depth = sub_func_ep_1(_tint_out, coord, 1.0f);
+  return _tint_out;
 }
 
 )");
@@ -750,32 +728,12 @@ struct ep_1_out {
 };
 
 fragment ep_1_out ep_1() {
-  ep_1_out tint_out = {};
-  tint_out.bar = 1.0f;
+  ep_1_out _tint_out = {};
+  _tint_out.bar = 1.0f;
   if ((1 == 1)) {
-    return tint_out;
+    return _tint_out;
   }
-  return tint_out;
-}
-
-)");
-}
-
-TEST_F(MslGeneratorImplTest,
-       Emit_FunctionDecoration_EntryPoint_WithNameCollision) {
-  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::FunctionDecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-       });
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
-
-using namespace metal;
-kernel void main_tint_0() {
-  return;
+  return _tint_out;
 }
 
 )");

@@ -82,8 +82,8 @@ namespace {
 
 const char kInStructNameSuffix[] = "in";
 const char kOutStructNameSuffix[] = "out";
-const char kTintStructInVarPrefix[] = "tint_in";
-const char kTintStructOutVarPrefix[] = "tint_out";
+const char kTintStructInVarPrefix[] = "_tint_in";
+const char kTintStructOutVarPrefix[] = "_tint_out";
 
 bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
   if (stmts->empty()) {
@@ -108,17 +108,6 @@ GeneratorImpl::GeneratorImpl(const Program* program)
     : TextGenerator(), program_(program) {}
 
 GeneratorImpl::~GeneratorImpl() = default;
-
-std::string GeneratorImpl::generate_name(const std::string& prefix) {
-  std::string name = prefix;
-  uint32_t i = 0;
-  while (namer_.IsMapped(name)) {
-    name = prefix + "_" + std::to_string(i);
-    ++i;
-  }
-  namer_.RegisterRemappedName(name);
-  return name;
-}
 
 bool GeneratorImpl::Generate() {
   out_ << "#include <metal_stdlib>" << std::endl << std::endl;
@@ -268,8 +257,8 @@ bool GeneratorImpl::EmitConstructedType(const type::Type* ty) {
     if (!EmitType(alias->type(), "")) {
       return false;
     }
-    out_ << " " << namer_.NameFor(program_->Symbols().NameFor(alias->symbol()))
-         << ";" << std::endl;
+    out_ << " " << program_->Symbols().NameFor(alias->symbol()) << ";"
+         << std::endl;
   } else if (auto* str = ty->As<type::Struct>()) {
     if (!EmitStructType(str)) {
       return false;
@@ -1102,9 +1091,8 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
 
   if (!in_locations.empty()) {
     auto in_struct_name =
-        generate_name(program_->Symbols().NameFor(func->symbol()) + "_" +
-                      kInStructNameSuffix);
-    auto in_var_name = generate_name(kTintStructInVarPrefix);
+        program_->Symbols().NameFor(func->symbol()) + "_" + kInStructNameSuffix;
+    auto* in_var_name = kTintStructInVarPrefix;
     ep_sym_to_in_data_[func->symbol()] = {in_struct_name, in_var_name};
 
     make_indent();
@@ -1139,10 +1127,9 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
   }
 
   if (!out_variables.empty()) {
-    auto out_struct_name =
-        generate_name(program_->Symbols().NameFor(func->symbol()) + "_" +
-                      kOutStructNameSuffix);
-    auto out_var_name = generate_name(kTintStructOutVarPrefix);
+    auto out_struct_name = program_->Symbols().NameFor(func->symbol()) + "_" +
+                           kOutStructNameSuffix;
+    auto* out_var_name = kTintStructOutVarPrefix;
     ep_sym_to_out_data_[func->symbol()] = {out_struct_name, out_var_name};
 
     make_indent();
@@ -1323,14 +1310,11 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
   if (emit_duplicate_functions) {
     auto func_name = name;
     auto ep_name = ep_sym.to_str();
-    // TODO(dsinclair): The SymbolToName should go away and just use
-    // to_str() here when the conversion is complete.
-    name = generate_name(program_->Symbols().NameFor(func->symbol()) + "_" +
-                         program_->Symbols().NameFor(ep_sym));
+    name = program_->Symbols().NameFor(func->symbol()) + "_" +
+           program_->Symbols().NameFor(ep_sym);
     ep_func_name_remapped_[ep_name + "_" + func_name] = name;
   } else {
-    // TODO(dsinclair): this should be updated to a remapped name
-    name = namer_.NameFor(program_->Symbols().NameFor(func->symbol()));
+    name = program_->Symbols().NameFor(func->symbol());
   }
   out_ << name << "(";
 
@@ -1494,8 +1478,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   } else {
     out_ << "void";
   }
-  out_ << " " << namer_.NameFor(program_->Symbols().NameFor(func->symbol()))
-       << "(";
+  out_ << " " << program_->Symbols().NameFor(func->symbol()) << "(";
 
   bool first = true;
   auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
@@ -1653,7 +1636,7 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
     }
   }
 
-  out_ << namer_.NameFor(program_->Symbols().NameFor(ident->symbol()));
+  out_ << program_->Symbols().NameFor(ident->symbol());
 
   return true;
 }
@@ -1661,8 +1644,8 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
 bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
   loop_emission_counter_++;
 
-  std::string guard = namer_.NameFor("tint_msl_is_first_" +
-                                     std::to_string(loop_emission_counter_));
+  std::string guard =
+      "tint_msl_is_first_" + std::to_string(loop_emission_counter_);
 
   if (stmt->has_continuing()) {
     make_indent();
@@ -1951,7 +1934,7 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
   }
 
   if (auto* alias = type->As<type::Alias>()) {
-    out_ << namer_.NameFor(program_->Symbols().NameFor(alias->symbol()));
+    out_ << program_->Symbols().NameFor(alias->symbol());
   } else if (auto* ary = type->As<type::Array>()) {
     type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
@@ -1967,7 +1950,7 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
       return false;
     }
     if (!name.empty()) {
-      out_ << " " << namer_.NameFor(name);
+      out_ << " " << name;
     }
     for (uint32_t size : sizes) {
       out_ << "[" << size << "]";
@@ -2111,7 +2094,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
 
     // Array member name will be output with the type
     if (!mem->type()->Is<type::Array>()) {
-      out_ << " " << namer_.NameFor(program_->Symbols().NameFor(mem->symbol()));
+      out_ << " " << program_->Symbols().NameFor(mem->symbol());
     }
     out_ << ";" << std::endl;
   }
