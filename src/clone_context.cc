@@ -28,6 +28,9 @@ CloneContext::CloneContext(ProgramBuilder* to, Program const* from)
 CloneContext::~CloneContext() = default;
 
 Symbol CloneContext::Clone(const Symbol& s) const {
+  if (symbol_transform_) {
+    return symbol_transform_(s);
+  }
   return dst->Symbols().Register(src->Symbols().NameFor(s));
 }
 
@@ -47,5 +50,10 @@ ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
 diag::List& CloneContext::Diagnostics() const {
   return dst->Diagnostics();
 }
+
+CloneContext::CloneableTransform::CloneableTransform() = default;
+CloneContext::CloneableTransform::CloneableTransform(
+    const CloneableTransform&) = default;
+CloneContext::CloneableTransform::~CloneableTransform() = default;
 
 }  // namespace tint

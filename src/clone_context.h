@@ -18,6 +18,7 @@
 #include <cassert>
 #include <functional>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "src/castable.h"
@@ -48,7 +49,18 @@ class Cloneable : public Castable<Cloneable> {
 
 /// CloneContext holds the state used while cloning AST nodes and types.
 class CloneContext {
+  /// ParamTypeIsPtrOf<F, T>::value is true iff the first parameter of
+  /// F is a pointer of (or derives from) type T.
+  template <typename F, typename T>
+  using ParamTypeIsPtrOf = traits::IsTypeOrDerived<
+      typename std::remove_pointer<traits::ParamTypeT<F, 0>>::type,
+      T>;
+
  public:
+  /// SymbolTransform is a function that takes a symbol and returns a new
+  /// symbol.
+  using SymbolTransform = std::function<Symbol(Symbol)>;
+
   /// Constructor
   /// @param to the target ProgramBuilder to clone into
   /// @param from the source Program to clone from
@@ -199,10 +211,8 @@ class CloneContext {
   /// `replacer` must be function-like with the signature: `T* (T*)`
   ///  where `T` is a type deriving from Cloneable.
   ///
-  /// If `replacer` returns a nullptr then Clone() will attempt the next
-  /// registered replacer function that matches the object type. If no replacers
-  /// match the object type, or all returned nullptr then Clone() will call
-  /// `T::Clone()` to clone the object.
+  /// If `replacer` returns a nullptr then Clone() will call `T::Clone()` to
+  /// clone the object.
   ///
   /// Example:
   ///
@@ -218,6 +228,9 @@ class CloneContext {
   ///   ctx.Clone();
   /// ```
   ///
+  /// @warning a single handler can only be registered for any given type.
+  /// Attempting to register two handlers for the same type will result in an
+  /// ICE.
   /// @warning The replacement object must be of the correct type for all
   /// references of the original object. A type mismatch will result in an
   /// assertion in debug builds, and undefined behavior in release builds.
@@ -225,13 +238,44 @@ class CloneContext {
   ///        `T* (T*)`, where `T` derives from Cloneable
   /// @returns this CloneContext so calls can be chained
   template <typename F>
-  CloneContext& ReplaceAll(F&& replacer) {
+  traits::EnableIf<ParamTypeIsPtrOf<F, Cloneable>::value, CloneContext>&
+  ReplaceAll(F&& replacer) {
     using TPtr = traits::ParamTypeT<F, 0>;
     using T = typename std::remove_pointer<TPtr>::type;
-    transforms_.emplace_back([=](Cloneable* in) {
-      auto* in_as_t = in->As<T>();
-      return in_as_t != nullptr ? replacer(in_as_t) : nullptr;
-    });
+    for (auto& transform : transforms_) {
+      if (transform.typeinfo->Is(TypeInfo::Of<T>()) ||
+          TypeInfo::Of<T>().Is(*transform.typeinfo)) {
+        TINT_ICE(Diagnostics())
+            << "ReplaceAll() called with a handler for type "
+            << TypeInfo::Of<T>().name
+            << " that is already handled by a handler for type "
+            << transform.typeinfo->name;
+        return *this;
+      }
+    }
+    CloneableTransform transform;
+    transform.typeinfo = &TypeInfo::Of<T>();
+    transform.function = [=](Cloneable* in) { return replacer(in->As<T>()); };
+    transforms_.emplace_back(std::move(transform));
+    return *this;
+  }
+
+  /// ReplaceAll() registers `replacer` to be called whenever the Clone() method
+  /// is called with a Symbol.
+  /// The returned symbol of `replacer` will be used as the replacement for
+  /// all references to the symbol that's being cloned. This returned Symbol
+  /// must be owned by the Program #dst.
+  /// @param replacer a function the signature `Symbol(Symbol)`.
+  /// @warning a SymbolTransform can only be registered once. Attempting to
+  /// register a SymbolTransform more than once will result in an ICE.
+  /// @returns this CloneContext so calls can be chained
+  CloneContext& ReplaceAll(const SymbolTransform& replacer) {
+    if (symbol_transform_) {
+      TINT_ICE(Diagnostics()) << "ReplaceAll(const SymbolTransform&) called "
+                                 "multiple times on the same CloneContext";
+      return *this;
+    }
+    symbol_transform_ = replacer;
     return *this;
   }
 
@@ -276,7 +320,19 @@ class CloneContext {
   Program const* const src;
 
  private:
-  using Transform = std::function<Cloneable*(Cloneable*)>;
+  struct CloneableTransform {
+    /// Constructor
+    CloneableTransform();
+    /// Copy constructor
+    /// @param other the CloneableTransform to copy
+    CloneableTransform(const CloneableTransform& other);
+    /// Destructor
+    ~CloneableTransform();
+
+    // TypeInfo of the Cloneable that the transform operates on
+    const TypeInfo* typeinfo;
+    std::function<Cloneable*(Cloneable*)> function;
+  };
 
   CloneContext(const CloneContext&) = delete;
   CloneContext& operator=(const CloneContext&) = delete;
@@ -293,11 +349,16 @@ class CloneContext {
     }
 
     // Attempt to clone using the registered replacer functions.
-    for (auto& f : transforms_) {
-      if (Cloneable* c = f(a)) {
+    auto& typeinfo = a->TypeInfo();
+    for (auto& transform : transforms_) {
+      if (!typeinfo.Is(*transform.typeinfo)) {
+        continue;
+      }
+      if (Cloneable* c = transform.function(a)) {
         cloned_.emplace(a, c);
         return c;
       }
+      break;
     }
 
     // No luck, Clone() will have to call T::Clone().
@@ -329,8 +390,11 @@ class CloneContext {
   /// into the target vector/ before cloning and inserting the map-key.
   std::unordered_map<Cloneable*, CloneableList> insert_before_;
 
-  /// Transform functions registered with ReplaceAll()
-  std::vector<Transform> transforms_;
+  /// Cloneable transform functions registered with ReplaceAll()
+  std::vector<CloneableTransform> transforms_;
+
+  /// Symbol transform registered with ReplaceAll()
+  SymbolTransform symbol_transform_;
 };
 
 }  // namespace tint
