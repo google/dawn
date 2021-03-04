@@ -32,7 +32,7 @@ deps = {
         'version': 'M56jPzDv1620Rnm__jTMYS62Zi8rxHVq7yw0qeBFEgkC',
       }
     ],
-    'condition': 'checkout_mac or checkout_ios',
+    'condition': 'dawn_standalone and (checkout_mac or checkout_ios)',
     'dep_type': 'cipd',
   },
 
@@ -110,14 +110,14 @@ hooks = [
   {
     'name': 'sysroot_x86',
     'pattern': '.',
-    'condition': 'checkout_linux and ((checkout_x86 or checkout_x64) and dawn_standalone)',
+    'condition': 'dawn_standalone and checkout_linux and (checkout_x86 or checkout_x64)',
     'action': ['python', 'build/linux/sysroot_scripts/install-sysroot.py',
                '--arch=x86'],
   },
   {
     'name': 'sysroot_x64',
     'pattern': '.',
-    'condition': 'checkout_linux and (checkout_x64 and dawn_standalone)',
+    'condition': 'dawn_standalone and checkout_linux and checkout_x64',
     'action': ['python', 'build/linux/sysroot_scripts/install-sysroot.py',
                '--arch=x64'],
   },
@@ -126,14 +126,14 @@ hooks = [
     # is more consistent (only changes when rolling build/) and is cached.
     'name': 'mac_toolchain',
     'pattern': '.',
-    'condition': 'checkout_mac',
+    'condition': 'dawn_standalone and checkout_mac',
     'action': ['python', 'build/mac_toolchain.py'],
   },
   {
     # Update the Windows toolchain if necessary. Must run before 'clang' below.
     'name': 'win_toolchain',
     'pattern': '.',
-    'condition': 'checkout_win and dawn_standalone',
+    'condition': 'dawn_standalone and checkout_win',
     'action': ['python', 'build/vs_toolchain.py', 'update', '--force'],
   },
   {
@@ -147,7 +147,7 @@ hooks = [
     # Pull rc binaries using checked-in hashes.
     'name': 'rc_win',
     'pattern': '.',
-    'condition': 'checkout_win and (host_os == "win" and dawn_standalone)',
+    'condition': 'dawn_standalone and checkout_win and host_os == "win"',
     'action': [ 'download_from_google_storage',
                 '--no_resume',
                 '--no_auth',
@@ -159,7 +159,7 @@ hooks = [
   {
     'name': 'clang_format_win',
     'pattern': '.',
-    'condition': 'host_os == "win"',
+    'condition': 'dawn_standalone and host_os == "win"',
     'action': [ 'download_from_google_storage',
                 '--no_resume',
                 '--no_auth',
@@ -170,7 +170,7 @@ hooks = [
   {
     'name': 'clang_format_mac',
     'pattern': '.',
-    'condition': 'host_os == "mac"',
+    'condition': 'dawn_standalone and host_os == "mac"',
     'action': [ 'download_from_google_storage',
                 '--no_resume',
                 '--no_auth',
@@ -181,7 +181,7 @@ hooks = [
   {
     'name': 'clang_format_linux',
     'pattern': '.',
-    'condition': 'host_os == "linux"',
+    'condition': 'dawn_standalone and host_os == "linux"',
     'action': [ 'download_from_google_storage',
                 '--no_resume',
                 '--no_auth',
