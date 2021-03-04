@@ -14,6 +14,8 @@
 
 #include "src/demangler.h"
 
+#include <sstream>
+
 #include "src/ast/module.h"
 #include "src/program.h"
 
@@ -31,31 +33,33 @@ Demangler::~Demangler() = default;
 
 std::string Demangler::Demangle(const SymbolTable& symbols,
                                 const std::string& str) const {
-  auto ret = str;
+  std::stringstream out;
 
   size_t pos = 0;
   for (;;) {
-    auto idx = ret.find(kSymbol, pos);
-    if (idx == std::string::npos)
+    auto idx = str.find(kSymbol, pos);
+    if (idx == std::string::npos) {
+      out << str.substr(pos);
       break;
+    }
+
+    out << str.substr(pos, idx - pos);
 
     auto start_idx = idx + kSymbolLen;
     auto end_idx = start_idx;
-    while (ret[end_idx] >= '0' && ret[end_idx] <= '9') {
+    while (str[end_idx] >= '0' && str[end_idx] <= '9') {
       end_idx++;
     }
     auto len = end_idx - start_idx;
 
-    auto id = ret.substr(start_idx, len);
-
+    auto id = str.substr(start_idx, len);
     Symbol sym(std::stoi(id));
-    auto name = symbols.NameFor(sym);
-    ret.replace(idx, end_idx - idx, name);
+    out << symbols.NameFor(sym);
 
-    pos = idx + name.length();
+    pos = end_idx;
   }
 
-  return ret;
+  return out.str();
 }
 
 }  // namespace tint
