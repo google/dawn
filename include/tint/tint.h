@@ -22,7 +22,6 @@
 #include "src/demangler.h"
 #include "src/diagnostic/printer.h"
 #include "src/inspector/inspector.h"
-#include "src/namer.h"
 #include "src/reader/reader.h"
 #include "src/transform/bound_array_accessors.h"
 #include "src/transform/emit_vertex_point_size.h"

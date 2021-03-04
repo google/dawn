@@ -185,8 +185,6 @@ set(TINT_LIB_SRCS
   inspector/inspector.h
   inspector/scalar.cc
   inspector/scalar.h
-  namer.cc
-  namer.h
   program_builder.cc
   program_builder.h
   program.cc
@@ -473,7 +471,6 @@ if(${TINT_BUILD_TESTS})
     diagnostic/printer_test.cc
     inspector/inspector_test.cc
     intrinsic_table_test.cc
-    namer_test.cc
     program_test.cc
     scope_stack_test.cc
     symbol_table_test.cc
