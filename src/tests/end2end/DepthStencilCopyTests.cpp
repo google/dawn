@@ -173,8 +173,10 @@ class DepthStencilCopyTests : public DawnTest {
         // Perform a T2T copy of all aspects
         {
             wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-            wgpu::TextureCopyView srcView = utils::CreateTextureCopyView(src, mipLevel, {0, 0, 0});
-            wgpu::TextureCopyView dstView = utils::CreateTextureCopyView(dst, mipLevel, {0, 0, 0});
+            wgpu::ImageCopyTexture srcView =
+                utils::CreateImageCopyTexture(src, mipLevel, {0, 0, 0});
+            wgpu::ImageCopyTexture dstView =
+                utils::CreateImageCopyTexture(dst, mipLevel, {0, 0, 0});
             wgpu::Extent3D copySize = {width >> mipLevel, height >> mipLevel, 1};
             commandEncoder.CopyTextureToTexture(&srcView, &dstView, &copySize);
 
@@ -229,10 +231,10 @@ class DepthStencilCopyTests : public DawnTest {
         }
         uploadBuffer.Unmap();
 
-        wgpu::BufferCopyView bufferCopy =
-            utils::CreateBufferCopyView(uploadBuffer, 0, bytesPerRow, height);
-        wgpu::TextureCopyView textureCopy =
-            utils::CreateTextureCopyView(depthDataTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
+        wgpu::ImageCopyBuffer bufferCopy =
+            utils::CreateImageCopyBuffer(uploadBuffer, 0, bytesPerRow, height);
+        wgpu::ImageCopyTexture textureCopy =
+            utils::CreateImageCopyTexture(depthDataTexture, 0, {0, 0, 0}, wgpu::TextureAspect::All);
         commandEncoder.CopyBufferToTexture(&bufferCopy, &textureCopy, &depthDataDesc.size);
 
         // Pipeline for a full screen quad.
@@ -636,11 +638,11 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
     wgpu::TextureDataLayout stencilDataLayout = {};
     stencilDataLayout.bytesPerRow = kWidth * sizeof(uint8_t);
 
-    wgpu::TextureCopyView stencilDataCopyView = utils::CreateTextureCopyView(
+    wgpu::ImageCopyTexture stencilDataCopyTexture = utils::CreateImageCopyTexture(
         depthStencilTexture, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
 
     wgpu::Extent3D writeSize = {kWidth, kHeight, 1};
-    queue.WriteTexture(&stencilDataCopyView, stencilData.data(),
+    queue.WriteTexture(&stencilDataCopyTexture, stencilData.data(),
                        stencilData.size() * sizeof(uint8_t), &stencilDataLayout, &writeSize);
 
     // Decrement the stencil value in a render pass to ensure the data is visible to the pipeline.

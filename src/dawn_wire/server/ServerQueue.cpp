@@ -97,7 +97,7 @@ namespace dawn_wire { namespace server {
     }
 
     bool Server::DoQueueWriteTextureInternal(ObjectId queueId,
-                                             const WGPUTextureCopyView* destination,
+                                             const WGPUImageCopyTexture* destination,
                                              const uint8_t* data,
                                              uint64_t dataSize,
                                              const WGPUTextureDataLayout* dataLayout,

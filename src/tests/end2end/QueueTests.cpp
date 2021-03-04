@@ -277,10 +277,10 @@ class QueueWriteTextureTests : public DawnTest {
         wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(
             dataSpec.offset, dataSpec.bytesPerRow, dataSpec.rowsPerImage);
 
-        wgpu::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(texture, textureSpec.level, textureSpec.copyOrigin);
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, textureSpec.level, textureSpec.copyOrigin);
 
-        queue.WriteTexture(&textureCopyView, data.data(), dataSpec.size, &textureDataLayout,
+        queue.WriteTexture(&imageCopyTexture, data.data(), dataSpec.size, &textureDataLayout,
                            &copySize);
 
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(kTextureFormat);

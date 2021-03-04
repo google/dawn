@@ -126,19 +126,19 @@ class BufferZeroInitTest : public DawnTest {
         wgpu::Texture texture =
             CreateAndInitializeTexture(spec.textureSize, kTextureFormat, kClearColor);
 
-        const wgpu::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
+        const wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
 
         const uint64_t bufferSize = spec.bufferOffset + spec.extraBytes +
                                     utils::RequiredBytesInCopy(spec.bytesPerRow, spec.rowsPerImage,
                                                                spec.textureSize, kTextureFormat);
         wgpu::Buffer buffer =
             CreateBuffer(bufferSize, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst);
-        const wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(
+        const wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
             buffer, spec.bufferOffset, spec.bytesPerRow, spec.rowsPerImage);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &spec.textureSize);
+        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &spec.textureSize);
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         EXPECT_LAZY_CLEAR(spec.lazyClearCount, queue.Submit(1, &commandBuffer));
 
@@ -871,8 +871,8 @@ TEST_P(BufferZeroInitTest, CopyBufferToTexture) {
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
 
     wgpu::Texture texture = CreateAndInitializeTexture(kTextureSize, kTextureFormat);
-    const wgpu::TextureCopyView textureCopyView =
-        utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
+    const wgpu::ImageCopyTexture imageCopyTexture =
+        utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
 
     const uint32_t rowsPerImage = kTextureSize.height;
     const uint32_t requiredBufferSizeForCopy = utils::RequiredBytesInCopy(
@@ -886,11 +886,11 @@ TEST_P(BufferZeroInitTest, CopyBufferToTexture) {
         constexpr uint64_t kOffset = 0;
         const uint32_t totalBufferSize = requiredBufferSizeForCopy + kOffset;
         wgpu::Buffer buffer = CreateBuffer(totalBufferSize, kBufferUsage);
-        const wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(
+        const wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
             buffer, kOffset, kTextureBytesPerRowAlignment, kTextureSize.height);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &kTextureSize);
+        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &kTextureSize);
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 
@@ -904,11 +904,11 @@ TEST_P(BufferZeroInitTest, CopyBufferToTexture) {
         constexpr uint64_t kOffset = 8u;
         const uint32_t totalBufferSize = requiredBufferSizeForCopy + kOffset;
         wgpu::Buffer buffer = CreateBuffer(totalBufferSize, kBufferUsage);
-        const wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(
+        const wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
             buffer, kOffset, kTextureBytesPerRowAlignment, kTextureSize.height);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &kTextureSize);
+        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &kTextureSize);
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         EXPECT_LAZY_CLEAR(1u, queue.Submit(1, &commandBuffer));
 

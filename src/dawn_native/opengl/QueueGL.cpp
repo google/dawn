@@ -52,7 +52,7 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
-    MaybeError Queue::WriteTextureImpl(const TextureCopyView& destination,
+    MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
                                        const void* data,
                                        const TextureDataLayout& dataLayout,
                                        const Extent3D& writeSizePixel) {

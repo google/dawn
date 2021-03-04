@@ -96,10 +96,10 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
 
         // Copy into the layer of the material array.
         {
-            wgpu::TextureCopyView sourceView;
+            wgpu::ImageCopyTexture sourceView;
             sourceView.texture = mUploadTexture;
 
-            wgpu::TextureCopyView destView;
+            wgpu::ImageCopyTexture destView;
             destView.texture = mMaterials;
             destView.origin.z = layerUploaded;
 

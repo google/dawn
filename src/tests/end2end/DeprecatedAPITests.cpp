@@ -180,16 +180,16 @@ DAWN_INSTANTIATE_TEST(DeprecationTests,
                       OpenGLESBackend(),
                       VulkanBackend());
 
-class BufferCopyViewDeprecationTests : public DeprecationTests {
+class ImageCopyBufferDeprecationTests : public DeprecationTests {
   protected:
-    wgpu::TextureCopyView MakeTextureCopyView() {
+    wgpu::ImageCopyTexture MakeImageCopyTexture() {
         wgpu::TextureDescriptor desc = {};
         desc.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
         desc.dimension = wgpu::TextureDimension::e2D;
         desc.size = {1, 1, 2};
         desc.format = wgpu::TextureFormat::RGBA8Unorm;
 
-        wgpu::TextureCopyView copy;
+        wgpu::ImageCopyTexture copy;
         copy.texture = device.CreateTexture(&desc);
         copy.origin = {0, 0, 1};
         return copy;

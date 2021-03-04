@@ -319,11 +319,11 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
                              {{0, buffer, 0, sizeof(transform)}, {1, sampler}, {2, textureView}});
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    wgpu::BufferCopyView bufferCopyView =
-        utils::CreateBufferCopyView(stagingBuffer, 0, widthInBytes);
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
+    wgpu::ImageCopyBuffer imageCopyBuffer =
+        utils::CreateImageCopyBuffer(stagingBuffer, 0, widthInBytes);
+    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
     wgpu::Extent3D copySize = {width, height, 1};
-    encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+    encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
     pass.SetPipeline(pipeline);
     pass.SetBindGroup(0, bindGroup);
@@ -1181,16 +1181,16 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         wgpu::Buffer textureData =
             utils::CreateBufferFromData(device, wgpu::BufferUsage::CopySrc, {value});
 
-        wgpu::BufferCopyView bufferCopyView = {};
-        bufferCopyView.buffer = textureData;
-        bufferCopyView.layout.bytesPerRow = 256;
+        wgpu::ImageCopyBuffer imageCopyBuffer = {};
+        imageCopyBuffer.buffer = textureData;
+        imageCopyBuffer.layout.bytesPerRow = 256;
 
-        wgpu::TextureCopyView textureCopyView = {};
-        textureCopyView.texture = texture;
+        wgpu::ImageCopyTexture imageCopyTexture = {};
+        imageCopyTexture.texture = texture;
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
-        commandEncoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+        commandEncoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
         return texture;
     };
 

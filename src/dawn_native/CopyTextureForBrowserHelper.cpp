@@ -170,15 +170,15 @@ namespace dawn_native {
     }  // anonymous namespace
 
     MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
-                                             const TextureCopyView* source,
-                                             const TextureCopyView* destination,
+                                             const ImageCopyTexture* source,
+                                             const ImageCopyTexture* destination,
                                              const Extent3D* copySize,
                                              const CopyTextureForBrowserOptions* options) {
         DAWN_TRY(device->ValidateObject(source->texture));
         DAWN_TRY(device->ValidateObject(destination->texture));
 
-        DAWN_TRY(ValidateTextureCopyView(device, *source, *copySize));
-        DAWN_TRY(ValidateTextureCopyView(device, *destination, *copySize));
+        DAWN_TRY(ValidateImageCopyTexture(device, *source, *copySize));
+        DAWN_TRY(ValidateImageCopyTexture(device, *destination, *copySize));
 
         DAWN_TRY(ValidateTextureToTextureCopyRestrictions(*source, *destination, *copySize));
 
@@ -208,8 +208,8 @@ namespace dawn_native {
     }
 
     MaybeError DoCopyTextureForBrowser(DeviceBase* device,
-                                       const TextureCopyView* source,
-                                       const TextureCopyView* destination,
+                                       const ImageCopyTexture* source,
+                                       const ImageCopyTexture* destination,
                                        const Extent3D* copySize,
                                        const CopyTextureForBrowserOptions* options) {
         // TODO(shaobo.yan@intel.com): In D3D12 and Vulkan, compatible texture format can directly

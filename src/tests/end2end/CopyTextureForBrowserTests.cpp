@@ -145,29 +145,29 @@ class CopyTextureForBrowserTests : public DawnTest {
                 srcSpec.level);
 
         const std::vector<RGBA8> textureArrayCopyData = GetSourceTextureData(copyLayout);
-        wgpu::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(srcTexture, srcSpec.level, {0, 0, srcSpec.copyOrigin.z});
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(srcTexture, srcSpec.level, {0, 0, srcSpec.copyOrigin.z});
 
         wgpu::TextureDataLayout textureDataLayout;
         textureDataLayout.offset = 0;
         textureDataLayout.bytesPerRow = copyLayout.bytesPerRow;
         textureDataLayout.rowsPerImage = copyLayout.rowsPerImage;
 
-        device.GetQueue().WriteTexture(&textureCopyView, textureArrayCopyData.data(),
+        device.GetQueue().WriteTexture(&imageCopyTexture, textureArrayCopyData.data(),
                                        textureArrayCopyData.size() * sizeof(RGBA8),
                                        &textureDataLayout, &copyLayout.mipSize);
 
         // Perform the texture to texture copy
-        wgpu::TextureCopyView srcTextureCopyView =
-            utils::CreateTextureCopyView(srcTexture, srcSpec.level, srcSpec.copyOrigin);
-        wgpu::TextureCopyView dstTextureCopyView =
-            utils::CreateTextureCopyView(dstTexture, dstSpec.level, dstSpec.copyOrigin);
+        wgpu::ImageCopyTexture srcImageCopyTexture =
+            utils::CreateImageCopyTexture(srcTexture, srcSpec.level, srcSpec.copyOrigin);
+        wgpu::ImageCopyTexture dstImageCopyTexture =
+            utils::CreateImageCopyTexture(dstTexture, dstSpec.level, dstSpec.copyOrigin);
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        device.GetQueue().CopyTextureForBrowser(&srcTextureCopyView, &dstTextureCopyView, &copySize,
-                                                &options);
+        device.GetQueue().CopyTextureForBrowser(&srcImageCopyTexture, &dstImageCopyTexture,
+                                                &copySize, &options);
 
         // Update uniform buffer based on test config
         uint32_t uniformBufferData[] = {

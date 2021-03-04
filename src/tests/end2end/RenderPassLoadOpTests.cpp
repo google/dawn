@@ -126,10 +126,11 @@ class RenderPassLoadOpTests : public DawnTest {
         bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
         wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-        wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
-        wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(buffer, 0, kTextureBytesPerRowAlignment);
-        encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &kTextureSize);
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+        wgpu::ImageCopyBuffer imageCopyBuffer =
+            utils::CreateImageCopyBuffer(buffer, 0, kTextureBytesPerRowAlignment);
+        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &kTextureSize);
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);

@@ -265,11 +265,11 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateBufferCopyView(DeviceBase const* device,
-                                      const BufferCopyView& bufferCopyView) {
-        DAWN_TRY(device->ValidateObject(bufferCopyView.buffer));
-        if (bufferCopyView.layout.bytesPerRow != wgpu::kCopyStrideUndefined) {
-            if (bufferCopyView.layout.bytesPerRow % kTextureBytesPerRowAlignment != 0) {
+    MaybeError ValidateImageCopyBuffer(DeviceBase const* device,
+                                       const ImageCopyBuffer& imageCopyBuffer) {
+        DAWN_TRY(device->ValidateObject(imageCopyBuffer.buffer));
+        if (imageCopyBuffer.layout.bytesPerRow != wgpu::kCopyStrideUndefined) {
+            if (imageCopyBuffer.layout.bytesPerRow % kTextureBytesPerRowAlignment != 0) {
                 return DAWN_VALIDATION_ERROR("bytesPerRow must be a multiple of 256");
             }
         }
@@ -277,9 +277,9 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateTextureCopyView(DeviceBase const* device,
-                                       const TextureCopyView& textureCopy,
-                                       const Extent3D& copySize) {
+    MaybeError ValidateImageCopyTexture(DeviceBase const* device,
+                                        const ImageCopyTexture& textureCopy,
+                                        const Extent3D& copySize) {
         const TextureBase* texture = textureCopy.texture;
         DAWN_TRY(device->ValidateObject(texture));
         if (textureCopy.mipLevel >= texture->GetNumMipLevels()) {
@@ -305,7 +305,7 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateTextureCopyRange(const TextureCopyView& textureCopy,
+    MaybeError ValidateTextureCopyRange(const ImageCopyTexture& textureCopy,
                                         const Extent3D& copySize) {
         // TODO(jiawei.shao@intel.com): add validations on the texture-to-texture copies within the
         // same texture.
@@ -357,7 +357,7 @@ namespace dawn_native {
 
     // Always returns a single aspect (color, stencil, depth, or ith plane for multi-planar
     // formats).
-    ResultOrError<Aspect> SingleAspectUsedByTextureCopyView(const TextureCopyView& view) {
+    ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture& view) {
         const Format& format = view.texture->GetFormat();
         switch (view.aspect) {
             case wgpu::TextureAspect::All:
@@ -382,9 +382,9 @@ namespace dawn_native {
         }
     }
 
-    MaybeError ValidateLinearToDepthStencilCopyRestrictions(const TextureCopyView& dst) {
+    MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& dst) {
         Aspect aspectUsed;
-        DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByTextureCopyView(dst));
+        DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByImageCopyTexture(dst));
         if (aspectUsed == Aspect::Depth) {
             return DAWN_VALIDATION_ERROR("Cannot copy into the depth aspect of a texture");
         }
@@ -392,8 +392,8 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateTextureToTextureCopyRestrictions(const TextureCopyView& src,
-                                                        const TextureCopyView& dst,
+    MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
+                                                        const ImageCopyTexture& dst,
                                                         const Extent3D& copySize) {
         const uint32_t srcSamples = src.texture->GetSampleCount();
         const uint32_t dstSamples = dst.texture->GetSampleCount();

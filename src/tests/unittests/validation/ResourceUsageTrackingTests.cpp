@@ -1286,8 +1286,8 @@ namespace {
         wgpu::TextureView view0 = texture0.CreateView();
         wgpu::TextureView view1 = texture1.CreateView();
 
-        wgpu::TextureCopyView srcView = utils::CreateTextureCopyView(texture0, 0, {0, 0, 0});
-        wgpu::TextureCopyView dstView = utils::CreateTextureCopyView(texture1, 0, {0, 0, 0});
+        wgpu::ImageCopyTexture srcView = utils::CreateImageCopyTexture(texture0, 0, {0, 0, 0});
+        wgpu::ImageCopyTexture dstView = utils::CreateImageCopyTexture(texture1, 0, {0, 0, 0});
         wgpu::Extent3D copySize = {1, 1, 1};
 
         // Use the texture as both copy dst and render attachment in render pass

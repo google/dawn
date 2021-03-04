@@ -77,9 +77,10 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateTextureDepthStencilToBufferCopyRestrictions(const TextureCopyView& src) {
+        MaybeError ValidateTextureDepthStencilToBufferCopyRestrictions(
+            const ImageCopyTexture& src) {
             Aspect aspectUsed;
-            DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByTextureCopyView(src));
+            DAWN_TRY_ASSIGN(aspectUsed, SingleAspectUsedByImageCopyTexture(src));
             if (aspectUsed == Aspect::Depth) {
                 switch (src.texture->GetFormat().format) {
                     case wgpu::TextureFormat::Depth24Plus:
@@ -621,15 +622,15 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::CopyBufferToTexture(const BufferCopyView* source,
-                                             const TextureCopyView* destination,
+    void CommandEncoder::CopyBufferToTexture(const ImageCopyBuffer* source,
+                                             const ImageCopyTexture* destination,
                                              const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateBufferCopyView(GetDevice(), *source));
+                DAWN_TRY(ValidateImageCopyBuffer(GetDevice(), *source));
                 DAWN_TRY(ValidateCanUseAs(source->buffer, wgpu::BufferUsage::CopySrc));
 
-                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination, *copySize));
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *copySize));
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
                 DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(destination->texture));
 
@@ -676,17 +677,17 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::CopyTextureToBuffer(const TextureCopyView* source,
-                                             const BufferCopyView* destination,
+    void CommandEncoder::CopyTextureToBuffer(const ImageCopyTexture* source,
+                                             const ImageCopyBuffer* destination,
                                              const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *source, *copySize));
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *source, *copySize));
                 DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
                 DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(source->texture));
                 DAWN_TRY(ValidateTextureDepthStencilToBufferCopyRestrictions(*source));
 
-                DAWN_TRY(ValidateBufferCopyView(GetDevice(), *destination));
+                DAWN_TRY(ValidateImageCopyBuffer(GetDevice(), *destination));
                 DAWN_TRY(ValidateCanUseAs(destination->buffer, wgpu::BufferUsage::CopyDst));
 
                 // We validate texture copy range before validating linear texture data,
@@ -730,16 +731,16 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::CopyTextureToTexture(const TextureCopyView* source,
-                                              const TextureCopyView* destination,
+    void CommandEncoder::CopyTextureToTexture(const ImageCopyTexture* source,
+                                              const ImageCopyTexture* destination,
                                               const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(source->texture));
                 DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
 
-                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *source, *copySize));
-                DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination, *copySize));
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *source, *copySize));
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *copySize));
 
                 DAWN_TRY(
                     ValidateTextureToTextureCopyRestrictions(*source, *destination, *copySize));

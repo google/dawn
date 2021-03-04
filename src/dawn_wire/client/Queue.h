@@ -37,7 +37,7 @@ namespace dawn_wire { namespace client {
                                  void* userdata);
         WGPUFence CreateFence(const WGPUFenceDescriptor* descriptor);
         void WriteBuffer(WGPUBuffer cBuffer, uint64_t bufferOffset, const void* data, size_t size);
-        void WriteTexture(const WGPUTextureCopyView* destination,
+        void WriteTexture(const WGPUImageCopyTexture* destination,
                           const void* data,
                           size_t dataSize,
                           const WGPUTextureDataLayout* dataLayout,

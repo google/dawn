@@ -123,14 +123,14 @@ namespace {
         wgpu::Texture dstTexture = CreateVideoTextureForTest(
             wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
 
-        wgpu::TextureCopyView srcCopyView = utils::CreateTextureCopyView(srcTexture, 0, {0, 0, 0});
+        wgpu::ImageCopyTexture copySrc = utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0});
 
-        wgpu::TextureCopyView dstCopyView = utils::CreateTextureCopyView(dstTexture, 0, {0, 0, 0});
+        wgpu::ImageCopyTexture copyDst = utils::CreateImageCopyTexture(dstTexture, 0, {0, 0, 0});
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToTexture(&srcCopyView, &dstCopyView, &copySize);
+        encoder.CopyTextureToTexture(&copySrc, &copyDst, &copySize);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -142,26 +142,26 @@ namespace {
         wgpu::Texture dstTexture = CreateVideoTextureForTest(
             wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
 
-        wgpu::TextureCopyView srcCopyView =
-            utils::CreateTextureCopyView(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
+        wgpu::ImageCopyTexture copySrc = utils::CreateImageCopyTexture(
+            srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
 
-        wgpu::TextureCopyView dstCopyView =
-            utils::CreateTextureCopyView(dstTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane1Only);
+        wgpu::ImageCopyTexture copyDst = utils::CreateImageCopyTexture(
+            dstTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane1Only);
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyTextureToTexture(&srcCopyView, &dstCopyView, &copySize);
+            encoder.CopyTextureToTexture(&copySrc, &copyDst, &copySize);
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
 
-        srcCopyView =
-            utils::CreateTextureCopyView(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane1Only);
+        copySrc = utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0},
+                                                wgpu::TextureAspect::Plane1Only);
 
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyTextureToTexture(&srcCopyView, &dstCopyView, &copySize);
+            encoder.CopyTextureToTexture(&copySrc, &copyDst, &copySize);
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
     }
@@ -176,14 +176,14 @@ namespace {
         bufferDescriptor.usage = wgpu::BufferUsage::CopyDst;
         wgpu::Buffer dstBuffer = device.CreateBuffer(&bufferDescriptor);
 
-        wgpu::TextureCopyView srcCopyView = utils::CreateTextureCopyView(srcTexture, 0, {0, 0, 0});
+        wgpu::ImageCopyTexture copySrc = utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0});
 
-        wgpu::BufferCopyView dstCopyView = utils::CreateBufferCopyView(dstBuffer, 0, 4);
+        wgpu::ImageCopyBuffer copyDst = utils::CreateImageCopyBuffer(dstBuffer, 0, 4);
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyTextureToBuffer(&srcCopyView, &dstCopyView, &copySize);
+        encoder.CopyTextureToBuffer(&copySrc, &copyDst, &copySize);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -197,25 +197,25 @@ namespace {
         bufferDescriptor.usage = wgpu::BufferUsage::CopyDst;
         wgpu::Buffer dstBuffer = device.CreateBuffer(&bufferDescriptor);
 
-        wgpu::TextureCopyView srcCopyView =
-            utils::CreateTextureCopyView(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
+        wgpu::ImageCopyTexture copySrc = utils::CreateImageCopyTexture(
+            srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
 
-        wgpu::BufferCopyView dstCopyView = utils::CreateBufferCopyView(dstBuffer, 0, 4);
+        wgpu::ImageCopyBuffer copyDst = utils::CreateImageCopyBuffer(dstBuffer, 0, 4);
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyTextureToBuffer(&srcCopyView, &dstCopyView, &copySize);
+            encoder.CopyTextureToBuffer(&copySrc, &copyDst, &copySize);
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
 
-        srcCopyView =
-            utils::CreateTextureCopyView(srcTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane1Only);
+        copySrc = utils::CreateImageCopyTexture(srcTexture, 0, {0, 0, 0},
+                                                wgpu::TextureAspect::Plane1Only);
 
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyTextureToBuffer(&srcCopyView, &dstCopyView, &copySize);
+            encoder.CopyTextureToBuffer(&copySrc, &copyDst, &copySize);
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
     }
@@ -230,14 +230,14 @@ namespace {
         wgpu::Texture dstTexture = CreateVideoTextureForTest(
             wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
 
-        wgpu::BufferCopyView srcCopyView = utils::CreateBufferCopyView(srcBuffer, 0, 12, 4);
+        wgpu::ImageCopyBuffer copySrc = utils::CreateImageCopyBuffer(srcBuffer, 0, 12, 4);
 
-        wgpu::TextureCopyView dstCopyView = utils::CreateTextureCopyView(dstTexture, 0, {0, 0, 0});
+        wgpu::ImageCopyTexture copyDst = utils::CreateImageCopyTexture(dstTexture, 0, {0, 0, 0});
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&srcCopyView, &dstCopyView, &copySize);
+        encoder.CopyBufferToTexture(&copySrc, &copyDst, &copySize);
         ASSERT_DEVICE_ERROR(encoder.Finish());
     }
 
@@ -251,25 +251,25 @@ namespace {
         wgpu::Texture dstTexture = CreateVideoTextureForTest(
             wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
 
-        wgpu::BufferCopyView srcCopyView = utils::CreateBufferCopyView(srcBuffer, 0, 12, 4);
+        wgpu::ImageCopyBuffer copySrc = utils::CreateImageCopyBuffer(srcBuffer, 0, 12, 4);
 
-        wgpu::TextureCopyView dstCopyView =
-            utils::CreateTextureCopyView(dstTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
+        wgpu::ImageCopyTexture copyDst = utils::CreateImageCopyTexture(
+            dstTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
 
         wgpu::Extent3D copySize = {1, 1, 1};
 
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyBufferToTexture(&srcCopyView, &dstCopyView, &copySize);
+            encoder.CopyBufferToTexture(&copySrc, &copyDst, &copySize);
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
 
-        dstCopyView =
-            utils::CreateTextureCopyView(dstTexture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane1Only);
+        copyDst = utils::CreateImageCopyTexture(dstTexture, 0, {0, 0, 0},
+                                                wgpu::TextureAspect::Plane1Only);
 
         {
             wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-            encoder.CopyBufferToTexture(&srcCopyView, &dstCopyView, &copySize);
+            encoder.CopyBufferToTexture(&copySrc, &copyDst, &copySize);
             ASSERT_DEVICE_ERROR(encoder.Finish());
         }
     }
@@ -306,15 +306,16 @@ namespace {
 
         wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, 4, 4);
 
-        wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
 
         std::vector<uint8_t> dummyData(4, 0);
         wgpu::Extent3D writeSize = {1, 1, 1};
 
         wgpu::Queue queue = device.GetQueue();
 
-        ASSERT_DEVICE_ERROR(queue.WriteTexture(&textureCopyView, dummyData.data(), dummyData.size(),
-                                               &textureDataLayout, &writeSize));
+        ASSERT_DEVICE_ERROR(queue.WriteTexture(&imageCopyTexture, dummyData.data(),
+                                               dummyData.size(), &textureDataLayout, &writeSize));
     }
 
     // Tests writing into a multi-planar format per plane fails.
@@ -323,15 +324,15 @@ namespace {
             wgpu::TextureFormat::R8BG8Biplanar420Unorm, wgpu::TextureUsage::Sampled);
 
         wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, 12, 4);
-        wgpu::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(texture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0}, wgpu::TextureAspect::Plane0Only);
 
         std::vector<uint8_t> dummmyData(4, 0);
         wgpu::Extent3D writeSize = {1, 1, 1};
 
         wgpu::Queue queue = device.GetQueue();
 
-        ASSERT_DEVICE_ERROR(queue.WriteTexture(&textureCopyView, dummmyData.data(),
+        ASSERT_DEVICE_ERROR(queue.WriteTexture(&imageCopyTexture, dummmyData.data(),
                                                dummmyData.size(), &textureDataLayout, &writeSize));
     }
 

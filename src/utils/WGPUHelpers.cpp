@@ -268,28 +268,28 @@ namespace utils {
         return BasicRenderPass(width, height, color);
     }
 
-    wgpu::BufferCopyView CreateBufferCopyView(wgpu::Buffer buffer,
-                                              uint64_t offset,
-                                              uint32_t bytesPerRow,
-                                              uint32_t rowsPerImage) {
-        wgpu::BufferCopyView bufferCopyView = {};
-        bufferCopyView.buffer = buffer;
-        bufferCopyView.layout = CreateTextureDataLayout(offset, bytesPerRow, rowsPerImage);
+    wgpu::ImageCopyBuffer CreateImageCopyBuffer(wgpu::Buffer buffer,
+                                                uint64_t offset,
+                                                uint32_t bytesPerRow,
+                                                uint32_t rowsPerImage) {
+        wgpu::ImageCopyBuffer imageCopyBuffer = {};
+        imageCopyBuffer.buffer = buffer;
+        imageCopyBuffer.layout = CreateTextureDataLayout(offset, bytesPerRow, rowsPerImage);
 
-        return bufferCopyView;
+        return imageCopyBuffer;
     }
 
-    wgpu::TextureCopyView CreateTextureCopyView(wgpu::Texture texture,
-                                                uint32_t mipLevel,
-                                                wgpu::Origin3D origin,
-                                                wgpu::TextureAspect aspect) {
-        wgpu::TextureCopyView textureCopyView;
-        textureCopyView.texture = texture;
-        textureCopyView.mipLevel = mipLevel;
-        textureCopyView.origin = origin;
-        textureCopyView.aspect = aspect;
+    wgpu::ImageCopyTexture CreateImageCopyTexture(wgpu::Texture texture,
+                                                  uint32_t mipLevel,
+                                                  wgpu::Origin3D origin,
+                                                  wgpu::TextureAspect aspect) {
+        wgpu::ImageCopyTexture imageCopyTexture;
+        imageCopyTexture.texture = texture;
+        imageCopyTexture.mipLevel = mipLevel;
+        imageCopyTexture.origin = origin;
+        imageCopyTexture.aspect = aspect;
 
-        return textureCopyView;
+        return imageCopyTexture;
     }
 
     wgpu::TextureDataLayout CreateTextureDataLayout(uint64_t offset,

@@ -1036,14 +1036,14 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
-    wgpu::TextureCopyView textureCopyView =
-        utils::CreateTextureCopyView(texture, level, {x, y, slice}, aspect);
-    wgpu::BufferCopyView bufferCopyView =
-        utils::CreateBufferCopyView(readback.buffer, readback.offset, bytesPerRow, rowsPerImage);
+    wgpu::ImageCopyTexture imageCopyTexture =
+        utils::CreateImageCopyTexture(texture, level, {x, y, slice}, aspect);
+    wgpu::ImageCopyBuffer imageCopyBuffer =
+        utils::CreateImageCopyBuffer(readback.buffer, readback.offset, bytesPerRow, rowsPerImage);
     wgpu::Extent3D copySize = {width, height, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
+    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);

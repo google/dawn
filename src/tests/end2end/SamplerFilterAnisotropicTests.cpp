@@ -121,12 +121,12 @@ class SamplerFilterAnisotropicTest : public DawnTest {
             std::vector<RGBA8> data(rowPixels * texHeight, color);
             wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
                 device, data.data(), data.size() * sizeof(RGBA8), wgpu::BufferUsage::CopySrc);
-            wgpu::BufferCopyView bufferCopyView =
-                utils::CreateBufferCopyView(stagingBuffer, 0, kTextureBytesPerRowAlignment);
-            wgpu::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(texture, level, {0, 0, 0});
+            wgpu::ImageCopyBuffer imageCopyBuffer =
+                utils::CreateImageCopyBuffer(stagingBuffer, 0, kTextureBytesPerRowAlignment);
+            wgpu::ImageCopyTexture imageCopyTexture =
+                utils::CreateImageCopyTexture(texture, level, {0, 0, 0});
             wgpu::Extent3D copySize = {texWidth, texHeight, 1};
-            encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+            encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
         }
         wgpu::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);

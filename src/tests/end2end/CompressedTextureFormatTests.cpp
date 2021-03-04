@@ -96,15 +96,15 @@ class CompressedTextureBCFormatTest : public DawnTest {
         // Copy texture data from a staging buffer to the destination texture.
         wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(device, data.data(), data.size(),
                                                                  wgpu::BufferUsage::CopySrc);
-        wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(stagingBuffer, copyConfig.bufferOffset,
-                                        copyConfig.bytesPerRowAlignment, copyConfig.rowsPerImage);
+        wgpu::ImageCopyBuffer imageCopyBuffer =
+            utils::CreateImageCopyBuffer(stagingBuffer, copyConfig.bufferOffset,
+                                         copyConfig.bytesPerRowAlignment, copyConfig.rowsPerImage);
 
-        wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
             bcCompressedTexture, copyConfig.viewMipmapLevel, copyConfig.copyOrigin3D);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copyConfig.copyExtent3D);
+        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copyConfig.copyExtent3D);
         wgpu::CommandBuffer copy = encoder.Finish();
         queue.Submit(1, &copy);
     }
@@ -258,11 +258,11 @@ class CompressedTextureBCFormatTest : public DawnTest {
                                     wgpu::Texture dstTexture,
                                     CopyConfig srcConfig,
                                     CopyConfig dstConfig) {
-        wgpu::TextureCopyView textureCopyViewSrc = utils::CreateTextureCopyView(
+        wgpu::ImageCopyTexture imageCopyTextureSrc = utils::CreateImageCopyTexture(
             srcTexture, srcConfig.viewMipmapLevel, srcConfig.copyOrigin3D);
-        wgpu::TextureCopyView textureCopyViewDst = utils::CreateTextureCopyView(
+        wgpu::ImageCopyTexture imageCopyTextureDst = utils::CreateImageCopyTexture(
             dstTexture, dstConfig.viewMipmapLevel, dstConfig.copyOrigin3D);
-        encoder.CopyTextureToTexture(&textureCopyViewSrc, &textureCopyViewDst,
+        encoder.CopyTextureToTexture(&imageCopyTextureSrc, &imageCopyTextureDst,
                                      &dstConfig.copyExtent3D);
     }
 
@@ -629,7 +629,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqua
         srcConfig.textureDescriptor.usage =
             wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
         wgpu::Texture bcTextureSrc = CreateTextureWithCompressedData(srcConfig);
-        wgpu::TextureCopyView textureCopyViewSrc = utils::CreateTextureCopyView(
+        wgpu::ImageCopyTexture imageCopyTextureSrc = utils::CreateImageCopyTexture(
             bcTextureSrc, srcConfig.viewMipmapLevel, srcConfig.copyOrigin3D);
 
         // Create bcTexture and copy from the content in bcTextureSrc into it.
@@ -1113,12 +1113,12 @@ TEST_P(CompressedTextureBCFormatTest, UnalignedDynamicUploader) {
     bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
-    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(buffer, 0, 256);
+    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+    wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(buffer, 0, 256);
     wgpu::Extent3D copyExtent = {4, 4, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copyExtent);
+    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copyExtent);
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 }
@@ -1148,10 +1148,10 @@ class CompressedTextureWriteTextureTest : public CompressedTextureBCFormatTest {
         wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(
             copyConfig.bufferOffset, copyConfig.bytesPerRowAlignment, copyConfig.rowsPerImage);
 
-        wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+        wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
             bcCompressedTexture, copyConfig.viewMipmapLevel, copyConfig.copyOrigin3D);
 
-        queue.WriteTexture(&textureCopyView, data.data(), data.size(), &textureDataLayout,
+        queue.WriteTexture(&imageCopyTexture, data.data(), data.size(), &textureDataLayout,
                            &copyConfig.copyExtent3D);
     }
 

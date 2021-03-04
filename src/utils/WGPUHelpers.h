@@ -50,11 +50,11 @@ namespace utils {
         return CreateBufferFromData(device, data.begin(), uint32_t(sizeof(T) * data.size()), usage);
     }
 
-    wgpu::BufferCopyView CreateBufferCopyView(wgpu::Buffer buffer,
-                                              uint64_t offset,
-                                              uint32_t bytesPerRow,
-                                              uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
-    wgpu::TextureCopyView CreateTextureCopyView(
+    wgpu::ImageCopyBuffer CreateImageCopyBuffer(wgpu::Buffer buffer,
+                                                uint64_t offset,
+                                                uint32_t bytesPerRow,
+                                                uint32_t rowsPerImage = wgpu::kCopyStrideUndefined);
+    wgpu::ImageCopyTexture CreateImageCopyTexture(
         wgpu::Texture texture,
         uint32_t level,
         wgpu::Origin3D origin,

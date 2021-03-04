@@ -149,11 +149,11 @@ class CopyTests_T2B : public CopyTests {
         // Initialize the source texture
         std::vector<RGBA8> textureArrayData = GetExpectedTextureDataRGBA8(copyLayout);
         {
-            wgpu::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(texture, textureSpec.copyLevel, {0, 0, 0});
+            wgpu::ImageCopyTexture imageCopyTexture =
+                utils::CreateImageCopyTexture(texture, textureSpec.copyLevel, {0, 0, 0});
             wgpu::TextureDataLayout textureDataLayout =
                 utils::CreateTextureDataLayout(0, copyLayout.bytesPerRow, copyLayout.rowsPerImage);
-            queue.WriteTexture(&textureCopyView, textureArrayData.data(), copyLayout.byteLength,
+            queue.WriteTexture(&imageCopyTexture, textureArrayData.data(), copyLayout.byteLength,
                                &textureDataLayout, &copyLayout.mipSize);
         }
 
@@ -169,11 +169,11 @@ class CopyTests_T2B : public CopyTests {
         wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
 
         {
-            wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+            wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
                 texture, textureSpec.copyLevel, textureSpec.copyOrigin);
-            wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(
+            wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
                 buffer, bufferSpec.offset, bufferSpec.bytesPerRow, bufferSpec.rowsPerImage);
-            encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
+            encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
         }
 
         wgpu::CommandBuffer commands = encoder.Finish();
@@ -260,11 +260,11 @@ class CopyTests_B2T : public CopyTests {
 
         const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depth;
 
-        wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(
+        wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
             buffer, bufferSpec.offset, bufferSpec.bytesPerRow, bufferSpec.rowsPerImage);
-        wgpu::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(texture, textureSpec.copyLevel, textureSpec.copyOrigin);
-        encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copySize);
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, textureSpec.copyLevel, textureSpec.copyOrigin);
+        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copySize);
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -339,11 +339,11 @@ class CopyTests_T2T : public CopyTests {
         // Initialize the source texture
         const std::vector<uint8_t> srcTextureCopyData = GetExpectedTextureData(srcDataCopyLayout);
         {
-            wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(
+            wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
                 srcTexture, srcSpec.copyLevel, {0, 0, srcSpec.copyOrigin.z});
             wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(
                 0, srcDataCopyLayout.bytesPerRow, srcDataCopyLayout.rowsPerImage);
-            queue.WriteTexture(&textureCopyView, srcTextureCopyData.data(),
+            queue.WriteTexture(&imageCopyTexture, srcTextureCopyData.data(),
                                srcDataCopyLayout.byteLength, &textureDataLayout,
                                &srcDataCopyLayout.mipSize);
         }
@@ -351,11 +351,11 @@ class CopyTests_T2T : public CopyTests {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         // Perform the texture to texture copy
-        wgpu::TextureCopyView srcTextureCopyView =
-            utils::CreateTextureCopyView(srcTexture, srcSpec.copyLevel, srcSpec.copyOrigin);
-        wgpu::TextureCopyView dstTextureCopyView =
-            utils::CreateTextureCopyView(dstTexture, dstSpec.copyLevel, dstSpec.copyOrigin);
-        encoder.CopyTextureToTexture(&srcTextureCopyView, &dstTextureCopyView, &copySize);
+        wgpu::ImageCopyTexture srcImageCopyTexture =
+            utils::CreateImageCopyTexture(srcTexture, srcSpec.copyLevel, srcSpec.copyOrigin);
+        wgpu::ImageCopyTexture dstImageCopyTexture =
+            utils::CreateImageCopyTexture(dstTexture, dstSpec.copyLevel, dstSpec.copyOrigin);
+        encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &copySize);
 
         // Copy the data from the srcSpec.copyOrigin.z-th layer to (srcSpec.copyOrigin.z +
         // copySize.depth)-th layer of dstTexture to outputBuffer
@@ -367,9 +367,9 @@ class CopyTests_T2T : public CopyTests {
         outputBufferDescriptor.size = dstDataCopyLayout.byteLength;
         outputBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
         wgpu::Buffer outputBuffer = device.CreateBuffer(&outputBufferDescriptor);
-        wgpu::BufferCopyView outputBufferCopyView = utils::CreateBufferCopyView(
+        wgpu::ImageCopyBuffer outputImageCopyBuffer = utils::CreateImageCopyBuffer(
             outputBuffer, 0, dstDataCopyLayout.bytesPerRow, dstDataCopyLayout.rowsPerImage);
-        encoder.CopyTextureToBuffer(&dstTextureCopyView, &outputBufferCopyView, &copySize);
+        encoder.CopyTextureToBuffer(&dstImageCopyTexture, &outputImageCopyBuffer, &copySize);
 
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -1597,12 +1597,12 @@ TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
     bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer buffer = device.CreateBuffer(&bufferDescriptor);
 
-    wgpu::BufferCopyView bufferCopyView =
-        utils::CreateBufferCopyView(buffer, kBufferCopyOffset, kTextureBytesPerRowAlignment);
-    wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
+    wgpu::ImageCopyBuffer imageCopyBuffer =
+        utils::CreateImageCopyBuffer(buffer, kBufferCopyOffset, kTextureBytesPerRowAlignment);
+    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
 
     wgpu::Extent3D copySize = textureDescriptor.size;
-    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copySize);
+    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
     queue.Submit(1, &commandBuffer);
 

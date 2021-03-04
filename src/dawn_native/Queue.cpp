@@ -291,7 +291,7 @@ namespace dawn_native {
                                                buffer, bufferOffset, size);
     }
 
-    void QueueBase::WriteTexture(const TextureCopyView* destination,
+    void QueueBase::WriteTexture(const ImageCopyTexture* destination,
                                  const void* data,
                                  size_t dataSize,
                                  const TextureDataLayout* dataLayout,
@@ -300,7 +300,7 @@ namespace dawn_native {
             WriteTextureInternal(destination, data, dataSize, dataLayout, writeSize));
     }
 
-    MaybeError QueueBase::WriteTextureInternal(const TextureCopyView* destination,
+    MaybeError QueueBase::WriteTextureInternal(const ImageCopyTexture* destination,
                                                const void* data,
                                                size_t dataSize,
                                                const TextureDataLayout* dataLayout,
@@ -318,7 +318,7 @@ namespace dawn_native {
         return WriteTextureImpl(*destination, data, layout, *writeSize);
     }
 
-    MaybeError QueueBase::WriteTextureImpl(const TextureCopyView& destination,
+    MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
                                            const void* data,
                                            const TextureDataLayout& dataLayout,
                                            const Extent3D& writeSizePixel) {
@@ -362,8 +362,8 @@ namespace dawn_native {
                                                 &textureCopy, writeSizePixel);
     }
 
-    void QueueBase::CopyTextureForBrowser(const TextureCopyView* source,
-                                          const TextureCopyView* destination,
+    void QueueBase::CopyTextureForBrowser(const ImageCopyTexture* source,
+                                          const ImageCopyTexture* destination,
                                           const Extent3D* copySize,
                                           const CopyTextureForBrowserOptions* options) {
         GetDevice()->ConsumedError(
@@ -371,8 +371,8 @@ namespace dawn_native {
     }
 
     MaybeError QueueBase::CopyTextureForBrowserInternal(
-        const TextureCopyView* source,
-        const TextureCopyView* destination,
+        const ImageCopyTexture* source,
+        const ImageCopyTexture* destination,
         const Extent3D* copySize,
         const CopyTextureForBrowserOptions* options) {
         if (GetDevice()->IsValidationEnabled()) {
@@ -485,7 +485,7 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError QueueBase::ValidateWriteTexture(const TextureCopyView* destination,
+    MaybeError QueueBase::ValidateWriteTexture(const ImageCopyTexture* destination,
                                                size_t dataSize,
                                                const TextureDataLayout* dataLayout,
                                                const Extent3D* writeSize) const {
@@ -493,7 +493,7 @@ namespace dawn_native {
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
 
-        DAWN_TRY(ValidateTextureCopyView(GetDevice(), *destination, *writeSize));
+        DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *writeSize));
 
         if (dataLayout->offset > dataSize) {
             return DAWN_VALIDATION_ERROR("Queue::WriteTexture out of range");

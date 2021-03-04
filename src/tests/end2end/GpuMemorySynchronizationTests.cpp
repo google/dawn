@@ -242,12 +242,12 @@ TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
         wgpu::TextureUsage::Storage | wgpu::TextureUsage::Sampled | wgpu::TextureUsage::CopyDst;
     wgpu::Texture tex = device.CreateTexture(&texDesc);
 
-    wgpu::TextureCopyView copyView;
-    copyView.texture = tex;
+    wgpu::ImageCopyTexture copyDst;
+    copyDst.texture = tex;
     wgpu::TextureDataLayout layout;
     wgpu::Extent3D copySize = {1, 1, 1};
     uint32_t kOne = 1;
-    queue.WriteTexture(&copyView, &kOne, sizeof(kOne), &layout, &copySize);
+    queue.WriteTexture(&copyDst, &kOne, sizeof(kOne), &layout, &copySize);
 
     // Create a pipeline that loads the texture from both the sampled and storage paths.
     wgpu::ComputePipelineDescriptor pipelineDesc;

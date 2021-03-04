@@ -49,14 +49,14 @@ namespace dawn_native {
                                 BufferBase* destination,
                                 uint64_t destinationOffset,
                                 uint64_t size);
-        void CopyBufferToTexture(const BufferCopyView* source,
-                                 const TextureCopyView* destination,
+        void CopyBufferToTexture(const ImageCopyBuffer* source,
+                                 const ImageCopyTexture* destination,
                                  const Extent3D* copySize);
-        void CopyTextureToBuffer(const TextureCopyView* source,
-                                 const BufferCopyView* destination,
+        void CopyTextureToBuffer(const ImageCopyTexture* source,
+                                 const ImageCopyBuffer* destination,
                                  const Extent3D* copySize);
-        void CopyTextureToTexture(const TextureCopyView* source,
-                                  const TextureCopyView* destination,
+        void CopyTextureToTexture(const ImageCopyTexture* source,
+                                  const ImageCopyTexture* destination,
                                   const Extent3D* copySize);
 
         void InjectValidationError(const char* message);

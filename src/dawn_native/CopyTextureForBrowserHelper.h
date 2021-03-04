@@ -21,18 +21,18 @@
 namespace dawn_native {
     class DeviceBase;
     struct Extent3D;
-    struct TextureCopyView;
+    struct ImageCopyTexture;
     struct CopyTextureForBrowserOptions;
 
     MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
-                                             const TextureCopyView* source,
-                                             const TextureCopyView* destination,
+                                             const ImageCopyTexture* source,
+                                             const ImageCopyTexture* destination,
                                              const Extent3D* copySize,
                                              const CopyTextureForBrowserOptions* options);
 
     MaybeError DoCopyTextureForBrowser(DeviceBase* device,
-                                       const TextureCopyView* source,
-                                       const TextureCopyView* destination,
+                                       const ImageCopyTexture* source,
+                                       const ImageCopyTexture* destination,
                                        const Extent3D* copySize,
                                        const CopyTextureForBrowserOptions* options);
 

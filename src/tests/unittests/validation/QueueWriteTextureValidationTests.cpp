@@ -63,10 +63,10 @@ namespace {
             textureDataLayout.bytesPerRow = dataBytesPerRow;
             textureDataLayout.rowsPerImage = dataRowsPerImage;
 
-            wgpu::TextureCopyView textureCopyView =
-                utils::CreateTextureCopyView(texture, texLevel, texOrigin, aspect);
+            wgpu::ImageCopyTexture imageCopyTexture =
+                utils::CreateImageCopyTexture(texture, texLevel, texOrigin, aspect);
 
-            queue.WriteTexture(&textureCopyView, data.data(), dataSize, &textureDataLayout, &size);
+            queue.WriteTexture(&imageCopyTexture, data.data(), dataSize, &textureDataLayout, &size);
         }
 
         void TestWriteTextureExactDataSize(uint32_t bytesPerRow,
@@ -361,8 +361,8 @@ namespace {
         errorTextureDescriptor.size.depth = 0;
         ASSERT_DEVICE_ERROR(wgpu::Texture errorTexture =
                                 device.CreateTexture(&errorTextureDescriptor));
-        wgpu::TextureCopyView errorTextureCopyView =
-            utils::CreateTextureCopyView(errorTexture, 0, {0, 0, 0});
+        wgpu::ImageCopyTexture errorImageCopyTexture =
+            utils::CreateImageCopyTexture(errorTexture, 0, {0, 0, 0});
 
         wgpu::Extent3D extent3D = {0, 0, 0};
 
@@ -370,7 +370,7 @@ namespace {
             std::vector<uint8_t> data(4);
             wgpu::TextureDataLayout textureDataLayout = utils::CreateTextureDataLayout(0, 0, 0);
 
-            ASSERT_DEVICE_ERROR(queue.WriteTexture(&errorTextureCopyView, data.data(), 4,
+            ASSERT_DEVICE_ERROR(queue.WriteTexture(&errorImageCopyTexture, data.data(), 4,
                                                    &textureDataLayout, &extent3D));
         }
     }

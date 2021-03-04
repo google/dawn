@@ -90,7 +90,7 @@ namespace dawn_wire { namespace client {
         client->SerializeCommand(cmd);
     }
 
-    void Queue::WriteTexture(const WGPUTextureCopyView* destination,
+    void Queue::WriteTexture(const WGPUImageCopyTexture* destination,
                              const void* data,
                              size_t dataSize,
                              const WGPUTextureDataLayout* dataLayout,

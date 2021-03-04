@@ -123,13 +123,14 @@ namespace utils {
         descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
-        wgpu::TextureCopyView textureCopyView = utils::CreateTextureCopyView(texture, 0, {0, 0, 0});
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
         wgpu::TextureDataLayout textureDataLayout =
             utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
         wgpu::Extent3D copyExtent = {1, 1, 1};
 
         // WriteTexture with exactly 1 byte of data.
-        device.GetQueue().WriteTexture(&textureCopyView, data.data(), 1, &textureDataLayout,
+        device.GetQueue().WriteTexture(&imageCopyTexture, data.data(), 1, &textureDataLayout,
                                        &copyExtent);
     }
 }  // namespace utils

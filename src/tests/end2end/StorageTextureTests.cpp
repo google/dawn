@@ -448,11 +448,11 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         const wgpu::Extent3D copyExtent = {kWidth, kHeight, arrayLayerCount};
-        wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(uploadBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
-        wgpu::TextureCopyView textureCopyView;
-        textureCopyView.texture = outputTexture;
-        encoder.CopyBufferToTexture(&bufferCopyView, &textureCopyView, &copyExtent);
+        wgpu::ImageCopyBuffer imageCopyBuffer =
+            utils::CreateImageCopyBuffer(uploadBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
+        wgpu::ImageCopyTexture imageCopyTexture;
+        imageCopyTexture.texture = outputTexture;
+        encoder.CopyBufferToTexture(&imageCopyBuffer, &imageCopyTexture, &copyExtent);
 
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
@@ -622,11 +622,11 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         const wgpu::Extent3D copyExtent = {kWidth, kHeight, arrayLayerCount};
-        wgpu::TextureCopyView textureCopyView =
-            utils::CreateTextureCopyView(writeonlyStorageTexture, 0, {0, 0, 0});
-        wgpu::BufferCopyView bufferCopyView =
-            utils::CreateBufferCopyView(resultBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
-        encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &copyExtent);
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(writeonlyStorageTexture, 0, {0, 0, 0});
+        wgpu::ImageCopyBuffer imageCopyBuffer =
+            utils::CreateImageCopyBuffer(resultBuffer, 0, kTextureBytesPerRowAlignment, kHeight);
+        encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copyExtent);
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
 
@@ -1032,12 +1032,12 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
     bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer resultBuffer = device.CreateBuffer(&bufferDescriptor);
 
-    wgpu::TextureCopyView textureCopyView;
-    textureCopyView.texture = storageTexture1;
+    wgpu::ImageCopyTexture imageCopyTexture;
+    imageCopyTexture.texture = storageTexture1;
 
-    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(resultBuffer, 0, 256, 1);
+    wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(resultBuffer, 0, 256, 1);
     wgpu::Extent3D extent3D = {1, 1, 1};
-    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D);
+    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &extent3D);
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1106,12 +1106,12 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer resultBuffer = device.CreateBuffer(&bufferDescriptor);
 
-    wgpu::TextureCopyView textureCopyView;
-    textureCopyView.texture = storageTexture1;
+    wgpu::ImageCopyTexture imageCopyTexture;
+    imageCopyTexture.texture = storageTexture1;
 
-    wgpu::BufferCopyView bufferCopyView = utils::CreateBufferCopyView(resultBuffer, 0, 256, 1);
+    wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(resultBuffer, 0, 256, 1);
     wgpu::Extent3D extent3D = {1, 1, 1};
-    encoder.CopyTextureToBuffer(&textureCopyView, &bufferCopyView, &extent3D);
+    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &extent3D);
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
