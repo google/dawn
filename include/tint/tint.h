@@ -28,6 +28,7 @@
 #include "src/transform/emit_vertex_point_size.h"
 #include "src/transform/first_index_offset.h"
 #include "src/transform/manager.h"
+#include "src/transform/renamer.h"
 #include "src/transform/vertex_pulling.h"
 #include "src/type/type_manager.h"
 #include "src/validator/validator.h"

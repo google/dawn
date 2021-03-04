@@ -225,6 +225,8 @@ set(TINT_LIB_SRCS
   transform/first_index_offset.h
   transform/manager.cc
   transform/manager.h
+  transform/renamer.cc
+  transform/renamer.h
   transform/transform.cc
   transform/transform.h
   transform/vertex_pulling.cc
@@ -711,6 +713,7 @@ if(${TINT_BUILD_TESTS})
       transform/bound_array_accessors_test.cc
       transform/emit_vertex_point_size_test.cc
       transform/first_index_offset_test.cc
+      transform/renamer_test.cc
       transform/test_helper.h
       transform/vertex_pulling_test.cc
     )
