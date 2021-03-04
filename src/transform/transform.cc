@@ -14,6 +14,8 @@
 
 #include "src/transform/transform.h"
 
+#include <algorithm>
+
 #include "src/ast/block_statement.h"
 #include "src/ast/function.h"
 #include "src/clone_context.h"
@@ -61,6 +63,24 @@ ast::Function* Transform::CloneWithStatementsAtStart(
   auto decos = ctx->Clone(in->decorations());
   return ctx->dst->create<ast::Function>(source, symbol, params, return_type,
                                          body, decos);
+}
+
+void Transform::RenameReservedKeywords(CloneContext* ctx,
+                                       const char* names[],
+                                       size_t count) {
+  ctx->ReplaceAll([=](Symbol in) {
+    auto name_in = ctx->src->Symbols().NameFor(in);
+    if (!std::binary_search(names, names + count, name_in)) {
+      return ctx->dst->Symbols().Register(name_in);
+    }
+    // Create a new unique name
+    auto base_name = "_tint_" + name_in;
+    auto name_out = base_name;
+    for (int i = 0; ctx->src->Symbols().Get(name_out).IsValid(); i++) {
+      name_out = base_name + "_" + std::to_string(i);
+    }
+    return ctx->dst->Symbols().Register(name_out);
+  });
 }
 
 }  // namespace transform

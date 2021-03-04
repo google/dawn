@@ -975,6 +975,7 @@ source_set("tint_unittests_spv_reader_src") {
 
 source_set("tint_unittests_spv_writer_src") {
   sources = [
+    "src/transform/msl_test.cc",
     "src/transform/spirv_test.cc",
     "src/writer/spirv/binary_writer_test.cc",
     "src/writer/spirv/builder_accessor_expression_test.cc",

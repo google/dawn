@@ -32,7 +32,8 @@ namespace tint {
 namespace transform {
 
 /// Helper class for testing transforms
-class TransformTest : public testing::Test {
+template <typename BASE>
+class TransformTestBase : public BASE {
  public:
   /// Transforms and returns the WGSL source `in`, transformed using
   /// `transforms`.
@@ -42,8 +43,11 @@ class TransformTest : public testing::Test {
   Transform::Output Transform(
       std::string in,
       std::vector<std::unique_ptr<transform::Transform>> transforms) {
-    Source::File file("test", in);
-    auto program = reader::wgsl::Parse(&file);
+    auto file = std::make_unique<Source::File>("test", in);
+    auto program = reader::wgsl::Parse(file.get());
+
+    // Keep this pointer alive after Transform() returns
+    files_.emplace_back(std::move(file));
 
     if (!program.IsValid()) {
       return Transform::Output(std::move(program));
@@ -108,7 +112,15 @@ class TransformTest : public testing::Test {
     }
     return "\n" + res + "\n";
   }
+
+ private:
+  std::vector<std::unique_ptr<Source::File>> files_;
 };
+
+using TransformTest = TransformTestBase<testing::Test>;
+
+template <typename T>
+using TransformTestWithParam = TransformTestBase<testing::TestWithParam<T>>;
 
 }  // namespace transform
 }  // namespace tint
