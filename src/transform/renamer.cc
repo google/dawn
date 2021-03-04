@@ -15,9 +15,14 @@
 #include "src/transform/renamer.h"
 
 #include <memory>
+#include <unordered_set>
 #include <utility>
 
+#include "src/ast/member_accessor_expression.h"
 #include "src/program_builder.h"
+#include "src/semantic/call.h"
+#include "src/semantic/intrinsic.h"
+#include "src/semantic/member_accessor_expression.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer::Data);
 
@@ -40,16 +45,57 @@ Transform::Output Renamer::Run(const Program* in) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
 
+  // Swizzles and intrinsic calls need to keep their symbols preserved.
+  std::unordered_set<ast::IdentifierExpression*> preserve;
+  for (auto* node : in->ASTNodes().Objects()) {
+    if (auto* member = node->As<ast::MemberAccessorExpression>()) {
+      auto* sem = in->Sem().Get(member);
+      if (!sem) {
+        TINT_ICE(out.Diagnostics())
+            << "MemberAccessorExpression has no semantic info";
+        continue;
+      }
+      if (sem->IsSwizzle()) {
+        preserve.emplace(member->member());
+      }
+    } else if (auto* call = node->As<ast::CallExpression>()) {
+      auto* sem = in->Sem().Get(call);
+      if (!sem) {
+        TINT_ICE(out.Diagnostics()) << "CallExpression has no semantic info";
+        continue;
+      }
+      if (sem->Target()->Is<semantic::Intrinsic>()) {
+        preserve.emplace(call->func()->As<ast::IdentifierExpression>());
+      }
+    }
+  }
+
   Data::Remappings remappings;
 
   switch (cfg_.method) {
     case Method::kMonotonic:
       ctx.ReplaceAll([&](Symbol sym) {
         auto str_in = in->Symbols().NameFor(sym);
-        auto str_out = "_tint_" + std::to_string(sym.value());
+        auto it = remappings.find(str_in);
+        if (it != remappings.end()) {
+          return out.Symbols().Get(it->second);
+        }
+        auto str_out = "_tint_" + std::to_string(remappings.size() + 1);
         remappings.emplace(str_in, str_out);
         return out.Symbols().Register(str_out);
       });
+
+      ctx.ReplaceAll(
+          [&](ast::IdentifierExpression* ident) -> ast::IdentifierExpression* {
+            if (preserve.count(ident)) {
+              auto sym_in = ident->symbol();
+              auto str = in->Symbols().NameFor(sym_in);
+              auto sym_out = out.Symbols().Register(str);
+              return ctx.dst->create<ast::IdentifierExpression>(
+                  ctx.Clone(ident->source()), sym_out);
+            }
+            return nullptr;  // Clone ident. Uses the symbol remapping above.
+          });
       break;
   }
   ctx.Clone();

@@ -80,6 +80,74 @@ fn _tint_3() -> void {
   EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
 
+TEST_F(RenamerTest, PreserveSwizzles) {
+  auto* src = R"(
+[[stage(vertex)]]
+fn entry() -> void {
+  var v : vec4<f32>;
+  var rgba : f32;
+  var xyzw : f32;
+  return v.zyxw + v.rgab;
+}
+)";
+
+  auto* expect = R"(
+[[stage(vertex)]]
+fn _tint_1() -> void {
+  var _tint_2 : vec4<f32>;
+  var _tint_3 : f32;
+  var _tint_4 : f32;
+  return (_tint_2.zyxw + _tint_2.rgab);
+}
+)";
+
+  auto got = Transform<Renamer>(src);
+
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<Renamer::Data>();
+
+  ASSERT_NE(data, nullptr);
+  Renamer::Data::Remappings expected_remappings = {
+      {"entry", "_tint_1"},
+      {"v", "_tint_2"},
+      {"rgba", "_tint_3"},
+      {"xyzw", "_tint_4"},
+  };
+  EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+}
+
+TEST_F(RenamerTest, PreserveIntrinsics) {
+  auto* src = R"(
+[[stage(vertex)]]
+fn entry() -> void {
+  var blah : vec4<f32>;
+  return abs(blah);
+}
+)";
+
+  auto* expect = R"(
+[[stage(vertex)]]
+fn _tint_1() -> void {
+  var _tint_2 : vec4<f32>;
+  return abs(_tint_2);
+}
+)";
+
+  auto got = Transform<Renamer>(src);
+
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<Renamer::Data>();
+
+  ASSERT_NE(data, nullptr);
+  Renamer::Data::Remappings expected_remappings = {
+      {"entry", "_tint_1"},
+      {"blah", "_tint_2"},
+  };
+  EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint
