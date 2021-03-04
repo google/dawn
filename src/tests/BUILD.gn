@@ -264,7 +264,9 @@ source_set("dawn_end2end_tests_sources") {
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn_native",
+
+    # Statically linked because the end2end white_box tests use Dawn internals.
+    "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
     "${dawn_root}/src/utils:dawn_utils",
   ]
@@ -390,12 +392,11 @@ source_set("dawn_white_box_tests_sources") {
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
     "${dawn_root}/src/dawn_native:dawn_native_sources",
+
+    # Statically linked because the end2end white_box tests use Dawn internals.
+    "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
     "${dawn_root}/src/utils:dawn_utils",
-
-    # Static because the tests both link against and have dawn_native
-    # sources. MSVC errors when both importing and exporting symbols.
-    "${dawn_root}/src/dawn_native:dawn_native_static",
   ]
 
   sources = [ "DawnTest.h" ]
@@ -448,7 +449,7 @@ test("dawn_end2end_tests") {
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
     "${dawn_root}/src/dawn:dawncpp",
-    "${dawn_root}/src/dawn_native",
+    "${dawn_root}/src/dawn_native:dawn_native_static",
     "${dawn_root}/src/dawn_wire",
     "${dawn_root}/src/utils:dawn_utils",
   ]

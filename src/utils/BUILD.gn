@@ -88,7 +88,7 @@ static_library("dawn_utils") {
   deps = [
     "${dawn_root}/src/common",
     "${dawn_root}/src/dawn:dawn_proc",
-    "${dawn_root}/src/dawn_native",
+    "${dawn_root}/src/dawn_native:dawn_native_headers",
     "${dawn_root}/src/dawn_wire",
     "${dawn_shaderc_dir}:libshaderc",
   ]
