@@ -54,6 +54,7 @@ struct Options {
   bool dump_ast = false;
   bool dawn_validation = false;
   bool demangle = false;
+  bool dump_inspector_bindings = false;
 
   Format format = Format::kNone;
 
@@ -90,6 +91,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                as Dawn does. Has no effect on non-SPIRV outputs.
   --demangle                -- Preserve original source names. Demangle them.
                                Affects AST dumping, and text-based output languages.
+  --dump-inspector-bindings -- Dump reflection data about bindins to stdout.
   -h                        -- This help text)";
 
 #ifdef _MSC_VER
@@ -207,6 +209,153 @@ std::vector<std::string> split_transform_names(std::string list) {
   return res;
 }
 
+std::string TextureDimensionToString(
+    tint::inspector::ResourceBinding::TextureDimension dim) {
+  switch (dim) {
+    case tint::inspector::ResourceBinding::TextureDimension::kNone:
+      return "None";
+    case tint::inspector::ResourceBinding::TextureDimension::k1d:
+      return "1d";
+    case tint::inspector::ResourceBinding::TextureDimension::k2d:
+      return "2d";
+    case tint::inspector::ResourceBinding::TextureDimension::k2dArray:
+      return "2dArray";
+    case tint::inspector::ResourceBinding::TextureDimension::k3d:
+      return "3d";
+    case tint::inspector::ResourceBinding::TextureDimension::kCube:
+      return "Cube";
+    case tint::inspector::ResourceBinding::TextureDimension::kCubeArray:
+      return "CubeArray";
+  }
+
+  return "Unknown";
+}
+
+std::string SampledKindToString(
+    tint::inspector::ResourceBinding::SampledKind kind) {
+  switch (kind) {
+    case tint::inspector::ResourceBinding::SampledKind::kFloat:
+      return "Float";
+    case tint::inspector::ResourceBinding::SampledKind::kUInt:
+      return "UInt";
+    case tint::inspector::ResourceBinding::SampledKind::kSInt:
+      return "SInt";
+    case tint::inspector::ResourceBinding::SampledKind::kUnknown:
+      break;
+  }
+
+  return "Unknown";
+}
+
+std::string ImageFormatToString(
+    tint::inspector::ResourceBinding::ImageFormat format) {
+  switch (format) {
+    case tint::inspector::ResourceBinding::ImageFormat::kR8Unorm:
+      return "R8Unorm";
+    case tint::inspector::ResourceBinding::ImageFormat::kR8Snorm:
+      return "R8Snorm";
+    case tint::inspector::ResourceBinding::ImageFormat::kR8Uint:
+      return "R8Uint";
+    case tint::inspector::ResourceBinding::ImageFormat::kR8Sint:
+      return "R8Sint";
+    case tint::inspector::ResourceBinding::ImageFormat::kR16Uint:
+      return "R16Uint";
+    case tint::inspector::ResourceBinding::ImageFormat::kR16Sint:
+      return "R16Sint";
+    case tint::inspector::ResourceBinding::ImageFormat::kR16Float:
+      return "R16Float";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg8Unorm:
+      return "Rg8Unorm";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg8Snorm:
+      return "Rg8Snorm";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg8Uint:
+      return "Rg8Uint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg8Sint:
+      return "Rg8Sint";
+    case tint::inspector::ResourceBinding::ImageFormat::kR32Uint:
+      return "R32Uint";
+    case tint::inspector::ResourceBinding::ImageFormat::kR32Sint:
+      return "R32Sint";
+    case tint::inspector::ResourceBinding::ImageFormat::kR32Float:
+      return "R32Float";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg16Uint:
+      return "Rg16Uint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg16Sint:
+      return "Rg16Sint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg16Float:
+      return "Rg16Float";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba8Unorm:
+      return "Rgba8Unorm";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba8UnormSrgb:
+      return "Rgba8UnormSrgb";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba8Snorm:
+      return "Rgba8Snorm";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba8Uint:
+      return "Rgba8Uint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba8Sint:
+      return "Rgba8Sint";
+    case tint::inspector::ResourceBinding::ImageFormat::kBgra8Unorm:
+      return "Bgra8Unorm";
+    case tint::inspector::ResourceBinding::ImageFormat::kBgra8UnormSrgb:
+      return "Bgra8UnormSrgb";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgb10A2Unorm:
+      return "Rgb10A2Unorm";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg11B10Float:
+      return "Rg11B10Float";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg32Uint:
+      return "Rg32Uint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg32Sint:
+      return "Rg32Sint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRg32Float:
+      return "Rg32Float";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba16Uint:
+      return "Rgba16Uint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba16Sint:
+      return "Rgba16Sint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba16Float:
+      return "Rgba16Float";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba32Uint:
+      return "Rgba32Uint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba32Sint:
+      return "Rgba32Sint";
+    case tint::inspector::ResourceBinding::ImageFormat::kRgba32Float:
+      return "Rgba32Float";
+    case tint::inspector::ResourceBinding::ImageFormat::kNone:
+      return "None";
+  }
+  return "Unknown";
+}
+
+std::string ResourceTypeToString(
+    tint::inspector::ResourceBinding::ResourceType type) {
+  switch (type) {
+    case tint::inspector::ResourceBinding::ResourceType::kUniformBuffer:
+      return "UniformBuffer";
+    case tint::inspector::ResourceBinding::ResourceType::kStorageBuffer:
+      return "StorageBuffer";
+    case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageBuffer:
+      return "ReadOnlyStorageBuffer";
+    case tint::inspector::ResourceBinding::ResourceType::kSampler:
+      return "Sampler";
+    case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
+      return "ComparisonSampler";
+    case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
+      return "SampledTexture";
+    case tint::inspector::ResourceBinding::ResourceType::kMulitsampledTexture:
+      return "MulitsampledTexture";
+    case tint::inspector::ResourceBinding::ResourceType::
+        kReadOnlyStorageTexture:
+      return "ReadOnlyStorageTexture";
+    case tint::inspector::ResourceBinding::ResourceType::
+        kWriteOnlyStorageTexture:
+      return "WriteOnlyStorageTexture";
+    case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
+      return "DepthTexture";
+  }
+
+  return "Unknown";
+}
+
 bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
   for (size_t i = 1; i < args.size(); ++i) {
     const std::string& arg = args[i];
@@ -263,6 +412,8 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
       opts->dawn_validation = true;
     } else if (arg == "--demangle") {
       opts->demangle = true;
+    } else if (arg == "--dump-inspector-bindings") {
+      opts->dump_inspector_bindings = true;
     } else if (!arg.empty()) {
       if (arg[0] == '-') {
         std::cerr << "Unrecognized option: " << arg << std::endl;
@@ -575,6 +726,42 @@ int main(int argc, const char** argv) {
   }
 
   *program = std::move(out.program);
+
+  if (options.dump_inspector_bindings) {
+    std::cout << std::string(80, '-') << std::endl;
+    tint::inspector::Inspector inspector(program.get());
+    auto entry_points = inspector.GetEntryPoints();
+    if (!inspector.error().empty()) {
+      std::cerr << "Failed to get entry points from Inspector: "
+                << inspector.error() << std::endl;
+      return 1;
+    }
+
+    for (auto& entry_point : entry_points) {
+      auto bindings = inspector.GetResourceBindings(entry_point.name);
+      if (!inspector.error().empty()) {
+        std::cerr << "Failed to get bindings from Inspector: "
+                  << inspector.error() << std::endl;
+        return 1;
+      }
+      std::cout << "Entry Point = " << entry_point.name << std::endl;
+      for (auto& binding : bindings) {
+        std::cout << "\t[" << binding.bind_group << "][" << binding.binding
+                  << "]:" << std::endl;
+        std::cout << "\t\t resource_type = "
+                  << ResourceTypeToString(binding.resource_type) << std::endl;
+        std::cout << "\t\t min_buffer_binding_size = "
+                  << binding.min_buffer_binding_size << std::endl;
+        std::cout << "\t\t dim = " << TextureDimensionToString(binding.dim)
+                  << std::endl;
+        std::cout << "\t\t sampled_kind = "
+                  << SampledKindToString(binding.sampled_kind) << std::endl;
+        std::cout << "\t\t image_format = "
+                  << ImageFormatToString(binding.image_format) << std::endl;
+      }
+    }
+    std::cout << std::string(80, '-') << std::endl;
+  }
 
   std::unique_ptr<tint::writer::Writer> writer;
 
