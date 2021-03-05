@@ -973,7 +973,6 @@ source_set("tint_unittests_spv_reader_src") {
 
 source_set("tint_unittests_spv_writer_src") {
   sources = [
-    "src/transform/msl_test.cc",
     "src/transform/spirv_test.cc",
     "src/writer/spirv/binary_writer_test.cc",
     "src/writer/spirv/builder_accessor_expression_test.cc",
@@ -1180,6 +1179,7 @@ source_set("tint_unittests_wgsl_writer_src") {
 
 source_set("tint_unittests_msl_writer_src") {
   sources = [
+    "src/transform/msl_test.cc",
     "src/writer/msl/generator_impl_alias_type_test.cc",
     "src/writer/msl/generator_impl_array_accessor_test.cc",
     "src/writer/msl/generator_impl_assign_test.cc",
