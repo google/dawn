@@ -241,7 +241,7 @@ ParserImpl::Failure::Errored ParserImpl::add_error(const Token& t,
 ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
                                                    const std::string& err) {
   if (silence_errors_ == 0) {
-    diags_.add_error(err, source);
+    builder_.Diagnostics().add_error(err, source);
   }
   return Failure::kErrored;
 }
@@ -293,14 +293,12 @@ void ParserImpl::translation_unit() {
       break;
     }
     expect_global_decl();
-    if (diags_.error_count() >= max_errors_) {
+    if (builder_.Diagnostics().error_count() >= max_errors_) {
       add_error(Source{{}, p.source().file_path},
                 "stopping after " + std::to_string(max_errors_) + " errors");
       break;
     }
   }
-
-  assert(builder_.IsValid());
 }
 
 // global_decl

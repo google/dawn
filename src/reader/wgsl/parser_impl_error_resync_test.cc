@@ -27,15 +27,15 @@ const diag::Formatter::Style formatter_style{
 
 class ParserImplErrorResyncTest : public ParserImplTest {};
 
-#define EXPECT(SOURCE, EXPECTED)                                          \
-  do {                                                                    \
-    std::string source = SOURCE;                                          \
-    std::string expected = EXPECTED;                                      \
-    auto p = parser(source);                                              \
-    EXPECT_EQ(false, p->Parse());                                         \
-    EXPECT_EQ(true, p->diagnostics().contains_errors());                  \
-    EXPECT_EQ(expected,                                                   \
-              diag::Formatter(formatter_style).format(p->diagnostics())); \
+#define EXPECT(SOURCE, EXPECTED)                                               \
+  do {                                                                         \
+    std::string source = SOURCE;                                               \
+    std::string expected = EXPECTED;                                           \
+    auto p = parser(source);                                                   \
+    EXPECT_EQ(false, p->Parse());                                              \
+    auto diagnostics = p->builder().Diagnostics();                             \
+    EXPECT_EQ(true, diagnostics.contains_errors());                            \
+    EXPECT_EQ(expected, diag::Formatter(formatter_style).format(diagnostics)); \
   } while (false)
 
 TEST_F(ParserImplErrorResyncTest, BadFunctionDecls) {

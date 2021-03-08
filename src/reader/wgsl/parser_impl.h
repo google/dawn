@@ -293,19 +293,13 @@ class ParserImpl {
   size_t get_max_errors() const { return max_errors_; }
 
   /// @returns true if an error was encountered.
-  bool has_error() const { return diags_.contains_errors(); }
+  bool has_error() const { return builder_.Diagnostics().contains_errors(); }
 
   /// @returns the parser error string
   std::string error() const {
     diag::Formatter formatter{{false, false, false, false}};
-    return formatter.format(diags_);
+    return formatter.format(builder_.Diagnostics());
   }
-
-  /// @returns the diagnostic messages
-  const diag::List& diagnostics() const { return diags_; }
-
-  /// @returns the diagnostic messages
-  diag::List& diagnostics() { return diags_; }
 
   /// @returns the Program. The program builder in the parser will be reset
   /// after this.
@@ -827,7 +821,6 @@ class ParserImpl {
     return builder_.create<T>(std::forward<ARGS>(args)...);
   }
 
-  diag::List diags_;
   std::unique_ptr<Lexer> lexer_;
   std::deque<Token> token_queue_;
   bool synchronized_ = true;

@@ -25,11 +25,7 @@ namespace wgsl {
 Program Parse(Source::File const* file) {
   ParserImpl parser(file);
   parser.Parse();
-  ProgramBuilder builder = std::move(parser.builder());
-  // TODO(bclayton): Remove ParserImpl::diagnostics() and put all diagnostic
-  // into the builder.
-  builder.Diagnostics().add(parser.diagnostics());
-  return Program(std::move(builder));
+  return Program(std::move(parser.builder()));
 }
 
 }  // namespace wgsl
