@@ -28,6 +28,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/resolver/resolver_test_helper.h"
 #include "src/semantic/call.h"
 #include "src/semantic/function.h"
 #include "src/semantic/member_accessor_expression.h"
@@ -62,41 +63,6 @@ class FakeExpr : public ast::Expression {
   bool IsValid() const override { return true; }
   void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
 };
-
-class ResolverHelper : public ProgramBuilder {
- public:
-  ResolverHelper() : td_(std::make_unique<Resolver>(this)) {}
-
-  Resolver* r() const { return td_.get(); }
-
-  ast::Statement* StmtOf(ast::Expression* expr) {
-    auto* sem_stmt = Sem().Get(expr)->Stmt();
-    return sem_stmt ? sem_stmt->Declaration() : nullptr;
-  }
-
-  bool CheckVarUsers(ast::Variable* var,
-                     std::vector<ast::Expression*>&& expected_users) {
-    auto& var_users = Sem().Get(var)->Users();
-    if (var_users.size() != expected_users.size()) {
-      return false;
-    }
-    for (size_t i = 0; i < var_users.size(); i++) {
-      if (var_users[i]->Declaration() != expected_users[i]) {
-        return false;
-      }
-    }
-    return true;
-  }
-
- private:
-  std::unique_ptr<Resolver> td_;
-};
-
-class ResolverTest : public ResolverHelper, public testing::Test {};
-
-template <typename T>
-class ResolverTestWithParam : public ResolverHelper,
-                              public testing::TestWithParam<T> {};
 
 TEST_F(ResolverTest, Error_WithEmptySource) {
   auto* s = create<FakeStmt>();

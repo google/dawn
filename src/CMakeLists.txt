@@ -471,6 +471,8 @@ if(${TINT_BUILD_TESTS})
     intrinsic_table_test.cc
     program_test.cc
     resolver/resolver_test.cc
+    resolver/resolver_test_helper.cc
+    resolver/resolver_test_helper.h
     semantic/sem_intrinsic_test.cc
     scope_stack_test.cc
     symbol_table_test.cc
