@@ -202,6 +202,7 @@ class Resolver {
   bool CaseStatement(ast::CaseStatement* stmt);
   bool Constructor(ast::ConstructorExpression* expr);
   bool Identifier(ast::IdentifierExpression* expr);
+  bool IfStatement(ast::IfStatement* stmt);
   bool IntrinsicCall(ast::CallExpression* call,
                      semantic::IntrinsicType intrinsic_type);
   bool MemberAccessor(ast::MemberAccessorExpression* expr);

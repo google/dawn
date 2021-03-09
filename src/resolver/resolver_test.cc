@@ -146,7 +146,7 @@ TEST_F(ResolverTest, Stmt_If) {
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
   auto* body = create<ast::BlockStatement>(ast::StatementList{assign});
-  auto* cond = Expr(3);
+  auto* cond = Expr(true);
   auto* stmt =
       create<ast::IfStatement>(cond, body, ast::ElseStatementList{else_stmt});
   WrapInFunction(stmt);
@@ -158,7 +158,7 @@ TEST_F(ResolverTest, Stmt_If) {
   ASSERT_NE(TypeOf(else_rhs), nullptr);
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
-  EXPECT_TRUE(TypeOf(stmt->condition())->Is<type::I32>());
+  EXPECT_TRUE(TypeOf(stmt->condition())->Is<type::Bool>());
   EXPECT_TRUE(TypeOf(else_lhs)->Is<type::I32>());
   EXPECT_TRUE(TypeOf(else_rhs)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(lhs)->Is<type::I32>());

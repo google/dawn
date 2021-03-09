@@ -254,16 +254,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
     return true;
   }
   if (auto* i = stmt->As<ast::IfStatement>()) {
-    if (!Expression(i->condition()) || !BlockStatement(i->body())) {
-      return false;
-    }
-
-    for (auto* else_stmt : i->else_statements()) {
-      if (!Statement(else_stmt)) {
-        return false;
-      }
-    }
-    return true;
+    return IfStatement(i);
   }
   if (auto* l = stmt->As<ast::LoopStatement>()) {
     // We don't call DetermineBlockStatement on the body and continuing block as
@@ -315,6 +306,31 @@ bool Resolver::Statement(ast::Statement* stmt) {
 bool Resolver::CaseStatement(ast::CaseStatement* stmt) {
   return BlockScope(BlockInfo::Type::kSwitchCase,
                     [&] { return Statements(stmt->body()->list()); });
+}
+
+bool Resolver::IfStatement(ast::IfStatement* stmt) {
+  if (!Expression(stmt->condition())) {
+    return false;
+  }
+
+  auto* cond_type = TypeOf(stmt->condition())->UnwrapAll();
+  if (cond_type != builder_->ty.bool_()) {
+    diagnostics_.add_error("if statement condition must be bool, got " +
+                               cond_type->FriendlyName(builder_->Symbols()),
+                           stmt->condition()->source());
+    return false;
+  }
+
+  if (!BlockStatement(stmt->body())) {
+    return false;
+  }
+
+  for (auto* else_stmt : stmt->else_statements()) {
+    if (!Statement(else_stmt)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool Resolver::Expressions(const ast::ExpressionList& list) {

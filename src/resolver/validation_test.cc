@@ -133,6 +133,19 @@ TEST_F(ResolverValidationTest, Stmt_Call_recursive) {
             "itself.");
 }
 
+TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
+  // if (1.23f) {}
+
+  WrapInFunction(If(create<ast::ScalarConstructorExpression>(Source{{12, 34}},
+                                                             Literal(1.23f)),
+                    Block()));
+
+  EXPECT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(r()->error(),
+            "12:34 error: if statement condition must be bool, got f32");
+}
+
 TEST_F(ResolverValidationTest,
        Stmt_VariableDecl_MismatchedTypeScalarConstructor) {
   u32 unsigned_value = 2u;  // Type does not match variable type
