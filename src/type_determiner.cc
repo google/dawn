@@ -96,6 +96,13 @@ TypeDeterminer::TypeDeterminer(ProgramBuilder* builder)
 
 TypeDeterminer::~TypeDeterminer() = default;
 
+TypeDeterminer::BlockInfo::BlockInfo(TypeDeterminer::BlockInfo::Type type,
+                                     TypeDeterminer::BlockInfo* parent,
+                                     const ast::BlockStatement* block)
+    : type(type), parent(parent), block(block) {}
+
+TypeDeterminer::BlockInfo::~BlockInfo() = default;
+
 void TypeDeterminer::set_referenced_from_function_if_needed(VariableInfo* var,
                                                             bool local) {
   if (current_function_ == nullptr) {
@@ -159,7 +166,7 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
     variable_stack_.set(param->symbol(), CreateVariableInfo(param));
   }
 
-  if (!DetermineStatements(func->body())) {
+  if (!DetermineBlockStatement(func->body())) {
     return false;
   }
   variable_stack_.pop_scope();
@@ -173,8 +180,17 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
   return true;
 }
 
-bool TypeDeterminer::DetermineStatements(const ast::BlockStatement* stmts) {
-  for (auto* stmt : *stmts) {
+bool TypeDeterminer::DetermineBlockStatement(const ast::BlockStatement* stmt) {
+  auto* block =
+      block_infos_.Create(BlockInfo::Type::Generic, current_block_, stmt);
+  block_to_info_[stmt] = block;
+  ScopedAssignment<BlockInfo*> scope_sa(current_block_, block);
+
+  return DetermineStatements(stmt->list());
+}
+
+bool TypeDeterminer::DetermineStatements(const ast::StatementList& stmts) {
+  for (auto* stmt : stmts) {
     if (auto* decl = stmt->As<ast::VariableDeclStatement>()) {
       if (!ValidateVariableDeclStatement(decl)) {
         return false;
@@ -231,7 +247,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineResultType(a->lhs()) && DetermineResultType(a->rhs());
   }
   if (auto* b = stmt->As<ast::BlockStatement>()) {
-    return DetermineStatements(b);
+    return DetermineBlockStatement(b);
   }
   if (stmt->Is<ast::BreakStatement>()) {
     return true;
@@ -240,9 +256,21 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return DetermineResultType(c->expr());
   }
   if (auto* c = stmt->As<ast::CaseStatement>()) {
-    return DetermineStatements(c->body());
+    return DetermineBlockStatement(c->body());
   }
   if (stmt->Is<ast::ContinueStatement>()) {
+    // Set if we've hit the first continue statement in our parent loop
+    if (auto* loop_block =
+            current_block_->FindFirstParent(BlockInfo::Type::Loop)) {
+      if (loop_block->first_continue == size_t(~0)) {
+        loop_block->first_continue = loop_block->decls.size();
+      }
+    } else {
+      diagnostics_.add_error("continue statement must be in a loop",
+                             stmt->source());
+      return false;
+    }
+
     return true;
   }
   if (stmt->Is<ast::DiscardStatement>()) {
@@ -250,14 +278,14 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   }
   if (auto* e = stmt->As<ast::ElseStatement>()) {
     return DetermineResultType(e->condition()) &&
-           DetermineStatements(e->body());
+           DetermineBlockStatement(e->body());
   }
   if (stmt->Is<ast::FallthroughStatement>()) {
     return true;
   }
   if (auto* i = stmt->As<ast::IfStatement>()) {
     if (!DetermineResultType(i->condition()) ||
-        !DetermineStatements(i->body())) {
+        !DetermineBlockStatement(i->body())) {
       return false;
     }
 
@@ -269,8 +297,30 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return true;
   }
   if (auto* l = stmt->As<ast::LoopStatement>()) {
-    return DetermineStatements(l->body()) &&
-           DetermineStatements(l->continuing());
+    // We don't call DetermineBlockStatement on the body and continuing block as
+    // these would make their BlockInfo siblings as in the AST, but we want the
+    // body BlockInfo to parent the continuing BlockInfo for semantics and
+    // validation. Also, we need to set their types differently.
+    auto* block =
+        block_infos_.Create(BlockInfo::Type::Loop, current_block_, l->body());
+    block_to_info_[l->body()] = block;
+    ScopedAssignment<BlockInfo*> scope_sa(current_block_, block);
+
+    if (!DetermineStatements(l->body()->list())) {
+      return false;
+    }
+
+    if (l->has_continuing()) {
+      auto* block = block_infos_.Create(BlockInfo::Type::LoopContinuing,
+                                        current_block_, l->continuing());
+      block_to_info_[l->continuing()] = block;
+      ScopedAssignment<BlockInfo*> scope_sa(current_block_, block);
+
+      if (!DetermineStatements(l->continuing()->list())) {
+        return false;
+      }
+    }
+    return true;
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return DetermineResultType(r->value());
@@ -289,6 +339,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
     variable_stack_.set(v->variable()->symbol(),
                         variable_to_info_.at(v->variable()));
+    current_block_->decls.push_back(v->variable());
     return DetermineResultType(v->variable()->constructor());
   }
 
@@ -552,6 +603,36 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
 
     var->users.push_back(expr);
     set_referenced_from_function_if_needed(var, true);
+
+    // If identifier is part of a loop continuing block, make sure it doesn't
+    // refer to a variable that is bypassed by a continue statement in the
+    // loop's body block.
+    if (auto* continuing_block =
+            current_block_->FindFirstParent(BlockInfo::Type::LoopContinuing)) {
+      auto* loop_block =
+          continuing_block->FindFirstParent(BlockInfo::Type::Loop);
+      if (loop_block->first_continue != size_t(~0)) {
+        auto& decls = loop_block->decls;
+        // If our identifier is in loop_block->decls, make sure its index is
+        // less than first_continue
+        auto iter = std::find_if(
+            decls.begin(), decls.end(),
+            [&symbol](auto* var) { return var->symbol() == symbol; });
+        if (iter != decls.end()) {
+          auto var_decl_index =
+              static_cast<size_t>(std::distance(decls.begin(), iter));
+          if (var_decl_index >= loop_block->first_continue) {
+            diagnostics_.add_error(
+                "continue statement bypasses declaration of '" +
+                    builder_->Symbols().NameFor(symbol) +
+                    "' in continuing block",
+                expr->source());
+            return false;
+          }
+        }
+      }
+    }
+
     return true;
   }
 

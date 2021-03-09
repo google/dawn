@@ -106,6 +106,43 @@ class TypeDeterminer {
     semantic::Statement* statement;
   };
 
+  /// Structure holding semantic information about a block (i.e. scope), such as
+  /// parent block and variables declared in the block.
+  /// Used to validate variable scoping rules.
+  struct BlockInfo {
+    enum class Type { Generic, Loop, LoopContinuing };
+
+    BlockInfo(Type type, BlockInfo* parent, const ast::BlockStatement* block);
+    ~BlockInfo();
+
+    template <typename Pred>
+    BlockInfo* FindFirstParent(Pred&& pred) {
+      BlockInfo* curr = this;
+      while (curr && !pred(curr)) {
+        curr = curr->parent;
+      }
+      return curr;
+    }
+
+    BlockInfo* FindFirstParent(BlockInfo::Type type) {
+      return FindFirstParent(
+          [type](auto* block_info) { return block_info->type == type; });
+    }
+
+    const Type type;
+    BlockInfo* parent;
+    const ast::BlockStatement* block;
+    std::vector<const ast::Variable*> decls;
+
+    // first_continue is set to the index of the first variable in decls
+    // declared after the first continue statement in a loop block, if any.
+    constexpr static size_t kNoContinue = size_t(~0);
+    size_t first_continue = kNoContinue;
+  };
+  std::unordered_map<const ast::BlockStatement*, BlockInfo*> block_to_info_;
+  BlockAllocator<BlockInfo> block_infos_;
+  BlockInfo* current_block_ = nullptr;
+
   /// Determines type information for the program, without creating final the
   /// semantic nodes.
   /// @returns true if the determination was successful
@@ -120,10 +157,14 @@ class TypeDeterminer {
   /// @param func the function to check
   /// @returns true if the determination was successful
   bool DetermineFunction(ast::Function* func);
+  /// Determines the type information for a block statement
+  /// @param stmt the block statement
+  /// @returns true if determination was successful
+  bool DetermineBlockStatement(const ast::BlockStatement* stmt);
   /// Determines type information for a set of statements
   /// @param stmts the statements to check
   /// @returns true if the determination was successful
-  bool DetermineStatements(const ast::BlockStatement* stmts);
+  bool DetermineStatements(const ast::StatementList& stmts);
   /// Determines type information for a statement
   /// @param stmt the statement to check
   /// @returns true if the determination was successful

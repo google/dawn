@@ -35,6 +35,9 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   BlockStatement(BlockStatement&&);
   ~BlockStatement() override;
 
+  /// @returns the StatementList
+  const StatementList& list() const { return statements_; }
+
   /// @returns true if the block is empty
   bool empty() const { return statements_.empty(); }
   /// @returns the number of statements directly in the block

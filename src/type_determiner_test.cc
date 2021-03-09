@@ -312,6 +312,218 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
   EXPECT_TRUE(TypeOf(continuing_rhs)->Is<type::F32>());
 }
 
+TEST_F(TypeDeterminerTest,
+       Stmt_Loop_ContinueInLoopBodyBeforeDecl_UsageInContinuing) {
+  // loop  {
+  //     continue; // Bypasses z decl
+  //     var z : i32;
+  //
+  //     continuing {
+  //         z = 2;
+  //     }
+  // }
+
+  auto error_loc = Source{Source::Location{12, 34}};
+  auto* body = Block(create<ast::ContinueStatement>(),
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto* continuing = Block(Assign(Expr(error_loc, "z"), Expr(2)));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_FALSE(td()->Determine()) << td()->error();
+  EXPECT_EQ(td()->error(),
+            "12:34 error: continue statement bypasses declaration of 'z' in "
+            "continuing block");
+}
+
+TEST_F(TypeDeterminerTest,
+       Stmt_Loop_ContinueInLoopBodyBeforeDeclAndAfterDecl_UsageInContinuing) {
+  // loop  {
+  //     continue; // Bypasses z decl
+  //     var z : i32;
+  //     continue; // Ok
+  //
+  //     continuing {
+  //         z = 2;
+  //     }
+  // }
+
+  auto error_loc = Source{Source::Location{12, 34}};
+  auto* body = Block(create<ast::ContinueStatement>(),
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
+                     create<ast::ContinueStatement>());
+  auto* continuing = Block(Assign(Expr(error_loc, "z"), Expr(2)));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_FALSE(td()->Determine()) << td()->error();
+  EXPECT_EQ(td()->error(),
+            "12:34 error: continue statement bypasses declaration of 'z' in "
+            "continuing block");
+}
+
+TEST_F(TypeDeterminerTest,
+       Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageInContinuing) {
+  // loop  {
+  //     if (true) {
+  //         continue; // Still bypasses z decl (if we reach here)
+  //     }
+  //     var z : i32;
+  //     continuing {
+  //         z = 2;
+  //     }
+  // }
+
+  auto error_loc = Source{Source::Location{12, 34}};
+  auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto* continuing = Block(Assign(Expr(error_loc, "z"), Expr(2)));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_FALSE(td()->Determine()) << td()->error();
+  EXPECT_EQ(td()->error(),
+            "12:34 error: continue statement bypasses declaration of 'z' in "
+            "continuing block");
+}
+
+TEST_F(
+    TypeDeterminerTest,
+    Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageInContinuingSubscope) {
+  // loop  {
+  //     if (true) {
+  //         continue; // Still bypasses z decl (if we reach here)
+  //     }
+  //     var z : i32;
+  //     continuing {
+  //         if (true) {
+  //             z = 2; // Must fail even if z is in a sub-scope
+  //         }
+  //     }
+  // }
+
+  auto error_loc = Source{Source::Location{12, 34}};
+  auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+
+  auto* continuing =
+      Block(If(Expr(true), Block(Assign(Expr(error_loc, "z"), Expr(2)))));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_FALSE(td()->Determine()) << td()->error();
+  EXPECT_EQ(td()->error(),
+            "12:34 error: continue statement bypasses declaration of 'z' in "
+            "continuing block");
+}
+
+TEST_F(TypeDeterminerTest,
+       Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageInContinuingLoop) {
+  // loop  {
+  //     if (true) {
+  //         continue; // Still bypasses z decl (if we reach here)
+  //     }
+  //     var z : i32;
+  //     continuing {
+  //         loop {
+  //             z = 2; // Must fail even if z is in a sub-scope
+  //         }
+  //     }
+  // }
+
+  auto error_loc = Source{Source::Location{12, 34}};
+  auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
+                     Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+
+  auto* continuing = Block(Loop(Block(Assign(Expr(error_loc, "z"), Expr(2)))));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_FALSE(td()->Determine()) << td()->error();
+  EXPECT_EQ(td()->error(),
+            "12:34 error: continue statement bypasses declaration of 'z' in "
+            "continuing block");
+}
+
+TEST_F(TypeDeterminerTest,
+       Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_UsageInContinuing) {
+  // loop  {
+  //     loop {
+  //         continue; // OK: not part of the outer loop
+  //     }
+  //     var z : i32;
+  //
+  //     continuing {
+  //         z = 2;
+  //     }
+  // }
+
+  auto* inner_loop = Loop(Block(create<ast::ContinueStatement>()));
+  auto* body =
+      Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto* continuing = Block(Assign(Expr("z"), Expr(2)));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+}
+
+TEST_F(TypeDeterminerTest,
+       Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_UsageInContinuingSubscope) {
+  // loop  {
+  //     loop {
+  //         continue; // OK: not part of the outer loop
+  //     }
+  //     var z : i32;
+  //
+  //     continuing {
+  //         if (true) {
+  //             z = 2;
+  //         }
+  //     }
+  // }
+
+  auto* inner_loop = Loop(Block(create<ast::ContinueStatement>()));
+  auto* body =
+      Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto* continuing = Block(If(Expr(true), Block(Assign(Expr("z"), Expr(2)))));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+}
+
+TEST_F(TypeDeterminerTest,
+       Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_UsageInContinuingLoop) {
+  // loop  {
+  //     loop {
+  //         continue; // OK: not part of the outer loop
+  //     }
+  //     var z : i32;
+  //
+  //     continuing {
+  //         loop {
+  //             z = 2;
+  //         }
+  //     }
+  // }
+
+  auto* inner_loop = Loop(Block(create<ast::ContinueStatement>()));
+  auto* body =
+      Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
+  auto* continuing = Block(Loop(Block(Assign(Expr("z"), Expr(2)))));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_TRUE(td()->Determine()) << td()->error();
+}
+
+TEST_F(TypeDeterminerTest, Stmt_ContinueNotInLoop) {
+  WrapInFunction(create<ast::ContinueStatement>());
+  EXPECT_FALSE(td()->Determine());
+  EXPECT_EQ(td()->error(), "error: continue statement must be in a loop");
+}
+
 TEST_F(TypeDeterminerTest, Stmt_Return) {
   auto* cond = Expr(2);
 

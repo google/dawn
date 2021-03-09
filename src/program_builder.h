@@ -19,12 +19,15 @@
 #include <utility>
 
 #include "src/ast/array_accessor_expression.h"
+#include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/expression.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/identifier_expression.h"
+#include "src/ast/if_statement.h"
+#include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
@@ -36,6 +39,7 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable.h"
+#include "src/ast/variable_decl_statement.h"
 #include "src/diagnostic/diagnostic.h"
 #include "src/program.h"
 #include "src/semantic/info.h"
@@ -1049,6 +1053,64 @@ class ProgramBuilder {
         ast::StructMemberDecorationList{
             create<ast::StructMemberOffsetDecoration>(offset),
         });
+  }
+
+  /// Creates a ast::BlockStatement with input statements
+  /// @param statements statements of block
+  /// @returns the block statement pointer
+  template <typename... Statements>
+  ast::BlockStatement* Block(Statements&&... statements) {
+    return create<ast::BlockStatement>(
+        ast::StatementList{std::forward<Statements>(statements)...});
+  }
+
+  /// Creates a ast::ElseStatement with input condition and body
+  /// @param condition the else condition expression
+  /// @param body the else body
+  /// @returns the else statement pointer
+  ast::ElseStatement* Else(ast::Expression* condition,
+                           ast::BlockStatement* body) {
+    return create<ast::ElseStatement>(condition, body);
+  }
+
+  /// Creates a ast::IfStatement with input condition, body, and optional
+  /// variadic else statements
+  /// @param condition the if statement condition expression
+  /// @param body the if statement body
+  /// @param elseStatements optional variadic else statements
+  /// @returns the if statement pointer
+  template <typename... ElseStatements>
+  ast::IfStatement* If(ast::Expression* condition,
+                       ast::BlockStatement* body,
+                       ElseStatements&&... elseStatements) {
+    return create<ast::IfStatement>(
+        condition, body,
+        ast::ElseStatementList{
+            std::forward<ElseStatements>(elseStatements)...});
+  }
+
+  /// Creates a ast::AssignmentStatement with input lhs and rhs expressions
+  /// @param lhs the left hand side expression
+  /// @param rhs the right hand side expression
+  /// @returns the assignment statement pointer
+  ast::AssignmentStatement* Assign(ast::Expression* lhs, ast::Expression* rhs) {
+    return create<ast::AssignmentStatement>(lhs, rhs);
+  }
+
+  /// Creates a ast::LoopStatement with input body and optional continuing
+  /// @param body the loop body
+  /// @param continuing the optional continuing block
+  /// @returns the loop statement pointer
+  ast::LoopStatement* Loop(ast::BlockStatement* body,
+                           ast::BlockStatement* continuing = nullptr) {
+    return create<ast::LoopStatement>(body, continuing);
+  }
+
+  /// Creates a ast::VariableDeclStatement for the input variable
+  /// @param var the variable to wrap in a decl statement
+  /// @returns the variable decl statement pointer
+  ast::VariableDeclStatement* Decl(ast::Variable* var) {
+    return create<ast::VariableDeclStatement>(var);
   }
 
   /// Sets the current builder source to `src`
