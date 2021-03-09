@@ -26,7 +26,22 @@ if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
   set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-option(TINT_BUILD_DOCS "Build documentation" ON)
+# TINT_IS_SUBPROJECT is 1 if added via add_subdirectory() from another project.
+get_directory_property(TINT_IS_SUBPROJECT PARENT_DIRECTORY)
+if(TINT_IS_SUBPROJECT)
+  set(TINT_IS_SUBPROJECT 1)
+
+  # If tint is used as a subproject, default to disabling the building of
+  # documentation and tests. These are unlikely to be desirable, but can be
+  # enabled.
+  set(TINT_BUILD_DOCS_DEFAULT OFF)
+  set(TINT_BUILD_TESTS_DEFAULT OFF)
+else()
+  set(TINT_BUILD_DOCS_DEFAULT ON)
+  set(TINT_BUILD_TESTS_DEFAULT ON)
+endif()
+
+option(TINT_BUILD_DOCS "Build documentation" ${TINT_BUILD_DOCS_DEFAULT})
 option(TINT_BUILD_SPV_READER "Build the SPIR-V input reader" ON)
 option(TINT_BUILD_WGSL_READER "Build the WGSL input reader" ON)
 option(TINT_BUILD_HLSL_WRITER "Build the HLSL output writer" ON)
@@ -34,7 +49,7 @@ option(TINT_BUILD_MSL_WRITER "Build the MSL output writer" ON)
 option(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ON)
 option(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
 option(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
-option(TINT_BUILD_TESTS "Build tests" ON)
+option(TINT_BUILD_TESTS "Build tests" ${TINT_BUILD_TESTS_DEFAULT})
 
 option(TINT_ENABLE_MSAN "Enable memory sanitizer" OFF)
 option(TINT_ENABLE_ASAN "Enable address sanitizer" OFF)
@@ -43,14 +58,6 @@ option(TINT_ENABLE_UBSAN "Enable undefined behaviour sanitizer" OFF)
 option(TINT_EMIT_COVERAGE "Emit code coverage information" OFF)
 
 option(TINT_CHECK_CHROMIUM_STYLE "Check for [chromium-style] issues during build" OFF)
-
-if(WIN32)
-  # On Windows, CMake by default compiles with the shared CRT.
-  # Default it to the static CRT.
-  option(TINT_ENABLE_SHARED_CRT
-         "Tint: Use the shared CRT with MSVC instead of the static CRT"
-         ${TINT_ENABLE_SHARED_CRT})
-endif(WIN32)
 
 message(STATUS "Tint build docs: ${TINT_BUILD_DOCS}")
 message(STATUS "Tint build SPIR-V reader: ${TINT_BUILD_SPV_READER}")
@@ -95,25 +102,6 @@ if(${TINT_BUILD_DOCS})
   else()
     message("Doxygen not found. Skipping documentation")
   endif(DOXYGEN_FOUND)
-endif()
-
-if(MSVC)
-  # We don't want to have to copy the C Runtime DLL everywhere the executable
-  # goes.  So by default compile code to assume the CRT is statically linked,
-  # i.e. use /MT* options.  For debug builds use /MTd, and for release builds
-  # use /MT.  If TINT_ENABLE_SHARED_CRT is ON, then use the shared C runtime.
-  # Modify the project-wide options variables. This is ugly, but seems to be
-  # the state of the art.
-  if(NOT ${TINT_ENABLE_SHARED_CRT})
-    message(STATUS "Tint: Static C runtime selected: replacing /MD* with /MT*")
-    foreach (flag_var
-       CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
-       CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
-       CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELEASE
-       CMAKE_CXX_FLAGS_MINSIZEREL CMAKE_CXX_FLAGS_RELWITHDEBINFO)
-      string(REPLACE "/MD" "/MT" ${flag_var} "${${flag_var}}")
-    endforeach()
-  endif()
 endif()
 
 function(tint_default_compile_options TARGET)
@@ -212,18 +200,6 @@ function(tint_default_compile_options TARGET)
     )
   endif()
 
-  if (NOT ${TINT_ENABLE_SHARED_CRT})
-    # For MinGW cross compile, statically link to the C++ runtime.
-    # But it still depends on MSVCRT.dll.
-    if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-      if (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
-        set_target_properties(${TARGET} PROPERTIES LINK_FLAGS
-          -static
-          -static-libgcc
-          -static-libstdc++)
-      endif()
-    endif()
-  endif()
 endfunction()
 
 add_subdirectory(third_party)
