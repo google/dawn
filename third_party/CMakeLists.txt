@@ -13,6 +13,7 @@
 # limitations under the License.
 
 if (${TINT_BUILD_TESTS} AND NOT TARGET gmock)
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
 endif()
 

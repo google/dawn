@@ -15,6 +15,7 @@
 #include "src/reader/spirv/parser_impl.h"
 
 #include <limits>
+#include <locale>
 
 #include "source/opt/build_module.h"
 #include "src/ast/bitcast_expression.h"

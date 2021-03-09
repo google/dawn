@@ -17,6 +17,26 @@
 
 #include <utility>
 
+#if defined(__clang__)
+/// Temporarily disable certain warnings when using Castable API
+#define TINT_CASTABLE_PUSH_DISABLE_WARNINGS()                               \
+  _Pragma("clang diagnostic push")                                     /**/ \
+      _Pragma("clang diagnostic ignored \"-Wundefined-var-template\"") /**/ \
+      static_assert(true, "require extra semicolon")
+
+/// Restore disabled warnings
+#define TINT_CASTABLE_POP_DISABLE_WARNINGS() \
+  _Pragma("clang diagnostic pop") /**/       \
+      static_assert(true, "require extra semicolon")
+#else
+#define TINT_CASTABLE_PUSH_DISABLE_WARNINGS() \
+  static_assert(true, "require extra semicolon")
+#define TINT_CASTABLE_POP_DISABLE_WARNINGS() \
+  static_assert(true, "require extra semicolon")
+#endif
+
+TINT_CASTABLE_PUSH_DISABLE_WARNINGS();
+
 namespace tint {
 
 namespace detail {
@@ -25,11 +45,14 @@ struct TypeInfoOf;
 }  // namespace detail
 
 /// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
-#define TINT_INSTANTIATE_TYPEINFO(CLASS)                       \
-  template <>                                                  \
-  const tint::TypeInfo tint::detail::TypeInfoOf<CLASS>::info { \
-    &tint::detail::TypeInfoOf<CLASS::TrueBase>::info, #CLASS,  \
-  }
+#define TINT_INSTANTIATE_TYPEINFO(CLASS)                      \
+  TINT_CASTABLE_PUSH_DISABLE_WARNINGS();                      \
+  template <>                                                 \
+  const tint::TypeInfo tint::detail::TypeInfoOf<CLASS>::info{ \
+      &tint::detail::TypeInfoOf<CLASS::TrueBase>::info,       \
+      #CLASS,                                                 \
+  };                                                          \
+  TINT_CASTABLE_POP_DISABLE_WARNINGS()
 
 /// TypeInfo holds type information for a Castable type.
 struct TypeInfo {
@@ -196,5 +219,7 @@ inline TO* As(FROM* obj) {
 }
 
 }  // namespace tint
+
+TINT_CASTABLE_POP_DISABLE_WARNINGS();
 
 #endif  // SRC_CASTABLE_H_
