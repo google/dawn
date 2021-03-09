@@ -470,11 +470,13 @@ if(${TINT_BUILD_TESTS})
     inspector/inspector_test.cc
     intrinsic_table_test.cc
     program_test.cc
-    resolver/resolver_test.cc
+    resolver/intrinsic_test.cc
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h
-    semantic/sem_intrinsic_test.cc
+    resolver/resolver_test.cc
+    resolver/validation_test.cc
     scope_stack_test.cc
+    semantic/sem_intrinsic_test.cc
     symbol_table_test.cc
     symbol_test.cc
     traits_test.cc
