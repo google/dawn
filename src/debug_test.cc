@@ -28,5 +28,13 @@ TEST(DebugTest, Unreachable) {
       "internal compiler error");
 }
 
+TEST(DebugTest, AssertTrue) {
+  TINT_ASSERT(true);
+}
+
+TEST(DebugTest, AssertFalse) {
+  EXPECT_FATAL_FAILURE({ TINT_ASSERT(false); }, "internal compiler error");
+}
+
 }  // namespace
 }  // namespace tint
