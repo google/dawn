@@ -40,6 +40,7 @@ using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
 namespace tint {
+namespace resolver {
 namespace {
 
 using IntrinsicType = semantic::IntrinsicType;
@@ -3774,10 +3775,11 @@ TEST_P(ResolverTextureIntrinsicTest, Call) {
   auto* target = call_sem->Target();
   ASSERT_NE(target, nullptr);
 
-  auto got = ::tint::to_str(param.function, target->Parameters());
+  auto got = resolver::to_str(param.function, target->Parameters());
   auto* expected = expected_texture_overload(param.overload);
   EXPECT_EQ(got, expected);
 }
 
 }  // namespace
+}  // namespace resolver
 }  // namespace tint

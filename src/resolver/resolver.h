@@ -45,6 +45,8 @@ namespace semantic {
 class Statement;
 }  // namespace semantic
 
+namespace resolver {
+
 /// Resolves types for all items in the given tint program
 class Resolver {
  public:
@@ -241,6 +243,7 @@ class Resolver {
   BlockAllocator<FunctionInfo> function_infos_;
 };
 
+}  // namespace resolver
 }  // namespace tint
 
 #endif  // SRC_RESOLVER_RESOLVER_H_

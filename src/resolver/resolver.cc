@@ -37,6 +37,7 @@
 #include "src/semantic/variable.h"
 
 namespace tint {
+namespace resolver {
 namespace {
 
 using IntrinsicType = tint::semantic::IntrinsicType;
@@ -961,4 +962,5 @@ Resolver::FunctionInfo::FunctionInfo(ast::Function* decl) : declaration(decl) {}
 
 Resolver::FunctionInfo::~FunctionInfo() = default;
 
+}  // namespace resolver
 }  // namespace tint

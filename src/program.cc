@@ -40,7 +40,7 @@ Program::Program(Program&& program)
 Program::Program(ProgramBuilder&& builder) {
   is_valid_ = builder.IsValid();
   if (builder.ResolveOnBuild() && builder.IsValid()) {
-    Resolver resolver(&builder);
+    resolver::Resolver resolver(&builder);
     if (!resolver.Resolve()) {
       diagnostics_.add_error(resolver.error());
       is_valid_ = false;
