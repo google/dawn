@@ -66,9 +66,8 @@ Resolver::Resolver(ProgramBuilder* builder)
 Resolver::~Resolver() = default;
 
 Resolver::BlockInfo::BlockInfo(Resolver::BlockInfo::Type ty,
-                               Resolver::BlockInfo* p,
-                               const ast::BlockStatement* b)
-    : type(ty), parent(p), block(b) {}
+                               Resolver::BlockInfo* p)
+    : type(ty), parent(p) {}
 
 Resolver::BlockInfo::~BlockInfo() = default;
 
@@ -150,12 +149,8 @@ bool Resolver::Function(ast::Function* func) {
 }
 
 bool Resolver::BlockStatement(const ast::BlockStatement* stmt) {
-  auto* block =
-      block_infos_.Create(BlockInfo::Type::Generic, current_block_, stmt);
-  block_to_info_[stmt] = block;
-  ScopedAssignment<BlockInfo*> scope_sa(current_block_, block);
-
-  return Statements(stmt->list());
+  return BlockScope(BlockInfo::Type::kGeneric,
+                    [&] { return Statements(stmt->list()); });
 }
 
 bool Resolver::Statements(const ast::StatementList& stmts) {
@@ -219,18 +214,24 @@ bool Resolver::Statement(ast::Statement* stmt) {
     return BlockStatement(b);
   }
   if (stmt->Is<ast::BreakStatement>()) {
+    if (!current_block_->FindFirstParent(BlockInfo::Type::kLoop) &&
+        !current_block_->FindFirstParent(BlockInfo::Type::kSwitchCase)) {
+      diagnostics_.add_error("break statement must be in a loop or switch case",
+                             stmt->source());
+      return false;
+    }
     return true;
   }
   if (auto* c = stmt->As<ast::CallStatement>()) {
     return Expression(c->expr());
   }
   if (auto* c = stmt->As<ast::CaseStatement>()) {
-    return BlockStatement(c->body());
+    return CaseStatement(c);
   }
   if (stmt->Is<ast::ContinueStatement>()) {
     // Set if we've hit the first continue statement in our parent loop
     if (auto* loop_block =
-            current_block_->FindFirstParent(BlockInfo::Type::Loop)) {
+            current_block_->FindFirstParent(BlockInfo::Type::kLoop)) {
       if (loop_block->first_continue == size_t(~0)) {
         loop_block->first_continue = loop_block->decls.size();
       }
@@ -268,26 +269,20 @@ bool Resolver::Statement(ast::Statement* stmt) {
     // these would make their BlockInfo siblings as in the AST, but we want the
     // body BlockInfo to parent the continuing BlockInfo for semantics and
     // validation. Also, we need to set their types differently.
-    auto* block =
-        block_infos_.Create(BlockInfo::Type::Loop, current_block_, l->body());
-    block_to_info_[l->body()] = block;
-    ScopedAssignment<BlockInfo*> scope_sa(current_block_, block);
-
-    if (!Statements(l->body()->list())) {
-      return false;
-    }
-
-    if (l->has_continuing()) {
-      auto* cont_block = block_infos_.Create(BlockInfo::Type::LoopContinuing,
-                                             current_block_, l->continuing());
-      block_to_info_[l->continuing()] = cont_block;
-      ScopedAssignment<BlockInfo*> scope_sa2(current_block_, cont_block);
-
-      if (!Statements(l->continuing()->list())) {
+    return BlockScope(BlockInfo::Type::kLoop, [&] {
+      if (!Statements(l->body()->list())) {
         return false;
       }
-    }
-    return true;
+
+      if (l->has_continuing()) {
+        if (!BlockScope(BlockInfo::Type::kLoopContinuing,
+                        [&] { return Statements(l->continuing()->list()); })) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return Expression(r->value());
@@ -297,7 +292,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
       return false;
     }
     for (auto* case_stmt : s->body()) {
-      if (!Statement(case_stmt)) {
+      if (!CaseStatement(case_stmt)) {
         return false;
       }
     }
@@ -314,6 +309,11 @@ bool Resolver::Statement(ast::Statement* stmt) {
       "unknown statement type for type determination: " + builder_->str(stmt),
       stmt->source());
   return false;
+}
+
+bool Resolver::CaseStatement(ast::CaseStatement* stmt) {
+  return BlockScope(BlockInfo::Type::kSwitchCase,
+                    [&] { return Statements(stmt->body()->list()); });
 }
 
 bool Resolver::Expressions(const ast::ExpressionList& list) {
@@ -395,8 +395,7 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
   } else if (auto* arr = parent_type->As<type::Array>()) {
     if (!arr->type()->is_scalar()) {
       // If we extract a non-scalar from an array then we also get a pointer. We
-      // will generate a Function storage class variable to store this
-      // into.
+      // will generate a Function storage class variable to store this into.
       ret = builder_->create<type::Pointer>(ret, ast::StorageClass::kFunction);
     }
   }
@@ -573,9 +572,9 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
     // refer to a variable that is bypassed by a continue statement in the
     // loop's body block.
     if (auto* continuing_block =
-            current_block_->FindFirstParent(BlockInfo::Type::LoopContinuing)) {
+            current_block_->FindFirstParent(BlockInfo::Type::kLoopContinuing)) {
       auto* loop_block =
-          continuing_block->FindFirstParent(BlockInfo::Type::Loop);
+          continuing_block->FindFirstParent(BlockInfo::Type::kLoop);
       if (loop_block->first_continue != size_t(~0)) {
         auto& decls = loop_block->decls;
         // If our identifier is in loop_block->decls, make sure its index is
@@ -944,6 +943,13 @@ void Resolver::CreateSemanticNodes() const {
     sem.Add(expr, builder_->create<semantic::Expression>(expr, info.type,
                                                          info.statement));
   }
+}
+
+template <typename F>
+bool Resolver::BlockScope(BlockInfo::Type type, F&& callback) {
+  BlockInfo block_info(type, current_block_);
+  ScopedAssignment<BlockInfo*> sa(current_block_, &block_info);
+  return callback();
 }
 
 Resolver::VariableInfo::VariableInfo(ast::Variable* decl)

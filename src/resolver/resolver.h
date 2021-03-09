@@ -33,6 +33,7 @@ class ArrayAccessorExpression;
 class BinaryExpression;
 class BitcastExpression;
 class CallExpression;
+class CaseStatement;
 class ConstructorExpression;
 class Function;
 class IdentifierExpression;
@@ -105,9 +106,9 @@ class Resolver {
   /// parent block and variables declared in the block.
   /// Used to validate variable scoping rules.
   struct BlockInfo {
-    enum class Type { Generic, Loop, LoopContinuing };
+    enum class Type { kGeneric, kLoop, kLoopContinuing, kSwitchCase };
 
-    BlockInfo(Type type, BlockInfo* parent, const ast::BlockStatement* block);
+    BlockInfo(Type type, BlockInfo* parent);
     ~BlockInfo();
 
     template <typename Pred>
@@ -124,9 +125,8 @@ class Resolver {
           [ty](auto* block_info) { return block_info->type == ty; });
     }
 
-    const Type type;
-    BlockInfo* parent;
-    const ast::BlockStatement* block;
+    Type const type;
+    BlockInfo* const parent;
     std::vector<const ast::Variable*> decls;
 
     // first_continue is set to the index of the first variable in decls
@@ -134,9 +134,6 @@ class Resolver {
     constexpr static size_t kNoContinue = size_t(~0);
     size_t first_continue = kNoContinue;
   };
-  std::unordered_map<const ast::BlockStatement*, BlockInfo*> block_to_info_;
-  BlockAllocator<BlockInfo> block_infos_;
-  BlockInfo* current_block_ = nullptr;
 
   /// Resolves the program, without creating final the semantic nodes.
   /// @returns true on success, false on error
@@ -200,6 +197,7 @@ class Resolver {
   bool Binary(ast::BinaryExpression* expr);
   bool Bitcast(ast::BitcastExpression* expr);
   bool Call(ast::CallExpression* expr);
+  bool CaseStatement(ast::CaseStatement* stmt);
   bool Constructor(ast::ConstructorExpression* expr);
   bool Identifier(ast::IdentifierExpression* expr);
   bool IntrinsicCall(ast::CallExpression* call,
@@ -221,9 +219,16 @@ class Resolver {
   /// @param type the resolved type
   void SetType(ast::Expression* expr, type::Type* type);
 
+  /// Constructs a new BlockInfo with the given type and with #current_block_ as
+  /// its parent, assigns this to #current_block_, and then calls `callback`.
+  /// The original #current_block_ is restored on exit.
+  template <typename F>
+  bool BlockScope(BlockInfo::Type type, F&& callback);
+
   ProgramBuilder* const builder_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
   diag::List diagnostics_;
+  BlockInfo* current_block_ = nullptr;
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
   std::unordered_map<ast::Function*, FunctionInfo*> function_to_info_;

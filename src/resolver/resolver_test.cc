@@ -17,6 +17,7 @@
 #include "gmock/gmock.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
+#include "src/ast/break_statement.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/if_statement.h"
@@ -476,10 +477,37 @@ TEST_F(ResolverTest,
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverTest, Stmt_ContinueInLoop) {
+  WrapInFunction(Loop(Block(create<ast::ContinueStatement>(Source{{12, 34}}))));
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverTest, Stmt_ContinueNotInLoop) {
-  WrapInFunction(create<ast::ContinueStatement>());
+  WrapInFunction(create<ast::ContinueStatement>(Source{{12, 34}}));
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "error: continue statement must be in a loop");
+  EXPECT_EQ(r()->error(), "12:34 error: continue statement must be in a loop");
+}
+
+TEST_F(ResolverTest, Stmt_BreakInLoop) {
+  WrapInFunction(Loop(Block(create<ast::BreakStatement>(Source{{12, 34}}))));
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTest, Stmt_BreakInSwitch) {
+  WrapInFunction(Loop(Block(create<ast::SwitchStatement>(
+      Expr(1), ast::CaseStatementList{
+                   create<ast::CaseStatement>(
+                       ast::CaseSelectorList{Literal(1)},
+                       Block(create<ast::BreakStatement>(Source{{12, 34}}))),
+               }))));
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTest, Stmt_BreakNotInLoopOrSwitch) {
+  WrapInFunction(create<ast::BreakStatement>(Source{{12, 34}}));
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: break statement must be in a loop or switch case");
 }
 
 TEST_F(ResolverTest, Stmt_Return) {
