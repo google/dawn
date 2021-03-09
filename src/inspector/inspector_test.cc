@@ -60,7 +60,6 @@
 #include "src/type/u32_type.h"
 #include "src/type/vector_type.h"
 #include "src/type/void_type.h"
-#include "src/type_determiner.h"
 #include "tint/tint.h"
 
 namespace tint {
@@ -704,7 +703,6 @@ class InspectorHelper : public ProgramBuilder {
   type::Sampler* comparison_sampler_type() { return &comparison_sampler_type_; }
 
  private:
-  std::unique_ptr<TypeDeterminer> td_;
   std::unique_ptr<Program> program_;
   std::unique_ptr<Inspector> inspector_;
   type::Sampler sampler_type_;

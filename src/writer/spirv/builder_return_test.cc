@@ -22,7 +22,6 @@
 #include "src/ast/type_constructor_expression.h"
 #include "src/type/f32_type.h"
 #include "src/type/vector_type.h"
-#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"

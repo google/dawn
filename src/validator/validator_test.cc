@@ -51,7 +51,6 @@
 #include "src/type/struct_type.h"
 #include "src/type/vector_type.h"
 #include "src/type/void_type.h"
-#include "src/type_determiner.h"
 #include "src/validator/validator_impl.h"
 #include "src/validator/validator_test_helper.h"
 
@@ -83,39 +82,6 @@ TEST_F(ValidatorTest, AssignToScalar_Fail) {
   EXPECT_EQ(v.error(),
             "12:34 v-000x: invalid assignment: left-hand-side does not "
             "reference storage: __i32");
-}
-
-TEST_F(ValidatorTest, UsingUndefinedVariable_Fail) {
-  // b = 2;
-
-  SetSource(Source{Source::Location{12, 34}});
-  auto* lhs = Expr("b");
-  auto* rhs = Expr(2);
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-  WrapInFunction(assign);
-
-  EXPECT_FALSE(td()->Determine());
-  EXPECT_EQ(td()->error(),
-            "12:34 error: v-0006: identifier must be declared before use: b");
-}
-
-TEST_F(ValidatorTest, UsingUndefinedVariableInBlockStatement_Fail) {
-  // {
-  //  b = 2;
-  // }
-
-  SetSource(Source{Source::Location{12, 34}});
-  auto* lhs = Expr("b");
-  auto* rhs = Expr(2);
-
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
-  });
-  WrapInFunction(body);
-
-  EXPECT_FALSE(td()->Determine());
-  EXPECT_EQ(td()->error(),
-            "12:34 error: v-0006: identifier must be declared before use: b");
 }
 
 TEST_F(ValidatorTest, AssignCompatibleTypes_Pass) {

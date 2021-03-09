@@ -18,9 +18,7 @@
 
 namespace tint {
 
-ValidatorTestHelper::ValidatorTestHelper() {
-  td_ = std::make_unique<TypeDeterminer>(this);
-}
+ValidatorTestHelper::ValidatorTestHelper() = default;
 
 ValidatorTestHelper::~ValidatorTestHelper() = default;
 

@@ -19,7 +19,6 @@
 #include "src/program.h"
 #include "src/type/f32_type.h"
 #include "src/type/u32_type.h"
-#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"

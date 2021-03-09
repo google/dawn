@@ -24,7 +24,6 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/variable.h"
 #include "src/program.h"
-#include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

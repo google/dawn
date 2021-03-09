@@ -29,7 +29,6 @@
 #include "src/program.h"
 #include "src/type/struct_type.h"
 #include "src/type/vector_type.h"
-#include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

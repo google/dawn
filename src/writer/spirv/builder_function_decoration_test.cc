@@ -25,7 +25,6 @@
 #include "src/ast/variable.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/semantic/function.h"
-#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"

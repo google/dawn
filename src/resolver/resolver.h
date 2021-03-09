@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TYPE_DETERMINER_H_
-#define SRC_TYPE_DETERMINER_H_
+#ifndef SRC_RESOLVER_RESOLVER_H_
+#define SRC_RESOLVER_RESOLVER_H_
 
 #include <memory>
 #include <string>
@@ -49,21 +49,21 @@ namespace semantic {
 class Statement;
 }  // namespace semantic
 
-/// Determines types for all items in the given tint program
-class TypeDeterminer {
+/// Resolves types for all items in the given tint program
+class Resolver {
  public:
   /// Constructor
   /// @param builder the program builder
-  explicit TypeDeterminer(ProgramBuilder* builder);
+  explicit Resolver(ProgramBuilder* builder);
 
   /// Destructor
-  ~TypeDeterminer();
+  ~Resolver();
 
-  /// @returns error messages from the type determiner
+  /// @returns error messages from the resolver
   std::string error() const { return diagnostics_.str(); }
 
-  /// @returns true if the type determiner was successful
-  bool Determine();
+  /// @returns true if the resolver was successful
+  bool Resolve();
 
  private:
   /// Structure holding semantic information about a variable.
@@ -124,9 +124,9 @@ class TypeDeterminer {
       return curr;
     }
 
-    BlockInfo* FindFirstParent(BlockInfo::Type type) {
+    BlockInfo* FindFirstParent(BlockInfo::Type ty) {
       return FindFirstParent(
-          [type](auto* block_info) { return block_info->type == type; });
+          [ty](auto* block_info) { return block_info->type == ty; });
     }
 
     const Type type;
@@ -143,45 +143,44 @@ class TypeDeterminer {
   BlockAllocator<BlockInfo> block_infos_;
   BlockInfo* current_block_ = nullptr;
 
-  /// Determines type information for the program, without creating final the
-  /// semantic nodes.
-  /// @returns true if the determination was successful
-  bool DetermineInternal();
+  /// Resolves the program, without creating final the semantic nodes.
+  /// @returns true on success, false on error
+  bool ResolveInternal();
 
-  /// Determines type information for functions
+  /// Resolves functions
   /// @param funcs the functions to check
-  /// @returns true if the determination was successful
-  bool DetermineFunctions(const ast::FunctionList& funcs);
-  /// Determines type information for a function. Requires all dependency
+  /// @returns true on success, false on error
+  bool Functions(const ast::FunctionList& funcs);
+  /// Resolves a function. Requires all dependency
   /// (callee) functions to have DetermineFunction() called on them first.
   /// @param func the function to check
-  /// @returns true if the determination was successful
-  bool DetermineFunction(ast::Function* func);
-  /// Determines the type information for a block statement
+  /// @returns true on success, false on error
+  bool Function(ast::Function* func);
+  /// Resolves a block statement
   /// @param stmt the block statement
   /// @returns true if determination was successful
-  bool DetermineBlockStatement(const ast::BlockStatement* stmt);
-  /// Determines type information for a set of statements
-  /// @param stmts the statements to check
-  /// @returns true if the determination was successful
-  bool DetermineStatements(const ast::StatementList& stmts);
-  /// Determines type information for a statement
+  bool BlockStatement(const ast::BlockStatement* stmt);
+  /// Resolves the list of statements
+  /// @param stmts the statements to resolve
+  /// @returns true on success, false on error
+  bool Statements(const ast::StatementList& stmts);
+  /// Resolves a statement
   /// @param stmt the statement to check
-  /// @returns true if the determination was successful
-  bool DetermineResultType(ast::Statement* stmt);
-  /// Determines type information for an expression list
+  /// @returns true on success, false on error
+  bool Statement(ast::Statement* stmt);
+  /// Resolves an expression list
   /// @param list the expression list to check
-  /// @returns true if the determination was successful
-  bool DetermineResultType(const ast::ExpressionList& list);
-  /// Determines type information for an expression
+  /// @returns true on success, false on error
+  bool Expressions(const ast::ExpressionList& list);
+  /// Resolves an expression
   /// @param expr the expression to check
-  /// @returns true if the determination was successful
-  bool DetermineResultType(ast::Expression* expr);
-  /// Determines the storage class for variables. This assumes that it is only
+  /// @returns true on success, false on error
+  bool Expression(ast::Expression* expr);
+  /// Resolves the storage class for variables. This assumes that it is only
   /// called for things in function scope, not module scope.
   /// @param stmt the statement to check
   /// @returns false on error
-  bool DetermineVariableStorageClass(ast::Statement* stmt);
+  bool VariableStorageClass(ast::Statement* stmt);
 
   /// Creates the nodes and adds them to the semantic::Info mappings of the
   /// ProgramBuilder.
@@ -202,18 +201,18 @@ class TypeDeterminer {
 
   void set_referenced_from_function_if_needed(VariableInfo* var, bool local);
 
-  bool DetermineArrayAccessor(ast::ArrayAccessorExpression* expr);
-  bool DetermineBinary(ast::BinaryExpression* expr);
-  bool DetermineBitcast(ast::BitcastExpression* expr);
-  bool DetermineCall(ast::CallExpression* expr);
-  bool DetermineConstructor(ast::ConstructorExpression* expr);
-  bool DetermineIdentifier(ast::IdentifierExpression* expr);
-  bool DetermineIntrinsicCall(ast::CallExpression* call,
-                              semantic::IntrinsicType intrinsic_type);
-  bool DetermineMemberAccessor(ast::MemberAccessorExpression* expr);
-  bool DetermineUnaryOp(ast::UnaryOpExpression* expr);
+  bool ArrayAccessor(ast::ArrayAccessorExpression* expr);
+  bool Binary(ast::BinaryExpression* expr);
+  bool Bitcast(ast::BitcastExpression* expr);
+  bool Call(ast::CallExpression* expr);
+  bool Constructor(ast::ConstructorExpression* expr);
+  bool Identifier(ast::IdentifierExpression* expr);
+  bool IntrinsicCall(ast::CallExpression* call,
+                     semantic::IntrinsicType intrinsic_type);
+  bool MemberAccessor(ast::MemberAccessorExpression* expr);
+  bool UnaryOp(ast::UnaryOpExpression* expr);
 
-  bool ValidateVariableDeclStatement(const ast::VariableDeclStatement* stmt);
+  bool VariableDeclStatement(const ast::VariableDeclStatement* stmt);
 
   VariableInfo* CreateVariableInfo(ast::Variable*);
 
@@ -244,4 +243,4 @@ class TypeDeterminer {
 
 }  // namespace tint
 
-#endif  // SRC_TYPE_DETERMINER_H_
+#endif  // SRC_RESOLVER_RESOLVER_H_

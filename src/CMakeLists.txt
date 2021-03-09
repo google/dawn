@@ -191,6 +191,8 @@ set(TINT_LIB_SRCS
   program.h
   reader/reader.cc
   reader/reader.h
+  resolver/resolver.cc
+  resolver/resolver.h
   scope_stack.h
   semantic/call.h
   semantic/expression.h
@@ -229,8 +231,6 @@ set(TINT_LIB_SRCS
   transform/transform.h
   transform/vertex_pulling.cc
   transform/vertex_pulling.h
-  type_determiner.cc
-  type_determiner.h
   type/access_control_type.cc
   type/access_control_type.h
   type/alias_type.cc
@@ -470,13 +470,13 @@ if(${TINT_BUILD_TESTS})
     inspector/inspector_test.cc
     intrinsic_table_test.cc
     program_test.cc
+    resolver/resolver_test.cc
     semantic/sem_intrinsic_test.cc
     scope_stack_test.cc
     symbol_table_test.cc
     symbol_test.cc
     traits_test.cc
     test_main.cc
-    type_determiner_test.cc
     type/access_control_type_test.cc
     type/alias_type_test.cc
     type/array_type_test.cc

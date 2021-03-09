@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/type_determiner.h"
+#include "src/resolver/resolver.h"
 
 #include <algorithm>
 #include <memory>
@@ -102,11 +102,11 @@ class FakeExpr : public ast::Expression {
   void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
 };
 
-class TypeDeterminerHelper : public ProgramBuilder {
+class ResolverHelper : public ProgramBuilder {
  public:
-  TypeDeterminerHelper() : td_(std::make_unique<TypeDeterminer>(this)) {}
+  ResolverHelper() : td_(std::make_unique<Resolver>(this)) {}
 
-  TypeDeterminer* td() const { return td_.get(); }
+  Resolver* r() const { return td_.get(); }
 
   ast::Statement* StmtOf(ast::Expression* expr) {
     auto* sem_stmt = Sem().Get(expr)->Stmt();
@@ -128,43 +128,43 @@ class TypeDeterminerHelper : public ProgramBuilder {
   }
 
  private:
-  std::unique_ptr<TypeDeterminer> td_;
+  std::unique_ptr<Resolver> td_;
 };
 
-class TypeDeterminerTest : public TypeDeterminerHelper, public testing::Test {};
+class ResolverTest : public ResolverHelper, public testing::Test {};
 
 template <typename T>
-class TypeDeterminerTestWithParam : public TypeDeterminerHelper,
-                                    public testing::TestWithParam<T> {};
+class ResolverTestWithParam : public ResolverHelper,
+                              public testing::TestWithParam<T> {};
 
-TEST_F(TypeDeterminerTest, Error_WithEmptySource) {
+TEST_F(ResolverTest, Error_WithEmptySource) {
   auto* s = create<FakeStmt>();
   WrapInFunction(s);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: unknown statement type for type determination: Fake");
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Error_Unknown) {
+TEST_F(ResolverTest, Stmt_Error_Unknown) {
   auto* s = create<FakeStmt>(Source{Source::Location{2, 30}});
   WrapInFunction(s);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "2:30 error: unknown statement type for type determination: Fake");
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Assign) {
+TEST_F(ResolverTest, Stmt_Assign) {
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
   WrapInFunction(assign);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
@@ -175,7 +175,7 @@ TEST_F(TypeDeterminerTest, Stmt_Assign) {
   EXPECT_EQ(StmtOf(rhs), assign);
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Case) {
+TEST_F(ResolverTest, Stmt_Case) {
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
 
@@ -188,7 +188,7 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   auto* cse = create<ast::CaseStatement>(lit, body);
   WrapInFunction(cse);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
@@ -198,7 +198,7 @@ TEST_F(TypeDeterminerTest, Stmt_Case) {
   EXPECT_EQ(StmtOf(rhs), assign);
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Block) {
+TEST_F(ResolverTest, Stmt_Block) {
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
 
@@ -208,7 +208,7 @@ TEST_F(TypeDeterminerTest, Stmt_Block) {
   });
   WrapInFunction(block);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(lhs), nullptr);
   ASSERT_NE(TypeOf(rhs), nullptr);
@@ -218,7 +218,7 @@ TEST_F(TypeDeterminerTest, Stmt_Block) {
   EXPECT_EQ(StmtOf(rhs), assign);
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Else) {
+TEST_F(ResolverTest, Stmt_Else) {
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
 
@@ -230,7 +230,7 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
   auto* stmt = create<ast::ElseStatement>(cond, body);
   WrapInFunction(stmt);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(stmt->condition()), nullptr);
   ASSERT_NE(TypeOf(lhs), nullptr);
@@ -243,7 +243,7 @@ TEST_F(TypeDeterminerTest, Stmt_Else) {
   EXPECT_EQ(StmtOf(cond), stmt);
 }
 
-TEST_F(TypeDeterminerTest, Stmt_If) {
+TEST_F(ResolverTest, Stmt_If) {
   auto* else_lhs = Expr(2);
   auto* else_rhs = Expr(2.3f);
 
@@ -264,7 +264,7 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
       create<ast::IfStatement>(cond, body, ast::ElseStatementList{else_stmt});
   WrapInFunction(stmt);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(stmt->condition()), nullptr);
   ASSERT_NE(TypeOf(else_lhs), nullptr);
@@ -282,7 +282,7 @@ TEST_F(TypeDeterminerTest, Stmt_If) {
   EXPECT_EQ(StmtOf(else_cond), else_stmt);
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Loop) {
+TEST_F(ResolverTest, Stmt_Loop) {
   auto* body_lhs = Expr(2);
   auto* body_rhs = Expr(2.3f);
 
@@ -300,7 +300,7 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
   auto* stmt = create<ast::LoopStatement>(body, continuing);
   WrapInFunction(stmt);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(body_lhs), nullptr);
   ASSERT_NE(TypeOf(body_rhs), nullptr);
@@ -312,8 +312,7 @@ TEST_F(TypeDeterminerTest, Stmt_Loop) {
   EXPECT_TRUE(TypeOf(continuing_rhs)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest,
-       Stmt_Loop_ContinueInLoopBodyBeforeDecl_UsageInContinuing) {
+TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyBeforeDecl_UsageInContinuing) {
   // loop  {
   //     continue; // Bypasses z decl
   //     var z : i32;
@@ -330,13 +329,13 @@ TEST_F(TypeDeterminerTest,
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_FALSE(td()->Determine()) << td()->error();
-  EXPECT_EQ(td()->error(),
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
             "12:34 error: continue statement bypasses declaration of 'z' in "
             "continuing block");
 }
 
-TEST_F(TypeDeterminerTest,
+TEST_F(ResolverTest,
        Stmt_Loop_ContinueInLoopBodyBeforeDeclAndAfterDecl_UsageInContinuing) {
   // loop  {
   //     continue; // Bypasses z decl
@@ -356,13 +355,13 @@ TEST_F(TypeDeterminerTest,
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_FALSE(td()->Determine()) << td()->error();
-  EXPECT_EQ(td()->error(),
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
             "12:34 error: continue statement bypasses declaration of 'z' in "
             "continuing block");
 }
 
-TEST_F(TypeDeterminerTest,
+TEST_F(ResolverTest,
        Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageInContinuing) {
   // loop  {
   //     if (true) {
@@ -381,14 +380,14 @@ TEST_F(TypeDeterminerTest,
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_FALSE(td()->Determine()) << td()->error();
-  EXPECT_EQ(td()->error(),
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
             "12:34 error: continue statement bypasses declaration of 'z' in "
             "continuing block");
 }
 
 TEST_F(
-    TypeDeterminerTest,
+    ResolverTest,
     Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageInContinuingSubscope) {
   // loop  {
   //     if (true) {
@@ -411,13 +410,13 @@ TEST_F(
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_FALSE(td()->Determine()) << td()->error();
-  EXPECT_EQ(td()->error(),
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
             "12:34 error: continue statement bypasses declaration of 'z' in "
             "continuing block");
 }
 
-TEST_F(TypeDeterminerTest,
+TEST_F(ResolverTest,
        Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageInContinuingLoop) {
   // loop  {
   //     if (true) {
@@ -439,13 +438,13 @@ TEST_F(TypeDeterminerTest,
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_FALSE(td()->Determine()) << td()->error();
-  EXPECT_EQ(td()->error(),
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(),
             "12:34 error: continue statement bypasses declaration of 'z' in "
             "continuing block");
 }
 
-TEST_F(TypeDeterminerTest,
+TEST_F(ResolverTest,
        Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_UsageInContinuing) {
   // loop  {
   //     loop {
@@ -465,10 +464,10 @@ TEST_F(TypeDeterminerTest,
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(TypeDeterminerTest,
+TEST_F(ResolverTest,
        Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_UsageInContinuingSubscope) {
   // loop  {
   //     loop {
@@ -490,10 +489,10 @@ TEST_F(TypeDeterminerTest,
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(TypeDeterminerTest,
+TEST_F(ResolverTest,
        Stmt_Loop_ContinueInNestedLoopBodyBeforeDecl_UsageInContinuingLoop) {
   // loop  {
   //     loop {
@@ -515,35 +514,35 @@ TEST_F(TypeDeterminerTest,
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(TypeDeterminerTest, Stmt_ContinueNotInLoop) {
+TEST_F(ResolverTest, Stmt_ContinueNotInLoop) {
   WrapInFunction(create<ast::ContinueStatement>());
-  EXPECT_FALSE(td()->Determine());
-  EXPECT_EQ(td()->error(), "error: continue statement must be in a loop");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "error: continue statement must be in a loop");
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Return) {
+TEST_F(ResolverTest, Stmt_Return) {
   auto* cond = Expr(2);
 
   auto* ret = create<ast::ReturnStatement>(cond);
   WrapInFunction(ret);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(cond), nullptr);
   EXPECT_TRUE(TypeOf(cond)->Is<type::I32>());
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Return_WithoutValue) {
+TEST_F(ResolverTest, Stmt_Return_WithoutValue) {
   auto* ret = create<ast::ReturnStatement>();
   WrapInFunction(ret);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Switch) {
+TEST_F(ResolverTest, Stmt_Switch) {
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
 
@@ -559,7 +558,7 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
   auto* stmt = create<ast::SwitchStatement>(Expr(2), cases);
   WrapInFunction(stmt);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(stmt->condition()), nullptr);
   ASSERT_NE(TypeOf(lhs), nullptr);
@@ -570,7 +569,7 @@ TEST_F(TypeDeterminerTest, Stmt_Switch) {
   EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Call) {
+TEST_F(ResolverTest, Stmt_Call) {
   ast::VariableList params;
   Func("my_func", params, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
@@ -580,14 +579,14 @@ TEST_F(TypeDeterminerTest, Stmt_Call) {
   auto* call = create<ast::CallStatement>(expr);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
   EXPECT_EQ(StmtOf(expr), call);
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
+TEST_F(ResolverTest, Stmt_Call_undeclared) {
   // fn main() -> void {func(); return; }
   // fn func() -> void { return; }
 
@@ -608,13 +607,13 @@ TEST_F(TypeDeterminerTest, Stmt_Call_undeclared) {
        },
        ast::FunctionDecorationList{});
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "12:34 error: v-0006: unable to find called function: func");
 }
 
-TEST_F(TypeDeterminerTest, Stmt_Call_recursive) {
+TEST_F(ResolverTest, Stmt_Call_recursive) {
   // fn main() -> void {main(); }
 
   SetSource(Source::Location{12, 34});
@@ -629,27 +628,27 @@ TEST_F(TypeDeterminerTest, Stmt_Call_recursive) {
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "12:34 error: recursion is not permitted. 'main' attempted to call "
             "itself.");
 }
 
-TEST_F(TypeDeterminerTest, Stmt_VariableDecl) {
+TEST_F(ResolverTest, Stmt_VariableDecl) {
   auto* var = Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(2));
   auto* init = var->constructor();
 
   auto* decl = create<ast::VariableDeclStatement>(var);
   WrapInFunction(decl);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(init), nullptr);
   EXPECT_TRUE(TypeOf(init)->Is<type::I32>());
 }
 
-TEST_F(TypeDeterminerTest, Stmt_VariableDecl_Alias) {
+TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
   auto* my_int = ty.alias("MyInt", ty.i32());
   auto* var = Var("my_var", my_int, ast::StorageClass::kNone, Expr(2));
   auto* init = var->constructor();
@@ -657,13 +656,13 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_Alias) {
   auto* decl = create<ast::VariableDeclStatement>(var);
   WrapInFunction(decl);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(init), nullptr);
   EXPECT_TRUE(TypeOf(init)->Is<type::I32>());
 }
 
-TEST_F(TypeDeterminerTest, Stmt_VariableDecl_MismatchedTypeScalarConstructor) {
+TEST_F(ResolverTest, Stmt_VariableDecl_MismatchedTypeScalarConstructor) {
   u32 unsigned_value = 2u;  // Type does not match variable type
   auto* var =
       Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(unsigned_value));
@@ -672,14 +671,13 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_MismatchedTypeScalarConstructor) {
       create<ast::VariableDeclStatement>(Source{{{3, 3}, {3, 22}}}, var);
   WrapInFunction(decl);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
-      td()->error(),
+      r()->error(),
       R"(3:3 error: constructor expression type does not match variable type)");
 }
 
-TEST_F(TypeDeterminerTest,
-       Stmt_VariableDecl_MismatchedTypeScalarConstructor_Alias) {
+TEST_F(ResolverTest, Stmt_VariableDecl_MismatchedTypeScalarConstructor_Alias) {
   auto* my_int = ty.alias("MyInt", ty.i32());
   u32 unsigned_value = 2u;  // Type does not match variable type
   auto* var =
@@ -689,24 +687,24 @@ TEST_F(TypeDeterminerTest,
       create<ast::VariableDeclStatement>(Source{{{3, 3}, {3, 22}}}, var);
   WrapInFunction(decl);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
-      td()->error(),
+      r()->error(),
       R"(3:3 error: constructor expression type does not match variable type)");
 }
 
-TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScope) {
+TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScope) {
   auto* init = Expr(2);
   Global("my_var", ty.i32(), ast::StorageClass::kNone, init);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(init), nullptr);
   EXPECT_TRUE(TypeOf(init)->Is<type::I32>());
   EXPECT_EQ(StmtOf(init), nullptr);
 }
 
-TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
+TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
   // fn func_i32() -> i32 {
   //   {
   //     var foo : i32 = 2;
@@ -745,7 +743,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
        ast::StatementList{inner, foo_f32_decl, bar_f32_decl},
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(r()->Resolve());
   ASSERT_NE(TypeOf(foo_i32_init), nullptr);
   EXPECT_TRUE(TypeOf(foo_i32_init)->Is<type::I32>());
   ASSERT_NE(TypeOf(foo_f32_init), nullptr);
@@ -762,7 +760,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
   EXPECT_TRUE(CheckVarUsers(foo_f32, {bar_f32->constructor()}));
 }
 
-TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
+TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   // fn func_i32() -> i32 {
   //   var foo : i32 = 2;
   // }
@@ -792,7 +790,7 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   Func("func_f32", params, ty.f32(), ast::StatementList{fn_f32_decl},
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine());
+  EXPECT_TRUE(r()->Resolve());
   ASSERT_NE(TypeOf(mod_init), nullptr);
   EXPECT_TRUE(TypeOf(mod_init)->Is<type::F32>());
   ASSERT_NE(TypeOf(fn_i32_init), nullptr);
@@ -806,24 +804,24 @@ TEST_F(TypeDeterminerTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   EXPECT_TRUE(CheckVarUsers(mod_f32, {fn_f32->constructor()}));
 }
 
-TEST_F(TypeDeterminerTest, Expr_Error_Unknown) {
+TEST_F(ResolverTest, Expr_Error_Unknown) {
   FakeExpr e(Source{Source::Location{2, 30}});
   WrapInFunction(&e);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "2:30 error: unknown expression for type determination");
 }
 
-TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
+TEST_F(ResolverTest, Expr_ArrayAccessor_Array) {
   auto* idx = Expr(2);
   Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kFunction);
 
   auto* acc = IndexAccessor("my_var", idx);
   WrapInFunction(acc);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
@@ -832,7 +830,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array) {
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
+TEST_F(ResolverTest, Expr_ArrayAccessor_Alias_Array) {
   auto* aary = ty.alias("myarrty", ty.array<f32, 3>());
 
   Global("my_var", aary, ast::StorageClass::kFunction);
@@ -840,7 +838,7 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
@@ -849,25 +847,25 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Alias_Array) {
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Array_Constant) {
+TEST_F(ResolverTest, Expr_ArrayAccessor_Array_Constant) {
   GlobalConst("my_var", ty.array<f32, 3>());
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(acc), nullptr);
   EXPECT_TRUE(TypeOf(acc)->Is<type::F32>()) << TypeOf(acc)->type_name();
 }
 
-TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
+TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix) {
   Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
@@ -877,13 +875,13 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix) {
   EXPECT_EQ(ptr->type()->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
+TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
   Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* acc = IndexAccessor(IndexAccessor("my_var", 2), 1);
   WrapInFunction(acc);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
@@ -892,13 +890,13 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
+TEST_F(ResolverTest, Expr_ArrayAccessor_Vector) {
   Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(acc), nullptr);
   ASSERT_TRUE(TypeOf(acc)->Is<type::Pointer>());
@@ -907,19 +905,19 @@ TEST_F(TypeDeterminerTest, Expr_ArrayAccessor_Vector) {
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Bitcast) {
+TEST_F(ResolverTest, Expr_Bitcast) {
   auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("name"));
   WrapInFunction(bitcast);
 
   Global("name", ty.f32(), ast::StorageClass::kPrivate);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(bitcast), nullptr);
   EXPECT_TRUE(TypeOf(bitcast)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Call) {
+TEST_F(ResolverTest, Expr_Call) {
   ast::VariableList params;
   Func("my_func", params, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
@@ -927,13 +925,13 @@ TEST_F(TypeDeterminerTest, Expr_Call) {
   auto* call = Call("my_func");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Call_InBinaryOp) {
+TEST_F(ResolverTest, Expr_Call_InBinaryOp) {
   ast::VariableList params;
   Func("func", params, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
@@ -941,13 +939,13 @@ TEST_F(TypeDeterminerTest, Expr_Call_InBinaryOp) {
   auto* expr = Add(Call("func"), Call("func"));
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
+TEST_F(ResolverTest, Expr_Call_WithParams) {
   ast::VariableList params;
   Func("my_func", params, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
@@ -957,70 +955,70 @@ TEST_F(TypeDeterminerTest, Expr_Call_WithParams) {
   auto* call = Call("my_func", param);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(param), nullptr);
   EXPECT_TRUE(TypeOf(param)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Call_Intrinsic) {
+TEST_F(ResolverTest, Expr_Call_Intrinsic) {
   auto* call = Call("round", 2.4f);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_DontCall_Function) {
+TEST_F(ResolverTest, Expr_DontCall_Function) {
   Func("func", {}, ty.void_(), {}, {});
   auto* ident = create<ast::IdentifierExpression>(
       Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
       Symbols().Register("func"));
   WrapInFunction(ident);
 
-  EXPECT_FALSE(td()->Determine());
-  EXPECT_EQ(td()->error(), "3:8 error: missing '(' for function call");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "3:8 error: missing '(' for function call");
 }
 
-TEST_F(TypeDeterminerTest, Expr_DontCall_Intrinsic) {
+TEST_F(ResolverTest, Expr_DontCall_Intrinsic) {
   auto* ident = create<ast::IdentifierExpression>(
       Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
       Symbols().Register("round"));
   WrapInFunction(ident);
 
-  EXPECT_FALSE(td()->Determine());
-  EXPECT_EQ(td()->error(), "3:8 error: missing '(' for intrinsic call");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "3:8 error: missing '(' for intrinsic call");
 }
 
-TEST_F(TypeDeterminerTest, Expr_Cast) {
+TEST_F(ResolverTest, Expr_Cast) {
   Global("name", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* cast = Construct(ty.f32(), "name");
   WrapInFunction(cast);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(cast), nullptr);
   EXPECT_TRUE(TypeOf(cast)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Constructor_Scalar) {
+TEST_F(ResolverTest, Expr_Constructor_Scalar) {
   auto* s = Expr(1.0f);
   WrapInFunction(s);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(s), nullptr);
   EXPECT_TRUE(TypeOf(s)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
+TEST_F(ResolverTest, Expr_Constructor_Type) {
   auto* tc = vec3<f32>(1.0f, 1.0f, 3.0f);
   WrapInFunction(tc);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
   ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
@@ -1028,13 +1026,13 @@ TEST_F(TypeDeterminerTest, Expr_Constructor_Type) {
   EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
+TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
   auto* my_var = Global("my_var", ty.f32(), ast::StorageClass::kNone);
 
   auto* ident = Expr("my_var");
   WrapInFunction(ident);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::Pointer>());
@@ -1042,20 +1040,20 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalVariable) {
   EXPECT_TRUE(CheckVarUsers(my_var, {ident}));
 }
 
-TEST_F(TypeDeterminerTest, Expr_Identifier_GlobalConstant) {
+TEST_F(ResolverTest, Expr_Identifier_GlobalConstant) {
   auto* my_var = GlobalConst("my_var", ty.f32());
 
   auto* ident = Expr("my_var");
   WrapInFunction(ident);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
   EXPECT_TRUE(CheckVarUsers(my_var, {ident}));
 }
 
-TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
+TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
   auto* my_var_a = Expr("my_var");
   auto* my_var_b = Expr("my_var");
   auto* var = Const("my_var", ty.f32());
@@ -1068,7 +1066,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
        },
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(my_var_a), nullptr);
   EXPECT_TRUE(TypeOf(my_var_a)->Is<type::F32>());
@@ -1079,7 +1077,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable_Const) {
   EXPECT_TRUE(CheckVarUsers(var, {my_var_a, my_var_b}));
 }
 
-TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
+TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
   auto* my_var_a = Expr("my_var");
   auto* my_var_b = Expr("my_var");
   auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
@@ -1093,7 +1091,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
        },
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(my_var_a), nullptr);
   EXPECT_TRUE(TypeOf(my_var_a)->Is<type::Pointer>());
@@ -1106,7 +1104,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_FunctionVariable) {
   EXPECT_TRUE(CheckVarUsers(var, {my_var_a, my_var_b}));
 }
 
-TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
+TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
   auto* my_var_a = Expr("my_var");
   auto* my_var_b = Expr("my_var");
   auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
@@ -1120,7 +1118,7 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
        },
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(my_var_a), nullptr);
   EXPECT_TRUE(TypeOf(my_var_a)->Is<type::Pointer>());
@@ -1132,27 +1130,60 @@ TEST_F(TypeDeterminerTest, Expr_Identifier_Function_Ptr) {
   EXPECT_EQ(StmtOf(my_var_b), assign);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Call_Function) {
+TEST_F(ResolverTest, Expr_Call_Function) {
   Func("my_func", ast::VariableList{}, ty.f32(), ast::StatementList{},
        ast::FunctionDecorationList{});
 
   auto* call = Call("my_func");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Identifier_Unknown) {
+TEST_F(ResolverTest, Expr_Identifier_Unknown) {
   auto* a = Expr("a");
   WrapInFunction(a);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 }
 
-TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
+TEST_F(ResolverTest, UsingUndefinedVariable_Fail) {
+  // b = 2;
+
+  SetSource(Source{Source::Location{12, 34}});
+  auto* lhs = Expr("b");
+  auto* rhs = Expr(2);
+  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
+  WrapInFunction(assign);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: v-0006: identifier must be declared before use: b");
+}
+
+TEST_F(ResolverTest, UsingUndefinedVariableInBlockStatement_Fail) {
+  // {
+  //  b = 2;
+  // }
+
+  SetSource(Source{Source::Location{12, 34}});
+  auto* lhs = Expr("b");
+  auto* rhs = Expr(2);
+
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(lhs, rhs),
+  });
+  WrapInFunction(body);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: v-0006: identifier must be declared before use: b");
+}
+
+TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
   auto* sb_var = Global("sb_var", ty.f32(), ast::StorageClass::kStorage);
@@ -1169,7 +1200,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
       },
       ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
@@ -1183,7 +1214,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables) {
   EXPECT_EQ(vars[4]->Declaration(), priv_var);
 }
 
-TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
+TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
   auto* sb_var = Global("sb_var", ty.f32(), ast::StorageClass::kStorage);
@@ -1206,7 +1237,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
       },
       ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   auto* func2_sem = Sem().Get(func2);
   ASSERT_NE(func2_sem, nullptr);
@@ -1220,7 +1251,7 @@ TEST_F(TypeDeterminerTest, Function_RegisterInputOutputVariables_SubFunction) {
   EXPECT_EQ(vars[4]->Declaration(), priv_var);
 }
 
-TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
+TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
   auto* var = Var("in_var", ty.f32(), ast::StorageClass::kFunction);
 
   auto* func =
@@ -1233,7 +1264,7 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
 
   Global("var", ty.f32(), ast::StorageClass::kFunction);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
@@ -1241,7 +1272,7 @@ TEST_F(TypeDeterminerTest, Function_NotRegisterFunctionVariable) {
   EXPECT_EQ(func_sem->ReferencedModuleVariables().size(), 0u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
+TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
   auto* strct = create<ast::Struct>(
       ast::StructMemberList{Member("first_member", ty.i32()),
                             Member("second_member", ty.f32())},
@@ -1253,7 +1284,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   auto* mem = MemberAccessor("my_struct", "second_member");
   WrapInFunction(mem);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Pointer>());
@@ -1262,7 +1293,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct) {
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
+TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
   auto* strct = create<ast::Struct>(
       ast::StructMemberList{Member("first_member", ty.i32()),
                             Member("second_member", ty.f32())},
@@ -1275,7 +1306,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   auto* mem = MemberAccessor("my_struct", "second_member");
   WrapInFunction(mem);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Pointer>());
@@ -1284,13 +1315,13 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_Struct_Alias) {
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
+TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* mem = MemberAccessor("my_vec", "xzyw");
   WrapInFunction(mem);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
@@ -1299,13 +1330,13 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle) {
   EXPECT_THAT(Sem().Get(mem)->Swizzle(), ElementsAre(0, 2, 1, 3));
 }
 
-TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
+TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* mem = MemberAccessor("my_vec", "b");
   WrapInFunction(mem);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Pointer>());
@@ -1315,7 +1346,7 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   EXPECT_THAT(Sem().Get(mem)->Swizzle(), ElementsAre(2));
 }
 
-TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
+TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* ident = create<ast::IdentifierExpression>(
@@ -1325,11 +1356,11 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
   auto* mem = MemberAccessor("my_vec", ident);
   WrapInFunction(mem);
 
-  EXPECT_FALSE(td()->Determine());
-  EXPECT_EQ(td()->error(), "3:5 error: invalid vector swizzle character");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "3:5 error: invalid vector swizzle character");
 }
 
-TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
+TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* ident = create<ast::IdentifierExpression>(
@@ -1339,13 +1370,13 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
   auto* mem = MemberAccessor("my_vec", ident);
   WrapInFunction(mem);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
-      td()->error(),
+      r()->error(),
       "3:3 error: invalid mixing of vector swizzle characters rgba with xyzw");
 }
 
-TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
+TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* ident = create<ast::IdentifierExpression>(
@@ -1354,11 +1385,11 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
   auto* mem = MemberAccessor("my_vec", ident);
   WrapInFunction(mem);
 
-  EXPECT_FALSE(td()->Determine());
-  EXPECT_EQ(td()->error(), "3:3 error: invalid vector swizzle size");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "3:3 error: invalid vector swizzle size");
 }
 
-TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
+TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   // struct b {
   //   vec4<f32> foo
   // }
@@ -1401,7 +1432,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
       "yx");
   WrapInFunction(mem);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(mem), nullptr);
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
@@ -1409,7 +1440,7 @@ TEST_F(TypeDeterminerTest, Expr_Accessor_MultiLevel) {
   EXPECT_EQ(TypeOf(mem)->As<type::Vector>()->size(), 2u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_MemberAccessor_InBinaryOp) {
+TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
   auto* strct = create<ast::Struct>(
       ast::StructMemberList{Member("first_member", ty.f32()),
                             Member("second_member", ty.f32())},
@@ -1422,13 +1453,13 @@ TEST_F(TypeDeterminerTest, Expr_MemberAccessor_InBinaryOp) {
                    MemberAccessor("my_struct", "second_member"));
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
 }
 
-using Expr_Binary_BitwiseTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
+using Expr_Binary_BitwiseTest = ResolverTestWithParam<ast::BinaryOp>;
 TEST_P(Expr_Binary_BitwiseTest, Scalar) {
   auto op = GetParam();
 
@@ -1437,7 +1468,7 @@ TEST_P(Expr_Binary_BitwiseTest, Scalar) {
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::I32>());
 }
@@ -1450,13 +1481,13 @@ TEST_P(Expr_Binary_BitwiseTest, Vector) {
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::I32>());
   EXPECT_EQ(TypeOf(expr)->As<type::Vector>()->size(), 3u);
 }
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          Expr_Binary_BitwiseTest,
                          testing::Values(ast::BinaryOp::kAnd,
                                          ast::BinaryOp::kOr,
@@ -1468,7 +1499,7 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                          ast::BinaryOp::kDivide,
                                          ast::BinaryOp::kModulo));
 
-using Expr_Binary_LogicalTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
+using Expr_Binary_LogicalTest = ResolverTestWithParam<ast::BinaryOp>;
 TEST_P(Expr_Binary_LogicalTest, Scalar) {
   auto op = GetParam();
 
@@ -1477,7 +1508,7 @@ TEST_P(Expr_Binary_LogicalTest, Scalar) {
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Bool>());
 }
@@ -1490,18 +1521,18 @@ TEST_P(Expr_Binary_LogicalTest, Vector) {
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::Bool>());
   EXPECT_EQ(TypeOf(expr)->As<type::Vector>()->size(), 3u);
 }
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          Expr_Binary_LogicalTest,
                          testing::Values(ast::BinaryOp::kLogicalAnd,
                                          ast::BinaryOp::kLogicalOr));
 
-using Expr_Binary_CompareTest = TypeDeterminerTestWithParam<ast::BinaryOp>;
+using Expr_Binary_CompareTest = ResolverTestWithParam<ast::BinaryOp>;
 TEST_P(Expr_Binary_CompareTest, Scalar) {
   auto op = GetParam();
 
@@ -1510,7 +1541,7 @@ TEST_P(Expr_Binary_CompareTest, Scalar) {
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Bool>());
 }
@@ -1523,13 +1554,13 @@ TEST_P(Expr_Binary_CompareTest, Vector) {
   auto* expr = create<ast::BinaryExpression>(op, Expr("val"), Expr("val"));
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::Bool>());
   EXPECT_EQ(TypeOf(expr)->As<type::Vector>()->size(), 3u);
 }
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          Expr_Binary_CompareTest,
                          testing::Values(ast::BinaryOp::kEqual,
                                          ast::BinaryOp::kNotEqual,
@@ -1538,66 +1569,66 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                          ast::BinaryOp::kLessThanEqual,
                                          ast::BinaryOp::kGreaterThanEqual));
 
-TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Scalar) {
+TEST_F(ResolverTest, Expr_Binary_Multiply_Scalar_Scalar) {
   Global("val", ty.i32(), ast::StorageClass::kNone);
 
   auto* expr = Mul("val", "val");
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::I32>());
 }
 
-TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Scalar) {
+TEST_F(ResolverTest, Expr_Binary_Multiply_Vector_Scalar) {
   Global("scalar", ty.f32(), ast::StorageClass::kNone);
   Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("vector", "scalar");
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(expr)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Vector) {
+TEST_F(ResolverTest, Expr_Binary_Multiply_Scalar_Vector) {
   Global("scalar", ty.f32(), ast::StorageClass::kNone);
   Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("scalar", "vector");
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(expr)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Vector) {
+TEST_F(ResolverTest, Expr_Binary_Multiply_Vector_Vector) {
   Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("vector", "vector");
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(expr)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
+TEST_F(ResolverTest, Expr_Binary_Multiply_Matrix_Scalar) {
   Global("scalar", ty.f32(), ast::StorageClass::kNone);
   Global("matrix", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("matrix", "scalar");
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Matrix>());
 
@@ -1607,14 +1638,14 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Scalar) {
   EXPECT_EQ(mat->columns(), 2u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
+TEST_F(ResolverTest, Expr_Binary_Multiply_Scalar_Matrix) {
   Global("scalar", ty.f32(), ast::StorageClass::kNone);
   Global("matrix", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("scalar", "matrix");
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Matrix>());
 
@@ -1624,42 +1655,42 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Scalar_Matrix) {
   EXPECT_EQ(mat->columns(), 2u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Vector) {
+TEST_F(ResolverTest, Expr_Binary_Multiply_Matrix_Vector) {
   Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
   Global("matrix", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("matrix", "vector");
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(expr)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Vector_Matrix) {
+TEST_F(ResolverTest, Expr_Binary_Multiply_Vector_Matrix) {
   Global("vector", ty.vec3<f32>(), ast::StorageClass::kNone);
   Global("matrix", ty.mat2x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("vector", "matrix");
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(expr)->As<type::Vector>()->size(), 2u);
 }
 
-TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
+TEST_F(ResolverTest, Expr_Binary_Multiply_Matrix_Matrix) {
   Global("mat3x4", ty.mat3x4<f32>(), ast::StorageClass::kNone);
   Global("mat4x3", ty.mat4x3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Mul("mat3x4", "mat4x3");
   WrapInFunction(expr);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Matrix>());
 
@@ -1669,7 +1700,7 @@ TEST_F(TypeDeterminerTest, Expr_Binary_Multiply_Matrix_Matrix) {
   EXPECT_EQ(mat->columns(), 4u);
 }
 
-using IntrinsicDerivativeTest = TypeDeterminerTestWithParam<std::string>;
+using IntrinsicDerivativeTest = ResolverTestWithParam<std::string>;
 TEST_P(IntrinsicDerivativeTest, Scalar) {
   auto name = GetParam();
 
@@ -1678,7 +1709,7 @@ TEST_P(IntrinsicDerivativeTest, Scalar) {
   auto* expr = Call(name, "ident");
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::F32>());
@@ -1691,7 +1722,7 @@ TEST_P(IntrinsicDerivativeTest, Vector) {
   auto* expr = Call(name, "ident");
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
@@ -1705,16 +1736,16 @@ TEST_P(IntrinsicDerivativeTest, MissingParam) {
   auto* expr = Call(name);
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(), "error: no matching call to " + name +
-                               "()\n\n"
-                               "2 candidate functions:\n  " +
-                               name + "(f32) -> f32\n  " + name +
-                               "(vecN<f32>) -> vecN<f32>\n");
+  EXPECT_EQ(r()->error(), "error: no matching call to " + name +
+                              "()\n\n"
+                              "2 candidate functions:\n  " +
+                              name + "(f32) -> f32\n  " + name +
+                              "(vecN<f32>) -> vecN<f32>\n");
 }
 
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          IntrinsicDerivativeTest,
                          testing::Values("dpdx",
                                          "dpdxCoarse",
@@ -1726,7 +1757,7 @@ INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
                                          "fwidthCoarse",
                                          "fwidthFine"));
 
-using Intrinsic = TypeDeterminerTestWithParam<std::string>;
+using Intrinsic = ResolverTestWithParam<std::string>;
 TEST_P(Intrinsic, Test) {
   auto name = GetParam();
 
@@ -1735,16 +1766,16 @@ TEST_P(Intrinsic, Test) {
   auto* expr = Call(name, "my_var");
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Bool>());
 }
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          Intrinsic,
                          testing::Values("any", "all"));
 
-using Intrinsic_FloatMethod = TypeDeterminerTestWithParam<std::string>;
+using Intrinsic_FloatMethod = ResolverTestWithParam<std::string>;
 TEST_P(Intrinsic_FloatMethod, Vector) {
   auto name = GetParam();
 
@@ -1753,7 +1784,7 @@ TEST_P(Intrinsic_FloatMethod, Vector) {
   auto* expr = Call(name, "my_var");
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
@@ -1769,7 +1800,7 @@ TEST_P(Intrinsic_FloatMethod, Scalar) {
   auto* expr = Call(name, "my_var");
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Bool>());
@@ -1783,13 +1814,13 @@ TEST_P(Intrinsic_FloatMethod, MissingParam) {
   auto* expr = Call(name);
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(), "error: no matching call to " + name +
-                               "()\n\n"
-                               "2 candidate functions:\n  " +
-                               name + "(f32) -> bool\n  " + name +
-                               "(vecN<f32>) -> vecN<bool>\n");
+  EXPECT_EQ(r()->error(), "error: no matching call to " + name +
+                              "()\n\n"
+                              "2 candidate functions:\n  " +
+                              name + "(f32) -> bool\n  " + name +
+                              "(vecN<f32>) -> vecN<bool>\n");
 }
 
 TEST_P(Intrinsic_FloatMethod, TooManyParams) {
@@ -1800,16 +1831,16 @@ TEST_P(Intrinsic_FloatMethod, TooManyParams) {
   auto* expr = Call(name, "my_var", 1.23f);
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(), "error: no matching call to " + name +
-                               "(ptr<f32>, f32)\n\n"
-                               "2 candidate functions:\n  " +
-                               name + "(f32) -> bool\n  " + name +
-                               "(vecN<f32>) -> vecN<bool>\n");
+  EXPECT_EQ(r()->error(), "error: no matching call to " + name +
+                              "(ptr<f32>, f32)\n\n"
+                              "2 candidate functions:\n  " +
+                              name + "(f32) -> bool\n  " + name +
+                              "(vecN<f32>) -> vecN<bool>\n");
 }
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_FloatMethod,
     testing::Values("isInf", "isNan", "isFinite", "isNormal"));
 
@@ -1836,7 +1867,7 @@ inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
 }
 
 class Intrinsic_TextureOperation
-    : public TypeDeterminerTestWithParam<TextureTestParams> {
+    : public ResolverTestWithParam<TextureTestParams> {
  public:
   /// Gets an appropriate type for the coords parameter depending the the
   /// dimensionality of the texture being sampled.
@@ -1902,7 +1933,7 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
   auto* expr = Call("textureLoad", call_params);
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
@@ -1917,7 +1948,7 @@ TEST_P(Intrinsic_StorageTextureOperation, TextureLoadRo) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_StorageTextureOperation,
     testing::Values(
         TextureTestParams{type::TextureDimension::k1d, Texture::kF32,
@@ -1966,7 +1997,7 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
   auto* expr = Call("textureLoad", call_params);
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   ASSERT_TRUE(TypeOf(expr)->Is<type::Vector>());
@@ -1981,56 +2012,56 @@ TEST_P(Intrinsic_SampledTextureOperation, TextureLoadSampled) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_SampledTextureOperation,
     testing::Values(TextureTestParams{type::TextureDimension::k1d},
                     TextureTestParams{type::TextureDimension::k2d},
                     TextureTestParams{type::TextureDimension::k2dArray},
                     TextureTestParams{type::TextureDimension::k3d}));
 
-TEST_F(TypeDeterminerTest, Intrinsic_Dot_Vec2) {
+TEST_F(ResolverTest, Intrinsic_Dot_Vec2) {
   Global("my_var", ty.vec2<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Dot_Vec3) {
+TEST_F(ResolverTest, Intrinsic_Dot_Vec3) {
   Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Dot_Vec4) {
+TEST_F(ResolverTest, Intrinsic_Dot_Vec4) {
   Global("my_var", ty.vec4<f32>(), ast::StorageClass::kNone);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Dot_Error_Scalar) {
+TEST_F(ResolverTest, Intrinsic_Dot_Error_Scalar) {
   auto* expr = Call("dot", 1.0f, 1.0f);
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to dot(f32, f32)
 
 1 candidate function:
@@ -2038,15 +2069,15 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot_Error_Scalar) {
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Dot_Error_VectorInt) {
+TEST_F(ResolverTest, Intrinsic_Dot_Error_VectorInt) {
   Global("my_var", ty.vec4<i32>(), ast::StorageClass::kNone);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to dot(ptr<vec4<i32>>, ptr<vec4<i32>>)
 
 1 candidate function:
@@ -2054,7 +2085,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Dot_Error_VectorInt) {
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Select) {
+TEST_F(ResolverTest, Intrinsic_Select) {
   Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
 
   Global("bool_var", ty.vec3<bool>(), ast::StorageClass::kNone);
@@ -2062,7 +2093,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select) {
   auto* expr = Call("select", "my_var", "my_var", "bool_var");
   WrapInFunction(expr);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(expr), nullptr);
   EXPECT_TRUE(TypeOf(expr)->Is<type::Vector>());
@@ -2070,13 +2101,13 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select) {
   EXPECT_TRUE(TypeOf(expr)->As<type::Vector>()->type()->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_NoParams) {
+TEST_F(ResolverTest, Intrinsic_Select_Error_NoParams) {
   auto* expr = Call("select");
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to select()
 
 2 candidate functions:
@@ -2085,13 +2116,13 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_NoParams) {
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_SelectorInt) {
+TEST_F(ResolverTest, Intrinsic_Select_Error_SelectorInt) {
   auto* expr = Call("select", Expr(1), Expr(1), Expr(1));
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to select(i32, i32, i32)
 
 2 candidate functions:
@@ -2100,14 +2131,14 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_SelectorInt) {
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_Matrix) {
+TEST_F(ResolverTest, Intrinsic_Select_Error_Matrix) {
   auto* mat = mat2x2<float>(vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f));
   auto* expr = Call("select", mat, mat, Expr(true));
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to select(mat2x2<f32>, mat2x2<f32>, bool)
 
 2 candidate functions:
@@ -2116,13 +2147,13 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_Matrix) {
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_MismatchTypes) {
+TEST_F(ResolverTest, Intrinsic_Select_Error_MismatchTypes) {
   auto* expr = Call("select", 1.0f, vec2<float>(2.0f, 3.0f), Expr(true));
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to select(f32, vec2<f32>, bool)
 
 2 candidate functions:
@@ -2131,14 +2162,14 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_MismatchTypes) {
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_MismatchVectorSize) {
+TEST_F(ResolverTest, Intrinsic_Select_Error_MismatchVectorSize) {
   auto* expr = Call("select", vec2<float>(1.0f, 2.0f),
                     vec3<float>(3.0f, 4.0f, 5.0f), Expr(true));
   WrapInFunction(expr);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to select(vec2<f32>, vec3<f32>, bool)
 
 2 candidate functions:
@@ -2147,7 +2178,7 @@ TEST_F(TypeDeterminerTest, Intrinsic_Select_Error_MismatchVectorSize) {
 )");
 }
 
-using UnaryOpExpressionTest = TypeDeterminerTestWithParam<ast::UnaryOp>;
+using UnaryOpExpressionTest = ResolverTestWithParam<ast::UnaryOp>;
 TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   auto op = GetParam();
 
@@ -2155,51 +2186,51 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   auto* der = create<ast::UnaryOpExpression>(op, Expr("ident"));
   WrapInFunction(der);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(der), nullptr);
   ASSERT_TRUE(TypeOf(der)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(der)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(der)->As<type::Vector>()->size(), 4u);
 }
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          UnaryOpExpressionTest,
                          testing::Values(ast::UnaryOp::kNegation,
                                          ast::UnaryOp::kNot));
 
-TEST_F(TypeDeterminerTest, StorageClass_SetsIfMissing) {
+TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
   auto* var = Var("var", ty.i32(), ast::StorageClass::kNone);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kFunction);
 }
 
-TEST_F(TypeDeterminerTest, StorageClass_DoesNotSetOnConst) {
+TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {
   auto* var = Const("var", ty.i32());
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
        ast::FunctionDecorationList{});
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kNone);
 }
 
-TEST_F(TypeDeterminerTest, StorageClass_NonFunctionClassError) {
+TEST_F(ResolverTest, StorageClass_NonFunctionClassError) {
   auto* var = Var("var", ty.i32(), ast::StorageClass::kWorkgroup);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
        ast::FunctionDecorationList{});
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: function variable has a non-function storage class");
 }
 
@@ -2213,7 +2244,7 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   return out;
 }
 
-using Intrinsic_DataPackingTest = TypeDeterminerTestWithParam<IntrinsicData>;
+using Intrinsic_DataPackingTest = ResolverTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_DataPackingTest, InferType) {
   auto param = GetParam();
 
@@ -2224,7 +2255,7 @@ TEST_P(Intrinsic_DataPackingTest, InferType) {
                      : Call(param.name, vec2<f32>(1.f, 2.f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
 }
@@ -2239,10 +2270,10 @@ TEST_P(Intrinsic_DataPackingTest, Error_IncorrectParamType) {
                      : Call(param.name, vec2<i32>(1, 2));
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_THAT(td()->error(), HasSubstr("error: no matching call to " +
-                                       std::string(param.name)));
+  EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                      std::string(param.name)));
 }
 
 TEST_P(Intrinsic_DataPackingTest, Error_NoParams) {
@@ -2251,10 +2282,10 @@ TEST_P(Intrinsic_DataPackingTest, Error_NoParams) {
   auto* call = Call(param.name);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_THAT(td()->error(), HasSubstr("error: no matching call to " +
-                                       std::string(param.name)));
+  EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                      std::string(param.name)));
 }
 
 TEST_P(Intrinsic_DataPackingTest, Error_TooManyParams) {
@@ -2267,14 +2298,14 @@ TEST_P(Intrinsic_DataPackingTest, Error_TooManyParams) {
                      : Call(param.name, vec2<f32>(1.f, 2.f), 1.0f);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_THAT(td()->error(), HasSubstr("error: no matching call to " +
-                                       std::string(param.name)));
+  EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                      std::string(param.name)));
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_DataPackingTest,
     testing::Values(
         IntrinsicData{"pack4x8snorm", IntrinsicType::kPack4x8Snorm},
@@ -2283,7 +2314,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"pack2x16unorm", IntrinsicType::kPack2x16Unorm},
         IntrinsicData{"pack2x16float", IntrinsicType::kPack2x16Float}));
 
-using Intrinsic_DataUnpackingTest = TypeDeterminerTestWithParam<IntrinsicData>;
+using Intrinsic_DataUnpackingTest = ResolverTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_DataUnpackingTest, InferType) {
   auto param = GetParam();
 
@@ -2293,7 +2324,7 @@ TEST_P(Intrinsic_DataUnpackingTest, InferType) {
   auto* call = Call(param.name, 1u);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
   if (pack4) {
@@ -2304,7 +2335,7 @@ TEST_P(Intrinsic_DataUnpackingTest, InferType) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_DataUnpackingTest,
     testing::Values(
         IntrinsicData{"unpack4x8snorm", IntrinsicType::kUnpack4x8Snorm},
@@ -2313,14 +2344,14 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"unpack2x16unorm", IntrinsicType::kUnpack2x16Unorm},
         IntrinsicData{"unpack2x16float", IntrinsicType::kUnpack2x16Float}));
 
-using Intrinsic_SingleParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
+using Intrinsic_SingleParamTest = ResolverTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_SingleParamTest, Scalar) {
   auto param = GetParam();
 
   auto* call = Call(param.name, 1.f);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_scalar());
@@ -2332,7 +2363,7 @@ TEST_P(Intrinsic_SingleParamTest, Vector) {
   auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
@@ -2345,9 +2376,9 @@ TEST_P(Intrinsic_SingleParamTest, Error_NoParams) {
   auto* call = Call(param.name);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
@@ -2361,9 +2392,9 @@ TEST_P(Intrinsic_SingleParamTest, Error_TooManyParams) {
   auto* call = Call(param.name, 1, 2, 3);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to " + std::string(param.name) +
                 "(i32, i32, i32)\n\n"
                 "2 candidate functions:\n  " +
@@ -2372,7 +2403,7 @@ TEST_P(Intrinsic_SingleParamTest, Error_TooManyParams) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_SingleParamTest,
     testing::Values(IntrinsicData{"acos", IntrinsicType::kAcos},
                     IntrinsicData{"asin", IntrinsicType::kAsin},
@@ -2396,14 +2427,14 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"tanh", IntrinsicType::kTanh},
                     IntrinsicData{"trunc", IntrinsicType::kTrunc}));
 
-using IntrinsicDataTest = TypeDeterminerTest;
+using IntrinsicDataTest = ResolverTest;
 
 TEST_F(IntrinsicDataTest, ArrayLength_Vector) {
   Global("arr", ty.array<int>(), ast::StorageClass::kNone);
   auto* call = Call("arrayLength", "arr");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
@@ -2414,9 +2445,9 @@ TEST_F(IntrinsicDataTest, ArrayLength_Error_ArraySized) {
   auto* call = Call("arrayLength", "arr");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to arrayLength(ptr<array<i32, 4>>)\n\n"
             "1 candidate function:\n"
             "  arrayLength(array<T>) -> u32\n");
@@ -2426,7 +2457,7 @@ TEST_F(IntrinsicDataTest, Normalize_Vector) {
   auto* call = Call("normalize", vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
@@ -2437,9 +2468,9 @@ TEST_F(IntrinsicDataTest, Normalize_Error_NoParams) {
   auto* call = Call("normalize");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to normalize()\n\n"
             "1 candidate function:\n"
             "  normalize(vecN<f32>) -> vecN<f32>\n");
@@ -2450,7 +2481,7 @@ TEST_F(IntrinsicDataTest, FrexpScalar) {
   auto* call = Call("frexp", 1.0f, "exp");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
@@ -2461,7 +2492,7 @@ TEST_F(IntrinsicDataTest, FrexpVector) {
   auto* call = Call("frexp", vec3<f32>(1.0f, 2.0f, 3.0f), "exp");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::Vector>());
@@ -2473,9 +2504,9 @@ TEST_F(IntrinsicDataTest, Frexp_Error_FirstParamInt) {
   auto* call = Call("frexp", 1, "exp");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to frexp(i32, ptr<workgroup, i32>)\n\n"
             "2 candidate functions:\n"
             "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
@@ -2488,9 +2519,9 @@ TEST_F(IntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
   auto* call = Call("frexp", 1.0f, "exp");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to frexp(f32, ptr<workgroup, f32>)\n\n"
             "2 candidate functions:\n"
             "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
@@ -2502,9 +2533,9 @@ TEST_F(IntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
   auto* call = Call("frexp", 1.0f, 1);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to frexp(f32, i32)\n\n"
             "2 candidate functions:\n"
             "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
@@ -2517,9 +2548,9 @@ TEST_F(IntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
   auto* call = Call("frexp", vec2<f32>(1.0f, 2.0f), "exp");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to frexp(vec2<f32>, ptr<workgroup, "
             "vec4<i32>>)\n\n"
             "2 candidate functions:\n"
@@ -2533,7 +2564,7 @@ TEST_F(IntrinsicDataTest, ModfScalar) {
   auto* call = Call("modf", 1.0f, "whole");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
@@ -2544,7 +2575,7 @@ TEST_F(IntrinsicDataTest, ModfVector) {
   auto* call = Call("modf", vec3<f32>(1.0f, 2.0f, 3.0f), "whole");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::Vector>());
@@ -2556,9 +2587,9 @@ TEST_F(IntrinsicDataTest, Modf_Error_FirstParamInt) {
   auto* call = Call("modf", 1, "whole");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to modf(i32, ptr<workgroup, f32>)\n\n"
             "2 candidate functions:\n"
             "  modf(f32, ptr<f32>) -> f32\n"
@@ -2570,9 +2601,9 @@ TEST_F(IntrinsicDataTest, Modf_Error_SecondParamIntPtr) {
   auto* call = Call("modf", 1.0f, "whole");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to modf(f32, ptr<workgroup, i32>)\n\n"
             "2 candidate functions:\n"
             "  modf(f32, ptr<f32>) -> f32\n"
@@ -2583,9 +2614,9 @@ TEST_F(IntrinsicDataTest, Modf_Error_SecondParamNotAPointer) {
   auto* call = Call("modf", 1.0f, 1.0f);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to modf(f32, f32)\n\n"
             "2 candidate functions:\n"
             "  modf(f32, ptr<f32>) -> f32\n"
@@ -2597,9 +2628,9 @@ TEST_F(IntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
   auto* call = Call("modf", vec2<f32>(1.0f, 2.0f), "whole");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to modf(vec2<f32>, ptr<workgroup, "
             "vec4<f32>>)\n\n"
             "2 candidate functions:\n"
@@ -2608,14 +2639,14 @@ TEST_F(IntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
 }
 
 using Intrinsic_SingleParam_FloatOrInt_Test =
-    TypeDeterminerTestWithParam<IntrinsicData>;
+    ResolverTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_SingleParam_FloatOrInt_Test, Float_Scalar) {
   auto param = GetParam();
 
   auto* call = Call(param.name, 1.f);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_scalar());
@@ -2627,7 +2658,7 @@ TEST_P(Intrinsic_SingleParam_FloatOrInt_Test, Float_Vector) {
   auto* call = Call(param.name, vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
@@ -2640,7 +2671,7 @@ TEST_P(Intrinsic_SingleParam_FloatOrInt_Test, Sint_Scalar) {
   auto* call = Call(param.name, -1);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::I32>());
@@ -2660,7 +2691,7 @@ TEST_P(Intrinsic_SingleParam_FloatOrInt_Test, Sint_Vector) {
   auto* call = Call(param.name, params);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
@@ -2676,7 +2707,7 @@ TEST_P(Intrinsic_SingleParam_FloatOrInt_Test, Uint_Scalar) {
   auto* call = Call(param.name, params);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
@@ -2688,7 +2719,7 @@ TEST_P(Intrinsic_SingleParam_FloatOrInt_Test, Uint_Vector) {
   auto* call = Call(param.name, vec3<u32>(1u, 1u, 3u));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
@@ -2701,9 +2732,9 @@ TEST_P(Intrinsic_SingleParam_FloatOrInt_Test, Error_NoParams) {
   auto* call = Call(param.name);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
@@ -2713,42 +2744,42 @@ TEST_P(Intrinsic_SingleParam_FloatOrInt_Test, Error_NoParams) {
                 "(vecN<T>) -> vecN<T>  where: T is f32, i32 or u32\n");
 }
 
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          Intrinsic_SingleParam_FloatOrInt_Test,
                          testing::Values(IntrinsicData{"abs",
                                                        IntrinsicType::kAbs}));
 
-TEST_F(TypeDeterminerTest, Intrinsic_Length_Scalar) {
+TEST_F(ResolverTest, Intrinsic_Length_Scalar) {
   auto* call = Call("length", 1.f);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Length_FloatVector) {
+TEST_F(ResolverTest, Intrinsic_Length_FloatVector) {
   ast::ExpressionList params;
   params.push_back(vec3<f32>(1.0f, 1.0f, 3.0f));
 
   auto* call = Call("length", params);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
-using Intrinsic_TwoParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
+using Intrinsic_TwoParamTest = ResolverTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_TwoParamTest, Scalar) {
   auto param = GetParam();
 
   auto* call = Call(param.name, 1.f, 1.f);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_scalar());
@@ -2761,7 +2792,7 @@ TEST_P(Intrinsic_TwoParamTest, Vector) {
                     vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
@@ -2774,9 +2805,9 @@ TEST_P(Intrinsic_TwoParamTest, Error_NoTooManyParams) {
   auto* call = Call(param.name, 1, 2, 3);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to " + std::string(param.name) +
                 "(i32, i32, i32)\n\n"
                 "2 candidate functions:\n  " +
@@ -2791,9 +2822,9 @@ TEST_P(Intrinsic_TwoParamTest, Error_NoParams) {
   auto* call = Call(param.name);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
@@ -2803,79 +2834,79 @@ TEST_P(Intrinsic_TwoParamTest, Error_NoParams) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_TwoParamTest,
     testing::Values(IntrinsicData{"atan2", IntrinsicType::kAtan2},
                     IntrinsicData{"pow", IntrinsicType::kPow},
                     IntrinsicData{"step", IntrinsicType::kStep},
                     IntrinsicData{"reflect", IntrinsicType::kReflect}));
 
-TEST_F(TypeDeterminerTest, Intrinsic_Distance_Scalar) {
+TEST_F(ResolverTest, Intrinsic_Distance_Scalar) {
   auto* call = Call("distance", 1.f, 1.f);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_scalar());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Distance_Vector) {
+TEST_F(ResolverTest, Intrinsic_Distance_Vector) {
   auto* call = Call("distance", vec3<f32>(1.0f, 1.0f, 3.0f),
                     vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Cross) {
+TEST_F(ResolverTest, Intrinsic_Cross) {
   auto* call =
       Call("cross", vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(1.0f, 2.0f, 3.0f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
   EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_NoArgs) {
+TEST_F(ResolverTest, Intrinsic_Cross_Error_NoArgs) {
   auto* call = Call("cross");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(), R"(error: no matching call to cross()
+  EXPECT_EQ(r()->error(), R"(error: no matching call to cross()
 
 1 candidate function:
   cross(vec3<f32>, vec3<f32>) -> vec3<f32>
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_Scalar) {
+TEST_F(ResolverTest, Intrinsic_Cross_Error_Scalar) {
   auto* call = Call("cross", 1.0f, 1.0f);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(), R"(error: no matching call to cross(f32, f32)
+  EXPECT_EQ(r()->error(), R"(error: no matching call to cross(f32, f32)
 
 1 candidate function:
   cross(vec3<f32>, vec3<f32>) -> vec3<f32>
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_Vec3Int) {
+TEST_F(ResolverTest, Intrinsic_Cross_Error_Vec3Int) {
   auto* call = Call("cross", vec3<i32>(1, 2, 3), vec3<i32>(1, 2, 3));
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to cross(vec3<i32>, vec3<i32>)
 
 1 candidate function:
@@ -2883,15 +2914,15 @@ TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_Vec3Int) {
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_Vec4) {
+TEST_F(ResolverTest, Intrinsic_Cross_Error_Vec4) {
   auto* call = Call("cross", vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f),
                     vec4<f32>(1.0f, 2.0f, 3.0f, 4.0f));
 
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to cross(vec4<f32>, vec4<f32>)
 
 1 candidate function:
@@ -2899,53 +2930,53 @@ TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_Vec4) {
 )");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Cross_Error_TooManyParams) {
+TEST_F(ResolverTest, Intrinsic_Cross_Error_TooManyParams) {
   auto* call = Call("cross", vec3<f32>(1.0f, 2.0f, 3.0f),
                     vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(1.0f, 2.0f, 3.0f));
 
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             R"(error: no matching call to cross(vec3<f32>, vec3<f32>, vec3<f32>)
 
 1 candidate function:
   cross(vec3<f32>, vec3<f32>) -> vec3<f32>
 )");
 }
-TEST_F(TypeDeterminerTest, Intrinsic_Normalize) {
+TEST_F(ResolverTest, Intrinsic_Normalize) {
   auto* call = Call("normalize", vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
   EXPECT_EQ(TypeOf(call)->As<type::Vector>()->size(), 3u);
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Normalize_NoArgs) {
+TEST_F(ResolverTest, Intrinsic_Normalize_NoArgs) {
   auto* call = Call("normalize");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(), R"(error: no matching call to normalize()
+  EXPECT_EQ(r()->error(), R"(error: no matching call to normalize()
 
 1 candidate function:
   normalize(vecN<f32>) -> vecN<f32>
 )");
 }
 
-using Intrinsic_ThreeParamTest = TypeDeterminerTestWithParam<IntrinsicData>;
+using Intrinsic_ThreeParamTest = ResolverTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_ThreeParamTest, Scalar) {
   auto param = GetParam();
 
   auto* call = Call(param.name, 1.f, 1.f, 1.f);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_scalar());
@@ -2958,7 +2989,7 @@ TEST_P(Intrinsic_ThreeParamTest, Vector) {
                     vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
@@ -2970,9 +3001,9 @@ TEST_P(Intrinsic_ThreeParamTest, Error_NoParams) {
   auto* call = Call(param.name);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
@@ -2982,7 +3013,7 @@ TEST_P(Intrinsic_ThreeParamTest, Error_NoParams) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_ThreeParamTest,
     testing::Values(IntrinsicData{"mix", IntrinsicType::kMix},
                     IntrinsicData{"smoothStep", IntrinsicType::kSmoothStep},
@@ -2990,14 +3021,14 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"faceForward", IntrinsicType::kFaceForward}));
 
 using Intrinsic_ThreeParam_FloatOrInt_Test =
-    TypeDeterminerTestWithParam<IntrinsicData>;
+    ResolverTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_ThreeParam_FloatOrInt_Test, Float_Scalar) {
   auto param = GetParam();
 
   auto* call = Call(param.name, 1.f, 1.f, 1.f);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_scalar());
@@ -3010,7 +3041,7 @@ TEST_P(Intrinsic_ThreeParam_FloatOrInt_Test, Float_Vector) {
                     vec3<f32>(1.0f, 1.0f, 3.0f), vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
@@ -3023,7 +3054,7 @@ TEST_P(Intrinsic_ThreeParam_FloatOrInt_Test, Sint_Scalar) {
   auto* call = Call(param.name, 1, 1, 1);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::I32>());
@@ -3036,7 +3067,7 @@ TEST_P(Intrinsic_ThreeParam_FloatOrInt_Test, Sint_Vector) {
                     vec3<i32>(1, 1, 3));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
@@ -3049,7 +3080,7 @@ TEST_P(Intrinsic_ThreeParam_FloatOrInt_Test, Uint_Scalar) {
   auto* call = Call(param.name, 1u, 1u, 1u);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
@@ -3062,7 +3093,7 @@ TEST_P(Intrinsic_ThreeParam_FloatOrInt_Test, Uint_Vector) {
                     vec3<u32>(1u, 1u, 3u));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
@@ -3075,9 +3106,9 @@ TEST_P(Intrinsic_ThreeParam_FloatOrInt_Test, Error_NoParams) {
   auto* call = Call(param.name);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
@@ -3088,20 +3119,19 @@ TEST_P(Intrinsic_ThreeParam_FloatOrInt_Test, Error_NoParams) {
                 "or u32\n");
 }
 
-INSTANTIATE_TEST_SUITE_P(TypeDeterminerTest,
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          Intrinsic_ThreeParam_FloatOrInt_Test,
                          testing::Values(IntrinsicData{"clamp",
                                                        IntrinsicType::kClamp}));
 
-using Intrinsic_Int_SingleParamTest =
-    TypeDeterminerTestWithParam<IntrinsicData>;
+using Intrinsic_Int_SingleParamTest = ResolverTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_Int_SingleParamTest, Scalar) {
   auto param = GetParam();
 
   auto* call = Call(param.name, 1);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_integer_scalar());
@@ -3113,7 +3143,7 @@ TEST_P(Intrinsic_Int_SingleParamTest, Vector) {
   auto* call = Call(param.name, vec3<i32>(1, 1, 3));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
@@ -3126,33 +3156,32 @@ TEST_P(Intrinsic_Int_SingleParamTest, Error_NoParams) {
   auto* call = Call(param.name);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
-            "error: no matching call to " + std::string(param.name) +
-                "()\n\n"
-                "2 candidate functions:\n  " +
-                std::string(param.name) +
-                "(T) -> T  where: T is i32 or u32\n  " +
-                std::string(param.name) +
-                "(vecN<T>) -> vecN<T>  where: T is i32 or u32\n");
+  EXPECT_EQ(r()->error(), "error: no matching call to " +
+                              std::string(param.name) +
+                              "()\n\n"
+                              "2 candidate functions:\n  " +
+                              std::string(param.name) +
+                              "(T) -> T  where: T is i32 or u32\n  " +
+                              std::string(param.name) +
+                              "(vecN<T>) -> vecN<T>  where: T is i32 or u32\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_Int_SingleParamTest,
     testing::Values(IntrinsicData{"countOneBits", IntrinsicType::kCountOneBits},
                     IntrinsicData{"reverseBits", IntrinsicType::kReverseBits}));
 
-using Intrinsic_FloatOrInt_TwoParamTest =
-    TypeDeterminerTestWithParam<IntrinsicData>;
+using Intrinsic_FloatOrInt_TwoParamTest = ResolverTestWithParam<IntrinsicData>;
 TEST_P(Intrinsic_FloatOrInt_TwoParamTest, Scalar_Signed) {
   auto param = GetParam();
 
   auto* call = Call(param.name, 1, 1);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::I32>());
@@ -3164,7 +3193,7 @@ TEST_P(Intrinsic_FloatOrInt_TwoParamTest, Scalar_Unsigned) {
   auto* call = Call(param.name, 1u, 1u);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::U32>());
@@ -3176,7 +3205,7 @@ TEST_P(Intrinsic_FloatOrInt_TwoParamTest, Scalar_Float) {
   auto* call = Call(param.name, 1.0f, 1.0f);
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
@@ -3188,7 +3217,7 @@ TEST_P(Intrinsic_FloatOrInt_TwoParamTest, Vector_Signed) {
   auto* call = Call(param.name, vec3<i32>(1, 1, 3), vec3<i32>(1, 1, 3));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_signed_integer_vector());
@@ -3201,7 +3230,7 @@ TEST_P(Intrinsic_FloatOrInt_TwoParamTest, Vector_Unsigned) {
   auto* call = Call(param.name, vec3<u32>(1u, 1u, 3u), vec3<u32>(1u, 1u, 3u));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_unsigned_integer_vector());
@@ -3215,7 +3244,7 @@ TEST_P(Intrinsic_FloatOrInt_TwoParamTest, Vector_Float) {
       Call(param.name, vec3<f32>(1.f, 1.f, 3.f), vec3<f32>(1.f, 1.f, 3.f));
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->is_float_vector());
@@ -3228,9 +3257,9 @@ TEST_P(Intrinsic_FloatOrInt_TwoParamTest, Error_NoParams) {
   auto* call = Call(param.name);
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to " + std::string(param.name) +
                 "()\n\n"
                 "2 candidate functions:\n  " +
@@ -3241,77 +3270,77 @@ TEST_P(Intrinsic_FloatOrInt_TwoParamTest, Error_NoParams) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
+    ResolverTest,
     Intrinsic_FloatOrInt_TwoParamTest,
     testing::Values(IntrinsicData{"min", IntrinsicType::kMin},
                     IntrinsicData{"max", IntrinsicType::kMax}));
 
-TEST_F(TypeDeterminerTest, Intrinsic_Determinant_2x2) {
+TEST_F(ResolverTest, Intrinsic_Determinant_2x2) {
   Global("var", ty.mat2x2<f32>(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Determinant_3x3) {
+TEST_F(ResolverTest, Intrinsic_Determinant_3x3) {
   Global("var", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Determinant_4x4) {
+TEST_F(ResolverTest, Intrinsic_Determinant_4x4) {
   Global("var", ty.mat4x4<f32>(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
 
-  EXPECT_TRUE(td()->Determine()) << td()->error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(call), nullptr);
   EXPECT_TRUE(TypeOf(call)->Is<type::F32>());
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Determinant_NotSquare) {
+TEST_F(ResolverTest, Intrinsic_Determinant_NotSquare) {
   Global("var", ty.mat2x3<f32>(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(
-      td()->error(),
+      r()->error(),
       "error: no matching call to determinant(ptr<function, mat2x3<f32>>)\n\n"
       "1 candidate function:\n"
       "  determinant(matNxN<f32>) -> f32\n");
 }
 
-TEST_F(TypeDeterminerTest, Intrinsic_Determinant_NotMatrix) {
+TEST_F(ResolverTest, Intrinsic_Determinant_NotMatrix) {
   Global("var", ty.f32(), ast::StorageClass::kFunction);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
 
-  EXPECT_FALSE(td()->Determine());
+  EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(td()->error(),
+  EXPECT_EQ(r()->error(),
             "error: no matching call to determinant(ptr<function, f32>)\n\n"
             "1 candidate function:\n"
             "  determinant(matNxN<f32>) -> f32\n");
 }
 
-TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
+TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
   // fn b() {}
   // fn c() { b(); }
   // fn a() { c(); }
@@ -3366,7 +3395,7 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
   Global("call_b", ty.f32(), ast::StorageClass::kPrivate);
   Global("call_c", ty.f32(), ast::StorageClass::kPrivate);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 
   auto* func_b_sem = Sem().Get(func_b);
   auto* func_a_sem = Sem().Get(func_a);
@@ -3399,7 +3428,7 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_StageDecoration) {
 
 // Check for linear-time traversal of functions reachable from entry points.
 // See: crbug.com/tint/245
-TEST_F(TypeDeterminerTest, Function_EntryPoints_LinearTime) {
+TEST_F(ResolverTest, Function_EntryPoints_LinearTime) {
   // fn lNa() { }
   // fn lNb() { }
   // ...
@@ -3441,15 +3470,15 @@ TEST_F(TypeDeterminerTest, Function_EntryPoints_LinearTime) {
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-using TypeDeterminerTextureIntrinsicTest =
-    TypeDeterminerTestWithParam<ast::intrinsic::test::TextureOverloadCase>;
+using ResolverTextureIntrinsicTest =
+    ResolverTestWithParam<ast::intrinsic::test::TextureOverloadCase>;
 
 INSTANTIATE_TEST_SUITE_P(
-    TypeDeterminerTest,
-    TypeDeterminerTextureIntrinsicTest,
+    ResolverTest,
+    ResolverTextureIntrinsicTest,
     testing::ValuesIn(ast::intrinsic::test::TextureOverloadCase::ValidCases()));
 
 std::string to_str(const std::string& function,
@@ -3700,7 +3729,7 @@ const char* expected_texture_overload(
   return "<unmatched texture overload>";
 }
 
-TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
+TEST_P(ResolverTextureIntrinsicTest, Call) {
   auto param = GetParam();
 
   param.buildTextureVariable(this);
@@ -3709,7 +3738,7 @@ TEST_P(TypeDeterminerTextureIntrinsicTest, Call) {
   auto* call = Call(param.function, param.args(this));
   WrapInFunction(call);
 
-  ASSERT_TRUE(td()->Determine()) << td()->error();
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 
   if (std::string(param.function) == "textureDimensions") {
     switch (param.texture_dimension) {

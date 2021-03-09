@@ -94,7 +94,7 @@ ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(ast::Variable* v) {
 }
 
 ast::Statement* ProgramBuilder::WrapInStatement(ast::Expression* expr) {
-  // TODO(ben-clayton): This is valid enough for the TypeDeterminer, but the LHS
+  // TODO(ben-clayton): This is valid enough for the Resolver, but the LHS
   // may not be assignable, and so may not validate.
   return create<ast::AssignmentStatement>(expr, expr);
 }

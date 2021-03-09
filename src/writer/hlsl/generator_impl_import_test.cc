@@ -27,7 +27,6 @@
 #include "src/type/i32_type.h"
 #include "src/type/matrix_type.h"
 #include "src/type/vector_type.h"
-#include "src/type_determiner.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

@@ -21,7 +21,6 @@
 #include "src/type/depth_texture_type.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
-#include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
 #include "src/writer/hlsl/test_helper.h"
 

@@ -206,12 +206,11 @@ class ProgramBuilder {
     return diagnostics_;
   }
 
-  /// Controls whether the TypeDeterminer will be run on the program when it is
-  /// built.
+  /// Controls whether the Resolver will be run on the program when it is built.
   /// @param enable the new flag value (defaults to true)
   void SetResolveOnBuild(bool enable) { resolve_on_build_ = enable; }
 
-  /// @return true if the TypeDeterminer will be run on the program when it is
+  /// @return true if the Resolver will be run on the program when it is
   /// built.
   bool ResolveOnBuild() const { return resolve_on_build_; }
 
@@ -1128,22 +1127,21 @@ class ProgramBuilder {
   }
 
   /// Helper for returning the resolved semantic type of the expression `expr`.
-  /// @note As the TypeDeterminator is run when the Program is built, this will
-  /// only be useful for the TypeDeterminer itself and tests that use their own
-  /// TypeDeterminer.
+  /// @note As the Resolver is run when the Program is built, this will only be
+  /// useful for the Resolver itself and tests that use their own Resolver.
   /// @param expr the AST expression
   /// @return the resolved semantic type for the expression, or nullptr if the
   /// expression has no resolved type.
   type::Type* TypeOf(ast::Expression* expr) const;
 
   /// Wraps the ast::Expression in a statement. This is used by tests that
-  /// construct a partial AST and require the TypeDeterminer to reach these
+  /// construct a partial AST and require the Resolver to reach these
   /// nodes.
   /// @param expr the ast::Expression to be wrapped by an ast::Statement
   /// @return the ast::Statement that wraps the ast::Expression
   ast::Statement* WrapInStatement(ast::Expression* expr);
   /// Wraps the ast::Variable in a ast::VariableDeclStatement. This is used by
-  /// tests that construct a partial AST and require the TypeDeterminer to reach
+  /// tests that construct a partial AST and require the Resolver to reach
   /// these nodes.
   /// @param v the ast::Variable to be wrapped by an ast::VariableDeclStatement
   /// @return the ast::VariableDeclStatement that wraps the ast::Variable
@@ -1154,7 +1152,7 @@ class ProgramBuilder {
   /// @return `stmt`
   ast::Statement* WrapInStatement(ast::Statement* stmt);
   /// Wraps the list of arguments in a simple function so that each is reachable
-  /// by the TypeDeterminer.
+  /// by the Resolver.
   /// @param args a mix of ast::Expression, ast::Statement, ast::Variables.
   template <typename... ARGS>
   void WrapInFunction(ARGS&&... args) {
@@ -1162,7 +1160,7 @@ class ProgramBuilder {
     WrapInFunction(stmts);
   }
   /// @param stmts a list of ast::Statement that will be wrapped by a function,
-  /// so that each statement is reachable by the TypeDeterminer.
+  /// so that each statement is reachable by the Resolver.
   void WrapInFunction(ast::StatementList stmts);
 
   /// The builder types
@@ -1185,7 +1183,7 @@ class ProgramBuilder {
   /// the first argument.
   Source source_;
 
-  /// Set by SetResolveOnBuild(). If set, the TypeDeterminer will be run on the
+  /// Set by SetResolveOnBuild(). If set, the Resolver will be run on the
   /// program when built.
   bool resolve_on_build_ = true;
 

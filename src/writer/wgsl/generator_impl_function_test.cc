@@ -29,7 +29,6 @@
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
 #include "src/type/void_type.h"
-#include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
 #include "src/writer/wgsl/test_helper.h"
 

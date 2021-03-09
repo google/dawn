@@ -24,7 +24,6 @@
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
 #include "src/type/void_type.h"
-#include "src/type_determiner.h"
 #include "src/validator/validator_impl.h"
 
 namespace tint {
@@ -56,10 +55,6 @@ class ValidatorTestHelper : public ProgramBuilder {
     return *val_;
   }
 
-  /// A handle to type_determiner
-  /// @returns a pointer to the type_determiner object
-  TypeDeterminer* td() const { return td_.get(); }
-
   /// Inserts a variable into the current scope.
   /// @param var the variable to register.
   void RegisterVariable(ast::Variable* var) {
@@ -78,7 +73,6 @@ class ValidatorTestHelper : public ProgramBuilder {
   }
 
  private:
-  std::unique_ptr<TypeDeterminer> td_;
   std::unique_ptr<Program> program_;
   std::unique_ptr<ValidatorImpl> val_;
   std::vector<ast::Variable*> vars_for_testing_;

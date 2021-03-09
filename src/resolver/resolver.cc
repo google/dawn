@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/type_determiner.h"
+#include "src/resolver/resolver.h"
 
 #include <algorithm>
 #include <memory>
@@ -91,20 +91,20 @@ class ScopedAssignment {
 
 }  // namespace
 
-TypeDeterminer::TypeDeterminer(ProgramBuilder* builder)
+Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder), intrinsic_table_(IntrinsicTable::Create()) {}
 
-TypeDeterminer::~TypeDeterminer() = default;
+Resolver::~Resolver() = default;
 
-TypeDeterminer::BlockInfo::BlockInfo(TypeDeterminer::BlockInfo::Type type,
-                                     TypeDeterminer::BlockInfo* parent,
-                                     const ast::BlockStatement* block)
-    : type(type), parent(parent), block(block) {}
+Resolver::BlockInfo::BlockInfo(Resolver::BlockInfo::Type ty,
+                               Resolver::BlockInfo* p,
+                               const ast::BlockStatement* b)
+    : type(ty), parent(p), block(b) {}
 
-TypeDeterminer::BlockInfo::~BlockInfo() = default;
+Resolver::BlockInfo::~BlockInfo() = default;
 
-void TypeDeterminer::set_referenced_from_function_if_needed(VariableInfo* var,
-                                                            bool local) {
+void Resolver::set_referenced_from_function_if_needed(VariableInfo* var,
+                                                      bool local) {
   if (current_function_ == nullptr) {
     return;
   }
@@ -119,8 +119,8 @@ void TypeDeterminer::set_referenced_from_function_if_needed(VariableInfo* var,
   }
 }
 
-bool TypeDeterminer::Determine() {
-  bool result = DetermineInternal();
+bool Resolver::Resolve() {
+  bool result = ResolveInternal();
 
   // Even if resolving failed, create all the semantic nodes for information we
   // did generate.
@@ -129,34 +129,34 @@ bool TypeDeterminer::Determine() {
   return result;
 }
 
-bool TypeDeterminer::DetermineInternal() {
+bool Resolver::ResolveInternal() {
   for (auto* var : builder_->AST().GlobalVariables()) {
     variable_stack_.set_global(var->symbol(), CreateVariableInfo(var));
 
     if (var->has_constructor()) {
-      if (!DetermineResultType(var->constructor())) {
+      if (!Expression(var->constructor())) {
         return false;
       }
     }
   }
 
-  if (!DetermineFunctions(builder_->AST().Functions())) {
+  if (!Functions(builder_->AST().Functions())) {
     return false;
   }
 
   return true;
 }
 
-bool TypeDeterminer::DetermineFunctions(const ast::FunctionList& funcs) {
+bool Resolver::Functions(const ast::FunctionList& funcs) {
   for (auto* func : funcs) {
-    if (!DetermineFunction(func)) {
+    if (!Function(func)) {
       return false;
     }
   }
   return true;
 }
 
-bool TypeDeterminer::DetermineFunction(ast::Function* func) {
+bool Resolver::Function(ast::Function* func) {
   auto* func_info = function_infos_.Create<FunctionInfo>(func);
 
   ScopedAssignment<FunctionInfo*> sa(current_function_, func_info);
@@ -166,7 +166,7 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
     variable_stack_.set(param->symbol(), CreateVariableInfo(param));
   }
 
-  if (!DetermineBlockStatement(func->body())) {
+  if (!BlockStatement(func->body())) {
     return false;
   }
   variable_stack_.pop_scope();
@@ -180,35 +180,35 @@ bool TypeDeterminer::DetermineFunction(ast::Function* func) {
   return true;
 }
 
-bool TypeDeterminer::DetermineBlockStatement(const ast::BlockStatement* stmt) {
+bool Resolver::BlockStatement(const ast::BlockStatement* stmt) {
   auto* block =
       block_infos_.Create(BlockInfo::Type::Generic, current_block_, stmt);
   block_to_info_[stmt] = block;
   ScopedAssignment<BlockInfo*> scope_sa(current_block_, block);
 
-  return DetermineStatements(stmt->list());
+  return Statements(stmt->list());
 }
 
-bool TypeDeterminer::DetermineStatements(const ast::StatementList& stmts) {
+bool Resolver::Statements(const ast::StatementList& stmts) {
   for (auto* stmt : stmts) {
     if (auto* decl = stmt->As<ast::VariableDeclStatement>()) {
-      if (!ValidateVariableDeclStatement(decl)) {
+      if (!VariableDeclStatement(decl)) {
         return false;
       }
     }
 
-    if (!DetermineVariableStorageClass(stmt)) {
+    if (!VariableStorageClass(stmt)) {
       return false;
     }
 
-    if (!DetermineResultType(stmt)) {
+    if (!Statement(stmt)) {
       return false;
     }
   }
   return true;
 }
 
-bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
+bool Resolver::VariableStorageClass(ast::Statement* stmt) {
   auto* var_decl = stmt->As<ast::VariableDeclStatement>();
   if (var_decl == nullptr) {
     return true;
@@ -238,25 +238,25 @@ bool TypeDeterminer::DetermineVariableStorageClass(ast::Statement* stmt) {
   return true;
 }
 
-bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
+bool Resolver::Statement(ast::Statement* stmt) {
   auto* sem_statement = builder_->create<semantic::Statement>(stmt);
 
   ScopedAssignment<semantic::Statement*> sa(current_statement_, sem_statement);
 
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
-    return DetermineResultType(a->lhs()) && DetermineResultType(a->rhs());
+    return Expression(a->lhs()) && Expression(a->rhs());
   }
   if (auto* b = stmt->As<ast::BlockStatement>()) {
-    return DetermineBlockStatement(b);
+    return BlockStatement(b);
   }
   if (stmt->Is<ast::BreakStatement>()) {
     return true;
   }
   if (auto* c = stmt->As<ast::CallStatement>()) {
-    return DetermineResultType(c->expr());
+    return Expression(c->expr());
   }
   if (auto* c = stmt->As<ast::CaseStatement>()) {
-    return DetermineBlockStatement(c->body());
+    return BlockStatement(c->body());
   }
   if (stmt->Is<ast::ContinueStatement>()) {
     // Set if we've hit the first continue statement in our parent loop
@@ -277,20 +277,18 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     return true;
   }
   if (auto* e = stmt->As<ast::ElseStatement>()) {
-    return DetermineResultType(e->condition()) &&
-           DetermineBlockStatement(e->body());
+    return Expression(e->condition()) && BlockStatement(e->body());
   }
   if (stmt->Is<ast::FallthroughStatement>()) {
     return true;
   }
   if (auto* i = stmt->As<ast::IfStatement>()) {
-    if (!DetermineResultType(i->condition()) ||
-        !DetermineBlockStatement(i->body())) {
+    if (!Expression(i->condition()) || !BlockStatement(i->body())) {
       return false;
     }
 
     for (auto* else_stmt : i->else_statements()) {
-      if (!DetermineResultType(else_stmt)) {
+      if (!Statement(else_stmt)) {
         return false;
       }
     }
@@ -306,31 +304,31 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     block_to_info_[l->body()] = block;
     ScopedAssignment<BlockInfo*> scope_sa(current_block_, block);
 
-    if (!DetermineStatements(l->body()->list())) {
+    if (!Statements(l->body()->list())) {
       return false;
     }
 
     if (l->has_continuing()) {
-      auto* block = block_infos_.Create(BlockInfo::Type::LoopContinuing,
-                                        current_block_, l->continuing());
-      block_to_info_[l->continuing()] = block;
-      ScopedAssignment<BlockInfo*> scope_sa(current_block_, block);
+      auto* cont_block = block_infos_.Create(BlockInfo::Type::LoopContinuing,
+                                             current_block_, l->continuing());
+      block_to_info_[l->continuing()] = cont_block;
+      ScopedAssignment<BlockInfo*> scope_sa2(current_block_, cont_block);
 
-      if (!DetermineStatements(l->continuing()->list())) {
+      if (!Statements(l->continuing()->list())) {
         return false;
       }
     }
     return true;
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
-    return DetermineResultType(r->value());
+    return Expression(r->value());
   }
   if (auto* s = stmt->As<ast::SwitchStatement>()) {
-    if (!DetermineResultType(s->condition())) {
+    if (!Expression(s->condition())) {
       return false;
     }
     for (auto* case_stmt : s->body()) {
-      if (!DetermineResultType(case_stmt)) {
+      if (!Statement(case_stmt)) {
         return false;
       }
     }
@@ -340,7 +338,7 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
     variable_stack_.set(v->variable()->symbol(),
                         variable_to_info_.at(v->variable()));
     current_block_->decls.push_back(v->variable());
-    return DetermineResultType(v->variable()->constructor());
+    return Expression(v->variable()->constructor());
   }
 
   diagnostics_.add_error(
@@ -349,16 +347,16 @@ bool TypeDeterminer::DetermineResultType(ast::Statement* stmt) {
   return false;
 }
 
-bool TypeDeterminer::DetermineResultType(const ast::ExpressionList& list) {
+bool Resolver::Expressions(const ast::ExpressionList& list) {
   for (auto* expr : list) {
-    if (!DetermineResultType(expr)) {
+    if (!Expression(expr)) {
       return false;
     }
   }
   return true;
 }
 
-bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
+bool Resolver::Expression(ast::Expression* expr) {
   // This is blindly called above, so in some cases the expression won't exist.
   if (!expr) {
     return true;
@@ -369,28 +367,28 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   }
 
   if (auto* a = expr->As<ast::ArrayAccessorExpression>()) {
-    return DetermineArrayAccessor(a);
+    return ArrayAccessor(a);
   }
   if (auto* b = expr->As<ast::BinaryExpression>()) {
-    return DetermineBinary(b);
+    return Binary(b);
   }
   if (auto* b = expr->As<ast::BitcastExpression>()) {
-    return DetermineBitcast(b);
+    return Bitcast(b);
   }
   if (auto* c = expr->As<ast::CallExpression>()) {
-    return DetermineCall(c);
+    return Call(c);
   }
   if (auto* c = expr->As<ast::ConstructorExpression>()) {
-    return DetermineConstructor(c);
+    return Constructor(c);
   }
   if (auto* i = expr->As<ast::IdentifierExpression>()) {
-    return DetermineIdentifier(i);
+    return Identifier(i);
   }
   if (auto* m = expr->As<ast::MemberAccessorExpression>()) {
-    return DetermineMemberAccessor(m);
+    return MemberAccessor(m);
   }
   if (auto* u = expr->As<ast::UnaryOpExpression>()) {
-    return DetermineUnaryOp(u);
+    return UnaryOp(u);
   }
 
   diagnostics_.add_error("unknown expression for type determination",
@@ -398,12 +396,11 @@ bool TypeDeterminer::DetermineResultType(ast::Expression* expr) {
   return false;
 }
 
-bool TypeDeterminer::DetermineArrayAccessor(
-    ast::ArrayAccessorExpression* expr) {
-  if (!DetermineResultType(expr->array())) {
+bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
+  if (!Expression(expr->array())) {
     return false;
   }
-  if (!DetermineResultType(expr->idx_expr())) {
+  if (!Expression(expr->idx_expr())) {
     return false;
   }
 
@@ -439,16 +436,16 @@ bool TypeDeterminer::DetermineArrayAccessor(
   return true;
 }
 
-bool TypeDeterminer::DetermineBitcast(ast::BitcastExpression* expr) {
-  if (!DetermineResultType(expr->expr())) {
+bool Resolver::Bitcast(ast::BitcastExpression* expr) {
+  if (!Expression(expr->expr())) {
     return false;
   }
   SetType(expr, expr->type());
   return true;
 }
 
-bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
-  if (!DetermineResultType(call->params())) {
+bool Resolver::Call(ast::CallExpression* call) {
+  if (!Expressions(call->params())) {
     return false;
   }
 
@@ -465,7 +462,7 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
 
   auto intrinsic_type = semantic::ParseIntrinsicType(name);
   if (intrinsic_type != IntrinsicType::kNone) {
-    if (!DetermineIntrinsicCall(call, intrinsic_type)) {
+    if (!IntrinsicCall(call, intrinsic_type)) {
       return false;
     }
   } else {
@@ -515,9 +512,8 @@ bool TypeDeterminer::DetermineCall(ast::CallExpression* call) {
   return true;
 }
 
-bool TypeDeterminer::DetermineIntrinsicCall(
-    ast::CallExpression* call,
-    semantic::IntrinsicType intrinsic_type) {
+bool Resolver::IntrinsicCall(ast::CallExpression* call,
+                             semantic::IntrinsicType intrinsic_type) {
   std::vector<type::Type*> arg_tys;
   arg_tys.reserve(call->params().size());
   for (auto* expr : call->params()) {
@@ -571,10 +567,10 @@ bool TypeDeterminer::DetermineIntrinsicCall(
   return true;
 }
 
-bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
+bool Resolver::Constructor(ast::ConstructorExpression* expr) {
   if (auto* ty = expr->As<ast::TypeConstructorExpression>()) {
     for (auto* value : ty->values()) {
-      if (!DetermineResultType(value)) {
+      if (!Expression(value)) {
         return false;
       }
     }
@@ -586,7 +582,7 @@ bool TypeDeterminer::DetermineConstructor(ast::ConstructorExpression* expr) {
   return true;
 }
 
-bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
+bool Resolver::Identifier(ast::IdentifierExpression* expr) {
   auto symbol = expr->symbol();
   VariableInfo* var;
   if (variable_stack_.get(symbol, &var)) {
@@ -615,9 +611,9 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
         auto& decls = loop_block->decls;
         // If our identifier is in loop_block->decls, make sure its index is
         // less than first_continue
-        auto iter = std::find_if(
-            decls.begin(), decls.end(),
-            [&symbol](auto* var) { return var->symbol() == symbol; });
+        auto iter =
+            std::find_if(decls.begin(), decls.end(),
+                         [&symbol](auto* v) { return v->symbol() == symbol; });
         if (iter != decls.end()) {
           auto var_decl_index =
               static_cast<size_t>(std::distance(decls.begin(), iter));
@@ -656,9 +652,8 @@ bool TypeDeterminer::DetermineIdentifier(ast::IdentifierExpression* expr) {
   return false;
 }
 
-bool TypeDeterminer::DetermineMemberAccessor(
-    ast::MemberAccessorExpression* expr) {
-  if (!DetermineResultType(expr->structure())) {
+bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
+  if (!Expression(expr->structure())) {
     return false;
   }
 
@@ -772,8 +767,8 @@ bool TypeDeterminer::DetermineMemberAccessor(
   return true;
 }
 
-bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
-  if (!DetermineResultType(expr->lhs()) || !DetermineResultType(expr->rhs())) {
+bool Resolver::Binary(ast::BinaryExpression* expr) {
+  if (!Expression(expr->lhs()) || !Expression(expr->rhs())) {
     return false;
   }
 
@@ -844,9 +839,9 @@ bool TypeDeterminer::DetermineBinary(ast::BinaryExpression* expr) {
   return false;
 }
 
-bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
+bool Resolver::UnaryOp(ast::UnaryOpExpression* expr) {
   // Result type matches the parameter type.
-  if (!DetermineResultType(expr->expr())) {
+  if (!Expression(expr->expr())) {
     return false;
   }
 
@@ -855,8 +850,7 @@ bool TypeDeterminer::DetermineUnaryOp(ast::UnaryOpExpression* expr) {
   return true;
 }
 
-bool TypeDeterminer::ValidateVariableDeclStatement(
-    const ast::VariableDeclStatement* stmt) {
+bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   auto* ctor = stmt->variable()->constructor();
   if (!ctor) {
     return true;
@@ -877,14 +871,13 @@ bool TypeDeterminer::ValidateVariableDeclStatement(
   return true;
 }
 
-TypeDeterminer::VariableInfo* TypeDeterminer::CreateVariableInfo(
-    ast::Variable* var) {
+Resolver::VariableInfo* Resolver::CreateVariableInfo(ast::Variable* var) {
   auto* info = variable_infos_.Create(var);
   variable_to_info_.emplace(var, info);
   return info;
 }
 
-type::Type* TypeDeterminer::TypeOf(ast::Expression* expr) {
+type::Type* Resolver::TypeOf(ast::Expression* expr) {
   auto it = expr_info_.find(expr);
   if (it != expr_info_.end()) {
     return it->second.type;
@@ -892,12 +885,12 @@ type::Type* TypeDeterminer::TypeOf(ast::Expression* expr) {
   return nullptr;
 }
 
-void TypeDeterminer::SetType(ast::Expression* expr, type::Type* type) {
+void Resolver::SetType(ast::Expression* expr, type::Type* type) {
   assert(expr_info_.count(expr) == 0);
   expr_info_.emplace(expr, ExpressionInfo{type, current_statement_});
 }
 
-void TypeDeterminer::CreateSemanticNodes() const {
+void Resolver::CreateSemanticNodes() const {
   auto& sem = builder_->Sem();
 
   // Collate all the 'ancestor_entry_points' - this is a map of function symbol
@@ -906,7 +899,7 @@ void TypeDeterminer::CreateSemanticNodes() const {
   for (auto* func : builder_->AST().Functions()) {
     auto it = function_to_info_.find(func);
     if (it == function_to_info_.end()) {
-      continue;  // Type determination has likely errored. Process what we can.
+      continue;  // Resolver has likely errored. Process what we can.
     }
 
     auto* info = it->second;
@@ -984,14 +977,13 @@ void TypeDeterminer::CreateSemanticNodes() const {
   }
 }
 
-TypeDeterminer::VariableInfo::VariableInfo(ast::Variable* decl)
+Resolver::VariableInfo::VariableInfo(ast::Variable* decl)
     : declaration(decl), storage_class(decl->declared_storage_class()) {}
 
-TypeDeterminer::VariableInfo::~VariableInfo() = default;
+Resolver::VariableInfo::~VariableInfo() = default;
 
-TypeDeterminer::FunctionInfo::FunctionInfo(ast::Function* decl)
-    : declaration(decl) {}
+Resolver::FunctionInfo::FunctionInfo(ast::Function* decl) : declaration(decl) {}
 
-TypeDeterminer::FunctionInfo::~FunctionInfo() = default;
+Resolver::FunctionInfo::~FunctionInfo() = default;
 
 }  // namespace tint

@@ -38,7 +38,6 @@
 #include "src/type/struct_type.h"
 #include "src/type/u32_type.h"
 #include "src/type/vector_type.h"
-#include "src/type_determiner.h"
 #include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"

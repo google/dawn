@@ -29,7 +29,6 @@
 #include "src/type/i32_type.h"
 #include "src/type/matrix_type.h"
 #include "src/type/vector_type.h"
-#include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 
@@ -53,7 +52,7 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   auto param = GetParam();
   auto* call = Call(param.name, 1.f);
 
-  // The call type determination will set the intrinsic data for the ident
+  // The resolver will set the intrinsic data for the ident
   WrapInFunction(call);
 
   GeneratorImpl& gen = Build();

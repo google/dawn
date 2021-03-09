@@ -53,7 +53,6 @@
 #include "src/semantic/function.h"
 #include "src/type/struct_type.h"
 #include "src/type/u32_type.h"
-#include "src/type_determiner.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::Data);
 

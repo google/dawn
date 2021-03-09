@@ -20,7 +20,6 @@
 
 #include "gtest/gtest.h"
 #include "src/program_builder.h"
-#include "src/type_determiner.h"
 #include "src/writer/wgsl/generator_impl.h"
 
 namespace tint {
@@ -31,7 +30,7 @@ namespace wgsl {
 template <typename BASE>
 class TestHelperBase : public BASE, public ProgramBuilder {
  public:
-  TestHelperBase() : td(this) {}
+  TestHelperBase() = default;
 
   ~TestHelperBase() override = default;
 
@@ -48,8 +47,6 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     return *gen_;
   }
 
-  /// The type determiner
-  TypeDeterminer td;
   /// The program built with a call to Build()
   std::unique_ptr<Program> program;
 

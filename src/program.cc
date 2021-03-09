@@ -21,8 +21,8 @@
 #include "src/clone_context.h"
 #include "src/demangler.h"
 #include "src/program_builder.h"
+#include "src/resolver/resolver.h"
 #include "src/semantic/expression.h"
-#include "src/type_determiner.h"
 
 namespace tint {
 
@@ -44,9 +44,9 @@ Program::Program(Program&& program)
 Program::Program(ProgramBuilder&& builder) {
   is_valid_ = builder.IsValid();
   if (builder.ResolveOnBuild() && builder.IsValid()) {
-    TypeDeterminer td(&builder);
-    if (!td.Determine()) {
-      diagnostics_.add_error(td.error());
+    Resolver resolver(&builder);
+    if (!resolver.Resolve()) {
+      diagnostics_.add_error(resolver.error());
       is_valid_ = false;
     }
   }

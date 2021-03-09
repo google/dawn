@@ -25,7 +25,6 @@
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
 #include "src/type/void_type.h"
-#include "src/type_determiner.h"
 #include "src/validator/validator_impl.h"
 #include "src/validator/validator_test_helper.h"
 

@@ -24,7 +24,6 @@
 #include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
 #include "src/transform/hlsl.h"
-#include "src/type_determiner.h"
 #include "src/writer/hlsl/generator_impl.h"
 
 namespace tint {

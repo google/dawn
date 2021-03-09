@@ -22,7 +22,6 @@
 #include "src/ast/module.h"
 #include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
-#include "src/type_determiner.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
