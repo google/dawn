@@ -216,10 +216,14 @@ class Builder {
   /// @param assign the statement to generate
   /// @returns true if the statement was successfully generated
   bool GenerateAssignStatement(ast::AssignmentStatement* assign);
-  /// Generates a block statement
+  /// Generates a block statement, wrapped in a push/pop scope
   /// @param stmt the statement to generate
   /// @returns true if the statement was successfully generated
   bool GenerateBlockStatement(const ast::BlockStatement* stmt);
+  /// Generates a block statement
+  /// @param stmt the statement to generate
+  /// @returns true if the statement was successfully generated
+  bool GenerateBlockStatementWithoutScoping(const ast::BlockStatement* stmt);
   /// Generates a break statement
   /// @param stmt the statement to generate
   /// @returns true if the statement was successfully generated

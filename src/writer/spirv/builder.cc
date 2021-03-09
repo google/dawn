@@ -1766,13 +1766,18 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
 
 bool Builder::GenerateBlockStatement(const ast::BlockStatement* stmt) {
   scope_stack_.push_scope();
+  auto result = GenerateBlockStatementWithoutScoping(stmt);
+  scope_stack_.pop_scope();
+  return result;
+}
+
+bool Builder::GenerateBlockStatementWithoutScoping(
+    const ast::BlockStatement* stmt) {
   for (auto* block_stmt : *stmt) {
     if (!GenerateStatement(block_stmt)) {
       return false;
     }
   }
-  scope_stack_.pop_scope();
-
   return true;
 }
 
@@ -2690,7 +2695,12 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   if (!GenerateLabel(body_block_id)) {
     return false;
   }
-  if (!GenerateBlockStatement(stmt->body())) {
+
+  // We need variables from the body to be visible in the continuing block, so
+  // manage scope outside of GenerateBlockStatement.
+  scope_stack_.push_scope();
+
+  if (!GenerateBlockStatementWithoutScoping(stmt->body())) {
     return false;
   }
 
@@ -2705,9 +2715,12 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   if (!GenerateLabel(continue_block_id)) {
     return false;
   }
-  if (!GenerateBlockStatement(stmt->continuing())) {
+  if (!GenerateBlockStatementWithoutScoping(stmt->continuing())) {
     return false;
   }
+
+  scope_stack_.pop_scope();
+
   if (!push_function_inst(spv::Op::OpBranch, {Operand::Int(loop_header_id)})) {
     return false;
   }
