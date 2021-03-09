@@ -14,8 +14,6 @@
 
 #include "src/writer/spirv/operand.h"
 
-#include <cmath>
-
 namespace tint {
 namespace writer {
 namespace spirv {

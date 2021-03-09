@@ -14,8 +14,6 @@
 
 #include "src/semantic/expression.h"
 
-#include "src/type/type.h"
-
 TINT_INSTANTIATE_TYPEINFO(tint::semantic::Expression);
 
 namespace tint {

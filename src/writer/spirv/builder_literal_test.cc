@@ -12,18 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "spirv/unified1/spirv.h"
-#include "src/ast/bool_literal.h"
-#include "src/ast/float_literal.h"
-#include "src/ast/literal.h"
-#include "src/ast/sint_literal.h"
-#include "src/ast/uint_literal.h"
-#include "src/type/bool_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/u32_type.h"
-#include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
 

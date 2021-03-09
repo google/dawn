@@ -17,9 +17,7 @@
 #include <string>
 #include <utility>
 
-#include "src/ast/variable.h"
 #include "src/program_builder.h"
-#include "src/semantic/expression.h"
 #include "src/semantic/variable.h"
 
 namespace tint {

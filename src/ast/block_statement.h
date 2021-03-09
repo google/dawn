@@ -15,9 +15,7 @@
 #ifndef SRC_AST_BLOCK_STATEMENT_H_
 #define SRC_AST_BLOCK_STATEMENT_H_
 
-#include <memory>
 #include <utility>
-#include <vector>
 
 #include "src/ast/statement.h"
 

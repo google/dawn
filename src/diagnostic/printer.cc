@@ -14,8 +14,6 @@
 
 #include "src/diagnostic/printer.h"
 
-#include <cstring>
-
 namespace tint {
 namespace diag {
 

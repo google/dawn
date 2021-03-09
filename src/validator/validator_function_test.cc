@@ -12,20 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "spirv/unified1/GLSL.std.450.h"
-#include "src/ast/call_statement.h"
-#include "src/ast/pipeline_stage.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/variable.h"
-#include "src/ast/variable_decl_statement.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/void_type.h"
-#include "src/validator/validator_impl.h"
 #include "src/validator/validator_test_helper.h"
 
 namespace tint {

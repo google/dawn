@@ -14,22 +14,17 @@
 
 #include "src/type/type.h"
 
-#include <assert.h>
-
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
-#include "src/type/array_type.h"
 #include "src/type/bool_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
 #include "src/type/matrix_type.h"
 #include "src/type/pointer_type.h"
 #include "src/type/sampler_type.h"
-#include "src/type/struct_type.h"
 #include "src/type/texture_type.h"
 #include "src/type/u32_type.h"
 #include "src/type/vector_type.h"
-#include "src/type/void_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
 
@@ -61,9 +56,9 @@ Type* Type::UnwrapIfNeeded() {
   auto* where = this;
   while (true) {
     if (auto* alias = where->As<type::Alias>()) {
-      where = alias->type();
+          where = alias->type();
     } else if (auto* access = where->As<type::AccessControl>()) {
-      where = access->type();
+          where = access->type();
     } else {
       break;
     }

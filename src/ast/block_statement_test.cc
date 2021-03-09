@@ -12,11 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/block_statement.h"
-
-#include <memory>
-#include <sstream>
-
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/test_helper.h"

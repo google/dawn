@@ -16,12 +16,9 @@
 #define SRC_TRANSFORM_TRANSFORM_H_
 
 #include <memory>
-#include <string>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 
-#include "src/diagnostic/diagnostic.h"
 #include "src/program.h"
 
 namespace tint {

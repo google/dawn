@@ -15,7 +15,6 @@
 #include "src/writer/spirv/instruction.h"
 
 #include "gtest/gtest.h"
-#include "src/writer/spirv/operand.h"
 
 namespace tint {
 namespace writer {

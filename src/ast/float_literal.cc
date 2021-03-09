@@ -15,9 +15,7 @@
 #include "src/ast/float_literal.h"
 
 #include <limits>
-#include <sstream>
 
-#include "src/clone_context.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::FloatLiteral);

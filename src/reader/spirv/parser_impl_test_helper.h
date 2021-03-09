@@ -16,12 +16,9 @@
 #define SRC_READER_SPIRV_PARSER_IMPL_TEST_HELPER_H_
 
 #include <memory>
-#include <sstream>
 #include <string>
 #include <vector>
 
-#include "gtest/gtest.h"
-#include "source/opt/ir_context.h"
 #include "src/demangler.h"
 #include "src/reader/spirv/parser_impl.h"
 

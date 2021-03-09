@@ -12,17 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
-#include "src/type/access_control_type.h"
 #include "src/type/depth_texture_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
-#include "src/type/sampler_type.h"
-#include "src/type/u32_type.h"
 
 namespace tint {
 namespace reader {

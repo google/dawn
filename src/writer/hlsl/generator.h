@@ -16,10 +16,8 @@
 #define SRC_WRITER_HLSL_GENERATOR_H_
 
 #include <memory>
-#include <sstream>
 #include <string>
 
-#include "src/program.h"
 #include "src/writer/hlsl/generator_impl.h"
 #include "src/writer/text.h"
 

@@ -14,13 +14,9 @@
 
 #include "src/program.h"
 
-#include <sstream>
 #include <utility>
 
-#include "src/ast/module.h"
-#include "src/clone_context.h"
 #include "src/demangler.h"
-#include "src/program_builder.h"
 #include "src/resolver/resolver.h"
 #include "src/semantic/expression.h"
 

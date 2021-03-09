@@ -14,10 +14,6 @@
 
 #include "src/ast/struct_member_decoration.h"
 
-#include <assert.h>
-
-#include "src/ast/struct_member_offset_decoration.h"
-
 TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberDecoration);
 
 namespace tint {

@@ -21,8 +21,6 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "src/program.h"
-#include "src/program_builder.h"
 #include "src/reader/wgsl/parser.h"
 #include "src/transform/manager.h"
 #include "src/writer/wgsl/generator.h"

@@ -16,17 +16,12 @@
 
 #include <algorithm>
 #include <limits>
-#include <string>
 #include <unordered_map>
 #include <utility>
 
-#include "src/block_allocator.h"
-#include "src/debug.h"
 #include "src/program_builder.h"
-#include "src/semantic/intrinsic.h"
 #include "src/type/access_control_type.h"
 #include "src/type/depth_texture_type.h"
-#include "src/type/f32_type.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
 #include "src/type/storage_texture_type.h"

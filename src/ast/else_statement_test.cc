@@ -12,14 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/else_statement.h"
-
-#include "src/ast/bool_literal.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/test_helper.h"
-#include "src/type/bool_type.h"
 
 namespace tint {
 namespace ast {

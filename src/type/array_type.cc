@@ -15,12 +15,8 @@
 #include "src/type/array_type.h"
 
 #include <cmath>
-#include <memory>
 
-#include "src/ast/stride_decoration.h"
-#include "src/clone_context.h"
 #include "src/program_builder.h"
-#include "src/type/vector_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Array);
 

@@ -12,28 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
-
-#include "gtest/gtest.h"
-#include "spirv/unified1/spirv.h"
-#include "spirv/unified1/spirv.hpp11"
-#include "src/ast/discard_statement.h"
-#include "src/ast/function.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/member_accessor_expression.h"
-#include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/variable.h"
-#include "src/ast/variable_decl_statement.h"
-#include "src/type/access_control_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/struct_type.h"
-#include "src/type/void_type.h"
-#include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
 

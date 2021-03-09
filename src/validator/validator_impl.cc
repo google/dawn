@@ -14,32 +14,18 @@
 
 #include "src/validator/validator_impl.h"
 
-#include <cassert>
-#include <unordered_set>
 #include <utility>
 
 #include "src/ast/call_statement.h"
 #include "src/ast/fallthrough_statement.h"
-#include "src/ast/function.h"
-#include "src/ast/int_literal.h"
-#include "src/ast/module.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/struct.h"
-#include "src/ast/switch_statement.h"
 #include "src/ast/uint_literal.h"
-#include "src/ast/variable_decl_statement.h"
-#include "src/debug.h"
 #include "src/semantic/call.h"
-#include "src/semantic/expression.h"
 #include "src/semantic/function.h"
-#include "src/semantic/intrinsic.h"
 #include "src/semantic/variable.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
-#include "src/type/bool_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
 #include "src/type/matrix_type.h"
 #include "src/type/pointer_type.h"
 #include "src/type/struct_type.h"

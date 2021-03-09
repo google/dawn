@@ -14,8 +14,6 @@
 
 #include "src/validator/validator_test_helper.h"
 
-#include <memory>
-
 namespace tint {
 
 ValidatorTestHelper::ValidatorTestHelper() = default;

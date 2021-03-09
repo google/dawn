@@ -14,9 +14,6 @@
 
 #include "src/ast/return_statement.h"
 
-#include <sstream>
-
-#include "src/ast/identifier_expression.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {

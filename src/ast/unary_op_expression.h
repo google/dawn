@@ -15,11 +15,7 @@
 #ifndef SRC_AST_UNARY_OP_EXPRESSION_H_
 #define SRC_AST_UNARY_OP_EXPRESSION_H_
 
-#include <memory>
-#include <utility>
-
 #include "src/ast/expression.h"
-#include "src/ast/literal.h"
 #include "src/ast/unary_op.h"
 
 namespace tint {

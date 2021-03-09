@@ -15,7 +15,6 @@
 #ifndef SRC_WRITER_MSL_GENERATOR_IMPL_H_
 #define SRC_WRITER_MSL_GENERATOR_IMPL_H_
 
-#include <sstream>
 #include <string>
 #include <unordered_map>
 
@@ -24,14 +23,9 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
-#include "src/ast/call_expression.h"
-#include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
-#include "src/ast/else_statement.h"
-#include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
@@ -41,7 +35,6 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/program.h"
 #include "src/scope_stack.h"
-#include "src/semantic/intrinsic.h"
 #include "src/type/struct_type.h"
 #include "src/writer/text_generator.h"
 

@@ -16,9 +16,6 @@
 
 #include <algorithm>
 
-#include "src/ast/block_statement.h"
-#include "src/ast/function.h"
-#include "src/clone_context.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);

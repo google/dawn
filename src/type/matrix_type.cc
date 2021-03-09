@@ -14,12 +14,7 @@
 
 #include "src/type/matrix_type.h"
 
-#include <assert.h>
-
-#include "src/clone_context.h"
 #include "src/program_builder.h"
-#include "src/type/array_type.h"
-#include "src/type/vector_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Matrix);
 

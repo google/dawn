@@ -14,14 +14,9 @@
 
 #include "src/ast/module.h"
 
-#include <sstream>
-#include <string>
 #include <utility>
 
-#include "src/debug.h"
 #include "src/program_builder.h"
-#include "src/type/alias_type.h"
-#include "src/type/struct_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Module);
 

@@ -14,8 +14,6 @@
 
 #include "src/writer/text.h"
 
-#include <utility>
-
 namespace tint {
 namespace writer {
 

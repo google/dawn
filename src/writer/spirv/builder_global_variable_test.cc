@@ -12,33 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
-#include "gtest/gtest.h"
-#include "src/ast/binding_decoration.h"
-#include "src/ast/bool_literal.h"
-#include "src/ast/builtin.h"
-#include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
-#include "src/ast/float_literal.h"
-#include "src/ast/group_decoration.h"
-#include "src/ast/location_decoration.h"
-#include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/storage_class.h"
-#include "src/ast/struct.h"
-#include "src/ast/type_constructor_expression.h"
-#include "src/ast/variable.h"
-#include "src/ast/variable_decoration.h"
-#include "src/program.h"
-#include "src/type/access_control_type.h"
-#include "src/type/bool_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/struct_type.h"
-#include "src/type/u32_type.h"
-#include "src/type/vector_type.h"
-#include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
 

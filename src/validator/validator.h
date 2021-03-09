@@ -15,14 +15,8 @@
 #ifndef SRC_VALIDATOR_VALIDATOR_H_
 #define SRC_VALIDATOR_VALIDATOR_H_
 
-#include <memory>
 #include <string>
 
-#include "src/ast/assignment_statement.h"
-#include "src/ast/expression.h"
-#include "src/ast/statement.h"
-#include "src/diagnostic/diagnostic.h"
-#include "src/diagnostic/formatter.h"
 #include "src/program.h"
 
 namespace tint {

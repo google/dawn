@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/array_accessor_expression.h"
-
-#include "src/ast/identifier_expression.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {

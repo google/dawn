@@ -18,7 +18,6 @@
 #include <string>
 
 #include "src/reader/wgsl/token.h"
-#include "src/source.h"
 
 namespace tint {
 namespace reader {

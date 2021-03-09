@@ -14,10 +14,6 @@
 
 #include "src/writer/text_generator.h"
 
-#include <assert.h>
-
-#include <utility>
-
 namespace tint {
 namespace writer {
 

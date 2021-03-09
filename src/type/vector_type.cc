@@ -14,10 +14,6 @@
 
 #include "src/type/vector_type.h"
 
-#include <assert.h>
-#include <cmath>
-
-#include "src/clone_context.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Vector);

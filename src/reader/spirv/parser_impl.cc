@@ -14,71 +14,17 @@
 
 #include "src/reader/spirv/parser_impl.h"
 
-#include <cassert>
-#include <cstring>
 #include <limits>
-#include <locale>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
 
-#include "source/opt/basic_block.h"
 #include "source/opt/build_module.h"
-#include "source/opt/constants.h"
-#include "source/opt/decoration_manager.h"
-#include "source/opt/function.h"
-#include "source/opt/instruction.h"
-#include "source/opt/module.h"
-#include "source/opt/type_manager.h"
-#include "source/opt/types.h"
-#include "spirv-tools/libspirv.hpp"
-#include "src/ast/binary_expression.h"
-#include "src/ast/binding_decoration.h"
 #include "src/ast/bitcast_expression.h"
-#include "src/ast/bool_literal.h"
-#include "src/ast/builtin.h"
-#include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
-#include "src/ast/float_literal.h"
-#include "src/ast/group_decoration.h"
-#include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/sint_literal.h"
-#include "src/ast/stride_decoration.h"
-#include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/ast/struct_decoration.h"
-#include "src/ast/struct_member.h"
-#include "src/ast/struct_member_decoration.h"
-#include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type_constructor_expression.h"
-#include "src/ast/uint_literal.h"
-#include "src/ast/unary_op_expression.h"
-#include "src/ast/variable.h"
-#include "src/ast/variable_decl_statement.h"
-#include "src/ast/variable_decoration.h"
-#include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/function.h"
-#include "src/reader/spirv/usage.h"
 #include "src/type/access_control_type.h"
-#include "src/type/alias_type.h"
-#include "src/type/array_type.h"
-#include "src/type/bool_type.h"
 #include "src/type/depth_texture_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/matrix_type.h"
 #include "src/type/multisampled_texture_type.h"
-#include "src/type/pointer_type.h"
 #include "src/type/sampled_texture_type.h"
-#include "src/type/sampler_type.h"
-#include "src/type/storage_texture_type.h"
-#include "src/type/struct_type.h"
-#include "src/type/type.h"
-#include "src/type/u32_type.h"
-#include "src/type/vector_type.h"
-#include "src/type/void_type.h"
 
 namespace tint {
 namespace reader {
@@ -575,7 +521,7 @@ Source ParserImpl::GetSourceForInst(
   if (where == inst_source_.end()) {
     return {};
   }
-  return Source{where->second};
+  return Source{where->second };
 }
 
 bool ParserImpl::ParseInternalModuleExceptFunctions() {

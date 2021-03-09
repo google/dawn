@@ -14,12 +14,7 @@
 
 #include "src/ast/null_literal.h"
 
-#include "src/ast/bool_literal.h"
-#include "src/ast/float_literal.h"
-#include "src/ast/sint_literal.h"
 #include "src/ast/test_helper.h"
-#include "src/ast/uint_literal.h"
-#include "src/type/i32_type.h"
 
 namespace tint {
 namespace ast {

@@ -12,16 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
-#include "gtest/gtest.h"
-#include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/function.h"
-#include "src/ast/identifier_expression.h"
-#include "src/program.h"
-#include "src/type/void_type.h"
-#include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {

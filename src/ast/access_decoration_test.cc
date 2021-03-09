@@ -14,8 +14,6 @@
 
 #include "src/ast/access_decoration.h"
 
-#include <sstream>
-
 #include "src/ast/test_helper.h"
 
 namespace tint {

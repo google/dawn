@@ -14,10 +14,7 @@
 
 #include "src/ast/variable.h"
 
-#include <assert.h>
-
 #include "src/ast/constant_id_decoration.h"
-#include "src/clone_context.h"
 #include "src/program_builder.h"
 #include "src/semantic/variable.h"
 

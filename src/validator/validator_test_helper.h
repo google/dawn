@@ -15,7 +15,6 @@
 #ifndef SRC_VALIDATOR_VALIDATOR_TEST_HELPER_H_
 #define SRC_VALIDATOR_VALIDATOR_TEST_HELPER_H_
 
-#include <functional>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -23,7 +22,6 @@
 #include "gtest/gtest.h"
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
-#include "src/type/void_type.h"
 #include "src/validator/validator_impl.h"
 
 namespace tint {

@@ -16,11 +16,8 @@
 #define SRC_WRITER_SPIRV_FUNCTION_H_
 
 #include <functional>
-#include <vector>
 
-#include "spirv/unified1/spirv.hpp11"
 #include "src/writer/spirv/instruction.h"
-#include "src/writer/spirv/operand.h"
 
 namespace tint {
 namespace writer {

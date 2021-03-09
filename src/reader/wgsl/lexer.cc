@@ -14,11 +14,6 @@
 
 #include "src/reader/wgsl/lexer.h"
 
-#include <ctype.h>
-#include <errno.h>
-#include <stdlib.h>
-
-#include <cctype>
 #include <limits>
 
 namespace tint {

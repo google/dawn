@@ -14,7 +14,6 @@
 
 #include "src/ast/assignment_statement.h"
 
-#include "src/ast/identifier_expression.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {

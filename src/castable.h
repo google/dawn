@@ -15,9 +15,6 @@
 #ifndef SRC_CASTABLE_H_
 #define SRC_CASTABLE_H_
 
-#include <cstdint>
-#include <functional>
-#include <type_traits>
 #include <utility>
 
 namespace tint {

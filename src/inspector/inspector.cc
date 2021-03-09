@@ -14,26 +14,18 @@
 
 #include "src/inspector/inspector.h"
 
-#include <algorithm>
-#include <map>
 #include <utility>
 
 #include "src/ast/bool_literal.h"
-#include "src/ast/constructor_expression.h"
 #include "src/ast/float_literal.h"
-#include "src/ast/function.h"
 #include "src/ast/module.h"
-#include "src/ast/null_literal.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
-#include "src/ast/variable.h"
-#include "src/program.h"
 #include "src/semantic/function.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
-#include "src/type/depth_texture_type.h"
 #include "src/type/f32_type.h"
 #include "src/type/i32_type.h"
 #include "src/type/matrix_type.h"
@@ -41,8 +33,6 @@
 #include "src/type/sampled_texture_type.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type/struct_type.h"
-#include "src/type/texture_type.h"
-#include "src/type/type.h"
 #include "src/type/u32_type.h"
 #include "src/type/vector_type.h"
 

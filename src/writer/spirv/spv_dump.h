@@ -19,7 +19,6 @@
 #include <vector>
 
 #include "src/writer/spirv/builder.h"
-#include "src/writer/spirv/instruction.h"
 
 namespace tint {
 namespace writer {

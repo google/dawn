@@ -14,10 +14,6 @@
 
 #include "src/transform/hlsl.h"
 
-#include <memory>
-#include <utility>
-#include <vector>
-
 #include "src/transform/test_helper.h"
 
 namespace tint {

@@ -14,10 +14,7 @@
 #include "src/scope_stack.h"
 
 #include "gtest/gtest.h"
-#include "src/ast/variable.h"
 #include "src/program_builder.h"
-#include "src/symbol.h"
-#include "src/type/f32_type.h"
 
 namespace tint {
 namespace {

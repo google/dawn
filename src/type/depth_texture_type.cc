@@ -14,10 +14,6 @@
 
 #include "src/type/depth_texture_type.h"
 
-#include <cassert>
-#include <sstream>
-
-#include "src/clone_context.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::DepthTexture);

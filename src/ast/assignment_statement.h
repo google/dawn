@@ -15,11 +15,7 @@
 #ifndef SRC_AST_ASSIGNMENT_STATEMENT_H_
 #define SRC_AST_ASSIGNMENT_STATEMENT_H_
 
-#include <memory>
-#include <utility>
-
 #include "src/ast/expression.h"
-#include "src/ast/literal.h"
 #include "src/ast/statement.h"
 
 namespace tint {

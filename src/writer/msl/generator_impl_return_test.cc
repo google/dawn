@@ -12,14 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-#include <vector>
-
-#include "gtest/gtest.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/return_statement.h"
-#include "src/program.h"
-#include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {

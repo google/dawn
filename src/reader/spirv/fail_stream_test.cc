@@ -14,9 +14,6 @@
 
 #include "src/reader/spirv/fail_stream.h"
 
-#include <memory>
-#include <sstream>
-
 #include "gmock/gmock.h"
 
 namespace tint {

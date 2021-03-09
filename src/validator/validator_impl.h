@@ -16,22 +16,14 @@
 #define SRC_VALIDATOR_VALIDATOR_IMPL_H_
 
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 #include "src/ast/assignment_statement.h"
-#include "src/ast/call_expression.h"
-#include "src/ast/expression.h"
 #include "src/ast/identifier_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/statement.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/diagnostic/diagnostic.h"
-#include "src/diagnostic/formatter.h"
 #include "src/program.h"
 #include "src/scope_stack.h"
 

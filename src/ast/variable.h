@@ -15,17 +15,12 @@
 #ifndef SRC_AST_VARIABLE_H_
 #define SRC_AST_VARIABLE_H_
 
-#include <memory>
-#include <ostream>
 #include <utility>
 #include <vector>
 
 #include "src/ast/expression.h"
-#include "src/ast/node.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/variable_decoration.h"
-#include "src/symbol.h"
-#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

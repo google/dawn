@@ -14,10 +14,7 @@
 
 #include "src/transform/msl.h"
 
-#include <memory>
 #include <string>
-#include <utility>
-#include <vector>
 
 #include "src/transform/test_helper.h"
 

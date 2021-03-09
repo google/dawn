@@ -14,8 +14,6 @@
 
 #include "src/writer/hlsl/generator.h"
 
-#include <utility>
-
 namespace tint {
 namespace writer {
 namespace hlsl {

@@ -15,15 +15,10 @@
 #ifndef SRC_AST_STRUCT_MEMBER_H_
 #define SRC_AST_STRUCT_MEMBER_H_
 
-#include <memory>
-#include <ostream>
 #include <utility>
 #include <vector>
 
-#include "src/ast/node.h"
 #include "src/ast/struct_member_decoration.h"
-#include "src/symbol.h"
-#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

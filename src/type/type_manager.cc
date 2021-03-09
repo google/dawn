@@ -14,8 +14,6 @@
 
 #include "src/type/type_manager.h"
 
-#include <utility>
-
 namespace tint {
 namespace type {
 

@@ -14,8 +14,6 @@
 
 #include "src/writer/wgsl/generator.h"
 
-#include <utility>
-
 namespace tint {
 namespace writer {
 namespace wgsl {

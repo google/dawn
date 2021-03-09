@@ -15,7 +15,6 @@
 #ifndef SRC_READER_SPIRV_USAGE_H_
 #define SRC_READER_SPIRV_USAGE_H_
 
-#include <ostream>
 #include <string>
 
 namespace tint {

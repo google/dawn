@@ -12,22 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
-#include "gtest/gtest.h"
-#include "src/ast/assignment_statement.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/location_decoration.h"
-#include "src/ast/member_accessor_expression.h"
-#include "src/ast/pipeline_stage.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/variable.h"
-#include "src/program.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/vector_type.h"
-#include "src/type/void_type.h"
-#include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {

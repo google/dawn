@@ -15,12 +15,8 @@
 #ifndef SRC_AST_IDENTIFIER_EXPRESSION_H_
 #define SRC_AST_IDENTIFIER_EXPRESSION_H_
 
-#include <memory>
-#include <utility>
-
 #include "src/ast/expression.h"
 #include "src/semantic/intrinsic.h"
-#include "src/symbol.h"
 
 namespace tint {
 namespace ast {

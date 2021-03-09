@@ -15,8 +15,6 @@
 #ifndef SRC_AST_ACCESS_DECORATION_H_
 #define SRC_AST_ACCESS_DECORATION_H_
 
-#include <stddef.h>
-
 #include "src/ast/access_control.h"
 #include "src/ast/type_decoration.h"
 

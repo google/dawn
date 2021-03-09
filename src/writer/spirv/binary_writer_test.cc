@@ -12,13 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/writer/spirv/binary_writer.h"
-
-#include <cstring>
-
-#include "gtest/gtest.h"
-#include "spirv/unified1/spirv.hpp11"
-#include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/test_helper.h"
 
 namespace tint {

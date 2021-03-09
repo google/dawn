@@ -12,11 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/else_statement.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/if_statement.h"
-#include "src/ast/return_statement.h"
-#include "src/program.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

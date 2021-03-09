@@ -15,7 +15,6 @@
 #ifndef SRC_SEMANTIC_CALL_TARGET_H_
 #define SRC_SEMANTIC_CALL_TARGET_H_
 
-#include <utility>
 #include <vector>
 
 #include "src/semantic/node.h"

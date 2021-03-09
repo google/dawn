@@ -15,7 +15,6 @@
 #include "src/diagnostic/formatter.h"
 
 #include <algorithm>
-#include <sstream>
 #include <vector>
 
 #include "src/diagnostic/diagnostic.h"

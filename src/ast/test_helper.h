@@ -15,10 +15,6 @@
 #ifndef SRC_AST_TEST_HELPER_H_
 #define SRC_AST_TEST_HELPER_H_
 
-#include <memory>
-#include <string>
-#include <utility>
-
 #include "gtest/gtest.h"
 #include "src/program_builder.h"
 

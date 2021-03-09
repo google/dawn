@@ -15,13 +15,10 @@
 #ifndef SRC_AST_ELSE_STATEMENT_H_
 #define SRC_AST_ELSE_STATEMENT_H_
 
-#include <memory>
-#include <utility>
 #include <vector>
 
 #include "src/ast/block_statement.h"
 #include "src/ast/expression.h"
-#include "src/ast/statement.h"
 
 namespace tint {
 namespace ast {

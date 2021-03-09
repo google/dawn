@@ -15,8 +15,6 @@
 #ifndef SRC_AST_WORKGROUP_DECORATION_H_
 #define SRC_AST_WORKGROUP_DECORATION_H_
 
-#include <stddef.h>
-
 #include <tuple>
 
 #include "src/ast/function_decoration.h"

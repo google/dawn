@@ -14,14 +14,6 @@
 
 #include "src/debug.h"
 
-#include <stdio.h>
-
-#include <sstream>
-#include <string>
-#include <vector>
-
-#include "src/diagnostic/diagnostic.h"
-
 namespace tint {
 namespace {
 

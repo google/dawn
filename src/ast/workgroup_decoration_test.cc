@@ -14,8 +14,6 @@
 
 #include "src/ast/workgroup_decoration.h"
 
-#include <sstream>
-
 #include "src/ast/stage_decoration.h"
 #include "src/ast/test_helper.h"
 

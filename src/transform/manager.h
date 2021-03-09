@@ -16,11 +16,9 @@
 #define SRC_TRANSFORM_MANAGER_H_
 
 #include <memory>
-#include <string>
 #include <utility>
 #include <vector>
 
-#include "src/diagnostic/diagnostic.h"
 #include "src/transform/transform.h"
 
 namespace tint {

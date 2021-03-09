@@ -20,11 +20,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "src/ast/expression.h"
-#include "src/ast/function.h"
-#include "src/ast/statement.h"
-#include "src/ast/variable.h"
-#include "src/program.h"
 #include "src/transform/transform.h"
 
 namespace tint {

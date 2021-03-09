@@ -12,13 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/variable.h"
-
 #include "src/ast/constant_id_decoration.h"
-#include "src/ast/identifier_expression.h"
 #include "src/ast/test_helper.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
 
 namespace tint {
 namespace ast {

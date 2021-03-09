@@ -15,11 +15,9 @@
 #ifndef SRC_TYPE_STRUCT_TYPE_H_
 #define SRC_TYPE_STRUCT_TYPE_H_
 
-#include <memory>
 #include <string>
 
 #include "src/ast/struct.h"
-#include "src/symbol.h"
 #include "src/type/type.h"
 
 namespace tint {

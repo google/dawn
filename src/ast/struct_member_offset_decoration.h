@@ -15,8 +15,6 @@
 #ifndef SRC_AST_STRUCT_MEMBER_OFFSET_DECORATION_H_
 #define SRC_AST_STRUCT_MEMBER_OFFSET_DECORATION_H_
 
-#include <stddef.h>
-
 #include "src/ast/struct_member_decoration.h"
 
 namespace tint {

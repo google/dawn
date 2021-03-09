@@ -15,14 +15,11 @@
 #ifndef SRC_AST_INTRINSIC_TEXTURE_HELPER_TEST_H_
 #define SRC_AST_INTRINSIC_TEXTURE_HELPER_TEST_H_
 
-#include <functional>
 #include <vector>
 
 #include "src/ast/access_control.h"
 #include "src/program_builder.h"
-#include "src/type/sampler_type.h"
 #include "src/type/storage_texture_type.h"
-#include "src/type/texture_type.h"
 
 namespace tint {
 namespace ast {

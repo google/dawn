@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
-#include "src/ast/block_statement.h"
-#include "src/ast/discard_statement.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

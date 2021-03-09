@@ -15,7 +15,6 @@
 #ifndef SRC_WRITER_WGSL_GENERATOR_IMPL_H_
 #define SRC_WRITER_WGSL_GENERATOR_IMPL_H_
 
-#include <sstream>
 #include <string>
 
 #include "src/ast/array_accessor_expression.h"
@@ -23,13 +22,9 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
-#include "src/ast/call_expression.h"
-#include "src/ast/case_statement.h"
-#include "src/ast/constructor_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
-#include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -38,12 +33,9 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
-#include "src/ast/variable.h"
-#include "src/diagnostic/diagnostic.h"
 #include "src/program.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type/struct_type.h"
-#include "src/type/type.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {

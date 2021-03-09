@@ -14,10 +14,6 @@
 
 #include "src/ast/type_decoration.h"
 
-#include <assert.h>
-
-#include "src/ast/access_decoration.h"
-
 TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeDecoration);
 
 namespace tint {

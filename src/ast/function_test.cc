@@ -12,15 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/function.h"
-
-#include "src/ast/builtin_decoration.h"
 #include "src/ast/discard_statement.h"
-#include "src/ast/location_decoration.h"
-#include "src/ast/pipeline_stage.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/test_helper.h"
-#include "src/ast/variable.h"
 #include "src/ast/workgroup_decoration.h"
 
 namespace tint {

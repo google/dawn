@@ -17,7 +17,6 @@
 
 #include <string>
 
-#include "src/ast/pipeline_stage.h"
 #include "src/program.h"
 
 namespace tint {

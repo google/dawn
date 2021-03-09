@@ -12,15 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
-#include "src/ast/break_statement.h"
-#include "src/ast/case_statement.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/sint_literal.h"
-#include "src/ast/switch_statement.h"
-#include "src/program.h"
-#include "src/type/i32_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

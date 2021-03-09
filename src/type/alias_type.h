@@ -17,7 +17,6 @@
 
 #include <string>
 
-#include "src/symbol.h"
 #include "src/type/type.h"
 
 namespace tint {

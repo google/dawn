@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_member_offset_decoration.h"
-
 #include "src/ast/test_helper.h"
 
 namespace tint {

@@ -15,7 +15,6 @@
 #ifndef SRC_SEMANTIC_INTRINSIC_H_
 #define SRC_SEMANTIC_INTRINSIC_H_
 
-#include <ostream>
 #include <string>
 
 #include "src/semantic/call_target.h"

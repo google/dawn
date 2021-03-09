@@ -15,19 +15,10 @@
 #include "src/type/multisampled_texture_type.h"
 
 #include "src/type/access_control_type.h"
-#include "src/type/array_type.h"
-#include "src/type/bool_type.h"
 #include "src/type/depth_texture_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/matrix_type.h"
-#include "src/type/pointer_type.h"
 #include "src/type/sampled_texture_type.h"
 #include "src/type/storage_texture_type.h"
-#include "src/type/struct_type.h"
 #include "src/type/test_helper.h"
-#include "src/type/u32_type.h"
-#include "src/type/vector_type.h"
 
 namespace tint {
 namespace type {

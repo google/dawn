@@ -14,8 +14,6 @@
 
 #include "src/writer/spirv/generator.h"
 
-#include <utility>
-
 namespace tint {
 namespace writer {
 namespace spirv {

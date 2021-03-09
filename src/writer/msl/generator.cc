@@ -14,8 +14,6 @@
 
 #include "src/writer/msl/generator.h"
 
-#include <utility>
-
 namespace tint {
 namespace writer {
 namespace msl {

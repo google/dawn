@@ -14,12 +14,7 @@
 
 #include "src/reader/spirv/namer.h"
 
-#include <cstdint>
-#include <sstream>
-#include <string>
-
 #include "gmock/gmock.h"
-#include "src/reader/spirv/fail_stream.h"
 
 namespace tint {
 namespace reader {

@@ -15,7 +15,6 @@
 #ifndef SRC_AST_CONSTANT_ID_DECORATION_H_
 #define SRC_AST_CONSTANT_ID_DECORATION_H_
 
-#include "src/ast/builtin.h"
 #include "src/ast/variable_decoration.h"
 
 namespace tint {

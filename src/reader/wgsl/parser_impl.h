@@ -15,50 +15,27 @@
 #ifndef SRC_READER_WGSL_PARSER_IMPL_H_
 #define SRC_READER_WGSL_PARSER_IMPL_H_
 
-#include <cassert>
 #include <deque>
 #include <memory>
 #include <string>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include "src/ast/access_control.h"
-#include "src/ast/array_decoration.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/break_statement.h"
-#include "src/ast/builtin.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/case_statement.h"
-#include "src/ast/constructor_expression.h"
 #include "src/ast/continue_statement.h"
-#include "src/ast/else_statement.h"
-#include "src/ast/function.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
-#include "src/ast/pipeline_stage.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/statement.h"
-#include "src/ast/storage_class.h"
-#include "src/ast/struct.h"
-#include "src/ast/struct_decoration.h"
-#include "src/ast/struct_member.h"
-#include "src/ast/struct_member_decoration.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/ast/variable_decoration.h"
-#include "src/diagnostic/diagnostic.h"
-#include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
 #include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
 #include "src/type/storage_texture_type.h"
-#include "src/type/struct_type.h"
-#include "src/type/texture_type.h"
-#include "src/type/type.h"
 
 namespace tint {
 namespace reader {

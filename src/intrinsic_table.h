@@ -19,7 +19,6 @@
 #include <string>
 #include <vector>
 
-#include "src/diagnostic/diagnostic.h"
 #include "src/semantic/intrinsic.h"
 
 namespace tint {

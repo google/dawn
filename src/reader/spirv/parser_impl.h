@@ -15,36 +15,20 @@
 #ifndef SRC_READER_SPIRV_PARSER_IMPL_H_
 #define SRC_READER_SPIRV_PARSER_IMPL_H_
 
-#include <cstdint>
 #include <memory>
-#include <sstream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include "source/opt/constants.h"
-#include "source/opt/decoration_manager.h"
 #include "source/opt/ir_context.h"
-#include "source/opt/module.h"
-#include "source/opt/type_manager.h"
-#include "source/opt/types.h"
-#include "spirv-tools/libspirv.hpp"
-#include "src/ast/expression.h"
-#include "src/ast/struct_member_decoration.h"
 #include "src/program_builder.h"
 #include "src/reader/reader.h"
 #include "src/reader/spirv/entry_point_info.h"
 #include "src/reader/spirv/enum_converter.h"
-#include "src/reader/spirv/fail_stream.h"
 #include "src/reader/spirv/namer.h"
 #include "src/reader/spirv/usage.h"
-#include "src/source.h"
-#include "src/type/alias_type.h"
-#include "src/type/array_type.h"
-#include "src/type/pointer_type.h"
-#include "src/type/type.h"
 
 /// This is the implementation of the SPIR-V parser for Tint.
 

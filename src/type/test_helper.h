@@ -15,8 +15,6 @@
 #ifndef SRC_TYPE_TEST_HELPER_H_
 #define SRC_TYPE_TEST_HELPER_H_
 
-#include <memory>
-#include <string>
 #include <utility>
 
 #include "gtest/gtest.h"

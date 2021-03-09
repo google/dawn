@@ -15,11 +15,8 @@
 #ifndef SRC_AST_STRUCT_H_
 #define SRC_AST_STRUCT_H_
 
-#include <ostream>
-#include <string>
 #include <utility>
 
-#include "src/ast/node.h"
 #include "src/ast/struct_decoration.h"
 #include "src/ast/struct_member.h"
 

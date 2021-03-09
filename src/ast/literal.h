@@ -18,7 +18,6 @@
 #include <string>
 
 #include "src/ast/node.h"
-#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

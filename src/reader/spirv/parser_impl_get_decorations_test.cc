@@ -13,8 +13,6 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "spirv/unified1/spirv.h"
-#include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
 

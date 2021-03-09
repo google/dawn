@@ -12,20 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
-
-#include "gtest/gtest.h"
-#include "spirv/unified1/spirv.h"
-#include "spirv/unified1/spirv.hpp11"
-#include "src/ast/assignment_statement.h"
-#include "src/ast/function.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/pipeline_stage.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/variable.h"
 #include "src/ast/workgroup_decoration.h"
-#include "src/semantic/function.h"
-#include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
 

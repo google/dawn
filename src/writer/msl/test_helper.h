@@ -19,8 +19,6 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/ast/module.h"
-#include "src/diagnostic/formatter.h"
 #include "src/program_builder.h"
 #include "src/writer/msl/generator_impl.h"
 

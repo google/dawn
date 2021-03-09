@@ -15,7 +15,6 @@
 #include "src/semantic/call_target.h"
 
 #include "src/symbol_table.h"
-#include "src/type/type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::semantic::CallTarget);
 

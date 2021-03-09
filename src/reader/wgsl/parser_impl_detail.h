@@ -16,7 +16,6 @@
 #define SRC_READER_WGSL_PARSER_IMPL_DETAIL_H_
 
 #include <memory>
-#include <type_traits>
 
 namespace tint {
 namespace reader {

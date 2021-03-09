@@ -14,45 +14,12 @@
 
 #include "src/transform/first_index_offset.h"
 
-#include <cassert>
 #include <memory>
 #include <utility>
 
-#include "src/ast/array_accessor_expression.h"
-#include "src/ast/assignment_statement.h"
-#include "src/ast/binary_expression.h"
-#include "src/ast/bitcast_expression.h"
-#include "src/ast/break_statement.h"
-#include "src/ast/builtin_decoration.h"
-#include "src/ast/call_statement.h"
-#include "src/ast/case_statement.h"
-#include "src/ast/constructor_expression.h"
-#include "src/ast/else_statement.h"
-#include "src/ast/expression.h"
-#include "src/ast/fallthrough_statement.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/if_statement.h"
-#include "src/ast/loop_statement.h"
-#include "src/ast/member_accessor_expression.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/ast/struct_decoration.h"
-#include "src/ast/struct_member.h"
-#include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/switch_statement.h"
-#include "src/ast/type_constructor_expression.h"
-#include "src/ast/unary_op_expression.h"
-#include "src/ast/variable.h"
-#include "src/ast/variable_decl_statement.h"
-#include "src/ast/variable_decoration.h"
-#include "src/clone_context.h"
-#include "src/program.h"
 #include "src/program_builder.h"
 #include "src/semantic/function.h"
-#include "src/type/struct_type.h"
-#include "src/type/u32_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::Data);
 

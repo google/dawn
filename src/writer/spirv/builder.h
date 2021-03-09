@@ -15,46 +15,28 @@
 #ifndef SRC_WRITER_SPIRV_BUILDER_H_
 #define SRC_WRITER_SPIRV_BUILDER_H_
 
-#include <functional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include "spirv/unified1/spirv.h"
-#include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
-#include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
-#include "src/ast/builtin.h"
-#include "src/ast/call_expression.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
-#include "src/ast/else_statement.h"
-#include "src/ast/identifier_expression.h"
 #include "src/ast/if_statement.h"
-#include "src/ast/literal.h"
 #include "src/ast/loop_statement.h"
-#include "src/ast/member_accessor_expression.h"
 #include "src/ast/return_statement.h"
-#include "src/ast/struct_member.h"
 #include "src/ast/switch_statement.h"
-#include "src/ast/type_constructor_expression.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
 #include "src/type/access_control_type.h"
-#include "src/type/array_type.h"
-#include "src/type/matrix_type.h"
-#include "src/type/pointer_type.h"
 #include "src/type/storage_texture_type.h"
-#include "src/type/struct_type.h"
-#include "src/type/type_manager.h"
-#include "src/type/vector_type.h"
 #include "src/writer/spirv/function.h"
-#include "src/writer/spirv/instruction.h"
 
 namespace tint {
 

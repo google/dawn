@@ -14,9 +14,6 @@
 
 #include "src/clone_context.h"
 
-#include "src/ast/function.h"
-#include "src/ast/module.h"
-#include "src/program.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::Cloneable);

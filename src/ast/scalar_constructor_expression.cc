@@ -14,7 +14,6 @@
 
 #include "src/ast/scalar_constructor_expression.h"
 
-#include "src/clone_context.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ScalarConstructorExpression);

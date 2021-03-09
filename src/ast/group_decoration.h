@@ -15,8 +15,6 @@
 #ifndef SRC_AST_GROUP_DECORATION_H_
 #define SRC_AST_GROUP_DECORATION_H_
 
-#include <stddef.h>
-
 #include "src/ast/variable_decoration.h"
 
 namespace tint {

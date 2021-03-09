@@ -14,9 +14,7 @@
 
 #include "src/ast/bitcast_expression.h"
 
-#include "src/ast/identifier_expression.h"
 #include "src/ast/test_helper.h"
-#include "src/type/f32_type.h"
 
 namespace tint {
 namespace ast {

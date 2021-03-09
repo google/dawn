@@ -15,7 +15,6 @@
 #ifndef SRC_TYPE_POINTER_TYPE_H_
 #define SRC_TYPE_POINTER_TYPE_H_
 
-#include <sstream>
 #include <string>
 
 #include "src/ast/storage_class.h"

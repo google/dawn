@@ -14,20 +14,10 @@
 
 #include "src/transform/emit_vertex_point_size.h"
 
-#include <memory>
 #include <utility>
 
 #include "src/ast/assignment_statement.h"
-#include "src/ast/block_statement.h"
-#include "src/ast/float_literal.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/variable.h"
-#include "src/clone_context.h"
-#include "src/program.h"
 #include "src/program_builder.h"
-#include "src/type/f32_type.h"
-#include "src/type/type_manager.h"
 
 namespace tint {
 namespace transform {

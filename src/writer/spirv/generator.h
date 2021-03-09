@@ -19,9 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "src/program.h"
 #include "src/writer/spirv/binary_writer.h"
-#include "src/writer/spirv/builder.h"
 #include "src/writer/writer.h"
 
 namespace tint {

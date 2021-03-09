@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/group_decoration.h"
-
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/test_helper.h"
 

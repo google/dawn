@@ -15,13 +15,9 @@
 #ifndef SRC_AST_IF_STATEMENT_H_
 #define SRC_AST_IF_STATEMENT_H_
 
-#include <memory>
 #include <utility>
 
-#include "src/ast/block_statement.h"
 #include "src/ast/else_statement.h"
-#include "src/ast/expression.h"
-#include "src/ast/statement.h"
 
 namespace tint {
 namespace ast {

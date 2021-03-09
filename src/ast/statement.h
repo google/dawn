@@ -15,7 +15,6 @@
 #ifndef SRC_AST_STATEMENT_H_
 #define SRC_AST_STATEMENT_H_
 
-#include <memory>
 #include <vector>
 
 #include "src/ast/node.h"

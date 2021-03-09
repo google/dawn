@@ -12,20 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "src/ast/array_accessor_expression.h"
-#include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
-#include "src/ast/bool_literal.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/sint_literal.h"
-#include "src/ast/type_constructor_expression.h"
-#include "src/ast/unary_op_expression.h"
-#include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
 
 namespace tint {
 namespace reader {

@@ -20,7 +20,6 @@
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/statement.h"
-#include "src/type/array_type.h"
 
 namespace tint {
 namespace transform {

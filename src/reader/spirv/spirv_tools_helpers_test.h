@@ -15,7 +15,6 @@
 #ifndef SRC_READER_SPIRV_SPIRV_TOOLS_HELPERS_TEST_H_
 #define SRC_READER_SPIRV_SPIRV_TOOLS_HELPERS_TEST_H_
 
-#include <cstdint>
 #include <string>
 #include <vector>
 

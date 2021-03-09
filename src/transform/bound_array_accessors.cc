@@ -15,40 +15,10 @@
 #include "src/transform/bound_array_accessors.h"
 
 #include <algorithm>
-#include <memory>
 #include <utility>
 
-#include "src/ast/assignment_statement.h"
-#include "src/ast/binary_expression.h"
-#include "src/ast/bitcast_expression.h"
-#include "src/ast/block_statement.h"
-#include "src/ast/break_statement.h"
-#include "src/ast/call_expression.h"
-#include "src/ast/call_statement.h"
-#include "src/ast/case_statement.h"
-#include "src/ast/continue_statement.h"
-#include "src/ast/discard_statement.h"
-#include "src/ast/else_statement.h"
-#include "src/ast/fallthrough_statement.h"
-#include "src/ast/if_statement.h"
-#include "src/ast/loop_statement.h"
-#include "src/ast/member_accessor_expression.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/sint_literal.h"
-#include "src/ast/switch_statement.h"
-#include "src/ast/type_constructor_expression.h"
-#include "src/ast/uint_literal.h"
-#include "src/ast/unary_op_expression.h"
-#include "src/ast/variable.h"
-#include "src/ast/variable_decl_statement.h"
-#include "src/clone_context.h"
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
-#include "src/type/array_type.h"
-#include "src/type/matrix_type.h"
-#include "src/type/u32_type.h"
-#include "src/type/vector_type.h"
 
 namespace tint {
 namespace transform {

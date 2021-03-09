@@ -19,9 +19,8 @@
 #include "src/ast/builtin.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/storage_class.h"
-#include "src/type/storage_texture_type.h"
-#include "src/type/texture_type.h"
 #include "src/reader/spirv/fail_stream.h"
+#include "src/type/storage_texture_type.h"
 
 namespace tint {
 namespace reader {

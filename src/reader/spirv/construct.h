@@ -15,9 +15,7 @@
 #ifndef SRC_READER_SPIRV_CONSTRUCT_H_
 #define SRC_READER_SPIRV_CONSTRUCT_H_
 
-#include <cstdint>
 #include <memory>
-#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>

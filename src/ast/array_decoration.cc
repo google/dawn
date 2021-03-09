@@ -14,10 +14,6 @@
 
 #include "src/ast/array_decoration.h"
 
-#include <assert.h>
-
-#include "src/ast/stride_decoration.h"
-
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ArrayDecoration);
 
 namespace tint {

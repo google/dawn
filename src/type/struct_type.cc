@@ -15,14 +15,8 @@
 #include "src/type/struct_type.h"
 
 #include <cmath>
-#include <utility>
 
-#include "src/clone_context.h"
 #include "src/program_builder.h"
-#include "src/type/alias_type.h"
-#include "src/type/array_type.h"
-#include "src/type/matrix_type.h"
-#include "src/type/vector_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::Struct);
 

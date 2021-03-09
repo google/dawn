@@ -14,8 +14,6 @@
 
 #include "src/transform/manager.h"
 
-#include "src/program_builder.h"
-
 namespace tint {
 namespace transform {
 

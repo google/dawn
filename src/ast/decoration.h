@@ -15,12 +15,9 @@
 #ifndef SRC_AST_DECORATION_H_
 #define SRC_AST_DECORATION_H_
 
-#include <memory>
-#include <ostream>
 #include <vector>
 
 #include "src/ast/node.h"
-#include "src/source.h"
 
 namespace tint {
 namespace ast {

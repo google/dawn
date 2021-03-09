@@ -16,11 +16,7 @@
 
 #include <utility>
 
-#include "src/ast/expression.h"
-#include "src/ast/type_constructor_expression.h"
 #include "src/semantic/expression.h"
-#include "src/semantic/info.h"
-#include "src/type/vector_type.h"
 
 namespace tint {
 namespace writer {

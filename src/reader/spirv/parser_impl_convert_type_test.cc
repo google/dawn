@@ -12,26 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cstdint>
-#include <string>
-#include <vector>
-
 #include "gmock/gmock.h"
-#include "src/ast/struct.h"
-#include "src/reader/spirv/parser_impl.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
-#include "src/type/array_type.h"
-#include "src/type/bool_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/matrix_type.h"
-#include "src/type/pointer_type.h"
-#include "src/type/struct_type.h"
-#include "src/type/type.h"
-#include "src/type/u32_type.h"
-#include "src/type/vector_type.h"
-#include "src/type/void_type.h"
 
 namespace tint {
 namespace reader {

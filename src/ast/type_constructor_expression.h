@@ -15,11 +15,9 @@
 #ifndef SRC_AST_TYPE_CONSTRUCTOR_EXPRESSION_H_
 #define SRC_AST_TYPE_CONSTRUCTOR_EXPRESSION_H_
 
-#include <memory>
 #include <utility>
 
 #include "src/ast/constructor_expression.h"
-#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

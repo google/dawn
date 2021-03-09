@@ -47,7 +47,7 @@ struct UniqueVector {
   ConstIterator end() const { return vector.end(); }
 
   /// @returns a const reference to the internal vector
-  operator const std::vector<T> &() const { return vector; }
+  operator const std::vector<T>&() const { return vector; }
 
  private:
   std::vector<T> vector;

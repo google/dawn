@@ -18,16 +18,11 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
-#include "src/ast/module.h"
-#include "src/diagnostic/diagnostic.h"
 #include "src/intrinsic_table.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
-#include "src/semantic/intrinsic.h"
-#include "src/type/storage_texture_type.h"
 #include "src/utils/unique_vector.h"
 
 namespace tint {

@@ -14,9 +14,6 @@
 
 #include "src/reader/spirv/parser.h"
 
-#include <cstdint>
-#include <vector>
-
 #include "gtest/gtest.h"
 
 namespace tint {

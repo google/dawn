@@ -14,8 +14,6 @@
 
 #include "src/ast/constructor_expression.h"
 
-#include <assert.h>
-
 TINT_INSTANTIATE_TYPEINFO(tint::ast::ConstructorExpression);
 
 namespace tint {

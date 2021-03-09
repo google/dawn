@@ -14,7 +14,6 @@
 
 #include "src/type/u32_type.h"
 
-#include "src/clone_context.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::type::U32);

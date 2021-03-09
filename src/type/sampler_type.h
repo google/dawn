@@ -15,7 +15,6 @@
 #ifndef SRC_TYPE_SAMPLER_TYPE_H_
 #define SRC_TYPE_SAMPLER_TYPE_H_
 
-#include <ostream>
 #include <string>
 
 #include "src/type/type.h"

@@ -12,14 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
-#include "gtest/gtest.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
-#include "src/type/depth_texture_type.h"
-#include "src/type/multisampled_texture_type.h"
-#include "src/type/sampled_texture_type.h"
-#include "src/writer/msl/generator_impl.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {

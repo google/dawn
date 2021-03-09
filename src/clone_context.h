@@ -15,7 +15,6 @@
 #ifndef SRC_CLONE_CONTEXT_H_
 #define SRC_CLONE_CONTEXT_H_
 
-#include <cassert>
 #include <functional>
 #include <unordered_map>
 #include <utility>
@@ -23,7 +22,6 @@
 
 #include "src/castable.h"
 #include "src/debug.h"
-#include "src/source.h"
 #include "src/symbol.h"
 #include "src/traits.h"
 

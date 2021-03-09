@@ -14,19 +14,12 @@
 
 #include "src/semantic/function.h"
 
-#include "src/ast/binding_decoration.h"
-#include "src/ast/builtin_decoration.h"
 #include "src/ast/function.h"
-#include "src/ast/group_decoration.h"
-#include "src/ast/location_decoration.h"
-#include "src/ast/variable.h"
-#include "src/ast/variable_decoration.h"
 #include "src/semantic/variable.h"
 #include "src/type/depth_texture_type.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
 #include "src/type/storage_texture_type.h"
-#include "src/type/texture_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::semantic::Function);
 

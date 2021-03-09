@@ -14,9 +14,6 @@
 
 #include "src/ast/loop_statement.h"
 
-#include <memory>
-#include <sstream>
-
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/test_helper.h"

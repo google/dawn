@@ -14,16 +14,10 @@
 
 #include "src/program_builder.h"
 
-#include <assert.h>
-
-#include <sstream>
-
 #include "src/ast/assignment_statement.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/clone_context.h"
 #include "src/demangler.h"
 #include "src/semantic/expression.h"
-#include "src/type/struct_type.h"
 
 namespace tint {
 

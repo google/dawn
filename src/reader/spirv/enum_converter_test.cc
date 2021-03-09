@@ -14,12 +14,9 @@
 
 #include "src/reader/spirv/enum_converter.h"
 
-#include <ostream>
 #include <string>
 
 #include "gmock/gmock.h"
-#include "spirv/unified1/spirv.h"
-#include "src/ast/pipeline_stage.h"
 
 namespace tint {
 namespace reader {

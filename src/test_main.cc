@@ -13,8 +13,6 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "src/debug.h"
 #include "src/utils/command.h"
 #include "src/writer/hlsl/test_helper.h"
 

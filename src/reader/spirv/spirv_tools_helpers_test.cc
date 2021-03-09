@@ -14,10 +14,6 @@
 
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
 
-#include <cstdint>
-#include <sstream>
-#include <vector>
-
 #include "gtest/gtest.h"
 #include "spirv-tools/libspirv.hpp"
 

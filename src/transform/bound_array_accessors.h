@@ -15,13 +15,7 @@
 #ifndef SRC_TRANSFORM_BOUND_ARRAY_ACCESSORS_H_
 #define SRC_TRANSFORM_BOUND_ARRAY_ACCESSORS_H_
 
-#include <string>
-
 #include "src/ast/array_accessor_expression.h"
-#include "src/ast/expression.h"
-#include "src/ast/statement.h"
-#include "src/program.h"
-#include "src/scope_stack.h"
 #include "src/transform/transform.h"
 
 namespace tint {

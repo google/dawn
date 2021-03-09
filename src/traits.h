@@ -16,7 +16,6 @@
 #define SRC_TRAITS_H_
 
 #include <tuple>
-#include <type_traits>
 
 namespace tint {
 namespace traits {

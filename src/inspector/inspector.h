@@ -21,7 +21,6 @@
 #include <tuple>
 #include <vector>
 
-#include "src/ast/pipeline_stage.h"
 #include "src/inspector/entry_point.h"
 #include "src/inspector/scalar.h"
 #include "src/program.h"

@@ -14,8 +14,6 @@
 
 #include "src/traits.h"
 
-#include <functional>
-
 #include "gtest/gtest.h"
 
 namespace tint {

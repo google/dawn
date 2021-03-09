@@ -14,9 +14,6 @@
 
 #include "src/demangler.h"
 
-#include <sstream>
-
-#include "src/ast/module.h"
 #include "src/program.h"
 
 namespace tint {

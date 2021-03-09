@@ -13,21 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
-#include "gtest/gtest.h"
-#include "src/ast/binary_expression.h"
-#include "src/ast/call_expression.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/float_literal.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/sint_literal.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/void_type.h"
-#include "src/writer/spirv/builder.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
 

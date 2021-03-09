@@ -15,7 +15,6 @@
 #include "src/intrinsic_table.h"
 
 #include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "src/program_builder.h"
 #include "src/type/access_control_type.h"
 #include "src/type/depth_texture_type.h"

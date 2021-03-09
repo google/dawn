@@ -15,13 +15,10 @@
 #ifndef SRC_SEMANTIC_VARIABLE_H_
 #define SRC_SEMANTIC_VARIABLE_H_
 
-#include <utility>
 #include <vector>
 
 #include "src/ast/storage_class.h"
 #include "src/semantic/expression.h"
-#include "src/semantic/node.h"
-#include "src/type/sampler_type.h"
 
 namespace tint {
 

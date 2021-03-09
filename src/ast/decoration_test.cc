@@ -12,28 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/decoration.h"
-
-#include <sstream>
-#include <unordered_map>
-#include <unordered_set>
-#include <utility>
-
 #include "src/ast/access_decoration.h"
-#include "src/ast/array_decoration.h"
-#include "src/ast/binding_decoration.h"
-#include "src/ast/builtin_decoration.h"
 #include "src/ast/constant_id_decoration.h"
-#include "src/ast/function_decoration.h"
-#include "src/ast/location_decoration.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/stride_decoration.h"
-#include "src/ast/struct_decoration.h"
-#include "src/ast/struct_member_decoration.h"
-#include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/test_helper.h"
-#include "src/ast/type_decoration.h"
-#include "src/ast/variable_decoration.h"
 #include "src/ast/workgroup_decoration.h"
 
 namespace tint {

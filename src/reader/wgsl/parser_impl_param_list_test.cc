@@ -12,15 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-
-#include "gtest/gtest.h"
-#include "src/ast/variable.h"
-#include "src/reader/wgsl/parser_impl.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/vector_type.h"
 
 namespace tint {
 namespace reader {

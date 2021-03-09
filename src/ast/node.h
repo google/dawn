@@ -15,12 +15,9 @@
 #ifndef SRC_AST_NODE_H_
 #define SRC_AST_NODE_H_
 
-#include <ostream>
 #include <string>
-#include <vector>
 
 #include "src/clone_context.h"
-#include "src/source.h"
 
 namespace tint {
 

@@ -12,16 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct.h"
-
-#include <memory>
-#include <sstream>
-#include <utility>
-
 #include "src/ast/struct_block_decoration.h"
-#include "src/ast/struct_member.h"
 #include "src/ast/test_helper.h"
-#include "src/type/i32_type.h"
 
 namespace tint {
 namespace ast {

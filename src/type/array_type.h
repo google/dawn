@@ -15,10 +15,7 @@
 #ifndef SRC_TYPE_ARRAY_TYPE_H_
 #define SRC_TYPE_ARRAY_TYPE_H_
 
-#include <assert.h>
-
 #include <string>
-#include <utility>
 
 #include "src/ast/array_decoration.h"
 #include "src/type/type.h"

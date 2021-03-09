@@ -14,9 +14,7 @@
 
 #include "src/utils/tmpfile.h"
 
-#include <stdio.h>
 #include <unistd.h>
-#include <cstdio>
 
 namespace tint {
 namespace utils {

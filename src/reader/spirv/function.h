@@ -15,36 +15,16 @@
 #ifndef SRC_READER_SPIRV_FUNCTION_H_
 #define SRC_READER_SPIRV_FUNCTION_H_
 
-#include <functional>
 #include <memory>
-#include <ostream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 
-#include "source/opt/basic_block.h"
-#include "source/opt/constants.h"
-#include "source/opt/function.h"
-#include "source/opt/instruction.h"
-#include "source/opt/ir_context.h"
-#include "source/opt/type_manager.h"
-#include "src/ast/case_statement.h"
-#include "src/ast/expression.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/module.h"
-#include "src/ast/statement.h"
-#include "src/ast/storage_class.h"
 #include "src/program_builder.h"
 #include "src/reader/spirv/construct.h"
-#include "src/reader/spirv/entry_point_info.h"
-#include "src/reader/spirv/fail_stream.h"
-#include "src/reader/spirv/namer.h"
 #include "src/reader/spirv/parser_impl.h"
-#include "src/type/i32_type.h"
-#include "src/type/texture_type.h"
-#include "src/type/u32_type.h"
 
 namespace tint {
 namespace reader {

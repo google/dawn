@@ -16,32 +16,12 @@
 
 #include <utility>
 
-#include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
-#include "src/ast/binary_expression.h"
 #include "src/ast/bitcast_expression.h"
-#include "src/ast/member_accessor_expression.h"
-#include "src/ast/scalar_constructor_expression.h"
-#include "src/ast/stride_decoration.h"
-#include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/ast/struct_decoration.h"
-#include "src/ast/struct_member.h"
-#include "src/ast/struct_member_offset_decoration.h"
-#include "src/ast/type_constructor_expression.h"
-#include "src/ast/uint_literal.h"
-#include "src/ast/variable.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/clone_context.h"
-#include "src/program.h"
 #include "src/program_builder.h"
 #include "src/semantic/variable.h"
-#include "src/type/array_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/struct_type.h"
-#include "src/type/u32_type.h"
-#include "src/type/vector_type.h"
 
 namespace tint {
 namespace transform {

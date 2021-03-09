@@ -15,7 +15,6 @@
 #ifndef SRC_DIAGNOSTIC_FORMATTER_H_
 #define SRC_DIAGNOSTIC_FORMATTER_H_
 
-#include <memory>
 #include <string>
 
 namespace tint {

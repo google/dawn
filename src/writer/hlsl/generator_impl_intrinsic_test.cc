@@ -12,15 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <sstream>
-
 #include "gmock/gmock.h"
-#include "src/ast/call_expression.h"
-#include "src/ast/identifier_expression.h"
-#include "src/program.h"
 #include "src/semantic/call.h"
-#include "src/type/f32_type.h"
-#include "src/type/vector_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

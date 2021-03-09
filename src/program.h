@@ -18,9 +18,7 @@
 #include <string>
 
 #include "src/ast/function.h"
-#include "src/diagnostic/diagnostic.h"
 #include "src/semantic/info.h"
-#include "src/semantic/node.h"
 #include "src/symbol_table.h"
 #include "src/type/type_manager.h"
 

@@ -15,9 +15,6 @@
 #ifndef SRC_AST_SCALAR_CONSTRUCTOR_EXPRESSION_H_
 #define SRC_AST_SCALAR_CONSTRUCTOR_EXPRESSION_H_
 
-#include <memory>
-#include <utility>
-
 #include "src/ast/constructor_expression.h"
 #include "src/ast/literal.h"
 

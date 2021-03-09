@@ -14,16 +14,11 @@
 
 #include "src/ast/statement.h"
 
-#include <assert.h>
-
 #include "src/ast/assignment_statement.h"
-#include "src/ast/block_statement.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/case_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
-#include "src/ast/else_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"

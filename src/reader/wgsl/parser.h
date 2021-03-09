@@ -16,7 +16,6 @@
 #define SRC_READER_WGSL_PARSER_H_
 
 #include "src/program.h"
-#include "src/source.h"
 
 namespace tint {
 namespace reader {

@@ -12,23 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest.h"
-#include "src/ast/array_accessor_expression.h"
-#include "src/ast/struct.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/ast/struct_member.h"
-#include "src/ast/struct_member_decoration.h"
-#include "src/ast/type_constructor_expression.h"
-#include "src/ast/variable_decl_statement.h"
-#include "src/type/alias_type.h"
-#include "src/type/array_type.h"
-#include "src/type/f32_type.h"
-#include "src/type/i32_type.h"
-#include "src/type/struct_type.h"
-#include "src/validator/validator_impl.h"
 #include "src/validator/validator_test_helper.h"
 
-#include "src/ast/pipeline_stage.h"
 #include "src/ast/stage_decoration.h"
 namespace tint {
 namespace {

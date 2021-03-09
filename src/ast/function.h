@@ -15,8 +15,6 @@
 #ifndef SRC_AST_FUNCTION_H_
 #define SRC_AST_FUNCTION_H_
 
-#include <memory>
-#include <ostream>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -25,17 +23,11 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/block_statement.h"
 #include "src/ast/builtin_decoration.h"
-#include "src/ast/expression.h"
 #include "src/ast/function_decoration.h"
 #include "src/ast/group_decoration.h"
 #include "src/ast/location_decoration.h"
-#include "src/ast/node.h"
 #include "src/ast/pipeline_stage.h"
-#include "src/ast/statement.h"
 #include "src/ast/variable.h"
-#include "src/symbol.h"
-#include "src/type/sampler_type.h"
-#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

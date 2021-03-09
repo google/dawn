@@ -15,9 +15,6 @@
 #ifndef SRC_READER_WGSL_TOKEN_H_
 #define SRC_READER_WGSL_TOKEN_H_
 
-#include <stddef.h>
-
-#include <ostream>
 #include <string>
 
 #include "src/source.h"

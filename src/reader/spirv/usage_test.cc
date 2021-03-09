@@ -13,12 +13,10 @@
 // limitations under the License.
 
 #include <algorithm>
-#include <sstream>
 #include <vector>
 
 #include "gmock/gmock.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
-#include "src/reader/spirv/usage.h"
 
 namespace tint {
 namespace reader {

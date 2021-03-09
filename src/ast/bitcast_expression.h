@@ -15,12 +15,7 @@
 #ifndef SRC_AST_BITCAST_EXPRESSION_H_
 #define SRC_AST_BITCAST_EXPRESSION_H_
 
-#include <memory>
-#include <utility>
-
 #include "src/ast/expression.h"
-#include "src/ast/literal.h"
-#include "src/type/type.h"
 
 namespace tint {
 namespace ast {

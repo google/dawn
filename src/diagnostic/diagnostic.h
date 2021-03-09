@@ -15,8 +15,6 @@
 #ifndef SRC_DIAGNOSTIC_DIAGNOSTIC_H_
 #define SRC_DIAGNOSTIC_DIAGNOSTIC_H_
 
-#include <cassert>
-#include <initializer_list>
 #include <string>
 #include <utility>
 #include <vector>

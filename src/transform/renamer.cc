@@ -18,10 +18,8 @@
 #include <unordered_set>
 #include <utility>
 
-#include "src/ast/member_accessor_expression.h"
 #include "src/program_builder.h"
 #include "src/semantic/call.h"
-#include "src/semantic/intrinsic.h"
 #include "src/semantic/member_accessor_expression.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer::Data);

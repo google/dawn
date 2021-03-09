@@ -16,10 +16,7 @@
 #define SRC_READER_READER_H_
 
 #include <string>
-#include <utility>
 
-#include "src/diagnostic/diagnostic.h"
-#include "src/diagnostic/formatter.h"
 #include "src/program.h"
 
 namespace tint {

@@ -15,7 +15,6 @@
 #ifndef SRC_DEBUG_H_
 #define SRC_DEBUG_H_
 
-#include <sstream>
 #include <utility>
 
 #include "src/diagnostic/diagnostic.h"

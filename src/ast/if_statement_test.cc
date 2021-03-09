@@ -15,7 +15,6 @@
 #include "src/ast/if_statement.h"
 
 #include "src/ast/discard_statement.h"
-#include "src/ast/identifier_expression.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {

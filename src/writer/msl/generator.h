@@ -18,7 +18,6 @@
 #include <memory>
 #include <string>
 
-#include "src/program.h"
 #include "src/writer/msl/generator_impl.h"
 #include "src/writer/text.h"
 

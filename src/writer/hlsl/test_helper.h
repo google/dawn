@@ -16,13 +16,10 @@
 #define SRC_WRITER_HLSL_TEST_HELPER_H_
 
 #include <memory>
-#include <sstream>
 #include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/diagnostic/formatter.h"
-#include "src/program_builder.h"
 #include "src/transform/hlsl.h"
 #include "src/writer/hlsl/generator_impl.h"
 

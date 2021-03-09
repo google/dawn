@@ -19,7 +19,6 @@
 #include <vector>
 
 #include "src/semantic/call_target.h"
-#include "src/type/sampler_type.h"
 
 namespace tint {
 

@@ -14,8 +14,6 @@
 
 #include "src/ast/variable_decoration.h"
 
-#include <assert.h>
-
 TINT_INSTANTIATE_TYPEINFO(tint::ast::VariableDecoration);
 
 namespace tint {

@@ -12,12 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/clone_context.h"
-
-#include <string>
-#include <utility>
-#include <vector>
-
 #include "gtest/gtest-spi.h"
 
 #include "src/program_builder.h"

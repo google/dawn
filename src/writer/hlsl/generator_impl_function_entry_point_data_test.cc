@@ -12,18 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <memory>
-#include <unordered_set>
-
-#include "src/ast/assignment_statement.h"
-#include "src/ast/identifier_expression.h"
-#include "src/ast/location_decoration.h"
-#include "src/ast/member_accessor_expression.h"
-#include "src/ast/pipeline_stage.h"
-#include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
-#include "src/ast/variable.h"
-#include "src/program.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
