@@ -503,6 +503,26 @@ TEST_F(ResolverValidationTest,
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
+  // loop  {
+  //     var z : i32;
+  //     continue;
+  //
+  //     continuing {
+  //         z = 2;
+  //     }
+  // }
+
+  auto error_loc = Source{Source::Location{12, 34}};
+  auto* body = Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
+                     create<ast::ContinueStatement>());
+  auto* continuing = Block(Assign(Expr(error_loc, "z"), Expr(2)));
+  auto* loop_stmt = Loop(body, continuing);
+  WrapInFunction(loop_stmt);
+
+  EXPECT_TRUE(r()->Resolve());
+}
+
 TEST_F(ResolverValidationTest, Stmt_ContinueInLoop) {
   WrapInFunction(Loop(Block(create<ast::ContinueStatement>(Source{{12, 34}}))));
   EXPECT_TRUE(r()->Resolve()) << r()->error();
