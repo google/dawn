@@ -66,12 +66,15 @@ class DrawIndexedTest : public DawnTest {
             {0, 1, 2, 0, 3, 1,
              // The indices below are added to test negatve baseVertex
              0 + 4, 1 + 4, 2 + 4, 0 + 4, 3 + 4, 1 + 4});
+        zeroSizedIndexBuffer =
+            utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {});
     }
 
     utils::BasicRenderPass renderPass;
     wgpu::RenderPipeline pipeline;
     wgpu::Buffer vertexBuffer;
     wgpu::Buffer indexBuffer;
+    wgpu::Buffer zeroSizedIndexBuffer;
 
     void Test(uint32_t indexCount,
               uint32_t instanceCount,
@@ -81,12 +84,34 @@ class DrawIndexedTest : public DawnTest {
               uint64_t bufferOffset,
               RGBA8 bottomLeftExpected,
               RGBA8 topRightExpected) {
+        // Regular draw with a reasonable index buffer
+        TestImplementation(indexCount, instanceCount, firstIndex, baseVertex, firstInstance,
+                           bufferOffset, indexBuffer, bottomLeftExpected, topRightExpected);
+    }
+
+    void TestZeroSizedIndexBufferDraw(uint32_t indexCount,
+                                      uint32_t firstIndex,
+                                      RGBA8 bottomLeftExpected,
+                                      RGBA8 topRightExpected) {
+        TestImplementation(indexCount, 1, firstIndex, 0, 0, 0, zeroSizedIndexBuffer,
+                           bottomLeftExpected, topRightExpected);
+    }
+
+    void TestImplementation(uint32_t indexCount,
+                            uint32_t instanceCount,
+                            uint32_t firstIndex,
+                            int32_t baseVertex,
+                            uint32_t firstInstance,
+                            uint64_t bufferOffset,
+                            const wgpu::Buffer& curIndexBuffer,
+                            RGBA8 bottomLeftExpected,
+                            RGBA8 topRightExpected) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
             pass.SetPipeline(pipeline);
             pass.SetVertexBuffer(0, vertexBuffer);
-            pass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32, bufferOffset);
+            pass.SetIndexBuffer(curIndexBuffer, wgpu::IndexFormat::Uint32, bufferOffset);
             pass.DrawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
             pass.EndPass();
         }
@@ -141,6 +166,16 @@ TEST_P(DrawIndexedTest, OutOfBounds) {
     Test(std::numeric_limits<uint32_t>::max(), 1, 2, 0, 0, 0, notFilled, notFilled);
     // small indexCount and max uint32_t firstIndex
     Test(2, 1, std::numeric_limits<uint32_t>::max(), 0, 0, 0, notFilled, notFilled);
+}
+
+TEST_P(DrawIndexedTest, ZeroSizedIndexBuffer) {
+    RGBA8 notFilled(0, 0, 0, 0);
+
+    // IndexBuffer size is zero, so index access is always out of bounds
+    TestZeroSizedIndexBufferDraw(3, 1, notFilled, notFilled);
+    TestZeroSizedIndexBufferDraw(0, 1, notFilled, notFilled);
+    TestZeroSizedIndexBufferDraw(3, 0, notFilled, notFilled);
+    TestZeroSizedIndexBufferDraw(0, 0, notFilled, notFilled);
 }
 
 // Test the parameter 'baseVertex' of DrawIndexed() works.
