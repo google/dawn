@@ -150,19 +150,6 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
   for (auto* func : funcs) {
     if (func->IsEntryPoint()) {
       shader_is_present = true;
-      if (!func->params().empty()) {
-        add_error(func->source(), "v-0023",
-                  "Entry point function must accept no parameters: '" +
-                      program_->Symbols().NameFor(func->symbol()) + "'");
-        return false;
-      }
-
-      if (!func->return_type()->Is<type::Void>()) {
-        add_error(func->source(), "v-0024",
-                  "Entry point function must return void: '" +
-                      program_->Symbols().NameFor(func->symbol()) + "'");
-        return false;
-      }
       auto stage_deco_count = 0;
       for (auto* deco : func->decorations()) {
         if (deco->Is<ast::StageDecoration>()) {

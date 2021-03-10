@@ -161,48 +161,6 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
   EXPECT_EQ(v.error(), "12:34 v-0016: function names must be unique 'func'");
 }
 
-TEST_F(ValidateFunctionTest, Function_WithPipelineStage_NotVoid_Fail) {
-  // [[stage(vertex)]]
-  // fn vtx_main() -> i32 { return 0; }
-
-  Func(Source{Source::Location{12, 34}}, "vtx_main", ast::VariableList{},
-       ty.i32(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(Expr(0)),
-       },
-       ast::FunctionDecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(v.error(),
-            "12:34 v-0024: Entry point function must return void: 'vtx_main'");
-}
-
-TEST_F(ValidateFunctionTest, Function_WithPipelineStage_WithParams_Fail) {
-  // [[stage(vertex)]]
-  // fn vtx_func(a : i32) -> void { return; }
-
-  Func(Source{Source::Location{12, 34}}, "vtx_func",
-       ast::VariableList{Var("a", ty.i32(), ast::StorageClass::kNone)},
-       ty.void_(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(),
-       },
-       ast::FunctionDecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(v.error(),
-            "12:34 v-0023: Entry point function must accept no parameters: "
-            "'vtx_func'");
-}
-
 TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
   // [[stage(fragment)]]
   // [[stage(vertex)]]
