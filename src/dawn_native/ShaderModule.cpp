@@ -756,6 +756,31 @@ namespace dawn_native {
                     metadata->localWorkgroupSize.z = entryPoint.workgroup_size_z;
                 }
 
+                if (metadata->stage == SingleShaderStage::Vertex) {
+                    for (const auto& input_var : entryPoint.input_variables) {
+                        uint32_t location = 0;
+                        if (input_var.has_location_decoration) {
+                            location = input_var.location_decoration;
+                        }
+
+                        if (DAWN_UNLIKELY(location >= kMaxVertexAttributes)) {
+                            std::stringstream ss;
+                            ss << "Attribute location (" << location << ") over limits";
+                            return DAWN_VALIDATION_ERROR(ss.str());
+                        }
+                        metadata->usedVertexAttributes.set(location);
+                    }
+
+                    for (const auto& output_var : entryPoint.output_variables) {
+                        if (DAWN_UNLIKELY(!output_var.has_location_decoration)) {
+                            std::stringstream ss;
+                            ss << "Missing location qualifier on vertex output, "
+                               << output_var.name;
+                            return DAWN_VALIDATION_ERROR(ss.str());
+                        }
+                    }
+                }
+
                 result[entryPoint.name] = std::move(metadata);
             }
             return std::move(result);
@@ -830,6 +855,14 @@ namespace dawn_native {
                         return DAWN_VALIDATION_ERROR(
                             "Tint and SPIRV-Cross returned different values for local workgroup "
                             "size");
+                    }
+                }
+
+                if (tintEntry->stage == SingleShaderStage::Vertex) {
+                    if (tintEntry->usedVertexAttributes != crossEntry->usedVertexAttributes) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Tint and SPIRV-Cross returned different values for used vertex "
+                            "attributes");
                     }
                 }
 
