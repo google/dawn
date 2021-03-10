@@ -13,8 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
+ROOT_DIR="$( cd "${SCRIPT_DIR}/.." >/dev/null 2>&1 && pwd )"
+
 set -e  # fail on error
 
 FILTER="-runtime/references"
-./third_party/cpplint/cpplint/cpplint.py --root=. --filter="$FILTER" `find src -type f`
-./third_party/cpplint/cpplint/cpplint.py --root=. --filter="$FILTER" `find samples -type f`
+
+FILES="`find src -type f` `find samples -type f`"
+
+if command -v go &> /dev/null
+then
+    # Go is installed. Run cpplint in parallel for speed wins
+    go run $SCRIPT_DIR/run-parallel/main.go       \
+         --only-print-failures                    \
+         ./third_party/cpplint/cpplint/cpplint.py \
+         --root=$ROOT_DIR                         \
+         --filter="$FILTER"                       \
+         $ -- $FILES
+else
+    ./third_party/cpplint/cpplint/cpplint.py --root=$ROOT_DIR --filter="$FILTER" $FILES
+fi
+
