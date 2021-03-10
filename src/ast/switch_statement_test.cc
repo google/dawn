@@ -14,6 +14,7 @@
 
 #include "src/ast/switch_statement.h"
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -61,69 +62,26 @@ TEST_F(SwitchStatementTest, IsSwitch) {
   EXPECT_TRUE(stmt->Is<SwitchStatement>());
 }
 
-TEST_F(SwitchStatementTest, IsValid) {
-  CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32(), 2));
-
-  auto* ident = Expr("ident");
-  CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
-
-  auto* stmt = create<SwitchStatement>(ident, body);
-  EXPECT_TRUE(stmt->IsValid());
+TEST_F(SwitchStatementTest, Assert_Null_Condition) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        CaseStatementList cases;
+        cases.push_back(
+            b.create<CaseStatement>(CaseSelectorList{b.Literal(1)},
+                                    b.create<BlockStatement>(StatementList{})));
+        b.create<SwitchStatement>(nullptr, cases);
+      },
+      "internal compiler error");
 }
 
-TEST_F(SwitchStatementTest, IsValid_Null_Condition) {
-  CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32(), 2));
-
-  CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
-
-  auto* stmt = create<SwitchStatement>(nullptr, body);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(SwitchStatementTest, IsValid_Invalid_Condition) {
-  CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32(), 2));
-
-  auto* ident = Expr("");
-  CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
-
-  auto* stmt = create<SwitchStatement>(ident, body);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(SwitchStatementTest, IsValid_Null_BodyStatement) {
-  CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32(), 2));
-
-  auto* ident = Expr("ident");
-  CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
-  body.push_back(nullptr);
-
-  auto* stmt = create<SwitchStatement>(ident, body);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(SwitchStatementTest, IsValid_Invalid_BodyStatement) {
-  auto* ident = Expr("ident");
-
-  auto* case_body = create<BlockStatement>(StatementList{
-      nullptr,
-  });
-  CaseStatementList body;
-  body.push_back(create<CaseStatement>(CaseSelectorList{}, case_body));
-
-  auto* stmt = create<SwitchStatement>(ident, body);
-  EXPECT_FALSE(stmt->IsValid());
+TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<SwitchStatement>(b.Expr(true), CaseStatementList{nullptr});
+      },
+      "internal compiler error");
 }
 
 TEST_F(SwitchStatementTest, ToStr_Empty) {

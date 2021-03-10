@@ -34,11 +34,6 @@ TEST_F(BreakStatementTest, IsBreak) {
   EXPECT_TRUE(stmt->Is<BreakStatement>());
 }
 
-TEST_F(BreakStatementTest, IsValid) {
-  auto* stmt = create<BreakStatement>();
-  EXPECT_TRUE(stmt->IsValid());
-}
-
 TEST_F(BreakStatementTest, ToStr) {
   auto* stmt = create<BreakStatement>();
   EXPECT_EQ(str(stmt), R"(Break{}

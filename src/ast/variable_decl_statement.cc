@@ -23,7 +23,9 @@ namespace ast {
 
 VariableDeclStatement::VariableDeclStatement(const Source& source,
                                              Variable* variable)
-    : Base(source), variable_(variable) {}
+    : Base(source), variable_(variable) {
+  TINT_ASSERT(variable_);
+}
 
 VariableDeclStatement::VariableDeclStatement(VariableDeclStatement&&) = default;
 
@@ -34,10 +36,6 @@ VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto* var = ctx->Clone(variable());
   return ctx->dst->create<VariableDeclStatement>(src, var);
-}
-
-bool VariableDeclStatement::IsValid() const {
-  return variable_ != nullptr && variable_->IsValid();
 }
 
 void VariableDeclStatement::to_str(const semantic::Info& sem,

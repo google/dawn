@@ -24,7 +24,10 @@ namespace ast {
 ArrayAccessorExpression::ArrayAccessorExpression(const Source& source,
                                                  Expression* array,
                                                  Expression* idx_expr)
-    : Base(source), array_(array), idx_expr_(idx_expr) {}
+    : Base(source), array_(array), idx_expr_(idx_expr) {
+  TINT_ASSERT(array_);
+  TINT_ASSERT(idx_expr_);
+}
 
 ArrayAccessorExpression::ArrayAccessorExpression(ArrayAccessorExpression&&) =
     default;
@@ -38,15 +41,6 @@ ArrayAccessorExpression* ArrayAccessorExpression::Clone(
   auto* arr = ctx->Clone(array_);
   auto* idx = ctx->Clone(idx_expr_);
   return ctx->dst->create<ArrayAccessorExpression>(src, arr, idx);
-}
-
-bool ArrayAccessorExpression::IsValid() const {
-  if (array_ == nullptr || !array_->IsValid())
-    return false;
-  if (idx_expr_ == nullptr || !idx_expr_->IsValid())
-    return false;
-
-  return true;
 }
 
 void ArrayAccessorExpression::to_str(const semantic::Info& sem,

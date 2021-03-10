@@ -22,7 +22,9 @@ namespace tint {
 namespace ast {
 
 IdentifierExpression::IdentifierExpression(const Source& source, Symbol sym)
-    : Base(source), sym_(sym) {}
+    : Base(source), sym_(sym) {
+  TINT_ASSERT(sym_.IsValid());
+}
 
 IdentifierExpression::IdentifierExpression(IdentifierExpression&&) = default;
 
@@ -33,10 +35,6 @@ IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto sym = ctx->Clone(symbol());
   return ctx->dst->create<IdentifierExpression>(src, sym);
-}
-
-bool IdentifierExpression::IsValid() const {
-  return sym_.IsValid();
 }
 
 void IdentifierExpression::to_str(const semantic::Info& sem,

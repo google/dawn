@@ -24,7 +24,9 @@ namespace ast {
 ElseStatement::ElseStatement(const Source& source,
                              Expression* condition,
                              BlockStatement* body)
-    : Base(source), condition_(condition), body_(body) {}
+    : Base(source), condition_(condition), body_(body) {
+  TINT_ASSERT(body_);
+}
 
 ElseStatement::ElseStatement(ElseStatement&&) = default;
 
@@ -36,13 +38,6 @@ ElseStatement* ElseStatement::Clone(CloneContext* ctx) const {
   auto* cond = ctx->Clone(condition_);
   auto* b = ctx->Clone(body_);
   return ctx->dst->create<ElseStatement>(src, cond, b);
-}
-
-bool ElseStatement::IsValid() const {
-  if (body_ == nullptr || !body_->IsValid()) {
-    return false;
-  }
-  return condition_ == nullptr || condition_->IsValid();
 }
 
 void ElseStatement::to_str(const semantic::Info& sem,

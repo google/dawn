@@ -42,11 +42,6 @@ TEST_F(FallthroughStatementTest, IsFallthrough) {
   EXPECT_TRUE(stmt->Is<FallthroughStatement>());
 }
 
-TEST_F(FallthroughStatementTest, IsValid) {
-  auto* stmt = create<FallthroughStatement>();
-  EXPECT_TRUE(stmt->IsValid());
-}
-
 TEST_F(FallthroughStatementTest, ToStr) {
   auto* stmt = create<FallthroughStatement>();
   EXPECT_EQ(str(stmt), R"(Fallthrough{}

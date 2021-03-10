@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -50,44 +51,26 @@ TEST_F(CallExpressionTest, IsCall) {
   EXPECT_TRUE(stmt->Is<CallExpression>());
 }
 
-TEST_F(CallExpressionTest, IsValid) {
-  auto* func = Expr("func");
-  auto* stmt = create<CallExpression>(func, ExpressionList{});
-  EXPECT_TRUE(stmt->IsValid());
+TEST_F(CallExpressionTest, Assert_NullFunction) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<CallExpression>(nullptr, ExpressionList{});
+      },
+      "internal compiler error");
 }
 
-TEST_F(CallExpressionTest, IsValid_MissingFunction) {
-  auto* stmt = create<CallExpression>(nullptr, ExpressionList{});
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(CallExpressionTest, IsValid_NullParam) {
-  auto* func = Expr("func");
-  ExpressionList params;
-  params.push_back(Expr("param1"));
-  params.push_back(nullptr);
-  params.push_back(Expr("param2"));
-
-  auto* stmt = create<CallExpression>(func, params);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(CallExpressionTest, IsValid_InvalidFunction) {
-  auto* func = Expr("");
-  ExpressionList params;
-  params.push_back(Expr("param1"));
-
-  auto* stmt = create<CallExpression>(func, params);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(CallExpressionTest, IsValid_InvalidParam) {
-  auto* func = Expr("func");
-  ExpressionList params;
-  params.push_back(Expr(""));
-
-  auto* stmt = create<CallExpression>(func, params);
-  EXPECT_FALSE(stmt->IsValid());
+TEST_F(CallExpressionTest, Assert_NullParam) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        ExpressionList params;
+        params.push_back(b.Expr("param1"));
+        params.push_back(nullptr);
+        params.push_back(b.Expr("param2"));
+        b.create<CallExpression>(b.Expr("func"), params);
+      },
+      "internal compiler error");
 }
 
 TEST_F(CallExpressionTest, ToStr_NoParams) {

@@ -42,9 +42,6 @@ class Decoration : public Castable<Decoration, Node> {
   /// @return the decoration kind
   virtual DecorationKind GetKind() const = 0;
 
-  /// @returns true if the node is valid
-  bool IsValid() const override;
-
  protected:
   /// Constructor
   /// @param source the source of this decoration

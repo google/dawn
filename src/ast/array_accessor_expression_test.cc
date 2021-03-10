@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -48,40 +49,22 @@ TEST_F(ArrayAccessorExpressionTest, IsArrayAccessor) {
   EXPECT_TRUE(exp->Is<ArrayAccessorExpression>());
 }
 
-TEST_F(ArrayAccessorExpressionTest, IsValid) {
-  auto* ary = Expr("ary");
-  auto* idx = Expr("idx");
-
-  auto* exp = create<ArrayAccessorExpression>(ary, idx);
-  EXPECT_TRUE(exp->IsValid());
+TEST_F(ArrayAccessorExpressionTest, Assert_NullArray) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<ArrayAccessorExpression>(nullptr, b.Expr("idx"));
+      },
+      "internal compiler error");
 }
 
-TEST_F(ArrayAccessorExpressionTest, IsValid_MissingArray) {
-  auto* idx = Expr("idx");
-
-  auto* exp = create<ArrayAccessorExpression>(nullptr, idx);
-  EXPECT_FALSE(exp->IsValid());
-}
-
-TEST_F(ArrayAccessorExpressionTest, IsValid_MissingIndex) {
-  auto* ary = Expr("ary");
-
-  auto* exp = create<ArrayAccessorExpression>(ary, nullptr);
-  EXPECT_FALSE(exp->IsValid());
-}
-
-TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidArray) {
-  auto* ary = Expr("");
-  auto* idx = Expr("idx");
-  auto* exp = create<ArrayAccessorExpression>(ary, idx);
-  EXPECT_FALSE(exp->IsValid());
-}
-
-TEST_F(ArrayAccessorExpressionTest, IsValid_InvalidIndex) {
-  auto* ary = Expr("ary");
-  auto* idx = Expr("");
-  auto* exp = create<ArrayAccessorExpression>(ary, idx);
-  EXPECT_FALSE(exp->IsValid());
+TEST_F(ArrayAccessorExpressionTest, Assert_NullIndex) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<ArrayAccessorExpression>(b.Expr("arr"), nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(ArrayAccessorExpressionTest, ToStr) {

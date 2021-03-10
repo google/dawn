@@ -37,7 +37,6 @@ struct Node : public Castable<Node, ast::Node> {
     return out;
   }
 
-  bool IsValid() const override { return true; }
   void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
 };
 
@@ -55,7 +54,6 @@ struct NotANode : public Castable<NotANode, ast::Node> {
     return ctx->dst->create<NotANode>();
   }
 
-  bool IsValid() const override { return true; }
   void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
 };
 

@@ -44,11 +44,6 @@ TEST_F(DiscardStatementTest, IsDiscard) {
   EXPECT_TRUE(stmt->Is<DiscardStatement>());
 }
 
-TEST_F(DiscardStatementTest, IsValid) {
-  auto* stmt = create<DiscardStatement>();
-  EXPECT_TRUE(stmt->IsValid());
-}
-
 TEST_F(DiscardStatementTest, ToStr) {
   auto* stmt = create<DiscardStatement>();
   EXPECT_EQ(str(stmt), R"(Discard{}

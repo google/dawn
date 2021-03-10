@@ -14,6 +14,7 @@
 
 #include "src/ast/variable_decl_statement.h"
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -46,21 +47,13 @@ TEST_F(VariableDeclStatementTest, IsVariableDecl) {
   EXPECT_TRUE(stmt->Is<VariableDeclStatement>());
 }
 
-TEST_F(VariableDeclStatementTest, IsValid) {
-  auto* var = Var("a", ty.f32(), StorageClass::kNone);
-  auto* stmt = create<VariableDeclStatement>(var);
-  EXPECT_TRUE(stmt->IsValid());
-}
-
-TEST_F(VariableDeclStatementTest, IsValid_InvalidVariable) {
-  auto* var = Var("", ty.f32(), StorageClass::kNone);
-  auto* stmt = create<VariableDeclStatement>(var);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(VariableDeclStatementTest, IsValid_NullVariable) {
-  auto* stmt = create<VariableDeclStatement>(nullptr);
-  EXPECT_FALSE(stmt->IsValid());
+TEST_F(VariableDeclStatementTest, Assert_NullVariable) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<VariableDeclStatement>(nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(VariableDeclStatementTest, ToStr) {

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/test_helper.h"
 
@@ -62,21 +63,24 @@ TEST_F(StructTest, CreationWithSourceAndDecorations) {
   EXPECT_EQ(s->source().range.end.column, 8u);
 }
 
-TEST_F(StructTest, IsValid) {
-  auto* s = create<Struct>(StructMemberList{}, StructDecorationList{});
-  EXPECT_TRUE(s->IsValid());
+TEST_F(StructTest, Assert_Null_StructMember) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<Struct>(StructMemberList{b.Member("a", b.ty.i32()), nullptr},
+                         StructDecorationList{});
+      },
+      "internal compiler error");
 }
 
-TEST_F(StructTest, IsValid_Null_StructMember) {
-  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32()), nullptr},
-                           StructDecorationList{});
-  EXPECT_FALSE(s->IsValid());
-}
-
-TEST_F(StructTest, IsValid_Invalid_StructMember) {
-  auto* s = create<Struct>(StructMemberList{Member("", ty.i32())},
-                           ast::StructDecorationList{});
-  EXPECT_FALSE(s->IsValid());
+TEST_F(StructTest, Assert_Null_Decoration) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<Struct>(StructMemberList{b.Member("a", b.ty.i32())},
+                         StructDecorationList{nullptr});
+      },
+      "internal compiler error");
 }
 
 TEST_F(StructTest, ToStr) {

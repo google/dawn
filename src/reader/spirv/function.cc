@@ -684,9 +684,6 @@ DefInfo::DefInfo(const spvtools::opt::Instruction& def_inst,
 
 DefInfo::~DefInfo() = default;
 
-bool StatementBuilder::IsValid() const {
-  return true;
-}
 ast::Node* StatementBuilder::Clone(CloneContext*) const {
   return nullptr;
 }
@@ -4116,6 +4113,9 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   ast::ExpressionList params;
   for (uint32_t iarg = 1; iarg < inst.NumInOperands(); ++iarg) {
     params.emplace_back(MakeOperand(inst, iarg).expr);
+  }
+  if (failed()) {
+    return false;
   }
   auto* call_expr =
       create<ast::CallExpression>(Source{}, function, std::move(params));

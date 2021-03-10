@@ -47,46 +47,6 @@ Module::Module(const Source& source, std::vector<CastableBase*> global_decls)
 
 Module::~Module() = default;
 
-bool Module::IsValid() const {
-  for (auto* decl : global_declarations_) {
-    if (decl == nullptr) {
-      return false;
-    }
-  }
-  for (auto* var : global_variables_) {
-    if (var == nullptr || !var->IsValid()) {
-      return false;
-    }
-  }
-  for (auto* const ty : constructed_types_) {
-    if (ty == nullptr) {
-      return false;
-    }
-    if (auto* alias = ty->As<type::Alias>()) {
-      if (alias->type() == nullptr) {
-        return false;
-      }
-      if (auto* str = alias->type()->As<type::Struct>()) {
-        if (!str->symbol().IsValid()) {
-          return false;
-        }
-      }
-    } else if (auto* str = ty->As<type::Struct>()) {
-      if (!str->symbol().IsValid()) {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-  for (auto* func : functions_) {
-    if (func == nullptr || !func->IsValid()) {
-      return false;
-    }
-  }
-  return true;
-}
-
 Module* Module::Clone(CloneContext* ctx) const {
   auto* out = ctx->dst->create<Module>();
   out->Copy(ctx, this);

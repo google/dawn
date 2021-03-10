@@ -24,7 +24,9 @@ namespace ast {
 CaseStatement::CaseStatement(const Source& source,
                              CaseSelectorList selectors,
                              BlockStatement* body)
-    : Base(source), selectors_(selectors), body_(body) {}
+    : Base(source), selectors_(selectors), body_(body) {
+  TINT_ASSERT(body_);
+}
 
 CaseStatement::CaseStatement(CaseStatement&&) = default;
 
@@ -36,10 +38,6 @@ CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
   auto sel = ctx->Clone(selectors_);
   auto* b = ctx->Clone(body_);
   return ctx->dst->create<CaseStatement>(src, sel, b);
-}
-
-bool CaseStatement::IsValid() const {
-  return body_ != nullptr && body_->IsValid();
 }
 
 void CaseStatement::to_str(const semantic::Info& sem,

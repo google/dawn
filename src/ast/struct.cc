@@ -27,7 +27,14 @@ Struct::Struct(const Source& source,
                StructDecorationList decorations)
     : Base(source),
       members_(std::move(members)),
-      decorations_(std::move(decorations)) {}
+      decorations_(std::move(decorations)) {
+  for (auto* mem : members_) {
+    TINT_ASSERT(mem);
+  }
+  for (auto* deco : decorations_) {
+    TINT_ASSERT(deco);
+  }
+}
 
 Struct::Struct(Struct&&) = default;
 
@@ -57,15 +64,6 @@ Struct* Struct::Clone(CloneContext* ctx) const {
   auto mem = ctx->Clone(members());
   auto decos = ctx->Clone(decorations());
   return ctx->dst->create<Struct>(src, mem, decos);
-}
-
-bool Struct::IsValid() const {
-  for (auto* mem : members_) {
-    if (mem == nullptr || !mem->IsValid()) {
-      return false;
-    }
-  }
-  return true;
 }
 
 void Struct::to_str(const semantic::Info& sem,

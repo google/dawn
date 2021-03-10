@@ -24,7 +24,12 @@ namespace ast {
 CallExpression::CallExpression(const Source& source,
                                Expression* func,
                                ExpressionList params)
-    : Base(source), func_(func), params_(params) {}
+    : Base(source), func_(func), params_(params) {
+  TINT_ASSERT(func_);
+  for (auto* param : params_) {
+    TINT_ASSERT(param);
+  }
+}
 
 CallExpression::CallExpression(CallExpression&&) = default;
 
@@ -36,18 +41,6 @@ CallExpression* CallExpression::Clone(CloneContext* ctx) const {
   auto* fn = ctx->Clone(func_);
   auto p = ctx->Clone(params_);
   return ctx->dst->create<CallExpression>(src, fn, p);
-}
-
-bool CallExpression::IsValid() const {
-  if (func_ == nullptr || !func_->IsValid())
-    return false;
-
-  // All params must be valid
-  for (auto* param : params_) {
-    if (param == nullptr || !param->IsValid())
-      return false;
-  }
-  return true;
 }
 
 void CallExpression::to_str(const semantic::Info& sem,

@@ -24,7 +24,9 @@ namespace ast {
 UnaryOpExpression::UnaryOpExpression(const Source& source,
                                      UnaryOp op,
                                      Expression* expr)
-    : Base(source), op_(op), expr_(expr) {}
+    : Base(source), op_(op), expr_(expr) {
+  TINT_ASSERT(expr_);
+}
 
 UnaryOpExpression::UnaryOpExpression(UnaryOpExpression&&) = default;
 
@@ -35,10 +37,6 @@ UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto* e = ctx->Clone(expr());
   return ctx->dst->create<UnaryOpExpression>(src, op_, e);
-}
-
-bool UnaryOpExpression::IsValid() const {
-  return expr_ != nullptr && expr_->IsValid();
 }
 
 void UnaryOpExpression::to_str(const semantic::Info& sem,

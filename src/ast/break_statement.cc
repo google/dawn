@@ -33,10 +33,6 @@ BreakStatement* BreakStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BreakStatement>(src);
 }
 
-bool BreakStatement::IsValid() const {
-  return true;
-}
-
 void BreakStatement::to_str(const semantic::Info&,
                             std::ostream& out,
                             size_t indent) const {

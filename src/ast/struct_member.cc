@@ -28,7 +28,13 @@ StructMember::StructMember(const Source& source,
     : Base(source),
       symbol_(sym),
       type_(type),
-      decorations_(std::move(decorations)) {}
+      decorations_(std::move(decorations)) {
+  TINT_ASSERT(type);
+  TINT_ASSERT(symbol_.IsValid());
+  for (auto* deco : decorations_) {
+    TINT_ASSERT(deco);
+  }
+}
 
 StructMember::StructMember(StructMember&&) = default;
 
@@ -59,18 +65,6 @@ StructMember* StructMember::Clone(CloneContext* ctx) const {
   auto* ty = ctx->Clone(type_);
   auto decos = ctx->Clone(decorations_);
   return ctx->dst->create<StructMember>(src, sym, ty, decos);
-}
-
-bool StructMember::IsValid() const {
-  if (type_ == nullptr || !symbol_.IsValid()) {
-    return false;
-  }
-  for (auto* deco : decorations_) {
-    if (deco == nullptr) {
-      return false;
-    }
-  }
-  return true;
 }
 
 void StructMember::to_str(const semantic::Info& sem,

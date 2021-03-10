@@ -25,7 +25,11 @@ BinaryExpression::BinaryExpression(const Source& source,
                                    BinaryOp op,
                                    Expression* lhs,
                                    Expression* rhs)
-    : Base(source), op_(op), lhs_(lhs), rhs_(rhs) {}
+    : Base(source), op_(op), lhs_(lhs), rhs_(rhs) {
+  TINT_ASSERT(lhs_);
+  TINT_ASSERT(rhs_);
+  TINT_ASSERT(op_ != BinaryOp::kNone);
+}
 
 BinaryExpression::BinaryExpression(BinaryExpression&&) = default;
 
@@ -37,16 +41,6 @@ BinaryExpression* BinaryExpression::Clone(CloneContext* ctx) const {
   auto* l = ctx->Clone(lhs_);
   auto* r = ctx->Clone(rhs_);
   return ctx->dst->create<BinaryExpression>(src, op_, l, r);
-}
-
-bool BinaryExpression::IsValid() const {
-  if (lhs_ == nullptr || !lhs_->IsValid()) {
-    return false;
-  }
-  if (rhs_ == nullptr || !rhs_->IsValid()) {
-    return false;
-  }
-  return op_ != BinaryOp::kNone;
 }
 
 void BinaryExpression::to_str(const semantic::Info& sem,

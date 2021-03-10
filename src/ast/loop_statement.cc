@@ -24,7 +24,9 @@ namespace ast {
 LoopStatement::LoopStatement(const Source& source,
                              BlockStatement* body,
                              BlockStatement* continuing)
-    : Base(source), body_(body), continuing_(continuing) {}
+    : Base(source), body_(body), continuing_(continuing) {
+  TINT_ASSERT(body_);
+}
 
 LoopStatement::LoopStatement(LoopStatement&&) = default;
 
@@ -36,16 +38,6 @@ LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
   auto* b = ctx->Clone(body_);
   auto* cont = ctx->Clone(continuing_);
   return ctx->dst->create<LoopStatement>(src, b, cont);
-}
-
-bool LoopStatement::IsValid() const {
-  if (body_ == nullptr || !body_->IsValid()) {
-    return false;
-  }
-  if (continuing_ == nullptr || !continuing_->IsValid()) {
-    return false;
-  }
-  return true;
 }
 
 void LoopStatement::to_str(const semantic::Info& sem,

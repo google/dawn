@@ -14,6 +14,7 @@
 
 #include "src/ast/if_statement.h"
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/test_helper.h"
 
@@ -36,128 +37,37 @@ TEST_F(IfStatementTest, Creation) {
 
 TEST_F(IfStatementTest, IsIf) {
   auto* stmt = create<IfStatement>(
-      nullptr, create<BlockStatement>(StatementList{}), ElseStatementList{});
+      Expr(true), create<BlockStatement>(StatementList{}), ElseStatementList{});
   EXPECT_TRUE(stmt->Is<IfStatement>());
 }
 
-TEST_F(IfStatementTest, IsValid) {
-  auto* cond = Expr("cond");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(cond, body, ElseStatementList{});
-  EXPECT_TRUE(stmt->IsValid());
+TEST_F(IfStatementTest, Assert_NullCondition) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        auto* body = b.create<BlockStatement>(StatementList{});
+        b.create<IfStatement>(nullptr, body, ElseStatementList{});
+      },
+      "internal compiler error");
 }
 
-TEST_F(IfStatementTest, IsValid_WithElseStatements) {
-  auto* cond = Expr("cond");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(
-      cond, body,
-      ElseStatementList{
-          create<ElseStatement>(Expr("Ident"),
-                                create<BlockStatement>(StatementList{})),
-          create<ElseStatement>(nullptr,
-                                create<BlockStatement>(StatementList{})),
-      });
-  EXPECT_TRUE(stmt->IsValid());
+TEST_F(IfStatementTest, Assert_NullBody) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<IfStatement>(b.Expr(true), nullptr, ElseStatementList{});
+      },
+      "internal compiler error");
 }
 
-TEST_F(IfStatementTest, IsValid_MissingCondition) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(nullptr, body, ElseStatementList{});
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_InvalidCondition) {
-  auto* cond = Expr("");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(cond, body, ElseStatementList{});
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_NullBodyStatement) {
-  auto* cond = Expr("cond");
-  auto* body = create<BlockStatement>(StatementList{
-      create<DiscardStatement>(),
-      nullptr,
-  });
-  auto* stmt = create<IfStatement>(cond, body, ElseStatementList{});
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_InvalidBodyStatement) {
-  auto* cond = Expr("cond");
-  auto* body = create<BlockStatement>(
-
-      StatementList{
-          create<DiscardStatement>(),
-          create<IfStatement>(nullptr, create<BlockStatement>(StatementList{}),
-                              ast::ElseStatementList{}),
-      });
-  auto* stmt = create<IfStatement>(cond, body, ElseStatementList{});
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_NullElseStatement) {
-  auto* cond = Expr("cond");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(
-      cond, body,
-      ElseStatementList{
-          create<ElseStatement>(Expr("Ident"),
-                                create<BlockStatement>(StatementList{})),
-          create<ElseStatement>(nullptr,
-                                create<BlockStatement>(StatementList{})),
-          nullptr,
-      });
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_InvalidElseStatement) {
-  auto* cond = Expr("cond");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(
-      cond, body,
-      ElseStatementList{
-          create<ElseStatement>(Expr(""),
-                                create<BlockStatement>(StatementList{})),
-      });
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_MultipleElseWiththoutCondition) {
-  auto* cond = Expr("cond");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(
-      cond, body,
-      ElseStatementList{
-          create<ElseStatement>(nullptr,
-                                create<BlockStatement>(StatementList{})),
-          create<ElseStatement>(nullptr,
-                                create<BlockStatement>(StatementList{})),
-      });
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(IfStatementTest, IsValid_ElseNotLast) {
-  auto* cond = Expr("cond");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(
-      cond, body,
-      ElseStatementList{
-          create<ElseStatement>(nullptr,
-                                create<BlockStatement>(StatementList{})),
-          create<ElseStatement>(Expr("Ident"),
-                                create<BlockStatement>(StatementList{})),
-      });
-  EXPECT_FALSE(stmt->IsValid());
+TEST_F(IfStatementTest, Assert_NullElseStatement) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        auto* body = b.create<BlockStatement>(StatementList{});
+        b.create<IfStatement>(b.Expr(true), body, ElseStatementList{nullptr});
+      },
+      "internal compiler error");
 }
 
 TEST_F(IfStatementTest, ToStr) {

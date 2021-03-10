@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -45,24 +46,31 @@ TEST_F(StructMemberTest, CreationWithSource) {
   EXPECT_EQ(st->source().range.end.column, 8u);
 }
 
-TEST_F(StructMemberTest, IsValid) {
-  auto* st = Member("a", ty.i32());
-  EXPECT_TRUE(st->IsValid());
+TEST_F(StructMemberTest, Assert_EmptySymbol) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.Member("", b.ty.i32());
+      },
+      "internal compiler error");
 }
 
-TEST_F(StructMemberTest, IsValid_EmptySymbol) {
-  auto* st = Member("", ty.i32());
-  EXPECT_FALSE(st->IsValid());
+TEST_F(StructMemberTest, Assert_NullType) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.Member("a", nullptr);
+      },
+      "internal compiler error");
 }
 
-TEST_F(StructMemberTest, IsValid_NullType) {
-  auto* st = Member("a", nullptr);
-  EXPECT_FALSE(st->IsValid());
-}
-
-TEST_F(StructMemberTest, IsValid_Null_Decoration) {
-  auto* st = Member("a", ty.i32(), {MemberOffset(4), nullptr});
-  EXPECT_FALSE(st->IsValid());
+TEST_F(StructMemberTest, Assert_NullDecoration) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.Member("a", b.ty.i32(), {b.MemberOffset(4), nullptr});
+      },
+      "internal compiler error");
 }
 
 TEST_F(StructMemberTest, ToStr) {

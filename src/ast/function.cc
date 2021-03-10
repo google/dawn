@@ -34,7 +34,14 @@ Function::Function(const Source& source,
       params_(std::move(params)),
       return_type_(return_type),
       body_(body),
-      decorations_(std::move(decorations)) {}
+      decorations_(std::move(decorations)) {
+  for (auto* param : params_) {
+    TINT_ASSERT(param);
+  }
+  TINT_ASSERT(body_);
+  TINT_ASSERT(symbol_.IsValid());
+  TINT_ASSERT(return_type_);
+}
 
 Function::Function(Function&&) = default;
 
@@ -71,23 +78,6 @@ Function* Function::Clone(CloneContext* ctx) const {
   auto* b = ctx->Clone(body_);
   auto decos = ctx->Clone(decorations_);
   return ctx->dst->create<Function>(src, sym, p, ret, b, decos);
-}
-
-bool Function::IsValid() const {
-  for (auto* param : params_) {
-    if (param == nullptr || !param->IsValid())
-      return false;
-  }
-  if (body_ == nullptr || !body_->IsValid()) {
-    return false;
-  }
-  if (!symbol_.IsValid()) {
-    return false;
-  }
-  if (return_type_ == nullptr) {
-    return false;
-  }
-  return true;
 }
 
 void Function::to_str(const semantic::Info& sem,

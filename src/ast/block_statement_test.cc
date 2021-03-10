@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/test_helper.h"
@@ -45,35 +46,13 @@ TEST_F(BlockStatementTest, IsBlock) {
   EXPECT_TRUE(b->Is<BlockStatement>());
 }
 
-TEST_F(BlockStatementTest, IsValid) {
-  auto* b = create<BlockStatement>(ast::StatementList{
-      create<DiscardStatement>(),
-  });
-  EXPECT_TRUE(b->IsValid());
-}
-
-TEST_F(BlockStatementTest, IsValid_Empty) {
-  auto* b = create<BlockStatement>(ast::StatementList{});
-  EXPECT_TRUE(b->IsValid());
-}
-
-TEST_F(BlockStatementTest, IsValid_NullBodyStatement) {
-  auto* b = create<BlockStatement>(ast::StatementList{
-      create<DiscardStatement>(),
-      nullptr,
-  });
-
-  EXPECT_FALSE(b->IsValid());
-}
-
-TEST_F(BlockStatementTest, IsValid_InvalidBodyStatement) {
-  auto* b = create<BlockStatement>(
-
-      ast::StatementList{
-          create<IfStatement>(nullptr, create<BlockStatement>(StatementList{}),
-                              ElseStatementList{}),
-      });
-  EXPECT_FALSE(b->IsValid());
+TEST_F(BlockStatementTest, Assert_NullStatement) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<BlockStatement>(ast::StatementList{nullptr});
+      },
+      "internal compiler error");
 }
 
 TEST_F(BlockStatementTest, ToStr) {

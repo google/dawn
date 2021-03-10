@@ -23,7 +23,11 @@ namespace ast {
 
 BlockStatement::BlockStatement(const Source& source,
                                const StatementList& statements)
-    : Base(source), statements_(std::move(statements)) {}
+    : Base(source), statements_(std::move(statements)) {
+  for (auto* stmt : *this) {
+    TINT_ASSERT(stmt);
+  }
+}
 
 BlockStatement::BlockStatement(BlockStatement&&) = default;
 
@@ -34,15 +38,6 @@ BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto stmts = ctx->Clone(statements_);
   return ctx->dst->create<BlockStatement>(src, stmts);
-}
-
-bool BlockStatement::IsValid() const {
-  for (auto* stmt : *this) {
-    if (stmt == nullptr || !stmt->IsValid()) {
-      return false;
-    }
-  }
-  return true;
 }
 
 void BlockStatement::to_str(const semantic::Info& sem,

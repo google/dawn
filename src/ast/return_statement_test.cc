@@ -52,23 +52,6 @@ TEST_F(ReturnStatementTest, HasValue_WithValue) {
   EXPECT_TRUE(r->has_value());
 }
 
-TEST_F(ReturnStatementTest, IsValid_WithoutValue) {
-  auto* r = create<ReturnStatement>();
-  EXPECT_TRUE(r->IsValid());
-}
-
-TEST_F(ReturnStatementTest, IsValid_WithValue) {
-  auto* expr = Expr("expr");
-  auto* r = create<ReturnStatement>(expr);
-  EXPECT_TRUE(r->IsValid());
-}
-
-TEST_F(ReturnStatementTest, IsValid_InvalidValue) {
-  auto* expr = Expr("");
-  auto* r = create<ReturnStatement>(expr);
-  EXPECT_FALSE(r->IsValid());
-}
-
 TEST_F(ReturnStatementTest, ToStr_WithValue) {
   auto* expr = Expr("expr");
   auto* r = create<ReturnStatement>(expr);

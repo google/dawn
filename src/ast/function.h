@@ -89,9 +89,6 @@ class Function : public Castable<Function, Node> {
   /// @return the newly cloned node
   Function* Clone(CloneContext* ctx) const override;
 
-  /// @returns true if the symbol and type are both present
-  bool IsValid() const override;
-
   /// Writes a representation of the node to the output stream
   /// @param sem the semantic info for the program
   /// @param out the stream to write to

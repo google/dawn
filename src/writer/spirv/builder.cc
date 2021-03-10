@@ -2715,8 +2715,10 @@ bool Builder::GenerateLoopStatement(ast::LoopStatement* stmt) {
   if (!GenerateLabel(continue_block_id)) {
     return false;
   }
-  if (!GenerateBlockStatementWithoutScoping(stmt->continuing())) {
-    return false;
+  if (stmt->has_continuing()) {
+    if (!GenerateBlockStatementWithoutScoping(stmt->continuing())) {
+      return false;
+    }
   }
 
   scope_stack_.pop_scope();

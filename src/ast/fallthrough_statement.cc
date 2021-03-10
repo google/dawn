@@ -34,10 +34,6 @@ FallthroughStatement* FallthroughStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<FallthroughStatement>(src);
 }
 
-bool FallthroughStatement::IsValid() const {
-  return true;
-}
-
 void FallthroughStatement::to_str(const semantic::Info&,
                                   std::ostream& out,
                                   size_t indent) const {

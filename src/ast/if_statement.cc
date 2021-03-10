@@ -28,7 +28,13 @@ IfStatement::IfStatement(const Source& source,
     : Base(source),
       condition_(condition),
       body_(body),
-      else_statements_(std::move(else_stmts)) {}
+      else_statements_(std::move(else_stmts)) {
+  TINT_ASSERT(condition_);
+  TINT_ASSERT(body);
+  for (auto* el : else_statements_) {
+    TINT_ASSERT(el);
+  }
+}
 
 IfStatement::IfStatement(IfStatement&&) = default;
 
@@ -41,30 +47,6 @@ IfStatement* IfStatement::Clone(CloneContext* ctx) const {
   auto* b = ctx->Clone(body_);
   auto el = ctx->Clone(else_statements_);
   return ctx->dst->create<IfStatement>(src, cond, b, el);
-}
-
-bool IfStatement::IsValid() const {
-  if (condition_ == nullptr || !condition_->IsValid()) {
-    return false;
-  }
-  if (body_ == nullptr || !body_->IsValid()) {
-    return false;
-  }
-
-  bool found_else = false;
-  for (auto* el : else_statements_) {
-    // Else statement must be last
-    if (found_else)
-      return false;
-
-    if (el == nullptr || !el->IsValid())
-      return false;
-
-    if (el->condition() == nullptr)
-      found_else = true;
-  }
-
-  return true;
 }
 
 void IfStatement::to_str(const semantic::Info& sem,

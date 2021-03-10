@@ -24,7 +24,10 @@ namespace ast {
 MemberAccessorExpression::MemberAccessorExpression(const Source& source,
                                                    Expression* structure,
                                                    IdentifierExpression* member)
-    : Base(source), struct_(structure), member_(member) {}
+    : Base(source), struct_(structure), member_(member) {
+  TINT_ASSERT(structure);
+  TINT_ASSERT(member);
+}
 
 MemberAccessorExpression::MemberAccessorExpression(MemberAccessorExpression&&) =
     default;
@@ -38,16 +41,6 @@ MemberAccessorExpression* MemberAccessorExpression::Clone(
   auto* str = ctx->Clone(structure());
   auto* mem = ctx->Clone(member());
   return ctx->dst->create<MemberAccessorExpression>(src, str, mem);
-}
-
-bool MemberAccessorExpression::IsValid() const {
-  if (struct_ == nullptr || !struct_->IsValid()) {
-    return false;
-  }
-  if (member_ == nullptr || !member_->IsValid()) {
-    return false;
-  }
-  return true;
 }
 
 void MemberAccessorExpression::to_str(const semantic::Info& sem,

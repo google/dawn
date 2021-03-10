@@ -60,7 +60,7 @@ ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
 }
 
 bool ProgramBuilder::IsValid() const {
-  return !diagnostics_.contains_errors() && ast_->IsValid();
+  return !diagnostics_.contains_errors();
 }
 
 std::string ProgramBuilder::str(const ast::Node* node) const {

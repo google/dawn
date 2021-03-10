@@ -24,7 +24,12 @@ namespace ast {
 SwitchStatement::SwitchStatement(const Source& source,
                                  Expression* condition,
                                  CaseStatementList body)
-    : Base(source), condition_(condition), body_(body) {}
+    : Base(source), condition_(condition), body_(body) {
+  TINT_ASSERT(condition_);
+  for (auto* stmt : body_) {
+    TINT_ASSERT(stmt);
+  }
+}
 
 SwitchStatement::SwitchStatement(SwitchStatement&&) = default;
 
@@ -36,18 +41,6 @@ SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
   auto* cond = ctx->Clone(condition());
   auto b = ctx->Clone(body());
   return ctx->dst->create<SwitchStatement>(src, cond, b);
-}
-
-bool SwitchStatement::IsValid() const {
-  if (condition_ == nullptr || !condition_->IsValid()) {
-    return false;
-  }
-  for (auto* stmt : body_) {
-    if (stmt == nullptr || !stmt->IsValid()) {
-      return false;
-    }
-  }
-  return true;
 }
 
 void SwitchStatement::to_str(const semantic::Info& sem,

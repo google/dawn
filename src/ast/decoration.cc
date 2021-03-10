@@ -39,9 +39,5 @@ std::ostream& operator<<(std::ostream& out, DecorationKind data) {
   return out << "<unknown>";
 }
 
-bool Decoration::IsValid() const {
-  return true;
-}
-
 }  // namespace ast
 }  // namespace tint

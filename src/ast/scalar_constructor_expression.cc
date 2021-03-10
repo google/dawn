@@ -22,8 +22,10 @@ namespace tint {
 namespace ast {
 
 ScalarConstructorExpression::ScalarConstructorExpression(const Source& source,
-                                                         Literal* litearl)
-    : Base(source), literal_(litearl) {}
+                                                         Literal* literal)
+    : Base(source), literal_(literal) {
+  TINT_ASSERT(literal);
+}
 
 ScalarConstructorExpression::ScalarConstructorExpression(
     ScalarConstructorExpression&&) = default;
@@ -36,10 +38,6 @@ ScalarConstructorExpression* ScalarConstructorExpression::Clone(
   auto src = ctx->Clone(source());
   auto* lit = ctx->Clone(literal());
   return ctx->dst->create<ScalarConstructorExpression>(src, lit);
-}
-
-bool ScalarConstructorExpression::IsValid() const {
-  return literal_ != nullptr;
 }
 
 void ScalarConstructorExpression::to_str(const semantic::Info& sem,

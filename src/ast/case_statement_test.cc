@@ -14,6 +14,7 @@
 
 #include "src/ast/case_statement.h"
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/test_helper.h"
@@ -89,36 +90,13 @@ TEST_F(CaseStatementTest, IsCase) {
   EXPECT_TRUE(c->Is<CaseStatement>());
 }
 
-TEST_F(CaseStatementTest, IsValid) {
-  auto* c = create<CaseStatement>(CaseSelectorList{},
-                                  create<BlockStatement>(StatementList{}));
-  EXPECT_TRUE(c->IsValid());
-}
-
-TEST_F(CaseStatementTest, IsValid_NullBodyStatement) {
-  CaseSelectorList b;
-  b.push_back(create<SintLiteral>(ty.i32(), 2));
-
-  auto* body = create<BlockStatement>(StatementList{
-      create<DiscardStatement>(),
-      nullptr,
-  });
-  auto* c = create<CaseStatement>(b, body);
-  EXPECT_FALSE(c->IsValid());
-}
-
-TEST_F(CaseStatementTest, IsValid_InvalidBodyStatement) {
-  CaseSelectorList b;
-  b.push_back(create<SintLiteral>(ty.i32(), 2));
-
-  auto* body = create<BlockStatement>(
-
-      StatementList{
-          create<IfStatement>(nullptr, create<BlockStatement>(StatementList{}),
-                              ElseStatementList{}),
-      });
-  auto* c = create<CaseStatement>(CaseSelectorList{b}, body);
-  EXPECT_FALSE(c->IsValid());
+TEST_F(CaseStatementTest, Assert_NullBody) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<CaseStatement>(CaseSelectorList{}, nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {

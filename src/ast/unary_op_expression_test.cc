@@ -14,6 +14,7 @@
 
 #include "src/ast/unary_op_expression.h"
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -45,21 +46,13 @@ TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
   EXPECT_TRUE(u->Is<UnaryOpExpression>());
 }
 
-TEST_F(UnaryOpExpressionTest, IsValid) {
-  auto* ident = Expr("ident");
-  auto* u = create<UnaryOpExpression>(UnaryOp::kNot, ident);
-  EXPECT_TRUE(u->IsValid());
-}
-
-TEST_F(UnaryOpExpressionTest, IsValid_NullExpression) {
-  auto* u = create<UnaryOpExpression>(UnaryOp::kNot, nullptr);
-  EXPECT_FALSE(u->IsValid());
-}
-
-TEST_F(UnaryOpExpressionTest, IsValid_InvalidExpression) {
-  auto* ident = Expr("");
-  auto* u = create<UnaryOpExpression>(UnaryOp::kNot, ident);
-  EXPECT_FALSE(u->IsValid());
+TEST_F(UnaryOpExpressionTest, Assert_NullExpression) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<UnaryOpExpression>(UnaryOp::kNot, nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(UnaryOpExpressionTest, ToStr) {

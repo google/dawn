@@ -24,7 +24,10 @@ namespace ast {
 AssignmentStatement::AssignmentStatement(const Source& source,
                                          Expression* lhs,
                                          Expression* rhs)
-    : Base(source), lhs_(lhs), rhs_(rhs) {}
+    : Base(source), lhs_(lhs), rhs_(rhs) {
+  TINT_ASSERT(lhs_);
+  TINT_ASSERT(rhs_);
+}
 
 AssignmentStatement::AssignmentStatement(AssignmentStatement&&) = default;
 
@@ -36,15 +39,6 @@ AssignmentStatement* AssignmentStatement::Clone(CloneContext* ctx) const {
   auto* l = ctx->Clone(lhs_);
   auto* r = ctx->Clone(rhs_);
   return ctx->dst->create<AssignmentStatement>(src, l, r);
-}
-
-bool AssignmentStatement::IsValid() const {
-  if (lhs_ == nullptr || !lhs_->IsValid())
-    return false;
-  if (rhs_ == nullptr || !rhs_->IsValid())
-    return false;
-
-  return true;
 }
 
 void AssignmentStatement::to_str(const semantic::Info& sem,

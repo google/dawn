@@ -14,6 +14,7 @@
 
 #include "src/ast/assignment_statement.h"
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -50,40 +51,22 @@ TEST_F(AssignmentStatementTest, IsAssign) {
   EXPECT_TRUE(stmt->Is<AssignmentStatement>());
 }
 
-TEST_F(AssignmentStatementTest, IsValid) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-
-  auto* stmt = create<AssignmentStatement>(lhs, rhs);
-  EXPECT_TRUE(stmt->IsValid());
+TEST_F(AssignmentStatementTest, Assert_NullLHS) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<AssignmentStatement>(nullptr, b.Expr(1));
+      },
+      "internal compiler error");
 }
 
-TEST_F(AssignmentStatementTest, IsValid_MissingLHS) {
-  auto* rhs = Expr("rhs");
-
-  auto* stmt = create<AssignmentStatement>(nullptr, rhs);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(AssignmentStatementTest, IsValid_MissingRHS) {
-  auto* lhs = Expr("lhs");
-
-  auto* stmt = create<AssignmentStatement>(lhs, nullptr);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(AssignmentStatementTest, IsValid_InvalidLHS) {
-  auto* lhs = Expr("");
-  auto* rhs = Expr("rhs");
-  auto* stmt = create<AssignmentStatement>(lhs, rhs);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(AssignmentStatementTest, IsValid_InvalidRHS) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("");
-  auto* stmt = create<AssignmentStatement>(lhs, rhs);
-  EXPECT_FALSE(stmt->IsValid());
+TEST_F(AssignmentStatementTest, Assert_NullRHS) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<AssignmentStatement>(b.Expr(1), nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(AssignmentStatementTest, ToStr) {

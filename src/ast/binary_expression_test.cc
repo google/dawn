@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -49,50 +50,22 @@ TEST_F(BinaryExpressionTest, IsBinary) {
   EXPECT_TRUE(r->Is<BinaryExpression>());
 }
 
-TEST_F(BinaryExpressionTest, IsValid) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-
-  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
-  EXPECT_TRUE(r->IsValid());
-}
-
 TEST_F(BinaryExpressionTest, IsValid_Null_LHS) {
-  auto* rhs = Expr("rhs");
-
-  auto* r = create<BinaryExpression>(BinaryOp::kEqual, nullptr, rhs);
-  EXPECT_FALSE(r->IsValid());
-}
-
-TEST_F(BinaryExpressionTest, IsValid_Invalid_LHS) {
-  auto* lhs = Expr("");
-  auto* rhs = Expr("rhs");
-
-  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
-  EXPECT_FALSE(r->IsValid());
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<BinaryExpression>(BinaryOp::kEqual, nullptr, b.Expr("rhs"));
+      },
+      "internal compiler error");
 }
 
 TEST_F(BinaryExpressionTest, IsValid_Null_RHS) {
-  auto* lhs = Expr("lhs");
-
-  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, nullptr);
-  EXPECT_FALSE(r->IsValid());
-}
-
-TEST_F(BinaryExpressionTest, IsValid_Invalid_RHS) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("");
-
-  auto* r = create<BinaryExpression>(BinaryOp::kEqual, lhs, rhs);
-  EXPECT_FALSE(r->IsValid());
-}
-
-TEST_F(BinaryExpressionTest, IsValid_Binary_None) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-
-  auto* r = create<BinaryExpression>(BinaryOp::kNone, lhs, rhs);
-  EXPECT_FALSE(r->IsValid());
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<BinaryExpression>(BinaryOp::kEqual, b.Expr("lhs"), nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(BinaryExpressionTest, ToStr) {

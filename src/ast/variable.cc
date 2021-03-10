@@ -36,7 +36,10 @@ Variable::Variable(const Source& source,
       is_const_(is_const),
       constructor_(constructor),
       decorations_(std::move(decorations)),
-      declared_storage_class_(sc) {}
+      declared_storage_class_(sc) {
+  TINT_ASSERT(symbol_.IsValid());
+  TINT_ASSERT(type_);
+}
 
 Variable::Variable(Variable&&) = default;
 
@@ -79,7 +82,7 @@ LocationDecoration* Variable::GetLocationDecoration() const {
 }
 
 uint32_t Variable::constant_id() const {
-  assert(HasConstantIdDecoration());
+  TINT_ASSERT(HasConstantIdDecoration());
   for (auto* deco : decorations_) {
     if (auto* cid = deco->As<ConstantIdDecoration>()) {
       return cid->value();
@@ -96,19 +99,6 @@ Variable* Variable::Clone(CloneContext* ctx) const {
   auto decos = ctx->Clone(decorations());
   return ctx->dst->create<Variable>(src, sym, declared_storage_class(), ty,
                                     is_const_, ctor, decos);
-}
-
-bool Variable::IsValid() const {
-  if (!symbol_.IsValid()) {
-    return false;
-  }
-  if (type_ == nullptr) {
-    return false;
-  }
-  if (constructor_ && !constructor_->IsValid()) {
-    return false;
-  }
-  return true;
 }
 
 void Variable::info_to_str(const semantic::Info& sem,

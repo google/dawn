@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -39,9 +40,13 @@ TEST_F(IdentifierExpressionTest, IsIdentifier) {
   EXPECT_TRUE(i->Is<IdentifierExpression>());
 }
 
-TEST_F(IdentifierExpressionTest, IsValid) {
-  auto* i = Expr("ident");
-  EXPECT_TRUE(i->IsValid());
+TEST_F(IdentifierExpressionTest, Assert_InvalidSymbol) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.Expr("");
+      },
+      "internal compiler error");
 }
 
 TEST_F(IdentifierExpressionTest, ToStr) {

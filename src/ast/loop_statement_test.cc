@@ -14,6 +14,7 @@
 
 #include "src/ast/loop_statement.h"
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/test_helper.h"
@@ -78,88 +79,13 @@ TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
   EXPECT_TRUE(l->has_continuing());
 }
 
-TEST_F(LoopStatementTest, IsValid) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-
-  auto* continuing =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-
-  auto* l = create<LoopStatement>(body, continuing);
-  EXPECT_TRUE(l->IsValid());
-}
-
-TEST_F(LoopStatementTest, IsValid_WithoutContinuing) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-
-  auto* l =
-      create<LoopStatement>(body, create<BlockStatement>(StatementList{}));
-  EXPECT_TRUE(l->IsValid());
-}
-
-TEST_F(LoopStatementTest, IsValid_WithoutBody) {
-  auto* l = create<LoopStatement>(create<BlockStatement>(StatementList{}),
-                                  create<BlockStatement>(StatementList{}));
-  EXPECT_TRUE(l->IsValid());
-}
-
-TEST_F(LoopStatementTest, IsValid_NullBodyStatement) {
-  auto* body = create<BlockStatement>(StatementList{
-      create<DiscardStatement>(),
-      nullptr,
-  });
-
-  auto* continuing =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-
-  auto* l = create<LoopStatement>(body, continuing);
-  EXPECT_FALSE(l->IsValid());
-}
-
-TEST_F(LoopStatementTest, IsValid_InvalidBodyStatement) {
-  auto* body = create<BlockStatement>(
-
-      StatementList{
-          create<DiscardStatement>(),
-          create<IfStatement>(nullptr, create<BlockStatement>(StatementList{}),
-                              ElseStatementList{}),
-      });
-
-  auto* continuing =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-
-  auto* l = create<LoopStatement>(body, continuing);
-  EXPECT_FALSE(l->IsValid());
-}
-
-TEST_F(LoopStatementTest, IsValid_NullContinuingStatement) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-
-  auto* continuing = create<BlockStatement>(StatementList{
-      create<DiscardStatement>(),
-      nullptr,
-  });
-
-  auto* l = create<LoopStatement>(body, continuing);
-  EXPECT_FALSE(l->IsValid());
-}
-
-TEST_F(LoopStatementTest, IsValid_InvalidContinuingStatement) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-
-  auto* continuing = create<BlockStatement>(
-
-      StatementList{
-          create<DiscardStatement>(),
-          create<IfStatement>(nullptr, create<BlockStatement>(StatementList{}),
-                              ElseStatementList{}),
-      });
-
-  auto* l = create<LoopStatement>(body, continuing);
-  EXPECT_FALSE(l->IsValid());
+TEST_F(LoopStatementTest, Assert_NullBody) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<LoopStatement>(nullptr, nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(LoopStatementTest, ToStr) {

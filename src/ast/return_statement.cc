@@ -38,13 +38,6 @@ ReturnStatement* ReturnStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ReturnStatement>(src, ret);
 }
 
-bool ReturnStatement::IsValid() const {
-  if (value_ != nullptr) {
-    return value_->IsValid();
-  }
-  return true;
-}
-
 void ReturnStatement::to_str(const semantic::Info& sem,
                              std::ostream& out,
                              size_t indent) const {

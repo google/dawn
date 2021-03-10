@@ -368,7 +368,6 @@ class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
   virtual ast::Statement* Build(ProgramBuilder* builder) const = 0;
 
  private:
-  bool IsValid() const override;
   Node* Clone(CloneContext*) const override;
   void to_str(const semantic::Info& sem,
               std::ostream& out,

@@ -33,10 +33,6 @@ ContinueStatement* ContinueStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ContinueStatement>(src);
 }
 
-bool ContinueStatement::IsValid() const {
-  return true;
-}
-
 void ContinueStatement::to_str(const semantic::Info&,
                                std::ostream& out,
                                size_t indent) const {

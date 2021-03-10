@@ -33,10 +33,6 @@ DiscardStatement* DiscardStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<DiscardStatement>(src);
 }
 
-bool DiscardStatement::IsValid() const {
-  return true;
-}
-
 void DiscardStatement::to_str(const semantic::Info&,
                               std::ostream& out,
                               size_t indent) const {

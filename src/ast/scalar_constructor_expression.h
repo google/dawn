@@ -42,9 +42,6 @@ class ScalarConstructorExpression
   /// @return the newly cloned node
   ScalarConstructorExpression* Clone(CloneContext* ctx) const override;
 
-  /// @returns true if the node is valid
-  bool IsValid() const override;
-
   /// Writes a representation of the node to the output stream
   /// @param sem the semantic info for the program
   /// @param out the stream to write to

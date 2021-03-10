@@ -40,9 +40,6 @@ class Node : public Castable<Node, Cloneable> {
   /// @returns the node source data
   const Source& source() const { return source_; }
 
-  /// @returns true if the node is valid
-  virtual bool IsValid() const = 0;
-
   /// Writes a representation of the node to the output stream
   /// @param sem the semantic info for the program
   /// @param out the stream to write to

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/test_helper.h"
 
@@ -62,34 +63,22 @@ TEST_F(VariableTest, CreationEmpty) {
   EXPECT_EQ(v->source().range.end.column, 7u);
 }
 
-TEST_F(VariableTest, IsValid) {
-  auto* v = Var("my_var", ty.i32(), StorageClass::kNone);
-  EXPECT_TRUE(v->IsValid());
+TEST_F(VariableTest, Assert_MissingSymbol) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.Var("", b.ty.i32(), StorageClass::kNone);
+      },
+      "internal compiler error");
 }
 
-TEST_F(VariableTest, IsValid_WithConstructor) {
-  auto* v = Var("my_var", ty.i32(), StorageClass::kNone, Expr("ident"));
-  EXPECT_TRUE(v->IsValid());
-}
-
-TEST_F(VariableTest, IsValid_MissingSymbol) {
-  auto* v = Var("", ty.i32(), StorageClass::kNone);
-  EXPECT_FALSE(v->IsValid());
-}
-
-TEST_F(VariableTest, IsValid_MissingType) {
-  auto* v = Var("x", nullptr, StorageClass::kNone);
-  EXPECT_FALSE(v->IsValid());
-}
-
-TEST_F(VariableTest, IsValid_MissingBoth) {
-  auto* v = Var("", nullptr, StorageClass::kNone);
-  EXPECT_FALSE(v->IsValid());
-}
-
-TEST_F(VariableTest, IsValid_InvalidConstructor) {
-  auto* v = Var("my_var", ty.i32(), StorageClass::kNone, Expr(""));
-  EXPECT_FALSE(v->IsValid());
+TEST_F(VariableTest, Assert_NullType) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.Var("x", nullptr, StorageClass::kNone);
+      },
+      "internal compiler error");
 }
 
 TEST_F(VariableTest, to_str) {

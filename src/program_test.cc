@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/test_helper.h"
 
@@ -37,109 +38,43 @@ TEST_F(ProgramTest, ToStrEmitsPreambleAndPostamble) {
   EXPECT_EQ(str, expected);
 }
 
-TEST_F(ProgramTest, IsValid_Empty) {
+TEST_F(ProgramTest, EmptyIsValid) {
   Program program(std::move(*this));
   EXPECT_TRUE(program.IsValid());
 }
 
-TEST_F(ProgramTest, IsValid_GlobalVariable) {
+TEST_F(ProgramTest, Assert_GlobalVariable) {
   Global("var", ty.f32(), ast::StorageClass::kInput);
 
   Program program(std::move(*this));
   EXPECT_TRUE(program.IsValid());
 }
 
-TEST_F(ProgramTest, IsValid_Null_GlobalVariable) {
-  AST().AddGlobalVariable(nullptr);
-
-  Program program(std::move(*this));
-  EXPECT_FALSE(program.IsValid());
+TEST_F(ProgramTest, Assert_NullGlobalVariable) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.AST().AddGlobalVariable(nullptr);
+      },
+      "internal compiler error");
 }
 
-TEST_F(ProgramTest, IsValid_Invalid_GlobalVariable) {
-  Global("var", nullptr, ast::StorageClass::kInput);
-
-  Program program(std::move(*this));
-  EXPECT_FALSE(program.IsValid());
+TEST_F(ProgramTest, Assert_NullConstructedType) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.AST().AddConstructedType(nullptr);
+      },
+      "internal compiler error");
 }
 
-TEST_F(ProgramTest, IsValid_Alias) {
-  auto* alias = ty.alias("alias", ty.f32());
-  AST().AddConstructedType(alias);
-
-  Program program(std::move(*this));
-  EXPECT_TRUE(program.IsValid());
-}
-
-TEST_F(ProgramTest, IsValid_Null_Alias) {
-  AST().AddConstructedType(nullptr);
-
-  Program program(std::move(*this));
-  EXPECT_FALSE(program.IsValid());
-}
-
-TEST_F(ProgramTest, IsValid_Struct) {
-  auto* st = ty.struct_("name", {});
-  auto* alias = ty.alias("name", st);
-  AST().AddConstructedType(alias);
-
-  Program program(std::move(*this));
-  EXPECT_TRUE(program.IsValid());
-}
-
-TEST_F(ProgramTest, IsValid_Struct_EmptyName) {
-  auto* st = ty.struct_("", {});
-  auto* alias = ty.alias("name", st);
-  AST().AddConstructedType(alias);
-
-  Program program(std::move(*this));
-  EXPECT_FALSE(program.IsValid());
-}
-
-TEST_F(ProgramTest, IsValid_Function) {
-  Func("main", ast::VariableList(), ty.f32(), ast::StatementList{},
-       ast::FunctionDecorationList{});
-
-  Program program(std::move(*this));
-  EXPECT_TRUE(program.IsValid());
-}
-
-TEST_F(ProgramTest, IsValid_Null_Function) {
-  AST().AddFunction(nullptr);
-
-  Program program(std::move(*this));
-  EXPECT_FALSE(program.IsValid());
-}
-
-TEST_F(ProgramTest, IsValid_Invalid_Function) {
-  Func("main", ast::VariableList{}, nullptr, ast::StatementList{},
-       ast::FunctionDecorationList{});
-
-  Program program(std::move(*this));
-  EXPECT_FALSE(program.IsValid());
-}
-
-TEST_F(ProgramTest, IsValid_Invalid_UnknownVar) {
-  Func("main", ast::VariableList{}, nullptr,
-       ast::StatementList{
-           create<ast::ReturnStatement>(Expr("unknown_ident")),
-       },
-       ast::FunctionDecorationList{});
-
-  Program program(std::move(*this));
-  EXPECT_FALSE(program.IsValid());
-  EXPECT_NE(program.Diagnostics().count(), 0u);
-}
-
-TEST_F(ProgramTest, IsValid_GeneratesError) {
-  AST().AddGlobalVariable(nullptr);
-
-  Program program(std::move(*this));
-  EXPECT_FALSE(program.IsValid());
-  EXPECT_EQ(program.Diagnostics().count(), 1u);
-  EXPECT_EQ(program.Diagnostics().error_count(), 1u);
-  EXPECT_EQ(program.Diagnostics().begin()->message,
-            "invalid program generated");
+TEST_F(ProgramTest, Assert_Null_Function) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.AST().AddFunction(nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(ProgramTest, DiagnosticsMove) {

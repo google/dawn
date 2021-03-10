@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/test_helper.h"
@@ -47,80 +48,38 @@ TEST_F(FunctionTest, Creation_WithSource) {
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
-TEST_F(FunctionTest, IsValid) {
-  VariableList params;
-  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
-
-  auto* f = Func("func", params, ty.void_(),
-                 StatementList{
-                     create<DiscardStatement>(),
-                 },
-                 FunctionDecorationList{});
-  EXPECT_TRUE(f->IsValid());
+TEST_F(FunctionTest, Assert_InvalidName) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.Func("", VariableList{}, b.ty.void_(), StatementList{},
+               FunctionDecorationList{});
+      },
+      "internal compiler error");
 }
 
-TEST_F(FunctionTest, IsValid_InvalidName) {
-  VariableList params;
-  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
-
-  auto* f =
-      Func("", params, ty.void_(), StatementList{}, FunctionDecorationList{});
-  EXPECT_FALSE(f->IsValid());
+TEST_F(FunctionTest, Assert_NullReturnType) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.Func("f", VariableList{}, nullptr, StatementList{},
+               FunctionDecorationList{});
+      },
+      "internal compiler error");
 }
 
-TEST_F(FunctionTest, IsValid_MissingReturnType) {
-  VariableList params;
-  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
+TEST_F(FunctionTest, Assert_NullParam) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        VariableList params;
+        params.push_back(b.Var("var", b.ty.i32(), StorageClass::kNone));
+        params.push_back(nullptr);
 
-  auto* f =
-      Func("func", params, nullptr, StatementList{}, FunctionDecorationList{});
-  EXPECT_FALSE(f->IsValid());
-}
-
-TEST_F(FunctionTest, IsValid_NullParam) {
-  VariableList params;
-  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
-  params.push_back(nullptr);
-
-  auto* f = Func("func", params, ty.void_(), StatementList{},
-                 FunctionDecorationList{});
-  EXPECT_FALSE(f->IsValid());
-}
-
-TEST_F(FunctionTest, IsValid_InvalidParam) {
-  VariableList params;
-  params.push_back(Var("var", nullptr, StorageClass::kNone));
-
-  auto* f = Func("func", params, ty.void_(), StatementList{},
-                 FunctionDecorationList{});
-  EXPECT_FALSE(f->IsValid());
-}
-
-TEST_F(FunctionTest, IsValid_NullBodyStatement) {
-  VariableList params;
-  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
-
-  auto* f = Func("func", params, ty.void_(),
-                 StatementList{
-                     create<DiscardStatement>(),
-                     nullptr,
-                 },
-                 FunctionDecorationList{});
-
-  EXPECT_FALSE(f->IsValid());
-}
-
-TEST_F(FunctionTest, IsValid_InvalidBodyStatement) {
-  VariableList params;
-  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
-
-  auto* f = Func("func", params, ty.void_(),
-                 StatementList{
-                     create<DiscardStatement>(),
-                     nullptr,
-                 },
-                 FunctionDecorationList{});
-  EXPECT_FALSE(f->IsValid());
+        b.Func("f", params, b.ty.void_(), StatementList{},
+               FunctionDecorationList{});
+      },
+      "internal compiler error");
 }
 
 TEST_F(FunctionTest, ToStr) {

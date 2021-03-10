@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -33,14 +34,13 @@ TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
-TEST_F(ScalarConstructorExpressionTest, IsValid) {
-  auto* c = Expr(true);
-  EXPECT_TRUE(c->IsValid());
-}
-
-TEST_F(ScalarConstructorExpressionTest, IsValid_MissingLiteral) {
-  auto* c = create<ScalarConstructorExpression>(nullptr);
-  EXPECT_FALSE(c->IsValid());
+TEST_F(ScalarConstructorExpressionTest, Assert_NullLiteral) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<ScalarConstructorExpression>(nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(ScalarConstructorExpressionTest, ToStr) {

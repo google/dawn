@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -43,30 +44,22 @@ TEST_F(MemberAccessorExpressionTest, IsMemberAccessor) {
   EXPECT_TRUE(stmt->Is<MemberAccessorExpression>());
 }
 
-TEST_F(MemberAccessorExpressionTest, IsValid) {
-  auto* stmt =
-      create<MemberAccessorExpression>(Expr("structure"), Expr("member"));
-  EXPECT_TRUE(stmt->IsValid());
+TEST_F(MemberAccessorExpressionTest, Assert_NullStruct) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<MemberAccessorExpression>(nullptr, b.Expr("member"));
+      },
+      "internal compiler error");
 }
 
-TEST_F(MemberAccessorExpressionTest, IsValid_NullStruct) {
-  auto* stmt = create<MemberAccessorExpression>(nullptr, Expr("member"));
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(MemberAccessorExpressionTest, IsValid_InvalidStruct) {
-  auto* stmt = create<MemberAccessorExpression>(Expr(""), Expr("member"));
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(MemberAccessorExpressionTest, IsValid_NullMember) {
-  auto* stmt = create<MemberAccessorExpression>(Expr("structure"), nullptr);
-  EXPECT_FALSE(stmt->IsValid());
-}
-
-TEST_F(MemberAccessorExpressionTest, IsValid_InvalidMember) {
-  auto* stmt = create<MemberAccessorExpression>(Expr("structure"), Expr(""));
-  EXPECT_FALSE(stmt->IsValid());
+TEST_F(MemberAccessorExpressionTest, Assert_NullMember) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<MemberAccessorExpression>(b.Expr("struct"), nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(MemberAccessorExpressionTest, ToStr) {

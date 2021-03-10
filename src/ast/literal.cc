@@ -24,10 +24,6 @@ Literal::Literal(const Source& source, type::Type* type)
 
 Literal::~Literal() = default;
 
-bool Literal::IsValid() const {
-  return true;
-}
-
 void Literal::to_str(const semantic::Info& sem,
                      std::ostream& out,
                      size_t indent) const {

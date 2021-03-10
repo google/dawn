@@ -14,6 +14,7 @@
 
 #include "src/ast/call_statement.h"
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -30,25 +31,17 @@ TEST_F(CallStatementTest, Creation) {
 }
 
 TEST_F(CallStatementTest, IsCall) {
-  auto* c = create<CallStatement>(nullptr);
+  auto* c = create<CallStatement>(Call("f"));
   EXPECT_TRUE(c->Is<CallStatement>());
 }
 
-TEST_F(CallStatementTest, IsValid) {
-  auto* c = create<CallStatement>(
-      create<CallExpression>(Expr("func"), ExpressionList{}));
-  EXPECT_TRUE(c->IsValid());
-}
-
-TEST_F(CallStatementTest, IsValid_MissingExpr) {
-  auto* c = create<CallStatement>(nullptr);
-  EXPECT_FALSE(c->IsValid());
-}
-
-TEST_F(CallStatementTest, IsValid_InvalidExpr) {
-  auto* c = create<CallStatement>(
-      create<CallExpression>(nullptr, ast::ExpressionList{}));
-  EXPECT_FALSE(c->IsValid());
+TEST_F(CallStatementTest, Assert_NullCall) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<CallStatement>(nullptr);
+      },
+      "internal compiler error");
 }
 
 TEST_F(CallStatementTest, ToStr) {

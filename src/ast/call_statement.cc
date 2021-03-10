@@ -22,7 +22,9 @@ namespace tint {
 namespace ast {
 
 CallStatement::CallStatement(const Source& source, CallExpression* call)
-    : Base(source), call_(call) {}
+    : Base(source), call_(call) {
+  TINT_ASSERT(call_);
+}
 
 CallStatement::CallStatement(CallStatement&&) = default;
 
@@ -33,10 +35,6 @@ CallStatement* CallStatement::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto* call = ctx->Clone(call_);
   return ctx->dst->create<CallStatement>(src, call);
-}
-
-bool CallStatement::IsValid() const {
-  return call_ != nullptr && call_->IsValid();
 }
 
 void CallStatement::to_str(const semantic::Info& sem,
