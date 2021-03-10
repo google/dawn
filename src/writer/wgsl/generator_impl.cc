@@ -307,6 +307,17 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     }
     first = false;
 
+    for (auto* deco : v->decorations()) {
+      out_ << "[[";
+      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+        out_ << "builtin(" << builtin->value() << ")";
+      }
+      if (auto* location = deco->As<ast::LocationDecoration>()) {
+        out_ << "location(" << location->value() << ")";
+      }
+      out_ << "]] ";
+    }
+
     out_ << program_->Symbols().NameFor(v->symbol()) << " : ";
 
     if (!EmitType(v->type())) {
