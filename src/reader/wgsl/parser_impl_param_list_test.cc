@@ -95,6 +95,47 @@ TEST_F(ParserImplTest, ParamList_HangingComma) {
   EXPECT_EQ(p->error(), "1:9: expected identifier for parameter");
 }
 
+TEST_F(ParserImplTest, ParamList_Decorations) {
+  auto p = parser(
+      "[[builtin(frag_coord)]] coord : vec4<f32>, "
+      "[[location(1)]] loc1 : f32");
+
+  auto* f32 = p->builder().create<type::F32>();
+  auto* vec4 = p->builder().create<type::Vector>(f32, 4);
+
+  auto e = p->expect_param_list();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(e.errored);
+  ASSERT_EQ(e.value.size(), 2u);
+
+  EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("coord"));
+  EXPECT_EQ(e.value[0]->type(), vec4);
+  EXPECT_TRUE(e.value[0]->is_const());
+  auto decos0 = e.value[0]->decorations();
+  ASSERT_EQ(decos0.size(), 1u);
+  EXPECT_TRUE(decos0[0]->Is<ast::BuiltinDecoration>());
+  EXPECT_EQ(decos0[0]->As<ast::BuiltinDecoration>()->value(),
+            ast::Builtin::kFragCoord);
+
+  ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
+  ASSERT_EQ(e.value[0]->source().range.begin.column, 25u);
+  ASSERT_EQ(e.value[0]->source().range.end.line, 1u);
+  ASSERT_EQ(e.value[0]->source().range.end.column, 30u);
+
+  EXPECT_EQ(e.value[1]->symbol(), p->builder().Symbols().Get("loc1"));
+  EXPECT_EQ(e.value[1]->type(), f32);
+  EXPECT_TRUE(e.value[1]->is_const());
+  auto decos1 = e.value[1]->decorations();
+  ASSERT_EQ(decos1.size(), 1u);
+  EXPECT_TRUE(decos1[0]->Is<ast::LocationDecoration>());
+  EXPECT_EQ(decos1[0]->As<ast::LocationDecoration>()->value(), 1u);
+
+  ASSERT_EQ(e.value[1]->source().range.begin.line, 1u);
+  ASSERT_EQ(e.value[1]->source().range.begin.column, 60u);
+  ASSERT_EQ(e.value[1]->source().range.end.line, 1u);
+  ASSERT_EQ(e.value[1]->source().range.end.column, 64u);
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

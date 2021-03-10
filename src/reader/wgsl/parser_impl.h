@@ -419,6 +419,9 @@ class ParserImpl {
   /// Parses a `param_list` grammar element, erroring on parse failure.
   /// @returns the parsed variables
   Expect<ast::VariableList> expect_param_list();
+  /// Parses a `param` grammar element, erroring on parse failure.
+  /// @returns the parsed variable
+  Expect<ast::Variable*> expect_param();
   /// Parses a `pipeline_stage` grammar element, erroring if the next token does
   /// not match a stage name.
   /// @returns the pipeline stage.

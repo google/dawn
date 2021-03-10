@@ -1263,40 +1263,54 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
 
 // param_list
 //   :
-//   | (variable_ident_decl COMMA)* variable_ident_decl
+//   | (param COMMA)* param
 Expect<ast::VariableList> ParserImpl::expect_param_list() {
-  if (!peek().IsIdentifier())  // Empty list
+  // Check for an empty list.
+  auto t = peek();
+  if (!t.IsIdentifier() && !t.IsAttrLeft()) {
     return ast::VariableList{};
+  }
+
+  ast::VariableList ret;
+  while (synchronized_) {
+    auto param = expect_param();
+    if (param.errored)
+      return Failure::kErrored;
+    ret.push_back(param.value);
+
+    if (!match(Token::Type::kComma))
+      break;
+  }
+
+  return ret;
+}
+
+// param
+//   : decoration_list* variable_ident_decl
+Expect<ast::Variable*> ParserImpl::expect_param() {
+  auto decos = decoration_list();
+  auto var_decos = cast_decorations<ast::VariableDecoration>(decos.value);
+  if (var_decos.errored)
+    return Failure::kErrored;
 
   auto decl = expect_variable_ident_decl("parameter");
   if (decl.errored)
     return Failure::kErrored;
 
-  ast::VariableList ret;
-  for (;;) {
-    auto* var = create<ast::Variable>(
-        decl->source,                             // source
-        builder_.Symbols().Register(decl->name),  // symbol
-        ast::StorageClass::kNone,                 // storage_class
-        decl->type,                               // type
-        true,                                     // is_const
-        nullptr,                                  // constructor
-        ast::VariableDecorationList{});           // decorations
-    // Formal parameters are treated like a const declaration where the
-    // initializer value is provided by the call's argument.  The key point is
-    // that it's not updatable after intially set.  This is unlike C or GLSL
-    // which treat formal parameters like local variables that can be updated.
-    ret.push_back(var);
+  auto* var =
+      create<ast::Variable>(decl->source,                             // source
+                            builder_.Symbols().Register(decl->name),  // symbol
+                            ast::StorageClass::kNone,     // storage_class
+                            decl->type,                   // type
+                            true,                         // is_const
+                            nullptr,                      // constructor
+                            std::move(var_decos.value));  // decorations
+  // Formal parameters are treated like a const declaration where the
+  // initializer value is provided by the call's argument.  The key point is
+  // that it's not updatable after initially set.  This is unlike C or GLSL
+  // which treat formal parameters like local variables that can be updated.
 
-    if (!match(Token::Type::kComma))
-      break;
-
-    decl = expect_variable_ident_decl("parameter");
-    if (decl.errored)
-      return Failure::kErrored;
-  }
-
-  return ret;
+  return var;
 }
 
 // pipeline_stage
