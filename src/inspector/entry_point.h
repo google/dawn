@@ -24,8 +24,16 @@
 namespace tint {
 namespace inspector {
 
+/// Base component type of a stage variable.
+enum class ComponentType {
+  kUnknown = -1,
+  kFloat,
+  kUInt,
+  kSInt,
+};
+
 /// Reflection data about an entry point input or output.
-typedef struct {
+struct StageVariable {
   /// Name of the variable in the shader.
   std::string name;
   /// Is Location Decoration present
@@ -33,10 +41,12 @@ typedef struct {
   /// Value of Location Decoration, only valid if |has_location_decoration| is
   /// true.
   uint32_t location_decoration;
-} StageVariable;
+  /// Scalar type that the variable is composed of.
+  ComponentType component_type;
+};
 
 /// Reflection data for an entry point in the shader.
-typedef struct EntryPoint {
+struct EntryPoint {
   /// Constructors
   EntryPoint();
   /// Copy Constructor
@@ -67,7 +77,7 @@ typedef struct EntryPoint {
     return std::tuple<uint32_t, uint32_t, uint32_t>(
         workgroup_size_x, workgroup_size_y, workgroup_size_z);
   }
-} EntryPoint;
+};
 
 }  // namespace inspector
 }  // namespace tint

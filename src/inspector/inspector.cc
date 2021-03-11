@@ -208,6 +208,17 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
       StageVariable stage_variable;
       stage_variable.name = name;
+
+      stage_variable.component_type = ComponentType::kUnknown;
+      auto* type = var->Declaration()->type()->UnwrapAll();
+      if (type->is_float_scalar_or_vector() || type->is_float_matrix()) {
+        stage_variable.component_type = ComponentType::kFloat;
+      } else if (type->is_unsigned_scalar_or_vector()) {
+        stage_variable.component_type = ComponentType::kUInt;
+      } else if (type->is_signed_scalar_or_vector()) {
+        stage_variable.component_type = ComponentType::kSInt;
+      }
+
       auto* location_decoration = decl->GetLocationDecoration();
       if (location_decoration) {
         stage_variable.has_location_decoration = true;
