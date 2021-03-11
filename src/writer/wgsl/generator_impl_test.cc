@@ -53,10 +53,10 @@ TEST_P(WgslBuiltinConversionTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  gen.EmitVariableDecorations(program->Sem().Get(var));
+  gen.EmitDecorations(var->decorations());
 
   EXPECT_EQ(gen.result(),
-            "[[builtin(" + std::string(params.attribute_name) + ")]] ");
+            "[[builtin(" + std::string(params.attribute_name) + ")]]");
 }
 INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,

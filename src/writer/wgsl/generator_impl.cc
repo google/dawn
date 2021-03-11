@@ -500,14 +500,14 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
 
   increment_indent();
   for (auto* mem : impl->members()) {
-    for (auto* deco : mem->decorations()) {
+    if (!mem->decorations().empty()) {
       make_indent();
-
-      // TODO(dsinclair): Split this out when we have more then one
-      auto* offset = deco->As<ast::StructMemberOffsetDecoration>();
-      assert(offset != nullptr);
-      out_ << "[[offset(" << offset->offset() << ")]]" << std::endl;
+      if (!EmitDecorations(mem->decorations())) {
+        return false;
+      }
+      out_ << std::endl;
     }
+
     make_indent();
     out_ << program_->Symbols().NameFor(mem->symbol()) << " : ";
     if (!EmitType(mem->type())) {
@@ -527,8 +527,11 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
 
   make_indent();
 
-  if (!var->decorations().empty() && !EmitVariableDecorations(sem)) {
-    return false;
+  if (!var->decorations().empty()) {
+    if (!EmitDecorations(var->decorations())) {
+      return false;
+    }
+    out_ << " ";
   }
 
   if (var->is_const()) {
@@ -558,12 +561,10 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   return true;
 }
 
-bool GeneratorImpl::EmitVariableDecorations(const semantic::Variable* var) {
-  auto* decl = var->Declaration();
-
+bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
   out_ << "[[";
   bool first = true;
-  for (auto* deco : decl->decorations()) {
+  for (auto* deco : decos) {
     if (!first) {
       out_ << ", ";
     }
@@ -579,12 +580,14 @@ bool GeneratorImpl::EmitVariableDecorations(const semantic::Variable* var) {
       out_ << "builtin(" << builtin->value() << ")";
     } else if (auto* constant = deco->As<ast::ConstantIdDecoration>()) {
       out_ << "constant_id(" << constant->value() << ")";
+    } else if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
+      out_ << "offset(" << offset->offset() << ")";
     } else {
       diagnostics_.add_error("unknown variable decoration");
       return false;
     }
   }
-  out_ << "]] ";
+  out_ << "]]";
 
   return true;
 }

@@ -210,6 +210,31 @@ struct S {
 )");
 }
 
+TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithEntryPointDecorations) {
+  ast::DecorationList decos;
+  decos.push_back(create<ast::StructBlockDecoration>());
+
+  auto* str = create<ast::Struct>(
+      ast::StructMemberList{
+          Member("a", ty.u32(),
+                 {create<ast::BuiltinDecoration>(ast::Builtin::kVertexIndex)}),
+          Member("b", ty.f32(), {create<ast::LocationDecoration>(2u)})},
+      decos);
+
+  auto* s = ty.struct_("S", str);
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"([[block]]
+struct S {
+  [[builtin(vertex_index)]]
+  a : u32;
+  [[location(2)]]
+  b : f32;
+};
+)");
+}
+
 TEST_F(WgslGeneratorImplTest, EmitType_U32) {
   auto* u32 = ty.u32();
 

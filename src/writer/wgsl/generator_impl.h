@@ -193,10 +193,10 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the variable to generate
   /// @returns true if the variable was emitted
   bool EmitVariable(ast::Variable* var);
-  /// Handles generating variable decorations
-  /// @param var the decorated variable
-  /// @returns true if the variable decoration was emitted
-  bool EmitVariableDecorations(const semantic::Variable* var);
+  /// Handles generating a decoration list
+  /// @param decos the decoration list
+  /// @returns true if the decorations were emitted
+  bool EmitDecorations(const ast::DecorationList& decos);
 
  private:
   Program const* const program_;
