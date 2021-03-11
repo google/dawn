@@ -205,7 +205,7 @@
             {"value": 9, "name": "writeonly storage texture"}
         ]
     },
-    "blend descriptor": {
+    "blend component": {
         "category": "structure",
         "extensible": false,
         "members": [
@@ -213,6 +213,10 @@
             {"name": "src factor", "type": "blend factor", "default": "one"},
             {"name": "dst factor", "type": "blend factor", "default": "zero"}
         ]
+    },
+    "blend descriptor": {
+        "category": "typedef",
+        "type": "blend component"
     },
     "blend factor": {
         "category": "enum",
@@ -247,8 +251,8 @@
         "extensible": true,
         "members": [
             {"name": "format", "type": "texture format"},
-            {"name": "alpha blend", "type": "blend descriptor"},
-            {"name": "color blend", "type": "blend descriptor"},
+            {"name": "alpha blend", "type": "blend component"},
+            {"name": "color blend", "type": "blend component"},
             {"name": "write mask", "type": "color write mask", "default": "all"}
         ]
     },
@@ -719,6 +723,13 @@
                 ]
             },
             {
+                "name": "create render pipeline 2",
+                "returns": "render pipeline",
+                "args": [
+                    {"name": "descriptor", "type": "render pipeline descriptor 2", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "create sampler",
                 "returns": "sampler",
                 "args": [
@@ -824,8 +835,8 @@
             {"name": "format", "type": "texture format"},
             {"name": "depth write enabled", "type": "bool", "default": "false"},
             {"name": "depth compare", "type": "compare function", "default": "always"},
-            {"name": "stencil front", "type": "stencil state face descriptor"},
-            {"name": "stencil back", "type": "stencil state face descriptor"},
+            {"name": "stencil front", "type": "stencil face state"},
+            {"name": "stencil back", "type": "stencil face state"},
             {"name": "stencil read mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
             {"name": "stencil write mask", "type": "uint32_t", "default": "0xFFFFFFFF"}
         ]
@@ -1539,6 +1550,84 @@
             }
         ]
     },
+
+    "vertex state": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "module", "type": "shader module"},
+            {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "buffer count", "type": "uint32_t"},
+            {"name": "buffers", "type": "vertex buffer layout", "annotation": "const*", "length": "buffer count"}
+        ]
+    },
+
+    "primitive state": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "topology", "type": "primitive topology", "default": "triangle list"},
+            {"name": "strip index format", "type": "index format", "default": "undefined"},
+            {"name": "front face", "type": "front face", "default": "CCW"},
+            {"name": "cull mode", "type": "cull mode", "default": "none"}
+        ]
+    },
+
+    "depth stencil state": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "format", "type": "texture format"},
+            {"name": "depth write enabled", "type": "bool", "default": "false"},
+            {"name": "depth compare", "type": "compare function", "default": "always"},
+            {"name": "stencil front", "type": "stencil face state"},
+            {"name": "stencil back", "type": "stencil face state"},
+            {"name": "stencil read mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
+            {"name": "stencil write mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
+            {"name": "depth bias", "type": "int32_t", "default": "0"},
+            {"name": "depth bias slope scale", "type": "float", "default": "0.0f"},
+            {"name": "depth bias clamp", "type": "float", "default": "0.0f"}
+        ]
+    },
+
+    "multisample state": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "count", "type": "uint32_t", "default": "1"},
+            {"name": "mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
+            {"name": "alpha to coverage enabled", "type": "bool", "default": "false"}
+        ]
+    },
+
+    "fragment state": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "module", "type": "shader module"},
+            {"name": "entry point", "type": "char", "annotation": "const*", "length": "strlen"},
+            {"name": "target count", "type": "uint32_t"},
+            {"name": "targets", "type": "color target state", "annotation": "const*", "length": "target count"}
+        ]
+    },
+    "color target state": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "format", "type": "texture format"},
+            {"name": "blend", "type": "blend state", "annotation": "const*", "optional": true},
+            {"name": "write mask", "type": "color write mask", "default": "all"}
+        ]
+    },
+    "blend state": {
+        "category": "structure",
+        "extensible": false,
+        "members": [
+            {"name": "color", "type": "blend component"},
+            {"name": "alpha", "type": "blend component"}
+        ]
+    },
+
     "render pipeline descriptor": {
         "category": "structure",
         "extensible": true,
@@ -1558,6 +1647,21 @@
             {"name": "alpha to coverage enabled", "type": "bool", "default": "false"}
         ]
     },
+
+    "render pipeline descriptor 2": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
+            {"name": "layout", "type": "pipeline layout", "optional": true},
+            {"name": "vertex", "type": "vertex state"},
+            {"name": "primitive", "type": "primitive state"},
+            {"name": "depth stencil", "type": "depth stencil state", "annotation": "const*", "optional": true},
+            {"name": "multisample", "type": "multisample state"},
+            {"name": "fragment", "type": "fragment state", "annotation": "const*", "optional": true}
+        ]
+    },
+
     "render pipeline descriptor dummy extension": {
         "category": "structure",
         "chained": true,
@@ -1639,7 +1743,7 @@
             {"value": 7, "name": "decrement wrap"}
         ]
     },
-    "stencil state face descriptor": {
+    "stencil face state": {
         "category": "structure",
         "extensible": false,
         "members": [
@@ -1648,6 +1752,10 @@
             {"name": "depth fail op", "type": "stencil operation", "default": "keep"},
             {"name": "pass op", "type": "stencil operation", "default": "keep"}
         ]
+    },
+    "stencil state face descriptor": {
+        "category": "typedef",
+        "type": "stencil face state"
     },
     "surface": {
         "category": "object"

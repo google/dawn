@@ -155,6 +155,7 @@ namespace dawn_native {
         RenderBundleEncoder* CreateRenderBundleEncoder(
             const RenderBundleEncoderDescriptor* descriptor);
         RenderPipelineBase* CreateRenderPipeline(const RenderPipelineDescriptor* descriptor);
+        RenderPipelineBase* CreateRenderPipeline2(const RenderPipelineDescriptor2* descriptor);
         SamplerBase* CreateSampler(const SamplerDescriptor* descriptor);
         ShaderModuleBase* CreateShaderModule(const ShaderModuleDescriptor* descriptor);
         SwapChainBase* CreateSwapChain(Surface* surface, const SwapChainDescriptor* descriptor);
@@ -307,6 +308,8 @@ namespace dawn_native {
         MaybeError CreateRenderBundleEncoderInternal(
             RenderBundleEncoder** result,
             const RenderBundleEncoderDescriptor* descriptor);
+        MaybeError CreateRenderPipelineInternal(RenderPipelineBase** result,
+                                                const RenderPipelineDescriptor2* descriptor);
         MaybeError CreateRenderPipelineInternal(RenderPipelineBase** result,
                                                 const RenderPipelineDescriptor* descriptor);
         MaybeError CreateSamplerInternal(SamplerBase** result, const SamplerDescriptor* descriptor);

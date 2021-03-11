@@ -23,6 +23,7 @@
 
 namespace utils {
 
+    // For creating deprecated render pipeline descriptors
     class ComboVertexStateDescriptor : public wgpu::VertexStateDescriptor {
       public:
         ComboVertexStateDescriptor();
@@ -51,6 +52,25 @@ namespace utils {
         wgpu::RasterizationStateDescriptor cRasterizationState;
         std::array<wgpu::ColorStateDescriptor, kMaxColorAttachments> cColorStates;
         wgpu::DepthStencilStateDescriptor cDepthStencilState;
+    };
+
+    // For creating the new style of render pipeline descriptors
+    class ComboRenderPipelineDescriptor2 : public wgpu::RenderPipelineDescriptor2 {
+      public:
+        ComboRenderPipelineDescriptor2();
+
+        ComboRenderPipelineDescriptor2(const ComboRenderPipelineDescriptor2&) = delete;
+        ComboRenderPipelineDescriptor2& operator=(const ComboRenderPipelineDescriptor2&) = delete;
+        ComboRenderPipelineDescriptor2(ComboRenderPipelineDescriptor2&&) = delete;
+        ComboRenderPipelineDescriptor2& operator=(ComboRenderPipelineDescriptor2&&) = delete;
+
+        std::array<wgpu::VertexBufferLayout, kMaxVertexBuffers> cBuffers;
+        std::array<wgpu::VertexAttribute, kMaxVertexAttributes> cAttributes;
+        std::array<wgpu::ColorTargetState, kMaxColorAttachments> cTargets;
+        std::array<wgpu::BlendState, kMaxColorAttachments> cBlends;
+
+        wgpu::DepthStencilState cDepthStencil;
+        wgpu::FragmentState cFragment;
     };
 
 }  // namespace utils
