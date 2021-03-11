@@ -80,7 +80,6 @@ endif()
 
 if (DAWN_ENABLE_WGSL)
     if (NOT TARGET libtint)
-        set(TINT_BUILD_TESTS OFF CACHE BOOL "" FORCE)
         message(STATUS "Dawn: using Tint at ${DAWN_TINT_DIR}")
         add_subdirectory(${DAWN_TINT_DIR})
     endif()
