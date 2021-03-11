@@ -326,6 +326,68 @@ INSTANTIATE_TEST_SUITE_P(MslReservedKeywordTest,
                              "vec",
                              "vertex"));
 
+using MslEntryPointIOTest = TransformTest;
+
+TEST_F(MslEntryPointIOTest, HandleEntryPointIOTypes_Parameters) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
+             [[location(1)]] loc1 : f32,
+             [[location(2)]] loc2 : vec4<u32>) -> void {
+  var col : f32 = (coord.x * loc1);
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_4 {
+  [[location(1)]]
+  tint_symbol_2 : f32;
+  [[location(2)]]
+  tint_symbol_3 : vec4<u32>;
+};
+
+[[stage(fragment)]]
+fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>, tint_symbol_5 : tint_symbol_4) -> void {
+  const tint_symbol_6 : f32 = tint_symbol_5.tint_symbol_2;
+  const tint_symbol_7 : vec4<u32> = tint_symbol_5.tint_symbol_3;
+  var col : f32 = (coord.x * tint_symbol_6);
+}
+)";
+
+  auto got = Transform<Msl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(MslEntryPointIOTest, HandleEntryPointIOTypes_Parameters_EmptyBody) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
+             [[location(1)]] loc1 : f32,
+             [[location(2)]] loc2 : vec4<u32>) -> void {
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_4 {
+  [[location(1)]]
+  tint_symbol_2 : f32;
+  [[location(2)]]
+  tint_symbol_3 : vec4<u32>;
+};
+
+[[stage(fragment)]]
+fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>, tint_symbol_5 : tint_symbol_4) -> void {
+  const tint_symbol_6 : f32 = tint_symbol_5.tint_symbol_2;
+  const tint_symbol_7 : vec4<u32> = tint_symbol_5.tint_symbol_3;
+}
+)";
+
+  auto got = Transform<Msl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

@@ -1036,6 +1036,8 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   return true;
 }
 
+// TODO(jrprice): Remove this when we remove support for entry point params as
+// module-scope globals.
 bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
   auto* func_sem = program_->Sem().Get(func);
 
@@ -1454,6 +1456,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   out_ << " " << program_->Symbols().NameFor(func->symbol()) << "(";
 
   bool first = true;
+  // TODO(jrprice): Remove this when we remove support for builtins as globals.
   auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
   if (in_data != ep_sym_to_in_data_.end()) {
     out_ << in_data->second.struct_name << " " << in_data->second.var_name
@@ -1461,6 +1464,46 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     first = false;
   }
 
+  // Emit entry point parameters.
+  for (auto* var : func->params()) {
+    if (!first) {
+      out_ << ", ";
+    }
+    first = false;
+
+    if (!EmitType(var->type(), "")) {
+      return false;
+    }
+
+    out_ << " " << program_->Symbols().NameFor(var->symbol());
+
+    if (var->type()->Is<type::Struct>()) {
+      out_ << " [[stage_in]]";
+    } else {
+      auto& decos = var->decorations();
+      bool builtin_found = false;
+      for (auto* deco : decos) {
+        auto* builtin = deco->As<ast::BuiltinDecoration>();
+        if (!builtin) {
+          continue;
+        }
+
+        builtin_found = true;
+
+        auto attr = builtin_to_attribute(builtin->value());
+        if (attr.empty()) {
+          diagnostics_.add_error("unknown builtin");
+          return false;
+        }
+        out_ << " [[" << attr << "]]";
+      }
+      if (!builtin_found) {
+        TINT_ICE(diagnostics_) << "Unsupported entry point parameter";
+      }
+    }
+  }
+
+  // TODO(jrprice): Remove this when we remove support for builtins as globals.
   for (auto data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
     if (var->StorageClass() != ast::StorageClass::kInput) {
@@ -2036,6 +2079,8 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
   uint32_t current_offset = 0;
   uint32_t pad_count = 0;
   for (auto* mem : str->impl()->members()) {
+    std::string attributes;
+
     make_indent();
     for (auto* deco : mem->decorations()) {
       if (auto* o = deco->As<ast::StructMemberOffsetDecoration>()) {
@@ -2047,6 +2092,8 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
           make_indent();
         }
         current_offset = offset;
+      } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
+        attributes = " [[user(locn" + std::to_string(loc->value()) + ")]]";
       } else {
         diagnostics_.add_error("unsupported member decoration: " +
                                program_->str(deco));
@@ -2069,6 +2116,9 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
     if (!mem->type()->Is<type::Array>()) {
       out_ << " " << program_->Symbols().NameFor(mem->symbol());
     }
+
+    out_ << attributes;
+
     out_ << ";" << std::endl;
   }
   decrement_indent();
