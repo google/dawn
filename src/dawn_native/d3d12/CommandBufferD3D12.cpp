@@ -118,6 +118,47 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
+        void CopyTextureToBufferWithCopySplit(ID3D12GraphicsCommandList* commandList,
+                                              const TextureCopy& textureCopy,
+                                              const BufferCopy& bufferCopy,
+                                              Texture* texture,
+                                              Buffer* buffer,
+                                              const Extent3D& copySize) {
+            const TexelBlockInfo& blockInfo =
+                texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
+
+            // See comments around ComputeTextureCopySplits() for more details.
+            const TextureCopySplits copySplits =
+                ComputeTextureCopySplits(textureCopy.origin, copySize, blockInfo, bufferCopy.offset,
+                                         bufferCopy.bytesPerRow, bufferCopy.rowsPerImage);
+
+            const uint64_t bytesPerSlice = bufferCopy.bytesPerRow * bufferCopy.rowsPerImage;
+
+            // copySplits.copies2D[1] is always calculated for the second copy slice with
+            // extra "bytesPerSlice" copy offset compared with the first copy slice. So
+            // here we use an array bufferOffsetsForNextSlice to record the extra offsets
+            // for each copy slice: bufferOffsetsForNextSlice[0] is the extra offset for
+            // the next copy slice that uses copySplits.copies2D[0], and
+            // bufferOffsetsForNextSlice[1] is the extra offset for the next copy slice
+            // that uses copySplits.copies2D[1].
+            std::array<uint64_t, TextureCopySplits::kMaxTextureCopySplits>
+                bufferOffsetsForNextSlice = {{0u, 0u}};
+            for (uint32_t copySlice = 0; copySlice < copySize.depth; ++copySlice) {
+                const uint32_t splitIndex = copySlice % copySplits.copies2D.size();
+
+                const Texture2DCopySplit& copySplitPerLayerBase = copySplits.copies2D[splitIndex];
+                const uint64_t bufferOffsetForNextSlice = bufferOffsetsForNextSlice[splitIndex];
+                const uint32_t copyTextureLayer = copySlice + textureCopy.origin.z;
+
+                RecordCopyTextureToBufferFromTextureCopySplit(
+                    commandList, copySplitPerLayerBase, buffer, bufferOffsetForNextSlice,
+                    bufferCopy.bytesPerRow, texture, textureCopy.mipLevel, copyTextureLayer,
+                    textureCopy.aspect);
+
+                bufferOffsetsForNextSlice[splitIndex] += bytesPerSlice * copySplits.copies2D.size();
+            }
+        }
+
         void RecordWriteTimestampCmd(ID3D12GraphicsCommandList* commandList,
                                      WriteTimestampCmd* cmd) {
             QuerySet* querySet = ToBackend(cmd->querySet.Get());
@@ -147,6 +188,77 @@ namespace dawn_native { namespace d3d12 {
             PipelineLayout* layout = ToBackend(pipeline->GetLayout());
             commandList->SetGraphicsRoot32BitConstants(layout->GetFirstIndexOffsetParameterIndex(),
                                                        count, offsets.data(), 0);
+        }
+
+        bool ShouldCopyUsingTemporaryBuffer(DeviceBase* device,
+                                            const TextureCopy& srcCopy,
+                                            const TextureCopy& dstCopy) {
+            // Currently we only need the workaround for an Intel D3D12 driver issue.
+            if (device->IsToggleEnabled(
+                    Toggle::
+                        UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel)) {
+                bool copyToLesserLevel = srcCopy.mipLevel > dstCopy.mipLevel;
+                ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
+
+                // GetAspectInfo(aspect) requires HasOneBit(aspect) == true, plus the texel block
+                // sizes of depth stencil formats are always no less than 4 bytes.
+                bool isSmallColorFormat =
+                    HasOneBit(srcCopy.aspect) &&
+                    srcCopy.texture->GetFormat().GetAspectInfo(srcCopy.aspect).block.byteSize < 4u;
+                if (copyToLesserLevel && isSmallColorFormat) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        void RecordCopyTextureWithTemporaryBuffer(CommandRecordingContext* recordingContext,
+                                                  const TextureCopy& srcCopy,
+                                                  const TextureCopy& dstCopy,
+                                                  const Extent3D& copySize) {
+            ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
+            ASSERT(srcCopy.aspect == dstCopy.aspect);
+            dawn_native::Format format = srcCopy.texture->GetFormat();
+            const TexelBlockInfo& blockInfo = format.GetAspectInfo(srcCopy.aspect).block;
+            ASSERT(copySize.width % blockInfo.width == 0);
+            uint32_t widthInBlocks = copySize.width / blockInfo.width;
+            ASSERT(copySize.height % blockInfo.height == 0);
+            uint32_t heightInBlocks = copySize.height / blockInfo.height;
+
+            // Create tempBuffer
+            uint32_t bytesPerRow =
+                Align(blockInfo.byteSize * widthInBlocks, kTextureBytesPerRowAlignment);
+            uint32_t rowsPerImage = heightInBlocks;
+            uint64_t tempBufferSize = bytesPerRow * (widthInBlocks * heightInBlocks - 1) +
+                                      Align(blockInfo.byteSize * widthInBlocks, 4);
+            BufferDescriptor tempBufferDescriptor;
+            tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+            tempBufferDescriptor.size = tempBufferSize;
+            Device* device = ToBackend(srcCopy.texture->GetDevice());
+            Ref<Buffer> tempBuffer =
+                AcquireRef(ToBackend(device->CreateBuffer(&tempBufferDescriptor)));
+
+            // Copy from source texture into tempBuffer
+            Texture* srcTexture = ToBackend(srcCopy.texture).Get();
+            tempBuffer->TrackUsageAndTransitionNow(recordingContext, wgpu::BufferUsage::CopyDst);
+            BufferCopy bufferCopy;
+            bufferCopy.buffer = tempBuffer;
+            bufferCopy.offset = 0;
+            bufferCopy.bytesPerRow = bytesPerRow;
+            bufferCopy.rowsPerImage = rowsPerImage;
+            CopyTextureToBufferWithCopySplit(recordingContext->GetCommandList(), srcCopy,
+                                             bufferCopy, srcTexture, tempBuffer.Get(), copySize);
+
+            // Copy from tempBuffer into destination texture
+            tempBuffer->TrackUsageAndTransitionNow(recordingContext, wgpu::BufferUsage::CopySrc);
+            Texture* dstTexture = ToBackend(dstCopy.texture).Get();
+            CopyBufferToTextureWithCopySplit(recordingContext, dstCopy,
+                                             tempBuffer->GetD3D12Resource(), 0, bytesPerRow,
+                                             rowsPerImage, copySize, dstTexture, dstCopy.aspect);
+
+            // Save tempBuffer into recordingContext
+            recordingContext->AddToTempBuffers(std::move(tempBuffer));
         }
     }  // anonymous namespace
 
@@ -733,43 +845,8 @@ namespace dawn_native { namespace d3d12 {
                                                         subresources);
                     buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
-                    const TexelBlockInfo& blockInfo =
-                        texture->GetFormat().GetAspectInfo(copy->source.aspect).block;
-
-                    // See comments around ComputeTextureCopySplits() for more details.
-                    const TextureCopySplits copySplits = ComputeTextureCopySplits(
-                        copy->source.origin, copy->copySize, blockInfo, copy->destination.offset,
-                        copy->destination.bytesPerRow, copy->destination.rowsPerImage);
-
-                    const uint64_t bytesPerSlice =
-                        copy->destination.bytesPerRow * copy->destination.rowsPerImage;
-
-                    // copySplits.copies2D[1] is always calculated for the second copy slice with
-                    // extra "bytesPerSlice" copy offset compared with the first copy slice. So
-                    // here we use an array bufferOffsetsForNextSlice to record the extra offsets
-                    // for each copy slice: bufferOffsetsForNextSlice[0] is the extra offset for
-                    // the next copy slice that uses copySplits.copies2D[0], and
-                    // bufferOffsetsForNextSlice[1] is the extra offset for the next copy slice
-                    // that uses copySplits.copies2D[1].
-                    std::array<uint64_t, TextureCopySplits::kMaxTextureCopySplits>
-                        bufferOffsetsForNextSlice = {{0u, 0u}};
-                    for (uint32_t copySlice = 0; copySlice < copy->copySize.depth; ++copySlice) {
-                        const uint32_t splitIndex = copySlice % copySplits.copies2D.size();
-
-                        const Texture2DCopySplit& copySplitPerLayerBase =
-                            copySplits.copies2D[splitIndex];
-                        const uint64_t bufferOffsetForNextSlice =
-                            bufferOffsetsForNextSlice[splitIndex];
-                        const uint32_t copyTextureLayer = copySlice + copy->source.origin.z;
-
-                        RecordCopyTextureToBufferFromTextureCopySplit(
-                            commandList, copySplitPerLayerBase, buffer, bufferOffsetForNextSlice,
-                            copy->destination.bytesPerRow, texture, copy->source.mipLevel,
-                            copyTextureLayer, subresources.aspects);
-
-                        bufferOffsetsForNextSlice[splitIndex] +=
-                            bytesPerSlice * copySplits.copies2D.size();
-                    }
+                    CopyTextureToBufferWithCopySplit(commandList, copy->source, copy->destination,
+                                                     texture, buffer, copy->copySize);
 
                     break;
                 }
@@ -809,6 +886,13 @@ namespace dawn_native { namespace d3d12 {
                                                             wgpu::TextureUsage::CopyDst, dstRange);
 
                     ASSERT(srcRange.aspects == dstRange.aspects);
+                    if (ShouldCopyUsingTemporaryBuffer(GetDevice(), copy->source,
+                                                       copy->destination)) {
+                        RecordCopyTextureWithTemporaryBuffer(commandContext, copy->source,
+                                                             copy->destination, copy->copySize);
+                        break;
+                    }
+
                     if (CanUseCopyResource(copy->source, copy->destination, copy->copySize)) {
                         commandList->CopyResource(destination->GetD3D12Resource(),
                                                   source->GetD3D12Resource());

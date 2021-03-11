@@ -172,7 +172,17 @@ namespace dawn_native {
               "If needed, use a compute shader to transform timestamp queries from ticks to "
               "nanoseconds. This is temporarily needed to avoid requiring Tint to use timestamp "
               "queries",
-              "https://crbug.com/dawn/686"}}
+              "https://crbug.com/dawn/686"}},
+            {Toggle::UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
+             {"use_temp_buffer_in_small_format_texture_to_texture_copy_from_greater_to_less_mip_"
+              "level",
+              "Split texture-to-texture copy into two copies: copy from source texture into a "
+              "temporary buffer, and copy from the temporary buffer into the destination texture "
+              "under specific situations. This workaround is by default enabled on some Intel "
+              "GPUs which have a driver bug in the execution of CopyTextureRegion() when we copy "
+              "with the formats whose texel block sizes are less than 4 bytes from a greater mip "
+              "level to a smaller mip level on D3D12 backends.",
+              "https://crbug.com/1161355"}}
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
 

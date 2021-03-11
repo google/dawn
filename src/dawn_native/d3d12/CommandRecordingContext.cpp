@@ -112,10 +112,15 @@ namespace dawn_native { namespace d3d12 {
         mIsOpen = false;
         mSharedTextures.clear();
         mHeapsPendingUsage.clear();
+        mTempBuffers.clear();
     }
 
     bool CommandRecordingContext::IsOpen() const {
         return mIsOpen;
+    }
+
+    void CommandRecordingContext::AddToTempBuffers(Ref<Buffer> tempBuffer) {
+        mTempBuffers.emplace_back(tempBuffer);
     }
 
 }}  // namespace dawn_native::d3d12

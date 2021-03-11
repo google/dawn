@@ -16,6 +16,7 @@
 
 #include "dawn_native/Error.h"
 #include "dawn_native/IntegerTypes.h"
+#include "dawn_native/d3d12/BufferD3D12.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
 #include <set>
@@ -41,12 +42,16 @@ namespace dawn_native { namespace d3d12 {
 
         void TrackHeapUsage(Heap* heap, ExecutionSerial serial);
 
+        void AddToTempBuffers(Ref<Buffer> tempBuffer);
+
       private:
         ComPtr<ID3D12GraphicsCommandList> mD3d12CommandList;
         ComPtr<ID3D12GraphicsCommandList4> mD3d12CommandList4;
         bool mIsOpen = false;
         std::set<Texture*> mSharedTextures;
         std::vector<Heap*> mHeapsPendingUsage;
+
+        std::vector<Ref<Buffer>> mTempBuffers;
     };
 }}  // namespace dawn_native::d3d12
 

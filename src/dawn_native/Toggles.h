@@ -51,6 +51,7 @@ namespace dawn_native {
         UseTintGenerator,
         FlushBeforeClientWaitSync,
         ConvertTimestampsToNanoseconds,
+        UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
 
         EnumCount,
         InvalidEnum = EnumCount,

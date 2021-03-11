@@ -14,6 +14,7 @@
 
 #include "dawn_native/d3d12/DeviceD3D12.h"
 
+#include "common/GPUInfo.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/d3d12/AdapterD3D12.h"
 #include "dawn_native/d3d12/BackendD3D12.h"
@@ -535,6 +536,20 @@ namespace dawn_native { namespace d3d12 {
 
         // By default use the maximum shader-visible heap size allowed.
         SetToggle(Toggle::UseD3D12SmallShaderVisibleHeapForTesting, false);
+
+        PCIInfo pciInfo = GetAdapter()->GetPCIInfo();
+
+        // Currently this workaround is only needed on Intel Gen9 and Gen9.5 GPUs.
+        // See http://crbug.com/1161355 for more information.
+        // TODO(jiawei.shao@intel.com): disable this workaround on the newer drivers when the driver
+        // bug is fixed.
+        if (gpu_info::IsIntel(pciInfo.vendorId) &&
+            (gpu_info::IsSkylake(pciInfo.deviceId) || gpu_info::IsKabylake(pciInfo.deviceId) ||
+             gpu_info::IsCoffeelake(pciInfo.deviceId))) {
+            SetToggle(
+                Toggle::UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
+                true);
+        }
     }
 
     MaybeError Device::WaitForIdleForDestruction() {

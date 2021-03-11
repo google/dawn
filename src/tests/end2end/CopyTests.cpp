@@ -1617,9 +1617,7 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
     // This test can pass on the Windows Intel Vulkan driver version 27.20.100.9168.
     // TODO(jiawei.shao@intel.com): enable this test on Intel Vulkan drivers after the upgrade of
     // try bots.
-    // TODO(jiawei.shao@intel.com): enable this test on Intel D3D12 drivers when the workaround is
-    // implemented.
-    DAWN_SKIP_TEST_IF((IsD3D12() || (IsVulkan() && IsWindows())) && IsIntel());
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsWindows() && IsIntel());
 
     constexpr std::array<wgpu::TextureFormat, 11> kFormats = {
         {wgpu::TextureFormat::RG8Sint, wgpu::TextureFormat::RG8Uint, wgpu::TextureFormat::RG8Snorm,
@@ -1663,12 +1661,15 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(CopyTests_T2T,
-                      D3D12Backend(),
-                      MetalBackend(),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend());
+DAWN_INSTANTIATE_TEST(
+    CopyTests_T2T,
+    D3D12Backend(),
+    D3D12Backend(
+        {"use_temp_buffer_in_small_format_texture_to_texture_copy_from_greater_to_less_mip_level"}),
+    MetalBackend(),
+    OpenGLBackend(),
+    OpenGLESBackend(),
+    VulkanBackend());
 
 static constexpr uint64_t kSmallBufferSize = 4;
 static constexpr uint64_t kLargeBufferSize = 1 << 16;
