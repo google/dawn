@@ -651,6 +651,7 @@ if(${TINT_BUILD_TESTS})
       writer/spirv/builder_call_test.cc
       writer/spirv/builder_constructor_expression_test.cc
       writer/spirv/builder_discard_test.cc
+      writer/spirv/builder_entry_point_test.cc
       writer/spirv/builder_format_conversion_test.cc
       writer/spirv/builder_function_decoration_test.cc
       writer/spirv/builder_function_test.cc

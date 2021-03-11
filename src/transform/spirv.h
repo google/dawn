@@ -39,6 +39,9 @@ class Spirv : public Transform {
   Output Run(const Program* program) override;
 
  private:
+  /// Hoist entry point parameters, return values, and struct members out to
+  /// global variables.
+  void HandleEntryPointIOTypes(CloneContext& ctx) const;
   /// Change type of sample mask builtin variables to single element arrays.
   void HandleSampleMaskBuiltins(CloneContext& ctx) const;
 };
