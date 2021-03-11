@@ -34,7 +34,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.f32()),
                             Member("b", ty.i32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("A", str);
   auto* alias = ty.alias("B", s);
@@ -56,7 +56,7 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.f32()),
                             Member("b", ty.i32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("A", str);
   auto* alias = ty.alias("B", s);

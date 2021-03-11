@@ -18,7 +18,7 @@
 #include <utility>
 #include <vector>
 
-#include "src/ast/struct_member_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
@@ -34,7 +34,7 @@ class StructMember : public Castable<StructMember, Node> {
   StructMember(const Source& source,
                const Symbol& sym,
                type::Type* type,
-               StructMemberDecorationList decorations);
+               DecorationList decorations);
   /// Move constructor
   StructMember(StructMember&&);
 
@@ -46,7 +46,7 @@ class StructMember : public Castable<StructMember, Node> {
   type::Type* type() const { return type_; }
 
   /// @returns the decorations
-  const StructMemberDecorationList& decorations() const { return decorations_; }
+  const DecorationList& decorations() const { return decorations_; }
 
   /// @returns true if the struct member has an offset decoration
   bool has_offset_decoration() const;
@@ -72,7 +72,7 @@ class StructMember : public Castable<StructMember, Node> {
 
   Symbol const symbol_;
   type::Type* const type_;
-  StructMemberDecorationList const decorations_;
+  DecorationList const decorations_;
 };
 
 /// A list of struct members

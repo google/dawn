@@ -20,18 +20,18 @@ namespace reader {
 namespace wgsl {
 namespace {
 
-TEST_F(ParserImplTest, StructDecorationDecl_Parses) {
+TEST_F(ParserImplTest, DecorationDecl_Parses) {
   auto p = parser("[[block]]");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
   ASSERT_EQ(decos.value.size(), 1u);
-  auto* struct_deco = decos.value[0]->As<ast::StructDecoration>();
+  auto* struct_deco = decos.value[0]->As<ast::Decoration>();
   EXPECT_TRUE(struct_deco->Is<ast::StructBlockDecoration>());
 }
 
-TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
+TEST_F(ParserImplTest, DecorationDecl_MissingAttrRight) {
   auto p = parser("[[block");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
@@ -41,7 +41,7 @@ TEST_F(ParserImplTest, StructDecorationDecl_MissingAttrRight) {
   EXPECT_EQ(p->error(), "1:8: expected ']]' for decoration list");
 }
 
-TEST_F(ParserImplTest, StructDecorationDecl_InvalidDecoration) {
+TEST_F(ParserImplTest, DecorationDecl_InvalidDecoration) {
   auto p = parser("[[invalid]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());

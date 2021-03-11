@@ -32,7 +32,7 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
        ast::StatementList{
            create<ast::VariableDeclStatement>(pos),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 

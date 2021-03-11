@@ -119,7 +119,7 @@ struct S {
     a : i32;
     blah blah blah;
     b : i32;
-    [[block]] x : i32;
+    [[]] x : i32;
     c : i32;
 }
 )",
@@ -131,10 +131,9 @@ struct S {
          "    blah blah blah;\n"
          "         ^^^^\n"
          "\n"
-         "test.wgsl:7:7 error: struct decoration type cannot be used for "
-         "struct member\n"
-         "    [[block]] x : i32;\n"
-         "      ^^^^^\n");
+         "test.wgsl:7:7 error: empty decoration list\n"
+         "    [[]] x : i32;\n"
+         "      ^^\n");
 }
 
 // Check that the forward scan in resynchronize() stop at nested sync points.

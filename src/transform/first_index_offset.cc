@@ -101,7 +101,7 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
 
   CloneContext ctx(&out, in);
   ctx.ReplaceAll([&](ast::Variable* var) -> ast::Variable* {
-    for (ast::VariableDecoration* dec : var->decorations()) {
+    for (ast::Decoration* dec : var->decorations()) {
       if (auto* blt_dec = dec->As<ast::BuiltinDecoration>()) {
         ast::Builtin blt_type = blt_dec->value();
         if (blt_type == ast::Builtin::kVertexIndex) {
@@ -157,7 +157,7 @@ ast::Variable* FirstIndexOffset::State::AddUniformBuffer() {
   ast::StructMemberList members;
   uint32_t offset = 0;
   if (has_vertex_index) {
-    ast::StructMemberDecorationList member_dec;
+    ast::DecorationList member_dec;
     member_dec.push_back(
         dst->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(dst->create<ast::StructMember>(
@@ -168,7 +168,7 @@ ast::Variable* FirstIndexOffset::State::AddUniformBuffer() {
   }
 
   if (has_instance_index) {
-    ast::StructMemberDecorationList member_dec;
+    ast::DecorationList member_dec;
     member_dec.push_back(
         dst->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(dst->create<ast::StructMember>(
@@ -178,7 +178,7 @@ ast::Variable* FirstIndexOffset::State::AddUniformBuffer() {
     offset += 4;
   }
 
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(dst->create<ast::StructBlockDecoration>(Source{}));
 
   auto* struct_type = dst->create<type::Struct>(
@@ -192,7 +192,7 @@ ast::Variable* FirstIndexOffset::State::AddUniformBuffer() {
       struct_type,                           // type
       false,                                 // is_const
       nullptr,                               // constructor
-      ast::VariableDecorationList{
+      ast::DecorationList{
           dst->create<ast::BindingDecoration>(Source{}, binding),
           dst->create<ast::GroupDecoration>(Source{}, group),
       });
@@ -227,7 +227,7 @@ ast::VariableDeclStatement* FirstIndexOffset::State::CreateFirstIndexOffset(
       dst->create<type::U32>(),                // type
       true,                                    // is_const
       constructor,                             // constructor
-      ast::VariableDecorationList{});          // decorations
+      ast::DecorationList{});                  // decorations
   return dst->create<ast::VariableDeclStatement>(Source{}, var);
 }
 

@@ -178,7 +178,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
 
   auto* s = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.f32()), Member("b", ty.f32())},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s_type = ty.struct_("my_struct", s);
   auto* v = Global("ident", s_type, ast::StorageClass::kFunction);

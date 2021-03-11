@@ -24,7 +24,7 @@ namespace ast {
 
 Struct::Struct(const Source& source,
                StructMemberList members,
-               StructDecorationList decorations)
+               DecorationList decorations)
     : Base(source),
       members_(std::move(members)),
       decorations_(std::move(decorations)) {

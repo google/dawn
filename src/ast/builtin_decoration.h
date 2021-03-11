@@ -16,14 +16,13 @@
 #define SRC_AST_BUILTIN_DECORATION_H_
 
 #include "src/ast/builtin.h"
-#include "src/ast/variable_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// A builtin decoration
-class BuiltinDecoration
-    : public Castable<BuiltinDecoration, VariableDecoration> {
+class BuiltinDecoration : public Castable<BuiltinDecoration, Decoration> {
  public:
   /// constructor
   /// @param source the source of this decoration

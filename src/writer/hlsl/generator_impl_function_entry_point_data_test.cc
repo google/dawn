@@ -33,12 +33,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(0),
          });
 
   Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(1),
          });
 
@@ -47,7 +47,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -76,12 +76,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(0),
          });
 
   Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(1),
          });
 
@@ -90,7 +90,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -119,12 +119,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(0),
          });
 
   Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(1),
          });
 
@@ -133,7 +133,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -162,12 +162,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(0),
          });
 
   Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(1),
          });
 
@@ -176,7 +176,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
@@ -202,12 +202,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   // -> Error, not allowed
 
   Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(0),
          });
 
   Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(1),
          });
 
@@ -216,7 +216,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 
@@ -238,12 +238,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   // -> Error not allowed
 
   Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(0),
          });
 
   Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::LocationDecoration>(1),
          });
 
@@ -252,7 +252,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 
@@ -280,12 +280,12 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
   // };
 
   Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
          });
 
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
          });
 
@@ -294,7 +294,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
            create<ast::AssignmentStatement>(Expr("depth"),
                                             MemberAccessor("coord", "x")),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 

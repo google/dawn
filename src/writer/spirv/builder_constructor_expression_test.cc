@@ -979,7 +979,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
           Member("a", ty.f32()),
           Member("b", ty.vec3<f32>()),
       },
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_type = ty.struct_("my_struct", s);
 
   auto* t = Construct(s_type, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
@@ -1131,7 +1131,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
       ast::StructMemberList{
           Member("a", ty.f32()),
       },
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_type = ty.struct_("my_struct", s);
   auto* t = Construct(s_type);
   WrapInFunction(t);
@@ -1569,7 +1569,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
           Member("a", ty.f32()),
           Member("b", ty.vec3<f32>()),
       },
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_type = ty.struct_("my_struct", s);
   auto* t = Construct(s_type, 2.f, vec3<f32>(2.f, 2.f, 2.f));
   WrapInFunction(t);
@@ -1587,7 +1587,7 @@ TEST_F(SpvBuilderConstructorTest,
           Member("a", ty.f32()),
           Member("b", ty.vec3<f32>()),
       },
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s_type = ty.struct_("my_struct", s);
   auto* t = Construct(s_type, 2.f, "a", 2.f);

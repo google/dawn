@@ -103,16 +103,14 @@ TEST_F(AccessControlTest, MinBufferBindingSizeU32) {
 
 TEST_F(AccessControlTest, MinBufferBindingSizeArray) {
   U32 u32;
-  Array array(&u32, 4,
-              ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array array(&u32, 4, ast::DecorationList{create<ast::StrideDecoration>(4)});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AccessControlTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
-  Array array(&u32, 0,
-              ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array array(&u32, 0, ast::DecorationList{create<ast::StrideDecoration>(4)});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(4u, at.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
@@ -121,7 +119,7 @@ TEST_F(AccessControlTest, MinBufferBindingSizeStruct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* struct_type = ty.struct_("struct_type", str);
   AccessControl at{ast::AccessControl::kReadOnly, struct_type};
@@ -137,16 +135,14 @@ TEST_F(AccessControlTest, BaseAlignmentU32) {
 
 TEST_F(AccessControlTest, BaseAlignmentArray) {
   U32 u32;
-  Array array(&u32, 4,
-              ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array array(&u32, 4, ast::DecorationList{create<ast::StrideDecoration>(4)});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(AccessControlTest, BaseAlignmentRuntimeArray) {
   U32 u32;
-  Array array(&u32, 0,
-              ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array array(&u32, 0, ast::DecorationList{create<ast::StrideDecoration>(4)});
   AccessControl at{ast::AccessControl::kReadOnly, &array};
   EXPECT_EQ(16u, at.BaseAlignment(MemoryLayout::kUniformBuffer));
 }
@@ -155,7 +151,7 @@ TEST_F(AccessControlTest, BaseAlignmentStruct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* struct_type = ty.struct_("struct_type", str);
 
   AccessControl at{ast::AccessControl::kReadOnly, struct_type};

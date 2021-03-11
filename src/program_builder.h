@@ -408,8 +408,7 @@ class ProgramBuilder {
     /// @param n the array size. 0 represents a runtime-array.
     /// @return the tint AST type for a array of size `n` of type `T`
     type::Array* array(type::Type* subtype, uint32_t n) const {
-      return builder->create<type::Array>(subtype, n,
-                                          ast::ArrayDecorationList{});
+      return builder->create<type::Array>(subtype, n, ast::DecorationList{});
     }
 
     /// @param subtype the array element type
@@ -419,7 +418,7 @@ class ProgramBuilder {
     type::Array* array(type::Type* subtype, uint32_t n, uint32_t stride) const {
       return builder->create<type::Array>(
           subtype, n,
-          ast::ArrayDecorationList{
+          ast::DecorationList{
               builder->create<ast::StrideDecoration>(stride),
           });
     }
@@ -755,7 +754,7 @@ class ProgramBuilder {
                      type::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
-                     ast::VariableDecorationList decorations = {}) {
+                     ast::DecorationList decorations = {}) {
     return create<ast::Variable>(Symbols().Register(name), storage, type, false,
                                  constructor, decorations);
   }
@@ -772,7 +771,7 @@ class ProgramBuilder {
                      type::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
-                     ast::VariableDecorationList decorations = {}) {
+                     ast::DecorationList decorations = {}) {
     return create<ast::Variable>(source, Symbols().Register(name), storage,
                                  type, false, constructor, decorations);
   }
@@ -787,7 +786,7 @@ class ProgramBuilder {
                      type::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
-                     ast::VariableDecorationList decorations = {}) {
+                     ast::DecorationList decorations = {}) {
     return create<ast::Variable>(symbol, storage, type, false, constructor,
                                  decorations);
   }
@@ -804,7 +803,7 @@ class ProgramBuilder {
                      type::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
-                     ast::VariableDecorationList decorations = {}) {
+                     ast::DecorationList decorations = {}) {
     return create<ast::Variable>(source, symbol, storage, type, false,
                                  constructor, decorations);
   }
@@ -817,7 +816,7 @@ class ProgramBuilder {
   ast::Variable* Const(const std::string& name,
                        type::Type* type,
                        ast::Expression* constructor = nullptr,
-                       ast::VariableDecorationList decorations = {}) {
+                       ast::DecorationList decorations = {}) {
     return create<ast::Variable>(Symbols().Register(name),
                                  ast::StorageClass::kNone, type, true,
                                  constructor, decorations);
@@ -833,7 +832,7 @@ class ProgramBuilder {
                        const std::string& name,
                        type::Type* type,
                        ast::Expression* constructor = nullptr,
-                       ast::VariableDecorationList decorations = {}) {
+                       ast::DecorationList decorations = {}) {
     return create<ast::Variable>(source, Symbols().Register(name),
                                  ast::StorageClass::kNone, type, true,
                                  constructor, decorations);
@@ -848,7 +847,7 @@ class ProgramBuilder {
   ast::Variable* Const(Symbol symbol,
                        type::Type* type,
                        ast::Expression* constructor = nullptr,
-                       ast::VariableDecorationList decorations = {}) {
+                       ast::DecorationList decorations = {}) {
     return create<ast::Variable>(symbol, ast::StorageClass::kNone, type, true,
                                  constructor, decorations);
   }
@@ -864,7 +863,7 @@ class ProgramBuilder {
                        Symbol symbol,
                        type::Type* type,
                        ast::Expression* constructor = nullptr,
-                       ast::VariableDecorationList decorations = {}) {
+                       ast::DecorationList decorations = {}) {
     return create<ast::Variable>(source, symbol, ast::StorageClass::kNone, type,
                                  true, constructor, decorations);
   }
@@ -969,7 +968,7 @@ class ProgramBuilder {
                       ast::VariableList params,
                       type::Type* type,
                       ast::StatementList body,
-                      ast::FunctionDecorationList decorations) {
+                      ast::DecorationList decorations) {
     auto* func =
         create<ast::Function>(source, Symbols().Register(name), params, type,
                               create<ast::BlockStatement>(body), decorations);
@@ -988,7 +987,7 @@ class ProgramBuilder {
                       ast::VariableList params,
                       type::Type* type,
                       ast::StatementList body,
-                      ast::FunctionDecorationList decorations) {
+                      ast::DecorationList decorations) {
     auto* func =
         create<ast::Function>(Symbols().Register(name), params, type,
                               create<ast::BlockStatement>(body), decorations);
@@ -1005,7 +1004,7 @@ class ProgramBuilder {
                             const std::string& name,
                             type::Type* type) {
     return create<ast::StructMember>(source, Symbols().Register(name), type,
-                                     ast::StructMemberDecorationList{});
+                                     ast::DecorationList{});
   }
 
   /// Creates a ast::StructMember
@@ -1014,7 +1013,7 @@ class ProgramBuilder {
   /// @returns the struct member pointer
   ast::StructMember* Member(const std::string& name, type::Type* type) {
     return create<ast::StructMember>(source_, Symbols().Register(name), type,
-                                     ast::StructMemberDecorationList{});
+                                     ast::DecorationList{});
   }
 
   /// Creates a ast::StructMember
@@ -1024,7 +1023,7 @@ class ProgramBuilder {
   /// @returns the struct member pointer
   ast::StructMember* Member(const std::string& name,
                             type::Type* type,
-                            ast::StructMemberDecorationList decorations) {
+                            ast::DecorationList decorations) {
     return create<ast::StructMember>(source_, Symbols().Register(name), type,
                                      decorations);
   }
@@ -1039,7 +1038,7 @@ class ProgramBuilder {
                             type::Type* type) {
     return create<ast::StructMember>(
         source_, Symbols().Register(name), type,
-        ast::StructMemberDecorationList{
+        ast::DecorationList{
             create<ast::StructMemberOffsetDecoration>(offset),
         });
   }

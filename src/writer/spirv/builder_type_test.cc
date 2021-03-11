@@ -58,7 +58,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
 }
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
-  type::Array ary(ty.i32(), 0, ast::ArrayDecorationList{});
+  type::Array ary(ty.i32(), 0, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -72,7 +72,7 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
-  type::Array ary(ty.i32(), 0, ast::ArrayDecorationList{});
+  type::Array ary(ty.i32(), 0, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -86,7 +86,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray) {
-  type::Array ary(ty.i32(), 4, ast::ArrayDecorationList{});
+  type::Array ary(ty.i32(), 4, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -103,7 +103,7 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
   type::Array ary(ty.i32(), 4,
-                  ast::ArrayDecorationList{
+                  ast::DecorationList{
                       create<ast::StrideDecoration>(16u),
                   });
 
@@ -124,7 +124,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
-  type::Array ary(ty.i32(), 4, ast::ArrayDecorationList{});
+  type::Array ary(ty.i32(), 4, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -277,8 +277,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
-  auto* s =
-      create<ast::Struct>(ast::StructMemberList{}, ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(ast::StructMemberList{}, ast::DecorationList{});
   auto* s_type = ty.struct_("S", s);
 
   spirv::Builder& b = Build();
@@ -296,7 +295,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
 
 TEST_F(BuilderTest_Type, GenerateStruct) {
   auto* s = create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32())},
-                                ast::StructDecorationList{});
+                                ast::DecorationList{});
   auto* s_type = ty.struct_("my_struct", s);
 
   spirv::Builder& b = Build();
@@ -314,7 +313,7 @@ OpMemberName %1 0 "a"
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
-  ast::StructDecorationList struct_decos;
+  ast::DecorationList struct_decos;
   struct_decos.push_back(create<ast::StructBlockDecoration>());
 
   auto* s = create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32())},
@@ -341,7 +340,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
   auto* s = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.f32(), {MemberOffset(0)}),
                             Member("b", ty.f32(), {MemberOffset(8)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_type = ty.struct_("S", s);
 
   spirv::Builder& b = Build();
@@ -367,7 +366,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
       create<ast::Struct>(ast::StructMemberList{Member("a", ty.mat2x2<f32>()),
                                                 Member("b", ty.mat2x3<f32>()),
                                                 Member("c", ty.mat4x4<f32>())},
-                          ast::StructDecorationList{});
+                          ast::DecorationList{});
   auto* s_type = ty.struct_("S", s);
 
   spirv::Builder& b = Build();
@@ -399,7 +398,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
       ast::StructMemberList{Member("a", ty.mat2x2<f32>(), {MemberOffset(0)}),
                             Member("b", ty.mat2x3<f32>(), {MemberOffset(16)}),
                             Member("c", ty.mat4x4<f32>(), {MemberOffset(48)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_type = ty.struct_("S", s);
 
   spirv::Builder& b = Build();
@@ -439,20 +438,20 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   // The decoration goes on the struct member, even if the matrix is buried
   // in levels of arrays.
   type::Array arr_mat2x2(ty.mat2x2<f32>(), 1,
-                         ast::ArrayDecorationList{});  // Singly nested array
+                         ast::DecorationList{});  // Singly nested array
 
-  type::Array arr_mat2x3(ty.mat2x3<f32>(), 1, ast::ArrayDecorationList{});
-  type::Array arr_arr_mat2x3(
-      ty.mat2x3<f32>(), 1, ast::ArrayDecorationList{});  // Doubly nested array
+  type::Array arr_mat2x3(ty.mat2x3<f32>(), 1, ast::DecorationList{});
+  type::Array arr_arr_mat2x3(ty.mat2x3<f32>(), 1,
+                             ast::DecorationList{});  // Doubly nested array
 
   type::Array rtarr_mat4x4(ty.mat4x4<f32>(), 0,
-                           ast::ArrayDecorationList{});  // Runtime array
+                           ast::DecorationList{});  // Runtime array
 
   auto* s = create<ast::Struct>(
       ast::StructMemberList{Member("a", &arr_mat2x2, {MemberOffset(0)}),
                             Member("b", &arr_arr_mat2x3, {MemberOffset(16)}),
                             Member("c", &rtarr_mat4x4, {MemberOffset(48)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_type = ty.struct_("S", s);
 
   spirv::Builder& b = Build();

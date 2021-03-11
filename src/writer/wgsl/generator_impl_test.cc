@@ -24,7 +24,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   GeneratorImpl& gen = Build();
 
@@ -47,7 +47,7 @@ TEST_P(WgslBuiltinConversionTest, Emit) {
   auto params = GetParam();
 
   auto* var = Global("a", ty.f32(), ast::StorageClass::kNone, nullptr,
-                     ast::VariableDecorationList{
+                     ast::DecorationList{
                          create<ast::BuiltinDecoration>(params.builtin),
                      });
 

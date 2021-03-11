@@ -37,7 +37,7 @@ TEST_F(VariableTest, Creation) {
 TEST_F(VariableTest, CreationWithSource) {
   auto* v = Var(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}},
-      "i", ty.f32(), StorageClass::kPrivate, nullptr, VariableDecorationList{});
+      "i", ty.f32(), StorageClass::kPrivate, nullptr, DecorationList{});
 
   EXPECT_EQ(v->symbol(), Symbol(1));
   EXPECT_EQ(v->declared_storage_class(), StorageClass::kPrivate);
@@ -51,8 +51,7 @@ TEST_F(VariableTest, CreationWithSource) {
 TEST_F(VariableTest, CreationEmpty) {
   auto* v = Var(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}},
-      "a_var", ty.i32(), StorageClass::kWorkgroup, nullptr,
-      VariableDecorationList{});
+      "a_var", ty.i32(), StorageClass::kWorkgroup, nullptr, DecorationList{});
 
   EXPECT_EQ(v->symbol(), Symbol(1));
   EXPECT_EQ(v->declared_storage_class(), StorageClass::kWorkgroup);
@@ -93,7 +92,7 @@ TEST_F(VariableTest, to_str) {
 
 TEST_F(VariableTest, WithDecorations) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                  VariableDecorationList{
+                  DecorationList{
                       create<LocationDecoration>(1),
                       create<BuiltinDecoration>(Builtin::kPosition),
                       create<ConstantIdDecoration>(1200),
@@ -110,7 +109,7 @@ TEST_F(VariableTest, WithDecorations) {
 
 TEST_F(VariableTest, ConstantId) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                  VariableDecorationList{
+                  DecorationList{
                       create<ConstantIdDecoration>(1200),
                   });
 
@@ -119,7 +118,7 @@ TEST_F(VariableTest, ConstantId) {
 
 TEST_F(VariableTest, Decorated_to_str) {
   auto* var = Var("my_var", ty.f32(), StorageClass::kFunction, Expr("expr"),
-                  VariableDecorationList{
+                  DecorationList{
                       create<BindingDecoration>(2),
                       create<GroupDecoration>(1),
                   });

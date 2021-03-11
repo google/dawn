@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/ast/array_decoration.h"
+#include "src/ast/decoration.h"
 #include "src/type/type.h"
 
 namespace tint {
@@ -31,7 +31,7 @@ class Array : public Castable<Array, Type> {
   /// @param size the number of elements in the array. `0` represents a
   /// runtime-sized array.
   /// @param decorations the array decorations
-  Array(Type* subtype, uint32_t size, ast::ArrayDecorationList decorations);
+  Array(Type* subtype, uint32_t size, ast::DecorationList decorations);
   /// Move constructor
   Array(Array&&);
   ~Array() override;
@@ -51,7 +51,7 @@ class Array : public Castable<Array, Type> {
   uint64_t BaseAlignment(MemoryLayout mem_layout) const override;
 
   /// @returns the array decorations
-  const ast::ArrayDecorationList& decorations() const { return decos_; }
+  const ast::DecorationList& decorations() const { return decos_; }
 
   /// @returns the array stride or 0 if none set.
   uint32_t array_stride() const;
@@ -79,7 +79,7 @@ class Array : public Castable<Array, Type> {
  private:
   Type* const subtype_;
   uint32_t const size_;
-  ast::ArrayDecorationList const decos_;
+  ast::DecorationList const decos_;
 };
 
 }  // namespace type

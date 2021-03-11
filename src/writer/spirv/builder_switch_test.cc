@@ -79,8 +79,8 @@ TEST_F(BuilderTest, Switch_WithCase) {
 
   WrapInFunction(expr);
 
-  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  auto* func =
+      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -151,8 +151,8 @@ TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
 
   WrapInFunction(expr);
 
-  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  auto* func =
+      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -215,8 +215,8 @@ TEST_F(BuilderTest, Switch_WithDefault) {
 
   WrapInFunction(expr);
 
-  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  auto* func =
+      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -289,8 +289,8 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
 
   WrapInFunction(expr);
 
-  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  auto* func =
+      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -372,8 +372,8 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
 
   WrapInFunction(expr);
 
-  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  auto* func =
+      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -439,8 +439,8 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
 
   WrapInFunction(expr);
 
-  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  auto* func =
+      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -482,8 +482,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
 
   WrapInFunction(expr);
 
-  auto* func = Func("a_func", {}, ty.i32(), ast::StatementList{},
-                    ast::FunctionDecorationList{});
+  auto* func =
+      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
 
   spirv::Builder& b = Build();
 

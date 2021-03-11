@@ -19,7 +19,7 @@ namespace reader {
 namespace wgsl {
 namespace {
 
-TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
+TEST_F(ParserImplTest, Decoration_Offset) {
   auto p = parser("offset(4)");
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
   ASSERT_NE(deco.value, nullptr);
   ASSERT_FALSE(p->has_error());
 
-  auto* member_deco = deco.value->As<ast::StructMemberDecoration>();
+  auto* member_deco = deco.value->As<ast::Decoration>();
   ASSERT_NE(member_deco, nullptr);
   ASSERT_TRUE(member_deco->Is<ast::StructMemberOffsetDecoration>());
 
@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset) {
   EXPECT_EQ(o->offset(), 4u);
 }
 
-TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingLeftParen) {
+TEST_F(ParserImplTest, Decoration_Offset_MissingLeftParen) {
   auto p = parser("offset 4)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingLeftParen) {
   EXPECT_EQ(p->error(), "1:8: expected '(' for offset decoration");
 }
 
-TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingRightParen) {
+TEST_F(ParserImplTest, Decoration_Offset_MissingRightParen) {
   auto p = parser("offset(4");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingRightParen) {
   EXPECT_EQ(p->error(), "1:9: expected ')' for offset decoration");
 }
 
-TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
+TEST_F(ParserImplTest, Decoration_Offset_MissingValue) {
   auto p = parser("offset()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -66,7 +66,7 @@ TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingValue) {
             "1:8: expected signed integer literal for offset decoration");
 }
 
-TEST_F(ParserImplTest, StructMemberDecoration_Offset_MissingInvalid) {
+TEST_F(ParserImplTest, Decoration_Offset_MissingInvalid) {
   auto p = parser("offset(nan)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);

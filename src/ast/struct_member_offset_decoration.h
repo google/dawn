@@ -15,14 +15,14 @@
 #ifndef SRC_AST_STRUCT_MEMBER_OFFSET_DECORATION_H_
 #define SRC_AST_STRUCT_MEMBER_OFFSET_DECORATION_H_
 
-#include "src/ast/struct_member_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// A struct member offset decoration
 class StructMemberOffsetDecoration
-    : public Castable<StructMemberOffsetDecoration, StructMemberDecoration> {
+    : public Castable<StructMemberOffsetDecoration, Decoration> {
  public:
   /// constructor
   /// @param source the source of this decoration

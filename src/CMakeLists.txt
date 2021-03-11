@@ -44,8 +44,6 @@ set(TINT_LIB_SRCS
   ast/access_decoration.h
   ast/array_accessor_expression.cc
   ast/array_accessor_expression.h
-  ast/array_decoration.cc
-  ast/array_decoration.h
   ast/assignment_statement.cc
   ast/assignment_statement.h
   ast/binary_expression.cc
@@ -90,8 +88,6 @@ set(TINT_LIB_SRCS
   ast/float_literal.h
   ast/function.cc
   ast/function.h
-  ast/function_decoration.cc
-  ast/function_decoration.h
   ast/group_decoration.cc
   ast/group_decoration.h
   ast/identifier_expression.cc
@@ -134,20 +130,14 @@ set(TINT_LIB_SRCS
   ast/struct.h
   ast/struct_block_decoration.cc
   ast/struct_block_decoration.h
-  ast/struct_decoration.cc
-  ast/struct_decoration.h
   ast/struct_member.cc
   ast/struct_member.h
-  ast/struct_member_decoration.cc
-  ast/struct_member_decoration.h
   ast/struct_member_offset_decoration.cc
   ast/struct_member_offset_decoration.h
   ast/switch_statement.cc
   ast/switch_statement.h
   ast/type_constructor_expression.cc
   ast/type_constructor_expression.h
-  ast/type_decoration.cc
-  ast/type_decoration.h
   ast/uint_literal.cc
   ast/uint_literal.h
   ast/unary_op.cc
@@ -156,8 +146,6 @@ set(TINT_LIB_SRCS
   ast/unary_op_expression.h
   ast/variable.cc
   ast/variable.h
-  ast/variable_decoration.cc
-  ast/variable_decoration.h
   ast/variable_decl_statement.cc
   ast/variable_decl_statement.h
   ast/workgroup_decoration.cc
@@ -426,7 +414,6 @@ if(${TINT_BUILD_TESTS})
     ast/case_statement_test.cc
     ast/constant_id_decoration_test.cc
     ast/continue_statement_test.cc
-    ast/decoration_test.cc
     ast/discard_statement_test.cc
     ast/else_statement_test.cc
     ast/fallthrough_statement_test.cc
@@ -506,6 +493,7 @@ if(${TINT_BUILD_TESTS})
     utils/unique_vector_test.cc
     validator/validator_builtins_test.cc
     validator/validator_control_block_test.cc
+    validator/validator_decoration_test.cc
     validator/validator_function_test.cc
     validator/validator_test.cc
     validator/validator_type_test.cc

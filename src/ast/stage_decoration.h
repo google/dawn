@@ -15,14 +15,14 @@
 #ifndef SRC_AST_STAGE_DECORATION_H_
 #define SRC_AST_STAGE_DECORATION_H_
 
-#include "src/ast/function_decoration.h"
+#include "src/ast/decoration.h"
 #include "src/ast/pipeline_stage.h"
 
 namespace tint {
 namespace ast {
 
 /// A workgroup decoration
-class StageDecoration : public Castable<StageDecoration, FunctionDecoration> {
+class StageDecoration : public Castable<StageDecoration, Decoration> {
  public:
   /// constructor
   /// @param stage the pipeline stage

@@ -15,14 +15,13 @@
 #ifndef SRC_AST_CONSTANT_ID_DECORATION_H_
 #define SRC_AST_CONSTANT_ID_DECORATION_H_
 
-#include "src/ast/variable_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// A constant id decoration
-class ConstantIdDecoration
-    : public Castable<ConstantIdDecoration, VariableDecoration> {
+class ConstantIdDecoration : public Castable<ConstantIdDecoration, Decoration> {
  public:
   /// constructor
   /// @param source the source of this decoration

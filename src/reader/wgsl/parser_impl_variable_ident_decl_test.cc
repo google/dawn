@@ -109,12 +109,12 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Write) {
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   auto p = parser("my_var : [[access(read)]] S");
 
-  auto* mem = Member("a", ty.i32(), ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32(), ast::DecorationList{});
   ast::StructMemberList members;
   members.push_back(mem);
 
   auto* block_deco = create<ast::StructBlockDecoration>();
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(members, decos);
@@ -134,12 +134,12 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   auto p = parser("my_var : [[access(read_write)]] S");
 
-  auto* mem = Member("a", ty.i32(), ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32(), ast::DecorationList{});
   ast::StructMemberList members;
   members.push_back(mem);
 
   auto* block_deco = create<ast::StructBlockDecoration>();
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(members, decos);
@@ -159,12 +159,12 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
   auto p = parser("my_var : [[access(read), access(read_write)]] S");
 
-  auto* mem = Member("a", ty.i32(), ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32(), ast::DecorationList{});
   ast::StructMemberList members;
   members.push_back(mem);
 
   auto* block_deco = create<ast::StructBlockDecoration>();
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(members, decos);
@@ -181,12 +181,12 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
   auto p = parser("my_var : [[access(read)]][[access(read_write)]] S");
 
-  auto* mem = Member("a", ty.i32(), ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32(), ast::DecorationList{});
   ast::StructMemberList members;
   members.push_back(mem);
 
   auto* block_deco = create<ast::StructBlockDecoration>();
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(members, decos);
@@ -219,12 +219,12 @@ TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoIllegalValue) {
 TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
   auto p = parser("my_var : [[stride(1)]] S");
 
-  auto* mem = Member("a", ty.i32(), ast::StructMemberDecorationList{});
+  auto* mem = Member("a", ty.i32(), ast::DecorationList{});
   ast::StructMemberList members;
   members.push_back(mem);
 
   auto* block_deco = create<ast::StructBlockDecoration>();
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(members, decos);

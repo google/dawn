@@ -48,7 +48,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
   create<ast::VariableDeclStatement>(global0);
 
   auto* str0 = create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
-                                   ast::StructDecorationList{});
+                                   ast::DecorationList{});
   auto* s0 = ty.struct_("S0", str0);
   AST().AddConstructedType(s0);
 
@@ -56,13 +56,13 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
        ast::StatementList{
            create<ast::ReturnStatement>(Expr("a0")),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   auto* global1 = Global("a1", ty.f32(), ast::StorageClass::kOutput);
   create<ast::VariableDeclStatement>(global1);
 
   auto* str1 = create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
-                                   ast::StructDecorationList{});
+                                   ast::DecorationList{});
   auto* s1 = ty.struct_("S1", str1);
   AST().AddConstructedType(s1);
 
@@ -76,7 +76,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
                Var("s1", s1, ast::StorageClass::kFunction)),
            create<ast::AssignmentStatement>(Expr("a1"), Expr(call_func)),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 

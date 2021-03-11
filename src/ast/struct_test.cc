@@ -23,8 +23,8 @@ namespace {
 using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
-  auto* s = create<Struct>(StructMemberList{Member("a", ty.i32())},
-                           StructDecorationList{});
+  auto* s =
+      create<Struct>(StructMemberList{Member("a", ty.i32())}, DecorationList{});
   EXPECT_EQ(s->members().size(), 1u);
   EXPECT_TRUE(s->decorations().empty());
   EXPECT_EQ(s->source().range.begin.line, 0u);
@@ -34,7 +34,7 @@ TEST_F(StructTest, Creation) {
 }
 
 TEST_F(StructTest, Creation_WithDecorations) {
-  StructDecorationList decos;
+  DecorationList decos;
   decos.push_back(create<StructBlockDecoration>());
 
   auto* s = create<Struct>(StructMemberList{Member("a", ty.i32())}, decos);
@@ -48,7 +48,7 @@ TEST_F(StructTest, Creation_WithDecorations) {
 }
 
 TEST_F(StructTest, CreationWithSourceAndDecorations) {
-  StructDecorationList decos;
+  DecorationList decos;
   decos.push_back(create<StructBlockDecoration>());
 
   auto* s = create<Struct>(
@@ -68,7 +68,7 @@ TEST_F(StructTest, Assert_Null_StructMember) {
       {
         ProgramBuilder b;
         b.create<Struct>(StructMemberList{b.Member("a", b.ty.i32()), nullptr},
-                         StructDecorationList{});
+                         DecorationList{});
       },
       "internal compiler error");
 }
@@ -78,13 +78,13 @@ TEST_F(StructTest, Assert_Null_Decoration) {
       {
         ProgramBuilder b;
         b.create<Struct>(StructMemberList{b.Member("a", b.ty.i32())},
-                         StructDecorationList{nullptr});
+                         DecorationList{nullptr});
       },
       "internal compiler error");
 }
 
 TEST_F(StructTest, ToStr) {
-  StructDecorationList decos;
+  DecorationList decos;
   decos.push_back(create<StructBlockDecoration>());
   auto* s = create<Struct>(StructMemberList{Member("a", ty.i32())}, decos);
 

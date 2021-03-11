@@ -33,7 +33,7 @@ TEST_F(ModuleTest, ToStrEmitsPreambleAndPostamble) {
 
 TEST_F(ModuleTest, LookupFunction) {
   auto* func = Func("main", VariableList{}, ty.f32(), StatementList{},
-                    ast::FunctionDecorationList{});
+                    ast::DecorationList{});
 
   Program program(std::move(*this));
   EXPECT_EQ(func,

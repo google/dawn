@@ -15,13 +15,13 @@
 #ifndef SRC_AST_GROUP_DECORATION_H_
 #define SRC_AST_GROUP_DECORATION_H_
 
-#include "src/ast/variable_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// A group decoration
-class GroupDecoration : public Castable<GroupDecoration, VariableDecoration> {
+class GroupDecoration : public Castable<GroupDecoration, Decoration> {
  public:
   /// constructor
   /// @param value the group value

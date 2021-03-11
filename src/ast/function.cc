@@ -28,7 +28,7 @@ Function::Function(const Source& source,
                    VariableList params,
                    type::Type* return_type,
                    BlockStatement* body,
-                   FunctionDecorationList decorations)
+                   DecorationList decorations)
     : Base(source),
       symbol_(symbol),
       params_(std::move(params)),

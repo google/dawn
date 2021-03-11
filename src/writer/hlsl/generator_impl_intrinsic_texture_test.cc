@@ -387,7 +387,7 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
        ast::StatementList{
            create<ast::CallStatement>(call),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 

@@ -49,7 +49,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
-  type::Array ary(ty.f32(), 5, ast::ArrayDecorationList{});
+  type::Array ary(ty.f32(), 5, ast::DecorationList{});
 
   auto* var = Var("a", &ary, ast::StorageClass::kNone);
   auto* stmt = create<ast::VariableDeclStatement>(var);
@@ -67,7 +67,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.f32()),
                             Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("S", str);
   auto* var = Var("a", s, ast::StorageClass::kNone);

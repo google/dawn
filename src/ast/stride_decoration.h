@@ -15,13 +15,13 @@
 #ifndef SRC_AST_STRIDE_DECORATION_H_
 #define SRC_AST_STRIDE_DECORATION_H_
 
-#include "src/ast/array_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// A stride decoration
-class StrideDecoration : public Castable<StrideDecoration, ArrayDecoration> {
+class StrideDecoration : public Castable<StrideDecoration, Decoration> {
  public:
   /// constructor
   /// @param stride the stride value

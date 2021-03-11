@@ -23,7 +23,7 @@
 #include "src/ast/binding_decoration.h"
 #include "src/ast/block_statement.h"
 #include "src/ast/builtin_decoration.h"
-#include "src/ast/function_decoration.h"
+#include "src/ast/decoration.h"
 #include "src/ast/group_decoration.h"
 #include "src/ast/location_decoration.h"
 #include "src/ast/pipeline_stage.h"
@@ -47,7 +47,7 @@ class Function : public Castable<Function, Node> {
            VariableList params,
            type::Type* return_type,
            BlockStatement* body,
-           FunctionDecorationList decorations);
+           DecorationList decorations);
   /// Move constructor
   Function(Function&&);
 
@@ -59,7 +59,7 @@ class Function : public Castable<Function, Node> {
   const VariableList& params() const { return params_; }
 
   /// @returns the decorations attached to this function
-  const FunctionDecorationList& decorations() const { return decorations_; }
+  const DecorationList& decorations() const { return decorations_; }
 
   /// @returns the workgroup size {x, y, z} for the function. {1, 1, 1} will be
   /// return if no workgroup size was set.
@@ -107,7 +107,7 @@ class Function : public Castable<Function, Node> {
   VariableList const params_;
   type::Type* const return_type_;
   BlockStatement* const body_;
-  FunctionDecorationList const decorations_;
+  DecorationList const decorations_;
 };
 
 /// A list of functions

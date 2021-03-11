@@ -135,7 +135,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
       GetI32Type(),                                    // type
       false,                                           // is_const
       nullptr,                                         // constructor
-      ast::VariableDecorationList{
+      ast::DecorationList{
           ctx.dst->create<ast::BuiltinDecoration>(Source{},
                                                   ast::Builtin::kVertexIndex),
       });
@@ -182,7 +182,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
       GetI32Type(),                                      // type
       false,                                             // is_const
       nullptr,                                           // constructor
-      ast::VariableDecorationList{
+      ast::DecorationList{
           ctx.dst->create<ast::BuiltinDecoration>(Source{},
                                                   ast::Builtin::kInstanceIndex),
       });
@@ -210,7 +210,7 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
             ctx.Clone(v->type()),               // type
             false,                              // is_const
             nullptr,                            // constructor
-            ast::VariableDecorationList{});     // decorations
+            ast::DecorationList{});             // decorations
         location_to_var[location] = replacement;
         location_replacements.emplace_back(LocationReplacement{v, replacement});
         break;
@@ -224,13 +224,13 @@ void VertexPulling::State::AddVertexStorageBuffers() {
   // The array inside the struct definition
   auto* internal_array_type = ctx.dst->create<type::Array>(
       GetU32Type(), 0,
-      ast::ArrayDecorationList{
+      ast::DecorationList{
           ctx.dst->create<ast::StrideDecoration>(Source{}, 4u),
       });
 
   // Creating the struct type
   ast::StructMemberList members;
-  ast::StructMemberDecorationList member_dec;
+  ast::DecorationList member_dec;
   member_dec.push_back(
       ctx.dst->create<ast::StructMemberOffsetDecoration>(Source{}, 0u));
 
@@ -238,7 +238,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
       Source{}, ctx.dst->Symbols().Register(kStructBufferName),
       internal_array_type, std::move(member_dec)));
 
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(ctx.dst->create<ast::StructBlockDecoration>(Source{}));
 
   auto* struct_type = ctx.dst->create<type::Struct>(
@@ -256,7 +256,7 @@ void VertexPulling::State::AddVertexStorageBuffers() {
         struct_type,                        // type
         false,                              // is_const
         nullptr,                            // constructor
-        ast::VariableDecorationList{
+        ast::DecorationList{
             ctx.dst->create<ast::BindingDecoration>(Source{}, i),
             ctx.dst->create<ast::GroupDecoration>(Source{}, cfg.pulling_group),
         });
@@ -276,11 +276,11 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
       Source{}, ctx.dst->create<ast::Variable>(
                     Source{},                                         // source
                     ctx.dst->Symbols().Register(kPullingPosVarName),  // symbol
-                    ast::StorageClass::kFunction,     // storage_class
-                    GetI32Type(),                     // type
-                    false,                            // is_const
-                    nullptr,                          // constructor
-                    ast::VariableDecorationList{}));  // decorations
+                    ast::StorageClass::kFunction,  // storage_class
+                    GetI32Type(),                  // type
+                    false,                         // is_const
+                    nullptr,                       // constructor
+                    ast::DecorationList{}));       // decorations
 
   // |kPullingPosVarName| refers to the byte location of the current read. We
   // declare a variable in the shader to avoid having to reuse Expression

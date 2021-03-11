@@ -170,7 +170,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.i32()),
                             Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("S", str);
 
@@ -188,7 +188,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.i32()),
                             Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("S", str);
 
@@ -203,7 +203,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
       ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(4)}),
                             Member("b", ty.f32(), {MemberOffset(32)}),
                             Member("c", ty.f32(), {MemberOffset(128)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("S", str);
 
@@ -224,7 +224,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
   auto* str =
       create<ast::Struct>(ast::StructMemberList{Member("double", ty.i32()),
                                                 Member("float", ty.f32())},
-                          ast::StructDecorationList{});
+                          ast::DecorationList{});
 
   auto* s = ty.struct_("S", str);
 
@@ -240,7 +240,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
 
   auto* str = create<ast::Struct>(

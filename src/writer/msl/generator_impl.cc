@@ -1040,8 +1040,7 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
   auto* func_sem = program_->Sem().Get(func);
 
   std::vector<std::pair<ast::Variable*, uint32_t>> in_locations;
-  std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>>
-      out_variables;
+  std::vector<std::pair<ast::Variable*, ast::Decoration*>> out_variables;
 
   for (auto data : func_sem->ReferencedLocationVariables()) {
     auto* var = data.first;
@@ -2028,7 +2027,7 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
 
 bool GeneratorImpl::EmitStructType(const type::Struct* str) {
   // TODO(dsinclair): Block decoration?
-  // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
+  // if (str->impl()->decoration() != ast::Decoration::kNone) {
   // }
   out_ << "struct " << program_->Symbols().NameFor(str->symbol()) << " {"
        << std::endl;

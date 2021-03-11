@@ -32,10 +32,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{create<ast::LocationDecoration>(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -43,7 +43,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   };
 
   Func("vtx_main", ast::VariableList{}, ty.f32(), body,
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -69,10 +69,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{create<ast::LocationDecoration>(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -80,7 +80,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   };
 
   Func("vtx_main", ast::VariableList{}, ty.f32(), body,
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -106,10 +106,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{create<ast::LocationDecoration>(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -117,7 +117,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   };
 
   Func("main", ast::VariableList{}, ty.f32(), body,
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
@@ -143,10 +143,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{create<ast::LocationDecoration>(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -154,7 +154,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   };
 
   Func("main", ast::VariableList{}, ty.f32(), body,
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
@@ -177,10 +177,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   // -> Error, not allowed
 
   Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{create<ast::LocationDecoration>(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -188,7 +188,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   };
 
   Func("main", ast::VariableList{}, ty.f32(), body,
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 
@@ -207,10 +207,10 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   // -> Error not allowed
 
   Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{create<ast::LocationDecoration>(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
@@ -218,7 +218,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   };
 
   Func("main", ast::VariableList{}, ty.f32(), body,
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 
@@ -242,18 +242,18 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   // };
 
   Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
 
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 
   auto body = ast::StatementList{create<ast::AssignmentStatement>(
       Expr("depth"), MemberAccessor("coord", "x"))};
 
   Func("main", ast::VariableList{}, ty.void_(), body,
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 

@@ -151,7 +151,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
     ProgramBuilder* b) const {
   auto* datatype = resultVectorComponentType(b);
 
-  VariableDecorationList decos = {
+  DecorationList decos = {
       b->create<ast::GroupDecoration>(0),
       b->create<ast::BindingDecoration>(0),
   };
@@ -189,7 +189,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
 
 ast::Variable* TextureOverloadCase::buildSamplerVariable(
     ProgramBuilder* b) const {
-  VariableDecorationList decos = {
+  DecorationList decos = {
       b->create<ast::GroupDecoration>(0),
       b->create<ast::BindingDecoration>(1),
   };

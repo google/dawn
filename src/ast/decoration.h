@@ -22,25 +22,10 @@
 namespace tint {
 namespace ast {
 
-/// The decoration kind enumerator
-enum class DecorationKind {
-  kArray,
-  kFunction,
-  kStruct,
-  kStructMember,
-  kType,
-  kVariable,
-};
-
-std::ostream& operator<<(std::ostream& out, DecorationKind data);
-
 /// The base class for all decorations
 class Decoration : public Castable<Decoration, Node> {
  public:
   ~Decoration() override;
-
-  /// @return the decoration kind
-  virtual DecorationKind GetKind() const = 0;
 
  protected:
   /// Constructor

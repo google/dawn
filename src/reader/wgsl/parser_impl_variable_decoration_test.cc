@@ -19,13 +19,13 @@ namespace reader {
 namespace wgsl {
 namespace {
 
-TEST_F(ParserImplTest, VariableDecoration_Location) {
+TEST_F(ParserImplTest, Decoration_Location) {
   auto p = parser("location(4)");
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = deco.value->As<ast::VariableDecoration>();
+  auto* var_deco = deco.value->As<ast::Decoration>();
   ASSERT_NE(var_deco, nullptr);
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(var_deco->Is<ast::LocationDecoration>());
@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location) {
   EXPECT_EQ(loc->value(), 4u);
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Location_MissingLeftParen) {
+TEST_F(ParserImplTest, Decoration_Location_MissingLeftParen) {
   auto p = parser("location 4)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -44,7 +44,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingLeftParen) {
   EXPECT_EQ(p->error(), "1:10: expected '(' for location decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Location_MissingRightParen) {
+TEST_F(ParserImplTest, Decoration_Location_MissingRightParen) {
   auto p = parser("location(4");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingRightParen) {
   EXPECT_EQ(p->error(), "1:11: expected ')' for location decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
+TEST_F(ParserImplTest, Decoration_Location_MissingValue) {
   auto p = parser("location()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, VariableDecoration_Location_MissingValue) {
             "1:10: expected signed integer literal for location decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Location_MissingInvalid) {
+TEST_F(ParserImplTest, Decoration_Location_MissingInvalid) {
   auto p = parser("location(nan)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -87,7 +87,7 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
 
 class BuiltinTest : public ParserImplTestWithParam<BuiltinData> {};
 
-TEST_P(BuiltinTest, VariableDecoration_Builtin) {
+TEST_P(BuiltinTest, Decoration_Builtin) {
   auto params = GetParam();
   auto p = parser(std::string("builtin(") + params.input + ")");
 
@@ -95,7 +95,7 @@ TEST_P(BuiltinTest, VariableDecoration_Builtin) {
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = deco.value->As<ast::VariableDecoration>();
+  auto* var_deco = deco.value->As<ast::Decoration>();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_NE(var_deco, nullptr);
   ASSERT_TRUE(var_deco->Is<ast::BuiltinDecoration>());
@@ -125,7 +125,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{"sample_mask_in", ast::Builtin::kSampleMaskIn},
         BuiltinData{"sample_mask_out", ast::Builtin::kSampleMaskOut}));
 
-TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingLeftParen) {
+TEST_F(ParserImplTest, Decoration_Builtin_MissingLeftParen) {
   auto p = parser("builtin position)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -135,7 +135,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingLeftParen) {
   EXPECT_EQ(p->error(), "1:9: expected '(' for builtin decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingRightParen) {
+TEST_F(ParserImplTest, Decoration_Builtin_MissingRightParen) {
   auto p = parser("builtin(position");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -145,7 +145,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingRightParen) {
   EXPECT_EQ(p->error(), "1:17: expected ')' for builtin decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
+TEST_F(ParserImplTest, Decoration_Builtin_MissingValue) {
   auto p = parser("builtin()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -155,7 +155,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingValue) {
   EXPECT_EQ(p->error(), "1:9: expected identifier for builtin");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Builtin_InvalidValue) {
+TEST_F(ParserImplTest, Decoration_Builtin_InvalidValue) {
   auto p = parser("builtin(other_thingy)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -165,7 +165,7 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_InvalidValue) {
   EXPECT_EQ(p->error(), "1:9: invalid value for builtin decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
+TEST_F(ParserImplTest, Decoration_Builtin_MissingInvalid) {
   auto p = parser("builtin(3)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -175,13 +175,13 @@ TEST_F(ParserImplTest, VariableDecoration_Builtin_MissingInvalid) {
   EXPECT_EQ(p->error(), "1:9: expected identifier for builtin");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Binding) {
+TEST_F(ParserImplTest, Decoration_Binding) {
   auto p = parser("binding(4)");
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = deco.value->As<ast::VariableDecoration>();
+  auto* var_deco = deco.value->As<ast::Decoration>();
   ASSERT_NE(var_deco, nullptr);
   ASSERT_FALSE(p->has_error());
   ASSERT_TRUE(var_deco->Is<ast::BindingDecoration>());
@@ -190,7 +190,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding) {
   EXPECT_EQ(binding->value(), 4u);
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Binding_MissingLeftParen) {
+TEST_F(ParserImplTest, Decoration_Binding_MissingLeftParen) {
   auto p = parser("binding 4)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -200,7 +200,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingLeftParen) {
   EXPECT_EQ(p->error(), "1:9: expected '(' for binding decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Binding_MissingRightParen) {
+TEST_F(ParserImplTest, Decoration_Binding_MissingRightParen) {
   auto p = parser("binding(4");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -210,7 +210,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingRightParen) {
   EXPECT_EQ(p->error(), "1:10: expected ')' for binding decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
+TEST_F(ParserImplTest, Decoration_Binding_MissingValue) {
   auto p = parser("binding()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -221,7 +221,7 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingValue) {
             "1:9: expected signed integer literal for binding decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
+TEST_F(ParserImplTest, Decoration_Binding_MissingInvalid) {
   auto p = parser("binding(nan)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -233,13 +233,13 @@ TEST_F(ParserImplTest, VariableDecoration_Binding_MissingInvalid) {
 }
 
 // DEPRECATED
-TEST_F(ParserImplTest, VariableDecoration_set) {
+TEST_F(ParserImplTest, Decoration_set) {
   auto p = parser("set(4)");
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = deco.value->As<ast::VariableDecoration>();
+  auto* var_deco = deco.value->As<ast::Decoration>();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(var_deco, nullptr);
   ASSERT_TRUE(var_deco->Is<ast::GroupDecoration>());
@@ -248,13 +248,13 @@ TEST_F(ParserImplTest, VariableDecoration_set) {
   EXPECT_EQ(group->value(), 4u);
 }
 
-TEST_F(ParserImplTest, VariableDecoration_group) {
+TEST_F(ParserImplTest, Decoration_group) {
   auto p = parser("group(4)");
   auto deco = p->decoration();
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* var_deco = deco.value->As<ast::VariableDecoration>();
+  auto* var_deco = deco.value->As<ast::Decoration>();
   ASSERT_FALSE(p->has_error());
   ASSERT_NE(var_deco, nullptr);
   ASSERT_TRUE(var_deco->Is<ast::GroupDecoration>());
@@ -263,7 +263,7 @@ TEST_F(ParserImplTest, VariableDecoration_group) {
   EXPECT_EQ(group->value(), 4u);
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Group_MissingLeftParen) {
+TEST_F(ParserImplTest, Decoration_Group_MissingLeftParen) {
   auto p = parser("group 2)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -273,7 +273,7 @@ TEST_F(ParserImplTest, VariableDecoration_Group_MissingLeftParen) {
   EXPECT_EQ(p->error(), "1:7: expected '(' for group decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Group_MissingRightParen) {
+TEST_F(ParserImplTest, Decoration_Group_MissingRightParen) {
   auto p = parser("group(2");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -283,7 +283,7 @@ TEST_F(ParserImplTest, VariableDecoration_Group_MissingRightParen) {
   EXPECT_EQ(p->error(), "1:8: expected ')' for group decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Group_MissingValue) {
+TEST_F(ParserImplTest, Decoration_Group_MissingValue) {
   auto p = parser("group()");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);
@@ -294,7 +294,7 @@ TEST_F(ParserImplTest, VariableDecoration_Group_MissingValue) {
             "1:7: expected signed integer literal for group decoration");
 }
 
-TEST_F(ParserImplTest, VariableDecoration_Group_MissingInvalid) {
+TEST_F(ParserImplTest, Decoration_Group_MissingInvalid) {
   auto p = parser("group(nan)");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);

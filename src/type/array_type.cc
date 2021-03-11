@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::type::Array);
 namespace tint {
 namespace type {
 
-Array::Array(Type* subtype, uint32_t size, ast::ArrayDecorationList decorations)
+Array::Array(Type* subtype, uint32_t size, ast::DecorationList decorations)
     : subtype_(subtype), size_(size), decos_(decorations) {}
 
 Array::Array(Array&&) = default;

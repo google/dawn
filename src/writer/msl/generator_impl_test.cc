@@ -24,7 +24,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 
@@ -139,7 +139,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct) {
       ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(4)}),
                             Member("b", ty.f32(), {MemberOffset(32)}),
                             Member("c", ty.f32(), {MemberOffset(128)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("S", str);
 
@@ -153,7 +153,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
       ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
                             Member("b", ty.vec3<f32>(), {MemberOffset(16)}),
                             Member("c", ty.f32(), {MemberOffset(32)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* inner_s = ty.struct_("Inner", inner_str);
 
@@ -161,7 +161,7 @@ TEST_F(MslGeneratorImplTest, calculate_alignment_size_struct_of_struct) {
       ast::StructMemberList{Member("d", ty.f32(), {MemberOffset(0)}),
                             Member("e", inner_s, {MemberOffset(32)}),
                             Member("f", ty.f32(), {MemberOffset(64)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* outer_s = ty.struct_("Outer", outer_str);
 

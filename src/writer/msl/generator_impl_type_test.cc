@@ -146,7 +146,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.i32()),
                             Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("S", str);
 
@@ -160,7 +160,7 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.i32()),
                             Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("S", str);
 
@@ -181,7 +181,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
           Member("b", ty.f32(), {MemberOffset(32)}),
           Member("c", ty.f32(), {MemberOffset(128)}),
       },
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* s = ty.struct_("S", str);
 
@@ -201,7 +201,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.i32()),

@@ -31,7 +31,7 @@ TEST_F(ValidateFunctionTest, VoidFunctionEndWithoutReturnStatement_Pass) {
        ast::StatementList{
            create<ast::VariableDeclStatement>(var),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -47,7 +47,7 @@ TEST_F(ValidateFunctionTest,
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
        ty.void_(), ast::StatementList{},
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -65,7 +65,7 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
        ast::StatementList{
            create<ast::VariableDeclStatement>(var),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -78,7 +78,7 @@ TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
   // fn func -> int {}
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
-       ast::StatementList{}, ast::FunctionDecorationList{});
+       ast::StatementList{}, ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -95,7 +95,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
        ast::StatementList{
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -111,7 +111,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
            create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
                                         Expr(2)),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -129,7 +129,7 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
            create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
                                         Expr(2)),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -147,13 +147,13 @@ TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
        ast::StatementList{
            create<ast::ReturnStatement>(Expr(2)),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
        ast::StatementList{
            create<ast::ReturnStatement>(Expr(2)),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -170,7 +170,7 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
        ast::StatementList{
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
@@ -191,7 +191,7 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
        ast::StatementList{
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -206,7 +206,7 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
        ast::StatementList{
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 

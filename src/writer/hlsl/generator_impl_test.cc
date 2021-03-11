@@ -23,7 +23,7 @@ using HlslGeneratorImplTest = TestHelper;
 
 TEST_F(HlslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   GeneratorImpl& gen = Build();
 

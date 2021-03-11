@@ -18,9 +18,9 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/decoration.h"
 #include "src/ast/expression.h"
 #include "src/ast/storage_class.h"
-#include "src/ast/variable_decoration.h"
 
 namespace tint {
 namespace ast {
@@ -90,7 +90,7 @@ class Variable : public Castable<Variable, Node> {
            type::Type* type,
            bool is_const,
            Expression* constructor,
-           VariableDecorationList decorations);
+           DecorationList decorations);
   /// Move constructor
   Variable(Variable&&);
 
@@ -115,7 +115,7 @@ class Variable : public Castable<Variable, Node> {
   bool is_const() const { return is_const_; }
 
   /// @returns the decorations attached to this variable
-  const VariableDecorationList& decorations() const { return decorations_; }
+  const DecorationList& decorations() const { return decorations_; }
 
   /// @returns true if the decorations include a LocationDecoration
   bool HasLocationDecoration() const;
@@ -169,7 +169,7 @@ class Variable : public Castable<Variable, Node> {
   type::Type* const type_;
   bool const is_const_;
   Expression* const constructor_;
-  VariableDecorationList const decorations_;
+  DecorationList const decorations_;
   StorageClass const declared_storage_class_;
 };
 

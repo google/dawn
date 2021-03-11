@@ -15,14 +15,13 @@
 #ifndef SRC_AST_BINDING_DECORATION_H_
 #define SRC_AST_BINDING_DECORATION_H_
 
-#include "src/ast/variable_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// A binding decoration
-class BindingDecoration
-    : public Castable<BindingDecoration, VariableDecoration> {
+class BindingDecoration : public Castable<BindingDecoration, Decoration> {
  public:
   /// constructor
   /// @param value the binding value

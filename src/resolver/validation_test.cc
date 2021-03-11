@@ -95,13 +95,13 @@ TEST_F(ResolverValidationTest, Stmt_Call_undeclared) {
            create<ast::CallStatement>(call_expr),
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   Func("func", params0, ty.f32(),
        ast::StatementList{
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -120,7 +120,7 @@ TEST_F(ResolverValidationTest, Stmt_Call_recursive) {
        ast::StatementList{
            create<ast::CallStatement>(call_expr),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -246,7 +246,7 @@ TEST_F(ResolverValidationTest, StorageClass_NonFunctionClassError) {
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   EXPECT_FALSE(r()->Resolve());
 

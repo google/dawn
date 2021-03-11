@@ -24,7 +24,7 @@ using StructTypeTest = TestHelper;
 
 TEST_F(StructTypeTest, Creation) {
   auto* impl =
-      create<ast::Struct>(ast::StructMemberList{}, ast::StructDecorationList{});
+      create<ast::Struct>(ast::StructMemberList{}, ast::DecorationList{});
   auto* ptr = impl;
   auto* s = ty.struct_("S", impl);
   EXPECT_EQ(s->impl(), ptr);
@@ -32,7 +32,7 @@ TEST_F(StructTypeTest, Creation) {
 
 TEST_F(StructTypeTest, Is) {
   auto* impl =
-      create<ast::Struct>(ast::StructMemberList{}, ast::StructDecorationList{});
+      create<ast::Struct>(ast::StructMemberList{}, ast::DecorationList{});
   auto* s = ty.struct_("S", impl);
   type::Type* ty = s;
   EXPECT_FALSE(ty->Is<AccessControl>());
@@ -52,14 +52,14 @@ TEST_F(StructTypeTest, Is) {
 
 TEST_F(StructTypeTest, TypeName) {
   auto* impl =
-      create<ast::Struct>(ast::StructMemberList{}, ast::StructDecorationList{});
+      create<ast::Struct>(ast::StructMemberList{}, ast::DecorationList{});
   auto* s = ty.struct_("my_struct", impl);
   EXPECT_EQ(s->type_name(), "__struct_tint_symbol_1");
 }
 
 TEST_F(StructTypeTest, FriendlyName) {
   auto* impl =
-      create<ast::Struct>(ast::StructMemberList{}, ast::StructDecorationList{});
+      create<ast::Struct>(ast::StructMemberList{}, ast::DecorationList{});
   auto* s = ty.struct_("my_struct", impl);
   EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
 }
@@ -68,7 +68,7 @@ TEST_F(StructTypeTest, MinBufferBindingSize) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(16u, s_ty->MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -76,14 +76,13 @@ TEST_F(StructTypeTest, MinBufferBindingSize) {
 }
 
 TEST_F(StructTypeTest, MinBufferBindingSizeArray) {
-  Array arr(ty.u32(), 4,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array arr(ty.u32(), 4, ast::DecorationList{create<ast::StrideDecoration>(4)});
 
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(4)}),
                             Member("bar", &arr, {MemberOffset(8)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(32u, s_ty->MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -91,14 +90,13 @@ TEST_F(StructTypeTest, MinBufferBindingSizeArray) {
 }
 
 TEST_F(StructTypeTest, MinBufferBindingSizeRuntimeArray) {
-  Array arr(ty.u32(), 0,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array arr(ty.u32(), 0, ast::DecorationList{create<ast::StrideDecoration>(4)});
 
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(4)}),
                             Member("bar", ty.u32(), {MemberOffset(8)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(12u, s_ty->MinBufferBindingSize(MemoryLayout::kStorageBuffer));
@@ -107,7 +105,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeRuntimeArray) {
 TEST_F(StructTypeTest, MinBufferBindingSizeVec2) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.vec2<u32>(), {MemberOffset(0)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(16u, s_ty->MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -117,7 +115,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec2) {
 TEST_F(StructTypeTest, MinBufferBindingSizeVec3) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.vec3<u32>(), {MemberOffset(0)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(16u, s_ty->MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -127,7 +125,7 @@ TEST_F(StructTypeTest, MinBufferBindingSizeVec3) {
 TEST_F(StructTypeTest, MinBufferBindingSizeVec4) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.vec4<u32>(), {MemberOffset(0)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(16u, s_ty->MinBufferBindingSize(MemoryLayout::kUniformBuffer));
@@ -138,7 +136,7 @@ TEST_F(StructTypeTest, BaseAlignment) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(8)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(16u, s_ty->BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -146,13 +144,12 @@ TEST_F(StructTypeTest, BaseAlignment) {
 }
 
 TEST_F(StructTypeTest, BaseAlignmentArray) {
-  Array arr(ty.u32(), 4,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array arr(ty.u32(), 4, ast::DecorationList{create<ast::StrideDecoration>(4)});
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(4)}),
                             Member("bar", &arr, {MemberOffset(8)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(16u, s_ty->BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -160,13 +157,12 @@ TEST_F(StructTypeTest, BaseAlignmentArray) {
 }
 
 TEST_F(StructTypeTest, BaseAlignmentRuntimeArray) {
-  Array arr(ty.u32(), 0,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array arr(ty.u32(), 0, ast::DecorationList{create<ast::StrideDecoration>(4)});
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(4)}),
                             Member("bar", ty.u32(), {MemberOffset(8)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(4u, s_ty->BaseAlignment(MemoryLayout::kStorageBuffer));
@@ -175,7 +171,7 @@ TEST_F(StructTypeTest, BaseAlignmentRuntimeArray) {
 TEST_F(StructTypeTest, BaseAlignmentVec2) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.vec2<u32>(), {MemberOffset(0)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(16u, s_ty->BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -185,7 +181,7 @@ TEST_F(StructTypeTest, BaseAlignmentVec2) {
 TEST_F(StructTypeTest, BaseAlignmentVec3) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.vec3<u32>(), {MemberOffset(0)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(16u, s_ty->BaseAlignment(MemoryLayout::kUniformBuffer));
@@ -195,7 +191,7 @@ TEST_F(StructTypeTest, BaseAlignmentVec3) {
 TEST_F(StructTypeTest, BaseAlignmentVec4) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.vec4<u32>(), {MemberOffset(0)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* s_ty = ty.struct_("s_ty", str);
 
   EXPECT_EQ(16u, s_ty->BaseAlignment(MemoryLayout::kUniformBuffer));

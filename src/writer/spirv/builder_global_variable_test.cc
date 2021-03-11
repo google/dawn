@@ -157,7 +157,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
 
 TEST_F(BuilderTest, GlobalVar_WithLocation) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, nullptr,
-                   ast::VariableDecorationList{
+                   ast::DecorationList{
                        create<ast::LocationDecoration>(5),
                    });
 
@@ -177,7 +177,7 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
 
 TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, nullptr,
-                   ast::VariableDecorationList{
+                   ast::DecorationList{
                        create<ast::BindingDecoration>(2),
                        create<ast::GroupDecoration>(3),
                    });
@@ -199,7 +199,7 @@ OpDecorate %1 DescriptorSet 3
 
 TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, nullptr,
-                   ast::VariableDecorationList{
+                   ast::DecorationList{
                        create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
                    });
 
@@ -219,7 +219,7 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
   auto* v = Global("var", ty.bool_(), ast::StorageClass::kNone, Expr(true),
-                   ast::VariableDecorationList{
+                   ast::DecorationList{
                        create<ast::ConstantIdDecoration>(1200),
                    });
 
@@ -239,7 +239,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
   auto* v = Global("var", ty.bool_(), ast::StorageClass::kNone, nullptr,
-                   ast::VariableDecorationList{
+                   ast::DecorationList{
                        create<ast::ConstantIdDecoration>(1200),
                    });
 
@@ -259,7 +259,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kNone, Expr(2.f),
-                   ast::VariableDecorationList{
+                   ast::DecorationList{
                        create<ast::ConstantIdDecoration>(0),
                    });
 
@@ -279,7 +279,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kNone, nullptr,
-                   ast::VariableDecorationList{
+                   ast::DecorationList{
                        create<ast::ConstantIdDecoration>(0),
                    });
 
@@ -299,7 +299,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
   auto* v = Global("var", ty.i32(), ast::StorageClass::kNone, nullptr,
-                   ast::VariableDecorationList{
+                   ast::DecorationList{
                        create<ast::ConstantIdDecoration>(0),
                    });
 
@@ -319,7 +319,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
   auto* v = Global("var", ty.u32(), ast::StorageClass::kNone, nullptr,
-                   ast::VariableDecorationList{
+                   ast::DecorationList{
                        create<ast::ConstantIdDecoration>(0),
                    });
 
@@ -386,7 +386,7 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   auto* A = ty.struct_(
       "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32()),
                                                      Member("b", ty.i32())},
-                               ast::StructDecorationList{}));
+                               ast::DecorationList{}));
   auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, A);
 
   auto* var = Global("b", ac, ast::StorageClass::kStorage);
@@ -419,7 +419,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   auto* A = ty.struct_(
       "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
-                               ast::StructDecorationList{}));
+                               ast::DecorationList{}));
   auto* B = ty.alias("B", A);
   auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, B);
   auto* var = Global("b", ac, ast::StorageClass::kStorage);
@@ -450,7 +450,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   auto* A = ty.struct_(
       "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
-                               ast::StructDecorationList{}));
+                               ast::DecorationList{}));
   auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, A);
   auto* B = ty.alias("B", ac);
   auto* var = Global("b", B, ast::StorageClass::kStorage);
@@ -481,7 +481,7 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   auto* A = ty.struct_(
       "A", create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
-                               ast::StructDecorationList{}));
+                               ast::DecorationList{}));
   type::AccessControl read{ast::AccessControl::kReadOnly, A};
   type::AccessControl rw{ast::AccessControl::kReadWrite, A};
 
@@ -606,7 +606,7 @@ OpDecorate %5 NonReadable
 TEST_F(BuilderTest, SampleIndex) {
   auto* var =
       Global("sample_index", ty.u32(), ast::StorageClass::kInput, nullptr,
-             ast::VariableDecorationList{
+             ast::DecorationList{
                  create<ast::BuiltinDecoration>(ast::Builtin::kSampleIndex),
              });
 
@@ -640,18 +640,18 @@ TEST_F(BuilderTest, SampleMask) {
   // }
 
   Global("mask_in", ty.u32(), ast::StorageClass::kInput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kSampleMaskIn),
          });
   Global("mask_out", ty.u32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kSampleMaskOut),
          });
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("mask_out"), Expr("mask_in")),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 

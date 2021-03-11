@@ -17,14 +17,13 @@
 
 #include <tuple>
 
-#include "src/ast/function_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// A workgroup decoration
-class WorkgroupDecoration
-    : public Castable<WorkgroupDecoration, FunctionDecoration> {
+class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
  public:
   /// constructor
   /// @param source the source of this decoration

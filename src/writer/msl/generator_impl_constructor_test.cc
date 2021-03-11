@@ -134,7 +134,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
-  type::Array ary(ty.vec3<f32>(), 3, ast::ArrayDecorationList{});
+  type::Array ary(ty.vec3<f32>(), 3, ast::DecorationList{});
 
   ast::ExpressionList ary_values;
 

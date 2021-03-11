@@ -32,7 +32,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
                         create<ast::DiscardStatement>(),
                         create<ast::ReturnStatement>(),
                     },
-                    ast::FunctionDecorationList{});
+                    ast::DecorationList{});
 
   GeneratorImpl& gen = Build();
 
@@ -56,7 +56,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
                create<ast::DiscardStatement>(),
                create<ast::ReturnStatement>(),
            },
-           ast::FunctionDecorationList{});
+           ast::DecorationList{});
 
   GeneratorImpl& gen = Build();
 
@@ -76,7 +76,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
                         create<ast::DiscardStatement>(),
                         create<ast::ReturnStatement>(),
                     },
-                    ast::FunctionDecorationList{
+                    ast::DecorationList{
                         create<ast::WorkgroupDecoration>(2u, 4u, 6u),
                     });
 
@@ -100,7 +100,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
                create<ast::DiscardStatement>(),
                create<ast::ReturnStatement>(),
            },
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
@@ -124,7 +124,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
                create<ast::DiscardStatement>(),
                create<ast::ReturnStatement>(),
            },
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
                create<ast::WorkgroupDecoration>(2u, 4u, 6u),
            });
@@ -152,7 +152,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
   auto* func =
       Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
            ast::StatementList{},
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
@@ -185,7 +185,7 @@ TEST_F(WgslGeneratorImplTest,
   //   return;
   // }
 
-  ast::StructDecorationList s_decos;
+  ast::DecorationList s_decos;
   s_decos.push_back(create<ast::StructBlockDecoration>());
 
   auto* str = create<ast::Struct>(
@@ -196,7 +196,7 @@ TEST_F(WgslGeneratorImplTest,
   AST().AddConstructedType(s);
 
   Global("data", &ac, ast::StorageClass::kStorage, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
@@ -211,7 +211,7 @@ TEST_F(WgslGeneratorImplTest,
              create<ast::VariableDeclStatement>(var),
              create<ast::ReturnStatement>(),
          },
-         ast::FunctionDecorationList{
+         ast::DecorationList{
              create<ast::StageDecoration>(ast::PipelineStage::kCompute),
          });
   }
@@ -226,7 +226,7 @@ TEST_F(WgslGeneratorImplTest,
              create<ast::VariableDeclStatement>(var),
              create<ast::ReturnStatement>(),
          },
-         ast::FunctionDecorationList{
+         ast::DecorationList{
              create<ast::StageDecoration>(ast::PipelineStage::kCompute),
          });
   }

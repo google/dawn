@@ -24,7 +24,7 @@ namespace ast {
 StructMember::StructMember(const Source& source,
                            const Symbol& sym,
                            type::Type* type,
-                           StructMemberDecorationList decorations)
+                           DecorationList decorations)
     : Base(source),
       symbol_(sym),
       type_(type),

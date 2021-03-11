@@ -24,7 +24,7 @@ using HlslGeneratorImplTest_Call = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   auto* call = Call("my_func");
   WrapInFunction(call);
@@ -37,7 +37,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithoutParams) {
 
 TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
   Global("param1", ty.f32(), ast::StorageClass::kNone);
   Global("param2", ty.f32(), ast::StorageClass::kNone);
 
@@ -52,7 +52,7 @@ TEST_F(HlslGeneratorImplTest_Call, EmitExpression_Call_WithParams) {
 
 TEST_F(HlslGeneratorImplTest_Call, EmitStatement_Call) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
   Global("param1", ty.f32(), ast::StorageClass::kNone);
   Global("param2", ty.f32(), ast::StorageClass::kNone);
 

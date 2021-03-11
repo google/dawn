@@ -24,7 +24,7 @@ using ArrayTest = TestHelper;
 
 TEST_F(ArrayTest, CreateSizedArray) {
   U32 u32;
-  Array arr{&u32, 3, ast::ArrayDecorationList{}};
+  Array arr{&u32, 3, ast::DecorationList{}};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 3u);
   EXPECT_TRUE(arr.Is<Array>());
@@ -33,7 +33,7 @@ TEST_F(ArrayTest, CreateSizedArray) {
 
 TEST_F(ArrayTest, CreateRuntimeArray) {
   U32 u32;
-  Array arr{&u32, 0, ast::ArrayDecorationList{}};
+  Array arr{&u32, 0, ast::DecorationList{}};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 0u);
   EXPECT_TRUE(arr.Is<Array>());
@@ -43,7 +43,7 @@ TEST_F(ArrayTest, CreateRuntimeArray) {
 TEST_F(ArrayTest, Is) {
   I32 i32;
 
-  Array arr{&i32, 3, ast::ArrayDecorationList{}};
+  Array arr{&i32, 3, ast::DecorationList{}};
   Type* ty = &arr;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -62,71 +62,66 @@ TEST_F(ArrayTest, Is) {
 
 TEST_F(ArrayTest, TypeName) {
   I32 i32;
-  Array arr{&i32, 0, ast::ArrayDecorationList{}};
+  Array arr{&i32, 0, ast::DecorationList{}};
   EXPECT_EQ(arr.type_name(), "__array__i32");
 }
 
 TEST_F(ArrayTest, FriendlyNameRuntimeSized) {
-  Array arr{ty.i32(), 0, ast::ArrayDecorationList{}};
+  Array arr{ty.i32(), 0, ast::DecorationList{}};
   EXPECT_EQ(arr.FriendlyName(Symbols()), "array<i32>");
 }
 
 TEST_F(ArrayTest, FriendlyNameStaticSized) {
-  Array arr{ty.i32(), 5, ast::ArrayDecorationList{}};
+  Array arr{ty.i32(), 5, ast::DecorationList{}};
   EXPECT_EQ(arr.FriendlyName(Symbols()), "array<i32, 5>");
 }
 
 TEST_F(ArrayTest, FriendlyNameWithStride) {
   Array arr{ty.i32(), 5,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(32)}};
+            ast::DecorationList{create<ast::StrideDecoration>(32)}};
   EXPECT_EQ(arr.FriendlyName(Symbols()), "[[stride(32)]] array<i32, 5>");
 }
 
 TEST_F(ArrayTest, TypeName_RuntimeArray) {
   I32 i32;
-  Array arr{&i32, 3, ast::ArrayDecorationList{}};
+  Array arr{&i32, 3, ast::DecorationList{}};
   EXPECT_EQ(arr.type_name(), "__array__i32_3");
 }
 
 TEST_F(ArrayTest, TypeName_WithStride) {
   I32 i32;
-  Array arr{&i32, 3,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(16)}};
+  Array arr{&i32, 3, ast::DecorationList{create<ast::StrideDecoration>(16)}};
   EXPECT_EQ(arr.type_name(), "__array__i32_3_stride_16");
 }
 
 TEST_F(ArrayTest, MinBufferBindingSizeNoStride) {
   U32 u32;
-  Array arr(&u32, 4, ast::ArrayDecorationList{});
+  Array arr(&u32, 4, ast::DecorationList{});
   EXPECT_EQ(0u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(ArrayTest, MinBufferBindingSizeArray) {
   U32 u32;
-  Array arr(&u32, 4,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array arr(&u32, 4, ast::DecorationList{create<ast::StrideDecoration>(4)});
   EXPECT_EQ(16u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(ArrayTest, MinBufferBindingSizeRuntimeArray) {
   U32 u32;
-  Array arr(&u32, 0,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array arr(&u32, 0, ast::DecorationList{create<ast::StrideDecoration>(4)});
   EXPECT_EQ(4u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
 }
 
 TEST_F(ArrayTest, BaseAlignmentArray) {
   U32 u32;
-  Array arr(&u32, 4,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array arr(&u32, 4, ast::DecorationList{create<ast::StrideDecoration>(4)});
   EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));
 }
 
 TEST_F(ArrayTest, BaseAlignmentRuntimeArray) {
   U32 u32;
-  Array arr(&u32, 0,
-            ast::ArrayDecorationList{create<ast::StrideDecoration>(4)});
+  Array arr(&u32, 0, ast::DecorationList{create<ast::StrideDecoration>(4)});
   EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
   EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));
 }

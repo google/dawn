@@ -27,7 +27,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
                                   ast::StructMemberList{
                                       Member("mem", ty.f32()),
                                   },
-                                  ast::StructDecorationList{})),
+                                  ast::DecorationList{})),
          ast::StorageClass::kPrivate);
   auto* expr = MemberAccessor("str", "mem");
   WrapInFunction(expr);

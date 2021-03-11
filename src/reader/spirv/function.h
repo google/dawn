@@ -849,7 +849,7 @@ class FunctionEmitter {
     /// Function return type
     type::Type* return_type;
     /// Function decorations
-    ast::FunctionDecorationList decorations;
+    ast::DecorationList decorations;
   };
 
   /// Parse the function declaration, which comprises the name, parameters, and

@@ -20,19 +20,18 @@ namespace reader {
 namespace wgsl {
 namespace {
 
-struct StructDecorationData {
+struct DecorationData {
   const char* input;
   bool is_block;
 };
-inline std::ostream& operator<<(std::ostream& out, StructDecorationData data) {
+inline std::ostream& operator<<(std::ostream& out, DecorationData data) {
   out << std::string(data.input);
   return out;
 }
 
-class StructDecorationTest
-    : public ParserImplTestWithParam<StructDecorationData> {};
+class DecorationTest : public ParserImplTestWithParam<DecorationData> {};
 
-TEST_P(StructDecorationTest, Parses) {
+TEST_P(DecorationTest, Parses) {
   auto params = GetParam();
   auto p = parser(params.input);
 
@@ -41,15 +40,15 @@ TEST_P(StructDecorationTest, Parses) {
   EXPECT_TRUE(deco.matched);
   EXPECT_FALSE(deco.errored);
   ASSERT_NE(deco.value, nullptr);
-  auto* struct_deco = deco.value->As<ast::StructDecoration>();
+  auto* struct_deco = deco.value->As<ast::Decoration>();
   ASSERT_NE(struct_deco, nullptr);
   EXPECT_EQ(struct_deco->Is<ast::StructBlockDecoration>(), params.is_block);
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
-                         StructDecorationTest,
-                         testing::Values(StructDecorationData{"block", true}));
+                         DecorationTest,
+                         testing::Values(DecorationData{"block", true}));
 
-TEST_F(ParserImplTest, StructDecoration_NoMatch) {
+TEST_F(ParserImplTest, Decoration_NoMatch) {
   auto p = parser("not-a-stage");
   auto deco = p->decoration();
   EXPECT_FALSE(deco.matched);

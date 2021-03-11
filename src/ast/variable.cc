@@ -29,7 +29,7 @@ Variable::Variable(const Source& source,
                    type::Type* type,
                    bool is_const,
                    Expression* constructor,
-                   VariableDecorationList decorations)
+                   DecorationList decorations)
     : Base(source),
       symbol_(sym),
       type_(type),

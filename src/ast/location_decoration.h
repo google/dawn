@@ -15,14 +15,13 @@
 #ifndef SRC_AST_LOCATION_DECORATION_H_
 #define SRC_AST_LOCATION_DECORATION_H_
 
-#include "src/ast/variable_decoration.h"
+#include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
 /// A location decoration
-class LocationDecoration
-    : public Castable<LocationDecoration, VariableDecoration> {
+class LocationDecoration : public Castable<LocationDecoration, Decoration> {
  public:
   /// constructor
   /// @param source the source of this decoration

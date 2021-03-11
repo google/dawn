@@ -177,10 +177,9 @@ class ParserImpl : Reader {
   /// @param member_index the index of the member
   /// @param decoration an encoded SPIR-V Decoration
   /// @returns the corresponding ast::StructuMemberDecoration
-  ast::StructMemberDecoration* ConvertMemberDecoration(
-      uint32_t struct_type_id,
-      uint32_t member_index,
-      const Decoration& decoration);
+  ast::Decoration* ConvertMemberDecoration(uint32_t struct_type_id,
+                                           uint32_t member_index,
+                                           const Decoration& decoration);
 
   /// Returns a string for the given type.  If the type ID is invalid,
   /// then the resulting string only names the type ID.
@@ -298,7 +297,7 @@ class ParserImpl : Reader {
                               type::Type* type,
                               bool is_const,
                               ast::Expression* constructor,
-                              ast::VariableDecorationList decorations);
+                              ast::DecorationList decorations);
 
   /// Creates an AST expression node for a SPIR-V constant.
   /// @param id the SPIR-V ID of the constant
@@ -537,7 +536,7 @@ class ParserImpl : Reader {
   /// @param decorations the populated decoration list
   /// @returns true on success.
   bool ParseArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
-                             ast::ArrayDecorationList* decorations);
+                             ast::DecorationList* decorations);
 
   /// Creates a new `ast::Node` owned by the ProgramBuilder.
   /// @param args the arguments to pass to the type constructor

@@ -377,7 +377,7 @@ std::string ParserImpl::ShowType(uint32_t type_id) {
   return "SPIR-V type " + std::to_string(type_id);
 }
 
-ast::StructMemberDecoration* ParserImpl::ConvertMemberDecoration(
+ast::Decoration* ParserImpl::ConvertMemberDecoration(
     uint32_t struct_type_id,
     uint32_t member_index,
     const Decoration& decoration) {
@@ -729,7 +729,7 @@ type::Type* ParserImpl::ConvertType(
   if (ast_elem_ty == nullptr) {
     return nullptr;
   }
-  ast::ArrayDecorationList decorations;
+  ast::DecorationList decorations;
   if (!ParseArrayDecorations(rtarr_ty, &decorations)) {
     return nullptr;
   }
@@ -770,7 +770,7 @@ type::Type* ParserImpl::ConvertType(
            << num_elem;
     return nullptr;
   }
-  ast::ArrayDecorationList decorations;
+  ast::DecorationList decorations;
   if (!ParseArrayDecorations(arr_ty, &decorations)) {
     return nullptr;
   }
@@ -784,7 +784,7 @@ type::Type* ParserImpl::ConvertType(
 
 bool ParserImpl::ParseArrayDecorations(
     const spvtools::opt::analysis::Type* spv_type,
-    ast::ArrayDecorationList* decorations) {
+    ast::DecorationList* decorations) {
   bool has_array_stride = false;
   const auto type_id = type_mgr_->GetId(spv_type);
   for (auto& decoration : this->GetDecorationsFor(type_id)) {
@@ -816,7 +816,7 @@ type::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Struct* struct_ty) {
   // Compute the struct decoration.
   auto struct_decorations = this->GetDecorationsFor(type_id);
-  ast::StructDecorationList ast_struct_decorations;
+  ast::DecorationList ast_struct_decorations;
   if (struct_decorations.size() == 1) {
     const auto decoration = struct_decorations[0][0];
     if (decoration == SpvDecorationBlock) {
@@ -849,7 +849,7 @@ type::Type* ParserImpl::ConvertType(
       // Already emitted diagnostics.
       return nullptr;
     }
-    ast::StructMemberDecorationList ast_member_decorations;
+    ast::DecorationList ast_member_decorations;
     bool is_non_writable = false;
     for (auto& decoration : GetDecorationsForMember(type_id, member_index)) {
       if (decoration.empty()) {
@@ -1034,7 +1034,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
         break;
     }
     if (ast_type && ast_expr) {
-      ast::VariableDecorationList spec_id_decos;
+      ast::DecorationList spec_id_decos;
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
           auto* cid = create<ast::ConstantIdDecoration>(Source{}, deco[1]);
@@ -1161,7 +1161,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     }
     auto* ast_var =
         MakeVariable(var.result_id(), ast_storage_class, ast_store_type, false,
-                     ast_constructor, ast::VariableDecorationList{});
+                     ast_constructor, ast::DecorationList{});
     // TODO(dneto): initializers (a.k.a. constructor expression)
     if (ast_var) {
       builder_.AST().AddGlobalVariable(ast_var);
@@ -1177,7 +1177,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
         builtin_position_.per_vertex_var_id,
         enum_converter_.ToStorageClass(builtin_position_.storage_class),
         ConvertType(builtin_position_.position_member_type_id), false, nullptr,
-        ast::VariableDecorationList{
+        ast::DecorationList{
             create<ast::BuiltinDecoration>(Source{}, ast::Builtin::kPosition),
         });
 
@@ -1211,13 +1211,12 @@ const spvtools::opt::analysis::IntConstant* ParserImpl::GetArraySize(
   return size->AsIntConstant();
 }
 
-ast::Variable* ParserImpl::MakeVariable(
-    uint32_t id,
-    ast::StorageClass sc,
-    type::Type* type,
-    bool is_const,
-    ast::Expression* constructor,
-    ast::VariableDecorationList decorations) {
+ast::Variable* ParserImpl::MakeVariable(uint32_t id,
+                                        ast::StorageClass sc,
+                                        type::Type* type,
+                                        bool is_const,
+                                        ast::Expression* constructor,
+                                        ast::DecorationList decorations) {
   if (type == nullptr) {
     Fail() << "internal error: can't make ast::Variable for null type";
     return nullptr;

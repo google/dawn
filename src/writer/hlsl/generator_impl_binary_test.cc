@@ -457,7 +457,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   // foo(a && b, c || d, (a || c) && (b || d))
 
   Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
   Global("a", ty.bool_(), ast::StorageClass::kNone);
   Global("b", ty.bool_(), ast::StorageClass::kNone);
   Global("c", ty.bool_(), ast::StorageClass::kNone);

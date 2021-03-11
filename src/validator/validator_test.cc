@@ -317,7 +317,7 @@ TEST_F(ValidatorTest, GlobalConstantWithStorageClass_Fail) {
   AST().AddGlobalVariable(create<ast::Variable>(
       Source{Source::Location{12, 34}}, Symbols().Register("global_var"),
       ast::StorageClass::kInput, ty.f32(), true, nullptr,
-      ast::VariableDecorationList{}));
+      ast::DecorationList{}));
 
   ValidatorImpl& v = Build();
 
@@ -350,7 +350,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
        ast::StatementList{
            create<ast::AssignmentStatement>(lhs, rhs),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
 
   Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
@@ -376,7 +376,7 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {
                                             Expr("global_var"), Expr(3.14f)),
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -553,7 +553,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Pass) {
        ast::StatementList{
            create<ast::VariableDeclStatement>(var),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
 
   Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
@@ -579,7 +579,7 @@ TEST_F(ValidatorTest, GlobalVariableFunctionVariableNotUnique_Fail) {
            create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
                                               var),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -602,7 +602,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifier_Fail) {
            create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
                                               var_a_float),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -728,7 +728,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
                                               var0),
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   Func("func1", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -736,7 +736,7 @@ TEST_F(ValidatorTest, RedeclaredIdentifierDifferentFunctions_Pass) {
                                               var1),
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -898,7 +898,7 @@ TEST_F(ValidatorTest, IsStorable_ArrayUnsizedOfNonStorable) {
 
 TEST_F(ValidatorTest, IsStorable_Struct_AllMembersStorable) {
   ast::StructMemberList members{Member("a", ty.i32()), Member("b", ty.f32())};
-  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(Source{}, members, ast::DecorationList{});
   auto* s_ty = ty.struct_("mystruct", s);
 
   ValidatorImpl& v = Build();
@@ -909,7 +909,7 @@ TEST_F(ValidatorTest, IsStorable_Struct_AllMembersStorable) {
 TEST_F(ValidatorTest, IsStorable_Struct_SomeMembersNonStorable) {
   auto* ptr_ty = ty.pointer<int>(ast::StorageClass::kPrivate);
   ast::StructMemberList members{Member("a", ty.i32()), Member("b", ptr_ty)};
-  auto* s = create<ast::Struct>(Source{}, members, ast::StructDecorationList{});
+  auto* s = create<ast::Struct>(Source{}, members, ast::DecorationList{});
   auto* s_ty = ty.struct_("mystruct", s);
 
   ValidatorImpl& v = Build();

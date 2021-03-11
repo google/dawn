@@ -772,18 +772,13 @@ class ParserImpl {
   template <typename T>
   std::vector<T*> take_decorations(ast::DecorationList& list);
 
-  /// Downcasts all the decorations in `list` to the type `T`, raising a parser
-  /// error if any of the decorations aren't of the type `T`.
-  template <typename T>
-  Expect<std::vector<T*>> cast_decorations(ast::DecorationList& list);
-
   /// Reports an error if the decoration list `list` is not empty.
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
 
   Expect<type::Type*> expect_type_decl_pointer();
   Expect<type::Type*> expect_type_decl_vector(Token t);
-  Expect<type::Type*> expect_type_decl_array(ast::ArrayDecorationList decos);
+  Expect<type::Type*> expect_type_decl_array(ast::DecorationList decos);
   Expect<type::Type*> expect_type_decl_matrix(Token t);
 
   Expect<type::Type*> expect_type(const std::string& use);

@@ -887,7 +887,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
         if (ast_type != nullptr) {
           auto* ast_param = parser_impl_.MakeVariable(
               param->result_id(), ast::StorageClass::kNone, ast_type, true,
-              nullptr, ast::VariableDecorationList{});
+              nullptr, ast::DecorationList{});
           // Parameters are treated as const declarations.
           ast_params.emplace_back(ast_param);
           // The value is accessible by name.
@@ -900,7 +900,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
   if (failed()) {
     return false;
   }
-  ast::FunctionDecorationList decos;
+  ast::DecorationList decos;
   if (ep_info_ != nullptr) {
     decos.emplace_back(create<ast::StageDecoration>(Source{}, ep_info_->stage));
   }
@@ -1961,7 +1961,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
     }
     auto* var = parser_impl_.MakeVariable(
         inst.result_id(), ast::StorageClass::kFunction, var_store_type, false,
-        constructor, ast::VariableDecorationList{});
+        constructor, ast::DecorationList{});
     auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
     AddStatement(var_decl_stmt);
     // Save this as an already-named value.
@@ -2287,7 +2287,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
         parser_impl_.Bool(),                      // type
         false,                                    // is_const
         MakeTrue(Source{}),                       // constructor
-        ast::VariableDecorationList{});           // decorations
+        ast::DecorationList{});                   // decorations
     auto* guard_decl = create<ast::VariableDeclStatement>(Source{}, guard_var);
     AddStatement(guard_decl);
   }
@@ -2796,9 +2796,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     auto* ast_type =
         RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
     AddStatement(create<ast::VariableDeclStatement>(
-        Source{}, parser_impl_.MakeVariable(id, ast::StorageClass::kFunction,
-                                            ast_type, false, nullptr,
-                                            ast::VariableDecorationList{})));
+        Source{},
+        parser_impl_.MakeVariable(id, ast::StorageClass::kFunction, ast_type,
+                                  false, nullptr, ast::DecorationList{})));
     // Save this as an already-named value.
     identifier_values_.insert(id);
   }
@@ -2815,7 +2815,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         parser_impl_.ConvertType(def_inst->type_id()),  // type
         false,                                          // is_const
         nullptr,                                        // constructor
-        ast::VariableDecorationList{});                 // decorations
+        ast::DecorationList{});                         // decorations
     AddStatement(create<ast::VariableDeclStatement>(Source{}, var));
   }
 
@@ -2866,7 +2866,7 @@ bool FunctionEmitter::EmitConstDefinition(
   }
   auto* ast_const = parser_impl_.MakeVariable(
       inst.result_id(), ast::StorageClass::kNone, ast_expr.type, true,
-      ast_expr.expr, ast::VariableDecorationList{});
+      ast_expr.expr, ast::DecorationList{});
   if (!ast_const) {
     return false;
   }
@@ -4910,7 +4910,7 @@ bool FunctionEmitter::MakeVectorInsertDynamic(
 
   auto* temp_var = create<ast::Variable>(
       Source{}, registered_temp_name, ast::StorageClass::kFunction, ast_type,
-      false, src_vector.expr, ast::VariableDecorationList{});
+      false, src_vector.expr, ast::DecorationList{});
   AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
 
   auto* lhs = create<ast::ArrayAccessorExpression>(
@@ -4956,7 +4956,7 @@ bool FunctionEmitter::MakeCompositeInsert(
 
   auto* temp_var = create<ast::Variable>(
       Source{}, registered_temp_name, ast::StorageClass::kFunction, ast_type,
-      false, src_composite.expr, ast::VariableDecorationList{});
+      false, src_composite.expr, ast::DecorationList{});
   AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
 
   TypedExpression seed_expr{ast_type, create<ast::IdentifierExpression>(

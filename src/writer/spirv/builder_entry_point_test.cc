@@ -51,7 +51,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
   auto* col = Var("col", f32, ast::StorageClass::kFunction, mul, {});
   Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
        ast::StatementList{WrapInStatement(col)},
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 

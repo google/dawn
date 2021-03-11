@@ -33,7 +33,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   auto* var = Const("pos", ty.f32(), Expr(3.0f),
-                    ast::VariableDecorationList{
+                    ast::DecorationList{
                         create<ast::ConstantIdDecoration>(23),
                     });
 
@@ -50,7 +50,7 @@ static const float pos = WGSL_SPEC_CONSTANT_23;
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   auto* var = Const("pos", ty.f32(), nullptr,
-                    ast::VariableDecorationList{
+                    ast::DecorationList{
                         create<ast::ConstantIdDecoration>(23),
                     });
 

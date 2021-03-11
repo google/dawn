@@ -414,7 +414,7 @@ class ArrayBuilder : public Builder {
 
   type::Type* Build(BuildState& state) const override {
     auto* el = element_builder_->Build(state);
-    return state.ty_mgr.Get<type::Array>(el, 0, ast::ArrayDecorationList{});
+    return state.ty_mgr.Get<type::Array>(el, 0, ast::DecorationList{});
   }
 
   std::string str() const override {

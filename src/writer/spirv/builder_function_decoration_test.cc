@@ -24,10 +24,10 @@ namespace {
 
 using BuilderTest = TestHelper;
 
-TEST_F(BuilderTest, FunctionDecoration_Stage) {
+TEST_F(BuilderTest, Decoration_Stage) {
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
@@ -47,12 +47,12 @@ inline std::ostream& operator<<(std::ostream& out, FunctionStageData data) {
   out << data.stage;
   return out;
 }
-using FunctionDecoration_StageTest = TestParamHelper<FunctionStageData>;
-TEST_P(FunctionDecoration_StageTest, Emit) {
+using Decoration_StageTest = TestParamHelper<FunctionStageData>;
+TEST_P(Decoration_StageTest, Emit) {
   auto params = GetParam();
 
   auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
-                    ast::FunctionDecorationList{
+                    ast::DecorationList{
                         create<ast::StageDecoration>(params.stage),
                     });
 
@@ -69,7 +69,7 @@ TEST_P(FunctionDecoration_StageTest, Emit) {
 }
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
-    FunctionDecoration_StageTest,
+    Decoration_StageTest,
     testing::Values(FunctionStageData{ast::PipelineStage::kVertex,
                                       SpvExecutionModelVertex},
                     FunctionStageData{ast::PipelineStage::kFragment,
@@ -77,10 +77,10 @@ INSTANTIATE_TEST_SUITE_P(
                     FunctionStageData{ast::PipelineStage::kCompute,
                                       SpvExecutionModelGLCompute}));
 
-TEST_F(BuilderTest, FunctionDecoration_Stage_WithUnusedInterfaceIds) {
+TEST_F(BuilderTest, Decoration_Stage_WithUnusedInterfaceIds) {
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
@@ -116,7 +116,7 @@ OpName %11 "main"
 )");
 }
 
-TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
+TEST_F(BuilderTest, Decoration_Stage_WithUsedInterfaceIds) {
   auto* func =
       Func("main", {}, ty.void_(),
            ast::StatementList{
@@ -125,7 +125,7 @@ TEST_F(BuilderTest, FunctionDecoration_Stage_WithUsedInterfaceIds) {
                // Add duplicate usages so we show they don't get
                // output multiple times.
                create<ast::AssignmentStatement>(Expr("my_out"), Expr("my_in"))},
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
@@ -161,10 +161,10 @@ OpName %11 "main"
 )");
 }
 
-TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
+TEST_F(BuilderTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
@@ -176,10 +176,10 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_Fragment_OriginUpperLeft) {
 )");
 }
 
-TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize_Default) {
+TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
@@ -191,10 +191,10 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize_Default) {
 )");
 }
 
-TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize) {
+TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize) {
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::WorkgroupDecoration>(2u, 4u, 6u),
                create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
@@ -207,16 +207,16 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_WorkgroupSize) {
 )");
 }
 
-TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_MultipleFragment) {
+TEST_F(BuilderTest, Decoration_ExecutionMode_MultipleFragment) {
   auto* func1 =
       Func("main1", {}, ty.void_(), ast::StatementList{},
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
   auto* func2 =
       Func("main2", {}, ty.void_(), ast::StatementList{},
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
@@ -244,9 +244,9 @@ OpFunctionEnd
 )");
 }
 
-TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
+TEST_F(BuilderTest, Decoration_ExecutionMode_FragDepth) {
   Global("fragdepth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::VariableDecorationList{
+         ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
          });
 
@@ -255,7 +255,7 @@ TEST_F(BuilderTest, FunctionDecoration_ExecutionMode_FragDepth) {
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("fragdepth"), Expr(1.f)),
            },
-           ast::FunctionDecorationList{});
+           ast::DecorationList{});
 
   spirv::Builder& b = Build();
 

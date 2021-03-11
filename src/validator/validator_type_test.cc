@@ -28,7 +28,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLast_Pass) {
   //   rt: array<f32>;
   // };
 
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st =
       create<ast::Struct>(ast::StructMemberList{Member("vf", ty.f32()),
@@ -50,7 +50,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsLastNoBlock_Fail) {
   //   rt: array<f32>;
   // };
 
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   auto* st =
       create<ast::Struct>(ast::StructMemberList{Member("vf", ty.f32()),
                                                 Member("rt", ty.array<f32>())},
@@ -74,7 +74,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayIsNotLast_Fail) {
   //   vf: f32;
   // };
 
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
 
   SetSource(Source::Location{12, 34});
@@ -105,7 +105,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsNotLast_Fail) {
 
   auto* alias = ty.alias("RTArr", ty.array<u32>());
 
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st = create<ast::Struct>(
       ast::StructMemberList{Member("b", alias), Member("a", ty.u32())}, decos);
@@ -131,7 +131,7 @@ TEST_F(ValidatorTypeTest, AliasRuntimeArrayIsLast_Pass) {
 
   auto* alias = ty.alias("RTArr", ty.array<u32>());
 
-  ast::StructDecorationList decos;
+  ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st = create<ast::Struct>(
       ast::StructMemberList{Member("a", ty.u32()), Member("b", alias)}, decos);
@@ -155,7 +155,7 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
            create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
                                               var),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
@@ -178,13 +178,13 @@ TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
        ast::StatementList{
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::ReturnStatement>(),
        },
-       ast::FunctionDecorationList{
+       ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 

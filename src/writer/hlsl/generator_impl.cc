@@ -1520,8 +1520,8 @@ bool GeneratorImpl::EmitEntryPointData(
     std::ostream& out,
     ast::Function* func,
     std::unordered_set<Symbol>& emitted_globals) {
-  std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> in_variables;
-  std::vector<std::pair<ast::Variable*, ast::VariableDecoration*>> outvariables;
+  std::vector<std::pair<ast::Variable*, ast::Decoration*>> in_variables;
+  std::vector<std::pair<ast::Variable*, ast::Decoration*>> outvariables;
   auto* func_sem = builder_.Sem().Get(func);
   auto func_sym = func->symbol();
 
@@ -2525,7 +2525,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
                                    const type::Struct* str,
                                    const std::string& name) {
   // TODO(dsinclair): Block decoration?
-  // if (str->impl()->decoration() != ast::StructDecoration::kNone) {
+  // if (str->impl()->decoration() != ast::Decoration::kNone) {
   // }
   out << "struct " << name << " {" << std::endl;
 

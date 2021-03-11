@@ -161,7 +161,7 @@ TEST_F(ParserImplTest, StructDecl_InvalidStructBody) {
   EXPECT_EQ(p->error(), "1:16: unknown constructed type 'B'");
 }
 
-TEST_F(ParserImplTest, StructDecl_InvalidStructDecorationDecl) {
+TEST_F(ParserImplTest, StructDecl_InvalidDecorationDecl) {
   auto p = parser("[[block struct S { a : i32; }");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);

@@ -248,7 +248,7 @@ TEST_F(ResolverTest, Stmt_Switch) {
 TEST_F(ResolverTest, Stmt_Call) {
   ast::VariableList params;
   Func("my_func", params, ty.f32(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   auto* expr = Call("my_func");
 
@@ -337,7 +337,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
 
   Func("func", params, ty.f32(),
        ast::StatementList{inner, foo_f32_decl, bar_f32_decl},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   EXPECT_TRUE(r()->Resolve());
   ASSERT_NE(TypeOf(foo_i32_init), nullptr);
@@ -372,7 +372,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   auto* fn_i32_init = fn_i32->constructor();
   auto* fn_i32_decl = create<ast::VariableDeclStatement>(fn_i32);
   Func("func_i32", params, ty.i32(), ast::StatementList{fn_i32_decl},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   // Declare f32 "foo" at module scope
   auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f));
@@ -384,7 +384,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   auto* fn_f32_init = fn_f32->constructor();
   auto* fn_f32_decl = create<ast::VariableDeclStatement>(fn_f32);
   Func("func_f32", params, ty.f32(), ast::StatementList{fn_f32_decl},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   EXPECT_TRUE(r()->Resolve());
   ASSERT_NE(TypeOf(mod_init), nullptr);
@@ -506,7 +506,7 @@ TEST_F(ResolverTest, Expr_Bitcast) {
 TEST_F(ResolverTest, Expr_Call) {
   ast::VariableList params;
   Func("my_func", params, ty.f32(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   auto* call = Call("my_func");
   WrapInFunction(call);
@@ -519,8 +519,7 @@ TEST_F(ResolverTest, Expr_Call) {
 
 TEST_F(ResolverTest, Expr_Call_InBinaryOp) {
   ast::VariableList params;
-  Func("func", params, ty.f32(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+  Func("func", params, ty.f32(), ast::StatementList{}, ast::DecorationList{});
 
   auto* expr = Add(Call("func"), Call("func"));
   WrapInFunction(expr);
@@ -534,7 +533,7 @@ TEST_F(ResolverTest, Expr_Call_InBinaryOp) {
 TEST_F(ResolverTest, Expr_Call_WithParams) {
   ast::VariableList params;
   Func("my_func", params, ty.f32(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   auto* param = Expr(2.4f);
 
@@ -629,7 +628,7 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
            create<ast::VariableDeclStatement>(var),
            assign,
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -654,7 +653,7 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
            create<ast::VariableDeclStatement>(var),
            assign,
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -681,7 +680,7 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
                    ast::StorageClass::kNone)),
            assign,
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -697,7 +696,7 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
 
 TEST_F(ResolverTest, Expr_Call_Function) {
   Func("my_func", ast::VariableList{}, ty.f32(), ast::StatementList{},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   auto* call = Call("my_func");
   WrapInFunction(call);
@@ -730,7 +729,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
           create<ast::AssignmentStatement>(Expr("sb_var"), Expr("sb_var")),
           create<ast::AssignmentStatement>(Expr("priv_var"), Expr("priv_var")),
       },
-      ast::FunctionDecorationList{});
+      ast::DecorationList{});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -760,14 +759,14 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
            create<ast::AssignmentStatement>(Expr("sb_var"), Expr("sb_var")),
            create<ast::AssignmentStatement>(Expr("priv_var"), Expr("priv_var")),
        },
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   auto* func2 = Func(
       "func", ast::VariableList{}, ty.f32(),
       ast::StatementList{
           create<ast::AssignmentStatement>(Expr("out_var"), Call("my_func")),
       },
-      ast::FunctionDecorationList{});
+      ast::DecorationList{});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -792,7 +791,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
                create<ast::VariableDeclStatement>(var),
                create<ast::AssignmentStatement>(Expr("var"), Expr(1.f)),
            },
-           ast::FunctionDecorationList{});
+           ast::DecorationList{});
 
   Global("var", ty.f32(), ast::StorageClass::kFunction);
 
@@ -808,7 +807,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
   auto* strct = create<ast::Struct>(
       ast::StructMemberList{Member("first_member", ty.i32()),
                             Member("second_member", ty.f32())},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* st = ty.struct_("S", strct);
   Global("my_struct", st, ast::StorageClass::kNone);
@@ -829,7 +828,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
   auto* strct = create<ast::Struct>(
       ast::StructMemberList{Member("first_member", ty.i32()),
                             Member("second_member", ty.f32())},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* st = ty.struct_("alias", strct);
   auto* alias = ty.alias("alias", st);
@@ -906,12 +905,12 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 
   auto* strctB =
       create<ast::Struct>(ast::StructMemberList{Member("foo", ty.vec4<f32>())},
-                          ast::StructDecorationList{});
+                          ast::DecorationList{});
   auto* stB = ty.struct_("B", strctB);
 
   type::Vector vecB(stB, 3);
   auto* strctA = create<ast::Struct>(
-      ast::StructMemberList{Member("mem", &vecB)}, ast::StructDecorationList{});
+      ast::StructMemberList{Member("mem", &vecB)}, ast::DecorationList{});
 
   auto* stA = ty.struct_("A", strctA);
   Global("c", stA, ast::StorageClass::kNone);
@@ -933,7 +932,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
   auto* strct = create<ast::Struct>(
       ast::StructMemberList{Member("first_member", ty.f32()),
                             Member("second_member", ty.f32())},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
 
   auto* st = ty.struct_("S", strct);
   Global("my_struct", st, ast::StorageClass::kNone);
@@ -1214,7 +1213,7 @@ TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1225,7 +1224,7 @@ TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {
   auto* var = Const("var", ty.i32());
   auto* stmt = create<ast::VariableDeclStatement>(var);
   Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
-       ast::FunctionDecorationList{});
+       ast::DecorationList{});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1246,21 +1245,21 @@ TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
   // ep_2 -> {}
 
   ast::VariableList params;
-  auto* func_b = Func("b", params, ty.f32(), ast::StatementList{},
-                      ast::FunctionDecorationList{});
+  auto* func_b =
+      Func("b", params, ty.f32(), ast::StatementList{}, ast::DecorationList{});
   auto* func_c =
       Func("c", params, ty.f32(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("second"), Call("b")),
            },
-           ast::FunctionDecorationList{});
+           ast::DecorationList{});
 
   auto* func_a =
       Func("a", params, ty.f32(),
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("first"), Call("c")),
            },
-           ast::FunctionDecorationList{});
+           ast::DecorationList{});
 
   auto* ep_1 =
       Func("ep_1", params, ty.f32(),
@@ -1268,7 +1267,7 @@ TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
                create<ast::AssignmentStatement>(Expr("call_a"), Call("a")),
                create<ast::AssignmentStatement>(Expr("call_b"), Call("b")),
            },
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 
@@ -1277,7 +1276,7 @@ TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
            ast::StatementList{
                create<ast::AssignmentStatement>(Expr("call_c"), Call("c")),
            },
-           ast::FunctionDecorationList{
+           ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
 

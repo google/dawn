@@ -17,10 +17,15 @@
 #include <utility>
 
 #include "src/ast/call_statement.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/stride_decoration.h"
+#include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/workgroup_decoration.h"
 #include "src/semantic/call.h"
 #include "src/semantic/function.h"
 #include "src/semantic/variable.h"
@@ -108,7 +113,33 @@ bool ValidatorImpl::ValidateConstructedType(const type::Type* type) {
                           program_->Symbols().NameFor(st->symbol()) + "'");
             return false;
           }
+
+          for (auto* deco : r->decorations()) {
+            if (!deco->Is<ast::StrideDecoration>()) {
+              add_error(deco->source(),
+                        "decoration is not valid for array types");
+              return false;
+            }
+          }
         }
+      }
+
+      for (auto* deco : member->decorations()) {
+        if (!(deco->Is<ast::BuiltinDecoration>() ||
+              deco->Is<ast::LocationDecoration>() ||
+              deco->Is<ast::StructMemberOffsetDecoration>())) {
+          add_error(deco->source(),
+                    "decoration is not valid for structure members");
+          return false;
+        }
+      }
+    }
+
+    for (auto* deco : st->impl()->decorations()) {
+      if (!(deco->Is<ast::StructBlockDecoration>())) {
+        add_error(deco->source(),
+                  "decoration is not valid for struct declarations");
+        return false;
       }
     }
   }
@@ -141,6 +172,18 @@ bool ValidatorImpl::ValidateGlobalVariable(const ast::Variable* var) {
               "global constants shouldn't have a storage class");
     return false;
   }
+
+  for (auto* deco : var->decorations()) {
+    if (!(deco->Is<ast::BindingDecoration>() ||
+          deco->Is<ast::BuiltinDecoration>() ||
+          deco->Is<ast::ConstantIdDecoration>() ||
+          deco->Is<ast::GroupDecoration>() ||
+          deco->Is<ast::LocationDecoration>())) {
+      add_error(deco->source(), "decoration is not valid for variables");
+      return false;
+    }
+  }
+
   variable_stack_.set_global(var->symbol(), var);
   return true;
 }
@@ -154,6 +197,9 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
       for (auto* deco : func->decorations()) {
         if (deco->Is<ast::StageDecoration>()) {
           stage_deco_count++;
+        } else if (!deco->Is<ast::WorkgroupDecoration>()) {
+          add_error(func->source(), "decoration is not valid for functions");
+          return false;
         }
       }
       if (stage_deco_count > 1) {

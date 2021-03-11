@@ -144,7 +144,7 @@ TEST_F(AliasTest, MinBufferBindingSizeU32) {
 
 TEST_F(AliasTest, MinBufferBindingSizeArray) {
   Array array(ty.u32(), 4,
-              ast::ArrayDecorationList{
+              ast::DecorationList{
                   create<ast::StrideDecoration>(4),
               });
   auto* alias = ty.alias("alias", &array);
@@ -153,7 +153,7 @@ TEST_F(AliasTest, MinBufferBindingSizeArray) {
 
 TEST_F(AliasTest, MinBufferBindingSizeRuntimeArray) {
   Array array(ty.u32(), 0,
-              ast::ArrayDecorationList{
+              ast::DecorationList{
                   create<ast::StrideDecoration>(4),
               });
   auto* alias = ty.alias("alias", &array);
@@ -164,7 +164,7 @@ TEST_F(AliasTest, MinBufferBindingSizeStruct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* struct_type = ty.struct_("struct_type", str);
   auto* alias = ty.alias("alias", struct_type);
 
@@ -179,7 +179,7 @@ TEST_F(AliasTest, BaseAlignmentU32) {
 
 TEST_F(AliasTest, BaseAlignmentArray) {
   Array array(ty.u32(), 4,
-              ast::ArrayDecorationList{
+              ast::DecorationList{
                   create<ast::StrideDecoration>(4),
               });
   auto* alias = ty.alias("alias", &array);
@@ -188,7 +188,7 @@ TEST_F(AliasTest, BaseAlignmentArray) {
 
 TEST_F(AliasTest, BaseAlignmentRuntimeArray) {
   Array array(ty.u32(), 0,
-              ast::ArrayDecorationList{
+              ast::DecorationList{
                   create<ast::StrideDecoration>(4),
               });
   auto* alias = ty.alias("alias", &array);
@@ -199,7 +199,7 @@ TEST_F(AliasTest, BaseAlignmentStruct) {
   auto* str = create<ast::Struct>(
       ast::StructMemberList{Member("foo", ty.u32(), {MemberOffset(0)}),
                             Member("bar", ty.u32(), {MemberOffset(4)})},
-      ast::StructDecorationList{});
+      ast::DecorationList{});
   auto* struct_type = ty.struct_("struct_type", str);
   auto* alias = ty.alias("alias", struct_type);
 
