@@ -174,6 +174,23 @@ namespace dawn_native {
             }
         }
 
+        ResultOrError<wgpu::TextureComponentType> TintComponentTypeToTextureComponentType(
+            tint::inspector::ComponentType type) {
+            switch (type) {
+                case tint::inspector::ComponentType::kFloat:
+                    return wgpu::TextureComponentType::Float;
+                case tint::inspector::ComponentType::kSInt:
+                    return wgpu::TextureComponentType::Sint;
+                case tint::inspector::ComponentType::kUInt:
+                    return wgpu::TextureComponentType::Uint;
+                default:
+                    break;
+            }
+
+            return DAWN_VALIDATION_ERROR(
+                "Attempted to convert unexpected component type from Tint");
+        }
+
 #endif  // DAWN_ENABLE_WGSL
 
         MaybeError ValidateSpirv(const uint32_t* code, uint32_t codeSize) {
@@ -781,6 +798,35 @@ namespace dawn_native {
                     }
                 }
 
+                if (metadata->stage == SingleShaderStage::Fragment) {
+                    for (const auto& input_var : entryPoint.input_variables) {
+                        if (!input_var.has_location_decoration) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Need location decoration on fragment input");
+                        }
+                    }
+
+                    for (const auto& output_var : entryPoint.output_variables) {
+                        if (!output_var.has_location_decoration) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Need location decoration on fragment output");
+                        }
+
+                        uint32_t unsanitizedAttachment = output_var.location_decoration;
+                        if (unsanitizedAttachment >= kMaxColorAttachments) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Fragment output index must be less than max number of color "
+                                "attachments");
+                        }
+                        ColorAttachmentIndex attachment(
+                            static_cast<uint8_t>(unsanitizedAttachment));
+                        DAWN_TRY_ASSIGN(
+                            metadata->fragmentOutputFormatBaseTypes[attachment],
+                            TintComponentTypeToTextureComponentType(output_var.component_type));
+                        metadata->fragmentOutputsWritten.set(attachment);
+                    }
+                }
+
                 result[entryPoint.name] = std::move(metadata);
             }
             return std::move(result);
@@ -866,11 +912,20 @@ namespace dawn_native {
                     }
                 }
 
+                if (tintEntry->stage == SingleShaderStage::Fragment) {
+                    // Equality is explictly not being tested, since SPIRV-Cross will include unused
+                    // variables in the written bitset. Instead testing that Tint's bitset is
+                    // a subset of SPIRV-Cross's.
+                    if (tintEntry->fragmentOutputsWritten !=
+                        (tintEntry->fragmentOutputsWritten & crossEntry->fragmentOutputsWritten)) {
+                        return DAWN_VALIDATION_ERROR(
+                            "Tint and SPIRV-Cross returned different values for used fragment "
+                            "output base type");
+                    }
+                }
+
                 // TODO(rharrison): Use the Inspector to get this data.
                 tintEntry->bindings = crossEntry->bindings;
-                tintEntry->fragmentOutputFormatBaseTypes =
-                    crossEntry->fragmentOutputFormatBaseTypes;
-                tintEntry->fragmentOutputsWritten = crossEntry->fragmentOutputsWritten;
             }
             return {};
         }
