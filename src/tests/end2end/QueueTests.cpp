@@ -322,6 +322,32 @@ class QueueWriteTextureTests : public DawnTest {
             dataOffset += bytesPerImage;
         }
     }
+
+    void DoSimpleWriteTextureTest(uint32_t width, uint32_t height) {
+        constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
+        constexpr uint32_t kPixelSize = 4;
+
+        std::vector<uint32_t> data(width * height);
+        for (size_t i = 0; i < data.size(); i++) {
+            data[i] = 0xFFFFFFFF;
+        }
+
+        wgpu::TextureDescriptor descriptor = {};
+        descriptor.size = {width, height, 1};
+        descriptor.format = kFormat;
+        descriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc;
+        wgpu::Texture texture = device.CreateTexture(&descriptor);
+
+        wgpu::ImageCopyTexture imageCopyTexture =
+            utils::CreateImageCopyTexture(texture, 0, {0, 0, 0});
+        wgpu::TextureDataLayout textureDataLayout =
+            utils::CreateTextureDataLayout(0, width * kPixelSize);
+        wgpu::Extent3D copyExtent = {width, height, 1};
+        device.GetQueue().WriteTexture(&imageCopyTexture, data.data(), width * height * kPixelSize,
+                                       &textureDataLayout, &copyExtent);
+
+        EXPECT_TEXTURE_RGBA8_EQ(data.data(), texture, 0, 0, width, height, 0, 0);
+    }
 };
 
 // Test writing the whole texture for varying texture sizes.
@@ -611,6 +637,19 @@ TEST_P(QueueWriteTextureTests, UnalignedDynamicUploader) {
     textureSpec.level = 0;
 
     DoTest(textureSpec, MinimumDataSpec(size), size);
+}
+
+// This tests for a bug that occurred within the D3D12 CopyTextureSplitter, which incorrectly copied
+// data when the internal offset was larger than 256, but less than 512 and the copy size was 64
+// width or less with a height of 1.
+TEST_P(QueueWriteTextureTests, WriteTo64x1TextureFromUnalignedDynamicUploader) {
+    // First, WriteTexture with 96 pixels, or 384 bytes to create an offset in the dynamic uploader.
+    DoSimpleWriteTextureTest(96, 1);
+
+    // Now test writing to a 64x1 texture. Because a 64x1 texture's row pitch is equal to its slice
+    // pitch, the texture copy offset could be calculated incorrectly inside the internal D3D12
+    // TextureCopySplitter.
+    DoSimpleWriteTextureTest(64, 1);
 }
 
 DAWN_INSTANTIATE_TEST(QueueWriteTextureTests,

@@ -141,8 +141,9 @@ namespace {
             uint32_t absoluteTexelOffset =
                 copySplit.offset / textureSpec.texelBlockSizeInBytes * texelsPerBlock +
                 copy.bufferOffset.x / textureSpec.blockWidth * texelsPerBlock +
-                copy.bufferOffset.y / textureSpec.blockHeight * bytesPerRowInTexels +
-                copy.bufferOffset.z * slicePitchInTexels;
+                copy.bufferOffset.y / textureSpec.blockHeight * bytesPerRowInTexels;
+
+            ASSERT_EQ(copy.bufferOffset.z, 0u);
 
             ASSERT(absoluteTexelOffset >=
                    bufferSpec.offset / textureSpec.texelBlockSizeInBytes * texelsPerBlock);
@@ -203,6 +204,7 @@ namespace {
     // Define base texture sizes and offsets to test with: some aligned, some unaligned
     constexpr TextureSpec kBaseTextureSpecs[] = {
         {0, 0, 0, 1, 1, 1, 4},
+        {0, 0, 0, 64, 1, 1, 4},
         {31, 16, 0, 1, 1, 1, 4},
         {64, 16, 0, 1, 1, 1, 4},
         {64, 16, 8, 1, 1, 1, 4},
@@ -237,7 +239,7 @@ namespace {
 
     // Define base buffer sizes to work with: some offsets aligned, some unaligned. bytesPerRow is
     // the minimum required
-    std::array<BufferSpec, 13> BaseBufferSpecs(const TextureSpec& textureSpec) {
+    std::array<BufferSpec, 14> BaseBufferSpecs(const TextureSpec& textureSpec) {
         uint32_t bytesPerRow = Align(textureSpec.texelBlockSizeInBytes * textureSpec.width,
                                      kTextureBytesPerRowAlignment);
 
@@ -265,6 +267,8 @@ namespace {
             BufferSpec{alignNonPow2(31, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
             BufferSpec{alignNonPow2(257, textureSpec.texelBlockSizeInBytes), bytesPerRow,
+                       textureSpec.height},
+            BufferSpec{alignNonPow2(384, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
             BufferSpec{alignNonPow2(511, textureSpec.texelBlockSizeInBytes), bytesPerRow,
                        textureSpec.height},
