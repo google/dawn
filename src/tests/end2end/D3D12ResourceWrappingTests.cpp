@@ -122,6 +122,7 @@ namespace {
 
             dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
             externalAccessDesc.acquireMutexKey = 0;
+            externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(dawnDesc->usage);
 
             *dawnTexture = wgpu::Texture::Acquire(
                 externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
@@ -361,6 +362,7 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
         externalAccessDesc.acquireMutexKey = 1;
         externalAccessDesc.isInitialized = isInitialized;
+        externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(dawnDescriptor->usage);
 
         *dawnTextureOut = wgpu::Texture::Acquire(
             externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
@@ -573,6 +575,7 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
     dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
     externalAccessDesc.acquireMutexKey = 1;
     externalAccessDesc.isInitialized = true;
+    externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(baseDawnDescriptor.usage);
 
     texture =
         wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
@@ -588,6 +591,32 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
 
         EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture.Get(), 0, 0);
     }
+}
+
+// Produce a new texture with a usage not specified in the external image.
+TEST_P(D3D12SharedHandleUsageTests, ExternalImageUsage) {
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    dawn_native::d3d12::ExternalImageAccessDescriptorDXGIKeyedMutex externalAccessDesc;
+    externalAccessDesc.acquireMutexKey = 1;
+    externalAccessDesc.isInitialized = true;
+
+    wgpu::Texture texture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    std::unique_ptr<dawn_native::d3d12::ExternalImageDXGI> externalImage;
+    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
+                     &externalImage);
+    ASSERT_NE(texture.Get(), nullptr);
+
+    externalAccessDesc.usage = WGPUTextureUsage_Storage;
+    texture =
+        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+    ASSERT_EQ(texture.Get(), nullptr);
+
+    externalAccessDesc.usage = WGPUTextureUsage_Sampled;
+    texture =
+        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+    ASSERT_NE(texture.Get(), nullptr);
 }
 
 DAWN_INSTANTIATE_TEST(D3D12SharedHandleValidation, D3D12Backend());

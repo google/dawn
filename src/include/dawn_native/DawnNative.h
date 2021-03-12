@@ -231,6 +231,7 @@ namespace dawn_native {
     struct DAWN_NATIVE_EXPORT ExternalImageAccessDescriptor {
       public:
         bool isInitialized;  // Whether the texture is initialized on import
+        WGPUTextureUsageFlags usage;
     };
 
     struct DAWN_NATIVE_EXPORT ExternalImageExportInfo {
