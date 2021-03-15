@@ -509,7 +509,7 @@ TEST_P(IntegerAllMatching, Vec2Unsigned) {
 
   ast::ExpressionList params;
   for (uint32_t i = 0; i < num_params; ++i) {
-    params.push_back(vec2<uint32_t>(1, 1));
+    params.push_back(vec2<uint32_t>(1u, 1u));
   }
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
@@ -526,7 +526,7 @@ TEST_P(IntegerAllMatching, Vec3Unsigned) {
 
   ast::ExpressionList params;
   for (uint32_t i = 0; i < num_params; ++i) {
-    params.push_back(vec3<uint32_t>(1, 1, 1));
+    params.push_back(vec3<uint32_t>(1u, 1u, 1u));
   }
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
@@ -543,7 +543,7 @@ TEST_P(IntegerAllMatching, Vec4Unsigned) {
 
   ast::ExpressionList params;
   for (uint32_t i = 0; i < num_params; ++i) {
-    params.push_back(vec4<uint32_t>(1, 1, 1, 1));
+    params.push_back(vec4<uint32_t>(1u, 1u, 1u, 1u));
   }
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);

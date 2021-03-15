@@ -177,6 +177,8 @@ class Resolver {
   bool Call(ast::CallExpression*);
   bool CaseStatement(ast::CaseStatement*);
   bool Constructor(ast::ConstructorExpression*);
+  bool VectorConstructor(const type::Vector& vec_type,
+                         const ast::ExpressionList& values);
   bool Expression(ast::Expression*);
   bool Expressions(const ast::ExpressionList&);
   bool Function(ast::Function*);

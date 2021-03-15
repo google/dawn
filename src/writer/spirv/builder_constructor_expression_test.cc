@@ -141,7 +141,7 @@ TEST_F(SpvBuilderConstructorTest, Type_IdentifierExpression_Param) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
-  auto* t = vec2<u32>(1, 1);
+  auto* t = vec2<u32>(Construct<u32>(1), Construct<u32>(1));
   WrapInFunction(t);
 
   spirv::Builder& b = Build();
@@ -153,14 +153,14 @@ TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
 %1 = OpTypeVector %2 2
-%3 = OpTypeInt 32 1
-%4 = OpConstant %3 1
+%4 = OpTypeInt 32 1
+%5 = OpConstant %4 1
 )");
 
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%5 = OpBitcast %2 %4
-%6 = OpBitcast %2 %4
-%7 = OpCompositeConstruct %1 %5 %6
+            R"(%3 = OpBitcast %2 %5
+%6 = OpBitcast %2 %5
+%7 = OpCompositeConstruct %1 %3 %6
 )");
 }
 
@@ -1450,7 +1450,7 @@ TEST_F(SpvBuilderConstructorTest,
 
 TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_GlobalVectorWithMatchingTypeConstructors) {
-  // vec3<f32>(f32(1.0), f32(2.0))  -> false
+  // vec2<f32>(f32(1.0), f32(2.0))  -> false
 
   auto* t = vec2<f32>(Construct<f32>(1.f), Construct<f32>(2.f));
   WrapInFunction(t);
@@ -1463,7 +1463,7 @@ TEST_F(SpvBuilderConstructorTest,
 
 TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_GlobalWithTypeCastConstructor) {
-  // vec3<f32>(f32(1), f32(2)) -> false
+  // vec2<f32>(f32(1), f32(2)) -> false
 
   auto* t = vec2<f32>(Construct<f32>(1), Construct<f32>(2));
   WrapInFunction(t);
@@ -1521,22 +1521,10 @@ TEST_F(SpvBuilderConstructorTest,
 }
 
 TEST_F(SpvBuilderConstructorTest,
-       IsConstructorConst_VectorWith_TypeCastConstConstructors) {
+       IsConstructorConst_VectorWithTypeCastConstConstructors) {
   // vec2<f32>(f32(1), f32(2))  -> false
 
-  auto* t = vec2<f32>(1, 2);
-  WrapInFunction(t);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_FALSE(b.is_constructor_const(t, false));
-  EXPECT_FALSE(b.has_error());
-}
-
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_WithTypeCastConstructor) {
-  // vec3<f32>(f32(1), f32(2)) -> false
-
-  auto* t = vec3<f32>(1, 2);
+  auto* t = vec2<f32>(Construct<f32>(1), Construct<f32>(2));
   WrapInFunction(t);
 
   spirv::Builder& b = Build();
@@ -1546,7 +1534,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_WithTypeCastConstructor) {
 }
 
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
-  auto* t = vec2<u32>(1, 1);
+  auto* t = vec2<u32>(Construct<u32>(1), Construct<u32>(1));
   WrapInFunction(t);
 
   spirv::Builder& b = Build();

@@ -65,7 +65,7 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
   var l0 : i32 = 3;
   var l1 : f32 = 8.0;
   var l2 : u32 = bitcast<u32>(4);
-  var l3 : vec2<u32> = vec2<u32>(l0, l1);
+  var l3 : vec2<u32> = vec2<u32>(u32(l0), u32(l1));
   var l4 : S;
   var l5 : u32 = l4.m1[5];
   var l6 : ptr<private, u32>;

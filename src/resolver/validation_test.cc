@@ -373,7 +373,7 @@ TEST_F(ResolverValidationTest,
 }
 
 TEST_F(
-    ResolverTest,
+    ResolverValidationTest,
     Stmt_Loop_ContinueInLoopBodySubscopeBeforeDecl_UsageInContinuingSubscope) {
   // loop  {
   //     if (true) {
@@ -622,6 +622,1046 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeDecoration) {
   EXPECT_EQ(r()->error(),
             "12:34 error: offset decorations cannot be used with align or size "
             "decorations");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2F32_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec2<f32>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)),
+      1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'f32', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2U32_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec2<u32>(1u, create<ast::ScalarConstructorExpression>(
+                               Source{{12, 34}}, Literal(1)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'u32', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2I32_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec2<i32>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1u)),
+      1);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'i32', found 'u32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2Bool_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec2<bool>(true, create<ast::ScalarConstructorExpression>(
+                                  Source{{12, 34}}, Literal(1)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'bool', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2_Error_Vec3ArgumentCardinalityTooLarge) {
+  auto* tc = vec2<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.vec3<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec2<f32>' with 3 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2_Error_Vec4ArgumentCardinalityTooLarge) {
+  auto* tc = vec2<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.vec4<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec2<f32>' with 4 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2_Error_TooFewArgumentsScalar) {
+  auto* tc = vec2<f32>(create<ast::ScalarConstructorExpression>(
+      Source{{12, 34}}, Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec2<f32>' with 1 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2_Error_TooManyArgumentsScalar) {
+  auto* tc = vec2<f32>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 40}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 46}},
+                                               Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec2<f32>' with 3 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2_Error_TooManyArgumentsVector) {
+  auto* tc = vec2<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
+                       create<ast::TypeConstructorExpression>(
+                           Source{{12, 40}}, ty.vec2<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec2<f32>' with 4 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2_Error_TooManyArgumentsVectorAndScalar) {
+  auto* tc = vec2<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
+                       create<ast::ScalarConstructorExpression>(
+                           Source{{12, 40}}, Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec2<f32>' with 3 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2_Error_InvalidConversionFromVec2Bool) {
+  SetSource(Source::Location({12, 34}));
+
+  auto* tc = vec2<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.vec2<bool>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'f32', found 'bool'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2_Error_InvalidArgumentType) {
+  auto* tc = vec2<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.mat2x2<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: expected vector or scalar type in vector "
+            "constructor; found: mat2x2<f32>");
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec2_Success_ZeroValue) {
+  auto* tc = vec2<f32>();
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec2F32_Success_Scalar) {
+  auto* tc = vec2<f32>(1.0f, 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec2U32_Success_Scalar) {
+  auto* tc = vec2<u32>(1u, 1u);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::U32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec2I32_Success_Scalar) {
+  auto* tc = vec2<i32>(1, 1);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::I32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec2Bool_Success_Scalar) {
+  auto* tc = vec2<bool>(true, false);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::Bool>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec2_Success_Identity) {
+  auto* tc = vec2<f32>(vec2<f32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec2_Success_Vec2TypeConversion) {
+  auto* tc = vec2<f32>(vec2<i32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3F32_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec3<f32>(
+      1.0f, 1.0f,
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'f32', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3U32_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec3<u32>(
+      1u,
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)),
+      1u);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'u32', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3I32_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec3<i32>(
+      1,
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1u)),
+      1);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'i32', found 'u32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3Bool_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec3<bool>(
+      true,
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)),
+      false);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'bool', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Error_Vec4ArgumentCardinalityTooLarge) {
+  auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.vec4<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Error_TooFewArgumentsScalar) {
+  auto* tc = vec3<f32>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 40}},
+                                               Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec3<f32>' with 2 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Error_TooManyArgumentsScalar) {
+  auto* tc = vec3<f32>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 40}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 46}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 52}},
+                                               Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Error_TooFewArgumentsVec2) {
+  auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.vec2<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec3<f32>' with 2 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Error_TooManyArgumentsVec2) {
+  auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
+                       create<ast::TypeConstructorExpression>(
+                           Source{{12, 40}}, ty.vec2<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Error_TooManyArgumentsVec2AndScalar) {
+  auto* tc = vec3<f32>(
+      create<ast::TypeConstructorExpression>(Source{{12, 34}}, ty.vec2<f32>(),
+                                             ExprList()),
+      create<ast::ScalarConstructorExpression>(Source{{12, 40}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 46}},
+                                               Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Error_TooManyArgumentsVec3) {
+  auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec3<f32>(), ExprList()),
+                       create<ast::ScalarConstructorExpression>(
+                           Source{{12, 40}}, Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec3<f32>' with 4 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Error_InvalidConversionFromVec3Bool) {
+  auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.vec3<bool>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'f32', found 'bool'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Error_InvalidArgumentType) {
+  auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.mat2x2<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: expected vector or scalar type in vector "
+            "constructor; found: mat2x2<f32>");
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_ZeroValue) {
+  auto* tc = vec3<f32>();
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec3F32_Success_Scalar) {
+  auto* tc = vec3<f32>(1.0f, 1.0f, 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec3U32_Success_Scalar) {
+  auto* tc = vec3<u32>(1u, 1u, 1u);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::U32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec3I32_Success_Scalar) {
+  auto* tc = vec3<i32>(1, 1, 1);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::I32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec3Bool_Success_Scalar) {
+  auto* tc = vec3<bool>(true, false, true);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::Bool>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_Vec2AndScalar) {
+  auto* tc = vec3<f32>(vec2<f32>(), 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_ScalarAndVec2) {
+  auto* tc = vec3<f32>(1.0f, vec2<f32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_Identity) {
+  auto* tc = vec3<f32>(vec3<f32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec3_Success_Vec3TypeConversion) {
+  auto* tc = vec3<f32>(vec3<i32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4F32_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec4<f32>(
+      1.0f, 1.0f,
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)),
+      1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'f32', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4U32_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec4<u32>(
+      1u, 1u,
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)),
+      1u);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'u32', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4I32_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec4<i32>(
+      1, 1,
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1u)),
+      1);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'i32', found 'u32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4Bool_Error_ScalarArgumentTypeMismatch) {
+  auto* tc = vec4<bool>(
+      true, false,
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1)),
+      true);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'bool', found 'i32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooFewArgumentsScalar) {
+  auto* tc = vec4<f32>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 40}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 46}},
+                                               Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 3 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooManyArgumentsScalar) {
+  auto* tc = vec4<f32>(
+      create<ast::ScalarConstructorExpression>(Source{{12, 34}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 40}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 46}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 52}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 58}},
+                                               Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooFewArgumentsVec2AndScalar) {
+  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
+                       create<ast::ScalarConstructorExpression>(
+                           Source{{12, 40}}, Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 3 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooManyArgumentsVec2AndScalars) {
+  auto* tc = vec4<f32>(
+      create<ast::TypeConstructorExpression>(Source{{12, 34}}, ty.vec2<f32>(),
+                                             ExprList()),
+      create<ast::ScalarConstructorExpression>(Source{{12, 40}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 46}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 52}},
+                                               Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooManyArgumentsVec2Vec2Scalar) {
+  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
+                       create<ast::TypeConstructorExpression>(
+                           Source{{12, 40}}, ty.vec2<f32>(), ExprList()),
+                       create<ast::ScalarConstructorExpression>(
+                           Source{{12, 46}}, Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooManyArgumentsVec2Vec2Vec2) {
+  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
+                       create<ast::TypeConstructorExpression>(
+                           Source{{12, 40}}, ty.vec2<f32>(), ExprList()),
+                       create<ast::TypeConstructorExpression>(
+                           Source{{12, 40}}, ty.vec2<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 6 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooFewArgumentsVec3) {
+  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.vec3<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 3 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooManyArgumentsVec3AndScalars) {
+  auto* tc = vec4<f32>(
+      create<ast::TypeConstructorExpression>(Source{{12, 34}}, ty.vec3<f32>(),
+                                             ExprList()),
+      create<ast::ScalarConstructorExpression>(Source{{12, 40}}, Literal(1.0f)),
+      create<ast::ScalarConstructorExpression>(Source{{12, 46}},
+                                               Literal(1.0f)));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooManyArgumentsVec3AndVec2) {
+  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec3<f32>(), ExprList()),
+                       create<ast::TypeConstructorExpression>(
+                           Source{{12, 40}}, ty.vec2<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooManyArgumentsVec2AndVec3) {
+  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec2<f32>(), ExprList()),
+                       create<ast::TypeConstructorExpression>(
+                           Source{{12, 40}}, ty.vec3<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 5 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_TooManyArgumentsVec3AndVec3) {
+  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, ty.vec3<f32>(), ExprList()),
+                       create<ast::TypeConstructorExpression>(
+                           Source{{12, 40}}, ty.vec3<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec4<f32>' with 6 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_InvalidConversionFromVec4Bool) {
+  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.vec4<bool>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'f32', found 'bool'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Error_InvalidArgumentType) {
+  auto* tc = vec4<f32>(create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, ty.mat2x2<f32>(), ExprList()));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: expected vector or scalar type in vector "
+            "constructor; found: mat2x2<f32>");
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ZeroValue) {
+  auto* tc = vec4<f32>();
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4F32_Success_Scalar) {
+  auto* tc = vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4U32_Success_Scalar) {
+  auto* tc = vec4<u32>(1u, 1u, 1u, 1u);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::U32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4I32_Success_Scalar) {
+  auto* tc = vec4<i32>(1, 1, 1, 1);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::I32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4Bool_Success_Scalar) {
+  auto* tc = vec4<bool>(true, false, true, false);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::Bool>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Vec2ScalarScalar) {
+  auto* tc = vec4<f32>(vec2<f32>(), 1.0f, 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ScalarVec2Scalar) {
+  auto* tc = vec4<f32>(1.0f, vec2<f32>(), 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ScalarScalarVec2) {
+  auto* tc = vec4<f32>(1.0f, 1.0f, vec2<f32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Vec2AndVec2) {
+  auto* tc = vec4<f32>(vec2<f32>(), vec2<f32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Vec3AndScalar) {
+  auto* tc = vec4<f32>(vec3<f32>(), 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ScalarAndVec3) {
+  auto* tc = vec4<f32>(1.0f, vec3<f32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Identity) {
+  auto* tc = vec4<f32>(vec4<f32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vec4_Success_Vec4TypeConversion) {
+  auto* tc = vec4<f32>(vec4<i32>());
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_NestedVectorConstructors_InnerError) {
+  auto* tc = vec4<f32>(
+      vec3<f32>(1.0f, vec2<f32>(create<ast::ScalarConstructorExpression>(
+                          Source{{12, 34}}, Literal(1.0f)))),
+      1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: attempted to construct 'vec2<f32>' with 1 component(s)");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_NestedVectorConstructors_Success) {
+  auto* tc = vec4<f32>(vec3<f32>(vec2<f32>(1.0f, 1.0f), 1.0f), 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
+  auto* alias = ty.alias("UnsignedInt", ty.u32());
+  Global("uint_var", alias, ast::StorageClass::kNone);
+
+  auto* tc = vec2<f32>(Expr(Source{{12, 34}}, "uint_var"));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'f32', found 'u32'");
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
+  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto* vec2_alias = ty.alias("VectorFloat2", ty.vec2<f32>());
+  Global("my_f32", f32_alias, ast::StorageClass::kNone);
+  Global("my_vec2", vec2_alias, ast::StorageClass::kNone);
+
+  auto* tc = vec3<f32>("my_vec2", "my_f32");
+  WrapInFunction(tc);
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, Expr_Constructor_Vector_ElementTypeAlias_Error) {
+  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto* vec_type = create<type::Vector>(f32_alias, 2);
+
+  // vec2<Float32>(1.0f, 1u)
+  auto* tc = create<ast::TypeConstructorExpression>(
+      Source{{12, 34}}, vec_type,
+      ExprList(1.0f, create<ast::ScalarConstructorExpression>(Source{{12, 40}},
+                                                              Literal(1u))));
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:40 error: type in vector constructor does not match vector "
+            "type: expected 'f32', found 'u32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vector_ElementTypeAlias_Success) {
+  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto* vec_type = create<type::Vector>(f32_alias, 2);
+
+  // vec2<Float32>(1.0f, 1.0f)
+  auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 34}}, vec_type,
+                                                    ExprList(1.0f, 1.0f));
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vector_ArgumentElementTypeAlias_Error) {
+  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto* vec_type = create<type::Vector>(f32_alias, 2);
+
+  // vec3<u32>(vec<Float32>(), 1.0f)
+  auto* tc = vec3<u32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, vec_type, ExprList()),
+                       1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: type in vector constructor does not match vector "
+            "type: expected 'u32', found 'f32'");
+}
+
+TEST_F(ResolverValidationTest,
+       Expr_Constructor_Vector_ArgumentElementTypeAlias_Success) {
+  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto* vec_type = create<type::Vector>(f32_alias, 2);
+
+  // vec3<f32>(vec<Float32>(), 1.0f)
+  auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
+                           Source{{12, 34}}, vec_type, ExprList()),
+                       1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 }  // namespace

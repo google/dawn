@@ -578,8 +578,20 @@ TEST_F(ResolverTest, Expr_Constructor_Scalar) {
   EXPECT_TRUE(TypeOf(s)->Is<type::F32>());
 }
 
-TEST_F(ResolverTest, Expr_Constructor_Type) {
-  auto* tc = vec3<f32>(1.0f, 1.0f, 3.0f);
+TEST_F(ResolverTest, Expr_Constructor_Type_Vec2) {
+  auto* tc = vec2<f32>(1.0f, 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+}
+
+TEST_F(ResolverTest, Expr_Constructor_Type_Vec3) {
+  auto* tc = vec3<f32>(1.0f, 1.0f, 1.0f);
   WrapInFunction(tc);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -588,6 +600,18 @@ TEST_F(ResolverTest, Expr_Constructor_Type) {
   ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+}
+
+TEST_F(ResolverTest, Expr_Constructor_Type_Vec4) {
+  auto* tc = vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f);
+  WrapInFunction(tc);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  ASSERT_NE(TypeOf(tc), nullptr);
+  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {

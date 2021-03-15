@@ -597,16 +597,97 @@ bool Resolver::IntrinsicCall(ast::CallExpression* call,
 }
 
 bool Resolver::Constructor(ast::ConstructorExpression* expr) {
-  if (auto* ty = expr->As<ast::TypeConstructorExpression>()) {
-    for (auto* value : ty->values()) {
+  if (auto* type_ctor = expr->As<ast::TypeConstructorExpression>()) {
+    for (auto* value : type_ctor->values()) {
       if (!Expression(value)) {
         return false;
       }
     }
-    SetType(expr, ty->type());
+    SetType(expr, type_ctor->type());
+
+    // Now that the argument types have been determined, make sure that they
+    // obey the constructor type rules laid out in
+    // https://gpuweb.github.io/gpuweb/wgsl.html#type-constructor-expr.
+    if (auto* vec_type = type_ctor->type()->As<type::Vector>()) {
+      return VectorConstructor(*vec_type, type_ctor->values());
+    }
+    // TODO(crbug.com/tint/633): Validate matrix constructor
+    // TODO(crbug.com/tint/634): Validate array constructor
+  } else if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
+    SetType(expr, scalar_ctor->literal()->type());
   } else {
-    SetType(expr,
-            expr->As<ast::ScalarConstructorExpression>()->literal()->type());
+    TINT_ICE(diagnostics_) << "unexpected constructor expression type";
+  }
+  return true;
+}
+
+bool Resolver::VectorConstructor(const type::Vector& vec_type,
+                                 const ast::ExpressionList& values) {
+  type::Type* elem_type = vec_type.type()->UnwrapAll();
+  size_t value_cardinality_sum = 0;
+  for (auto* value : values) {
+    type::Type* value_type = TypeOf(value)->UnwrapAll();
+    if (value_type->is_scalar()) {
+      if (elem_type != value_type) {
+        diagnostics_.add_error(
+            "type in vector constructor does not match vector type: "
+            "expected '" +
+                elem_type->FriendlyName(builder_->Symbols()) + "', found '" +
+                value_type->FriendlyName(builder_->Symbols()) + "'",
+            value->source());
+        return false;
+      }
+
+      value_cardinality_sum++;
+    } else if (auto* value_vec = value_type->As<type::Vector>()) {
+      type::Type* value_elem_type = value_vec->type()->UnwrapAll();
+      // A mismatch of vector type parameter T is only an error if multiple
+      // arguments are present. A single argument constructor constitutes a
+      // type conversion expression.
+      // NOTE: A conversion expression from a vec<bool> to any other vecN<T>
+      // is disallowed (see
+      // https://gpuweb.github.io/gpuweb/wgsl.html#conversion-expr).
+      if (elem_type != value_elem_type &&
+          (values.size() > 1u || value_vec->is_bool_vector())) {
+        diagnostics_.add_error(
+            "type in vector constructor does not match vector type: "
+            "expected '" +
+                elem_type->FriendlyName(builder_->Symbols()) + "', found '" +
+                value_elem_type->FriendlyName(builder_->Symbols()) + "'",
+            value->source());
+        return false;
+      }
+
+      value_cardinality_sum += value_vec->size();
+    } else {
+      // A vector constructor can only accept vectors and scalars.
+      diagnostics_.add_error(
+          "expected vector or scalar type in vector constructor; found: " +
+              value_type->FriendlyName(builder_->Symbols()),
+          value->source());
+      return false;
+    }
+  }
+
+  // A correct vector constructor must either be a zero-value expression
+  // or the number of components of all constructor arguments must add up
+  // to the vector cardinality.
+  if (value_cardinality_sum > 0 && value_cardinality_sum != vec_type.size()) {
+    if (values.empty()) {
+      TINT_ICE(diagnostics_)
+          << "constructor arguments expected to be non-empty!";
+    }
+    const Source& values_start = values[0]->source();
+    const Source& values_end = values[values.size() - 1]->source();
+    const Source src(
+        Source::Range(values_start.range.begin, values_end.range.end),
+        values_start.file_path, values_start.file_content);
+    diagnostics_.add_error(
+        "attempted to construct '" +
+            vec_type.FriendlyName(builder_->Symbols()) + "' with " +
+            std::to_string(value_cardinality_sum) + " component(s)",
+        src);
+    return false;
   }
   return true;
 }

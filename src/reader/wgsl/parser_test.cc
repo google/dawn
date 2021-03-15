@@ -38,7 +38,7 @@ TEST_F(ParserTest, Parses) {
 
 [[stage(vertex)]]
 fn main() -> void {
-  gl_FragColor = vec4<f32>(.4, .2, .3, 1);
+  gl_FragColor = vec4<f32>(.4, .2, .3, 1.);
 }
 )");
   auto program = Parse(&file);

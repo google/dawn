@@ -108,7 +108,7 @@ struct Uniforms {
 [[stage(vertex)]]
 fn main() -> void {
   const transform : mat2x2<f32> = ubo.transform;
-  var coord : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+  var coord : vec2<f32> = array<vec2<f32>, 3>(
       vec2<f32>(-1.0,  1.0),
       vec2<f32>( 1.0,  1.0),
       vec2<f32>(-1.0, -1.0)
@@ -133,7 +133,7 @@ struct Uniforms {
 fn main() -> void {
   const transform : mat2x2<f32> = ubo.transform;
   const tint_symbol_1 : array<vec2<f32>, 3> = array<vec2<f32>, 3>(vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(-1.0, -1.0));
-  var coord : array<vec2<f32>, 3> = tint_symbol_1[vertex_index];
+  var coord : vec2<f32> = tint_symbol_1[vertex_index];
   position = vec4<f32>((transform * coord), 0.0, 1.0);
 }
 )";
