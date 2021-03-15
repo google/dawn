@@ -1,0 +1,652 @@
+# Copyright 2021 The Tint Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build_overrides/build.gni")
+import("//testing/test.gni")
+import("../tint_overrides_with_defaults.gni")
+
+###############################################################################
+# Gtest Gmock - Handle building inside and outside of Chromium.
+###############################################################################
+# When building outside of Chromium we need to define our own targets for GTest
+# and GMock. However when compiling inside of Chromium we need to reuse the
+# existing targets, both because Chromium has a special harness for swarming
+# and because otherwise the "gn check" fails.
+
+if (!build_with_chromium) {
+  # When we aren't in Chromium we define out own targets based on the location
+  # of the googletest repo.
+  config("gtest_config") {
+    include_dirs = [
+      "${tint_googletest_dir}/googletest",
+      "${tint_googletest_dir}/googletest/include",
+    ]
+  }
+  static_library("gtest") {
+    testonly = true
+    sources = [ "${tint_googletest_dir}/googletest/src/gtest-all.cc" ]
+    public_configs = [ ":gtest_config" ]
+  }
+
+  config("gmock_config") {
+    include_dirs = [
+      "${tint_googletest_dir}/googlemock",
+      "${tint_googletest_dir}/googlemock/include",
+      "${tint_googletest_dir}/googletest/include",
+    ]
+  }
+
+  static_library("gmock") {
+    testonly = true
+    sources = [ "${tint_googletest_dir}/googlemock/src/gmock-all.cc" ]
+    public_configs = [ ":gmock_config" ]
+  }
+
+  group("gmock_and_gtest") {
+    testonly = true
+    public_deps = [
+      ":gmock",
+      ":gtest",
+    ]
+  }
+} else {
+  # When we are in Chromium we reuse its targets, and also add some deps that
+  # are needed to launch the test in swarming mode.
+  group("gmock_and_gtest") {
+    testonly = true
+    public_deps = [
+      "//base",
+      "//base/test:test_support",
+      "//testing/gmock",
+      "//testing/gtest",
+      "//third_party/googletest:gmock",
+    ]
+  }
+}
+
+###############################################################################
+# Wrapping of Chromium targets
+###############################################################################
+# These targets are separated because they are Chromium sources files that
+# can't use the tint_internal config, otherwise Tint's warning flags get
+# applied while compiling a bunch of Chromium's //base (via header inclusion)
+source_set("tint_unittests_main") {
+  testonly = true
+  deps = [ ":gmock_and_gtest" ]
+  if (build_with_chromium) {
+    sources = [ "//gpu/tint_unittests_main.cc" ]
+  } else {
+    sources = [ "../src/test_main.cc" ]
+  }
+}
+
+###############################################################################
+# Tests - For libtint core and optional modules
+###############################################################################
+config("tint_unittests_config") {
+  include_dirs = [
+    "${tint_googletest_dir}/googlemock/include",
+    "${tint_googletest_dir}/googletest/include",
+  ]
+
+  configs = [
+    "${tint_root_dir}/src:tint_common_config",
+    "${tint_root_dir}/src:tint_public_config",
+  ]
+}
+
+source_set("tint_unittests_core_src") {
+  sources = [
+    "../src/ast/access_decoration_test.cc",
+    "../src/ast/array_accessor_expression_test.cc",
+    "../src/ast/assignment_statement_test.cc",
+    "../src/ast/binary_expression_test.cc",
+    "../src/ast/binding_decoration_test.cc",
+    "../src/ast/bitcast_expression_test.cc",
+    "../src/ast/block_statement_test.cc",
+    "../src/ast/bool_literal_test.cc",
+    "../src/ast/break_statement_test.cc",
+    "../src/ast/builtin_decoration_test.cc",
+    "../src/ast/call_expression_test.cc",
+    "../src/ast/call_statement_test.cc",
+    "../src/ast/case_statement_test.cc",
+    "../src/ast/constant_id_decoration_test.cc",
+    "../src/ast/continue_statement_test.cc",
+    "../src/ast/discard_statement_test.cc",
+    "../src/ast/else_statement_test.cc",
+    "../src/ast/fallthrough_statement_test.cc",
+    "../src/ast/float_literal_test.cc",
+    "../src/ast/function_test.cc",
+    "../src/ast/group_decoration_test.cc",
+    "../src/ast/identifier_expression_test.cc",
+    "../src/ast/if_statement_test.cc",
+    "../src/ast/int_literal_test.cc",
+    "../src/ast/intrinsic_texture_helper_test.cc",
+    "../src/ast/intrinsic_texture_helper_test.h",
+    "../src/ast/location_decoration_test.cc",
+    "../src/ast/loop_statement_test.cc",
+    "../src/ast/member_accessor_expression_test.cc",
+    "../src/ast/module_clone_test.cc",
+    "../src/ast/module_test.cc",
+    "../src/ast/null_literal_test.cc",
+    "../src/ast/return_statement_test.cc",
+    "../src/ast/scalar_constructor_expression_test.cc",
+    "../src/ast/sint_literal_test.cc",
+    "../src/ast/stage_decoration_test.cc",
+    "../src/ast/stride_decoration_test.cc",
+    "../src/ast/struct_member_offset_decoration_test.cc",
+    "../src/ast/struct_member_test.cc",
+    "../src/ast/struct_test.cc",
+    "../src/ast/switch_statement_test.cc",
+    "../src/ast/test_helper.h",
+    "../src/ast/type_constructor_expression_test.cc",
+    "../src/ast/uint_literal_test.cc",
+    "../src/ast/unary_op_expression_test.cc",
+    "../src/ast/variable_decl_statement_test.cc",
+    "../src/ast/variable_test.cc",
+    "../src/ast/workgroup_decoration_test.cc",
+    "../src/block_allocator_test.cc",
+    "../src/castable_test.cc",
+    "../src/clone_context_test.cc",
+    "../src/debug_test.cc",
+    "../src/demangler_test.cc",
+    "../src/diagnostic/formatter_test.cc",
+    "../src/diagnostic/printer_test.cc",
+    "../src/inspector/inspector_test.cc",
+    "../src/intrinsic_table_test.cc",
+    "../src/program_builder_test.cc",
+    "../src/program_test.cc",
+    "../src/resolver/intrinsic_test.cc",
+    "../src/resolver/resolver_test.cc",
+    "../src/resolver/resolver_test_helper.cc",
+    "../src/resolver/resolver_test_helper.h",
+    "../src/resolver/validation_test.cc",
+    "../src/scope_stack_test.cc",
+    "../src/semantic/sem_intrinsic_test.cc",
+    "../src/symbol_table_test.cc",
+    "../src/symbol_test.cc",
+    "../src/traits_test.cc",
+    "../src/transform/bound_array_accessors_test.cc",
+    "../src/transform/emit_vertex_point_size_test.cc",
+    "../src/transform/first_index_offset_test.cc",
+    "../src/transform/renamer_test.cc",
+    "../src/transform/test_helper.h",
+    "../src/transform/vertex_pulling_test.cc",
+    "../src/type/access_control_type_test.cc",
+    "../src/type/alias_type_test.cc",
+    "../src/type/array_type_test.cc",
+    "../src/type/bool_type_test.cc",
+    "../src/type/depth_texture_type_test.cc",
+    "../src/type/f32_type_test.cc",
+    "../src/type/i32_type_test.cc",
+    "../src/type/matrix_type_test.cc",
+    "../src/type/multisampled_texture_type_test.cc",
+    "../src/type/pointer_type_test.cc",
+    "../src/type/sampled_texture_type_test.cc",
+    "../src/type/sampler_type_test.cc",
+    "../src/type/storage_texture_type_test.cc",
+    "../src/type/struct_type_test.cc",
+    "../src/type/texture_type_test.cc",
+    "../src/type/type_manager_test.cc",
+    "../src/type/u32_type_test.cc",
+    "../src/type/vector_type_test.cc",
+    "../src/utils/command.h",
+    "../src/utils/command_test.cc",
+    "../src/utils/tmpfile.h",
+    "../src/utils/tmpfile_test.cc",
+    "../src/utils/unique_vector_test.cc",
+    "../src/validator/validator_builtins_test.cc",
+    "../src/validator/validator_control_block_test.cc",
+    "../src/validator/validator_decoration_test.cc",
+    "../src/validator/validator_function_test.cc",
+    "../src/validator/validator_test.cc",
+    "../src/validator/validator_test_helper.cc",
+    "../src/validator/validator_test_helper.h",
+    "../src/writer/float_to_string_test.cc",
+  ]
+
+  if (is_linux || is_mac) {
+    sources += [ "../src/utils/command_posix.cc" ]
+    sources += [ "../src/utils/tmpfile_posix.cc" ]
+  } else if (is_win) {
+    sources += [ "../src/utils/command_windows.cc" ]
+    sources += [ "../src/utils/tmpfile_windows.cc" ]
+  } else {
+    sources += [ "../src/utils/command_other.cc" ]
+    sources += [ "../src/utils/tmpfile_other.cc" ]
+  }
+
+  configs += [ ":tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    "${tint_root_dir}/src:libtint_core_src",
+    "${tint_root_dir}/src:libtint_wgsl_reader_src",
+    "${tint_root_dir}/src:libtint_wgsl_writer_src",
+  ]
+}
+
+source_set("tint_unittests_spv_reader_src") {
+  sources = [
+    "../src/reader/spirv/enum_converter_test.cc",
+    "../src/reader/spirv/fail_stream_test.cc",
+    "../src/reader/spirv/function_arithmetic_test.cc",
+    "../src/reader/spirv/function_bit_test.cc",
+    "../src/reader/spirv/function_call_test.cc",
+    "../src/reader/spirv/function_cfg_test.cc",
+    "../src/reader/spirv/function_composite_test.cc",
+    "../src/reader/spirv/function_conversion_test.cc",
+    "../src/reader/spirv/function_decl_test.cc",
+    "../src/reader/spirv/function_glsl_std_450_test.cc",
+    "../src/reader/spirv/function_logical_test.cc",
+    "../src/reader/spirv/function_memory_test.cc",
+    "../src/reader/spirv/function_misc_test.cc",
+    "../src/reader/spirv/function_var_test.cc",
+    "../src/reader/spirv/namer_test.cc",
+    "../src/reader/spirv/parser_impl_convert_member_decoration_test.cc",
+    "../src/reader/spirv/parser_impl_convert_type_test.cc",
+    "../src/reader/spirv/parser_impl_function_decl_test.cc",
+    "../src/reader/spirv/parser_impl_get_decorations_test.cc",
+    "../src/reader/spirv/parser_impl_handle_test.cc",
+    "../src/reader/spirv/parser_impl_import_test.cc",
+    "../src/reader/spirv/parser_impl_module_var_test.cc",
+    "../src/reader/spirv/parser_impl_named_types_test.cc",
+    "../src/reader/spirv/parser_impl_test.cc",
+    "../src/reader/spirv/parser_impl_user_name_test.cc",
+    "../src/reader/spirv/parser_test.cc",
+    "../src/reader/spirv/spirv_tools_helpers_test.cc",
+    "../src/reader/spirv/spirv_tools_helpers_test.h",
+    "../src/reader/spirv/usage_test.cc",
+  ]
+
+  configs += [ ":tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":tint_unittests_core_src",
+    "${tint_root_dir}/src:libtint_spv_reader_src",
+  ]
+}
+
+source_set("tint_unittests_spv_writer_src") {
+  sources = [
+    "../src/transform/spirv_test.cc",
+    "../src/writer/spirv/binary_writer_test.cc",
+    "../src/writer/spirv/builder_accessor_expression_test.cc",
+    "../src/writer/spirv/builder_assign_test.cc",
+    "../src/writer/spirv/builder_binary_expression_test.cc",
+    "../src/writer/spirv/builder_bitcast_expression_test.cc",
+    "../src/writer/spirv/builder_block_test.cc",
+    "../src/writer/spirv/builder_call_test.cc",
+    "../src/writer/spirv/builder_constructor_expression_test.cc",
+    "../src/writer/spirv/builder_discard_test.cc",
+    "../src/writer/spirv/builder_entry_point_test.cc",
+    "../src/writer/spirv/builder_format_conversion_test.cc",
+    "../src/writer/spirv/builder_function_decoration_test.cc",
+    "../src/writer/spirv/builder_function_test.cc",
+    "../src/writer/spirv/builder_function_variable_test.cc",
+    "../src/writer/spirv/builder_global_variable_test.cc",
+    "../src/writer/spirv/builder_ident_expression_test.cc",
+    "../src/writer/spirv/builder_if_test.cc",
+    "../src/writer/spirv/builder_intrinsic_test.cc",
+    "../src/writer/spirv/builder_intrinsic_texture_test.cc",
+    "../src/writer/spirv/builder_literal_test.cc",
+    "../src/writer/spirv/builder_loop_test.cc",
+    "../src/writer/spirv/builder_return_test.cc",
+    "../src/writer/spirv/builder_switch_test.cc",
+    "../src/writer/spirv/builder_test.cc",
+    "../src/writer/spirv/builder_type_test.cc",
+    "../src/writer/spirv/builder_unary_op_expression_test.cc",
+    "../src/writer/spirv/instruction_test.cc",
+    "../src/writer/spirv/operand_test.cc",
+    "../src/writer/spirv/spv_dump.cc",
+    "../src/writer/spirv/spv_dump.h",
+    "../src/writer/spirv/test_helper.h",
+  ]
+
+  configs += [ ":tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":tint_unittests_core_src",
+    "${tint_root_dir}/src:libtint_spv_writer_src",
+  ]
+}
+
+source_set("tint_unittests_wgsl_reader_src") {
+  sources = [
+    "../src/reader/wgsl/lexer_test.cc",
+    "../src/reader/wgsl/parser_impl_additive_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_and_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_argument_expression_list_test.cc",
+    "../src/reader/wgsl/parser_impl_assignment_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_body_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_break_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_bug_cases_test.cc",
+    "../src/reader/wgsl/parser_impl_call_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_case_body_test.cc",
+    "../src/reader/wgsl/parser_impl_const_expr_test.cc",
+    "../src/reader/wgsl/parser_impl_const_literal_test.cc",
+    "../src/reader/wgsl/parser_impl_continue_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_continuing_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_depth_texture_type_test.cc",
+    "../src/reader/wgsl/parser_impl_else_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_elseif_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_equality_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_error_msg_test.cc",
+    "../src/reader/wgsl/parser_impl_error_resync_test.cc",
+    "../src/reader/wgsl/parser_impl_exclusive_or_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_for_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_function_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_function_decoration_list_test.cc",
+    "../src/reader/wgsl/parser_impl_function_decoration_test.cc",
+    "../src/reader/wgsl/parser_impl_function_header_test.cc",
+    "../src/reader/wgsl/parser_impl_function_type_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_global_constant_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_global_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_global_variable_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_if_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_image_storage_type_test.cc",
+    "../src/reader/wgsl/parser_impl_inclusive_or_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_logical_and_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_logical_or_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_loop_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_multiplicative_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_param_list_test.cc",
+    "../src/reader/wgsl/parser_impl_paren_rhs_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_pipeline_stage_test.cc",
+    "../src/reader/wgsl/parser_impl_postfix_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_primary_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_relational_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_sampled_texture_type_test.cc",
+    "../src/reader/wgsl/parser_impl_sampler_type_test.cc",
+    "../src/reader/wgsl/parser_impl_shift_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_statement_test.cc",
+    "../src/reader/wgsl/parser_impl_statements_test.cc",
+    "../src/reader/wgsl/parser_impl_storage_class_test.cc",
+    "../src/reader/wgsl/parser_impl_storage_texture_type_test.cc",
+    "../src/reader/wgsl/parser_impl_struct_body_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_struct_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_struct_decoration_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_struct_decoration_test.cc",
+    "../src/reader/wgsl/parser_impl_struct_member_decoration_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_struct_member_decoration_test.cc",
+    "../src/reader/wgsl/parser_impl_struct_member_test.cc",
+    "../src/reader/wgsl/parser_impl_switch_body_test.cc",
+    "../src/reader/wgsl/parser_impl_switch_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_test.cc",
+    "../src/reader/wgsl/parser_impl_test_helper.cc",
+    "../src/reader/wgsl/parser_impl_test_helper.h",
+    "../src/reader/wgsl/parser_impl_texture_sampler_types_test.cc",
+    "../src/reader/wgsl/parser_impl_type_alias_test.cc",
+    "../src/reader/wgsl/parser_impl_type_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_unary_expression_test.cc",
+    "../src/reader/wgsl/parser_impl_variable_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_variable_decoration_list_test.cc",
+    "../src/reader/wgsl/parser_impl_variable_decoration_test.cc",
+    "../src/reader/wgsl/parser_impl_variable_ident_decl_test.cc",
+    "../src/reader/wgsl/parser_impl_variable_stmt_test.cc",
+    "../src/reader/wgsl/parser_impl_variable_storage_decoration_test.cc",
+    "../src/reader/wgsl/parser_test.cc",
+    "../src/reader/wgsl/token_test.cc",
+  ]
+
+  configs += [ ":tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":tint_unittests_core_src",
+    "${tint_root_dir}/src:libtint_wgsl_reader_src",
+  ]
+}
+
+source_set("tint_unittests_wgsl_writer_src") {
+  sources = [
+    "../src/writer/wgsl/generator_impl_alias_type_test.cc",
+    "../src/writer/wgsl/generator_impl_array_accessor_test.cc",
+    "../src/writer/wgsl/generator_impl_assign_test.cc",
+    "../src/writer/wgsl/generator_impl_binary_test.cc",
+    "../src/writer/wgsl/generator_impl_bitcast_test.cc",
+    "../src/writer/wgsl/generator_impl_block_test.cc",
+    "../src/writer/wgsl/generator_impl_break_test.cc",
+    "../src/writer/wgsl/generator_impl_call_test.cc",
+    "../src/writer/wgsl/generator_impl_case_test.cc",
+    "../src/writer/wgsl/generator_impl_cast_test.cc",
+    "../src/writer/wgsl/generator_impl_constructor_test.cc",
+    "../src/writer/wgsl/generator_impl_continue_test.cc",
+    "../src/writer/wgsl/generator_impl_discard_test.cc",
+    "../src/writer/wgsl/generator_impl_entry_point_test.cc",
+    "../src/writer/wgsl/generator_impl_fallthrough_test.cc",
+    "../src/writer/wgsl/generator_impl_function_test.cc",
+    "../src/writer/wgsl/generator_impl_global_decl_test.cc",
+    "../src/writer/wgsl/generator_impl_identifier_test.cc",
+    "../src/writer/wgsl/generator_impl_if_test.cc",
+    "../src/writer/wgsl/generator_impl_loop_test.cc",
+    "../src/writer/wgsl/generator_impl_member_accessor_test.cc",
+    "../src/writer/wgsl/generator_impl_return_test.cc",
+    "../src/writer/wgsl/generator_impl_switch_test.cc",
+    "../src/writer/wgsl/generator_impl_test.cc",
+    "../src/writer/wgsl/generator_impl_type_test.cc",
+    "../src/writer/wgsl/generator_impl_unary_op_test.cc",
+    "../src/writer/wgsl/generator_impl_variable_decl_statement_test.cc",
+    "../src/writer/wgsl/generator_impl_variable_test.cc",
+    "../src/writer/wgsl/test_helper.h",
+  ]
+
+  configs += [ ":tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":tint_unittests_core_src",
+    "${tint_root_dir}/src:libtint_wgsl_writer_src",
+  ]
+}
+
+source_set("tint_unittests_msl_writer_src") {
+  sources = [
+    "../src/transform/msl_test.cc",
+    "../src/writer/msl/generator_impl_alias_type_test.cc",
+    "../src/writer/msl/generator_impl_array_accessor_test.cc",
+    "../src/writer/msl/generator_impl_assign_test.cc",
+    "../src/writer/msl/generator_impl_binary_test.cc",
+    "../src/writer/msl/generator_impl_bitcast_test.cc",
+    "../src/writer/msl/generator_impl_block_test.cc",
+    "../src/writer/msl/generator_impl_break_test.cc",
+    "../src/writer/msl/generator_impl_call_test.cc",
+    "../src/writer/msl/generator_impl_case_test.cc",
+    "../src/writer/msl/generator_impl_cast_test.cc",
+    "../src/writer/msl/generator_impl_constructor_test.cc",
+    "../src/writer/msl/generator_impl_continue_test.cc",
+    "../src/writer/msl/generator_impl_discard_test.cc",
+    "../src/writer/msl/generator_impl_function_entry_point_data_test.cc",
+    "../src/writer/msl/generator_impl_function_test.cc",
+    "../src/writer/msl/generator_impl_identifier_test.cc",
+    "../src/writer/msl/generator_impl_if_test.cc",
+    "../src/writer/msl/generator_impl_import_test.cc",
+    "../src/writer/msl/generator_impl_intrinsic_test.cc",
+    "../src/writer/msl/generator_impl_intrinsic_texture_test.cc",
+    "../src/writer/msl/generator_impl_loop_test.cc",
+    "../src/writer/msl/generator_impl_member_accessor_test.cc",
+    "../src/writer/msl/generator_impl_module_constant_test.cc",
+    "../src/writer/msl/generator_impl_return_test.cc",
+    "../src/writer/msl/generator_impl_switch_test.cc",
+    "../src/writer/msl/generator_impl_test.cc",
+    "../src/writer/msl/generator_impl_type_test.cc",
+    "../src/writer/msl/generator_impl_unary_op_test.cc",
+    "../src/writer/msl/generator_impl_variable_decl_statement_test.cc",
+    "../src/writer/msl/test_helper.h",
+  ]
+
+  configs += [ ":tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":tint_unittests_core_src",
+    "${tint_root_dir}/src:libtint_msl_writer_src",
+  ]
+}
+
+source_set("tint_unittests_hlsl_writer_src") {
+  sources = [
+    "../src/transform/hlsl_test.cc",
+    "../src/writer/hlsl/generator_impl_alias_type_test.cc",
+    "../src/writer/hlsl/generator_impl_array_accessor_test.cc",
+    "../src/writer/hlsl/generator_impl_assign_test.cc",
+    "../src/writer/hlsl/generator_impl_binary_test.cc",
+    "../src/writer/hlsl/generator_impl_bitcast_test.cc",
+    "../src/writer/hlsl/generator_impl_block_test.cc",
+    "../src/writer/hlsl/generator_impl_break_test.cc",
+    "../src/writer/hlsl/generator_impl_call_test.cc",
+    "../src/writer/hlsl/generator_impl_case_test.cc",
+    "../src/writer/hlsl/generator_impl_cast_test.cc",
+    "../src/writer/hlsl/generator_impl_constructor_test.cc",
+    "../src/writer/hlsl/generator_impl_continue_test.cc",
+    "../src/writer/hlsl/generator_impl_discard_test.cc",
+    "../src/writer/hlsl/generator_impl_function_entry_point_data_test.cc",
+    "../src/writer/hlsl/generator_impl_function_test.cc",
+    "../src/writer/hlsl/generator_impl_identifier_test.cc",
+    "../src/writer/hlsl/generator_impl_if_test.cc",
+    "../src/writer/hlsl/generator_impl_import_test.cc",
+    "../src/writer/hlsl/generator_impl_intrinsic_test.cc",
+    "../src/writer/hlsl/generator_impl_intrinsic_texture_test.cc",
+    "../src/writer/hlsl/generator_impl_loop_test.cc",
+    "../src/writer/hlsl/generator_impl_member_accessor_test.cc",
+    "../src/writer/hlsl/generator_impl_module_constant_test.cc",
+    "../src/writer/hlsl/generator_impl_return_test.cc",
+    "../src/writer/hlsl/generator_impl_sanitizer_test.cc",
+    "../src/writer/hlsl/generator_impl_switch_test.cc",
+    "../src/writer/hlsl/generator_impl_test.cc",
+    "../src/writer/hlsl/generator_impl_type_test.cc",
+    "../src/writer/hlsl/generator_impl_unary_op_test.cc",
+    "../src/writer/hlsl/generator_impl_variable_decl_statement_test.cc",
+    "../src/writer/hlsl/namer_test.cc",
+    "../src/writer/hlsl/test_helper.cc",
+    "../src/writer/hlsl/test_helper.h",
+  ]
+
+  configs += [ ":tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  testonly = true
+
+  deps = [
+    ":gmock_and_gtest",
+    ":tint_unittests_core_src",
+    "${tint_root_dir}/src:libtint_hlsl_writer_src",
+  ]
+}
+
+source_set("tint_unittests_src") {
+  testonly = true
+
+  deps = [ ":tint_unittests_core_src" ]
+
+  if (tint_build_spv_reader) {
+    deps += [ ":tint_unittests_spv_reader_src" ]
+  }
+
+  if (tint_build_spv_writer) {
+    deps += [ ":tint_unittests_spv_writer_src" ]
+  }
+
+  if (tint_build_wgsl_reader) {
+    deps += [ ":tint_unittests_wgsl_reader_src" ]
+  }
+
+  if (tint_build_wgsl_writer) {
+    deps += [ ":tint_unittests_wgsl_writer_src" ]
+  }
+
+  if (tint_build_msl_writer) {
+    deps += [ ":tint_unittests_msl_writer_src" ]
+  }
+
+  if (tint_build_hlsl_writer) {
+    deps += [ ":tint_unittests_hlsl_writer_src" ]
+  }
+
+  configs += [ ":tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+}
+
+test("tint_unittests") {
+  deps = [
+    ":gmock_and_gtest",
+    ":tint_unittests_src",
+    "${tint_spirv_tools_dir}/:spvtools",
+    "${tint_spirv_tools_dir}/:spvtools_opt",
+    "${tint_spirv_tools_dir}/:spvtools_val",
+  ]
+
+  deps += [ ":tint_unittests_main" ]
+
+  configs += [ ":tint_unittests_config" ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
+
+  testonly = true
+}

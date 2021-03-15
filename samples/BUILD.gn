@@ -1,4 +1,4 @@
-# Copyright 2020 The Tint Authors
+# Copyright 2021 The Tint Authors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,21 +13,24 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
-import("tint_overrides_with_defaults.gni")
+import("../tint_overrides_with_defaults.gni")
 
-# Temporary group to not break dependents while they rename their Tint GN
-# targets
-group("libtint") {
-  deps = [ "src:libtint" ]
-}
-
-# This target is built when no specific target is specified on the command line.
-group("default") {
-  testonly = true
+executable("tint") {
+  sources = [ "main.cc" ]
   deps = [
-    "fuzzers",
-    "samples:tint",
-    "src:libtint",
-    "test:tint_unittests",
+    "${tint_root_dir}/src:libtint",
+    "${tint_spirv_tools_dir}/:spvtools",
+    "${tint_spirv_tools_dir}/:spvtools_opt",
+    "${tint_spirv_tools_dir}/:spvtools_val",
   ]
+
+  configs += [
+    "${tint_root_dir}/src:tint_common_config",
+    "${tint_root_dir}/src:tint_config",
+  ]
+
+  if (build_with_chromium) {
+    configs -= [ "//build/config/compiler:chromium_code" ]
+    configs += [ "//build/config/compiler:no_chromium_code" ]
+  }
 }
