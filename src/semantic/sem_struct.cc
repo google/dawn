@@ -30,8 +30,9 @@ Struct::~Struct() = default;
 
 StructMember::StructMember(ast::StructMember* declaration,
                            uint32_t offset,
+                           uint32_t align,
                            uint32_t size)
-    : declaration_(declaration), offset_(offset), size_(size) {}
+    : declaration_(declaration), offset_(offset), align_(align), size_(size) {}
 
 StructMember::~StructMember() = default;
 

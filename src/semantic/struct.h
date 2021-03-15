@@ -85,8 +85,12 @@ class StructMember : public Castable<StructMember, Node> {
   /// Constructor
   /// @param declaration the AST declaration node
   /// @param offset the byte offset from the base of the structure
-  /// @param size the byte size
-  StructMember(ast::StructMember* declaration, uint32_t offset, uint32_t size);
+  /// @param align the byte alignment of the member
+  /// @param size the byte size of the member
+  StructMember(ast::StructMember* declaration,
+               uint32_t offset,
+               uint32_t align,
+               uint32_t size);
 
   /// Destructor
   ~StructMember() override;
@@ -97,13 +101,17 @@ class StructMember : public Castable<StructMember, Node> {
   /// @returns byte offset from base of structure
   uint32_t Offset() const { return offset_; }
 
+  /// @returns the alignment of the member in bytes
+  uint32_t Align() const { return align_; }
+
   /// @returns byte size
   uint32_t Size() const { return size_; }
 
  private:
   ast::StructMember* const declaration_;
   uint32_t const offset_;  // Byte offset from base of structure
-  uint32_t const size_;    // Byte size
+  uint32_t const align_;   // Byte alignment of the member
+  uint32_t const size_;    // Byte size of the member
 };
 
 }  // namespace semantic

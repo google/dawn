@@ -159,33 +159,90 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
   EXPECT_EQ(gen.result(), "S");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitType_StructDecl) {
+TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
   auto* s = Structure("S", {
-                               Member("a", ty.i32()),
-                               Member("b", ty.f32(), {MemberOffset(4)}),
+                               Member("a", ty.i32(), {MemberOffset(8)}),
+                               Member("b", ty.f32(), {MemberOffset(16)}),
                            });
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
+  [[size(8)]]
+  tint_0_padding : u32;
   a : i32;
-  [[offset(4)]]
+  [[size(4)]]
+  tint_1_padding : u32;
+  b : f32;
+};
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
+  auto* s =
+      Structure("S", {
+                         Member("tint_0_padding", ty.i32(), {MemberOffset(8)}),
+                         Member("tint_2_padding", ty.f32(), {MemberOffset(16)}),
+                     });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct S {
+  [[size(8)]]
+  tint_1_padding : u32;
+  tint_0_padding : i32;
+  [[size(4)]]
+  tint_3_padding : u32;
+  tint_2_padding : f32;
+};
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitType_StructAlignDecl) {
+  auto* s = Structure("S", {
+                               Member("a", ty.i32(), {MemberAlign(8)}),
+                               Member("b", ty.f32(), {MemberAlign(16)}),
+                           });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct S {
+  [[align(8)]]
+  a : i32;
+  [[align(16)]]
+  b : f32;
+};
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
+  auto* s = Structure("S", {
+                               Member("a", ty.i32(), {MemberSize(16)}),
+                               Member("b", ty.f32(), {MemberSize(32)}),
+                           });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct S {
+  [[size(16)]]
+  a : i32;
+  [[size(32)]]
   b : f32;
 };
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
-  ast::DecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>());
-
   auto* s = Structure("S",
                       {
                           Member("a", ty.i32()),
-                          Member("b", ty.f32(), {MemberOffset(4)}),
+                          Member("b", ty.f32(), {MemberAlign(8)}),
                       },
-                      decos);
+                      {create<ast::StructBlockDecoration>()});
 
   GeneratorImpl& gen = Build();
 
@@ -193,7 +250,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
   EXPECT_EQ(gen.result(), R"([[block]]
 struct S {
   a : i32;
-  [[offset(4)]]
+  [[align(8)]]
   b : f32;
 };
 )");

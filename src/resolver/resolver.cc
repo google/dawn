@@ -1188,7 +1188,7 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
     offset = utils::RoundUp(align, offset);
 
     auto* sem_member =
-        builder_->create<semantic::StructMember>(member, offset, size);
+        builder_->create<semantic::StructMember>(member, offset, align, size);
     builder_->Sem().Add(member, sem_member);
     sem_members.emplace_back(sem_member);
 
