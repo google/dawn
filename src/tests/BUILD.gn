@@ -238,6 +238,10 @@ test("dawn_unittests") {
     "unittests/wire/WireWGPUDevicePropertiesTests.cpp",
   ]
 
+  if (is_win) {
+    sources += [ "unittests/WindowsUtilsTests.cpp" ]
+  }
+
   if (dawn_enable_d3d12) {
     sources += [ "unittests/d3d12/CopySplitTests.cpp" ]
   }

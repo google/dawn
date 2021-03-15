@@ -198,7 +198,6 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "ityp_stack_vec.h",
       "ityp_vector.h",
       "vulkan_platform.h",
-      "windows_with_undefs.h",
       "xlib_with_undefs.h",
     ]
 
@@ -207,6 +206,14 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       "${dawn_root}/src/dawn:dawn_headers",
       "${dawn_root}/src/dawn:dawncpp_headers",
     ]
+
+    if (is_win) {
+      sources += [
+        "WindowsUtils.cpp",
+        "WindowsUtils.h",
+        "windows_with_undefs.h",
+      ]
+    }
     if (dawn_enable_vulkan) {
       public_deps = [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
     }

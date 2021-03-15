@@ -15,27 +15,16 @@
 #include "dawn_native/d3d12/AdapterD3D12.h"
 
 #include "common/Constants.h"
+#include "common/WindowsUtils.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/d3d12/BackendD3D12.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PlatformFunctions.h"
 
-#include <locale>
 #include <sstream>
 
 namespace dawn_native { namespace d3d12 {
-
-    // utility wrapper to adapt locale-bound facets for wstring/wbuffer convert
-    template <class Facet>
-    struct DeletableFacet : Facet {
-        template <class... Args>
-        DeletableFacet(Args&&... args) : Facet(std::forward<Args>(args)...) {
-        }
-
-        ~DeletableFacet() {
-        }
-    };
 
     Adapter::Adapter(Backend* backend, ComPtr<IDXGIAdapter3> hardwareAdapter)
         : AdapterBase(backend->GetInstance(), wgpu::BackendType::D3D12),
@@ -80,6 +69,7 @@ namespace dawn_native { namespace d3d12 {
 
         mPCIInfo.deviceId = adapterDesc.DeviceId;
         mPCIInfo.vendorId = adapterDesc.VendorId;
+        mPCIInfo.name = WCharToUTF8(adapterDesc.Description);
 
         DAWN_TRY_ASSIGN(mDeviceInfo, GatherDeviceInfo(*this));
 
@@ -89,11 +79,6 @@ namespace dawn_native { namespace d3d12 {
             mAdapterType = (mDeviceInfo.isUMA) ? wgpu::AdapterType::IntegratedGPU
                                                : wgpu::AdapterType::DiscreteGPU;
         }
-
-        // Get the adapter's name as a UTF8 string.
-        std::wstring_convert<DeletableFacet<std::codecvt<wchar_t, char, std::mbstate_t>>> converter(
-            "Error converting");
-        mPCIInfo.name = converter.to_bytes(adapterDesc.Description);
 
         // Convert the adapter's D3D12 driver version to a readable string like "24.21.13.9793".
         LARGE_INTEGER umdVersion;

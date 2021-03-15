@@ -61,9 +61,17 @@ target_sources(dawn_common PRIVATE
     "ityp_stack_vec.h"
     "ityp_vector.h"
     "vulkan_platform.h"
-    "windows_with_undefs.h"
     "xlib_with_undefs.h"
 )
+
+if (WIN32)
+    target_sources(dawn_common PRIVATE
+        "WindowsUtils.cpp"
+        "WindowsUtils.h"
+        "windows_with_undefs.h"
+    )
+endif()
+
 target_link_libraries(dawn_common PRIVATE dawn_internal_config)
 
 # TODO Android Log support
