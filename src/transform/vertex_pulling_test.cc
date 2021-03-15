@@ -33,7 +33,7 @@ TEST_F(VertexPullingTest, Error_NoEntryPoint) {
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -51,7 +51,7 @@ fn main() -> void {}
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -69,7 +69,7 @@ fn main() -> void {}
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -99,7 +99,7 @@ fn main() -> void {
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -141,7 +141,7 @@ fn main() -> void {
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -183,7 +183,7 @@ fn main() -> void {
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -226,7 +226,7 @@ fn main() -> void {
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -290,7 +290,7 @@ fn main() -> void {
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -339,7 +339,7 @@ fn main() -> void {
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }
@@ -398,7 +398,7 @@ fn main() -> void {
 
   auto transform = std::make_unique<VertexPulling>(cfg);
 
-  auto got = Transform(src, std::move(transform));
+  auto got = Run(src, std::move(transform));
 
   EXPECT_EQ(expect, str(got));
 }

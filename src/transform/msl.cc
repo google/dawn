@@ -320,7 +320,7 @@ void Msl::HandleEntryPointIOTypes(CloneContext& ctx) const {
       }
 
       auto* deco = param->decorations()[0];
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+      if (deco->Is<ast::BuiltinDecoration>()) {
         // Keep any builtin-decorated parameters unchanged.
         builtins.insert(param);
         continue;

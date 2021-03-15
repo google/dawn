@@ -47,7 +47,7 @@ fn entry() -> void {
   transforms.emplace_back(std::make_unique<FirstIndexOffset>(0, 0));
   transforms.emplace_back(std::make_unique<FirstIndexOffset>(1, 1));
 
-  auto got = Transform(src, std::move(transforms));
+  auto got = Run(src, std::move(transforms));
 
   EXPECT_EQ(expect, str(got));
 
@@ -64,7 +64,7 @@ TEST_F(FirstIndexOffsetTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";
 
-  auto got = Transform<FirstIndexOffset>(src, 0, 0);
+  auto got = Run<FirstIndexOffset>(src, 0, 0);
 
   EXPECT_EQ(expect, str(got));
 
@@ -112,7 +112,7 @@ fn entry() -> void {
 }
 )";
 
-  auto got = Transform<FirstIndexOffset>(src, 1, 2);
+  auto got = Run<FirstIndexOffset>(src, 1, 2);
 
   EXPECT_EQ(expect, str(got));
 
@@ -160,7 +160,7 @@ fn entry() -> void {
 }
 )";
 
-  auto got = Transform<FirstIndexOffset>(src, 1, 7);
+  auto got = Run<FirstIndexOffset>(src, 1, 7);
 
   EXPECT_EQ(expect, str(got));
 
@@ -213,7 +213,7 @@ fn entry() -> void {
 }
 )";
 
-  auto got = Transform<FirstIndexOffset>(src, 1, 2);
+  auto got = Run<FirstIndexOffset>(src, 1, 2);
 
   EXPECT_EQ(expect, str(got));
 
@@ -269,7 +269,7 @@ fn entry() -> void {
 }
 )";
 
-  auto got = Transform<FirstIndexOffset>(src, 1, 2);
+  auto got = Run<FirstIndexOffset>(src, 1, 2);
 
   EXPECT_EQ(expect, str(got));
 

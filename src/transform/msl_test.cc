@@ -55,7 +55,7 @@ fn _tint_main() -> void {
 }
 )";
 
-  auto got = Transform<Msl>(src);
+  auto got = Run<Msl>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -79,7 +79,7 @@ fn _tint_main() -> void {
 }
 )";
 
-  auto got = Transform<Msl>(src);
+  auto got = Run<Msl>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -354,7 +354,7 @@ fn frag_main(tint_symbol_4 : tint_symbol_3, [[builtin(frag_coord)]] coord : vec4
 }
 )";
 
-  auto got = Transform<Msl>(src);
+  auto got = Run<Msl>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -396,7 +396,7 @@ fn frag_main(tint_symbol_4 : tint_symbol_3, [[builtin(frag_coord)]] coord : vec4
 }
 )";
 
-  auto got = Transform<Msl>(src);
+  auto got = Run<Msl>(src);
 
   EXPECT_EQ(expect, str(got));
 }

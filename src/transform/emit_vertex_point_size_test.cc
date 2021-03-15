@@ -52,7 +52,7 @@ fn non_entry_b() -> void {
 }
 )";
 
-  auto got = Transform<EmitVertexPointSize>(src);
+  auto got = Run<EmitVertexPointSize>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -85,7 +85,7 @@ fn non_entry_b() -> void {
 }
 )";
 
-  auto got = Transform<EmitVertexPointSize>(src);
+  auto got = Run<EmitVertexPointSize>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -111,7 +111,7 @@ fn compute_entry() -> void {
 }
 )";
 
-  auto got = Transform<EmitVertexPointSize>(src);
+  auto got = Run<EmitVertexPointSize>(src);
 
   EXPECT_EQ(expect, str(got));
 }

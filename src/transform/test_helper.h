@@ -37,7 +37,7 @@ class TransformTestBase : public BASE {
   /// @param in the input WGSL source
   /// @param transforms the list of transforms to apply
   /// @return the transformed output
-  Transform::Output Transform(
+  Transform::Output Run(
       std::string in,
       std::vector<std::unique_ptr<transform::Transform>> transforms) {
     auto file = std::make_unique<Source::File>("test", in);
@@ -62,11 +62,11 @@ class TransformTestBase : public BASE {
   /// @param transform the transform to apply
   /// @param in the input WGSL source
   /// @return the transformed output
-  Transform::Output Transform(std::string in,
-                              std::unique_ptr<transform::Transform> transform) {
+  Transform::Output Run(std::string in,
+                        std::unique_ptr<transform::Transform> transform) {
     std::vector<std::unique_ptr<transform::Transform>> transforms;
     transforms.emplace_back(std::move(transform));
-    return Transform(std::move(in), std::move(transforms));
+    return Run(std::move(in), std::move(transforms));
   }
 
   /// Transforms and returns the WGSL source `in`, transformed using
@@ -75,9 +75,9 @@ class TransformTestBase : public BASE {
   /// @param args the TRANSFORM constructor arguments
   /// @return the transformed output
   template <typename TRANSFORM, typename... ARGS>
-  Transform::Output Transform(std::string in, ARGS&&... args) {
-    return Transform(std::move(in),
-                     std::make_unique<TRANSFORM>(std::forward<ARGS>(args)...));
+  Transform::Output Run(std::string in, ARGS&&... args) {
+    return Run(std::move(in),
+               std::make_unique<TRANSFORM>(std::forward<ARGS>(args)...));
   }
 
   /// @param output the output of the transform

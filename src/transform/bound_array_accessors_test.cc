@@ -43,7 +43,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -73,7 +73,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -95,7 +95,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -121,7 +121,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -143,7 +143,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -165,7 +165,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -187,7 +187,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -213,7 +213,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -235,7 +235,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -261,7 +261,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -286,7 +286,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -308,7 +308,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -330,7 +330,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -352,7 +352,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -378,7 +378,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -404,7 +404,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -426,7 +426,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -448,7 +448,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -470,7 +470,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -492,7 +492,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -559,7 +559,7 @@ fn f() -> void {
 }
 )";
 
-  auto got = Transform<BoundArrayAccessors>(src);
+  auto got = Run<BoundArrayAccessors>(src);
 
   EXPECT_EQ(expect, str(got));
 }

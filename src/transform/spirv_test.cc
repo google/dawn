@@ -57,7 +57,7 @@ fn compute_main() -> void {
 }
 )";
 
-  auto got = Transform<Spirv>(src);
+  auto got = Run<Spirv>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -89,7 +89,7 @@ fn main() -> void {
 }
 )";
 
-  auto got = Transform<Spirv>(src);
+  auto got = Run<Spirv>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -133,7 +133,7 @@ fn main() -> void {
 }
 )";
 
-  auto got = Transform<Spirv>(src);
+  auto got = Run<Spirv>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -164,7 +164,7 @@ fn main() -> void {
 }
 )";
 
-  auto got = Transform<Spirv>(src);
+  auto got = Run<Spirv>(src);
 
   EXPECT_EQ(expect, str(got));
 }

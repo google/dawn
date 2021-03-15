@@ -46,7 +46,7 @@ fn main() -> void {
 }
 )";
 
-  auto got = Transform<Hlsl>(src);
+  auto got = Run<Hlsl>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -69,7 +69,7 @@ fn main() -> void {
 }
 )";
 
-  auto got = Transform<Hlsl>(src);
+  auto got = Run<Hlsl>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -86,7 +86,7 @@ const module_arr : array<f32, 4> = array<f32, 4>(0.0, 1.0, 2.0, 3.0);
 
   auto* expect = src;
 
-  auto got = Transform<Hlsl>(src);
+  auto got = Run<Hlsl>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -138,7 +138,7 @@ fn main() -> void {
 }
 )";
 
-  auto got = Transform<Hlsl>(src);
+  auto got = Run<Hlsl>(src);
 
   EXPECT_EQ(expect, str(got));
 }

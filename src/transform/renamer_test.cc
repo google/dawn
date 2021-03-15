@@ -29,7 +29,7 @@ TEST_F(RenamerTest, EmptyModule) {
   auto* src = "";
   auto* expect = "";
 
-  auto got = Transform<Renamer>(src);
+  auto got = Run<Renamer>(src);
 
   EXPECT_EQ(expect, str(got));
 
@@ -65,7 +65,7 @@ fn _tint_3() -> void {
 }
 )";
 
-  auto got = Transform<Renamer>(src);
+  auto got = Run<Renamer>(src);
 
   EXPECT_EQ(expect, str(got));
 
@@ -101,7 +101,7 @@ fn _tint_1() -> void {
 }
 )";
 
-  auto got = Transform<Renamer>(src);
+  auto got = Run<Renamer>(src);
 
   EXPECT_EQ(expect, str(got));
 
@@ -134,7 +134,7 @@ fn _tint_1() -> void {
 }
 )";
 
-  auto got = Transform<Renamer>(src);
+  auto got = Run<Renamer>(src);
 
   EXPECT_EQ(expect, str(got));
 

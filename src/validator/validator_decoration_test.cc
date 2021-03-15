@@ -75,6 +75,7 @@ ast::Decoration* createDecoration(ProgramBuilder& builder,
     case DecorationKind::kConstantId:
       return builder.create<ast::ConstantIdDecoration>(0u);
   }
+  return nullptr;
 }
 
 using ArrayDecorationTest = ValidatorDecorationsTestWithParams;
