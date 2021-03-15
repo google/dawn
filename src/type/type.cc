@@ -71,7 +71,7 @@ Type* Type::UnwrapAll() {
 }
 
 bool Type::is_scalar() const {
-  return is_float_scalar() || is_integer_scalar() || Is<Bool>();
+  return IsAnyOf<F32, U32, I32, Bool>();
 }
 
 bool Type::is_float_scalar() const {
@@ -91,7 +91,7 @@ bool Type::is_float_scalar_or_vector() const {
 }
 
 bool Type::is_integer_scalar() const {
-  return Is<U32>() || Is<I32>();
+  return IsAnyOf<U32, I32>();
 }
 
 bool Type::is_unsigned_integer_vector() const {
@@ -123,7 +123,7 @@ bool Type::is_bool_scalar_or_vector() const {
 }
 
 bool Type::is_handle() const {
-  return Is<type::Sampler>() || Is<type::Texture>();
+  return IsAnyOf<Sampler, Texture>();
 }
 
 }  // namespace type

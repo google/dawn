@@ -83,6 +83,11 @@ struct TypeInfoOf {
   /// The unique TypeInfo for the type T.
   static const TypeInfo info;
 };
+
+// Forward declaration
+template <typename TO_FIRST, typename... TO_REST>
+struct IsAnyOf;
+
 }  // namespace detail
 
 /// @returns true if `obj` is a valid pointer, and is of, or derives from the
@@ -104,6 +109,14 @@ bool Is(FROM* obj) {
   }
 
   return obj->TypeInfo().Is(TypeInfo::Of<std::remove_const_t<TO>>());
+}
+
+/// @returns true if `obj` is of, or derives from any of the `TO`
+/// classes.
+/// @param obj the object to cast from
+template <typename... TO, typename FROM>
+inline bool IsAnyOf(FROM* obj) {
+  return detail::IsAnyOf<TO...>::Exec(obj);
 }
 
 /// @returns obj dynamically cast to the type `TO` or `nullptr` if
@@ -135,6 +148,13 @@ class CastableBase {
   template <typename TO>
   inline bool Is() const {
     return tint::Is<TO>(this);
+  }
+
+  /// @returns true if this object is of, or derives from any of the `TO`
+  /// classes.
+  template <typename... TO>
+  inline bool IsAnyOf() const {
+    return tint::IsAnyOf<TO...>(this);
   }
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
@@ -199,6 +219,13 @@ class Castable : public BASE {
     return tint::Is<TO>(static_cast<const CLASS*>(this));
   }
 
+  /// @returns true if this object is of, or derives from any of the `TO`
+  /// classes.
+  template <typename... TO>
+  inline bool IsAnyOf() const {
+    return tint::IsAnyOf<TO...>(static_cast<const CLASS*>(this));
+  }
+
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
   /// this object does not derive from `TO`.
   template <typename TO>
@@ -213,6 +240,30 @@ class Castable : public BASE {
     return tint::As<const TO>(this);
   }
 };
+
+namespace detail {
+/// Helper for Castable::IsAnyOf
+template <typename TO_FIRST, typename... TO_REST>
+struct IsAnyOf {
+  /// @param obj castable object to test
+  /// @returns true if `obj` is of, or derives from any of `[TO_FIRST,
+  /// ...TO_REST]`
+  template <typename FROM>
+  static bool Exec(FROM* obj) {
+    return Is<TO_FIRST>(obj) || IsAnyOf<TO_REST...>::Exec(obj);
+  }
+};
+/// Terminal specialization
+template <typename TO>
+struct IsAnyOf<TO> {
+  /// @param obj castable object to test
+  /// @returns true if `obj` is of, or derives from TO
+  template <typename FROM>
+  static bool Exec(FROM* obj) {
+    return Is<TO>(obj);
+  }
+};
+}  // namespace detail
 
 }  // namespace tint
 

@@ -73,6 +73,27 @@ TEST(CastableBase, Is) {
   ASSERT_TRUE(gecko->Is<Reptile>());
 }
 
+TEST(CastableBase, IsAnyOf) {
+  std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
+  std::unique_ptr<CastableBase> bear = std::make_unique<Bear>();
+  std::unique_ptr<CastableBase> gecko = std::make_unique<Gecko>();
+
+  ASSERT_TRUE((frog->IsAnyOf<Animal, Mammal, Amphibian, Reptile>()));
+  ASSERT_TRUE((frog->IsAnyOf<Mammal, Amphibian>()));
+  ASSERT_TRUE((frog->IsAnyOf<Amphibian, Reptile>()));
+  ASSERT_FALSE((frog->IsAnyOf<Mammal, Reptile>()));
+
+  ASSERT_TRUE((bear->IsAnyOf<Animal, Mammal, Amphibian, Reptile>()));
+  ASSERT_TRUE((bear->IsAnyOf<Mammal, Amphibian>()));
+  ASSERT_TRUE((bear->IsAnyOf<Mammal, Reptile>()));
+  ASSERT_FALSE((bear->IsAnyOf<Amphibian, Reptile>()));
+
+  ASSERT_TRUE((gecko->IsAnyOf<Animal, Mammal, Amphibian, Reptile>()));
+  ASSERT_TRUE((gecko->IsAnyOf<Mammal, Reptile>()));
+  ASSERT_TRUE((gecko->IsAnyOf<Amphibian, Reptile>()));
+  ASSERT_FALSE((gecko->IsAnyOf<Mammal, Amphibian>()));
+}
+
 TEST(CastableBase, As) {
   std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
   std::unique_ptr<CastableBase> bear = std::make_unique<Bear>();
