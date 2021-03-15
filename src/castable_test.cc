@@ -81,12 +81,12 @@ TEST(CastableBase, IsWithPredicate) {
     return true;
   });
 
-  ASSERT_TRUE((frog->Is<Animal>([](const Animal* a) { return true; })));
-  ASSERT_FALSE((frog->Is<Animal>([](const Animal* a) { return false; })));
+  ASSERT_TRUE((frog->Is<Animal>([](const Animal*) { return true; })));
+  ASSERT_FALSE((frog->Is<Animal>([](const Animal*) { return false; })));
 
   // Predicate not called if cast is invalid
   auto expect_not_called = [] { FAIL() << "Should not be called"; };
-  ASSERT_FALSE((frog->Is<Bear>([&](const Animal* a) {
+  ASSERT_FALSE((frog->Is<Bear>([&](const Animal*) {
     expect_not_called();
     return true;
   })));
@@ -165,12 +165,12 @@ TEST(Castable, IsWithPredicate) {
     return true;
   });
 
-  ASSERT_TRUE((frog->Is<Animal>([](const Animal* a) { return true; })));
-  ASSERT_FALSE((frog->Is<Animal>([](const Animal* a) { return false; })));
+  ASSERT_TRUE((frog->Is<Animal>([](const Animal*) { return true; })));
+  ASSERT_FALSE((frog->Is<Animal>([](const Animal*) { return false; })));
 
   // Predicate not called if cast is invalid
   auto expect_not_called = [] { FAIL() << "Should not be called"; };
-  ASSERT_FALSE((frog->Is<Bear>([&](const Animal* a) {
+  ASSERT_FALSE((frog->Is<Bear>([&](const Animal*) {
     expect_not_called();
     return true;
   })));
