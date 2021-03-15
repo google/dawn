@@ -167,6 +167,31 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
 )");
 }
 
+TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_ReturnValue) {
+  auto* func =
+      Func("frag_main", ast::VariableList{}, ty.f32(),
+           ast::StatementList{
+               create<ast::ReturnStatement>(Expr(1.f)),
+           },
+           ast::DecorationList{
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           },
+           ast::DecorationList{
+               create<ast::LocationDecoration>(1u),
+           });
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.EmitFunction(func));
+  EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
+  fn frag_main() -> [[location(1)]] f32 {
+    return 1.0;
+  }
+)");
+}
+
 // https://crbug.com/tint/297
 TEST_F(WgslGeneratorImplTest,
        Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar) {

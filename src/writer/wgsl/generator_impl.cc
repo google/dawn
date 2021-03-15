@@ -329,6 +329,13 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 
   out_ << ") -> ";
 
+  if (!func->return_type_decorations().empty()) {
+    if (!EmitDecorations(func->return_type_decorations())) {
+      return false;
+    }
+    out_ << " ";
+  }
+
   if (!EmitType(func->return_type())) {
     return false;
   }
