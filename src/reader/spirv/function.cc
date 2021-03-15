@@ -843,10 +843,10 @@ bool FunctionEmitter::Emit() {
 
   auto& statements = statements_stack_[0].GetStatements();
   auto* body = create<ast::BlockStatement>(Source{}, statements);
-  builder_.AST().AddFunction(
-      create<ast::Function>(decl.source, builder_.Symbols().Register(decl.name),
-                            std::move(decl.params), decl.return_type, body,
-                            std::move(decl.decorations)));
+  builder_.AST().AddFunction(create<ast::Function>(
+      decl.source, builder_.Symbols().Register(decl.name),
+      std::move(decl.params), decl.return_type, body,
+      std::move(decl.decorations), ast::DecorationList{}));
 
   // Maintain the invariant by repopulating the one and only element.
   statements_stack_.clear();

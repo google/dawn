@@ -58,8 +58,9 @@ ast::Function* Transform::CloneWithStatementsAtStart(
   auto* body = ctx->dst->create<ast::BlockStatement>(
       ctx->Clone(in->body()->source()), statements);
   auto decos = ctx->Clone(in->decorations());
+  auto ret_decos = ctx->Clone(in->return_type_decorations());
   return ctx->dst->create<ast::Function>(source, symbol, params, return_type,
-                                         body, decos);
+                                         body, decos, ret_decos);
 }
 
 void Transform::RenameReservedKeywords(CloneContext* ctx,

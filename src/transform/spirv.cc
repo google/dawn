@@ -138,7 +138,8 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
     auto* new_func = ctx.dst->create<ast::Function>(
         func->source(), ctx.Clone(func->symbol()), ast::VariableList{},
         ctx.Clone(func->return_type()), ctx.Clone(func->body()),
-        ctx.Clone(func->decorations()));
+        ctx.Clone(func->decorations()),
+        ctx.Clone(func->return_type_decorations()));
     ctx.Replace(func, new_func);
   }
 }

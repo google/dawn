@@ -218,10 +218,12 @@ class ParserImpl {
     /// @param n function name
     /// @param p function parameters
     /// @param ret_ty function return type
+    /// @param ret_decos return type decorations
     FunctionHeader(Source src,
                    std::string n,
                    ast::VariableList p,
-                   type::Type* ret_ty);
+                   type::Type* ret_ty,
+                   ast::DecorationList ret_decos);
     /// Destructor
     ~FunctionHeader();
     /// Assignment operator
@@ -237,6 +239,8 @@ class ParserImpl {
     ast::VariableList params;
     /// Function return type
     type::Type* return_type;
+    /// Function return type decorations
+    ast::DecorationList return_type_decorations;
   };
 
   /// VarDeclInfo contains the parsed information for variable declaration.

@@ -28,13 +28,15 @@ Function::Function(const Source& source,
                    VariableList params,
                    type::Type* return_type,
                    BlockStatement* body,
-                   DecorationList decorations)
+                   DecorationList decorations,
+                   DecorationList return_type_decorations)
     : Base(source),
       symbol_(symbol),
       params_(std::move(params)),
       return_type_(return_type),
       body_(body),
-      decorations_(std::move(decorations)) {
+      decorations_(std::move(decorations)),
+      return_type_decorations_(std::move(return_type_decorations)) {
   for (auto* param : params_) {
     TINT_ASSERT(param);
   }
@@ -77,7 +79,8 @@ Function* Function::Clone(CloneContext* ctx) const {
   auto* ret = ctx->Clone(return_type_);
   auto* b = ctx->Clone(body_);
   auto decos = ctx->Clone(decorations_);
-  return ctx->dst->create<Function>(src, sym, p, ret, b, decos);
+  auto ret_decos = ctx->Clone(return_type_decorations_);
+  return ctx->dst->create<Function>(src, sym, p, ret, b, decos, ret_decos);
 }
 
 void Function::to_str(const semantic::Info& sem,

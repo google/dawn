@@ -994,16 +994,18 @@ class ProgramBuilder {
   /// @param type the function return type
   /// @param body the function body
   /// @param decorations the function decorations
+  /// @param return_type_decorations the function return type decorations
   /// @returns the function pointer
   ast::Function* Func(Source source,
                       std::string name,
                       ast::VariableList params,
                       type::Type* type,
                       ast::StatementList body,
-                      ast::DecorationList decorations) {
-    auto* func =
-        create<ast::Function>(source, Symbols().Register(name), params, type,
-                              create<ast::BlockStatement>(body), decorations);
+                      ast::DecorationList decorations,
+                      ast::DecorationList return_type_decorations = {}) {
+    auto* func = create<ast::Function>(source, Symbols().Register(name), params,
+                                       type, create<ast::BlockStatement>(body),
+                                       decorations, return_type_decorations);
     AST().AddFunction(func);
     return func;
   }
@@ -1014,15 +1016,17 @@ class ProgramBuilder {
   /// @param type the function return type
   /// @param body the function body
   /// @param decorations the function decorations
+  /// @param return_type_decorations the function return type decorations
   /// @returns the function pointer
   ast::Function* Func(std::string name,
                       ast::VariableList params,
                       type::Type* type,
                       ast::StatementList body,
-                      ast::DecorationList decorations) {
-    auto* func =
-        create<ast::Function>(Symbols().Register(name), params, type,
-                              create<ast::BlockStatement>(body), decorations);
+                      ast::DecorationList decorations,
+                      ast::DecorationList return_type_decorations = {}) {
+    auto* func = create<ast::Function>(Symbols().Register(name), params, type,
+                                       create<ast::BlockStatement>(body),
+                                       decorations, return_type_decorations);
     AST().AddFunction(func);
     return func;
   }

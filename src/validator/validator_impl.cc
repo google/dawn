@@ -248,6 +248,15 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
                 "non-void function must end with a return statement");
       return false;
     }
+
+    for (auto* deco : current_function_->return_type_decorations()) {
+      if (!(deco->Is<ast::BuiltinDecoration>() ||
+            deco->Is<ast::LocationDecoration>())) {
+        add_error(deco->source(),
+                  "decoration is not valid for function return types");
+        return false;
+      }
+    }
   }
   return true;
 }

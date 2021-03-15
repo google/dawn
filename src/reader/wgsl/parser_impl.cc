@@ -167,8 +167,13 @@ ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            std::string n,
                                            ast::VariableList p,
-                                           type::Type* ret_ty)
-    : source(src), name(n), params(p), return_type(ret_ty) {}
+                                           type::Type* ret_ty,
+                                           ast::DecorationList ret_decos)
+    : source(src),
+      name(n),
+      params(p),
+      return_type(ret_ty),
+      return_type_decorations(ret_decos) {}
 
 ParserImpl::FunctionHeader::~FunctionHeader() = default;
 
@@ -1185,7 +1190,7 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
 
   return create<ast::Function>(
       header->source, builder_.Symbols().Register(header->name), header->params,
-      header->return_type, body.value, decos);
+      header->return_type, body.value, decos, header->return_type_decorations);
 }
 
 // function_type_decl
@@ -1225,6 +1230,11 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
   if (!expect(use, Token::Type::kArrow))
     return Failure::kErrored;
 
+  auto decos = decoration_list();
+  if (decos.errored) {
+    return Failure::kErrored;
+  }
+
   auto type = function_type_decl();
   if (type.errored) {
     errored = true;
@@ -1235,8 +1245,8 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
   if (errored)
     return Failure::kErrored;
 
-  return FunctionHeader{source, name.value, std::move(params.value),
-                        type.value};
+  return FunctionHeader{source, name.value, std::move(params.value), type.value,
+                        std::move(decos.value)};
 }
 
 // param_list

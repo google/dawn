@@ -42,12 +42,14 @@ class Function : public Castable<Function, Node> {
   /// @param return_type the return type
   /// @param body the function body
   /// @param decorations the function decorations
+  /// @param return_type_decorations the return type decorations
   Function(const Source& source,
            Symbol symbol,
            VariableList params,
            type::Type* return_type,
            BlockStatement* body,
-           DecorationList decorations);
+           DecorationList decorations,
+           DecorationList return_type_decorations);
   /// Move constructor
   Function(Function&&);
 
@@ -73,6 +75,11 @@ class Function : public Castable<Function, Node> {
 
   /// @returns the function return type.
   type::Type* return_type() const { return return_type_; }
+
+  /// @returns the decorations attached to the function return type.
+  const DecorationList& return_type_decorations() const {
+    return return_type_decorations_;
+  }
 
   /// @returns a pointer to the last statement of the function or nullptr if
   // function is empty
@@ -108,6 +115,7 @@ class Function : public Castable<Function, Node> {
   type::Type* const return_type_;
   BlockStatement* const body_;
   DecorationList const decorations_;
+  DecorationList const return_type_decorations_;
 };
 
 /// A list of functions

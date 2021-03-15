@@ -391,7 +391,8 @@ void Msl::HandleEntryPointIOTypes(CloneContext& ctx) const {
         func->source(), ctx.Clone(func->symbol()), new_parameters,
         ctx.Clone(func->return_type()),
         ctx.dst->create<ast::BlockStatement>(new_body),
-        ctx.Clone(func->decorations()));
+        ctx.Clone(func->decorations()),
+        ctx.Clone(func->return_type_decorations()));
     ctx.Replace(func, new_func);
   }
 }
