@@ -20,7 +20,9 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/struct_member_size_decoration.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/validator/validator_test_helper.h"
 
@@ -29,15 +31,17 @@ namespace {
 
 enum class DecorationKind {
   kAccess,
+  kAlign,
   kBinding,
   kBuiltin,
   kConstantId,
   kGroup,
   kLocation,
+  kOffset,
+  kSize,
   kStage,
   kStride,
   kStructBlock,
-  kStructMemberOffset,
   kWorkgroup,
 };
 struct DecorationTestParams {
@@ -54,26 +58,30 @@ ast::Decoration* createDecoration(ProgramBuilder& builder,
     case DecorationKind::kAccess:
       return builder.create<ast::AccessDecoration>(
           ast::AccessControl::kReadOnly);
-    case DecorationKind::kLocation:
-      return builder.create<ast::LocationDecoration>(1);
+    case DecorationKind::kAlign:
+      return builder.create<ast::StructMemberAlignDecoration>(4u);
     case DecorationKind::kBinding:
       return builder.create<ast::BindingDecoration>(1);
-    case DecorationKind::kGroup:
-      return builder.create<ast::GroupDecoration>(1u);
     case DecorationKind::kBuiltin:
       return builder.create<ast::BuiltinDecoration>(ast::Builtin::kPosition);
-    case DecorationKind::kWorkgroup:
-      return builder.create<ast::WorkgroupDecoration>(1u, 1u, 1u);
-    case DecorationKind::kStage:
-      return builder.create<ast::StageDecoration>(ast::PipelineStage::kCompute);
-    case DecorationKind::kStructBlock:
-      return builder.create<ast::StructBlockDecoration>();
-    case DecorationKind::kStride:
-      return builder.create<ast::StrideDecoration>(4u);
-    case DecorationKind::kStructMemberOffset:
-      return builder.create<ast::StructMemberOffsetDecoration>(4u);
     case DecorationKind::kConstantId:
       return builder.create<ast::ConstantIdDecoration>(0u);
+    case DecorationKind::kGroup:
+      return builder.create<ast::GroupDecoration>(1u);
+    case DecorationKind::kLocation:
+      return builder.create<ast::LocationDecoration>(1);
+    case DecorationKind::kOffset:
+      return builder.create<ast::StructMemberOffsetDecoration>(4u);
+    case DecorationKind::kSize:
+      return builder.create<ast::StructMemberSizeDecoration>(4u);
+    case DecorationKind::kStage:
+      return builder.create<ast::StageDecoration>(ast::PipelineStage::kCompute);
+    case DecorationKind::kStride:
+      return builder.create<ast::StrideDecoration>(4u);
+    case DecorationKind::kStructBlock:
+      return builder.create<ast::StructBlockDecoration>();
+    case DecorationKind::kWorkgroup:
+      return builder.create<ast::WorkgroupDecoration>(1u, 1u, 1u);
   }
   return nullptr;
 }
@@ -103,16 +111,17 @@ INSTANTIATE_TEST_SUITE_P(
     ValidatorTest,
     ArrayDecorationTest,
     testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
+                    DecorationTestParams{DecorationKind::kAlign, false},
                     DecorationTestParams{DecorationKind::kBinding, false},
                     DecorationTestParams{DecorationKind::kBuiltin, false},
                     DecorationTestParams{DecorationKind::kConstantId, false},
                     DecorationTestParams{DecorationKind::kGroup, false},
                     DecorationTestParams{DecorationKind::kLocation, false},
+                    DecorationTestParams{DecorationKind::kOffset, false},
+                    DecorationTestParams{DecorationKind::kSize, false},
                     DecorationTestParams{DecorationKind::kStage, false},
                     DecorationTestParams{DecorationKind::kStride, true},
                     DecorationTestParams{DecorationKind::kStructBlock, false},
-                    DecorationTestParams{DecorationKind::kStructMemberOffset,
-                                         false},
                     DecorationTestParams{DecorationKind::kWorkgroup, false}));
 
 using FunctionDecorationTest = ValidatorDecorationsTestWithParams;
@@ -137,16 +146,17 @@ INSTANTIATE_TEST_SUITE_P(
     ValidatorTest,
     FunctionDecorationTest,
     testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
+                    DecorationTestParams{DecorationKind::kAlign, false},
                     DecorationTestParams{DecorationKind::kBinding, false},
                     DecorationTestParams{DecorationKind::kBuiltin, false},
                     DecorationTestParams{DecorationKind::kConstantId, false},
                     DecorationTestParams{DecorationKind::kGroup, false},
                     DecorationTestParams{DecorationKind::kLocation, false},
+                    DecorationTestParams{DecorationKind::kOffset, false},
+                    DecorationTestParams{DecorationKind::kSize, false},
                     // Skip kStage as we always apply it in this test
                     DecorationTestParams{DecorationKind::kStride, false},
                     DecorationTestParams{DecorationKind::kStructBlock, false},
-                    DecorationTestParams{DecorationKind::kStructMemberOffset,
-                                         false},
                     DecorationTestParams{DecorationKind::kWorkgroup, true}));
 
 using FunctionReturnTypeDecorationTest = ValidatorDecorationsTestWithParams;
@@ -172,16 +182,17 @@ INSTANTIATE_TEST_SUITE_P(
     ValidatorTest,
     FunctionReturnTypeDecorationTest,
     testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
+                    DecorationTestParams{DecorationKind::kAlign, false},
                     DecorationTestParams{DecorationKind::kBinding, false},
                     DecorationTestParams{DecorationKind::kBuiltin, true},
                     DecorationTestParams{DecorationKind::kConstantId, false},
                     DecorationTestParams{DecorationKind::kGroup, false},
                     DecorationTestParams{DecorationKind::kLocation, true},
+                    DecorationTestParams{DecorationKind::kOffset, false},
+                    DecorationTestParams{DecorationKind::kSize, false},
                     DecorationTestParams{DecorationKind::kStage, false},
                     DecorationTestParams{DecorationKind::kStride, false},
                     DecorationTestParams{DecorationKind::kStructBlock, false},
-                    DecorationTestParams{DecorationKind::kStructMemberOffset,
-                                         false},
                     DecorationTestParams{DecorationKind::kWorkgroup, false}));
 
 using StructDecorationTest = ValidatorDecorationsTestWithParams;
@@ -206,16 +217,17 @@ INSTANTIATE_TEST_SUITE_P(
     ValidatorTest,
     StructDecorationTest,
     testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
+                    DecorationTestParams{DecorationKind::kAlign, false},
                     DecorationTestParams{DecorationKind::kBinding, false},
                     DecorationTestParams{DecorationKind::kBuiltin, false},
                     DecorationTestParams{DecorationKind::kConstantId, false},
                     DecorationTestParams{DecorationKind::kGroup, false},
                     DecorationTestParams{DecorationKind::kLocation, false},
+                    DecorationTestParams{DecorationKind::kOffset, false},
+                    DecorationTestParams{DecorationKind::kSize, false},
                     DecorationTestParams{DecorationKind::kStage, false},
                     DecorationTestParams{DecorationKind::kStride, false},
                     DecorationTestParams{DecorationKind::kStructBlock, true},
-                    DecorationTestParams{DecorationKind::kStructMemberOffset,
-                                         false},
                     DecorationTestParams{DecorationKind::kWorkgroup, false}));
 
 using StructMemberDecorations = ValidatorDecorationsTestWithParams;
@@ -241,16 +253,17 @@ INSTANTIATE_TEST_SUITE_P(
     ValidatorTest,
     StructMemberDecorations,
     testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
+                    DecorationTestParams{DecorationKind::kAlign, true},
                     DecorationTestParams{DecorationKind::kBinding, false},
                     DecorationTestParams{DecorationKind::kBuiltin, true},
                     DecorationTestParams{DecorationKind::kConstantId, false},
                     DecorationTestParams{DecorationKind::kGroup, false},
                     DecorationTestParams{DecorationKind::kLocation, true},
+                    DecorationTestParams{DecorationKind::kOffset, true},
+                    DecorationTestParams{DecorationKind::kSize, true},
                     DecorationTestParams{DecorationKind::kStage, false},
                     DecorationTestParams{DecorationKind::kStride, false},
                     DecorationTestParams{DecorationKind::kStructBlock, false},
-                    DecorationTestParams{DecorationKind::kStructMemberOffset,
-                                         true},
                     DecorationTestParams{DecorationKind::kWorkgroup, false}));
 
 using VariableDecorationTest = ValidatorDecorationsTestWithParams;
@@ -273,16 +286,17 @@ INSTANTIATE_TEST_SUITE_P(
     ValidatorTest,
     VariableDecorationTest,
     testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
+                    DecorationTestParams{DecorationKind::kAlign, false},
                     DecorationTestParams{DecorationKind::kBinding, true},
                     DecorationTestParams{DecorationKind::kBuiltin, true},
                     DecorationTestParams{DecorationKind::kConstantId, true},
                     DecorationTestParams{DecorationKind::kGroup, true},
                     DecorationTestParams{DecorationKind::kLocation, true},
+                    DecorationTestParams{DecorationKind::kOffset, false},
+                    DecorationTestParams{DecorationKind::kSize, false},
                     DecorationTestParams{DecorationKind::kStage, false},
                     DecorationTestParams{DecorationKind::kStride, false},
                     DecorationTestParams{DecorationKind::kStructBlock, false},
-                    DecorationTestParams{DecorationKind::kStructMemberOffset,
-                                         false},
                     DecorationTestParams{DecorationKind::kWorkgroup, false}));
 
 }  // namespace

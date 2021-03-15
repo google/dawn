@@ -23,7 +23,9 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct_block_decoration.h"
+#include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/struct_member_size_decoration.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/semantic/call.h"
@@ -127,7 +129,9 @@ bool ValidatorImpl::ValidateConstructedType(const type::Type* type) {
       for (auto* deco : member->decorations()) {
         if (!(deco->Is<ast::BuiltinDecoration>() ||
               deco->Is<ast::LocationDecoration>() ||
-              deco->Is<ast::StructMemberOffsetDecoration>())) {
+              deco->Is<ast::StructMemberOffsetDecoration>() ||
+              deco->Is<ast::StructMemberSizeDecoration>() ||
+              deco->Is<ast::StructMemberAlignDecoration>())) {
           add_error(deco->source(),
                     "decoration is not valid for structure members");
           return false;
