@@ -367,7 +367,7 @@ fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>) -> void {
 }
 )";
 
-  auto got = Transform<Msl>(src);
+  auto got = Run<Msl>(src);
 
   EXPECT_EQ(src, str(got));
 }

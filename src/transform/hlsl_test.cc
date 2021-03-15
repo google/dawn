@@ -179,7 +179,7 @@ fn frag_main(tint_symbol_4 : tint_symbol_3, frag_in : FragIn) -> void {
 }
 )";
 
-  auto got = Transform<Hlsl>(src);
+  auto got = Run<Hlsl>(src);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -205,7 +205,7 @@ fn frag_main(builtins : FragBuiltins, inputs : FragInputs) -> void {
 }
 )";
 
-  auto got = Transform<Hlsl>(src);
+  auto got = Run<Hlsl>(src);
 
   EXPECT_EQ(src, str(got));
 }
@@ -237,7 +237,7 @@ fn frag_main(tint_symbol_5 : tint_symbol_4) -> void {
 }
 )";
 
-  auto got = Transform<Hlsl>(src);
+  auto got = Run<Hlsl>(src);
 
   EXPECT_EQ(expect, str(got));
 }
