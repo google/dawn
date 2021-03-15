@@ -34,6 +34,7 @@ class Msl : public Transform {
   /// @returns the transformation result
   Output Run(const Program* program) override;
 
+ private:
   /// Hoist location-decorated entry point parameters out to struct members.
   void HandleEntryPointIOTypes(CloneContext& ctx) const;
 };

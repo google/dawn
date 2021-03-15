@@ -173,8 +173,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
-  auto p =
-      parser("struct A { [[offset(0)]] data: [[stride(4)]] array<f32>; };");
+  auto p = parser("struct A { data: [[stride(4)]] array<f32>; };");
 
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -194,12 +193,15 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   const auto* ty = str->impl()->members()[0]->type();
   ASSERT_TRUE(ty->Is<type::Array>());
   const auto* arr = ty->As<type::Array>();
-  EXPECT_TRUE(arr->has_array_stride());
-  EXPECT_EQ(arr->array_stride(), 4u);
+
+  ASSERT_EQ(arr->decorations().size(), 1u);
+  auto* stride = arr->decorations()[0];
+  ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
+  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 4u);
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
-  auto p = parser("[[block]] struct A { [[offset(0)]] data: f32; };");
+  auto p = parser("[[block]] struct A { data: f32; };");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 

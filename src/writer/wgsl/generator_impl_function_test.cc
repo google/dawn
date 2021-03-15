@@ -171,7 +171,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
 TEST_F(WgslGeneratorImplTest,
        Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar) {
   // [[block]] struct Data {
-  //   [[offset(0)]] d : f32;
+  //   d : f32;
   // };
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
@@ -185,15 +185,10 @@ TEST_F(WgslGeneratorImplTest,
   //   return;
   // }
 
-  ast::DecorationList s_decos;
-  s_decos.push_back(create<ast::StructBlockDecoration>());
+  auto* s = Structure("Data", {Member("d", ty.f32())},
+                      {create<ast::StructBlockDecoration>()});
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("d", ty.f32(), {MemberOffset(0)})}, s_decos);
-
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
-  AST().AddConstructedType(s);
 
   Global("data", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
@@ -236,7 +231,6 @@ TEST_F(WgslGeneratorImplTest,
   ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
   EXPECT_EQ(gen.result(), R"([[block]]
 struct Data {
-  [[offset(0)]]
   d : f32;
 };
 

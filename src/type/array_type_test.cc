@@ -94,38 +94,6 @@ TEST_F(ArrayTest, TypeName_WithStride) {
   EXPECT_EQ(arr.type_name(), "__array__i32_3_stride_16");
 }
 
-TEST_F(ArrayTest, MinBufferBindingSizeNoStride) {
-  U32 u32;
-  Array arr(&u32, 4, ast::DecorationList{});
-  EXPECT_EQ(0u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
-TEST_F(ArrayTest, MinBufferBindingSizeArray) {
-  U32 u32;
-  Array arr(&u32, 4, ast::DecorationList{create<ast::StrideDecoration>(4)});
-  EXPECT_EQ(16u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
-TEST_F(ArrayTest, MinBufferBindingSizeRuntimeArray) {
-  U32 u32;
-  Array arr(&u32, 0, ast::DecorationList{create<ast::StrideDecoration>(4)});
-  EXPECT_EQ(4u, arr.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
-TEST_F(ArrayTest, BaseAlignmentArray) {
-  U32 u32;
-  Array arr(&u32, 4, ast::DecorationList{create<ast::StrideDecoration>(4)});
-  EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));
-}
-
-TEST_F(ArrayTest, BaseAlignmentRuntimeArray) {
-  U32 u32;
-  Array arr(&u32, 0, ast::DecorationList{create<ast::StrideDecoration>(4)});
-  EXPECT_EQ(16u, arr.BaseAlignment(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(4u, arr.BaseAlignment(MemoryLayout::kStorageBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

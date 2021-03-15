@@ -143,12 +143,10 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Pointer) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32()),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
-
-  auto* s = ty.struct_("S", str);
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -157,12 +155,10 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32()),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
-
-  auto* s = ty.struct_("S", str);
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -174,41 +170,37 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
 )");
 }
 
+/// TODO(bclayton): Add tests for vector, matrix, array and nested structures.
 TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.i32(), {MemberOffset(4)}),
-          Member("b", ty.f32(), {MemberOffset(32)}),
-          Member("c", ty.f32(), {MemberOffset(128)}),
-      },
-      ast::DecorationList{});
-
-  auto* s = ty.struct_("S", str);
+  auto* s = Structure(
+      "S", {
+               Member("a", ty.i32(), {MemberSize(32)}),
+               Member("b", ty.f32()),
+               Member("c", ty.f32(), {MemberAlign(128), MemberSize(128)}),
+           });
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
-  int8_t pad_0[4];
   int a;
-  int8_t pad_1[24];
+  int8_t pad_0[28];
   float b;
-  int8_t pad_2[92];
+  int8_t pad_1[92];
   float c;
+  int8_t pad_2[124];
 };
 )");
 }
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
-  ast::DecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>());
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32()),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      decos);
-
-  auto* s = ty.struct_("S", str);
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   GeneratorImpl& gen = Build();
 

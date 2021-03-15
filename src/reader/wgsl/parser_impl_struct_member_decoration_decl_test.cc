@@ -39,7 +39,7 @@ TEST_F(ParserImplTest, DecorationDecl_EmptyBlock) {
 }
 
 TEST_F(ParserImplTest, DecorationDecl_Single) {
-  auto p = parser("[[offset(4)]]");
+  auto p = parser("[[size(4)]]");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(decos.errored);
@@ -47,26 +47,35 @@ TEST_F(ParserImplTest, DecorationDecl_Single) {
   ASSERT_EQ(decos.value.size(), 1u);
   auto* deco = decos.value[0]->As<ast::Decoration>();
   ASSERT_NE(deco, nullptr);
-  EXPECT_TRUE(deco->Is<ast::StructMemberOffsetDecoration>());
+  EXPECT_TRUE(deco->Is<ast::StructMemberSizeDecoration>());
 }
 
 TEST_F(ParserImplTest, DecorationDecl_InvalidDecoration) {
-  auto p = parser("[[offset(nan)]]");
+  auto p = parser("[[size(nan)]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error()) << p->error();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
   EXPECT_EQ(p->error(),
-            "1:10: expected signed integer literal for offset decoration");
+            "1:8: expected signed integer literal for size decoration");
 }
 
 TEST_F(ParserImplTest, DecorationDecl_MissingClose) {
-  auto p = parser("[[offset(4)");
+  auto p = parser("[[size(4)");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error()) << p->error();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(p->error(), "1:12: expected ']]' for decoration list");
+  EXPECT_EQ(p->error(), "1:10: expected ']]' for decoration list");
+}
+
+TEST_F(ParserImplTest, StructMemberDecorationDecl_SizeMissingClose) {
+  auto p = parser("[[size(4)");
+  auto decos = p->decoration_list();
+  EXPECT_TRUE(p->has_error()) << p->error();
+  EXPECT_TRUE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+  EXPECT_EQ(p->error(), "1:10: expected ']]' for decoration list");
 }
 
 }  // namespace

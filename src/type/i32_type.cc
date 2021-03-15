@@ -35,14 +35,6 @@ std::string I32::FriendlyName(const SymbolTable&) const {
   return "i32";
 }
 
-uint64_t I32::MinBufferBindingSize(MemoryLayout) const {
-  return 4;
-}
-
-uint64_t I32::BaseAlignment(MemoryLayout) const {
-  return 4;
-}
-
 I32* I32::Clone(CloneContext* ctx) const {
   return ctx->dst->create<I32>();
 }

@@ -14,7 +14,7 @@
 
 // Vertex shader
 [[block]] struct Uniforms {
-  [[offset(0)]] modelViewProjectionMatrix : mat4x4<f32>;
+  modelViewProjectionMatrix : mat4x4<f32>;
 };
 
 [[binding(0), group(0)]] var<uniform> uniforms : [[access(read)]] Uniforms;

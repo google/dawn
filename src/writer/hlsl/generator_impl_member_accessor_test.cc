@@ -22,11 +22,7 @@ namespace {
 using HlslGeneratorImplTest_MemberAccessor = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
-  auto* strct = create<ast::Struct>(
-      ast::StructMemberList{Member("mem", ty.f32(), {MemberOffset(0)})},
-      ast::DecorationList{});
-
-  auto* s = ty.struct_("Str", strct);
+  auto* s = Structure("Data", {Member("mem", ty.f32())});
   auto* str_var = Global("str", s, ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("str", "mem");
@@ -43,20 +39,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load) {
   // struct Data {
-  //   [[offset(0)]] a : i32;
-  //   [[offset(4)]] b : f32;
+  //   a : i32;
+  //   b : f32;
   // };
   // var<storage> data : Data;
   // data.b;
   //
   // -> asfloat(data.Load(4));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s = Structure("data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "b");
@@ -73,19 +68,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Int) {
   // struct Data {
-  //   [[offset(0)]] a : i32;
-  //   [[offset(4)]] b : f32;
+  //   a : i32;
+  //   b : f32;
   // };
   // var<storage> data : Data;
   // data.a;
   //
   // -> asint(data.Load(0));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
-  auto* s = ty.struct_("Data", str);
+  auto* s = Structure("data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
+
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "a");
@@ -102,8 +97,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Matrix) {
   // struct Data {
-  //   [[offset(0)]] z : f32;
-  //   [[offset(4)]] a : mat2x3<f32>;
+  //   z : f32;
+  //   a : mat2x3<f32>;
   // };
   // var<storage> data : Data;
   // mat2x3<f32> b;
@@ -113,12 +108,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //    data.Store3(4 + 0, asuint(_tint_tmp[0]));
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.i32(), {MemberOffset(0)}),
-                            Member("a", ty.mat2x3<f32>(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s =
+      Structure("Data", {Member("z", ty.i32()), Member("a", ty.mat2x3<f32>())});
 
-  auto* s = ty.struct_("Data", str);
   auto* b_var = Global("b", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
@@ -135,31 +127,28 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(result(), R"(float3x2 _tint_tmp = b;
-data.Store3(4 + 0, asuint(_tint_tmp[0]));
-data.Store3(4 + 16, asuint(_tint_tmp[1]));
+data.Store3(16 + 0, asuint(_tint_tmp[0]));
+data.Store3(16 + 16, asuint(_tint_tmp[1]));
 )");
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Matrix_Empty) {
   // struct Data {
-  //   [[offset(0)]] z : f32;
-  //   [[offset(4)]] a : mat2x3<f32>;
+  //   z : f32;
+  //   a : mat2x3<f32>;
   // };
   // var<storage> data : Data;
   // data.a = mat2x3<f32>();
   //
   // -> float3x2 _tint_tmp = float3x2(0.0f, 0.0f, 0.0f,
   // 0.0f, 0.0f, 0.0f);
-  //    data.Store3(4 + 0, asuint(_tint_tmp[0]);
-  //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
+  //    data.Store3(16 + 0, asuint(_tint_tmp[0]);
+  //    data.Store3(16 + 16, asuint(_tint_tmp[1]));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.i32(), {MemberOffset(0)}),
-                            Member("a", ty.mat2x3<f32>(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s =
+      Structure("Data", {Member("z", ty.i32()), Member("a", ty.mat2x3<f32>())});
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor("data", "a");
@@ -176,16 +165,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   EXPECT_EQ(
       result(),
       R"(float3x2 _tint_tmp = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-data.Store3(4 + 0, asuint(_tint_tmp[0]));
-data.Store3(4 + 16, asuint(_tint_tmp[1]));
+data.Store3(16 + 0, asuint(_tint_tmp[0]));
+data.Store3(16 + 16, asuint(_tint_tmp[1]));
 )");
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix) {
   // struct Data {
-  //   [[offset(0)]] z : f32;
-  //   [[offset(4)]] a : mat3x2<f32>;
+  //   z : f32;
+  //   a : mat3x2<f32>;
   // };
   // var<storage> data : Data;
   // data.a;
@@ -193,12 +182,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // -> asfloat(uint2x3(data.Load2(4 + 0), data.Load2(4 + 8),
   // data.Load2(4 + 16)));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.i32(), {MemberOffset(0)}),
-                            Member("a", ty.mat3x2<f32>(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s =
+      Structure("Data", {Member("z", ty.i32()), Member("a", ty.mat3x2<f32>())});
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "a");
@@ -210,33 +196,26 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
-            "asfloat(uint2x3(data.Load2(4 + 0), data.Load2(4 + 8), "
-            "data.Load2(4 + 16)))");
+            "asfloat(uint2x3(data.Load2(8 + 0), data.Load2(8 + 8), "
+            "data.Load2(8 + 16)))");
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_Nested) {
   // struct Data {
-  //   [[offset(0)]] z : f32;
-  //   [[offset(4)]] a : mat2x3<f32;
-  // };
-  // struct Outer {
-  //   [[offset(0)]] c : f32;
-  //   [[offset(4)]] b : Data;
+  //   z : f32;
+  //   a : mat2x3<f32>
   // };
   // var<storage> data : Outer;
   // data.b.a;
   //
-  // -> asfloat(uint3x2(data.Load3(4 + 0), data.Load3(4 + 16)));
+  // -> asfloat(uint3x2(data.Load3(4 + 0), data.Load3(16 + 16)));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("z", ty.i32(), {MemberOffset(0)}),
-          Member("a", ty.mat2x3<f32>(), {MemberOffset(4)}),
-      },
-      ast::DecorationList{});
+  auto* s = Structure("Data", {
+                                  Member("z", ty.i32()),
+                                  Member("a", ty.mat2x3<f32>()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "a");
@@ -248,14 +227,14 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(),
-            "asfloat(uint3x2(data.Load3(4 + 0), data.Load3(4 + 16)))");
+            "asfloat(uint3x2(data.Load3(16 + 0), data.Load3(16 + 16)))");
 }
 
 TEST_F(
     HlslGeneratorImplTest_MemberAccessor,
     EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_By3_Is_16_Bytes) {
   // struct Data {
-  //   [[offset(4)]] a : mat3x3<f32;
+  //   a : mat3x3<f32>
   // };
   // var<storage> data : Data;
   // data.a;
@@ -263,11 +242,10 @@ TEST_F(
   // -> asfloat(uint3x3(data.Load3(0), data.Load3(16),
   // data.Load3(32)));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.mat3x3<f32>(), {MemberOffset(0)})},
-      ast::DecorationList{});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.mat3x3<f32>()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "a");
@@ -286,20 +264,19 @@ TEST_F(
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_Single_Element) {
   // struct Data {
-  //   [[offset(0)]] z : f32;
-  //   [[offset(16)]] a : mat4x3<f32>;
+  //   z : f32;
+  //   a : mat4x3<f32>;
   // };
   // var<storage> data : Data;
   // data.a[2][1];
   //
   // -> asfloat(data.Load((2 * 16) + (1 * 4) + 16)))
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("z", ty.i32(), {MemberOffset(0)}),
-                            Member("a", ty.mat4x3<f32>(), {MemberOffset(16)})},
-      ast::DecorationList{});
+  auto* s = Structure("Data", {
+                                  Member("z", ty.i32()),
+                                  Member("a", ty.mat4x3<f32>()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = IndexAccessor(
@@ -317,7 +294,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray) {
   // struct Data {
-  //   [[offset(0)]] a : [[stride(4)]] array<i32, 5>;
+  //   a : [[stride(4)]] array<i32, 5>;
   // };
   // var<storage> data : Data;
   // data.a[2];
@@ -328,10 +305,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                       create<ast::StrideDecoration>(4),
                   });
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
-      ast::DecorationList{});
-  auto* s = ty.struct_("Data", str);
+  auto* s = Structure("Data", {Member("a", &ary)});
+
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
@@ -348,7 +323,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_ArrayAccessor_StorageBuffer_Load_Int_FromArray_ExprIdx) {
   // struct Data {
-  //   [[offset(0)]] a : [[stride(4)]] array<i32, 5>;
+  //   a : [[stride(4)]] array<i32, 5>;
   // };
   // var<storage> data : Data;
   // data.a[(2 + 4) - 3];
@@ -359,10 +334,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                       create<ast::StrideDecoration>(4),
                   });
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
-      ast::DecorationList{});
-  auto* s = ty.struct_("Data", str);
+  auto* s = Structure("Data", {Member("a", &ary)});
+
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = IndexAccessor(MemberAccessor("data", "a"),
@@ -380,20 +353,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store) {
   // struct Data {
-  //   [[offset(0)]] a : i32;
-  //   [[offset(4)]] b : f32;
+  //   a : i32;
+  //   b : f32;
   // };
   // var<storage> data : Data;
   // data.b = 2.3f;
   //
   // -> data.Store(0, asuint(2.0f));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s = Structure("data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor("data", "b");
@@ -413,7 +385,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_ToArray) {
   // struct Data {
-  //   [[offset(0)]] a : [[stride(4)]] array<i32, 5>;
+  //   a : [[stride(4)]] array<i32, 5>;
   // };
   // var<storage> data : Data;
   // data.a[2] = 2;
@@ -425,11 +397,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
                       create<ast::StrideDecoration>(4),
                   });
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", &ary, {MemberOffset(0)})},
-      ast::DecorationList{});
+  auto* s = Structure("Data", {Member("a", &ary)});
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
@@ -449,20 +418,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Int) {
   // struct Data {
-  //   [[offset(0)]] a : i32;
-  //   [[offset(4)]] b : f32;
+  //   a : i32;
+  //   b : f32;
   // };
   // var<storage> data : Data;
   // data.a = 2;
   //
   // -> data.Store(0, asuint(2));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s = Structure("data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor("data", "a");
@@ -482,20 +450,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_Vec3) {
   // struct Data {
-  //   [[offset(0)]] a : vec3<i32>;
-  //   [[offset(16)]] b : vec3<f32>;
+  //   a : vec3<i32>;
+  //   b : vec3<f32>;
   // };
   // var<storage> data : Data;
   // data.b;
   //
   // -> asfloat(data.Load(16));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.vec3<i32>(), {MemberOffset(0)}),
-                            Member("b", ty.vec3<f32>(), {MemberOffset(16)})},
-      ast::DecorationList{});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.vec3<i32>()),
+                                  Member("b", ty.vec3<f32>()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor("data", "b");
@@ -512,20 +479,19 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Vec3) {
   // struct Data {
-  //   [[offset(0)]] a : vec3<i32>;
-  //   [[offset(16)]] b : vec3<f32>;
+  //   a : vec3<i32>;
+  //   b : vec3<f32>;
   // };
   // var<storage> data : Data;
   // data.b = vec3<f32>(2.3f, 1.2f, 0.2f);
   //
   // -> data.Store(16, asuint(float3(2.3f, 1.2f, 0.2f)));
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.vec3<i32>(), {MemberOffset(0)}),
-                            Member("b", ty.vec3<f32>(), {MemberOffset(16)})},
-      ast::DecorationList{});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.vec3<i32>()),
+                                  Member("b", ty.vec3<f32>()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor("data", "b");
@@ -548,8 +514,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel) {
   // struct Data {
-  //   [[offset(0)]] a : vec3<i32>;
-  //   [[offset(16)]] b : vec3<f32>;
+  //   a : vec3<i32>;
+  //   b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride(32)]] array<Data, 4>;
@@ -560,24 +526,18 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load3(16 + (2 * 32)))
 
-  auto* data_str = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.vec3<i32>(), {MemberOffset(0)}),
-          Member("b", ty.vec3<f32>(), {MemberOffset(16)}),
-      },
-      ast::DecorationList{});
+  auto* data = Structure("Data", {
+                                     Member("a", ty.vec3<i32>()),
+                                     Member("b", ty.vec3<f32>()),
+                                 });
 
-  auto* data = ty.struct_("Data", data_str);
   type::Array ary(data, 4,
                   ast::DecorationList{
                       create<ast::StrideDecoration>(32),
                   });
 
-  auto* pre_str = create<ast::Struct>(
-      ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
-      ast::DecorationList{});
+  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
 
-  auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* expr =
@@ -595,8 +555,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle) {
   // struct Data {
-  //   [[offset(0)]] a : vec3<i32>;
-  //   [[offset(16)]] b : vec3<f32>;
+  //   a : vec3<i32>;
+  //   b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride(32)]] array<Data, 4>;
@@ -607,22 +567,16 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load3(16 + (2 * 32))).xy
 
-  auto* data_str = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.vec3<i32>(), {MemberOffset(0)}),
-          Member("b", ty.vec3<f32>(), {MemberOffset(16)}),
-      },
-      ast::DecorationList{});
+  auto* data = Structure("Data", {
+                                     Member("a", ty.vec3<i32>()),
+                                     Member("b", ty.vec3<f32>()),
+                                 });
 
-  auto* data = ty.struct_("Data", data_str);
   type::Array ary(data, 4,
                   ast::DecorationList{create<ast::StrideDecoration>(32)});
 
-  auto* pre_str = create<ast::Struct>(
-      ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
-      ast::DecorationList{});
+  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
 
-  auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor(
@@ -642,8 +596,8 @@ TEST_F(
     HlslGeneratorImplTest_MemberAccessor,
     EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle_SingleLetter) {  // NOLINT
   // struct Data {
-  //   [[offset(0)]] a : vec3<i32>;
-  //   [[offset(16)]] b : vec3<f32>;
+  //   a : vec3<i32>;
+  //   b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride(32)]] array<Data, 4>;
@@ -654,24 +608,18 @@ TEST_F(
   //
   // -> asfloat(data.Load((4 * 1) + 16 + (2 * 32) + 0))
 
-  auto* data_str = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.vec3<i32>(), {MemberOffset(0)}),
-          Member("b", ty.vec3<f32>(), {MemberOffset(16)}),
-      },
-      ast::DecorationList{});
+  auto* data = Structure("Data", {
+                                     Member("a", ty.vec3<i32>()),
+                                     Member("b", ty.vec3<f32>()),
+                                 });
 
-  auto* data = ty.struct_("Data", data_str);
   type::Array ary(data, 4,
                   ast::DecorationList{
                       create<ast::StrideDecoration>(32),
                   });
 
-  auto* pre_str = create<ast::Struct>(
-      ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
-      ast::DecorationList{});
+  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
 
-  auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* expr = MemberAccessor(
@@ -690,8 +638,8 @@ TEST_F(
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Index) {
   // struct Data {
-  //   [[offset(0)]] a : vec3<i32>;
-  //   [[offset(16)]] b : vec3<f32>;
+  //   a : vec3<i32>;
+  //   b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride(32)]] array<Data, 4>;
@@ -702,24 +650,18 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> asfloat(data.Load(4 + 16 + (2 * 32)))
 
-  auto* data_str = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.vec3<i32>(), {MemberOffset(0)}),
-          Member("b", ty.vec3<f32>(), {MemberOffset(16)}),
-      },
-      ast::DecorationList{});
+  auto* data = Structure("Data", {
+                                     Member("a", ty.vec3<i32>()),
+                                     Member("b", ty.vec3<f32>()),
+                                 });
 
-  auto* data = ty.struct_("Data", data_str);
   type::Array ary(data, 4,
                   ast::DecorationList{
                       create<ast::StrideDecoration>(32),
                   });
 
-  auto* pre_str = create<ast::Struct>(
-      ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
-      ast::DecorationList{});
+  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
 
-  auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* expr = IndexAccessor(
@@ -738,8 +680,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_MultiLevel) {
   // struct Data {
-  //   [[offset(0)]] a : vec3<i32>;
-  //   [[offset(16)]] b : vec3<f32>;
+  //   a : vec3<i32>;
+  //   b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride(32)]] array<Data, 4>;
@@ -750,24 +692,18 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store3(16 + (2 * 32), asuint(float3(1.0f, 2.0f, 3.0f)));
 
-  auto* data_str = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.vec3<i32>(), {MemberOffset(0)}),
-          Member("b", ty.vec3<f32>(), {MemberOffset(16)}),
-      },
-      ast::DecorationList{});
+  auto* data = Structure("Data", {
+                                     Member("a", ty.vec3<i32>()),
+                                     Member("b", ty.vec3<f32>()),
+                                 });
 
-  auto* data = ty.struct_("Data", data_str);
   type::Array ary(data, 4,
                   ast::DecorationList{
                       create<ast::StrideDecoration>(32),
                   });
 
-  auto* pre_str = create<ast::Struct>(
-      ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
-      ast::DecorationList{});
+  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
 
-  auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* lhs =
@@ -791,8 +727,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
        EmitExpression_MemberAccessor_StorageBuffer_Store_Swizzle_SingleLetter) {
   // struct Data {
-  //   [[offset(0)]] a : vec3<i32>;
-  //   [[offset(16)]] b : vec3<f32>;
+  //   a : vec3<i32>;
+  //   b : vec3<f32>;
   // };
   // struct Pre {
   //   var c : [[stride(32)]] array<Data, 4>;
@@ -803,24 +739,18 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   //
   // -> data.Store((4 * 1) + 16 + (2 * 32) + 0, asuint(1.0f));
 
-  auto* data_str = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.vec3<i32>(), {MemberOffset(0)}),
-          Member("b", ty.vec3<f32>(), {MemberOffset(16)}),
-      },
-      ast::DecorationList{});
+  auto* data = Structure("Data", {
+                                     Member("a", ty.vec3<i32>()),
+                                     Member("b", ty.vec3<f32>()),
+                                 });
 
-  auto* data = ty.struct_("Data", data_str);
   type::Array ary(data, 4,
                   ast::DecorationList{
                       create<ast::StrideDecoration>(32),
                   });
 
-  auto* pre_str = create<ast::Struct>(
-      ast::StructMemberList{Member("c", &ary, {MemberOffset(0)})},
-      ast::DecorationList{});
+  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
 
-  auto* pre_struct = ty.struct_("Pre", pre_str);
   auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
 
   auto* lhs = MemberAccessor(

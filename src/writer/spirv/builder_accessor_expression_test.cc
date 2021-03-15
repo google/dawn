@@ -135,12 +135,12 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
 }
 
 TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
-  type::Array ary4(ty.vec3<f32>(), 4, ast::DecorationList{});
+  auto* ary4 = ty.array(ty.vec3<f32>(), 4);
 
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
 
-  auto* var = Global("ary", &ary4, ast::StorageClass::kFunction);
+  auto* var = Global("ary", ary4, ast::StorageClass::kFunction);
 
   auto* expr = IndexAccessor(IndexAccessor("ary", 3), 2);
   WrapInFunction(expr);
@@ -173,12 +173,12 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 }
 
 TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
-  type::Array ary4(ty.vec3<f32>(), 4, ast::DecorationList{});
+  auto* ary4 = ty.array(ty.vec3<f32>(), 4);
 
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
 
-  auto* var = Global("ary", &ary4, ast::StorageClass::kFunction);
+  auto* var = Global("ary", ary4, ast::StorageClass::kFunction);
 
   auto* expr = MemberAccessor(IndexAccessor("ary", 2), "xy");
   WrapInFunction(expr);
@@ -219,12 +219,12 @@ TEST_F(BuilderTest, MemberAccessor) {
   // var ident : my_struct
   // ident.b
 
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32()), Member("b", ty.f32())},
-      ast::DecorationList{});
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.f32()),
+                                   });
 
-  auto* s_type = ty.struct_("my_struct", s);
-  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
+  auto* var = Global("ident", s, ast::StorageClass::kFunction);
 
   auto* expr = MemberAccessor("ident", "b");
   WrapInFunction(expr);
@@ -262,15 +262,12 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   //
   // var ident : my_struct
   // ident.inner.a
-  auto* inner_struct = ty.struct_(
-      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32()),
-                                                         Member("b", ty.f32())},
-                                   ast::DecorationList{}));
+  auto* inner_struct = Structure("Inner", {
+                                              Member("a", ty.f32()),
+                                              Member("b", ty.f32()),
+                                          });
 
-  auto* s_type = ty.struct_(
-      "my_struct",
-      create<ast::Struct>(ast::StructMemberList{Member("inner", inner_struct)},
-                          ast::DecorationList{}));
+  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
@@ -311,16 +308,13 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   //
   // var ident : my_struct
   // ident.inner.a
-  auto* inner_struct = ty.struct_(
-      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32()),
-                                                         Member("b", ty.f32())},
-                                   ast::DecorationList{}));
+  auto* inner_struct = Structure("Inner", {
+                                              Member("a", ty.f32()),
+                                              Member("b", ty.f32()),
+                                          });
 
   auto* alias = ty.alias("Inner", inner_struct);
-  auto* s_type = ty.struct_(
-      "Outer",
-      create<ast::Struct>(ast::StructMemberList{Member("inner", alias)},
-                          ast::DecorationList{}));
+  auto* s_type = Structure("Outer", {Member("inner", alias)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
@@ -360,15 +354,12 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   //
   // var ident : my_struct
   // ident.inner.a = 2.0f;
-  auto* inner_struct = ty.struct_(
-      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32()),
-                                                         Member("b", ty.f32())},
-                                   ast::DecorationList{}));
+  auto* inner_struct = Structure("Inner", {
+                                              Member("a", ty.f32()),
+                                              Member("b", ty.f32()),
+                                          });
 
-  auto* s_type = ty.struct_(
-      "my_struct",
-      create<ast::Struct>(ast::StructMemberList{Member("inner", inner_struct)},
-                          ast::DecorationList{}));
+  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* expr = create<ast::AssignmentStatement>(
@@ -412,15 +403,12 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   // var ident : my_struct
   // var store : f32 = ident.inner.a
 
-  auto* inner_struct = ty.struct_(
-      "Inner", create<ast::Struct>(ast::StructMemberList{Member("a", ty.f32()),
-                                                         Member("b", ty.f32())},
-                                   ast::DecorationList{}));
+  auto* inner_struct = Structure("Inner", {
+                                              Member("a", ty.f32()),
+                                              Member("b", ty.f32()),
+                                          });
 
-  auto* s_type = ty.struct_(
-      "my_struct",
-      create<ast::Struct>(ast::StructMemberList{Member("inner", inner_struct)},
-                          ast::DecorationList{}));
+  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* store = Global("store", ty.f32(), ast::StorageClass::kFunction);
@@ -625,21 +613,14 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   // var index : array<A, 2>
   // index[0].foo[2].bar.baz.yx
 
-  auto* s =
-      create<ast::Struct>(ast::StructMemberList{Member("baz", ty.vec3<f32>())},
-                          ast::DecorationList{});
-  auto* c_type = ty.struct_("C", s);
+  auto* c_type = Structure("C", {Member("baz", ty.vec3<f32>())});
 
-  s = create<ast::Struct>(ast::StructMemberList{Member("bar", c_type)},
-                          ast::DecorationList{});
-  auto* b_type = ty.struct_("B", s);
-  type::Array b_ary_type(b_type, 3, ast::DecorationList{});
-  s = create<ast::Struct>(ast::StructMemberList{Member("foo", &b_ary_type)},
-                          ast::DecorationList{});
-  auto* a_type = ty.struct_("A", s);
+  auto* b_type = Structure("B", {Member("bar", c_type)});
+  auto* b_ary_type = ty.array(b_type, 3);
+  auto* a_type = Structure("A", {Member("foo", b_ary_type)});
 
-  type::Array a_ary_type(a_type, 2, ast::DecorationList{});
-  auto* var = Global("index", &a_ary_type, ast::StorageClass::kFunction);
+  auto* a_ary_type = ty.array(a_type, 2);
+  auto* var = Global("index", a_ary_type, ast::StorageClass::kFunction);
   auto* expr = MemberAccessor(
       MemberAccessor(
           MemberAccessor(
@@ -693,12 +674,12 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   //   vec2<f32>(0.5, -0.5));
   // pos[1]
 
-  type::Array arr(ty.vec2<f32>(), 3, ast::DecorationList{});
+  auto* arr = ty.array(ty.vec2<f32>(), 3);
 
   auto* var =
-      GlobalConst("pos", &arr,
-                  Construct(&arr, vec2<f32>(0.0f, 0.5f),
-                            vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)));
+      GlobalConst("pos", arr,
+                  Construct(arr, vec2<f32>(0.0f, 0.5f), vec2<f32>(-0.5f, -0.5f),
+                            vec2<f32>(0.5f, -0.5f)));
 
   auto* expr = IndexAccessor("pos", 1u);
   WrapInFunction(expr);

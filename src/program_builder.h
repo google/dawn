@@ -31,7 +31,9 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stride_decoration.h"
+#include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/struct_member_size_decoration.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
@@ -955,6 +957,36 @@ class ProgramBuilder {
     return create<ast::StructMemberOffsetDecoration>(source_, val);
   }
 
+  /// Creates a ast::StructMemberSizeDecoration
+  /// @param source the source information
+  /// @param val the size value
+  /// @returns the size decoration pointer
+  ast::StructMemberSizeDecoration* MemberSize(Source source, uint32_t val) {
+    return create<ast::StructMemberSizeDecoration>(source, val);
+  }
+
+  /// Creates a ast::StructMemberSizeDecoration
+  /// @param val the size value
+  /// @returns the size decoration pointer
+  ast::StructMemberSizeDecoration* MemberSize(uint32_t val) {
+    return create<ast::StructMemberSizeDecoration>(source_, val);
+  }
+
+  /// Creates a ast::StructMemberAlignDecoration
+  /// @param source the source information
+  /// @param val the align value
+  /// @returns the align decoration pointer
+  ast::StructMemberAlignDecoration* MemberAlign(Source source, uint32_t val) {
+    return create<ast::StructMemberAlignDecoration>(source, val);
+  }
+
+  /// Creates a ast::StructMemberAlignDecoration
+  /// @param val the align value
+  /// @returns the align decoration pointer
+  ast::StructMemberAlignDecoration* MemberAlign(uint32_t val) {
+    return create<ast::StructMemberAlignDecoration>(source_, val);
+  }
+
   /// Creates an ast::Function and registers it with the ast::Module.
   /// @param source the source information
   /// @param name the function name
@@ -995,37 +1027,64 @@ class ProgramBuilder {
     return func;
   }
 
+  /// Creates a ast::Struct and type::Struct, registering the type::Struct with
+  /// the AST().ConstructedTypes().
+  /// @param source the source information
+  /// @param name the struct name
+  /// @param members the struct members
+  /// @param decorations the optional struct decorations
+  /// @returns the struct type
+  type::Struct* Structure(const Source& source,
+                          const std::string& name,
+                          ast::StructMemberList members,
+                          ast::DecorationList decorations = {}) {
+    auto* impl =
+        create<ast::Struct>(source, std::move(members), std::move(decorations));
+    auto* type = ty.struct_(name, impl);
+    AST().AddConstructedType(type);
+    return type;
+  }
+
+  /// Creates a ast::Struct and type::Struct, registering the type::Struct with
+  /// the AST().ConstructedTypes().
+  /// @param name the struct name
+  /// @param members the struct members
+  /// @param decorations the optional struct decorations
+  /// @returns the struct type
+  type::Struct* Structure(const std::string& name,
+                          ast::StructMemberList members,
+                          ast::DecorationList decorations = {}) {
+    auto* impl =
+        create<ast::Struct>(std::move(members), std::move(decorations));
+    auto* type = ty.struct_(name, impl);
+    AST().AddConstructedType(type);
+    return type;
+  }
+
   /// Creates a ast::StructMember
   /// @param source the source information
   /// @param name the struct member name
   /// @param type the struct member type
+  /// @param decorations the optional struct member decorations
   /// @returns the struct member pointer
   ast::StructMember* Member(const Source& source,
                             const std::string& name,
-                            type::Type* type) {
+                            type::Type* type,
+                            ast::DecorationList decorations = {}) {
     return create<ast::StructMember>(source, Symbols().Register(name), type,
-                                     ast::DecorationList{});
+                                     std::move(decorations));
   }
 
   /// Creates a ast::StructMember
   /// @param name the struct member name
   /// @param type the struct member type
-  /// @returns the struct member pointer
-  ast::StructMember* Member(const std::string& name, type::Type* type) {
-    return create<ast::StructMember>(source_, Symbols().Register(name), type,
-                                     ast::DecorationList{});
-  }
-
-  /// Creates a ast::StructMember
-  /// @param name the struct member name
-  /// @param type the struct member type
-  /// @param decorations the struct member decorations
+  /// @param decorations the optional struct member decorations
   /// @returns the struct member pointer
   ast::StructMember* Member(const std::string& name,
                             type::Type* type,
-                            ast::DecorationList decorations) {
+                            ast::DecorationList decorations = {}) {
     return create<ast::StructMember>(source_, Symbols().Register(name), type,
-                                     decorations);
+                                     std::move(decorations));
   }
 
   /// Creates a ast::StructMember with the given byte offset

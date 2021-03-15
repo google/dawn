@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/type/access_control_type.h"
 #include "src/writer/hlsl/test_helper.h"
+
+using ::testing::HasSubstr;
 
 namespace tint {
 namespace writer {
@@ -264,19 +267,13 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_UniformStruct) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("coord", ty.vec4<f32>())},
-      ast::DecorationList{});
-
-  auto* s = ty.struct_("Uniforms", str);
+  auto* s = Structure("Uniforms", {Member("coord", ty.vec4<f32>())});
 
   Global("uniforms", s, ast::StorageClass::kUniform, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
-
-  AST().AddConstructedType(s);
 
   auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
                   create<ast::MemberAccessorExpression>(
@@ -310,12 +307,11 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_RW_StorageBuffer_Read) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
@@ -339,24 +335,21 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
+  EXPECT_THAT(result(), HasSubstr(R"(RWByteAddressBuffer coord : register(u0);
 
 void frag_main() {
   float v = asfloat(coord.Load(4));
   return;
-}
-
-)");
+})"));
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_RO_StorageBuffer_Read) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
@@ -380,24 +373,21 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(ByteAddressBuffer coord : register(t0);
+  EXPECT_THAT(result(), HasSubstr(R"(ByteAddressBuffer coord : register(t0);
 
 void frag_main() {
   float v = asfloat(coord.Load(4));
   return;
-}
-
-)");
+})"));
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_WO_StorageBuffer_Store) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kWriteOnly, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
@@ -419,24 +409,21 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
+  EXPECT_THAT(result(), HasSubstr(R"(RWByteAddressBuffer coord : register(u0);
 
 void frag_main() {
   coord.Store(4, asuint(2.0f));
   return;
-}
-
-)");
+})"));
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_StorageBuffer_Store) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
@@ -458,14 +445,12 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
+  EXPECT_THAT(result(), HasSubstr(R"(RWByteAddressBuffer coord : register(u0);
 
 void frag_main() {
   coord.Store(4, asuint(2.0f));
   return;
-}
-
-)");
+})"));
 }
 
 TEST_F(
@@ -715,7 +700,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(RWByteAddressBuffer coord : register(u0);
+  EXPECT_THAT(result(), HasSubstr(R"(RWByteAddressBuffer coord : register(u0);
 
 float sub_func(float param) {
   return asfloat(coord.Load((4 * 0)));
@@ -724,9 +709,7 @@ float sub_func(float param) {
 void frag_main() {
   float v = sub_func(1.0f);
   return;
-}
-
-)");
+})"));
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -857,7 +840,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   // [[block]] struct Data {
-  //   [[offset(0)]] d : f32;
+  //   d : f32;
   // };
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
@@ -871,12 +854,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   //   return;
   // }
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("d", ty.f32(), {MemberOffset(0)})},
-      ast::DecorationList{create<ast::StructBlockDecoration>()});
-
-  auto* s = ty.struct_("Data", str);
-  AST().AddConstructedType(s);
+  auto* s =
+      Structure("Data", {Member("d", ty.f32())},
+                ast::DecorationList{create<ast::StructBlockDecoration>()});
 
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 

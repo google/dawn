@@ -167,12 +167,10 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32()),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
-
-  auto* s = ty.struct_("S", str);
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -185,12 +183,10 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32()),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
-
-  auto* s = ty.struct_("S", str);
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -198,35 +194,35 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   EXPECT_EQ(result(), "S");
 }
 
+/// TODO(bclayton): Enable this, fix it, add tests for vector, matrix, array and
+/// nested structures.
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(4)}),
-                            Member("b", ty.f32(), {MemberOffset(32)}),
-                            Member("c", ty.f32(), {MemberOffset(128)})},
-      ast::DecorationList{});
-
-  auto* s = ty.struct_("S", str);
+  auto* s = Structure(
+      "S", {
+               Member("a", ty.i32(), {MemberSize(32)}),
+               Member("b", ty.f32()),
+               Member("c", ty.f32(), {MemberAlign(128), MemberSize(128)}),
+           });
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, s, "")) << gen.error();
-  EXPECT_EQ(result(), R"(struct {
-  int8_t pad_0[4];
+  EXPECT_EQ(gen.result(), R"(struct S {
   int a;
-  int8_t pad_1[24];
+  int8_t pad_0[28];
   float b;
-  int8_t pad_2[92];
+  int8_t pad_1[92];
   float c;
-})");
+  int8_t pad_2[124];
+};
+)");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
-  auto* str =
-      create<ast::Struct>(ast::StructMemberList{Member("double", ty.i32()),
-                                                Member("float", ty.f32())},
-                          ast::DecorationList{});
-
-  auto* s = ty.struct_("S", str);
+  auto* s = Structure("S", {
+                               Member("double", ty.i32()),
+                               Member("float", ty.f32()),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -240,15 +236,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
-  ast::DecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>());
-
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32()),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      decos);
-
-  auto* s = ty.struct_("S", str);
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   GeneratorImpl& gen = Build();
 

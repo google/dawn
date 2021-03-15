@@ -19,44 +19,52 @@ namespace tint {
 
 // Forward declarations
 namespace ast {
-
 class CallExpression;
 class Expression;
 class Function;
 class MemberAccessorExpression;
+class StructMember;
 class Variable;
-
 }  // namespace ast
+namespace type {
+class Array;
+class Struct;
+}  // namespace type
 
 namespace semantic {
 
+// Forward declarations
+class Array;
 class Call;
 class Expression;
 class Function;
 class MemberAccessorExpression;
+class Struct;
+class StructMember;
 class Variable;
 
 /// TypeMappings is a struct that holds dummy `operator()` methods that's used
-/// by SemanticNodeTypeFor to map AST node types to their corresponding semantic
-/// node types.
-/// The standard operator overload resolving rules will be used to infer the
-/// return type based on the argument type.
+/// by SemanticNodeTypeFor to map AST / type node types to their corresponding
+/// semantic node types. The standard operator overload resolving rules will be
+/// used to infer the return type based on the argument type.
 struct TypeMappings {
   //! @cond Doxygen_Suppress
-  semantic::Expression* operator()(ast::Expression*);
-  semantic::Function* operator()(ast::Function*);
-  semantic::Variable* operator()(ast::Variable*);
-  semantic::Call* operator()(ast::CallExpression*);
-  semantic::MemberAccessorExpression* operator()(
-      ast::MemberAccessorExpression*);
+  Array* operator()(type::Array*);
+  Call* operator()(ast::CallExpression*);
+  Expression* operator()(ast::Expression*);
+  Function* operator()(ast::Function*);
+  MemberAccessorExpression* operator()(ast::MemberAccessorExpression*);
+  Struct* operator()(type::Struct*);
+  StructMember* operator()(ast::StructMember*);
+  Variable* operator()(ast::Variable*);
   //! @endcond
 };
 
 /// SemanticNodeTypeFor resolves to the appropriate semantic::Node type for the
-/// AST node type `AST`.
-template <typename AST>
+/// AST or type node `AST_OR_TYPE`.
+template <typename AST_OR_TYPE>
 using SemanticNodeTypeFor = typename std::remove_pointer<decltype(
-    TypeMappings()(std::declval<AST*>()))>::type;
+    TypeMappings()(std::declval<AST_OR_TYPE*>()))>::type;
 
 }  // namespace semantic
 }  // namespace tint

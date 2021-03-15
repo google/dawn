@@ -750,8 +750,6 @@ int main(int argc, const char** argv) {
                   << "]:" << std::endl;
         std::cout << "\t\t resource_type = "
                   << ResourceTypeToString(binding.resource_type) << std::endl;
-        std::cout << "\t\t min_buffer_binding_size = "
-                  << binding.min_buffer_binding_size << std::endl;
         std::cout << "\t\t dim = " << TextureDimensionToString(binding.dim)
                   << std::endl;
         std::cout << "\t\t sampled_kind = "

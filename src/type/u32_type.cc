@@ -35,14 +35,6 @@ std::string U32::FriendlyName(const SymbolTable&) const {
   return "u32";
 }
 
-uint64_t U32::MinBufferBindingSize(MemoryLayout) const {
-  return 4;
-}
-
-uint64_t U32::BaseAlignment(MemoryLayout) const {
-  return 4;
-}
-
 U32* U32::Clone(CloneContext* ctx) const {
   return ctx->dst->create<U32>();
 }

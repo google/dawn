@@ -243,16 +243,14 @@ fragment void frag_main(constant float4& coord [[buffer(0)]]) {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_With_RW_StorageBuffer) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+TEST_F(MslGeneratorImplTest,
+       Emit_FunctionDecoration_EntryPoint_With_RW_StorageBuffer) {
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
-
-  AST().AddConstructedType(s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),
@@ -289,15 +287,14 @@ fragment void frag_main(device Data& coord [[buffer(0)]]) {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_With_RO_StorageBuffer) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+TEST_F(MslGeneratorImplTest,
+       Emit_FunctionDecoration_EntryPoint_With_RO_StorageBuffer) {
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
-  AST().AddConstructedType(s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),
@@ -555,15 +552,13 @@ fragment void frag_main(constant float4& coord [[buffer(0)]]) {
 }
 
 TEST_F(MslGeneratorImplTest,
-       Emit_Decoration_Called_By_EntryPoint_With_RW_StorageBuffer) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+       Emit_FunctionDecoration_Called_By_EntryPoint_With_RW_StorageBuffer) {
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
-  AST().AddConstructedType(s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),
@@ -613,15 +608,13 @@ fragment void frag_main(device Data& coord [[buffer(0)]]) {
 }
 
 TEST_F(MslGeneratorImplTest,
-       Emit_Decoration_Called_By_EntryPoint_With_RO_StorageBuffer) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.i32(), {MemberOffset(0)}),
-                            Member("b", ty.f32(), {MemberOffset(4)})},
-      ast::DecorationList{});
+       Emit_FunctionDecoration_Called_By_EntryPoint_With_RO_StorageBuffer) {
+  auto* s = Structure("Data", {
+                                  Member("a", ty.i32()),
+                                  Member("b", ty.f32()),
+                              });
 
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
-  AST().AddConstructedType(s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),
@@ -746,7 +739,7 @@ using namespace metal;
 TEST_F(MslGeneratorImplTest,
        Emit_Function_Multiple_EntryPoint_With_Same_ModuleVar) {
   // [[block]] struct Data {
-  //   [[offset(0)]] d : f32;
+  //   d : f32;
   // };
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
@@ -760,20 +753,14 @@ TEST_F(MslGeneratorImplTest,
   //   return;
   // }
 
-  ast::DecorationList s_decos;
-  s_decos.push_back(create<ast::StructBlockDecoration>());
+  auto* s = Structure("Data", {Member("d", ty.f32())},
+                      {create<ast::StructBlockDecoration>()});
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("d", ty.f32(), {MemberOffset(0)})}, s_decos);
-
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("data", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),
                              create<ast::GroupDecoration>(0)});
-
-  AST().AddConstructedType(s);
 
   {
     auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,

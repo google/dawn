@@ -40,20 +40,6 @@ std::string Vector::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-uint64_t Vector::MinBufferBindingSize(MemoryLayout mem_layout) const {
-  return size_ * subtype_->MinBufferBindingSize(mem_layout);
-}
-
-uint64_t Vector::BaseAlignment(MemoryLayout mem_layout) const {
-  if (size_ == 2) {
-    return 2 * subtype_->BaseAlignment(mem_layout);
-  } else if (size_ == 3 || size_ == 4) {
-    return 4 * subtype_->BaseAlignment(mem_layout);
-  }
-
-  return 0;  // vectors are only supposed to have 2, 3, or 4 elements.
-}
-
 Vector* Vector::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto* ty = ctx->Clone(type());

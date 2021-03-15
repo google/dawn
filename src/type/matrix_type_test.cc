@@ -60,62 +60,6 @@ TEST_F(MatrixTest, FriendlyName) {
   EXPECT_EQ(m.FriendlyName(Symbols()), "mat2x3<i32>");
 }
 
-TEST_F(MatrixTest, MinBufferBindingSize4x2) {
-  I32 i32;
-  Matrix m{&i32, 4, 2};
-  EXPECT_EQ(32u, m.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(32u, m.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
-}
-
-TEST_F(MatrixTest, MinBufferBindingSize3x2) {
-  I32 i32;
-  Matrix m{&i32, 3, 2};
-  EXPECT_EQ(28u, m.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(28u, m.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
-}
-
-TEST_F(MatrixTest, MinBufferBindingSize2x3) {
-  I32 i32;
-  Matrix m{&i32, 2, 3};
-  EXPECT_EQ(24u, m.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(24u, m.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
-}
-
-TEST_F(MatrixTest, MinBufferBindingSize2x2) {
-  I32 i32;
-  Matrix m{&i32, 2, 2};
-  EXPECT_EQ(16u, m.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(16u, m.MinBufferBindingSize(MemoryLayout::kStorageBuffer));
-}
-
-TEST_F(MatrixTest, BaseAlignment4x2) {
-  I32 i32;
-  Matrix m{&i32, 4, 2};
-  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kStorageBuffer));
-}
-
-TEST_F(MatrixTest, BaseAlignment3x2) {
-  I32 i32;
-  Matrix m{&i32, 3, 2};
-  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kStorageBuffer));
-}
-
-TEST_F(MatrixTest, BaseAlignment2x3) {
-  I32 i32;
-  Matrix m{&i32, 2, 3};
-  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(8u, m.BaseAlignment(MemoryLayout::kStorageBuffer));
-}
-
-TEST_F(MatrixTest, BaseAlignment2x2) {
-  I32 i32;
-  Matrix m{&i32, 2, 2};
-  EXPECT_EQ(16u, m.BaseAlignment(MemoryLayout::kUniformBuffer));
-  EXPECT_EQ(8u, m.BaseAlignment(MemoryLayout::kStorageBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

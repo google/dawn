@@ -104,7 +104,9 @@ const char kBuiltinDecoration[] = "builtin";
 const char kConstantIdDecoration[] = "constant_id";
 const char kGroupDecoration[] = "group";
 const char kLocationDecoration[] = "location";
-const char kOffsetDecoration[] = "offset";
+const char kOffsetDecoration[] = "offset";  // DEPRECATED
+const char kSizeDecoration[] = "size";
+const char kAlignDecoration[] = "align";
 const char kSetDecoration[] = "set";
 const char kStageDecoration[] = "stage";
 const char kStrideDecoration[] = "stride";
@@ -115,11 +117,12 @@ bool is_decoration(Token t) {
     return false;
 
   auto s = t.to_str();
-  return s == kAccessDecoration || s == kBindingDecoration ||
-         s == kBlockDecoration || s == kBuiltinDecoration ||
-         s == kConstantIdDecoration || s == kLocationDecoration ||
+  return s == kAccessDecoration || s == kAlignDecoration ||
+         s == kBindingDecoration || s == kBlockDecoration ||
+         s == kBuiltinDecoration || s == kConstantIdDecoration ||
+         s == kGroupDecoration || s == kLocationDecoration ||
          s == kOffsetDecoration || s == kSetDecoration ||
-         s == kGroupDecoration || s == kStageDecoration ||
+         s == kSizeDecoration || s == kStageDecoration ||
          s == kStrideDecoration || s == kWorkgroupSizeDecoration;
 }
 
@@ -2916,6 +2919,28 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
         return Failure::kErrored;
 
       return create<ast::StructMemberOffsetDecoration>(t.source(), val.value);
+    });
+  }
+
+  if (s == kSizeDecoration) {
+    const char* use = "size decoration";
+    return expect_paren_block(use, [&]() -> Result {
+      auto val = expect_positive_sint(use);
+      if (val.errored)
+        return Failure::kErrored;
+
+      return create<ast::StructMemberSizeDecoration>(t.source(), val.value);
+    });
+  }
+
+  if (s == kAlignDecoration) {
+    const char* use = "align decoration";
+    return expect_paren_block(use, [&]() -> Result {
+      auto val = expect_positive_sint(use);
+      if (val.errored)
+        return Failure::kErrored;
+
+      return create<ast::StructMemberAlignDecoration>(t.source(), val.value);
     });
   }
 

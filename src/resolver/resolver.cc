@@ -30,11 +30,14 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/semantic/array.h"
 #include "src/semantic/call.h"
 #include "src/semantic/function.h"
 #include "src/semantic/member_accessor_expression.h"
 #include "src/semantic/statement.h"
+#include "src/semantic/struct.h"
 #include "src/semantic/variable.h"
+#include "src/type/access_control_type.h"
 
 namespace tint {
 namespace resolver {
@@ -58,6 +61,20 @@ class ScopedAssignment {
   T& ref_;
   T old_value_;
 };
+
+/// Rounds `value` to the next multiple of `alignment`
+/// Assumes `alignment` is positive.
+template <typename T>
+T RoundUp(T alignment, T value) {
+  return ((value + alignment - 1) / alignment) * alignment;
+}
+
+/// Returns true if `value` is a power-of-two.
+/// Assumes `alignment` is positive.
+template <typename T>
+bool IsPowerOfTwo(T value) {
+  return (value & (value - 1)) == 0;
+}
 
 }  // namespace
 
@@ -98,7 +115,47 @@ bool Resolver::Resolve() {
   return result;
 }
 
+bool Resolver::IsStorable(type::Type* type) {
+  if (type == nullptr) {
+    return false;
+  }
+  if (type->is_scalar() || type->Is<type::Vector>() ||
+      type->Is<type::Matrix>()) {
+    return true;
+  }
+  if (type::Array* array_type = type->As<type::Array>()) {
+    return IsStorable(array_type->type());
+  }
+  if (type::Struct* struct_type = type->As<type::Struct>()) {
+    for (const auto* member : struct_type->impl()->members()) {
+      if (!IsStorable(member->type())) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (type::Alias* alias_type = type->As<type::Alias>()) {
+    return IsStorable(alias_type->type());
+  }
+  return false;
+}
+
 bool Resolver::ResolveInternal() {
+  for (auto* ty : builder_->Types()) {
+    if (auto* str = ty->As<type::Struct>()) {
+      if (!Structure(str)) {
+        return false;
+      }
+      continue;
+    }
+    if (auto* arr = ty->As<type::Array>()) {
+      if (!Array(arr)) {
+        return false;
+      }
+      continue;
+    }
+  }
+
   for (auto* var : builder_->AST().GlobalVariables()) {
     variable_stack_.set_global(var->symbol(), CreateVariableInfo(var));
 
@@ -960,6 +1017,204 @@ void Resolver::CreateSemanticNodes() const {
     sem.Add(expr, builder_->create<semantic::Expression>(expr, info.type,
                                                          info.statement));
   }
+}
+
+bool Resolver::DefaultAlignAndSize(type::Type* ty,
+                                   uint32_t& align,
+                                   uint32_t& size) {
+  static constexpr uint32_t vector_size[] = {
+      /* padding */ 0,
+      /* padding */ 0,
+      /*vec2*/ 8,
+      /*vec3*/ 12,
+      /*vec4*/ 16,
+  };
+  static constexpr uint32_t vector_align[] = {
+      /* padding */ 0,
+      /* padding */ 0,
+      /*vec2*/ 8,
+      /*vec3*/ 16,
+      /*vec4*/ 16,
+  };
+
+  ty = ty->UnwrapAliasIfNeeded();
+  if (ty->is_scalar()) {
+    // Note: Also captures booleans, but these are not host-sharable.
+    align = 4;
+    size = 4;
+    return true;
+  } else if (auto* vec = ty->As<type::Vector>()) {
+    if (vec->size() < 2 || vec->size() > 4) {
+      TINT_UNREACHABLE(diagnostics_)
+          << "Invalid vector size: vec" << vec->size();
+      return false;
+    }
+    align = vector_align[vec->size()];
+    size = vector_size[vec->size()];
+    return true;
+  } else if (auto* mat = ty->As<type::Matrix>()) {
+    if (mat->columns() < 2 || mat->columns() > 4 || mat->rows() < 2 ||
+        mat->rows() > 4) {
+      TINT_UNREACHABLE(diagnostics_)
+          << "Invalid matrix size: mat" << mat->columns() << "x" << mat->rows();
+      return false;
+    }
+    align = vector_align[mat->rows()];
+    size = vector_align[mat->rows()] * mat->columns();
+    return true;
+  } else if (auto* s = ty->As<type::Struct>()) {
+    if (auto* sem = Structure(s)) {
+      align = sem->Align();
+      size = sem->Size();
+      return true;
+    }
+    return false;
+  } else if (auto* arr = ty->As<type::Array>()) {
+    if (auto* sem = Array(arr)) {
+      align = sem->Align();
+      size = sem->Size();
+      return true;
+    }
+    return false;
+  }
+  TINT_UNREACHABLE(diagnostics_) << "Invalid type " << ty->TypeInfo().name;
+  return false;
+}
+
+const semantic::Array* Resolver::Array(type::Array* arr) {
+  if (auto* sem = builder_->Sem().Get(arr)) {
+    // Semantic info already constructed for this array type
+    return sem;
+  }
+
+  // First check the element type is legal
+  auto* el_ty = arr->type();
+  if (!IsStorable(el_ty)) {
+    builder_->Diagnostics().add_error(
+        std::string(el_ty->FriendlyName(builder_->Symbols())) +
+        " cannot be used as an element type of an array");
+    return nullptr;
+  }
+
+  auto create_semantic = [&](uint32_t stride) -> semantic::Array* {
+    uint32_t el_align = 0;
+    uint32_t el_size = 0;
+    if (!DefaultAlignAndSize(arr->type(), el_align, el_size)) {
+      return nullptr;
+    }
+
+    auto align = el_align;
+    // WebGPU requires runtime arrays have at least one element, but the AST
+    // records an element count of 0 for it.
+    auto size = std::max<uint32_t>(arr->size(), 1) * stride;
+    auto* sem = builder_->create<semantic::Array>(arr, align, size, stride);
+    builder_->Sem().Add(arr, sem);
+    return sem;
+  };
+
+  // Look for explicit stride via [[stride(n)]] decoration
+  for (auto* deco : arr->decorations()) {
+    if (auto* stride = deco->As<ast::StrideDecoration>()) {
+      return create_semantic(stride->stride());
+    }
+  }
+
+  // Calculate implicit stride
+  uint32_t el_align = 0;
+  uint32_t el_size = 0;
+  if (!DefaultAlignAndSize(el_ty, el_align, el_size)) {
+    return nullptr;
+  }
+
+  return create_semantic(RoundUp(el_align, el_size));
+}
+
+const semantic::Struct* Resolver::Structure(type::Struct* str) {
+  if (auto* sem = builder_->Sem().Get(str)) {
+    // Semantic info already constructed for this structure type
+    return sem;
+  }
+
+  semantic::StructMemberList sem_members;
+  sem_members.reserve(str->impl()->members().size());
+
+  // Calculate the effective size and alignment of each field, and the overall
+  // size of the structure.
+  // For size, use the size attribute if provided, otherwise use the default
+  // size for the type.
+  // For alignment, use the alignment attribute if provided, otherwise use the
+  // default alignment for the member type.
+  // Diagnostic errors are raised if a basic rule is violated.
+  // Validation of storage-class rules requires analysing the actual variable
+  // usage of the structure, and so is performed as part of the variable
+  // validation.
+  // TODO(crbug.com/tint/628): Actually implement storage-class validation.
+  uint32_t struct_size = 0;
+  uint32_t struct_align = 1;
+
+  for (auto* member : str->impl()->members()) {
+    // First check the member type is legal
+    if (!IsStorable(member->type())) {
+      builder_->Diagnostics().add_error(
+          std::string(member->type()->FriendlyName(builder_->Symbols())) +
+          " cannot be used as the type of a structure member");
+      return nullptr;
+    }
+
+    uint32_t offset = struct_size;
+    uint32_t align = 0;
+    uint32_t size = 0;
+    if (!DefaultAlignAndSize(member->type(), align, size)) {
+      return nullptr;
+    }
+
+    for (auto* deco : member->decorations()) {
+      if (auto* o = deco->As<ast::StructMemberOffsetDecoration>()) {
+        // [DEPRECATED]
+        if (o->offset() < struct_size) {
+          diagnostics_.add_error("offsets must be in ascending order",
+                                 o->source());
+          return nullptr;
+        }
+        offset = o->offset();
+        align = 1;
+      } else if (auto* a = deco->As<ast::StructMemberAlignDecoration>()) {
+        if (a->align() <= 0 || !IsPowerOfTwo(a->align())) {
+          diagnostics_.add_error(
+              "align value must be a positive, power-of-two integer",
+              a->source());
+          return nullptr;
+        }
+        align = a->align();
+      } else if (auto* s = deco->As<ast::StructMemberSizeDecoration>()) {
+        if (s->size() < size) {
+          diagnostics_.add_error(
+              "size must be at least as big as the type's size (" +
+                  std::to_string(size) + ")",
+              s->source());
+          return nullptr;
+        }
+        size = s->size();
+      }
+    }
+
+    offset = RoundUp(align, offset);
+
+    auto* sem_member =
+        builder_->create<semantic::StructMember>(member, offset, size);
+    builder_->Sem().Add(member, sem_member);
+    sem_members.emplace_back(sem_member);
+
+    struct_size = offset + size;
+    struct_align = std::max(struct_align, align);
+  }
+
+  struct_size = RoundUp(struct_align, struct_size);
+
+  auto* sem = builder_->create<semantic::Struct>(str, std::move(sem_members),
+                                                 struct_align, struct_size);
+  builder_->Sem().Add(str, sem);
+  return sem;
 }
 
 template <typename F>

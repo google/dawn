@@ -23,6 +23,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/semantic/function.h"
+#include "src/semantic/struct.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/array_type.h"
@@ -379,12 +380,18 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
       continue;
     }
 
+    auto* sem = program_->Sem().Get(str);
+    if (!sem) {
+      error_ = "Missing semantic information for structure " +
+               program_->Symbols().NameFor(str->symbol());
+      continue;
+    }
+
     ResourceBinding entry;
     entry.resource_type = ResourceBinding::ResourceType::kUniformBuffer;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
-    entry.min_buffer_binding_size =
-        decl->type()->MinBufferBindingSize(type::MemoryLayout::kUniformBuffer);
+    entry.size = sem->Size();
 
     result.push_back(entry);
   }
@@ -541,7 +548,15 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    if (!decl->type()->UnwrapIfNeeded()->Is<type::Struct>()) {
+    auto* str = decl->type()->UnwrapIfNeeded()->As<type::Struct>();
+    if (!str) {
+      continue;
+    }
+
+    auto* sem = program_->Sem().Get(str);
+    if (!sem) {
+      error_ = "Missing semantic information for structure " +
+               program_->Symbols().NameFor(str->symbol());
       continue;
     }
 
@@ -551,8 +566,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
                   : ResourceBinding::ResourceType::kStorageBuffer;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
-    entry.min_buffer_binding_size =
-        decl->type()->MinBufferBindingSize(type::MemoryLayout::kStorageBuffer);
+    entry.size = sem->Size();
 
     result.push_back(entry);
   }

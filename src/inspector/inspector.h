@@ -112,8 +112,8 @@ struct ResourceBinding {
   uint32_t bind_group;
   /// Identifier to identify this binding within the bind group
   uint32_t binding;
-  /// Minimum size required for this binding, in bytes, if defined.
-  uint64_t min_buffer_binding_size;
+  /// Size for this binding, in bytes, if defined.
+  uint64_t size;
   /// Dimensionality of this binding, if defined.
   TextureDimension dim;
   /// Kind of data being sampled, if defined.

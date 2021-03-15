@@ -67,11 +67,6 @@ TEST_F(DepthTextureTest, FriendlyName) {
   EXPECT_EQ(d.FriendlyName(Symbols()), "texture_depth_cube");
 }
 
-TEST_F(DepthTextureTest, MinBufferBindingSize) {
-  DepthTexture d(TextureDimension::kCube);
-  EXPECT_EQ(0u, d.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

@@ -704,33 +704,62 @@ TEST_F(ParserImplErrorTest, GlobalDeclStructMemberMissingSemicolon) {
          "                   ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetMissingLParen) {
-  EXPECT("struct S { [[offset 1)]] i : i32; };",
-         "test.wgsl:1:21 error: expected '(' for offset decoration\n"
-         "struct S { [[offset 1)]] i : i32; };\n"
-         "                    ^\n");
+TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignMissingLParen) {
+  EXPECT("struct S { [[align 1)]] i : i32; };",
+         "test.wgsl:1:20 error: expected '(' for align decoration\n"
+         "struct S { [[align 1)]] i : i32; };\n"
+         "                   ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetMissingRParen) {
-  EXPECT("struct S { [[offset(1]] i : i32; };",
-         "test.wgsl:1:22 error: expected ')' for offset decoration\n"
-         "struct S { [[offset(1]] i : i32; };\n"
-         "                     ^^\n");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetInvaldValue) {
-  EXPECT("struct S { [[offset(x)]] i : i32; };",
-         "test.wgsl:1:21 error: expected signed integer literal for offset "
-         "decoration\n"
-         "struct S { [[offset(x)]] i : i32; };\n"
-         "                    ^\n");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberOffsetNegativeValue) {
-  EXPECT("struct S { [[offset(-2)]] i : i32; };",
-         "test.wgsl:1:21 error: offset decoration must be positive\n"
-         "struct S { [[offset(-2)]] i : i32; };\n"
+TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignMissingRParen) {
+  EXPECT("struct S { [[align(1]] i : i32; };",
+         "test.wgsl:1:21 error: expected ')' for align decoration\n"
+         "struct S { [[align(1]] i : i32; };\n"
          "                    ^^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignInvaldValue) {
+  EXPECT("struct S { [[align(x)]] i : i32; };",
+         "test.wgsl:1:20 error: expected signed integer literal for align "
+         "decoration\n"
+         "struct S { [[align(x)]] i : i32; };\n"
+         "                   ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignNegativeValue) {
+  EXPECT("struct S { [[align(-2)]] i : i32; };",
+         "test.wgsl:1:20 error: align decoration must be positive\n"
+         "struct S { [[align(-2)]] i : i32; };\n"
+         "                   ^^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeMissingLParen) {
+  EXPECT("struct S { [[size 1)]] i : i32; };",
+         "test.wgsl:1:19 error: expected '(' for size decoration\n"
+         "struct S { [[size 1)]] i : i32; };\n"
+         "                  ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeMissingRParen) {
+  EXPECT("struct S { [[size(1]] i : i32; };",
+         "test.wgsl:1:20 error: expected ')' for size decoration\n"
+         "struct S { [[size(1]] i : i32; };\n"
+         "                   ^^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeInvaldValue) {
+  EXPECT("struct S { [[size(x)]] i : i32; };",
+         "test.wgsl:1:19 error: expected signed integer literal for size "
+         "decoration\n"
+         "struct S { [[size(x)]] i : i32; };\n"
+         "                  ^\n");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeNegativeValue) {
+  EXPECT("struct S { [[size(-2)]] i : i32; };",
+         "test.wgsl:1:19 error: size decoration must be positive\n"
+         "struct S { [[size(-2)]] i : i32; };\n"
+         "                  ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingIdentifier) {

@@ -35,14 +35,6 @@ std::string F32::FriendlyName(const SymbolTable&) const {
   return "f32";
 }
 
-uint64_t F32::MinBufferBindingSize(MemoryLayout) const {
-  return 4;
-}
-
-uint64_t F32::BaseAlignment(MemoryLayout) const {
-  return 4;
-}
-
 F32* F32::Clone(CloneContext* ctx) const {
   return ctx->dst->create<F32>();
 }

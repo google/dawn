@@ -78,12 +78,6 @@ TEST_F(MultisampledTextureTest, FriendlyName) {
   EXPECT_EQ(s.FriendlyName(Symbols()), "texture_multisampled_3d<f32>");
 }
 
-TEST_F(MultisampledTextureTest, MinBufferBindingSize) {
-  F32 f32;
-  MultisampledTexture s(TextureDimension::k3d, &f32);
-  EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

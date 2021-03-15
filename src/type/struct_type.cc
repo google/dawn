@@ -38,48 +38,6 @@ std::string Struct::FriendlyName(const SymbolTable& symbols) const {
   return symbols.NameFor(symbol_);
 }
 
-uint64_t Struct::MinBufferBindingSize(MemoryLayout mem_layout) const {
-  if (!struct_->members().size()) {
-    return 0;
-  }
-
-  auto* last_member = struct_->members().back();
-
-  // If there is no offset, then this is not a host-shareable struct, returning
-  // 0 indicates this to the caller.
-  if (!last_member->has_offset_decoration()) {
-    return 0;
-  }
-
-  uint64_t size = last_member->type()->MinBufferBindingSize(mem_layout);
-  if (!size) {
-    return 0;
-  }
-
-  float unaligned = static_cast<float>(last_member->offset() + size);
-  float alignment = static_cast<float>(BaseAlignment(mem_layout));
-
-  return static_cast<uint64_t>(alignment * std::ceil(unaligned / alignment));
-}
-
-uint64_t Struct::BaseAlignment(MemoryLayout mem_layout) const {
-  uint64_t max = 0;
-  for (auto* member : struct_->members()) {
-    if (member->type()->BaseAlignment(mem_layout) > max) {
-      max = member->type()->BaseAlignment(mem_layout);
-    }
-  }
-
-  if (mem_layout == MemoryLayout::kUniformBuffer) {
-    // Round up to a vec4.
-    return static_cast<uint64_t>(16 *
-                                 std::ceil(static_cast<float>(max) / 16.0f));
-  } else if (mem_layout == MemoryLayout::kStorageBuffer) {
-    return max;
-  }
-  return 0;
-}
-
 Struct* Struct::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto sym = ctx->Clone(symbol());

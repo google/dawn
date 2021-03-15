@@ -192,7 +192,7 @@ TEST_F(BuilderTest, FunctionType_DeDuplicate) {
 // https://crbug.com/tint/297
 TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   // [[block]] struct Data {
-  //   [[offset(0)]] d : f32;
+  //   d : f32;
   // };
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
@@ -206,13 +206,9 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   //   return;
   // }
 
-  ast::DecorationList s_decos;
-  s_decos.push_back(create<ast::StructBlockDecoration>());
+  auto* s = Structure("Data", {Member("d", ty.f32())},
+                      {create<ast::StructBlockDecoration>()});
 
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{Member("d", ty.f32(), {MemberOffset(0)})}, s_decos);
-
-  auto* s = ty.struct_("Data", str);
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("data", &ac, ast::StorageClass::kStorage, nullptr,
@@ -220,8 +216,6 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
-
-  AST().AddConstructedType(s);
 
   {
     auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,

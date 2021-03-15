@@ -176,12 +176,12 @@ TEST_F(BuilderTest, Assign_StructMember) {
   // var ident : my_struct
   // ident.b = 4.0;
 
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{Member("a", ty.f32()), Member("b", ty.f32())},
-      ast::DecorationList{});
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.f32()),
+                                   });
 
-  auto* s_type = ty.struct_("my_struct", s);
-  auto* v = Global("ident", s_type, ast::StorageClass::kFunction);
+  auto* v = Global("ident", s, ast::StorageClass::kFunction);
 
   auto* assign =
       create<ast::AssignmentStatement>(MemberAccessor("ident", "b"), Expr(4.f));

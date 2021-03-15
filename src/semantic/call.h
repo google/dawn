@@ -29,9 +29,9 @@ class Call : public Castable<Call, Expression> {
   /// @param declaration the AST node
   /// @param target the call target
   /// @param statement the statement that owns this expression
-  explicit Call(ast::Expression* declaration,
-                const CallTarget* target,
-                Statement* statement);
+  Call(ast::Expression* declaration,
+       const CallTarget* target,
+       Statement* statement);
 
   /// Destructor
   ~Call() override;

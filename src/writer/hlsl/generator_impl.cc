@@ -21,9 +21,11 @@
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/semantic/array.h"
 #include "src/semantic/call.h"
 #include "src/semantic/function.h"
 #include "src/semantic/member_accessor_expression.h"
+#include "src/semantic/struct.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/multisampled_texture_type.h"
@@ -2021,11 +2023,13 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         auto* str_type = str->impl();
         auto* str_member = str_type->get_member(mem->member()->symbol());
 
-        if (!str_member->has_offset_decoration()) {
-          diagnostics_.add_error("missing offset decoration for struct member");
+        auto* sem_mem = builder_.Sem().Get(str_member);
+        if (!sem_mem) {
+          TINT_ICE(diagnostics_) << "struct member missing semantic info";
           return "";
         }
-        out << str_member->offset();
+
+        out << sem_mem->Offset();
 
       } else if (res_type->Is<type::Vector>()) {
         auto swizzle = builder_.Sem().Get(mem)->Swizzle();
@@ -2035,9 +2039,9 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         // This must be a single element swizzle if we've got a vector at this
         // point.
         if (swizzle.size() != 1) {
-          diagnostics_.add_error(
-              "Encountered multi-element swizzle when should have only one "
-              "level");
+          TINT_ICE(diagnostics_)
+              << "Encountered multi-element swizzle when should have only one "
+                 "level";
           return "";
         }
 
@@ -2046,8 +2050,8 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
         // f64 types.
         out << "(4 * " << swizzle[0] << ")";
       } else {
-        diagnostics_.add_error("Invalid result type for member accessor: " +
-                               res_type->type_name());
+        TINT_ICE(diagnostics_) << "Invalid result type for member accessor: "
+                               << res_type->type_name();
         return "";
       }
 
@@ -2057,7 +2061,12 @@ std::string GeneratorImpl::generate_storage_buffer_index_expression(
 
       out << "(";
       if (auto* arr = ary_type->As<type::Array>()) {
-        out << arr->array_stride();
+        auto* sem_arr = builder_.Sem().Get(arr);
+        if (!sem_arr) {
+          TINT_ICE(diagnostics_) << "array type missing semantic info";
+          return "";
+        }
+        out << sem_arr->Stride();
       } else if (ary_type->Is<type::Vector>()) {
         // TODO(dsinclair): This is a hack. Our vectors can only be f32, i32
         // or u32 which are all 4 bytes. When we get f16 or other types we'll

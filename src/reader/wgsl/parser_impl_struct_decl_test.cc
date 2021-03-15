@@ -24,7 +24,7 @@ TEST_F(ParserImplTest, StructDecl_Parses) {
   auto p = parser(R"(
 struct S {
   a : i32;
-  [[offset(4)]] b : f32;
+  b : f32;
 })");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);

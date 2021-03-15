@@ -50,16 +50,6 @@ TEST_F(I32Test, FriendlyName) {
   EXPECT_EQ(i.FriendlyName(Symbols()), "i32");
 }
 
-TEST_F(I32Test, MinBufferBindingSize) {
-  I32 i;
-  EXPECT_EQ(4u, i.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
-TEST_F(I32Test, BaseAlignment) {
-  I32 i;
-  EXPECT_EQ(4u, i.BaseAlignment(MemoryLayout::kUniformBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

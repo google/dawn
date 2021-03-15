@@ -23,12 +23,6 @@
 #include "src/semantic/type_mappings.h"
 
 namespace tint {
-
-// Forward declarations
-namespace ast {
-class Node;
-}  // namespace ast
-
 namespace semantic {
 
 /// Info holds all the resolved semantic information for a Program.
@@ -48,26 +42,29 @@ class Info {
   /// @return this Program
   Info& operator=(Info&& rhs);
 
-  /// Get looks up the semantic information for the AST node `ast_node`.
-  /// @param ast_node the AST node
+  /// Get looks up the semantic information for the AST or type node `node`.
+  /// @param node the AST or type node
   /// @returns a pointer to the semantic node if found, otherwise nullptr
-  template <typename AST, typename SEM = SemanticNodeTypeFor<AST>>
-  const SEM* Get(const AST* ast_node) const {
-    auto it = ast_to_sem_.find(ast_node);
-    if (it == ast_to_sem_.end()) {
+  template <typename AST_OR_TYPE,
+            typename SEM = SemanticNodeTypeFor<AST_OR_TYPE>>
+  const SEM* Get(const AST_OR_TYPE* node) const {
+    auto it = map.find(node);
+    if (it == map.end()) {
       return nullptr;
     }
     return it->second->template As<SEM>();
   }
 
-  /// Add registers the semantic node `sem_node` for the AST node `ast_node`.
-  /// @param ast_node the AST node
+  /// Add registers the semantic node `sem_node` for the AST or type node
+  /// `node`.
+  /// @param node the AST or type node
   /// @param sem_node the semantic node
-  template <typename AST>
-  void Add(const AST* ast_node, const SemanticNodeTypeFor<AST>* sem_node) {
+  template <typename AST_OR_TYPE>
+  void Add(const AST_OR_TYPE* node,
+           const SemanticNodeTypeFor<AST_OR_TYPE>* sem_node) {
     // Check there's no semantic info already existing for the node
-    assert(Get(ast_node) == nullptr);
-    ast_to_sem_.emplace(ast_node, sem_node);
+    assert(Get(node) == nullptr);
+    map.emplace(node, sem_node);
   }
 
   /// Wrap returns a new Info created with the contents of `inner`.
@@ -79,12 +76,12 @@ class Info {
   /// @return the Info that wraps `inner`
   static Info Wrap(const Info& inner) {
     Info out;
-    out.ast_to_sem_ = inner.ast_to_sem_;
+    out.map = inner.map;
     return out;
   }
 
  private:
-  std::unordered_map<const ast::Node*, const semantic::Node*> ast_to_sem_;
+  std::unordered_map<const CastableBase*, const semantic::Node*> map;
 };
 
 }  // namespace semantic

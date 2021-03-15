@@ -24,7 +24,9 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/stride_decoration.h"
+#include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
+#include "src/ast/struct_member_size_decoration.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
@@ -582,6 +584,10 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
       out_ << "constant_id(" << constant->value() << ")";
     } else if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
       out_ << "offset(" << offset->offset() << ")";
+    } else if (auto* size = deco->As<ast::StructMemberSizeDecoration>()) {
+      out_ << "[[size(" << size->size() << ")]]" << std::endl;
+    } else if (auto* align = deco->As<ast::StructMemberAlignDecoration>()) {
+      out_ << "[[align(" << align->align() << ")]]" << std::endl;
     } else {
       diagnostics_.add_error("unknown variable decoration");
       return false;

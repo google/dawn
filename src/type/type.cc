@@ -70,14 +70,6 @@ Type* Type::UnwrapAll() {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 
-uint64_t Type::MinBufferBindingSize(MemoryLayout) const {
-  return 0;
-}
-
-uint64_t Type::BaseAlignment(MemoryLayout) const {
-  return 0;
-}
-
 bool Type::is_scalar() const {
   return is_float_scalar() || is_integer_scalar() || Is<Bool>();
 }

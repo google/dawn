@@ -28,9 +28,8 @@ TEST(ModuleCloneTest, Clone) {
   // See also fuzzers/tint_ast_clone_fuzzer.cc for further coverage of cloning.
   Source::File file("test.wgsl", R"([[block]]
 struct S {
-  [[offset(0)]]
+  [[size(4)]]
   m0 : u32;
-  [[offset(4)]]
   m1 : array<u32>;
 };
 
@@ -38,7 +37,7 @@ const c0 : i32 = 10;
 const c1 : bool = true;
 
 type t0 = [[stride(16)]] array<vec4<f32>>;
-type t1 = [[stride(32)]] array<vec4<f32>>;
+type t1 = array<vec4<f32>>;
 
 var<uniform> g0 : u32 = 20u;
 var<out> g1 : f32 = 123.0;

@@ -42,8 +42,12 @@ class UnaryOpExpression;
 class Variable;
 }  // namespace ast
 namespace semantic {
+class Array;
 class Statement;
 }  // namespace semantic
+namespace type {
+class Struct;
+}  // namespace type
 
 namespace resolver {
 
@@ -62,6 +66,10 @@ class Resolver {
 
   /// @returns true if the resolver was successful
   bool Resolve();
+
+  /// @param type the given type
+  /// @returns true if the given type is storable.
+  static bool IsStorable(type::Type* type);
 
  private:
   /// Structure holding semantic information about a variable.
@@ -141,41 +149,6 @@ class Resolver {
   /// @returns true on success, false on error
   bool ResolveInternal();
 
-  /// Resolves functions
-  /// @param funcs the functions to check
-  /// @returns true on success, false on error
-  bool Functions(const ast::FunctionList& funcs);
-  /// Resolves a function. Requires all dependency
-  /// (callee) functions to have DetermineFunction() called on them first.
-  /// @param func the function to check
-  /// @returns true on success, false on error
-  bool Function(ast::Function* func);
-  /// Resolves a block statement
-  /// @param stmt the block statement
-  /// @returns true if determination was successful
-  bool BlockStatement(const ast::BlockStatement* stmt);
-  /// Resolves the list of statements
-  /// @param stmts the statements to resolve
-  /// @returns true on success, false on error
-  bool Statements(const ast::StatementList& stmts);
-  /// Resolves a statement
-  /// @param stmt the statement to check
-  /// @returns true on success, false on error
-  bool Statement(ast::Statement* stmt);
-  /// Resolves an expression list
-  /// @param list the expression list to check
-  /// @returns true on success, false on error
-  bool Expressions(const ast::ExpressionList& list);
-  /// Resolves an expression
-  /// @param expr the expression to check
-  /// @returns true on success, false on error
-  bool Expression(ast::Expression* expr);
-  /// Resolves the storage class for variables. This assumes that it is only
-  /// called for things in function scope, not module scope.
-  /// @param stmt the statement to check
-  /// @returns false on error
-  bool VariableStorageClass(ast::Statement* stmt);
-
   /// Creates the nodes and adds them to the semantic::Info mappings of the
   /// ProgramBuilder.
   void CreateSemanticNodes() const;
@@ -195,20 +168,43 @@ class Resolver {
 
   void set_referenced_from_function_if_needed(VariableInfo* var, bool local);
 
-  bool ArrayAccessor(ast::ArrayAccessorExpression* expr);
-  bool Binary(ast::BinaryExpression* expr);
-  bool Bitcast(ast::BitcastExpression* expr);
-  bool Call(ast::CallExpression* expr);
-  bool CaseStatement(ast::CaseStatement* stmt);
-  bool Constructor(ast::ConstructorExpression* expr);
-  bool Identifier(ast::IdentifierExpression* expr);
-  bool IfStatement(ast::IfStatement* stmt);
-  bool IntrinsicCall(ast::CallExpression* call,
-                     semantic::IntrinsicType intrinsic_type);
-  bool MemberAccessor(ast::MemberAccessorExpression* expr);
-  bool UnaryOp(ast::UnaryOpExpression* expr);
+  // AST and Type traversal methods
+  // Each return true on success, false on failure.
+  bool ArrayAccessor(ast::ArrayAccessorExpression*);
+  bool Binary(ast::BinaryExpression*);
+  bool Bitcast(ast::BitcastExpression*);
+  bool BlockStatement(const ast::BlockStatement*);
+  bool Call(ast::CallExpression*);
+  bool CaseStatement(ast::CaseStatement*);
+  bool Constructor(ast::ConstructorExpression*);
+  bool Expression(ast::Expression*);
+  bool Expressions(const ast::ExpressionList&);
+  bool Function(ast::Function*);
+  bool Functions(const ast::FunctionList&);
+  bool Identifier(ast::IdentifierExpression*);
+  bool IfStatement(ast::IfStatement*);
+  bool IntrinsicCall(ast::CallExpression*, semantic::IntrinsicType);
+  bool MemberAccessor(ast::MemberAccessorExpression*);
+  bool Statement(ast::Statement*);
+  bool Statements(const ast::StatementList&);
+  bool UnaryOp(ast::UnaryOpExpression*);
+  bool VariableDeclStatement(const ast::VariableDeclStatement*);
+  bool VariableStorageClass(ast::Statement*);
 
-  bool VariableDeclStatement(const ast::VariableDeclStatement* stmt);
+  /// @returns the semantic information for the array `arr`, building it if it
+  /// hasn't been constructed already. If an error is raised, nullptr is
+  /// returned.
+  const semantic::Array* Array(type::Array*);
+
+  /// @returns the semantic information for the structure `str`, building it if
+  /// it hasn't been constructed already. If an error is raised, nullptr is
+  /// returned.
+  const semantic::Struct* Structure(type::Struct* str);
+
+  /// @param align the output default alignment in bytes for the type `ty`
+  /// @param size the output default size in bytes for the type `ty`
+  /// @returns true on success, false on error
+  bool DefaultAlignAndSize(type::Type* ty, uint32_t& align, uint32_t& size);
 
   VariableInfo* CreateVariableInfo(ast::Variable*);
 

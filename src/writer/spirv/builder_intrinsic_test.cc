@@ -1377,13 +1377,9 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{Member(0, "a", ty.array<f32>(4))},
-      ast::DecorationList{
-          create<ast::StructBlockDecoration>(),
-      });
-  auto* s_type = ty.struct_("my_struct", s);
-  Global("b", s_type, ast::StorageClass::kStorage, nullptr,
+  auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
+                      {create<ast::StructBlockDecoration>()});
+  Global("b", s, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
@@ -1426,15 +1422,14 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
 }
 
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{Member(0, "z", ty.f32()),
-                            Member(4, "a", ty.array<f32>(4))},
-      ast::DecorationList{
-          create<ast::StructBlockDecoration>(),
-      });
+  auto* s = Structure("my_struct",
+                      {
+                          Member(0, "z", ty.f32()),
+                          Member(4, "a", ty.array<f32>(4)),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
-  auto* s_type = ty.struct_("my_struct", s);
-  Global("b", s_type, ast::StorageClass::kStorage, nullptr,
+  Global("b", s, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),

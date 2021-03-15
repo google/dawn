@@ -132,8 +132,12 @@ set(TINT_LIB_SRCS
   ast/struct_block_decoration.h
   ast/struct_member.cc
   ast/struct_member.h
+  ast/struct_member_align_decoration.cc
+  ast/struct_member_align_decoration.h
   ast/struct_member_offset_decoration.cc
   ast/struct_member_offset_decoration.h
+  ast/struct_member_size_decoration.cc
+  ast/struct_member_size_decoration.h
   ast/switch_statement.cc
   ast/switch_statement.h
   ast/type_constructor_expression.cc
@@ -182,11 +186,14 @@ set(TINT_LIB_SRCS
   resolver/resolver.cc
   resolver/resolver.h
   scope_stack.h
+  semantic/array.h
   semantic/call.h
+  semantic/call_target.h
   semantic/expression.h
   semantic/info.h
   semantic/intrinsic.h
   semantic/node.h
+  semantic/sem_array.cc
   semantic/sem_call.cc
   semantic/sem_call_target.cc
   semantic/sem_expression.cc
@@ -196,6 +203,7 @@ set(TINT_LIB_SRCS
   semantic/sem_intrinsic.cc
   semantic/sem_node.cc
   semantic/sem_statement.cc
+  semantic/sem_struct.cc
   semantic/sem_variable.cc
   semantic/type_mappings.h
   source.cc
@@ -436,7 +444,9 @@ if(${TINT_BUILD_TESTS})
     ast/sint_literal_test.cc
     ast/stage_decoration_test.cc
     ast/stride_decoration_test.cc
+    ast/struct_member_align_decoration_test.cc
     ast/struct_member_offset_decoration_test.cc
+    ast/struct_member_size_decoration_test.cc
     ast/struct_member_test.cc
     ast/struct_test.cc
     ast/switch_statement_test.cc
@@ -458,9 +468,11 @@ if(${TINT_BUILD_TESTS})
     intrinsic_table_test.cc
     program_test.cc
     resolver/intrinsic_test.cc
+    resolver/is_storeable_test.cc
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h
     resolver/resolver_test.cc
+    resolver/struct_layout_test.cc
     resolver/validation_test.cc
     scope_stack_test.cc
     semantic/sem_intrinsic_test.cc

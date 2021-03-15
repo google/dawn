@@ -872,28 +872,12 @@ TEST_F(ValidatorTest, IsStorable_ArraySizedOfStorable) {
   EXPECT_TRUE(v.IsStorable(arr));
 }
 
-TEST_F(ValidatorTest, IsStorable_ArraySizedOfNonStorable) {
-  auto* arr = ty.array(ty.void_(), 5);
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.IsStorable(arr));
-}
-
 TEST_F(ValidatorTest, IsStorable_ArrayUnsizedOfStorable) {
   auto* arr = ty.array<int>();
 
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.IsStorable(arr));
-}
-
-TEST_F(ValidatorTest, IsStorable_ArrayUnsizedOfNonStorable) {
-  auto* arr = ty.array<void>();
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.IsStorable(arr));
 }
 
 TEST_F(ValidatorTest, IsStorable_Struct_AllMembersStorable) {
@@ -904,17 +888,6 @@ TEST_F(ValidatorTest, IsStorable_Struct_AllMembersStorable) {
   ValidatorImpl& v = Build();
 
   EXPECT_TRUE(v.IsStorable(s_ty));
-}
-
-TEST_F(ValidatorTest, IsStorable_Struct_SomeMembersNonStorable) {
-  auto* ptr_ty = ty.pointer<int>(ast::StorageClass::kPrivate);
-  ast::StructMemberList members{Member("a", ty.i32()), Member("b", ptr_ty)};
-  auto* s = create<ast::Struct>(Source{}, members, ast::DecorationList{});
-  auto* s_ty = ty.struct_("mystruct", s);
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.IsStorable(s_ty));
 }
 
 }  // namespace

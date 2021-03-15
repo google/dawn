@@ -22,8 +22,11 @@
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/null_literal.h"
+#include "src/semantic/array.h"
 #include "src/semantic/call.h"
 #include "src/semantic/function.h"
+#include "src/semantic/intrinsic.h"
+#include "src/semantic/struct.h"
 #include "src/semantic/variable.h"
 #include "src/type/depth_texture_type.h"
 #include "src/type/multisampled_texture_type.h"
@@ -2961,11 +2964,14 @@ bool Builder::GenerateArrayType(type::Array* ary, const Operand& result) {
               {result, Operand::Int(elem_type), Operand::Int(len_id)});
   }
 
-  if (ary->has_array_stride()) {
-    push_annot(spv::Op::OpDecorate,
-               {Operand::Int(result_id), Operand::Int(SpvDecorationArrayStride),
-                Operand::Int(ary->array_stride())});
+  auto* sem_arr = builder_.Sem().Get(ary);
+  if (!sem_arr) {
+    error_ = "array type missing semantic info";
+    return false;
   }
+  push_annot(spv::Op::OpDecorate,
+             {Operand::Int(result_id), Operand::Int(SpvDecorationArrayStride),
+              Operand::Int(sem_arr->Stride())});
   return true;
 }
 
@@ -3054,38 +3060,39 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
              {Operand::Int(struct_id), Operand::Int(idx),
               Operand::String(builder_.Symbols().NameFor(member->symbol()))});
 
-  bool has_layout = false;
-  for (auto* deco : member->decorations()) {
-    if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
-      push_annot(
-          spv::Op::OpMemberDecorate,
-          {Operand::Int(struct_id), Operand::Int(idx),
-           Operand::Int(SpvDecorationOffset), Operand::Int(offset->offset())});
-      has_layout = true;
-    } else {
-      error_ = "unknown struct member decoration";
-      return 0;
-    }
+  // Note: This will generate layout annotations for *all* structs, whether or
+  // not they are used in host-shareable variables. This is officially ok in
+  // SPIR-V 1.0 through 1.3. If / when we migrate to using SPIR-V 1.4 we'll have
+  // to only generate the layout info for structs used for certain storage
+  // classes.
+
+  auto* sem_member = builder_.Sem().Get(member);
+  if (!sem_member) {
+    error_ = "Struct member has no semantic information";
+    return 0;
   }
 
-  if (has_layout) {
-    // Infer and emit matrix layout.
-    auto* matrix_type = GetNestedMatrixType(member->type());
-    if (matrix_type) {
-      push_annot(spv::Op::OpMemberDecorate,
-                 {Operand::Int(struct_id), Operand::Int(idx),
-                  Operand::Int(SpvDecorationColMajor)});
-      if (!matrix_type->type()->Is<type::F32>()) {
-        error_ = "matrix scalar element type must be f32";
-        return 0;
-      }
-      const auto scalar_elem_size = 4;
-      const auto effective_row_count = (matrix_type->rows() == 2) ? 2 : 4;
-      push_annot(spv::Op::OpMemberDecorate,
-                 {Operand::Int(struct_id), Operand::Int(idx),
-                  Operand::Int(SpvDecorationMatrixStride),
-                  Operand::Int(effective_row_count * scalar_elem_size)});
+  push_annot(
+      spv::Op::OpMemberDecorate,
+      {Operand::Int(struct_id), Operand::Int(idx),
+       Operand::Int(SpvDecorationOffset), Operand::Int(sem_member->Offset())});
+
+  // Infer and emit matrix layout.
+  auto* matrix_type = GetNestedMatrixType(member->type());
+  if (matrix_type) {
+    push_annot(spv::Op::OpMemberDecorate,
+               {Operand::Int(struct_id), Operand::Int(idx),
+                Operand::Int(SpvDecorationColMajor)});
+    if (!matrix_type->type()->Is<type::F32>()) {
+      error_ = "matrix scalar element type must be f32";
+      return 0;
     }
+    const auto scalar_elem_size = 4;
+    const auto effective_row_count = (matrix_type->rows() == 2) ? 2 : 4;
+    push_annot(spv::Op::OpMemberDecorate,
+               {Operand::Int(struct_id), Operand::Int(idx),
+                Operand::Int(SpvDecorationMatrixStride),
+                Operand::Int(effective_row_count * scalar_elem_size)});
   }
 
   return GenerateTypeIfNeeded(member->type());

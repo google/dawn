@@ -76,12 +76,6 @@ TEST_F(SampledTextureTest, FriendlyName) {
   EXPECT_EQ(s.FriendlyName(Symbols()), "texture_3d<f32>");
 }
 
-TEST_F(SampledTextureTest, MinBufferBindingSize) {
-  F32 f32;
-  SampledTexture s(TextureDimension::kCube, &f32);
-  EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

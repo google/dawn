@@ -38,22 +38,22 @@ fn frag_main() -> void {
 
 // compute shader
 [[block]] struct Particle {
-  [[offset(0)]] pos : vec2<f32>;
-  [[offset(8)]] vel : vec2<f32>;
+  pos : vec2<f32>;
+  vel : vec2<f32>;
 };
 
 [[block]] struct SimParams {
-  [[offset(0)]] deltaT : f32;
-  [[offset(4)]] rule1Distance : f32;
-  [[offset(8)]] rule2Distance : f32;
-  [[offset(12)]] rule3Distance : f32;
-  [[offset(16)]] rule1Scale : f32;
-  [[offset(20)]] rule2Scale : f32;
-  [[offset(24)]] rule3Scale : f32;
+  deltaT : f32;
+  rule1Distance : f32;
+  rule2Distance : f32;
+  rule3Distance : f32;
+  rule1Scale : f32;
+  rule2Scale : f32;
+  rule3Scale : f32;
 };
 
 [[block]] struct Particles {
-  [[offset(0)]] particles : [[stride(16)]] array<Particle, 5>;
+  particles : array<Particle, 5>;
 };
 
 [[binding(0), group(0)]] var<uniform> params : [[access(read)]] SimParams;

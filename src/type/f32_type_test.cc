@@ -50,16 +50,6 @@ TEST_F(F32Test, FriendlyName) {
   EXPECT_EQ(f.FriendlyName(Symbols()), "f32");
 }
 
-TEST_F(F32Test, MinBufferBindingSize) {
-  F32 f;
-  EXPECT_EQ(4u, f.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
-TEST_F(F32Test, BaseAlignment) {
-  F32 f;
-  EXPECT_EQ(4u, f.BaseAlignment(MemoryLayout::kUniformBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

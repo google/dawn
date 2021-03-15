@@ -344,7 +344,7 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->Is<type::F32>());
-  ASSERT_FALSE(a->has_array_stride());
+  EXPECT_EQ(a->decorations().size(), 0u);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
@@ -360,8 +360,11 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->Is<type::F32>());
-  ASSERT_TRUE(a->has_array_stride());
-  EXPECT_EQ(a->array_stride(), 16u);
+
+  ASSERT_EQ(a->decorations().size(), 1u);
+  auto* stride = a->decorations()[0];
+  ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
+  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 16u);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
@@ -376,8 +379,11 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
   auto* a = t->As<type::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->Is<type::F32>());
-  ASSERT_TRUE(a->has_array_stride());
-  EXPECT_EQ(a->array_stride(), 16u);
+
+  ASSERT_EQ(a->decorations().size(), 1u);
+  auto* stride = a->decorations()[0];
+  ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
+  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 16u);
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {

@@ -38,14 +38,6 @@ std::string Alias::FriendlyName(const SymbolTable& symbols) const {
   return symbols.NameFor(symbol_);
 }
 
-uint64_t Alias::MinBufferBindingSize(MemoryLayout mem_layout) const {
-  return subtype_->MinBufferBindingSize(mem_layout);
-}
-
-uint64_t Alias::BaseAlignment(MemoryLayout mem_layout) const {
-  return subtype_->BaseAlignment(mem_layout);
-}
-
 Alias* Alias::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto sym = ctx->Clone(symbol());

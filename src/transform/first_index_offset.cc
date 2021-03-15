@@ -154,26 +154,20 @@ Transform::Output FirstIndexOffset::Run(const Program* in) {
 
 ast::Variable* FirstIndexOffset::State::AddUniformBuffer() {
   auto* u32_type = dst->create<type::U32>();
-  ast::StructMemberList members;
   uint32_t offset = 0;
+  ast::StructMemberList members;
   if (has_vertex_index) {
-    ast::DecorationList member_dec;
-    member_dec.push_back(
-        dst->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(dst->create<ast::StructMember>(
         Source{}, dst->Symbols().Register(kFirstVertexName), u32_type,
-        std::move(member_dec)));
+        ast::DecorationList{}));
     vertex_index_offset = offset;
     offset += 4;
   }
 
   if (has_instance_index) {
-    ast::DecorationList member_dec;
-    member_dec.push_back(
-        dst->create<ast::StructMemberOffsetDecoration>(Source{}, offset));
     members.push_back(dst->create<ast::StructMember>(
         Source{}, dst->Symbols().Register(kFirstInstanceName), u32_type,
-        std::move(member_dec)));
+        ast::DecorationList{}));
     instance_index_offset = offset;
     offset += 4;
   }

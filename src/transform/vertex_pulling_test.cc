@@ -83,7 +83,6 @@ fn main() -> void {}
   auto* expect = R"(
 [[block]]
 struct TintVertexData {
-  [[offset(0)]]
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
@@ -120,7 +119,6 @@ fn main() -> void {}
 
 [[block]]
 struct TintVertexData {
-  [[offset(0)]]
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
@@ -163,7 +161,6 @@ fn main() -> void {}
 
 [[block]]
 struct TintVertexData {
-  [[offset(0)]]
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
@@ -206,7 +203,6 @@ fn main() -> void {}
 
 [[block]]
 struct TintVertexData {
-  [[offset(0)]]
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
@@ -254,7 +250,6 @@ fn main() -> void {}
 
 [[block]]
 struct TintVertexData {
-  [[offset(0)]]
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
@@ -316,7 +311,6 @@ fn main() -> void {}
 
 [[block]]
 struct TintVertexData {
-  [[offset(0)]]
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
@@ -371,7 +365,6 @@ fn main() -> void {}
 
 [[block]]
 struct TintVertexData {
-  [[offset(0)]]
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 

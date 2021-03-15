@@ -65,14 +65,6 @@ std::string AccessControl::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-uint64_t AccessControl::MinBufferBindingSize(MemoryLayout mem_layout) const {
-  return subtype_->MinBufferBindingSize(mem_layout);
-}
-
-uint64_t AccessControl::BaseAlignment(MemoryLayout mem_layout) const {
-  return subtype_->BaseAlignment(mem_layout);
-}
-
 AccessControl* AccessControl::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto* ty = ctx->Clone(type());

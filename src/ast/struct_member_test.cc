@@ -22,11 +22,11 @@ namespace {
 using StructMemberTest = TestHelper;
 
 TEST_F(StructMemberTest, Creation) {
-  auto* st = Member("a", ty.i32(), {MemberOffset(4)});
+  auto* st = Member("a", ty.i32(), {MemberSize(4)});
   EXPECT_EQ(st->symbol(), Symbol(1));
   EXPECT_EQ(st->type(), ty.i32());
   EXPECT_EQ(st->decorations().size(), 1u);
-  EXPECT_TRUE(st->decorations()[0]->Is<StructMemberOffsetDecoration>());
+  EXPECT_TRUE(st->decorations()[0]->Is<StructMemberSizeDecoration>());
   EXPECT_EQ(st->source().range.begin.line, 0u);
   EXPECT_EQ(st->source().range.begin.column, 0u);
   EXPECT_EQ(st->source().range.end.line, 0u);
@@ -68,14 +68,14 @@ TEST_F(StructMemberTest, Assert_NullDecoration) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
-        b.Member("a", b.ty.i32(), {b.MemberOffset(4), nullptr});
+        b.Member("a", b.ty.i32(), {b.MemberSize(4), nullptr});
       },
       "internal compiler error");
 }
 
 TEST_F(StructMemberTest, ToStr) {
-  auto* st = Member("a", ty.i32(), {MemberOffset(4)});
-  EXPECT_EQ(str(st), "StructMember{[[ offset 4 ]] a: __i32}\n");
+  auto* st = Member("a", ty.i32(), {MemberSize(4)});
+  EXPECT_EQ(str(st), "StructMember{[[ size 4 ]] a: __i32}\n");
 }
 
 TEST_F(StructMemberTest, ToStrNoDecorations) {

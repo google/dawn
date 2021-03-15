@@ -21,6 +21,8 @@ namespace tint {
 namespace ast {
 
 /// A struct member offset decoration
+// [DEPRECATED] - Replaced with StructMemberAlignDecoration and
+// StructMemberSizeDecoration
 class StructMemberOffsetDecoration
     : public Castable<StructMemberOffsetDecoration, Decoration> {
  public:

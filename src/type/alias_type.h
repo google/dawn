@@ -47,16 +47,6 @@ class Alias : public Castable<Alias, Type> {
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// @param mem_layout type of memory layout to use in calculation.
-  /// @returns minimum size required for this type, in bytes.
-  ///          0 for non-host shareable types.
-  uint64_t MinBufferBindingSize(MemoryLayout mem_layout) const override;
-
-  /// @param mem_layout type of memory layout to use in calculation.
-  /// @returns base alignment for the type, in bytes.
-  ///          0 for non-host shareable types.
-  uint64_t BaseAlignment(MemoryLayout mem_layout) const override;
-
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type

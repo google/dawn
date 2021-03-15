@@ -331,8 +331,7 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray) {
   EXPECT_TRUE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
   EXPECT_EQ(arr_type->size(), 0u);
-  EXPECT_EQ(arr_type->array_stride(), 0u);
-  EXPECT_FALSE(arr_type->has_array_stride());
+  EXPECT_EQ(arr_type->decorations().size(), 0u);
   auto* elem_type = arr_type->type();
   ASSERT_NE(elem_type, nullptr);
   EXPECT_TRUE(elem_type->Is<type::U32>());
@@ -365,8 +364,10 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_ArrayStride_Valid) {
   auto* arr_type = type->As<type::Array>();
   EXPECT_TRUE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
-  EXPECT_EQ(arr_type->array_stride(), 64u);
-  EXPECT_TRUE(arr_type->has_array_stride());
+  ASSERT_EQ(arr_type->decorations().size(), 1u);
+  auto* stride = arr_type->decorations()[0];
+  ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
+  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 64u);
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -413,8 +414,7 @@ TEST_F(SpvParserTest, ConvertType_Array) {
   EXPECT_FALSE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
   EXPECT_EQ(arr_type->size(), 42u);
-  EXPECT_EQ(arr_type->array_stride(), 0u);
-  EXPECT_FALSE(arr_type->has_array_stride());
+  EXPECT_EQ(arr_type->decorations().size(), 0u);
   auto* elem_type = arr_type->type();
   ASSERT_NE(elem_type, nullptr);
   EXPECT_TRUE(elem_type->Is<type::U32>());
@@ -499,8 +499,12 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_Valid) {
   EXPECT_TRUE(type->Is<type::Array>());
   auto* arr_type = type->As<type::Array>();
   ASSERT_NE(arr_type, nullptr);
-  ASSERT_EQ(arr_type->array_stride(), 8u);
-  EXPECT_TRUE(arr_type->has_array_stride());
+
+  ASSERT_EQ(arr_type->decorations().size(), 1u);
+  auto* stride = arr_type->decorations()[0];
+  ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
+  ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 8u);
+
   EXPECT_TRUE(p->error().empty());
 }
 

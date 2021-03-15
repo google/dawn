@@ -974,15 +974,12 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Struct) {
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.f32()),
-          Member("b", ty.vec3<f32>()),
-      },
-      ast::DecorationList{});
-  auto* s_type = ty.struct_("my_struct", s);
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
-  auto* t = Construct(s_type, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
+  auto* t = Construct(s, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
   WrapInFunction(t);
 
   spirv::Builder& b = Build();
@@ -1127,13 +1124,8 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.f32()),
-      },
-      ast::DecorationList{});
-  auto* s_type = ty.struct_("my_struct", s);
-  auto* t = Construct(s_type);
+  auto* s = Structure("my_struct", {Member("a", ty.f32())});
+  auto* t = Construct(s);
   WrapInFunction(t);
 
   spirv::Builder& b = Build();
@@ -1564,14 +1556,12 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
 }
 
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.f32()),
-          Member("b", ty.vec3<f32>()),
-      },
-      ast::DecorationList{});
-  auto* s_type = ty.struct_("my_struct", s);
-  auto* t = Construct(s_type, 2.f, vec3<f32>(2.f, 2.f, 2.f));
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
+
+  auto* t = Construct(s, 2.f, vec3<f32>(2.f, 2.f, 2.f));
   WrapInFunction(t);
 
   spirv::Builder& b = Build();
@@ -1582,15 +1572,12 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
 
 TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_Struct_WithIdentSubExpression) {
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.f32()),
-          Member("b", ty.vec3<f32>()),
-      },
-      ast::DecorationList{});
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
-  auto* s_type = ty.struct_("my_struct", s);
-  auto* t = Construct(s_type, 2.f, "a", 2.f);
+  auto* t = Construct(s, 2.f, "a", 2.f);
   WrapInFunction(t);
 
   Global("a", ty.f32(), ast::StorageClass::kPrivate);

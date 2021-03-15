@@ -132,13 +132,6 @@ TEST_F(StorageTextureTest, I32) {
   EXPECT_TRUE(s->As<StorageTexture>()->type()->Is<I32>());
 }
 
-TEST_F(StorageTextureTest, MinBufferBindingSize) {
-  auto* subtype = StorageTexture::SubtypeFor(ImageFormat::kRgba32Sint, Types());
-  auto* s = create<StorageTexture>(TextureDimension::k2dArray,
-                                   ImageFormat::kRgba32Sint, subtype);
-  EXPECT_EQ(0u, s->MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

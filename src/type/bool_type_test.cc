@@ -50,11 +50,6 @@ TEST_F(BoolTest, FriendlyName) {
   EXPECT_EQ(b.FriendlyName(Symbols()), "bool");
 }
 
-TEST_F(BoolTest, MinBufferBindingSize) {
-  Bool b;
-  EXPECT_EQ(0u, b.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

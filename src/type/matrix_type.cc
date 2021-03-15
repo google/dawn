@@ -45,18 +45,6 @@ std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-uint64_t Matrix::MinBufferBindingSize(MemoryLayout mem_layout) const {
-  Vector vec(subtype_, rows_);
-  return (columns_ - 1) * vec.BaseAlignment(mem_layout) +
-         vec.MinBufferBindingSize(mem_layout);
-}
-
-uint64_t Matrix::BaseAlignment(MemoryLayout mem_layout) const {
-  Vector vec(subtype_, rows_);
-  Array arr(&vec, columns_, ast::DecorationList{});
-  return arr.BaseAlignment(mem_layout);
-}
-
 Matrix* Matrix::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto* ty = ctx->Clone(type());

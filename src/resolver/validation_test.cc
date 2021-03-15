@@ -556,6 +556,38 @@ TEST_F(ResolverValidationTest, Stmt_BreakNotInLoopOrSwitch) {
             "12:34 error: break statement must be in a loop or switch case");
 }
 
+TEST_F(ResolverValidationTest, NonPOTStructMemberAlignDecoration) {
+  Structure("S", {
+                     Member("a", ty.f32(), {MemberAlign(Source{{12, 34}}, 3)}),
+                 });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: align value must be a positive, power-of-two integer");
+}
+
+TEST_F(ResolverValidationTest, ZeroStructMemberAlignDecoration) {
+  Structure("S", {
+                     Member("a", ty.f32(), {MemberAlign(Source{{12, 34}}, 0)}),
+                 });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: align value must be a positive, power-of-two integer");
+}
+
+TEST_F(ResolverValidationTest, ZeroStructMemberSizeDecoration) {
+  Structure("S", {
+                     Member("a", ty.f32(), {MemberSize(Source{{12, 34}}, 0)}),
+                 });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: size must be at least as big as the type's size (4)");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

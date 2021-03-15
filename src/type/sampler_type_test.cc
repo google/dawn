@@ -71,11 +71,6 @@ TEST_F(SamplerTest, FriendlyNameComparisonSampler) {
   EXPECT_EQ(s.FriendlyName(Symbols()), "sampler_comparison");
 }
 
-TEST_F(SamplerTest, MinBufferBindingSize) {
-  Sampler s{SamplerKind::kSampler};
-  EXPECT_EQ(0u, s.MinBufferBindingSize(MemoryLayout::kUniformBuffer));
-}
-
 }  // namespace
 }  // namespace type
 }  // namespace tint

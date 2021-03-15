@@ -60,16 +60,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate();
 
-  /// Calculates the alignment size of the given `type`. This returns 0
-  /// for pointers as the size is unknown.
-  /// @param type the type to calculate the alignment size for
-  /// @returns the number of bytes used to align `type` or 0 on error
-  uint32_t calculate_alignment_size(type::Type* type);
-  /// Calculates the largest alignment seen within a struct
-  /// @param type the struct to calculate
-  /// @returns the largest alignment value
-  uint32_t calculate_largest_alignment(type::Struct* type);
-
   /// Handles generating a constructed
   /// @param ty the constructed type to generate
   /// @returns true if the constructed type was emitted

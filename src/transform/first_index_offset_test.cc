@@ -98,7 +98,6 @@ fn entry() -> void {
 
 [[block]]
 struct TintFirstIndexOffsetData {
-  [[offset(0)]]
   tint_first_vertex_index : u32;
 };
 
@@ -147,7 +146,6 @@ fn entry() -> void {
 
 [[block]]
 struct TintFirstIndexOffsetData {
-  [[offset(0)]]
   tint_first_instance_index : u32;
 };
 
@@ -199,9 +197,7 @@ fn entry() -> void {
 
 [[block]]
 struct TintFirstIndexOffsetData {
-  [[offset(0)]]
   tint_first_vertex_index : u32;
-  [[offset(4)]]
   tint_first_instance_index : u32;
 };
 
@@ -255,7 +251,6 @@ fn entry() -> void {
 
 [[block]]
 struct TintFirstIndexOffsetData {
-  [[offset(0)]]
   tint_first_vertex_index : u32;
 };
 

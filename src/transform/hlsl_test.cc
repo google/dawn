@@ -96,7 +96,6 @@ TEST_F(HlslTest, PromoteArrayInitializerToConstVar_Bug406) {
   auto* src = R"(
 [[block]]
 struct Uniforms {
-  [[offset(0)]]
   transform : mat2x2<f32>;
 };
 
@@ -121,7 +120,6 @@ fn main() -> void {
   auto* expect = R"(
 [[block]]
 struct Uniforms {
-  [[offset(0)]]
   transform : mat2x2<f32>;
 };
 

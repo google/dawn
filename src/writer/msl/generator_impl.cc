@@ -25,12 +25,12 @@
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
 #include "src/ast/sint_literal.h"
-#include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/semantic/call.h"
 #include "src/semantic/function.h"
 #include "src/semantic/member_accessor_expression.h"
+#include "src/semantic/struct.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
@@ -66,14 +66,6 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
 
   return stmts->last()->Is<ast::BreakStatement>() ||
          stmts->last()->Is<ast::FallthroughStatement>();
-}
-
-uint32_t adjust_for_alignment(uint32_t count, uint32_t alignment) {
-  const auto spill = count % alignment;
-  if (spill == 0) {
-    return count;
-  }
-  return count + alignment - spill;
 }
 
 }  // namespace
@@ -138,89 +130,6 @@ bool GeneratorImpl::Generate() {
   }
 
   return true;
-}
-
-uint32_t GeneratorImpl::calculate_largest_alignment(type::Struct* type) {
-  auto* stct = type->As<type::Struct>()->impl();
-  uint32_t largest_alignment = 0;
-  for (auto* mem : stct->members()) {
-    auto align = calculate_alignment_size(mem->type());
-    if (align == 0) {
-      return 0;
-    }
-    if (!mem->type()->Is<type::Struct>()) {
-      largest_alignment = std::max(largest_alignment, align);
-    } else {
-      largest_alignment = std::max(
-          largest_alignment,
-          calculate_largest_alignment(mem->type()->As<type::Struct>()));
-    }
-  }
-  return largest_alignment;
-}
-
-uint32_t GeneratorImpl::calculate_alignment_size(type::Type* type) {
-  if (auto* alias = type->As<type::Alias>()) {
-    return calculate_alignment_size(alias->type());
-  }
-  if (auto* ary = type->As<type::Array>()) {
-    // TODO(dsinclair): Handle array stride and adjust for alignment.
-    uint32_t type_size = calculate_alignment_size(ary->type());
-    return ary->size() * type_size;
-  }
-  if (type->Is<type::Bool>()) {
-    return 1;
-  }
-  if (type->Is<type::Pointer>()) {
-    return 0;
-  }
-  if (type->Is<type::F32>() || type->Is<type::I32>() || type->Is<type::U32>()) {
-    return 4;
-  }
-  if (auto* mat = type->As<type::Matrix>()) {
-    // TODO(dsinclair): Handle MatrixStride
-    // https://github.com/gpuweb/gpuweb/issues/773
-    uint32_t type_size = calculate_alignment_size(mat->type());
-    return mat->rows() * mat->columns() * type_size;
-  }
-  if (auto* stct_ty = type->As<type::Struct>()) {
-    auto* stct = stct_ty->impl();
-    uint32_t count = 0;
-    uint32_t largest_alignment = 0;
-    // Offset decorations in WGSL must be in increasing order.
-    for (auto* mem : stct->members()) {
-      for (auto* deco : mem->decorations()) {
-        if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
-          count = offset->offset();
-        }
-      }
-      auto align = calculate_alignment_size(mem->type());
-      if (align == 0) {
-        return 0;
-      }
-      if (auto* str = mem->type()->As<type::Struct>()) {
-        largest_alignment =
-            std::max(largest_alignment, calculate_largest_alignment(str));
-      } else {
-        largest_alignment = std::max(largest_alignment, align);
-      }
-
-      // Round up to the alignment size
-      count = adjust_for_alignment(count, align);
-      count += align;
-    }
-    // Round struct up to largest align size
-    count = adjust_for_alignment(count, largest_alignment);
-    return count;
-  }
-  if (auto* vec = type->As<type::Vector>()) {
-    uint32_t type_size = calculate_alignment_size(vec->type());
-    if (vec->size() == 2) {
-      return 2 * type_size;
-    }
-    return 4 * type_size;
-  }
-  return 0;
 }
 
 bool GeneratorImpl::EmitConstructedType(const type::Type* ty) {
@@ -2075,52 +1984,76 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
   out_ << "struct " << program_->Symbols().NameFor(str->symbol()) << " {"
        << std::endl;
 
+  uint32_t pad_count = 0;
+  auto add_padding = [&](uint32_t size) {
+    out_ << "int8_t pad_" << pad_count << "[" << size << "];" << std::endl;
+    pad_count++;
+  };
+
   increment_indent();
   uint32_t current_offset = 0;
-  uint32_t pad_count = 0;
   for (auto* mem : str->impl()->members()) {
     std::string attributes;
 
     make_indent();
+
+    auto* sem_mem = program_->Sem().Get(mem);
+    if (!sem_mem) {
+      TINT_ICE(diagnostics_) << "struct member missing semantic info";
+      return false;
+    }
+
+    auto const offset = sem_mem->Offset();
+    if (offset != current_offset) {
+      add_padding(offset - current_offset);
+      make_indent();
+    }
+
     for (auto* deco : mem->decorations()) {
-      if (auto* o = deco->As<ast::StructMemberOffsetDecoration>()) {
-        uint32_t offset = o->offset();
-        if (offset != current_offset) {
-          out_ << "int8_t pad_" << pad_count << "[" << (offset - current_offset)
-               << "];" << std::endl;
-          pad_count++;
-          make_indent();
-        }
-        current_offset = offset;
-      } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
+      if (auto* loc = deco->As<ast::LocationDecoration>()) {
         attributes = " [[user(locn" + std::to_string(loc->value()) + ")]]";
-      } else {
-        diagnostics_.add_error("unsupported member decoration: " +
-                               program_->str(deco));
-        return false;
       }
     }
 
     if (!EmitType(mem->type(), program_->Symbols().NameFor(mem->symbol()))) {
       return false;
     }
-    auto size = calculate_alignment_size(mem->type());
-    if (size == 0) {
-      diagnostics_.add_error("unable to calculate byte size for: " +
-                             mem->type()->type_name());
-      return false;
-    }
-    current_offset += size;
+
+    auto* ty = mem->type()->UnwrapAliasIfNeeded();
 
     // Array member name will be output with the type
-    if (!mem->type()->Is<type::Array>()) {
+    if (!ty->Is<type::Array>()) {
       out_ << " " << program_->Symbols().NameFor(mem->symbol());
     }
 
     out_ << attributes;
 
     out_ << ";" << std::endl;
+
+    if (ty->is_scalar()) {
+      current_offset = offset + 4;
+    } else if (ty->Is<type::Struct>()) {
+      /// Structure will already contain padding matching the WGSL size
+      current_offset = offset + sem_mem->Size();
+    } else {
+      /// TODO(bclayton): Implement for vector, matrix, array and nested
+      /// structures.
+      TINT_UNREACHABLE(diagnostics_)
+          << "Unhandled type " << ty->TypeInfo().name;
+      return false;
+    }
   }
+
+  auto* sem_str = program_->Sem().Get(str);
+  if (!sem_str) {
+    TINT_ICE(diagnostics_) << "struct missing semantic info";
+    return false;
+  }
+  if (sem_str->Size() != current_offset) {
+    make_indent();
+    add_padding(sem_str->Size() - current_offset);
+  }
+
   decrement_indent();
   make_indent();
 
