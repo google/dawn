@@ -250,7 +250,7 @@ bool InitSample(int argc, const char** argv) {
         }
         if (std::string("-h") == argv[i] || std::string("--help") == argv[i]) {
             printf("Usage: %s [-b BACKEND] [-c COMMAND_BUFFER]\n", argv[0]);
-            printf("  BACKEND is one of: d3d12, metal, null, opengl, vulkan\n");
+            printf("  BACKEND is one of: d3d12, metal, null, opengl, opengles, vulkan\n");
             printf("  COMMAND_BUFFER is one of: none, terrible\n");
             return false;
         }
