@@ -18,7 +18,7 @@ import("tint_overrides_with_defaults.gni")
 # Temporary group to not break dependents while they rename their Tint GN
 # targets
 group("libtint") {
-  deps = [ "src:libtint" ]
+  public_deps = [ "src:libtint" ]
 }
 
 # This target is built when no specific target is specified on the command line.
