@@ -75,8 +75,8 @@ func run() error {
 
 	taskIndices := make(chan int, 64)
 	type result struct {
-		msg     string
-		success bool
+		msg    string
+		failed bool
 	}
 	results := make([]result, len(perInstanceValues))
 
@@ -93,7 +93,7 @@ func run() error {
 				}
 				success, out := invoke(exe, taskArgs)
 				if !success || !*onlyPrintFailures {
-					results[idx] = result{out, success}
+					results[idx] = result{out, !success}
 				}
 			}
 		}()
@@ -106,14 +106,14 @@ func run() error {
 
 	wg.Wait()
 
-	success := true
+	failed := false
 	for _, result := range results {
 		if result.msg != "" {
 			fmt.Println(result.msg)
 		}
-		success = success && result.success
+		failed = failed || result.failed
 	}
-	if !success {
+	if failed {
 		os.Exit(1)
 	}
 	return nil
