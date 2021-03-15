@@ -26,116 +26,116 @@ if (build_with_chromium) {
 
   source_set("tint_fuzzer_common") {
     public_configs = [
-      ":tint_config",
-      ":tint_common_config",
+      "${tint_root_dir}/src:tint_config",
+      "${tint_root_dir}/src:tint_common_config",
     ]
 
     public_deps = [ "${tint_root_dir}/src:libtint" ]
 
     sources = [
-      "fuzzers/tint_common_fuzzer.cc",
-      "fuzzers/tint_common_fuzzer.h",
+      "tint_common_fuzzer.cc",
+      "tint_common_fuzzer.h",
     ]
   }
 
   if (tint_build_wgsl_reader) {
     fuzzer_test("tint_wgsl_reader_fuzzer") {
-      sources = [ "fuzzers/tint_wgsl_reader_fuzzer.cc" ]
+      sources = [ "tint_wgsl_reader_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
     fuzzer_test("tint_wgsl_reader_wgsl_writer_fuzzer") {
-      sources = [ "fuzzers/tint_wgsl_reader_wgsl_writer_fuzzer.cc" ]
+      sources = [ "tint_wgsl_reader_wgsl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_wgsl_reader && tint_build_spv_writer) {
     fuzzer_test("tint_wgsl_reader_spv_writer_fuzzer") {
-      sources = [ "fuzzers/tint_wgsl_reader_spv_writer_fuzzer.cc" ]
+      sources = [ "tint_wgsl_reader_spv_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
 
     fuzzer_test("tint_all_transforms_fuzzer") {
-      sources = [ "fuzzers/tint_all_transforms_fuzzer.cc" ]
+      sources = [ "tint_all_transforms_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
 
     fuzzer_test("tint_bound_array_accessors_fuzzer") {
-      sources = [ "fuzzers/tint_bound_array_accessors_fuzzer.cc" ]
+      sources = [ "tint_bound_array_accessors_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
 
     fuzzer_test("tint_emit_vertex_point_size_fuzzer") {
-      sources = [ "fuzzers/tint_emit_vertex_point_size_fuzzer.cc" ]
+      sources = [ "tint_emit_vertex_point_size_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
 
     fuzzer_test("tint_first_index_offset_fuzzer") {
-      sources = [ "fuzzers/tint_first_index_offset_fuzzer.cc" ]
+      sources = [ "tint_first_index_offset_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
 
     fuzzer_test("tint_inspector_fuzzer") {
-      sources = [ "fuzzers/tint_inspector_fuzzer.cc" ]
+      sources = [ "tint_inspector_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_wgsl_reader && tint_build_hlsl_writer) {
     fuzzer_test("tint_wgsl_reader_hlsl_writer_fuzzer") {
-      sources = [ "fuzzers/tint_wgsl_reader_hlsl_writer_fuzzer.cc" ]
+      sources = [ "tint_wgsl_reader_hlsl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_wgsl_reader && tint_build_msl_writer) {
     fuzzer_test("tint_wgsl_reader_msl_writer_fuzzer") {
-      sources = [ "fuzzers/tint_wgsl_reader_msl_writer_fuzzer.cc" ]
+      sources = [ "tint_wgsl_reader_msl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_spv_reader) {
     fuzzer_test("tint_spv_reader_fuzzer") {
-      sources = [ "fuzzers/tint_spv_reader_fuzzer.cc" ]
+      sources = [ "tint_spv_reader_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_spv_reader && tint_build_wgsl_writer) {
     fuzzer_test("tint_spv_reader_wgsl_writer_fuzzer") {
-      sources = [ "fuzzers/tint_spv_reader_wgsl_writer_fuzzer.cc" ]
+      sources = [ "tint_spv_reader_wgsl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_spv_reader && tint_build_spv_writer) {
     fuzzer_test("tint_spv_reader_spv_writer_fuzzer") {
-      sources = [ "fuzzers/tint_spv_reader_spv_writer_fuzzer.cc" ]
+      sources = [ "tint_spv_reader_spv_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_spv_reader && tint_build_hlsl_writer) {
     fuzzer_test("tint_spv_reader_hlsl_writer_fuzzer") {
-      sources = [ "fuzzers/tint_spv_reader_hlsl_writer_fuzzer.cc" ]
+      sources = [ "tint_spv_reader_hlsl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_spv_reader && tint_build_msl_writer) {
     fuzzer_test("tint_spv_reader_msl_writer_fuzzer") {
-      sources = [ "fuzzers/tint_spv_reader_msl_writer_fuzzer.cc" ]
+      sources = [ "tint_spv_reader_msl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
 
   if (tint_build_wgsl_reader && tint_build_wgsl_writer) {
     fuzzer_test("tint_ast_clone_fuzzer") {
-      sources = [ "fuzzers/tint_ast_clone_fuzzer.cc" ]
+      sources = [ "tint_ast_clone_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
     }
   }
