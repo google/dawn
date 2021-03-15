@@ -591,10 +591,6 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
     // It passes on AMD Radeon Pro and Intel HD Graphics 630.
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
-    // TODO(enga): Figure out why this fails on Windows Intel Vulkan.
-    // Reading back the depth does not work.
-    DAWN_SKIP_TEST_IF(IsWindows() && IsIntel() && IsVulkan());
-
     // Create a stencil texture
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
