@@ -207,6 +207,7 @@ source_set("tint_unittests_core_src") {
     "../src/type/vector_type_test.cc",
     "../src/utils/command.h",
     "../src/utils/command_test.cc",
+    "../src/utils/math_test.cc",
     "../src/utils/tmpfile.h",
     "../src/utils/tmpfile_test.cc",
     "../src/utils/unique_vector_test.cc",

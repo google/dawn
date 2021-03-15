@@ -38,6 +38,7 @@
 #include "src/semantic/struct.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
+#include "src/utils/math.h"
 
 namespace tint {
 namespace resolver {
@@ -61,20 +62,6 @@ class ScopedAssignment {
   T& ref_;
   T old_value_;
 };
-
-/// Rounds `value` to the next multiple of `alignment`
-/// Assumes `alignment` is positive.
-template <typename T>
-T RoundUp(T alignment, T value) {
-  return ((value + alignment - 1) / alignment) * alignment;
-}
-
-/// Returns true if `value` is a power-of-two.
-/// Assumes `alignment` is positive.
-template <typename T>
-bool IsPowerOfTwo(T value) {
-  return (value & (value - 1)) == 0;
-}
 
 }  // namespace
 
@@ -1126,7 +1113,7 @@ const semantic::Array* Resolver::Array(type::Array* arr) {
     return nullptr;
   }
 
-  return create_semantic(RoundUp(el_align, el_size));
+  return create_semantic(utils::RoundUp(el_align, el_size));
 }
 
 const semantic::Struct* Resolver::Structure(type::Struct* str) {
@@ -1179,7 +1166,7 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
         offset = o->offset();
         align = 1;
       } else if (auto* a = deco->As<ast::StructMemberAlignDecoration>()) {
-        if (a->align() <= 0 || !IsPowerOfTwo(a->align())) {
+        if (a->align() <= 0 || !utils::IsPowerOfTwo(a->align())) {
           diagnostics_.add_error(
               "align value must be a positive, power-of-two integer",
               a->source());
@@ -1198,7 +1185,7 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
       }
     }
 
-    offset = RoundUp(align, offset);
+    offset = utils::RoundUp(align, offset);
 
     auto* sem_member =
         builder_->create<semantic::StructMember>(member, offset, size);
@@ -1209,7 +1196,7 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
     struct_align = std::max(struct_align, align);
   }
 
-  struct_size = RoundUp(struct_align, struct_size);
+  struct_size = utils::RoundUp(struct_align, struct_size);
 
   auto* sem = builder_->create<semantic::Struct>(str, std::move(sem_members),
                                                  struct_align, struct_size);

@@ -500,6 +500,7 @@ if(${TINT_BUILD_TESTS})
     type/vector_type_test.cc
     utils/command_test.cc
     utils/command.h
+    utils/math_test.cc
     utils/tmpfile_test.cc
     utils/tmpfile.h
     utils/unique_vector_test.cc
