@@ -83,8 +83,36 @@ struct TypeInfoOf {
   /// The unique TypeInfo for the type T.
   static const TypeInfo info;
 };
-
 }  // namespace detail
+
+/// @returns true if `obj` is a valid pointer, and is of, or derives from the
+/// class `TO`
+/// @param obj the object to test from
+template <typename TO, typename FROM>
+bool Is(FROM* obj) {
+  constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
+  constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
+  constexpr const bool nocast = std::is_same<FROM, TO>::value;
+  static_assert(upcast || downcast || nocast, "impossible cast");
+
+  if (obj == nullptr) {
+    return false;
+  }
+
+  if (upcast || nocast) {
+    return true;
+  }
+
+  return obj->TypeInfo().Is(TypeInfo::Of<std::remove_const_t<TO>>());
+}
+
+/// @returns obj dynamically cast to the type `TO` or `nullptr` if
+/// this object does not derive from `TO`.
+/// @param obj the object to cast from
+template <typename TO, typename FROM>
+inline TO* As(FROM* obj) {
+  return Is<TO>(obj) ? static_cast<TO*>(obj) : nullptr;
+}
 
 /// CastableBase is the base class for all Castable objects.
 /// It is not encouraged to directly derive from CastableBase without using the
@@ -106,31 +134,21 @@ class CastableBase {
   /// @returns true if this object is of, or derives from the class `TO`
   template <typename TO>
   inline bool Is() const {
-    using FROM = CastableBase;
-    constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
-    constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
-    constexpr const bool nocast = std::is_same<FROM, TO>::value;
-    static_assert(upcast || downcast || nocast, "impossible cast");
-
-    if (upcast || nocast) {
-      return true;
-    }
-
-    return TypeInfo().Is(TypeInfo::Of<TO>());
+    return tint::Is<TO>(this);
   }
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
   /// this object does not derive from `TO`.
   template <typename TO>
   inline TO* As() {
-    return Is<TO>() ? static_cast<TO*>(this) : nullptr;
+    return tint::As<TO>(this);
   }
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
   /// this object does not derive from `TO`.
   template <typename TO>
   inline const TO* As() const {
-    return Is<TO>() ? static_cast<const TO*>(this) : nullptr;
+    return tint::As<const TO>(this);
   }
 
  protected:
@@ -178,45 +196,23 @@ class Castable : public BASE {
   /// @returns true if this object is of, or derives from the class `TO`
   template <typename TO>
   inline bool Is() const {
-    using FROM = Castable;
-    constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
-    constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
-    constexpr const bool nocast = std::is_same<FROM, TO>::value;
-    static_assert(upcast || downcast || nocast, "impossible cast");
-
-    if (upcast || nocast) {
-      return true;
-    }
-
-    return TypeInfo().Is(TypeInfo::Of<TO>());
+    return tint::Is<TO>(static_cast<const CLASS*>(this));
   }
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
   /// this object does not derive from `TO`.
   template <typename TO>
   inline TO* As() {
-    return Is<TO>() ? static_cast<TO*>(this) : nullptr;
+    return tint::As<TO>(this);
   }
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
   /// this object does not derive from `TO`.
   template <typename TO>
   inline const TO* As() const {
-    return Is<TO>() ? static_cast<const TO*>(this) : nullptr;
+    return tint::As<const TO>(this);
   }
 };
-
-/// As() dynamically casts `obj` to the target type `TO`.
-/// @returns the cast object, or nullptr if `obj` is `nullptr` or not of the
-/// type `TO`.
-/// @param obj the object to cast
-template <typename TO, typename FROM>
-inline TO* As(FROM* obj) {
-  if (obj == nullptr) {
-    return nullptr;
-  }
-  return obj->template As<TO>();
-}
 
 }  // namespace tint
 
