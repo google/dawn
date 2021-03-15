@@ -339,24 +339,37 @@ fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
 )";
 
   auto* expect = R"(
-struct tint_symbol_4 {
+struct tint_symbol_3 {
   [[location(1)]]
-  tint_symbol_2 : f32;
+  loc1 : f32;
   [[location(2)]]
-  tint_symbol_3 : vec4<u32>;
+  loc2 : vec4<u32>;
 };
 
 [[stage(fragment)]]
-fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>, tint_symbol_5 : tint_symbol_4) -> void {
-  const tint_symbol_6 : f32 = tint_symbol_5.tint_symbol_2;
-  const tint_symbol_7 : vec4<u32> = tint_symbol_5.tint_symbol_3;
-  var col : f32 = (coord.x * tint_symbol_6);
+fn frag_main(tint_symbol_4 : tint_symbol_3, [[builtin(frag_coord)]] coord : vec4<f32>) -> void {
+  const loc1 : f32 = tint_symbol_4.loc1;
+  const loc2 : vec4<u32> = tint_symbol_4.loc2;
+  var col : f32 = (coord.x * loc1);
 }
 )";
 
   auto got = Transform<Msl>(src);
 
   EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(MslEntryPointIOTest, HandleEntryPointIOTypes_OnlyBuiltinParameters) {
+  // Expect no change.
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>) -> void {
+}
+)";
+
+  auto got = Transform<Msl>(src);
+
+  EXPECT_EQ(src, str(got));
 }
 
 TEST_F(MslEntryPointIOTest, HandleEntryPointIOTypes_Parameters_EmptyBody) {
@@ -369,17 +382,17 @@ fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
 )";
 
   auto* expect = R"(
-struct tint_symbol_4 {
+struct tint_symbol_3 {
   [[location(1)]]
-  tint_symbol_2 : f32;
+  loc1 : f32;
   [[location(2)]]
-  tint_symbol_3 : vec4<u32>;
+  loc2 : vec4<u32>;
 };
 
 [[stage(fragment)]]
-fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>, tint_symbol_5 : tint_symbol_4) -> void {
-  const tint_symbol_6 : f32 = tint_symbol_5.tint_symbol_2;
-  const tint_symbol_7 : vec4<u32> = tint_symbol_5.tint_symbol_3;
+fn frag_main(tint_symbol_4 : tint_symbol_3, [[builtin(frag_coord)]] coord : vec4<f32>) -> void {
+  const loc1 : f32 = tint_symbol_4.loc1;
+  const loc2 : vec4<u32> = tint_symbol_4.loc2;
 }
 )";
 

@@ -114,7 +114,7 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_NoReturn_InOut) {
 
 using namespace metal;
 struct tint_symbol_2 {
-  float tint_symbol_1 [[user(locn0)]];
+  float foo [[user(locn0)]];
 };
 
 struct _tint_main_out {
@@ -123,8 +123,8 @@ struct _tint_main_out {
 
 fragment _tint_main_out _tint_main(tint_symbol_2 tint_symbol_3 [[stage_in]]) {
   _tint_main_out _tint_out = {};
-  const float tint_symbol_4 = tint_symbol_3.tint_symbol_1;
-  _tint_out.bar = tint_symbol_4;
+  const float foo = tint_symbol_3.foo;
+  _tint_out.bar = foo;
   return _tint_out;
 }
 
@@ -154,7 +154,7 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOutVars) {
 
 using namespace metal;
 struct tint_symbol_2 {
-  float tint_symbol_1 [[user(locn0)]];
+  float foo [[user(locn0)]];
 };
 
 struct frag_main_out {
@@ -163,8 +163,8 @@ struct frag_main_out {
 
 fragment frag_main_out frag_main(tint_symbol_2 tint_symbol_3 [[stage_in]]) {
   frag_main_out _tint_out = {};
-  const float tint_symbol_4 = tint_symbol_3.tint_symbol_1;
-  _tint_out.bar = tint_symbol_4;
+  const float foo = tint_symbol_3.foo;
+  _tint_out.bar = foo;
   return _tint_out;
 }
 
@@ -372,7 +372,7 @@ TEST_F(
 
 using namespace metal;
 struct tint_symbol_2 {
-  float tint_symbol_1 [[user(locn0)]];
+  float foo [[user(locn0)]];
 };
 
 struct ep_1_out {
@@ -388,8 +388,8 @@ float sub_func_ep_1(thread ep_1_out& _tint_out, float param, float foo) {
 
 fragment ep_1_out ep_1(tint_symbol_2 tint_symbol_3 [[stage_in]]) {
   ep_1_out _tint_out = {};
-  const float tint_symbol_4 = tint_symbol_3.tint_symbol_1;
-  _tint_out.bar = sub_func_ep_1(_tint_out, 1.0f, tint_symbol_4);
+  const float foo = tint_symbol_3.foo;
+  _tint_out.bar = sub_func_ep_1(_tint_out, 1.0f, foo);
   return _tint_out;
 }
 

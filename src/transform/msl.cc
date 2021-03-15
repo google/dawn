@@ -14,6 +14,7 @@
 
 #include "src/transform/msl.h"
 
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -309,12 +310,9 @@ void Msl::HandleEntryPointIOTypes(CloneContext& ctx) const {
       continue;
     }
 
-    std::vector<ast::Variable*> worklist;
+    // Find location-decorated parameters and build a struct to hold them.
     ast::StructMemberList struct_members;
-    ast::VariableList new_parameters;
-    ast::StatementList new_body;
-
-    // Find location-decorated parameters.
+    std::unordered_set<ast::Variable*> builtins;
     for (auto* param : func->params()) {
       // TODO(jrprice): Handle structs (collate members into a single struct).
       if (param->decorations().size() != 1) {
@@ -324,23 +322,26 @@ void Msl::HandleEntryPointIOTypes(CloneContext& ctx) const {
       auto* deco = param->decorations()[0];
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         // Keep any builtin-decorated parameters unchanged.
-        new_parameters.push_back(ctx.Clone(param));
+        builtins.insert(param);
+        continue;
       } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
         // Create a struct member with the location decoration.
-        struct_members.push_back(
-            ctx.dst->Member(param->symbol().to_str(), ctx.Clone(param->type()),
-                            ast::DecorationList{ctx.Clone(loc)}));
-        worklist.push_back(param);
+        struct_members.push_back(ctx.dst->Member(
+            ctx.src->Symbols().NameFor(param->symbol()),
+            ctx.Clone(param->type()), ast::DecorationList{ctx.Clone(loc)}));
       } else {
         TINT_ICE(ctx.dst->Diagnostics())
             << "Unsupported entry point parameter decoration";
       }
     }
 
-    if (worklist.empty()) {
+    if (struct_members.empty()) {
       // Nothing to do.
       continue;
     }
+
+    ast::VariableList new_parameters;
+    ast::StatementList new_body;
 
     // Create a struct type to hold all of the user-defined input parameters.
     auto* in_struct = ctx.dst->create<type::Struct>(
@@ -355,14 +356,21 @@ void Msl::HandleEntryPointIOTypes(CloneContext& ctx) const {
     new_parameters.push_back(struct_param);
 
     // Replace the original parameters with function-scope constants.
-    for (auto* param : worklist) {
+    for (auto* param : func->params()) {
+      if (builtins.count(param)) {
+        // Keep any builtin-decorated parameters unchanged.
+        new_parameters.push_back(ctx.Clone(param));
+        continue;
+      }
+
+      auto name = ctx.src->Symbols().NameFor(param->symbol());
+
       // Create a function-scope const to replace the parameter.
       // Initialize it with the value extracted from the struct parameter.
-      auto func_const_symbol = ctx.dst->Symbols().New();
+      auto func_const_symbol = ctx.dst->Symbols().Register(name);
       auto* func_const =
           ctx.dst->Const(func_const_symbol, ctx.Clone(param->type()),
-                         ctx.dst->MemberAccessor(struct_param_symbol,
-                                                 param->symbol().to_str()));
+                         ctx.dst->MemberAccessor(struct_param_symbol, name));
 
       new_body.push_back(ctx.dst->WrapInStatement(func_const));
 
