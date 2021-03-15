@@ -366,11 +366,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     auto* decl = var->Declaration();
     auto binding_info = ruv.second;
 
-    if (!decl->type()->Is<type::AccessControl>()) {
-      continue;
-    }
     auto* unwrapped_type = decl->type()->UnwrapIfNeeded();
-
     auto* str = unwrapped_type->As<type::Struct>();
     if (str == nullptr) {
       continue;

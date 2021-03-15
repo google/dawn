@@ -215,16 +215,11 @@ class InspectorHelper : public ProgramBuilder {
   /// Generates types appropriate for using in an uniform buffer
   /// @param name name for the type
   /// @param member_types a vector of member types
-  /// @returns a tuple {struct type, access control type}, where the struct has
-  ///          the layout for an uniform buffer, and the control type wraps the
-  ///          struct.
-  std::tuple<type::Struct*, type::AccessControl*> MakeUniformBufferTypes(
-      const std::string& name,
-      std::vector<type::Type*> member_types) {
+  /// @returns a struct type that has the layout for an uniform buffer.
+  type::Struct* MakeUniformBufferType(const std::string& name,
+                                      std::vector<type::Type*> member_types) {
     auto* struct_type = MakeStructType(name, member_types, true);
-    auto* access_type =
-        create<type::AccessControl>(ast::AccessControl::kReadOnly, struct_type);
-    return {struct_type, std::move(access_type)};
+    return struct_type;
   }
 
   /// Generates types appropriate for using in a storage buffer
@@ -1392,11 +1387,8 @@ TEST_F(InspectorGetResourceBindingsTest, Empty) {
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Simple) {
-  type::Struct* ub_struct_type;
-  type::AccessControl* ub_control_type;
-  std::tie(ub_struct_type, ub_control_type) =
-      MakeUniformBufferTypes("ub_type", {ty.i32()});
-  AddUniformBuffer("ub_var", ub_control_type, 0, 0);
+  type::Struct* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32()});
+  AddUniformBuffer("ub_var", ub_struct_type, 0, 0);
   MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
 
   type::Struct* sb_struct_type;
@@ -1487,11 +1479,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
-  type::Struct* foo_struct_type;
-  type::AccessControl* foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeUniformBufferTypes("foo_type", {ty.i32()});
-  AddUniformBuffer("foo_ub", foo_control_type, 0, 0);
+  type::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
@@ -1533,11 +1522,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
-  type::Struct* foo_struct_type;
-  type::AccessControl* foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeUniformBufferTypes("foo_type", {ty.i32()});
-  AddUniformBuffer("foo_ub", foo_control_type, 0, 0);
+  type::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
@@ -1561,11 +1547,9 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
-  type::Struct* foo_struct_type;
-  type::AccessControl* foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeUniformBufferTypes("foo_type", {ty.i32(), ty.u32(), ty.f32()});
-  AddUniformBuffer("foo_ub", foo_control_type, 0, 0);
+  type::Struct* foo_struct_type =
+      MakeUniformBufferType("foo_type", {ty.i32(), ty.u32(), ty.f32()});
+  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
   MakeStructVariableReferenceBodyFunction(
       "ub_func", "foo_ub", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
@@ -1590,13 +1574,11 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
-  type::Struct* ub_struct_type;
-  type::AccessControl* ub_control_type;
-  std::tie(ub_struct_type, ub_control_type) =
-      MakeUniformBufferTypes("ub_type", {ty.i32(), ty.u32(), ty.f32()});
-  AddUniformBuffer("ub_foo", ub_control_type, 0, 0);
-  AddUniformBuffer("ub_bar", ub_control_type, 0, 1);
-  AddUniformBuffer("ub_baz", ub_control_type, 2, 0);
+  type::Struct* ub_struct_type =
+      MakeUniformBufferType("ub_type", {ty.i32(), ty.u32(), ty.f32()});
+  AddUniformBuffer("ub_foo", ub_struct_type, 0, 0);
+  AddUniformBuffer("ub_bar", ub_struct_type, 0, 1);
+  AddUniformBuffer("ub_baz", ub_struct_type, 2, 0);
 
   auto AddReferenceFunc = [this](const std::string& func_name,
                                  const std::string& var_name) {
@@ -1645,14 +1627,12 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
-  type::Struct* foo_struct_type;
-  type::AccessControl* foo_control_type;
   // TODO(bclayton) - This is not a legal structure layout for uniform buffer
   // usage. Once crbug.com/tint/628 is implemented, this will fail validation
   // and will need to be fixed.
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeUniformBufferTypes("foo_type", {ty.i32(), u32_array_type(4)});
-  AddUniformBuffer("foo_ub", foo_control_type, 0, 0);
+  type::Struct* foo_struct_type =
+      MakeUniformBufferType("foo_type", {ty.i32(), u32_array_type(4)});
+  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
