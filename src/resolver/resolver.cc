@@ -1155,9 +1155,13 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
       return nullptr;
     }
 
+    bool has_offset_deco = false;
+    bool has_align_deco = false;
+    bool has_size_deco = false;
     for (auto* deco : member->decorations()) {
       if (auto* o = deco->As<ast::StructMemberOffsetDecoration>()) {
-        // [DEPRECATED]
+        // Offset decorations are not part of the WGSL spec, but are emitted by
+        // the SPIR-V reader.
         if (o->offset() < struct_size) {
           diagnostics_.add_error("offsets must be in ascending order",
                                  o->source());
@@ -1165,6 +1169,7 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
         }
         offset = o->offset();
         align = 1;
+        has_offset_deco = true;
       } else if (auto* a = deco->As<ast::StructMemberAlignDecoration>()) {
         if (a->align() <= 0 || !utils::IsPowerOfTwo(a->align())) {
           diagnostics_.add_error(
@@ -1173,6 +1178,7 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
           return nullptr;
         }
         align = a->align();
+        has_align_deco = true;
       } else if (auto* s = deco->As<ast::StructMemberSizeDecoration>()) {
         if (s->size() < size) {
           diagnostics_.add_error(
@@ -1182,7 +1188,15 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
           return nullptr;
         }
         size = s->size();
+        has_size_deco = true;
       }
+    }
+
+    if (has_offset_deco && (has_align_deco || has_size_deco)) {
+      diagnostics_.add_error(
+          "offset decorations cannot be used with align or size decorations",
+          member->source());
+      return nullptr;
     }
 
     offset = utils::RoundUp(align, offset);

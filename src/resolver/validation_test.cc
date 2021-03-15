@@ -588,6 +588,42 @@ TEST_F(ResolverValidationTest, ZeroStructMemberSizeDecoration) {
             "12:34 error: size must be at least as big as the type's size (4)");
 }
 
+TEST_F(ResolverValidationTest, OffsetAndSizeDecoration) {
+  Structure("S", {
+                     Member(Source{{12, 34}}, "a", ty.f32(),
+                            {MemberOffset(0), MemberSize(4)}),
+                 });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: offset decorations cannot be used with align or size "
+            "decorations");
+}
+
+TEST_F(ResolverValidationTest, OffsetAndAlignDecoration) {
+  Structure("S", {
+                     Member(Source{{12, 34}}, "a", ty.f32(),
+                            {MemberOffset(0), MemberAlign(4)}),
+                 });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: offset decorations cannot be used with align or size "
+            "decorations");
+}
+
+TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeDecoration) {
+  Structure("S", {
+                     Member(Source{{12, 34}}, "a", ty.f32(),
+                            {MemberOffset(0), MemberAlign(4), MemberSize(4)}),
+                 });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: offset decorations cannot be used with align or size "
+            "decorations");
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

@@ -21,8 +21,15 @@ namespace tint {
 namespace ast {
 
 /// A struct member offset decoration
-// [DEPRECATED] - Replaced with StructMemberAlignDecoration and
-// StructMemberSizeDecoration
+/// @note The WGSL spec removed the `[[offset(n)]]` decoration for `[[size(n)]]`
+/// and `[[align(n)]]` in https://github.com/gpuweb/gpuweb/pull/1447. However
+/// this decoration is kept because the SPIR-V reader has to deal with absolute
+/// offsets, and transforming these to size / align is complex and can be done
+/// in a number of ways. The Resolver is responsible for consuming the size and
+/// align decorations and transforming these into absolute offsets. It is
+/// trivial for the Resolver to handle `[[offset(n)]]` or `[[size(n)]]` /
+/// `[[align(n)]]` decorations, so this is what we do, keeping all the layout
+/// logic in one place.
 class StructMemberOffsetDecoration
     : public Castable<StructMemberOffsetDecoration, Decoration> {
  public:
