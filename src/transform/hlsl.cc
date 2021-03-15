@@ -15,11 +15,13 @@
 #include "src/transform/hlsl.h"
 
 #include <utility>
+#include <vector>
 
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
 #include "src/semantic/statement.h"
+#include "src/semantic/variable.h"
 
 namespace tint {
 namespace transform {
@@ -31,6 +33,7 @@ Transform::Output Hlsl::Run(const Program* in) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
   PromoteArrayInitializerToConstVar(ctx);
+  HandleEntryPointIOTypes(ctx);
   ctx.Clone();
   return Output{Program(std::move(out))};
 }
@@ -100,6 +103,134 @@ void Hlsl::PromoteArrayInitializerToConstVar(CloneContext& ctx) const {
         ctx.Replace(src_init, dst_ident);
       }
     }
+  }
+}
+
+void Hlsl::HandleEntryPointIOTypes(CloneContext& ctx) const {
+  // Collect entry point parameters into a struct.
+  // Insert function-scope const declarations to replace those parameters.
+  //
+  // Before:
+  // ```
+  // [[stage(fragment)]]
+  // fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
+  //              [[location(1)]] loc1 : f32,
+  //              [[location(2)]] loc2 : vec4<u32>) -> void {
+  //   var col : f32 = (coord.x * loc1);
+  // }
+  // ```
+  //
+  // After:
+  // ```
+  // struct frag_main_in {
+  //   [[builtin(frag_coord)]] coord : vec4<f32>;
+  //   [[location(1)]] loc1 : f32;
+  //   [[location(2)]] loc2 : vec4<u32>
+  // };
+
+  // [[stage(fragment)]]
+  // fn frag_main(in : frag_main_in) -> void {
+  //   const coord : vec4<f32> = in.coord;
+  //   const loc1 : f32 = in.loc1;
+  //   const loc2 : vec4<u32> = in.loc2;
+  //   var col : f32 = (coord.x * loc1);
+  // }
+  // ```
+
+  for (auto* func : ctx.src->AST().Functions()) {
+    if (!func->IsEntryPoint()) {
+      continue;
+    }
+
+    // Build a new structure to hold the non-struct input parameters.
+    ast::StructMemberList struct_members;
+    for (auto* param : func->params()) {
+      if (param->type()->Is<type::Struct>()) {
+        // Already a struct, nothing to do.
+        continue;
+      }
+
+      if (param->decorations().size() != 1) {
+        TINT_ICE(ctx.dst->Diagnostics()) << "Unsupported entry point parameter";
+      }
+
+      auto name = ctx.src->Symbols().NameFor(param->symbol());
+
+      auto* deco = param->decorations()[0];
+      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+        // Create a struct member with the builtin decoration.
+        struct_members.push_back(
+            ctx.dst->Member(name, ctx.Clone(param->type()),
+                            ast::DecorationList{ctx.Clone(builtin)}));
+      } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
+        // Create a struct member with the location decoration.
+        struct_members.push_back(
+            ctx.dst->Member(name, ctx.Clone(param->type()),
+                            ast::DecorationList{ctx.Clone(loc)}));
+      } else {
+        TINT_ICE(ctx.dst->Diagnostics())
+            << "Unsupported entry point parameter decoration";
+      }
+    }
+
+    if (struct_members.empty()) {
+      // Nothing to do.
+      continue;
+    }
+
+    ast::VariableList new_parameters;
+    ast::StatementList new_body;
+
+    // Create a struct type to hold all of the non-struct input parameters.
+    auto* in_struct = ctx.dst->create<type::Struct>(
+        ctx.dst->Symbols().New(),
+        ctx.dst->create<ast::Struct>(struct_members, ast::DecorationList{}));
+    ctx.dst->AST().AddConstructedType(in_struct);
+
+    // Create a new function parameter using this struct type.
+    auto struct_param_symbol = ctx.dst->Symbols().New();
+    auto* struct_param =
+        ctx.dst->Var(struct_param_symbol, in_struct, ast::StorageClass::kNone);
+    new_parameters.push_back(struct_param);
+
+    // Replace the original parameters with function-scope constants.
+    for (auto* param : func->params()) {
+      if (param->type()->Is<type::Struct>()) {
+        // Keep struct parameters unchanged.
+        new_parameters.push_back(ctx.Clone(param));
+        continue;
+      }
+
+      auto name = ctx.src->Symbols().NameFor(param->symbol());
+
+      // Create a function-scope const to replace the parameter.
+      // Initialize it with the value extracted from the struct parameter.
+      auto func_const_symbol = ctx.dst->Symbols().Register(name);
+      auto* func_const =
+          ctx.dst->Const(func_const_symbol, ctx.Clone(param->type()),
+                         ctx.dst->MemberAccessor(struct_param_symbol, name));
+
+      new_body.push_back(ctx.dst->WrapInStatement(func_const));
+
+      // Replace all uses of the function parameter with the function const.
+      for (auto* user : ctx.src->Sem().Get(param)->Users()) {
+        ctx.Replace<ast::Expression>(user->Declaration(),
+                                     ctx.dst->Expr(func_const_symbol));
+      }
+    }
+
+    // Copy over the rest of the function body unchanged.
+    for (auto* stmt : func->body()->list()) {
+      new_body.push_back(ctx.Clone(stmt));
+    }
+
+    // Rewrite the function header with the new parameters.
+    auto* new_func = ctx.dst->create<ast::Function>(
+        func->source(), ctx.Clone(func->symbol()), new_parameters,
+        ctx.Clone(func->return_type()),
+        ctx.dst->create<ast::BlockStatement>(new_body),
+        ctx.Clone(func->decorations()));
+    ctx.Replace(func, new_func);
   }
 }
 

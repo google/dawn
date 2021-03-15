@@ -1527,6 +1527,8 @@ bool GeneratorImpl::EmitEntryPointData(
   auto* func_sem = builder_.Sem().Get(func);
   auto func_sym = func->symbol();
 
+  // TODO(jrprice): Remove this when we remove support for entry point
+  // inputs/outputs as module-scope globals.
   for (auto data : func_sem->ReferencedLocationVariables()) {
     auto* var = data.first;
     auto* decl = var->Declaration();
@@ -1539,6 +1541,8 @@ bool GeneratorImpl::EmitEntryPointData(
     }
   }
 
+  // TODO(jrprice): Remove this when we remove support for entry point
+  // inputs/outputs as module-scope globals.
   for (auto data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
     auto* decl = var->Declaration();
@@ -1633,6 +1637,8 @@ bool GeneratorImpl::EmitEntryPointData(
     out << std::endl;
   }
 
+  // TODO(jrprice): Remove this when we remove support for entry point inputs as
+  // module-scope globals.
   if (!in_variables.empty()) {
     auto in_struct_name = generate_name(builder_.Symbols().NameFor(func_sym) +
                                         "_" + kInStructNameSuffix);
@@ -1682,6 +1688,8 @@ bool GeneratorImpl::EmitEntryPointData(
     out << "};" << std::endl << std::endl;
   }
 
+  // TODO(jrprice): Remove this when we remove support for entry point outputs
+  // as module-scope globals.
   if (!outvariables.empty()) {
     auto outstruct_name = generate_name(builder_.Symbols().NameFor(func_sym) +
                                         "_" + kOutStructNameSuffix);
@@ -1824,10 +1832,32 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   out << " " << namer_.NameFor(builder_.Symbols().NameFor(current_ep_sym_))
       << "(";
 
+  bool first = true;
+  // TODO(jrprice): Remove this when we remove support for inputs as globals.
   auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
   if (in_data != ep_sym_to_in_data_.end()) {
     out << in_data->second.struct_name << " " << in_data->second.var_name;
+    first = false;
   }
+
+  // Emit entry point parameters.
+  for (auto* var : func->params()) {
+    if (!var->type()->Is<type::Struct>()) {
+      TINT_ICE(diagnostics_) << "Unsupported non-struct entry point parameter";
+    }
+
+    if (!first) {
+      out << ", ";
+    }
+    first = false;
+
+    if (!EmitType(out, var->type(), "")) {
+      return false;
+    }
+
+    out << " " << builder_.Symbols().NameFor(var->symbol());
+  }
+
   out << ") {" << std::endl;
 
   increment_indent();
@@ -2552,6 +2582,26 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
     if (!mem->type()->Is<type::Array>()) {
       out << " " << namer_.NameFor(builder_.Symbols().NameFor(mem->symbol()));
     }
+
+    if (mem->decorations().size() > 0) {
+      auto* deco = mem->decorations()[0];
+      if (auto* location = deco->As<ast::LocationDecoration>()) {
+        out << " : TEXCOORD" << location->value();
+      } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+        auto attr = builtin_to_attribute(builtin->value());
+        if (attr.empty()) {
+          diagnostics_.add_error("unsupported builtin");
+          return false;
+        }
+        out << " : " << attr;
+      } else if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
+        // Nothing to do, offsets are handled at the point of access.
+      } else {
+        diagnostics_.add_error("unsupported struct member decoration");
+        return false;
+      }
+    }
+
     out << ";" << std::endl;
   }
   decrement_indent();

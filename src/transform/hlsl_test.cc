@@ -143,6 +143,105 @@ fn main() -> void {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(HlslTest, HandleEntryPointIOTypes_Parameters) {
+  auto* src = R"(
+struct FragIn {
+  [[location(2)]]
+  loc2 : f32;
+};
+
+[[stage(fragment)]]
+fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
+             [[location(1)]] loc1 : f32,
+             frag_in : FragIn) -> void {
+  var col : f32 = (coord.x * loc1 + frag_in.loc2);
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_3 {
+  [[builtin(frag_coord)]]
+  coord : vec4<f32>;
+  [[location(1)]]
+  loc1 : f32;
+};
+
+struct FragIn {
+  [[location(2)]]
+  loc2 : f32;
+};
+
+[[stage(fragment)]]
+fn frag_main(tint_symbol_4 : tint_symbol_3, frag_in : FragIn) -> void {
+  const coord : vec4<f32> = tint_symbol_4.coord;
+  const loc1 : f32 = tint_symbol_4.loc1;
+  var col : f32 = ((coord.x * loc1) + frag_in.loc2);
+}
+)";
+
+  auto got = Transform<Hlsl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(HlslTest, HandleEntryPointIOTypes_OnlyStructParameters) {
+  // Expect no change.
+  auto* src = R"(
+struct FragBuiltins {
+  [[builtin(frag_coord)]]
+  coord : vec4<f32>;
+};
+
+struct FragInputs {
+  [[location(1)]]
+  loc1 : f32;
+  [[location(2)]]
+  loc2 : vec4<u32>;
+};
+
+[[stage(fragment)]]
+fn frag_main(builtins : FragBuiltins, inputs : FragInputs) -> void {
+  var col : f32 = (builtins.coord.x * inputs.loc1);
+}
+)";
+
+  auto got = Transform<Hlsl>(src);
+
+  EXPECT_EQ(src, str(got));
+}
+
+TEST_F(HlslTest, HandleEntryPointIOTypes_Parameters_EmptyBody) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
+             [[location(1)]] loc1 : f32,
+             [[location(2)]] loc2 : vec4<u32>) -> void {
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_4 {
+  [[builtin(frag_coord)]]
+  coord : vec4<f32>;
+  [[location(1)]]
+  loc1 : f32;
+  [[location(2)]]
+  loc2 : vec4<u32>;
+};
+
+[[stage(fragment)]]
+fn frag_main(tint_symbol_5 : tint_symbol_4) -> void {
+  const coord : vec4<f32> = tint_symbol_5.coord;
+  const loc1 : f32 = tint_symbol_5.loc1;
+  const loc2 : vec4<u32> = tint_symbol_5.loc2;
+}
+)";
+
+  auto got = Transform<Hlsl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

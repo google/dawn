@@ -109,17 +109,18 @@ TEST_F(HlslGeneratorImplTest_Function,
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_NoReturn_InOut) {
-  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{
-             create<ast::LocationDecoration>(0),
-         });
+  auto* foo_in = Var("foo", ty.f32(), ast::StorageClass::kNone, nullptr,
+                     ast::DecorationList{
+                         create<ast::LocationDecoration>(0),
+                     });
 
+  // TODO(jrprice): Make this the return value when supported.
   Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{
              create<ast::LocationDecoration>(1),
          });
 
-  Func("main", ast::VariableList{}, ty.void_(),
+  Func("main", ast::VariableList{foo_in}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
            /* no explicit return */},
@@ -127,10 +128,10 @@ TEST_F(HlslGeneratorImplTest_Function,
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct main_in {
+  EXPECT_EQ(result(), R"(struct tint_symbol_2 {
   float foo : TEXCOORD0;
 };
 
@@ -138,9 +139,10 @@ struct main_out {
   float bar : SV_Target1;
 };
 
-main_out main(main_in tint_in) {
+main_out main(tint_symbol_2 tint_symbol_3) {
   main_out tint_out;
-  tint_out.bar = tint_in.foo;
+  const float foo = tint_symbol_3.foo;
+  tint_out.bar = foo;
   return tint_out;
 }
 
@@ -149,17 +151,18 @@ main_out main(main_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_WithInOutVars) {
-  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{
-             create<ast::LocationDecoration>(0),
-         });
+  auto* foo_in = Var("foo", ty.f32(), ast::StorageClass::kNone, nullptr,
+                     ast::DecorationList{
+                         create<ast::LocationDecoration>(0),
+                     });
 
+  // TODO(jrprice): Make this the return value when supported.
   Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{
              create<ast::LocationDecoration>(1),
          });
 
-  Func("frag_main", ast::VariableList{}, ty.void_(),
+  Func("frag_main", ast::VariableList{foo_in}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
            create<ast::ReturnStatement>(),
@@ -168,10 +171,10 @@ TEST_F(HlslGeneratorImplTest_Function,
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct frag_main_in {
+  EXPECT_EQ(result(), R"(struct tint_symbol_2 {
   float foo : TEXCOORD0;
 };
 
@@ -179,9 +182,10 @@ struct frag_main_out {
   float bar : SV_Target1;
 };
 
-frag_main_out frag_main(frag_main_in tint_in) {
+frag_main_out frag_main(tint_symbol_2 tint_symbol_3) {
   frag_main_out tint_out;
-  tint_out.bar = tint_in.foo;
+  const float foo = tint_symbol_3.foo;
+  tint_out.bar = foo;
   return tint_out;
 }
 
@@ -190,17 +194,19 @@ frag_main_out frag_main(frag_main_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_WithInOut_Builtins) {
-  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
-         });
+  auto* coord_in =
+      Var("coord", ty.vec4<f32>(), ast::StorageClass::kNone, nullptr,
+          ast::DecorationList{
+              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
+          });
 
+  // TODO(jrprice): Make this the return value when supported.
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
          });
 
-  Func("frag_main", ast::VariableList{}, ty.void_(),
+  Func("frag_main", ast::VariableList{coord_in}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("depth"),
                                             MemberAccessor("coord", "x")),
@@ -210,10 +216,10 @@ TEST_F(HlslGeneratorImplTest_Function,
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct frag_main_in {
+  EXPECT_EQ(result(), R"(struct tint_symbol_2 {
   float4 coord : SV_Position;
 };
 
@@ -221,9 +227,10 @@ struct frag_main_out {
   float depth : SV_Depth;
 };
 
-frag_main_out frag_main(frag_main_in tint_in) {
+frag_main_out frag_main(tint_symbol_2 tint_symbol_3) {
   frag_main_out tint_out;
-  tint_out.depth = tint_in.coord.x;
+  const float4 coord = tint_symbol_3.coord;
+  tint_out.depth = coord.x;
   return tint_out;
 }
 
@@ -456,10 +463,10 @@ void frag_main() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_Decoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{
-             create<ast::LocationDecoration>(0),
-         });
+  auto* foo_in = Var("foo", ty.f32(), ast::StorageClass::kNone, nullptr,
+                     ast::DecorationList{
+                         create<ast::LocationDecoration>(0),
+                     });
 
   Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{
@@ -472,7 +479,8 @@ TEST_F(
          });
 
   Func("sub_func",
-       ast::VariableList{Var("param", ty.f32(), ast::StorageClass::kFunction)},
+       ast::VariableList{Var("param", ty.f32(), ast::StorageClass::kNone),
+                         Var("foo", ty.f32(), ast::StorageClass::kNone)},
        ty.f32(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
@@ -481,20 +489,20 @@ TEST_F(
        },
        ast::DecorationList{});
 
-  Func(
-      "ep_1", ast::VariableList{}, ty.void_(),
-      ast::StatementList{
-          create<ast::AssignmentStatement>(Expr("bar"), Call("sub_func", 1.0f)),
-          create<ast::ReturnStatement>(),
-      },
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  Func("ep_1", ast::VariableList{foo_in}, ty.void_(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(
+               Expr("bar"), Call("sub_func", 1.0f, Expr("foo"))),
+           create<ast::ReturnStatement>(),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct ep_1_in {
+  EXPECT_EQ(result(), R"(struct tint_symbol_2 {
   float foo : TEXCOORD0;
 };
 
@@ -503,15 +511,16 @@ struct ep_1_out {
   float val : SV_Target0;
 };
 
-float sub_func_ep_1(in ep_1_in tint_in, out ep_1_out tint_out, float param) {
-  tint_out.bar = tint_in.foo;
+float sub_func_ep_1(out ep_1_out tint_out, float param, float foo) {
+  tint_out.bar = foo;
   tint_out.val = param;
-  return tint_in.foo;
+  return foo;
 }
 
-ep_1_out ep_1(ep_1_in tint_in) {
+ep_1_out ep_1(tint_symbol_2 tint_symbol_3) {
   ep_1_out tint_out;
-  tint_out.bar = sub_func_ep_1(tint_in, tint_out, 1.0f);
+  const float foo = tint_symbol_3.foo;
+  tint_out.bar = sub_func_ep_1(tint_out, 1.0f, foo);
   return tint_out;
 }
 
@@ -566,40 +575,44 @@ ep_1_out ep_1() {
 TEST_F(
     HlslGeneratorImplTest_Function,
     Emit_Decoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
-  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
-         });
+  auto* coord_in =
+      Var("coord", ty.vec4<f32>(), ast::StorageClass::kNone, nullptr,
+          ast::DecorationList{
+              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
+          });
 
+  // TODO(jrprice): Make this the return value when supported.
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
          });
 
-  Func("sub_func",
-       ast::VariableList{Var("param", ty.f32(), ast::StorageClass::kFunction)},
-       ty.f32(),
-       ast::StatementList{
-           create<ast::AssignmentStatement>(Expr("depth"),
-                                            MemberAccessor("coord", "x")),
-           create<ast::ReturnStatement>(Expr("param")),
-       },
-       ast::DecorationList{});
+  Func(
+      "sub_func",
+      ast::VariableList{Var("param", ty.f32(), ast::StorageClass::kNone),
+                        Var("coord", ty.vec4<f32>(), ast::StorageClass::kNone)},
+      ty.f32(),
+      ast::StatementList{
+          create<ast::AssignmentStatement>(Expr("depth"),
+                                           MemberAccessor("coord", "x")),
+          create<ast::ReturnStatement>(Expr("param")),
+      },
+      ast::DecorationList{});
 
-  Func("ep_1", ast::VariableList{}, ty.void_(),
+  Func("ep_1", ast::VariableList{coord_in}, ty.void_(),
        ast::StatementList{
-           create<ast::AssignmentStatement>(Expr("depth"),
-                                            Call("sub_func", 1.0f)),
+           create<ast::AssignmentStatement>(
+               Expr("depth"), Call("sub_func", 1.0f, Expr("coord"))),
            create<ast::ReturnStatement>(),
        },
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct ep_1_in {
+  EXPECT_EQ(result(), R"(struct tint_symbol_2 {
   float4 coord : SV_Position;
 };
 
@@ -607,14 +620,15 @@ struct ep_1_out {
   float depth : SV_Depth;
 };
 
-float sub_func_ep_1(in ep_1_in tint_in, out ep_1_out tint_out, float param) {
-  tint_out.depth = tint_in.coord.x;
+float sub_func_ep_1(out ep_1_out tint_out, float param, float4 coord) {
+  tint_out.depth = coord.x;
   return param;
 }
 
-ep_1_out ep_1(ep_1_in tint_in) {
+ep_1_out ep_1(tint_symbol_2 tint_symbol_3) {
   ep_1_out tint_out;
-  tint_out.depth = sub_func_ep_1(tint_in, tint_out, 1.0f);
+  const float4 coord = tint_symbol_3.coord;
+  tint_out.depth = sub_func_ep_1(tint_out, 1.0f, coord);
   return tint_out;
 }
 
