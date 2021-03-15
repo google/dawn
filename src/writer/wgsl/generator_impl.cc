@@ -309,15 +309,11 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     }
     first = false;
 
-    for (auto* deco : v->decorations()) {
-      out_ << "[[";
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        out_ << "builtin(" << builtin->value() << ")";
+    if (!v->decorations().empty()) {
+      if (!EmitDecorations(v->decorations())) {
+        return false;
       }
-      if (auto* location = deco->As<ast::LocationDecoration>()) {
-        out_ << "location(" << location->value() << ")";
-      }
-      out_ << "]] ";
+      out_ << " ";
     }
 
     out_ << program_->Symbols().NameFor(v->symbol()) << " : ";
