@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
   EXPECT_EQ(f->name, "main");
   EXPECT_EQ(f->params.size(), 0u);
   EXPECT_TRUE(f->return_type->Is<type::F32>());
-  ASSERT_TRUE(f->return_type_decorations.size() == 1u);
+  ASSERT_EQ(f->return_type_decorations.size(), 1u);
   auto* loc = f->return_type_decorations[0]->As<ast::LocationDecoration>();
   ASSERT_TRUE(loc != nullptr);
   EXPECT_EQ(loc->value(), 1u);

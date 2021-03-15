@@ -74,7 +74,11 @@ func run() error {
 	}
 
 	taskIndices := make(chan int, 64)
-	results := make([]string, len(perInstanceValues))
+	type result struct {
+		msg     string
+		success bool
+	}
+	results := make([]result, len(perInstanceValues))
 
 	numCPU := runtime.NumCPU()
 	wg := sync.WaitGroup{}
@@ -89,7 +93,7 @@ func run() error {
 				}
 				success, out := invoke(exe, taskArgs)
 				if !success || !*onlyPrintFailures {
-					results[idx] = out
+					results[idx] = result{out, success}
 				}
 			}
 		}()
@@ -102,12 +106,16 @@ func run() error {
 
 	wg.Wait()
 
-	for _, output := range results {
-		if output != "" {
-			fmt.Println(output)
+	success := true
+	for _, result := range results {
+		if result.msg != "" {
+			fmt.Println(result.msg)
 		}
+		success = success && result.success
 	}
-
+	if !success {
+		os.Exit(1)
+	}
 	return nil
 }
 
@@ -116,7 +124,10 @@ func invoke(exe string, args []string) (ok bool, output string) {
 	out, err := cmd.CombinedOutput()
 	str := string(out)
 	if err != nil {
-		return false, "\n" + err.Error()
+		if str != "" {
+			return false, str
+		}
+		return false, err.Error()
 	}
 	return true, str
 }
