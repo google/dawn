@@ -73,6 +73,25 @@ TEST(CastableBase, Is) {
   ASSERT_TRUE(gecko->Is<Reptile>());
 }
 
+TEST(CastableBase, IsWithPredicate) {
+  std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
+
+  frog->Is<Animal>([&frog](const Animal* a) {
+    EXPECT_EQ(a, frog.get());
+    return true;
+  });
+
+  ASSERT_TRUE((frog->Is<Animal>([](const Animal* a) { return true; })));
+  ASSERT_FALSE((frog->Is<Animal>([](const Animal* a) { return false; })));
+
+  // Predicate not called if cast is invalid
+  auto expect_not_called = [] { FAIL() << "Should not be called"; };
+  ASSERT_FALSE((frog->Is<Bear>([&](const Animal* a) {
+    expect_not_called();
+    return true;
+  })));
+}
+
 TEST(CastableBase, IsAnyOf) {
   std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
   std::unique_ptr<CastableBase> bear = std::make_unique<Bear>();
@@ -136,6 +155,25 @@ TEST(Castable, Is) {
   ASSERT_FALSE(frog->Is<Reptile>());
   ASSERT_FALSE(bear->Is<Reptile>());
   ASSERT_TRUE(gecko->Is<Reptile>());
+}
+
+TEST(Castable, IsWithPredicate) {
+  std::unique_ptr<Animal> frog = std::make_unique<Frog>();
+
+  frog->Is<Animal>([&frog](const Animal* a) {
+    EXPECT_EQ(a, frog.get());
+    return true;
+  });
+
+  ASSERT_TRUE((frog->Is<Animal>([](const Animal* a) { return true; })));
+  ASSERT_FALSE((frog->Is<Animal>([](const Animal* a) { return false; })));
+
+  // Predicate not called if cast is invalid
+  auto expect_not_called = [] { FAIL() << "Should not be called"; };
+  ASSERT_FALSE((frog->Is<Bear>([&](const Animal* a) {
+    expect_not_called();
+    return true;
+  })));
 }
 
 TEST(Castable, As) {
