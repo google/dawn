@@ -41,7 +41,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
         [[stage(compute)]] fn main() -> void {
-            buf.data[GlobalInvocationID.x] = buf.data[GlobalInvocationID.x] + 0x1234;
+            buf.data[GlobalInvocationID.x] = buf.data[GlobalInvocationID.x] + 0x1234u;
         }
     )");
 
@@ -97,7 +97,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
         [[stage(compute)]] fn main() -> void {
-            dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] + 0x1234;
+            dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] + 0x1234u;
         }
     )");
 
@@ -169,7 +169,7 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
         [[stage(compute)]] fn main() -> void {
-            dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] + 0x1234;
+            dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] + 0x1234u;
         }
     )");
 
