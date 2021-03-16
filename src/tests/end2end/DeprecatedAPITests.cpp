@@ -208,8 +208,8 @@ class VertexFormatDeprecationTests : public DeprecationTests {
         attribute += ";";
 
         std::string attribAccess = dawn::VertexFormatNumComponents(vertexFormat) > 1
-                                       ? "vec4<f32>(a.x, 0.0, 0.0, 1.0)"
-                                       : "vec4<f32>(a, 0.0, 0.0, 1.0)";
+                                       ? "vec4<f32>(f32(a.x), 0.0, 0.0, 1.0)"
+                                       : "vec4<f32>(f32(a), 0.0, 0.0, 1.0)";
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, (attribute + R"(
                 [[builtin(position)]] var<out> Position : vec4<f32>;

@@ -238,7 +238,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
 
         [[stage(compute)]] fn main() -> void {
             dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] +
-                vec4<u32>(0x1234, 0x1234, 0x1234, 0x1234);
+                vec4<u32>(0x1234u, 0x1234u, 0x1234u, 0x1234u);
         }
     )");
 
@@ -306,7 +306,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
 
         [[stage(compute)]] fn main() -> void {
             dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] +
-                vec4<u32>(0x1234, 0x1234, 0x1234, 0x1234);
+                vec4<u32>(0x1234u, 0x1234u, 0x1234u, 0x1234u);
         }
     )");
 

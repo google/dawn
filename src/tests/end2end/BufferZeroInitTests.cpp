@@ -999,7 +999,7 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
         [[group(0), binding(1)]] var outImage : [[access(write)]] texture_storage_2d<rgba8unorm>;
 
         [[stage(compute)]] fn main() -> void {
-            if (all(ubo.value == vec4<u32>(0, 0, 0, 0))) {
+            if (all(ubo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
             } else {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
@@ -1041,7 +1041,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
         [[group(0), binding(1)]] var outImage : [[access(write)]] texture_storage_2d<rgba8unorm>;
 
         [[stage(compute)]] fn main() -> void {
-            if (all(ssbo.value == vec4<u32>(0, 0, 0, 0))) {
+            if (all(ssbo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
             } else {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
