@@ -627,7 +627,7 @@ source_set("dawn_native_sources") {
   }
 
   if (dawn_enable_wgsl) {
-    deps += [ "${dawn_tint_dir}:libtint" ]
+    deps += [ "${dawn_tint_dir}/src:libtint" ]
   }
 }
 
