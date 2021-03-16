@@ -501,33 +501,6 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
-// Test that a pipeline with defaulted layout may not have multisampled array textures
-// TODO(enga): Also test multisampled cube, cube array, and 3D. These have no GLSL keywords.
-// TODO(cwallez@chromium.org): Convert them to SPIRV ASM to remove the dependency on glslang.
-TEST_F(RenderPipelineValidationTest, MultisampledTexture) {
-    utils::ComboRenderPipelineDescriptor descriptor(device);
-    descriptor.layout = nullptr;
-    descriptor.cFragmentStage.module = fsModule;
-
-    // Base case works.
-    descriptor.vertexStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform texture2DMS texture;
-        void main() {
-        })");
-    device.CreateRenderPipeline(&descriptor);
-
-    // texture2DMSArray invalid
-    descriptor.vertexStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        layout(set = 0, binding = 0) uniform texture2DMSArray texture;
-        void main() {
-        })");
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
-}
-
 // Tests that strip primitive topologies require an index format
 TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
     constexpr uint32_t kNumStripType = 2u;

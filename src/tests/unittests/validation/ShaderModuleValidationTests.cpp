@@ -73,14 +73,83 @@ TEST_F(ShaderModuleValidationTest, NoChainedDescriptor) {
 }
 
 // Test that it is not allowed to use combined texture and sampler.
-// TODO(cwallez@chromium.org): Convert them to SPIRV ASM to remove the dependency on glslang.
 TEST_F(ShaderModuleValidationTest, CombinedTextureAndSampler) {
+    // SPIR-V ASM produced by glslang for the following fragment shader:
+    //
+    //   #version 450
+    //   layout(set = 0, binding = 0) uniform sampler2D tex;
+    //   void main () {}
+    //
+    // Note that the following defines an interface combined texture/sampler which is not allowed
+    // in Dawn / WebGPU.
+    //
+    //   %8 = OpTypeSampledImage %7
+    //   %_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
+    //   %tex = OpVariable %_ptr_UniformConstant_8 UniformConstant
     const char* shader = R"(
-        #version 450
-        layout (set = 0, binding = 0) uniform sampler2D texture;
-        void main() {
-        })";
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpSource GLSL 450
+               OpName %main "main"
+               OpName %tex "tex"
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+          %7 = OpTypeImage %float 2D 0 0 0 1 Unknown
+          %8 = OpTypeSampledImage %7
+%_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
+        %tex = OpVariable %_ptr_UniformConstant_8 UniformConstant
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+               OpReturn
+               OpFunctionEnd
+        )";
 
-    ASSERT_DEVICE_ERROR(
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, shader));
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromASM(device, shader));
+}
+
+// Test that it is not allowed to declare a multisampled-array interface texture.
+// TODO(enga): Also test multisampled cube, cube array, and 3D. These have no GLSL keywords.
+TEST_F(ShaderModuleValidationTest, MultisampledArrayTexture) {
+    // SPIR-V ASM produced by glslang for the following fragment shader:
+    //
+    //  #version 450
+    //  layout(set=0, binding=0) uniform texture2DMSArray tex;
+    //  void main () {}}
+    //
+    // Note that the following defines an interface array multisampled texture which is not allowed
+    // in Dawn / WebGPU.
+    //
+    //  %7 = OpTypeImage %float 2D 0 1 1 1 Unknown
+    //  %_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+    //  %tex = OpVariable %_ptr_UniformConstant_7 UniformConstant
+    const char* shader = R"(
+               OpCapability Shader
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main"
+               OpExecutionMode %main OriginUpperLeft
+               OpSource GLSL 450
+               OpName %main "main"
+               OpName %tex "tex"
+               OpDecorate %tex DescriptorSet 0
+               OpDecorate %tex Binding 0
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+          %7 = OpTypeImage %float 2D 0 1 1 1 Unknown
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+        %tex = OpVariable %_ptr_UniformConstant_7 UniformConstant
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+               OpReturn
+               OpFunctionEnd
+        )";
+
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromASM(device, shader));
 }

@@ -566,6 +566,10 @@ namespace dawn_native {
                                 }
                                 info->texture.sampleType = wgpu::TextureSampleType::Depth;
                             }
+                            if (imageType.ms && imageType.arrayed) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Multisampled array textures aren't supported");
+                            }
                             break;
                         }
                         case BindingInfoType::Buffer: {
