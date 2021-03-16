@@ -46,6 +46,35 @@ namespace tint {
 namespace resolver {
 namespace {
 
+// Helpers and typedefs
+using i32 = ProgramBuilder::i32;
+using u32 = ProgramBuilder::u32;
+using f32 = ProgramBuilder::f32;
+using Op = ast::BinaryOp;
+
+type::Type* ty_bool_(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.bool_();
+}
+type::Type* ty_i32(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.i32();
+}
+type::Type* ty_u32(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.u32();
+}
+type::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.f32();
+}
+
+template <typename T>
+type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec3<T>();
+}
+
+template <typename T>
+type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat3x3<T>();
+}
+
 TEST_F(ResolverTest, Stmt_Assign) {
   auto* lhs = Expr(2);
   auto* rhs = Expr(2.3f);
@@ -985,36 +1014,6 @@ struct Params {
   create_type_func_ptr create_result_type;
 };
 
-// Helpers and typedefs to make building the table below more succinct
-
-using i32 = ProgramBuilder::i32;
-using u32 = ProgramBuilder::u32;
-using f32 = ProgramBuilder::f32;
-using Op = ast::BinaryOp;
-
-type::Type* ty_bool_(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.bool_();
-}
-type::Type* ty_i32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.i32();
-}
-type::Type* ty_u32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.u32();
-}
-type::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.f32();
-}
-
-template <typename T>
-type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.vec3<T>();
-}
-
-template <typename T>
-type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat3x3<T>();
-}
-
 static constexpr create_type_func_ptr all_create_type_funcs[] = {
     ty_bool_,       ty_u32,         ty_i32,        ty_f32,
     ty_vec3<bool>,  ty_vec3<i32>,   ty_vec3<u32>,  ty_vec3<f32>,
@@ -1174,10 +1173,6 @@ TEST_P(Expr_Binary_Test_Valid, All) {
   auto* rhs_type = params.create_rhs_type(ty);
   auto* result_type = params.create_result_type(ty);
 
-  SCOPED_TRACE(testing::Message()
-               << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
-               << rhs_type->FriendlyName(Symbols()));
-
   Global("lhs", lhs_type, ast::StorageClass::kNone);
   Global("rhs", rhs_type, ast::StorageClass::kNone);
 
@@ -1220,10 +1215,6 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
       rhs_type->is_float_scalar_or_vector_or_matrix()) {
     return;
   }
-
-  SCOPED_TRACE(testing::Message()
-               << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
-               << rhs_type->FriendlyName(Symbols()));
 
   Global("lhs", lhs_type, ast::StorageClass::kNone);
   Global("rhs", rhs_type, ast::StorageClass::kNone);
