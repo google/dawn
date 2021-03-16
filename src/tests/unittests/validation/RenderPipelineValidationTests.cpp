@@ -695,7 +695,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
             return;
         }
         [[stage(fragment)]] fn fragmentUint() -> void {
-            colorUint = vec4<u32>(0, 0, 0, 0);
+            colorUint = vec4<u32>(0u, 0u, 0u, 0u);
             return;
         }
     )");
