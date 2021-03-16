@@ -3,7 +3,8 @@
 .gclient
 .gclient_entries
 .vs
-.vscode
+.vscode/*
+!.vscode/tasks.json
 .idea
 build
 buildtools

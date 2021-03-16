@@ -1,0 +1,106 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    // Available variables which can be used inside of strings.
+    // ${workspaceRoot}: the root folder of the team
+    // ${file}: the current opened file
+    // ${fileBasename}: the current opened file's basename
+    // ${fileDirname}: the current opened file's dirname
+    // ${fileExtname}: the current opened file's extension
+    // ${cwd}: the current working directory of the spawned process
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "make",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "type": "shell",
+            "command": "sh",
+            "osx": {
+                "args": [
+                    "-c",
+                    "cmake --build . && echo Done"
+                ]
+            },
+            "linux": {
+                "args": [
+                    "-c",
+                    "cmake --build . && echo Done"
+                ]
+            },
+            "windows": {
+                "args": [
+                    "-c",
+                    "cmake --build . && echo Done"
+                ]
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/build",
+            },
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true,
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },
+        {
+            "label": "cmake",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "..",
+                "-GNinja",
+                "-DCMAKE_BUILD_TYPE=${input:buildType}",
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}/build"
+            },
+            "problemMatcher": [],
+        },
+        {
+            "label": "Push branch for review",
+            "type": "shell",
+            "command": "git",
+            "args": [
+                "push",
+                "origin",
+                "HEAD:refs/for/main"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": [],
+        }
+    ],
+    "inputs": [
+        {
+            "id": "buildType",
+            "type": "pickString",
+            "options": [
+                "Debug",
+                "Release",
+                "MinSizeRel",
+                "RelWithDebInfo",
+            ],
+            "default": "Debug",
+            "description": "The type of build",
+        },
+    ]
+}
