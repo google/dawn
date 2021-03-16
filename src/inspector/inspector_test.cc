@@ -1398,12 +1398,13 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   AddStorageBuffer("sb_var", sb_control_type, 1, 0);
   MakeStructVariableReferenceBodyFunction("sb_func", "sb_var", {{0, ty.i32()}});
 
-  type::Struct* ro_struct_type;
-  type::AccessControl* ro_control_type;
-  std::tie(ro_struct_type, ro_control_type) =
-      MakeReadOnlyStorageBufferTypes("ro_type", {ty.i32()});
-  AddStorageBuffer("ro_var", ro_control_type, 1, 1);
-  MakeStructVariableReferenceBodyFunction("ro_func", "ro_var", {{0, ty.i32()}});
+  type::Struct* rosb_struct_type;
+  type::AccessControl* rosb_control_type;
+  std::tie(rosb_struct_type, rosb_control_type) =
+      MakeReadOnlyStorageBufferTypes("rosb_type", {ty.i32()});
+  AddStorageBuffer("rosb_var", rosb_control_type, 1, 1);
+  MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
+                                          {{0, ty.i32()}});
 
   auto* s_texture_type =
       MakeSampledTextureType(type::TextureDimension::k1d, ty.f32());
@@ -1422,8 +1423,26 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   MakeComparisonSamplerReferenceBodyFunction(
       "cs_func", "cs_texture", "cs_var", "cs_coords", "cs_depth", ty.f32(), {});
 
+  type::StorageTexture* st_type;
+  type::Type* st_subtype;
+  type::AccessControl* st_ac;
+  std::tie(st_type, st_subtype, st_ac) = MakeStorageTextureTypes(
+      type::TextureDimension::k2d, type::ImageFormat::kR8Uint, false);
+  AddStorageTexture("st_var", st_ac, 4, 0);
+  MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<i32>(), {});
+
+  type::StorageTexture* rost_type;
+  type::Type* rost_subtype;
+  type::AccessControl* rost_ac;
+  std::tie(rost_type, rost_subtype, rost_ac) = MakeStorageTextureTypes(
+      type::TextureDimension::k2d, type::ImageFormat::kR8Uint, true);
+  AddStorageTexture("rost_var", rost_ac, 4, 1);
+  MakeStorageTextureBodyFunction("rost_func", "rost_var", ty.vec2<i32>(), {});
+
   MakeCallerBodyFunction(
-      "ep_func", {"ub_func", "sb_func", "ro_func", "s_func", "cs_func"},
+      "ep_func",
+      {"ub_func", "sb_func", "rosb_func", "s_func", "cs_func", "st_func",
+       "rost_func"},
       ast::DecorationList{
           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
       });
@@ -1432,7 +1451,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
 
   auto result = inspector.GetResourceBindings("ep_func");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
-  ASSERT_EQ(7u, result.size());
+  ASSERT_EQ(9u, result.size());
 
   EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
             result[0].resource_type);
@@ -1463,10 +1482,20 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   EXPECT_EQ(2u, result[5].bind_group);
   EXPECT_EQ(0u, result[5].binding);
 
-  EXPECT_EQ(ResourceBinding::ResourceType::kDepthTexture,
+  EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageTexture,
             result[6].resource_type);
-  EXPECT_EQ(3u, result[6].bind_group);
+  EXPECT_EQ(4u, result[6].bind_group);
   EXPECT_EQ(1u, result[6].binding);
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kWriteOnlyStorageTexture,
+            result[7].resource_type);
+  EXPECT_EQ(4u, result[7].bind_group);
+  EXPECT_EQ(0u, result[7].binding);
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kDepthTexture,
+            result[8].resource_type);
+  EXPECT_EQ(3u, result[8].bind_group);
+  EXPECT_EQ(1u, result[8].binding);
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {

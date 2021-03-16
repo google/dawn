@@ -346,6 +346,10 @@ std::vector<ResourceBinding> Inspector::GetResourceBindings(
                          GetSampledTextureResourceBindings(entry_point));
   AppendResourceBindings(&result,
                          GetMultisampledTextureResourceBindings(entry_point));
+  AppendResourceBindings(
+      &result, GetReadOnlyStorageTextureResourceBindings(entry_point));
+  AppendResourceBindings(
+      &result, GetWriteOnlyStorageTextureResourceBindings(entry_point));
   AppendResourceBindings(&result, GetDepthTextureResourceBindings(entry_point));
 
   return result;
