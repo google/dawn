@@ -38,7 +38,7 @@ class TestHelper : public ProgramBuilder {
   ~TestHelper() override;
 
   /// @return a pointer to the Resolver
-  Resolver* r() const { return td_.get(); }
+  Resolver* r() const { return resolver_.get(); }
 
   /// Returns the statement that holds the given expression.
   /// @param expr the ast::Expression
@@ -68,7 +68,7 @@ class TestHelper : public ProgramBuilder {
   }
 
  private:
-  std::unique_ptr<Resolver> td_;
+  std::unique_ptr<Resolver> resolver_;
 };
 
 class ResolverTest : public TestHelper, public testing::Test {};

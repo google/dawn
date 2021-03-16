@@ -19,7 +19,7 @@
 namespace tint {
 namespace resolver {
 
-TestHelper::TestHelper() : td_(std::make_unique<Resolver>(this)) {}
+TestHelper::TestHelper() : resolver_(std::make_unique<Resolver>(this)) {}
 
 TestHelper::~TestHelper() = default;
 
