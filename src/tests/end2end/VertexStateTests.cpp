@@ -106,9 +106,9 @@ class VertexStateTest : public DawnTest {
                     vs << (component == 3 ? "1.0" : "0.0");
                 } else {
                     if (input.step == InputStepMode::Vertex) {
-                        vs << "f32(" << multiplier << " * VertexIndex) + " << component << ".0";
+                        vs << "f32(" << multiplier << "u * VertexIndex) + " << component << ".0";
                     } else {
-                        vs << "f32(" << multiplier << " * InstanceIndex) + " << component << ".0";
+                        vs << "f32(" << multiplier << "u * InstanceIndex) + " << component << ".0";
                     }
                 }
                 vs << ");\n";
