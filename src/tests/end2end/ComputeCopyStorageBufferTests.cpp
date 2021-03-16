@@ -103,7 +103,7 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
 
         [[stage(compute)]] fn main() -> void {
             var index : u32 = GlobalInvocationID.x;
-            if (index >= 4) { return; }
+            if (index >= 4u) { return; }
             dst.s[index] = src.s[index];
         })");
 }
@@ -131,7 +131,7 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
 
         [[stage(compute)]] fn main() -> void {
             var index : u32 = GlobalInvocationID.x;
-            if (index >= 4) { return; }
+            if (index >= 4u) { return; }
             dst.s[index] = src.s[index];
         })");
 }
@@ -154,7 +154,7 @@ TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
 
         [[stage(compute)]] fn main() -> void {
             var index : u32 = GlobalInvocationID.x;
-            if (index >= 4) { return; }
+            if (index >= 4u) { return; }
             dst.s[index] = src.s[index];
         })");
 }
