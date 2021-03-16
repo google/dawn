@@ -91,7 +91,7 @@ class CopyTextureForBrowserTests : public DawnTest {
                 var size : vec2<i32> = textureDimensions(src);
                 var dstTexCoord : vec2<i32> = vec2<i32>(GlobalInvocationID.xy);
                 var srcTexCoord : vec2<i32> = dstTexCoord;
-                if (uniforms.dstTextureFlipY == 1) {
+                if (uniforms.dstTextureFlipY == 1u) {
                     srcTexCoord.y = size.y - dstTexCoord.y - 1;
                 }
 
@@ -99,11 +99,11 @@ class CopyTextureForBrowserTests : public DawnTest {
                 var dstColor : vec4<f32> = textureLoad(dst, dstTexCoord, 0);
                 var success : bool = all(srcColor == dstColor);
 
-                var outputIndex : u32 = GlobalInvocationID.y * size.x + GlobalInvocationID.x;
+                var outputIndex : u32 = GlobalInvocationID.y * u32(size.x) + GlobalInvocationID.x;
                 if (success) {
-                    output.result[outputIndex] = u32(1);
+                    output.result[outputIndex] = 1u;
                 } else {
-                    output.result[outputIndex] = u32(0);
+                    output.result[outputIndex] = 0u;
                 }
             }
          )");
