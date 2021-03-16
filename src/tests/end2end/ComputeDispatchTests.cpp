@@ -45,7 +45,7 @@ class ComputeDispatchTests : public DawnTest {
             fn main() -> void {
                 const dispatch : vec3<u32> = input.expectedDispatch;
 
-                if (dispatch.x == 0 || dispatch.y == 0 || dispatch.z == 0) {
+                if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
                     output.workGroups = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);
                     return;
                 }
