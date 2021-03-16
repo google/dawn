@@ -183,7 +183,7 @@ function(tint_default_compile_options TARGET)
     target_compile_options(${TARGET} PRIVATE
       /bigobj
       /EHsc
-      /W3
+      /W4
       /WX
       /wd4068
       /wd4244
