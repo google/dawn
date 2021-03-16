@@ -132,7 +132,7 @@ void VertexPulling::State::FindOrInsertVertexIndexIfUsed() {
       Source{},                                        // source
       ctx.dst->Symbols().Register(vertex_index_name),  // symbol
       ast::StorageClass::kInput,                       // storage_class
-      GetI32Type(),                                    // type
+      GetU32Type(),                                    // type
       false,                                           // is_const
       nullptr,                                         // constructor
       ast::DecorationList{
@@ -179,7 +179,7 @@ void VertexPulling::State::FindOrInsertInstanceIndexIfUsed() {
       Source{},                                          // source
       ctx.dst->Symbols().Register(instance_index_name),  // symbol
       ast::StorageClass::kInput,                         // storage_class
-      GetI32Type(),                                      // type
+      GetU32Type(),                                      // type
       false,                                             // is_const
       nullptr,                                           // constructor
       ast::DecorationList{
@@ -273,7 +273,7 @@ ast::BlockStatement* VertexPulling::State::CreateVertexPullingPreamble() const {
                     Source{},                                         // source
                     ctx.dst->Symbols().Register(kPullingPosVarName),  // symbol
                     ast::StorageClass::kFunction,  // storage_class
-                    GetI32Type(),                  // type
+                    GetU32Type(),                  // type
                     false,                         // is_const
                     nullptr,                       // constructor
                     ast::DecorationList{}));       // decorations

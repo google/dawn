@@ -104,7 +104,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Expr) {
   auto* src = R"(
 var a : array<f32, 3>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a[c + 2 - 3];
@@ -114,7 +114,7 @@ fn f() -> void {
   auto* expect = R"(
 var a : array<f32, 3>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a[min(u32(((c + 2) - 3)), 2u)];
@@ -196,7 +196,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Expr) {
   auto* src = R"(
 var a : vec3<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a[c + 2 - 3];
@@ -206,7 +206,7 @@ fn f() -> void {
   auto* expect = R"(
 var a : vec3<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a[min(u32(((c + 2) - 3)), 2u)];
@@ -244,7 +244,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Swizzle_Idx_Var) {
   auto* src = R"(
 var a : vec3<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a.xy[c];
@@ -254,7 +254,7 @@ fn f() -> void {
   auto* expect = R"(
 var a : vec3<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a.xy[min(u32(c), 1u)];
@@ -269,7 +269,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Swizzle_Idx_Expr) {
   auto* src = R"(
 var a : vec3<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a.xy[c + 2 - 3];
@@ -279,7 +279,7 @@ fn f() -> void {
   auto* expect = R"(
 var a : vec3<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a.xy[min(u32(((c + 2) - 3)), 1u)];
@@ -361,7 +361,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Column) {
   auto* src = R"(
 var a : mat3x2<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a[c + 2 - 3][1];
@@ -371,7 +371,7 @@ fn f() -> void {
   auto* expect = R"(
 var a : mat3x2<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a[min(u32(((c + 2) - 3)), 2u)][1];
@@ -387,7 +387,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Expr_Row) {
   auto* src = R"(
 var a : mat3x2<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a[1][c + 2 - 3];
@@ -397,7 +397,7 @@ fn f() -> void {
   auto* expect = R"(
 var a : mat3x2<f32>;
 
-var c : u32;
+var c : i32;
 
 fn f() -> void {
   var b : f32 = a[1][min(u32(((c + 2) - 3)), 1u)];

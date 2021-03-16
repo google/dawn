@@ -92,6 +92,10 @@ bool Type::is_float_scalar_or_vector() const {
   return is_float_scalar() || is_float_vector();
 }
 
+bool Type::is_float_scalar_or_vector_or_matrix() const {
+  return is_float_scalar() || is_float_vector() || is_float_matrix();
+}
+
 bool Type::is_integer_scalar() const {
   return IsAnyOf<U32, I32>();
 }

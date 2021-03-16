@@ -36,6 +36,14 @@ using HlslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(HlslBinaryTest, Emit_f32) {
   auto params = GetParam();
 
+  // Skip ops that are illegal for this type
+  if (params.op == ast::BinaryOp::kAnd || params.op == ast::BinaryOp::kOr ||
+      params.op == ast::BinaryOp::kXor ||
+      params.op == ast::BinaryOp::kShiftLeft ||
+      params.op == ast::BinaryOp::kShiftRight) {
+    return;
+  }
+
   Global("left", ty.f32(), ast::StorageClass::kFunction);
   Global("right", ty.f32(), ast::StorageClass::kFunction);
 
@@ -71,6 +79,12 @@ TEST_P(HlslBinaryTest, Emit_u32) {
 }
 TEST_P(HlslBinaryTest, Emit_i32) {
   auto params = GetParam();
+
+  // Skip ops that are illegal for this type
+  if (params.op == ast::BinaryOp::kShiftLeft ||
+      params.op == ast::BinaryOp::kShiftRight) {
+    return;
+  }
 
   Global("left", ty.i32(), ast::StorageClass::kFunction);
   Global("right", ty.i32(), ast::StorageClass::kFunction);

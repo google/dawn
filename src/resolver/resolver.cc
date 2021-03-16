@@ -877,8 +877,164 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
   return true;
 }
 
+bool Resolver::ValidateBinary(ast::BinaryExpression* expr) {
+  using Bool = type::Bool;
+  using F32 = type::F32;
+  using I32 = type::I32;
+  using U32 = type::U32;
+  using Matrix = type::Matrix;
+  using Vector = type::Vector;
+
+  auto* lhs_type = TypeOf(expr->lhs())->UnwrapPtrIfNeeded();
+  auto* rhs_type = TypeOf(expr->rhs())->UnwrapPtrIfNeeded();
+
+  auto* lhs_vec = lhs_type->As<Vector>();
+  auto* lhs_vec_elem_type = lhs_vec ? lhs_vec->type() : nullptr;
+  auto* rhs_vec = rhs_type->As<Vector>();
+  auto* rhs_vec_elem_type = rhs_vec ? rhs_vec->type() : nullptr;
+
+  const bool matching_types = lhs_type == rhs_type;
+  const bool matching_vec_elem_types = lhs_vec_elem_type && rhs_vec_elem_type &&
+                                       (lhs_vec_elem_type == rhs_vec_elem_type);
+
+  // Binary logical expressions
+  if (expr->IsLogicalAnd() || expr->IsLogicalOr()) {
+    if (matching_types && lhs_type->Is<Bool>()) {
+      return true;
+    }
+  }
+  if (expr->IsOr() || expr->IsAnd()) {
+    if (matching_types && lhs_type->Is<Bool>()) {
+      return true;
+    }
+    if (matching_types && lhs_vec_elem_type && lhs_vec_elem_type->Is<Bool>()) {
+      return true;
+    }
+  }
+
+  // Arithmetic expressions
+  if (expr->IsArithmetic()) {
+    // Binary arithmetic expressions over scalars
+    if (matching_types && lhs_type->IsAnyOf<I32, F32, U32>()) {
+      return true;
+    }
+
+    // Binary arithmetic expressions over vectors
+    if (matching_types && lhs_vec_elem_type &&
+        lhs_vec_elem_type->IsAnyOf<I32, F32, U32>()) {
+      return true;
+    }
+  }
+
+  // Binary arithmetic expressions with mixed scalar, vector, and matrix
+  // operands
+  if (expr->IsMultiply()) {
+    // Multiplication of a vector and a scalar
+    if (lhs_type->Is<F32>() && rhs_vec_elem_type &&
+        rhs_vec_elem_type->Is<F32>()) {
+      return true;
+    }
+    if (lhs_vec_elem_type && lhs_vec_elem_type->Is<F32>() &&
+        rhs_type->Is<F32>()) {
+      return true;
+    }
+
+    auto* lhs_mat = lhs_type->As<Matrix>();
+    auto* lhs_mat_elem_type = lhs_mat ? lhs_mat->type() : nullptr;
+    auto* rhs_mat = rhs_type->As<Matrix>();
+    auto* rhs_mat_elem_type = rhs_mat ? rhs_mat->type() : nullptr;
+
+    // Multiplication of a matrix and a scalar
+    if (lhs_type->Is<F32>() && rhs_mat_elem_type &&
+        rhs_mat_elem_type->Is<F32>()) {
+      return true;
+    }
+    if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() &&
+        rhs_type->Is<F32>()) {
+      return true;
+    }
+
+    // Vector times matrix
+    if (lhs_vec_elem_type && lhs_vec_elem_type->Is<F32>() &&
+        rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>()) {
+      return true;
+    }
+
+    // Matrix times vector
+    if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() &&
+        rhs_vec_elem_type && rhs_vec_elem_type->Is<F32>()) {
+      return true;
+    }
+
+    // Matrix times matrix
+    if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() &&
+        rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>()) {
+      return true;
+    }
+  }
+
+  // Comparison expressions
+  if (expr->IsComparison()) {
+    if (matching_types) {
+      // Special case for bools: only == and !=
+      if (lhs_type->Is<Bool>() && (expr->IsEqual() || expr->IsNotEqual())) {
+        return true;
+      }
+
+      // For the rest, we can compare i32, u32, and f32
+      if (lhs_type->IsAnyOf<I32, U32, F32>()) {
+        return true;
+      }
+    }
+
+    // Same for vectors
+    if (matching_vec_elem_types) {
+      if (lhs_vec_elem_type->Is<Bool>() &&
+          (expr->IsEqual() || expr->IsNotEqual())) {
+        return true;
+      }
+
+      if (lhs_vec_elem_type->IsAnyOf<I32, U32, F32>()) {
+        return true;
+      }
+    }
+  }
+
+  // Binary bitwise operations
+  if (expr->IsBitwise()) {
+    if (matching_types && lhs_type->IsAnyOf<I32, U32>()) {
+      return true;
+    }
+  }
+
+  // Bit shift expressions
+  if (expr->IsBitshift()) {
+    // Type validation rules are the same for left or right shift, despite
+    // differences in computation rules (i.e. right shift can be arithmetic or
+    // logical depending on lhs type).
+
+    if (lhs_type->IsAnyOf<I32, U32>() && rhs_type->Is<U32>()) {
+      return true;
+    }
+
+    if (lhs_vec_elem_type && lhs_vec_elem_type->IsAnyOf<I32, U32>() &&
+        rhs_vec_elem_type && rhs_vec_elem_type->Is<U32>()) {
+      return true;
+    }
+  }
+
+  diagnostics_.add_error(
+      "Binary expression operand types are invalid for this operation",
+      expr->source());
+  return false;
+}
+
 bool Resolver::Binary(ast::BinaryExpression* expr) {
   if (!Expression(expr->lhs()) || !Expression(expr->rhs())) {
+    return false;
+  }
+
+  if (!ValidateBinary(expr)) {
     return false;
   }
 

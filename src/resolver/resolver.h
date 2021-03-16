@@ -171,6 +171,7 @@ class Resolver {
   // AST and Type traversal methods
   // Each return true on success, false on failure.
   bool ArrayAccessor(ast::ArrayAccessorExpression*);
+  bool ValidateBinary(ast::BinaryExpression* expr);
   bool Binary(ast::BinaryExpression*);
   bool Bitcast(ast::BitcastExpression*);
   bool BlockStatement(const ast::BlockStatement*);

@@ -77,6 +77,8 @@ class Type : public Castable<Type, Cloneable> {
   bool is_float_vector() const;
   /// @returns true if this type is a float scalar or vector
   bool is_float_scalar_or_vector() const;
+  /// @returns true if this type is a float scalar or vector or matrix
+  bool is_float_scalar_or_vector_or_matrix() const;
   /// @returns true if this type is an integer scalar
   bool is_integer_scalar() const;
   /// @returns true if this type is a signed integer vector

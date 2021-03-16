@@ -89,7 +89,7 @@ struct TintVertexData {
 [[stage(vertex)]]
 fn main() -> void {
   {
-    var _tint_pulling_pos : i32;
+    var _tint_pulling_pos : u32;
   }
 }
 )";
@@ -113,7 +113,7 @@ fn main() -> void {}
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
+[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : u32;
 
 [[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -127,7 +127,7 @@ var<private> var_a : f32;
 [[stage(vertex)]]
 fn main() -> void {
   {
-    var _tint_pulling_pos : i32;
+    var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 4u) + 0u);
     var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
   }
@@ -155,7 +155,7 @@ fn main() -> void {}
 )";
 
   auto* expect = R"(
-[[builtin(instance_index)]] var<in> _tint_pulling_instance_index : i32;
+[[builtin(instance_index)]] var<in> _tint_pulling_instance_index : u32;
 
 [[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -169,7 +169,7 @@ var<private> var_a : f32;
 [[stage(vertex)]]
 fn main() -> void {
   {
-    var _tint_pulling_pos : i32;
+    var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_instance_index * 4u) + 0u);
     var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
   }
@@ -197,7 +197,7 @@ fn main() -> void {}
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
+[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : u32;
 
 [[binding(0), group(5)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -211,7 +211,7 @@ var<private> var_a : f32;
 [[stage(vertex)]]
 fn main() -> void {
   {
-    var _tint_pulling_pos : i32;
+    var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 4u) + 0u);
     var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
   }
@@ -236,8 +236,8 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
   auto* src = R"(
 [[location(0)]] var<in> var_a : f32;
 [[location(1)]] var<in> var_b : f32;
-[[builtin(vertex_index)]] var<in> custom_vertex_index : i32;
-[[builtin(instance_index)]] var<in> custom_instance_index : i32;
+[[builtin(vertex_index)]] var<in> custom_vertex_index : u32;
+[[builtin(instance_index)]] var<in> custom_instance_index : u32;
 
 [[stage(vertex)]]
 fn main() -> void {}
@@ -257,14 +257,14 @@ var<private> var_a : f32;
 
 var<private> var_b : f32;
 
-[[builtin(vertex_index)]] var<in> custom_vertex_index : i32;
+[[builtin(vertex_index)]] var<in> custom_vertex_index : u32;
 
-[[builtin(instance_index)]] var<in> custom_instance_index : i32;
+[[builtin(instance_index)]] var<in> custom_instance_index : u32;
 
 [[stage(vertex)]]
 fn main() -> void {
   {
-    var _tint_pulling_pos : i32;
+    var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((custom_vertex_index * 4u) + 0u);
     var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
     _tint_pulling_pos = ((custom_instance_index * 4u) + 0u);
@@ -305,7 +305,7 @@ fn main() -> void {}
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
+[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : u32;
 
 [[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -321,7 +321,7 @@ var<private> var_b : array<f32, 4>;
 [[stage(vertex)]]
 fn main() -> void {
   {
-    var _tint_pulling_pos : i32;
+    var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 16u) + 0u);
     var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 16u) + 0u);
@@ -355,7 +355,7 @@ fn main() -> void {}
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : i32;
+[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : u32;
 
 [[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
 
@@ -377,7 +377,7 @@ var<private> var_c : array<f32, 4>;
 [[stage(vertex)]]
 fn main() -> void {
   {
-    var _tint_pulling_pos : i32;
+    var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 8u) + 0u);
     var_a = vec2<f32>(bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 4u) / 4u)]));
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 12u) + 0u);

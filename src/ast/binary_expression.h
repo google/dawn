@@ -23,11 +23,11 @@ namespace ast {
 /// The operator type
 enum class BinaryOp {
   kNone = 0,
-  kAnd,
-  kOr,
+  kAnd,  // &
+  kOr,   // |
   kXor,
-  kLogicalAnd,
-  kLogicalOr,
+  kLogicalAnd,  // &&
+  kLogicalOr,   // ||
   kEqual,
   kNotEqual,
   kLessThan,
@@ -98,6 +98,14 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   bool IsDivide() const { return op_ == BinaryOp::kDivide; }
   /// @returns true if the op is modulo
   bool IsModulo() const { return op_ == BinaryOp::kModulo; }
+  /// @returns true if the op is an arithmetic operation
+  bool IsArithmetic() const;
+  /// @returns true if the op is a comparison operation
+  bool IsComparison() const;
+  /// @returns true if the op is a bitwise operation
+  bool IsBitwise() const;
+  /// @returns true if the op is a bit shift operation
+  bool IsBitshift() const;
 
   /// @returns the left side expression
   Expression* lhs() const { return lhs_; }
@@ -125,6 +133,54 @@ class BinaryExpression : public Castable<BinaryExpression, Expression> {
   Expression* const lhs_;
   Expression* const rhs_;
 };
+
+inline bool BinaryExpression::IsArithmetic() const {
+  switch (op_) {
+    case ast::BinaryOp::kAdd:
+    case ast::BinaryOp::kSubtract:
+    case ast::BinaryOp::kMultiply:
+    case ast::BinaryOp::kDivide:
+    case ast::BinaryOp::kModulo:
+      return true;
+    default:
+      return false;
+  }
+}
+
+inline bool BinaryExpression::IsComparison() const {
+  switch (op_) {
+    case ast::BinaryOp::kEqual:
+    case ast::BinaryOp::kNotEqual:
+    case ast::BinaryOp::kLessThan:
+    case ast::BinaryOp::kLessThanEqual:
+    case ast::BinaryOp::kGreaterThan:
+    case ast::BinaryOp::kGreaterThanEqual:
+      return true;
+    default:
+      return false;
+  }
+}
+
+inline bool BinaryExpression::IsBitwise() const {
+  switch (op_) {
+    case ast::BinaryOp::kAnd:
+    case ast::BinaryOp::kOr:
+    case ast::BinaryOp::kXor:
+      return true;
+    default:
+      return false;
+  }
+}
+
+inline bool BinaryExpression::IsBitshift() const {
+  switch (op_) {
+    case ast::BinaryOp::kShiftLeft:
+    case ast::BinaryOp::kShiftRight:
+      return true;
+    default:
+      return false;
+  }
+}
 
 inline std::ostream& operator<<(std::ostream& out, BinaryOp op) {
   switch (op) {
