@@ -287,7 +287,7 @@ bool ValidatorImpl::ValidateReturnStatement(const ast::ReturnStatement* ret) {
                        ? program_->Sem().Get(ret->value())->Type()->UnwrapAll()
                        : &void_type;
 
-  if (func_type->type_name() != ret_type->type_name()) {
+  if (func_type->UnwrapAll()->type_name() != ret_type->type_name()) {
     add_error(ret->source(), "v-000y",
               "return statement type must match its function return "
               "type, returned '" +

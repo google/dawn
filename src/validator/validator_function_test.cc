@@ -122,6 +122,24 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_fail) {
             "return type, returned '__i32', expected '__void'");
 }
 
+TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_pass) {
+  // fn func -> f32 { return 2.0; }
+  Func("func", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                        Expr(2.f)),
+       },
+       ast::DecorationList{});
+  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.Validate());
+}
+
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   // fn func -> f32 { return 2; }
   Func("func", ast::VariableList{}, ty.f32(),
@@ -138,6 +156,52 @@ TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementTypeF32_fail) {
   EXPECT_EQ(v.error(),
             "12:34 v-000y: return statement type must match its function "
             "return type, returned '__i32', expected '__f32'");
+}
+
+TEST_F(ValidateFunctionTest,
+       FunctionTypeMustMatchReturnStatementTypeF32Alias_pass) {
+  // type myf32 = f32;
+  // fn func -> myf32 { return 2.0; }
+  auto* myf32 = ty.alias("myf32", ty.f32());
+  Func("func", ast::VariableList{}, myf32,
+       ast::StatementList{
+           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                        Expr(2.f)),
+       },
+       ast::DecorationList{});
+  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.Validate());
+}
+
+TEST_F(ValidateFunctionTest,
+       FunctionTypeMustMatchReturnStatementTypeF32Alias_fail) {
+  // type myf32 = f32;
+  // fn func -> myf32 { return 2; }
+  auto* myf32 = ty.alias("myf32", ty.f32());
+  Func("func", ast::VariableList{}, myf32,
+       ast::StatementList{
+           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                        Expr(2u)),
+       },
+       ast::DecorationList{});
+  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_FALSE(v.Validate());
+  EXPECT_EQ(
+      v.error(),
+      "12:34 v-000y: return statement type must match its function "
+      "return type, returned '__u32', expected '__alias_tint_symbol_1__f32'");
 }
 
 TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
