@@ -39,22 +39,29 @@ class D3D12DescriptorHeapTests : public DawnTest {
         DAWN_SKIP_TEST_IF(UsesWire());
         mD3DDevice = reinterpret_cast<Device*>(device.Get());
 
-        mSimpleVSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        void main() {
-            const vec2 pos[3] = vec2[3](vec2(-1.f, 1.f), vec2(1.f, 1.f), vec2(-1.f, -1.f));
-            gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-        })");
+        mSimpleVSModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-        mSimpleFSModule = utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout (location = 0) out vec4 fragColor;
-        layout (set = 0, binding = 0) uniform colorBuffer {
-            vec4 color;
-        };
-        void main() {
-            fragColor = color;
-        })");
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    vec2<f32>(-1.0,  1.0),
+                    vec2<f32>( 1.0,  1.0),
+                    vec2<f32>(-1.0, -1.0)
+                );
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            })");
+
+        mSimpleFSModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[block]] struct U {
+                color : vec4<f32>;
+            };
+            [[group(0), binding(0)]] var<uniform> colorBuffer : U;
+            [[location(0)]] var<out> FragColor : vec4<f32>;
+
+            [[stage(fragment)]] fn main() -> void {
+                FragColor = colorBuffer.color;
+            })");
     }
 
     utils::BasicRenderPass MakeRenderPass(uint32_t width,
@@ -169,19 +176,17 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     // Fill in a sampler heap with "sampler only" bindgroups (1x sampler per group) by creating a
     // sampler bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps WILL NOT switch over
     // because the sampler heap allocations are de-duplicated.
-    renderPipelineDescriptor.vertexStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            void main() {
-                gl_Position = vec4(0.f, 0.f, 0.f, 1.f);
+    renderPipelineDescriptor.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[stage(vertex)]] fn main() -> void {
+                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
-    renderPipelineDescriptor.cFragmentStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(#version 450
-            layout(set = 0, binding = 0) uniform sampler sampler0;
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-               fragColor = vec4(0.0, 0.0, 0.0, 0.0);
+    renderPipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[location(0)]] var<out> FragColor : vec4<f32>;
+            [[group(0), binding(0)]] var sampler0 : sampler;
+            [[stage(fragment)]] fn main() -> void {
+                FragColor = vec4<f32>(0.0, 0.0, 0.0, 0.0);
             })");
 
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
@@ -440,15 +445,15 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
     utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
     pipelineDescriptor.vertexStage.module = mSimpleVSModule;
 
-    pipelineDescriptor.cFragmentStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout (location = 0) out float fragColor;
-        layout (set = 0, binding = 0) uniform buffer0 {
-            float heapSize;
+    pipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct U {
+            heapSize : f32;
         };
-        void main() {
-            fragColor = heapSize;
+        [[group(0), binding(0)]] var<uniform> buffer0 : U;
+        [[location(0)]] var<out> FragColor : f32;
+
+        [[stage(fragment)]] fn main() -> void {
+            FragColor = buffer0.heapSize;
         })");
 
     pipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::R32Float;
@@ -770,30 +775,36 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
     {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
 
-        pipelineDescriptor.vertexStage.module =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        layout (set = 0, binding = 0) uniform vertexUniformBuffer {
-            mat2 transform;
-        };
-        void main() {
-            const vec2 pos[3] = vec2[3](vec2(-1.f, 1.f), vec2(1.f, 1.f), vec2(-1.f, -1.f));
-            gl_Position = vec4(transform * pos[gl_VertexIndex], 0.f, 1.f);
-        })");
+        pipelineDescriptor.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[block]] struct U {
+                transform : mat2x2<f32>;
+            };
+            [[group(0), binding(0)]] var<uniform> buffer0 : U;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-        pipelineDescriptor.cFragmentStage.module =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout (set = 0, binding = 1) uniform sampler sampler0;
-        layout (set = 0, binding = 2) uniform texture2D texture0;
-        layout (set = 0, binding = 3) uniform buffer0 {
-            vec4 color;
-        };
-        layout (location = 0) out vec4 fragColor;
-        void main() {
-            fragColor = texture(sampler2D(texture0, sampler0), gl_FragCoord.xy);
-            fragColor += color;
-        })");
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    vec2<f32>(-1.0,  1.0),
+                    vec2<f32>( 1.0,  1.0),
+                    vec2<f32>(-1.0, -1.0)
+                );
+                Position = vec4<f32>(buffer0.transform * (pos[VertexIndex]), 0.0, 1.0);
+            })");
+        pipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[block]] struct U {
+                color : vec4<f32>;
+            };
+            [[group(0), binding(1)]] var sampler0 : sampler;
+            [[group(0), binding(2)]] var texture0 : texture_2d<f32>;
+            [[group(0), binding(3)]] var<uniform> buffer0 : U;
+
+            [[location(0)]] var<out> FragColor : vec4<f32>;
+            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
+
+            [[stage(fragment)]] fn main() -> void {
+                FragColor = textureSample(texture0, sampler0, FragCoord.xy) + buffer0.color;
+            })");
 
         utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
         pipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;

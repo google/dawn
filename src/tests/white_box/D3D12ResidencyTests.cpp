@@ -334,24 +334,29 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
 
     // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a
     // view bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps must switch over.
-    renderPipelineDescriptor.vertexStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-        #version 450
-        void main() {
-            const vec2 pos[3] = vec2[3](vec2(-1.f, 1.f), vec2(1.f, 1.f), vec2(-1.f, -1.f));
-            gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-        })");
+    renderPipelineDescriptor.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-    renderPipelineDescriptor.cFragmentStage.module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-        #version 450
-        layout (location = 0) out vec4 fragColor;
-        layout (set = 0, binding = 0) uniform colorBuffer {
-            vec4 color;
-        };
-        void main() {
-            fragColor = color;
-        })");
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    vec2<f32>(-1.0,  1.0),
+                    vec2<f32>( 1.0,  1.0),
+                    vec2<f32>(-1.0, -1.0)
+                );
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+            })");
+
+    renderPipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            [[block]] struct U {
+                color : vec4<f32>;
+            };
+            [[group(0), binding(0)]] var<uniform> colorBuffer : U;
+            [[location(0)]] var<out> FragColor : vec4<f32>;
+
+            [[stage(fragment)]] fn main() -> void {
+                FragColor = colorBuffer.color;
+            })");
 
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
     constexpr uint32_t kSize = 512;
