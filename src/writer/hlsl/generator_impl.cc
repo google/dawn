@@ -2594,7 +2594,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
           return false;
         }
         out << " : " << attr;
-      } else if (auto* offset = deco->As<ast::StructMemberOffsetDecoration>()) {
+      } else if (deco->Is<ast::StructMemberOffsetDecoration>()) {
         // Nothing to do, offsets are handled at the point of access.
       } else {
         diagnostics_.add_error("unsupported struct member decoration");
