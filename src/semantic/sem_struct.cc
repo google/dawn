@@ -24,12 +24,14 @@ Struct::Struct(type::Struct* type,
                StructMemberList members,
                uint32_t align,
                uint32_t size,
-               uint32_t size_no_padding)
+               uint32_t size_no_padding,
+               std::unordered_set<ast::StorageClass> storage_class_usage)
     : type_(type),
       members_(std::move(members)),
       align_(align),
       size_(size),
-      size_no_padding_(size_no_padding) {}
+      size_no_padding_(size_no_padding),
+      storage_class_usage_(std::move(storage_class_usage)) {}
 
 Struct::~Struct() = default;
 

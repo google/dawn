@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "src/intrinsic_table.h"
@@ -124,6 +125,7 @@ class Resolver {
     uint32_t align = 0;
     uint32_t size = 0;
     uint32_t size_no_padding = 0;
+    std::unordered_set<ast::StorageClass> storage_class_usage;
   };
 
   /// Structure holding semantic information about a block (i.e. scope), such as
@@ -206,7 +208,6 @@ class Resolver {
   bool Statements(const ast::StatementList&);
   bool UnaryOp(ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
-  bool VariableStorageClass(ast::Statement*);
 
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
@@ -216,6 +217,12 @@ class Resolver {
   /// @returns the StructInfo for the structure `str`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
   StructInfo* Structure(type::Struct* str);
+
+  /// Records the storage class usage for the given type, and any transient
+  /// dependencies of the type. Validates that the type can be used for the
+  /// given storage class, erroring if it cannot.
+  /// @returns true on success, false on error
+  bool ApplyStorageClassUsageToType(ast::StorageClass, type::Type*);
 
   /// @param align the output default alignment in bytes for the type `ty`
   /// @param size the output default size in bytes for the type `ty`

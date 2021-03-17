@@ -17,8 +17,10 @@
 
 #include <stdint.h>
 
+#include <unordered_set>
 #include <vector>
 
+#include "src/ast/storage_class.h"
 #include "src/semantic/node.h"
 
 namespace tint {
@@ -48,11 +50,13 @@ class Struct : public Castable<Struct, Node> {
   /// @param size the byte size of the structure
   /// @param size_no_padding size of the members without the end of structure
   /// alignment padding
+  /// @param storage_class_usage a set of all the storage class usages
   Struct(type::Struct* type,
          StructMemberList members,
          uint32_t align,
          uint32_t size,
-         uint32_t size_no_padding);
+         uint32_t size_no_padding,
+         std::unordered_set<ast::StorageClass> storage_class_usage);
 
   /// Destructor
   ~Struct() override;
@@ -79,12 +83,24 @@ class Struct : public Castable<Struct, Node> {
   /// alignment padding
   uint32_t SizeNoPadding() const { return size_no_padding_; }
 
+  /// @returns the set of storage class uses of this structure
+  const std::unordered_set<ast::StorageClass>& StorageClassUsage() const {
+    return storage_class_usage_;
+  }
+
+  /// @param usage the ast::StorageClass usage type to query
+  /// @returns true iff this structure has been used as the given storage class
+  bool UsedAs(ast::StorageClass usage) const {
+    return storage_class_usage_.count(usage) > 0;
+  }
+
  private:
   type::Struct* const type_;
   StructMemberList const members_;
   uint32_t const align_;
   uint32_t const size_;
   uint32_t const size_no_padding_;
+  std::unordered_set<ast::StorageClass> const storage_class_usage_;
 };
 
 /// StructMember holds the semantic information for structure members.

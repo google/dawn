@@ -473,6 +473,7 @@ if(${TINT_BUILD_TESTS})
     resolver/resolver_test_helper.h
     resolver/resolver_test.cc
     resolver/struct_layout_test.cc
+    resolver/struct_storage_class_use_test.cc
     resolver/validation_test.cc
     scope_stack_test.cc
     semantic/sem_intrinsic_test.cc

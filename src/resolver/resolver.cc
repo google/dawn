@@ -151,6 +151,11 @@ bool Resolver::ResolveInternal() {
         return false;
       }
     }
+
+    if (!ApplyStorageClassUsageToType(var->declared_storage_class(),
+                                      var->type())) {
+      return false;
+    }
   }
 
   if (!Functions(builder_->AST().Functions())) {
@@ -200,50 +205,10 @@ bool Resolver::BlockStatement(const ast::BlockStatement* stmt) {
 
 bool Resolver::Statements(const ast::StatementList& stmts) {
   for (auto* stmt : stmts) {
-    if (auto* decl = stmt->As<ast::VariableDeclStatement>()) {
-      if (!VariableDeclStatement(decl)) {
-        return false;
-      }
-    }
-
-    if (!VariableStorageClass(stmt)) {
-      return false;
-    }
-
     if (!Statement(stmt)) {
       return false;
     }
   }
-  return true;
-}
-
-bool Resolver::VariableStorageClass(ast::Statement* stmt) {
-  auto* var_decl = stmt->As<ast::VariableDeclStatement>();
-  if (var_decl == nullptr) {
-    return true;
-  }
-
-  auto* var = var_decl->variable();
-
-  auto* info = CreateVariableInfo(var);
-  variable_to_info_.emplace(var, info);
-
-  // Nothing to do for const
-  if (var->is_const()) {
-    return true;
-  }
-
-  if (info->storage_class == ast::StorageClass::kFunction) {
-    return true;
-  }
-
-  if (info->storage_class != ast::StorageClass::kNone) {
-    diagnostics_.add_error("function variable has a non-function storage class",
-                           stmt->source());
-    return false;
-  }
-
-  info->storage_class = ast::StorageClass::kFunction;
   return true;
 }
 
@@ -336,10 +301,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
     return true;
   }
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
-    variable_stack_.set(v->variable()->symbol(),
-                        variable_to_info_.at(v->variable()));
-    current_block_->decls.push_back(v->variable());
-    return Expression(v->variable()->constructor());
+    return VariableDeclStatement(v);
   }
 
   diagnostics_.add_error(
@@ -1118,21 +1080,44 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* expr) {
 }
 
 bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
-  auto* ctor = stmt->variable()->constructor();
-  if (!ctor) {
-    return true;
-  }
-
-  if (auto* sce = ctor->As<ast::ScalarConstructorExpression>()) {
-    auto* lhs_type = stmt->variable()->type()->UnwrapAliasIfNeeded();
-    auto* rhs_type = sce->literal()->type()->UnwrapAliasIfNeeded();
-
-    if (lhs_type != rhs_type) {
-      diagnostics_.add_error(
-          "constructor expression type does not match variable type",
-          stmt->source());
+  if (auto* ctor = stmt->variable()->constructor()) {
+    if (!Expression(ctor)) {
       return false;
     }
+    if (auto* sce = ctor->As<ast::ScalarConstructorExpression>()) {
+      auto* lhs_type = stmt->variable()->type()->UnwrapAliasIfNeeded();
+      auto* rhs_type = sce->literal()->type()->UnwrapAliasIfNeeded();
+
+      if (lhs_type != rhs_type) {
+        diagnostics_.add_error(
+            "constructor expression type does not match variable type",
+            stmt->source());
+        return false;
+      }
+    }
+  }
+
+  auto* var = stmt->variable();
+
+  auto* info = CreateVariableInfo(var);
+  variable_to_info_.emplace(var, info);
+  variable_stack_.set(var->symbol(), info);
+  current_block_->decls.push_back(var);
+
+  if (!var->is_const()) {
+    if (info->storage_class != ast::StorageClass::kFunction) {
+      if (info->storage_class != ast::StorageClass::kNone) {
+        diagnostics_.add_error(
+            "function variable has a non-function storage class",
+            stmt->source());
+        return false;
+      }
+      info->storage_class = ast::StorageClass::kFunction;
+    }
+  }
+
+  if (!ApplyStorageClassUsageToType(info->storage_class, var->type())) {
+    return false;
   }
 
   return true;
@@ -1247,9 +1232,10 @@ void Resolver::CreateSemanticNodes() const {
   for (auto it : struct_info_) {
     auto* str = it.first;
     auto* info = it.second;
-    builder_->Sem().Add(str, builder_->create<semantic::Struct>(
-                                 str, std::move(info->members), info->align,
-                                 info->size, info->size_no_padding));
+    builder_->Sem().Add(
+        str, builder_->create<semantic::Struct>(
+                 str, std::move(info->members), info->align, info->size,
+                 info->size_no_padding, info->storage_class_usage));
   }
 }
 
@@ -1468,6 +1454,44 @@ Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
   info->size_no_padding = size_no_padding;
   struct_info_.emplace(str, info);
   return info;
+}
+
+bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
+                                            type::Type* ty) {
+  ty = ty->UnwrapAliasIfNeeded();
+
+  if (auto* str = ty->As<type::Struct>()) {
+    auto* info = Structure(str);
+    if (!info) {
+      return false;
+    }
+    if (info->storage_class_usage.count(sc)) {
+      return true;  // Already applied
+    }
+    info->storage_class_usage.emplace(sc);
+    for (auto* member : str->impl()->members()) {
+      // TODO(amaiorano): Determine the host-sharable types
+      bool can_be_host_sharable = true;
+      if (ast::IsHostSharable(sc) && !can_be_host_sharable) {
+        std::stringstream err;
+        err << "Structure '" << str->FriendlyName(builder_->Symbols())
+            << "' is used by storage class " << sc
+            << " which contains a member of non-host-sharable type "
+            << member->type()->FriendlyName(builder_->Symbols());
+        diagnostics_.add_error(err.str(), member->source());
+        return false;
+      }
+      if (!ApplyStorageClassUsageToType(sc, member->type())) {
+        return false;
+      }
+    }
+  }
+
+  if (auto* arr = ty->As<type::Array>()) {
+    return ApplyStorageClassUsageToType(sc, arr->type());
+  }
+
+  return true;
 }
 
 template <typename F>
