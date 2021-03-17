@@ -35,8 +35,8 @@ namespace dawn_native {
         // TODO(shaobo.yan@intel.com) : Support premultiplay-alpha, flipY.
         static const char sCopyTextureForBrowserVertex[] = R"(
             [[block]] struct Uniforms {
-                [[offset(0)]] u_scale : vec2<f32>;
-                [[offset(8)]] u_offset : vec2<f32>;
+                u_scale : vec2<f32>;
+                u_offset : vec2<f32>;
             };
             const texcoord : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                 vec2<f32>(-0.5, 0.0),

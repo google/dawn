@@ -195,7 +195,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
             [[builtin(local_invocation_id)]] var<in> LocalInvocationID : vec3<u32>;
 
             [[block]] struct Buf {
-                [[offset(0)]] data : f32;
+                data : f32;
             };
             [[group(0), binding(1)]] var<storage_buffer> buf : [[access(read_write)]] Buf;
 

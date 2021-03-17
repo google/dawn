@@ -57,7 +57,7 @@ class ColorStateTest : public DawnTest {
     void SetupSingleSourcePipelines(wgpu::ColorStateDescriptor colorStateDescriptor) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
                 [[block]] struct MyBlock {
-                    [[offset(0)]] color : vec4<f32>;
+                    color : vec4<f32>;
                 };
 
                 [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
@@ -771,10 +771,10 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct MyBlock {
-            [[offset(0)]] color0 : vec4<f32>;
-            [[offset(16)]] color1 : vec4<f32>;
-            [[offset(32)]] color2 : vec4<f32>;
-            [[offset(48)]] color3 : vec4<f32>;
+            color0 : vec4<f32>;
+            color1 : vec4<f32>;
+            color2 : vec4<f32>;
+            color3 : vec4<f32>;
         };
 
         [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
@@ -881,7 +881,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
 TEST_P(ColorStateTest, DefaultBlendColor) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct MyBlock {
-            [[offset(0)]] color : vec4<f32>;
+            color : vec4<f32>;
         };
 
         [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;
@@ -1004,7 +1004,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct MyBlock {
-            [[offset(0)]] color : vec4<f32>;
+            color : vec4<f32>;
         };
 
         [[group(0), binding(0)]] var<uniform> myUbo : MyBlock;

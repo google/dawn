@@ -993,7 +993,7 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
 
     const char* computeShader = R"(
         [[block]] struct UBO {
-            [[offset(0)]] value : vec4<u32>;
+            value : vec4<u32>;
         };
         [[group(0), binding(0)]] var<uniform> ubo : UBO;
         [[group(0), binding(1)]] var outImage : [[access(write)]] texture_storage_2d<rgba8unorm>;
@@ -1035,7 +1035,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 
     const char* computeShader = R"(
         [[block]] struct SSBO {
-            [[offset(0)]] value : vec4<u32>;
+            value : vec4<u32>;
         };
         [[group(0), binding(0)]] var<storage> ssbo : SSBO;
         [[group(0), binding(1)]] var outImage : [[access(write)]] texture_storage_2d<rgba8unorm>;

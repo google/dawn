@@ -89,10 +89,10 @@ void ComputeCopyStorageBufferTests::BasicTest(const char* shader) {
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
     BasicTest(R"(
         [[block]] struct Buf1 {
-            [[offset(0)]] s : [[stride(16)]] array<vec4<u32>, 4>;
+            s : array<vec4<u32>, 4>;
         };
         [[block]] struct Buf2 {
-            [[offset(0)]] s : [[stride(16)]] array<vec4<u32>, 4>;
+            s : array<vec4<u32>, 4>;
         };
 
         // TODO(crbug.com/tint/386): Use the same struct type
@@ -112,15 +112,15 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
 TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
     BasicTest(R"(
         struct S {
-            [[offset(0)]] a : vec2<u32>;
-            [[offset(8)]] b : vec2<u32>;
+            a : vec2<u32>;
+            b : vec2<u32>;
         };
 
         [[block]] struct Buf1 {
-            [[offset(0)]] s : [[stride(16)]] array<S, 4>;
+            s : array<S, 4>;
         };
         [[block]] struct Buf2 {
-            [[offset(0)]] s : [[stride(16)]] array<S, 4>;
+            s : array<S, 4>;
         };
 
         // TODO(crbug.com/tint/386): Use the same struct type
@@ -140,10 +140,10 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
 TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
     BasicTest(R"(
         [[block]] struct Buf1 {
-            [[offset(0)]] s : [[stride(16)]] array<vec4<u32>>;
+            s : array<vec4<u32>>;
         };
         [[block]] struct Buf2 {
-            [[offset(0)]] s : [[stride(16)]] array<vec4<u32>>;
+            s : array<vec4<u32>>;
         };
 
         // TODO(crbug.com/tint/386): Use the same struct type

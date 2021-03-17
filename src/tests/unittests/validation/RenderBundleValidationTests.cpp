@@ -31,7 +31,7 @@ namespace {
                 [[location(0)]] var<in> pos : vec2<f32>;
 
                 [[block]] struct S {
-                    [[offset(0)]] transform : mat2x2<f32>;
+                    transform : mat2x2<f32>;
                 };
                 [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -40,12 +40,12 @@ namespace {
 
             fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
                 [[block]] struct Uniforms {
-                    [[offset(0)]] color : vec4<f32>;
+                    color : vec4<f32>;
                 };
                 [[group(1), binding(0)]] var<uniform> uniforms : Uniforms;
 
                 [[block]] struct Storage {
-                    [[offset(0)]] dummy : [[stride(4)]] array<f32>;
+                    dummy : array<f32>;
                 };
                 [[group(1), binding(1)]] var<storage_buffer> ssbo : [[access(read_write)]] Storage;
 

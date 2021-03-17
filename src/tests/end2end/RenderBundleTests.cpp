@@ -41,7 +41,7 @@ class RenderBundleTest : public DawnTest {
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[block]] struct Ubo {
-                [[offset(0)]] color : vec4<f32>;
+                color : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> fragmentUniformBuffer : Ubo;
 

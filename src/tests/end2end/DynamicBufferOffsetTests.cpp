@@ -110,19 +110,19 @@ class DynamicBufferOffsetTests : public DawnTest {
         fs << R"(
             // TODO(crbug.com/tint/386):  Use the same struct.
             [[block]] struct Buffer1 {
-                [[offset(0)]] value : vec2<u32>;
+                value : vec2<u32>;
             };
 
             [[block]] struct Buffer2 {
-                [[offset(0)]] value : vec2<u32>;
+                value : vec2<u32>;
             };
 
             [[block]] struct Buffer3 {
-                [[offset(0)]] value : vec2<u32>;
+                value : vec2<u32>;
             };
 
             [[block]] struct Buffer4 {
-                [[offset(0)]] value : vec2<u32>;
+                value : vec2<u32>;
             };
 
             [[group(0), binding(0)]] var<uniform> uBufferNotDynamic : Buffer1;
@@ -134,7 +134,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         if (isInheritedPipeline) {
             fs << R"(
                 [[block]] struct Buffer5 {
-                    [[offset(0)]] value : vec2<u32>;
+                    value : vec2<u32>;
                 };
 
                 [[group(1), binding(0)]] var<uniform> paddingBlock : Buffer5;
@@ -179,19 +179,19 @@ class DynamicBufferOffsetTests : public DawnTest {
         cs << R"(
             // TODO(crbug.com/tint/386):  Use the same struct.
             [[block]] struct Buffer1 {
-                [[offset(0)]] value : vec2<u32>;
+                value : vec2<u32>;
             };
 
             [[block]] struct Buffer2 {
-                [[offset(0)]] value : vec2<u32>;
+                value : vec2<u32>;
             };
 
             [[block]] struct Buffer3 {
-                [[offset(0)]] value : vec2<u32>;
+                value : vec2<u32>;
             };
 
             [[block]] struct Buffer4 {
-                [[offset(0)]] value : vec2<u32>;
+                value : vec2<u32>;
             };
 
             [[group(0), binding(0)]] var<uniform> uBufferNotDynamic : Buffer1;
@@ -203,7 +203,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         if (isInheritedPipeline) {
             cs << R"(
                 [[block]] struct Buffer5 {
-                    [[offset(0)]] value : vec2<u32>;
+                    value : vec2<u32>;
                 };
 
                 [[group(1), binding(0)]] var<uniform> paddingBlock : Buffer5;

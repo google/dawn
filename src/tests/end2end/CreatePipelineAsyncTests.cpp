@@ -36,7 +36,7 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct SSBO {
-            [[offset(0)]] value : u32;
+            value : u32;
         };
         [[group(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
 
@@ -103,7 +103,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct SSBO {
-            [[offset(0)]] value : u32;
+            value : u32;
         };
         [[group(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
 

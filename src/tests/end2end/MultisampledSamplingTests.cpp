@@ -94,8 +94,8 @@ class MultisampledSamplingTest : public DawnTest {
                 [[group(0), binding(1)]] var texture1 : texture_multisampled_2d<f32>;
 
                 [[block]] struct Results {
-                    [[offset(0)]] colorSamples : [[stride(4)]] array<f32, 4>;
-                    [[offset(16)]] depthSamples : [[stride(4)]] array<f32, 4>;
+                    colorSamples : array<f32, 4>;
+                    depthSamples : array<f32, 4>;
                 };
                 [[group(0), binding(2)]] var<storage_buffer> results : [[access(read_write)]] Results;
 

@@ -37,7 +37,7 @@ class GpuMemorySyncTests : public DawnTest {
         const wgpu::Buffer& buffer) {
         wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct Data {
-                [[offset(0)]] a : i32;
+                a : i32;
             };
             [[group(0), binding(0)]] var<storage_buffer> data : [[access(read_write)]] Data;
             [[stage(compute)]] fn main() -> void {
@@ -65,7 +65,7 @@ class GpuMemorySyncTests : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct Data {
-                [[offset(0)]] i : i32;
+                i : i32;
             };
             [[group(0), binding(0)]] var<storage_buffer> data : [[access(read_write)]] Data;
             [[location(0)]] var<out> fragColor : vec4<f32>;
@@ -254,8 +254,8 @@ TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
     pipelineDesc.computeStage.entryPoint = "main";
     pipelineDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Output {
-            [[offset(0)]] sampledOut: u32;
-            [[offset(4)]] storageOut: u32;
+            sampledOut: u32;
+            storageOut: u32;
         };
         [[group(0), binding(0)]] var<storage_buffer> output : [[access(write)]] Output;
         [[group(0), binding(1)]] var sampledTex : texture_2d<u32>;
@@ -315,7 +315,7 @@ class StorageToUniformSyncTests : public DawnTest {
     std::tuple<wgpu::ComputePipeline, wgpu::BindGroup> CreatePipelineAndBindGroupForCompute() {
         wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct Data {
-                [[offset(0)]] a : f32;
+                a : f32;
             };
             [[group(0), binding(0)]] var<storage_buffer> data : [[access(read_write)]] Data;
             [[stage(compute)]] fn main() -> void {
@@ -342,7 +342,7 @@ class StorageToUniformSyncTests : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct Contents {
-                [[offset(0)]] color : f32;
+                color : f32;
             };
             [[group(0), binding(0)]] var<uniform> contents : Contents;
 
@@ -514,21 +514,21 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     // Create pipeline, bind group, and different buffers for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct VBContents {
-            [[offset(0)]] pos : [[stride(16)]] array<vec4<f32>, 4>;
+            pos : array<vec4<f32>, 4>;
         };
         [[group(0), binding(0)]] var<storage_buffer> vbContents : [[access(read_write)]] VBContents;
 
         [[block]] struct IBContents {
-            [[offset(0)]] indices : [[stride(16)]] array<vec4<i32>, 2>;
+            indices : array<vec4<i32>, 2>;
         };
         [[group(0), binding(1)]] var<storage_buffer> ibContents : [[access(read_write)]] IBContents;
 
         // TODO(crbug.com/tint/386): Use the same struct.
         [[block]] struct ColorContents1 {
-            [[offset(0)]] color : f32;
+            color : f32;
         };
         [[block]] struct ColorContents2 {
-            [[offset(0)]] color : f32;
+            color : f32;
         };
         [[group(0), binding(2)]] var<storage_buffer> uniformContents : [[access(read_write)]] ColorContents1;
         [[group(0), binding(3)]] var<storage_buffer> storageContents : [[access(read_write)]] ColorContents2;
@@ -582,7 +582,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Buf {
-            [[offset(0)]] color : f32;
+            color : f32;
         };
 
         [[group(0), binding(0)]] var<uniform> uniformBuffer : Buf;
@@ -642,10 +642,10 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     // Create pipeline, bind group, and a complex buffer for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Contents {
-            [[offset(0)]] pos : [[stride(16)]] array<vec4<f32>, 4>;
-            [[offset(256)]] indices : [[stride(16)]] array<vec4<i32>, 2>;
-            [[offset(512)]] color0 : f32;
-            [[offset(768)]] color1 : f32;
+            [[align(256)]] pos : array<vec4<f32>, 4>;
+            [[align(256)]] indices : array<vec4<i32>, 2>;
+            [[align(256)]] color0 : f32;
+            [[align(256)]] color1 : f32;
         };
 
         [[group(0), binding(0)]] var<storage_buffer> contents : [[access(read_write)]] Contents;
@@ -700,7 +700,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Buf {
-            [[offset(0)]] color : f32;
+            color : f32;
         };
         [[group(0), binding(0)]] var<uniform> uniformBuffer : Buf;
         [[group(0), binding(1)]] var<storage_buffer> storageBuffer : [[access(read)]] Buf;

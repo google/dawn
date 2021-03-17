@@ -54,8 +54,8 @@ class DepthStencilStateTest : public DawnTest {
 
         vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct UBO {
-                [[offset(0)]] color : vec3<f32>;
-                [[offset(12)]] depth : f32;
+                color : vec3<f32>;
+                depth : f32;
             };
             [[group(0), binding(0)]] var<uniform> ubo : UBO;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
@@ -74,8 +74,8 @@ class DepthStencilStateTest : public DawnTest {
 
         fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct UBO {
-                [[offset(0)]] color : vec3<f32>;
-                [[offset(12)]] depth : f32;
+                color : vec3<f32>;
+                depth : f32;
             };
             [[group(0), binding(0)]] var<uniform> ubo : UBO;
 

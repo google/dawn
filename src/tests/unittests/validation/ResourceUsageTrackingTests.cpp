@@ -777,7 +777,7 @@ namespace {
 
             wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
                 [[block]] struct RBuffer {
-                    [[offset(0)]] value : f32;
+                    value : f32;
                 };
                 [[group(0), binding(0)]] var<storage_buffer> rBuffer : [[access(read)]] RBuffer;
                 [[stage(fragment)]] fn main() -> void {
@@ -817,7 +817,7 @@ namespace {
             // Create a passthrough compute pipeline with a readonly buffer
             wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
                 [[block]] struct RBuffer {
-                    [[offset(0)]] value : f32;
+                    value : f32;
                 };
                 [[group(0), binding(0)]] var<storage_buffer> rBuffer : [[access(read)]] RBuffer;
                 [[stage(compute)]] fn main() -> void {

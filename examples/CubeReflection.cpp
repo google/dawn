@@ -103,13 +103,13 @@ void init() {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Camera {
-            [[offset(0)]] view : mat4x4<f32>;
-            [[offset(64)]] proj : mat4x4<f32>;
+            view : mat4x4<f32>;
+            proj : mat4x4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> camera : Camera;
 
         [[block]] struct Model {
-            [[offset(0)]] matrix : mat4x4<f32>;
+            matrix : mat4x4<f32>;
         };
         [[group(0), binding(1)]] var<uniform> model : Model;
 

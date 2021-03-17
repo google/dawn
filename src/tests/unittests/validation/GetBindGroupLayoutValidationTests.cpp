@@ -45,7 +45,7 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uniform0 : S;
         [[group(1), binding(0)]] var<uniform> uniform1 : S;
@@ -55,12 +55,12 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S2 {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(2), binding(0)]] var<uniform> uniform2 : S2;
 
         [[block]] struct S3 {
-            [[offset(0)]] pos : mat4x4<f32>;
+            pos : mat4x4<f32>;
         };
         [[group(3), binding(0)]] var<storage_buffer> storage3 : S3;
 
@@ -98,7 +98,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
 
     wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         [[block]] struct S {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -141,7 +141,7 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
 
     wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -192,7 +192,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         binding.buffer.type = wgpu::BufferBindingType::Storage;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             [[block]] struct S {
-                [[offset(0)]] pos : vec4<f32>;
+                pos : vec4<f32>;
             };
             [[group(0), binding(0)]] var<storage_buffer> ssbo : S;
 
@@ -204,7 +204,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         binding.buffer.type = wgpu::BufferBindingType::Uniform;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             [[block]] struct S {
-                [[offset(0)]] pos : vec4<f32>;
+                pos : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -217,7 +217,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
         binding.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             [[block]] struct S {
-                [[offset(0)]] pos : vec4<f32>;
+                pos : vec4<f32>;
             };
             [[group(0), binding(0)]] var<storage_buffer> ssbo : [[access(read)]] S;
 
@@ -404,7 +404,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
         binding.binding = 0;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             [[block]] struct S {
-                [[offset(0)]] pos : vec4<f32>;
+                pos : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -417,7 +417,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
         binding.binding = 1;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             [[block]] struct S {
-                [[offset(0)]] pos : vec4<f32>;
+                pos : vec4<f32>;
             };
             [[group(0), binding(1)]] var<uniform> uniforms : S;
 
@@ -430,7 +430,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
         binding.binding = 2;
         wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
             [[block]] struct S {
-                [[offset(0)]] pos : vec4<f32>;
+                pos : vec4<f32>;
             };
             [[group(0), binding(1)]] var<uniform> uniforms : S;
 
@@ -444,7 +444,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
 TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uniform0 : S;
         [[group(1), binding(0)]] var<uniform> uniform1 : S;
@@ -454,7 +454,7 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(1), binding(0)]] var<uniform> uniforms : S;
 
@@ -478,7 +478,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
     wgpu::ShaderModule vsModule4 = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : f32;
+            pos : f32;
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -487,7 +487,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
     wgpu::ShaderModule vsModule64 = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : mat4x4<f32>;
+            pos : mat4x4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -496,7 +496,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
     wgpu::ShaderModule fsModule4 = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : f32;
+            pos : f32;
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -505,7 +505,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
     wgpu::ShaderModule fsModule64 = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : mat4x4<f32>;
+            pos : mat4x4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -627,7 +627,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> ubo : S;
 
@@ -636,7 +636,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<storage_buffer> ssbo : S;
 
@@ -739,7 +739,7 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
 
     wgpu::RenderPipeline pipeline = RenderPipelineFromFragmentShader(R"(
         [[block]] struct S {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uniforms0 : S;
         [[group(2), binding(0)]] var<uniform> uniforms2 : S;
@@ -786,7 +786,7 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct S {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
@@ -825,7 +825,7 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
 TEST_F(GetBindGroupLayoutTests, DISABLED_FromCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Data {
-            [[offset 0]] data : f32;
+            data : f32;
         };
         [[binding 0, set 0]] var<storage_buffer> data0 : Data;
         [[binding 1, set 0]] var<storage_buffer> data1 : Data;

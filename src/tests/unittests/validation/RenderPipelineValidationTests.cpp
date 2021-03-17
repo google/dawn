@@ -486,7 +486,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
     wgpu::ShaderModule vsModuleWithStorageBuffer = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Dst {
-            [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
+            data : array<u32, 100>;
         };
         [[group(0), binding(0)]] var<storage_buffer> dst : [[access(read_write)]] Dst;
         [[builtin(vertex_index)]] var<in> VertexIndex : u32;
@@ -703,7 +703,7 @@ TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Uniforms {
-            [[offset 0]] data : vec4<f32>;
+            data : vec4<f32>;
         };
         [[binding 0, set 0]] var<uniform> var0 : Uniforms;
         [[binding 1, set 0]] var<uniform> var1 : Uniforms;

@@ -115,8 +115,8 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
         [[stage(vertex)]] fn main() -> void {)";
     fragmentShader << R"(
          [[block]] struct IndexVals {
-             [[offset(0)]] vertex_index : u32;
-             [[offset(4)]] instance_index : u32;
+             vertex_index : u32;
+             instance_index : u32;
          };
 
         [[group(0), binding(0)]] var<storage_buffer> idx_vals : [[access(read_write)]] IndexVals;

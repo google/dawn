@@ -124,10 +124,10 @@ class DepthStencilSamplingTest : public DawnTest {
         std::ostringstream shaderBody;
         shaderSource << R"(
             [[block]] struct DepthResult {
-                [[offset(0)]] value : f32;
+                value : f32;
             };
             [[block]] struct StencilResult {
-                [[offset(0)]] value : u32;
+                value : u32;
             };)";
         shaderSource << "\n";
 
@@ -184,7 +184,7 @@ class DepthStencilSamplingTest : public DawnTest {
             [[group(0), binding(0)]] var samp : sampler_comparison;
             [[group(0), binding(1)]] var tex : texture_depth_2d;
             [[block]] struct Uniforms {
-                [[offset(0)]] compareRef : f32;
+                compareRef : f32;
             };
             [[group(0), binding(2)]] var<uniform> uniforms : Uniforms;
 
@@ -216,12 +216,12 @@ class DepthStencilSamplingTest : public DawnTest {
             [[group(0), binding(0)]] var samp : sampler_comparison;
             [[group(0), binding(1)]] var tex : texture_depth_2d;
             [[block]] struct Uniforms {
-                [[offset(0)]] compareRef : f32;
+                compareRef : f32;
             };
             [[group(0), binding(2)]] var<uniform> uniforms : Uniforms;
 
             [[block]] struct SamplerResult {
-                [[offset(0)]] value : f32;
+                value : f32;
             };
             [[group(0), binding(3)]] var<storage_buffer> samplerResult : SamplerResult;
 

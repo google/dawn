@@ -30,10 +30,10 @@ class ComputeDispatchTests : public DawnTest {
         // To make sure the dispatch was not called, write maximum u32 value for 0 dispatches
         wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct InputBuf {
-                [[offset(0)]] expectedDispatch : vec3<u32>;
+                expectedDispatch : vec3<u32>;
             };
             [[block]] struct OutputBuf {
-                [[offset(0)]] workGroups : vec3<u32>;
+                workGroups : vec3<u32>;
             };
 
             [[group(0), binding(0)]] var<uniform> input : InputBuf;

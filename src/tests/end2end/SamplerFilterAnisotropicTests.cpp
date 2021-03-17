@@ -39,7 +39,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct Uniforms {
-                [[offset(0)]] matrix : mat4x4<f32>;
+                matrix : mat4x4<f32>;
             };
 
             [[location(0)]] var<in> position : vec4<f32>;

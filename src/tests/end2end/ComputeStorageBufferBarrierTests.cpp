@@ -33,7 +33,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Buf {
-            [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
+            data : array<u32, 100>;
         };
 
         [[group(0), binding(0)]] var<storage_buffer> buf : [[access(read_write)]] Buf;
@@ -85,11 +85,11 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         // TODO(crbug.com/tint/386):  Use the same struct.
         [[block]] struct Src {
-            [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
+            data : array<u32, 100>;
         };
 
         [[block]] struct Dst {
-            [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
+            data : array<u32, 100>;
         };
 
         [[group(0), binding(0)]] var<storage_buffer> src : [[access(read_write)]] Src;
@@ -156,11 +156,11 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         // TODO(crbug.com/tint/386):  Use the same struct.
         [[block]] struct Src {
-            [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
+            data : array<u32, 100>;
         };
 
         [[block]] struct Dst {
-            [[offset(0)]] data : [[stride(4)]] array<u32, 100>;
+            data : array<u32, 100>;
         };
 
         [[group(0), binding(0)]] var<storage_buffer> src : [[access(read)]] Src;
@@ -229,7 +229,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Buf {
-            [[offset(0)]] data : [[stride(16)]] array<vec4<u32>, 25>;
+            data : array<vec4<u32>, 25>;
         };
 
         [[group(0), binding(0)]] var<uniform> src : Buf;
@@ -297,7 +297,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
 
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Buf {
-            [[offset(0)]] data : [[stride(16)]] array<vec4<u32>, 25>;
+            data : array<vec4<u32>, 25>;
         };
 
         [[group(0), binding(0)]] var<uniform> src : Buf;

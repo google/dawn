@@ -1089,7 +1089,7 @@ class SetBindGroupValidationTest : public ValidationTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
                 [[block]] struct S {
-                    [[offset(0)]] value : vec2<f32>;
+                    value : vec2<f32>;
                 };
 
                 [[group(0), binding(0)]] var<uniform> uBufferDynamic : S;
@@ -1112,7 +1112,7 @@ class SetBindGroupValidationTest : public ValidationTest {
     wgpu::ComputePipeline CreateComputePipeline() {
         wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
                 [[block]] struct S {
-                    [[offset(0)]] value : vec2<f32>;
+                    value : vec2<f32>;
                 };
 
                 [[group(0), binding(0)]] var<uniform> uBufferDynamic : S;
@@ -1532,7 +1532,7 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
             device.CreatePipelineLayout(&pipelineLayoutDescriptor);
 
         std::stringstream ss;
-        ss << "[[block]] struct S { [[offset(0)]] value : vec2<f32>; };";
+        ss << "[[block]] struct S { value : vec2<f32>; };";
 
         // Build a shader which has bindings that match the pipeline layout.
         for (uint32_t l = 0; l < layouts.size(); ++l) {
@@ -1708,7 +1708,7 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
     wgpu::RenderPipeline CreateRenderPipeline(std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
         return CreateFSRenderPipeline(R"(
             [[block]] struct S {
-                [[offset(0)]] value : vec2<f32>;
+                value : vec2<f32>;
             };
 
             [[group(0), binding(0)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;
@@ -1741,7 +1741,7 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
         std::vector<wgpu::BindGroupLayout> bindGroupLayouts) {
         return CreateComputePipeline(R"(
             [[block]] struct S {
-                [[offset(0)]] value : vec2<f32>;
+                value : vec2<f32>;
             };
 
             [[group(0), binding(0)]] var<storage_buffer> sBufferDynamic : [[access(read_write)]] S;

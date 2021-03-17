@@ -55,11 +55,11 @@ class OpArrayLengthTest : public DawnTest {
         mShaderInterface = R"(
             // TODO(crbug.com/tint/386): Use the same struct.
             [[block]] struct DataBuffer1 {
-                [[offset(0)]] data : [[stride(4)]] array<f32>;
+                data : [[stride(4)]] array<f32>;
             };
 
             [[block]] struct DataBuffer2 {
-                [[offset(0)]] data : [[stride(4)]] array<f32>;
+                data : [[stride(4)]] array<f32>;
             };
 
             // The length should be 1 because the buffer is 4-byte long.
@@ -71,13 +71,13 @@ class OpArrayLengthTest : public DawnTest {
             // The length should be (512 - 16*4) / 8 = 56 because the buffer is 512 bytes long
             // and the structure is 8 bytes big.
             struct Buffer3Data {
-                [[offset(0)]] a : f32;
-                [[offset(4)]] b : i32;
+                a : f32;
+                b : i32;
             };
 
             [[block]] struct Buffer3 {
-                [[offset(0)]] garbage : mat4x4<f32>;
-                [[offset(64)]] data : [[stride(8)]] array<Buffer3Data>;
+                [[size(64)]] garbage : mat4x4<f32>;
+                data : [[stride(8)]] array<Buffer3Data>;
             };
             [[group(0), binding(2)]] var<storage_buffer> buffer3 : [[access(read)]] Buffer3;
         )";
@@ -126,7 +126,7 @@ TEST_P(OpArrayLengthTest, Compute) {
     pipelineDesc.computeStage.entryPoint = "main";
     pipelineDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, (R"(
         [[block]] struct ResultBuffer {
-            [[offset(0)]] data : [[stride(4)]] array<u32, 3>;
+            data : [[stride(4)]] array<u32, 3>;
         };
         [[group(1), binding(0)]] var<storage_buffer> result : [[access(read_write)]] ResultBuffer;
         )" + mShaderInterface + R"(

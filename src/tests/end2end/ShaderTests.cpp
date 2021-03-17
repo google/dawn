@@ -32,7 +32,7 @@ TEST_P(ShaderTests, ComputeLog2) {
 
     std::string shader = R"(
 [[block]] struct Buf {
-    [[offset(0)]] data : [[stride(4)]] array<u32, 19>;
+    data : array<u32, 19>;
 };
 
 [[group(0), binding(0)]] var<storage_buffer> buf : [[access(read_write)]] Buf;

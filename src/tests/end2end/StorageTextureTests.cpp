@@ -709,7 +709,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
         std::ostringstream csStream;
         csStream << R"(
 [[block]] struct DstBuffer {
-  [[offset(0)]] result : u32;
+  result : u32;
 };
 
 [[group(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
@@ -934,7 +934,7 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
     std::ostringstream csStream;
     csStream << R"(
 [[block]] struct DstBuffer {
-  [[offset(0)]] result : u32;
+  result : u32;
 };
 
 [[group(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
@@ -1203,7 +1203,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
     // to DstBuffer if they all have to expected value.
     const std::string kComputeShader = std::string(R"(
 [[block]] struct DstBuffer {
-  [[offset(0)]] result : u32;
+  result : u32;
 };
 
 [[group(0), binding(0)]] var srcImage : [[access(read)]] texture_storage_2d<r32uint>;

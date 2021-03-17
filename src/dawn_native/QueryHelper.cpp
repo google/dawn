@@ -34,22 +34,22 @@ namespace dawn_native {
 
         static const char sConvertTimestampsToNanoseconds[] = R"(
             struct Timestamp {
-                [[offset(0)]] low  : u32;
-                [[offset(4)]] high : u32;
+                low  : u32;
+                high : u32;
             };
 
             [[block]] struct TimestampArr {
-                [[offset(0)]] t : [[stride(8)]] array<Timestamp>;
+                t : array<Timestamp>;
             };
 
             [[block]] struct AvailabilityArr {
-                [[offset(0)]] v : [[stride(4)]] array<u32>;
+                v : array<u32>;
             };
 
             [[block]] struct TimestampParams {
-                [[offset(0)]]  count  : u32;
-                [[offset(4)]]  offset : u32;
-                [[offset(8)]]  period : f32;
+                count  : u32;
+                offset : u32;
+                period : f32;
             };
 
             [[group(0), binding(0)]]

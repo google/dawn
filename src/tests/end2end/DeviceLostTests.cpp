@@ -87,8 +87,7 @@ class DeviceLostTest : public DawnTest {
         device.LoseForTesting();
     }
 
-    static void MapFailCallback(WGPUBufferMapAsyncStatus status,
-                                void* userdata) {
+    static void MapFailCallback(WGPUBufferMapAsyncStatus status, void* userdata) {
         EXPECT_EQ(WGPUBufferMapAsyncStatus_DeviceLost, status);
         EXPECT_EQ(&fakeUserData, userdata);
     }
@@ -127,7 +126,7 @@ TEST_P(DeviceLostTest, CreateBindGroupLayoutFails) {
 TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
     wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct UniformBuffer {
-            [[offset(0)]] pos : vec4<f32>;
+            pos : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> ubo : UniformBuffer;
         [[stage(compute)]] fn main() -> void {
