@@ -25,7 +25,7 @@ namespace ast {
 
 Module::Module(const Source& source) : Base(source) {}
 
-Module::Module(const Source& source, std::vector<CastableBase*> global_decls)
+Module::Module(const Source& source, std::vector<Cloneable*> global_decls)
     : Base(source), global_declarations_(std::move(global_decls)) {
   for (auto* decl : global_declarations_) {
     if (decl == nullptr) {
@@ -54,14 +54,14 @@ Module* Module::Clone(CloneContext* ctx) const {
 }
 
 void Module::Copy(CloneContext* ctx, const Module* src) {
-  for (auto* decl : src->global_declarations_) {
+  for (auto* decl : ctx->Clone(src->global_declarations_)) {
     assert(decl);
     if (auto* ty = decl->As<type::Type>()) {
-      AddConstructedType(ctx->Clone(ty));
+      AddConstructedType(ty);
     } else if (auto* func = decl->As<Function>()) {
-      AddFunction(ctx->Clone(func));
+      AddFunction(func);
     } else if (auto* var = decl->As<Variable>()) {
-      AddGlobalVariable(ctx->Clone(var));
+      AddGlobalVariable(var);
     } else {
       TINT_ICE(ctx->dst->Diagnostics()) << "Unknown global declaration type";
     }

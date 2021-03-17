@@ -42,18 +42,42 @@ fn compute_main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
 
 [[location(1)]] var<in> tint_symbol_2 : f32;
 
-[[builtin(local_invocation_id)]] var<in> tint_symbol_6 : vec3<u32>;
-
-[[builtin(local_invocation_index)]] var<in> tint_symbol_7 : u32;
-
 [[stage(fragment)]]
 fn frag_main() -> void {
   var col : f32 = (tint_symbol_1.x * tint_symbol_2);
 }
 
+[[builtin(local_invocation_id)]] var<in> tint_symbol_6 : vec3<u32>;
+
+[[builtin(local_invocation_index)]] var<in> tint_symbol_7 : u32;
+
 [[stage(compute)]]
 fn compute_main() -> void {
   var id_x : u32 = tint_symbol_6.x;
+}
+)";
+
+  auto got = Run<Spirv>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvTest, HandleEntryPointIOTypes_Parameter_TypeAlias) {
+  auto* src = R"(
+type myf32 = f32;
+
+[[stage(fragment)]]
+fn frag_main([[location(1)]] loc1 : myf32) -> void {
+}
+)";
+
+  auto* expect = R"(
+type myf32 = f32;
+
+[[location(1)]] var<in> tint_symbol_1 : myf32;
+
+[[stage(fragment)]]
+fn frag_main() -> void {
 }
 )";
 
@@ -152,11 +176,11 @@ fn main([[builtin(sample_index)]] sample_index : u32,
 )";
 
   auto* expect = R"(
+[[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
+
 [[builtin(sample_index)]] var<in> tint_symbol_1 : u32;
 
 [[builtin(sample_mask_in)]] var<in> tint_symbol_2 : array<u32, 1>;
-
-[[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
 
 [[stage(fragment)]]
 fn main() -> void {

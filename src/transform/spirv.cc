@@ -114,9 +114,10 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       // Create a new symbol for the global variable.
       auto var_symbol = ctx.dst->Symbols().New();
       // Create the global variable.
-      ctx.dst->Global(var_symbol, ctx.Clone(param->type()),
-                      ast::StorageClass::kInput, nullptr,
-                      ctx.Clone(param->decorations()));
+      auto* var = ctx.dst->Var(var_symbol, ctx.Clone(param->type()),
+                               ast::StorageClass::kInput, nullptr,
+                               ctx.Clone(param->decorations()));
+      ctx.InsertBefore(func, var);
 
       // Replace all uses of the function parameter with the global variable.
       for (auto* user : ctx.src->Sem().Get(param)->Users()) {

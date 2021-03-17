@@ -159,6 +159,11 @@ fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
 )";
 
   auto* expect = R"(
+struct FragIn {
+  [[location(2)]]
+  loc2 : f32;
+};
+
 struct tint_symbol_3 {
   [[builtin(frag_coord)]]
   coord : vec4<f32>;
@@ -166,16 +171,39 @@ struct tint_symbol_3 {
   loc1 : f32;
 };
 
-struct FragIn {
-  [[location(2)]]
-  loc2 : f32;
-};
-
 [[stage(fragment)]]
 fn frag_main(tint_symbol_4 : tint_symbol_3, frag_in : FragIn) -> void {
   const coord : vec4<f32> = tint_symbol_4.coord;
   const loc1 : f32 = tint_symbol_4.loc1;
   var col : f32 = ((coord.x * loc1) + frag_in.loc2);
+}
+)";
+
+  auto got = Run<Hlsl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(HlslTest, HandleEntryPointIOTypes_Parameter_TypeAlias) {
+  auto* src = R"(
+type myf32 = f32;
+
+[[stage(fragment)]]
+fn frag_main([[location(1)]] loc1 : myf32) -> void {
+}
+)";
+
+  auto* expect = R"(
+type myf32 = f32;
+
+struct tint_symbol_3 {
+  [[location(1)]]
+  loc1 : myf32;
+};
+
+[[stage(fragment)]]
+fn frag_main(tint_symbol_4 : tint_symbol_3) -> void {
+  const loc1 : myf32 = tint_symbol_4.loc1;
 }
 )";
 

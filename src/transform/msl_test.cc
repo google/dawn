@@ -372,6 +372,34 @@ fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>) -> void {
   EXPECT_EQ(src, str(got));
 }
 
+TEST_F(MslEntryPointIOTest, HandleEntryPointIOTypes_Parameter_TypeAlias) {
+  auto* src = R"(
+type myf32 = f32;
+
+[[stage(fragment)]]
+fn frag_main([[location(1)]] loc1 : myf32) -> void {
+}
+)";
+
+  auto* expect = R"(
+type myf32 = f32;
+
+struct tint_symbol_3 {
+  [[location(1)]]
+  loc1 : myf32;
+};
+
+[[stage(fragment)]]
+fn frag_main(tint_symbol_4 : tint_symbol_3) -> void {
+  const loc1 : myf32 = tint_symbol_4.loc1;
+}
+)";
+
+  auto got = Run<Msl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(MslEntryPointIOTest, HandleEntryPointIOTypes_Parameters_EmptyBody) {
   auto* src = R"(
 [[stage(fragment)]]

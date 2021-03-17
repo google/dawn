@@ -347,7 +347,7 @@ void Msl::HandleEntryPointIOTypes(CloneContext& ctx) const {
     auto* in_struct = ctx.dst->create<type::Struct>(
         ctx.dst->Symbols().New(),
         ctx.dst->create<ast::Struct>(struct_members, ast::DecorationList{}));
-    ctx.dst->AST().AddConstructedType(in_struct);
+    ctx.InsertBefore(func, in_struct);
 
     // Create a new function parameter using this struct type.
     auto struct_param_symbol = ctx.dst->Symbols().New();

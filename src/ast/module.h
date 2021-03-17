@@ -35,13 +35,13 @@ class Module : public Castable<Module, Node> {
   /// @param source the source of the module
   /// @param global_decls the list of global types, functions, and variables, in
   /// the order they were declared in the source program
-  Module(const Source& source, std::vector<CastableBase*> global_decls);
+  Module(const Source& source, std::vector<Cloneable*> global_decls);
 
   /// Destructor
   ~Module() override;
 
   /// @returns the ordered global declarations for the translation unit
-  const std::vector<CastableBase*>& GlobalDeclarations() const {
+  const std::vector<Cloneable*>& GlobalDeclarations() const {
     return global_declarations_;
   }
 
@@ -108,7 +108,7 @@ class Module : public Castable<Module, Node> {
   std::string to_str(const semantic::Info& sem) const;
 
  private:
-  std::vector<CastableBase*> global_declarations_;
+  std::vector<Cloneable*> global_declarations_;
   std::vector<type::Type*> constructed_types_;
   FunctionList functions_;
   VariableList global_variables_;

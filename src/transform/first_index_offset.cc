@@ -191,9 +191,10 @@ ast::Variable* FirstIndexOffset::State::AddUniformBuffer() {
           dst->create<ast::GroupDecoration>(Source{}, group),
       });
 
-  dst->AST().AddGlobalVariable(idx_var);
 
   dst->AST().AddConstructedType(struct_type);
+
+  dst->AST().AddGlobalVariable(idx_var);
 
   return idx_var;
 }
