@@ -67,9 +67,9 @@ namespace {
 
             pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
 
-            utils::ComboRenderPipelineDescriptor descriptor(device);
+            utils::ComboRenderPipelineDescriptor2 descriptor;
             InitializeRenderPipelineDescriptor(&descriptor);
-            pipeline = device.CreateRenderPipeline(&descriptor);
+            pipeline = device.CreateRenderPipeline2(&descriptor);
 
             float data[8];
             wgpu::Buffer buffer = utils::CreateBufferFromData(device, data, 8 * sizeof(float),
@@ -99,15 +99,15 @@ namespace {
                                               {1, vertexStorageBuffer, 0, sizeof(kVertices)}});
         }
 
-        void InitializeRenderPipelineDescriptor(utils::ComboRenderPipelineDescriptor* descriptor) {
+        void InitializeRenderPipelineDescriptor(utils::ComboRenderPipelineDescriptor2* descriptor) {
             descriptor->layout = pipelineLayout;
-            descriptor->vertexStage.module = vsModule;
-            descriptor->cFragmentStage.module = fsModule;
-            descriptor->cVertexState.vertexBufferCount = 1;
-            descriptor->cVertexState.cVertexBuffers[0].arrayStride = 2 * sizeof(float);
-            descriptor->cVertexState.cVertexBuffers[0].attributeCount = 1;
-            descriptor->cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
-            descriptor->cVertexState.cAttributes[0].shaderLocation = 0;
+            descriptor->vertex.module = vsModule;
+            descriptor->cFragment.module = fsModule;
+            descriptor->vertex.bufferCount = 1;
+            descriptor->cBuffers[0].arrayStride = 2 * sizeof(float);
+            descriptor->cBuffers[0].attributeCount = 1;
+            descriptor->cAttributes[0].format = wgpu::VertexFormat::Float32x2;
+            descriptor->cAttributes[0].shaderLocation = 0;
         }
 
         wgpu::ShaderModule vsModule;
@@ -730,48 +730,48 @@ TEST_F(RenderBundleValidationTest, PipelineColorFormatMismatch) {
     renderBundleDesc.cColorFormats[1] = wgpu::TextureFormat::RG16Float;
     renderBundleDesc.cColorFormats[2] = wgpu::TextureFormat::R16Sint;
 
-    auto SetupRenderPipelineDescForTest = [this](utils::ComboRenderPipelineDescriptor* desc) {
+    auto SetupRenderPipelineDescForTest = [this](utils::ComboRenderPipelineDescriptor2* desc) {
         InitializeRenderPipelineDescriptor(desc);
-        desc->colorStateCount = 3;
-        desc->cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
-        desc->cColorStates[1].format = wgpu::TextureFormat::RG16Float;
-        desc->cColorStates[2].format = wgpu::TextureFormat::R16Sint;
+        desc->cFragment.targetCount = 3;
+        desc->cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        desc->cTargets[1].format = wgpu::TextureFormat::RG16Float;
+        desc->cTargets[2].format = wgpu::TextureFormat::R16Sint;
     };
 
     // Test the success case.
     {
-        utils::ComboRenderPipelineDescriptor desc(device);
+        utils::ComboRenderPipelineDescriptor2 desc;
         SetupRenderPipelineDescForTest(&desc);
 
         wgpu::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.Finish();
     }
 
     // Test the failure case for mismatched format types.
     {
-        utils::ComboRenderPipelineDescriptor desc(device);
+        utils::ComboRenderPipelineDescriptor2 desc;
         SetupRenderPipelineDescForTest(&desc);
-        desc.cColorStates[1].format = wgpu::TextureFormat::RGBA8Unorm;
+        desc.cTargets[1].format = wgpu::TextureFormat::RGBA8Unorm;
 
         wgpu::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
         renderBundleEncoder.SetPipeline(pipeline);
         ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
     }
 
     // Test the failure case for missing format
     {
-        utils::ComboRenderPipelineDescriptor desc(device);
+        utils::ComboRenderPipelineDescriptor2 desc;
         SetupRenderPipelineDescForTest(&desc);
-        desc.colorStateCount = 2;
+        desc.cFragment.targetCount = 2;
 
         wgpu::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
         renderBundleEncoder.SetPipeline(pipeline);
         ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
     }
@@ -784,48 +784,47 @@ TEST_F(RenderBundleValidationTest, PipelineDepthStencilFormatMismatch) {
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     renderBundleDesc.depthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
 
-    auto SetupRenderPipelineDescForTest = [this](utils::ComboRenderPipelineDescriptor* desc) {
+    auto SetupRenderPipelineDescForTest = [this](utils::ComboRenderPipelineDescriptor2* desc) {
         InitializeRenderPipelineDescriptor(desc);
-        desc->colorStateCount = 1;
-        desc->cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
-        desc->depthStencilState = &desc->cDepthStencilState;
-        desc->cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
+        desc->cFragment.targetCount = 1;
+        desc->cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
     };
 
     // Test the success case.
     {
-        utils::ComboRenderPipelineDescriptor desc(device);
+        utils::ComboRenderPipelineDescriptor2 desc;
         SetupRenderPipelineDescForTest(&desc);
+        desc.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
 
         wgpu::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.Finish();
     }
 
     // Test the failure case for mismatched format.
     {
-        utils::ComboRenderPipelineDescriptor desc(device);
+        utils::ComboRenderPipelineDescriptor2 desc;
         SetupRenderPipelineDescForTest(&desc);
-        desc.cDepthStencilState.format = wgpu::TextureFormat::Depth24Plus;
+        desc.EnableDepthStencil(wgpu::TextureFormat::Depth24Plus);
 
         wgpu::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
         renderBundleEncoder.SetPipeline(pipeline);
         ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
     }
 
     // Test the failure case for missing format.
     {
-        utils::ComboRenderPipelineDescriptor desc(device);
+        utils::ComboRenderPipelineDescriptor2 desc;
         SetupRenderPipelineDescForTest(&desc);
-        desc.depthStencilState = nullptr;
+        desc.depthStencil = nullptr;
 
         wgpu::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
         renderBundleEncoder.SetPipeline(pipeline);
         ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
     }
@@ -838,28 +837,28 @@ TEST_F(RenderBundleValidationTest, PipelineSampleCountMismatch) {
     renderBundleDesc.cColorFormats[0] = wgpu::TextureFormat::RGBA8Unorm;
     renderBundleDesc.sampleCount = 4;
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDesc;
     InitializeRenderPipelineDescriptor(&renderPipelineDesc);
-    renderPipelineDesc.colorStateCount = 1;
-    renderPipelineDesc.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
-    renderPipelineDesc.sampleCount = 4;
+    renderPipelineDesc.cFragment.targetCount = 1;
+    renderPipelineDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    renderPipelineDesc.multisample.count = 4;
 
     // Test the success case.
     {
         wgpu::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&renderPipelineDesc);
         renderBundleEncoder.SetPipeline(pipeline);
         renderBundleEncoder.Finish();
     }
 
     // Test the failure case.
     {
-        renderPipelineDesc.sampleCount = 1;
+        renderPipelineDesc.multisample.count = 1;
 
         wgpu::RenderBundleEncoder renderBundleEncoder =
             device.CreateRenderBundleEncoder(&renderBundleDesc);
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&renderPipelineDesc);
         renderBundleEncoder.SetPipeline(pipeline);
         ASSERT_DEVICE_ERROR(renderBundleEncoder.Finish());
     }

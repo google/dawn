@@ -38,12 +38,12 @@ class DrawIndirectValidationTest : public ValidationTest {
         // Set up render pipeline
         wgpu::PipelineLayout pipelineLayout = utils::MakeBasicPipelineLayout(device, nullptr);
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
+        utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.layout = pipelineLayout;
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
 
-        pipeline = device.CreateRenderPipeline(&descriptor);
+        pipeline = device.CreateRenderPipeline2(&descriptor);
     }
 
     void ValidateExpectation(wgpu::CommandEncoder encoder, utils::Expectation expectation) {

@@ -30,16 +30,17 @@ class VertexStateTest : public ValidationTest {
             }
         )");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.vertexState = &state;
-        descriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.vertex.bufferCount = state.vertexBufferCount;
+        descriptor.vertex.buffers = &state.cVertexBuffers[0];
+        descriptor.cFragment.module = fsModule;
+        descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
         if (!success) {
-            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+            ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
         } else {
-            device.CreateRenderPipeline(&descriptor);
+            device.CreateRenderPipeline2(&descriptor);
         }
     }
 

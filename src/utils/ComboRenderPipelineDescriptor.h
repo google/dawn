@@ -64,13 +64,18 @@ namespace utils {
         ComboRenderPipelineDescriptor2(ComboRenderPipelineDescriptor2&&) = delete;
         ComboRenderPipelineDescriptor2& operator=(ComboRenderPipelineDescriptor2&&) = delete;
 
+        wgpu::DepthStencilState* EnableDepthStencil(
+            wgpu::TextureFormat format = wgpu::TextureFormat::Depth24PlusStencil8);
+
         std::array<wgpu::VertexBufferLayout, kMaxVertexBuffers> cBuffers;
         std::array<wgpu::VertexAttribute, kMaxVertexAttributes> cAttributes;
         std::array<wgpu::ColorTargetState, kMaxColorAttachments> cTargets;
         std::array<wgpu::BlendState, kMaxColorAttachments> cBlends;
 
-        wgpu::DepthStencilState cDepthStencil;
         wgpu::FragmentState cFragment;
+
+      private:
+        wgpu::DepthStencilState cDepthStencil;
     };
 
 }  // namespace utils

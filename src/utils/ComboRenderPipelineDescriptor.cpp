@@ -208,4 +208,11 @@ namespace utils {
         }
     }
 
+    wgpu::DepthStencilState* ComboRenderPipelineDescriptor2::EnableDepthStencil(
+        wgpu::TextureFormat format) {
+        this->depthStencil = &cDepthStencil;
+        cDepthStencil.format = format;
+        return &cDepthStencil;
+    }
+
 }  // namespace utils

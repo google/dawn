@@ -128,11 +128,11 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
                 Position = textureLoad(image0, vec2<i32>(i32(VertexIndex), 0));
             })");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
+        utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.layout = nullptr;
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = mDefaultFSModule;
-        device.CreateRenderPipeline(&descriptor);
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = mDefaultFSModule;
+        device.CreateRenderPipeline2(&descriptor);
     }
 
     // Read-only storage textures can be declared in a fragment shader.
@@ -145,11 +145,11 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
                 fragColor = textureLoad(image0, vec2<i32>(FragCoord.xy));
             })");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
+        utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.layout = nullptr;
-        descriptor.vertexStage.module = mDefaultVSModule;
-        descriptor.cFragmentStage.module = fsModule;
-        device.CreateRenderPipeline(&descriptor);
+        descriptor.vertex.module = mDefaultVSModule;
+        descriptor.cFragment.module = fsModule;
+        device.CreateRenderPipeline2(&descriptor);
     }
 
     // Write-only storage textures cannot be declared in a vertex shader.
@@ -161,11 +161,11 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
                 textureStore(image0, vec2<i32>(i32(vertex_index), 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
+        utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.layout = nullptr;
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = mDefaultFSModule;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = mDefaultFSModule;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
     }
 
     // Write-only storage textures can be declared in a fragment shader.
@@ -177,11 +177,11 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
                 textureStore(image0, vec2<i32>(frag_coord.xy), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
+        utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.layout = nullptr;
-        descriptor.vertexStage.module = mDefaultVSModule;
-        descriptor.cFragmentStage.module = fsModule;
-        device.CreateRenderPipeline(&descriptor);
+        descriptor.vertex.module = mDefaultVSModule;
+        descriptor.cFragment.module = fsModule;
+        device.CreateRenderPipeline2(&descriptor);
     }
 }
 

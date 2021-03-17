@@ -48,12 +48,12 @@ TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
     bundleDesc.colorFormatsCount = 1;
     bundleDesc.cColorFormats[0] = renderPass.attachmentFormat;
 
-    utils::ComboRenderPipelineDescriptor desc(device);
-    desc.vertexStage.module =
+    utils::ComboRenderPipelineDescriptor2 desc;
+    desc.vertex.module =
         utils::CreateShaderModuleFromWGSL(device, "[[stage(vertex)]] fn main() -> void {}");
-    desc.cFragmentStage.module =
+    desc.cFragment.module =
         utils::CreateShaderModuleFromWGSL(device, "[[stage(fragment)]] fn main() -> void {}");
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
 
     // Control cases: DrawIndirect and DrawIndexed are allowed inside a render pass.
     {
@@ -249,7 +249,7 @@ TEST_F(UnsafeAPIValidationTest, CreateRenderPipelineAsyncDisallowed) {
     desc.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
     // Control case: CreateRenderPipeline is allowed.
-    device.CreateRenderPipeline(&desc);
+    EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&desc));
 
     testing::MockCallback<WGPUCreateRenderPipelineAsyncCallback> callback;
     EXPECT_CALL(callback,

@@ -87,7 +87,7 @@ TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
         utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        descriptor.depthStencil = &descriptor.cDepthStencil;
+        descriptor.EnableDepthStencil();
         device.CreateRenderPipeline2(&descriptor);
     }
 
@@ -96,8 +96,8 @@ TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
         utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        descriptor.cDepthStencil.depthBiasClamp = INFINITY;
-        descriptor.depthStencil = &descriptor.cDepthStencil;
+        wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
+        depthStencil->depthBiasClamp = INFINITY;
         device.CreateRenderPipeline2(&descriptor);
     }
     // NAN depth bias clamp is invalid
@@ -105,8 +105,8 @@ TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
         utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        descriptor.cDepthStencil.depthBiasClamp = NAN;
-        descriptor.depthStencil = &descriptor.cDepthStencil;
+        wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
+        depthStencil->depthBiasClamp = NAN;
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
     }
 
@@ -115,8 +115,8 @@ TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
         utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        descriptor.cDepthStencil.depthBiasSlopeScale = INFINITY;
-        descriptor.depthStencil = &descriptor.cDepthStencil;
+        wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
+        depthStencil->depthBiasSlopeScale = INFINITY;
         device.CreateRenderPipeline2(&descriptor);
     }
     // NAN depth bias slope is invalid
@@ -124,8 +124,8 @@ TEST_F(RenderPipelineValidationTest, DepthBiasParameterNotBeNaN) {
         utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        descriptor.cDepthStencil.depthBiasSlopeScale = NAN;
-        descriptor.depthStencil = &descriptor.cDepthStencil;
+        wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
+        depthStencil->depthBiasSlopeScale = NAN;
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
     }
 }
@@ -185,9 +185,9 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
 
     for (size_t i = 0; i < kNumTextureFormatBaseType; ++i) {
         for (size_t j = 0; j < kNumTextureFormatBaseType; ++j) {
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.vertexStage.module = vsModule;
-            descriptor.cColorStates[0].format = kColorFormats[j];
+            utils::ComboRenderPipelineDescriptor2 descriptor;
+            descriptor.vertex.module = vsModule;
+            descriptor.cTargets[0].format = kColorFormats[j];
 
             std::ostringstream stream;
             stream << R"(
@@ -195,13 +195,13 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
                    << kScalarTypes[i] << R"(>;
                 [[stage(fragment)]] fn main() -> void {
                 })";
-            descriptor.cFragmentStage.module =
+            descriptor.cFragment.module =
                 utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
 
             if (i == j) {
-                device.CreateRenderPipeline(&descriptor);
+                device.CreateRenderPipeline2(&descriptor);
             } else {
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
             }
         }
     }
@@ -243,31 +243,29 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
     baseTextureDescriptor.dimension = wgpu::TextureDimension::e2D;
     baseTextureDescriptor.usage = wgpu::TextureUsage::RenderAttachment;
 
-    utils::ComboRenderPipelineDescriptor nonMultisampledPipelineDescriptor(device);
-    nonMultisampledPipelineDescriptor.sampleCount = 1;
-    nonMultisampledPipelineDescriptor.vertexStage.module = vsModule;
-    nonMultisampledPipelineDescriptor.cFragmentStage.module = fsModule;
+    utils::ComboRenderPipelineDescriptor2 nonMultisampledPipelineDescriptor;
+    nonMultisampledPipelineDescriptor.multisample.count = 1;
+    nonMultisampledPipelineDescriptor.vertex.module = vsModule;
+    nonMultisampledPipelineDescriptor.cFragment.module = fsModule;
     wgpu::RenderPipeline nonMultisampledPipeline =
-        device.CreateRenderPipeline(&nonMultisampledPipelineDescriptor);
+        device.CreateRenderPipeline2(&nonMultisampledPipelineDescriptor);
 
-    nonMultisampledPipelineDescriptor.colorStateCount = 0;
-    nonMultisampledPipelineDescriptor.depthStencilState =
-        &nonMultisampledPipelineDescriptor.cDepthStencilState;
+    nonMultisampledPipelineDescriptor.cFragment.targetCount = 0;
+    nonMultisampledPipelineDescriptor.EnableDepthStencil();
     wgpu::RenderPipeline nonMultisampledPipelineWithDepthStencilOnly =
-        device.CreateRenderPipeline(&nonMultisampledPipelineDescriptor);
+        device.CreateRenderPipeline2(&nonMultisampledPipelineDescriptor);
 
-    utils::ComboRenderPipelineDescriptor multisampledPipelineDescriptor(device);
-    multisampledPipelineDescriptor.sampleCount = kMultisampledCount;
-    multisampledPipelineDescriptor.vertexStage.module = vsModule;
-    multisampledPipelineDescriptor.cFragmentStage.module = fsModule;
+    utils::ComboRenderPipelineDescriptor2 multisampledPipelineDescriptor;
+    multisampledPipelineDescriptor.multisample.count = kMultisampledCount;
+    multisampledPipelineDescriptor.vertex.module = vsModule;
+    multisampledPipelineDescriptor.cFragment.module = fsModule;
     wgpu::RenderPipeline multisampledPipeline =
-        device.CreateRenderPipeline(&multisampledPipelineDescriptor);
+        device.CreateRenderPipeline2(&multisampledPipelineDescriptor);
 
-    multisampledPipelineDescriptor.colorStateCount = 0;
-    multisampledPipelineDescriptor.depthStencilState =
-        &multisampledPipelineDescriptor.cDepthStencilState;
+    multisampledPipelineDescriptor.cFragment.targetCount = 0;
+    multisampledPipelineDescriptor.EnableDepthStencil();
     wgpu::RenderPipeline multisampledPipelineWithDepthStencilOnly =
-        device.CreateRenderPipeline(&multisampledPipelineDescriptor);
+        device.CreateRenderPipeline2(&multisampledPipelineDescriptor);
 
     // It is not allowed to use multisampled render pass and non-multisampled render pipeline.
     {
@@ -406,8 +404,8 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
 
     for (size_t i = 0; i < kNumTextureComponentType; ++i) {
         for (size_t j = 0; j < kNumTextureComponentType; ++j) {
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.vertexStage.module = vsModule;
+            utils::ComboRenderPipelineDescriptor2 descriptor;
+            descriptor.vertex.module = vsModule;
 
             std::ostringstream stream;
             stream << R"(
@@ -416,7 +414,7 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
 
                 [[stage(fragment)]] fn main() -> void {
                 })";
-            descriptor.cFragmentStage.module =
+            descriptor.cFragment.module =
                 utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
@@ -424,9 +422,9 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
             if (i == j) {
-                device.CreateRenderPipeline(&descriptor);
+                device.CreateRenderPipeline2(&descriptor);
             } else {
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
             }
         }
     }
@@ -455,8 +453,8 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 
     for (size_t i = 0; i < kNumTextureViewDimensions; ++i) {
         for (size_t j = 0; j < kNumTextureViewDimensions; ++j) {
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.vertexStage.module = vsModule;
+            utils::ComboRenderPipelineDescriptor2 descriptor;
+            descriptor.vertex.module = vsModule;
 
             std::ostringstream stream;
             stream << R"(
@@ -464,7 +462,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
                    << kTextureKeywords[i] << R"(<f32>;
                 [[stage(fragment)]] fn main() -> void {
                 })";
-            descriptor.cFragmentStage.module =
+            descriptor.cFragment.module =
                 utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
@@ -473,9 +471,9 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
             descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
             if (i == j) {
-                device.CreateRenderPipeline(&descriptor);
+                device.CreateRenderPipeline2(&descriptor);
             } else {
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
             }
         }
     }
@@ -494,11 +492,11 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
             dst.data[VertexIndex] = 0x1234u;
         })");
 
-    utils::ComboRenderPipelineDescriptor descriptor(device);
+    utils::ComboRenderPipelineDescriptor2 descriptor;
     descriptor.layout = nullptr;
-    descriptor.vertexStage.module = vsModuleWithStorageBuffer;
-    descriptor.cFragmentStage.module = fsModule;
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+    descriptor.vertex.module = vsModuleWithStorageBuffer;
+    descriptor.cFragment.module = fsModule;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
 }
 
 // Tests that strip primitive topologies require an index format
@@ -519,37 +517,37 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
 
     for (wgpu::PrimitiveTopology primitiveTopology : kStripTopologyTypes) {
         for (wgpu::IndexFormat indexFormat : kIndexFormatTypes) {
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.vertexStage.module = vsModule;
-            descriptor.cFragmentStage.module = fsModule;
-            descriptor.primitiveTopology = primitiveTopology;
-            descriptor.cVertexState.indexFormat = indexFormat;
+            utils::ComboRenderPipelineDescriptor2 descriptor;
+            descriptor.vertex.module = vsModule;
+            descriptor.cFragment.module = fsModule;
+            descriptor.primitive.topology = primitiveTopology;
+            descriptor.primitive.stripIndexFormat = indexFormat;
 
             if (indexFormat == wgpu::IndexFormat::Undefined) {
                 // Fail because the index format is undefined and the primitive
                 // topology is a strip type.
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
             } else {
                 // Succeeds because the index format is given.
-                device.CreateRenderPipeline(&descriptor);
+                device.CreateRenderPipeline2(&descriptor);
             }
         }
     }
 
     for (wgpu::PrimitiveTopology primitiveTopology : kListTopologyTypes) {
         for (wgpu::IndexFormat indexFormat : kIndexFormatTypes) {
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.vertexStage.module = vsModule;
-            descriptor.cFragmentStage.module = fsModule;
-            descriptor.primitiveTopology = primitiveTopology;
-            descriptor.cVertexState.indexFormat = indexFormat;
+            utils::ComboRenderPipelineDescriptor2 descriptor;
+            descriptor.vertex.module = vsModule;
+            descriptor.cFragment.module = fsModule;
+            descriptor.primitive.topology = primitiveTopology;
+            descriptor.primitive.stripIndexFormat = indexFormat;
 
             if (indexFormat == wgpu::IndexFormat::Undefined) {
                 // Succeeds even when the index format is undefined because the
                 // primitive topology isn't a strip type.
-                device.CreateRenderPipeline(&descriptor);
+                device.CreateRenderPipeline2(&descriptor);
             } else {
-                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
+                ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
             }
         }
     }

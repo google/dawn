@@ -53,11 +53,11 @@ namespace {
             wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
                 [[stage(fragment)]] fn main() -> void {
                 })");
-            utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-            pipelineDescriptor.vertexStage.module = vsModule;
-            pipelineDescriptor.cFragmentStage.module = fsModule;
+            utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+            pipelineDescriptor.vertex.module = vsModule;
+            pipelineDescriptor.cFragment.module = fsModule;
             pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, nullptr);
-            return device.CreateRenderPipeline(&pipelineDescriptor);
+            return device.CreateRenderPipeline2(&pipelineDescriptor);
         }
 
         wgpu::ComputePipeline CreateNoOpComputePipeline() {
@@ -782,11 +782,11 @@ namespace {
                 [[group(0), binding(0)]] var<storage_buffer> rBuffer : [[access(read)]] RBuffer;
                 [[stage(fragment)]] fn main() -> void {
                 })");
-            utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-            pipelineDescriptor.vertexStage.module = vsModule;
-            pipelineDescriptor.cFragmentStage.module = fsModule;
+            utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+            pipelineDescriptor.vertex.module = vsModule;
+            pipelineDescriptor.cFragment.module = fsModule;
             pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl0);
-            wgpu::RenderPipeline rp = device.CreateRenderPipeline(&pipelineDescriptor);
+            wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&pipelineDescriptor);
 
             // Resource in bg1 conflicts with resources used in bg0. However, bindings in bg1 is
             // not used in pipeline. But we still track this binding.
@@ -1557,11 +1557,11 @@ namespace {
                 [[group(0), binding(0)]] var tex : [[access(read)]] texture_storage_2d<rgba8unorm>;
                 [[stage(fragment)]] fn main() -> void {
                 })");
-            utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-            pipelineDescriptor.vertexStage.module = vsModule;
-            pipelineDescriptor.cFragmentStage.module = fsModule;
+            utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+            pipelineDescriptor.vertex.module = vsModule;
+            pipelineDescriptor.cFragment.module = fsModule;
             pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &readBGL);
-            wgpu::RenderPipeline rp = device.CreateRenderPipeline(&pipelineDescriptor);
+            wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&pipelineDescriptor);
 
             // Texture binding in readBG conflicts with texture binding in writeBG. The binding
             // in writeBG is not used in pipeline. But we still track this binding.
