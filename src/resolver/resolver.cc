@@ -1448,10 +1448,11 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
     struct_align = std::max(struct_align, align);
   }
 
+  auto size_no_padding = struct_size;
   struct_size = utils::RoundUp(struct_align, struct_size);
 
-  auto* sem = builder_->create<semantic::Struct>(str, std::move(sem_members),
-                                                 struct_align, struct_size);
+  auto* sem = builder_->create<semantic::Struct>(
+      str, std::move(sem_members), struct_align, struct_size, size_no_padding);
   builder_->Sem().Add(str, sem);
   return sem;
 }

@@ -1573,6 +1573,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(4u, result[0].size);
+  EXPECT_EQ(4u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
@@ -1600,6 +1601,35 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(12u, result[0].size);
+  EXPECT_EQ(12u, result[0].size_no_padding);
+}
+
+TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
+  type::Struct* foo_struct_type =
+      MakeUniformBufferType("foo_type", {ty.vec3<f32>()});
+  AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
+
+  MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                          {{0, ty.vec3<f32>()}});
+
+  MakeCallerBodyFunction(
+      "ep_func", {"ub_func"},
+      ast::DecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+      });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
+            result[0].resource_type);
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(16u, result[0].size);
+  EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
@@ -1641,18 +1671,21 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(12u, result[0].size);
+  EXPECT_EQ(12u, result[0].size_no_padding);
 
   EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
             result[1].resource_type);
   EXPECT_EQ(0u, result[1].bind_group);
   EXPECT_EQ(1u, result[1].binding);
   EXPECT_EQ(12u, result[1].size);
+  EXPECT_EQ(12u, result[1].size_no_padding);
 
   EXPECT_EQ(ResourceBinding::ResourceType::kUniformBuffer,
             result[2].resource_type);
   EXPECT_EQ(2u, result[2].bind_group);
   EXPECT_EQ(0u, result[2].binding);
   EXPECT_EQ(12u, result[2].size);
+  EXPECT_EQ(12u, result[2].size_no_padding);
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
@@ -1682,6 +1715,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(20u, result[0].size);
+  EXPECT_EQ(20u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
@@ -1710,6 +1744,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(4u, result[0].size);
+  EXPECT_EQ(4u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
@@ -1739,6 +1774,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(12u, result[0].size);
+  EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
@@ -1785,18 +1821,21 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(12u, result[0].size);
+  EXPECT_EQ(12u, result[0].size_no_padding);
 
   EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
             result[1].resource_type);
   EXPECT_EQ(0u, result[1].bind_group);
   EXPECT_EQ(1u, result[1].binding);
   EXPECT_EQ(12u, result[1].size);
+  EXPECT_EQ(12u, result[1].size_no_padding);
 
   EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
             result[2].resource_type);
   EXPECT_EQ(2u, result[2].bind_group);
   EXPECT_EQ(0u, result[2].binding);
   EXPECT_EQ(12u, result[2].size);
+  EXPECT_EQ(12u, result[2].size_no_padding);
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
@@ -1825,6 +1864,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(20u, result[0].size);
+  EXPECT_EQ(20u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
@@ -1853,6 +1893,37 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(8u, result[0].size);
+  EXPECT_EQ(8u, result[0].size_no_padding);
+}
+
+TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
+  type::Struct* foo_struct_type;
+  type::AccessControl* foo_control_type;
+  std::tie(foo_struct_type, foo_control_type) =
+      MakeStorageBufferTypes("foo_type", {ty.vec3<f32>()});
+  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+
+  MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                          {{0, ty.vec3<f32>()}});
+
+  MakeCallerBodyFunction(
+      "ep_func", {"sb_func"},
+      ast::DecorationList{
+          create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+      });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetStorageBufferResourceBindings("ep_func");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  ASSERT_EQ(1u, result.size());
+
+  EXPECT_EQ(ResourceBinding::ResourceType::kStorageBuffer,
+            result[0].resource_type);
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+  EXPECT_EQ(16u, result[0].size);
+  EXPECT_EQ(12u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
@@ -1903,6 +1974,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(4u, result[0].size);
+  EXPECT_EQ(4u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
@@ -1950,18 +2022,21 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(12u, result[0].size);
+  EXPECT_EQ(12u, result[0].size_no_padding);
 
   EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer,
             result[1].resource_type);
   EXPECT_EQ(0u, result[1].bind_group);
   EXPECT_EQ(1u, result[1].binding);
   EXPECT_EQ(12u, result[1].size);
+  EXPECT_EQ(12u, result[1].size_no_padding);
 
   EXPECT_EQ(ResourceBinding::ResourceType::kReadOnlyStorageBuffer,
             result[2].resource_type);
   EXPECT_EQ(2u, result[2].bind_group);
   EXPECT_EQ(0u, result[2].binding);
   EXPECT_EQ(12u, result[2].size);
+  EXPECT_EQ(12u, result[2].size_no_padding);
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
@@ -1990,6 +2065,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(20u, result[0].size);
+  EXPECT_EQ(20u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
@@ -2019,6 +2095,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(8u, result[0].size);
+  EXPECT_EQ(8u, result[0].size_no_padding);
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {

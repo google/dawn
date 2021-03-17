@@ -23,8 +23,13 @@ namespace semantic {
 Struct::Struct(type::Struct* type,
                StructMemberList members,
                uint32_t align,
-               uint32_t size)
-    : type_(type), members_(std::move(members)), align_(align), size_(size) {}
+               uint32_t size,
+               uint32_t size_no_padding)
+    : type_(type),
+      members_(std::move(members)),
+      align_(align),
+      size_(size),
+      size_no_padding_(size_no_padding) {}
 
 Struct::~Struct() = default;
 

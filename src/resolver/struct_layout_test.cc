@@ -36,13 +36,17 @@ TEST_F(ResolverStructLayoutTest, Scalars) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 12u);
+  EXPECT_EQ(sem->SizeNoPadding(), 12u);
   EXPECT_EQ(sem->Align(), 4u);
   ASSERT_EQ(sem->Members().size(), 3u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 4u);
   EXPECT_EQ(sem->Members()[1]->Offset(), 4u);
+  EXPECT_EQ(sem->Members()[1]->Align(), 4u);
   EXPECT_EQ(sem->Members()[1]->Size(), 4u);
   EXPECT_EQ(sem->Members()[2]->Offset(), 8u);
+  EXPECT_EQ(sem->Members()[2]->Align(), 4u);
   EXPECT_EQ(sem->Members()[2]->Size(), 4u);
 }
 
@@ -57,11 +61,14 @@ TEST_F(ResolverStructLayoutTest, Alias) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 8u);
+  EXPECT_EQ(sem->SizeNoPadding(), 8u);
   EXPECT_EQ(sem->Align(), 4u);
   ASSERT_EQ(sem->Members().size(), 2u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 4u);
   EXPECT_EQ(sem->Members()[1]->Offset(), 4u);
+  EXPECT_EQ(sem->Members()[1]->Align(), 4u);
   EXPECT_EQ(sem->Members()[1]->Size(), 4u);
 }
 
@@ -77,13 +84,17 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayStaticSize) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 36u);
+  EXPECT_EQ(sem->SizeNoPadding(), 36u);
   EXPECT_EQ(sem->Align(), 4u);
   ASSERT_EQ(sem->Members().size(), 3u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 12u);
   EXPECT_EQ(sem->Members()[1]->Offset(), 12u);
+  EXPECT_EQ(sem->Members()[1]->Align(), 4u);
   EXPECT_EQ(sem->Members()[1]->Size(), 20u);
   EXPECT_EQ(sem->Members()[2]->Offset(), 32u);
+  EXPECT_EQ(sem->Members()[2]->Align(), 4u);
   EXPECT_EQ(sem->Members()[2]->Size(), 4u);
 }
 
@@ -99,13 +110,17 @@ TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayStaticSize) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 136u);
+  EXPECT_EQ(sem->SizeNoPadding(), 136u);
   EXPECT_EQ(sem->Align(), 4u);
   ASSERT_EQ(sem->Members().size(), 3u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 24u);
   EXPECT_EQ(sem->Members()[1]->Offset(), 24u);
+  EXPECT_EQ(sem->Members()[1]->Align(), 4u);
   EXPECT_EQ(sem->Members()[1]->Size(), 80u);
   EXPECT_EQ(sem->Members()[2]->Offset(), 104u);
+  EXPECT_EQ(sem->Members()[2]->Align(), 4u);
   EXPECT_EQ(sem->Members()[2]->Size(), 32u);
 }
 
@@ -119,9 +134,11 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayRuntimeSized) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 4u);
+  EXPECT_EQ(sem->SizeNoPadding(), 4u);
   EXPECT_EQ(sem->Align(), 4u);
   ASSERT_EQ(sem->Members().size(), 1u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 4u);
 }
 
@@ -135,9 +152,11 @@ TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayRuntimeSized) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 32u);
+  EXPECT_EQ(sem->SizeNoPadding(), 32u);
   EXPECT_EQ(sem->Align(), 4u);
   ASSERT_EQ(sem->Members().size(), 1u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 32u);
 }
 
@@ -153,9 +172,11 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayOfExplicitStrideArray) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 384u);
+  EXPECT_EQ(sem->SizeNoPadding(), 384u);
   EXPECT_EQ(sem->Align(), 4u);
   ASSERT_EQ(sem->Members().size(), 1u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 384u);
 }
 
@@ -175,9 +196,11 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayOfStructure) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 576u);
+  EXPECT_EQ(sem->SizeNoPadding(), 576u);
   EXPECT_EQ(sem->Align(), 16u);
   ASSERT_EQ(sem->Members().size(), 1u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 16u);
   EXPECT_EQ(sem->Members()[0]->Size(), 576u);
 }
 
@@ -193,13 +216,17 @@ TEST_F(ResolverStructLayoutTest, Vector) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 48u);
+  EXPECT_EQ(sem->SizeNoPadding(), 48u);
   EXPECT_EQ(sem->Align(), 16u);
   ASSERT_EQ(sem->Members().size(), 3u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);  // vec2
+  EXPECT_EQ(sem->Members()[0]->Align(), 8u);
   EXPECT_EQ(sem->Members()[0]->Size(), 8u);
   EXPECT_EQ(sem->Members()[1]->Offset(), 16u);  // vec3
+  EXPECT_EQ(sem->Members()[1]->Align(), 16u);
   EXPECT_EQ(sem->Members()[1]->Size(), 12u);
   EXPECT_EQ(sem->Members()[2]->Offset(), 32u);  // vec4
+  EXPECT_EQ(sem->Members()[2]->Align(), 16u);
   EXPECT_EQ(sem->Members()[2]->Size(), 16u);
 }
 
@@ -221,25 +248,35 @@ TEST_F(ResolverStructLayoutTest, Matrix) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 368u);
+  EXPECT_EQ(sem->SizeNoPadding(), 368u);
   EXPECT_EQ(sem->Align(), 16u);
   ASSERT_EQ(sem->Members().size(), 9u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);  // mat2x2
+  EXPECT_EQ(sem->Members()[0]->Align(), 8u);
   EXPECT_EQ(sem->Members()[0]->Size(), 16u);
   EXPECT_EQ(sem->Members()[1]->Offset(), 16u);  // mat2x3
+  EXPECT_EQ(sem->Members()[1]->Align(), 16u);
   EXPECT_EQ(sem->Members()[1]->Size(), 32u);
   EXPECT_EQ(sem->Members()[2]->Offset(), 48u);  // mat2x4
+  EXPECT_EQ(sem->Members()[2]->Align(), 16u);
   EXPECT_EQ(sem->Members()[2]->Size(), 32u);
   EXPECT_EQ(sem->Members()[3]->Offset(), 80u);  // mat3x2
+  EXPECT_EQ(sem->Members()[3]->Align(), 8u);
   EXPECT_EQ(sem->Members()[3]->Size(), 24u);
   EXPECT_EQ(sem->Members()[4]->Offset(), 112u);  // mat3x3
+  EXPECT_EQ(sem->Members()[4]->Align(), 16u);
   EXPECT_EQ(sem->Members()[4]->Size(), 48u);
   EXPECT_EQ(sem->Members()[5]->Offset(), 160u);  // mat3x4
+  EXPECT_EQ(sem->Members()[5]->Align(), 16u);
   EXPECT_EQ(sem->Members()[5]->Size(), 48u);
   EXPECT_EQ(sem->Members()[6]->Offset(), 208u);  // mat4x2
+  EXPECT_EQ(sem->Members()[6]->Align(), 8u);
   EXPECT_EQ(sem->Members()[6]->Size(), 32u);
   EXPECT_EQ(sem->Members()[7]->Offset(), 240u);  // mat4x3
+  EXPECT_EQ(sem->Members()[7]->Align(), 16u);
   EXPECT_EQ(sem->Members()[7]->Size(), 64u);
   EXPECT_EQ(sem->Members()[8]->Offset(), 304u);  // mat4x4
+  EXPECT_EQ(sem->Members()[8]->Align(), 16u);
   EXPECT_EQ(sem->Members()[8]->Size(), 64u);
 }
 
@@ -258,13 +295,17 @@ TEST_F(ResolverStructLayoutTest, NestedStruct) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 80u);
+  EXPECT_EQ(sem->SizeNoPadding(), 68u);
   EXPECT_EQ(sem->Align(), 16u);
   ASSERT_EQ(sem->Members().size(), 3u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 4u);
   EXPECT_EQ(sem->Members()[1]->Offset(), 16u);
+  EXPECT_EQ(sem->Members()[1]->Align(), 16u);
   EXPECT_EQ(sem->Members()[1]->Size(), 48u);
   EXPECT_EQ(sem->Members()[2]->Offset(), 64u);
+  EXPECT_EQ(sem->Members()[2]->Align(), 4u);
   EXPECT_EQ(sem->Members()[2]->Size(), 4u);
 }
 
@@ -286,15 +327,20 @@ TEST_F(ResolverStructLayoutTest, SizeDecorations) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 76u);
+  EXPECT_EQ(sem->SizeNoPadding(), 76u);
   EXPECT_EQ(sem->Align(), 4u);
   ASSERT_EQ(sem->Members().size(), 4u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 4u);
   EXPECT_EQ(sem->Members()[1]->Offset(), 4u);
+  EXPECT_EQ(sem->Members()[1]->Align(), 4u);
   EXPECT_EQ(sem->Members()[1]->Size(), 8u);
   EXPECT_EQ(sem->Members()[2]->Offset(), 12u);
+  EXPECT_EQ(sem->Members()[2]->Align(), 4u);
   EXPECT_EQ(sem->Members()[2]->Size(), 32u);
   EXPECT_EQ(sem->Members()[3]->Offset(), 44u);
+  EXPECT_EQ(sem->Members()[3]->Align(), 4u);
   EXPECT_EQ(sem->Members()[3]->Size(), 32u);
 }
 
@@ -316,16 +362,39 @@ TEST_F(ResolverStructLayoutTest, AlignDecorations) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_EQ(sem->Size(), 96u);
+  EXPECT_EQ(sem->SizeNoPadding(), 68u);
   EXPECT_EQ(sem->Align(), 32u);
   ASSERT_EQ(sem->Members().size(), 4u);
   EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 4u);
   EXPECT_EQ(sem->Members()[0]->Size(), 4u);
   EXPECT_EQ(sem->Members()[1]->Offset(), 8u);
+  EXPECT_EQ(sem->Members()[1]->Align(), 8u);
   EXPECT_EQ(sem->Members()[1]->Size(), 4u);
   EXPECT_EQ(sem->Members()[2]->Offset(), 16u);
+  EXPECT_EQ(sem->Members()[2]->Align(), 16u);
   EXPECT_EQ(sem->Members()[2]->Size(), 32u);
   EXPECT_EQ(sem->Members()[3]->Offset(), 64u);
+  EXPECT_EQ(sem->Members()[3]->Align(), 32u);
   EXPECT_EQ(sem->Members()[3]->Size(), 4u);
+}
+
+TEST_F(ResolverStructLayoutTest, StructWithLotsOfPadding) {
+  auto* s = Structure("S", {
+                               Member("a", ty.i32(), {MemberAlign(1024)}),
+                           });
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* sem = Sem().Get(s);
+  ASSERT_NE(sem, nullptr);
+  EXPECT_EQ(sem->Size(), 1024u);
+  EXPECT_EQ(sem->SizeNoPadding(), 4u);
+  EXPECT_EQ(sem->Align(), 1024u);
+  ASSERT_EQ(sem->Members().size(), 1u);
+  EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+  EXPECT_EQ(sem->Members()[0]->Align(), 1024u);
+  EXPECT_EQ(sem->Members()[0]->Size(), 4u);
 }
 
 }  // namespace

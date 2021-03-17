@@ -114,6 +114,9 @@ struct ResourceBinding {
   uint32_t binding;
   /// Size for this binding, in bytes, if defined.
   uint64_t size;
+  /// Size for this binding without trailing structure padding, in bytes, if
+  /// defined.
+  uint64_t size_no_padding;
   /// Dimensionality of this binding, if defined.
   TextureDimension dim;
   /// Kind of data being sampled, if defined.

@@ -392,6 +392,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
     entry.size = sem->Size();
+    entry.size_no_padding = sem->SizeNoPadding();
 
     result.push_back(entry);
   }
@@ -567,6 +568,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
     entry.size = sem->Size();
+    entry.size_no_padding = sem->SizeNoPadding();
 
     result.push_back(entry);
   }

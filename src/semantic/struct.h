@@ -46,10 +46,13 @@ class Struct : public Castable<Struct, Node> {
   /// @param members the structure members
   /// @param align the byte alignment of the structure
   /// @param size the byte size of the structure
+  /// @param size_no_padding size of the members without the end of structure
+  /// alignment padding
   Struct(type::Struct* type,
          StructMemberList members,
          uint32_t align,
-         uint32_t size);
+         uint32_t size,
+         uint32_t size_no_padding);
 
   /// Destructor
   ~Struct() override;
@@ -72,11 +75,16 @@ class Struct : public Castable<Struct, Node> {
   /// decoration.
   uint32_t Size() const { return size_; }
 
+  /// @returns the byte size of the members without the end of structure
+  /// alignment padding
+  uint32_t SizeNoPadding() const { return size_no_padding_; }
+
  private:
   type::Struct* const type_;
   StructMemberList const members_;
   uint32_t const align_;
   uint32_t const size_;
+  uint32_t const size_no_padding_;
 };
 
 /// StructMember holds the semantic information for structure members.
