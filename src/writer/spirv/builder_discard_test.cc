@@ -28,7 +28,7 @@ TEST_F(BuilderTest, Discard) {
   spirv::Builder& b = Build();
 
   b.push_function(Function{});
-  EXPECT_EQ(b.GenerateStatement(expr), 1u) << b.error();
+  EXPECT_TRUE(b.GenerateStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpKill
 )");
 }

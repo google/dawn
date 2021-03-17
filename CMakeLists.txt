@@ -76,6 +76,14 @@ message(STATUS "Tint build checking [chromium-style]: ${TINT_CHECK_CHROMIUM_STYL
 message(STATUS "Using python3")
 find_package(PythonInterp 3 REQUIRED)
 
+# CMake < 3.15 sets /W3 in CMAKE_CXX_FLAGS. Remove it if it's there.
+# See https://gitlab.kitware.com/cmake/cmake/-/issues/18317
+if (MSVC)
+    if (CMAKE_CXX_FLAGS MATCHES "/W3")
+        string(REPLACE "/W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    endif()
+endif()
+
 if (${TINT_CHECK_CHROMIUM_STYLE})
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -add-plugin -Xclang find-bad-constructs")
 endif()
@@ -186,8 +194,10 @@ function(tint_default_compile_options TARGET)
       /W4
       /WX
       /wd4068
+      /wd4127
       /wd4244
       /wd4267
+      /wd4458
       /wd4514
       /wd4571
       /wd4625
