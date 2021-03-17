@@ -875,7 +875,8 @@
         "members": [
             {"name": "width", "type": "uint32_t"},
             {"name": "height", "type": "uint32_t", "default": 1},
-            {"name": "depth", "type": "uint32_t", "default": 1}
+            {"name": "depth", "type": "uint32_t", "default": 1},
+            {"name": "depthOrArrayLayers", "type": "uint32_t", "default": 1}
         ]
     },
     "fence": {
