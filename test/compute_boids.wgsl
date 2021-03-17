@@ -81,7 +81,7 @@ fn comp_main() -> void {
 
   var pos : vec2<f32>;
   var vel : vec2<f32>;
-  for(var i : u32 = 0u; i < 5u; i = i + 1) {
+  for(var i : u32 = 0u; i < 5u; i = i + 1u) {
     if (i == index) {
       continue;
     }
