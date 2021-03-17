@@ -1628,13 +1628,17 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
     ASSERT_LE(kSrcSize, kTextureBytesPerRowAlignment);
     ASSERT_LE(kDstSize, kTextureBytesPerRowAlignment);
 
+    // The copyDepth to test:
+    // 1u (non-array texture), 3u (copyDepth < copyWidth), 5u (copyDepth > copyWidth)
+    constexpr std::array<uint32_t, 3> kTestTextureDepth = {1u, 3u, 5u};
+
     for (wgpu::TextureFormat format : kFormats) {
         if (HasToggleEnabled("disable_snorm_read") &&
             (format == wgpu::TextureFormat::RG8Snorm || format == wgpu::TextureFormat::R8Snorm)) {
             continue;
         }
 
-        for (uint32_t textureDepth = 1; textureDepth < 3; ++textureDepth) {
+        for (uint32_t textureDepth : kTestTextureDepth) {
             const wgpu::Extent3D kUploadSize = {4u, 4u, textureDepth};
 
             for (uint32_t srcLevel = 0; srcLevel < kSrcLevelCount; ++srcLevel) {

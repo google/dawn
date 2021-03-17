@@ -230,11 +230,15 @@ namespace dawn_native { namespace d3d12 {
             uint32_t bytesPerRow =
                 Align(blockInfo.byteSize * widthInBlocks, kTextureBytesPerRowAlignment);
             uint32_t rowsPerImage = heightInBlocks;
-            uint64_t tempBufferSize = bytesPerRow * (widthInBlocks * heightInBlocks - 1) +
-                                      Align(blockInfo.byteSize * widthInBlocks, 4);
+
+            // The size of temporary buffer isn't needed to be a multiple of 4 because we don't
+            // need to set mappedAtCreation to be true.
+            auto tempBufferSize =
+                ComputeRequiredBytesInCopy(blockInfo, copySize, bytesPerRow, rowsPerImage);
+
             BufferDescriptor tempBufferDescriptor;
             tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
-            tempBufferDescriptor.size = tempBufferSize;
+            tempBufferDescriptor.size = tempBufferSize.AcquireSuccess();
             Device* device = ToBackend(srcCopy.texture->GetDevice());
             Ref<Buffer> tempBuffer =
                 AcquireRef(ToBackend(device->CreateBuffer(&tempBufferDescriptor)));
