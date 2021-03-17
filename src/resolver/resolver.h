@@ -114,6 +114,18 @@ class Resolver {
     semantic::Statement* statement;
   };
 
+  /// Structure holding semantic information about a struct.
+  /// Used to build the semantic::Struct nodes at the end of resolving.
+  struct StructInfo {
+    StructInfo();
+    ~StructInfo();
+
+    std::vector<semantic::StructMember*> members;
+    uint32_t align = 0;
+    uint32_t size = 0;
+    uint32_t size_no_padding = 0;
+  };
+
   /// Structure holding semantic information about a block (i.e. scope), such as
   /// parent block and variables declared in the block.
   /// Used to validate variable scoping rules.
@@ -201,10 +213,9 @@ class Resolver {
   /// returned.
   const semantic::Array* Array(type::Array*);
 
-  /// @returns the semantic information for the structure `str`, building it if
-  /// it hasn't been constructed already. If an error is raised, nullptr is
-  /// returned.
-  const semantic::Struct* Structure(type::Struct* str);
+  /// @returns the StructInfo for the structure `str`, building it if it hasn't
+  /// been constructed already. If an error is raised, nullptr is returned.
+  StructInfo* Structure(type::Struct* str);
 
   /// @param align the output default alignment in bytes for the type `ty`
   /// @param size the output default size in bytes for the type `ty`
@@ -239,10 +250,12 @@ class Resolver {
   std::unordered_map<ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
   std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;
+  std::unordered_map<type::Struct*, StructInfo*> struct_info_;
   FunctionInfo* current_function_ = nullptr;
   semantic::Statement* current_statement_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
+  BlockAllocator<StructInfo> struct_infos_;
 };
 
 }  // namespace resolver

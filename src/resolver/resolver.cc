@@ -1242,6 +1242,15 @@ void Resolver::CreateSemanticNodes() const {
     sem.Add(expr, builder_->create<semantic::Expression>(expr, info.type,
                                                          info.statement));
   }
+
+  // Create semantic nodes for all structs
+  for (auto it : struct_info_) {
+    auto* str = it.first;
+    auto* info = it.second;
+    builder_->Sem().Add(str, builder_->create<semantic::Struct>(
+                                 str, std::move(info->members), info->align,
+                                 info->size, info->size_no_padding));
+  }
 }
 
 bool Resolver::DefaultAlignAndSize(type::Type* ty,
@@ -1288,9 +1297,9 @@ bool Resolver::DefaultAlignAndSize(type::Type* ty,
     size = vector_align[mat->rows()] * mat->columns();
     return true;
   } else if (auto* s = ty->As<type::Struct>()) {
-    if (auto* sem = Structure(s)) {
-      align = sem->Align();
-      size = sem->Size();
+    if (auto* si = Structure(s)) {
+      align = si->align;
+      size = si->size;
       return true;
     }
     return false;
@@ -1354,10 +1363,11 @@ const semantic::Array* Resolver::Array(type::Array* arr) {
   return create_semantic(utils::RoundUp(el_align, el_size));
 }
 
-const semantic::Struct* Resolver::Structure(type::Struct* str) {
-  if (auto* sem = builder_->Sem().Get(str)) {
-    // Semantic info already constructed for this structure type
-    return sem;
+Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
+  auto info_it = struct_info_.find(str);
+  if (info_it != struct_info_.end()) {
+    // StructInfo already resolved for this structure type
+    return info_it->second;
   }
 
   semantic::StructMemberList sem_members;
@@ -1451,10 +1461,13 @@ const semantic::Struct* Resolver::Structure(type::Struct* str) {
   auto size_no_padding = struct_size;
   struct_size = utils::RoundUp(struct_align, struct_size);
 
-  auto* sem = builder_->create<semantic::Struct>(
-      str, std::move(sem_members), struct_align, struct_size, size_no_padding);
-  builder_->Sem().Add(str, sem);
-  return sem;
+  auto* info = struct_infos_.Create();
+  info->members = std::move(sem_members);
+  info->align = struct_align;
+  info->size = struct_size;
+  info->size_no_padding = size_no_padding;
+  struct_info_.emplace(str, info);
+  return info;
 }
 
 template <typename F>
@@ -1470,8 +1483,10 @@ Resolver::VariableInfo::VariableInfo(ast::Variable* decl)
 Resolver::VariableInfo::~VariableInfo() = default;
 
 Resolver::FunctionInfo::FunctionInfo(ast::Function* decl) : declaration(decl) {}
-
 Resolver::FunctionInfo::~FunctionInfo() = default;
+
+Resolver::StructInfo::StructInfo() = default;
+Resolver::StructInfo::~StructInfo() = default;
 
 }  // namespace resolver
 }  // namespace tint
