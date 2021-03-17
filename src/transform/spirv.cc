@@ -17,7 +17,9 @@
 #include <string>
 #include <utility>
 
+#include "src/ast/return_statement.h"
 #include "src/program_builder.h"
+#include "src/semantic/function.h"
 #include "src/semantic/variable.h"
 
 namespace tint {
@@ -102,6 +104,8 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       continue;
     }
 
+    auto* sem_func = ctx.src->Sem().Get(func);
+
     for (auto* param : func->params()) {
       // TODO(jrprice): Handle structures by moving the declaration and
       // construction to the function body.
@@ -126,21 +130,37 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       }
     }
 
-    // TODO(jrprice): Hoist the return type out to a global variable, and
-    // replace return statements with variable assignments.
     if (!func->return_type()->Is<type::Void>()) {
-      TINT_UNIMPLEMENTED(ctx.dst->Diagnostics())
-          << "entry point return values are not yet supported";
-      continue;
+      // TODO(jrprice): Handle structures by creating a variable for each member
+      // and replacing return statements with extracts+stores.
+      if (func->return_type()->UnwrapAll()->Is<type::Struct>()) {
+        TINT_UNIMPLEMENTED(ctx.dst->Diagnostics())
+            << "structures as entry point return values are not yet supported";
+        continue;
+      }
+
+      // Create a new symbol for the global variable.
+      auto var_symbol = ctx.dst->Symbols().New();
+      // Create the global variable.
+      auto* var = ctx.dst->Var(var_symbol, ctx.Clone(func->return_type()),
+                               ast::StorageClass::kOutput, nullptr,
+                               ctx.Clone(func->return_type_decorations()));
+      ctx.InsertBefore(func, var);
+
+      // Replace all return statements with stores to the global variable.
+      for (auto* ret : sem_func->ReturnStatements()) {
+        ctx.InsertBefore(
+            ret, ctx.dst->create<ast::AssignmentStatement>(
+                     ctx.dst->Expr(var_symbol), ctx.Clone(ret->value())));
+        ctx.Replace(ret, ctx.dst->create<ast::ReturnStatement>());
+      }
     }
 
-    // Rewrite the function header to remove the parameters.
-    // TODO(jrprice): Change return type to void when return values are handled.
+    // Rewrite the function header to remove the parameters and return value.
     auto* new_func = ctx.dst->create<ast::Function>(
         func->source(), ctx.Clone(func->symbol()), ast::VariableList{},
-        ctx.Clone(func->return_type()), ctx.Clone(func->body()),
-        ctx.Clone(func->decorations()),
-        ctx.Clone(func->return_type_decorations()));
+        ctx.dst->ty.void_(), ctx.Clone(func->body()),
+        ctx.Clone(func->decorations()), ast::DecorationList{});
     ctx.Replace(func, new_func);
   }
 }

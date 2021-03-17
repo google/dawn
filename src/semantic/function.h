@@ -29,6 +29,7 @@ class BuiltinDecoration;
 class Function;
 class GroupDecoration;
 class LocationDecoration;
+class ReturnStatement;
 }  // namespace ast
 
 namespace semantic {
@@ -53,11 +54,13 @@ class Function : public Castable<Function, CallTarget> {
   /// @param declaration the ast::Function
   /// @param referenced_module_vars the referenced module variables
   /// @param local_referenced_module_vars the locally referenced module
+  /// @param return_statements the function return statements
   /// variables
   /// @param ancestor_entry_points the ancestor entry points
   Function(ast::Function* declaration,
            std::vector<const Variable*> referenced_module_vars,
            std::vector<const Variable*> local_referenced_module_vars,
+           std::vector<const ast::ReturnStatement*> return_statements,
            std::vector<Symbol> ancestor_entry_points);
 
   /// Destructor
@@ -75,6 +78,10 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns the locally referenced module variables
   const std::vector<const Variable*>& LocalReferencedModuleVariables() const {
     return local_referenced_module_vars_;
+  }
+  /// @returns the return statements
+  const std::vector<const ast::ReturnStatement*> ReturnStatements() const {
+    return return_statements_;
   }
   /// @returns the ancestor entry points
   const std::vector<Symbol>& AncestorEntryPoints() const {
@@ -148,6 +155,7 @@ class Function : public Castable<Function, CallTarget> {
   ast::Function* const declaration_;
   std::vector<const Variable*> const referenced_module_vars_;
   std::vector<const Variable*> const local_referenced_module_vars_;
+  std::vector<const ast::ReturnStatement*> const return_statements_;
   std::vector<Symbol> const ancestor_entry_points_;
 };
 

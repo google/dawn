@@ -18,6 +18,7 @@
 #include "src/ast/builtin.h"
 #include "src/ast/builtin_decoration.h"
 #include "src/ast/location_decoration.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/variable.h"
@@ -91,6 +92,74 @@ OpDecorate %5 Location 1
 %15 = OpLoad %4 %5
 %16 = OpFMul %4 %14 %15
 OpStore %17 %16
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(BuilderTest, EntryPoint_ReturnValue) {
+  // [[stage(fragment)]]
+  // fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] f32 {
+  //   if (loc_in > 10) {
+  //     return 0.5;
+  //   }
+  //   return 1.0;
+  // }
+  auto* f32 = ty.f32();
+  auto* u32 = ty.u32();
+  auto* loc_in = Var("loc_in", u32, ast::StorageClass::kFunction, nullptr,
+                     {create<ast::LocationDecoration>(0)});
+  auto* cond = create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan,
+                                             Expr("loc_in"), Expr(10u));
+  Func("frag_main", ast::VariableList{loc_in}, f32,
+       ast::StatementList{
+           If(cond, Block(create<ast::ReturnStatement>(Expr(0.5f)))),
+           create<ast::ReturnStatement>(Expr(1.0f)),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       },
+       ast::DecorationList{create<ast::LocationDecoration>(0)});
+
+  spirv::Builder& b = SanitizeAndBuild();
+
+  ASSERT_TRUE(b.Build());
+
+  // Test that the return value gets hoisted out to a global variable with the
+  // Output storage class, and the return statements are replaced with stores.
+  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint Fragment %10 "frag_main" %1 %4
+OpExecutionMode %10 OriginUpperLeft
+OpName %1 "tint_symbol_1"
+OpName %4 "tint_symbol_2"
+OpName %10 "frag_main"
+OpDecorate %1 Location 0
+OpDecorate %4 Location 0
+%3 = OpTypeInt 32 0
+%2 = OpTypePointer Input %3
+%1 = OpVariable %2 Input
+%6 = OpTypeFloat 32
+%5 = OpTypePointer Output %6
+%7 = OpConstantNull %6
+%4 = OpVariable %5 Output %7
+%9 = OpTypeVoid
+%8 = OpTypeFunction %9
+%13 = OpConstant %3 10
+%15 = OpTypeBool
+%18 = OpConstant %6 0.5
+%19 = OpConstant %6 1
+%10 = OpFunction %9 None %8
+%11 = OpLabel
+%12 = OpLoad %3 %1
+%14 = OpUGreaterThan %15 %12 %13
+OpSelectionMerge %16 None
+OpBranchConditional %14 %17 %16
+%17 = OpLabel
+OpStore %4 %18
+OpReturn
+%16 = OpLabel
+OpStore %4 %19
 OpReturn
 OpFunctionEnd
 )");

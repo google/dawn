@@ -858,6 +858,30 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
   EXPECT_EQ(func_sem->ReferencedModuleVariables().size(), 0u);
 }
 
+TEST_F(ResolverTest, Function_ReturnStatements) {
+  auto* var = Var("foo", ty.f32(), ast::StorageClass::kFunction);
+
+  auto* ret_1 = create<ast::ReturnStatement>(Expr(1.f));
+  auto* ret_foo = create<ast::ReturnStatement>(Expr("foo"));
+
+  auto* func = Func("my_func", ast::VariableList{}, ty.f32(),
+                    ast::StatementList{
+                        create<ast::VariableDeclStatement>(var),
+                        If(Expr(true), Block(ret_1)),
+                        ret_foo,
+                    },
+                    ast::DecorationList{});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->ReturnStatements().size(), 2u);
+  EXPECT_EQ(func_sem->ReturnStatements()[0], ret_1);
+  EXPECT_EQ(func_sem->ReturnStatements()[1], ret_foo);
+}
+
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
   auto* strct = create<ast::Struct>(
       ast::StructMemberList{Member("first_member", ty.i32()),

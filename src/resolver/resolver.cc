@@ -321,6 +321,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
     });
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
+    current_function_->return_statements.push_back(r);
     return Expression(r->value());
   }
   if (auto* s = stmt->As<ast::SwitchStatement>()) {
@@ -1215,7 +1216,7 @@ void Resolver::CreateSemanticNodes() const {
 
     auto* sem_func = builder_->create<semantic::Function>(
         info->declaration, remap_vars(info->referenced_module_vars),
-        remap_vars(info->local_referenced_module_vars),
+        remap_vars(info->local_referenced_module_vars), info->return_statements,
         ancestor_entry_points[func->symbol()]);
     func_info_to_sem_func.emplace(info, sem_func);
     sem.Add(func, sem_func);

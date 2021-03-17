@@ -381,12 +381,12 @@ class CloneContext {
   using CloneableList = std::vector<Cloneable*>;
 
   /// A map of object in #src to their cloned equivalent in #dst
-  std::unordered_map<Cloneable*, Cloneable*> cloned_;
+  std::unordered_map<const Cloneable*, Cloneable*> cloned_;
 
   /// A map of object in #src to the list of cloned objects in #dst.
   /// Clone(const std::vector<T*>& v) will use this to insert the map-value list
   /// into the target vector/ before cloning and inserting the map-key.
-  std::unordered_map<Cloneable*, CloneableList> insert_before_;
+  std::unordered_map<const Cloneable*, CloneableList> insert_before_;
 
   /// Cloneable transform functions registered with ReplaceAll()
   std::vector<CloneableTransform> transforms_;

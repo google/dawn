@@ -38,6 +38,7 @@ class ConstructorExpression;
 class Function;
 class IdentifierExpression;
 class MemberAccessorExpression;
+class ReturnStatement;
 class UnaryOpExpression;
 class Variable;
 }  // namespace ast
@@ -92,6 +93,7 @@ class Resolver {
     ast::Function* const declaration;
     UniqueVector<VariableInfo*> referenced_module_vars;
     UniqueVector<VariableInfo*> local_referenced_module_vars;
+    std::vector<const ast::ReturnStatement*> return_statements;
 
     // List of transitive calls this function makes
     UniqueVector<FunctionInfo*> transitive_calls;

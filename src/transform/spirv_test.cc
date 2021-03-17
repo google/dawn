@@ -86,6 +86,97 @@ fn frag_main() -> void {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SpirvTest, HandleEntryPointIOTypes_ReturnBuiltin) {
+  auto* src = R"(
+[[stage(vertex)]]
+fn vert_main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>(1.0, 2.0, 3.0, 0.0);
+}
+)";
+
+  auto* expect = R"(
+[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+
+[[stage(vertex)]]
+fn vert_main() -> void {
+  tint_symbol_1 = vec4<f32>(1.0, 2.0, 3.0, 0.0);
+  return;
+}
+)";
+
+  auto got = Run<Spirv>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvTest, HandleEntryPointIOTypes_ReturnLocation) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] f32 {
+  if (loc_in > 10u) {
+    return 0.5;
+  }
+  return 1.0;
+}
+)";
+
+  auto* expect = R"(
+[[location(0)]] var<in> tint_symbol_1 : u32;
+
+[[location(0)]] var<out> tint_symbol_2 : f32;
+
+[[stage(fragment)]]
+fn frag_main() -> void {
+  if ((tint_symbol_1 > 10u)) {
+    tint_symbol_2 = 0.5;
+    return;
+  }
+  tint_symbol_2 = 1.0;
+  return;
+}
+)";
+
+  auto got = Run<Spirv>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvTest, HandleEntryPointIOTypes_ReturnLocation_TypeAlias) {
+  auto* src = R"(
+type myf32 = f32;
+
+[[stage(fragment)]]
+fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] myf32 {
+  if (loc_in > 10u) {
+    return 0.5;
+  }
+  return 1.0;
+}
+)";
+
+  auto* expect = R"(
+type myf32 = f32;
+
+[[location(0)]] var<in> tint_symbol_1 : u32;
+
+[[location(0)]] var<out> tint_symbol_2 : myf32;
+
+[[stage(fragment)]]
+fn frag_main() -> void {
+  if ((tint_symbol_1 > 10u)) {
+    tint_symbol_2 = 0.5;
+    return;
+  }
+  tint_symbol_2 = 1.0;
+  return;
+}
+)";
+
+  auto got = Run<Spirv>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SpirvTest, HandleSampleMaskBuiltins_Basic) {
   auto* src = R"(
 [[builtin(sample_index)]] var<in> sample_index : u32;
@@ -164,27 +255,26 @@ fn main() -> void {
 
 // Test that different transforms within the sanitizer interact correctly.
 TEST_F(SpirvTest, MultipleTransforms) {
-  // TODO(jrprice): Make `mask_out` a return value when supported.
   auto* src = R"(
-[[builtin(sample_mask_out)]] var<out> mask_out : u32;
-
 [[stage(fragment)]]
 fn main([[builtin(sample_index)]] sample_index : u32,
-        [[builtin(sample_mask_in)]] mask_in : u32) -> void {
-  mask_out = mask_in;
+        [[builtin(sample_mask_in)]] mask_in : u32)
+        -> [[builtin(sample_mask_out)]] u32 {
+  return mask_in;
 }
 )";
 
   auto* expect = R"(
-[[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
-
 [[builtin(sample_index)]] var<in> tint_symbol_1 : u32;
 
 [[builtin(sample_mask_in)]] var<in> tint_symbol_2 : array<u32, 1>;
 
+[[builtin(sample_mask_out)]] var<out> tint_symbol_3 : array<u32, 1>;
+
 [[stage(fragment)]]
 fn main() -> void {
-  mask_out[0] = tint_symbol_2[0];
+  tint_symbol_3[0] = tint_symbol_2[0];
+  return;
 }
 )";
 
