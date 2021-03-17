@@ -87,15 +87,15 @@ namespace dawn_native {
                 if (timestamp.low <= u32(f32(0xFFFFFFFFu) / period)) {
                     timestamps.t[index].low = u32(round(f32(timestamp.low) * period));
                 } else {
-                    var lo : u32 = timestamp.low & 0xFFFF;
-                    var hi : u32 = timestamp.low >> 16;
+                    var lo : u32 = timestamp.low & 0xFFFFu;
+                    var hi : u32 = timestamp.low >> 16u;
 
                     var t0 : u32 = u32(round(f32(lo) * period));
-                    var t1 : u32 = u32(round(f32(hi) * period)) + (t0 >> 16);
-                    w = t1 >> 16;
+                    var t1 : u32 = u32(round(f32(hi) * period)) + (t0 >> 16u);
+                    w = t1 >> 16u;
 
-                    var result : u32 = t1 << 16;
-                    result = result | (t0 & 0xFFFF);
+                    var result : u32 = t1 << 16u;
+                    result = result | (t0 & 0xFFFFu);
                     timestamps.t[index].low = result;
                 }
 
