@@ -88,6 +88,15 @@ class InternalCompilerError {
 #define TINT_UNREACHABLE(diagnostics) \
   TINT_ICE(diagnostics) << "TINT_UNREACHABLE "
 
+/// TINT_UNIMPLEMENTED() is a macro for appending a "TINT_UNIMPLEMENTED"
+/// internal compiler error message to the diagnostics list `diagnostics`, and
+/// calling the InternalCompilerErrorReporter with the full diagnostic list if a
+/// reporter is set.
+/// The ICE message contains the callsite's file and line.
+/// Use the `<<` operator to append an error message to the ICE.
+#define TINT_UNIMPLEMENTED(diagnostics) \
+  TINT_ICE(diagnostics) << "TINT_UNIMPLEMENTED "
+
 /// TINT_ASSERT() is a macro for checking the expression is true, triggering a
 /// TINT_ICE if it is not.
 /// The ICE message contains the callsite's file and line.

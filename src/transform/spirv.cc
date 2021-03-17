@@ -106,7 +106,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       // TODO(jrprice): Handle structures by moving the declaration and
       // construction to the function body.
       if (param->type()->Is<type::Struct>()) {
-        TINT_ICE(ctx.dst->Diagnostics())
+        TINT_UNIMPLEMENTED(ctx.dst->Diagnostics())
             << "structures as entry point parameters are not yet supported";
         continue;
       }
@@ -128,7 +128,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
     // TODO(jrprice): Hoist the return type out to a global variable, and
     // replace return statements with variable assignments.
     if (!func->return_type()->Is<type::Void>()) {
-      TINT_ICE(ctx.dst->Diagnostics())
+      TINT_UNIMPLEMENTED(ctx.dst->Diagnostics())
           << "entry point return values are not yet supported";
       continue;
     }
