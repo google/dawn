@@ -12,15 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build_overrides/build.gni")
-import("tint_overrides_with_defaults.gni")
-
-# Temporary group to not break dependents while they rename their Tint GN
-# targets
-group("libtint") {
-  public_deps = [ "src:libtint" ]
-}
-
 # This target is built when no specific target is specified on the command line.
 group("default") {
   testonly = true
