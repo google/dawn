@@ -1500,7 +1500,7 @@ Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
 
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
                                             type::Type* ty) {
-  ty = ty->UnwrapAliasIfNeeded();
+  ty = ty->UnwrapIfNeeded();
 
   if (auto* str = ty->As<type::Struct>()) {
     auto* info = Structure(str);

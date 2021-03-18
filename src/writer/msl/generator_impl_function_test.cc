@@ -275,8 +275,8 @@ TEST_F(MslGeneratorImplTest,
 
 using namespace metal;
 struct Data {
-  int a;
-  float b;
+  /* 0x0000 */ int a;
+  /* 0x0004 */ float b;
 };
 
 fragment void frag_main(device Data& coord [[buffer(0)]]) {
@@ -319,8 +319,8 @@ TEST_F(MslGeneratorImplTest,
 
 using namespace metal;
 struct Data {
-  int a;
-  float b;
+  /* 0x0000 */ int a;
+  /* 0x0004 */ float b;
 };
 
 fragment void frag_main(const device Data& coord [[buffer(0)]]) {
@@ -591,8 +591,8 @@ TEST_F(MslGeneratorImplTest,
 
 using namespace metal;
 struct Data {
-  int a;
-  float b;
+  /* 0x0000 */ int a;
+  /* 0x0004 */ float b;
 };
 
 float sub_func(device Data& coord, float param) {
@@ -650,8 +650,8 @@ TEST_F(MslGeneratorImplTest,
 
 using namespace metal;
 struct Data {
-  int a;
-  float b;
+  /* 0x0000 */ int a;
+  /* 0x0004 */ float b;
 };
 
 float sub_func(const device Data& coord, float param) {
@@ -794,7 +794,7 @@ TEST_F(MslGeneratorImplTest,
 
 using namespace metal;
 struct Data {
-  float d;
+  /* 0x0000 */ float d;
 };
 
 kernel void a(device Data& data [[buffer(0)]]) {
