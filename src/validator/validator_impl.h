@@ -131,12 +131,6 @@ class ValidatorImpl {
   /// @param funcs the functions to check
   /// @returns true if the valdiation was successful
   bool ValidateEntryPoint(const ast::FunctionList& funcs);
-
-  /// Validates a constructed type
-  /// @param type the type to check
-  /// @returns true if the valdiation was successful
-  bool ValidateConstructedType(const type::Type* type);
-
   /// Returns true if the given type is storable. This uses and
   /// updates `storable_` and `not_storable_`.
   /// @param type the given type

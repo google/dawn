@@ -216,6 +216,10 @@ class Resolver {
   /// returned.
   const semantic::Array* Array(type::Array*);
 
+  /// @returns returns true if input struct is valid
+  /// @param st the struct to validate
+  bool ValidateStructure(const type::Struct* st);
+
   /// @returns the StructInfo for the structure `str`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
   StructInfo* Structure(type::Struct* str);

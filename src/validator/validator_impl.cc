@@ -72,9 +72,8 @@ bool ValidatorImpl::Validate() {
   // Validate global declarations in the order they appear in the module.
   for (auto* decl : program_->AST().GlobalDeclarations()) {
     if (auto* ty = decl->As<type::Type>()) {
-      if (!ValidateConstructedType(ty)) {
-        return false;
-      }
+      // Validated by Resolver (Struct types only)
+      return true;
     } else if (auto* func = decl->As<ast::Function>()) {
       current_function_ = func;
       if (!ValidateFunction(func)) {
@@ -92,60 +91,6 @@ bool ValidatorImpl::Validate() {
   }
   if (!ValidateEntryPoint(program_->AST().Functions())) {
     return false;
-  }
-
-  return true;
-}
-
-bool ValidatorImpl::ValidateConstructedType(const type::Type* type) {
-  if (auto* st = type->As<type::Struct>()) {
-    for (auto* member : st->impl()->members()) {
-      if (auto* r = member->type()->UnwrapAll()->As<type::Array>()) {
-        if (r->IsRuntimeArray()) {
-          if (member != st->impl()->members().back()) {
-            add_error(member->source(), "v-0015",
-                      "runtime arrays may only appear as the last member of "
-                      "a struct");
-            return false;
-          }
-          if (!st->IsBlockDecorated()) {
-            add_error(member->source(), "v-0015",
-                      "a struct containing a runtime-sized array "
-                      "requires the [[block]] attribute: '" +
-                          program_->Symbols().NameFor(st->symbol()) + "'");
-            return false;
-          }
-
-          for (auto* deco : r->decorations()) {
-            if (!deco->Is<ast::StrideDecoration>()) {
-              add_error(deco->source(),
-                        "decoration is not valid for array types");
-              return false;
-            }
-          }
-        }
-      }
-
-      for (auto* deco : member->decorations()) {
-        if (!(deco->Is<ast::BuiltinDecoration>() ||
-              deco->Is<ast::LocationDecoration>() ||
-              deco->Is<ast::StructMemberOffsetDecoration>() ||
-              deco->Is<ast::StructMemberSizeDecoration>() ||
-              deco->Is<ast::StructMemberAlignDecoration>())) {
-          add_error(deco->source(),
-                    "decoration is not valid for structure members");
-          return false;
-        }
-      }
-    }
-
-    for (auto* deco : st->impl()->decorations()) {
-      if (!(deco->Is<ast::StructBlockDecoration>())) {
-        add_error(deco->source(),
-                  "decoration is not valid for struct declarations");
-        return false;
-      }
-    }
   }
 
   return true;

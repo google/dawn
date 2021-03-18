@@ -110,21 +110,35 @@ class List {
 
   /// adds the error message without a source to the end of this list.
   /// @param err_msg the error message
-  void add_error(const std::string& err_msg) {
+  void add_error(std::string err_msg) {
     diag::Diagnostic error{};
     error.severity = diag::Severity::Error;
-    error.message = err_msg;
+    error.message = std::move(err_msg);
     add(std::move(error));
   }
 
   /// adds the error message with the given Source to the end of this list.
   /// @param err_msg the error message
   /// @param source the source of the error diagnostic
-  void add_error(const std::string& err_msg, const Source& source) {
+  void add_error(std::string err_msg, const Source& source) {
     diag::Diagnostic error{};
     error.severity = diag::Severity::Error;
     error.source = source;
-    error.message = err_msg;
+    error.message = std::move(err_msg);
+    add(std::move(error));
+  }
+
+  /// adds the error message with the given code and Source to the end of this
+  /// list.
+  /// @param code the error code
+  /// @param err_msg the error message
+  /// @param source the source of the error diagnostic
+  void add_error(const char* code, std::string err_msg, const Source& source) {
+    diag::Diagnostic error{};
+    error.code = code;
+    error.severity = diag::Severity::Error;
+    error.source = source;
+    error.message = std::move(err_msg);
     add(std::move(error));
   }
 

@@ -27,6 +27,7 @@
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -1391,11 +1392,70 @@ const semantic::Array* Resolver::Array(type::Array* arr) {
   return create_semantic(utils::RoundUp(el_align, el_size));
 }
 
+bool Resolver::ValidateStructure(const type::Struct* st) {
+  for (auto* member : st->impl()->members()) {
+    if (auto* r = member->type()->UnwrapAll()->As<type::Array>()) {
+      if (r->IsRuntimeArray()) {
+        if (member != st->impl()->members().back()) {
+          diagnostics_.add_error(
+              "v-0015",
+              "runtime arrays may only appear as the last member of a struct",
+              member->source());
+          return false;
+        }
+        if (!st->IsBlockDecorated()) {
+          diagnostics_.add_error("v-0015",
+                                 "a struct containing a runtime-sized array "
+                                 "requires the [[block]] attribute: '" +
+                                     builder_->Symbols().NameFor(st->symbol()) +
+                                     "'",
+                                 member->source());
+          return false;
+        }
+
+        for (auto* deco : r->decorations()) {
+          if (!deco->Is<ast::StrideDecoration>()) {
+            diagnostics_.add_error("decoration is not valid for array types",
+                                   deco->source());
+            return false;
+          }
+        }
+      }
+    }
+
+    for (auto* deco : member->decorations()) {
+      if (!(deco->Is<ast::BuiltinDecoration>() ||
+            deco->Is<ast::LocationDecoration>() ||
+            deco->Is<ast::StructMemberOffsetDecoration>() ||
+            deco->Is<ast::StructMemberSizeDecoration>() ||
+            deco->Is<ast::StructMemberAlignDecoration>())) {
+        diagnostics_.add_error("decoration is not valid for structure members",
+                               deco->source());
+        return false;
+      }
+    }
+  }
+
+  for (auto* deco : st->impl()->decorations()) {
+    if (!(deco->Is<ast::StructBlockDecoration>())) {
+      diagnostics_.add_error("decoration is not valid for struct declarations",
+                             deco->source());
+      return false;
+    }
+  }
+
+  return true;
+}
+
 Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
   auto info_it = struct_info_.find(str);
   if (info_it != struct_info_.end()) {
     // StructInfo already resolved for this structure type
     return info_it->second;
+  }
+
+  if (!ValidateStructure(str)) {
+    return nullptr;
   }
 
   semantic::StructMemberList sem_members;

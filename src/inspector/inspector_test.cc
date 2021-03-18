@@ -222,6 +222,17 @@ class InspectorHelper : public ProgramBuilder {
     return struct_type;
   }
 
+  /// Returns true if the struct with `member_types` requires a block decoration
+  /// @param member_types a vector of member types
+  /// @returns true if block decoration is required
+  bool StructRequiresBlockDecoration(
+      std::vector<type::Type*> member_types) const {
+    // Structure needs a [[block]] attribute if the last member is a
+    // dynamically-sized array.
+    return member_types.back()->Is<type::Array>(
+        [](auto&& a) { return a->IsRuntimeArray(); });
+  }
+
   /// Generates types appropriate for using in a storage buffer
   /// @param name name for the type
   /// @param member_types a vector of member types
@@ -231,7 +242,8 @@ class InspectorHelper : public ProgramBuilder {
   std::tuple<type::Struct*, type::AccessControl*> MakeStorageBufferTypes(
       const std::string& name,
       std::vector<type::Type*> member_types) {
-    auto* struct_type = MakeStructType(name, member_types, false);
+    bool is_block = StructRequiresBlockDecoration(member_types);
+    auto* struct_type = MakeStructType(name, member_types, is_block);
     auto* access_type = create<type::AccessControl>(
         ast::AccessControl::kReadWrite, struct_type);
     return {struct_type, std::move(access_type)};
@@ -246,7 +258,8 @@ class InspectorHelper : public ProgramBuilder {
   std::tuple<type::Struct*, type::AccessControl*>
   MakeReadOnlyStorageBufferTypes(const std::string& name,
                                  std::vector<type::Type*> member_types) {
-    auto* struct_type = MakeStructType(name, member_types, false);
+    bool is_block = StructRequiresBlockDecoration(member_types);
+    auto* struct_type = MakeStructType(name, member_types, is_block);
     auto* access_type =
         create<type::AccessControl>(ast::AccessControl::kReadOnly, struct_type);
     return {struct_type, std::move(access_type)};

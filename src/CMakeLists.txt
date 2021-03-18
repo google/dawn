@@ -467,6 +467,7 @@ if(${TINT_BUILD_TESTS})
     inspector/inspector_test.cc
     intrinsic_table_test.cc
     program_test.cc
+    resolver/decoration_validation_test.cc
     resolver/intrinsic_test.cc
     resolver/is_storeable_test.cc
     resolver/resolver_test_helper.cc
@@ -474,6 +475,7 @@ if(${TINT_BUILD_TESTS})
     resolver/resolver_test.cc
     resolver/struct_layout_test.cc
     resolver/struct_storage_class_use_test.cc
+    resolver/type_validation_test.cc
     resolver/validation_test.cc
     scope_stack_test.cc
     semantic/sem_intrinsic_test.cc

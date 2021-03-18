@@ -535,6 +535,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
 
 TEST_F(BoundArrayAccessorsTest, RuntimeArray_Clamps) {
   auto* src = R"(
+[[block]]
 struct S {
   a : f32;
   b : array<f32>;
@@ -547,6 +548,7 @@ fn f() -> void {
 )";
 
   auto* expect = R"(
+[[block]]
 struct S {
   a : f32;
   b : array<f32>;

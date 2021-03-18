@@ -15,6 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "gmock/gmock.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/semantic/struct.h"
 
@@ -125,9 +126,12 @@ TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayStaticSize) {
 }
 
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayRuntimeSized) {
-  auto* s = Structure("S", {
-                               Member("c", ty.array<f32>()),
-                           });
+  auto* s =
+      Structure("S",
+                {
+                    Member("c", ty.array<f32>()),
+                },
+                ast::DecorationList{create<ast::StructBlockDecoration>()});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -143,9 +147,12 @@ TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayRuntimeSized) {
 }
 
 TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayRuntimeSized) {
-  auto* s = Structure("S", {
-                               Member("c", ty.array<f32>(/*stride*/ 32)),
-                           });
+  auto* s =
+      Structure("S",
+                {
+                    Member("c", ty.array<f32>(/*stride*/ 32)),
+                },
+                ast::DecorationList{create<ast::StructBlockDecoration>()});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 

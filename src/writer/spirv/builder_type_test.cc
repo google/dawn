@@ -438,11 +438,14 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   auto* arr_arr_mat2x3 = ty.array(ty.mat2x3<f32>(), 1);  // Doubly nested array
   auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>(), 0);    // Runtime array
 
-  auto* s = Structure("S", {
-                               Member("a", arr_mat2x2),
-                               Member("b", arr_arr_mat2x3),
-                               Member("c", rtarr_mat4x4),
-                           });
+  auto* s =
+      Structure("S",
+                {
+                    Member("a", arr_mat2x2),
+                    Member("b", arr_arr_mat2x3),
+                    Member("c", rtarr_mat4x4),
+                },
+                ast::DecorationList{create<ast::StructBlockDecoration>()});
 
   spirv::Builder& b = Build();
 
@@ -469,7 +472,8 @@ OpMemberName %1 0 "a"
 OpMemberName %1 1 "b"
 OpMemberName %1 2 "c"
 )");
-  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %1 0 Offset 0
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Block
+OpMemberDecorate %1 0 Offset 0
 OpMemberDecorate %1 0 ColMajor
 OpMemberDecorate %1 0 MatrixStride 8
 OpDecorate %2 ArrayStride 16

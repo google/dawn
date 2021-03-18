@@ -410,14 +410,17 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
   // array_z: size(4), align(4)
   auto* array_z = ty.array<f32>();
 
-  auto* s = Structure("S", {
-                               Member("a", ty.i32()),
-                               Member("b", array_x),
-                               Member("c", ty.f32()),
-                               Member("d", array_y),
-                               Member("e", ty.f32()),
-                               Member("f", array_z),
-                           });
+  auto* s =
+      Structure("S",
+                {
+                    Member("a", ty.i32()),
+                    Member("b", array_x),
+                    Member("c", ty.f32()),
+                    Member("d", array_y),
+                    Member("e", ty.f32()),
+                    Member("f", array_z),
+                },
+                ast::DecorationList{create<ast::StructBlockDecoration>()});
 
   Global("G", s, ast::StorageClass::kStorage);
 

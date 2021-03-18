@@ -86,44 +86,6 @@ ast::Decoration* createDecoration(ProgramBuilder& builder,
   return nullptr;
 }
 
-using ArrayDecorationTest = ValidatorDecorationsTestWithParams;
-TEST_P(ArrayDecorationTest, Decoration_IsValid) {
-  auto params = GetParam();
-
-  ast::StructMemberList members{Member(
-      "a", create<type::Array>(
-               ty.f32(), 0,
-               ast::DecorationList{createDecoration(*this, params.kind)}))};
-  auto* s = create<ast::Struct>(
-      members, ast::DecorationList{create<ast::StructBlockDecoration>()});
-  auto* s_ty = ty.struct_("mystruct", s);
-
-  ValidatorImpl& v = Build();
-
-  if (params.should_pass) {
-    EXPECT_TRUE(v.ValidateConstructedType(s_ty));
-  } else {
-    EXPECT_FALSE(v.ValidateConstructedType(s_ty));
-    EXPECT_EQ(v.error(), "decoration is not valid for array types");
-  }
-}
-INSTANTIATE_TEST_SUITE_P(
-    ValidatorTest,
-    ArrayDecorationTest,
-    testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
-                    DecorationTestParams{DecorationKind::kAlign, false},
-                    DecorationTestParams{DecorationKind::kBinding, false},
-                    DecorationTestParams{DecorationKind::kBuiltin, false},
-                    DecorationTestParams{DecorationKind::kConstantId, false},
-                    DecorationTestParams{DecorationKind::kGroup, false},
-                    DecorationTestParams{DecorationKind::kLocation, false},
-                    DecorationTestParams{DecorationKind::kOffset, false},
-                    DecorationTestParams{DecorationKind::kSize, false},
-                    DecorationTestParams{DecorationKind::kStage, false},
-                    DecorationTestParams{DecorationKind::kStride, true},
-                    DecorationTestParams{DecorationKind::kStructBlock, false},
-                    DecorationTestParams{DecorationKind::kWorkgroup, false}));
-
 using FunctionDecorationTest = ValidatorDecorationsTestWithParams;
 TEST_P(FunctionDecorationTest, Decoration_IsValid) {
   auto params = GetParam();
@@ -190,77 +152,6 @@ INSTANTIATE_TEST_SUITE_P(
                     DecorationTestParams{DecorationKind::kLocation, true},
                     DecorationTestParams{DecorationKind::kOffset, false},
                     DecorationTestParams{DecorationKind::kSize, false},
-                    DecorationTestParams{DecorationKind::kStage, false},
-                    DecorationTestParams{DecorationKind::kStride, false},
-                    DecorationTestParams{DecorationKind::kStructBlock, false},
-                    DecorationTestParams{DecorationKind::kWorkgroup, false}));
-
-using StructDecorationTest = ValidatorDecorationsTestWithParams;
-TEST_P(StructDecorationTest, Decoration_IsValid) {
-  auto params = GetParam();
-
-  auto* s = create<ast::Struct>(
-      ast::StructMemberList{},
-      ast::DecorationList{createDecoration(*this, params.kind)});
-  auto* s_ty = ty.struct_("mystruct", s);
-
-  ValidatorImpl& v = Build();
-
-  if (params.should_pass) {
-    EXPECT_TRUE(v.ValidateConstructedType(s_ty));
-  } else {
-    EXPECT_FALSE(v.ValidateConstructedType(s_ty));
-    EXPECT_EQ(v.error(), "decoration is not valid for struct declarations");
-  }
-}
-INSTANTIATE_TEST_SUITE_P(
-    ValidatorTest,
-    StructDecorationTest,
-    testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
-                    DecorationTestParams{DecorationKind::kAlign, false},
-                    DecorationTestParams{DecorationKind::kBinding, false},
-                    DecorationTestParams{DecorationKind::kBuiltin, false},
-                    DecorationTestParams{DecorationKind::kConstantId, false},
-                    DecorationTestParams{DecorationKind::kGroup, false},
-                    DecorationTestParams{DecorationKind::kLocation, false},
-                    DecorationTestParams{DecorationKind::kOffset, false},
-                    DecorationTestParams{DecorationKind::kSize, false},
-                    DecorationTestParams{DecorationKind::kStage, false},
-                    DecorationTestParams{DecorationKind::kStride, false},
-                    DecorationTestParams{DecorationKind::kStructBlock, true},
-                    DecorationTestParams{DecorationKind::kWorkgroup, false}));
-
-using StructMemberDecorations = ValidatorDecorationsTestWithParams;
-TEST_P(StructMemberDecorations, Decoration_IsValid) {
-  auto params = GetParam();
-
-  ast::StructMemberList members{
-      Member("a", ty.i32(),
-             ast::DecorationList{createDecoration(*this, params.kind)})};
-  auto* s = create<ast::Struct>(members, ast::DecorationList{});
-  auto* s_ty = ty.struct_("mystruct", s);
-
-  ValidatorImpl& v = Build();
-
-  if (params.should_pass) {
-    EXPECT_TRUE(v.ValidateConstructedType(s_ty));
-  } else {
-    EXPECT_FALSE(v.ValidateConstructedType(s_ty));
-    EXPECT_EQ(v.error(), "decoration is not valid for structure members");
-  }
-}
-INSTANTIATE_TEST_SUITE_P(
-    ValidatorTest,
-    StructMemberDecorations,
-    testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
-                    DecorationTestParams{DecorationKind::kAlign, true},
-                    DecorationTestParams{DecorationKind::kBinding, false},
-                    DecorationTestParams{DecorationKind::kBuiltin, true},
-                    DecorationTestParams{DecorationKind::kConstantId, false},
-                    DecorationTestParams{DecorationKind::kGroup, false},
-                    DecorationTestParams{DecorationKind::kLocation, true},
-                    DecorationTestParams{DecorationKind::kOffset, true},
-                    DecorationTestParams{DecorationKind::kSize, true},
                     DecorationTestParams{DecorationKind::kStage, false},
                     DecorationTestParams{DecorationKind::kStride, false},
                     DecorationTestParams{DecorationKind::kStructBlock, false},
