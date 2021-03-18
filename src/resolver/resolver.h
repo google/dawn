@@ -70,8 +70,12 @@ class Resolver {
   bool Resolve();
 
   /// @param type the given type
-  /// @returns true if the given type is storable.
+  /// @returns true if the given type is storable
   static bool IsStorable(type::Type* type);
+
+  /// @param type the given type
+  /// @returns true if the given type is host-sharable
+  static bool IsHostSharable(type::Type* type);
 
  private:
   /// Structure holding semantic information about a variable.
@@ -227,8 +231,14 @@ class Resolver {
   /// Records the storage class usage for the given type, and any transient
   /// dependencies of the type. Validates that the type can be used for the
   /// given storage class, erroring if it cannot.
+  /// @param sc the storage class to apply to the type and transitent types
+  /// @param ty the type to apply the storage class on
+  /// @param usage the Source of the root variable declaration that uses the
+  /// given type and storage class. Used for generating sensible error messages.
   /// @returns true on success, false on error
-  bool ApplyStorageClassUsageToType(ast::StorageClass, type::Type*);
+  bool ApplyStorageClassUsageToType(ast::StorageClass sc,
+                                    type::Type* ty,
+                                    Source usage);
 
   /// @param align the output default alignment in bytes for the type `ty`
   /// @param size the output default size in bytes for the type `ty`

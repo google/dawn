@@ -131,6 +131,32 @@ bool Resolver::IsStorable(type::Type* type) {
   return false;
 }
 
+// https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
+bool Resolver::IsHostSharable(type::Type* type) {
+  type = type->UnwrapIfNeeded();
+  if (type->IsAnyOf<type::I32, type::U32, type::F32>()) {
+    return true;
+  }
+  if (auto* vec = type->As<type::Vector>()) {
+    return IsHostSharable(vec->type());
+  }
+  if (auto* mat = type->As<type::Matrix>()) {
+    return IsHostSharable(mat->type());
+  }
+  if (auto* arr = type->As<type::Array>()) {
+    return IsHostSharable(arr->type());
+  }
+  if (auto* str = type->As<type::Struct>()) {
+    for (auto* member : str->impl()->members()) {
+      if (!IsHostSharable(member->type())) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
 bool Resolver::ResolveInternal() {
   for (auto* ty : builder_->Types()) {
     if (auto* str = ty->As<type::Struct>()) {
@@ -157,7 +183,10 @@ bool Resolver::ResolveInternal() {
     }
 
     if (!ApplyStorageClassUsageToType(var->declared_storage_class(),
-                                      var->type())) {
+                                      var->type(), var->source())) {
+      diagnostics_.add_note("while instantiating variable " +
+                                builder_->Symbols().NameFor(var->symbol()),
+                            var->source());
       return false;
     }
   }
@@ -1159,7 +1188,11 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     }
   }
 
-  if (!ApplyStorageClassUsageToType(info->storage_class, var->type())) {
+  if (!ApplyStorageClassUsageToType(info->storage_class, var->type(),
+                                    var->source())) {
+    diagnostics_.add_note("while instantiating variable " +
+                              builder_->Symbols().NameFor(var->symbol()),
+                          var->source());
     return false;
   }
 
@@ -1559,7 +1592,8 @@ Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
 }
 
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
-                                            type::Type* ty) {
+                                            type::Type* ty,
+                                            Source usage) {
   ty = ty->UnwrapIfNeeded();
 
   if (auto* str = ty->As<type::Struct>()) {
@@ -1572,25 +1606,29 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
     }
     info->storage_class_usage.emplace(sc);
     for (auto* member : str->impl()->members()) {
-      // TODO(amaiorano): Determine the host-sharable types
-      bool can_be_host_sharable = true;
-      if (ast::IsHostSharable(sc) && !can_be_host_sharable) {
+      if (!ApplyStorageClassUsageToType(sc, member->type(), usage)) {
         std::stringstream err;
-        err << "Structure '" << str->FriendlyName(builder_->Symbols())
-            << "' is used by storage class " << sc
-            << " which contains a member of non-host-sharable type "
-            << member->type()->FriendlyName(builder_->Symbols());
-        diagnostics_.add_error(err.str(), member->source());
-        return false;
-      }
-      if (!ApplyStorageClassUsageToType(sc, member->type())) {
+        err << "while analysing structure member "
+            << str->FriendlyName(builder_->Symbols()) << "."
+            << builder_->Symbols().NameFor(member->symbol());
+        diagnostics_.add_note(err.str(), member->source());
         return false;
       }
     }
+    return true;
   }
 
   if (auto* arr = ty->As<type::Array>()) {
-    return ApplyStorageClassUsageToType(sc, arr->type());
+    return ApplyStorageClassUsageToType(sc, arr->type(), usage);
+  }
+
+  if (ast::IsHostSharable(sc) && !IsHostSharable(ty)) {
+    std::stringstream err;
+    err << "Type '" << ty->FriendlyName(builder_->Symbols())
+        << "' cannot be used in storage class '" << sc
+        << "' as it is non-host-sharable";
+    diagnostics_.add_error(err.str(), usage);
+    return false;
   }
 
   return true;
