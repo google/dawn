@@ -74,8 +74,8 @@ class Resolver {
   static bool IsStorable(type::Type* type);
 
   /// @param type the given type
-  /// @returns true if the given type is host-sharable
-  static bool IsHostSharable(type::Type* type);
+  /// @returns true if the given type is host-shareable
+  static bool IsHostShareable(type::Type* type);
 
  private:
   /// Structure holding semantic information about a variable.

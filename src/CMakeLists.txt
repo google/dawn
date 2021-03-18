@@ -468,9 +468,9 @@ if(${TINT_BUILD_TESTS})
     intrinsic_table_test.cc
     program_test.cc
     resolver/decoration_validation_test.cc
-    resolver/host_sharable_validation_test.cc
+    resolver/host_shareable_validation_test.cc
     resolver/intrinsic_test.cc
-    resolver/is_host_sharable_test.cc
+    resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h

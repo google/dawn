@@ -132,23 +132,23 @@ bool Resolver::IsStorable(type::Type* type) {
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
-bool Resolver::IsHostSharable(type::Type* type) {
+bool Resolver::IsHostShareable(type::Type* type) {
   type = type->UnwrapIfNeeded();
   if (type->IsAnyOf<type::I32, type::U32, type::F32>()) {
     return true;
   }
   if (auto* vec = type->As<type::Vector>()) {
-    return IsHostSharable(vec->type());
+    return IsHostShareable(vec->type());
   }
   if (auto* mat = type->As<type::Matrix>()) {
-    return IsHostSharable(mat->type());
+    return IsHostShareable(mat->type());
   }
   if (auto* arr = type->As<type::Array>()) {
-    return IsHostSharable(arr->type());
+    return IsHostShareable(arr->type());
   }
   if (auto* str = type->As<type::Struct>()) {
     for (auto* member : str->impl()->members()) {
-      if (!IsHostSharable(member->type())) {
+      if (!IsHostShareable(member->type())) {
         return false;
       }
     }
@@ -1335,7 +1335,7 @@ bool Resolver::DefaultAlignAndSize(type::Type* ty,
 
   ty = ty->UnwrapAliasIfNeeded();
   if (ty->is_scalar()) {
-    // Note: Also captures booleans, but these are not host-sharable.
+    // Note: Also captures booleans, but these are not host-shareable.
     align = 4;
     size = 4;
     return true;
@@ -1622,11 +1622,11 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
     return ApplyStorageClassUsageToType(sc, arr->type(), usage);
   }
 
-  if (ast::IsHostSharable(sc) && !IsHostSharable(ty)) {
+  if (ast::IsHostShareable(sc) && !IsHostShareable(ty)) {
     std::stringstream err;
     err << "Type '" << ty->FriendlyName(builder_->Symbols())
         << "' cannot be used in storage class '" << sc
-        << "' as it is non-host-sharable";
+        << "' as it is non-host-shareable";
     diagnostics_.add_error(err.str(), usage);
     return false;
   }

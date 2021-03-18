@@ -95,10 +95,10 @@ class Struct : public Castable<Struct, Node> {
   }
 
   /// @returns true iff this structure has been used by storage class that's
-  /// host-sharable.
-  bool IsHostSharable() const {
+  /// host-shareable.
+  bool IsHostShareable() const {
     for (auto sc : storage_class_usage_) {
-      if (ast::IsHostSharable(sc)) {
+      if (ast::IsHostShareable(sc)) {
         return true;
       }
     }

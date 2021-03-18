@@ -2009,7 +2009,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
     return false;
   }
 
-  bool is_host_sharable = sem_str->IsHostSharable();
+  bool is_host_shareable = sem_str->IsHostShareable();
 
   // Emits a `/* 0xnnnn */` byte offset comment for a struct member.
   auto add_byte_offset_comment = [&](uint32_t offset) {
@@ -2039,7 +2039,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
 
     auto wgsl_offset = sem_mem->Offset();
 
-    if (is_host_sharable) {
+    if (is_host_shareable) {
       if (wgsl_offset < msl_offset) {
         // Unimplementable layout
         TINT_ICE(diagnostics_)
@@ -2084,7 +2084,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
 
     out_ << ";" << std::endl;
 
-    if (is_host_sharable) {
+    if (is_host_shareable) {
       // Calculate new MSL offset
       auto size_align = MslPackedTypeSizeAndAlign(ty);
       if (msl_offset % size_align.align) {
@@ -2097,7 +2097,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
     }
   }
 
-  if (is_host_sharable && sem_str->Size() != msl_offset) {
+  if (is_host_shareable && sem_str->Size() != msl_offset) {
     make_indent();
     add_byte_offset_comment(msl_offset);
     add_padding(sem_str->Size() - msl_offset);

@@ -34,9 +34,9 @@ enum class StorageClass {
   kFunction
 };
 
-/// @returns true if the StorageClass is host-sharable
+/// @returns true if the StorageClass is host-shareable
 /// @see https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable
-inline bool IsHostSharable(StorageClass sc) {
+inline bool IsHostShareable(StorageClass sc) {
   return sc == ast::StorageClass::kUniform || sc == ast::StorageClass::kStorage;
 }
 
