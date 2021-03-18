@@ -249,7 +249,9 @@ TEST_F(UnsafeAPIValidationTest, CreateRenderPipelineAsyncDisallowed) {
     desc.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
     // Control case: CreateRenderPipeline is allowed.
-    EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&desc));
+    device.CreateRenderPipeline(&desc);
+    // TODO(bajones): Enable this when the deprecation warning is re-enabled in Device.cpp.
+    // EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&desc));
 
     testing::MockCallback<WGPUCreateRenderPipelineAsyncCallback> callback;
     EXPECT_CALL(callback,
