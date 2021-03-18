@@ -109,27 +109,23 @@ bool Resolver::Resolve() {
   return result;
 }
 
+// https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Resolver::IsStorable(type::Type* type) {
-  if (type == nullptr) {
-    return false;
-  }
+  type = type->UnwrapIfNeeded();
   if (type->is_scalar() || type->Is<type::Vector>() ||
       type->Is<type::Matrix>()) {
     return true;
   }
-  if (type::Array* array_type = type->As<type::Array>()) {
-    return IsStorable(array_type->type());
+  if (type::Array* arr = type->As<type::Array>()) {
+    return IsStorable(arr->type());
   }
-  if (type::Struct* struct_type = type->As<type::Struct>()) {
-    for (const auto* member : struct_type->impl()->members()) {
+  if (type::Struct* str = type->As<type::Struct>()) {
+    for (const auto* member : str->impl()->members()) {
       if (!IsStorable(member->type())) {
         return false;
       }
     }
     return true;
-  }
-  if (type::Alias* alias_type = type->As<type::Alias>()) {
-    return IsStorable(alias_type->type());
   }
   return false;
 }
