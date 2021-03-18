@@ -76,7 +76,7 @@ class BindGroupTests : public DawnTest {
                        << " : Buffer" << i << ";";
                     break;
                 case wgpu::BufferBindingType::Storage:
-                    fs << "\n[[group(" << i << "), binding(0)]] var<storage_buffer> buffer" << i
+                    fs << "\n[[group(" << i << "), binding(0)]] var<storage> buffer" << i
                        << " : [[access(read)]] Buffer" << i << ";";
                     break;
                 default:
@@ -854,9 +854,9 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
         };
 
         [[group(0), binding(2)]] var<uniform> buffer2 : Buffer2;
-        [[group(0), binding(3)]] var<storage_buffer> buffer3 : [[access(read)]] Buffer3;
-        [[group(0), binding(0)]] var<storage_buffer> buffer0 : [[access(read)]] Buffer0;
-        [[group(0), binding(4)]] var<storage_buffer> outputBuffer : [[access(read_write)]] OutputBuffer;
+        [[group(0), binding(3)]] var<storage> buffer3 : [[access(read)]] Buffer3;
+        [[group(0), binding(0)]] var<storage> buffer0 : [[access(read)]] Buffer0;
+        [[group(0), binding(4)]] var<storage> outputBuffer : [[access(read_write)]] OutputBuffer;
 
         [[stage(compute)]] fn main() -> void {
             outputBuffer.value = vec3<u32>(buffer0.value, buffer2.value, buffer3.value);
@@ -1123,7 +1123,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
         [[block]] struct Buffer0 {
             color : vec4<f32>;
         };
-        [[group(0), binding(0)]] var<storage_buffer> buffer0 : [[access(read)]] Buffer0;
+        [[group(0), binding(0)]] var<storage> buffer0 : [[access(read)]] Buffer0;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
@@ -1261,8 +1261,8 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
             };
         )";
         interface << "[[group(0), binding(" << binding++ << ")]] "
-                  << "var<storage_buffer> sbuf" << i << " : [[access(read)]] ReadOnlyStorageBuffer"
-                  << i << ";\n";
+                  << "var<storage> sbuf" << i << " : [[access(read)]] ReadOnlyStorageBuffer" << i
+                  << ";\n";
 
         body << "if (sbuf" << i << ".value != " << expectedValue++ << "u) {\n";
         body << "    return;\n";
@@ -1278,7 +1278,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
         };
     )";
     interface << "[[group(0), binding(" << binding++ << ")]] "
-              << "var<storage_buffer> result : [[access(read_write)]] ReadWriteStorageBuffer;\n";
+              << "var<storage> result : [[access(read_write)]] ReadWriteStorageBuffer;\n";
 
     body << "result.value = 1u;\n";
 

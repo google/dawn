@@ -119,7 +119,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
              instance_index : u32;
          };
 
-        [[group(0), binding(0)]] var<storage_buffer> idx_vals : [[access(read_write)]] IndexVals;
+        [[group(0), binding(0)]] var<storage> idx_vals : [[access(read_write)]] IndexVals;
 
         [[stage(fragment)]] fn main() -> void  {
         )";

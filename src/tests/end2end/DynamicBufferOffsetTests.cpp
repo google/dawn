@@ -126,9 +126,9 @@ class DynamicBufferOffsetTests : public DawnTest {
             };
 
             [[group(0), binding(0)]] var<uniform> uBufferNotDynamic : Buffer1;
-            [[group(0), binding(1)]] var<storage_buffer> sBufferNotDynamic : [[access(read_write)]] Buffer2;
+            [[group(0), binding(1)]] var<storage> sBufferNotDynamic : [[access(read_write)]] Buffer2;
             [[group(0), binding(3)]] var<uniform> uBuffer : Buffer3;
-            [[group(0), binding(4)]] var<storage_buffer> sBuffer : [[access(read_write)]] Buffer4;
+            [[group(0), binding(4)]] var<storage> sBuffer : [[access(read_write)]] Buffer4;
         )";
 
         if (isInheritedPipeline) {
@@ -195,9 +195,9 @@ class DynamicBufferOffsetTests : public DawnTest {
             };
 
             [[group(0), binding(0)]] var<uniform> uBufferNotDynamic : Buffer1;
-            [[group(0), binding(1)]] var<storage_buffer> sBufferNotDynamic : [[access(read_write)]] Buffer2;
+            [[group(0), binding(1)]] var<storage> sBufferNotDynamic : [[access(read_write)]] Buffer2;
             [[group(0), binding(3)]] var<uniform> uBuffer : Buffer3;
-            [[group(0), binding(4)]] var<storage_buffer> sBuffer : [[access(read_write)]] Buffer4;
+            [[group(0), binding(4)]] var<storage> sBuffer : [[access(read_write)]] Buffer4;
         )";
 
         if (isInheritedPipeline) {

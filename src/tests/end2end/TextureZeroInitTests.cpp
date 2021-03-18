@@ -977,7 +977,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
         [[block]] struct Result {
             value : vec4<f32>;
         };
-        [[group(0), binding(1)]] var<storage> result : Result;
+        [[group(0), binding(1)]] var<storage> result : [[access(read_write)]] Result;
         [[stage(compute)]] fn main() -> void {
            result.value = textureLoad(tex, vec2<i32>(0,0), 0);
         }

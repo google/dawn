@@ -38,7 +38,7 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
         [[block]] struct SSBO {
             value : u32;
         };
-        [[group(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
+        [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] SSBO;
 
         [[stage(compute)]] fn main() -> void {
             ssbo.value = 1u;
@@ -105,7 +105,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
         [[block]] struct SSBO {
             value : u32;
         };
-        [[group(0), binding(0)]] var<storage_buffer> ssbo : SSBO;
+        [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] SSBO;
 
         [[stage(compute)]] fn main() -> void {
             ssbo.value = 1u;

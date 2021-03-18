@@ -197,7 +197,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
             [[block]] struct Buf {
                 data : f32;
             };
-            [[group(0), binding(1)]] var<storage_buffer> buf : [[access(read_write)]] Buf;
+            [[group(0), binding(1)]] var<storage> buf : [[access(read_write)]] Buf;
 
             [[stage(compute)]] fn main() -> void {
                  buf.data = textureLoad(image0, vec2<i32>(LocalInvocationID.xy)).x;

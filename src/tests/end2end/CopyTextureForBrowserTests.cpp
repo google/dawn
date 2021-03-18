@@ -80,7 +80,7 @@ class CopyTextureForBrowserTests : public DawnTest {
             };
             [[group(0), binding(0)]] var src : texture_2d<f32>;
             [[group(0), binding(1)]] var dst : texture_2d<f32>;
-            [[group(0), binding(2)]] var<storage_buffer> output : OutputBuf;
+            [[group(0), binding(2)]] var<storage> output : [[access(read_write)]] OutputBuf;
             [[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
             [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
             [[stage(compute), workgroup_size(1, 1, 1)]]

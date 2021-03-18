@@ -96,7 +96,7 @@ class MultisampledSamplingTest : public DawnTest {
                     colorSamples : array<f32, 4>;
                     depthSamples : array<f32, 4>;
                 };
-                [[group(0), binding(2)]] var<storage_buffer> results : [[access(read_write)]] Results;
+                [[group(0), binding(2)]] var<storage> results : [[access(read_write)]] Results;
 
                 [[stage(compute)]] fn main() -> void {
                     for (var i : i32 = 0; i < 4; i = i + 1) {

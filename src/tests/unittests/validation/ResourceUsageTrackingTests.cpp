@@ -779,7 +779,7 @@ namespace {
                 [[block]] struct RBuffer {
                     value : f32;
                 };
-                [[group(0), binding(0)]] var<storage_buffer> rBuffer : [[access(read)]] RBuffer;
+                [[group(0), binding(0)]] var<storage> rBuffer : [[access(read)]] RBuffer;
                 [[stage(fragment)]] fn main() -> void {
                 })");
             utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
@@ -819,7 +819,7 @@ namespace {
                 [[block]] struct RBuffer {
                     value : f32;
                 };
-                [[group(0), binding(0)]] var<storage_buffer> rBuffer : [[access(read)]] RBuffer;
+                [[group(0), binding(0)]] var<storage> rBuffer : [[access(read)]] RBuffer;
                 [[stage(compute)]] fn main() -> void {
                 })");
             wgpu::ComputePipelineDescriptor pipelineDescriptor;

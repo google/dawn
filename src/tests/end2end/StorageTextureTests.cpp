@@ -712,7 +712,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
   result : u32;
 };
 
-[[group(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
+[[group(0), binding(1)]] var<storage> dstBuffer : [[access(read_write)]] DstBuffer;
 )" << CommonReadOnlyTestCode(format)
                  << R"(
 [[stage(compute)]] fn main() -> void {
@@ -937,7 +937,7 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
   result : u32;
 };
 
-[[group(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
+[[group(0), binding(1)]] var<storage> dstBuffer : [[access(read_write)]] DstBuffer;
 )" << CommonReadOnlyTestCode(kTextureFormat, true)
              << R"(
 [[stage(compute)]] fn main() -> void {
@@ -1207,7 +1207,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
 };
 
 [[group(0), binding(0)]] var srcImage : [[access(read)]] texture_storage_2d<r32uint>;
-[[group(0), binding(1)]] var<storage_buffer> dstBuffer : DstBuffer;
+[[group(0), binding(1)]] var<storage> dstBuffer : [[access(read_write)]] DstBuffer;
 )") + kCommonReadOnlyZeroInitTestCode + R"(
 [[stage(compute)]] fn main() -> void {
   if (doTest()) {

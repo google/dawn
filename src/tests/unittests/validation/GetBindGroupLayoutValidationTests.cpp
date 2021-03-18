@@ -62,7 +62,7 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
         [[block]] struct S3 {
             pos : mat4x4<f32>;
         };
-        [[group(3), binding(0)]] var<storage_buffer> storage3 : S3;
+        [[group(3), binding(0)]] var<storage> storage3 : [[access(read_write)]] S3;
 
         [[stage(fragment)]] fn main() -> void {
         })");
@@ -194,7 +194,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[block]] struct S {
                 pos : vec4<f32>;
             };
-            [[group(0), binding(0)]] var<storage_buffer> ssbo : S;
+            [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] S;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -219,7 +219,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[block]] struct S {
                 pos : vec4<f32>;
             };
-            [[group(0), binding(0)]] var<storage_buffer> ssbo : [[access(read)]] S;
+            [[group(0), binding(0)]] var<storage> ssbo : [[access(read)]] S;
 
             [[stage(fragment)]] fn main() -> void {
             })");
@@ -638,7 +638,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
         [[block]] struct S {
             pos : vec4<f32>;
         };
-        [[group(0), binding(0)]] var<storage_buffer> ssbo : S;
+        [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] S;
 
         [[stage(fragment)]] fn main() -> void {
         })");
@@ -827,8 +827,8 @@ TEST_F(GetBindGroupLayoutTests, DISABLED_FromCorrectEntryPoint) {
         [[block]] struct Data {
             data : f32;
         };
-        [[binding 0, set 0]] var<storage_buffer> data0 : Data;
-        [[binding 1, set 0]] var<storage_buffer> data1 : Data;
+        [[binding 0, set 0]] var<storage> data0 : [[access(read_write)]] Data;
+        [[binding 1, set 0]] var<storage> data1 : [[access(read_write)]] Data;
 
         fn compute0() -> void {
             data0.data = 0.0;

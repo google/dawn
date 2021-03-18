@@ -229,7 +229,7 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPoints) {
         [[block]] struct Data {
             data : u32;
         };
-        [[binding(0), group(0)]] var<storage_buffer> data : Data;
+        [[binding(0), group(0)]] var<storage> data : [[access(read_write)]] Data;
 
         [[stage(compute)]] fn write1() -> void {
             data.data = 1u;

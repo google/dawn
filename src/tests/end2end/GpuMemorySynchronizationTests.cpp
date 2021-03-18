@@ -39,7 +39,7 @@ class GpuMemorySyncTests : public DawnTest {
             [[block]] struct Data {
                 a : i32;
             };
-            [[group(0), binding(0)]] var<storage_buffer> data : [[access(read_write)]] Data;
+            [[group(0), binding(0)]] var<storage> data : [[access(read_write)]] Data;
             [[stage(compute)]] fn main() -> void {
                 data.a = data.a + 1;
             })");
@@ -67,7 +67,7 @@ class GpuMemorySyncTests : public DawnTest {
             [[block]] struct Data {
                 i : i32;
             };
-            [[group(0), binding(0)]] var<storage_buffer> data : [[access(read_write)]] Data;
+            [[group(0), binding(0)]] var<storage> data : [[access(read_write)]] Data;
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
                 data.i = data.i + 1;
@@ -257,7 +257,7 @@ TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
             sampledOut: u32;
             storageOut: u32;
         };
-        [[group(0), binding(0)]] var<storage_buffer> output : [[access(write)]] Output;
+        [[group(0), binding(0)]] var<storage> output : [[access(write)]] Output;
         [[group(0), binding(1)]] var sampledTex : texture_2d<u32>;
         [[group(0), binding(2)]] var storageTex : [[access(read)]] texture_storage_2d<r32uint>;
 
@@ -317,7 +317,7 @@ class StorageToUniformSyncTests : public DawnTest {
             [[block]] struct Data {
                 a : f32;
             };
-            [[group(0), binding(0)]] var<storage_buffer> data : [[access(read_write)]] Data;
+            [[group(0), binding(0)]] var<storage> data : [[access(read_write)]] Data;
             [[stage(compute)]] fn main() -> void {
                 data.a = 1.0;
             })");
@@ -516,12 +516,12 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         [[block]] struct VBContents {
             pos : array<vec4<f32>, 4>;
         };
-        [[group(0), binding(0)]] var<storage_buffer> vbContents : [[access(read_write)]] VBContents;
+        [[group(0), binding(0)]] var<storage> vbContents : [[access(read_write)]] VBContents;
 
         [[block]] struct IBContents {
             indices : array<vec4<i32>, 2>;
         };
-        [[group(0), binding(1)]] var<storage_buffer> ibContents : [[access(read_write)]] IBContents;
+        [[group(0), binding(1)]] var<storage> ibContents : [[access(read_write)]] IBContents;
 
         // TODO(crbug.com/tint/386): Use the same struct.
         [[block]] struct ColorContents1 {
@@ -530,8 +530,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         [[block]] struct ColorContents2 {
             color : f32;
         };
-        [[group(0), binding(2)]] var<storage_buffer> uniformContents : [[access(read_write)]] ColorContents1;
-        [[group(0), binding(3)]] var<storage_buffer> storageContents : [[access(read_write)]] ColorContents2;
+        [[group(0), binding(2)]] var<storage> uniformContents : [[access(read_write)]] ColorContents1;
+        [[group(0), binding(3)]] var<storage> storageContents : [[access(read_write)]] ColorContents2;
 
         [[stage(compute)]] fn main() -> void {
             vbContents.pos[0] = vec4<f32>(-1.0, 1.0, 0.0, 1.0);
@@ -586,7 +586,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         };
 
         [[group(0), binding(0)]] var<uniform> uniformBuffer : Buf;
-        [[group(0), binding(1)]] var<storage_buffer> storageBuffer : [[access(read)]] Buf;
+        [[group(0), binding(1)]] var<storage> storageBuffer : [[access(read)]] Buf;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
@@ -648,7 +648,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
             [[align(256)]] color1 : f32;
         };
 
-        [[group(0), binding(0)]] var<storage_buffer> contents : [[access(read_write)]] Contents;
+        [[group(0), binding(0)]] var<storage> contents : [[access(read_write)]] Contents;
 
         [[stage(compute)]] fn main() -> void {
             contents.pos[0] = vec4<f32>(-1.0, 1.0, 0.0, 1.0);
@@ -703,7 +703,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
             color : f32;
         };
         [[group(0), binding(0)]] var<uniform> uniformBuffer : Buf;
-        [[group(0), binding(1)]] var<storage_buffer> storageBuffer : [[access(read)]] Buf;
+        [[group(0), binding(1)]] var<storage> storageBuffer : [[access(read)]] Buf;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {

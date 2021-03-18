@@ -96,8 +96,8 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfBasic) {
         };
 
         // TODO(crbug.com/tint/386): Use the same struct type
-        [[set(0), binding(0)]] var<storage> src : Buf1;
-        [[set(0), binding(1)]] var<storage> dst : Buf2;
+        [[set(0), binding(0)]] var<storage> src : [[access(read_write)]] Buf1;
+        [[set(0), binding(1)]] var<storage> dst : [[access(read_write)]] Buf2;
 
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
@@ -124,8 +124,8 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
         };
 
         // TODO(crbug.com/tint/386): Use the same struct type
-        [[set(0), binding(0)]] var<storage> src : Buf1;
-        [[set(0), binding(1)]] var<storage> dst : Buf2;
+        [[set(0), binding(0)]] var<storage> src : [[access(read_write)]] Buf1;
+        [[set(0), binding(1)]] var<storage> dst : [[access(read_write)]] Buf2;
 
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
@@ -147,8 +147,8 @@ TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
         };
 
         // TODO(crbug.com/tint/386): Use the same struct type
-        [[set(0), binding(0)]] var<storage> src : Buf1;
-        [[set(0), binding(1)]] var<storage> dst : Buf2;
+        [[set(0), binding(0)]] var<storage> src : [[access(read_write)]] Buf1;
+        [[set(0), binding(1)]] var<storage> dst : [[access(read_write)]] Buf2;
 
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 

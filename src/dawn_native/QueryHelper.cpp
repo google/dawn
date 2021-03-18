@@ -53,9 +53,9 @@ namespace dawn_native {
             };
 
             [[group(0), binding(0)]]
-                var<storage_buffer> timestamps : [[access(read_write)]] TimestampArr;
+                var<storage> timestamps : [[access(read_write)]] TimestampArr;
             [[group(0), binding(1)]]
-                var<storage_buffer> availability : [[access(read)]] AvailabilityArr;
+                var<storage> availability : [[access(read)]] AvailabilityArr;
             [[group(0), binding(2)]] var<uniform> params : TimestampParams;
 
             [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
