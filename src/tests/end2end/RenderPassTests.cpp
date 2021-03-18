@@ -45,13 +45,13 @@ class RenderPassTest : public DawnTest {
                 fragColor = vec4<f32>(0.0, 0.0, 1.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = mVSModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
-        descriptor.cColorStates[0].format = kFormat;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = mVSModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+        descriptor.cTargets[0].format = kFormat;
 
-        pipeline = device.CreateRenderPipeline(&descriptor);
+        pipeline = device.CreateRenderPipeline2(&descriptor);
     }
 
     wgpu::Texture CreateDefault2DTexture() {
@@ -143,14 +143,14 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[stage(fragment)]] fn main() -> void {
             })");
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = mVSModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
-        descriptor.cColorStates[0].format = kFormat;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = mVSModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+        descriptor.cTargets[0].format = kFormat;
 
         wgpu::RenderPipeline pipelineWithNoFragmentOutput =
-            device.CreateRenderPipeline(&descriptor);
+            device.CreateRenderPipeline2(&descriptor);
 
         pass.SetPipeline(pipelineWithNoFragmentOutput);
         pass.Draw(3);

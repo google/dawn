@@ -202,7 +202,7 @@ class MultisampledRenderingTest : public DawnTest {
                                                      uint32_t sampleMask = 0xFFFFFFFF,
                                                      bool alphaToCoverageEnabled = false,
                                                      bool flipTriangle = false) {
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
 
         // Draw a bottom-right triangle. In standard 4xMSAA pattern, for the pixels on diagonal,
         // only two of the samples will be touched.
@@ -222,33 +222,33 @@ class MultisampledRenderingTest : public DawnTest {
             })";
 
         if (flipTriangle) {
-            pipelineDescriptor.vertexStage.module =
+            pipelineDescriptor.vertex.module =
                 utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vsFlipped);
         } else {
-            pipelineDescriptor.vertexStage.module =
+            pipelineDescriptor.vertex.module =
                 utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs);
         }
 
-        pipelineDescriptor.cFragmentStage.module =
+        pipelineDescriptor.cFragment.module =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fs);
 
         if (hasDepthStencilAttachment) {
-            pipelineDescriptor.cDepthStencilState.format = kDepthStencilFormat;
-            pipelineDescriptor.cDepthStencilState.depthWriteEnabled = true;
-            pipelineDescriptor.cDepthStencilState.depthCompare = wgpu::CompareFunction::Less;
-            pipelineDescriptor.depthStencilState = &pipelineDescriptor.cDepthStencilState;
+            wgpu::DepthStencilState* depthStencil =
+                pipelineDescriptor.EnableDepthStencil(kDepthStencilFormat);
+            depthStencil->depthWriteEnabled = true;
+            depthStencil->depthCompare = wgpu::CompareFunction::Less;
         }
 
-        pipelineDescriptor.sampleCount = kSampleCount;
-        pipelineDescriptor.sampleMask = sampleMask;
-        pipelineDescriptor.alphaToCoverageEnabled = alphaToCoverageEnabled;
+        pipelineDescriptor.multisample.count = kSampleCount;
+        pipelineDescriptor.multisample.mask = sampleMask;
+        pipelineDescriptor.multisample.alphaToCoverageEnabled = alphaToCoverageEnabled;
 
-        pipelineDescriptor.colorStateCount = numColorAttachments;
+        pipelineDescriptor.cFragment.targetCount = numColorAttachments;
         for (uint32_t i = 0; i < numColorAttachments; ++i) {
-            pipelineDescriptor.cColorStates[i].format = kColorFormat;
+            pipelineDescriptor.cTargets[i].format = kColorFormat;
         }
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
         return pipeline;
     }
 

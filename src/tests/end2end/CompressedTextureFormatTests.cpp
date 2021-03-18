@@ -138,7 +138,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
     wgpu::RenderPipeline CreateRenderPipelineForTest() {
         ASSERT(IsBCFormatSupported());
 
-        utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+        utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[location(0)]] var<out> texCoord : vec2 <f32>;
@@ -166,12 +166,11 @@ class CompressedTextureBCFormatTest : public DawnTest {
                 fragColor = textureSample(texture0, sampler0, texCoord);
                 return;
             })");
-        renderPipelineDescriptor.vertexStage.module = vsModule;
-        renderPipelineDescriptor.cFragmentStage.module = fsModule;
-        renderPipelineDescriptor.cColorStates[0].format =
-            utils::BasicRenderPass::kDefaultColorFormat;
+        renderPipelineDescriptor.vertex.module = vsModule;
+        renderPipelineDescriptor.cFragment.module = fsModule;
+        renderPipelineDescriptor.cTargets[0].format = utils::BasicRenderPass::kDefaultColorFormat;
 
-        return device.CreateRenderPipeline(&renderPipelineDescriptor);
+        return device.CreateRenderPipeline2(&renderPipelineDescriptor);
     }
 
     // Run the given render pipeline and bind group and verify the pixels in the render target.

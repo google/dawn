@@ -133,35 +133,35 @@ namespace dawn_native {
                 ShaderModuleBase* fragmentModule = store->copyTextureForBrowserFS.Get();
 
                 // Prepare vertex stage.
-                ProgrammableStageDescriptor vertexStage = {};
-                vertexStage.module = vertexModule;
-                vertexStage.entryPoint = "main";
+                VertexState vertex = {};
+                vertex.module = vertexModule;
+                vertex.entryPoint = "main";
 
                 // Prepare frgament stage.
-                ProgrammableStageDescriptor fragmentStage = {};
-                fragmentStage.module = fragmentModule;
-                fragmentStage.entryPoint = "main";
+                FragmentState fragment = {};
+                fragment.module = fragmentModule;
+                fragment.entryPoint = "main";
 
                 // Prepare color state.
-                ColorStateDescriptor colorState = {};
-                colorState.format = wgpu::TextureFormat::RGBA8Unorm;
+                ColorTargetState target = {};
+                target.format = wgpu::TextureFormat::RGBA8Unorm;
 
                 // Create RenderPipeline.
-                RenderPipelineDescriptor renderPipelineDesc = {};
+                RenderPipelineDescriptor2 renderPipelineDesc = {};
 
                 // Generate the layout based on shader modules.
                 renderPipelineDesc.layout = nullptr;
 
-                renderPipelineDesc.vertexStage = vertexStage;
-                renderPipelineDesc.fragmentStage = &fragmentStage;
+                renderPipelineDesc.vertex = vertex;
+                renderPipelineDesc.fragment = &fragment;
 
-                renderPipelineDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
+                renderPipelineDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
 
-                renderPipelineDesc.colorStateCount = 1;
-                renderPipelineDesc.colorStates = &colorState;
+                fragment.targetCount = 1;
+                fragment.targets = &target;
 
                 store->copyTextureForBrowserPipeline =
-                    AcquireRef(device->CreateRenderPipeline(&renderPipelineDesc));
+                    AcquireRef(device->CreateRenderPipeline2(&renderPipelineDesc));
             }
 
             return store->copyTextureForBrowserPipeline.Get();

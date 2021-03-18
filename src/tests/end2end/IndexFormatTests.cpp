@@ -51,18 +51,18 @@ class IndexFormatTest : public DawnTest {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = primitiveTopology;
-        descriptor.cVertexState.indexFormat = format;
-        descriptor.cVertexState.vertexBufferCount = 1;
-        descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
-        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
-        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
-        descriptor.cColorStates[0].format = renderPass.colorFormat;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.primitive.topology = primitiveTopology;
+        descriptor.primitive.stripIndexFormat = format;
+        descriptor.vertex.bufferCount = 1;
+        descriptor.cBuffers[0].arrayStride = 4 * sizeof(float);
+        descriptor.cBuffers[0].attributeCount = 1;
+        descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+        descriptor.cTargets[0].format = renderPass.colorFormat;
 
-        return device.CreateRenderPipeline(&descriptor);
+        return device.CreateRenderPipeline2(&descriptor);
     }
 };
 

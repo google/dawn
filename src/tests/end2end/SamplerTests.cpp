@@ -81,12 +81,12 @@ class SamplerTest : public DawnTest {
                 fragColor = textureSample(texture0, sampler0, FragCoord.xy / vec2<f32>(2.0, 2.0));
             })");
 
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.vertexStage.module = vsModule;
-        pipelineDescriptor.cFragmentStage.module = fsModule;
-        pipelineDescriptor.cColorStates[0].format = mRenderPass.colorFormat;
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        pipelineDescriptor.vertex.module = vsModule;
+        pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.cTargets[0].format = mRenderPass.colorFormat;
 
-        mPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+        mPipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
         mBindGroupLayout = mPipeline.GetBindGroupLayout(0);
 
         wgpu::TextureDescriptor descriptor;

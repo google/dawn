@@ -180,13 +180,13 @@ TEST_P(OpArrayLengthTest, Fragment) {
         })")
                                                                                 .c_str());
 
-    utils::ComboRenderPipelineDescriptor descriptor(device);
-    descriptor.vertexStage.module = vsModule;
-    descriptor.cFragmentStage.module = fsModule;
-    descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-    descriptor.cColorStates[0].format = renderPass.colorFormat;
+    utils::ComboRenderPipelineDescriptor2 descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
 
     // "Draw" the lengths to the texture.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -240,13 +240,13 @@ TEST_P(OpArrayLengthTest, Vertex) {
             fragColor = pointColor;
         })");
 
-    utils::ComboRenderPipelineDescriptor descriptor(device);
-    descriptor.vertexStage.module = vsModule;
-    descriptor.cFragmentStage.module = fsModule;
-    descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-    descriptor.cColorStates[0].format = renderPass.colorFormat;
+    utils::ComboRenderPipelineDescriptor2 descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    descriptor.cTargets[0].format = renderPass.colorFormat;
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &mBindGroupLayout);
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
 
     // "Draw" the lengths to the texture.
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

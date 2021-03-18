@@ -154,19 +154,19 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
 
     constexpr uint32_t kComponentsPerVertex = 4;
 
-    utils::ComboRenderPipelineDescriptor pipelineDesc(device);
-    pipelineDesc.vertexStage.module =
+    utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+    pipelineDesc.vertex.module =
         utils::CreateShaderModuleFromWGSL(device, vertexShader.str().c_str());
-    pipelineDesc.cFragmentStage.module =
+    pipelineDesc.cFragment.module =
         utils::CreateShaderModuleFromWGSL(device, fragmentShader.str().c_str());
-    pipelineDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-    pipelineDesc.cVertexState.vertexBufferCount = 1;
-    pipelineDesc.cVertexState.cVertexBuffers[0].arrayStride = kComponentsPerVertex * sizeof(float);
-    pipelineDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
-    pipelineDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
-    pipelineDesc.cColorStates[0].format = renderPass.colorFormat;
+    pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    pipelineDesc.vertex.bufferCount = 1;
+    pipelineDesc.cBuffers[0].arrayStride = kComponentsPerVertex * sizeof(float);
+    pipelineDesc.cBuffers[0].attributeCount = 1;
+    pipelineDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+    pipelineDesc.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDesc);
 
     std::vector<float> vertexData(firstVertex * kComponentsPerVertex);
     vertexData.insert(vertexData.end(), {0, 0, 0, 1});

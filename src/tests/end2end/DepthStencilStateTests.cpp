@@ -87,7 +87,7 @@ class DepthStencilStateTest : public DawnTest {
     }
 
     struct TestSpec {
-        const wgpu::DepthStencilStateDescriptor& depthStencilState;
+        const wgpu::DepthStencilState& depthStencil;
         RGBA8 color;
         float depth;
         uint32_t stencil;
@@ -101,13 +101,13 @@ class DepthStencilStateTest : public DawnTest {
                                    bool less,
                                    bool equal,
                                    bool greater) {
-        wgpu::StencilStateFaceDescriptor stencilFace;
+        wgpu::StencilFaceState stencilFace;
         stencilFace.compare = wgpu::CompareFunction::Always;
         stencilFace.failOp = wgpu::StencilOperation::Keep;
         stencilFace.depthFailOp = wgpu::StencilOperation::Keep;
         stencilFace.passOp = wgpu::StencilOperation::Keep;
 
-        wgpu::DepthStencilStateDescriptor baseState;
+        wgpu::DepthStencilState baseState;
         baseState.depthWriteEnabled = true;
         baseState.depthCompare = wgpu::CompareFunction::Always;
         baseState.stencilBack = stencilFace;
@@ -115,7 +115,7 @@ class DepthStencilStateTest : public DawnTest {
         baseState.stencilReadMask = 0xff;
         baseState.stencilWriteMask = 0xff;
 
-        wgpu::DepthStencilStateDescriptor state;
+        wgpu::DepthStencilState state;
         state.depthWriteEnabled = true;
         state.depthCompare = compareFunction;
         state.stencilBack = stencilFace;
@@ -151,12 +151,12 @@ class DepthStencilStateTest : public DawnTest {
                                      bool less,
                                      bool equal,
                                      bool greater) {
-        wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+        wgpu::StencilFaceState baseStencilFaceDescriptor;
         baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
         baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
         baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
         baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-        wgpu::DepthStencilStateDescriptor baseState;
+        wgpu::DepthStencilState baseState;
         baseState.depthWriteEnabled = false;
         baseState.depthCompare = wgpu::CompareFunction::Always;
         baseState.stencilBack = baseStencilFaceDescriptor;
@@ -164,12 +164,12 @@ class DepthStencilStateTest : public DawnTest {
         baseState.stencilReadMask = 0xff;
         baseState.stencilWriteMask = 0xff;
 
-        wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+        wgpu::StencilFaceState stencilFaceDescriptor;
         stencilFaceDescriptor.compare = compareFunction;
         stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
         stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
         stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
-        wgpu::DepthStencilStateDescriptor state;
+        wgpu::DepthStencilState state;
         state.depthWriteEnabled = false;
         state.depthCompare = wgpu::CompareFunction::Always;
         state.stencilBack = stencilFaceDescriptor;
@@ -204,12 +204,12 @@ class DepthStencilStateTest : public DawnTest {
                                uint32_t initialStencil,
                                uint32_t reference,
                                uint32_t expectedStencil) {
-        wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+        wgpu::StencilFaceState baseStencilFaceDescriptor;
         baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
         baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
         baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
         baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-        wgpu::DepthStencilStateDescriptor baseState;
+        wgpu::DepthStencilState baseState;
         baseState.depthWriteEnabled = false;
         baseState.depthCompare = wgpu::CompareFunction::Always;
         baseState.stencilBack = baseStencilFaceDescriptor;
@@ -217,12 +217,12 @@ class DepthStencilStateTest : public DawnTest {
         baseState.stencilReadMask = 0xff;
         baseState.stencilWriteMask = 0xff;
 
-        wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+        wgpu::StencilFaceState stencilFaceDescriptor;
         stencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
         stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
         stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
         stencilFaceDescriptor.passOp = stencilOperation;
-        wgpu::DepthStencilStateDescriptor state;
+        wgpu::DepthStencilState state;
         state.depthWriteEnabled = false;
         state.depthCompare = wgpu::CompareFunction::Always;
         state.stencilBack = stencilFaceDescriptor;
@@ -243,12 +243,12 @@ class DepthStencilStateTest : public DawnTest {
 
     // Draw a list of test specs, and check if the stencil value is equal to the expected value
     void CheckStencil(std::vector<TestSpec> testParams, uint32_t expectedStencil) {
-        wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+        wgpu::StencilFaceState stencilFaceDescriptor;
         stencilFaceDescriptor.compare = wgpu::CompareFunction::Equal;
         stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
         stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
         stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
-        wgpu::DepthStencilStateDescriptor state;
+        wgpu::DepthStencilState state;
         state.depthWriteEnabled = false;
         state.depthCompare = wgpu::CompareFunction::Always;
         state.stencilBack = stencilFaceDescriptor;
@@ -290,15 +290,15 @@ class DepthStencilStateTest : public DawnTest {
 
             // Create a pipeline for the triangles with the test spec's depth stencil state
 
-            utils::ComboRenderPipelineDescriptor descriptor(device);
-            descriptor.vertexStage.module = vsModule;
-            descriptor.cFragmentStage.module = fsModule;
-            descriptor.cDepthStencilState = test.depthStencilState;
-            descriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
-            descriptor.cRasterizationState.frontFace = test.frontFace;
-            descriptor.depthStencilState = &descriptor.cDepthStencilState;
+            utils::ComboRenderPipelineDescriptor2 descriptor;
+            descriptor.vertex.module = vsModule;
+            descriptor.cFragment.module = fsModule;
+            wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
+            *depthStencil = test.depthStencil;
+            depthStencil->format = wgpu::TextureFormat::Depth24PlusStencil8;
+            descriptor.primitive.frontFace = test.frontFace;
 
-            wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+            wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
 
             // Create a bind group for the data
             wgpu::BindGroup bindGroup = utils::MakeBindGroup(
@@ -335,13 +335,13 @@ class DepthStencilStateTest : public DawnTest {
 
 // Test compilation and usage of the fixture
 TEST_P(DepthStencilStateTest, Basic) {
-    wgpu::StencilStateFaceDescriptor stencilFace;
+    wgpu::StencilFaceState stencilFace;
     stencilFace.compare = wgpu::CompareFunction::Always;
     stencilFace.failOp = wgpu::StencilOperation::Keep;
     stencilFace.depthFailOp = wgpu::StencilOperation::Keep;
     stencilFace.passOp = wgpu::StencilOperation::Keep;
 
-    wgpu::DepthStencilStateDescriptor state;
+    wgpu::DepthStencilState state;
     state.depthWriteEnabled = false;
     state.depthCompare = wgpu::CompareFunction::Always;
     state.stencilBack = stencilFace;
@@ -358,13 +358,13 @@ TEST_P(DepthStencilStateTest, Basic) {
 
 // Test defaults: depth and stencil tests disabled
 TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
-    wgpu::StencilStateFaceDescriptor stencilFace;
+    wgpu::StencilFaceState stencilFace;
     stencilFace.compare = wgpu::CompareFunction::Always;
     stencilFace.failOp = wgpu::StencilOperation::Keep;
     stencilFace.depthFailOp = wgpu::StencilOperation::Keep;
     stencilFace.passOp = wgpu::StencilOperation::Keep;
 
-    wgpu::DepthStencilStateDescriptor state;
+    wgpu::DepthStencilState state;
     state.depthWriteEnabled = false;
     state.depthCompare = wgpu::CompareFunction::Always;
     state.stencilBack = stencilFace;
@@ -423,13 +423,13 @@ TEST_P(DepthStencilStateTest, DepthNotEqual) {
 
 // Test that disabling depth writes works and leaves the depth buffer unchanged
 TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
-    wgpu::StencilStateFaceDescriptor stencilFace;
+    wgpu::StencilFaceState stencilFace;
     stencilFace.compare = wgpu::CompareFunction::Always;
     stencilFace.failOp = wgpu::StencilOperation::Keep;
     stencilFace.depthFailOp = wgpu::StencilOperation::Keep;
     stencilFace.passOp = wgpu::StencilOperation::Keep;
 
-    wgpu::DepthStencilStateDescriptor baseState;
+    wgpu::DepthStencilState baseState;
     baseState.depthWriteEnabled = true;
     baseState.depthCompare = wgpu::CompareFunction::Always;
     baseState.stencilBack = stencilFace;
@@ -437,7 +437,7 @@ TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
-    wgpu::DepthStencilStateDescriptor noDepthWrite;
+    wgpu::DepthStencilState noDepthWrite;
     noDepthWrite.depthWriteEnabled = false;
     noDepthWrite.depthCompare = wgpu::CompareFunction::Always;
     noDepthWrite.stencilBack = stencilFace;
@@ -445,7 +445,7 @@ TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
     noDepthWrite.stencilReadMask = 0xff;
     noDepthWrite.stencilWriteMask = 0xff;
 
-    wgpu::DepthStencilStateDescriptor checkState;
+    wgpu::DepthStencilState checkState;
     checkState.depthWriteEnabled = false;
     checkState.depthCompare = wgpu::CompareFunction::Equal;
     checkState.stencilBack = stencilFace;
@@ -538,12 +538,12 @@ TEST_P(DepthStencilStateTest, StencilDecrementWrap) {
 
 // Check that the setting a stencil read mask works
 TEST_P(DepthStencilStateTest, StencilReadMask) {
-    wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    wgpu::StencilFaceState baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
     baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-    wgpu::DepthStencilStateDescriptor baseState;
+    wgpu::DepthStencilState baseState;
     baseState.depthWriteEnabled = false;
     baseState.depthCompare = wgpu::CompareFunction::Always;
     baseState.stencilBack = baseStencilFaceDescriptor;
@@ -551,12 +551,12 @@ TEST_P(DepthStencilStateTest, StencilReadMask) {
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
-    wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+    wgpu::StencilFaceState stencilFaceDescriptor;
     stencilFaceDescriptor.compare = wgpu::CompareFunction::Equal;
     stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
     stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
     stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
-    wgpu::DepthStencilStateDescriptor state;
+    wgpu::DepthStencilState state;
     state.depthWriteEnabled = false;
     state.depthCompare = wgpu::CompareFunction::Always;
     state.stencilBack = stencilFaceDescriptor;
@@ -577,12 +577,12 @@ TEST_P(DepthStencilStateTest, StencilReadMask) {
 
 // Check that setting a stencil write mask works
 TEST_P(DepthStencilStateTest, StencilWriteMask) {
-    wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    wgpu::StencilFaceState baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
     baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-    wgpu::DepthStencilStateDescriptor baseState;
+    wgpu::DepthStencilState baseState;
     baseState.depthWriteEnabled = false;
     baseState.depthCompare = wgpu::CompareFunction::Always;
     baseState.stencilBack = baseStencilFaceDescriptor;
@@ -590,12 +590,12 @@ TEST_P(DepthStencilStateTest, StencilWriteMask) {
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0x1;
 
-    wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+    wgpu::StencilFaceState stencilFaceDescriptor;
     stencilFaceDescriptor.compare = wgpu::CompareFunction::Equal;
     stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
     stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
     stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
-    wgpu::DepthStencilStateDescriptor state;
+    wgpu::DepthStencilState state;
     state.depthWriteEnabled = false;
     state.depthCompare = wgpu::CompareFunction::Always;
     state.stencilBack = stencilFaceDescriptor;
@@ -616,12 +616,12 @@ TEST_P(DepthStencilStateTest, StencilWriteMask) {
 
 // Test that the stencil operation is executed on stencil fail
 TEST_P(DepthStencilStateTest, StencilFail) {
-    wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    wgpu::StencilFaceState baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
     baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-    wgpu::DepthStencilStateDescriptor baseState;
+    wgpu::DepthStencilState baseState;
     baseState.depthWriteEnabled = false;
     baseState.depthCompare = wgpu::CompareFunction::Always;
     baseState.stencilBack = baseStencilFaceDescriptor;
@@ -629,12 +629,12 @@ TEST_P(DepthStencilStateTest, StencilFail) {
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
-    wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+    wgpu::StencilFaceState stencilFaceDescriptor;
     stencilFaceDescriptor.compare = wgpu::CompareFunction::Less;
     stencilFaceDescriptor.failOp = wgpu::StencilOperation::Replace;
     stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
     stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
-    wgpu::DepthStencilStateDescriptor state;
+    wgpu::DepthStencilState state;
     state.depthWriteEnabled = false;
     state.depthCompare = wgpu::CompareFunction::Always;
     state.stencilBack = stencilFaceDescriptor;
@@ -653,12 +653,12 @@ TEST_P(DepthStencilStateTest, StencilFail) {
 
 // Test that the stencil operation is executed on stencil pass, depth fail
 TEST_P(DepthStencilStateTest, StencilDepthFail) {
-    wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    wgpu::StencilFaceState baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
     baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-    wgpu::DepthStencilStateDescriptor baseState;
+    wgpu::DepthStencilState baseState;
     baseState.depthWriteEnabled = true;
     baseState.depthCompare = wgpu::CompareFunction::Always;
     baseState.stencilBack = baseStencilFaceDescriptor;
@@ -666,12 +666,12 @@ TEST_P(DepthStencilStateTest, StencilDepthFail) {
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
-    wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+    wgpu::StencilFaceState stencilFaceDescriptor;
     stencilFaceDescriptor.compare = wgpu::CompareFunction::Greater;
     stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
     stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Replace;
     stencilFaceDescriptor.passOp = wgpu::StencilOperation::Keep;
-    wgpu::DepthStencilStateDescriptor state;
+    wgpu::DepthStencilState state;
     state.depthWriteEnabled = true;
     state.depthCompare = wgpu::CompareFunction::Less;
     state.stencilBack = stencilFaceDescriptor;
@@ -689,12 +689,12 @@ TEST_P(DepthStencilStateTest, StencilDepthFail) {
 
 // Test that the stencil operation is executed on stencil pass, depth pass
 TEST_P(DepthStencilStateTest, StencilDepthPass) {
-    wgpu::StencilStateFaceDescriptor baseStencilFaceDescriptor;
+    wgpu::StencilFaceState baseStencilFaceDescriptor;
     baseStencilFaceDescriptor.compare = wgpu::CompareFunction::Always;
     baseStencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
     baseStencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-    wgpu::DepthStencilStateDescriptor baseState;
+    wgpu::DepthStencilState baseState;
     baseState.depthWriteEnabled = true;
     baseState.depthCompare = wgpu::CompareFunction::Always;
     baseState.stencilBack = baseStencilFaceDescriptor;
@@ -702,12 +702,12 @@ TEST_P(DepthStencilStateTest, StencilDepthPass) {
     baseState.stencilReadMask = 0xff;
     baseState.stencilWriteMask = 0xff;
 
-    wgpu::StencilStateFaceDescriptor stencilFaceDescriptor;
+    wgpu::StencilFaceState stencilFaceDescriptor;
     stencilFaceDescriptor.compare = wgpu::CompareFunction::Greater;
     stencilFaceDescriptor.failOp = wgpu::StencilOperation::Keep;
     stencilFaceDescriptor.depthFailOp = wgpu::StencilOperation::Keep;
     stencilFaceDescriptor.passOp = wgpu::StencilOperation::Replace;
-    wgpu::DepthStencilStateDescriptor state;
+    wgpu::DepthStencilState state;
     state.depthWriteEnabled = true;
     state.depthCompare = wgpu::CompareFunction::Less;
     state.stencilBack = stencilFaceDescriptor;
@@ -732,19 +732,18 @@ TEST_P(DepthStencilStateTest, CreatePipelineWithAllFormats) {
     };
 
     for (wgpu::TextureFormat depthStencilFormat : kDepthStencilFormats) {
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.cDepthStencilState.format = depthStencilFormat;
-        descriptor.depthStencilState = &descriptor.cDepthStencilState;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.EnableDepthStencil(depthStencilFormat);
 
-        device.CreateRenderPipeline(&descriptor);
+        device.CreateRenderPipeline2(&descriptor);
     }
 }
 
 // Test that the front and back stencil states are set correctly (and take frontFace into account)
 TEST_P(DepthStencilStateTest, StencilFrontAndBackFace) {
-    wgpu::DepthStencilStateDescriptor state;
+    wgpu::DepthStencilState state;
     state.stencilFront.compare = wgpu::CompareFunction::Always;
     state.stencilBack.compare = wgpu::CompareFunction::Never;
 

@@ -74,13 +74,13 @@ class GpuMemorySyncTests : public DawnTest {
                 fragColor = vec4<f32>(f32(data.i) / 255.0, 0.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor rpDesc(device);
-        rpDesc.vertexStage.module = vsModule;
-        rpDesc.cFragmentStage.module = fsModule;
-        rpDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        rpDesc.cColorStates[0].format = colorFormat;
+        utils::ComboRenderPipelineDescriptor2 rpDesc;
+        rpDesc.vertex.module = vsModule;
+        rpDesc.cFragment.module = fsModule;
+        rpDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        rpDesc.cTargets[0].format = colorFormat;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
 
         wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
@@ -351,13 +351,13 @@ class StorageToUniformSyncTests : public DawnTest {
                 fragColor = vec4<f32>(contents.color, 0.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor rpDesc(device);
-        rpDesc.vertexStage.module = vsModule;
-        rpDesc.cFragmentStage.module = fsModule;
-        rpDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        rpDesc.cColorStates[0].format = colorFormat;
+        utils::ComboRenderPipelineDescriptor2 rpDesc;
+        rpDesc.vertex.module = vsModule;
+        rpDesc.cFragment.module = fsModule;
+        rpDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        rpDesc.cTargets[0].format = colorFormat;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
 
         wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, mBuffer}});
@@ -595,17 +595,17 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    utils::ComboRenderPipelineDescriptor rpDesc(device);
-    rpDesc.vertexStage.module = vsModule;
-    rpDesc.cFragmentStage.module = fsModule;
-    rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
-    rpDesc.cVertexState.vertexBufferCount = 1;
-    rpDesc.cVertexState.cVertexBuffers[0].arrayStride = kVertexBufferStride;
-    rpDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
-    rpDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
-    rpDesc.cColorStates[0].format = renderPass.colorFormat;
+    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    rpDesc.vertex.module = vsModule;
+    rpDesc.cFragment.module = fsModule;
+    rpDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    rpDesc.vertex.bufferCount = 1;
+    rpDesc.cBuffers[0].arrayStride = kVertexBufferStride;
+    rpDesc.cBuffers[0].attributeCount = 1;
+    rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+    rpDesc.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
+    wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&rpDesc);
 
     wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, rp.GetBindGroupLayout(0),
                                                       {{0, uniformBuffer}, {1, storageBuffer}});
@@ -712,17 +712,17 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    utils::ComboRenderPipelineDescriptor rpDesc(device);
-    rpDesc.vertexStage.module = vsModule;
-    rpDesc.cFragmentStage.module = fsModule;
-    rpDesc.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
-    rpDesc.cVertexState.vertexBufferCount = 1;
-    rpDesc.cVertexState.cVertexBuffers[0].arrayStride = kVertexBufferStride;
-    rpDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
-    rpDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
-    rpDesc.cColorStates[0].format = renderPass.colorFormat;
+    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    rpDesc.vertex.module = vsModule;
+    rpDesc.cFragment.module = fsModule;
+    rpDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+    rpDesc.vertex.bufferCount = 1;
+    rpDesc.cBuffers[0].arrayStride = kVertexBufferStride;
+    rpDesc.cBuffers[0].attributeCount = 1;
+    rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+    rpDesc.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
+    wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&rpDesc);
 
     wgpu::BindGroup bindGroup1 =
         utils::MakeBindGroup(device, rp.GetBindGroupLayout(0),

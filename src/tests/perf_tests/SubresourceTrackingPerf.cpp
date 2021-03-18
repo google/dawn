@@ -69,21 +69,21 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
         uploadTexDesc.usage = wgpu::TextureUsage::CopySrc;
         mUploadTexture = device.CreateTexture(&uploadTexDesc);
 
-        utils::ComboRenderPipelineDescriptor pipelineDesc(device);
-        pipelineDesc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+        pipelineDesc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )");
-        pipelineDesc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDesc.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[location(0)]] var<out> FragColor : vec4<f32>;
             [[group(0), binding(0)]] var materials : texture_2d<f32>;
             [[stage(fragment)]] fn main() -> void {
                 FragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )");
-        mPipeline = device.CreateRenderPipeline(&pipelineDesc);
+        mPipeline = device.CreateRenderPipeline2(&pipelineDesc);
     }
 
   private:

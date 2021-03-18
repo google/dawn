@@ -330,11 +330,11 @@ TEST_P(D3D12ResourceResidencyTests, SetExternalReservation) {
 // Checks that when a descriptor heap is bound, it is locked resident. Also checks that when a
 // previous descriptor heap becomes unbound, it is unlocked, placed in the LRU and can be evicted.
 TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
 
     // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a
     // view bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps must switch over.
-    renderPipelineDescriptor.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
@@ -347,7 +347,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
                 Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
-    renderPipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct U {
                 color : vec4<f32>;
             };
@@ -358,7 +358,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
                 FragColor = colorBuffer.color;
             })");
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
     constexpr uint32_t kSize = 512;
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kSize, kSize);
 

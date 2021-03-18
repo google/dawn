@@ -71,7 +71,7 @@ class DepthStencilSamplingTest : public DawnTest {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
 
         std::ostringstream shaderSource;
         std::ostringstream shaderBody;
@@ -88,7 +88,7 @@ class DepthStencilSamplingTest : public DawnTest {
 
                     shaderBody << "\nresult" << index << " = textureLoad(tex" << index
                                << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];\n";
-                    pipelineDescriptor.cColorStates[index].format = wgpu::TextureFormat::R32Float;
+                    pipelineDescriptor.cTargets[index].format = wgpu::TextureFormat::R32Float;
                     break;
                 case TestAspect::Stencil:
                     shaderSource << "[[group(0), binding(" << index << ")]] var tex" << index
@@ -99,7 +99,7 @@ class DepthStencilSamplingTest : public DawnTest {
 
                     shaderBody << "\nresult" << index << " = textureLoad(tex" << index
                                << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];\n";
-                    pipelineDescriptor.cColorStates[index].format = wgpu::TextureFormat::R8Uint;
+                    pipelineDescriptor.cTargets[index].format = wgpu::TextureFormat::R8Uint;
                     break;
             }
 
@@ -110,12 +110,12 @@ class DepthStencilSamplingTest : public DawnTest {
 
         wgpu::ShaderModule fsModule =
             utils::CreateShaderModuleFromWGSL(device, shaderSource.str().c_str());
-        pipelineDescriptor.vertexStage.module = vsModule;
-        pipelineDescriptor.cFragmentStage.module = fsModule;
-        pipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        pipelineDescriptor.colorStateCount = static_cast<uint32_t>(aspects.size());
+        pipelineDescriptor.vertex.module = vsModule;
+        pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        pipelineDescriptor.cFragment.targetCount = static_cast<uint32_t>(aspects.size());
 
-        return device.CreateRenderPipeline(&pipelineDescriptor);
+        return device.CreateRenderPipeline2(&pipelineDescriptor);
     }
 
     wgpu::ComputePipeline CreateSamplingComputePipeline(std::vector<TestAspect> aspects,
@@ -201,14 +201,14 @@ class DepthStencilSamplingTest : public DawnTest {
                      {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth},
                      {2, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform}});
 
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.vertexStage.module = vsModule;
-        pipelineDescriptor.cFragmentStage.module = fsModule;
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        pipelineDescriptor.vertex.module = vsModule;
+        pipelineDescriptor.cFragment.module = fsModule;
         pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-        pipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        pipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::R32Float;
+        pipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::R32Float;
 
-        return device.CreateRenderPipeline(&pipelineDescriptor);
+        return device.CreateRenderPipeline2(&pipelineDescriptor);
     }
 
     wgpu::ComputePipeline CreateComparisonComputePipeline() {

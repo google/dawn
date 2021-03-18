@@ -69,22 +69,19 @@ class SamplerFilterAnisotropicTest : public DawnTest {
                 fragColor = textureSample(texture0, sampler0, fragUV);
             })");
 
-        utils::ComboVertexStateDescriptor vertexState;
-        vertexState.cVertexBuffers[0].attributeCount = 2;
-        vertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
-        vertexState.cAttributes[1].shaderLocation = 1;
-        vertexState.cAttributes[1].offset = 4 * sizeof(float);
-        vertexState.cAttributes[1].format = wgpu::VertexFormat::Float32x2;
-        vertexState.vertexBufferCount = 1;
-        vertexState.cVertexBuffers[0].arrayStride = 6 * sizeof(float);
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        pipelineDescriptor.vertex.module = vsModule;
+        pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.cBuffers[0].attributeCount = 2;
+        pipelineDescriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+        pipelineDescriptor.cAttributes[1].shaderLocation = 1;
+        pipelineDescriptor.cAttributes[1].offset = 4 * sizeof(float);
+        pipelineDescriptor.cAttributes[1].format = wgpu::VertexFormat::Float32x2;
+        pipelineDescriptor.vertex.bufferCount = 1;
+        pipelineDescriptor.cBuffers[0].arrayStride = 6 * sizeof(float);
+        pipelineDescriptor.cTargets[0].format = mRenderPass.colorFormat;
 
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.vertexStage.module = vsModule;
-        pipelineDescriptor.cFragmentStage.module = fsModule;
-        pipelineDescriptor.vertexState = &vertexState;
-        pipelineDescriptor.cColorStates[0].format = mRenderPass.colorFormat;
-
-        mPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+        mPipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
         mBindGroupLayout = mPipeline.GetBindGroupLayout(0);
 
         InitTexture();

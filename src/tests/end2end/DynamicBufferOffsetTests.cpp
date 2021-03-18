@@ -155,10 +155,10 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fs.str().c_str());
 
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.vertexStage.module = vsModule;
-        pipelineDescriptor.cFragmentStage.module = fsModule;
-        pipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        pipelineDescriptor.vertex.module = vsModule;
+        pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
         wgpu::PipelineLayoutDescriptor pipelineLayoutDescriptor;
         if (isInheritedPipeline) {
@@ -169,7 +169,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         pipelineLayoutDescriptor.bindGroupLayouts = mBindGroupLayouts;
         pipelineDescriptor.layout = device.CreatePipelineLayout(&pipelineLayoutDescriptor);
 
-        return device.CreateRenderPipeline(&pipelineDescriptor);
+        return device.CreateRenderPipeline2(&pipelineDescriptor);
     }
 
     wgpu::ComputePipeline CreateComputePipeline(bool isInheritedPipeline = false) {

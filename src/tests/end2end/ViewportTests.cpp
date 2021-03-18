@@ -60,11 +60,11 @@ class ViewportTest : public DawnTest {
                           uint32_t height,
                           bool doViewportCall = true) {
         // Create a pipeline that will draw a white quad.
-        utils::ComboRenderPipelineDescriptor pipelineDesc(device);
-        pipelineDesc.vertexStage.module = mQuadVS;
-        pipelineDesc.cFragmentStage.module = mQuadFS;
-        pipelineDesc.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+        utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+        pipelineDesc.vertex.module = mQuadVS;
+        pipelineDesc.cFragment.module = mQuadFS;
+        pipelineDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDesc);
 
         // Render the quad with the viewport call.
         utils::BasicRenderPass rp = utils::CreateBasicRenderPass(device, kWidth, kHeight);
@@ -94,8 +94,8 @@ class ViewportTest : public DawnTest {
 
     void TestViewportDepth(float minDepth, float maxDepth, bool doViewportCall = true) {
         // Create a pipeline drawing 3 points at depth 1.0, 0.5 and 0.0.
-        utils::ComboRenderPipelineDescriptor pipelineDesc(device);
-        pipelineDesc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+        pipelineDesc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -107,13 +107,13 @@ class ViewportTest : public DawnTest {
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>(points[VertexIndex], 1.0);
             })");
-        pipelineDesc.cFragmentStage.module = mQuadFS;
-        pipelineDesc.colorStateCount = 0;
-        pipelineDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        pipelineDesc.depthStencilState = &pipelineDesc.cDepthStencilState;
-        pipelineDesc.cDepthStencilState.depthWriteEnabled = true;
-        pipelineDesc.cDepthStencilState.format = wgpu::TextureFormat::Depth32Float;
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+        pipelineDesc.cFragment.module = mQuadFS;
+        pipelineDesc.cFragment.targetCount = 0;
+        pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        wgpu::DepthStencilState* depthStencil =
+            pipelineDesc.EnableDepthStencil(wgpu::TextureFormat::Depth32Float);
+        depthStencil->depthWriteEnabled = true;
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDesc);
 
         // Create the texture that will store the post-viewport-transform depth.
         wgpu::TextureDescriptor depthDesc;
@@ -187,11 +187,11 @@ TEST_P(ViewportTest, ViewportDepth) {
 
 // Test that a draw with an empty viewport doesn't draw anything.
 TEST_P(ViewportTest, EmptyViewport) {
-    utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-    pipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
-    pipelineDescriptor.vertexStage.module = mQuadVS;
-    pipelineDescriptor.cFragmentStage.module = mQuadFS;
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+    utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+    pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    pipelineDescriptor.vertex.module = mQuadVS;
+    pipelineDescriptor.cFragment.module = mQuadFS;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 

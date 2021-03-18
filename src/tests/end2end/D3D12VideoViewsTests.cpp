@@ -273,10 +273,10 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
     viewDesc.aspect = wgpu::TextureAspect::Plane0Only;
     wgpu::TextureView textureView = wgpuTexture.CreateView(&viewDesc);
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.vertexStage.module = GetTestVertexShaderModule();
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
-    renderPipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[set(0), binding(0)]] var sampler0 : sampler;
             [[set(0), binding(1)]] var texture : texture_2d<f32>;
 
@@ -290,10 +290,10 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(
         device, kYUVImageDataWidthInTexels, kYUVImageDataHeightInTexels);
-    renderPipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
-    renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
+    renderPipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
+    renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
 
     wgpu::Sampler sampler = device.CreateSampler();
 
@@ -326,10 +326,10 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
     viewDesc.aspect = wgpu::TextureAspect::Plane1Only;
     wgpu::TextureView textureView = wgpuTexture.CreateView(&viewDesc);
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.vertexStage.module = GetTestVertexShaderModule();
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
-    renderPipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[set(0), binding(0)]] var sampler0 : sampler;
             [[set(0), binding(1)]] var texture : texture_2d<f32>;
 
@@ -344,10 +344,10 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(
         device, kYUVImageDataWidthInTexels, kYUVImageDataHeightInTexels);
-    renderPipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
-    renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
+    renderPipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
+    renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
 
     wgpu::Sampler sampler = device.CreateSampler();
 
@@ -384,10 +384,10 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
     chromaViewDesc.aspect = wgpu::TextureAspect::Plane1Only;
     wgpu::TextureView chromaTextureView = wgpuTexture.CreateView(&chromaViewDesc);
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.vertexStage.module = GetTestVertexShaderModule();
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
-    renderPipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[set(0), binding(0)]] var sampler0 : sampler;
             [[set(0), binding(1)]] var lumaTexture : texture_2d<f32>;
             [[set(0), binding(2)]] var chromaTexture : texture_2d<f32>;
@@ -404,9 +404,9 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(
         device, kYUVImageDataWidthInTexels, kYUVImageDataHeightInTexels);
-    renderPipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
+    renderPipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
 
     wgpu::Sampler sampler = device.CreateSampler();
 

@@ -474,12 +474,12 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vertexShader);
         wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fragmentShader);
 
-        utils::ComboRenderPipelineDescriptor desc(device);
-        desc.vertexStage.module = vsModule;
-        desc.cFragmentStage.module = fsModule;
-        desc.cColorStates[0].format = kRenderAttachmentFormat;
-        desc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        return device.CreateRenderPipeline(&desc);
+        utils::ComboRenderPipelineDescriptor2 desc;
+        desc.vertex.module = vsModule;
+        desc.cFragment.module = fsModule;
+        desc.cTargets[0].format = kRenderAttachmentFormat;
+        desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        return device.CreateRenderPipeline2(&desc);
     }
 
     void CheckDrawsGreen(const char* vertexShader,

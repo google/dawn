@@ -359,16 +359,16 @@ class VertexFormatTest : public DawnTest {
             strideBytes += (4 - strideBytes % 4);
         }
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.cVertexState.vertexBufferCount = 1;
-        descriptor.cVertexState.cVertexBuffers[0].arrayStride = strideBytes;
-        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
-        descriptor.cVertexState.cAttributes[0].format = format;
-        descriptor.cColorStates[0].format = renderPass.colorFormat;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.vertex.bufferCount = 1;
+        descriptor.cBuffers[0].arrayStride = strideBytes;
+        descriptor.cBuffers[0].attributeCount = 1;
+        descriptor.cAttributes[0].format = format;
+        descriptor.cTargets[0].format = renderPass.colorFormat;
 
-        return device.CreateRenderPipeline(&descriptor);
+        return device.CreateRenderPipeline2(&descriptor);
     }
 
     template <typename VertexType, typename ExpectedType>

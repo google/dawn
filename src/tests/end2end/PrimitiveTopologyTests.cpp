@@ -185,23 +185,23 @@ class PrimitiveTopologyTest : public DawnTest {
     // locations
     void DoTest(wgpu::PrimitiveTopology primitiveTopology,
                 const std::vector<LocationSpec>& locationSpecs) {
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
 
-        descriptor.primitiveTopology = primitiveTopology;
+        descriptor.primitive.topology = primitiveTopology;
         if (primitiveTopology == wgpu::PrimitiveTopology::TriangleStrip ||
             primitiveTopology == wgpu::PrimitiveTopology::LineStrip) {
-            descriptor.cVertexState.indexFormat = wgpu::IndexFormat::Uint32;
+            descriptor.primitive.stripIndexFormat = wgpu::IndexFormat::Uint32;
         }
 
-        descriptor.cVertexState.vertexBufferCount = 1;
-        descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
-        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
-        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
-        descriptor.cColorStates[0].format = renderPass.colorFormat;
+        descriptor.vertex.bufferCount = 1;
+        descriptor.cBuffers[0].arrayStride = 4 * sizeof(float);
+        descriptor.cBuffers[0].attributeCount = 1;
+        descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+        descriptor.cTargets[0].format = renderPass.colorFormat;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {

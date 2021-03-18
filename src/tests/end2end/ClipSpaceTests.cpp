@@ -20,12 +20,12 @@
 class ClipSpaceTest : public DawnTest {
   protected:
     wgpu::RenderPipeline CreatePipelineForTest() {
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
 
         // Draw two triangles:
         // 1. The depth value of the top-left one is >= 0.5
         // 2. The depth value of the bottom-right one is <= 0.5
-        pipelineDescriptor.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
             const pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
                 vec3<f32>(-1.0,  1.0, 1.0),
                 vec3<f32>(-1.0, -1.0, 0.5),
@@ -42,17 +42,17 @@ class ClipSpaceTest : public DawnTest {
                 return;
             })");
 
-        pipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;;
             [[stage(fragment)]] fn main() -> void {
                fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
                return;
             })");
 
-        pipelineDescriptor.cDepthStencilState.depthCompare = wgpu::CompareFunction::LessEqual;
-        pipelineDescriptor.depthStencilState = &pipelineDescriptor.cDepthStencilState;
+        wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil();
+        depthStencil->depthCompare = wgpu::CompareFunction::LessEqual;
 
-        return device.CreateRenderPipeline(&pipelineDescriptor);
+        return device.CreateRenderPipeline2(&pipelineDescriptor);
     }
 
     wgpu::Texture Create2DTextureForTest(wgpu::TextureFormat format) {

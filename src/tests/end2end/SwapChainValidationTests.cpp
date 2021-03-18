@@ -220,24 +220,24 @@ TEST_P(SwapChainValidationTests, ViewDestroyedAfterPresent) {
 
 // Check that returned view is of the current format / usage / dimension / size / sample count
 TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
-    utils::ComboRenderPipelineDescriptor pipelineDesc(device);
-    pipelineDesc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+    pipelineDesc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
-    pipelineDesc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    pipelineDesc.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
             fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
     // Validation will check that the sample count of the view matches this format.
-    pipelineDesc.sampleCount = 1;
-    pipelineDesc.colorStateCount = 2;
+    pipelineDesc.multisample.count = 1;
+    pipelineDesc.cFragment.targetCount = 2;
     // Validation will check that the format of the view matches this format.
-    pipelineDesc.cColorStates[0].format = wgpu::TextureFormat::BGRA8Unorm;
-    pipelineDesc.cColorStates[1].format = wgpu::TextureFormat::R8Unorm;
-    device.CreateRenderPipeline(&pipelineDesc);
+    pipelineDesc.cTargets[0].format = wgpu::TextureFormat::BGRA8Unorm;
+    pipelineDesc.cTargets[1].format = wgpu::TextureFormat::R8Unorm;
+    device.CreateRenderPipeline2(&pipelineDesc);
 
     // Create a second texture to be used as render pass attachment. Validation will check that the
     // size of the view matches the size of this texture.

@@ -66,21 +66,20 @@ class TextureZeroInitTest : public DawnTest {
         return descriptor;
     }
     wgpu::RenderPipeline CreatePipelineForTest(float depth = 0.f) {
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest(depth);
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        pipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest(depth);
         const char* fs = R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
                fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )";
-        pipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, fs);
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, fs);
+        wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil();
+        depthStencil->depthCompare = wgpu::CompareFunction::Equal;
+        depthStencil->stencilFront.compare = wgpu::CompareFunction::Equal;
 
-        pipelineDescriptor.cDepthStencilState.depthCompare = wgpu::CompareFunction::Equal;
-        pipelineDescriptor.cDepthStencilState.stencilFront.compare = wgpu::CompareFunction::Equal;
-        pipelineDescriptor.depthStencilState = &pipelineDescriptor.cDepthStencilState;
-
-        return device.CreateRenderPipeline(&pipelineDescriptor);
+        return device.CreateRenderPipeline2(&pipelineDescriptor);
     }
     wgpu::ShaderModule CreateBasicVertexShaderForTest(float depth = 0.f) {
         std::string source = R"(
@@ -857,11 +856,11 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
     wgpu::Texture renderTexture = device.CreateTexture(&renderTextureDescriptor);
 
     // Create render pipeline
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
-    renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
-    renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    renderPipelineDescriptor.cTargets[0].format = kColorFormat;
+    renderPipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest();
+    renderPipelineDescriptor.cFragment.module = CreateSampledTextureFragmentShaderForTest();
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
 
     // Create bindgroup
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
@@ -916,11 +915,11 @@ TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
     wgpu::TextureView sampleView = texture.CreateView(&viewDesc);
 
     // Create render pipeline
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
-    renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
-    renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    renderPipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    renderPipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest();
+    renderPipelineDescriptor.cFragment.module = CreateSampledTextureFragmentShaderForTest();
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
 
     wgpu::BindGroup bindGroup =
         utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0), {{0, sampleView}});
@@ -1142,11 +1141,11 @@ TEST_P(TextureZeroInitTest, RenderPassStoreOpClear) {
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     // Create render pipeline
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
-    renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
-    renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    renderPipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest();
+    renderPipelineDescriptor.cFragment.module = CreateSampledTextureFragmentShaderForTest();
+    renderPipelineDescriptor.cTargets[0].format = kColorFormat;
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
 
     // Create bindgroup
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
@@ -1288,11 +1287,11 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     // Create render pipeline
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
-    renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
-    renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    renderPipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest();
+    renderPipelineDescriptor.cFragment.module = CreateSampledTextureFragmentShaderForTest();
+    renderPipelineDescriptor.cTargets[0].format = kColorFormat;
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
 
     // Create bindgroup
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, renderPipeline.GetBindGroupLayout(0),
@@ -1365,11 +1364,11 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commands));
 
     // Create render pipeline
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-    renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
-    renderPipelineDescriptor.cFragmentStage.module = CreateSampledTextureFragmentShaderForTest();
-    renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    renderPipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest();
+    renderPipelineDescriptor.cFragment.module = CreateSampledTextureFragmentShaderForTest();
+    renderPipelineDescriptor.cTargets[0].format = kColorFormat;
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
 
     // Only sample from the uninitialized first layer.
     wgpu::TextureViewDescriptor textureViewDescriptor;
@@ -1790,13 +1789,12 @@ class CompressedTextureZeroInitTest : public TextureZeroInitTest {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-            utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
-            renderPipelineDescriptor.cColorStates[0].format = kColorFormat;
-            renderPipelineDescriptor.vertexStage.module = CreateBasicVertexShaderForTest();
-            renderPipelineDescriptor.cFragmentStage.module =
-                CreateSampledTextureFragmentShaderForTest();
+            utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+            renderPipelineDescriptor.cTargets[0].format = kColorFormat;
+            renderPipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest();
+            renderPipelineDescriptor.cFragment.module = CreateSampledTextureFragmentShaderForTest();
             wgpu::RenderPipeline renderPipeline =
-                device.CreateRenderPipeline(&renderPipelineDescriptor);
+                device.CreateRenderPipeline2(&renderPipelineDescriptor);
             pass.SetPipeline(renderPipeline);
 
             wgpu::TextureViewDescriptor textureViewDescriptor = CreateTextureViewDescriptor(

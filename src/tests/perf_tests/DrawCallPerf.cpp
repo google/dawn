@@ -351,14 +351,13 @@ void DrawCallPerf::SetUp() {
     }
 
     // Setup the base render pipeline descriptor.
-    utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
-    renderPipelineDesc.cVertexState.vertexBufferCount = 1;
-    renderPipelineDesc.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
-    renderPipelineDesc.cVertexState.cVertexBuffers[0].attributeCount = 1;
-    renderPipelineDesc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
-    renderPipelineDesc.depthStencilState = &renderPipelineDesc.cDepthStencilState;
-    renderPipelineDesc.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
-    renderPipelineDesc.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDesc;
+    renderPipelineDesc.vertex.bufferCount = 1;
+    renderPipelineDesc.cBuffers[0].arrayStride = 4 * sizeof(float);
+    renderPipelineDesc.cBuffers[0].attributeCount = 1;
+    renderPipelineDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+    renderPipelineDesc.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
+    renderPipelineDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
     // Create the pipeline layout for the first pipeline.
     wgpu::PipelineLayoutDescriptor pipelineLayoutDesc = {};
@@ -372,9 +371,9 @@ void DrawCallPerf::SetUp() {
 
     // Create the first pipeline.
     renderPipelineDesc.layout = pipelineLayout;
-    renderPipelineDesc.vertexStage.module = vsModule;
-    renderPipelineDesc.cFragmentStage.module = fsModule;
-    mPipelines[0] = device.CreateRenderPipeline(&renderPipelineDesc);
+    renderPipelineDesc.vertex.module = vsModule;
+    renderPipelineDesc.cFragment.module = fsModule;
+    mPipelines[0] = device.CreateRenderPipeline2(&renderPipelineDesc);
 
     // If the test is using a dynamic pipeline, create the second pipeline.
     if (GetParam().pipelineType == Pipeline::Dynamic) {
@@ -400,8 +399,8 @@ void DrawCallPerf::SetUp() {
 
         // Create the pipeline.
         renderPipelineDesc.layout = pipelineLayout;
-        renderPipelineDesc.cFragmentStage.module = fsModule;
-        mPipelines[1] = device.CreateRenderPipeline(&renderPipelineDesc);
+        renderPipelineDesc.cFragment.module = fsModule;
+        mPipelines[1] = device.CreateRenderPipeline2(&renderPipelineDesc);
 
         // Create the buffer and bind group to bind to the constant bind group layout slot.
         constexpr float kConstantData[] = {0.01, 0.02, 0.03};
@@ -459,8 +458,8 @@ void DrawCallPerf::SetUp() {
     if (GetParam().withRenderBundle == RenderBundle::Yes) {
         wgpu::RenderBundleEncoderDescriptor descriptor = {};
         descriptor.colorFormatsCount = 1;
-        descriptor.colorFormats = &renderPipelineDesc.cColorStates[0].format;
-        descriptor.depthStencilFormat = renderPipelineDesc.cDepthStencilState.format;
+        descriptor.colorFormats = &renderPipelineDesc.cTargets[0].format;
+        descriptor.depthStencilFormat = wgpu::TextureFormat::Depth24PlusStencil8;
 
         wgpu::RenderBundleEncoder encoder = device.CreateRenderBundleEncoder(&descriptor);
         RecordRenderCommands(encoder);

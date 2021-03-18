@@ -121,24 +121,21 @@ class OcclusionQueryTests : public QueryTests {
     void TestOcclusionQueryWithDepthStencilTest(bool depthTestEnabled,
                                                 bool stencilTestEnabled,
                                                 OcclusionExpectation::Result expected) {
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
 
         // Enable depth and stencil tests and set comparison tests never pass.
-        wgpu::DepthStencilStateDescriptor depthStencilState;
-        depthStencilState.depthCompare =
+        wgpu::DepthStencilState* depthStencil =
+            descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
+        depthStencil->depthCompare =
             depthTestEnabled ? wgpu::CompareFunction::Never : wgpu::CompareFunction::Always;
-        depthStencilState.stencilFront.compare =
+        depthStencil->stencilFront.compare =
             stencilTestEnabled ? wgpu::CompareFunction::Never : wgpu::CompareFunction::Always;
-        depthStencilState.stencilBack.compare =
+        depthStencil->stencilBack.compare =
             stencilTestEnabled ? wgpu::CompareFunction::Never : wgpu::CompareFunction::Always;
 
-        descriptor.cDepthStencilState = depthStencilState;
-        descriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
-        descriptor.depthStencilState = &descriptor.cDepthStencilState;
-
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
 
         wgpu::Texture renderTarget = CreateRenderTexture(wgpu::TextureFormat::RGBA8Unorm);
         wgpu::TextureView renderTargetView = renderTarget.CreateView();
@@ -173,11 +170,11 @@ class OcclusionQueryTests : public QueryTests {
 
     void TestOcclusionQueryWithScissorTest(ScissorRect rect,
                                            OcclusionExpectation::Result expected) {
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
 
         wgpu::QuerySet querySet = CreateOcclusionQuerySet(kQueryCount);
         wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));

@@ -224,16 +224,16 @@ class BufferZeroInitTest : public DawnTest {
             })");
 
         ASSERT(vertexBufferCount <= 1u);
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        descriptor.cVertexState.vertexBufferCount = vertexBufferCount;
-        descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
-        descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
-        descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
-        descriptor.cColorStates[0].format = kColorAttachmentFormat;
-        return device.CreateRenderPipeline(&descriptor);
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        descriptor.vertex.bufferCount = vertexBufferCount;
+        descriptor.cBuffers[0].arrayStride = 4 * sizeof(float);
+        descriptor.cBuffers[0].attributeCount = 1;
+        descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+        descriptor.cTargets[0].format = kColorAttachmentFormat;
+        return device.CreateRenderPipeline2(&descriptor);
     }
 
     void ExpectLazyClearSubmitAndCheckOutputs(wgpu::CommandEncoder encoder,

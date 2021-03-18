@@ -163,12 +163,12 @@ class TextureViewSamplingTest : public DawnTest {
         wgpu::ShaderModule fsModule =
             utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
 
-        utils::ComboRenderPipelineDescriptor textureDescriptor(device);
-        textureDescriptor.vertexStage.module = mVSModule;
-        textureDescriptor.cFragmentStage.module = fsModule;
-        textureDescriptor.cColorStates[0].format = mRenderPass.colorFormat;
+        utils::ComboRenderPipelineDescriptor2 textureDescriptor;
+        textureDescriptor.vertex.module = mVSModule;
+        textureDescriptor.cFragment.module = fsModule;
+        textureDescriptor.cTargets[0].format = mRenderPass.colorFormat;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&textureDescriptor);
 
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                          {{0, mSampler}, {1, textureView}});
@@ -513,12 +513,12 @@ class TextureViewRenderingTest : public DawnTest {
         wgpu::ShaderModule oneColorFsModule = utils::CreateShaderModule(
             device, utils::SingleShaderStage::Fragment, oneColorFragmentShader);
 
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-        pipelineDescriptor.vertexStage.module = vsModule;
-        pipelineDescriptor.cFragmentStage.module = oneColorFsModule;
-        pipelineDescriptor.cColorStates[0].format = kDefaultFormat;
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        pipelineDescriptor.vertex.module = vsModule;
+        pipelineDescriptor.cFragment.module = oneColorFsModule;
+        pipelineDescriptor.cTargets[0].format = kDefaultFormat;
 
-        wgpu::RenderPipeline oneColorPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+        wgpu::RenderPipeline oneColorPipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {

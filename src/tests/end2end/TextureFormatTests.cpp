@@ -144,7 +144,7 @@ class TextureFormatTest : public DawnTest {
     // bindgroup and output its decompressed values to the render target.
     wgpu::RenderPipeline CreateSamplePipeline(FormatTestInfo sampleFormatInfo,
                                               FormatTestInfo renderFormatInfo) {
-        utils::ComboRenderPipelineDescriptor desc(device);
+        utils::ComboRenderPipelineDescriptor2 desc;
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
@@ -173,11 +173,11 @@ class TextureFormatTest : public DawnTest {
         wgpu::ShaderModule fsModule =
             utils::CreateShaderModuleFromWGSL(device, fsSource.str().c_str());
 
-        desc.vertexStage.module = vsModule;
-        desc.cFragmentStage.module = fsModule;
-        desc.cColorStates[0].format = renderFormatInfo.format;
+        desc.vertex.module = vsModule;
+        desc.cFragment.module = fsModule;
+        desc.cTargets[0].format = renderFormatInfo.format;
 
-        return device.CreateRenderPipeline(&desc);
+        return device.CreateRenderPipeline2(&desc);
     }
 
     // The sampling test uploads the sample data in a texture with the sampleFormatInfo.format.

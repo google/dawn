@@ -229,25 +229,22 @@ class VertexFormatDeprecationTests : public DeprecationTests {
                 }
             )");
 
-        utils::ComboVertexStateDescriptor vertexState;
-        vertexState.vertexBufferCount = 1;
-        vertexState.cVertexBuffers[0].arrayStride = 32;
-        vertexState.cVertexBuffers[0].attributeCount = 1;
-        vertexState.cAttributes[0].format = vertexFormat;
-        vertexState.cAttributes[0].offset = 0;
-        vertexState.cAttributes[0].shaderLocation = 0;
-
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        descriptor.vertexState = &vertexState;
-        descriptor.cColorStates[0].format = utils::BasicRenderPass::kDefaultColorFormat;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        descriptor.vertex.bufferCount = 1;
+        descriptor.cBuffers[0].arrayStride = 32;
+        descriptor.cBuffers[0].attributeCount = 1;
+        descriptor.cAttributes[0].format = vertexFormat;
+        descriptor.cAttributes[0].offset = 0;
+        descriptor.cAttributes[0].shaderLocation = 0;
+        descriptor.cTargets[0].format = utils::BasicRenderPass::kDefaultColorFormat;
 
         if (deprecated) {
-            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
+            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline2(&descriptor));
         } else {
-            device.CreateRenderPipeline(&descriptor);
+            device.CreateRenderPipeline2(&descriptor);
         }
     }
 };

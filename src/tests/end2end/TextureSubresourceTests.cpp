@@ -68,13 +68,13 @@ class TextureSubresourceTest : public DawnTest {
                 fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
-        descriptor.cColorStates[0].format = kFormat;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+        descriptor.cTargets[0].format = kFormat;
 
-        wgpu::RenderPipeline rp = device.CreateRenderPipeline(&descriptor);
+        wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&descriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -117,15 +117,15 @@ class TextureSubresourceTest : public DawnTest {
                 fragColor = textureSample(tex, samp, FragCoord.xy / vec2<f32>(4.0, 4.0));
             })");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::TriangleList;
-        descriptor.cColorStates[0].format = kFormat;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+        descriptor.cTargets[0].format = kFormat;
 
         wgpu::Sampler sampler = device.CreateSampler();
 
-        wgpu::RenderPipeline rp = device.CreateRenderPipeline(&descriptor);
+        wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&descriptor);
         wgpu::BindGroupLayout bgl = rp.GetBindGroupLayout(0);
         wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, samplerView}});

@@ -73,8 +73,6 @@ namespace utils {
         std::array<wgpu::BlendState, kMaxColorAttachments> cBlends;
 
         wgpu::FragmentState cFragment;
-
-      private:
         wgpu::DepthStencilState cDepthStencil;
     };
 

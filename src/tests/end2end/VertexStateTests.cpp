@@ -132,13 +132,14 @@ class VertexStateTest : public DawnTest {
             }
         )");
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.vertexState = &vertexState;
-        descriptor.cColorStates[0].format = renderPass.colorFormat;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.vertex.bufferCount = vertexState.vertexBufferCount;
+        descriptor.vertex.buffers = vertexState.vertexBuffers;
+        descriptor.cTargets[0].format = renderPass.colorFormat;
 
-        return device.CreateRenderPipeline(&descriptor);
+        return device.CreateRenderPipeline2(&descriptor);
     }
 
     struct VertexAttributeSpec {
@@ -567,8 +568,8 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
     wgpu::Buffer vertexBuffer =
         utils::CreateBufferFromData(device, &data, sizeof(data), wgpu::BufferUsage::Vertex);
 
-    utils::ComboRenderPipelineDescriptor pipelineDesc(device);
-    pipelineDesc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+    pipelineDesc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[location(0)]] var<in> attr0 : vec4<f32>;
         [[location(1)]] var<in> attr1 : vec2<u32>;
         [[location(2)]] var<in> attr2 : vec4<f32>;
@@ -594,17 +595,18 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
                 color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         })");
-    pipelineDesc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    pipelineDesc.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[location(0)]] var<in> color : vec4<f32>;
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
             fragColor = color;
         })");
-    pipelineDesc.vertexState = &vertexState;
-    pipelineDesc.cColorStates[0].format = renderPass.colorFormat;
-    pipelineDesc.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+    pipelineDesc.vertex.bufferCount = vertexState.vertexBufferCount;
+    pipelineDesc.vertex.buffers = &vertexState.cVertexBuffers[0];
+    pipelineDesc.cTargets[0].format = renderPass.colorFormat;
+    pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDesc);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
@@ -651,13 +653,14 @@ TEST_P(OptionalVertexStateTest, Basic) {
             fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
 
-    utils::ComboRenderPipelineDescriptor descriptor(device);
-    descriptor.vertexStage.module = vsModule;
-    descriptor.cFragmentStage.module = fsModule;
-    descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-    descriptor.vertexState = nullptr;
+    utils::ComboRenderPipelineDescriptor2 descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    descriptor.vertex.bufferCount = 0;
+    descriptor.vertex.buffers = nullptr;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {

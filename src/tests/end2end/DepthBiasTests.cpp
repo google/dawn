@@ -101,24 +101,21 @@ class DepthBiasTests : public DawnTest {
         renderPassDesc.cDepthStencilAttachmentInfo.clearDepth = depthClear;
 
         // Create a render pipeline to render the quad
-        utils::ComboRenderPipelineDescriptor renderPipelineDesc(device);
+        utils::ComboRenderPipelineDescriptor2 renderPipelineDesc;
 
-        renderPipelineDesc.cRasterizationState.depthBias = bias;
-        renderPipelineDesc.cRasterizationState.depthBiasSlopeScale = biasSlopeScale;
-        renderPipelineDesc.cRasterizationState.depthBiasClamp = biasClamp;
-
-        renderPipelineDesc.vertexStage.module = vertexModule;
-        renderPipelineDesc.cFragmentStage.module = fragmentModule;
-        renderPipelineDesc.cDepthStencilState.format = depthFormat;
-        renderPipelineDesc.cDepthStencilState.depthWriteEnabled = true;
+        renderPipelineDesc.vertex.module = vertexModule;
+        renderPipelineDesc.cFragment.module = fragmentModule;
+        wgpu::DepthStencilState* depthStencil = renderPipelineDesc.EnableDepthStencil(depthFormat);
+        depthStencil->depthWriteEnabled = true;
+        depthStencil->depthBias = bias;
+        depthStencil->depthBiasSlopeScale = biasSlopeScale;
+        depthStencil->depthBiasClamp = biasClamp;
 
         if (depthFormat != wgpu::TextureFormat::Depth32Float) {
-            renderPipelineDesc.cDepthStencilState.depthCompare = wgpu::CompareFunction::Greater;
+            depthStencil->depthCompare = wgpu::CompareFunction::Greater;
         }
 
-        renderPipelineDesc.depthStencilState = &renderPipelineDesc.cDepthStencilState;
-
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&renderPipelineDesc);
 
         // Draw the quad (two triangles)
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();

@@ -100,19 +100,23 @@ class BindGroupTests : public DawnTest {
 
         wgpu::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(bindGroupLayouts);
 
-        utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
         pipelineDescriptor.layout = pipelineLayout;
-        pipelineDescriptor.vertexStage.module = vsModule;
-        pipelineDescriptor.cFragmentStage.module = fsModule;
-        pipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
-        pipelineDescriptor.cColorStates[0].colorBlend.operation = wgpu::BlendOperation::Add;
-        pipelineDescriptor.cColorStates[0].colorBlend.srcFactor = wgpu::BlendFactor::One;
-        pipelineDescriptor.cColorStates[0].colorBlend.dstFactor = wgpu::BlendFactor::One;
-        pipelineDescriptor.cColorStates[0].alphaBlend.operation = wgpu::BlendOperation::Add;
-        pipelineDescriptor.cColorStates[0].alphaBlend.srcFactor = wgpu::BlendFactor::One;
-        pipelineDescriptor.cColorStates[0].alphaBlend.dstFactor = wgpu::BlendFactor::One;
+        pipelineDescriptor.vertex.module = vsModule;
+        pipelineDescriptor.cFragment.module = fsModule;
+        pipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-        return device.CreateRenderPipeline(&pipelineDescriptor);
+        wgpu::BlendState blend;
+        blend.color.operation = wgpu::BlendOperation::Add;
+        blend.color.srcFactor = wgpu::BlendFactor::One;
+        blend.color.dstFactor = wgpu::BlendFactor::One;
+        blend.alpha.operation = wgpu::BlendOperation::Add;
+        blend.alpha.srcFactor = wgpu::BlendFactor::One;
+        blend.alpha.dstFactor = wgpu::BlendFactor::One;
+
+        pipelineDescriptor.cTargets[0].blend = &blend;
+
+        return device.CreateRenderPipeline2(&pipelineDescriptor);
     }
 };
 
@@ -187,12 +191,12 @@ TEST_P(BindGroupTests, ReusedUBO) {
             fragColor = fragmentUbo.color;
         })");
 
-    utils::ComboRenderPipelineDescriptor textureDescriptor(device);
-    textureDescriptor.vertexStage.module = vsModule;
-    textureDescriptor.cFragmentStage.module = fsModule;
-    textureDescriptor.cColorStates[0].format = renderPass.colorFormat;
+    utils::ComboRenderPipelineDescriptor2 textureDescriptor;
+    textureDescriptor.vertex.module = vsModule;
+    textureDescriptor.cFragment.module = fsModule;
+    textureDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&textureDescriptor);
 
     struct Data {
         float transform[8];
@@ -269,12 +273,12 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
             fragColor = textureSample(tex, samp, FragCoord.xy);
         })");
 
-    utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-    pipelineDescriptor.vertexStage.module = vsModule;
-    pipelineDescriptor.cFragmentStage.module = fsModule;
-    pipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
+    utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    pipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
 
     constexpr float transform[] = {1.f, 0.f, 0.f, 1.f};
     wgpu::Buffer buffer = utils::CreateBufferFromData(device, &transform, sizeof(transform),
@@ -395,12 +399,12 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
             fragColor = fragmentUbo1.color + fragmentUbo2.color;
         })");
 
-    utils::ComboRenderPipelineDescriptor textureDescriptor(device);
-    textureDescriptor.vertexStage.module = vsModule;
-    textureDescriptor.cFragmentStage.module = fsModule;
-    textureDescriptor.cColorStates[0].format = renderPass.colorFormat;
+    utils::ComboRenderPipelineDescriptor2 textureDescriptor;
+    textureDescriptor.vertex.module = vsModule;
+    textureDescriptor.cFragment.module = fsModule;
+    textureDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&textureDescriptor);
 
     struct Data {
         float transform[4];
@@ -984,12 +988,12 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
             fragColor = ubo1.color + 2.0 * ubo2.color + 4.0 * ubo3.color;
         })");
 
-    utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
-    pipelineDescriptor.vertexStage.module = vsModule;
-    pipelineDescriptor.cFragmentStage.module = fsModule;
-    pipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
+    utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    pipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
 
     wgpu::Buffer black =
         utils::CreateBufferFromData(device, wgpu::BufferUsage::Uniform, {0.f, 0.f, 0.f, 0.f});
@@ -1100,9 +1104,9 @@ TEST_P(BindGroupTests, EmptyLayout) {
 // This is a regression test for crbug.com/dawn/410 which tests that it can successfully compile and
 // execute the shader.
 TEST_P(BindGroupTests, ReadonlyStorage) {
-    utils::ComboRenderPipelineDescriptor pipelineDescriptor(device);
+    utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
 
-    pipelineDescriptor.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    pipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -1115,7 +1119,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
             Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
         })");
 
-    pipelineDescriptor.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Buffer0 {
             color : vec4<f32>;
         };
@@ -1128,14 +1132,14 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
 
     constexpr uint32_t kRTSize = 4;
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
-    pipelineDescriptor.cColorStates[0].format = renderPass.colorFormat;
+    pipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
 
     pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);

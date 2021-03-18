@@ -51,16 +51,16 @@ class MultisampledSamplingTest : public DawnTest {
         DawnTest::SetUp();
 
         {
-            utils::ComboRenderPipelineDescriptor desc(device);
+            utils::ComboRenderPipelineDescriptor2 desc;
 
-            desc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            desc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
                 [[location(0)]] var<in> pos : vec2<f32>;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
                 [[stage(vertex)]] fn main() -> void {
                     Position = vec4<f32>(pos, 0.0, 1.0);
                 })");
 
-            desc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            desc.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
                 [[location(0)]] var<out> fragColor : f32;
                 [[builtin(frag_depth)]] var<out> FragDepth : f32;
                 [[stage(fragment)]] fn main() -> void {
@@ -68,23 +68,22 @@ class MultisampledSamplingTest : public DawnTest {
                     FragDepth = 0.7;
                 })");
 
-            desc.cVertexState.indexFormat = wgpu::IndexFormat::Uint32;
-            desc.cVertexState.vertexBufferCount = 1;
-            desc.cVertexState.cVertexBuffers[0].attributeCount = 1;
-            desc.cVertexState.cVertexBuffers[0].arrayStride = 2 * sizeof(float);
-            desc.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
+            desc.primitive.stripIndexFormat = wgpu::IndexFormat::Uint32;
+            desc.vertex.bufferCount = 1;
+            desc.cBuffers[0].attributeCount = 1;
+            desc.cBuffers[0].arrayStride = 2 * sizeof(float);
+            desc.cAttributes[0].format = wgpu::VertexFormat::Float32x2;
 
-            desc.cDepthStencilState.format = kDepthFormat;
-            desc.cDepthStencilState.depthWriteEnabled = true;
-            desc.depthStencilState = &desc.cDepthStencilState;
+            wgpu::DepthStencilState* depthStencil = desc.EnableDepthStencil(kDepthFormat);
+            depthStencil->depthWriteEnabled = true;
 
-            desc.sampleCount = kSampleCount;
-            desc.colorStateCount = 1;
-            desc.cColorStates[0].format = kColorFormat;
+            desc.multisample.count = kSampleCount;
+            desc.cFragment.targetCount = 1;
+            desc.cTargets[0].format = kColorFormat;
 
-            desc.primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip;
+            desc.primitive.topology = wgpu::PrimitiveTopology::TriangleStrip;
 
-            drawPipeline = device.CreateRenderPipeline(&desc);
+            drawPipeline = device.CreateRenderPipeline2(&desc);
         }
         {
             wgpu::ComputePipelineDescriptor desc = {};

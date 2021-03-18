@@ -68,15 +68,16 @@ class VertexBufferRobustnessTest : public DawnTest {
 
         utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
-        utils::ComboRenderPipelineDescriptor descriptor(device);
-        descriptor.vertexStage.module = vsModule;
-        descriptor.cFragmentStage.module = fsModule;
-        descriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
-        descriptor.vertexState = &vertexState;
-        descriptor.cColorStates[0].format = renderPass.colorFormat;
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        descriptor.vertex.bufferCount = vertexState.vertexBufferCount;
+        descriptor.vertex.buffers = &vertexState.cVertexBuffers[0];
+        descriptor.cTargets[0].format = renderPass.colorFormat;
         renderPass.renderPassInfo.cColorAttachments[0].clearColor = {0, 0, 0, 1};
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
