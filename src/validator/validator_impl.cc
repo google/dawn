@@ -71,7 +71,7 @@ bool ValidatorImpl::Validate() {
 
   // Validate global declarations in the order they appear in the module.
   for (auto* decl : program_->AST().GlobalDeclarations()) {
-    if (auto* ty = decl->As<type::Type>()) {
+    if (decl->Is<type::Type>()) {
       // Validated by Resolver (Struct types only)
       return true;
     } else if (auto* func = decl->As<ast::Function>()) {
