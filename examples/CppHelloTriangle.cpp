@@ -116,27 +116,26 @@ void init() {
 
     auto bgl = utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Fragment, wgpu::BindingType::Sampler},
-                    {1, wgpu::ShaderStage::Fragment, wgpu::BindingType::SampledTexture},
+                    {0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Filtering},
+                    {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float},
                 });
 
     wgpu::PipelineLayout pl = utils::MakeBasicPipelineLayout(device, &bgl);
 
     depthStencilView = CreateDefaultDepthStencilView(device);
 
-    utils::ComboRenderPipelineDescriptor descriptor(device);
+    utils::ComboRenderPipelineDescriptor2 descriptor;
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-    descriptor.vertexStage.module = vsModule;
-    descriptor.cFragmentStage.module = fsModule;
-    descriptor.cVertexState.vertexBufferCount = 1;
-    descriptor.cVertexState.cVertexBuffers[0].arrayStride = 4 * sizeof(float);
-    descriptor.cVertexState.cVertexBuffers[0].attributeCount = 1;
-    descriptor.cVertexState.cAttributes[0].format = wgpu::VertexFormat::Float4;
-    descriptor.depthStencilState = &descriptor.cDepthStencilState;
-    descriptor.cDepthStencilState.format = wgpu::TextureFormat::Depth24PlusStencil8;
-    descriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
+    descriptor.vertex.module = vsModule;
+    descriptor.vertex.bufferCount = 1;
+    descriptor.cBuffers[0].arrayStride = 4 * sizeof(float);
+    descriptor.cBuffers[0].attributeCount = 1;
+    descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
+    descriptor.cFragment.module = fsModule;
+    descriptor.cTargets[0].format = GetPreferredSwapChainTextureFormat();
+    descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
 
-    pipeline = device.CreateRenderPipeline(&descriptor);
+    pipeline = device.CreateRenderPipeline2(&descriptor);
 
     wgpu::TextureView view = texture.CreateView();
 

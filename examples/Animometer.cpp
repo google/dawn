@@ -113,15 +113,15 @@ void init() {
         })");
 
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BindingType::UniformBuffer, true}});
+        device, {{0, wgpu::ShaderStage::Vertex, wgpu::BufferBindingType::Uniform, true}});
 
-    utils::ComboRenderPipelineDescriptor descriptor(device);
+    utils::ComboRenderPipelineDescriptor2 descriptor;
     descriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
-    descriptor.vertexStage.module = vsModule;
-    descriptor.cFragmentStage.module = fsModule;
-    descriptor.cColorStates[0].format = GetPreferredSwapChainTextureFormat();
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.cTargets[0].format = GetPreferredSwapChainTextureFormat();
 
-    pipeline = device.CreateRenderPipeline(&descriptor);
+    pipeline = device.CreateRenderPipeline2(&descriptor);
 
     shaderData.resize(kNumTriangles);
     for (auto& data : shaderData) {
