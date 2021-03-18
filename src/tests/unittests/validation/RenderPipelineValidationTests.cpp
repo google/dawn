@@ -59,7 +59,7 @@ TEST_F(RenderPipelineValidationTest, CreationSuccess) {
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
 
-        EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
+        device.CreateRenderPipeline(&descriptor);
     }
     {
         // Vertex input should be optional
@@ -68,7 +68,7 @@ TEST_F(RenderPipelineValidationTest, CreationSuccess) {
         descriptor.cFragmentStage.module = fsModule;
         descriptor.vertexState = nullptr;
 
-        EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
+        device.CreateRenderPipeline(&descriptor);
     }
     {
         // Rasterization state should be optional
@@ -76,7 +76,7 @@ TEST_F(RenderPipelineValidationTest, CreationSuccess) {
         descriptor.vertexStage.module = vsModule;
         descriptor.cFragmentStage.module = fsModule;
         descriptor.rasterizationState = nullptr;
-        EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
+        device.CreateRenderPipeline(&descriptor);
     }
 }
 
