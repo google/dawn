@@ -15,6 +15,7 @@
 #include "src/writer/msl/generator_impl.h"
 
 #include <algorithm>
+#include <iomanip>
 #include <utility>
 #include <vector>
 
@@ -27,6 +28,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/semantic/array.h"
 #include "src/semantic/call.h"
 #include "src/semantic/function.h"
 #include "src/semantic/member_accessor_expression.h"
@@ -1977,6 +1979,23 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
   return true;
 }
 
+bool GeneratorImpl::EmitPackedType(type::Type* type, const std::string& name) {
+  if (auto* alias = type->As<type::Alias>()) {
+    return EmitPackedType(alias->type(), name);
+  }
+
+  if (auto* vec = type->As<type::Vector>()) {
+    out_ << "packed_";
+    if (!EmitType(vec->type(), "")) {
+      return false;
+    }
+    out_ << vec->size();
+    return true;
+  }
+
+  return EmitType(type, name);
+}
+
 bool GeneratorImpl::EmitStructType(const type::Struct* str) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::Decoration::kNone) {
@@ -1984,17 +2003,32 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
   out_ << "struct " << program_->Symbols().NameFor(str->symbol()) << " {"
        << std::endl;
 
+  auto* sem_str = program_->Sem().Get(str);
+  if (!sem_str) {
+    TINT_ICE(diagnostics_) << "struct  missing semantic info";
+    return false;
+  }
+
+  bool is_host_sharable = sem_str->IsHostSharable();
+
+  // Emits a `/* 0xnnnn */` byte offset comment for a struct member.
+  auto add_byte_offset_comment = [&](uint32_t offset) {
+    std::ios_base::fmtflags saved_flag_state(out_.flags());
+    out_ << "/* 0x" << std::hex << std::setfill('0') << std::setw(4) << offset
+         << " */ ";
+    out_.flags(saved_flag_state);
+  };
+
   uint32_t pad_count = 0;
   auto add_padding = [&](uint32_t size) {
-    out_ << "int8_t pad_" << pad_count << "[" << size << "];" << std::endl;
+    out_ << "int8_t _tint_pad_" << pad_count << "[" << size << "];"
+         << std::endl;
     pad_count++;
   };
 
   increment_indent();
-  uint32_t current_offset = 0;
+  uint32_t msl_offset = 0;
   for (auto* mem : str->impl()->members()) {
-    std::string attributes;
-
     make_indent();
 
     auto* sem_mem = program_->Sem().Get(mem);
@@ -2003,20 +2037,35 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
       return false;
     }
 
-    auto const offset = sem_mem->Offset();
-    if (offset != current_offset) {
-      add_padding(offset - current_offset);
-      make_indent();
-    }
+    auto wgsl_offset = sem_mem->Offset();
 
-    for (auto* deco : mem->decorations()) {
-      if (auto* loc = deco->As<ast::LocationDecoration>()) {
-        attributes = " [[user(locn" + std::to_string(loc->value()) + ")]]";
+    if (is_host_sharable) {
+      if (wgsl_offset < msl_offset) {
+        // Unimplementable layout
+        TINT_ICE(diagnostics_)
+            << "Structure member WGSL offset (" << wgsl_offset
+            << ") is behind MSL offset (" << msl_offset << ")";
+        return false;
       }
-    }
 
-    if (!EmitType(mem->type(), program_->Symbols().NameFor(mem->symbol()))) {
-      return false;
+      // Generate padding if required
+      if (auto padding = wgsl_offset - msl_offset) {
+        add_byte_offset_comment(msl_offset);
+        add_padding(padding);
+        msl_offset += padding;
+        make_indent();
+      }
+
+      add_byte_offset_comment(msl_offset);
+
+      if (!EmitPackedType(mem->type(),
+                          program_->Symbols().NameFor(mem->symbol()))) {
+        return false;
+      }
+    } else {
+      if (!EmitType(mem->type(), program_->Symbols().NameFor(mem->symbol()))) {
+        return false;
+      }
     }
 
     auto* ty = mem->type()->UnwrapAliasIfNeeded();
@@ -2026,32 +2075,32 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
       out_ << " " << program_->Symbols().NameFor(mem->symbol());
     }
 
-    out_ << attributes;
+    // Emit decorations
+    for (auto* deco : mem->decorations()) {
+      if (auto* loc = deco->As<ast::LocationDecoration>()) {
+        out_ << " [[user(locn" + std::to_string(loc->value()) + ")]]";
+      }
+    }
 
     out_ << ";" << std::endl;
 
-    if (ty->is_scalar()) {
-      current_offset = offset + 4;
-    } else if (ty->Is<type::Struct>()) {
-      /// Structure will already contain padding matching the WGSL size
-      current_offset = offset + sem_mem->Size();
-    } else {
-      /// TODO(bclayton): Implement for vector, matrix, array and nested
-      /// structures.
-      TINT_UNREACHABLE(diagnostics_)
-          << "Unhandled type " << ty->TypeInfo().name;
-      return false;
+    if (is_host_sharable) {
+      // Calculate new MSL offset
+      auto size_align = MslPackedTypeSizeAndAlign(ty);
+      if (msl_offset % size_align.align) {
+        TINT_ICE(diagnostics_) << "Misaligned MSL structure member "
+                               << ty->FriendlyName(program_->Symbols()) << " "
+                               << program_->Symbols().NameFor(mem->symbol());
+        return false;
+      }
+      msl_offset += size_align.size;
     }
   }
 
-  auto* sem_str = program_->Sem().Get(str);
-  if (!sem_str) {
-    TINT_ICE(diagnostics_) << "struct missing semantic info";
-    return false;
-  }
-  if (sem_str->Size() != current_offset) {
+  if (is_host_sharable && sem_str->Size() != msl_offset) {
     make_indent();
-    add_padding(sem_str->Size() - current_offset);
+    add_byte_offset_comment(msl_offset);
+    add_padding(sem_str->Size() - msl_offset);
   }
 
   decrement_indent();
@@ -2155,6 +2204,84 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   out_ << ";" << std::endl;
 
   return true;
+}
+
+GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
+    type::Type* ty) {
+  ty = ty->UnwrapAliasIfNeeded();
+
+  if (ty->IsAnyOf<type::U32, type::I32, type::F32>()) {
+    // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
+    // 2.1 Scalar Data Types
+    return {4, 4};
+  }
+
+  if (auto* vec = ty->As<type::Vector>()) {
+    // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
+    // 2.2.3 Packed Vector Types
+    auto num_els = vec->size();
+    auto* el_ty = vec->type()->UnwrapAll();
+    if (el_ty->IsAnyOf<type::U32, type::I32, type::F32>()) {
+      return SizeAndAlign{num_els * 4, 4};
+    }
+  }
+
+  if (auto* mat = ty->As<type::Matrix>()) {
+    // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
+    // 2.3 Matrix Data Types
+    auto cols = mat->columns();
+    auto rows = mat->rows();
+    auto* el_ty = mat->type()->UnwrapAll();
+    if (el_ty->IsAnyOf<type::U32, type::I32, type::F32>()) {
+      static constexpr SizeAndAlign table[] = {
+          /* float2x2 */ {16, 8},
+          /* float2x3 */ {32, 16},
+          /* float2x4 */ {32, 16},
+          /* float3x2 */ {24, 8},
+          /* float3x3 */ {48, 16},
+          /* float3x4 */ {48, 16},
+          /* float4x2 */ {32, 8},
+          /* float4x3 */ {64, 16},
+          /* float4x4 */ {64, 16},
+      };
+      if (cols >= 2 && cols <= 4 && rows >= 2 && rows <= 4) {
+        return table[(3 * (cols - 2)) + (rows - 2)];
+      }
+    }
+  }
+
+  if (auto* arr = ty->As<type::Array>()) {
+    auto* sem = program_->Sem().Get(arr);
+    if (!sem) {
+      TINT_ICE(diagnostics_) << "Array missing semantic info";
+      return {};
+    }
+    auto el_size_align = MslPackedTypeSizeAndAlign(arr->type());
+    if (sem->Stride() != el_size_align.size) {
+      // TODO(crbug.com/tint/649): transform::Msl needs to replace these arrays
+      // with a new array type that has the element type padded to the required
+      // stride.
+      TINT_UNIMPLEMENTED(diagnostics_)
+          << "Arrays with custom strides not yet implemented";
+      return {};
+    }
+    auto num_els = std::max<uint32_t>(arr->size(), 1);
+    return SizeAndAlign{el_size_align.size * num_els, el_size_align.align};
+  }
+
+  if (auto* str = ty->As<type::Struct>()) {
+    // TODO(crbug.com/tint/650): There's an assumption here that MSL's default
+    // structure size and alignment matches WGSL's. We need to confirm this.
+    auto* sem = program_->Sem().Get(str);
+    if (!sem) {
+      TINT_ICE(diagnostics_) << "Array missing semantic info";
+      return {};
+    }
+    return SizeAndAlign{sem->Size(), sem->Align()};
+  }
+
+  TINT_UNREACHABLE(diagnostics_) << "Unhandled type " << ty->TypeInfo().name;
+  return {};
 }
 
 }  // namespace msl

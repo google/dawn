@@ -94,6 +94,17 @@ class Struct : public Castable<Struct, Node> {
     return storage_class_usage_.count(usage) > 0;
   }
 
+  /// @returns true iff this structure has been used by storage class that's
+  /// host-sharable.
+  bool IsHostSharable() const {
+    for (auto sc : storage_class_usage_) {
+      if (ast::IsHostSharable(sc)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
  private:
   type::Struct* const type_;
   StructMemberList const members_;

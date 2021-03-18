@@ -170,28 +170,171 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
 )");
 }
 
-/// TODO(bclayton): Add tests for vector, matrix, array and nested structures.
-TEST_F(MslGeneratorImplTest, EmitType_Struct_InjectPadding) {
+TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
   auto* s = Structure(
       "S", {
                Member("a", ty.i32(), {MemberSize(32)}),
-               Member("b", ty.f32()),
-               Member("c", ty.f32(), {MemberAlign(128), MemberSize(128)}),
+               Member("b", ty.f32(), {MemberAlign(128), MemberSize(128)}),
+               Member("c", ty.vec2<f32>()),
+               Member("d", ty.u32()),
+               Member("e", ty.vec3<f32>()),
+               Member("f", ty.u32()),
+               Member("g", ty.vec4<f32>()),
+               Member("h", ty.u32()),
+               Member("i", ty.mat2x2<f32>()),
+               Member("j", ty.u32()),
+               Member("k", ty.mat2x3<f32>()),
+               Member("l", ty.u32()),
+               Member("m", ty.mat2x4<f32>()),
+               Member("n", ty.u32()),
+               Member("o", ty.mat3x2<f32>()),
+               Member("p", ty.u32()),
+               Member("q", ty.mat3x3<f32>()),
+               Member("r", ty.u32()),
+               Member("s", ty.mat3x4<f32>()),
+               Member("t", ty.u32()),
+               Member("u", ty.mat4x2<f32>()),
+               Member("v", ty.u32()),
+               Member("w", ty.mat4x3<f32>()),
+               Member("x", ty.u32()),
+               Member("y", ty.mat4x4<f32>()),
+               Member("z", ty.f32()),
            });
+
+  Global("G", s, ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
-  int a;
-  int8_t pad_0[28];
-  float b;
-  int8_t pad_1[92];
-  float c;
-  int8_t pad_2[124];
+  /* 0x0000 */ int a;
+  /* 0x0004 */ int8_t _tint_pad_0[124];
+  /* 0x0080 */ float b;
+  /* 0x0084 */ int8_t _tint_pad_1[124];
+  /* 0x0100 */ packed_float2 c;
+  /* 0x0108 */ uint d;
+  /* 0x010c */ int8_t _tint_pad_2[4];
+  /* 0x0110 */ packed_float3 e;
+  /* 0x011c */ uint f;
+  /* 0x0120 */ packed_float4 g;
+  /* 0x0130 */ uint h;
+  /* 0x0134 */ int8_t _tint_pad_3[4];
+  /* 0x0138 */ float2x2 i;
+  /* 0x0148 */ uint j;
+  /* 0x014c */ int8_t _tint_pad_4[4];
+  /* 0x0150 */ float2x3 k;
+  /* 0x0170 */ uint l;
+  /* 0x0174 */ int8_t _tint_pad_5[12];
+  /* 0x0180 */ float2x4 m;
+  /* 0x01a0 */ uint n;
+  /* 0x01a4 */ int8_t _tint_pad_6[4];
+  /* 0x01a8 */ float3x2 o;
+  /* 0x01c0 */ uint p;
+  /* 0x01c4 */ int8_t _tint_pad_7[12];
+  /* 0x01d0 */ float3x3 q;
+  /* 0x0200 */ uint r;
+  /* 0x0204 */ int8_t _tint_pad_8[12];
+  /* 0x0210 */ float3x4 s;
+  /* 0x0240 */ uint t;
+  /* 0x0244 */ int8_t _tint_pad_9[4];
+  /* 0x0248 */ float4x2 u;
+  /* 0x0268 */ uint v;
+  /* 0x026c */ int8_t _tint_pad_10[4];
+  /* 0x0270 */ float4x3 w;
+  /* 0x02b0 */ uint x;
+  /* 0x02b4 */ int8_t _tint_pad_11[12];
+  /* 0x02c0 */ float4x4 y;
+  /* 0x0300 */ float z;
+  /* 0x0304 */ int8_t _tint_pad_12[124];
 };
 )");
 }
+
+TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
+  // inner_x: size(1024), align(512)
+  auto* inner_x =
+      Structure("inner_x", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32(), {MemberAlign(512)}),
+                           });
+
+  // inner_y: size(516), align(4)
+  auto* inner_y =
+      Structure("inner_y", {
+                               Member("a", ty.i32(), {MemberSize(512)}),
+                               Member("b", ty.f32()),
+                           });
+
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", inner_x),
+                               Member("c", ty.f32()),
+                               Member("d", inner_y),
+                               Member("e", ty.f32()),
+                           });
+
+  Global("G", s, ast::StorageClass::kStorage);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct S {
+  /* 0x0000 */ int a;
+  /* 0x0004 */ int8_t _tint_pad_0[508];
+  /* 0x0200 */ inner_x b;
+  /* 0x0600 */ float c;
+  /* 0x0604 */ inner_y d;
+  /* 0x0808 */ float e;
+  /* 0x080c */ int8_t _tint_pad_1[500];
+};
+)");
+}
+
+TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
+  // inner: size(1024), align(512)
+  auto* inner =
+      Structure("inner", {
+                             Member("a", ty.i32()),
+                             Member("b", ty.f32(), {MemberAlign(512)}),
+                         });
+
+  // array_x: size(28), align(4)
+  auto* array_x = ty.array<f32, 7>();
+
+  // array_y: size(4096), align(512)
+  auto* array_y = ty.array(inner, 4);
+
+  // array_z: size(4), align(4)
+  auto* array_z = ty.array<f32>();
+
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", array_x),
+                               Member("c", ty.f32()),
+                               Member("d", array_y),
+                               Member("e", ty.f32()),
+                               Member("f", array_z),
+                           });
+
+  Global("G", s, ast::StorageClass::kStorage);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct S {
+  /* 0x0000 */ int a;
+  /* 0x0004 */ float b[7];
+  /* 0x0020 */ float c;
+  /* 0x0024 */ int8_t _tint_pad_0[476];
+  /* 0x0200 */ inner d[4];
+  /* 0x1200 */ float e;
+  /* 0x1204 */ float f[1];
+  /* 0x1208 */ int8_t _tint_pad_1[504];
+};
+)");
+}
+
+// TODO(crbug.com/tint/649): Add tests for array with explicit stride.
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
@@ -202,12 +345,14 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
                       },
                       {create<ast::StructBlockDecoration>()});
 
+  Global("G", s, ast::StorageClass::kStorage);
+
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(s, "")) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct {
-  int a;
-  float b;
+  /* 0x0000 */ int a;
+  /* 0x0004 */ float b;
 })");
 }
 

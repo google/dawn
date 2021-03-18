@@ -191,11 +191,18 @@ class GeneratorImpl : public TextGenerator {
   /// @param stmt the statement to emit
   /// @returns true if the statement was emitted
   bool EmitSwitch(ast::SwitchStatement* stmt);
-  /// Handles generating type
+  /// Handles generating a type
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
   bool EmitType(type::Type* type, const std::string& name);
+  /// Handles generating an MSL-packed storage type.
+  /// If the type does not have a packed form, the standard non-packed form is
+  /// emitted.
+  /// @param type the type to generate
+  /// @param name the name of the variable, only used for array emission
+  /// @returns true if the type is emitted
+  bool EmitPackedType(type::Type* type, const std::string& name);
   /// Handles generating a struct declaration
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
@@ -265,6 +272,16 @@ class GeneratorImpl : public TextGenerator {
   type::Type* TypeOf(ast::Expression* expr) const {
     return program_->TypeOf(expr);
   }
+
+  // A pair of byte size and alignment `uint32_t`s.
+  struct SizeAndAlign {
+    uint32_t size;
+    uint32_t align;
+  };
+
+  /// @returns the MSL packed type size and alignment in bytes for the given
+  /// type.
+  SizeAndAlign MslPackedTypeSizeAndAlign(type::Type* ty);
 
   ScopeStack<const semantic::Variable*> global_variables_;
   Symbol current_ep_sym_;
