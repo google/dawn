@@ -157,7 +157,7 @@ TEST_F(ResolverValidationTest,
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(3:3 error: constructor expression type does not match variable type)");
+      R"(3:3 error: variable of type 'i32' cannot be initialized with a value of type 'u32')");
 }
 
 TEST_F(ResolverValidationTest,
@@ -174,7 +174,7 @@ TEST_F(ResolverValidationTest,
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(3:3 error: constructor expression type does not match variable type)");
+      R"(3:3 error: variable of type 'MyInt' cannot be initialized with a value of type 'u32')");
 }
 
 TEST_F(ResolverValidationTest, Expr_Error_Unknown) {

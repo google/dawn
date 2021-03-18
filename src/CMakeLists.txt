@@ -467,6 +467,7 @@ if(${TINT_BUILD_TESTS})
     inspector/inspector_test.cc
     intrinsic_table_test.cc
     program_test.cc
+    resolver/assignment_validation_test.cc
     resolver/decoration_validation_test.cc
     resolver/host_shareable_validation_test.cc
     resolver/intrinsic_test.cc

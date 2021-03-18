@@ -77,6 +77,13 @@ class Resolver {
   /// @returns true if the given type is host-shareable
   static bool IsHostShareable(type::Type* type);
 
+  /// @param lhs the assignment store type (non-pointer)
+  /// @param rhs the assignment source type (non-pointer or pointer with
+  /// auto-deref)
+  /// @returns true an expression of type `rhs` can be assigned to a variable,
+  /// structure member or array element of type `lhs`
+  static bool IsValidAssignment(type::Type* lhs, type::Type* rhs);
+
  private:
   /// Structure holding semantic information about a variable.
   /// Used to build the semantic::Variable nodes at the end of resolving.
@@ -191,7 +198,6 @@ class Resolver {
   // AST and Type traversal methods
   // Each return true on success, false on failure.
   bool ArrayAccessor(ast::ArrayAccessorExpression*);
-  bool ValidateBinary(ast::BinaryExpression* expr);
   bool Binary(ast::BinaryExpression*);
   bool Bitcast(ast::BitcastExpression*);
   bool BlockStatement(const ast::BlockStatement*);
@@ -214,6 +220,10 @@ class Resolver {
   bool Statements(const ast::StatementList&);
   bool UnaryOp(ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
+
+  // AST and Type validation methods
+  // Each return true on success, false on failure.
+  bool ValidateBinary(ast::BinaryExpression* expr);
 
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is

@@ -157,6 +157,21 @@ bool Resolver::IsHostShareable(type::Type* type) {
   return false;
 }
 
+bool Resolver::IsValidAssignment(type::Type* lhs, type::Type* rhs) {
+  // TODO(crbug.com/tint/659): This is a rough approximation, and is missing
+  // checks for writability of pointer storage class, access control, etc.
+  // This will need to be fixed after WGSL agrees the behavior of pointers /
+  // references.
+  // Check:
+  if (lhs->UnwrapIfNeeded() != rhs->UnwrapIfNeeded()) {
+    // Try RHS dereference
+    if (lhs->UnwrapIfNeeded() != rhs->UnwrapAll()) {
+      return false;
+    }
+  }
+  return true;
+}
+
 bool Resolver::ResolveInternal() {
   for (auto* ty : builder_->Types()) {
     if (auto* str = ty->As<type::Struct>()) {
@@ -251,7 +266,23 @@ bool Resolver::Statement(ast::Statement* stmt) {
   ScopedAssignment<semantic::Statement*> sa(current_statement_, sem_statement);
 
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
-    return Expression(a->lhs()) && Expression(a->rhs());
+    if (!Expression(a->lhs()) || !Expression(a->rhs())) {
+      return false;
+    }
+    // TODO(crbug.com/tint/659): This logic needs updating once pointers are
+    // pinned down in the WGSL spec.
+    auto* lhs_type = TypeOf(a->lhs())->UnwrapAll();
+    auto* rhs_type = TypeOf(a->rhs());
+    if (!IsValidAssignment(lhs_type, rhs_type)) {
+      diagnostics_.add_error(
+          "invalid assignment: cannot assign value of type '" +
+              rhs_type->FriendlyName(builder_->Symbols()) +
+              "' to a variable of type '" +
+              lhs_type->FriendlyName(builder_->Symbols()) + "'",
+          stmt->source());
+      return false;
+    }
+    return true;
   }
   if (auto* b = stmt->As<ast::BlockStatement>()) {
     return BlockStatement(b);
@@ -1156,16 +1187,15 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     if (!Expression(ctor)) {
       return false;
     }
-    if (auto* sce = ctor->As<ast::ScalarConstructorExpression>()) {
-      auto* lhs_type = stmt->variable()->type()->UnwrapAliasIfNeeded();
-      auto* rhs_type = sce->literal()->type()->UnwrapAliasIfNeeded();
-
-      if (lhs_type != rhs_type) {
-        diagnostics_.add_error(
-            "constructor expression type does not match variable type",
-            stmt->source());
-        return false;
-      }
+    auto* lhs_type = stmt->variable()->type();
+    auto* rhs_type = TypeOf(ctor);
+    if (!IsValidAssignment(lhs_type, rhs_type)) {
+      diagnostics_.add_error(
+          "variable of type '" + lhs_type->FriendlyName(builder_->Symbols()) +
+              "' cannot be initialized with a value of type '" +
+              rhs_type->FriendlyName(builder_->Symbols()) + "'",
+          stmt->source());
+      return false;
     }
   }
 

@@ -24,22 +24,22 @@ using BoundArrayAccessorsTest = TransformTest;
 
 TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   auto* src = R"(
-var a : array<f32, 3>;
+var<storage> a : array<f32, 3>;
 
 const c : u32 = 1u;
 
 fn f() -> void {
-  const b : ptr<function, f32> = a[c];
+  const b : ptr<storage, f32> = a[c];
 }
 )";
 
   auto* expect = R"(
-var a : array<f32, 3>;
+var<storage> a : array<f32, 3>;
 
 const c : u32 = 1u;
 
 fn f() -> void {
-  const b : ptr<function, f32> = a[min(u32(c), 2u)];
+  const b : ptr<storage, f32> = a[min(u32(c), 2u)];
 }
 )";
 

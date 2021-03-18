@@ -484,16 +484,7 @@ bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* assign) {
     return false;
   }
   auto* lhs_result_type = program_->Sem().Get(lhs)->Type()->UnwrapIfNeeded();
-  if (auto* lhs_reference_type = As<type::Pointer>(lhs_result_type)) {
-    auto* lhs_store_type = lhs_reference_type->type()->UnwrapIfNeeded();
-    if (lhs_store_type != rhs_result_type) {
-      add_error(assign->source(), "v-000x",
-                "invalid assignment: can't assign value of type '" +
-                    rhs_result_type->type_name() + "' to '" +
-                    lhs_store_type->type_name() + "'");
-      return false;
-    }
-  } else {
+  if (!Is<type::Pointer>(lhs_result_type)) {
     if (!ValidateBadAssignmentToIdentifier(assign)) {
       return false;
     }

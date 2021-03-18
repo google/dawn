@@ -30,7 +30,7 @@ fn main() -> void {
   var f1 : f32 = 2.0;
   var f2 : f32 = 3.0;
   var f3 : f32 = 4.0;
-  var i : i32 = array<f32, 4>(f0, f1, f2, f3)[2];
+  var i : f32 = array<f32, 4>(f0, f1, f2, f3)[2];
 }
 )";
 
@@ -42,7 +42,7 @@ fn main() -> void {
   var f2 : f32 = 3.0;
   var f3 : f32 = 4.0;
   const tint_symbol_1 : array<f32, 4> = array<f32, 4>(f0, f1, f2, f3);
-  var i : i32 = tint_symbol_1[2];
+  var i : f32 = tint_symbol_1[2];
 }
 )";
 
@@ -55,7 +55,7 @@ TEST_F(HlslTest, PromoteArrayInitializerToConstVar_ArrayInArray) {
   auto* src = R"(
 [[stage(vertex)]]
 fn main() -> void {
-  var i : i32 = array<array<f32, 2>, 2>(array<f32, 2>(1.0, 2.0), array<f32, 2>(3.0, 4.0))[0][1];
+  var i : f32 = array<array<f32, 2>, 2>(array<f32, 2>(1.0, 2.0), array<f32, 2>(3.0, 4.0))[0][1];
 }
 )";
 
@@ -65,7 +65,7 @@ fn main() -> void {
   const tint_symbol_1 : array<f32, 2> = array<f32, 2>(1.0, 2.0);
   const tint_symbol_2 : array<f32, 2> = array<f32, 2>(3.0, 4.0);
   const tint_symbol_3 : array<array<f32, 2>, 2> = array<array<f32, 2>, 2>(tint_symbol_1, tint_symbol_2);
-  var i : i32 = tint_symbol_3[0][1];
+  var i : f32 = tint_symbol_3[0][1];
 }
 )";
 

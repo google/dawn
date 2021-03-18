@@ -653,7 +653,7 @@ class InspectorHelper : public ProgramBuilder {
     if (vector_type_memo_.find(std::tie(type, count)) ==
         vector_type_memo_.end()) {
       vector_type_memo_[std::tie(type, count)] =
-          create<type::Vector>(ty.u32(), count);
+          create<type::Vector>(type, count);
     }
     return vector_type_memo_[std::tie(type, count)];
   }

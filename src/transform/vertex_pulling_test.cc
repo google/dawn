@@ -298,7 +298,7 @@ fn main() -> void {
 TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
   auto* src = R"(
 [[location(0)]] var<in> var_a : f32;
-[[location(1)]] var<in> var_b : array<f32, 4>;
+[[location(1)]] var<in> var_b : vec4<f32>;
 
 [[stage(vertex)]]
 fn main() -> void {}
@@ -316,7 +316,7 @@ struct TintVertexData {
 
 var<private> var_a : f32;
 
-var<private> var_b : array<f32, 4>;
+var<private> var_b : vec4<f32>;
 
 [[stage(vertex)]]
 fn main() -> void {
@@ -346,9 +346,9 @@ fn main() -> void {
 
 TEST_F(VertexPullingTest, FloatVectorAttributes) {
   auto* src = R"(
-[[location(0)]] var<in> var_a : array<f32, 2>;
-[[location(1)]] var<in> var_b : array<f32, 3>;
-[[location(2)]] var<in> var_c : array<f32, 4>;
+[[location(0)]] var<in> var_a : vec2<f32>;
+[[location(1)]] var<in> var_b : vec3<f32>;
+[[location(2)]] var<in> var_c : vec4<f32>;
 
 [[stage(vertex)]]
 fn main() -> void {}
@@ -368,11 +368,11 @@ struct TintVertexData {
   _tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-var<private> var_a : array<f32, 2>;
+var<private> var_a : vec2<f32>;
 
-var<private> var_b : array<f32, 3>;
+var<private> var_b : vec3<f32>;
 
-var<private> var_c : array<f32, 4>;
+var<private> var_c : vec4<f32>;
 
 [[stage(vertex)]]
 fn main() -> void {
