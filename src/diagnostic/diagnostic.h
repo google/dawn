@@ -25,7 +25,7 @@ namespace tint {
 namespace diag {
 
 /// Severity is an enumerator of diagnostic severities.
-enum class Severity { Info, Warning, Error, InternalCompilerError, Fatal };
+enum class Severity { Note, Warning, Error, InternalCompilerError, Fatal };
 
 /// @return true iff `a` is more than, or of equal severity to `b`
 inline bool operator>=(Severity a, Severity b) {
@@ -95,6 +95,17 @@ class List {
     for (auto diag : list) {
       add(std::move(diag));
     }
+  }
+
+  /// adds the note message with the given Source to the end of this list.
+  /// @param note_msg the note message
+  /// @param source the source of the note diagnostic
+  void add_note(const std::string& note_msg, const Source& source) {
+    diag::Diagnostic error{};
+    error.severity = diag::Severity::Note;
+    error.source = source;
+    error.message = note_msg;
+    add(std::move(error));
   }
 
   /// adds the error message without a source to the end of this list.
