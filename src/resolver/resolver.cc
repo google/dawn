@@ -63,6 +63,13 @@ class ScopedAssignment {
   T old_value_;
 };
 
+// Helper function that returns the range union of two source locations. The
+// `start` and `end` locations are assumed to refer to the same source file.
+Source CombineSourceRange(const Source& start, const Source& end) {
+  return Source(Source::Range(start.range.begin, end.range.end),
+                start.file_path, start.file_content);
+}
+
 }  // namespace
 
 Resolver::Resolver(ProgramBuilder* builder)
@@ -572,9 +579,11 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     // obey the constructor type rules laid out in
     // https://gpuweb.github.io/gpuweb/wgsl.html#type-constructor-expr.
     if (auto* vec_type = type_ctor->type()->As<type::Vector>()) {
-      return VectorConstructor(*vec_type, type_ctor->values());
+      return VectorConstructor(vec_type, type_ctor->values());
     }
-    // TODO(crbug.com/tint/633): Validate matrix constructor
+    if (auto* mat_type = type_ctor->type()->As<type::Matrix>()) {
+      return MatrixConstructor(mat_type, type_ctor->values());
+    }
     // TODO(crbug.com/tint/634): Validate array constructor
   } else if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
     SetType(expr, scalar_ctor->literal()->type());
@@ -584,9 +593,9 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
   return true;
 }
 
-bool Resolver::VectorConstructor(const type::Vector& vec_type,
+bool Resolver::VectorConstructor(const type::Vector* vec_type,
                                  const ast::ExpressionList& values) {
-  type::Type* elem_type = vec_type.type()->UnwrapAll();
+  type::Type* elem_type = vec_type->type()->UnwrapAll();
   size_t value_cardinality_sum = 0;
   for (auto* value : values) {
     type::Type* value_type = TypeOf(value)->UnwrapAll();
@@ -635,23 +644,60 @@ bool Resolver::VectorConstructor(const type::Vector& vec_type,
   // A correct vector constructor must either be a zero-value expression
   // or the number of components of all constructor arguments must add up
   // to the vector cardinality.
-  if (value_cardinality_sum > 0 && value_cardinality_sum != vec_type.size()) {
+  if (value_cardinality_sum > 0 && value_cardinality_sum != vec_type->size()) {
     if (values.empty()) {
       TINT_ICE(diagnostics_)
           << "constructor arguments expected to be non-empty!";
     }
     const Source& values_start = values[0]->source();
     const Source& values_end = values[values.size() - 1]->source();
-    const Source src(
-        Source::Range(values_start.range.begin, values_end.range.end),
-        values_start.file_path, values_start.file_content);
     diagnostics_.add_error(
         "attempted to construct '" +
-            vec_type.FriendlyName(builder_->Symbols()) + "' with " +
+            vec_type->FriendlyName(builder_->Symbols()) + "' with " +
             std::to_string(value_cardinality_sum) + " component(s)",
-        src);
+        CombineSourceRange(values_start, values_end));
     return false;
   }
+  return true;
+}
+
+bool Resolver::MatrixConstructor(const type::Matrix* matrix_type,
+                                 const ast::ExpressionList& values) {
+  // Zero Value expression
+  if (values.empty()) {
+    return true;
+  }
+
+  type::Type* elem_type = matrix_type->type()->UnwrapAll();
+  if (matrix_type->columns() != values.size()) {
+    const Source& values_start = values[0]->source();
+    const Source& values_end = values[values.size() - 1]->source();
+    diagnostics_.add_error(
+        "expected " + std::to_string(matrix_type->columns()) + " '" +
+            VectorPretty(matrix_type->rows(), elem_type) + "' arguments in '" +
+            matrix_type->FriendlyName(builder_->Symbols()) +
+            "' constructor, found " + std::to_string(values.size()),
+        CombineSourceRange(values_start, values_end));
+    return false;
+  }
+
+  for (auto* value : values) {
+    type::Type* value_type = TypeOf(value)->UnwrapAll();
+    auto* value_vec = value_type->As<type::Vector>();
+
+    if (!value_vec || value_vec->size() != matrix_type->rows() ||
+        elem_type != value_vec->type()->UnwrapAll()) {
+      diagnostics_.add_error(
+          "expected argument type '" +
+              VectorPretty(matrix_type->rows(), elem_type) + "' in '" +
+              matrix_type->FriendlyName(builder_->Symbols()) +
+              "' constructor, found '" +
+              value_type->FriendlyName(builder_->Symbols()) + "'",
+          value->source());
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -1499,6 +1545,11 @@ bool Resolver::BlockScope(BlockInfo::Type type, F&& callback) {
   BlockInfo block_info(type, current_block_);
   ScopedAssignment<BlockInfo*> sa(current_block_, &block_info);
   return callback();
+}
+
+std::string Resolver::VectorPretty(uint32_t size, type::Type* element_type) {
+  type::Vector vec_type(element_type, size);
+  return vec_type.FriendlyName(builder_->Symbols());
 }
 
 Resolver::VariableInfo::VariableInfo(ast::Variable* decl)

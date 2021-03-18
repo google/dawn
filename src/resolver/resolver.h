@@ -194,7 +194,9 @@ class Resolver {
   bool Call(ast::CallExpression*);
   bool CaseStatement(ast::CaseStatement*);
   bool Constructor(ast::ConstructorExpression*);
-  bool VectorConstructor(const type::Vector& vec_type,
+  bool VectorConstructor(const type::Vector* vec_type,
+                         const ast::ExpressionList& values);
+  bool MatrixConstructor(const type::Matrix* matrix_type,
                          const ast::ExpressionList& values);
   bool Expression(ast::Expression*);
   bool Expressions(const ast::ExpressionList&);
@@ -246,6 +248,13 @@ class Resolver {
   /// The original #current_block_ is restored on exit.
   template <typename F>
   bool BlockScope(BlockInfo::Type type, F&& callback);
+
+  /// Returns a human-readable string representation of the vector type name
+  /// with the given parameters.
+  /// @param size the vector dimension
+  /// @param element_type scalar vector sub-element type
+  /// @return pretty string representation
+  std::string VectorPretty(uint32_t size, type::Type* element_type);
 
   ProgramBuilder* const builder_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
