@@ -211,7 +211,6 @@ class Resolver {
   bool Expression(ast::Expression*);
   bool Expressions(const ast::ExpressionList&);
   bool Function(ast::Function*);
-  bool Functions(const ast::FunctionList&);
   bool Identifier(ast::IdentifierExpression*);
   bool IfStatement(ast::IfStatement*);
   bool IntrinsicCall(ast::CallExpression*, semantic::IntrinsicType);

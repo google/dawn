@@ -118,6 +118,10 @@ OpName %11 "main"
 }
 
 TEST_F(BuilderTest, Decoration_Stage_WithUsedInterfaceIds) {
+  auto* v_in = Global("my_in", ty.f32(), ast::StorageClass::kInput);
+  auto* v_out = Global("my_out", ty.f32(), ast::StorageClass::kOutput);
+  auto* v_wg = Global("my_wg", ty.f32(), ast::StorageClass::kWorkgroup);
+
   auto* func =
       Func("main", {}, ty.void_(),
            ast::StatementList{
@@ -129,10 +133,6 @@ TEST_F(BuilderTest, Decoration_Stage_WithUsedInterfaceIds) {
            ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-
-  auto* v_in = Global("my_in", ty.f32(), ast::StorageClass::kInput);
-  auto* v_out = Global("my_out", ty.f32(), ast::StorageClass::kOutput);
-  auto* v_wg = Global("my_wg", ty.f32(), ast::StorageClass::kWorkgroup);
 
   spirv::Builder& b = Build();
 

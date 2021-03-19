@@ -1490,12 +1490,12 @@ TEST_F(SpvBuilderConstructorTest,
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Vector_WithIdent) {
   // vec3<f32>(a, b, c)  -> false
 
-  auto* t = vec3<f32>("a", "b", "c");
-  WrapInFunction(t);
-
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
   Global("b", ty.f32(), ast::StorageClass::kPrivate);
   Global("c", ty.f32(), ast::StorageClass::kPrivate);
+
+  auto* t = vec3<f32>("a", "b", "c");
+  WrapInFunction(t);
 
   spirv::Builder& b = Build();
 
@@ -1565,11 +1565,11 @@ TEST_F(SpvBuilderConstructorTest,
                                        Member("b", ty.vec3<f32>()),
                                    });
 
-  auto* t = Construct(s, 2.f, "a", 2.f);
-  WrapInFunction(t);
-
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
   Global("b", ty.f32(), ast::StorageClass::kPrivate);
+
+  auto* t = Construct(s, 2.f, "a", 2.f);
+  WrapInFunction(t);
 
   spirv::Builder& b = Build();
 

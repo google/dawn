@@ -204,10 +204,11 @@ TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
 
   Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
 
-  ValidatorImpl& v = Build();
+  // TODO(amaiorano): Move to resolver tests. Program is invalid now because
+  // Resolver catches this. ValidatorImpl& v = Build();
 
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(v.error(), "12:34 v-0006: 'global_var' is not declared");
+  // EXPECT_FALSE(v.Validate());
+  // EXPECT_EQ(v.error(), "12:34 v-0006: 'global_var' is not declared");
 }
 
 TEST_F(ValidatorTest, UsingUndefinedVariableGlobalVariable_Pass) {

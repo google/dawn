@@ -173,52 +173,52 @@ bool Resolver::IsValidAssignment(type::Type* lhs, type::Type* rhs) {
 }
 
 bool Resolver::ResolveInternal() {
+  // Process non-user-defined types (arrays). The rest will be processed in
+  // order of declaration below.
   for (auto* ty : builder_->Types()) {
-    if (auto* str = ty->As<type::Struct>()) {
-      if (!Structure(str)) {
-        return false;
-      }
-      continue;
-    }
     if (auto* arr = ty->As<type::Array>()) {
       if (!Array(arr)) {
         return false;
       }
-      continue;
     }
   }
 
-  for (auto* var : builder_->AST().GlobalVariables()) {
-    variable_stack_.set_global(var->symbol(), CreateVariableInfo(var));
+  // Process everything else in the order they appear in the module. This is
+  // necessary for validation of use-before-declaration.
+  for (auto* decl : builder_->AST().GlobalDeclarations()) {
+    if (decl->Is<type::Type>()) {
+      if (auto* str = decl->As<type::Struct>()) {
+        if (!Structure(str)) {
+          return false;
+        }
+      } else if (auto* arr = decl->As<type::Array>()) {
+        if (!Array(arr)) {
+          return false;
+        }
+      }
+    } else if (auto* func = decl->As<ast::Function>()) {
+      if (!Function(func)) {
+        return false;
+      }
+    } else if (auto* var = decl->As<ast::Variable>()) {
+      variable_stack_.set_global(var->symbol(), CreateVariableInfo(var));
 
-    if (var->has_constructor()) {
-      if (!Expression(var->constructor())) {
+      if (var->has_constructor()) {
+        if (!Expression(var->constructor())) {
+          return false;
+        }
+      }
+
+      if (!ApplyStorageClassUsageToType(var->declared_storage_class(),
+                                        var->type(), var->source())) {
+        diagnostics_.add_note("while instantiating variable " +
+                                  builder_->Symbols().NameFor(var->symbol()),
+                              var->source());
         return false;
       }
     }
-
-    if (!ApplyStorageClassUsageToType(var->declared_storage_class(),
-                                      var->type(), var->source())) {
-      diagnostics_.add_note("while instantiating variable " +
-                                builder_->Symbols().NameFor(var->symbol()),
-                            var->source());
-      return false;
-    }
   }
 
-  if (!Functions(builder_->AST().Functions())) {
-    return false;
-  }
-
-  return true;
-}
-
-bool Resolver::Functions(const ast::FunctionList& funcs) {
-  for (auto* func : funcs) {
-    if (!Function(func)) {
-      return false;
-    }
-  }
   return true;
 }
 

@@ -516,10 +516,10 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Vector) {
 }
 
 TEST_F(ResolverTest, Expr_Bitcast) {
+  Global("name", ty.f32(), ast::StorageClass::kPrivate);
+
   auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("name"));
   WrapInFunction(bitcast);
-
-  Global("name", ty.f32(), ast::StorageClass::kPrivate);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -833,6 +833,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
 
 TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
   auto* var = Var("in_var", ty.f32(), ast::StorageClass::kFunction);
+  Global("var", ty.f32(), ast::StorageClass::kFunction);
 
   auto* func =
       Func("my_func", ast::VariableList{}, ty.void_(),
@@ -841,8 +842,6 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
                create<ast::AssignmentStatement>(Expr("var"), Expr(1.f)),
            },
            ast::DecorationList{});
-
-  Global("var", ty.f32(), ast::StorageClass::kFunction);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1309,6 +1308,12 @@ TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
   // ep_1 -> {}
   // ep_2 -> {}
 
+  Global("first", ty.f32(), ast::StorageClass::kPrivate);
+  Global("second", ty.f32(), ast::StorageClass::kPrivate);
+  Global("call_a", ty.f32(), ast::StorageClass::kPrivate);
+  Global("call_b", ty.f32(), ast::StorageClass::kPrivate);
+  Global("call_c", ty.f32(), ast::StorageClass::kPrivate);
+
   ast::VariableList params;
   auto* func_b =
       Func("b", params, ty.f32(), ast::StatementList{Return(Expr(0.0f))},
@@ -1343,12 +1348,6 @@ TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
            ast::DecorationList{
                create<ast::StageDecoration>(ast::PipelineStage::kVertex),
            });
-
-  Global("first", ty.f32(), ast::StorageClass::kPrivate);
-  Global("second", ty.f32(), ast::StorageClass::kPrivate);
-  Global("call_a", ty.f32(), ast::StorageClass::kPrivate);
-  Global("call_b", ty.f32(), ast::StorageClass::kPrivate);
-  Global("call_c", ty.f32(), ast::StorageClass::kPrivate);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 

@@ -153,15 +153,15 @@ using HlslIntrinsicTest = TestParamHelper<IntrinsicData>;
 TEST_P(HlslIntrinsicTest, Emit) {
   auto param = GetParam();
 
-  auto* call = GenerateCall(param.intrinsic, param.type, this);
-  ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
-  WrapInFunction(call);
-
   Global("f2", ty.vec2<float>(), ast::StorageClass::kFunction);
   Global("f3", ty.vec3<float>(), ast::StorageClass::kFunction);
   Global("u2", ty.vec2<unsigned int>(), ast::StorageClass::kFunction);
   Global("b2", ty.vec2<bool>(), ast::StorageClass::kFunction);
   Global("m2x2", ty.mat2x2<float>(), ast::StorageClass::kFunction);
+
+  auto* call = GenerateCall(param.intrinsic, param.type, this);
+  ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
+  WrapInFunction(call);
 
   GeneratorImpl& gen = Build();
 
