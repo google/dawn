@@ -21,18 +21,56 @@
 #include "utils/TextureFormatUtils.h"
 #include "utils/WGPUHelpers.h"
 
+namespace {
+    static constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+    // Set default texture size to single line texture for color conversion tests.
+    static constexpr uint64_t kDefaultTextureWidth = 10;
+    static constexpr uint64_t kDefaultTextureHeight = 1;
+
+    // Dst texture format copyTextureForBrowser accept
+    static constexpr wgpu::TextureFormat kDstTextureFormat[] = {
+        wgpu::TextureFormat::RGBA8Unorm,  wgpu::TextureFormat::BGRA8Unorm,
+        wgpu::TextureFormat::RGBA32Float, wgpu::TextureFormat::RG8Unorm,
+        wgpu::TextureFormat::RGBA16Float, wgpu::TextureFormat::RG16Float,
+        wgpu::TextureFormat::RGB10A2Unorm};
+}  // anonymous namespace
+
 class CopyTextureForBrowserTests : public DawnTest {
   protected:
-    static constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
-    static constexpr uint64_t kDefaultTextureWidth = 4;
-    static constexpr uint64_t kDefaultTextureHeight = 4;
-
     struct TextureSpec {
         wgpu::Origin3D copyOrigin = {};
         wgpu::Extent3D textureSize = {kDefaultTextureWidth, kDefaultTextureHeight};
         uint32_t level = 0;
         wgpu::TextureFormat format = kTextureFormat;
     };
+
+    // This fixed source texture data is for color conversion tests.
+    // The source data can fill a texture in default width and height.
+    static std::vector<RGBA8> GetFixedSourceTextureData() {
+        std::vector<RGBA8> sourceTextureData{
+            // Take RGBA8Unorm as example:
+            // R channel has different values
+            RGBA8(0, 255, 255, 255),    // r = 0.0
+            RGBA8(102, 255, 255, 255),  // r = 0.4
+            RGBA8(153, 255, 255, 255),  // r = 0.6
+
+            // G channel has different values
+            RGBA8(255, 0, 255, 255),    // g = 0.0
+            RGBA8(255, 102, 255, 255),  // g = 0.4
+            RGBA8(255, 153, 255, 255),  // g = 0.6
+
+            // B channel has different values
+            RGBA8(255, 255, 0, 255),    // b = 0.0
+            RGBA8(255, 255, 102, 255),  // b = 0.4
+            RGBA8(255, 255, 153, 255),  // b = 0.6
+
+            // A channel set to 0
+            RGBA8(255, 255, 255, 0)  // a = 0
+        };
+
+        return sourceTextureData;
+    }
 
     static std::vector<RGBA8> GetSourceTextureData(const utils::TextureDataCopyLayout& layout) {
         std::vector<RGBA8> textureData(layout.texelBlockCount);
@@ -44,7 +82,7 @@ class CopyTextureForBrowserTests : public DawnTest {
                     textureData[sliceOffset + rowOffset + x] =
                         RGBA8(static_cast<uint8_t>((x + layer * x) % 256),
                               static_cast<uint8_t>((y + layer * y) % 256),
-                              static_cast<uint8_t>(x / 256), static_cast<uint8_t>(y / 256));
+                              static_cast<uint8_t>(x % 256), static_cast<uint8_t>(x % 256));
                 }
             }
         }
@@ -59,6 +97,7 @@ class CopyTextureForBrowserTests : public DawnTest {
 
         uint32_t uniformBufferData[] = {
             0,  // copy have flipY option
+            4,  // channelCount
         };
 
         wgpu::BufferDescriptor uniformBufferDesc = {};
@@ -74,6 +113,7 @@ class CopyTextureForBrowserTests : public DawnTest {
         wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
             [[block]] struct Uniforms {
                 dstTextureFlipY : u32;
+                channelCount : u32;
             };
             [[block]] struct OutputBuf {
                 result : array<u32>;
@@ -83,10 +123,13 @@ class CopyTextureForBrowserTests : public DawnTest {
             [[group(0), binding(2)]] var<storage> output : [[access(read_write)]] OutputBuf;
             [[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
             [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
-            [[stage(compute), workgroup_size(1, 1, 1)]]
-            fn main() -> void {
+            fn aboutEqual(value : f32, expect : f32) -> bool {
+                // The value diff should be smaller than the hard coded tolerance.
+                return abs(value - expect) < 0.001;
+            }
+            [[stage(compute), workgroup_size(1, 1, 1)]] fn main() -> void {
                 // Current CopyTextureForBrowser only support full copy now.
-                // TODO(dawn:465): Refactor this after CopyTextureForBrowser
+                // TODO(crbug.com/dawn/465): Refactor this after CopyTextureForBrowser
                 // support sub-rect copy.
                 var size : vec2<i32> = textureDimensions(src);
                 var dstTexCoord : vec2<i32> = vec2<i32>(GlobalInvocationID.xy);
@@ -97,7 +140,21 @@ class CopyTextureForBrowserTests : public DawnTest {
 
                 var srcColor : vec4<f32> = textureLoad(src, srcTexCoord, 0);
                 var dstColor : vec4<f32> = textureLoad(dst, dstTexCoord, 0);
-                var success : bool = all(srcColor == dstColor);
+                var success : bool = true;
+
+                // Not use loop and variable index format to workaround
+                // crbug.com/tint/638.
+                if (uniforms.channelCount == 2u) { // All have rg components.
+                    success = success &&
+                              aboutEqual(dstColor.r, srcColor.r) &&
+                              aboutEqual(dstColor.g, srcColor.g);
+                } else {
+                    success = success &&
+                              aboutEqual(dstColor.r, srcColor.r) &&
+                              aboutEqual(dstColor.g, srcColor.g) &&
+                              aboutEqual(dstColor.b, srcColor.b) &&
+                              aboutEqual(dstColor.a, srcColor.a);
+                }
 
                 var outputIndex : u32 = GlobalInvocationID.y * u32(size.x) + GlobalInvocationID.x;
                 if (success) {
@@ -114,11 +171,31 @@ class CopyTextureForBrowserTests : public DawnTest {
 
         return device.CreateComputePipeline(&csDesc);
     }
+    static uint32_t GetTextureFormatComponentCount(wgpu::TextureFormat format) {
+        switch (format) {
+            case wgpu::TextureFormat::RGBA8Unorm:
+            case wgpu::TextureFormat::BGRA8Unorm:
+            case wgpu::TextureFormat::RGB10A2Unorm:
+            case wgpu::TextureFormat::RGBA16Float:
+            case wgpu::TextureFormat::RGBA32Float:
+                return 4;
+            case wgpu::TextureFormat::RG8Unorm:
+            case wgpu::TextureFormat::RG16Float:
+                return 2;
+            default:
+                UNREACHABLE();
+        }
+    }
+
+    void DoColorConversionTest(const TextureSpec& srcSpec, const TextureSpec& dstSpec) {
+        DoTest(srcSpec, dstSpec, {kDefaultTextureWidth, kDefaultTextureHeight}, {}, true);
+    }
 
     void DoTest(const TextureSpec& srcSpec,
                 const TextureSpec& dstSpec,
                 const wgpu::Extent3D& copySize = {kDefaultTextureWidth, kDefaultTextureHeight},
-                const wgpu::CopyTextureForBrowserOptions options = {}) {
+                const wgpu::CopyTextureForBrowserOptions options = {},
+                bool useFixedTestValue = false) {
         wgpu::TextureDescriptor srcDescriptor;
         srcDescriptor.size = srcSpec.textureSize;
         srcDescriptor.format = srcSpec.format;
@@ -133,7 +210,7 @@ class CopyTextureForBrowserTests : public DawnTest {
         dstDescriptor.format = dstSpec.format;
         dstDescriptor.mipLevelCount = dstSpec.level + 1;
         dstDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled |
-                              wgpu::TextureUsage::OutputAttachment;
+                              wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
         dstTexture = device.CreateTexture(&dstDescriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -144,7 +221,8 @@ class CopyTextureForBrowserTests : public DawnTest {
                 {srcSpec.textureSize.width, srcSpec.textureSize.height, copySize.depth},
                 srcSpec.level);
 
-        const std::vector<RGBA8> textureArrayCopyData = GetSourceTextureData(copyLayout);
+        const std::vector<RGBA8> textureArrayCopyData =
+            useFixedTestValue ? GetFixedSourceTextureData() : GetSourceTextureData(copyLayout);
         wgpu::ImageCopyTexture imageCopyTexture =
             utils::CreateImageCopyTexture(srcTexture, srcSpec.level, {0, 0, srcSpec.copyOrigin.z});
 
@@ -171,8 +249,8 @@ class CopyTextureForBrowserTests : public DawnTest {
 
         // Update uniform buffer based on test config
         uint32_t uniformBufferData[] = {
-            options.flipY,  // copy have flipY option
-        };
+            options.flipY,                                    // copy have flipY option
+            GetTextureFormatComponentCount(dstSpec.format)};  // channelCount
 
         device.GetQueue().WriteBuffer(uniformBuffer, 0, uniformBufferData,
                                       sizeof(uniformBufferData));
@@ -308,6 +386,45 @@ TEST_P(CopyTextureForBrowserTests, VerifyFlipYInSlimTexture) {
     wgpu::CopyTextureForBrowserOptions options = {};
     options.flipY = true;
     DoTest(textureSpec, textureSpec, {kWidth, kHeight}, options);
+}
+
+// Verify |CopyTextureForBrowser| doing color conversion correctly when
+// the source texture is RGBA8Unorm format.
+TEST_P(CopyTextureForBrowserTests, FromRGBA8UnormCopy) {
+    // Tests skip due to crbug.com/dawn/592.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+    // Skip OpenGLES backend because it fails on using RGBA8Unorm as
+    // source texture format.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
+    for (wgpu::TextureFormat dstFormat : kDstTextureFormat) {
+        TextureSpec srcTextureSpec = {};  // default format is RGBA8Unorm
+
+        TextureSpec dstTextureSpec;
+        dstTextureSpec.format = dstFormat;
+
+        DoColorConversionTest(srcTextureSpec, dstTextureSpec);
+    }
+}
+
+// Verify |CopyTextureForBrowser| doing color conversion correctly when
+// the source texture is BGRAUnorm format.
+TEST_P(CopyTextureForBrowserTests, FromBGRA8UnormCopy) {
+    // Tests skip due to crbug.com/dawn/592.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+    // Skip OpenGLES backend because it fails on using BGRA8Unorm as
+    // source texture format.
+    DAWN_SKIP_TEST_IF(IsOpenGLES());
+
+    for (wgpu::TextureFormat dstFormat : kDstTextureFormat) {
+        TextureSpec srcTextureSpec;
+        srcTextureSpec.format = wgpu::TextureFormat::BGRA8Unorm;
+
+        TextureSpec dstTextureSpec;
+        dstTextureSpec.format = dstFormat;
+
+        DoColorConversionTest(srcTextureSpec, dstTextureSpec);
+    }
 }
 
 DAWN_INSTANTIATE_TEST(CopyTextureForBrowserTests,
