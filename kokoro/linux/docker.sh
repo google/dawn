@@ -39,9 +39,11 @@ function status {
     task_begin $@
 }
 
+ORIGINAL_SRC_DIR="$(pwd)"
+
 . /bin/using.sh # Declare the bash `using` function for configuring toolchains.
 
-ORIGINAL_SRC_DIR="$(pwd)"
+using depot_tools
 
 status "Cloning to clean source directory"
 # We do this so that the docker script can be tested in a local development
@@ -50,14 +52,6 @@ SRC_DIR=/tmp/tint-src
 mkdir -p ${SRC_DIR}
 cd ${SRC_DIR}
 git clone ${ORIGINAL_SRC_DIR} .
-
-status "Fetching depot_tools"
-# TODO(bclayton): Add depot_tools to the docker image
-mkdir -p /tmp/depot_tools
-curl https://storage.googleapis.com/chrome-infra/depot_tools.zip -o /tmp/depot_tools.zip
-unzip /tmp/depot_tools.zip -d /tmp/depot_tools
-rm /tmp/depot_tools.zip
-export PATH="/tmp/depot_tools:$PATH"
 
 status "Fetching dependencies"
 cp standalone.gclient .gclient
