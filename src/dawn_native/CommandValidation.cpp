@@ -392,15 +392,20 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture& src,
-                                                              const ImageCopyTexture& dst,
-                                                              const Extent3D& copySize) {
+    MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
+                                                        const ImageCopyTexture& dst,
+                                                        const Extent3D& copySize) {
         const uint32_t srcSamples = src.texture->GetSampleCount();
         const uint32_t dstSamples = dst.texture->GetSampleCount();
 
         if (srcSamples != dstSamples) {
             return DAWN_VALIDATION_ERROR(
                 "Source and destination textures must have matching sample counts.");
+        }
+
+        if (src.texture->GetFormat().format != dst.texture->GetFormat().format) {
+            // Metal requires texture-to-texture copies be the same format
+            return DAWN_VALIDATION_ERROR("Source and destination texture formats must match.");
         }
 
         // Metal cannot select a single aspect for texture-to-texture copies.
@@ -425,34 +430,6 @@ namespace dawn_native {
         }
 
         return {};
-    }
-
-    MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
-                                                        const ImageCopyTexture& dst,
-                                                        const Extent3D& copySize) {
-        if (src.texture->GetFormat().format != dst.texture->GetFormat().format) {
-            // Metal requires texture-to-texture copies be the same format
-            return DAWN_VALIDATION_ERROR("Source and destination texture formats must match.");
-        }
-
-        return ValidateTextureToTextureCopyCommonRestrictions(src, dst, copySize);
-    }
-
-    // CopyTextureForBrowser could handle color conversion during the copy and it
-    // requires the source must be sampleable and the destination must be writable
-    // using a render pass
-    MaybeError ValidateCopyTextureForBrowserRestrictions(const ImageCopyTexture& src,
-                                                         const ImageCopyTexture& dst,
-                                                         const Extent3D& copySize) {
-        if (!(src.texture->GetUsage() & wgpu::TextureUsage::Sampled)) {
-            return DAWN_VALIDATION_ERROR("Source texture must have sampled usage");
-        }
-
-        if (!(dst.texture->GetUsage() & wgpu::TextureUsage::OutputAttachment)) {
-            return DAWN_VALIDATION_ERROR("Dest texture must have outputAttachment usage");
-        }
-
-        return ValidateTextureToTextureCopyCommonRestrictions(src, dst, copySize);
     }
 
     MaybeError ValidateCanUseAs(const TextureBase* texture, wgpu::TextureUsage usage) {
