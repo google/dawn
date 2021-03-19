@@ -112,7 +112,12 @@ INSTANTIATE_TEST_SUITE_P(
                       IntrinsicType::kTextureSampleCompare},
         IntrinsicData{"textureSampleGrad", IntrinsicType::kTextureSampleGrad},
         IntrinsicData{"textureSampleLevel", IntrinsicType::kTextureSampleLevel},
-        IntrinsicData{"trunc", IntrinsicType::kTrunc}));
+        IntrinsicData{"trunc", IntrinsicType::kTrunc},
+        IntrinsicData{"unpack2x16float", IntrinsicType::kUnpack2x16Float},
+        IntrinsicData{"unpack2x16snorm", IntrinsicType::kUnpack2x16Snorm},
+        IntrinsicData{"unpack2x16unorm", IntrinsicType::kUnpack2x16Unorm},
+        IntrinsicData{"unpack4x8snorm", IntrinsicType::kUnpack4x8Snorm},
+        IntrinsicData{"unpack4x8unorm", IntrinsicType::kUnpack4x8Unorm}));
 
 TEST_F(IntrinsicTypeTest, ParseNoMatch) {
   EXPECT_EQ(ParseIntrinsicType("not_intrinsic"), IntrinsicType::kNone);
