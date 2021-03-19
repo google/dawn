@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "src/ast/pipeline_stage.h"
+
 namespace tint {
 namespace reader {
 namespace spirv {

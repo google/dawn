@@ -15,6 +15,8 @@
 #ifndef SRC_SEMANTIC_TYPE_MAPPINGS_H_
 #define SRC_SEMANTIC_TYPE_MAPPINGS_H_
 
+#include <type_traits>
+
 namespace tint {
 
 // Forward declarations
