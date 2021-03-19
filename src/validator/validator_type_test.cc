@@ -44,33 +44,5 @@ TEST_F(ValidatorTypeTest, RuntimeArrayInFunction_Fail) {
             "of a struct");
 }
 
-TEST_F(ValidatorTypeTest, RuntimeArrayAsParameter_Fail) {
-  // fn func(a : array<u32>) {}
-  // [[stage(vertex)]] fn main() {}
-
-  auto* param = Var(Source{Source::Location{12, 34}}, "a", ty.array<i32>(),
-                    ast::StorageClass::kNone);
-
-  Func("func", ast::VariableList{param}, ty.void_(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(),
-       },
-       ast::DecorationList{});
-
-  Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(),
-       },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(v.error(),
-            "12:34 v-0015: runtime arrays may only appear as the last member "
-            "of a struct");
-}
 }  // namespace
 }  // namespace tint

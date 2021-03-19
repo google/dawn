@@ -97,8 +97,8 @@ ast::Statement* ProgramBuilder::WrapInStatement(ast::Statement* stmt) {
   return stmt;
 }
 
-void ProgramBuilder::WrapInFunction(ast::StatementList stmts) {
-  Func("test_function", {}, ty.void_(), stmts, {});
+ast::Function* ProgramBuilder::WrapInFunction(ast::StatementList stmts) {
+  return Func("test_function", {}, ty.void_(), std::move(stmts), {});
 }
 
 }  // namespace tint

@@ -171,6 +171,7 @@ source_set("tint_unittests_core_src") {
     "../src/program_test.cc",
     "../src/resolver/assignment_validation_test.cc",
     "../src/resolver/decoration_validation_test.cc",
+    "../src/resolver/function_validation_test.cc",
     "../src/resolver/host_shareable_validation_test.cc",
     "../src/resolver/intrinsic_test.cc",
     "../src/resolver/is_host_shareable_test.cc",

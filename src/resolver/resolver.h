@@ -224,15 +224,14 @@ class Resolver {
   // AST and Type validation methods
   // Each return true on success, false on failure.
   bool ValidateBinary(ast::BinaryExpression* expr);
+  bool ValidateParameter(const ast::Variable* param);
+  bool ValidateFunction(const ast::Function* func);
+  bool ValidateStructure(const type::Struct* st);
 
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
   /// returned.
   const semantic::Array* Array(type::Array*);
-
-  /// @returns returns true if input struct is valid
-  /// @param st the struct to validate
-  bool ValidateStructure(const type::Struct* st);
 
   /// @returns the StructInfo for the structure `str`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
@@ -286,7 +285,7 @@ class Resolver {
   BlockInfo* current_block_ = nullptr;
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
-  std::unordered_map<ast::Function*, FunctionInfo*> function_to_info_;
+  std::unordered_map<const ast::Function*, FunctionInfo*> function_to_info_;
   std::unordered_map<ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
   std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;

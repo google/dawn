@@ -76,10 +76,6 @@ class ValidatorImpl {
   /// @param func the function to check
   /// @returns true if the validation was successful
   bool ValidateFunction(const ast::Function* func);
-  /// Validates a function parameter
-  /// @param param the function parameter to check
-  /// @returns true if the validation was successful
-  bool ValidateParameter(const ast::Variable* param);
   /// Validates a block of statements
   /// @param block the statements to check
   /// @returns true if the validation was successful
@@ -147,7 +143,6 @@ class ValidatorImpl {
   const Program* program_;
   diag::List diags_;
   ScopeStack<const ast::Variable*> variable_stack_;
-  ScopeStack<const ast::Function*> function_stack_;
   ast::Function* current_function_ = nullptr;
 };
 

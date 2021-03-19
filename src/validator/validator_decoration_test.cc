@@ -121,42 +121,6 @@ INSTANTIATE_TEST_SUITE_P(
                     DecorationTestParams{DecorationKind::kStructBlock, false},
                     DecorationTestParams{DecorationKind::kWorkgroup, true}));
 
-using FunctionReturnTypeDecorationTest = ValidatorDecorationsTestWithParams;
-TEST_P(FunctionReturnTypeDecorationTest, Decoration_IsValid) {
-  auto params = GetParam();
-
-  Func("main", ast::VariableList{}, ty.f32(),
-       ast::StatementList{create<ast::ReturnStatement>(Expr(1.f))},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex)},
-       ast::DecorationList{createDecoration(*this, params.kind)});
-
-  ValidatorImpl& v = Build();
-
-  if (params.should_pass) {
-    EXPECT_TRUE(v.Validate());
-  } else {
-    EXPECT_FALSE(v.Validate());
-    EXPECT_EQ(v.error(), "decoration is not valid for function return types");
-  }
-}
-INSTANTIATE_TEST_SUITE_P(
-    ValidatorTest,
-    FunctionReturnTypeDecorationTest,
-    testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
-                    DecorationTestParams{DecorationKind::kAlign, false},
-                    DecorationTestParams{DecorationKind::kBinding, false},
-                    DecorationTestParams{DecorationKind::kBuiltin, true},
-                    DecorationTestParams{DecorationKind::kConstantId, false},
-                    DecorationTestParams{DecorationKind::kGroup, false},
-                    DecorationTestParams{DecorationKind::kLocation, true},
-                    DecorationTestParams{DecorationKind::kOffset, false},
-                    DecorationTestParams{DecorationKind::kSize, false},
-                    DecorationTestParams{DecorationKind::kStage, false},
-                    DecorationTestParams{DecorationKind::kStride, false},
-                    DecorationTestParams{DecorationKind::kStructBlock, false},
-                    DecorationTestParams{DecorationKind::kWorkgroup, false}));
-
 using VariableDecorationTest = ValidatorDecorationsTestWithParams;
 TEST_P(VariableDecorationTest, Decoration_IsValid) {
   auto params = GetParam();

@@ -14,6 +14,7 @@
 
 #include "src/ast/access_decoration.h"
 #include "src/ast/constant_id_decoration.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/workgroup_decoration.h"
@@ -83,6 +84,41 @@ ast::Decoration* createDecoration(const Source& source,
   }
   return nullptr;
 }
+
+using FunctionReturnTypeDecorationTest = TestWithParams;
+TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
+  auto params = GetParam();
+
+  Func("main", ast::VariableList{}, ty.f32(),
+       ast::StatementList{create<ast::ReturnStatement>(Expr(1.f))},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex)},
+       ast::DecorationList{createDecoration({}, *this, params.kind)});
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              "error: decoration is not valid for function return types");
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    FunctionReturnTypeDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAccess, false},
+                    TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, true},
+                    TestParams{DecorationKind::kConstantId, false},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kLocation, true},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false}));
 
 using ArrayDecorationTest = TestWithParams;
 

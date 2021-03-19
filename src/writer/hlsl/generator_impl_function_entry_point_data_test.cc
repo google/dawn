@@ -42,7 +42,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
              create<ast::LocationDecoration>(1),
          });
 
-  Func("vtx_main", ast::VariableList{}, ty.f32(),
+  Func("vtx_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -85,7 +85,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
              create<ast::LocationDecoration>(1),
          });
 
-  Func("vtx_main", ast::VariableList{}, ty.f32(),
+  Func("vtx_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -128,7 +128,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
              create<ast::LocationDecoration>(1),
          });
 
-  Func("main", ast::VariableList{}, ty.f32(),
+  Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -171,7 +171,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
              create<ast::LocationDecoration>(1),
          });
 
-  Func("main", ast::VariableList{}, ty.f32(),
+  Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -211,7 +211,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
              create<ast::LocationDecoration>(1),
          });
 
-  Func("main", ast::VariableList{}, ty.f32(),
+  Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
@@ -247,7 +247,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
              create<ast::LocationDecoration>(1),
          });
 
-  Func("main", ast::VariableList{}, ty.f32(),
+  Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),

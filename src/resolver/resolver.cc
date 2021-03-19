@@ -222,8 +222,64 @@ bool Resolver::Functions(const ast::FunctionList& funcs) {
   return true;
 }
 
+bool Resolver::ValidateParameter(const ast::Variable* param) {
+  if (auto* r = param->type()->UnwrapAll()->As<type::Array>()) {
+    if (r->IsRuntimeArray()) {
+      diagnostics_.add_error(
+          "v-0015",
+          "runtime arrays may only appear as the last member of a struct",
+          param->source());
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Resolver::ValidateFunction(const ast::Function* func) {
+  if (symbol_to_function_.find(func->symbol()) != symbol_to_function_.end()) {
+    diagnostics_.add_error("v-0016",
+                           "function names must be unique '" +
+                               builder_->Symbols().NameFor(func->symbol()) +
+                               "'",
+                           func->source());
+    return false;
+  }
+
+  for (auto* param : func->params()) {
+    if (!ValidateParameter(param)) {
+      return false;
+    }
+  }
+
+  if (!func->return_type()->Is<type::Void>()) {
+    if (!func->get_last_statement() ||
+        !func->get_last_statement()->Is<ast::ReturnStatement>()) {
+      diagnostics_.add_error(
+          "v-0002", "non-void function must end with a return statement",
+          func->source());
+      return false;
+    }
+
+    for (auto* deco : func->return_type_decorations()) {
+      if (!(deco->Is<ast::BuiltinDecoration>() ||
+            deco->Is<ast::LocationDecoration>())) {
+        diagnostics_.add_error(
+            "decoration is not valid for function return types",
+            deco->source());
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 bool Resolver::Function(ast::Function* func) {
   auto* func_info = function_infos_.Create<FunctionInfo>(func);
+
+  if (!ValidateFunction(func)) {
+    return false;
+  }
 
   ScopedAssignment<FunctionInfo*> sa(current_function_, func_info);
 

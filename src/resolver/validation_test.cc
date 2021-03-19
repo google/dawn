@@ -116,7 +116,7 @@ TEST_F(ResolverValidationTest, Stmt_Call_recursive) {
   auto* call_expr = Call("main");
   ast::VariableList params0;
 
-  Func("main", params0, ty.f32(),
+  Func("main", params0, ty.void_(),
        ast::StatementList{
            create<ast::CallStatement>(call_expr),
        },
@@ -245,7 +245,7 @@ TEST_F(ResolverValidationTest, StorageClass_NonFunctionClassError) {
   auto* var = Var("var", ty.i32(), ast::StorageClass::kWorkgroup);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
-  Func("func", ast::VariableList{}, ty.i32(), ast::StatementList{stmt},
+  Func("func", ast::VariableList{}, ty.void_(), ast::StatementList{stmt},
        ast::DecorationList{});
 
   EXPECT_FALSE(r()->Resolve());

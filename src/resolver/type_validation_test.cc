@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver.h"
@@ -94,6 +95,34 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
   EXPECT_EQ(r()->error(),
             "12:34 error v-0015: runtime arrays may only appear as the last "
             "member of a struct");
+}
+
+TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
+  // fn func(a : array<u32>) {}
+  // [[stage(vertex)]] fn main() {}
+
+  auto* param = Var(Source{Source::Location{12, 34}}, "a", ty.array<i32>(),
+                    ast::StorageClass::kNone);
+
+  Func("func", ast::VariableList{param}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::DecorationList{});
+
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error v-0015: runtime arrays may only appear as the last member "
+      "of a struct");
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {

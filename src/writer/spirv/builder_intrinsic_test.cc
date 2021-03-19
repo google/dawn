@@ -382,8 +382,8 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   auto* expr2 = Call("textureSampleCompare", "texture", "sampler",
                      vec2<f32>(1.0f, 2.0f), 2.0f);
 
-  WrapInFunction(expr1);
-  WrapInFunction(expr2);
+  Func("f1", {}, ty.void_(), {create<ast::CallStatement>(expr1)}, {});
+  Func("f2", {}, ty.void_(), {create<ast::CallStatement>(expr2)}, {});
 
   spirv::Builder& b = Build();
 

@@ -79,8 +79,8 @@ TEST_F(BuilderTest, Switch_WithCase) {
 
   WrapInFunction(expr);
 
-  auto* func =
-      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
+  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -92,29 +92,30 @@ TEST_F(BuilderTest, Switch_WithCase) {
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
-OpName %7 "a_func"
+OpName %8 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 %5 = OpVariable %2 Private %4
-%6 = OpTypeFunction %3
-%14 = OpConstant %3 1
-%15 = OpConstant %3 2
-%7 = OpFunction %3 None %6
-%8 = OpLabel
-%10 = OpLoad %3 %5
-OpSelectionMerge %9 None
-OpSwitch %10 %11 1 %12 2 %13
-%12 = OpLabel
-OpStore %1 %14
-OpBranch %9
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%15 = OpConstant %3 1
+%16 = OpConstant %3 2
+%8 = OpFunction %7 None %6
+%9 = OpLabel
+%11 = OpLoad %3 %5
+OpSelectionMerge %10 None
+OpSwitch %11 %12 1 %13 2 %14
 %13 = OpLabel
 OpStore %1 %15
-OpBranch %9
-%11 = OpLabel
-OpBranch %9
-%9 = OpLabel
+OpBranch %10
+%14 = OpLabel
+OpStore %1 %16
+OpBranch %10
+%12 = OpLabel
+OpBranch %10
+%10 = OpLabel
 OpReturn
 OpFunctionEnd
 )");
@@ -151,8 +152,8 @@ TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
 
   WrapInFunction(expr);
 
-  auto* func =
-      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
+  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -164,7 +165,7 @@ TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
-OpName %10 "a_func"
+OpName %11 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
@@ -173,23 +174,24 @@ OpName %10 "a_func"
 %6 = OpTypePointer Private %7
 %8 = OpConstantNull %7
 %5 = OpVariable %6 Private %8
-%9 = OpTypeFunction %3
-%17 = OpConstant %3 1
-%18 = OpConstant %3 2
-%10 = OpFunction %3 None %9
-%11 = OpLabel
-%13 = OpLoad %7 %5
-OpSelectionMerge %12 None
-OpSwitch %13 %14 1 %15 2 %16
-%15 = OpLabel
-OpStore %1 %17
-OpBranch %12
+%10 = OpTypeVoid
+%9 = OpTypeFunction %10
+%18 = OpConstant %3 1
+%19 = OpConstant %3 2
+%11 = OpFunction %10 None %9
+%12 = OpLabel
+%14 = OpLoad %7 %5
+OpSelectionMerge %13 None
+OpSwitch %14 %15 1 %16 2 %17
 %16 = OpLabel
 OpStore %1 %18
-OpBranch %12
-%14 = OpLabel
-OpBranch %12
-%12 = OpLabel
+OpBranch %13
+%17 = OpLabel
+OpStore %1 %19
+OpBranch %13
+%15 = OpLabel
+OpBranch %13
+%13 = OpLabel
 OpReturn
 OpFunctionEnd
 )");
@@ -215,8 +217,8 @@ TEST_F(BuilderTest, Switch_WithDefault) {
 
   WrapInFunction(expr);
 
-  auto* func =
-      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
+  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -228,23 +230,24 @@ TEST_F(BuilderTest, Switch_WithDefault) {
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
-OpName %7 "a_func"
+OpName %8 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 %5 = OpVariable %2 Private %4
-%6 = OpTypeFunction %3
-%12 = OpConstant %3 1
-%7 = OpFunction %3 None %6
-%8 = OpLabel
-%10 = OpLoad %3 %5
-OpSelectionMerge %9 None
-OpSwitch %10 %11
-%11 = OpLabel
-OpStore %1 %12
-OpBranch %9
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%13 = OpConstant %3 1
+%8 = OpFunction %7 None %6
 %9 = OpLabel
+%11 = OpLoad %3 %5
+OpSelectionMerge %10 None
+OpSwitch %11 %12
+%12 = OpLabel
+OpStore %1 %13
+OpBranch %10
+%10 = OpLabel
 OpReturn
 OpFunctionEnd
 )");
@@ -289,8 +292,8 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
 
   WrapInFunction(expr);
 
-  auto* func =
-      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
+  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -302,31 +305,32 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
-OpName %7 "a_func"
+OpName %8 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 %5 = OpVariable %2 Private %4
-%6 = OpTypeFunction %3
-%14 = OpConstant %3 1
-%15 = OpConstant %3 2
-%16 = OpConstant %3 3
-%7 = OpFunction %3 None %6
-%8 = OpLabel
-%10 = OpLoad %3 %5
-OpSelectionMerge %9 None
-OpSwitch %10 %11 1 %12 2 %13 3 %13
-%12 = OpLabel
-OpStore %1 %14
-OpBranch %9
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%15 = OpConstant %3 1
+%16 = OpConstant %3 2
+%17 = OpConstant %3 3
+%8 = OpFunction %7 None %6
+%9 = OpLabel
+%11 = OpLoad %3 %5
+OpSelectionMerge %10 None
+OpSwitch %11 %12 1 %13 2 %14 3 %14
 %13 = OpLabel
 OpStore %1 %15
-OpBranch %9
-%11 = OpLabel
+OpBranch %10
+%14 = OpLabel
 OpStore %1 %16
-OpBranch %9
-%9 = OpLabel
+OpBranch %10
+%12 = OpLabel
+OpStore %1 %17
+OpBranch %10
+%10 = OpLabel
 OpReturn
 OpFunctionEnd
 )");
@@ -372,8 +376,8 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
 
   WrapInFunction(expr);
 
-  auto* func =
-      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
+  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -385,31 +389,32 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
-OpName %7 "a_func"
+OpName %8 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 %5 = OpVariable %2 Private %4
-%6 = OpTypeFunction %3
-%14 = OpConstant %3 1
-%15 = OpConstant %3 2
-%16 = OpConstant %3 3
-%7 = OpFunction %3 None %6
-%8 = OpLabel
-%10 = OpLoad %3 %5
-OpSelectionMerge %9 None
-OpSwitch %10 %11 1 %12 2 %13
-%12 = OpLabel
-OpStore %1 %14
-OpBranch %13
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%15 = OpConstant %3 1
+%16 = OpConstant %3 2
+%17 = OpConstant %3 3
+%8 = OpFunction %7 None %6
+%9 = OpLabel
+%11 = OpLoad %3 %5
+OpSelectionMerge %10 None
+OpSwitch %11 %12 1 %13 2 %14
 %13 = OpLabel
 OpStore %1 %15
-OpBranch %9
-%11 = OpLabel
+OpBranch %14
+%14 = OpLabel
 OpStore %1 %16
-OpBranch %9
-%9 = OpLabel
+OpBranch %10
+%12 = OpLabel
+OpStore %1 %17
+OpBranch %10
+%10 = OpLabel
 OpReturn
 OpFunctionEnd
 )");
@@ -439,8 +444,8 @@ TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
 
   WrapInFunction(expr);
 
-  auto* func =
-      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
+  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -482,8 +487,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
 
   WrapInFunction(expr);
 
-  auto* func =
-      Func("a_func", {}, ty.i32(), ast::StatementList{}, ast::DecorationList{});
+  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{});
 
   spirv::Builder& b = Build();
 
@@ -495,32 +500,33 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
 
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
 OpName %5 "a"
-OpName %7 "a_func"
+OpName %8 "a_func"
 %3 = OpTypeInt 32 1
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
 %5 = OpVariable %2 Private %4
-%6 = OpTypeFunction %3
-%13 = OpTypeBool
-%14 = OpConstantTrue %13
-%17 = OpConstant %3 1
-%7 = OpFunction %3 None %6
-%8 = OpLabel
-%10 = OpLoad %3 %5
-OpSelectionMerge %9 None
-OpSwitch %10 %11 1 %12
-%12 = OpLabel
-OpSelectionMerge %15 None
-OpBranchConditional %14 %16 %15
-%16 = OpLabel
-OpBranch %9
-%15 = OpLabel
-OpStore %1 %17
-OpBranch %9
-%11 = OpLabel
-OpBranch %9
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%14 = OpTypeBool
+%15 = OpConstantTrue %14
+%18 = OpConstant %3 1
+%8 = OpFunction %7 None %6
 %9 = OpLabel
+%11 = OpLoad %3 %5
+OpSelectionMerge %10 None
+OpSwitch %11 %12 1 %13
+%13 = OpLabel
+OpSelectionMerge %16 None
+OpBranchConditional %15 %17 %16
+%17 = OpLabel
+OpBranch %10
+%16 = OpLabel
+OpStore %1 %18
+OpBranch %10
+%12 = OpLabel
+OpBranch %10
+%10 = OpLabel
 OpReturn
 OpFunctionEnd
 )");

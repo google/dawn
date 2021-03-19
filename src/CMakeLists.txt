@@ -469,6 +469,7 @@ if(${TINT_BUILD_TESTS})
     program_test.cc
     resolver/assignment_validation_test.cc
     resolver/decoration_validation_test.cc
+    resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
     resolver/intrinsic_test.cc
     resolver/is_host_shareable_test.cc

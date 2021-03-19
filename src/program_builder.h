@@ -28,6 +28,7 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stride_decoration.h"
@@ -1031,6 +1032,14 @@ class ProgramBuilder {
     return func;
   }
 
+  /// Creates an ast::ReturnStatement with the input args
+  /// @param args arguments to construct a return statement with
+  /// @returns the return statement pointer
+  template <typename... Args>
+  ast::ReturnStatement* Return(Args&&... args) {
+    return create<ast::ReturnStatement>(std::forward<Args>(args)...);
+  }
+
   /// Creates a ast::Struct and type::Struct, registering the type::Struct with
   /// the AST().ConstructedTypes().
   /// @param source the source information
@@ -1206,14 +1215,16 @@ class ProgramBuilder {
   /// Wraps the list of arguments in a simple function so that each is reachable
   /// by the Resolver.
   /// @param args a mix of ast::Expression, ast::Statement, ast::Variables.
+  /// @returns the function
   template <typename... ARGS>
-  void WrapInFunction(ARGS&&... args) {
+  ast::Function* WrapInFunction(ARGS&&... args) {
     ast::StatementList stmts{WrapInStatement(std::forward<ARGS>(args))...};
-    WrapInFunction(stmts);
+    return WrapInFunction(std::move(stmts));
   }
   /// @param stmts a list of ast::Statement that will be wrapped by a function,
   /// so that each statement is reachable by the Resolver.
-  void WrapInFunction(ast::StatementList stmts);
+  /// @returns the function
+  ast::Function* WrapInFunction(ast::StatementList stmts);
 
   /// The builder types
   TypesBuilder const ty{this};

@@ -56,37 +56,6 @@ TEST_F(ValidateFunctionTest,
   EXPECT_TRUE(v.Validate());
 }
 
-TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatement_Fail) {
-  // fn func -> int { var a:i32 = 2; }
-
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
-
-  Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
-       ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
-       },
-       ast::DecorationList{});
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(v.error(),
-            "12:34 v-0002: non-void function must end with a return statement");
-}
-
-TEST_F(ValidateFunctionTest, FunctionEndWithoutReturnStatementEmptyBody_Fail) {
-  // fn func -> int {}
-
-  Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
-       ast::StatementList{}, ast::DecorationList{});
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(v.error(),
-            "12:34 v-0002: non-void function must end with a return statement");
-}
-
 TEST_F(ValidateFunctionTest, FunctionTypeMustMatchReturnStatementType_Pass) {
   // [[stage(vertex)]]
   // fn func -> void { return; }
@@ -204,26 +173,6 @@ TEST_F(ValidateFunctionTest,
       "return type, returned '__u32', expected '__alias_tint_symbol_1__f32'");
 }
 
-TEST_F(ValidateFunctionTest, FunctionNamesMustBeUnique_fail) {
-  // fn func -> i32 { return 2; }
-  // fn func -> i32 { return 2; }
-  Func("func", ast::VariableList{}, ty.i32(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(Expr(2)),
-       },
-       ast::DecorationList{});
-
-  Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(Expr(2)),
-       },
-       ast::DecorationList{});
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(v.error(), "12:34 v-0016: function names must be unique 'func'");
-}
 
 TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
   // [[stage(fragment)]]

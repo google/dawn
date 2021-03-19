@@ -168,56 +168,10 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
 }
 
 bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
-  if (function_stack_.has(func->symbol())) {
-    add_error(func->source(), "v-0016",
-              "function names must be unique '" +
-                  program_->Symbols().NameFor(func->symbol()) + "'");
-    return false;
-  }
-
-  function_stack_.set(func->symbol(), func);
-
-  variable_stack_.push_scope();
-
-  for (auto* param : func->params()) {
-    variable_stack_.set(param->symbol(), param);
-    if (!ValidateParameter(param)) {
-      return false;
-    }
-  }
+  // TODO(amaiorano): Remove ValidateFunction once we've moved all the statement
+  // validation to Resovler
   if (!ValidateStatements(func->body())) {
     return false;
-  }
-  variable_stack_.pop_scope();
-
-  if (!current_function_->return_type()->Is<type::Void>()) {
-    if (!func->get_last_statement() ||
-        !func->get_last_statement()->Is<ast::ReturnStatement>()) {
-      add_error(func->source(), "v-0002",
-                "non-void function must end with a return statement");
-      return false;
-    }
-
-    for (auto* deco : current_function_->return_type_decorations()) {
-      if (!(deco->Is<ast::BuiltinDecoration>() ||
-            deco->Is<ast::LocationDecoration>())) {
-        add_error(deco->source(),
-                  "decoration is not valid for function return types");
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-bool ValidatorImpl::ValidateParameter(const ast::Variable* param) {
-  if (auto* r = param->type()->UnwrapAll()->As<type::Array>()) {
-    if (r->IsRuntimeArray()) {
-      add_error(
-          param->source(), "v-0015",
-          "runtime arrays may only appear as the last member of a struct");
-      return false;
-    }
   }
   return true;
 }

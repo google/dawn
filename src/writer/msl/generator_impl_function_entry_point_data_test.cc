@@ -42,7 +42,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
 
-  Func("vtx_main", ast::VariableList{}, ty.f32(), body,
+  Func("vtx_main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
@@ -79,7 +79,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
 
-  Func("vtx_main", ast::VariableList{}, ty.f32(), body,
+  Func("vtx_main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
@@ -116,7 +116,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
 
-  Func("main", ast::VariableList{}, ty.f32(), body,
+  Func("main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
@@ -153,7 +153,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
 
-  Func("main", ast::VariableList{}, ty.f32(), body,
+  Func("main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
@@ -187,7 +187,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
 
-  Func("main", ast::VariableList{}, ty.f32(), body,
+  Func("main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
@@ -217,7 +217,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
       create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
   };
 
-  Func("main", ast::VariableList{}, ty.f32(), body,
+  Func("main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
