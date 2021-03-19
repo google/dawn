@@ -18,12 +18,25 @@ set -e # Fail on any error.
 
 function show_cmds { set -x; }
 function hide_cmds { { set +x; } 2>/dev/null; }
+function task_begin {
+    TASK_NAME="$@"
+    SECONDS=0
+}
+function print_last_task_duration {
+    if [ ! -z "${TASK_NAME}" ]; then
+        echo "${TASK_NAME} completed in $(($SECONDS / 3600))h$((($SECONDS / 60) % 60))m$(($SECONDS % 60))s"
+    fi
+}
 function status {
+    echo ""
+    echo ""
+    print_last_task_duration
     echo ""
     echo "*****************************************************************"
     echo "* $@"
     echo "*****************************************************************"
     echo ""
+    task_begin $@
 }
 
 . /bin/using.sh # Declare the bash `using` function for configuring toolchains.

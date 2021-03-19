@@ -20,7 +20,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
 
 export BUILD_SYSTEM=cmake
 export BUILD_TOOLCHAIN=clang
-export BUILD_TYPE=RelWithDebInfo
+export BUILD_TYPE=Release
 export BUILD_SANITIZER=asan
 
 ${SCRIPT_DIR}/../build.sh
