@@ -46,7 +46,7 @@
             { "name": "device id", "type": "ObjectId" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "pipeline object handle", "type": "ObjectHandle", "handle_type": "render pipeline"},
-            { "name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
+            { "name": "descriptor", "type": "render pipeline descriptor 2", "annotation": "const*"}
         ],
         "device pop error scope": [
             { "name": "device id", "type": "ObjectId" },

@@ -235,21 +235,21 @@ TEST_F(UnsafeAPIValidationTest, CreateComputePipelineAsyncDisallowed) {
 
 // Check that CreateRenderPipelineAsync is disallowed as part of unsafe APIs
 TEST_F(UnsafeAPIValidationTest, CreateRenderPipelineAsyncDisallowed) {
-    utils::ComboRenderPipelineDescriptor desc(device);
-    desc.vertexStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    utils::ComboRenderPipelineDescriptor2 desc;
+    desc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
-    desc.cFragmentStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    desc.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[location(0)]] var<out> o_color : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
             o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
-    desc.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
     // Control case: CreateRenderPipeline is allowed.
-    device.CreateRenderPipeline(&desc);
+    device.CreateRenderPipeline2(&desc);
     // TODO(bajones): Enable this when the deprecation warning is re-enabled in Device.cpp.
     // EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&desc));
 

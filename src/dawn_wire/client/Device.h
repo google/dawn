@@ -45,7 +45,7 @@ namespace dawn_wire { namespace client {
         void CreateComputePipelineAsync(WGPUComputePipelineDescriptor const* descriptor,
                                         WGPUCreateComputePipelineAsyncCallback callback,
                                         void* userdata);
-        void CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
+        void CreateRenderPipelineAsync(WGPURenderPipelineDescriptor2 const* descriptor,
                                        WGPUCreateRenderPipelineAsyncCallback callback,
                                        void* userdata);
 

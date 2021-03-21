@@ -149,10 +149,11 @@ namespace dawn_wire { namespace server {
         SerializeCommand(cmd);
     }
 
-    bool Server::DoDeviceCreateRenderPipelineAsync(ObjectId deviceId,
-                                                   uint64_t requestSerial,
-                                                   ObjectHandle pipelineObjectHandle,
-                                                   const WGPURenderPipelineDescriptor* descriptor) {
+    bool Server::DoDeviceCreateRenderPipelineAsync(
+        ObjectId deviceId,
+        uint64_t requestSerial,
+        ObjectHandle pipelineObjectHandle,
+        const WGPURenderPipelineDescriptor2* descriptor) {
         auto* device = DeviceObjects().Get(deviceId);
         if (device == nullptr) {
             return false;

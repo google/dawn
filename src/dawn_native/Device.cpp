@@ -758,7 +758,7 @@ namespace dawn_native {
 
         return result;
     }
-    void DeviceBase::CreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
+    void DeviceBase::CreateRenderPipelineAsync(const RenderPipelineDescriptor2* descriptor,
                                                WGPUCreateRenderPipelineAsyncCallback callback,
                                                void* userdata) {
         RenderPipelineBase* result = nullptr;

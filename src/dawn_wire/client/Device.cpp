@@ -277,7 +277,7 @@ namespace dawn_wire { namespace client {
         return true;
     }
 
-    void Device::CreateRenderPipelineAsync(WGPURenderPipelineDescriptor const* descriptor,
+    void Device::CreateRenderPipelineAsync(WGPURenderPipelineDescriptor2 const* descriptor,
                                            WGPUCreateRenderPipelineAsyncCallback callback,
                                            void* userdata) {
         if (client->IsDisconnected()) {

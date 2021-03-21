@@ -137,7 +137,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
 TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateRenderPipelineAsync) {
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
@@ -148,10 +148,10 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateRenderPipelineAsync) {
         [[stage(fragment)]] fn main() -> void {
             o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
-    renderPipelineDescriptor.vertexStage.module = vsModule;
-    renderPipelineDescriptor.cFragmentStage.module = fsModule;
-    renderPipelineDescriptor.cColorStates[0].format = kRenderAttachmentFormat;
-    renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+    renderPipelineDescriptor.vertex.module = vsModule;
+    renderPipelineDescriptor.cFragment.module = fsModule;
+    renderPipelineDescriptor.cTargets[0].format = kRenderAttachmentFormat;
+    renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
 
     device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor,
@@ -207,7 +207,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
 
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::Depth32Float;
 
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
@@ -218,10 +218,10 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
         [[stage(fragment)]] fn main() -> void {
             o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
-    renderPipelineDescriptor.vertexStage.module = vsModule;
-    renderPipelineDescriptor.cFragmentStage.module = fsModule;
-    renderPipelineDescriptor.cColorStates[0].format = kRenderAttachmentFormat;
-    renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+    renderPipelineDescriptor.vertex.module = vsModule;
+    renderPipelineDescriptor.cFragment.module = fsModule;
+    renderPipelineDescriptor.cTargets[0].format = kRenderAttachmentFormat;
+    renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
 
     device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor,
@@ -271,7 +271,7 @@ TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateComputePipeli
 // Verify there is no error when the device is released before the callback of
 // CreateRenderPipelineAsync() is called.
 TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateRenderPipelineAsync) {
-    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
+    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
     wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
@@ -282,10 +282,10 @@ TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateRenderPipelin
         [[stage(fragment)]] fn main() -> void {
             o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
-    renderPipelineDescriptor.vertexStage.module = vsModule;
-    renderPipelineDescriptor.cFragmentStage.module = fsModule;
-    renderPipelineDescriptor.cColorStates[0].format = wgpu::TextureFormat::RGBA8Unorm;
-    renderPipelineDescriptor.primitiveTopology = wgpu::PrimitiveTopology::PointList;
+    renderPipelineDescriptor.vertex.module = vsModule;
+    renderPipelineDescriptor.cFragment.module = fsModule;
+    renderPipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+    renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
 
     device.CreateRenderPipelineAsync(
         &renderPipelineDescriptor,
