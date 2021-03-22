@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/ast/return_statement.h"
+#include "src/ast/stage_decoration.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
 
@@ -72,6 +73,112 @@ TEST_F(ResolverFunctionValidationTest,
   EXPECT_EQ(
       r()->error(),
       "12:34 error v-0002: non-void function must end with a return statement");
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       FunctionTypeMustMatchReturnStatementType_Pass) {
+  // [[stage(vertex)]]
+  // fn func -> void { return; }
+
+  Func("func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       FunctionTypeMustMatchReturnStatementType_fail) {
+  // fn func -> void { return 2; }
+  Func("func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                        Expr(2)),
+       },
+       ast::DecorationList{});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-000y: return statement type must match its function "
+            "return type, returned 'i32', expected 'void'");
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       FunctionTypeMustMatchReturnStatementTypeF32_pass) {
+  // fn func -> f32 { return 2.0; }
+  Func("func", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                        Expr(2.f)),
+       },
+       ast::DecorationList{});
+  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       FunctionTypeMustMatchReturnStatementTypeF32_fail) {
+  // fn func -> f32 { return 2; }
+  Func("func", ast::VariableList{}, ty.f32(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                        Expr(2)),
+       },
+       ast::DecorationList{});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-000y: return statement type must match its function "
+            "return type, returned 'i32', expected 'f32'");
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       FunctionTypeMustMatchReturnStatementTypeF32Alias_pass) {
+  // type myf32 = f32;
+  // fn func -> myf32 { return 2.0; }
+  auto* myf32 = ty.alias("myf32", ty.f32());
+  Func("func", ast::VariableList{}, myf32,
+       ast::StatementList{
+           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                        Expr(2.f)),
+       },
+       ast::DecorationList{});
+  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       FunctionTypeMustMatchReturnStatementTypeF32Alias_fail) {
+  // type myf32 = f32;
+  // fn func -> myf32 { return 2; }
+  auto* myf32 = ty.alias("myf32", ty.f32());
+  Func("func", ast::VariableList{}, myf32,
+       ast::StatementList{
+           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
+                                        Expr(2u)),
+       },
+       ast::DecorationList{});
+  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-000y: return statement type must match its function "
+            "return type, returned 'u32', expected 'myf32'");
 }
 
 }  // namespace

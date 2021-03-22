@@ -99,10 +99,6 @@ class ValidatorImpl {
   /// @returns true if no previous declaration with the `decl` 's name
   /// exist in the variable stack
   bool ValidateDeclStatement(const ast::VariableDeclStatement* decl);
-  /// Validates return statement
-  /// @param ret the return statement to check
-  /// @returns true if function return type matches the return statement type
-  bool ValidateReturnStatement(const ast::ReturnStatement* ret);
   /// Validates switch statements
   /// @param s the switch statement to check
   /// @returns true if the valdiation was successful

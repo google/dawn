@@ -511,14 +511,10 @@ TEST_F(BuilderTest, If_WithReturnValue) {
   // if (true) {
   //   return false;
   // }
-  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(Expr(false)),
-  });
-
-  auto* expr =
-      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
-  WrapInFunction(expr);
-
+  // return true;
+  auto* if_body = Block(Return(Expr(false)));
+  auto* expr = If(Expr(true), if_body);
+  Func("test", {}, ty.bool_(), {expr, Return(Expr(true))}, {});
   spirv::Builder& b = Build();
 
   b.push_function(Function{});

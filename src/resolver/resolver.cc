@@ -406,8 +406,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
     });
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
-    current_function_->return_statements.push_back(r);
-    return Expression(r->value());
+    return Return(r);
   }
   if (auto* s = stmt->As<ast::SwitchStatement>()) {
     if (!Expression(s->condition())) {
@@ -1645,6 +1644,36 @@ Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
   info->size_no_padding = size_no_padding;
   struct_info_.emplace(str, info);
   return info;
+}
+
+bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
+  type::Type* func_type = current_function_->declaration->return_type();
+
+  auto* ret_type = ret->has_value() ? TypeOf(ret->value())->UnwrapAll()
+                                    : builder_->ty.void_();
+
+  if (func_type->UnwrapAll() != ret_type) {
+    diagnostics_.add_error(
+        "v-000y",
+        "return statement type must match its function "
+        "return type, returned '" +
+            ret_type->FriendlyName(builder_->Symbols()) + "', expected '" +
+            func_type->FriendlyName(builder_->Symbols()) + "'",
+        ret->source());
+    return false;
+  }
+
+  return true;
+}
+
+bool Resolver::Return(ast::ReturnStatement* ret) {
+  current_function_->return_statements.push_back(ret);
+
+  auto result = Expression(ret->value());
+
+  // Validate after processing the return value expression so that its type is
+  // available for validation
+  return result && ValidateReturn(ret);
 }
 
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,

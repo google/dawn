@@ -219,6 +219,7 @@ class Resolver {
   bool Statements(const ast::StatementList&);
   bool UnaryOp(ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
+  bool Return(ast::ReturnStatement* ret);
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
@@ -226,6 +227,7 @@ class Resolver {
   bool ValidateParameter(const ast::Variable* param);
   bool ValidateFunction(const ast::Function* func);
   bool ValidateStructure(const type::Struct* st);
+  bool ValidateReturn(const ast::ReturnStatement* ret);
 
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is

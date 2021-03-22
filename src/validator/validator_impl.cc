@@ -182,28 +182,6 @@ bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
   return true;
 }
 
-bool ValidatorImpl::ValidateReturnStatement(const ast::ReturnStatement* ret) {
-  // TODO(sarahM0): update this when this issue resolves:
-  // https://github.com/gpuweb/gpuweb/issues/996
-  type::Type* func_type = current_function_->return_type();
-
-  type::Void void_type;
-  auto* ret_type = ret->has_value()
-                       ? program_->Sem().Get(ret->value())->Type()->UnwrapAll()
-                       : &void_type;
-
-  if (func_type->UnwrapAll()->type_name() != ret_type->type_name()) {
-    add_error(ret->source(), "v-000y",
-              "return statement type must match its function return "
-              "type, returned '" +
-                  ret_type->type_name() + "', expected '" +
-                  func_type->type_name() + "'");
-    return false;
-  }
-
-  return true;
-}
-
 bool ValidatorImpl::ValidateStatements(const ast::BlockStatement* block) {
   if (!block) {
     return false;
@@ -261,9 +239,6 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
   }
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return ValidateAssign(a);
-  }
-  if (auto* r = stmt->As<ast::ReturnStatement>()) {
-    return ValidateReturnStatement(r);
   }
   if (auto* s = stmt->As<ast::SwitchStatement>()) {
     return ValidateSwitch(s);

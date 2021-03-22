@@ -228,7 +228,7 @@ TEST_F(ResolverTest, Stmt_Return) {
   auto* cond = Expr(2);
 
   auto* ret = create<ast::ReturnStatement>(cond);
-  WrapInFunction(ret);
+  Func("test", {}, ty.i32(), {ret}, {});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 

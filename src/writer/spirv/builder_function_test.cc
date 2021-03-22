@@ -65,7 +65,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
-  Func("a_func", {}, ty.void_(),
+  Func("a_func", {}, ty.f32(),
        ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
        ast::DecorationList{});
 
@@ -77,17 +77,16 @@ TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
   ASSERT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "a"
-OpName %7 "a_func"
+OpName %6 "a_func"
 %3 = OpTypeFloat 32
 %2 = OpTypePointer Private %3
 %4 = OpConstantNull %3
 %1 = OpVariable %2 Private %4
-%6 = OpTypeVoid
-%5 = OpTypeFunction %6
-%7 = OpFunction %6 None %5
-%8 = OpLabel
-%9 = OpLoad %3 %1
-OpReturnValue %9
+%5 = OpTypeFunction %3
+%6 = OpFunction %3 None %5
+%7 = OpLabel
+%8 = OpLoad %3 %1
+OpReturnValue %8
 OpFunctionEnd
 )");
 }
