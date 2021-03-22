@@ -96,7 +96,7 @@ class BufferZeroInitTest : public DawnTest {
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
-        for (uint32_t arrayLayer = 0; arrayLayer < size.depth; ++arrayLayer) {
+        for (uint32_t arrayLayer = 0; arrayLayer < size.depthOrArrayLayers; ++arrayLayer) {
             wgpu::TextureViewDescriptor viewDescriptor;
             viewDescriptor.format = format;
             viewDescriptor.dimension = wgpu::TextureViewDimension::e2D;
@@ -145,7 +145,7 @@ class BufferZeroInitTest : public DawnTest {
         const uint64_t expectedValueCount = bufferSize / sizeof(float);
         std::vector<float> expectedValues(expectedValueCount, 0.f);
 
-        for (uint32_t slice = 0; slice < spec.textureSize.depth; ++slice) {
+        for (uint32_t slice = 0; slice < spec.textureSize.depthOrArrayLayers; ++slice) {
             const uint64_t baseOffsetBytesPerSlice =
                 spec.bufferOffset + spec.bytesPerRow * spec.rowsPerImage * slice;
             for (uint32_t y = 0; y < spec.textureSize.height; ++y) {
@@ -963,7 +963,8 @@ TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
     constexpr wgpu::Extent3D kTextureSize = {64u, 4u, 3u};
 
     // bytesPerRow == texelBlockSizeInBytes * copySize.width && rowsPerImage == copySize.height &&
-    // bytesPerRow * (rowsPerImage * (copySize.depth - 1) + copySize.height) == buffer.size
+    // bytesPerRow * (rowsPerImage * (copySize.depthOrArrayLayers - 1) + copySize.height) ==
+    // buffer.size
     {
         TestBufferZeroInitInCopyTextureToBuffer(
             {kTextureSize, 0u, 0u, kTextureBytesPerRowAlignment, kTextureSize.height, 0u});
@@ -976,7 +977,7 @@ TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
             {kTextureSize, 0u, 0u, kTextureBytesPerRowAlignment, kRowsPerImage, 1u});
     }
 
-    // bytesPerRow * rowsPerImage * copySize.depth < buffer.size
+    // bytesPerRow * rowsPerImage * copySize.depthOrArrayLayers < buffer.size
     {
         constexpr uint64_t kExtraBufferSize = 16u;
         TestBufferZeroInitInCopyTextureToBuffer({kTextureSize, 0u, kExtraBufferSize,

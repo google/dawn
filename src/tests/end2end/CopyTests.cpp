@@ -46,7 +46,7 @@ class CopyTests : public DawnTest {
     static std::vector<uint8_t> GetExpectedTextureData(const utils::TextureDataCopyLayout& layout) {
         uint32_t bytesPerTexelBlock = layout.bytesPerRow / layout.texelBlocksPerRow;
         std::vector<uint8_t> textureData(layout.byteLength);
-        for (uint32_t layer = 0; layer < layout.mipSize.depth; ++layer) {
+        for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
             const uint32_t byteOffsetPerSlice = layout.bytesPerImage * layer;
             for (uint32_t y = 0; y < layout.mipSize.height; ++y) {
                 for (uint32_t x = 0; x < layout.mipSize.width * bytesPerTexelBlock; ++x) {
@@ -64,7 +64,7 @@ class CopyTests : public DawnTest {
     static std::vector<RGBA8> GetExpectedTextureDataRGBA8(
         const utils::TextureDataCopyLayout& layout) {
         std::vector<RGBA8> textureData(layout.texelBlockCount);
-        for (uint32_t layer = 0; layer < layout.mipSize.depth; ++layer) {
+        for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
             const uint32_t texelIndexOffsetPerSlice = layout.texelBlocksPerImage * layer;
             for (uint32_t y = 0; y < layout.mipSize.height; ++y) {
                 for (uint32_t x = 0; x < layout.mipSize.width; ++x) {
@@ -185,7 +185,7 @@ class CopyTests_T2B : public CopyTests {
         // Texels in single slice.
         const uint32_t texelCountInCopyRegion = utils::GetTexelCountInCopyRegion(
             bufferSpec.bytesPerRow, bufferSpec.rowsPerImage, copySizePerSlice, textureSpec.format);
-        const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depth;
+        const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depthOrArrayLayers;
         std::vector<RGBA8> expected(texelCountInCopyRegion);
         for (uint32_t slice = textureSpec.copyOrigin.z; slice < maxArrayLayer; ++slice) {
             // Pack the data used to create the upload buffer in the specified copy region to have
@@ -207,7 +207,7 @@ class CopyTests_T2B : public CopyTests {
                 << ", " << textureSpec.copyOrigin.y << ", " << textureSpec.copyOrigin.z << "), ("
                 << textureSpec.copyOrigin.x + copySize.width << ", "
                 << textureSpec.copyOrigin.y + copySize.height << ", "
-                << textureSpec.copyOrigin.z + copySize.depth << ")) from "
+                << textureSpec.copyOrigin.z + copySize.depthOrArrayLayers << ")) from "
                 << textureSpec.textureSize.width << " x " << textureSpec.textureSize.height
                 << " texture at mip level " << textureSpec.copyLevel << " layer " << slice << " to "
                 << bufferSpec.size << "-byte buffer with offset " << bufferOffset
@@ -258,7 +258,7 @@ class CopyTests_B2T : public CopyTests {
                 textureSpec.format, textureSpec.textureSize, textureSpec.copyLevel,
                 bufferSpec.rowsPerImage);
 
-        const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depth;
+        const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depthOrArrayLayers;
 
         wgpu::ImageCopyBuffer imageCopyBuffer = utils::CreateImageCopyBuffer(
             buffer, bufferSpec.offset, bufferSpec.bytesPerRow, bufferSpec.rowsPerImage);
@@ -333,7 +333,9 @@ class CopyTests_T2T : public CopyTests {
         // `level` mip level
         const utils::TextureDataCopyLayout srcDataCopyLayout =
             utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
-                format, {srcSpec.textureSize.width, srcSpec.textureSize.height, copySize.depth},
+                format,
+                {srcSpec.textureSize.width, srcSpec.textureSize.height,
+                 copySize.depthOrArrayLayers},
                 srcSpec.copyLevel);
 
         // Initialize the source texture
@@ -358,10 +360,12 @@ class CopyTests_T2T : public CopyTests {
         encoder.CopyTextureToTexture(&srcImageCopyTexture, &dstImageCopyTexture, &copySize);
 
         // Copy the data from the srcSpec.copyOrigin.z-th layer to (srcSpec.copyOrigin.z +
-        // copySize.depth)-th layer of dstTexture to outputBuffer
+        // copySize.depthOrArrayLayers)-th layer of dstTexture to outputBuffer
         const utils::TextureDataCopyLayout dstDataCopyLayout =
             utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
-                format, {dstSpec.textureSize.width, dstSpec.textureSize.height, copySize.depth},
+                format,
+                {dstSpec.textureSize.width, dstSpec.textureSize.height,
+                 copySize.depthOrArrayLayers},
                 dstSpec.copyLevel);
         wgpu::BufferDescriptor outputBufferDescriptor;
         outputBufferDescriptor.size = dstDataCopyLayout.byteLength;
@@ -384,7 +388,7 @@ class CopyTests_T2T : public CopyTests {
                 bytesPerTexel);
 
             std::vector<uint8_t> expectedDstDataPerSlice(validDataSizePerDstTextureLayer);
-            for (uint32_t slice = 0; slice < copySize.depth; ++slice) {
+            for (uint32_t slice = 0; slice < copySize.depthOrArrayLayers; ++slice) {
                 // For each source texture array slice involved in the copy, emulate the T2T copy
                 // on the CPU side by "copying" the copy data from the "source texture"
                 // (srcTextureCopyData) to the "destination texture" (expectedDstDataPerSlice).

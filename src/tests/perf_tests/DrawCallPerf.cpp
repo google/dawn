@@ -287,7 +287,7 @@ void DrawCallPerf::SetUp() {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = kTextureSize;
         descriptor.size.height = kTextureSize;
-        descriptor.size.depth = 1;
+        descriptor.size.depthOrArrayLayers = 1;
         descriptor.usage = wgpu::TextureUsage::RenderAttachment;
 
         descriptor.format = wgpu::TextureFormat::RGBA8Unorm;

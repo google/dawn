@@ -41,7 +41,7 @@ class CopyCommandTest : public ValidationTest {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = width;
         descriptor.size.height = height;
-        descriptor.size.depth = arrayLayerCount;
+        descriptor.size.depthOrArrayLayers = arrayLayerCount;
         descriptor.sampleCount = sampleCount;
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;
@@ -663,7 +663,7 @@ TEST_F(CopyCommandTest_B2T, BufferOrTextureInErrorState) {
     ASSERT_DEVICE_ERROR(wgpu::Buffer errorBuffer = device.CreateBuffer(&errorBufferDescriptor));
 
     wgpu::TextureDescriptor errorTextureDescriptor;
-    errorTextureDescriptor.size.depth = 0;
+    errorTextureDescriptor.size.depthOrArrayLayers = 0;
     ASSERT_DEVICE_ERROR(wgpu::Texture errorTexture = device.CreateTexture(&errorTextureDescriptor));
 
     wgpu::ImageCopyBuffer errorImageCopyBuffer = utils::CreateImageCopyBuffer(errorBuffer, 0, 0, 0);
@@ -1252,7 +1252,7 @@ TEST_F(CopyCommandTest_T2B, BufferOrTextureInErrorState) {
     ASSERT_DEVICE_ERROR(wgpu::Buffer errorBuffer = device.CreateBuffer(&errorBufferDescriptor));
 
     wgpu::TextureDescriptor errorTextureDescriptor;
-    errorTextureDescriptor.size.depth = 0;
+    errorTextureDescriptor.size.depthOrArrayLayers = 0;
     ASSERT_DEVICE_ERROR(wgpu::Texture errorTexture = device.CreateTexture(&errorTextureDescriptor));
 
     wgpu::ImageCopyBuffer errorImageCopyBuffer = utils::CreateImageCopyBuffer(errorBuffer, 0, 0, 0);
@@ -1533,12 +1533,12 @@ TEST_F(CopyCommandTest_T2T, Success) {
         TestT2TCopy(utils::Expectation::Success, source, 0, {0, 0, 1}, destination, 0, {0, 0, 1},
                     {16, 16, 1});
 
-        // Copy multiple slices (srcImageCopyTexture.arrayLayer + copySize.depth ==
+        // Copy multiple slices (srcImageCopyTexture.arrayLayer + copySize.depthOrArrayLayers ==
         // srcImageCopyTexture.texture.arrayLayerCount)
         TestT2TCopy(utils::Expectation::Success, source, 0, {0, 0, 2}, destination, 0, {0, 0, 0},
                     {16, 16, 2});
 
-        // Copy multiple slices (dstImageCopyTexture.arrayLayer + copySize.depth ==
+        // Copy multiple slices (dstImageCopyTexture.arrayLayer + copySize.depthOrArrayLayers ==
         // dstImageCopyTexture.texture.arrayLayerCount)
         TestT2TCopy(utils::Expectation::Success, source, 0, {0, 0, 0}, destination, 0, {0, 0, 2},
                     {16, 16, 2});

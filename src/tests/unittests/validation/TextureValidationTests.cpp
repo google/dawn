@@ -33,7 +33,7 @@ namespace {
             wgpu::TextureDescriptor descriptor;
             descriptor.size.width = kWidth;
             descriptor.size.height = kHeight;
-            descriptor.size.depth = kDefaultDepth;
+            descriptor.size.depthOrArrayLayers = kDefaultDepth;
             descriptor.mipLevelCount = kDefaultMipLevels;
             descriptor.sampleCount = kDefaultSampleCount;
             descriptor.dimension = wgpu::TextureDimension::e2D;
@@ -109,7 +109,7 @@ namespace {
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
             descriptor.sampleCount = 4;
-            descriptor.size.depth = 2;
+            descriptor.size.depthOrArrayLayers = 2;
 
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }
@@ -217,7 +217,7 @@ namespace {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
             descriptor.size.width = 32;
             descriptor.size.height = 8;
-            descriptor.size.depth = 64;
+            descriptor.size.depthOrArrayLayers = 64;
             descriptor.dimension = wgpu::TextureDimension::e3D;
             // Non square mip map halves width, height and depth until a 1x1x1 dimension for a 3D
             // texture. So there are 7 mipmaps at most: 32 * 8 * 64, 16 * 4 * 32, 8 * 2 * 16,
@@ -231,7 +231,7 @@ namespace {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
             descriptor.size.width = 32;
             descriptor.size.height = 8;
-            descriptor.size.depth = 64;
+            descriptor.size.depthOrArrayLayers = 64;
             // Non square mip map halves width and height until a 1x1 dimension for a 2D texture,
             // even its depth > 1. So there are 6 mipmaps at most: 32 * 8, 16 * 4, 8 * 2, 4 * 1, 2 *
             // 1, 1 * 1.
@@ -261,21 +261,21 @@ namespace {
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
 
-            descriptor.size.depth = kMaxTextureArrayLayers + 1u;
+            descriptor.size.depthOrArrayLayers = kMaxTextureArrayLayers + 1u;
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }
 
         // Array layer count less than kMaxTextureArrayLayers is allowed
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
-            descriptor.size.depth = kMaxTextureArrayLayers >> 1;
+            descriptor.size.depthOrArrayLayers = kMaxTextureArrayLayers >> 1;
             device.CreateTexture(&descriptor);
         }
 
         // Array layer count equal to kMaxTextureArrayLayers is allowed
         {
             wgpu::TextureDescriptor descriptor = defaultDescriptor;
-            descriptor.size.depth = kMaxTextureArrayLayers;
+            descriptor.size.depthOrArrayLayers = kMaxTextureArrayLayers;
             device.CreateTexture(&descriptor);
         }
     }
@@ -602,7 +602,7 @@ namespace {
         for (wgpu::TextureFormat format : utils::kBCFormats) {
             wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
             descriptor.format = format;
-            descriptor.size.depth = 6;
+            descriptor.size.depthOrArrayLayers = 6;
             device.CreateTexture(&descriptor);
         }
     }
@@ -612,7 +612,7 @@ namespace {
         for (wgpu::TextureFormat format : utils::kBCFormats) {
             wgpu::TextureDescriptor descriptor = CreateDefaultTextureDescriptor();
             descriptor.format = format;
-            descriptor.size.depth = 4;
+            descriptor.size.depthOrArrayLayers = 4;
             descriptor.dimension = wgpu::TextureDimension::e3D;
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
         }

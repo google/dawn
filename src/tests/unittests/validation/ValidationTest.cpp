@@ -187,7 +187,7 @@ ValidationTest::DummyRenderPass::DummyRenderPass(const wgpu::Device& device)
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = width;
     descriptor.size.height = height;
-    descriptor.size.depth = 1;
+    descriptor.size.depthOrArrayLayers = 1;
     descriptor.sampleCount = 1;
     descriptor.format = attachmentFormat;
     descriptor.mipLevelCount = 1;

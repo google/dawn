@@ -45,7 +45,7 @@ class TextureZeroInitTest : public DawnTest {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = kSize;
         descriptor.size.height = kSize;
-        descriptor.size.depth = arrayLayerCount;
+        descriptor.size.depthOrArrayLayers = arrayLayerCount;
         descriptor.sampleCount = 1;
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;
@@ -1425,7 +1425,7 @@ TEST_P(TextureZeroInitTest, CopyTextureToBufferNonRenderableUnaligned) {
     wgpu::TextureDescriptor descriptor;
     descriptor.size.width = kUnalignedSize;
     descriptor.size.height = kUnalignedSize;
-    descriptor.size.depth = 1;
+    descriptor.size.depthOrArrayLayers = 1;
     descriptor.format = wgpu::TextureFormat::R8Snorm;
     descriptor.usage = wgpu::TextureUsage::CopySrc;
     wgpu::Texture texture = device.CreateTexture(&descriptor);

@@ -58,7 +58,7 @@ namespace dawn_native { namespace vulkan {
             Extent3D imageExtentDst = ComputeTextureCopyExtent(dstCopy, copySize);
             return imageExtentSrc.width == imageExtentDst.width &&
                    imageExtentSrc.height == imageExtentDst.height &&
-                   imageExtentSrc.depth == imageExtentDst.depth;
+                   imageExtentSrc.depthOrArrayLayers == imageExtentDst.depthOrArrayLayers;
         }
 
         VkImageCopy ComputeImageCopyRegion(const TextureCopy& srcCopy,
@@ -76,7 +76,7 @@ namespace dawn_native { namespace vulkan {
             region.srcSubresource.aspectMask = VulkanAspectMask(aspect);
             region.srcSubresource.mipLevel = srcCopy.mipLevel;
             region.srcSubresource.baseArrayLayer = srcCopy.origin.z;
-            region.srcSubresource.layerCount = copySize.depth;
+            region.srcSubresource.layerCount = copySize.depthOrArrayLayers;
 
             region.srcOffset.x = srcCopy.origin.x;
             region.srcOffset.y = srcCopy.origin.y;
@@ -85,7 +85,7 @@ namespace dawn_native { namespace vulkan {
             region.dstSubresource.aspectMask = VulkanAspectMask(aspect);
             region.dstSubresource.mipLevel = dstCopy.mipLevel;
             region.dstSubresource.baseArrayLayer = dstCopy.origin.z;
-            region.dstSubresource.layerCount = copySize.depth;
+            region.dstSubresource.layerCount = copySize.depthOrArrayLayers;
 
             region.dstOffset.x = dstCopy.origin.x;
             region.dstOffset.y = dstCopy.origin.y;
@@ -459,7 +459,7 @@ namespace dawn_native { namespace vulkan {
         // Create the temporary buffer. Note that We don't need to respect WebGPU's 256 alignment
         // because it isn't a hard constraint in Vulkan.
         uint64_t tempBufferSize =
-            widthInBlocks * heightInBlocks * copySize.depth * blockInfo.byteSize;
+            widthInBlocks * heightInBlocks * copySize.depthOrArrayLayers * blockInfo.byteSize;
         BufferDescriptor tempBufferDescriptor;
         tempBufferDescriptor.size = tempBufferSize;
         tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -689,8 +689,8 @@ namespace dawn_native { namespace vulkan {
                         // subresources should all be GENERAL instead of what we set now. Currently
                         // it is not allowed to copy with overlapped subresources, but we still
                         // add the ASSERT here as a reminder for this possible misuse.
-                        ASSERT(
-                            !IsRangeOverlapped(src.origin.z, dst.origin.z, copy->copySize.depth));
+                        ASSERT(!IsRangeOverlapped(src.origin.z, dst.origin.z,
+                                                  copy->copySize.depthOrArrayLayers));
                     }
 
                     // TODO after Yunchao's CL

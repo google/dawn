@@ -286,7 +286,7 @@ class QueueWriteTextureTests : public DawnTest {
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(kTextureFormat);
         wgpu::Extent3D mipSize = {textureSpec.textureSize.width >> textureSpec.level,
                                   textureSpec.textureSize.height >> textureSpec.level,
-                                  textureSpec.textureSize.depth};
+                                  textureSpec.textureSize.depthOrArrayLayers};
         uint32_t bytesPerRow = dataSpec.bytesPerRow;
         if (bytesPerRow == wgpu::kCopyStrideUndefined) {
             bytesPerRow = mipSize.width * bytesPerTexel;
@@ -296,7 +296,7 @@ class QueueWriteTextureTests : public DawnTest {
             dataSpec.rowsPerImage > 0 ? dataSpec.rowsPerImage : mipSize.height;
         uint32_t bytesPerImage = bytesPerRow * appliedRowsPerImage;
 
-        const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depth;
+        const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depthOrArrayLayers;
 
         uint64_t dataOffset = dataSpec.offset;
         const uint32_t texelCountLastLayer =

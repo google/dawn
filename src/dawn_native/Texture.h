@@ -38,6 +38,8 @@ namespace dawn_native {
 
     bool IsValidSampleCount(uint32_t sampleCount);
 
+    MaybeError FixUpDeprecatedGPUExtent3DDepth(DeviceBase* device, Extent3D* extent);
+
     static constexpr wgpu::TextureUsage kReadOnlyTextureUsages =
         wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::Sampled | kReadOnlyStorageTexture;
 

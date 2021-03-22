@@ -314,7 +314,7 @@ namespace dawn_native { namespace vulkan {
     // Test an error occurs if the descriptor depth isn't 1
     TEST_P(VulkanImageWrappingValidationTests, InvalidDepth) {
         DAWN_SKIP_TEST_IF(UsesWire());
-        defaultDescriptor.size.depth = 2;
+        defaultDescriptor.size.depthOrArrayLayers = 2;
 
         ASSERT_DEVICE_ERROR(wgpu::Texture texture = WrapVulkanImage(
                                 device, &defaultDescriptor, defaultFd, defaultAllocationSize,
@@ -929,7 +929,7 @@ namespace dawn_native { namespace vulkan {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = 640;
         descriptor.size.height = 480;
-        descriptor.size.depth = 1;
+        descriptor.size.depthOrArrayLayers = 1;
         descriptor.sampleCount = 1;
         descriptor.format = wgpu::TextureFormat::BGRA8Unorm;
         descriptor.mipLevelCount = 1;

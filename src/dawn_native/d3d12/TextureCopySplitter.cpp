@@ -131,7 +131,7 @@ namespace dawn_native { namespace d3d12 {
             copy.copies[0].bufferOffset = texelOffset;
             copy.copies[0].bufferSize.width = copySize.width + texelOffset.x;
             copy.copies[0].bufferSize.height = rowsPerImageInTexels + texelOffset.y;
-            copy.copies[0].bufferSize.depth = copySize.depth;
+            copy.copies[0].bufferSize.depthOrArrayLayers = copySize.depthOrArrayLayers;
 
             return copy;
         }
@@ -178,12 +178,12 @@ namespace dawn_native { namespace d3d12 {
         uint32_t texelsPerRow = bytesPerRow / blockInfo.byteSize * blockInfo.width;
         copy.copies[0].copySize.width = texelsPerRow - texelOffset.x;
         copy.copies[0].copySize.height = copySize.height;
-        copy.copies[0].copySize.depth = copySize.depth;
+        copy.copies[0].copySize.depthOrArrayLayers = copySize.depthOrArrayLayers;
 
         copy.copies[0].bufferOffset = texelOffset;
         copy.copies[0].bufferSize.width = texelsPerRow;
         copy.copies[0].bufferSize.height = rowsPerImageInTexels + texelOffset.y;
-        copy.copies[0].bufferSize.depth = copySize.depth;
+        copy.copies[0].bufferSize.depthOrArrayLayers = copySize.depthOrArrayLayers;
 
         copy.copies[1].textureOffset.x = origin.x + copy.copies[0].copySize.width;
         copy.copies[1].textureOffset.y = origin.y;
@@ -192,14 +192,14 @@ namespace dawn_native { namespace d3d12 {
         ASSERT(copySize.width > copy.copies[0].copySize.width);
         copy.copies[1].copySize.width = copySize.width - copy.copies[0].copySize.width;
         copy.copies[1].copySize.height = copySize.height;
-        copy.copies[1].copySize.depth = copySize.depth;
+        copy.copies[1].copySize.depthOrArrayLayers = copySize.depthOrArrayLayers;
 
         copy.copies[1].bufferOffset.x = 0;
         copy.copies[1].bufferOffset.y = texelOffset.y + blockInfo.height;
         copy.copies[1].bufferOffset.z = 0;
         copy.copies[1].bufferSize.width = copy.copies[1].copySize.width;
         copy.copies[1].bufferSize.height = rowsPerImageInTexels + texelOffset.y + blockInfo.height;
-        copy.copies[1].bufferSize.depth = copySize.depth;
+        copy.copies[1].bufferSize.depthOrArrayLayers = copySize.depthOrArrayLayers;
 
         return copy;
     }
@@ -233,7 +233,7 @@ namespace dawn_native { namespace d3d12 {
 
         // When the copy only refers one texture 2D array layer copies.copies2D[1] will never be
         // used so we can safely early return here.
-        if (copySize.depth == 1) {
+        if (copySize.depthOrArrayLayers == 1) {
             return copies;
         }
 

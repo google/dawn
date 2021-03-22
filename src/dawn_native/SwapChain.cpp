@@ -180,7 +180,7 @@ namespace dawn_native {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = mWidth;
         descriptor.size.height = mHeight;
-        descriptor.size.depth = 1;
+        descriptor.size.depthOrArrayLayers = 1;
         descriptor.sampleCount = 1;
         descriptor.format = mFormat;
         descriptor.mipLevelCount = 1;

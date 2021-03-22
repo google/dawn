@@ -64,7 +64,7 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
         mMaterials = device.CreateTexture(&materialDesc);
 
         wgpu::TextureDescriptor uploadTexDesc = materialDesc;
-        uploadTexDesc.size.depth = 1;
+        uploadTexDesc.size.depthOrArrayLayers = 1;
         uploadTexDesc.mipLevelCount = 1;
         uploadTexDesc.usage = wgpu::TextureUsage::CopySrc;
         mUploadTexture = device.CreateTexture(&uploadTexDesc);

@@ -55,7 +55,7 @@ namespace {
         descriptor.dimension = dimension;
         descriptor.size.width = width;
         descriptor.size.height = height;
-        descriptor.size.depth = arrayLayerCount;
+        descriptor.size.depthOrArrayLayers = arrayLayerCount;
         descriptor.sampleCount = sampleCount;
         descriptor.format = format;
         descriptor.mipLevelCount = mipLevelCount;

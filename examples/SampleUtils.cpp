@@ -193,7 +193,7 @@ wgpu::TextureView CreateDefaultDepthStencilView(const wgpu::Device& device) {
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = 640;
     descriptor.size.height = 480;
-    descriptor.size.depth = 1;
+    descriptor.size.depthOrArrayLayers = 1;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
     descriptor.mipLevelCount = 1;

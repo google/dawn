@@ -313,7 +313,7 @@ namespace dawn_native { namespace metal {
         const Extent3D clampedSize =
             texture->ClampToMipLevelVirtualSize(dst->mipLevel, dst->origin, copySizePixels);
         const uint32_t copyBaseLayer = dst->origin.z;
-        const uint32_t copyLayerCount = copySizePixels.depth;
+        const uint32_t copyLayerCount = copySizePixels.depthOrArrayLayers;
         const uint64_t bytesPerImage = dataLayout.rowsPerImage * dataLayout.bytesPerRow;
 
         MTLBlitOption blitOption = ComputeMTLBlitOption(texture->GetFormat(), dst->aspect);

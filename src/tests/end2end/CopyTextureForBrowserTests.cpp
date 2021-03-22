@@ -36,7 +36,7 @@ class CopyTextureForBrowserTests : public DawnTest {
 
     static std::vector<RGBA8> GetSourceTextureData(const utils::TextureDataCopyLayout& layout) {
         std::vector<RGBA8> textureData(layout.texelBlockCount);
-        for (uint32_t layer = 0; layer < layout.mipSize.depth; ++layer) {
+        for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
             const uint32_t sliceOffset = layout.texelBlocksPerImage * layer;
             for (uint32_t y = 0; y < layout.mipSize.height; ++y) {
                 const uint32_t rowOffset = layout.texelBlocksPerRow * y;
@@ -141,7 +141,8 @@ class CopyTextureForBrowserTests : public DawnTest {
         const utils::TextureDataCopyLayout copyLayout =
             utils::GetTextureDataCopyLayoutForTexture2DAtLevel(
                 kTextureFormat,
-                {srcSpec.textureSize.width, srcSpec.textureSize.height, copySize.depth},
+                {srcSpec.textureSize.width, srcSpec.textureSize.height,
+                 copySize.depthOrArrayLayers},
                 srcSpec.level);
 
         const std::vector<RGBA8> textureArrayCopyData = GetSourceTextureData(copyLayout);

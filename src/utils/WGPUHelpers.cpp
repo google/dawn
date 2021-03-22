@@ -258,7 +258,7 @@ namespace utils {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = width;
         descriptor.size.height = height;
-        descriptor.size.depth = 1;
+        descriptor.size.depthOrArrayLayers = 1;
         descriptor.sampleCount = 1;
         descriptor.format = BasicRenderPass::kDefaultColorFormat;
         descriptor.mipLevelCount = 1;

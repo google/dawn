@@ -64,14 +64,14 @@ class CompressedTextureBCFormatTest : public DawnTest {
             copyRowsPerImage = copyHeightInBlock;
         }
         uint32_t copyBytesPerImage = copyBytesPerRow * copyRowsPerImage;
-        uint32_t uploadBufferSize =
-            copyConfig.bufferOffset + copyBytesPerImage * copyConfig.copyExtent3D.depth;
+        uint32_t uploadBufferSize = copyConfig.bufferOffset +
+                                    copyBytesPerImage * copyConfig.copyExtent3D.depthOrArrayLayers;
 
         // Fill data with the pre-prepared one-block compressed texture data.
         std::vector<uint8_t> data(uploadBufferSize, 0);
         std::vector<uint8_t> oneBlockCompressedTextureData =
             GetOneBlockBCFormatTextureData(copyConfig.textureDescriptor.format);
-        for (uint32_t layer = 0; layer < copyConfig.copyExtent3D.depth; ++layer) {
+        for (uint32_t layer = 0; layer < copyConfig.copyExtent3D.depthOrArrayLayers; ++layer) {
             for (uint32_t h = 0; h < copyHeightInBlock; ++h) {
                 for (uint32_t w = 0; w < copyWidthInBlock; ++w) {
                     uint32_t uploadBufferOffset = copyConfig.bufferOffset +
@@ -227,14 +227,14 @@ class CompressedTextureBCFormatTest : public DawnTest {
         if (config.copyOrigin3D.y + config.copyExtent3D.height > virtualSizeAtLevel.height) {
             noPaddingExtent3D.height = virtualSizeAtLevel.height - config.copyOrigin3D.y;
         }
-        noPaddingExtent3D.depth = 1u;
+        noPaddingExtent3D.depthOrArrayLayers = 1u;
 
         std::vector<RGBA8> expectedData =
             GetExpectedData(config.textureDescriptor.format, noPaddingExtent3D);
 
         wgpu::Origin3D firstLayerCopyOrigin = {config.copyOrigin3D.x, config.copyOrigin3D.y, 0};
         for (uint32_t layer = config.copyOrigin3D.z;
-             layer < config.copyOrigin3D.z + config.copyExtent3D.depth; ++layer) {
+             layer < config.copyOrigin3D.z + config.copyExtent3D.depthOrArrayLayers; ++layer) {
             wgpu::BindGroup bindGroup = CreateBindGroupForTest(
                 renderPipeline.GetBindGroupLayout(0), bcTexture, config.textureDescriptor.format,
                 layer, config.viewMipmapLevel);
@@ -391,7 +391,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
     static std::vector<RGBA8> FillExpectedData(const wgpu::Extent3D& testRegion,
                                                RGBA8 leftColorInBlock,
                                                RGBA8 rightColorInBlock) {
-        ASSERT(testRegion.depth == 1);
+        ASSERT(testRegion.depthOrArrayLayers == 1);
 
         std::vector<RGBA8> expectedData(testRegion.width * testRegion.height, leftColorInBlock);
         for (uint32_t y = 0; y < testRegion.height; ++y) {
@@ -409,7 +409,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
     static wgpu::Extent3D GetVirtualSizeAtLevel(const CopyConfig& config) {
         return {config.textureDescriptor.size.width >> config.viewMipmapLevel,
                 config.textureDescriptor.size.height >> config.viewMipmapLevel,
-                config.textureDescriptor.size.depth};
+                config.textureDescriptor.size.depthOrArrayLayers};
     }
 
     static wgpu::Extent3D GetPhysicalSizeAtLevel(const CopyConfig& config) {
@@ -484,7 +484,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
     config.copyExtent3D = config.textureDescriptor.size;
 
     constexpr uint32_t kArrayLayerCount = 3;
-    config.textureDescriptor.size.depth = kArrayLayerCount;
+    config.textureDescriptor.size.depthOrArrayLayers = kArrayLayerCount;
     config.copyOrigin3D.z = kArrayLayerCount - 1;
 
     for (wgpu::TextureFormat format : utils::kBCFormats) {
@@ -973,8 +973,8 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
 }
 
 // Test the workaround in the B2T copies when (bufferSize - bufferOffset < bytesPerImage *
-// copyExtent.depth) on Metal backends. As copyExtent.depth can only be 1 for BC formats, on Metal
-// backend we will use two copies to implement such copy.
+// copyExtent.depthOrArrayLayers) on Metal backends. As copyExtent.depthOrArrayLayers can only be 1
+// for BC formats, on Metal backend we will use two copies to implement such copy.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
@@ -995,7 +995,7 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
 }
 
 // Test the workaround in the B2T copies when (bufferSize - bufferOffset < bytesPerImage *
-// copyExtent.depth) and copyExtent needs to be clamped.
+// copyExtent.depthOrArrayLayers) and copyExtent needs to be clamped.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
     DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
@@ -1055,7 +1055,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWhole2DArrayTexture) {
     config.rowsPerImage = 8;
 
     config.copyExtent3D = config.textureDescriptor.size;
-    config.copyExtent3D.depth = kArrayLayerCount;
+    config.copyExtent3D.depthOrArrayLayers = kArrayLayerCount;
 
     for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;
@@ -1084,7 +1084,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyMultiple2DArrayLayers) {
     constexpr uint32_t kCopyLayerCount = 2;
     config.copyOrigin3D = {0, 0, kCopyBaseArrayLayer};
     config.copyExtent3D = config.textureDescriptor.size;
-    config.copyExtent3D.depth = kCopyLayerCount;
+    config.copyExtent3D.depthOrArrayLayers = kCopyLayerCount;
 
     for (wgpu::TextureFormat format : utils::kBCFormats) {
         config.textureDescriptor.format = format;

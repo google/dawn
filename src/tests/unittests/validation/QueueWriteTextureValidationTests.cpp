@@ -38,7 +38,7 @@ namespace {
             descriptor.dimension = wgpu::TextureDimension::e2D;
             descriptor.size.width = size.width;
             descriptor.size.height = size.height;
-            descriptor.size.depth = size.depth;
+            descriptor.size.depthOrArrayLayers = size.depthOrArrayLayers;
             descriptor.sampleCount = sampleCount;
             descriptor.format = format;
             descriptor.mipLevelCount = mipLevelCount;
@@ -358,7 +358,7 @@ namespace {
     // Test WriteTexture with texture in error state causes errors.
     TEST_F(QueueWriteTextureValidationTest, TextureInErrorState) {
         wgpu::TextureDescriptor errorTextureDescriptor;
-        errorTextureDescriptor.size.depth = 0;
+        errorTextureDescriptor.size.depthOrArrayLayers = 0;
         ASSERT_DEVICE_ERROR(wgpu::Texture errorTexture =
                                 device.CreateTexture(&errorTextureDescriptor));
         wgpu::ImageCopyTexture errorImageCopyTexture =

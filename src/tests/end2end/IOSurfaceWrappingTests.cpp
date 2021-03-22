@@ -182,7 +182,7 @@ TEST_P(IOSurfaceValidationTests, InvalidMipLevelCount) {
 // Test an error occurs if the descriptor depth isn't 1
 TEST_P(IOSurfaceValidationTests, InvalidDepth) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    descriptor.size.depth = 2;
+    descriptor.size.depthOrArrayLayers = 2;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));

@@ -81,8 +81,8 @@ namespace dawn_native { namespace d3d12 {
                    copySize.width == srcSize.width &&      //
                    copySize.height == dstSize.height &&    //
                    copySize.height == srcSize.height &&    //
-                   copySize.depth == dstSize.depth &&      //
-                   copySize.depth == srcSize.depth;
+                   copySize.depthOrArrayLayers == dstSize.depthOrArrayLayers &&  //
+                   copySize.depthOrArrayLayers == srcSize.depthOrArrayLayers;
         }
 
         void RecordCopyTextureToBufferFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
@@ -143,7 +143,7 @@ namespace dawn_native { namespace d3d12 {
             // that uses copySplits.copies2D[1].
             std::array<uint64_t, TextureCopySplits::kMaxTextureCopySplits>
                 bufferOffsetsForNextSlice = {{0u, 0u}};
-            for (uint32_t copySlice = 0; copySlice < copySize.depth; ++copySlice) {
+            for (uint32_t copySlice = 0; copySlice < copySize.depthOrArrayLayers; ++copySlice) {
                 const uint32_t splitIndex = copySlice % copySplits.copies2D.size();
 
                 const Texture2DCopySplit& copySplitPerLayerBase = copySplits.copies2D[splitIndex];
@@ -882,7 +882,7 @@ namespace dawn_native { namespace d3d12 {
                         // it is not allowed to copy with overlapped subresources, but we still
                         // add the ASSERT here as a reminder for this possible misuse.
                         ASSERT(!IsRangeOverlapped(copy->source.origin.z, copy->destination.origin.z,
-                                                  copy->copySize.depth));
+                                                  copy->copySize.depthOrArrayLayers));
                     }
                     source->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopySrc,
                                                        srcRange);
@@ -908,7 +908,8 @@ namespace dawn_native { namespace d3d12 {
                             copy->copySize.width, copy->copySize.height, 1u};
 
                         for (Aspect aspect : IterateEnumMask(srcRange.aspects)) {
-                            for (uint32_t slice = 0; slice < copy->copySize.depth; ++slice) {
+                            for (uint32_t slice = 0; slice < copy->copySize.depthOrArrayLayers;
+                                 ++slice) {
                                 D3D12_TEXTURE_COPY_LOCATION srcLocation =
                                     ComputeTextureCopyLocationForTexture(
                                         source, copy->source.mipLevel,

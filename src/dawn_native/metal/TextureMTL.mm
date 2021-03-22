@@ -275,7 +275,7 @@ namespace dawn_native { namespace metal {
             return DAWN_VALIDATION_ERROR("IOSurface mip level count must be 1");
         }
 
-        if (descriptor->size.depth != 1) {
+        if (descriptor->size.depthOrArrayLayers != 1) {
             return DAWN_VALIDATION_ERROR("IOSurface array layer count must be 1");
         }
 
@@ -285,7 +285,7 @@ namespace dawn_native { namespace metal {
 
         if (descriptor->size.width != IOSurfaceGetWidthOfPlane(ioSurface, plane) ||
             descriptor->size.height != IOSurfaceGetHeightOfPlane(ioSurface, plane) ||
-            descriptor->size.depth != 1) {
+            descriptor->size.depthOrArrayLayers != 1) {
             return DAWN_VALIDATION_ERROR("IOSurface size doesn't match descriptor");
         }
 
@@ -317,7 +317,7 @@ namespace dawn_native { namespace metal {
 
         // Choose the correct MTLTextureType and paper over differences in how the array layer count
         // is specified.
-        mtlDesc.depth = descriptor->size.depth;
+        mtlDesc.depth = descriptor->size.depthOrArrayLayers;
         mtlDesc.arrayLength = 1;
         switch (descriptor->dimension) {
             case wgpu::TextureDimension::e2D:
@@ -532,8 +532,8 @@ namespace dawn_native { namespace metal {
                              (largestMipSize.height / blockInfo.height),
                          512llu);
 
-            // TODO(enga): Multiply by largestMipSize.depth and do a larger 3D copy to clear a whole
-            // range of subresources when tracking that is improved.
+            // TODO(enga): Multiply by largestMipSize.depthOrArrayLayers and do a larger 3D copy to
+            // clear a whole range of subresources when tracking that is improved.
             uint64_t bufferSize = largestMipBytesPerImage * 1;
 
             if (bufferSize > std::numeric_limits<NSUInteger>::max()) {

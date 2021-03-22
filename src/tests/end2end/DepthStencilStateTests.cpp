@@ -29,7 +29,7 @@ class DepthStencilStateTest : public DawnTest {
         renderTargetDescriptor.dimension = wgpu::TextureDimension::e2D;
         renderTargetDescriptor.size.width = kRTSize;
         renderTargetDescriptor.size.height = kRTSize;
-        renderTargetDescriptor.size.depth = 1;
+        renderTargetDescriptor.size.depthOrArrayLayers = 1;
         renderTargetDescriptor.sampleCount = 1;
         renderTargetDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         renderTargetDescriptor.mipLevelCount = 1;
@@ -43,7 +43,7 @@ class DepthStencilStateTest : public DawnTest {
         depthDescriptor.dimension = wgpu::TextureDimension::e2D;
         depthDescriptor.size.width = kRTSize;
         depthDescriptor.size.height = kRTSize;
-        depthDescriptor.size.depth = 1;
+        depthDescriptor.size.depthOrArrayLayers = 1;
         depthDescriptor.sampleCount = 1;
         depthDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
         depthDescriptor.mipLevelCount = 1;

@@ -1247,10 +1247,12 @@ namespace dawn_native {
     ResultOrError<Ref<TextureBase>> DeviceBase::CreateTextureInternal(
         const TextureDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
+        TextureDescriptor fixedDescriptor = *descriptor;
+        DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(this, &(fixedDescriptor.size)));
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateTextureDescriptor(this, descriptor));
+            DAWN_TRY(ValidateTextureDescriptor(this, &fixedDescriptor));
         }
-        return CreateTextureImpl(descriptor);
+        return CreateTextureImpl(&fixedDescriptor);
     }
 
     MaybeError DeviceBase::CreateTextureViewInternal(TextureViewBase** result,

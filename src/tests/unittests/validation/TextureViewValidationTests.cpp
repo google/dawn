@@ -35,7 +35,7 @@ namespace {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = width;
         descriptor.size.height = height;
-        descriptor.size.depth = arrayLayerCount;
+        descriptor.size.depthOrArrayLayers = arrayLayerCount;
         descriptor.sampleCount = sampleCount;
         descriptor.format = kDefaultTextureFormat;
         descriptor.mipLevelCount = mipLevelCount;

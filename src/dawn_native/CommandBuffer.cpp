@@ -77,7 +77,8 @@ namespace dawn_native {
                                                    const Extent3D& copySize) {
         switch (copy.texture->GetDimension()) {
             case wgpu::TextureDimension::e2D:
-                return {copy.aspect, {copy.origin.z, copySize.depth}, {copy.mipLevel, 1}};
+                return {
+                    copy.aspect, {copy.origin.z, copySize.depthOrArrayLayers}, {copy.mipLevel, 1}};
             default:
                 UNREACHABLE();
         }
@@ -181,7 +182,7 @@ namespace dawn_native {
         }
 
         const uint64_t overwrittenRangeSize =
-            copyTextureDataSizePerRow * heightInBlocks * copy->copySize.depth;
+            copyTextureDataSizePerRow * heightInBlocks * copy->copySize.depthOrArrayLayers;
         if (copy->destination.buffer->GetSize() > overwrittenRangeSize) {
             return false;
         }

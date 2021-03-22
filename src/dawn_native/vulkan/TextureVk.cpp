@@ -199,12 +199,12 @@ namespace dawn_native { namespace vulkan {
                 case wgpu::TextureDimension::e2D:
                     info->imageType = VK_IMAGE_TYPE_2D;
                     info->extent = {size.width, size.height, 1};
-                    info->arrayLayers = size.depth;
+                    info->arrayLayers = size.depthOrArrayLayers;
                     break;
 
                 case wgpu::TextureDimension::e3D:
                     info->imageType = VK_IMAGE_TYPE_3D;
-                    info->extent = {size.width, size.height, size.depth};
+                    info->extent = {size.width, size.height, size.depthOrArrayLayers};
                     info->arrayLayers = 1;
                     break;
 
@@ -456,7 +456,7 @@ namespace dawn_native { namespace vulkan {
             return DAWN_VALIDATION_ERROR("Mip level count must be 1");
         }
 
-        if (descriptor->size.depth != 1) {
+        if (descriptor->size.depthOrArrayLayers != 1) {
             return DAWN_VALIDATION_ERROR("Array layer count must be 1");
         }
 

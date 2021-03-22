@@ -93,7 +93,7 @@ namespace dawn_native { namespace d3d12 {
             texture->GetD3D12CopyableSubresourceFormat(aspect);
         bufferLocation.PlacedFootprint.Footprint.Width = bufferSize.width;
         bufferLocation.PlacedFootprint.Footprint.Height = bufferSize.height;
-        bufferLocation.PlacedFootprint.Footprint.Depth = bufferSize.depth;
+        bufferLocation.PlacedFootprint.Footprint.Depth = bufferSize.depthOrArrayLayers;
         bufferLocation.PlacedFootprint.Footprint.RowPitch = rowPitch;
         return bufferLocation;
     }
@@ -105,7 +105,7 @@ namespace dawn_native { namespace d3d12 {
         sourceRegion.front = offset.z;
         sourceRegion.right = offset.x + copySize.width;
         sourceRegion.bottom = offset.y + copySize.height;
-        sourceRegion.back = offset.z + copySize.depth;
+        sourceRegion.back = offset.z + copySize.depthOrArrayLayers;
         return sourceRegion;
     }
 
@@ -201,7 +201,7 @@ namespace dawn_native { namespace d3d12 {
         std::array<uint64_t, TextureCopySplits::kMaxTextureCopySplits> bufferOffsetsForNextSlice = {
             {0u, 0u}};
 
-        for (uint32_t copySlice = 0; copySlice < copySize.depth; ++copySlice) {
+        for (uint32_t copySlice = 0; copySlice < copySize.depthOrArrayLayers; ++copySlice) {
             const uint32_t splitIndex = copySlice % copySplits.copies2D.size();
 
             const Texture2DCopySplit& copySplitPerLayerBase = copySplits.copies2D[splitIndex];

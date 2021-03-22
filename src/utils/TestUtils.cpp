@@ -40,7 +40,8 @@ namespace utils {
         TextureDataCopyLayout layout;
 
         layout.mipSize = {textureSizeAtLevel0.width >> mipmapLevel,
-                          textureSizeAtLevel0.height >> mipmapLevel, textureSizeAtLevel0.depth};
+                          textureSizeAtLevel0.height >> mipmapLevel,
+                          textureSizeAtLevel0.depthOrArrayLayers};
 
         layout.bytesPerRow = GetMinimumBytesPerRow(format, layout.mipSize.width);
 
@@ -83,7 +84,7 @@ namespace utils {
         ASSERT(copyExtent.height % blockHeight == 0);
         uint32_t heightInBlocks = copyExtent.height / blockHeight;
         return RequiredBytesInCopy(bytesPerRow, rowsPerImage, widthInBlocks, heightInBlocks,
-                                   copyExtent.depth, blockSize);
+                                   copyExtent.depthOrArrayLayers, blockSize);
     }
 
     uint64_t RequiredBytesInCopy(uint64_t bytesPerRow,

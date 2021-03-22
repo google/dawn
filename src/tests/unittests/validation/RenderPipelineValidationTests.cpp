@@ -238,7 +238,7 @@ TEST_F(RenderPipelineValidationTest, SampleCountCompatibilityWithRenderPass) {
     wgpu::TextureDescriptor baseTextureDescriptor;
     baseTextureDescriptor.size.width = 4;
     baseTextureDescriptor.size.height = 4;
-    baseTextureDescriptor.size.depth = 1;
+    baseTextureDescriptor.size.depthOrArrayLayers = 1;
     baseTextureDescriptor.mipLevelCount = 1;
     baseTextureDescriptor.dimension = wgpu::TextureDimension::e2D;
     baseTextureDescriptor.usage = wgpu::TextureUsage::RenderAttachment;

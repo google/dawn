@@ -59,7 +59,8 @@ namespace dawn_native { namespace opengl {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
         Texture* texture = ToBackend(destination.texture);
-        SubresourceRange range(Aspect::Color, {destination.origin.z, writeSizePixel.depth},
+        SubresourceRange range(Aspect::Color,
+                               {destination.origin.z, writeSizePixel.depthOrArrayLayers},
                                {destination.mipLevel, 1});
         if (IsCompleteSubresourceCopiedTo(texture, writeSizePixel, destination.mipLevel)) {
             texture->SetIsSubresourceContentInitialized(true, range);
@@ -97,7 +98,7 @@ namespace dawn_native { namespace opengl {
                 const uint8_t* slice = static_cast<const uint8_t*>(data);
 
                 for (uint32_t z = destination.origin.z;
-                     z < destination.origin.z + writeSizePixel.depth; ++z) {
+                     z < destination.origin.z + writeSizePixel.depthOrArrayLayers; ++z) {
                     const uint8_t* d = slice;
 
                     for (uint32_t y = destination.origin.y;
@@ -122,8 +123,8 @@ namespace dawn_native { namespace opengl {
                 gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, dataLayout.rowsPerImage * blockInfo.height);
                 gl.TexSubImage3D(target, destination.mipLevel, destination.origin.x,
                                  destination.origin.y, destination.origin.z, writeSizePixel.width,
-                                 writeSizePixel.height, writeSizePixel.depth, format.format,
-                                 format.type, data);
+                                 writeSizePixel.height, writeSizePixel.depthOrArrayLayers,
+                                 format.format, format.type, data);
                 gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
             }
             gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -138,7 +139,7 @@ namespace dawn_native { namespace opengl {
                 }
             } else {
                 const uint8_t* slice = static_cast<const uint8_t*>(data);
-                for (uint32_t z = 0; z < writeSizePixel.depth; ++z) {
+                for (uint32_t z = 0; z < writeSizePixel.depthOrArrayLayers; ++z) {
                     const uint8_t* d = slice;
                     for (uint32_t y = 0; y < writeSizePixel.height; ++y) {
                         gl.TexSubImage3D(target, destination.mipLevel, destination.origin.x,

@@ -191,7 +191,7 @@ TEST_P(D3D12SharedHandleValidation, InvalidMipLevelCount) {
 // Test an error occurs if the descriptor depth isn't 1
 TEST_P(D3D12SharedHandleValidation, InvalidDepth) {
     DAWN_SKIP_TEST_IF(UsesWire());
-    baseDawnDescriptor.size.depth = 2;
+    baseDawnDescriptor.size.depthOrArrayLayers = 2;
 
     wgpu::Texture texture;
     ComPtr<ID3D11Texture2D> d3d11Texture;

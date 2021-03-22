@@ -638,7 +638,7 @@ namespace dawn_native { namespace metal {
                         const TextureBufferCopySplit::CopyInfo& copyInfo = splitCopies.copies[i];
 
                         const uint32_t copyBaseLayer = copyInfo.textureOrigin.z;
-                        const uint32_t copyLayerCount = copyInfo.copyExtent.depth;
+                        const uint32_t copyLayerCount = copyInfo.copyExtent.depthOrArrayLayers;
                         const MTLOrigin textureOrigin =
                             MTLOriginMake(copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, 0);
                         const MTLSize copyExtent =
@@ -688,7 +688,7 @@ namespace dawn_native { namespace metal {
                         const TextureBufferCopySplit::CopyInfo& copyInfo = splitCopies.copies[i];
 
                         const uint32_t copyBaseLayer = copyInfo.textureOrigin.z;
-                        const uint32_t copyLayerCount = copyInfo.copyExtent.depth;
+                        const uint32_t copyLayerCount = copyInfo.copyExtent.depthOrArrayLayers;
                         const MTLOrigin textureOrigin =
                             MTLOriginMake(copyInfo.textureOrigin.x, copyInfo.textureOrigin.y, 0);
                         const MTLSize copyExtent =
@@ -738,7 +738,7 @@ namespace dawn_native { namespace metal {
                     const MTLOrigin destinationOriginNoLayer =
                         MTLOriginMake(copy->destination.origin.x, copy->destination.origin.y, 0);
 
-                    for (uint32_t slice = 0; slice < copy->copySize.depth; ++slice) {
+                    for (uint32_t slice = 0; slice < copy->copySize.depthOrArrayLayers; ++slice) {
                         [commandContext->EnsureBlit()
                               copyFromTexture:srcTexture->GetMTLTexture()
                                   sourceSlice:copy->source.origin.z + slice

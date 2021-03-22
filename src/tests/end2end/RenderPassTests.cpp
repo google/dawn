@@ -59,7 +59,7 @@ class RenderPassTest : public DawnTest {
         descriptor.dimension = wgpu::TextureDimension::e2D;
         descriptor.size.width = kRTSize;
         descriptor.size.height = kRTSize;
-        descriptor.size.depth = 1;
+        descriptor.size.depthOrArrayLayers = 1;
         descriptor.sampleCount = 1;
         descriptor.format = kFormat;
         descriptor.mipLevelCount = 1;

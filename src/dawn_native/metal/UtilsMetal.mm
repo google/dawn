@@ -60,9 +60,9 @@ namespace dawn_native { namespace metal {
         // compute the correct range when checking if the buffer is big enough to contain the
         // data for the whole copy. Instead of looking at the position of the last texel in the
         // buffer, it computes the volume of the 3D box with bytesPerRow * (rowsPerImage /
-        // format.blockHeight) * copySize.depth. For example considering the pixel buffer below
-        // where in memory, each row data (D) of the texture is followed by some padding data
-        // (P):
+        // format.blockHeight) * copySize.depthOrArrayLayers. For example considering the pixel
+        // buffer below where in memory, each row data (D) of the texture is followed by some
+        // padding data (P):
         //     |DDDDDDD|PP|
         //     |DDDDDDD|PP|
         //     |DDDDDDD|PP|
@@ -85,7 +85,8 @@ namespace dawn_native { namespace metal {
         ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
 
         // Check whether buffer size is big enough.
-        bool needWorkaround = bufferSize - bufferOffset < bytesPerImage * copyExtent.depth;
+        bool needWorkaround =
+            bufferSize - bufferOffset < bytesPerImage * copyExtent.depthOrArrayLayers;
         if (!needWorkaround) {
             copy.count = 1;
             copy.copies[0].bufferOffset = bufferOffset;
@@ -93,25 +94,25 @@ namespace dawn_native { namespace metal {
             copy.copies[0].bytesPerImage = bytesPerImage;
             copy.copies[0].textureOrigin = origin;
             copy.copies[0].copyExtent = {clampedCopyExtent.width, clampedCopyExtent.height,
-                                         copyExtent.depth};
+                                         copyExtent.depthOrArrayLayers};
             return copy;
         }
 
         uint64_t currentOffset = bufferOffset;
 
         // Doing all the copy except the last image.
-        if (copyExtent.depth > 1) {
+        if (copyExtent.depthOrArrayLayers > 1) {
             copy.copies[copy.count].bufferOffset = currentOffset;
             copy.copies[copy.count].bytesPerRow = bytesPerRow;
             copy.copies[copy.count].bytesPerImage = bytesPerImage;
             copy.copies[copy.count].textureOrigin = origin;
             copy.copies[copy.count].copyExtent = {clampedCopyExtent.width, clampedCopyExtent.height,
-                                                  copyExtent.depth - 1};
+                                                  copyExtent.depthOrArrayLayers - 1};
 
             ++copy.count;
 
             // Update offset to copy to the last image.
-            currentOffset += (copyExtent.depth - 1) * bytesPerImage;
+            currentOffset += (copyExtent.depthOrArrayLayers - 1) * bytesPerImage;
         }
 
         // Doing all the copy in last image except the last row.
@@ -121,7 +122,7 @@ namespace dawn_native { namespace metal {
             copy.copies[copy.count].bytesPerRow = bytesPerRow;
             copy.copies[copy.count].bytesPerImage = bytesPerRow * (copyBlockRowCount - 1);
             copy.copies[copy.count].textureOrigin = {origin.x, origin.y,
-                                                     origin.z + copyExtent.depth - 1};
+                                                     origin.z + copyExtent.depthOrArrayLayers - 1};
 
             ASSERT(copyExtent.height - blockInfo.height <
                    texture->GetMipLevelVirtualSize(mipLevel).height);
@@ -146,7 +147,7 @@ namespace dawn_native { namespace metal {
         copy.copies[copy.count].bytesPerImage = lastRowDataSize;
         copy.copies[copy.count].textureOrigin = {origin.x,
                                                  origin.y + copyExtent.height - blockInfo.height,
-                                                 origin.z + copyExtent.depth - 1};
+                                                 origin.z + copyExtent.depthOrArrayLayers - 1};
         copy.copies[copy.count].copyExtent = {clampedCopyExtent.width, lastRowCopyExtentHeight, 1};
         ++copy.count;
 

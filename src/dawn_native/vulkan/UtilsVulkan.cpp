@@ -130,7 +130,7 @@ namespace dawn_native { namespace vulkan {
                 region.imageOffset.z = 0;
 
                 region.imageSubresource.baseArrayLayer = textureCopy.origin.z;
-                region.imageSubresource.layerCount = copySize.depth;
+                region.imageSubresource.layerCount = copySize.depthOrArrayLayers;
 
                 Extent3D imageExtent = ComputeTextureCopyExtent(textureCopy, copySize);
                 region.imageExtent.width = imageExtent.width;

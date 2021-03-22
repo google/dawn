@@ -55,7 +55,7 @@ void initTextures() {
     descriptor.dimension = wgpu::TextureDimension::e2D;
     descriptor.size.width = 1024;
     descriptor.size.height = 1024;
-    descriptor.size.depth = 1;
+    descriptor.size.depthOrArrayLayers = 1;
     descriptor.sampleCount = 1;
     descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
     descriptor.mipLevelCount = 1;

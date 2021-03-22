@@ -344,7 +344,7 @@ namespace dawn_native { namespace d3d12 {
             return DAWN_VALIDATION_ERROR("Mip level count must be 1");
         }
 
-        if (descriptor->size.depth != 1) {
+        if (descriptor->size.depthOrArrayLayers != 1) {
             return DAWN_VALIDATION_ERROR("Depth must be 1");
         }
 
@@ -360,7 +360,7 @@ namespace dawn_native { namespace d3d12 {
         const D3D12_RESOURCE_DESC d3dDescriptor = d3d12Resource->GetDesc();
         if ((dawnDescriptor->size.width != d3dDescriptor.Width) ||
             (dawnDescriptor->size.height != d3dDescriptor.Height) ||
-            (dawnDescriptor->size.depth != 1)) {
+            (dawnDescriptor->size.depthOrArrayLayers != 1)) {
             return DAWN_VALIDATION_ERROR("D3D12 texture size doesn't match descriptor");
         }
 
@@ -485,7 +485,7 @@ namespace dawn_native { namespace d3d12 {
         const Extent3D& size = GetSize();
         resourceDescriptor.Width = size.width;
         resourceDescriptor.Height = size.height;
-        resourceDescriptor.DepthOrArraySize = size.depth;
+        resourceDescriptor.DepthOrArraySize = size.depthOrArrayLayers;
 
         // This will need to be much more nuanced when WebGPU has
         // texture view compatibility rules.

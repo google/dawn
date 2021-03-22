@@ -79,7 +79,7 @@ namespace dawn_native { namespace d3d12 {
         TextureDescriptor textureDescriptor = {};
         textureDescriptor.usage = static_cast<wgpu::TextureUsage>(descriptor->usage);
         textureDescriptor.dimension = static_cast<wgpu::TextureDimension>(mDimension);
-        textureDescriptor.size = {mSize.width, mSize.height, mSize.depth};
+        textureDescriptor.size = {mSize.width, mSize.height, mSize.depthOrArrayLayers};
         textureDescriptor.format = static_cast<wgpu::TextureFormat>(mFormat);
         textureDescriptor.mipLevelCount = mMipLevelCount;
         textureDescriptor.sampleCount = mSampleCount;
