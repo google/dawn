@@ -40,20 +40,16 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   uint32_t packed_size;
   type::Type* packed_el_ty;  // Currently must be f32.
   auto* vector_sem = b->Sem().Get(vector);
-  if (auto* vec = vector_sem->Type()->As<type::Vector>()) {
+  auto* vector_ty = vector_sem->Type()->UnwrapPtrIfNeeded();
+  if (auto* vec = vector_ty->As<type::Vector>()) {
     packed_size = vec->size() + 1;
     packed_el_ty = vec->type();
   } else {
     packed_size = 2;
-    packed_el_ty = vector_sem->Type();
+    packed_el_ty = vector_ty;
   }
 
   auto* statement = vector_sem->Stmt();
-
-  // Cast scalar to the vector element type
-  auto* scalar_cast = b->Construct(packed_el_ty, scalar);
-  b->Sem().Add(scalar_cast, b->create<semantic::Expression>(
-                                scalar_cast, packed_el_ty, statement));
 
   auto* packed_ty = b->create<type::Vector>(packed_el_ty, packed_size);
 
@@ -65,7 +61,11 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   } else {
     packed.emplace_back(vector);
   }
-  if (packed_el_ty != b->Sem().Get(scalar)->Type()) {
+  if (packed_el_ty != b->Sem().Get(scalar)->Type()->UnwrapPtrIfNeeded()) {
+    // Cast scalar to the vector element type
+    auto* scalar_cast = b->Construct(packed_el_ty, scalar);
+    b->Sem().Add(scalar_cast, b->create<semantic::Expression>(
+                                  scalar_cast, packed_el_ty, statement));
     packed.emplace_back(scalar_cast);
   } else {
     packed.emplace_back(scalar);
