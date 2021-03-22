@@ -10,10 +10,10 @@ vars = {
   'buildtools_revision': 'e3db55b4639f2a331af6f3708ca1fbd22322aac3',
   'clang_revision': 'eb5ab41f3801e2085208204fd71a490573d72dfd',
   'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
-  'googletest_revision': 'f3ef7e173fd0853069f16c4b5afc7e80a350604b',
-  'gpuweb_cts_revision': 'd836e71f29a606a428c6dca9a205fd61fa7a4ed8',
-  'spirv_headers_revision': '75b30a659c8a4979104986652c54cc421fc51129',
-  'spirv_tools_revision': 'cfa1dadb1e62312655531de3cb97cecb0b21a737',
+  'googletest_revision': 'b7d472f1225c5a64943821d8483fecb469d3f382',
+  'gpuweb_cts_revision': 'dea8ed8c2bbcac4155fd5e7fb0ed2200b93043d2',
+  'spirv_headers_revision': 'bcf55210f13a4fa3c3d0963b509ff1070e434c79',
+  'spirv_tools_revision': '4f498774db5250c05fbdd8f24912ab2938401c00',
   'testing_revision': '2691851e49de541c3fe42fa8692ddcdee938162f',
 }
 
