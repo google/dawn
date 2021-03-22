@@ -1726,7 +1726,10 @@ template <typename F>
 bool Resolver::BlockScope(BlockInfo::Type type, F&& callback) {
   BlockInfo block_info(type, current_block_);
   ScopedAssignment<BlockInfo*> sa(current_block_, &block_info);
-  return callback();
+  variable_stack_.push_scope();
+  bool result = callback();
+  variable_stack_.pop_scope();
+  return result;
 }
 
 std::string Resolver::VectorPretty(uint32_t size, type::Type* element_type) {

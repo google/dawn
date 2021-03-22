@@ -98,10 +98,6 @@ class ValidatorImpl {
   /// @param expr the expression to check
   /// @return true if the expression is valid
   bool ValidateExpression(const ast::Expression* expr);
-  /// Validates v-0006:Variables must be defined before use
-  /// @param ident the identifer to check if its in the scope
-  /// @return true if idnet was defined
-  bool ValidateIdentifier(const ast::IdentifierExpression* ident);
   /// Validates declaration name uniqueness
   /// @param decl is the new declaration to be added
   /// @returns true if no previous declaration with the `decl` 's name

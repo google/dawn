@@ -211,8 +211,7 @@ TEST_F(ResolverValidationTest, Expr_DontCall_Intrinsic) {
 TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {
   // b = 2;
 
-  SetSource(Source{Source::Location{12, 34}});
-  auto* lhs = Expr("b");
+  auto* lhs = Expr(Source{{12, 34}}, "b");
   auto* rhs = Expr(2);
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
   WrapInFunction(assign);
@@ -227,8 +226,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
   //  b = 2;
   // }
 
-  SetSource(Source{Source::Location{12, 34}});
-  auto* lhs = Expr("b");
+  auto* lhs = Expr(Source{{12, 34}}, "b");
   auto* rhs = Expr(2);
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
@@ -239,6 +237,133 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: v-0006: identifier must be declared before use: b");
+}
+
+TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
+  // fn my_func() -> void {
+  //   global_var = 3.14f;
+  // }
+  // var global_var: f32 = 2.1;
+
+  auto* lhs = Expr(Source{{12, 34}}, "global_var");
+  auto* rhs = Expr(3.14f);
+
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(lhs, rhs),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+
+  Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: v-0006: identifier must be declared before use: "
+            "global_var");
+}
+
+TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
+  // var global_var: f32 = 2.1;
+  // fn my_func() -> void {
+  //   global_var = 3.14;
+  //   return;
+  // }
+
+  Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
+
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::AssignmentStatement>(Source{Source::Location{12, 34}},
+                                            Expr("global_var"), Expr(3.14f)),
+           create<ast::ReturnStatement>(),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, UsingUndefinedVariableInnerScope_Fail) {
+  // {
+  //   if (true) { var a : f32 = 2.0; }
+  //   a = 3.14;
+  // }
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+
+  auto* cond = Expr(true);
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+  });
+
+  SetSource(Source{Source::Location{12, 34}});
+  auto* lhs = Expr(Source{{12, 34}}, "a");
+  auto* rhs = Expr(3.14f);
+
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
+      create<ast::AssignmentStatement>(lhs, rhs),
+  });
+
+  WrapInFunction(outer_body);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: v-0006: identifier must be declared before use: a");
+}
+
+TEST_F(ResolverValidationTest, UsingUndefinedVariableOuterScope_Pass) {
+  // {
+  //   var a : f32 = 2.0;
+  //   if (true) { a = 3.14; }
+  // }
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+
+  auto* lhs = Expr(Source{{12, 34}}, "a");
+  auto* rhs = Expr(3.14f);
+
+  auto* cond = Expr(true);
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(lhs, rhs),
+  });
+
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
+  });
+
+  WrapInFunction(outer_body);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
+  // {
+  //  { var a : f32 = 2.0; }
+  //  { a = 3.14; }
+  // }
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+  auto* first_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+  });
+
+  auto* lhs = Expr(Source{{12, 34}}, "a");
+  auto* rhs = Expr(3.14f);
+  auto* second_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::AssignmentStatement>(lhs, rhs),
+  });
+
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      first_body,
+      second_body,
+  });
+
+  WrapInFunction(outer_body);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: v-0006: identifier must be declared before use: a");
 }
 
 TEST_F(ResolverValidationTest, StorageClass_NonFunctionClassError) {

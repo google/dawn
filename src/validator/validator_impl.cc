@@ -411,11 +411,10 @@ bool ValidatorImpl::ValidateBadAssignmentToIdentifier(
       return false;
     }
   } else {
-    // The identifier is not defined. This should already have been caught
-    // when validating the subexpression.
-    add_error(ident->source(), "v-0006",
-              "'" + program_->Symbols().NameFor(ident->symbol()) +
-                  "' is not declared");
+    // The identifier is not defined.
+    // Shouldn't reach here. This should already have been caught when
+    // validation expressions in the Resolver
+    TINT_UNREACHABLE(diagnostics());
     return false;
   }
   return true;
@@ -463,23 +462,9 @@ bool ValidatorImpl::ValidateExpression(const ast::Expression* expr) {
   if (!expr) {
     return false;
   }
-  if (auto* i = expr->As<ast::IdentifierExpression>()) {
-    return ValidateIdentifier(i);
-  }
 
   if (auto* c = expr->As<ast::CallExpression>()) {
     return ValidateCallExpr(c);
-  }
-  return true;
-}
-
-bool ValidatorImpl::ValidateIdentifier(const ast::IdentifierExpression* ident) {
-  const ast::Variable* var;
-  if (!variable_stack_.get(ident->symbol(), &var)) {
-    add_error(ident->source(), "v-0006",
-              "'" + program_->Symbols().NameFor(ident->symbol()) +
-                  "' is not declared");
-    return false;
   }
   return true;
 }
