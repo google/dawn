@@ -558,6 +558,7 @@ source_set("libtint_spv_writer_src") {
     "writer/spirv/instruction.h",
     "writer/spirv/operand.cc",
     "writer/spirv/operand.h",
+    "writer/spirv/scalar_constant.h",
   ]
 
   configs += [ ":tint_common_config" ]

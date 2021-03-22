@@ -343,6 +343,7 @@ if(${TINT_BUILD_SPV_WRITER})
     writer/spirv/instruction.h
     writer/spirv/operand.cc
     writer/spirv/operand.h
+    writer/spirv/scalar_constant.h
   )
 endif()
 
@@ -678,6 +679,7 @@ if(${TINT_BUILD_TESTS})
       writer/spirv/builder_unary_op_expression_test.cc
       writer/spirv/instruction_test.cc
       writer/spirv/operand_test.cc
+      writer/spirv/scalar_constant_test.cc
       writer/spirv/spv_dump.cc
       writer/spirv/spv_dump.h
       writer/spirv/test_helper.h

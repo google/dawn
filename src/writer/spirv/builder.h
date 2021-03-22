@@ -37,6 +37,7 @@
 #include "src/type/access_control_type.h"
 #include "src/type/storage_texture_type.h"
 #include "src/writer/spirv/function.h"
+#include "src/writer/spirv/scalar_constant.h"
 
 namespace tint {
 
@@ -208,10 +209,6 @@ class Builder {
   /// @param id the id to use for the label
   /// @returns true on success.
   bool GenerateLabel(uint32_t id);
-  /// Generates a uint32_t literal.
-  /// @param val the value to generate
-  /// @returns the ID of the generated literal
-  uint32_t GenerateU32Literal(uint32_t val);
   /// Generates an assignment statement
   /// @param assign the statement to generate
   /// @returns true if the statement was successfully generated
@@ -486,6 +483,16 @@ class Builder {
     return builder_.TypeOf(expr);
   }
 
+  /// Generates a constant if needed
+  /// @param constant the constant to generate.
+  /// @returns the ID on success or 0 on failure
+  uint32_t GenerateConstantIfNeeded(const ScalarConstant& constant);
+
+  /// Generates a constant-null of the given type, if needed
+  /// @param type the type of the constant null to generate.
+  /// @returns the ID on success or 0 on failure
+  uint32_t GenerateConstantNullIfNeeded(type::Type* type);
+
   ProgramBuilder builder_;
   std::string error_;
   uint32_t next_id_ = 1;
@@ -504,7 +511,9 @@ class Builder {
   std::unordered_map<std::string, uint32_t> import_name_to_id_;
   std::unordered_map<Symbol, uint32_t> func_symbol_to_id_;
   std::unordered_map<std::string, uint32_t> type_name_to_id_;
-  std::unordered_map<std::string, uint32_t> const_to_id_;
+  std::unordered_map<ScalarConstant, uint32_t> const_to_id_;
+  std::unordered_map<std::string, uint32_t> type_constructor_to_id_;
+  std::unordered_map<std::string, uint32_t> const_null_to_id_;
   std::unordered_map<std::string, uint32_t>
       texture_type_name_to_sampled_image_type_id_;
   ScopeStack<uint32_t> scope_stack_;

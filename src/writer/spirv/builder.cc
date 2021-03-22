@@ -21,7 +21,6 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/fallthrough_statement.h"
-#include "src/ast/null_literal.h"
 #include "src/semantic/array.h"
 #include "src/semantic/call.h"
 #include "src/semantic/function.h"
@@ -365,12 +364,6 @@ bool Builder::GenerateLabel(uint32_t id) {
   return true;
 }
 
-uint32_t Builder::GenerateU32Literal(uint32_t val) {
-  type::U32 u32;
-  ast::SintLiteral lit(Source{}, &u32, val);
-  return GenerateLiteralIfNeeded(nullptr, &lit);
-}
-
 bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
   auto lhs_id = GenerateExpression(assign->lhs());
   if (lhs_id == 0) {
@@ -648,8 +641,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
 
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
-  ast::NullLiteral nl(Source{}, var->type()->UnwrapPtrIfNeeded());
-  auto null_id = GenerateLiteralIfNeeded(var, &nl);
+  auto null_id = GenerateConstantNullIfNeeded(var->type()->UnwrapPtrIfNeeded());
   if (null_id == 0) {
     return 0;
   }
@@ -779,8 +771,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     } else if (sem->StorageClass() == ast::StorageClass::kPrivate ||
                sem->StorageClass() == ast::StorageClass::kNone ||
                sem->StorageClass() == ast::StorageClass::kOutput) {
-      ast::NullLiteral nl(Source{}, type);
-      init_id = GenerateLiteralIfNeeded(var, &nl);
+      init_id = GenerateConstantNullIfNeeded(type);
       if (init_id == 0) {
         return 0;
       }
@@ -888,7 +879,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       }
     }
 
-    auto idx_id = GenerateU32Literal(i);
+    auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(i));
     if (idx_id == 0) {
       return 0;
     }
@@ -913,7 +904,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     }
 
     if (info->source_type->Is<type::Pointer>()) {
-      auto idx_id = GenerateU32Literal(val);
+      auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(val));
       if (idx_id == 0) {
         return 0;
       }
@@ -1044,8 +1035,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 
       auto ary_result = result_op();
 
-      ast::NullLiteral nl(Source{}, ary_res_type);
-      auto init = GenerateLiteralIfNeeded(nullptr, &nl);
+      auto init = GenerateConstantNullIfNeeded(ary_res_type);
 
       // If we're access chaining into an array then we must be in a function
       push_function_var(
@@ -1259,8 +1249,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   // Generate the zero initializer if there are no values provided.
   if (values.empty()) {
-    ast::NullLiteral nl(Source{}, init->type()->UnwrapPtrIfNeeded());
-    return GenerateLiteralIfNeeded(nullptr, &nl);
+    return GenerateConstantNullIfNeeded(init->type()->UnwrapPtrIfNeeded());
   }
 
   std::ostringstream out;
@@ -1370,7 +1359,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
           result_is_constant_composite = false;
         } else {
           // A global initializer, must use OpSpecConstantOp. Case 1.
-          auto idx_id = GenerateU32Literal(i);
+          auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(i));
           if (idx_id == 0) {
             return 0;
           }
@@ -1392,8 +1381,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   }
 
   auto str = out.str();
-  auto val = const_to_id_.find(str);
-  if (val != const_to_id_.end()) {
+  auto val = type_constructor_to_id_.find(str);
+  if (val != type_constructor_to_id_.end()) {
     return val->second;
   }
 
@@ -1401,7 +1390,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   ops.insert(ops.begin(), result);
   ops.insert(ops.begin(), Operand::Int(type_id));
 
-  const_to_id_[str] = result.to_i();
+  type_constructor_to_id_[str] = result.to_i();
 
   if (result_is_spec_composite) {
     push_type(spv::Op::OpSpecConstantComposite, ops);
@@ -1480,59 +1469,133 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(type::Type* to_type,
 
 uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
                                           ast::Literal* lit) {
-  auto type_id = GenerateTypeIfNeeded(lit->type());
-  if (type_id == 0) {
-    return 0;
-  }
+  ScalarConstant constant;
 
-  auto name = lit->name();
-  bool is_spec_constant = false;
   if (var && var->HasConstantIdDecoration()) {
-    name = "__spec" + name;
-    is_spec_constant = true;
-  }
-
-  auto val = const_to_id_.find(name);
-  if (val != const_to_id_.end()) {
-    return val->second;
-  }
-
-  auto result = result_op();
-  auto result_id = result.to_i();
-
-  if (is_spec_constant) {
-    push_annot(spv::Op::OpDecorate,
-               {Operand::Int(result_id), Operand::Int(SpvDecorationSpecId),
-                Operand::Int(var->constant_id())});
+    constant.is_spec_op = true;
+    constant.constant_id = var->constant_id();
   }
 
   if (auto* l = lit->As<ast::BoolLiteral>()) {
-    if (l->IsTrue()) {
-      push_type(is_spec_constant ? spv::Op::OpSpecConstantTrue
-                                 : spv::Op::OpConstantTrue,
-                {Operand::Int(type_id), result});
-    } else {
-      push_type(is_spec_constant ? spv::Op::OpSpecConstantFalse
-                                 : spv::Op::OpConstantFalse,
-                {Operand::Int(type_id), result});
-    }
+    constant.kind = ScalarConstant::Kind::kBool;
+    constant.value.b = l->IsTrue();
   } else if (auto* sl = lit->As<ast::SintLiteral>()) {
-    push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
-              {Operand::Int(type_id), result, Operand::Int(sl->value())});
+    constant.kind = ScalarConstant::Kind::kI32;
+    constant.value.i32 = sl->value();
   } else if (auto* ul = lit->As<ast::UintLiteral>()) {
-    push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
-              {Operand::Int(type_id), result, Operand::Int(ul->value())});
+    constant.kind = ScalarConstant::Kind::kU32;
+    constant.value.u32 = ul->value();
   } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
-    push_type(is_spec_constant ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
-              {Operand::Int(type_id), result, Operand::Float(fl->value())});
-  } else if (lit->Is<ast::NullLiteral>()) {
-    push_type(spv::Op::OpConstantNull, {Operand::Int(type_id), result});
+    constant.kind = ScalarConstant::Kind::kF32;
+    constant.value.f32 = fl->value();
   } else {
     error_ = "unknown literal type";
     return 0;
   }
 
-  const_to_id_[name] = result_id;
+  return GenerateConstantIfNeeded(constant);
+}
+
+uint32_t Builder::GenerateConstantIfNeeded(const ScalarConstant& constant) {
+  auto it = const_to_id_.find(constant);
+  if (it != const_to_id_.end()) {
+    return it->second;
+  }
+
+  uint32_t type_id = 0;
+
+  switch (constant.kind) {
+    case ScalarConstant::Kind::kU32: {
+      type::U32 u32;
+      type_id = GenerateTypeIfNeeded(&u32);
+      break;
+    }
+    case ScalarConstant::Kind::kI32: {
+      type::I32 i32;
+      type_id = GenerateTypeIfNeeded(&i32);
+      break;
+    }
+    case ScalarConstant::Kind::kF32: {
+      type::F32 f32;
+      type_id = GenerateTypeIfNeeded(&f32);
+      break;
+    }
+    case ScalarConstant::Kind::kBool: {
+      type::Bool bool_;
+      type_id = GenerateTypeIfNeeded(&bool_);
+      break;
+    }
+  }
+
+  if (type_id == 0) {
+    return 0;
+  }
+
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  if (constant.is_spec_op) {
+    push_annot(spv::Op::OpDecorate,
+               {Operand::Int(result_id), Operand::Int(SpvDecorationSpecId),
+                Operand::Int(constant.constant_id)});
+  }
+
+  switch (constant.kind) {
+    case ScalarConstant::Kind::kU32: {
+      push_type(
+          constant.is_spec_op ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
+          {Operand::Int(type_id), result, Operand::Int(constant.value.u32)});
+      break;
+    }
+    case ScalarConstant::Kind::kI32: {
+      push_type(
+          constant.is_spec_op ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
+          {Operand::Int(type_id), result, Operand::Int(constant.value.i32)});
+      break;
+    }
+    case ScalarConstant::Kind::kF32: {
+      push_type(
+          constant.is_spec_op ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
+          {Operand::Int(type_id), result, Operand::Float(constant.value.f32)});
+      break;
+    }
+    case ScalarConstant::Kind::kBool: {
+      if (constant.value.b) {
+        push_type(constant.is_spec_op ? spv::Op::OpSpecConstantTrue
+                                      : spv::Op::OpConstantTrue,
+                  {Operand::Int(type_id), result});
+      } else {
+        push_type(constant.is_spec_op ? spv::Op::OpSpecConstantFalse
+                                      : spv::Op::OpConstantFalse,
+                  {Operand::Int(type_id), result});
+      }
+      break;
+    }
+  }
+
+  const_to_id_[constant] = result_id;
+  return result_id;
+}
+
+uint32_t Builder::GenerateConstantNullIfNeeded(type::Type* type) {
+  auto type_id = GenerateTypeIfNeeded(type);
+  if (type_id == 0) {
+    return 0;
+  }
+
+  auto name = type->type_name();
+
+  auto it = const_null_to_id_.find(name);
+  if (it != const_null_to_id_.end()) {
+    return it->second;
+  }
+
+  auto result = result_op();
+  auto result_id = result.to_i();
+
+  push_type(spv::Op::OpConstantNull, {Operand::Int(type_id), result});
+
+  const_null_to_id_[name] = result_id;
   return result_id;
 }
 
@@ -2955,7 +3018,7 @@ bool Builder::GenerateArrayType(type::Array* ary, const Operand& result) {
   if (ary->IsRuntimeArray()) {
     push_type(spv::Op::OpTypeRuntimeArray, {result, Operand::Int(elem_type)});
   } else {
-    auto len_id = GenerateU32Literal(ary->size());
+    auto len_id = GenerateConstantIfNeeded(ScalarConstant::U32(ary->size()));
     if (len_id == 0) {
       return false;
     }
