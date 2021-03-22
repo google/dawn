@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "gtest/gtest.h"
 #include "src/demangler.h"
 #include "src/reader/spirv/parser_impl.h"
 
