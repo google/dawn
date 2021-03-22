@@ -50,8 +50,6 @@ INSTANTIATE_TEST_SUITE_P(
         StorageClassData{"out", ast::StorageClass::kOutput},
         StorageClassData{"uniform", ast::StorageClass::kUniform},
         StorageClassData{"workgroup", ast::StorageClass::kWorkgroup},
-        StorageClassData{"uniform_constant",
-                         ast::StorageClass::kUniformConstant},
         StorageClassData{"storage", ast::StorageClass::kStorage},
         StorageClassData{"storage_buffer", ast::StorageClass::kStorage},
         StorageClassData{"image", ast::StorageClass::kImage},

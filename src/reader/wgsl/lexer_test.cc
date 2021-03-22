@@ -518,7 +518,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"type", Token::Type::kType},
         TokenData{"u32", Token::Type::kU32},
         TokenData{"uniform", Token::Type::kUniform},
-        TokenData{"uniform_constant", Token::Type::kUniformConstant},
         TokenData{"var", Token::Type::kVar},
         TokenData{"vec2", Token::Type::kVec2},
         TokenData{"vec3", Token::Type::kVec3},

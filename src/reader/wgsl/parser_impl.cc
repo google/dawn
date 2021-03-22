@@ -459,7 +459,12 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
 
   if (decl->type->UnwrapAll()->is_handle()) {
     // handle types implicitly have the `UniformConstant` storage class.
-    // TODO(jrprice): Produce an error if an explicit storage class is provided.
+    if (explicit_sc.matched) {
+      return add_error(
+          explicit_sc.source,
+          decl->type->UnwrapAll()->FriendlyName(builder_.Symbols()) +
+              " variables must not have a storage class");
+    }
     sc = ast::StorageClass::kUniformConstant;
   }
 
@@ -1049,7 +1054,6 @@ Expect<type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
 //  | OUTPUT
 //  | UNIFORM
 //  | WORKGROUP
-//  | UNIFORM_CONSTANT
 //  | STORAGE
 //  | IMAGE
 //  | PRIVATE
@@ -1069,9 +1073,6 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 
   if (match(Token::Type::kWorkgroup))
     return {ast::StorageClass::kWorkgroup, source};
-
-  if (match(Token::Type::kUniformConstant))
-    return {ast::StorageClass::kUniformConstant, source};
 
   if (match(Token::Type::kStorage))
     return {ast::StorageClass::kStorage, source};

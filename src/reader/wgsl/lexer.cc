@@ -673,8 +673,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kU32, source, "u32"};
   if (str == "uniform")
     return {Token::Type::kUniform, source, "uniform"};
-  if (str == "uniform_constant")
-    return {Token::Type::kUniformConstant, source, "uniform_constant"};
   if (str == "var")
     return {Token::Type::kVar, source, "var"};
   if (str == "vec2")

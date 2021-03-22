@@ -297,8 +297,6 @@ std::string Token::TypeToName(Type type) {
       return "u32";
     case Token::Type::kUniform:
       return "uniform";
-    case Token::Type::kUniformConstant:
-      return "uniform_constant";
     case Token::Type::kVar:
       return "var";
     case Token::Type::kVec2:

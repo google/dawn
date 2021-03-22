@@ -101,7 +101,6 @@
 "type"
 "u32"
 "uniform"
-"uniform_constant"
 "var"
 "vec2"
 "vec3"
