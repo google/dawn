@@ -302,15 +302,15 @@ namespace dawn_native {
         return {};
     }
 
-    bool StencilTestEnabled(const DepthStencilStateDescriptor* mDepthStencilState) {
-        return mDepthStencilState->stencilBack.compare != wgpu::CompareFunction::Always ||
-               mDepthStencilState->stencilBack.failOp != wgpu::StencilOperation::Keep ||
-               mDepthStencilState->stencilBack.depthFailOp != wgpu::StencilOperation::Keep ||
-               mDepthStencilState->stencilBack.passOp != wgpu::StencilOperation::Keep ||
-               mDepthStencilState->stencilFront.compare != wgpu::CompareFunction::Always ||
-               mDepthStencilState->stencilFront.failOp != wgpu::StencilOperation::Keep ||
-               mDepthStencilState->stencilFront.depthFailOp != wgpu::StencilOperation::Keep ||
-               mDepthStencilState->stencilFront.passOp != wgpu::StencilOperation::Keep;
+    bool StencilTestEnabled(const DepthStencilState* mDepthStencil) {
+        return mDepthStencil->stencilBack.compare != wgpu::CompareFunction::Always ||
+               mDepthStencil->stencilBack.failOp != wgpu::StencilOperation::Keep ||
+               mDepthStencil->stencilBack.depthFailOp != wgpu::StencilOperation::Keep ||
+               mDepthStencil->stencilBack.passOp != wgpu::StencilOperation::Keep ||
+               mDepthStencil->stencilFront.compare != wgpu::CompareFunction::Always ||
+               mDepthStencil->stencilFront.failOp != wgpu::StencilOperation::Keep ||
+               mDepthStencil->stencilFront.depthFailOp != wgpu::StencilOperation::Keep ||
+               mDepthStencil->stencilFront.passOp != wgpu::StencilOperation::Keep;
     }
 
     bool BlendEnabled(const ColorStateDescriptor* mColorState) {
@@ -330,71 +330,104 @@ namespace dawn_native {
                        descriptor->layout,
                        {{SingleShaderStage::Vertex, &descriptor->vertexStage},
                         {SingleShaderStage::Fragment, descriptor->fragmentStage}}),
-          mAttachmentState(device->GetOrCreateAttachmentState(descriptor)),
-          mPrimitiveTopology(descriptor->primitiveTopology),
-          mSampleMask(descriptor->sampleMask),
-          mAlphaToCoverageEnabled(descriptor->alphaToCoverageEnabled) {
+          mAttachmentState(device->GetOrCreateAttachmentState(descriptor)) {
+        mPrimitive.topology = descriptor->primitiveTopology;
+
+        mMultisample.count = descriptor->sampleCount;
+        mMultisample.mask = descriptor->sampleMask;
+        mMultisample.alphaToCoverageEnabled = descriptor->alphaToCoverageEnabled;
+
         if (descriptor->vertexState != nullptr) {
-            mVertexState = *descriptor->vertexState;
-        } else {
-            mVertexState = VertexStateDescriptor();
-        }
+            const VertexStateDescriptor& vertexState = *descriptor->vertexState;
+            mVertexBufferCount = vertexState.vertexBufferCount;
+            mPrimitive.stripIndexFormat = vertexState.indexFormat;
 
-        for (uint8_t slot = 0; slot < mVertexState.vertexBufferCount; ++slot) {
-            if (mVertexState.vertexBuffers[slot].attributeCount == 0) {
-                continue;
+            for (uint8_t slot = 0; slot < mVertexBufferCount; ++slot) {
+                if (vertexState.vertexBuffers[slot].attributeCount == 0) {
+                    continue;
+                }
+
+                VertexBufferSlot typedSlot(slot);
+
+                mVertexBufferSlotsUsed.set(typedSlot);
+                mVertexBufferInfos[typedSlot].arrayStride =
+                    vertexState.vertexBuffers[slot].arrayStride;
+                mVertexBufferInfos[typedSlot].stepMode = vertexState.vertexBuffers[slot].stepMode;
+
+                for (uint32_t i = 0; i < vertexState.vertexBuffers[slot].attributeCount; ++i) {
+                    VertexAttributeLocation location = VertexAttributeLocation(static_cast<uint8_t>(
+                        vertexState.vertexBuffers[slot].attributes[i].shaderLocation));
+                    mAttributeLocationsUsed.set(location);
+                    mAttributeInfos[location].shaderLocation = location;
+                    mAttributeInfos[location].vertexBufferSlot = typedSlot;
+                    mAttributeInfos[location].offset =
+                        vertexState.vertexBuffers[slot].attributes[i].offset;
+
+                    mAttributeInfos[location].format = dawn::NormalizeVertexFormat(
+                        vertexState.vertexBuffers[slot].attributes[i].format);
+                }
             }
-
-            VertexBufferSlot typedSlot(slot);
-
-            mVertexBufferSlotsUsed.set(typedSlot);
-            mVertexBufferInfos[typedSlot].arrayStride =
-                mVertexState.vertexBuffers[slot].arrayStride;
-            mVertexBufferInfos[typedSlot].stepMode = mVertexState.vertexBuffers[slot].stepMode;
-
-            for (uint32_t i = 0; i < mVertexState.vertexBuffers[slot].attributeCount; ++i) {
-                VertexAttributeLocation location = VertexAttributeLocation(static_cast<uint8_t>(
-                    mVertexState.vertexBuffers[slot].attributes[i].shaderLocation));
-                mAttributeLocationsUsed.set(location);
-                mAttributeInfos[location].shaderLocation = location;
-                mAttributeInfos[location].vertexBufferSlot = typedSlot;
-                mAttributeInfos[location].offset =
-                    mVertexState.vertexBuffers[slot].attributes[i].offset;
-
-                mAttributeInfos[location].format = dawn::NormalizeVertexFormat(
-                    mVertexState.vertexBuffers[slot].attributes[i].format);
-            }
-        }
-
-        if (descriptor->rasterizationState != nullptr) {
-            mRasterizationState = *descriptor->rasterizationState;
         } else {
-            mRasterizationState = RasterizationStateDescriptor();
+            mVertexBufferCount = 0;
+            mPrimitive.stripIndexFormat = wgpu::IndexFormat::Undefined;
         }
 
         if (mAttachmentState->HasDepthStencilAttachment()) {
-            mDepthStencilState = *descriptor->depthStencilState;
+            const DepthStencilStateDescriptor& depthStencil = *descriptor->depthStencilState;
+            mDepthStencil.format = depthStencil.format;
+            mDepthStencil.depthWriteEnabled = depthStencil.depthWriteEnabled;
+            mDepthStencil.depthCompare = depthStencil.depthCompare;
+            mDepthStencil.stencilBack = depthStencil.stencilBack;
+            mDepthStencil.stencilFront = depthStencil.stencilFront;
+            mDepthStencil.stencilReadMask = depthStencil.stencilReadMask;
+            mDepthStencil.stencilWriteMask = depthStencil.stencilWriteMask;
         } else {
             // These default values below are useful for backends to fill information.
             // The values indicate that depth and stencil test are disabled when backends
             // set their own depth stencil states/descriptors according to the values in
-            // mDepthStencilState.
-            mDepthStencilState.depthCompare = wgpu::CompareFunction::Always;
-            mDepthStencilState.depthWriteEnabled = false;
-            mDepthStencilState.stencilBack.compare = wgpu::CompareFunction::Always;
-            mDepthStencilState.stencilBack.failOp = wgpu::StencilOperation::Keep;
-            mDepthStencilState.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
-            mDepthStencilState.stencilBack.passOp = wgpu::StencilOperation::Keep;
-            mDepthStencilState.stencilFront.compare = wgpu::CompareFunction::Always;
-            mDepthStencilState.stencilFront.failOp = wgpu::StencilOperation::Keep;
-            mDepthStencilState.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
-            mDepthStencilState.stencilFront.passOp = wgpu::StencilOperation::Keep;
-            mDepthStencilState.stencilReadMask = 0xff;
-            mDepthStencilState.stencilWriteMask = 0xff;
+            // mDepthStencil.
+            mDepthStencil.format = wgpu::TextureFormat::Undefined;
+            mDepthStencil.depthWriteEnabled = false;
+            mDepthStencil.depthCompare = wgpu::CompareFunction::Always;
+            mDepthStencil.stencilBack.compare = wgpu::CompareFunction::Always;
+            mDepthStencil.stencilBack.failOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilBack.passOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilFront.compare = wgpu::CompareFunction::Always;
+            mDepthStencil.stencilFront.failOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilFront.passOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilReadMask = 0xff;
+            mDepthStencil.stencilWriteMask = 0xff;
+        }
+
+        if (descriptor->rasterizationState != nullptr) {
+            mPrimitive.frontFace = descriptor->rasterizationState->frontFace;
+            mPrimitive.cullMode = descriptor->rasterizationState->cullMode;
+            mDepthStencil.depthBias = descriptor->rasterizationState->depthBias;
+            mDepthStencil.depthBiasSlopeScale = descriptor->rasterizationState->depthBiasSlopeScale;
+            mDepthStencil.depthBiasClamp = descriptor->rasterizationState->depthBiasClamp;
+        } else {
+            mPrimitive.frontFace = wgpu::FrontFace::CCW;
+            mPrimitive.cullMode = wgpu::CullMode::None;
+            mDepthStencil.depthBias = 0;
+            mDepthStencil.depthBiasSlopeScale = 0.0f;
+            mDepthStencil.depthBiasClamp = 0.0f;
         }
 
         for (ColorAttachmentIndex i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
-            mColorStates[i] = descriptor->colorStates[static_cast<uint8_t>(i)];
+            const ColorStateDescriptor* colorState =
+                &descriptor->colorStates[static_cast<uint8_t>(i)];
+            mTargets[i].format = colorState->format;
+            mTargets[i].writeMask = colorState->writeMask;
+
+            if (BlendEnabled(colorState)) {
+                mTargetBlend[i].color = colorState->colorBlend;
+                mTargetBlend[i].alpha = colorState->alphaBlend;
+                mTargets[i].blend = &mTargetBlend[i];
+            } else {
+                mTargets[i].blend = nullptr;
+            }
         }
 
         // TODO(cwallez@chromium.org): Check against the shader module that the correct color
@@ -414,11 +447,6 @@ namespace dawn_native {
         if (IsCachedReference()) {
             GetDevice()->UncacheRenderPipeline(this);
         }
-    }
-
-    const VertexStateDescriptor* RenderPipelineBase::GetVertexStateDescriptor() const {
-        ASSERT(!IsError());
-        return &mVertexState;
     }
 
     const ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes>&
@@ -446,51 +474,61 @@ namespace dawn_native {
         return mVertexBufferInfos[slot];
     }
 
-    const ColorStateDescriptor* RenderPipelineBase::GetColorStateDescriptor(
-        ColorAttachmentIndex attachmentSlot) const {
+    uint32_t RenderPipelineBase::GetVertexBufferCount() const {
         ASSERT(!IsError());
-        ASSERT(attachmentSlot < mColorStates.size());
-        return &mColorStates[attachmentSlot];
+        return mVertexBufferCount;
     }
 
-    const DepthStencilStateDescriptor* RenderPipelineBase::GetDepthStencilStateDescriptor() const {
+    const ColorTargetState* RenderPipelineBase::GetColorTargetState(
+        ColorAttachmentIndex attachmentSlot) const {
         ASSERT(!IsError());
-        return &mDepthStencilState;
+        ASSERT(attachmentSlot < mTargets.size());
+        return &mTargets[attachmentSlot];
+    }
+
+    const DepthStencilState* RenderPipelineBase::GetDepthStencilState() const {
+        ASSERT(!IsError());
+        return &mDepthStencil;
     }
 
     wgpu::PrimitiveTopology RenderPipelineBase::GetPrimitiveTopology() const {
         ASSERT(!IsError());
-        return mPrimitiveTopology;
+        return mPrimitive.topology;
+    }
+
+    wgpu::IndexFormat RenderPipelineBase::GetStripIndexFormat() const {
+        ASSERT(!IsError());
+        return mPrimitive.stripIndexFormat;
     }
 
     wgpu::CullMode RenderPipelineBase::GetCullMode() const {
         ASSERT(!IsError());
-        return mRasterizationState.cullMode;
+        return mPrimitive.cullMode;
     }
 
     wgpu::FrontFace RenderPipelineBase::GetFrontFace() const {
         ASSERT(!IsError());
-        return mRasterizationState.frontFace;
+        return mPrimitive.frontFace;
     }
 
     bool RenderPipelineBase::IsDepthBiasEnabled() const {
         ASSERT(!IsError());
-        return mRasterizationState.depthBias != 0 || mRasterizationState.depthBiasSlopeScale != 0;
+        return mDepthStencil.depthBias != 0 || mDepthStencil.depthBiasSlopeScale != 0;
     }
 
     int32_t RenderPipelineBase::GetDepthBias() const {
         ASSERT(!IsError());
-        return mRasterizationState.depthBias;
+        return mDepthStencil.depthBias;
     }
 
     float RenderPipelineBase::GetDepthBiasSlopeScale() const {
         ASSERT(!IsError());
-        return mRasterizationState.depthBiasSlopeScale;
+        return mDepthStencil.depthBiasSlopeScale;
     }
 
     float RenderPipelineBase::GetDepthBiasClamp() const {
         ASSERT(!IsError());
-        return mRasterizationState.depthBiasClamp;
+        return mDepthStencil.depthBiasClamp;
     }
 
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>
@@ -507,13 +545,13 @@ namespace dawn_native {
     wgpu::TextureFormat RenderPipelineBase::GetColorAttachmentFormat(
         ColorAttachmentIndex attachment) const {
         ASSERT(!IsError());
-        return mColorStates[attachment].format;
+        return mTargets[attachment].format;
     }
 
     wgpu::TextureFormat RenderPipelineBase::GetDepthStencilFormat() const {
         ASSERT(!IsError());
         ASSERT(mAttachmentState->HasDepthStencilAttachment());
-        return mDepthStencilState.format;
+        return mDepthStencil.format;
     }
 
     uint32_t RenderPipelineBase::GetSampleCount() const {
@@ -523,12 +561,12 @@ namespace dawn_native {
 
     uint32_t RenderPipelineBase::GetSampleMask() const {
         ASSERT(!IsError());
-        return mSampleMask;
+        return mMultisample.mask;
     }
 
     bool RenderPipelineBase::IsAlphaToCoverageEnabled() const {
         ASSERT(!IsError());
-        return mAlphaToCoverageEnabled;
+        return mMultisample.alphaToCoverageEnabled;
     }
 
     const AttachmentState* RenderPipelineBase::GetAttachmentState() const {
@@ -549,22 +587,25 @@ namespace dawn_native {
 
         // Record attachments
         for (ColorAttachmentIndex i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
-            const ColorStateDescriptor& desc = *GetColorStateDescriptor(i);
+            const ColorTargetState& desc = *GetColorTargetState(i);
             recorder.Record(desc.writeMask);
-            recorder.Record(desc.colorBlend.operation, desc.colorBlend.srcFactor,
-                            desc.colorBlend.dstFactor);
-            recorder.Record(desc.alphaBlend.operation, desc.alphaBlend.srcFactor,
-                            desc.alphaBlend.dstFactor);
+            if (desc.blend != nullptr) {
+                recorder.Record(desc.blend->color.operation, desc.blend->color.srcFactor,
+                                desc.blend->color.dstFactor);
+                recorder.Record(desc.blend->alpha.operation, desc.blend->alpha.srcFactor,
+                                desc.blend->alpha.dstFactor);
+            }
         }
 
         if (mAttachmentState->HasDepthStencilAttachment()) {
-            const DepthStencilStateDescriptor& desc = mDepthStencilState;
+            const DepthStencilState& desc = mDepthStencil;
             recorder.Record(desc.depthWriteEnabled, desc.depthCompare);
             recorder.Record(desc.stencilReadMask, desc.stencilWriteMask);
             recorder.Record(desc.stencilFront.compare, desc.stencilFront.failOp,
                             desc.stencilFront.depthFailOp, desc.stencilFront.passOp);
             recorder.Record(desc.stencilBack.compare, desc.stencilBack.failOp,
                             desc.stencilBack.depthFailOp, desc.stencilBack.passOp);
+            recorder.Record(desc.depthBias, desc.depthBiasSlopeScale, desc.depthBiasClamp);
         }
 
         // Record vertex state
@@ -580,17 +621,13 @@ namespace dawn_native {
             recorder.Record(desc.arrayStride, desc.stepMode);
         }
 
-        recorder.Record(mVertexState.indexFormat);
+        // Record primitive state
+        recorder.Record(mPrimitive.topology, mPrimitive.stripIndexFormat, mPrimitive.frontFace,
+                        mPrimitive.cullMode);
 
-        // Record rasterization state
-        {
-            const RasterizationStateDescriptor& desc = mRasterizationState;
-            recorder.Record(desc.frontFace, desc.cullMode);
-            recorder.Record(desc.depthBias, desc.depthBiasSlopeScale, desc.depthBiasClamp);
-        }
-
-        // Record other state
-        recorder.Record(mPrimitiveTopology, mSampleMask, mAlphaToCoverageEnabled);
+        // Record multisample state
+        // Sample count hashed as part of the attachment state
+        recorder.Record(mMultisample.mask, mMultisample.alphaToCoverageEnabled);
 
         return recorder.GetContentHash();
     }
@@ -610,44 +647,59 @@ namespace dawn_native {
 
         for (ColorAttachmentIndex i :
              IterateBitSet(a->mAttachmentState->GetColorAttachmentsMask())) {
-            const ColorStateDescriptor& descA = *a->GetColorStateDescriptor(i);
-            const ColorStateDescriptor& descB = *b->GetColorStateDescriptor(i);
+            const ColorTargetState& descA = *a->GetColorTargetState(i);
+            const ColorTargetState& descB = *b->GetColorTargetState(i);
             if (descA.writeMask != descB.writeMask) {
                 return false;
             }
-            if (descA.colorBlend.operation != descB.colorBlend.operation ||
-                descA.colorBlend.srcFactor != descB.colorBlend.srcFactor ||
-                descA.colorBlend.dstFactor != descB.colorBlend.dstFactor) {
+            if ((descA.blend == nullptr) != (descB.blend == nullptr)) {
                 return false;
             }
-            if (descA.alphaBlend.operation != descB.alphaBlend.operation ||
-                descA.alphaBlend.srcFactor != descB.alphaBlend.srcFactor ||
-                descA.alphaBlend.dstFactor != descB.alphaBlend.dstFactor) {
-                return false;
+            if (descA.blend != nullptr) {
+                if (descA.blend->color.operation != descB.blend->color.operation ||
+                    descA.blend->color.srcFactor != descB.blend->color.srcFactor ||
+                    descA.blend->color.dstFactor != descB.blend->color.dstFactor) {
+                    return false;
+                }
+                if (descA.blend->alpha.operation != descB.blend->alpha.operation ||
+                    descA.blend->alpha.srcFactor != descB.blend->alpha.srcFactor ||
+                    descA.blend->alpha.dstFactor != descB.blend->alpha.dstFactor) {
+                    return false;
+                }
             }
         }
 
+        // Check depth/stencil state
         if (a->mAttachmentState->HasDepthStencilAttachment()) {
-            const DepthStencilStateDescriptor& descA = a->mDepthStencilState;
-            const DepthStencilStateDescriptor& descB = b->mDepthStencilState;
-            if (descA.depthWriteEnabled != descB.depthWriteEnabled ||
-                descA.depthCompare != descB.depthCompare) {
+            const DepthStencilState& stateA = a->mDepthStencil;
+            const DepthStencilState& stateB = b->mDepthStencil;
+
+            ASSERT(!std::isnan(stateA.depthBiasSlopeScale));
+            ASSERT(!std::isnan(stateB.depthBiasSlopeScale));
+            ASSERT(!std::isnan(stateA.depthBiasClamp));
+            ASSERT(!std::isnan(stateB.depthBiasClamp));
+
+            if (stateA.depthWriteEnabled != stateB.depthWriteEnabled ||
+                stateA.depthCompare != stateB.depthCompare ||
+                stateA.depthBias != stateB.depthBias ||
+                stateA.depthBiasSlopeScale != stateB.depthBiasSlopeScale ||
+                stateA.depthBiasClamp != stateB.depthBiasClamp) {
                 return false;
             }
-            if (descA.stencilReadMask != descB.stencilReadMask ||
-                descA.stencilWriteMask != descB.stencilWriteMask) {
+            if (stateA.stencilFront.compare != stateB.stencilFront.compare ||
+                stateA.stencilFront.failOp != stateB.stencilFront.failOp ||
+                stateA.stencilFront.depthFailOp != stateB.stencilFront.depthFailOp ||
+                stateA.stencilFront.passOp != stateB.stencilFront.passOp) {
                 return false;
             }
-            if (descA.stencilFront.compare != descB.stencilFront.compare ||
-                descA.stencilFront.failOp != descB.stencilFront.failOp ||
-                descA.stencilFront.depthFailOp != descB.stencilFront.depthFailOp ||
-                descA.stencilFront.passOp != descB.stencilFront.passOp) {
+            if (stateA.stencilBack.compare != stateB.stencilBack.compare ||
+                stateA.stencilBack.failOp != stateB.stencilBack.failOp ||
+                stateA.stencilBack.depthFailOp != stateB.stencilBack.depthFailOp ||
+                stateA.stencilBack.passOp != stateB.stencilBack.passOp) {
                 return false;
             }
-            if (descA.stencilBack.compare != descB.stencilBack.compare ||
-                descA.stencilBack.failOp != descB.stencilBack.failOp ||
-                descA.stencilBack.depthFailOp != descB.stencilBack.depthFailOp ||
-                descA.stencilBack.passOp != descB.stencilBack.passOp) {
+            if (stateA.stencilReadMask != stateB.stencilReadMask ||
+                stateA.stencilWriteMask != stateB.stencilWriteMask) {
                 return false;
             }
         }
@@ -679,34 +731,26 @@ namespace dawn_native {
             }
         }
 
-        if (a->mVertexState.indexFormat != b->mVertexState.indexFormat) {
-            return false;
-        }
-
-        // Check rasterization state
+        // Check primitive state
         {
-            const RasterizationStateDescriptor& descA = a->mRasterizationState;
-            const RasterizationStateDescriptor& descB = b->mRasterizationState;
-            if (descA.frontFace != descB.frontFace || descA.cullMode != descB.cullMode) {
-                return false;
-            }
-
-            ASSERT(!std::isnan(descA.depthBiasSlopeScale));
-            ASSERT(!std::isnan(descB.depthBiasSlopeScale));
-            ASSERT(!std::isnan(descA.depthBiasClamp));
-            ASSERT(!std::isnan(descB.depthBiasClamp));
-
-            if (descA.depthBias != descB.depthBias ||
-                descA.depthBiasSlopeScale != descB.depthBiasSlopeScale ||
-                descA.depthBiasClamp != descB.depthBiasClamp) {
+            const PrimitiveState& stateA = a->mPrimitive;
+            const PrimitiveState& stateB = b->mPrimitive;
+            if (stateA.topology != stateB.topology ||
+                stateA.stripIndexFormat != stateB.stripIndexFormat ||
+                stateA.frontFace != stateB.frontFace || stateA.cullMode != stateB.cullMode) {
                 return false;
             }
         }
 
-        // Check other state
-        if (a->mPrimitiveTopology != b->mPrimitiveTopology || a->mSampleMask != b->mSampleMask ||
-            a->mAlphaToCoverageEnabled != b->mAlphaToCoverageEnabled) {
-            return false;
+        // Check multisample state
+        {
+            const MultisampleState& stateA = a->mMultisample;
+            const MultisampleState& stateB = b->mMultisample;
+            // Sample count already checked as part of the attachment state.
+            if (stateA.mask != stateB.mask ||
+                stateA.alphaToCoverageEnabled != stateB.alphaToCoverageEnabled) {
+                return false;
+            }
         }
 
         return true;

@@ -47,7 +47,8 @@ namespace dawn_native { namespace metal {
                                   const PipelineLayout* layout,
                                   MetalFunctionData* out,
                                   uint32_t sampleMask = 0xFFFFFFFF,
-                                  const RenderPipeline* renderPipeline = nullptr);
+                                  const RenderPipeline* renderPipeline = nullptr,
+                                  const VertexStateDescriptor* vertexState = nullptr);
 
       private:
         ResultOrError<std::string> TranslateToMSLWithTint(const char* entryPointName,
@@ -55,6 +56,7 @@ namespace dawn_native { namespace metal {
                                                           const PipelineLayout* layout,
                                                           uint32_t sampleMask,
                                                           const RenderPipeline* renderPipeline,
+                                                          const VertexStateDescriptor* vertexState,
                                                           std::string* remappedEntryPointName,
                                                           bool* needsStorageBufferLength);
         ResultOrError<std::string> TranslateToMSLWithSPIRVCross(
@@ -63,6 +65,7 @@ namespace dawn_native { namespace metal {
             const PipelineLayout* layout,
             uint32_t sampleMask,
             const RenderPipeline* renderPipeline,
+            const VertexStateDescriptor* vertexState,
             std::string* remappedEntryPointName,
             bool* needsStorageBufferLength);
 

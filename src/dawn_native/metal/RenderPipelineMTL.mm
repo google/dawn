@@ -201,21 +201,23 @@ namespace dawn_native { namespace metal {
         }
 
         void ComputeBlendDesc(MTLRenderPipelineColorAttachmentDescriptor* attachment,
-                              const ColorStateDescriptor* descriptor,
+                              const ColorTargetState* state,
                               bool isDeclaredInFragmentShader) {
-            attachment.blendingEnabled = BlendEnabled(descriptor);
-            attachment.sourceRGBBlendFactor =
-                MetalBlendFactor(descriptor->colorBlend.srcFactor, false);
-            attachment.destinationRGBBlendFactor =
-                MetalBlendFactor(descriptor->colorBlend.dstFactor, false);
-            attachment.rgbBlendOperation = MetalBlendOperation(descriptor->colorBlend.operation);
-            attachment.sourceAlphaBlendFactor =
-                MetalBlendFactor(descriptor->alphaBlend.srcFactor, true);
-            attachment.destinationAlphaBlendFactor =
-                MetalBlendFactor(descriptor->alphaBlend.dstFactor, true);
-            attachment.alphaBlendOperation = MetalBlendOperation(descriptor->alphaBlend.operation);
+            attachment.blendingEnabled = state->blend != nullptr;
+            if (attachment.blendingEnabled) {
+                attachment.sourceRGBBlendFactor =
+                    MetalBlendFactor(state->blend->color.srcFactor, false);
+                attachment.destinationRGBBlendFactor =
+                    MetalBlendFactor(state->blend->color.dstFactor, false);
+                attachment.rgbBlendOperation = MetalBlendOperation(state->blend->color.operation);
+                attachment.sourceAlphaBlendFactor =
+                    MetalBlendFactor(state->blend->alpha.srcFactor, true);
+                attachment.destinationAlphaBlendFactor =
+                    MetalBlendFactor(state->blend->alpha.dstFactor, true);
+                attachment.alphaBlendOperation = MetalBlendOperation(state->blend->alpha.operation);
+            }
             attachment.writeMask =
-                MetalColorWriteMask(descriptor->writeMask, isDeclaredInFragmentShader);
+                MetalColorWriteMask(state->writeMask, isDeclaredInFragmentShader);
         }
 
         MTLStencilOperation MetalStencilOperation(wgpu::StencilOperation stencilOperation) {
@@ -239,8 +241,7 @@ namespace dawn_native { namespace metal {
             }
         }
 
-        NSRef<MTLDepthStencilDescriptor> MakeDepthStencilDesc(
-            const DepthStencilStateDescriptor* descriptor) {
+        NSRef<MTLDepthStencilDescriptor> MakeDepthStencilDesc(const DepthStencilState* descriptor) {
             NSRef<MTLDepthStencilDescriptor> mtlDepthStencilDescRef =
                 AcquireNSRef([MTLDepthStencilDescriptor new]);
             MTLDepthStencilDescriptor* mtlDepthStencilDescriptor = mtlDepthStencilDescRef.Get();
@@ -340,9 +341,17 @@ namespace dawn_native { namespace metal {
         ShaderModule* vertexModule = ToBackend(descriptor->vertexStage.module);
         const char* vertexEntryPoint = descriptor->vertexStage.entryPoint;
         ShaderModule::MetalFunctionData vertexData;
+
+        const VertexStateDescriptor* vertexStatePtr = descriptor->vertexState;
+        VertexStateDescriptor vertexState;
+        if (vertexStatePtr == nullptr) {
+            vertexState = {};
+            vertexStatePtr = &vertexState;
+        }
+
         DAWN_TRY(vertexModule->CreateFunction(vertexEntryPoint, SingleShaderStage::Vertex,
-                                              ToBackend(GetLayout()), &vertexData, 0xFFFFFFFF,
-                                              this));
+                                              ToBackend(GetLayout()), &vertexData, 0xFFFFFFFF, this,
+                                              vertexStatePtr));
 
         descriptorMTL.vertexFunction = vertexData.function.Get();
         if (vertexData.needsStorageBufferLength) {
@@ -379,7 +388,7 @@ namespace dawn_native { namespace metal {
         for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
             descriptorMTL.colorAttachments[static_cast<uint8_t>(i)].pixelFormat =
                 MetalPixelFormat(GetColorAttachmentFormat(i));
-            const ColorStateDescriptor* descriptor = GetColorStateDescriptor(i);
+            const ColorTargetState* descriptor = GetColorTargetState(i);
             ComputeBlendDesc(descriptorMTL.colorAttachments[static_cast<uint8_t>(i)], descriptor,
                              fragmentOutputsWritten[i]);
         }
@@ -403,7 +412,7 @@ namespace dawn_native { namespace metal {
         // call setDepthStencilState() for a given render pipeline in CommandEncoder, in order to
         // improve performance.
         NSRef<MTLDepthStencilDescriptor> depthStencilDesc =
-            MakeDepthStencilDesc(GetDepthStencilStateDescriptor());
+            MakeDepthStencilDesc(GetDepthStencilState());
         mMtlDepthStencilState =
             AcquireNSPRef([mtlDevice newDepthStencilStateWithDescriptor:depthStencilDesc.Get()]);
 

@@ -207,16 +207,18 @@ namespace dawn_native { namespace d3d12 {
             return static_cast<uint8_t>(writeMask);
         }
 
-        D3D12_RENDER_TARGET_BLEND_DESC ComputeColorDesc(const ColorStateDescriptor* descriptor) {
+        D3D12_RENDER_TARGET_BLEND_DESC ComputeColorDesc(const ColorTargetState* state) {
             D3D12_RENDER_TARGET_BLEND_DESC blendDesc;
-            blendDesc.BlendEnable = BlendEnabled(descriptor);
-            blendDesc.SrcBlend = D3D12Blend(descriptor->colorBlend.srcFactor);
-            blendDesc.DestBlend = D3D12Blend(descriptor->colorBlend.dstFactor);
-            blendDesc.BlendOp = D3D12BlendOperation(descriptor->colorBlend.operation);
-            blendDesc.SrcBlendAlpha = D3D12Blend(descriptor->alphaBlend.srcFactor);
-            blendDesc.DestBlendAlpha = D3D12Blend(descriptor->alphaBlend.dstFactor);
-            blendDesc.BlendOpAlpha = D3D12BlendOperation(descriptor->alphaBlend.operation);
-            blendDesc.RenderTargetWriteMask = D3D12RenderTargetWriteMask(descriptor->writeMask);
+            blendDesc.BlendEnable = state->blend != nullptr;
+            if (blendDesc.BlendEnable) {
+                blendDesc.SrcBlend = D3D12Blend(state->blend->color.srcFactor);
+                blendDesc.DestBlend = D3D12Blend(state->blend->color.dstFactor);
+                blendDesc.BlendOp = D3D12BlendOperation(state->blend->color.operation);
+                blendDesc.SrcBlendAlpha = D3D12Blend(state->blend->alpha.srcFactor);
+                blendDesc.DestBlendAlpha = D3D12Blend(state->blend->alpha.dstFactor);
+                blendDesc.BlendOpAlpha = D3D12BlendOperation(state->blend->alpha.operation);
+            }
+            blendDesc.RenderTargetWriteMask = D3D12RenderTargetWriteMask(state->writeMask);
             blendDesc.LogicOpEnable = false;
             blendDesc.LogicOp = D3D12_LOGIC_OP_NOOP;
             return blendDesc;
@@ -254,8 +256,7 @@ namespace dawn_native { namespace d3d12 {
             return desc;
         }
 
-        D3D12_DEPTH_STENCIL_DESC ComputeDepthStencilDesc(
-            const DepthStencilStateDescriptor* descriptor) {
+        D3D12_DEPTH_STENCIL_DESC ComputeDepthStencilDesc(const DepthStencilState* descriptor) {
             D3D12_DEPTH_STENCIL_DESC mDepthStencilDescriptor;
             mDepthStencilDescriptor.DepthEnable = TRUE;
             mDepthStencilDescriptor.DepthWriteMask = descriptor->depthWriteEnabled
@@ -347,8 +348,8 @@ namespace dawn_native { namespace d3d12 {
             descriptorD3D12.InputLayout = ComputeInputLayout(&inputElementDescriptors);
         }
 
-        descriptorD3D12.IBStripCutValue = ComputeIndexBufferStripCutValue(
-            GetPrimitiveTopology(), GetVertexStateDescriptor()->indexFormat);
+        descriptorD3D12.IBStripCutValue =
+            ComputeIndexBufferStripCutValue(GetPrimitiveTopology(), GetStripIndexFormat());
 
         descriptorD3D12.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
         descriptorD3D12.RasterizerState.CullMode = D3D12CullMode(GetCullMode());
@@ -372,15 +373,14 @@ namespace dawn_native { namespace d3d12 {
             descriptorD3D12.RTVFormats[static_cast<uint8_t>(i)] =
                 D3D12TextureFormat(GetColorAttachmentFormat(i));
             descriptorD3D12.BlendState.RenderTarget[static_cast<uint8_t>(i)] =
-                ComputeColorDesc(GetColorStateDescriptor(i));
+                ComputeColorDesc(GetColorTargetState(i));
         }
         descriptorD3D12.NumRenderTargets = static_cast<uint32_t>(GetColorAttachmentsMask().count());
 
         descriptorD3D12.BlendState.AlphaToCoverageEnable = descriptor->alphaToCoverageEnabled;
         descriptorD3D12.BlendState.IndependentBlendEnable = TRUE;
 
-        descriptorD3D12.DepthStencilState =
-            ComputeDepthStencilDesc(GetDepthStencilStateDescriptor());
+        descriptorD3D12.DepthStencilState = ComputeDepthStencilDesc(GetDepthStencilState());
 
         descriptorD3D12.SampleMask = GetSampleMask();
         descriptorD3D12.PrimitiveTopologyType = D3D12PrimitiveTopologyType(GetPrimitiveTopology());

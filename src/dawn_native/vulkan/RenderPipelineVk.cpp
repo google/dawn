@@ -222,18 +222,29 @@ namespace dawn_native { namespace vulkan {
                                               : static_cast<VkColorComponentFlags>(0);
         }
 
-        VkPipelineColorBlendAttachmentState ComputeColorDesc(const ColorStateDescriptor* descriptor,
+        VkPipelineColorBlendAttachmentState ComputeColorDesc(const ColorTargetState* state,
                                                              bool isDeclaredInFragmentShader) {
             VkPipelineColorBlendAttachmentState attachment;
-            attachment.blendEnable = BlendEnabled(descriptor) ? VK_TRUE : VK_FALSE;
-            attachment.srcColorBlendFactor = VulkanBlendFactor(descriptor->colorBlend.srcFactor);
-            attachment.dstColorBlendFactor = VulkanBlendFactor(descriptor->colorBlend.dstFactor);
-            attachment.colorBlendOp = VulkanBlendOperation(descriptor->colorBlend.operation);
-            attachment.srcAlphaBlendFactor = VulkanBlendFactor(descriptor->alphaBlend.srcFactor);
-            attachment.dstAlphaBlendFactor = VulkanBlendFactor(descriptor->alphaBlend.dstFactor);
-            attachment.alphaBlendOp = VulkanBlendOperation(descriptor->alphaBlend.operation);
+            attachment.blendEnable = state->blend != nullptr ? VK_TRUE : VK_FALSE;
+            if (attachment.blendEnable) {
+                attachment.srcColorBlendFactor = VulkanBlendFactor(state->blend->color.srcFactor);
+                attachment.dstColorBlendFactor = VulkanBlendFactor(state->blend->color.dstFactor);
+                attachment.colorBlendOp = VulkanBlendOperation(state->blend->color.operation);
+                attachment.srcAlphaBlendFactor = VulkanBlendFactor(state->blend->alpha.srcFactor);
+                attachment.dstAlphaBlendFactor = VulkanBlendFactor(state->blend->alpha.dstFactor);
+                attachment.alphaBlendOp = VulkanBlendOperation(state->blend->alpha.operation);
+            } else {
+                // Swiftshader's Vulkan implementation appears to expect these values to be valid
+                // even when blending is not enabled.
+                attachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
+                attachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
+                attachment.colorBlendOp = VK_BLEND_OP_ADD;
+                attachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
+                attachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
+                attachment.alphaBlendOp = VK_BLEND_OP_ADD;
+            }
             attachment.colorWriteMask =
-                VulkanColorWriteMask(descriptor->writeMask, isDeclaredInFragmentShader);
+                VulkanColorWriteMask(state->writeMask, isDeclaredInFragmentShader);
             return attachment;
         }
 
@@ -259,7 +270,7 @@ namespace dawn_native { namespace vulkan {
         }
 
         VkPipelineDepthStencilStateCreateInfo ComputeDepthStencilDesc(
-            const DepthStencilStateDescriptor* descriptor) {
+            const DepthStencilState* descriptor) {
             VkPipelineDepthStencilStateCreateInfo depthStencilState;
             depthStencilState.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
             depthStencilState.pNext = nullptr;
@@ -404,7 +415,7 @@ namespace dawn_native { namespace vulkan {
         multisample.alphaToOneEnable = VK_FALSE;
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState =
-            ComputeDepthStencilDesc(GetDepthStencilStateDescriptor());
+            ComputeDepthStencilDesc(GetDepthStencilState());
 
         // Initialize the "blend state info" that will be chained in the "create info" from the data
         // pre-computed in the ColorState
@@ -413,9 +424,8 @@ namespace dawn_native { namespace vulkan {
         const auto& fragmentOutputsWritten =
             GetStage(SingleShaderStage::Fragment).metadata->fragmentOutputsWritten;
         for (ColorAttachmentIndex i : IterateBitSet(GetColorAttachmentsMask())) {
-            const ColorStateDescriptor* colorStateDescriptor = GetColorStateDescriptor(i);
-            colorBlendAttachments[i] =
-                ComputeColorDesc(colorStateDescriptor, fragmentOutputsWritten[i]);
+            const ColorTargetState* target = GetColorTargetState(i);
+            colorBlendAttachments[i] = ComputeColorDesc(target, fragmentOutputsWritten[i]);
         }
         VkPipelineColorBlendStateCreateInfo colorBlend;
         colorBlend.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;

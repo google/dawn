@@ -284,7 +284,7 @@ namespace dawn_native { namespace metal {
                                                ->GetBufferBindingCount(SingleShaderStage::Vertex);
 
                     if (enableVertexPulling) {
-                        bufferCount += pipeline->GetVertexStateDescriptor()->vertexBufferCount;
+                        bufferCount += pipeline->GetVertexBufferCount();
                     }
 
                     [render setVertexBytes:data[SingleShaderStage::Vertex].data()

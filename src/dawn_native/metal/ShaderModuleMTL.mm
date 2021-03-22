@@ -56,6 +56,7 @@ namespace dawn_native { namespace metal {
         // TODO(crbug.com/tint/387): AND in a fixed sample mask in the shader.
         uint32_t sampleMask,
         const RenderPipeline* renderPipeline,
+        const VertexStateDescriptor* vertexState,
         std::string* remappedEntryPointName,
         bool* needsStorageBufferLength) {
         // TODO(crbug.com/tint/256): Set this accordingly if arrayLength(..) is used.
@@ -68,8 +69,7 @@ namespace dawn_native { namespace metal {
         if (stage == SingleShaderStage::Vertex &&
             GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
             transformManager.append(
-                MakeVertexPullingTransform(*renderPipeline->GetVertexStateDescriptor(),
-                                           entryPointName, kPullingBufferBindingSet));
+                MakeVertexPullingTransform(*vertexState, entryPointName, kPullingBufferBindingSet));
 
             for (VertexBufferSlot slot :
                  IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
@@ -118,6 +118,7 @@ namespace dawn_native { namespace metal {
         const PipelineLayout* layout,
         uint32_t sampleMask,
         const RenderPipeline* renderPipeline,
+        const VertexStateDescriptor* vertexState,
         std::string* remappedEntryPointName,
         bool* needsStorageBufferLength) {
         const std::vector<uint32_t>* spirv = &GetSpirv();
@@ -128,14 +129,12 @@ namespace dawn_native { namespace metal {
             stage == SingleShaderStage::Vertex) {
             if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
                 DAWN_TRY_ASSIGN(pullingSpirv,
-                                GeneratePullingSpirv(GetTintProgram(),
-                                                     *renderPipeline->GetVertexStateDescriptor(),
-                                                     entryPointName, kPullingBufferBindingSet));
+                                GeneratePullingSpirv(GetTintProgram(), *vertexState, entryPointName,
+                                                     kPullingBufferBindingSet));
             } else {
-                DAWN_TRY_ASSIGN(
-                    pullingSpirv,
-                    GeneratePullingSpirv(GetSpirv(), *renderPipeline->GetVertexStateDescriptor(),
-                                         entryPointName, kPullingBufferBindingSet));
+                DAWN_TRY_ASSIGN(pullingSpirv,
+                                GeneratePullingSpirv(GetSpirv(), *vertexState, entryPointName,
+                                                     kPullingBufferBindingSet));
             }
             spirv = &pullingSpirv;
         }
@@ -228,20 +227,29 @@ namespace dawn_native { namespace metal {
                                             const PipelineLayout* layout,
                                             ShaderModule::MetalFunctionData* out,
                                             uint32_t sampleMask,
-                                            const RenderPipeline* renderPipeline) {
+                                            const RenderPipeline* renderPipeline,
+                                            const VertexStateDescriptor* vertexState) {
         ASSERT(!IsError());
         ASSERT(out);
+
+        // Vertex stages must specify a renderPipeline and vertexState
+        if (stage == SingleShaderStage::Vertex) {
+            ASSERT(renderPipeline != nullptr);
+            ASSERT(vertexState != nullptr);
+        }
 
         std::string remappedEntryPointName;
         std::string msl;
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            DAWN_TRY_ASSIGN(msl, TranslateToMSLWithTint(entryPointName, stage, layout, sampleMask,
-                                                        renderPipeline, &remappedEntryPointName,
-                                                        &out->needsStorageBufferLength));
+            DAWN_TRY_ASSIGN(
+                msl, TranslateToMSLWithTint(entryPointName, stage, layout, sampleMask,
+                                            renderPipeline, vertexState, &remappedEntryPointName,
+                                            &out->needsStorageBufferLength));
         } else {
-            DAWN_TRY_ASSIGN(msl, TranslateToMSLWithSPIRVCross(
-                                     entryPointName, stage, layout, sampleMask, renderPipeline,
-                                     &remappedEntryPointName, &out->needsStorageBufferLength));
+            DAWN_TRY_ASSIGN(msl, TranslateToMSLWithSPIRVCross(entryPointName, stage, layout,
+                                                              sampleMask, renderPipeline,
+                                                              vertexState, &remappedEntryPointName,
+                                                              &out->needsStorageBufferLength));
         }
 
         // Metal uses Clang to compile the shader as C++14. Disable everything in the -Wall

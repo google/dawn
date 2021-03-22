@@ -127,10 +127,8 @@ namespace dawn_native {
         }
 
         if (aspects[VALIDATION_ASPECT_INDEX_BUFFER] && mIndexBufferSet) {
-            wgpu::IndexFormat pipelineIndexFormat =
-                mLastRenderPipeline->GetVertexStateDescriptor()->indexFormat;
             if (!IsStripPrimitiveTopology(mLastRenderPipeline->GetPrimitiveTopology()) ||
-                mIndexFormat == pipelineIndexFormat) {
+                mIndexFormat == mLastRenderPipeline->GetStripIndexFormat()) {
                 mAspects.set(VALIDATION_ASPECT_INDEX_BUFFER);
             }
         }
@@ -142,8 +140,7 @@ namespace dawn_native {
         }
 
         if (aspects[VALIDATION_ASPECT_INDEX_BUFFER]) {
-            wgpu::IndexFormat pipelineIndexFormat =
-                mLastRenderPipeline->GetVertexStateDescriptor()->indexFormat;
+            wgpu::IndexFormat pipelineIndexFormat = mLastRenderPipeline->GetStripIndexFormat();
             if (!mIndexBufferSet) {
                 return DAWN_VALIDATION_ERROR("Missing index buffer");
             } else if (IsStripPrimitiveTopology(mLastRenderPipeline->GetPrimitiveTopology()) &&
