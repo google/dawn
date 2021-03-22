@@ -173,7 +173,6 @@ TEST_F(ValidateFunctionTest,
       "return type, returned '__u32', expected '__alias_tint_symbol_1__f32'");
 }
 
-
 TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
   // [[stage(fragment)]]
   // [[stage(vertex)]]
@@ -227,6 +226,24 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
   EXPECT_EQ(v.error(),
             "v-0003: At least one of vertex, fragment or compute shader must "
             "be present");
+}
+
+TEST_F(ValidateFunctionTest, FunctionVarInitWithParam) {
+  // fn foo(bar : f32) -> void{
+  //   var baz : f32 = bar;
+  // }
+
+  auto* bar = Var("bar", ty.f32(), ast::StorageClass::kFunction);
+  auto* baz = Var("baz", ty.f32(), ast::StorageClass::kFunction, Expr("bar"));
+
+  Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.Validate()) << v.error();
 }
 
 }  // namespace

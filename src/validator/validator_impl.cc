@@ -170,9 +170,15 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
 bool ValidatorImpl::ValidateFunction(const ast::Function* func) {
   // TODO(amaiorano): Remove ValidateFunction once we've moved all the statement
   // validation to Resovler
+
+  variable_stack_.push_scope();
+  for (auto* param : func->params()) {
+    variable_stack_.set(param->symbol(), param);
+  }
   if (!ValidateStatements(func->body())) {
     return false;
   }
+  variable_stack_.pop_scope();
   return true;
 }
 
