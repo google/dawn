@@ -555,8 +555,6 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
 
 // Test that the entryPoint names must be present for the correct stage in the shader module.
 TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
-    DAWN_SKIP_TEST_IF(!HasWGSL());
-
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> position : vec4<f32>;
         [[stage(vertex)]] fn vertex_main() -> void {
@@ -607,8 +605,6 @@ TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
 
 // Test that vertex attrib validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
-    DAWN_SKIP_TEST_IF(!HasWGSL());
-
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[builtin(position)]] var<out> position : vec4<f32>;
         [[location(0)]] var<in> attrib0 : vec4<f32>;
@@ -655,8 +651,6 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
 
 // Test that fragment output validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
-    DAWN_SKIP_TEST_IF(!HasWGSL());
-
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[location(0)]] var<out> colorFloat : vec4<f32>;
         [[location(0)]] var<out> colorUint : vec4<u32>;
@@ -697,8 +691,6 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
 // Test that fragment output validation is for the correct entryPoint
 // TODO(dawn:216): Re-enable when we correctly reflect which bindings are used for an entryPoint.
 TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
-    DAWN_SKIP_TEST_IF(!HasWGSL());
-
     wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct Uniforms {
             data : vec4<f32>;

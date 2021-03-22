@@ -27,13 +27,11 @@
 #include <spirv-tools/optimizer.hpp>
 #include <spirv_cross.hpp>
 
-#ifdef DAWN_ENABLE_WGSL
 // Tint include must be after spirv_cross.hpp, because spirv-cross has its own
 // version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
 // is at 3 while spirv-headers is at 4.
-#    undef SPV_REVISION
-#    include <tint/tint.h>
-#endif  // DAWN_ENABLE_WGSL
+#undef SPV_REVISION
+#include <tint/tint.h>
 
 #include <sstream>
 
@@ -48,7 +46,6 @@ namespace dawn_native {
             return ostream.str();
         }
 
-#ifdef DAWN_ENABLE_WGSL
         tint::transform::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {
             format = dawn::NormalizeVertexFormat(format);
             switch (format) {
@@ -191,8 +188,6 @@ namespace dawn_native {
                 "Attempted to convert unexpected component type from Tint");
         }
 
-#endif  // DAWN_ENABLE_WGSL
-
         MaybeError ValidateSpirv(const uint32_t* code, uint32_t codeSize) {
             spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
 
@@ -235,7 +230,6 @@ namespace dawn_native {
             return {};
         }
 
-#ifdef DAWN_ENABLE_WGSL
         ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file) {
             std::ostringstream errorStream;
             errorStream << "Tint WGSL reader failure:" << std::endl;
@@ -293,7 +287,6 @@ namespace dawn_native {
             std::vector<uint32_t> spirv = generator.result();
             return std::move(spirv);
         }
-#endif  // DAWN_ENABLE_WGSL
 
         std::vector<uint64_t> GetBindGroupMinBufferSizes(
             const EntryPointMetadata::BindingGroupInfoMap& shaderBindings,
@@ -722,7 +715,6 @@ namespace dawn_native {
             return {std::move(metadata)};
         }
 
-#ifdef DAWN_ENABLE_WGSL
         // Currently only partially populated the reflection data, needs to be
         // completed using PopulateMetadataUsingSPIRVCross. In the future, once
         // this function is complete, ReflectShaderUsingSPIRVCross and
@@ -835,7 +827,6 @@ namespace dawn_native {
             }
             return std::move(result);
         }
-#endif  // DAWN_ENABLE_WGSL
 
         // Uses SPIRV-Cross, which is planned for removal, but until
         // ReflectShaderUsingTint is completed, will be kept as a
@@ -860,7 +851,6 @@ namespace dawn_native {
             return std::move(result);
         }
 
-#ifdef DAWN_ENABLE_WGSL
         // Temporary utility method that allows for polyfilling like behaviour,
         // specifically data missing from the Tint implementation is filled in
         // using the SPIRV-Cross implementation. Once the Tint implementation is
@@ -933,7 +923,6 @@ namespace dawn_native {
             }
             return {};
         }
-#endif  // DAWN_ENABLE_WGSL
 
     }  // anonymous namespace
 
@@ -965,16 +954,12 @@ namespace dawn_native {
                     static_cast<const ShaderModuleSPIRVDescriptor*>(chainedDescriptor);
                 std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
                 if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
-#ifdef DAWN_ENABLE_WGSL
                     tint::Program program;
                     DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv));
                     if (device->IsValidationEnabled()) {
                         DAWN_TRY(ValidateModule(&program));
                     }
                     parseResult.tintProgram = std::make_unique<tint::Program>(std::move(program));
-#else
-                    return DAWN_VALIDATION_ERROR("Using Tint is not enabled in this build.");
-#endif  // DAWN_ENABLE_WGSL
                 } else {
                     if (device->IsValidationEnabled()) {
                         DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
@@ -985,7 +970,6 @@ namespace dawn_native {
             }
 
             case wgpu::SType::ShaderModuleWGSLDescriptor: {
-#ifdef DAWN_ENABLE_WGSL
                 const auto* wgslDesc =
                     static_cast<const ShaderModuleWGSLDescriptor*>(chainedDescriptor);
 
@@ -1017,9 +1001,6 @@ namespace dawn_native {
                     parseResult.spirv = std::move(spirv);
                 }
                 break;
-#else
-                return DAWN_VALIDATION_ERROR("Using Tint is not enabled in this build.");
-#endif  // DAWN_ENABLE_WGSL
             }
             default:
                 return DAWN_VALIDATION_ERROR("Unsupported sType");
@@ -1039,7 +1020,6 @@ namespace dawn_native {
         return bufferSizes;
     }
 
-#ifdef DAWN_ENABLE_WGSL
     ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
                                                const tint::Program* program) {
         tint::transform::Transform::Output output = transform->Run(program);
@@ -1077,7 +1057,6 @@ namespace dawn_native {
         }
         return std::make_unique<tint::transform::VertexPulling>(cfg);
     }
-#endif
 
     MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                        const EntryPointMetadata& entryPoint,
@@ -1167,7 +1146,6 @@ namespace dawn_native {
         return mSpirv;
     }
 
-#ifdef DAWN_ENABLE_WGSL
     const tint::Program* ShaderModuleBase::GetTintProgram() const {
         ASSERT(GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator));
         return mTintProgram.get();
@@ -1214,12 +1192,9 @@ namespace dawn_native {
         DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
         return std::move(spirv);
     }
-#endif
 
     MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult) {
-#ifdef DAWN_ENABLE_WGSL
         mTintProgram = std::move(parseResult->tintProgram);
-#endif
         mSpirv = std::move(parseResult->spirv);
 
         // If not using Tint to generate backend code, run the robust buffer access pass now since
@@ -1231,7 +1206,6 @@ namespace dawn_native {
         }
 
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-#ifdef DAWN_ENABLE_WGSL
             // We still need the spirv for reflection. Remove this when we use the Tint inspector
             // completely.
             std::vector<uint32_t> reflectionSpirv;
@@ -1242,9 +1216,6 @@ namespace dawn_native {
             DAWN_TRY_ASSIGN(table, ReflectShaderUsingTint(GetDevice(), mTintProgram.get()));
             DAWN_TRY(PopulateMetadataUsingSPIRVCross(GetDevice(), reflectionSpirv, &table));
             mEntryPoints = std::move(table);
-#else
-            UNREACHABLE();
-#endif
         } else {
             DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), mSpirv));
         }

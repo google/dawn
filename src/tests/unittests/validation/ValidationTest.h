@@ -92,7 +92,6 @@ class ValidationTest : public testing::Test {
         wgpu::RenderPassColorAttachmentDescriptor mColorAttachment;
     };
 
-    bool HasWGSL() const;
     bool HasToggleEnabled(const char* toggle) const;
 
   protected:

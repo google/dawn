@@ -22,13 +22,11 @@
 
 #include <spirv_msl.hpp>
 
-#ifdef DAWN_ENABLE_WGSL
 // Tint include must be after spirv_msl.hpp, because spirv-cross has its own
 // version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
 // is at 3 while spirv-headers is at 4.
-#    undef SPV_REVISION
-#    include <tint/tint.h>
-#endif  // DAWN_ENABLE_WGSL
+#undef SPV_REVISION
+#include <tint/tint.h>
 
 #include <sstream>
 
@@ -60,7 +58,6 @@ namespace dawn_native { namespace metal {
         const RenderPipeline* renderPipeline,
         std::string* remappedEntryPointName,
         bool* needsStorageBufferLength) {
-#if DAWN_ENABLE_WGSL
         // TODO(crbug.com/tint/256): Set this accordingly if arrayLength(..) is used.
         *needsStorageBufferLength = false;
 
@@ -113,9 +110,6 @@ namespace dawn_native { namespace metal {
 
         std::string msl = generator.result();
         return std::move(msl);
-#else
-        UNREACHABLE();
-#endif
     }
 
     ResultOrError<std::string> ShaderModule::TranslateToMSLWithSPIRVCross(
@@ -129,7 +123,6 @@ namespace dawn_native { namespace metal {
         const std::vector<uint32_t>* spirv = &GetSpirv();
         spv::ExecutionModel executionModel = ShaderStageToExecutionModel(stage);
 
-#ifdef DAWN_ENABLE_WGSL
         std::vector<uint32_t> pullingSpirv;
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
             stage == SingleShaderStage::Vertex) {
@@ -146,7 +139,6 @@ namespace dawn_native { namespace metal {
             }
             spirv = &pullingSpirv;
         }
-#endif
 
         // If these options are changed, the values in DawnSPIRVCrossMSLFastFuzzer.cpp need to
         // be updated.
@@ -202,7 +194,6 @@ namespace dawn_native { namespace metal {
             }
         }
 
-#ifdef DAWN_ENABLE_WGSL
         // Add vertex buffers bound as storage buffers
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
             stage == SingleShaderStage::Vertex) {
@@ -219,7 +210,6 @@ namespace dawn_native { namespace metal {
                 compiler.add_msl_resource_binding(mslBinding);
             }
         }
-#endif
 
         // SPIRV-Cross also supports re-ordering attributes but it seems to do the correct thing
         // by default.

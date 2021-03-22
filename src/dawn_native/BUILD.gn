@@ -146,6 +146,7 @@ source_set("dawn_native_sources") {
     "${dawn_root}/third_party/gn/spirv_cross:spirv_cross",
     "${dawn_spirv_tools_dir}:spvtools_opt",
     "${dawn_spirv_tools_dir}:spvtools_val",
+    "${dawn_tint_dir}/src:libtint",
   ]
   defines = []
   libs = []
@@ -624,10 +625,6 @@ source_set("dawn_native_sources") {
       "${dawn_angle_dir}:libEGL",
       "${dawn_angle_dir}:libGLESv2",
     ]
-  }
-
-  if (dawn_enable_wgsl) {
-    deps += [ "${dawn_tint_dir}/src:libtint" ]
   }
 }
 

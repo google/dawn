@@ -788,14 +788,6 @@ bool DawnTestBase::IsBackendValidationEnabled() const {
     return gTestEnv->GetBackendValidationLevel() != dawn_native::BackendValidationLevel::Disabled;
 }
 
-bool DawnTestBase::HasWGSL() const {
-#ifdef DAWN_ENABLE_WGSL
-    return true;
-#else
-    return false;
-#endif
-}
-
 bool DawnTestBase::IsAsan() const {
 #if defined(ADDRESS_SANITIZER)
     return true;

@@ -78,11 +78,9 @@ if (DAWN_BUILD_EXAMPLES)
     endif()
 endif()
 
-if (DAWN_ENABLE_WGSL)
-    if (NOT TARGET libtint)
-        message(STATUS "Dawn: using Tint at ${DAWN_TINT_DIR}")
-        add_subdirectory(${DAWN_TINT_DIR})
-    endif()
+if (NOT TARGET libtint)
+    message(STATUS "Dawn: using Tint at ${DAWN_TINT_DIR}")
+    add_subdirectory(${DAWN_TINT_DIR})
 endif()
 
 # Header-only library for khrplatform.h

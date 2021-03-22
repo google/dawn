@@ -60,9 +60,7 @@ namespace dawn_native {
         ShaderModuleParseResult(ShaderModuleParseResult&& rhs);
         ShaderModuleParseResult& operator=(ShaderModuleParseResult&& rhs);
 
-#ifdef DAWN_ENABLE_WGSL
         std::unique_ptr<tint::Program> tintProgram;
-#endif
         std::vector<uint32_t> spirv;
     };
 
@@ -75,7 +73,6 @@ namespace dawn_native {
 
     RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                             const PipelineLayoutBase* layout);
-#ifdef DAWN_ENABLE_WGSL
     ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
                                                const tint::Program* program);
 
@@ -83,7 +80,6 @@ namespace dawn_native {
         const VertexStateDescriptor& vertexState,
         const std::string& entryPoint,
         BindGroupIndex pullingBufferBindingSet);
-#endif
 
     // Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). They are
     // stored in the ShaderModuleBase and destroyed only when the shader program is destroyed so
@@ -145,8 +141,6 @@ namespace dawn_native {
         };
 
         const std::vector<uint32_t>& GetSpirv() const;
-
-#ifdef DAWN_ENABLE_WGSL
         const tint::Program* GetTintProgram() const;
 
         ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
@@ -160,7 +154,6 @@ namespace dawn_native {
             const VertexStateDescriptor& vertexState,
             const std::string& entryPoint,
             BindGroupIndex pullingBufferBindingSet) const;
-#endif
 
       protected:
         MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
@@ -178,9 +171,7 @@ namespace dawn_native {
         // mTintProgram is set iff UseTintGenerator.
         EntryPointMetadataTable mEntryPoints;
         std::vector<uint32_t> mSpirv;
-#ifdef DAWN_ENABLE_WGSL
         std::unique_ptr<tint::Program> mTintProgram;
-#endif
     };
 
 }  // namespace dawn_native

@@ -23,13 +23,11 @@
 
 #include <spirv_glsl.hpp>
 
-#ifdef DAWN_ENABLE_WGSL
 // Tint include must be after spirv_glsl.hpp, because spirv-cross has its own
 // version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
 // is at 3 while spirv-headers is at 4.
-#    undef SPV_REVISION
-#    include <tint/tint.h>
-#endif  // DAWN_ENABLE_WGSL
+#undef SPV_REVISION
+#include <tint/tint.h>
 
 #include <sstream>
 
@@ -80,7 +78,6 @@ namespace dawn_native { namespace opengl {
 
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-#ifdef DAWN_ENABLE_WGSL
             std::ostringstream errorStream;
             errorStream << "Tint SPIR-V (for GLSL) writer failure:" << std::endl;
 
@@ -107,9 +104,6 @@ namespace dawn_native { namespace opengl {
             transformedParseResult.spirv = mSpirv;
 
             DAWN_TRY(InitializeBase(&transformedParseResult));
-#else
-            UNREACHABLE();
-#endif
         } else {
             DAWN_TRY(InitializeBase(parseResult));
         }

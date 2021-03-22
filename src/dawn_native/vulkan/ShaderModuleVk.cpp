@@ -20,13 +20,11 @@
 
 #include <spirv_cross.hpp>
 
-#ifdef DAWN_ENABLE_WGSL
 // Tint include must be after spirv_hlsl.hpp, because spirv-cross has its own
 // version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
 // is at 3 while spirv-headers is at 4.
-#    undef SPV_REVISION
-#    include <tint/tint.h>
-#endif  // DAWN_ENABLE_WGSL
+#undef SPV_REVISION
+#include <tint/tint.h>
 
 namespace dawn_native { namespace vulkan {
 
@@ -51,7 +49,6 @@ namespace dawn_native { namespace vulkan {
         const std::vector<uint32_t>* spirvPtr;
 
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-#ifdef DAWN_ENABLE_WGSL
             std::ostringstream errorStream;
             errorStream << "Tint SPIR-V writer failure:" << std::endl;
 
@@ -79,9 +76,6 @@ namespace dawn_native { namespace vulkan {
             transformedParseResult.spirv = spirv;
 
             DAWN_TRY(InitializeBase(&transformedParseResult));
-#else
-            UNREACHABLE();
-#endif
         } else {
             DAWN_TRY(InitializeBase(parseResult));
             spirvPtr = &GetSpirv();

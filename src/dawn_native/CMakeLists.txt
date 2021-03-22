@@ -25,10 +25,6 @@ if(BUILD_SHARED_LIBS)
     target_compile_definitions(dawn_native PRIVATE "DAWN_NATIVE_SHARED_LIBRARY")
 endif()
 
-if(DAWN_ENABLE_WGSL)
-    target_link_libraries(dawn_native PRIVATE libtint)
-endif()
-
 target_sources(dawn_native PRIVATE
     "${DAWN_INCLUDE_DIR}/dawn_native/DawnNative.h"
     "${DAWN_INCLUDE_DIR}/dawn_native/dawn_native_export.h"
@@ -169,6 +165,7 @@ target_link_libraries(dawn_native
     PRIVATE dawn_common
             dawn_platform
             dawn_internal_config
+            libtint
             spirv-cross-core
             spirv-cross-glsl
             spirv-cross-hlsl

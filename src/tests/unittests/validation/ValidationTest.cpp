@@ -148,14 +148,6 @@ void ValidationTest::WaitForAllOperations(const wgpu::Device& device) {
     FlushWire();
 }
 
-bool ValidationTest::HasWGSL() const {
-#ifdef DAWN_ENABLE_WGSL
-    return true;
-#else
-    return false;
-#endif
-}
-
 bool ValidationTest::HasToggleEnabled(const char* toggle) const {
     auto toggles = dawn_native::GetTogglesUsed(backendDevice);
     return std::find_if(toggles.begin(), toggles.end(), [toggle](const char* name) {

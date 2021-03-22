@@ -29,13 +29,11 @@
 
 #include <spirv_hlsl.hpp>
 
-#ifdef DAWN_ENABLE_WGSL
 // Tint include must be after spirv_hlsl.hpp, because spirv-cross has its own
 // version of spirv_headers. We also need to undef SPV_REVISION because SPIRV-Cross
 // is at 3 while spirv-headers is at 4.
-#    undef SPV_REVISION
-#    include <tint/tint.h>
-#endif  // DAWN_ENABLE_WGSL
+#undef SPV_REVISION
+#include <tint/tint.h>
 
 namespace dawn_native { namespace d3d12 {
 
@@ -197,7 +195,6 @@ namespace dawn_native { namespace d3d12 {
         FirstOffsetInfo* firstOffsetInfo) const {
         ASSERT(!IsError());
 
-#ifdef DAWN_ENABLE_WGSL
         std::ostringstream errorStream;
         errorStream << "Tint HLSL failure:" << std::endl;
 
@@ -249,9 +246,6 @@ namespace dawn_native { namespace d3d12 {
         }
 
         return generator.result();
-#else
-        return DAWN_VALIDATION_ERROR("Using Tint to generate HLSL is not supported.");
-#endif  // DAWN_ENABLE_WGSL
     }
 
     ResultOrError<std::string> ShaderModule::TranslateToHLSLWithSPIRVCross(

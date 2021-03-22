@@ -281,7 +281,6 @@ class DawnTestBase {
 
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
-    bool HasWGSL() const;
 
     bool IsAsan() const;
 
