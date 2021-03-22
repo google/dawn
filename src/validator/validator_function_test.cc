@@ -246,5 +246,23 @@ TEST_F(ValidateFunctionTest, FunctionVarInitWithParam) {
   EXPECT_TRUE(v.Validate()) << v.error();
 }
 
+TEST_F(ValidateFunctionTest, FunctionConstInitWithParam) {
+  // fn foo(bar : f32) -> void{
+  //   const baz : f32 = bar;
+  // }
+
+  auto* bar = Var("bar", ty.f32(), ast::StorageClass::kFunction);
+  auto* baz = Const("baz", ty.f32(), Expr("bar"));
+
+  Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  ValidatorImpl& v = Build();
+
+  EXPECT_TRUE(v.Validate()) << v.error();
+}
+
 }  // namespace
 }  // namespace tint
