@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/null_literal.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -34,7 +33,6 @@ TEST_F(FloatLiteralTest, Is) {
   EXPECT_FALSE(l->Is<IntLiteral>());
   EXPECT_TRUE(l->Is<FloatLiteral>());
   EXPECT_FALSE(l->Is<UintLiteral>());
-  EXPECT_FALSE(l->Is<NullLiteral>());
 }
 
 TEST_F(FloatLiteralTest, ToStr) {

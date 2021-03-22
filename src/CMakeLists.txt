@@ -108,8 +108,6 @@ set(TINT_LIB_SRCS
   ast/module.h
   ast/node.cc
   ast/node.h
-  ast/null_literal.cc
-  ast/null_literal.h
   ast/pipeline_stage.cc
   ast/pipeline_stage.h
   ast/return_statement.cc
@@ -439,7 +437,6 @@ if(${TINT_BUILD_TESTS})
     ast/member_accessor_expression_test.cc
     ast/module_clone_test.cc
     ast/module_test.cc
-    ast/null_literal_test.cc
     ast/return_statement_test.cc
     ast/scalar_constructor_expression_test.cc
     ast/sint_literal_test.cc

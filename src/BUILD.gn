@@ -299,8 +299,6 @@ source_set("libtint_core_src") {
     "ast/module.h",
     "ast/node.cc",
     "ast/node.h",
-    "ast/null_literal.cc",
-    "ast/null_literal.h",
     "ast/pipeline_stage.cc",
     "ast/pipeline_stage.h",
     "ast/return_statement.cc",

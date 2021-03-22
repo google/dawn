@@ -139,7 +139,6 @@ source_set("tint_unittests_core_src") {
     "../src/ast/member_accessor_expression_test.cc",
     "../src/ast/module_clone_test.cc",
     "../src/ast/module_test.cc",
-    "../src/ast/null_literal_test.cc",
     "../src/ast/return_statement_test.cc",
     "../src/ast/scalar_constructor_expression_test.cc",
     "../src/ast/sint_literal_test.cc",

@@ -34,15 +34,6 @@ TEST_F(ScalarConstructorExpressionTest, Creation_WithSource) {
   EXPECT_EQ(src.range.begin.column, 2u);
 }
 
-TEST_F(ScalarConstructorExpressionTest, Assert_NullLiteral) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder b;
-        b.create<ScalarConstructorExpression>(nullptr);
-      },
-      "internal compiler error");
-}
-
 TEST_F(ScalarConstructorExpressionTest, ToStr) {
   auto* c = Expr(true);
   EXPECT_EQ(str(c), R"(ScalarConstructor[not set]{true}
