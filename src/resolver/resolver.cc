@@ -832,30 +832,32 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
     var->users.push_back(expr);
     set_referenced_from_function_if_needed(var, true);
 
-    // If identifier is part of a loop continuing block, make sure it doesn't
-    // refer to a variable that is bypassed by a continue statement in the
-    // loop's body block.
-    if (auto* continuing_block =
-            current_block_->FindFirstParent(BlockInfo::Type::kLoopContinuing)) {
-      auto* loop_block =
-          continuing_block->FindFirstParent(BlockInfo::Type::kLoop);
-      if (loop_block->first_continue != size_t(~0)) {
-        auto& decls = loop_block->decls;
-        // If our identifier is in loop_block->decls, make sure its index is
-        // less than first_continue
-        auto iter =
-            std::find_if(decls.begin(), decls.end(),
-                         [&symbol](auto* v) { return v->symbol() == symbol; });
-        if (iter != decls.end()) {
-          auto var_decl_index =
-              static_cast<size_t>(std::distance(decls.begin(), iter));
-          if (var_decl_index >= loop_block->first_continue) {
-            diagnostics_.add_error(
-                "continue statement bypasses declaration of '" +
-                    builder_->Symbols().NameFor(symbol) +
-                    "' in continuing block",
-                expr->source());
-            return false;
+    if (current_block_) {
+      // If identifier is part of a loop continuing block, make sure it doesn't
+      // refer to a variable that is bypassed by a continue statement in the
+      // loop's body block.
+      if (auto* continuing_block = current_block_->FindFirstParent(
+              BlockInfo::Type::kLoopContinuing)) {
+        auto* loop_block =
+            continuing_block->FindFirstParent(BlockInfo::Type::kLoop);
+        if (loop_block->first_continue != size_t(~0)) {
+          auto& decls = loop_block->decls;
+          // If our identifier is in loop_block->decls, make sure its index is
+          // less than first_continue
+          auto iter = std::find_if(
+              decls.begin(), decls.end(),
+              [&symbol](auto* v) { return v->symbol() == symbol; });
+          if (iter != decls.end()) {
+            auto var_decl_index =
+                static_cast<size_t>(std::distance(decls.begin(), iter));
+            if (var_decl_index >= loop_block->first_continue) {
+              diagnostics_.add_error(
+                  "continue statement bypasses declaration of '" +
+                      builder_->Symbols().NameFor(symbol) +
+                      "' in continuing block",
+                  expr->source());
+              return false;
+            }
           }
         }
       }
