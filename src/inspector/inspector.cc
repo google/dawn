@@ -596,7 +596,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
 
     ResourceBinding entry;
     entry.resource_type =
-        multisampled_only ? ResourceBinding::ResourceType::kMulitsampledTexture
+        multisampled_only ? ResourceBinding::ResourceType::kMultisampledTexture
                           : ResourceBinding::ResourceType::kSampledTexture;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();

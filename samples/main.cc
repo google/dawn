@@ -341,8 +341,8 @@ std::string ResourceTypeToString(
       return "ComparisonSampler";
     case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
       return "SampledTexture";
-    case tint::inspector::ResourceBinding::ResourceType::kMulitsampledTexture:
-      return "MulitsampledTexture";
+    case tint::inspector::ResourceBinding::ResourceType::kMultisampledTexture:
+      return "MultisampledTexture";
     case tint::inspector::ResourceBinding::ResourceType::
         kReadOnlyStorageTexture:
       return "ReadOnlyStorageTexture";

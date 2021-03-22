@@ -100,7 +100,7 @@ struct ResourceBinding {
     kSampler,
     kComparisonSampler,
     kSampledTexture,
-    kMulitsampledTexture,
+    kMultisampledTexture,
     kReadOnlyStorageTexture,
     kWriteOnlyStorageTexture,
     kDepthTexture,

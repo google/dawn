@@ -2484,7 +2484,7 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
   auto result = inspector.GetMultisampledTextureResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
-  EXPECT_EQ(ResourceBinding::ResourceType::kMulitsampledTexture,
+  EXPECT_EQ(ResourceBinding::ResourceType::kMultisampledTexture,
             result[0].resource_type);
   ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
@@ -2554,7 +2554,7 @@ TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
   ASSERT_EQ(1u, result.size());
 
-  EXPECT_EQ(ResourceBinding::ResourceType::kMulitsampledTexture,
+  EXPECT_EQ(ResourceBinding::ResourceType::kMultisampledTexture,
             result[0].resource_type);
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
