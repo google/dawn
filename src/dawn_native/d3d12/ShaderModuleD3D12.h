@@ -76,10 +76,6 @@ namespace dawn_native { namespace d3d12 {
 
         ResultOrError<uint64_t> GetDXCompilerVersion() const;
         uint64_t GetD3DCompilerVersion() const;
-
-#ifdef DAWN_ENABLE_WGSL
-        std::unique_ptr<tint::Program> mTintProgram;
-#endif
     };
 
 }}  // namespace dawn_native::d3d12

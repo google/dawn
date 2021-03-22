@@ -77,7 +77,7 @@ namespace dawn_native {
                                                             const PipelineLayoutBase* layout);
 #ifdef DAWN_ENABLE_WGSL
     ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
-                                               tint::Program* program);
+                                               const tint::Program* program);
 
     std::unique_ptr<tint::transform::VertexPulling> MakeVertexPullingTransform(
         const VertexStateDescriptor& vertexState,
@@ -147,6 +147,8 @@ namespace dawn_native {
         const std::vector<uint32_t>& GetSpirv() const;
 
 #ifdef DAWN_ENABLE_WGSL
+        const tint::Program* GetTintProgram() const;
+
         ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
             const std::vector<uint32_t>& spirv,
             const VertexStateDescriptor& vertexState,
@@ -154,7 +156,7 @@ namespace dawn_native {
             BindGroupIndex pullingBufferBindingSet) const;
 
         ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
-            tint::Program* program,
+            const tint::Program* program,
             const VertexStateDescriptor& vertexState,
             const std::string& entryPoint,
             BindGroupIndex pullingBufferBindingSet) const;
@@ -166,13 +168,19 @@ namespace dawn_native {
       private:
         ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
+        // The original data in the descriptor for caching.
         enum class Type { Undefined, Spirv, Wgsl };
         Type mType;
         std::vector<uint32_t> mOriginalSpirv;
-        std::vector<uint32_t> mSpirv;
         std::string mWgsl;
 
+        // Data computed from what is in the descriptor. mSpirv is set iff !UseTintGenerator while
+        // mTintProgram is set iff UseTintGenerator.
         EntryPointMetadataTable mEntryPoints;
+        std::vector<uint32_t> mSpirv;
+#ifdef DAWN_ENABLE_WGSL
+        std::unique_ptr<tint::Program> mTintProgram;
+#endif
     };
 
 }  // namespace dawn_native

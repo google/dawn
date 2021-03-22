@@ -69,10 +69,6 @@ namespace dawn_native { namespace metal {
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override = default;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
-
-#ifdef DAWN_ENABLE_WGSL
-        std::unique_ptr<tint::Program> mTintProgram;
-#endif
     };
 
 }}  // namespace dawn_native::metal

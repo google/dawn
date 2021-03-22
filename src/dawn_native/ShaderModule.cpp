@@ -266,7 +266,7 @@ namespace dawn_native {
             return std::move(program);
         }
 
-        MaybeError ValidateModule(tint::Program* program) {
+        MaybeError ValidateModule(const tint::Program* program) {
             std::ostringstream errorStream;
             errorStream << "Tint program validation" << std::endl;
 
@@ -729,14 +729,14 @@ namespace dawn_native {
         // PopulateMetadataUsingSPIRVCross will be removed.
         ResultOrError<EntryPointMetadataTable> ReflectShaderUsingTint(
             DeviceBase*,
-            const tint::Program& program) {
-            ASSERT(program.IsValid());
+            const tint::Program* program) {
+            ASSERT(program->IsValid());
 
             EntryPointMetadataTable result;
             std::ostringstream errorStream;
             errorStream << "Tint Reflection failure:" << std::endl;
 
-            tint::inspector::Inspector inspector(&program);
+            tint::inspector::Inspector inspector(program);
             auto entryPoints = inspector.GetEntryPoints();
             if (inspector.has_error()) {
                 errorStream << "Inspector: " << inspector.error() << std::endl;
@@ -842,7 +842,7 @@ namespace dawn_native {
         // fallback/source of truth.
         ResultOrError<EntryPointMetadataTable> ReflectShaderUsingSPIRVCross(
             DeviceBase* device,
-            std::vector<uint32_t> spirv) {
+            const std::vector<uint32_t>& spirv) {
             EntryPointMetadataTable result;
             spirv_cross::Compiler compiler(spirv);
             for (const spirv_cross::EntryPoint& entryPoint :
@@ -866,7 +866,7 @@ namespace dawn_native {
         // using the SPIRV-Cross implementation. Once the Tint implementation is
         // completed, this function will be removed.
         MaybeError PopulateMetadataUsingSPIRVCross(DeviceBase* device,
-                                                   std::vector<uint32_t> spirv,
+                                                   const std::vector<uint32_t>& spirv,
                                                    EntryPointMetadataTable* tintTable) {
             EntryPointMetadataTable crossTable;
             DAWN_TRY_ASSIGN(crossTable, ReflectShaderUsingSPIRVCross(device, spirv));
@@ -998,6 +998,7 @@ namespace dawn_native {
                     if (device->IsValidationEnabled()) {
                         DAWN_TRY(ValidateModule(&program));
                     }
+                    parseResult.tintProgram = std::make_unique<tint::Program>(std::move(program));
                 } else {
                     tint::transform::Manager transformManager;
                     transformManager.append(
@@ -1015,8 +1016,6 @@ namespace dawn_native {
 
                     parseResult.spirv = std::move(spirv);
                 }
-
-                parseResult.tintProgram = std::make_unique<tint::Program>(std::move(program));
                 break;
 #else
                 return DAWN_VALIDATION_ERROR("Using Tint is not enabled in this build.");
@@ -1042,7 +1041,7 @@ namespace dawn_native {
 
 #ifdef DAWN_ENABLE_WGSL
     ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
-                                               tint::Program* program) {
+                                               const tint::Program* program) {
         tint::transform::Transform::Output output = transform->Run(program);
         if (!output.program.IsValid()) {
             std::string err = "Tint program failure: " + output.program.Diagnostics().str();
@@ -1169,6 +1168,11 @@ namespace dawn_native {
     }
 
 #ifdef DAWN_ENABLE_WGSL
+    const tint::Program* ShaderModuleBase::GetTintProgram() const {
+        ASSERT(GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator));
+        return mTintProgram.get();
+    }
+
     ResultOrError<std::vector<uint32_t>> ShaderModuleBase::GeneratePullingSpirv(
         const std::vector<uint32_t>& spirv,
         const VertexStateDescriptor& vertexState,
@@ -1181,7 +1185,7 @@ namespace dawn_native {
     }
 
     ResultOrError<std::vector<uint32_t>> ShaderModuleBase::GeneratePullingSpirv(
-        tint::Program* programIn,
+        const tint::Program* programIn,
         const VertexStateDescriptor& vertexState,
         const std::string& entryPoint,
         BindGroupIndex pullingBufferBindingSet) const {
@@ -1214,7 +1218,7 @@ namespace dawn_native {
 
     MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult) {
 #ifdef DAWN_ENABLE_WGSL
-        tint::Program* program = parseResult->tintProgram.get();
+        mTintProgram = std::move(parseResult->tintProgram);
 #endif
         mSpirv = std::move(parseResult->spirv);
 
@@ -1226,43 +1230,23 @@ namespace dawn_native {
             DAWN_TRY_ASSIGN(mSpirv, RunRobustBufferAccessPass(mSpirv));
         }
 
-        // We still need the spirv for reflection. Remove this when we use the Tint inspector
-        // completely.
-        std::vector<uint32_t>* spirvPtr = &mSpirv;
-        std::vector<uint32_t> localSpirv;
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
 #ifdef DAWN_ENABLE_WGSL
-            ASSERT(program != nullptr);
+            // We still need the spirv for reflection. Remove this when we use the Tint inspector
+            // completely.
+            std::vector<uint32_t> reflectionSpirv;
+            DAWN_TRY_ASSIGN(reflectionSpirv, ModuleToSPIRV(mTintProgram.get()));
+            DAWN_TRY(ValidateSpirv(reflectionSpirv.data(), reflectionSpirv.size()));
 
-            DAWN_TRY_ASSIGN(localSpirv, ModuleToSPIRV(program));
-            DAWN_TRY(ValidateSpirv(localSpirv.data(), localSpirv.size()));
-            spirvPtr = &localSpirv;
+            EntryPointMetadataTable table;
+            DAWN_TRY_ASSIGN(table, ReflectShaderUsingTint(GetDevice(), mTintProgram.get()));
+            DAWN_TRY(PopulateMetadataUsingSPIRVCross(GetDevice(), reflectionSpirv, &table));
+            mEntryPoints = std::move(table);
 #else
             UNREACHABLE();
 #endif
-        }
-
-        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-#ifdef DAWN_ENABLE_WGSL
-            tint::Program localProgram;
-
-            tint::Program* programPtr = program;
-            if (!GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-                // We have mSpirv, but no Tint program
-                DAWN_TRY_ASSIGN(localProgram, ParseSPIRV(mSpirv));
-                DAWN_TRY(ValidateModule(&localProgram));
-                programPtr = &localProgram;
-            }
-
-            EntryPointMetadataTable table;
-            DAWN_TRY_ASSIGN(table, ReflectShaderUsingTint(GetDevice(), *programPtr));
-            DAWN_TRY(PopulateMetadataUsingSPIRVCross(GetDevice(), *spirvPtr, &table));
-            mEntryPoints = std::move(table);
-#else
-            return DAWN_VALIDATION_ERROR("Using Tint is not enabled in this build.");
-#endif
         } else {
-            DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), *spirvPtr));
+            DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), mSpirv));
         }
 
         return {};

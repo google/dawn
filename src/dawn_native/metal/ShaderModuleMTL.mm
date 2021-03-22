@@ -48,11 +48,7 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
-        DAWN_TRY(InitializeBase(parseResult));
-#ifdef DAWN_ENABLE_WGSL
-        mTintProgram = std::move(parseResult->tintProgram);
-#endif
-        return {};
+        return InitializeBase(parseResult);
     }
 
     ResultOrError<std::string> ShaderModule::TranslateToMSLWithTint(
@@ -90,7 +86,7 @@ namespace dawn_native { namespace metal {
         transformManager.append(std::make_unique<tint::transform::Renamer>());
         transformManager.append(std::make_unique<tint::transform::Msl>());
 
-        tint::transform::Transform::Output output = transformManager.Run(mTintProgram.get());
+        tint::transform::Transform::Output output = transformManager.Run(GetTintProgram());
 
         tint::Program& program = output.program;
         if (!program.IsValid()) {
@@ -137,9 +133,9 @@ namespace dawn_native { namespace metal {
         std::vector<uint32_t> pullingSpirv;
         if (GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling) &&
             stage == SingleShaderStage::Vertex) {
-            if (mTintProgram) {
+            if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
                 DAWN_TRY_ASSIGN(pullingSpirv,
-                                GeneratePullingSpirv(mTintProgram.get(),
+                                GeneratePullingSpirv(GetTintProgram(),
                                                      *renderPipeline->GetVertexStateDescriptor(),
                                                      entryPointName, kPullingBufferBindingSet));
             } else {

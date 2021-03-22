@@ -186,11 +186,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
-        DAWN_TRY(InitializeBase(parseResult));
-#ifdef DAWN_ENABLE_WGSL
-        mTintProgram = std::move(parseResult->tintProgram);
-#endif
-        return {};
+        return InitializeBase(parseResult);
     }
 
     ResultOrError<std::string> ShaderModule::TranslateToHLSLWithTint(
@@ -215,7 +211,7 @@ namespace dawn_native { namespace d3d12 {
         transformManager.append(std::make_unique<tint::transform::Renamer>());
         transformManager.append(std::make_unique<tint::transform::Hlsl>());
 
-        tint::transform::Transform::Output output = transformManager.Run(mTintProgram.get());
+        tint::transform::Transform::Output output = transformManager.Run(GetTintProgram());
 
         tint::Program& program = output.program;
         if (!program.IsValid()) {
