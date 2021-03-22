@@ -12,111 +12,91 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/validator/validator_test_helper.h"
+#include "src/resolver/resolver_test_helper.h"
 
 namespace tint {
+namespace {
+class ResolverBuiltinsValidationTest : public resolver::TestHelper,
+                                       public testing::Test {};
 
-class ValidatorBuiltinsTest : public ValidatorTestHelper,
-                              public testing::Test {};
-
-TEST_F(ValidatorBuiltinsTest, Length_Float_Scalar) {
+TEST_F(ResolverBuiltinsValidationTest, Length_Float_Scalar) {
   auto* builtin = Call("length", 1.0f);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Length_Float_Vec2) {
+TEST_F(ResolverBuiltinsValidationTest, Length_Float_Vec2) {
   auto* builtin = Call("length", vec2<float>(1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Length_Float_Vec3) {
+TEST_F(ResolverBuiltinsValidationTest, Length_Float_Vec3) {
   auto* builtin = Call("length", vec3<float>(1.0f, 1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Length_Float_Vec4) {
+TEST_F(ResolverBuiltinsValidationTest, Length_Float_Vec4) {
   auto* builtin = Call("length", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Distance_Float_Scalar) {
+TEST_F(ResolverBuiltinsValidationTest, Distance_Float_Scalar) {
   auto* builtin = Call("distance", 1.0f, 1.0f);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Distance_Float_Vec2) {
+TEST_F(ResolverBuiltinsValidationTest, Distance_Float_Vec2) {
   auto* builtin =
       Call("distance", vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Distance_Float_Vec3) {
+TEST_F(ResolverBuiltinsValidationTest, Distance_Float_Vec3) {
   auto* builtin = Call("distance", vec3<float>(1.0f, 1.0f, 1.0f),
                        vec3<float>(1.0f, 1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Distance_Float_Vec4) {
+TEST_F(ResolverBuiltinsValidationTest, Distance_Float_Vec4) {
   auto* builtin = Call("distance", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
                        vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Determinant_Mat2x2) {
+TEST_F(ResolverBuiltinsValidationTest, Determinant_Mat2x2) {
   auto* builtin = Call("determinant", mat2x2<float>(vec2<float>(1.0f, 1.0f),
                                                     vec2<float>(1.0f, 1.0f)));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Determinant_Mat3x3) {
+TEST_F(ResolverBuiltinsValidationTest, Determinant_Mat3x3) {
   auto* builtin =
       Call("determinant", mat3x3<float>(vec3<float>(1.0f, 1.0f, 1.0f),
                                         vec3<float>(1.0f, 1.0f, 1.0f),
                                         vec3<float>(1.0f, 1.0f, 1.0f)));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Determinant_Mat4x4) {
+TEST_F(ResolverBuiltinsValidationTest, Determinant_Mat4x4) {
   auto* builtin =
       Call("determinant", mat4x4<float>(vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
                                         vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
@@ -124,251 +104,198 @@ TEST_F(ValidatorBuiltinsTest, Determinant_Mat4x4) {
                                         vec4<float>(1.0f, 1.0f, 1.0f, 1.0f)));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Frexp_Scalar) {
-  auto* a = Var("a", ty.i32(), ast::StorageClass::kWorkgroup);
-  RegisterVariable(a);
+TEST_F(ResolverBuiltinsValidationTest, Frexp_Scalar) {
+  auto* a = Var("a", ty.i32(), ast::StorageClass::kFunction);
   auto* builtin = Call("frexp", 1.0f, Expr("a"));
-  WrapInFunction(builtin);
+  WrapInFunction(Decl(a), builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Frexp_Vec2) {
-  auto* a = Var("a", ty.vec2<int>(), ast::StorageClass::kWorkgroup);
+TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
+  auto* a = Var("a", ty.vec2<int>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.i32(), 2),
-                                        ast::StorageClass::kWorkgroup),
+                                        ast::StorageClass::kFunction),
                   Expr("a"), {});
-  RegisterVariable(a);
-  RegisterVariable(b);
   auto* builtin = Call("frexp", vec2<float>(1.0f, 1.0f), Expr("b"));
-  WrapInFunction(builtin);
+  WrapInFunction(Decl(a), Decl(b), builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Frexp_Vec3) {
-  auto* a = Var("a", ty.vec3<int>(), ast::StorageClass::kWorkgroup);
+TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
+  auto* a = Var("a", ty.vec3<int>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.i32(), 3),
-                                        ast::StorageClass::kWorkgroup),
+                                        ast::StorageClass::kFunction),
                   Expr("a"), {});
-  RegisterVariable(a);
-  RegisterVariable(b);
   auto* builtin = Call("frexp", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
-  WrapInFunction(builtin);
+  WrapInFunction(Decl(a), Decl(b), builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Frexp_Vec4) {
-  auto* a = Var("a", ty.vec4<int>(), ast::StorageClass::kWorkgroup);
+TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
+  auto* a = Var("a", ty.vec4<int>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.i32(), 4),
-                                        ast::StorageClass::kWorkgroup),
+                                        ast::StorageClass::kFunction),
                   Expr("a"), {});
-  RegisterVariable(a);
-  RegisterVariable(b);
   auto* builtin = Call("frexp", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));
-  WrapInFunction(builtin);
+  WrapInFunction(Decl(a), Decl(b), builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Modf_Scalar) {
-  auto* a = Var("a", ty.f32(), ast::StorageClass::kWorkgroup);
-  auto* b = Const("b", ty.pointer<float>(ast::StorageClass::kWorkgroup),
+TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
+  auto* a = Var("a", ty.f32(), ast::StorageClass::kFunction);
+  auto* b = Const("b", ty.pointer<float>(ast::StorageClass::kFunction),
                   Expr("a"), {});
-  RegisterVariable(a);
-  RegisterVariable(b);
   auto* builtin = Call("modf", 1.0f, Expr("b"));
-  WrapInFunction(builtin);
+  WrapInFunction(Decl(a), Decl(b), builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Modf_Vec2) {
-  auto* a = Var("a", ty.vec2<float>(), ast::StorageClass::kWorkgroup);
+TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
+  auto* a = Var("a", ty.vec2<float>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.f32(), 2),
-                                        ast::StorageClass::kWorkgroup),
+                                        ast::StorageClass::kFunction),
                   Expr("a"), {});
-  RegisterVariable(a);
-  RegisterVariable(b);
   auto* builtin = Call("modf", vec2<float>(1.0f, 1.0f), Expr("b"));
-  WrapInFunction(builtin);
+  WrapInFunction(Decl(a), Decl(b), builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Modf_Vec3) {
-  auto* a = Var("a", ty.vec3<float>(), ast::StorageClass::kWorkgroup);
+TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
+  auto* a = Var("a", ty.vec3<float>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.f32(), 3),
-                                        ast::StorageClass::kWorkgroup),
+                                        ast::StorageClass::kFunction),
                   Expr("a"), {});
-  RegisterVariable(a);
-  RegisterVariable(b);
   auto* builtin = Call("modf", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
-  WrapInFunction(builtin);
+  WrapInFunction(Decl(a), Decl(b), builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Modf_Vec4) {
-  auto* a = Var("a", ty.vec4<float>(), ast::StorageClass::kWorkgroup);
+TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
+  auto* a = Var("a", ty.vec4<float>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
                   create<type::Pointer>(create<type::Vector>(ty.f32(), 4),
-                                        ast::StorageClass::kWorkgroup),
+                                        ast::StorageClass::kFunction),
                   Expr("a"), {});
-  RegisterVariable(a);
-  RegisterVariable(b);
   auto* builtin = Call("modf", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));
-  WrapInFunction(builtin);
+  WrapInFunction(Decl(a), Decl(b), builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
   EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Cross_Float_Vec3) {
+TEST_F(ResolverBuiltinsValidationTest, Cross_Float_Vec3) {
   auto* builtin = Call("cross", vec3<float>(1.0f, 1.0f, 1.0f),
                        vec3<float>(1.0f, 1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Dot_Float_Vec2) {
+TEST_F(ResolverBuiltinsValidationTest, Dot_Float_Vec2) {
   auto* builtin = Call("dot", vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Dot_Float_Vec3) {
+TEST_F(ResolverBuiltinsValidationTest, Dot_Float_Vec3) {
   auto* builtin =
       Call("dot", vec3<float>(1.0f, 1.0f, 1.0f), vec3<float>(1.0f, 1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Dot_Float_Vec4) {
+TEST_F(ResolverBuiltinsValidationTest, Dot_Float_Vec4) {
   auto* builtin = Call("dot", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f),
                        vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Select_Float_Scalar) {
+TEST_F(ResolverBuiltinsValidationTest, Select_Float_Scalar) {
   auto* builtin = Call("select", Expr(1.0f), Expr(1.0f), Expr(true));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Select_Integer_Scalar) {
+TEST_F(ResolverBuiltinsValidationTest, Select_Integer_Scalar) {
   auto* builtin = Call("select", Expr(1), Expr(1), Expr(true));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Select_Boolean_Scalar) {
+TEST_F(ResolverBuiltinsValidationTest, Select_Boolean_Scalar) {
   auto* builtin = Call("select", Expr(true), Expr(true), Expr(true));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Select_Float_Vec2) {
+TEST_F(ResolverBuiltinsValidationTest, Select_Float_Vec2) {
   auto* builtin = Call("select", vec2<float>(1.0f, 1.0f),
                        vec2<float>(1.0f, 1.0f), vec2<bool>(true, true));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Select_Integer_Vec2) {
+TEST_F(ResolverBuiltinsValidationTest, Select_Integer_Vec2) {
   auto* builtin =
       Call("select", vec2<int>(1, 1), vec2<int>(1, 1), vec2<bool>(true, true));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidatorBuiltinsTest, Select_Boolean_Vec2) {
+TEST_F(ResolverBuiltinsValidationTest, Select_Boolean_Vec2) {
   auto* builtin = Call("select", vec2<bool>(true, true), vec2<bool>(true, true),
                        vec2<bool>(true, true));
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 template <typename T>
-class ValidatorBuiltinsTestWithParams : public ValidatorTestHelper,
-                                        public testing::TestWithParam<T> {};
+class ResolverBuiltinsValidationTestWithParams
+    : public resolver::TestHelper,
+      public testing::TestWithParam<T> {};
 
 using FloatAllMatching =
-    ValidatorBuiltinsTestWithParams<std::tuple<std::string, uint32_t>>;
+    ResolverBuiltinsValidationTestWithParams<std::tuple<std::string, uint32_t>>;
 
 TEST_P(FloatAllMatching, Scalar) {
   std::string name = std::get<0>(GetParam());
@@ -381,10 +308,8 @@ TEST_P(FloatAllMatching, Scalar) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(FloatAllMatching, Vec2) {
@@ -398,10 +323,8 @@ TEST_P(FloatAllMatching, Vec2) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(FloatAllMatching, Vec3) {
@@ -415,10 +338,8 @@ TEST_P(FloatAllMatching, Vec3) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(FloatAllMatching, Vec4) {
@@ -432,13 +353,11 @@ TEST_P(FloatAllMatching, Vec4) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
+INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
                          FloatAllMatching,
                          ::testing::Values(std::make_tuple("abs", 1),
                                            std::make_tuple("acos", 1),
@@ -484,7 +403,7 @@ INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
                                            std::make_tuple("trunc", 1)));
 
 using IntegerAllMatching =
-    ValidatorBuiltinsTestWithParams<std::tuple<std::string, uint32_t>>;
+    ResolverBuiltinsValidationTestWithParams<std::tuple<std::string, uint32_t>>;
 
 TEST_P(IntegerAllMatching, ScalarUnsigned) {
   std::string name = std::get<0>(GetParam());
@@ -497,10 +416,8 @@ TEST_P(IntegerAllMatching, ScalarUnsigned) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(IntegerAllMatching, Vec2Unsigned) {
@@ -514,10 +431,8 @@ TEST_P(IntegerAllMatching, Vec2Unsigned) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(IntegerAllMatching, Vec3Unsigned) {
@@ -531,10 +446,8 @@ TEST_P(IntegerAllMatching, Vec3Unsigned) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(IntegerAllMatching, Vec4Unsigned) {
@@ -548,10 +461,8 @@ TEST_P(IntegerAllMatching, Vec4Unsigned) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_unsigned_integer_vector());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(IntegerAllMatching, ScalarSigned) {
@@ -565,10 +476,8 @@ TEST_P(IntegerAllMatching, ScalarSigned) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->Is<type::I32>());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(IntegerAllMatching, Vec2Signed) {
@@ -582,10 +491,8 @@ TEST_P(IntegerAllMatching, Vec2Signed) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(IntegerAllMatching, Vec3Signed) {
@@ -599,10 +506,8 @@ TEST_P(IntegerAllMatching, Vec3Signed) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
 TEST_P(IntegerAllMatching, Vec4Signed) {
@@ -616,13 +521,11 @@ TEST_P(IntegerAllMatching, Vec4Signed) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_signed_integer_vector());
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
+INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
                          IntegerAllMatching,
                          ::testing::Values(std::make_tuple("abs", 1),
                                            std::make_tuple("clamp", 3),
@@ -632,7 +535,7 @@ INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
                                            std::make_tuple("reverseBits", 1)));
 
 using BooleanVectorInput =
-    ValidatorBuiltinsTestWithParams<std::tuple<std::string, uint32_t>>;
+    ResolverBuiltinsValidationTestWithParams<std::tuple<std::string, uint32_t>>;
 
 TEST_P(BooleanVectorInput, Vec2) {
   std::string name = std::get<0>(GetParam());
@@ -645,9 +548,7 @@ TEST_P(BooleanVectorInput, Vec2) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_P(BooleanVectorInput, Vec3) {
@@ -661,9 +562,7 @@ TEST_P(BooleanVectorInput, Vec3) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_P(BooleanVectorInput, Vec4) {
@@ -677,44 +576,41 @@ TEST_P(BooleanVectorInput, Vec4) {
   auto* builtin = Call(name, params);
   WrapInFunction(builtin);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
+INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
                          BooleanVectorInput,
                          ::testing::Values(std::make_tuple("all", 1),
                                            std::make_tuple("any", 1)));
 
-using DataPacking4x8 = ValidatorBuiltinsTestWithParams<std::string>;
+using DataPacking4x8 = ResolverBuiltinsValidationTestWithParams<std::string>;
 
 TEST_P(DataPacking4x8, Float_Vec4) {
   auto name = GetParam();
   auto* builtin = Call(name, vec4<float>(1.0f, 1.0f, 1.0f, 1.0f));
   WrapInFunction(builtin);
-  ValidatorImpl& v = Build();
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
+INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
                          DataPacking4x8,
                          ::testing::Values("pack4x8snorm", "pack4x8unorm"));
 
-using DataPacking2x16 = ValidatorBuiltinsTestWithParams<std::string>;
+using DataPacking2x16 = ResolverBuiltinsValidationTestWithParams<std::string>;
 
 TEST_P(DataPacking2x16, Float_Vec2) {
   auto name = GetParam();
   auto* builtin = Call(name, vec2<float>(1.0f, 1.0f));
   WrapInFunction(builtin);
-  ValidatorImpl& v = Build();
-  EXPECT_TRUE(v.ValidateCallExpr(builtin)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-INSTANTIATE_TEST_SUITE_P(ValidatorBuiltinsTest,
+INSTANTIATE_TEST_SUITE_P(ResolverBuiltinsValidationTest,
                          DataPacking2x16,
                          ::testing::Values("pack2x16snorm",
                                            "pack2x16unorm",
                                            "pack2x16float"));
 
+}  // namespace
 }  // namespace tint

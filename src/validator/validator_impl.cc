@@ -257,21 +257,13 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
     return false;
   }
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
-    bool constructor_valid =
-        v->variable()->has_constructor()
-            ? ValidateExpression(v->variable()->constructor())
-            : true;
-
-    return constructor_valid && ValidateDeclStatement(v);
+    return ValidateDeclStatement(v);
   }
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return ValidateAssign(a);
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return ValidateReturnStatement(r);
-  }
-  if (auto* c = stmt->As<ast::CallStatement>()) {
-    return ValidateCallExpr(c->expr());
   }
   if (auto* s = stmt->As<ast::SwitchStatement>()) {
     return ValidateSwitch(s);
@@ -286,10 +278,6 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
 }
 
 bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
-  if (!ValidateExpression(s->condition())) {
-    return false;
-  }
-
   auto* cond_type = program_->Sem().Get(s->condition())->Type()->UnwrapAll();
   if (!cond_type->is_integer_scalar()) {
     add_error(s->condition()->source(), "v-0025",
@@ -358,41 +346,6 @@ bool ValidatorImpl::ValidateCase(const ast::CaseStatement* c) {
   return true;
 }
 
-bool ValidatorImpl::ValidateCallExpr(const ast::CallExpression* expr) {
-  if (!expr) {
-    // TODO(sarahM0): Here and other Validate.*: figure out whether return
-    // false or true
-    return false;
-  }
-
-  auto* call = program_->Sem().Get(expr);
-  if (call == nullptr) {
-    add_error(expr->source(), "CallExpression is missing semantic information");
-    return false;
-  }
-
-  auto* target = call->Target();
-
-  if (target->Is<semantic::Intrinsic>()) {
-    // TODO(bclayton): Add intrinsic validation checks here.
-    return true;
-  }
-
-  if (auto* func = target->As<semantic::Function>()) {
-    if (current_function_ == func->Declaration()) {
-      add_error(expr->source(), "v-0004",
-                "recursion is not allowed: '" +
-                    program_->Symbols().NameFor(current_function_->symbol()) +
-                    "'");
-      return false;
-    }
-    return true;
-  }
-
-  add_error(expr->source(), "Invalid function call expression");
-  return false;
-}
-
 bool ValidatorImpl::ValidateBadAssignmentToIdentifier(
     const ast::AssignmentStatement* assign) {
   auto* ident = assign->lhs()->As<ast::IdentifierExpression>();
@@ -426,12 +379,7 @@ bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* assign) {
   }
   auto* lhs = assign->lhs();
   auto* rhs = assign->rhs();
-  if (!ValidateExpression(lhs)) {
-    return false;
-  }
-  if (!ValidateExpression(rhs)) {
-    return false;
-  }
+
   // Pointers are not storable in WGSL, but the right-hand side must be
   // storable. The raw right-hand side might be a pointer value which must be
   // loaded (dereferenced) to provide the value to be stored.
@@ -455,17 +403,6 @@ bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* assign) {
     return false;
   }
 
-  return true;
-}
-
-bool ValidatorImpl::ValidateExpression(const ast::Expression* expr) {
-  if (!expr) {
-    return false;
-  }
-
-  if (auto* c = expr->As<ast::CallExpression>()) {
-    return ValidateCallExpr(c);
-  }
   return true;
 }
 

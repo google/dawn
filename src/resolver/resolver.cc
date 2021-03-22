@@ -582,7 +582,8 @@ bool Resolver::Call(ast::CallExpression* call) {
       auto callee_func_it = symbol_to_function_.find(ident->symbol());
       if (callee_func_it == symbol_to_function_.end()) {
         if (current_function_->declaration->symbol() == ident->symbol()) {
-          diagnostics_.add_error("recursion is not permitted. '" + name +
+          diagnostics_.add_error("v-0004",
+                                 "recursion is not permitted. '" + name +
                                      "' attempted to call itself.",
                                  call->source());
         } else {
@@ -637,39 +638,6 @@ bool Resolver::IntrinsicCall(ast::CallExpression* call,
   if (!result.intrinsic) {
     // Intrinsic lookup failed.
     diagnostics_.add(result.diagnostics);
-
-    // TODO(bclayton): https://crbug.com/tint/487
-    // The Validator expects intrinsic signature mismatches to still produce
-    // type information. The rules for what the Validator expects are rather
-    // bespoke. Try to match what the Validator expects. As the Validator's
-    // checks on intrinsics is now almost entirely covered by the
-    // IntrinsicTable, we should remove the Validator checks on intrinsic
-    // signatures and remove these hacks.
-    semantic::ParameterList parameters;
-    parameters.reserve(arg_tys.size());
-    for (auto* arg : arg_tys) {
-      parameters.emplace_back(semantic::Parameter{arg});
-    }
-    type::Type* ret_ty = nullptr;
-    switch (intrinsic_type) {
-      case IntrinsicType::kCross:
-        ret_ty = builder_->ty.vec3<ProgramBuilder::f32>();
-        break;
-      case IntrinsicType::kDeterminant:
-        ret_ty = builder_->create<type::F32>();
-        break;
-      case IntrinsicType::kArrayLength:
-        ret_ty = builder_->create<type::U32>();
-        break;
-      default:
-        ret_ty = arg_tys.empty() ? builder_->ty.void_() : arg_tys[0];
-        break;
-    }
-    auto* intrinsic = builder_->create<semantic::Intrinsic>(intrinsic_type,
-                                                            ret_ty, parameters);
-    builder_->Sem().Add(call, builder_->create<semantic::Call>(
-                                  call, intrinsic, current_statement_));
-    SetType(call, ret_ty);
     return false;
   }
 

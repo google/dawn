@@ -127,7 +127,8 @@ TEST_F(ResolverValidationTest, Stmt_Call_recursive) {
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "12:34 error: recursion is not permitted. 'main' attempted to call "
+            "12:34 error v-0004: recursion is not permitted. 'main' attempted "
+            "to call "
             "itself.");
 }
 

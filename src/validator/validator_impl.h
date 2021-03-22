@@ -94,10 +94,6 @@ class ValidatorImpl {
   /// @returns true if the LHS of theassignment is not an identifier expression
   bool ValidateBadAssignmentToIdentifier(
       const ast::AssignmentStatement* assign);
-  /// Validates an expression
-  /// @param expr the expression to check
-  /// @return true if the expression is valid
-  bool ValidateExpression(const ast::Expression* expr);
   /// Validates declaration name uniqueness
   /// @param decl is the new declaration to be added
   /// @returns true if no previous declaration with the `decl` 's name
@@ -107,10 +103,6 @@ class ValidatorImpl {
   /// @param ret the return statement to check
   /// @returns true if function return type matches the return statement type
   bool ValidateReturnStatement(const ast::ReturnStatement* ret);
-  /// Validates function calls
-  /// @param expr the call to validate
-  /// @returns true if successful
-  bool ValidateCallExpr(const ast::CallExpression* expr);
   /// Validates switch statements
   /// @param s the switch statement to check
   /// @returns true if the valdiation was successful
