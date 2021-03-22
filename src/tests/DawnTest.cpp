@@ -258,6 +258,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             } else {
                 mBackendValidationLevel = dawn_native::BackendValidationLevel::Full;
             }
+            continue;
         }
 
         if (strcmp("-c", argv[i]) == 0 || strcmp("--begin-capture-on-startup", argv[i]) == 0) {
@@ -320,6 +321,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                     }
                 }
             }
+            continue;
         }
 
         constexpr const char kWireTraceDirArg[] = "--wire-trace-dir=";
