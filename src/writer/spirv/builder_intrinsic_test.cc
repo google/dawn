@@ -1596,6 +1596,71 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"unpack2x16unorm", "UnpackUnorm2x16"},
                     IntrinsicData{"unpack2x16float", "UnpackHalf2x16"}));
 
+TEST_F(IntrinsicBuilderTest, Call_WorkgroupBarrier) {
+  Func("f", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(Call("workgroupBarrier")),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+       });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 2
+%8 = OpConstant %6 264
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(OpControlBarrier %7 %7 %8
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
+TEST_F(IntrinsicBuilderTest, Call_StorageBarrier) {
+  Func("f", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(Call("storageBarrier")),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+       });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  ASSERT_EQ(b.functions().size(), 1u);
+
+  auto* expected_types = R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 2
+%8 = OpConstant %6 1
+%9 = OpConstant %6 72
+)";
+  auto got_types = DumpInstructions(b.types());
+  EXPECT_EQ(expected_types, got_types);
+
+  auto* expected_instructions = R"(OpControlBarrier %7 %8 %9
+)";
+  auto got_instructions = DumpInstructions(b.functions()[0].instructions());
+  EXPECT_EQ(expected_instructions, got_instructions);
+
+  Validate(b);
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace writer

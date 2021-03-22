@@ -883,6 +883,12 @@ class FunctionEmitter {
   /// @returns false if emission failed
   bool EmitFunctionCall(const spvtools::opt::Instruction& inst);
 
+  /// Emits a control barrier intrinsic.  On failure, emits a diagnostic and
+  /// returns false.
+  /// @param inst the SPIR-V control barrier instruction
+  /// @returns false if emission failed
+  bool EmitControlBarrier(const spvtools::opt::Instruction& inst);
+
   /// Returns an expression for a SPIR-V instruction that maps to a WGSL
   /// intrinsic function call.
   /// @param inst the SPIR-V instruction

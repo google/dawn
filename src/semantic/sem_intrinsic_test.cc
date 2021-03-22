@@ -99,6 +99,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"smoothStep", IntrinsicType::kSmoothStep},
         IntrinsicData{"sqrt", IntrinsicType::kSqrt},
         IntrinsicData{"step", IntrinsicType::kStep},
+        IntrinsicData{"storageBarrier", IntrinsicType::kStorageBarrier},
         IntrinsicData{"tan", IntrinsicType::kTan},
         IntrinsicData{"tanh", IntrinsicType::kTanh},
         IntrinsicData{"textureDimensions", IntrinsicType::kTextureDimensions},
@@ -117,7 +118,8 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{"unpack2x16snorm", IntrinsicType::kUnpack2x16Snorm},
         IntrinsicData{"unpack2x16unorm", IntrinsicType::kUnpack2x16Unorm},
         IntrinsicData{"unpack4x8snorm", IntrinsicType::kUnpack4x8Snorm},
-        IntrinsicData{"unpack4x8unorm", IntrinsicType::kUnpack4x8Unorm}));
+        IntrinsicData{"unpack4x8unorm", IntrinsicType::kUnpack4x8Unorm},
+        IntrinsicData{"workgroupBarrier", IntrinsicType::kWorkgroupBarrier}));
 
 TEST_F(IntrinsicTypeTest, ParseNoMatch) {
   EXPECT_EQ(ParseIntrinsicType("not_intrinsic"), IntrinsicType::kNone);

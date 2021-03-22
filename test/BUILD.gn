@@ -272,6 +272,7 @@ source_set("tint_unittests_spv_reader_src") {
     "../src/reader/spirv/function_misc_test.cc",
     "../src/reader/spirv/function_var_test.cc",
     "../src/reader/spirv/namer_test.cc",
+    "../src/reader/spirv/parser_impl_barrier_test.cc",
     "../src/reader/spirv/parser_impl_convert_member_decoration_test.cc",
     "../src/reader/spirv/parser_impl_convert_type_test.cc",
     "../src/reader/spirv/parser_impl_function_decl_test.cc",

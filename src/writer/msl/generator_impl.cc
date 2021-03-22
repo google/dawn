@@ -339,6 +339,18 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
       out_ << "))";
       return true;
     }
+    // TODO(crbug.com/tint/661): Combine sequential barriers to a single
+    // instruction.
+    if (intrinsic->Type() == semantic::IntrinsicType::kStorageBarrier) {
+      make_indent();
+      out_ << "threadgroup_barrier(mem_flags::mem_device)";
+      return true;
+    }
+    if (intrinsic->Type() == semantic::IntrinsicType::kWorkgroupBarrier) {
+      make_indent();
+      out_ << "threadgroup_barrier(mem_flags::mem_threadgroup)";
+      return true;
+    }
     auto name = generate_builtin_name(intrinsic);
     if (name.empty()) {
       return false;

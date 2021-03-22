@@ -120,6 +120,14 @@ class GeneratorImpl : public TextGenerator {
   bool EmitCall(std::ostream& pre,
                 std::ostream& out,
                 ast::CallExpression* expr);
+  /// Handles generating a barrier intrinsic call
+  /// @param pre the preamble for the expression stream
+  /// @param out the output of the expression stream
+  /// @param intrinsic the semantic information for the barrier intrinsic
+  /// @returns true if the call expression is emitted
+  bool EmitBarrierCall(std::ostream& pre,
+                       std::ostream& out,
+                       const semantic::Intrinsic* intrinsic);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param pre the preamble for the expression stream

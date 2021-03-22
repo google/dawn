@@ -105,6 +105,8 @@ ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
     case IntrinsicType::kReflect:
     case IntrinsicType::kStep:
       return builder->Call(str.str(), "f2", "f2");
+    case IntrinsicType::kStorageBarrier:
+      return builder->Call(str.str());
     case IntrinsicType::kCross:
       return builder->Call(str.str(), "f3", "f3");
     case IntrinsicType::kFma:
@@ -152,6 +154,8 @@ ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
     case IntrinsicType::kUnpack2x16Snorm:
     case IntrinsicType::kUnpack2x16Unorm:
       return builder->Call(str.str(), "u1");
+    case IntrinsicType::kWorkgroupBarrier:
+      return builder->Call(str.str());
     default:
       break;
   }
@@ -284,6 +288,28 @@ TEST_F(MslGeneratorImplTest, Intrinsic_Call) {
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
   EXPECT_EQ(gen.result(), "  dot(param1, param2)");
+}
+
+TEST_F(MslGeneratorImplTest, StorageBarrier) {
+  auto* call = Call("storageBarrier");
+  WrapInFunction(call);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
+  EXPECT_EQ(gen.result(), "  threadgroup_barrier(mem_flags::mem_device)");
+}
+
+TEST_F(MslGeneratorImplTest, WorkgroupBarrier) {
+  auto* call = Call("workgroupBarrier");
+  WrapInFunction(call);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+  ASSERT_TRUE(gen.EmitExpression(call)) << gen.error();
+  EXPECT_EQ(gen.result(), "  threadgroup_barrier(mem_flags::mem_threadgroup)");
 }
 
 TEST_F(MslGeneratorImplTest, Pack2x16Float) {

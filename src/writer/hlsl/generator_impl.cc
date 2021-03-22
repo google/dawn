@@ -505,6 +505,8 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       return EmitDataPackingCall(pre, out, expr, intrinsic);
     } else if (intrinsic->IsDataUnpacking()) {
       return EmitDataUnpackingCall(pre, out, expr, intrinsic);
+    } else if (intrinsic->IsBarrier()) {
+      return EmitBarrierCall(pre, out, intrinsic);
     }
     auto name = generate_builtin_name(intrinsic);
     if (name.empty()) {
@@ -713,6 +715,23 @@ bool GeneratorImpl::EmitDataUnpackingCall(
       return false;
   }
 
+  return true;
+}
+
+bool GeneratorImpl::EmitBarrierCall(std::ostream&,
+                                    std::ostream& out,
+                                    const semantic::Intrinsic* intrinsic) {
+  // TODO(crbug.com/tint/661): Combine sequential barriers to a single
+  // instruction.
+  if (intrinsic->Type() == semantic::IntrinsicType::kWorkgroupBarrier) {
+    out << "GroupMemoryBarrierWithGroupSync()";
+  } else if (intrinsic->Type() == semantic::IntrinsicType::kStorageBarrier) {
+    out << "DeviceMemoryBarrierWithGroupSync()";
+  } else {
+    TINT_UNREACHABLE(diagnostics_) << "unexpected barrier intrinsic type "
+                                   << semantic::str(intrinsic->Type());
+    return false;
+  }
   return true;
 }
 

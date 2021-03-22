@@ -1921,6 +1921,13 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
     return result_id;
   }
 
+  if (intrinsic->IsBarrier()) {
+    if (!GenerateControlBarrierIntrinsic(intrinsic)) {
+      return 0;
+    }
+    return result_id;
+  }
+
   OperandList params = {Operand::Int(result_type_id), result};
 
   spv::Op op = spv::Op::OpNop;
@@ -2453,6 +2460,47 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
   }
 
   return post_emission();
+}
+
+bool Builder::GenerateControlBarrierIntrinsic(
+    const semantic::Intrinsic* intrinsic) {
+  auto const op = spv::Op::OpControlBarrier;
+  uint32_t execution = 0;
+  uint32_t memory = 0;
+  uint32_t semantics = 0;
+
+  // TODO(crbug.com/tint/661): Combine sequential barriers to a single
+  // instruction.
+  if (intrinsic->Type() == semantic::IntrinsicType::kWorkgroupBarrier) {
+    execution = static_cast<uint32_t>(spv::Scope::Workgroup);
+    memory = static_cast<uint32_t>(spv::Scope::Workgroup);
+    semantics =
+        static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
+        static_cast<uint32_t>(spv::MemorySemanticsMask::WorkgroupMemory);
+  } else if (intrinsic->Type() == semantic::IntrinsicType::kStorageBarrier) {
+    execution = static_cast<uint32_t>(spv::Scope::Workgroup);
+    memory = static_cast<uint32_t>(spv::Scope::Device);
+    semantics =
+        static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
+        static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
+  } else {
+    error_ = "unexpected barrier intrinsic type ";
+    error_ += semantic::str(intrinsic->Type());
+    return false;
+  }
+
+  auto execution_id = GenerateConstantIfNeeded(ScalarConstant::U32(execution));
+  auto memory_id = GenerateConstantIfNeeded(ScalarConstant::U32(memory));
+  auto semantics_id = GenerateConstantIfNeeded(ScalarConstant::U32(semantics));
+  if (execution_id == 0 || memory_id == 0 || semantics_id == 0) {
+    return false;
+  }
+
+  return push_function_inst(op, {
+                                    Operand::Int(execution_id),
+                                    Operand::Int(memory_id),
+                                    Operand::Int(semantics_id),
+                                });
 }
 
 uint32_t Builder::GenerateSampledImage(type::Type* texture_type,

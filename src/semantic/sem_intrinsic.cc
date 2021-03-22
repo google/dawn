@@ -94,6 +94,7 @@ const char* Intrinsic::str() const {
   INTRINSIC(IntrinsicType::kSmoothStep, "smoothStep")                     \
   INTRINSIC(IntrinsicType::kSqrt, "sqrt")                                 \
   INTRINSIC(IntrinsicType::kStep, "step")                                 \
+  INTRINSIC(IntrinsicType::kStorageBarrier, "storageBarrier")             \
   INTRINSIC(IntrinsicType::kTan, "tan")                                   \
   INTRINSIC(IntrinsicType::kTanh, "tanh")                                 \
   INTRINSIC(IntrinsicType::kTextureDimensions, "textureDimensions")       \
@@ -112,7 +113,8 @@ const char* Intrinsic::str() const {
   INTRINSIC(IntrinsicType::kUnpack2x16Snorm, "unpack2x16snorm")           \
   INTRINSIC(IntrinsicType::kUnpack2x16Unorm, "unpack2x16unorm")           \
   INTRINSIC(IntrinsicType::kUnpack4x8Snorm, "unpack4x8snorm")             \
-  INTRINSIC(IntrinsicType::kUnpack4x8Unorm, "unpack4x8unorm")
+  INTRINSIC(IntrinsicType::kUnpack4x8Unorm, "unpack4x8unorm")             \
+  INTRINSIC(IntrinsicType::kWorkgroupBarrier, "workgroupBarrier")
 
 IntrinsicType ParseIntrinsicType(const std::string& name) {
 #define INTRINSIC(ENUM, NAME) \
@@ -187,6 +189,11 @@ bool IsDataUnpackingIntrinsic(IntrinsicType i) {
          i == IntrinsicType::kUnpack2x16Float;
 }
 
+bool IsBarrierIntrinsic(IntrinsicType i) {
+  return i == IntrinsicType::kWorkgroupBarrier ||
+         i == IntrinsicType::kStorageBarrier;
+}
+
 Intrinsic::Intrinsic(IntrinsicType type,
                      type::Type* return_type,
                      const ParameterList& parameters)
@@ -224,6 +231,10 @@ bool Intrinsic::IsDataPacking() const {
 
 bool Intrinsic::IsDataUnpacking() const {
   return IsDataUnpackingIntrinsic(type_);
+}
+
+bool Intrinsic::IsBarrier() const {
+  return IsBarrierIntrinsic(type_);
 }
 
 }  // namespace semantic

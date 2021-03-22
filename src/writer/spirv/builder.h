@@ -358,6 +358,11 @@ class Builder {
                                 const semantic::Intrinsic* intrinsic,
                                 spirv::Operand result_type,
                                 spirv::Operand result_id);
+  /// Generates a control barrier statement.
+  /// @param intrinsic the semantic information for the barrier intrinsic
+  /// parameters
+  /// @returns true on success
+  bool GenerateControlBarrierIntrinsic(const semantic::Intrinsic* intrinsic);
   /// Generates a sampled image
   /// @param texture_type the texture type
   /// @param texture_operand the texture operand

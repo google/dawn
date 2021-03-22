@@ -538,6 +538,37 @@ inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
   return out;
 }
 
+using ResolverIntrinsicTest_Barrier = ResolverTestWithParam<IntrinsicData>;
+TEST_P(ResolverIntrinsicTest_Barrier, InferType) {
+  auto param = GetParam();
+
+  auto* call = Call(param.name);
+  WrapInFunction(call);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_NE(TypeOf(call), nullptr);
+  EXPECT_TRUE(TypeOf(call)->Is<type::Void>());
+}
+
+TEST_P(ResolverIntrinsicTest_Barrier, Error_TooManyParams) {
+  auto param = GetParam();
+
+  auto* call = Call(param.name, vec4<f32>(1.f, 2.f, 3.f, 4.f), 1.0f);
+  WrapInFunction(call);
+
+  EXPECT_FALSE(r()->Resolve());
+
+  EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                      std::string(param.name)));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ResolverTest,
+    ResolverIntrinsicTest_Barrier,
+    testing::Values(
+        IntrinsicData{"storageBarrier", IntrinsicType::kStorageBarrier},
+        IntrinsicData{"workgroupBarrier", IntrinsicType::kWorkgroupBarrier}));
+
 using ResolverIntrinsicTest_DataPacking = ResolverTestWithParam<IntrinsicData>;
 TEST_P(ResolverIntrinsicTest_DataPacking, InferType) {
   auto param = GetParam();

@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "src/ast/call_statement.h"
+#include "src/ast/stage_decoration.h"
 #include "src/semantic/call.h"
 #include "src/writer/hlsl/test_helper.h"
 
@@ -411,6 +413,44 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Float) {
   EXPECT_THAT(
       result(),
       HasSubstr("f16tof32(uint2(_tint_tmp & 0xffff, _tint_tmp >> 16))"));
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, StorageBarrier) {
+  Func("main", {}, ty.void_(),
+       {create<ast::CallStatement>(Call("storageBarrier"))},
+       {create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
+void main() {
+  DeviceMemoryBarrierWithGroupSync();
+  return;
+}
+
+)");
+
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_Intrinsic, WorkgroupBarrier) {
+  Func("main", {}, ty.void_(),
+       {create<ast::CallStatement>(Call("workgroupBarrier"))},
+       {create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_EQ(result(), R"([numthreads(1, 1, 1)]
+void main() {
+  GroupMemoryBarrierWithGroupSync();
+  return;
+}
+
+)");
+
+  Validate();
 }
 
 }  // namespace

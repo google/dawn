@@ -3104,6 +3104,9 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
     case SpvOpFunctionCall:
       return EmitFunctionCall(inst);
 
+    case SpvOpControlBarrier:
+      return EmitControlBarrier(inst);
+
     case SpvOpExtInst:
       if (parser_impl_.IsIgnoredExtendedInstruction(inst)) {
         return true;
@@ -4131,6 +4134,53 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   }
 
   return EmitConstDefOrWriteToHoistedVar(inst, {result_type, call_expr});
+}
+
+bool FunctionEmitter::EmitControlBarrier(
+    const spvtools::opt::Instruction& inst) {
+  uint32_t operands[3];
+  for (int i = 0; i < 3; i++) {
+    if (auto* op = MakeOperand(inst, i).expr) {
+      auto* lit = As<ast::ScalarConstructorExpression>(op)->literal();
+      if (auto* int_lit = lit->As<ast::IntLiteral>()) {
+        operands[i] = int_lit->value_as_u32();
+        continue;
+      }
+    }
+    return Fail() << "invalid or missing operands for control barrier";
+  }
+
+  uint32_t execution = operands[0];
+  uint32_t memory = operands[1];
+  uint32_t semantics = operands[2];
+
+  if (execution != SpvScopeWorkgroup) {
+    return Fail() << "unsupported control barrier execution scope: "
+                  << "expected Workgroup (2), got: " << execution;
+  }
+  if (semantics & SpvMemorySemanticsAcquireReleaseMask) {
+    semantics &= ~SpvMemorySemanticsAcquireReleaseMask;
+  } else {
+    return Fail() << "control barrier semantics requires acquire and release";
+  }
+  if (semantics & SpvMemorySemanticsWorkgroupMemoryMask) {
+    if (memory != SpvScopeWorkgroup) {
+      return Fail() << "workgroupBarrier requires workgroup memory scope";
+    }
+    AddStatement(create<ast::CallStatement>(builder_.Call("workgroupBarrier")));
+    semantics &= ~SpvMemorySemanticsWorkgroupMemoryMask;
+  }
+  if (semantics & SpvMemorySemanticsUniformMemoryMask) {
+    if (memory != SpvScopeDevice) {
+      return Fail() << "storageBarrier requires device memory scope";
+    }
+    AddStatement(create<ast::CallStatement>(builder_.Call("storageBarrier")));
+    semantics &= ~SpvMemorySemanticsUniformMemoryMask;
+  }
+  if (semantics) {
+    return Fail() << "unsupported control barrier semantics: " << semantics;
+  }
+  return true;
 }
 
 TypedExpression FunctionEmitter::MakeIntrinsicCall(

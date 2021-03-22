@@ -1055,6 +1055,7 @@ Impl::Impl() {
   Register(I::kSqrt,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
   Register(I::kStep,            f32,         {f32, f32}                                               ); // NOLINT
   Register(I::kStep,            vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
+  Register(I::kStorageBarrier,  void_,       {}                                                       ); // NOLINT
   Register(I::kTan,             f32,         {f32}                                                    ); // NOLINT
   Register(I::kTan,             vecN_f32,    {vecN_f32}                                               ); // NOLINT
   Register(I::kTanh,            f32,         {f32}                                                    ); // NOLINT
@@ -1066,6 +1067,7 @@ Impl::Impl() {
   Register(I::kUnpack2x16Unorm, vec2_f32,    {u32}                                                    ); // NOLINT
   Register(I::kUnpack4x8Snorm,  vec4_f32,    {u32}                                                    ); // NOLINT
   Register(I::kUnpack4x8Unorm,  vec4_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kWorkgroupBarrier,void_,       {}                                                       ); // NOLINT
   // clang-format on
 
   auto* tex_1d_f32 = sampled_texture(Dim::k1d, f32);
