@@ -57,33 +57,96 @@ TEST_P(ShaderFloat16Tests, Basic16BitFloatFeaturesTest) {
         utils::CreateBufferFromData(device, &bufferOutData, sizeof(bufferOutData),
                                     wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
-    wgpu::ShaderModule module =
-        utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, R"(
-        #version 450
+    // SPIR-V ASM produced by glslang for the following fragment shader:
+    //
+    //   #version 450
+    //   #extension GL_AMD_gpu_shader_half_float : require
+    //
+    //   struct S {
+    //       float16_t f;
+    //       float16_t padding;
+    //   };
+    //   layout(std140, set = 0, binding = 0) uniform uniformBuf { S c; };
+    //   layout(std140, set = 0, binding = 1) readonly buffer bufA { S a; };
+    //   layout(std140, set = 0, binding = 2) buffer bufB { S b; };
+    //
+    //   void main() {
+    //       b.f = a.f + c.f;
+    //   }
 
-        #extension GL_AMD_gpu_shader_half_float : require
-
-        struct S {
-            float16_t f;
-            float16_t padding;
-        };
-        layout(std140, set = 0, binding = 0) uniform uniformBuf {
-            S c;
-        };
-
-        layout(std140, set = 0, binding = 1) readonly buffer bufA {
-            S a;
-        } ;
-
-        layout(std140, set = 0, binding = 2) buffer bufB {
-            S b;
-        } ;
-
-        void main() {
-            b.f = a.f + c.f;
-        }
-
-        )");
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromASM(device, R"(
+; SPIR-V
+; Version: 1.0
+; Generator: Khronos Glslang Reference Front End; 10
+; Bound: 26
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability StorageBuffer16BitAccess
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpExtension "SPV_KHR_16bit_storage"
+          %1 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpSource GLSL 450
+               OpSourceExtension "GL_AMD_gpu_shader_half_float"
+               OpName %main "main"
+               OpName %S "S"
+               OpMemberName %S 0 "f"
+               OpMemberName %S 1 "padding"
+               OpName %bufB "bufB"
+               OpMemberName %bufB 0 "b"
+               OpName %_ ""
+               OpName %bufA "bufA"
+               OpMemberName %bufA 0 "a"
+               OpName %__0 ""
+               OpName %uniformBuf "uniformBuf"
+               OpMemberName %uniformBuf 0 "c"
+               OpName %__1 ""
+               OpMemberDecorate %S 0 Offset 0
+               OpMemberDecorate %S 1 Offset 2
+               OpMemberDecorate %bufB 0 Offset 0
+               OpDecorate %bufB BufferBlock
+               OpDecorate %_ DescriptorSet 0
+               OpDecorate %_ Binding 2
+               OpMemberDecorate %bufA 0 NonWritable
+               OpMemberDecorate %bufA 0 Offset 0
+               OpDecorate %bufA BufferBlock
+               OpDecorate %__0 DescriptorSet 0
+               OpDecorate %__0 Binding 1
+               OpMemberDecorate %uniformBuf 0 Offset 0
+               OpDecorate %uniformBuf Block
+               OpDecorate %__1 DescriptorSet 0
+               OpDecorate %__1 Binding 0
+       %void = OpTypeVoid
+          %3 = OpTypeFunction %void
+       %half = OpTypeFloat 16
+          %S = OpTypeStruct %half %half
+       %bufB = OpTypeStruct %S
+%_ptr_Uniform_bufB = OpTypePointer Uniform %bufB
+          %_ = OpVariable %_ptr_Uniform_bufB Uniform
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+       %bufA = OpTypeStruct %S
+%_ptr_Uniform_bufA = OpTypePointer Uniform %bufA
+        %__0 = OpVariable %_ptr_Uniform_bufA Uniform
+%_ptr_Uniform_half = OpTypePointer Uniform %half
+ %uniformBuf = OpTypeStruct %S
+%_ptr_Uniform_uniformBuf = OpTypePointer Uniform %uniformBuf
+        %__1 = OpVariable %_ptr_Uniform_uniformBuf Uniform
+       %main = OpFunction %void None %3
+          %5 = OpLabel
+         %17 = OpAccessChain %_ptr_Uniform_half %__0 %int_0 %int_0
+         %18 = OpLoad %half %17
+         %22 = OpAccessChain %_ptr_Uniform_half %__1 %int_0 %int_0
+         %23 = OpLoad %half %22
+         %24 = OpFAdd %half %18 %23
+         %25 = OpAccessChain %_ptr_Uniform_half %_ %int_0 %int_0
+               OpStore %25 %24
+               OpReturn
+               OpFunctionEnd
+    )");
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.computeStage.module = module;
