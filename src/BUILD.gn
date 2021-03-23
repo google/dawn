@@ -27,12 +27,6 @@ config("tint_common_config") {
     "${tint_spirv_tools_dir}/",
     "${tint_spirv_tools_dir}/include",
   ]
-
-  if (is_clang && !build_with_chromium) {
-    # Suppress a warning enabled by Skia: Tint is C++14 so the C++11 defect
-    # detected by this warning has been fixed.
-    cflags = [ "-Wno-return-std-move-in-c++11" ]
-  }
 }
 
 config("tint_public_config") {
