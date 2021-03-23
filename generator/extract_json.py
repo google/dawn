@@ -27,9 +27,18 @@ if __name__ == "__main__":
     for (name, content) in files.items():
         output_file = output_dir + os.path.sep + name
 
+        # Create the output directory if needed.
         directory = os.path.dirname(output_file)
         if not os.path.exists(directory):
             os.makedirs(directory)
+
+        # Skip writing to the file if it already has the correct content.
+        try:
+            with open(output_file, 'r') as outfile:
+                if outfile.read() == content:
+                    continue
+        except (OSError, EnvironmentError):
+            pass
 
         with open(output_file, 'w') as outfile:
             outfile.write(content)
