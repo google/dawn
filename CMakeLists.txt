@@ -84,6 +84,11 @@ if (MSVC)
     endif()
 endif()
 
+# Enable msbuild multiprocessor builds
+if (MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+endif()
+
 if (${TINT_CHECK_CHROMIUM_STYLE})
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -add-plugin -Xclang find-bad-constructs")
 endif()
@@ -197,6 +202,7 @@ function(tint_default_compile_options TARGET)
       /wd4127
       /wd4244
       /wd4267
+      /wd4324
       /wd4458
       /wd4514
       /wd4571
