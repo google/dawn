@@ -51,9 +51,6 @@ namespace {
     std::unique_ptr<dawn_native::Instance> sInstance;
     WGPUProcDeviceCreateSwapChain sOriginalDeviceCreateSwapChain = nullptr;
 
-    std::string sInjectedErrorTestcaseOutDir;
-    uint64_t sOutputFileNumber = 0;
-
     bool sCommandsComplete = false;
 
     WGPUSwapChain ErrorDeviceCreateSwapChain(WGPUDevice device,
@@ -68,32 +65,6 @@ namespace {
 }  // namespace
 
 int DawnWireServerFuzzer::Initialize(int* argc, char*** argv) {
-    ASSERT(argc != nullptr && argv != nullptr);
-
-    // The first argument (the fuzzer binary) always stays the same.
-    int argcOut = 1;
-
-    for (int i = 1; i < *argc; ++i) {
-        constexpr const char kInjectedErrorTestcaseDirArg[] = "--injected-error-testcase-dir=";
-        if (strstr((*argv)[i], kInjectedErrorTestcaseDirArg) == (*argv)[i]) {
-            sInjectedErrorTestcaseOutDir = (*argv)[i] + strlen(kInjectedErrorTestcaseDirArg);
-            const char* sep = GetPathSeparator();
-            if (sInjectedErrorTestcaseOutDir.back() != *sep) {
-                sInjectedErrorTestcaseOutDir += sep;
-            }
-            // Log so that it's clear the fuzzer found the argument.
-            dawn::InfoLog() << "Generating injected errors, output dir is: \""
-                            << sInjectedErrorTestcaseOutDir << "\"";
-            continue;
-        }
-
-        // Move any unconsumed arguments to the next slot in the output array.
-        (*argv)[argcOut++] = (*argv)[i];
-    }
-
-    // Write the argument count
-    *argc = argcOut;
-
     // TODO(crbug.com/1038952): The Instance must be static because destructing the vkInstance with
     // Swiftshader crashes libFuzzer. When this is fixed, move this into Run so that error injection
     // for adapter discovery can be fuzzed.
@@ -107,7 +78,15 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
                               size_t size,
                               MakeDeviceFn MakeDevice,
                               bool supportsErrorInjection) {
-    bool didInjectError = false;
+    // We require at least the injected error index.
+    if (size < sizeof(uint64_t)) {
+        return 0;
+    }
+
+    // Get and consume the injected error index.
+    uint64_t injectedErrorIndex = *reinterpret_cast<const uint64_t*>(data);
+    data += sizeof(uint64_t);
+    size -= sizeof(uint64_t);
 
     if (supportsErrorInjection) {
         dawn_native::EnableErrorInjector();
@@ -115,17 +94,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
         // Clear the error injector since it has the previous run's call counts.
         dawn_native::ClearErrorInjector();
 
-        // If we're outputing testcases with injected errors, we run the fuzzer on the original
-        // input data, and prepend injected errors to it. In the case, where we're NOT outputing,
-        // we use the first bytes as the injected error index.
-        if (sInjectedErrorTestcaseOutDir.empty() && size >= sizeof(uint64_t)) {
-            // Otherwise, use the first bytes as the injected error index.
-            dawn_native::InjectErrorAt(*reinterpret_cast<const uint64_t*>(data));
-            didInjectError = true;
-
-            data += sizeof(uint64_t);
-            size -= sizeof(uint64_t);
-        }
+        dawn_native::InjectErrorAt(injectedErrorIndex);
     }
 
     DawnProcTable procs = dawn_native::GetProcs();
@@ -142,7 +111,7 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     wgpu::Device device = MakeDevice(sInstance.get());
     if (!device) {
         // We should only ever fail device creation if an error was injected.
-        ASSERT(didInjectError);
+        ASSERT(supportsErrorInjection);
         return 0;
     }
 
@@ -168,28 +137,5 @@ int DawnWireServerFuzzer::Run(const uint8_t* data,
     }
 
     wireServer = nullptr;
-
-    // If we support error injection, and an output directory was provided, output copies of the
-    // original testcase data, prepended with the injected error index.
-    if (supportsErrorInjection && !sInjectedErrorTestcaseOutDir.empty()) {
-        const uint64_t injectedCallCount = dawn_native::AcquireErrorInjectorCallCount();
-
-        auto WriteTestcase = [&](uint64_t i) {
-            std::ofstream outFile(
-                sInjectedErrorTestcaseOutDir + "injected_error_testcase_" +
-                    std::to_string(sOutputFileNumber++),
-                std::ios_base::out | std::ios_base::binary | std::ios_base::trunc);
-            outFile.write(reinterpret_cast<const char*>(&i), sizeof(i));
-            outFile.write(reinterpret_cast<const char*>(data), size);
-        };
-
-        for (uint64_t i = 0; i < injectedCallCount; ++i) {
-            WriteTestcase(i);
-        }
-
-        // Also add a testcase where the injected error is so large no errors should occur.
-        WriteTestcase(std::numeric_limits<uint64_t>::max());
-    }
-
     return 0;
 }
