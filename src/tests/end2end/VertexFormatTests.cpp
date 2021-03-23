@@ -24,7 +24,7 @@
 // the vertex content is the same as what we expected. On success it outputs green,
 // otherwise red.
 
-constexpr uint32_t kRTSize = 400;
+constexpr uint32_t kRTSize = 1;
 constexpr uint32_t kVertexNum = 3;
 
 std::vector<uint16_t> Float32ToFloat16(std::vector<float> data) {
@@ -199,23 +199,20 @@ class VertexFormatTest : public DawnTest {
                                     bool isNormalized,
                                     bool isUnsigned,
                                     uint32_t componentCount) {
-        if (componentCount == 1) {
-            if (isFloat || isNormalized) {
-                return "float";
-            } else if (isUnsigned) {
-                return "uint";
-            } else {
-                return "int";
-            }
+        std::string base;
+        if (isFloat || isNormalized) {
+            base = "f32";
+        } else if (isUnsigned) {
+            base = "u32";
         } else {
-            if (isNormalized || isFloat) {
-                return "vec" + std::to_string(componentCount);
-            } else if (isUnsigned) {
-                return "uvec" + std::to_string(componentCount);
-            } else {
-                return "ivec" + std::to_string(componentCount);
-            }
+            base = "i32";
         }
+
+        if (componentCount == 1) {
+            return base;
+        }
+
+        return "vec" + std::to_string(componentCount) + "<" + base + ">";
     }
 
     // The length of vertexData is fixed to 3, it aligns to triangle vertex number
@@ -233,46 +230,45 @@ class VertexFormatTest : public DawnTest {
         std::string variableType =
             ShaderTypeGenerator(isFloat, isNormalized, isUnsigned, componentCount);
         std::string expectedDataType = ShaderTypeGenerator(isFloat, isNormalized, isUnsigned, 1);
-        std::ostringstream vs;
-        vs << "#version 450\n";
 
-        // layout(location = 0) in float/uint/int/ivecn/vecn/uvecn test;
-        vs << "layout(location = 0) in " << variableType << " test;\n";
-        vs << "layout(location = 0) out vec4 color;\n";
+        std::ostringstream vs;
+        vs << "[[location(0)]] var<in> test : " << variableType << ";\n";
         // Because x86 CPU using "extended
         // precision"(https://en.wikipedia.org/wiki/Extended_precision) during float
         // math(https://developer.nvidia.com/sites/default/files/akamai/cuda/files/NVIDIA-CUDA-Floating-Point.pdf),
         // move normalization and Float16ToFloat32 into shader to generate
         // expected value.
-        vs << "float Float16ToFloat32(uint fp16) {\n";
-        vs << "  uint magic = (uint(254) - uint(15)) << 23;\n";
-        vs << "  uint was_inf_nan = (uint(127) + uint(16)) << 23;\n";
-        vs << "  uint fp32u;\n";
-        vs << "  float fp32;\n";
-        vs << "  fp32u = (fp16 & 0x7FFF) << 13;\n";
-        vs << "  fp32 = uintBitsToFloat(fp32u) * uintBitsToFloat(magic);\n";
-        vs << "  fp32u = floatBitsToUint(fp32);\n";
-        vs << "  if (fp32 >= uintBitsToFloat(was_inf_nan)) {\n";
-        vs << "    fp32u |= uint(255) << 23;\n";
-        vs << "  }\n";
-        vs << "  fp32u |= (fp16 & 0x8000) << 16;\n";
-        vs << "  fp32 = uintBitsToFloat(fp32u);\n";
-        vs << "  return fp32;\n";
-        vs << "}\n";
+        vs << R"(
+            [[location(0)]] var<out> color : vec4<f32>;
+            fn Float16ToFloat32(fp16 : u32) -> f32 {
+                const magic : u32 = (254u - 15u) << 23u;
+                const was_inf_nan : u32 = (127u + 16u) << 23u;
+                var fp32u : u32 = (fp16 & 0x7FFFu) << 13u;
+                const fp32 : f32 = bitcast<f32>(fp32u) * bitcast<f32>(magic);
+                fp32u = bitcast<u32>(fp32);
+                if (fp32 >= bitcast<f32>(was_inf_nan)) {
+                    fp32u = fp32u | (255u << 23u);
+                }
+                fp32u = fp32u | ((fp16 & 0x8000u) << 16u);
+                return bitcast<f32>(fp32u);
+            }
 
-        vs << "void main() {\n";
-
-        // Hard code the triangle in the shader so that we don't have to add a vertex input for it.
-        vs << "    const vec2 pos[3] = vec2[3](vec2(-1.0f, 0.0f), vec2(-1.0f, 1.0f), vec2(0.0f, "
-              "1.0f));\n";
-        vs << "    gl_Position = vec4(pos[gl_VertexIndex], 0.0, 1.0);\n";
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+                    vec2<f32>(-1.0, -1.0),
+                    vec2<f32>( 2.0,  0.0),
+                    vec2<f32>( 0.0,  2.0));
+                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+        )";
 
         // Declare expected values.
-        vs << "    " << expectedDataType << " expected[" + std::to_string(kVertexNum) + "]";
-        vs << "[" + std::to_string(componentCount) + "];\n";
+        vs << "var expected : array<array<" << expectedDataType << ", "
+           << std::to_string(componentCount) << ">, " << std::to_string(kVertexNum) << ">;";
         // Assign each elements in expected values
-        // e.g. expected[0][0] = uint(1);
-        //      expected[0][1] = uint(2);
+        // e.g. expected[0][0] = u32(1u);
+        //      expected[0][1] = u32(2u);
         for (uint32_t i = 0; i < kVertexNum; ++i) {
             for (uint32_t j = 0; j < componentCount; ++j) {
                 vs << "    expected[" + std::to_string(i) + "][" + std::to_string(j) + "] = "
@@ -284,36 +280,38 @@ class VertexFormatTest : public DawnTest {
                 } else if (isNormalized) {
                     // Move normalize operation into shader because of CPU and GPU precision
                     // different on float math.
-                    vs << "max(float(" << std::to_string(expectedData[i * componentCount + j])
-                       << ") / " << std::to_string(std::numeric_limits<T>::max()) << ", -1.0));\n";
+                    vs << "max(f32(" << std::to_string(expectedData[i * componentCount + j])
+                       << ") / " << std::to_string(std::numeric_limits<T>::max())
+                       << ".0 , -1.0));\n";
                 } else if (isHalf) {
-                    // Becasue Vulkan and D3D12 handle -0.0f through uintBitsToFloat have different
+                    // Becasue Vulkan and D3D12 handle -0.0f through bitcast have different
                     // result (Vulkan take -0.0f as -0.0 but D3D12 take -0.0f as 0), add workaround
                     // for -0.0f.
                     if (static_cast<uint16_t>(expectedData[i * componentCount + j]) ==
                         kNegativeZeroInHalf) {
-                        vs << "-0.0f);\n";
+                        vs << "-0.0);\n";
                     } else {
-                        vs << "Float16ToFloat32("
-                           << std::to_string(expectedData[i * componentCount + j]);
-                        vs << "));\n";
+                        vs << "Float16ToFloat32(u32("
+                           << std::to_string(expectedData[i * componentCount + j]) << ")));\n";
                     }
+                } else if (isUnsigned) {
+                    vs << std::to_string(expectedData[i * componentCount + j]) << "u);\n";
                 } else {
                     vs << std::to_string(expectedData[i * componentCount + j]) << ");\n";
                 }
             }
         }
 
-        vs << "    bool success = true;\n";
+        vs << "    var success : bool = true;\n";
         // Perform the checks by successively ANDing a boolean
         for (uint32_t component = 0; component < componentCount; ++component) {
             std::string suffix = componentCount == 1 ? "" : "[" + std::to_string(component) + "]";
             std::string testVal = "testVal" + std::to_string(component);
             std::string expectedVal = "expectedVal" + std::to_string(component);
-            vs << "    " << expectedDataType << " " << testVal << ";\n";
-            vs << "    " << expectedDataType << " " << expectedVal << ";\n";
+            vs << "    var " << testVal << " : " << expectedDataType << ";\n";
+            vs << "    var " << expectedVal << " : " << expectedDataType << ";\n";
             vs << "    " << testVal << " = test" << suffix << ";\n";
-            vs << "    " << expectedVal << " = expected[gl_VertexIndex]"
+            vs << "    " << expectedVal << " = expected[VertexIndex]"
                << "[" << component << "];\n";
             if (!isInputTypeFloat) {  // Integer / unsigned integer need to match exactly.
                 vs << "    success = success && (" << testVal << " == " << expectedVal << ");\n";
@@ -321,35 +319,32 @@ class VertexFormatTest : public DawnTest {
                 // TODO(shaobo.yan@intel.com) : a difference of 8 ULPs is allowed in this test
                 // because it is required on MacbookPro 11.5,AMD Radeon HD 8870M(on macOS 10.13.6),
                 // but that it might be possible to tighten.
-                vs << "    if (isnan(" << expectedVal << ")) {\n";
-                vs << "        success = success && isnan(" << testVal << ");\n";
+                vs << "    if (isNan(" << expectedVal << ")) {\n";
+                vs << "       success = success && isNan(" << testVal << ");\n";
                 vs << "    } else {\n";
-                vs << "        uint testValFloatToUint = floatBitsToUint(" << testVal << ");\n";
-                vs << "        uint expectedValFloatToUint = floatBitsToUint(" << expectedVal
+                vs << "        const testValFloatToUint : u32 = bitcast<u32>(" << testVal << ");\n";
+                vs << "        const expectedValFloatToUint : u32 = bitcast<u32>(" << expectedVal
                    << ");\n";
                 vs << "        success = success && max(testValFloatToUint, "
                       "expectedValFloatToUint)";
-                vs << "        - min(testValFloatToUint, expectedValFloatToUint) < uint(8);\n";
+                vs << "        - min(testValFloatToUint, expectedValFloatToUint) < 8u;\n";
                 vs << "    }\n";
             }
         }
-        vs << "    if (success) {\n";
-        vs << "        color = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n";
-        vs << "    } else {\n";
-        vs << "        color = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n";
-        vs << "    }\n";
-        vs << "}\n";
+        vs << R"(
+            if (success) {
+                color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            } else {
+                color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            }
+        })";
 
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, vs.str().c_str());
-
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, R"(
-                #version 450
-                layout(location = 0) in vec4 color;
-                layout(location = 0) out vec4 fragColor;
-                void main() {
-                    fragColor = color;
+        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vs.str().c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                [[location(0)]] var<in> color : vec4<f32>;
+                [[location(0)]] var<out> FragColor : vec4<f32>;
+                [[stage(fragment)]] fn main() -> void {
+                    FragColor = color;
                 })");
 
         uint32_t bytesPerComponents = BytesPerComponents(format);
@@ -375,11 +370,6 @@ class VertexFormatTest : public DawnTest {
     void DoVertexFormatTest(wgpu::VertexFormat format,
                             std::vector<VertexType> vertex,
                             std::vector<ExpectedType> expectedData) {
-        // TODO(crbug.com/tint/402): Unimplemented min / max
-        DAWN_SKIP_TEST_IF(
-            (IsFloatFormat(format) || IsHalfFormat(format) || IsNormalizedFormat(format)) &&
-            HasToggleEnabled("use_tint_generator"));
-
         wgpu::RenderPipeline pipeline = MakeTestPipeline(format, expectedData);
         wgpu::Buffer vertexBuffer = utils::CreateBufferFromData(
             device, vertex.data(), vertex.size() * sizeof(VertexType), wgpu::BufferUsage::Vertex);
@@ -756,6 +746,9 @@ TEST_P(VertexFormatTest, Float16x2) {
     // See http://crbug.com/dawn/259
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
+    // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+
     std::vector<uint16_t> vertexData =
         Float32ToFloat16(std::vector<float>({14.8f, -0.0f, 22.5f, 1.3f, +0.0f, -24.8f}));
 
@@ -766,6 +759,9 @@ TEST_P(VertexFormatTest, Float16x4) {
     // TODO(cwallez@chromium.org): Failing because of a SPIRV-Cross issue.
     // See http://crbug.com/dawn/259
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+
+    // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
 
     std::vector<uint16_t> vertexData = Float32ToFloat16(std::vector<float>(
         {+0.0f, -16.8f, 18.2f, -0.0f, 12.5f, 1.3f, 14.8f, -12.4f, 22.5f, -48.8f, 47.4f, -24.8f}));
@@ -792,6 +788,9 @@ TEST_P(VertexFormatTest, Float32x2) {
     // See http://crbug.com/dawn/259
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
 
+    // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+
     std::vector<float> vertexData = {18.23f, -0.0f, +0.0f, +1.0f, 1.3f, -1.0f};
 
     DoVertexFormatTest(wgpu::VertexFormat::Float32x2, vertexData, vertexData);
@@ -801,6 +800,9 @@ TEST_P(VertexFormatTest, Float32x3) {
     // TODO(cwallez@chromium.org): Failing because of a SPIRV-Cross issue.
     // See http://crbug.com/dawn/259
     DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+
+    // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
+    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
 
     std::vector<float> vertexData = {
         +0.0f, -1.0f, -0.0f, 1.0f, 1.3f, 99.45f, 23.6f, -81.2f, 55.0f,
