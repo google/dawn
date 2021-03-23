@@ -84,11 +84,6 @@ if (MSVC)
     endif()
 endif()
 
-# Enable msbuild multiprocessor builds
-if (MSVC)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-endif()
-
 if (${TINT_CHECK_CHROMIUM_STYLE})
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Xclang -add-plugin -Xclang find-bad-constructs")
 endif()
@@ -97,11 +92,20 @@ if (${TINT_BUILD_SPV_READER})
   include_directories("${PROJECT_SOURCE_DIR}/third_party/spirv-tools/include")
 endif()
 
-if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU") OR
-    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang") OR
-    (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") AND
-     (NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")))
+if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
+  set(COMPILER_IS_CLANG_CL TRUE)
+endif()
+
+if((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
+    (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang") OR
+    ((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") AND
+     (NOT COMPILER_IS_CLANG_CL)))
   set(COMPILER_IS_LIKE_GNU TRUE)
+endif()
+
+# Enable msbuild multiprocessor builds
+if (MSVC AND NOT COMPILER_IS_CLANG_CL)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 endif()
 
 if(${TINT_BUILD_DOCS})
