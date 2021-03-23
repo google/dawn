@@ -200,15 +200,6 @@ class BufferZeroInitTest : public DawnTest {
         EXPECT_PIXEL_RGBA8_EQ(kExpectedColor, outputTexture, 0u, 0u);
     }
 
-    void TestBufferZeroInitInBindGroup(const char* glslComputeShader,
-                                       uint64_t bufferOffset,
-                                       uint64_t boundBufferSize,
-                                       const std::vector<uint32_t>& expectedBufferData) {
-        return TestBufferZeroInitInBindGroup(
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Compute, glslComputeShader),
-            bufferOffset, boundBufferSize, expectedBufferData);
-    }
-
     wgpu::RenderPipeline CreateRenderPipelineForTest(const char* vertexShader,
                                                      uint32_t vertexBufferCount = 1u) {
         constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
@@ -992,7 +983,8 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
     // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
     DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
-    const char* computeShader = R"(
+    constexpr uint32_t kBoundBufferSize = 16u;
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct UBO {
             value : vec4<u32>;
         };
@@ -1006,11 +998,7 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             }
         }
-    )";
-
-    constexpr uint32_t kBoundBufferSize = 16u;
-
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, computeShader);
+    )");
 
     // Bind the whole buffer
     {
@@ -1034,7 +1022,8 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
     // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
     DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
-    const char* computeShader = R"(
+    constexpr uint32_t kBoundBufferSize = 16u;
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
         [[block]] struct SSBO {
             value : vec4<u32>;
         };
@@ -1048,10 +1037,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             }
         }
-    )";
-
-    constexpr uint32_t kBoundBufferSize = 16u;
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, computeShader);
+    )");
 
     // Bind the whole buffer
     {
@@ -1075,37 +1061,35 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
     DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
-    // TODO(crbug.com/tint/375): Enable once barriers are implemented
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-    const char* computeShader = R"(
-        #version 450
-        layout(set = 0, binding = 0, std140) buffer SSBO {
-            uvec4 value[2];
-        } ssbo;
-        layout(set = 0, binding = 1, rgba8) uniform writeonly image2D outImage;
-        void main() {
-            if (ssbo.value[0] == uvec4(0, 0, 0, 0) && ssbo.value[1] == uvec4(0, 0, 0, 0)) {
-                imageStore(outImage, ivec2(0, 0), vec4(0.f, 1.f, 0.f, 1.f));
+    constexpr uint32_t kBoundBufferSize = 32u;
+    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        [[block]] struct SSBO {
+            value : array<vec4<u32>, 2>;
+        };
+        [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] SSBO;
+        [[group(0), binding(1)]] var outImage : [[access(write)]] texture_storage_2d<rgba8unorm>;
+
+        [[stage(compute)]] fn main() -> void {
+            if (all(ssbo.value[0] == vec4<u32>(0u, 0u, 0u, 0u)) &&
+                all(ssbo.value[1] == vec4<u32>(0u, 0u, 0u, 0u))) {
+                textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
             } else {
-                imageStore(outImage, ivec2(0, 0), vec4(1.f, 0.f, 0.f, 1.f));
+                textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             }
 
-            memoryBarrier();
-            barrier();
+            storageBarrier();
 
             ssbo.value[0].x = 10u;
             ssbo.value[1].y = 20u;
         }
-    )";
-
-    constexpr uint32_t kBoundBufferSize = 32u;
+    )");
 
     // Bind the whole buffer
     {
         std::vector<uint32_t> expected(kBoundBufferSize / sizeof(uint32_t), 0u);
         expected[0] = 10u;
         expected[5] = 20u;
-        TestBufferZeroInitInBindGroup(computeShader, 0, kBoundBufferSize, expected);
+        TestBufferZeroInitInBindGroup(module, 0, kBoundBufferSize, expected);
     }
 
     // Bind a range of a buffer
@@ -1116,7 +1100,7 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
             (kBoundBufferSize + kOffset + kExtraBytes) / sizeof(uint32_t), 0u);
         expected[kOffset / sizeof(uint32_t)] = 10u;
         expected[kOffset / sizeof(uint32_t) + 5u] = 20u;
-        TestBufferZeroInitInBindGroup(computeShader, kOffset, kBoundBufferSize, expected);
+        TestBufferZeroInitInBindGroup(module, kOffset, kBoundBufferSize, expected);
     }
 }
 
