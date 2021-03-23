@@ -13542,9 +13542,31 @@ TEST_F(SpvParserTest,
                  "a structured header (it has no merge instruction)"));
 }
 
+TEST_F(SpvParserTest, Switch_NotAsSelectionHeader_Simple) {
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSwitch %uint_0 %99
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_FALSE(fe.EmitBody());
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("invalid structured control flow: found an OpSwitch that "
+                "is not preceded by an OpSelectionMerge:"));
+}
+
 TEST_F(SpvParserTest,
-       DISABLED_Switch_NotAsSelectionHeader_NonDefaultBranchesAreContinue) {
-  // Adapted from SPIRV-Tools test MissingMergeOneUnseenTargetSwitchGood
+       Switch_NotAsSelectionHeader_NonDefaultBranchesAreContinue) {
+  // Adapted from SPIRV-Tools test MissingMergeOneUnseenTargetSwitchBad
   auto p = parser(test::Assemble(CommonTypes() + R"(
  %100 = OpFunction %void None %voidfn
  %entry = OpLabel
@@ -13571,15 +13593,15 @@ TEST_F(SpvParserTest,
    )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = "unhandled case";
-  ASSERT_EQ(expect, got);
+  EXPECT_FALSE(fe.EmitBody());
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("invalid structured control flow: found an OpSwitch that "
+                "is not preceded by an OpSelectionMerge:"));
 }
 
-TEST_F(SpvParserTest,
-       DISABLED_Switch_NotAsSelectionHeader_DefaultBranchIsContinue) {
-  // Adapted from SPIRV-Tools test MissingMergeOneUnseenTargetSwitchGood
+TEST_F(SpvParserTest, Switch_NotAsSelectionHeader_DefaultBranchIsContinue) {
+  // Adapted from SPIRV-Tools test MissingMergeOneUnseenTargetSwitchBad
   auto p = parser(test::Assemble(CommonTypes() + R"(
  %100 = OpFunction %void None %voidfn
  %entry = OpLabel
@@ -13606,10 +13628,11 @@ TEST_F(SpvParserTest,
    )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  auto got = ToString(p->builder(), fe.ast_body());
-  auto* expect = "unhandled case";
-  ASSERT_EQ(expect, got);
+  EXPECT_FALSE(fe.EmitBody());
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("invalid structured control flow: found an OpSwitch that "
+                "is not preceded by an OpSelectionMerge:"));
 }
 
 TEST_F(SpvParserTest, SiblingLoopConstruct_Null) {

@@ -2621,8 +2621,14 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       return true;
     }
     case SpvOpSwitch:
-      // TODO(dneto)
-      break;
+      // An OpSelectionMerge must precede an OpSwitch.  That is clarified
+      // in the resolution to Khronos-internal SPIR-V issue 115.
+      // A new enough version of the SPIR-V validator checks this case.
+      // But issue an error in this case, as a defensive measure.
+      return Fail() << "invalid structured control flow: found an OpSwitch "
+                       "that is not preceded by an "
+                       "OpSelectionMerge: "
+                    << terminator.PrettyPrint();
     default:
       break;
   }
