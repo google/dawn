@@ -1,0 +1,138 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    // Available variables which can be used inside of strings.
+    // ${workspaceRoot}: the root folder of the team
+    // ${file}: the current opened file
+    // ${fileBasename}: the current opened file's basename
+    // ${fileDirname}: the current opened file's dirname
+    // ${fileExtname}: the current opened file's extension
+    // ${cwd}: the current working directory of the spawned process
+    "version": "2.0.0",
+    "tasks": [
+        // Invokes ninja in the 'out/active' directory, which is created with
+        // the 'gn gen' task (see below).
+        {
+            "label": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "type": "shell",
+            "linux": {
+                "command": "sh",
+                "args": [
+                    "-c",
+                    "ninja && echo Done"
+                ],
+            },
+            "osx": {
+                "command": "sh",
+                "args": [
+                    "-c",
+                    "ninja && echo Done"
+                ],
+            },
+            "options": {
+                "cwd": "${workspaceRoot}/out/active",
+            },
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": true,
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },
+        // Generates a GN build directory at 'out/<build-type>' with the
+        // is_debug argument set to to true iff the build-type is Debug.
+        // A symbolic link to this build directory is created at 'out/active'
+        // which is used to track the active build directory.
+        {
+            "label": "gn gen",
+            "type": "shell",
+            "linux": {
+                "command": "sh",
+                "args": [
+                    "-c",
+                    "gn gen 'out/${input:buildType}' --args=is_debug=$(if [ '${input:buildType}' = 'Debug' ]; then echo 'true'; else echo 'false'; fi) && (rm -fr out/active || true) && ln -s ${input:buildType} out/active",
+                ],
+            },
+            "osx": {
+                "command": "sh",
+                "args": [
+                    "-c",
+                    "gn gen 'out/${input:buildType}' --args=is_debug=$(if [ '${input:buildType}' = 'Debug' ]; then echo 'true'; else echo 'false'; fi) && (rm -fr out/active || true) && ln -s ${input:buildType} out/active",
+                ],
+            },
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": [],
+        },
+        // Rebases the current branch on to out origin/main and then calls
+        // `gclient sync`.
+        {
+            "label": "sync",
+            "type": "shell",
+            "linux": {
+                "command": "sh",
+                "args": [
+                    "-c",
+                    "git fetch origin && git rebase origin/main && gclient sync"
+                ],
+            },
+            "osx": {
+                "command": "sh",
+                "args": [
+                    "-c",
+                    "git fetch origin && git rebase origin/main && gclient sync"
+                ],
+            },
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": [],
+        },
+        // Pushes the changes at HEAD to gerrit for review
+        {
+            "label": "push",
+            "type": "shell",
+            "command": "git",
+            "args": [
+                "push",
+                "origin",
+                "HEAD:refs/for/main"
+            ],
+            "options": {
+                "cwd": "${workspaceRoot}"
+            },
+            "problemMatcher": [],
+        }
+    ],
+    "inputs": [
+        {
+            "id": "buildType",
+            "type": "pickString",
+            "options": [
+                "Debug",
+                "Release",
+            ],
+            "default": "Debug",
+            "description": "The type of build",
+        },
+    ]
+}
