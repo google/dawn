@@ -15,6 +15,8 @@
 #ifndef SRC_TRANSFORM_SPIRV_H_
 #define SRC_TRANSFORM_SPIRV_H_
 
+#include <vector>
+
 #include "src/transform/transform.h"
 
 namespace tint {
@@ -44,6 +46,34 @@ class Spirv : public Transform {
   void HandleEntryPointIOTypes(CloneContext& ctx) const;
   /// Change type of sample mask builtin variables to single element arrays.
   void HandleSampleMaskBuiltins(CloneContext& ctx) const;
+
+  /// Recursively create module-scope input variables for `ty` and add
+  /// function-scope variables for structs to `func`.
+  ///
+  /// For non-structures, create a module-scope input variable.
+  /// For structures, recurse into members and then create a function-scope
+  /// variable initialized using the variables created for its members.
+  /// Return the symbol for the variable that was created.
+  Symbol HoistToInputVariables(CloneContext& ctx,
+                               const ast::Function* func,
+                               type::Type* ty,
+                               const ast::DecorationList& decorations) const;
+
+  /// Recursively create module-scope output variables for `ty` and build a list
+  /// of assignment instructions to write to them from `store_value`.
+  ///
+  /// For non-structures, create a module-scope output variable and generate the
+  /// assignment instruction.
+  /// For structures, recurse into members, tracking the chain of member
+  /// accessors.
+  /// Returns the list of variable assignments in `stores`.
+  void HoistToOutputVariables(CloneContext& ctx,
+                              const ast::Function* func,
+                              type::Type* ty,
+                              const ast::DecorationList& decorations,
+                              std::vector<Symbol> member_accesses,
+                              Symbol store_value,
+                              ast::StatementList& stores) const;
 };
 
 }  // namespace transform

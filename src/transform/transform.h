@@ -170,6 +170,16 @@ class Transform {
                                      const char* (&names)[N]) {
     RenameReservedKeywords(ctx, names, N);
   }
+
+  /// Clones the decoration list `in`, removing decorations based on a filter.
+  /// @param ctx the clone context
+  /// @param in the decorations to clone
+  /// @param should_remove the function to select which decorations to remove
+  /// @return the cloned decorations
+  static ast::DecorationList RemoveDecorations(
+      CloneContext* ctx,
+      const ast::DecorationList& in,
+      std::function<bool(const ast::Decoration*)> should_remove);
 };
 
 }  // namespace transform

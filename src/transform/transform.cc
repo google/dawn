@@ -81,5 +81,18 @@ void Transform::RenameReservedKeywords(CloneContext* ctx,
   });
 }
 
+ast::DecorationList Transform::RemoveDecorations(
+    CloneContext* ctx,
+    const ast::DecorationList& in,
+    std::function<bool(const ast::Decoration*)> should_remove) {
+  ast::DecorationList new_decorations;
+  for (auto* deco : in) {
+    if (!should_remove(deco)) {
+      new_decorations.push_back(ctx->Clone(deco));
+    }
+  }
+  return new_decorations;
+}
+
 }  // namespace transform
 }  // namespace tint
