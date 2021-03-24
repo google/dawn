@@ -79,6 +79,9 @@ Session.vim
 .netrwhist
 tags
 
+### VisualStudio ###
+.vs/*
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/tasks.json
