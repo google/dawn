@@ -60,24 +60,27 @@ namespace {
     }
 
     wgpu::ShaderModule CreateDefaultVertexShaderModule(wgpu::Device device) {
-        return utils::CreateShaderModule(device, utils::SingleShaderStage::Vertex, R"(
-            #version 450
-            layout (location = 0) out vec2 o_texCoord;
-            void main() {
-                const vec2 pos[6] = vec2[6](vec2(-2.f, -2.f),
-                                            vec2(-2.f,  2.f),
-                                            vec2( 2.f, -2.f),
-                                            vec2(-2.f,  2.f),
-                                            vec2( 2.f, -2.f),
-                                            vec2( 2.f,  2.f));
-                const vec2 texCoord[6] = vec2[6](vec2(0.f, 0.f),
-                                                 vec2(0.f, 1.f),
-                                                 vec2(1.f, 0.f),
-                                                 vec2(0.f, 1.f),
-                                                 vec2(1.f, 0.f),
-                                                 vec2(1.f, 1.f));
-                gl_Position = vec4(pos[gl_VertexIndex], 0.f, 1.f);
-                o_texCoord = texCoord[gl_VertexIndex];
+        return utils::CreateShaderModuleFromWGSL(device, R"(
+            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
+            [[builtin(position)]] var<out> Position : vec4<f32>;
+            [[location(0)]] var<out> TexCoord : vec2<f32>;
+            [[stage(vertex)]] fn main() -> void {
+                const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                                            vec2<f32>(-2., -2.),
+                                            vec2<f32>(-2.,  2.),
+                                            vec2<f32>( 2., -2.),
+                                            vec2<f32>(-2.,  2.),
+                                            vec2<f32>( 2., -2.),
+                                            vec2<f32>( 2.,  2.));
+                const texCoord : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                                                 vec2<f32>(0., 0.),
+                                                 vec2<f32>(0., 1.),
+                                                 vec2<f32>(1., 0.),
+                                                 vec2<f32>(0., 1.),
+                                                 vec2<f32>(1., 0.),
+                                                 vec2<f32>(1., 1.));
+                Position = vec4<f32>(pos[VertexIndex], 0., 1.);
+                TexCoord = texCoord[VertexIndex];
             }
         )");
     }
@@ -160,8 +163,7 @@ class TextureViewSamplingTest : public DawnTest {
     }
 
     void Verify(const wgpu::TextureView& textureView, const char* fragmentShader, int expected) {
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModule(device, utils::SingleShaderStage::Fragment, fragmentShader);
+        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fragmentShader);
 
         utils::ComboRenderPipelineDescriptor2 textureDescriptor;
         textureDescriptor.vertex.module = mVSModule;
@@ -212,15 +214,13 @@ class TextureViewSamplingTest : public DawnTest {
         wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
         const char* fragmentShader = R"(
-            #version 450
-            layout(set = 0, binding = 0) uniform sampler sampler0;
-            layout(set = 0, binding = 1) uniform texture2D texture0;
-            layout(location = 0) in vec2 texCoord;
-            layout(location = 0) out vec4 fragColor;
+            [[group(0), binding(0)]] var sampler0 : sampler;
+            [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
+            [[location(0)]] var<in> texCoord : vec2<f32>;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            void main() {
-                fragColor =
-                    texture(sampler2D(texture0, sampler0), texCoord);
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = textureSample(texture0, sampler0, texCoord);
             }
         )";
 
@@ -253,17 +253,15 @@ class TextureViewSamplingTest : public DawnTest {
         wgpu::TextureView textureView = mTexture.CreateView(&descriptor);
 
         const char* fragmentShader = R"(
-            #version 450
-            layout(set = 0, binding = 0) uniform sampler sampler0;
-            layout(set = 0, binding = 1) uniform texture2DArray texture0;
-            layout(location = 0) in vec2 texCoord;
-            layout(location = 0) out vec4 fragColor;
+            [[group(0), binding(0)]] var sampler0 : sampler;
+            [[group(0), binding(1)]] var texture0 : texture_2d_array<f32>;
+            [[location(0)]] var<in> texCoord : vec2<f32>;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            void main() {
-                fragColor =
-                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 0)) +
-                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 1)) +
-                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 2));
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = textureSample(texture0, sampler0, texCoord, 0) +
+                            textureSample(texture0, sampler0, texCoord, 1) +
+                            textureSample(texture0, sampler0, texCoord, 2);
             }
         )";
 
@@ -277,40 +275,37 @@ class TextureViewSamplingTest : public DawnTest {
     std::string CreateFragmentShaderForCubeMapFace(uint32_t layer, bool isCubeMapArray) {
         // Reference: https://en.wikipedia.org/wiki/Cube_mapping
         const std::array<std::string, 6> kCoordsToCubeMapFace = {{
-            " 1.f,   tc,  -sc",  // Positive X
-            "-1.f,   tc,   sc",  // Negative X
-            "  sc,  1.f,  -tc",  // Positive Y
-            "  sc, -1.f,   tc",  // Negative Y
-            "  sc,   tc,  1.f",  // Positive Z
-            " -sc,   tc, -1.f",  // Negative Z
+            " 1.,  tc, -sc",  // Positive X
+            "-1.,  tc,  sc",  // Negative X
+            " sc,  1., -tc",  // Positive Y
+            " sc, -1.,  tc",  // Negative Y
+            " sc,  tc,  1.",  // Positive Z
+            "-sc,  tc, -1.",  // Negative Z
         }};
 
-        const std::string textureType = isCubeMapArray ? "textureCubeArray" : "textureCube";
-        const std::string samplerType = isCubeMapArray ? "samplerCubeArray" : "samplerCube";
+        const std::string textureType = isCubeMapArray ? "texture_cube_array" : "texture_cube";
         const uint32_t cubeMapArrayIndex = layer / 6;
         const std::string coordToCubeMapFace = kCoordsToCubeMapFace[layer % 6];
 
         std::ostringstream stream;
         stream << R"(
-            #version 450
-            layout(set = 0, binding = 0) uniform sampler sampler0;
-            layout(set = 0, binding = 1) uniform )"
-               << textureType << R"( texture0;
-            layout(location = 0) in vec2 texCoord;
-            layout(location = 0) out vec4 fragColor;
-            void main() {
-                float sc = 2.f * texCoord.x - 1.f;
-                float tc = 2.f * texCoord.y - 1.f;
-                fragColor = texture()"
-               << samplerType << "(texture0, sampler0), ";
+            [[group(0), binding(0)]] var sampler0 : sampler;
+            [[group(0), binding(1)]] var texture0 : )"
+               << textureType << R"(<f32>;
+            [[location(0)]] var<in> texCoord : vec2<f32>;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
+
+            [[stage(fragment)]] fn main() -> void {
+                var sc : f32 = 2.0 * texCoord.x - 1.0;
+                var tc : f32 = 2.0 * texCoord.y - 1.0;
+                fragColor = textureSample(texture0, sampler0, vec3<f32>()"
+               << coordToCubeMapFace << ")";
 
         if (isCubeMapArray) {
-            stream << "vec4(" << coordToCubeMapFace << ", " << cubeMapArrayIndex;
-        } else {
-            stream << "vec3(" << coordToCubeMapFace;
+            stream << ", " << cubeMapArrayIndex;
         }
 
-        stream << R"());
+        stream << R"();
             })";
 
         return stream.str();
@@ -368,17 +363,15 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     wgpu::TextureView textureView = mTexture.CreateView();
 
     const char* fragmentShader = R"(
-            #version 450
-            layout(set = 0, binding = 0) uniform sampler sampler0;
-            layout(set = 0, binding = 1) uniform texture2DArray texture0;
-            layout(location = 0) in vec2 texCoord;
-            layout(location = 0) out vec4 fragColor;
+            [[group(0), binding(0)]] var sampler0 : sampler;
+            [[group(0), binding(1)]] var texture0 : texture_2d_array<f32>;
+            [[location(0)]] var<in> texCoord : vec2<f32>;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            void main() {
-                fragColor =
-                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 0)) +
-                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 1)) +
-                    texture(sampler2DArray(texture0, sampler0), vec3(texCoord, 2));
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = textureSample(texture0, sampler0, texCoord, 0) +
+                            textureSample(texture0, sampler0, texCoord, 1) +
+                            textureSample(texture0, sampler0, texCoord, 2);
             }
         )";
 
@@ -503,15 +496,14 @@ class TextureViewRenderingTest : public DawnTest {
         renderPassInfo.cColorAttachments[0].clearColor = {1.0f, 0.0f, 0.0f, 1.0f};
 
         const char* oneColorFragmentShader = R"(
-            #version 450
-            layout(location = 0) out vec4 fragColor;
+            [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            void main() {
-                fragColor = vec4(0.0, 1.0, 0.0, 1.0);
+            [[stage(fragment)]] fn main() -> void {
+                fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
             }
         )";
-        wgpu::ShaderModule oneColorFsModule = utils::CreateShaderModule(
-            device, utils::SingleShaderStage::Fragment, oneColorFragmentShader);
+        wgpu::ShaderModule oneColorFsModule =
+            utils::CreateShaderModuleFromWGSL(device, oneColorFragmentShader);
 
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
