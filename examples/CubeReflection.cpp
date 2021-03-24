@@ -101,7 +101,7 @@ void init() {
 
     initBuffers();
 
-    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[block]] struct Camera {
             view : mat4x4<f32>;
             proj : mat4x4<f32>;
@@ -125,7 +125,7 @@ void init() {
             return;
         })");
 
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> FragColor : vec4<f32>;
         [[location(2)]] var<in> f_col : vec3<f32>;
 
@@ -134,7 +134,7 @@ void init() {
             return;
         })");
 
-    wgpu::ShaderModule fsReflectionModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsReflectionModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> FragColor : vec4<f32>;
         [[location(2)]] var<in> f_col : vec3<f32>;
 

@@ -339,8 +339,8 @@ class VertexFormatTest : public DawnTest {
             }
         })";
 
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vs.str().c_str());
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vs.str().c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<in> color : vec4<f32>;
                 [[location(0)]] var<out> FragColor : vec4<f32>;
                 [[stage(fragment)]] fn main() -> void {

@@ -28,7 +28,7 @@ class DepthStencilCopyTests : public DawnTest {
         DawnTest::SetUp();
 
         // Draw a square in the bottom left quarter of the screen.
-        mVertexModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        mVertexModule = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -79,7 +79,7 @@ class DepthStencilCopyTests : public DawnTest {
             FragDepth = )" + std::to_string(regionDepth) +
                                ";\n}";
 
-        desc->cFragment.module = utils::CreateShaderModuleFromWGSL(device, fsSource.c_str());
+        desc->cFragment.module = utils::CreateShaderModule(device, fsSource.c_str());
         wgpu::DepthStencilState* depthStencil = desc->EnableDepthStencil(format);
         depthStencil->depthWriteEnabled = true;
         desc->cFragment.targetCount = 0;
@@ -238,7 +238,7 @@ class DepthStencilCopyTests : public DawnTest {
         // Pipeline for a full screen quad.
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
 
-        pipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -252,7 +252,7 @@ class DepthStencilCopyTests : public DawnTest {
 
         // Sample the input texture and write out depth. |result| will only be set to 1 if we
         // pass the depth test.
-        pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var texture0 : texture_2d<f32>;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 
@@ -645,7 +645,7 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
         // A quad is drawn in the bottom left.
         utils::ComboRenderPipelineDescriptor2 renderPipelineDesc;
         renderPipelineDesc.vertex.module = mVertexModule;
-        renderPipelineDesc.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
             [[stage(fragment)]] fn main() -> void {
             })");
         wgpu::DepthStencilState* depthStencil =

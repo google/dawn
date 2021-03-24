@@ -54,7 +54,7 @@ class SamplerTest : public DawnTest {
         DawnTest::SetUp();
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        auto vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        auto vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -69,7 +69,7 @@ class SamplerTest : public DawnTest {
                 Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             }
         )");
-        auto fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        auto fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var sampler0 : sampler;
             [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
 

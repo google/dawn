@@ -52,7 +52,7 @@ class DepthStencilStateTest : public DawnTest {
 
         depthTextureView = depthTexture.CreateView();
 
-        vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        vsModule = utils::CreateShaderModule(device, R"(
             [[block]] struct UBO {
                 color : vec3<f32>;
                 depth : f32;
@@ -72,7 +72,7 @@ class DepthStencilStateTest : public DawnTest {
                 Position = vec4<f32>(pos[VertexIndex], ubo.depth, 1.0);
             })");
 
-        fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        fsModule = utils::CreateShaderModule(device, R"(
             [[block]] struct UBO {
                 color : vec3<f32>;
                 depth : f32;

@@ -26,7 +26,7 @@ class RenderPassTest : public DawnTest {
         DawnTest::SetUp();
 
         // Shaders to draw a bottom-left triangle in blue.
-        mVSModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        mVSModule = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -39,7 +39,7 @@ class RenderPassTest : public DawnTest {
                 Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
                 fragColor = vec4<f32>(0.0, 0.0, 1.0, 1.0);
@@ -140,7 +140,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
 
     {
         // Next we use a pipeline whose fragment shader has no outputs.
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[stage(fragment)]] fn main() -> void {
             })");
         utils::ComboRenderPipelineDescriptor2 descriptor;

@@ -28,39 +28,6 @@ namespace utils {
 
     namespace {
 
-        shaderc_shader_kind ShadercShaderKind(SingleShaderStage stage) {
-            switch (stage) {
-                case SingleShaderStage::Vertex:
-                    return shaderc_glsl_vertex_shader;
-                case SingleShaderStage::Fragment:
-                    return shaderc_glsl_fragment_shader;
-                case SingleShaderStage::Compute:
-                    return shaderc_glsl_compute_shader;
-                default:
-                    UNREACHABLE();
-            }
-        }
-
-        wgpu::ShaderModule CreateShaderModuleFromResult(
-            const wgpu::Device& device,
-            const shaderc::SpvCompilationResult& result) {
-            // result.cend and result.cbegin return pointers to uint32_t.
-            const uint32_t* resultBegin = result.cbegin();
-            const uint32_t* resultEnd = result.cend();
-            // So this size is in units of sizeof(uint32_t).
-            ptrdiff_t resultSize = resultEnd - resultBegin;
-            // SetSource takes data as uint32_t*.
-
-            wgpu::ShaderModuleSPIRVDescriptor spirvDesc;
-            spirvDesc.codeSize = static_cast<uint32_t>(resultSize);
-            spirvDesc.code = result.cbegin();
-
-            wgpu::ShaderModuleDescriptor descriptor;
-            descriptor.nextInChain = &spirvDesc;
-
-            return device.CreateShaderModule(&descriptor);
-        }
-
         class CompilerSingleton {
           public:
             static shaderc::Compiler* Get() {
@@ -87,49 +54,6 @@ namespace utils {
 
     }  // anonymous namespace
 
-    wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device,
-                                          SingleShaderStage stage,
-                                          const char* source) {
-        shaderc_shader_kind kind = ShadercShaderKind(stage);
-
-        shaderc::Compiler* compiler = CompilerSingleton::Get();
-        auto result = compiler->CompileGlslToSpv(source, strlen(source), kind, "myshader?");
-        if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-            dawn::ErrorLog() << result.GetErrorMessage();
-            return {};
-        }
-#ifdef DUMP_SPIRV_ASSEMBLY
-        {
-            shaderc::CompileOptions options;
-            auto resultAsm = compiler->CompileGlslToSpvAssembly(source, strlen(source), kind,
-                                                                "myshader?", options);
-            size_t sizeAsm = (resultAsm.cend() - resultAsm.cbegin());
-
-            char* buffer = reinterpret_cast<char*>(malloc(sizeAsm + 1));
-            memcpy(buffer, resultAsm.cbegin(), sizeAsm);
-            buffer[sizeAsm] = '\0';
-            printf("SPIRV ASSEMBLY DUMP START\n%s\nSPIRV ASSEMBLY DUMP END\n", buffer);
-            free(buffer);
-        }
-#endif
-
-#ifdef DUMP_SPIRV_JS_ARRAY
-        printf("SPIRV JS ARRAY DUMP START\n");
-        for (size_t i = 0; i < size; i++) {
-            printf("%#010x", result.cbegin()[i]);
-            if ((i + 1) % 4 == 0) {
-                printf(",\n");
-            } else {
-                printf(", ");
-            }
-        }
-        printf("\n");
-        printf("SPIRV JS ARRAY DUMP END\n");
-#endif
-
-        return CreateShaderModuleFromResult(device, result);
-    }
-
     wgpu::ShaderModule CreateShaderModuleFromASM(const wgpu::Device& device, const char* source) {
         shaderc::Compiler* compiler = CompilerSingleton::Get();
         shaderc::SpvCompilationResult result = compiler->AssembleToSpv(source, strlen(source));
@@ -138,27 +62,29 @@ namespace utils {
             return {};
         }
 
-        return CreateShaderModuleFromResult(device, result);
+        // result.cend and result.cbegin return pointers to uint32_t.
+        const uint32_t* resultBegin = result.cbegin();
+        const uint32_t* resultEnd = result.cend();
+        // So this size is in units of sizeof(uint32_t).
+        ptrdiff_t resultSize = resultEnd - resultBegin;
+        // SetSource takes data as uint32_t*.
+
+        wgpu::ShaderModuleSPIRVDescriptor spirvDesc;
+        spirvDesc.codeSize = static_cast<uint32_t>(resultSize);
+        spirvDesc.code = result.cbegin();
+
+        wgpu::ShaderModuleDescriptor descriptor;
+        descriptor.nextInChain = &spirvDesc;
+
+        return device.CreateShaderModule(&descriptor);
     }
 
-    wgpu::ShaderModule CreateShaderModuleFromWGSL(const wgpu::Device& device, const char* source) {
+    wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* source) {
         wgpu::ShaderModuleWGSLDescriptor wgslDesc;
         wgslDesc.source = source;
         wgpu::ShaderModuleDescriptor descriptor;
         descriptor.nextInChain = &wgslDesc;
         return device.CreateShaderModule(&descriptor);
-    }
-
-    std::vector<uint32_t> CompileGLSLToSpirv(SingleShaderStage stage, const char* source) {
-        shaderc_shader_kind kind = ShadercShaderKind(stage);
-
-        shaderc::Compiler* compiler = CompilerSingleton::Get();
-        auto result = compiler->CompileGlslToSpv(source, strlen(source), kind, "myshader?");
-        if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-            dawn::ErrorLog() << result.GetErrorMessage();
-            return {};
-        }
-        return {result.cbegin(), result.cend()};
     }
 
     wgpu::Buffer CreateBufferFromData(const wgpu::Device& device,

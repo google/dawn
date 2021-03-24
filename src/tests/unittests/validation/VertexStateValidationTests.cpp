@@ -22,8 +22,8 @@ class VertexStateTest : public ValidationTest {
     void CreatePipeline(bool success,
                         const utils::ComboVertexStateDescriptor& state,
                         const char* vertexSource) {
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vertexSource);
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexSource);
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
                 fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);

@@ -142,7 +142,7 @@ class MinBufferSizeTestsBase : public ValidationTest {
     // Creates compute pipeline given a layout and shader
     wgpu::ComputePipeline CreateComputePipeline(const std::vector<wgpu::BindGroupLayout>& layouts,
                                                 const std::string& shader) {
-        wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, shader.c_str());
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, shader.c_str());
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.layout = nullptr;
@@ -167,10 +167,9 @@ class MinBufferSizeTestsBase : public ValidationTest {
     wgpu::RenderPipeline CreateRenderPipeline(const std::vector<wgpu::BindGroupLayout>& layouts,
                                               const std::string& vertexShader,
                                               const std::string& fragShader) {
-        wgpu::ShaderModule vsModule =
-            utils::CreateShaderModuleFromWGSL(device, vertexShader.c_str());
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader.c_str());
 
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fragShader.c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragShader.c_str());
 
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;

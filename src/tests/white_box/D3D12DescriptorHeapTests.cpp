@@ -39,7 +39,7 @@ class D3D12DescriptorHeapTests : public DawnTest {
         DAWN_SKIP_TEST_IF(UsesWire());
         mD3DDevice = reinterpret_cast<Device*>(device.Get());
 
-        mSimpleVSModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        mSimpleVSModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
@@ -52,7 +52,7 @@ class D3D12DescriptorHeapTests : public DawnTest {
                 Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
-        mSimpleFSModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        mSimpleFSModule = utils::CreateShaderModule(device, R"(
             [[block]] struct U {
                 color : vec4<f32>;
             };
@@ -176,13 +176,13 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     // Fill in a sampler heap with "sampler only" bindgroups (1x sampler per group) by creating a
     // sampler bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps WILL NOT switch over
     // because the sampler heap allocations are de-duplicated.
-    renderPipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
-    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> FragColor : vec4<f32>;
             [[group(0), binding(0)]] var sampler0 : sampler;
             [[stage(fragment)]] fn main() -> void {
@@ -445,7 +445,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
     utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
     pipelineDescriptor.vertex.module = mSimpleVSModule;
 
-    pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
         [[block]] struct U {
             heapSize : f32;
         };
@@ -778,7 +778,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
     {
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
 
-        pipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             [[block]] struct U {
                 transform : mat2x2<f32>;
             };
@@ -794,7 +794,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
                 );
                 Position = vec4<f32>(buffer0.transform * (pos[VertexIndex]), 0.0, 1.0);
             })");
-        pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[block]] struct U {
                 color : vec4<f32>;
             };

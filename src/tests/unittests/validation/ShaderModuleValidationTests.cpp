@@ -62,7 +62,7 @@ TEST_F(ShaderModuleValidationTest, FragmentOutputLocationExceedsMaxColorAttachme
         [[stage(fragment)]] fn main() -> void {
             fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })";
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromWGSL(device, stream.str().c_str()));
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, stream.str().c_str()));
 }
 
 // Test that it is invalid to create a shader module with no chained descriptor. (It must be

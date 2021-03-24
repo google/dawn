@@ -27,7 +27,7 @@ class ComputeSharedMemoryTests : public DawnTest {
 
 void ComputeSharedMemoryTests::BasicTest(const char* shader) {
     // Set up shader and pipeline
-    auto module = utils::CreateShaderModuleFromWGSL(device, shader);
+    auto module = utils::CreateShaderModule(device, shader);
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.computeStage.module = module;

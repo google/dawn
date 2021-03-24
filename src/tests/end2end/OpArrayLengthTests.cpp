@@ -124,7 +124,7 @@ TEST_P(OpArrayLengthTest, Compute) {
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.layout = pl;
     pipelineDesc.computeStage.entryPoint = "main";
-    pipelineDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, (R"(
+    pipelineDesc.computeStage.module = utils::CreateShaderModule(device, (R"(
         [[block]] struct ResultBuffer {
             data : [[stride(4)]] array<u32, 3>;
         };
@@ -135,7 +135,7 @@ TEST_P(OpArrayLengthTest, Compute) {
             result.data[1] = arrayLength(buffer2.data);
             result.data[2] = arrayLength(buffer3.data);
         })")
-                                                                                     .c_str());
+                                                                             .c_str());
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     // Run a single instance of the compute shader
@@ -164,13 +164,13 @@ TEST_P(OpArrayLengthTest, Fragment) {
 
     // Create the pipeline that computes the length of the buffers and writes it to the only render
     // pass pixel.
-    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
 
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, (mShaderInterface + R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
             fragColor.r = f32(arrayLength(buffer1.data)) / 255.0;
@@ -178,7 +178,7 @@ TEST_P(OpArrayLengthTest, Fragment) {
             fragColor.b = f32(arrayLength(buffer3.data)) / 255.0;
             fragColor.a = 0.0;
         })")
-                                                                                .c_str());
+                                                                        .c_str());
 
     utils::ComboRenderPipelineDescriptor2 descriptor;
     descriptor.vertex.module = vsModule;
@@ -220,7 +220,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
 
     // Create the pipeline that computes the length of the buffers and writes it to the only render
     // pass pixel.
-    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, (mShaderInterface + R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
         [[location(0)]] var<out> pointColor : vec4<f32>;
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
@@ -231,9 +231,9 @@ TEST_P(OpArrayLengthTest, Vertex) {
 
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })")
-                                                                                .c_str());
+                                                                        .c_str());
 
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[location(0)]] var<in> pointColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {

@@ -139,7 +139,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
         ASSERT(IsBCFormatSupported());
 
         utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[location(0)]] var<out> texCoord : vec2 <f32>;
 
@@ -155,7 +155,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
                 texCoord = vec2<f32>(Position.x / 2.0, -Position.y / 2.0) + vec2<f32>(0.5, 0.5);
                 return;
             })");
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var sampler0 : sampler;
             [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
 

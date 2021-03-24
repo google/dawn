@@ -78,7 +78,7 @@ class OcclusionQueryTests : public QueryTests {
     void SetUp() override {
         DawnTest::SetUp();
 
-        vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
@@ -89,7 +89,7 @@ class OcclusionQueryTests : public QueryTests {
                 Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
-        fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);

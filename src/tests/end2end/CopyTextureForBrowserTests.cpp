@@ -110,7 +110,7 @@ class CopyTextureForBrowserTests : public DawnTest {
     // shader) instead of CPU after executing CopyTextureForBrowser() to avoid the errors caused by
     // comparing a value generated on CPU to the one generated on GPU.
     wgpu::ComputePipeline MakeTestPipeline() {
-        wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
             [[block]] struct Uniforms {
                 dstTextureFlipY : u32;
                 channelCount : u32;

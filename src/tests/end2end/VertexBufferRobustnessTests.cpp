@@ -32,7 +32,7 @@ class VertexBufferRobustnessTest : public DawnTest {
     // viewport.
     wgpu::ShaderModule CreateVertexModule(const std::string& attributes,
                                           const std::string& successExpression) {
-        return utils::CreateShaderModuleFromWGSL(device, (attributes + R"(
+        return utils::CreateShaderModule(device, (attributes + R"(
                 [[builtin(position)]] var<out> Position : vec4<f32>;
 
                 [[stage(vertex)]] fn main() -> void {
@@ -46,7 +46,7 @@ class VertexBufferRobustnessTest : public DawnTest {
                     return;
                 }
             )")
-                                                             .c_str());
+                                                     .c_str());
     }
 
     // Runs the test, a true |expectation| meaning success
@@ -57,7 +57,7 @@ class VertexBufferRobustnessTest : public DawnTest {
                 uint64_t bufferOffset,
                 bool expectation) {
         wgpu::ShaderModule vsModule = CreateVertexModule(attributes, successExpression);
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<out> outColor : vec4<f32>;
 
                 [[stage(fragment)]] fn main() -> void {

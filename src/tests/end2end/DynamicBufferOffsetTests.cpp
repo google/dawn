@@ -93,7 +93,7 @@ class DynamicBufferOffsetTests : public DawnTest {
     wgpu::Texture mColorAttachment;
 
     wgpu::RenderPipeline CreateRenderPipeline(bool isInheritedPipeline = false) {
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
@@ -153,7 +153,7 @@ class DynamicBufferOffsetTests : public DawnTest {
             }
         )";
 
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fs.str().c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fs.str().c_str());
 
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
@@ -218,7 +218,7 @@ class DynamicBufferOffsetTests : public DawnTest {
             }
         )";
 
-        wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, cs.str().c_str());
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, cs.str().c_str());
 
         wgpu::ComputePipelineDescriptor csDesc;
         csDesc.computeStage.module = csModule;

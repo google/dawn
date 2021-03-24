@@ -46,11 +46,11 @@ namespace {
         // in the caller, so it is always correct for binding validation between bind groups and
         // pipeline. But those bind groups in caller can be used for validation for other purposes.
         wgpu::RenderPipeline CreateNoOpRenderPipeline() {
-            wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
                 [[stage(vertex)]] fn main() -> void {
                 })");
 
-            wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[stage(fragment)]] fn main() -> void {
                 })");
             utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
@@ -61,7 +61,7 @@ namespace {
         }
 
         wgpu::ComputePipeline CreateNoOpComputePipeline() {
-            wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
                 [[stage(compute)]] fn main() -> void {
                 })");
             wgpu::ComputePipelineDescriptor pipelineDescriptor;
@@ -771,11 +771,11 @@ namespace {
             wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer}});
 
             // Create a passthrough render pipeline with a readonly buffer
-            wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
                 [[stage(vertex)]] fn main() -> void {
                 })");
 
-            wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[block]] struct RBuffer {
                     value : f32;
                 };
@@ -815,7 +815,7 @@ namespace {
             wgpu::BindGroup bg1 = utils::MakeBindGroup(device, bgl1, {{0, buffer}});
 
             // Create a passthrough compute pipeline with a readonly buffer
-            wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
                 [[block]] struct RBuffer {
                     value : f32;
                 };
@@ -1549,11 +1549,11 @@ namespace {
         // Test render pass
         {
             // Create a passthrough render pipeline with a readonly storage texture
-            wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
                 [[stage(vertex)]] fn main() -> void {
                 })");
 
-            wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[group(0), binding(0)]] var tex : [[access(read)]] texture_storage_2d<rgba8unorm>;
                 [[stage(fragment)]] fn main() -> void {
                 })");
@@ -1579,7 +1579,7 @@ namespace {
         // Test compute pass
         {
             // Create a passthrough compute pipeline with a readonly storage texture
-            wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
                 [[group(0), binding(0)]] var tex : [[access(read)]] texture_storage_2d<rgba8unorm>;
                 [[stage(compute)]] fn main() -> void {
                 })");

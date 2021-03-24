@@ -26,8 +26,8 @@ class DrawQuad {
     DrawQuad() {
     }
     DrawQuad(wgpu::Device device, const char* vsSource, const char* fsSource) : device(device) {
-        vsModule = utils::CreateShaderModuleFromWGSL(device, vsSource);
-        fsModule = utils::CreateShaderModuleFromWGSL(device, fsSource);
+        vsModule = utils::CreateShaderModule(device, vsSource);
+        fsModule = utils::CreateShaderModule(device, fsSource);
 
         pipelineLayout = utils::MakeBasicPipelineLayout(device, nullptr);
     }

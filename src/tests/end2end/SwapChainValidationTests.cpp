@@ -221,12 +221,12 @@ TEST_P(SwapChainValidationTests, ViewDestroyedAfterPresent) {
 // Check that returned view is of the current format / usage / dimension / size / sample count
 TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
     utils::ComboRenderPipelineDescriptor2 pipelineDesc;
-    pipelineDesc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
-    pipelineDesc.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
             fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);

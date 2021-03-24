@@ -25,7 +25,7 @@ class CullingTest : public DawnTest {
         // Draw two triangles with different winding orders:
         // 1. The top-left one is counterclockwise (CCW)
         // 2. The bottom-right one is clockwise (CW)
-        pipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                 vec2<f32>(-1.0,  1.0),
                 vec2<f32>(-1.0,  0.0),
@@ -45,7 +45,7 @@ class CullingTest : public DawnTest {
         // FragCoord of pixel(x, y) in framebuffer coordinate is (x + 0.5, y + 0.5). And we use
         // RGBA8 format for the back buffer. So (FragCoord.xy - vec2(0.5)) / 255 in shader code
         // will make the pixel's R and G channels exactly equal to the pixel's x and y coordinates.
-        pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 

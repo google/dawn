@@ -95,7 +95,7 @@ void init() {
     initBuffers();
     initTextures();
 
-    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[location(0)]] var<in> pos : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
@@ -103,7 +103,7 @@ void init() {
             return;
         })");
 
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
         [[group(0), binding(0)]] var mySampler: sampler;
         [[group(0), binding(1)]] var myTexture : texture_2d<f32>;

@@ -23,7 +23,7 @@ class EntryPointTests : public DawnTest {};
 TEST_P(EntryPointTests, FragAndVertexSameModule) {
     // TODO(crbug.com/dawn/658): Crashes on bots
     DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
         [[stage(vertex)]] fn vertex_main() -> void {
@@ -70,7 +70,7 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
     // https://crbug.com/tint/297
     DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
 
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Data {
             data : u32;
         };

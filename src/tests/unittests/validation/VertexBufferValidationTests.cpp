@@ -25,7 +25,7 @@ class VertexBufferValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
-        fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
@@ -59,7 +59,7 @@ class VertexBufferValidationTest : public ValidationTest {
 
         vs << "}\n";
 
-        return utils::CreateShaderModuleFromWGSL(device, vs.str().c_str());
+        return utils::CreateShaderModule(device, vs.str().c_str());
     }
 
     wgpu::RenderPipeline MakeRenderPipeline(const wgpu::ShaderModule& vsModule,

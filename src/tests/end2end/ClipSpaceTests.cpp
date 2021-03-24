@@ -25,7 +25,7 @@ class ClipSpaceTest : public DawnTest {
         // Draw two triangles:
         // 1. The depth value of the top-left one is >= 0.5
         // 2. The depth value of the bottom-right one is <= 0.5
-        pipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             const pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
                 vec3<f32>(-1.0,  1.0, 1.0),
                 vec3<f32>(-1.0, -1.0, 0.5),
@@ -42,7 +42,7 @@ class ClipSpaceTest : public DawnTest {
                 return;
             })");
 
-        pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;;
             [[stage(fragment)]] fn main() -> void {
                fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);

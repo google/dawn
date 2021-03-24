@@ -461,7 +461,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
     }
 
     wgpu::ComputePipeline CreateComputePipeline(const char* computeShader) {
-        wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, computeShader);
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, computeShader);
         wgpu::ComputePipelineDescriptor computeDescriptor;
         computeDescriptor.layout = nullptr;
         computeDescriptor.computeStage.module = csModule;
@@ -471,8 +471,8 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
     wgpu::RenderPipeline CreateRenderPipeline(const char* vertexShader,
                                               const char* fragmentShader) {
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vertexShader);
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fragmentShader);
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader);
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader);
 
         utils::ComboRenderPipelineDescriptor2 desc;
         desc.vertex.module = vsModule;
@@ -982,7 +982,7 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
     wgpu::Texture storageTexture2 = CreateTexture(
         kTextureFormat, wgpu::TextureUsage::Storage | wgpu::TextureUsage::CopySrc, 1u, 1u);
 
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 [[group(0), binding(0)]] var Src : [[access(read)]]  texture_storage_2d<r32uint>;
 [[group(0), binding(1)]] var Dst : [[access(write)]] texture_storage_2d<r32uint>;
 [[stage(compute)]] fn main() -> void {
@@ -1056,7 +1056,7 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
         1u);
     wgpu::Texture storageTexture2 = CreateTexture(
         kTextureFormat, wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage, 1u, 1u);
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 [[group(0), binding(0)]] var Src : texture_2d<u32>;
 [[group(0), binding(1)]] var Dst : [[access(write)]] texture_storage_2d<r32uint>;
 [[stage(compute)]] fn main() -> void {

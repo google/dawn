@@ -31,7 +31,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
     wgpu::Buffer buffer = utils::CreateBufferFromData(
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Buf {
             data : array<u32, 100>;
         };
@@ -82,7 +82,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
     wgpu::Buffer bufferB = utils::CreateBufferFromData(
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/386):  Use the same struct.
         [[block]] struct Src {
             data : array<u32, 100>;
@@ -153,7 +153,7 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
     wgpu::Buffer bufferB = utils::CreateBufferFromData(
         device, data.data(), bufferSize, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc);
 
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         // TODO(crbug.com/tint/386):  Use the same struct.
         [[block]] struct Src {
             data : array<u32, 100>;
@@ -227,7 +227,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         device, data.data(), bufferSize,
         wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc);
 
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Buf {
             data : array<vec4<u32>, 25>;
         };
@@ -295,7 +295,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
         device, data.data(), bufferSize,
         wgpu::BufferUsage::Storage | wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopySrc);
 
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Buf {
             data : array<vec4<u32>, 25>;
         };

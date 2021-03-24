@@ -62,7 +62,7 @@ TEST_P(ShaderTests, ComputeLog2) {
 })";
 
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, shader.c_str());
+    csDesc.computeStage.module = utils::CreateShaderModule(device, shader.c_str());
     csDesc.computeStage.entryPoint = "main";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 

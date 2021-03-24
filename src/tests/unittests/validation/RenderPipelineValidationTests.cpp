@@ -26,13 +26,13 @@ class RenderPipelineValidationTest : public ValidationTest {
     void SetUp() override {
         ValidationTest::SetUp();
 
-        vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
-        fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
@@ -195,8 +195,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
                    << kScalarTypes[i] << R"(>;
                 [[stage(fragment)]] fn main() -> void {
                 })";
-            descriptor.cFragment.module =
-                utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
+            descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
             if (i == j) {
                 device.CreateRenderPipeline2(&descriptor);
@@ -414,8 +413,7 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
 
                 [[stage(fragment)]] fn main() -> void {
                 })";
-            descriptor.cFragment.module =
-                utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
+            descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
                 device, {{0, wgpu::ShaderStage::Fragment, kTextureComponentTypes[j]}});
@@ -462,8 +460,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
                    << kTextureKeywords[i] << R"(<f32>;
                 [[stage(fragment)]] fn main() -> void {
                 })";
-            descriptor.cFragment.module =
-                utils::CreateShaderModuleFromWGSL(device, stream.str().c_str());
+            descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
             wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
                 device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float,
@@ -482,7 +479,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
 // Test that declaring a storage buffer in the vertex shader without setting pipeline layout won't
 // cause crash.
 TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
-    wgpu::ShaderModule vsModuleWithStorageBuffer = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModuleWithStorageBuffer = utils::CreateShaderModule(device, R"(
         [[block]] struct Dst {
             data : array<u32, 100>;
         };
@@ -555,7 +552,7 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
 
 // Test that the entryPoint names must be present for the correct stage in the shader module.
 TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> position : vec4<f32>;
         [[stage(vertex)]] fn vertex_main() -> void {
             position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -605,7 +602,7 @@ TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
 
 // Test that vertex attrib validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> position : vec4<f32>;
         [[location(0)]] var<in> attrib0 : vec4<f32>;
         [[location(1)]] var<in> attrib1 : vec4<f32>;
@@ -651,7 +648,7 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
 
 // Test that fragment output validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> colorFloat : vec4<f32>;
         [[location(0)]] var<out> colorUint : vec4<u32>;
 
@@ -691,7 +688,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
 // Test that fragment output validation is for the correct entryPoint
 // TODO(dawn:216): Re-enable when we correctly reflect which bindings are used for an entryPoint.
 TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Uniforms {
             data : vec4<f32>;
         };

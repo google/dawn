@@ -146,7 +146,7 @@ class TextureFormatTest : public DawnTest {
                                               FormatTestInfo renderFormatInfo) {
         utils::ComboRenderPipelineDescriptor2 desc;
 
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -170,8 +170,7 @@ class TextureFormatTest : public DawnTest {
         fsSource << "    fragColor = textureLoad(myTexture, vec2<i32>(FragCoord.xy), 0);\n";
         fsSource << "}";
 
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModuleFromWGSL(device, fsSource.str().c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fsSource.str().c_str());
 
         desc.vertex.module = vsModule;
         desc.cFragment.module = fsModule;

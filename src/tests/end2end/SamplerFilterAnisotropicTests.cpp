@@ -37,7 +37,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
         DawnTest::SetUp();
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[block]] struct Uniforms {
                 matrix : mat4x4<f32>;
             };
@@ -55,7 +55,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
                 Position = uniforms.matrix * position;
             }
         )");
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var sampler0 : sampler;
             [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
 

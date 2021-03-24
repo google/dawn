@@ -124,7 +124,7 @@ TEST_P(DeviceLostTest, CreateBindGroupLayoutFails) {
 
 // Test that GetBindGroupLayout fails when device is lost
 TEST_P(DeviceLostTest, GetBindGroupLayoutFails) {
-    wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
         [[block]] struct UniformBuffer {
             pos : vec4<f32>;
         };
@@ -211,7 +211,7 @@ TEST_P(DeviceLostTest, CreateSamplerFails) {
 TEST_P(DeviceLostTest, CreateShaderModuleFails) {
     SetCallbackAndLoseForTesting();
 
-    ASSERT_DEVICE_ERROR(utils::CreateShaderModuleFromWGSL(device, R"(
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
         [[location(0)]] var<in> color : vec4<f32>;
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {

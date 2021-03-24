@@ -65,7 +65,7 @@ class DepthStencilSamplingTest : public DawnTest {
 
     wgpu::RenderPipeline CreateSamplingRenderPipeline(std::vector<TestAspect> aspects,
                                                       uint32_t componentIndex) {
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -108,8 +108,7 @@ class DepthStencilSamplingTest : public DawnTest {
 
         shaderSource << "[[stage(fragment)]] fn main() -> void { " << shaderBody.str() << "\n}";
 
-        wgpu::ShaderModule fsModule =
-            utils::CreateShaderModuleFromWGSL(device, shaderSource.str().c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
         pipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
@@ -163,8 +162,7 @@ class DepthStencilSamplingTest : public DawnTest {
 
         shaderSource << "[[stage(compute)]] fn main() -> void { " << shaderBody.str() << "\n}";
 
-        wgpu::ShaderModule csModule =
-            utils::CreateShaderModuleFromWGSL(device, shaderSource.str().c_str());
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.computeStage.module = csModule;
@@ -174,13 +172,13 @@ class DepthStencilSamplingTest : public DawnTest {
     }
 
     wgpu::RenderPipeline CreateComparisonRenderPipeline() {
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var samp : sampler_comparison;
             [[group(0), binding(1)]] var tex : texture_depth_2d;
             [[block]] struct Uniforms {
@@ -212,7 +210,7 @@ class DepthStencilSamplingTest : public DawnTest {
     }
 
     wgpu::ComputePipeline CreateComparisonComputePipeline() {
-        wgpu::ShaderModule csModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var samp : sampler_comparison;
             [[group(0), binding(1)]] var tex : texture_depth_2d;
             [[block]] struct Uniforms {

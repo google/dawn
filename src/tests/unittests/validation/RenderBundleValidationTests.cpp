@@ -27,7 +27,7 @@ namespace {
         void SetUp() override {
             ValidationTest::SetUp();
 
-            vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            vsModule = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<in> pos : vec2<f32>;
 
                 [[block]] struct S {
@@ -38,7 +38,7 @@ namespace {
                 [[stage(vertex)]] fn main() -> void {
                 })");
 
-            fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+            fsModule = utils::CreateShaderModule(device, R"(
                 [[block]] struct Uniforms {
                     color : vec4<f32>;
                 };

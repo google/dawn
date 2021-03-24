@@ -28,7 +28,7 @@ class ComputeDispatchTests : public DawnTest {
         // Write workgroup number into the output buffer if we saw the biggest dispatch
         // This is a workaround since D3D12 doesn't have gl_NumWorkGroups
         // To make sure the dispatch was not called, write maximum u32 value for 0 dispatches
-        wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
             [[block]] struct InputBuf {
                 expectedDispatch : vec3<u32>;
             };

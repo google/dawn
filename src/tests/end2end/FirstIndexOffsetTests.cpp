@@ -155,10 +155,8 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
     constexpr uint32_t kComponentsPerVertex = 4;
 
     utils::ComboRenderPipelineDescriptor2 pipelineDesc;
-    pipelineDesc.vertex.module =
-        utils::CreateShaderModuleFromWGSL(device, vertexShader.str().c_str());
-    pipelineDesc.cFragment.module =
-        utils::CreateShaderModuleFromWGSL(device, fragmentShader.str().c_str());
+    pipelineDesc.vertex.module = utils::CreateShaderModule(device, vertexShader.str().c_str());
+    pipelineDesc.cFragment.module = utils::CreateShaderModule(device, fragmentShader.str().c_str());
     pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     pipelineDesc.vertex.bufferCount = 1;
     pipelineDesc.cBuffers[0].arrayStride = kComponentsPerVertex * sizeof(float);

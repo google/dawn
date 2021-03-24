@@ -247,7 +247,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
         // The simplest texture sampling pipeline.
         wgpu::RenderPipeline pipeline;
         {
-            wgpu::ShaderModule vs = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule vs = utils::CreateShaderModule(device, R"(
                 [[builtin(vertex_index)]] var<in> VertexIndex : u32;
                 [[location(0)]] var<out> o_texCoord : vec2<f32>;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
@@ -273,7 +273,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                     o_texCoord = texCoord[VertexIndex];
                 }
             )");
-            wgpu::ShaderModule fs = utils::CreateShaderModuleFromWGSL(device, R"(
+            wgpu::ShaderModule fs = utils::CreateShaderModule(device, R"(
                 [[group(0), binding(0)]] var sampler0 : sampler;
                 [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
 

@@ -123,8 +123,8 @@ class VertexStateTest : public DawnTest {
         vs << "    }\n";
         vs << "}\n";
 
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vs.str().c_str());
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vs.str().c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<in> color : vec4<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
@@ -569,7 +569,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
         utils::CreateBufferFromData(device, &data, sizeof(data), wgpu::BufferUsage::Vertex);
 
     utils::ComboRenderPipelineDescriptor2 pipelineDesc;
-    pipelineDesc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<in> attr0 : vec4<f32>;
         [[location(1)]] var<in> attr1 : vec2<u32>;
         [[location(2)]] var<in> attr2 : vec4<f32>;
@@ -595,7 +595,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
                 color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         })");
-    pipelineDesc.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<in> color : vec4<f32>;
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
@@ -641,13 +641,13 @@ class OptionalVertexStateTest : public DawnTest {};
 TEST_P(OptionalVertexStateTest, Basic) {
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 3, 3);
 
-    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
 
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
             fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);

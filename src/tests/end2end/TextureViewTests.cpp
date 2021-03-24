@@ -60,7 +60,7 @@ namespace {
     }
 
     wgpu::ShaderModule CreateDefaultVertexShaderModule(wgpu::Device device) {
-        return utils::CreateShaderModuleFromWGSL(device, R"(
+        return utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[location(0)]] var<out> TexCoord : vec2<f32>;
@@ -163,7 +163,7 @@ class TextureViewSamplingTest : public DawnTest {
     }
 
     void Verify(const wgpu::TextureView& textureView, const char* fragmentShader, int expected) {
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fragmentShader);
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader);
 
         utils::ComboRenderPipelineDescriptor2 textureDescriptor;
         textureDescriptor.vertex.module = mVSModule;
@@ -503,7 +503,7 @@ class TextureViewRenderingTest : public DawnTest {
             }
         )";
         wgpu::ShaderModule oneColorFsModule =
-            utils::CreateShaderModuleFromWGSL(device, oneColorFragmentShader);
+            utils::CreateShaderModule(device, oneColorFragmentShader);
 
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;

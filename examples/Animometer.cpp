@@ -55,8 +55,7 @@ void init() {
     swapchain.Configure(GetPreferredSwapChainTextureFormat(), wgpu::TextureUsage::RenderAttachment,
                         640, 480);
 
-    wgpu::ShaderModule vsModule =
-        utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[block]] struct Constants {
             scale : f32;
             time : f32;
@@ -108,7 +107,7 @@ void init() {
             Position = vec4<f32>(xpos, ypos, 0.0, 1.0);
         })");
 
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> FragColor : vec4<f32>;
         [[location(0)]] var<in> v_color : vec4<f32>;
 

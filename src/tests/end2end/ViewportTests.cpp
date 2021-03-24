@@ -22,7 +22,7 @@ class ViewportTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        mQuadVS = utils::CreateShaderModuleFromWGSL(device, R"(
+        mQuadVS = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -38,7 +38,7 @@ class ViewportTest : public DawnTest {
                 Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
-        mQuadFS = utils::CreateShaderModuleFromWGSL(device, R"(
+        mQuadFS = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
                 fragColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
@@ -95,7 +95,7 @@ class ViewportTest : public DawnTest {
     void TestViewportDepth(float minDepth, float maxDepth, bool doViewportCall = true) {
         // Create a pipeline drawing 3 points at depth 1.0, 0.5 and 0.0.
         utils::ComboRenderPipelineDescriptor2 pipelineDesc;
-        pipelineDesc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+        pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 

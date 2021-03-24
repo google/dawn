@@ -34,7 +34,7 @@ class CreatePipelineAsyncTest : public DawnTest {
 // Verify the basic use of CreateComputePipelineAsync works on all backends.
 TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
         [[block]] struct SSBO {
             value : u32;
         };
@@ -101,7 +101,7 @@ TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
     DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
         [[block]] struct SSBO {
             value : u32;
         };
@@ -138,12 +138,12 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateRenderPipelineAsync) {
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
     utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
-    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> o_color : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
             o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
@@ -208,12 +208,12 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::Depth32Float;
 
     utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
-    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> o_color : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
             o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
@@ -248,7 +248,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
 // CreateComputePipelineAsync() is called.
 TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateComputePipelineAsync) {
     wgpu::ComputePipelineDescriptor csDesc;
-    csDesc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
         [[stage(compute)]] fn main() -> void {
         })");
     csDesc.computeStage.entryPoint = "main";
@@ -272,12 +272,12 @@ TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateComputePipeli
 // CreateRenderPipelineAsync() is called.
 TEST_P(CreatePipelineAsyncTest, ReleaseDeviceBeforeCallbackOfCreateRenderPipelineAsync) {
     utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
-    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
         [[stage(vertex)]] fn main() -> void {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> o_color : vec4<f32>;
         [[stage(fragment)]] fn main() -> void {
             o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);

@@ -221,7 +221,7 @@ namespace {
 
         // Vertex shader used to render a sampled texture into a quad.
         wgpu::ShaderModule GetTestVertexShaderModule() const {
-            return utils::CreateShaderModuleFromWGSL(device, R"(
+            return utils::CreateShaderModule(device, R"(
                 [[builtin(position)]] var<out> Position : vec4<f32>;
                 [[location(0)]] var<out> texCoord : vec2 <f32>;
 
@@ -276,7 +276,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
     utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
-    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[set(0), binding(0)]] var sampler0 : sampler;
             [[set(0), binding(1)]] var texture : texture_2d<f32>;
 
@@ -329,7 +329,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
     utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
-    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[set(0), binding(0)]] var sampler0 : sampler;
             [[set(0), binding(1)]] var texture : texture_2d<f32>;
 
@@ -387,7 +387,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
     utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
-    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[set(0), binding(0)]] var sampler0 : sampler;
             [[set(0), binding(1)]] var lumaTexture : texture_2d<f32>;
             [[set(0), binding(2)]] var chromaTexture : texture_2d<f32>;

@@ -30,7 +30,7 @@ class ColorStateTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        vsModule = utils::CreateShaderModule(device, R"(
                 [[builtin(vertex_index)]] var<in> VertexIndex : u32;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
 
@@ -55,7 +55,7 @@ class ColorStateTest : public DawnTest {
     // Set up basePipeline and testPipeline. testPipeline has the given blend state on the first
     // attachment. basePipeline has no blending
     void SetupSingleSourcePipelines(wgpu::ColorTargetState colorTargetState) {
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[block]] struct MyBlock {
                     color : vec4<f32>;
                 };
@@ -785,7 +785,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
     utils::ComboRenderPassDescriptor renderPass(
         {renderTargetViews[0], renderTargetViews[1], renderTargetViews[2], renderTargetViews[3]});
 
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[block]] struct MyBlock {
             color0 : vec4<f32>;
             color1 : vec4<f32>;
@@ -904,7 +904,7 @@ TEST_P(ColorStateTest, IndependentColorState) {
 
 // Test that the default blend color is correctly set at the beginning of every subpass
 TEST_P(ColorStateTest, DefaultBlendColor) {
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[block]] struct MyBlock {
             color : vec4<f32>;
         };
@@ -1031,7 +1031,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 // persisted and prevented a render pass loadOp from fully clearing the output
 // attachment.
 TEST_P(ColorStateTest, ColorWriteMaskDoesNotAffectRenderPassLoadOpClear) {
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[block]] struct MyBlock {
             color : vec4<f32>;
         };

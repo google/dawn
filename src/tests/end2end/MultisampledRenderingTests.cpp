@@ -238,12 +238,12 @@ class MultisampledRenderingTest : public DawnTest {
             })";
 
         if (flipTriangle) {
-            pipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, vsFlipped);
+            pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, vsFlipped);
         } else {
-            pipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, vs);
+            pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, vs);
         }
 
-        pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, fs);
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, fs);
 
         if (hasDepthStencilAttachment) {
             wgpu::DepthStencilState* depthStencil =

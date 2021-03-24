@@ -48,7 +48,7 @@ void init() {
         "    Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);\n"
         "    return;\n"
         "}\n";
-    WGPUShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vs).Release();
+    WGPUShaderModule vsModule = utils::CreateShaderModule(device, vs).Release();
 
     const char* fs =
         "[[location(0)]] var<out> fragColor : vec4<f32>;\n"
@@ -56,7 +56,7 @@ void init() {
         "    fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);\n"
         "    return;\n"
         "}\n";
-    WGPUShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, fs).Release();
+    WGPUShaderModule fsModule = utils::CreateShaderModule(device, fs).Release();
 
     {
         WGPURenderPipelineDescriptor2 descriptor = {};

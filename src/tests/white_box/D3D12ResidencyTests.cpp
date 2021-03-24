@@ -334,7 +334,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
 
     // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a
     // view bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps must switch over.
-    renderPipelineDescriptor.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
@@ -347,7 +347,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
                 Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
-    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+    renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[block]] struct U {
                 color : vec4<f32>;
             };

@@ -53,14 +53,14 @@ class MultisampledSamplingTest : public DawnTest {
         {
             utils::ComboRenderPipelineDescriptor2 desc;
 
-            desc.vertex.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            desc.vertex.module = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<in> pos : vec2<f32>;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
                 [[stage(vertex)]] fn main() -> void {
                     Position = vec4<f32>(pos, 0.0, 1.0);
                 })");
 
-            desc.cFragment.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            desc.cFragment.module = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<out> fragColor : f32;
                 [[builtin(frag_depth)]] var<out> FragDepth : f32;
                 [[stage(fragment)]] fn main() -> void {
@@ -88,7 +88,7 @@ class MultisampledSamplingTest : public DawnTest {
         {
             wgpu::ComputePipelineDescriptor desc = {};
             desc.computeStage.entryPoint = "main";
-            desc.computeStage.module = utils::CreateShaderModuleFromWGSL(device, R"(
+            desc.computeStage.module = utils::CreateShaderModule(device, R"(
                 [[group(0), binding(0)]] var texture0 : texture_multisampled_2d<f32>;
                 [[group(0), binding(1)]] var texture1 : texture_multisampled_2d<f32>;
 

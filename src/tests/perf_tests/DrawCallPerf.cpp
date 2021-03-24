@@ -366,8 +366,8 @@ void DrawCallPerf::SetUp() {
     wgpu::PipelineLayout pipelineLayout = device.CreatePipelineLayout(&pipelineLayoutDesc);
 
     // Create the shaders for the first pipeline.
-    wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, kVertexShader);
-    wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, kFragmentShaderA);
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, kVertexShader);
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, kFragmentShaderA);
 
     // Create the first pipeline.
     renderPipelineDesc.layout = pipelineLayout;
@@ -395,7 +395,7 @@ void DrawCallPerf::SetUp() {
 
         // Create the fragment shader module. This shader matches the pipeline layout described
         // above.
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, kFragmentShaderB);
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, kFragmentShaderB);
 
         // Create the pipeline.
         renderPipelineDesc.layout = pipelineLayout;

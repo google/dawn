@@ -204,9 +204,9 @@ class BufferZeroInitTest : public DawnTest {
                                                      uint32_t vertexBufferCount = 1u) {
         constexpr wgpu::TextureFormat kColorAttachmentFormat = wgpu::TextureFormat::RGBA8Unorm;
 
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, vertexShader);
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader);
 
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<in> i_color : vec4<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
@@ -424,8 +424,7 @@ class BufferZeroInitTest : public DawnTest {
 
         wgpu::ComputePipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.layout = nullptr;
-        pipelineDescriptor.computeStage.module =
-            utils::CreateShaderModuleFromWGSL(device, computeShader);
+        pipelineDescriptor.computeStage.module = utils::CreateShaderModule(device, computeShader);
         pipelineDescriptor.computeStage.entryPoint = "main";
         wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
 
@@ -984,7 +983,7 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
     DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
     constexpr uint32_t kBoundBufferSize = 16u;
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct UBO {
             value : vec4<u32>;
         };
@@ -1023,7 +1022,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
     DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
     constexpr uint32_t kBoundBufferSize = 16u;
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct SSBO {
             value : vec4<u32>;
         };
@@ -1062,7 +1061,7 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
     constexpr uint32_t kBoundBufferSize = 32u;
-    wgpu::ShaderModule module = utils::CreateShaderModuleFromWGSL(device, R"(
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct SSBO {
             value : array<vec4<u32>, 2>;
         };

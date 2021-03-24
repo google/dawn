@@ -496,7 +496,7 @@ class VertexFormatDeprecationTests : public DeprecationTests {
                                        ? "vec4<f32>(f32(a.x), 0.0, 0.0, 1.0)"
                                        : "vec4<f32>(f32(a), 0.0, 0.0, 1.0)";
 
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, (attribute + R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, (attribute + R"(
                 [[builtin(position)]] var<out> Position : vec4<f32>;
 
                 [[stage(vertex)]] fn main() -> void {
@@ -504,8 +504,8 @@ class VertexFormatDeprecationTests : public DeprecationTests {
                     return;
                 }
             )")
-                                                                                    .c_str());
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+                                                                            .c_str());
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<out> outColor : vec4<f32>;
 
                 [[stage(fragment)]] fn main() -> void {

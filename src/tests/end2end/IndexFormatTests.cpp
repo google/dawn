@@ -32,7 +32,7 @@ class IndexFormatTest : public DawnTest {
 
     wgpu::RenderPipeline MakeTestPipeline(wgpu::IndexFormat format,
         wgpu::PrimitiveTopology primitiveTopology = wgpu::PrimitiveTopology::TriangleStrip) {
-        wgpu::ShaderModule vsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<in> pos : vec4<f32>;
             [[builtin(vertex_index)]] var<in> idx : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
@@ -45,7 +45,7 @@ class IndexFormatTest : public DawnTest {
                 }
             })");
 
-        wgpu::ShaderModule fsModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
             [[stage(fragment)]] fn main() -> void {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);

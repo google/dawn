@@ -74,7 +74,7 @@ class TextureZeroInitTest : public DawnTest {
                fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )";
-        pipelineDescriptor.cFragment.module = utils::CreateShaderModuleFromWGSL(device, fs);
+        pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, fs);
         wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil();
         depthStencil->depthCompare = wgpu::CompareFunction::Equal;
         depthStencil->stencilFront.compare = wgpu::CompareFunction::Equal;
@@ -99,10 +99,10 @@ class TextureZeroInitTest : public DawnTest {
                 Position = vec4<f32>(pos[VertexIndex], )" +
                              std::to_string(depth) + R"(, 1.0);
             })";
-        return utils::CreateShaderModuleFromWGSL(device, source.c_str());
+        return utils::CreateShaderModule(device, source.c_str());
     }
     wgpu::ShaderModule CreateSampledTextureFragmentShaderForTest() {
-        return utils::CreateShaderModuleFromWGSL(device, R"(
+        return utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var texture0 : texture_2d<f32>;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
@@ -982,7 +982,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
            result.value = textureLoad(tex, vec2<i32>(0,0), 0);
         }
     )";
-    computePipelineDescriptor.computeStage.module = utils::CreateShaderModuleFromWGSL(device, cs);
+    computePipelineDescriptor.computeStage.module = utils::CreateShaderModule(device, cs);
     computePipelineDescriptor.computeStage.entryPoint = "main";
     wgpu::ComputePipeline computePipeline =
         device.CreateComputePipeline(&computePipelineDescriptor);

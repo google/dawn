@@ -70,9 +70,9 @@ class DepthBiasTests : public DawnTest {
                 break;
         }
 
-        wgpu::ShaderModule vertexModule = utils::CreateShaderModuleFromWGSL(device, vertexSource);
+        wgpu::ShaderModule vertexModule = utils::CreateShaderModule(device, vertexSource);
 
-        wgpu::ShaderModule fragmentModule = utils::CreateShaderModuleFromWGSL(device, R"(
+        wgpu::ShaderModule fragmentModule = utils::CreateShaderModule(device, R"(
     [[location(0)]] var<out> fragColor : vec4<f32>;;
     [[stage(fragment)]] fn main() -> void {
         fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
