@@ -44,7 +44,7 @@ target_link_libraries(dawn_utils
             dawn_native
             dawn_proc
             dawn_wire
-            shaderc
+            SPIRV-Tools-opt
             glfw
 )
 

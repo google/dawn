@@ -17,66 +17,50 @@
 #include "common/Constants.h"
 #include "common/Log.h"
 
-#include <shaderc/shaderc.hpp>
+#include "spirv-tools/optimizer.hpp"
 
 #include <cstring>
 #include <iomanip>
+#include <limits>
 #include <mutex>
 #include <sstream>
 
 namespace utils {
 
-    namespace {
-
-        class CompilerSingleton {
-          public:
-            static shaderc::Compiler* Get() {
-                std::call_once(mInitFlag, &CompilerSingleton::Initialize);
-                return mCompiler;
-            }
-
-          private:
-            CompilerSingleton() = default;
-            ~CompilerSingleton() = default;
-            CompilerSingleton(const CompilerSingleton&) = delete;
-            CompilerSingleton& operator=(const CompilerSingleton&) = delete;
-
-            static shaderc::Compiler* mCompiler;
-            static std::once_flag mInitFlag;
-
-            static void Initialize() {
-                mCompiler = new shaderc::Compiler();
-            }
-        };
-
-        shaderc::Compiler* CompilerSingleton::mCompiler = nullptr;
-        std::once_flag CompilerSingleton::mInitFlag;
-
-    }  // anonymous namespace
-
     wgpu::ShaderModule CreateShaderModuleFromASM(const wgpu::Device& device, const char* source) {
-        shaderc::Compiler* compiler = CompilerSingleton::Get();
-        shaderc::SpvCompilationResult result = compiler->AssembleToSpv(source, strlen(source));
-        if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
-            dawn::ErrorLog() << result.GetErrorMessage();
-            return {};
+        // Use SPIRV-Tools's C API to assemble the SPIR-V assembly text to binary. Because the types
+        // aren't RAII, we don't return directly on success and instead always go through the code
+        // path that destroys the SPIRV-Tools objects.
+        wgpu::ShaderModule result = nullptr;
+
+        spv_context context = spvContextCreate(SPV_ENV_UNIVERSAL_1_3);
+        ASSERT(context != nullptr);
+
+        spv_binary spirv = nullptr;
+        spv_diagnostic diagnostic = nullptr;
+        if (spvTextToBinary(context, source, strlen(source), &spirv, &diagnostic) == SPV_SUCCESS) {
+            ASSERT(spirv != nullptr);
+            ASSERT(spirv->wordCount <= std::numeric_limits<uint32_t>::max());
+
+            wgpu::ShaderModuleSPIRVDescriptor spirvDesc;
+            spirvDesc.codeSize = static_cast<uint32_t>(spirv->wordCount);
+            spirvDesc.code = spirv->code;
+
+            wgpu::ShaderModuleDescriptor descriptor;
+            descriptor.nextInChain = &spirvDesc;
+            result = device.CreateShaderModule(&descriptor);
+        } else {
+            ASSERT(diagnostic != nullptr);
+            dawn::WarningLog() << "CreateShaderModuleFromASM SPIRV assembly error:"
+                               << diagnostic->position.line + 1 << ":"
+                               << diagnostic->position.column + 1 << ": " << diagnostic->error;
         }
 
-        // result.cend and result.cbegin return pointers to uint32_t.
-        const uint32_t* resultBegin = result.cbegin();
-        const uint32_t* resultEnd = result.cend();
-        // So this size is in units of sizeof(uint32_t).
-        ptrdiff_t resultSize = resultEnd - resultBegin;
-        // SetSource takes data as uint32_t*.
+        spvDiagnosticDestroy(diagnostic);
+        spvBinaryDestroy(spirv);
+        spvContextDestroy(context);
 
-        wgpu::ShaderModuleSPIRVDescriptor spirvDesc;
-        spirvDesc.codeSize = static_cast<uint32_t>(resultSize);
-        spirvDesc.code = result.cbegin();
-
-        wgpu::ShaderModuleDescriptor descriptor;
-        descriptor.nextInChain = &spirvDesc;
-
-        return device.CreateShaderModule(&descriptor);
+        return result;
     }
 
     wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* source) {

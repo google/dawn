@@ -16,7 +16,6 @@ third_party/jinja2/
 third_party/jsoncpp/
 third_party/llvm-build
 third_party/markupsafe/
-third_party/shaderc/
 third_party/swiftshader/
 third_party/tint/
 third_party/vulkan-deps/

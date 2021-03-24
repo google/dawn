@@ -56,12 +56,6 @@ deps = {
     'condition': 'dawn_standalone',
   },
 
-  # SPIRV compiler dependencies: shaderc
-  'third_party/shaderc': {
-    'url': '{chromium_git}/external/github.com/google/shaderc@8d081127ee28ff5df8123c994c00bc66a57e9e9c',
-    'condition': 'dawn_standalone',
-  },
-
   # WGSL support
   'third_party/tint': {
     'url': '{dawn_git}/tint@84ef13c84fb38d37793d7aef2025be38dd9265f5',

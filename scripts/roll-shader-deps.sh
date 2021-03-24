@@ -18,10 +18,6 @@
 #
 # Depends on roll-dep from depot_path being in PATH.
 
-glslang_dir="third_party/glslang/"
-glslang_trunk="origin/master"
-shaderc_dir="third_party/shaderc/"
-shaderc_trunk="origin/main"
 spirv_cross_dir="third_party/spirv-cross/"
 spirv_cross_trunk="origin/master"
 spirv_headers_dir="third_party/spirv-headers/"
@@ -43,8 +39,6 @@ fi
 
 old_head=$(git rev-parse HEAD)
 
-roll-dep --ignore-dirty-tree --roll-to="${glslang_trunk}" "${glslang_dir}"
-roll-dep --ignore-dirty-tree --roll-to="${shaderc_trunk}" "${shaderc_dir}"
 roll-dep --ignore-dirty-tree --roll-to="${spirv_cross_trunk}" "${spirv_cross_dir}"
 roll-dep --ignore-dirty-tree --roll-to="${spirv_headers_trunk}" "${spirv_headers_dir}"
 roll-dep --ignore-dirty-tree --roll-to="${spirv_tools_trunk}" "${spirv_tools_dir}"
