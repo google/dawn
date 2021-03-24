@@ -50,6 +50,4 @@ Normally libraries implementing `webgpu.h` should implement function like `wgpuD
 
 ## Code generation
 
-When the WebGPU API evolves a lot of places in Dawn have to be updated, so to reduce efforts, Dawn relies heavily on code generation. The code generators are based on [Jinja2](https://jinja.palletsprojects.com/) and separate the model from the view like in Web development. The model is some JSON file, usually [`dawn.json`](../dawn.json) and the views are the Jinja2 templates in [`generator/templates`](../generator/templates). The generated files are not checked into the repository but instead are generated during the build.
-
-Most of the code generation is done in [`dawn_json_generator.py`](../generator/dawn_json_generator.py) but other generators exist so common functionality to build code generators has been extracted into[`generator_lib.py`](../generator/generator_lib.py).
+When the WebGPU API evolves, a lot of places in Dawn have to be updated, so to reduce efforts, Dawn relies heavily on code generation for things like headers, proc tables and de/serialization. For more information, see [codegen.md](codegen.md).
