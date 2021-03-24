@@ -14,24 +14,62 @@ vars = {
 deps = {
   # Dependencies required to use GN/Clang in standalone
   'build': {
-    'url': '{chromium_git}/chromium/src/build@6fa63e6b1506d6dce6c8e86c4dc2b70e4e6f1e6b',
+    'url': '{chromium_git}/chromium/src/build@ea192b29d26f84e94910791c1eeb89d24c063dd0',
     'condition': 'dawn_standalone',
   },
   'buildtools': {
-    'url': '{chromium_git}/chromium/src/buildtools@fc5af1ac75d8a249d692fb3cbf707dd9f791ec3c',
+    'url': '{chromium_git}/chromium/src/buildtools@69cc9b8a3ae010e0721c4bea12de7a352d9a93f9',
     'condition': 'dawn_standalone',
   },
+  'buildtools/clang_format/script': {
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/clang/tools/clang-format.git@99803d74e35962f63a775f29477882afd4d57d94',
+    'condition': 'dawn_standalone',
+  },
+
+  'buildtools/linux64': {
+    'packages': [{
+      'package': 'gn/gn/linux-amd64',
+      'version': 'git_revision:dfcbc6fed0a8352696f92d67ccad54048ad182b3',
+    }],
+    'dep_type': 'cipd',
+    'condition': 'dawn_standalone and host_os == "linux"',
+  },
+  'buildtools/mac': {
+    'packages': [{
+      'package': 'gn/gn/mac-${{arch}}',
+      'version': 'git_revision:dfcbc6fed0a8352696f92d67ccad54048ad182b3',
+    }],
+    'dep_type': 'cipd',
+    'condition': 'dawn_standalone and host_os == "mac"',
+  },
+  'buildtools/win': {
+    'packages': [{
+      'package': 'gn/gn/windows-amd64',
+      'version': 'git_revision:dfcbc6fed0a8352696f92d67ccad54048ad182b3',
+    }],
+    'dep_type': 'cipd',
+    'condition': 'dawn_standalone and host_os == "win"',
+  },
+
+  'buildtools/third_party/libc++/trunk': {
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxx.git@8fa87946779682841e21e2da977eccfb6cb3bded',
+    'condition': 'dawn_standalone',
+  },
+
+  'buildtools/third_party/libc++abi/trunk': {
+    'url': '{chromium_git}/external/github.com/llvm/llvm-project/libcxxabi.git@6918862bfc2bff22b45058fac22b1596c49982fb',
+    'condition': 'dawn_standalone',
+  },
+
   'tools/clang': {
-    'url': '{chromium_git}/chromium/src/tools/clang@aecd85e062e006f47665ed6347e0cc1e9a116421',
+    'url': '{chromium_git}/chromium/src/tools/clang@24cecabb89512de31a1083308b237420651a835c',
     'condition': 'dawn_standalone',
   },
   'tools/clang/dsymutil': {
-    'packages': [
-      {
-        'package': 'chromium/llvm-build-tools/dsymutil',
-        'version': 'M56jPzDv1620Rnm__jTMYS62Zi8rxHVq7yw0qeBFEgkC',
-      }
-    ],
+    'packages': [{
+      'package': 'chromium/llvm-build-tools/dsymutil',
+      'version': 'M56jPzDv1620Rnm__jTMYS62Zi8rxHVq7yw0qeBFEgkC',
+    }],
     'condition': 'dawn_standalone and (checkout_mac or checkout_ios)',
     'dep_type': 'cipd',
   },
