@@ -33,6 +33,13 @@
                     "ninja && echo Done"
                 ],
             },
+            "windows": {
+                "command": "cmd",
+                "args": [
+                    "/C",
+                    "ninja && echo Done"
+                ],
+            },
             "options": {
                 "cwd": "${workspaceRoot}/out/active",
             },
@@ -78,12 +85,19 @@
                     "gn gen 'out/${input:buildType}' --args=is_debug=$(if [ '${input:buildType}' = 'Debug' ]; then echo 'true'; else echo 'false'; fi) && (rm -fr out/active || true) && ln -s ${input:buildType} out/active",
                 ],
             },
+            "windows": {
+                "command": "cmd",
+                "args": [
+                    "/C",
+                    "(IF \"${input:buildType}\" == \"Debug\" ( gn gen 'out\\${input:buildType}' --args=is_debug=true ) ELSE ( gn gen 'out\\${input:buildType}' --args=is_debug=false )) && (IF EXIST 'out\\active' rmdir 'out\\active' /q /s) && (mklink /j 'out\\active' 'out\\${input:buildType}')",
+                ],
+            },
             "options": {
                 "cwd": "${workspaceRoot}"
             },
             "problemMatcher": [],
         },
-        // Rebases the current branch on to out origin/main and then calls
+        // Rebases the current branch on to origin/main and then calls
         // `gclient sync`.
         {
             "label": "sync",
@@ -92,14 +106,21 @@
                 "command": "sh",
                 "args": [
                     "-c",
-                    "git fetch origin && git rebase origin/main && gclient sync"
+                    "git fetch origin && git rebase origin/main && gclient sync && echo Done"
                 ],
             },
             "osx": {
                 "command": "sh",
                 "args": [
                     "-c",
-                    "git fetch origin && git rebase origin/main && gclient sync"
+                    "git fetch origin && git rebase origin/main && gclient sync && echo Done"
+                ],
+            },
+            "windows": {
+                "command": "cmd",
+                "args": [
+                    "/C",
+                    "git fetch origin && git rebase origin/main && gclient sync && echo Done"
                 ],
             },
             "options": {
