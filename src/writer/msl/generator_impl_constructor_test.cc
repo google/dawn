@@ -154,8 +154,29 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
             "float3(7.0f, 8.0f, 9.0f)}");
 }
 
-// TODO(dsinclair): Add struct constructor test.
-TEST_F(MslGeneratorImplTest, DISABLED_EmitConstructor_Type_Struct) {}
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
+  auto* struct_ty = Structure("S",
+                              ast::StructMemberList{
+                                  Member("a", ty.f32()),
+                                  Member("b", ty.u32()),
+                                  Member("c", ty.vec4<f32>()),
+                              },
+                              ast::DecorationList{});
+
+  ast::ExpressionList struct_values;
+  struct_values.push_back(Expr(0.f));
+  struct_values.push_back(Expr(42u));
+  struct_values.push_back(Construct(
+      ty.vec4<f32>(),
+      ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f), Expr(4.f)}));
+
+  auto* expr = Construct(struct_ty, struct_values);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "{0.0f, 42u, float4(1.0f, 2.0f, 3.0f, 4.0f)}");
+}
 
 }  // namespace
 }  // namespace msl

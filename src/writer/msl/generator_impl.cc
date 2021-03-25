@@ -872,7 +872,7 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
-  if (expr->type()->Is<type::Array>()) {
+  if (expr->type()->IsAnyOf<type::Array, type::Struct>()) {
     out_ << "{";
   } else {
     if (!EmitType(expr->type(), "")) {
@@ -901,7 +901,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  if (expr->type()->Is<type::Array>()) {
+  if (expr->type()->IsAnyOf<type::Array, type::Struct>()) {
     out_ << "}";
   } else {
     out_ << ")";
