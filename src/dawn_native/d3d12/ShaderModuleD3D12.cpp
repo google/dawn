@@ -18,6 +18,7 @@
 #include "common/BitSetIterator.h"
 #include "common/Log.h"
 #include "dawn_native/SpirvUtils.h"
+#include "dawn_native/TintUtils.h"
 #include "dawn_native/d3d12/BindGroupLayoutD3D12.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
@@ -184,6 +185,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
+        ScopedTintICEHandler scopedICEHandler(GetDevice());
         return InitializeBase(parseResult);
     }
 
@@ -194,6 +196,8 @@ namespace dawn_native { namespace d3d12 {
         std::string* remappedEntryPointName,
         FirstOffsetInfo* firstOffsetInfo) const {
         ASSERT(!IsError());
+
+        ScopedTintICEHandler scopedICEHandler(GetDevice());
 
         std::ostringstream errorStream;
         errorStream << "Tint HLSL failure:" << std::endl;

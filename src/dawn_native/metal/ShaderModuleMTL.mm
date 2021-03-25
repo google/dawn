@@ -16,6 +16,7 @@
 
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/SpirvUtils.h"
+#include "dawn_native/TintUtils.h"
 #include "dawn_native/metal/DeviceMTL.h"
 #include "dawn_native/metal/PipelineLayoutMTL.h"
 #include "dawn_native/metal/RenderPipelineMTL.h"
@@ -46,6 +47,7 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
+        ScopedTintICEHandler scopedICEHandler(GetDevice());
         return InitializeBase(parseResult);
     }
 
@@ -61,6 +63,8 @@ namespace dawn_native { namespace metal {
         bool* needsStorageBufferLength) {
         // TODO(crbug.com/tint/256): Set this accordingly if arrayLength(..) is used.
         *needsStorageBufferLength = false;
+
+        ScopedTintICEHandler scopedICEHandler(GetDevice());
 
         std::ostringstream errorStream;
         errorStream << "Tint MSL failure:" << std::endl;

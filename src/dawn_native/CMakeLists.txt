@@ -155,6 +155,8 @@ target_sources(dawn_native PRIVATE
     "SwapChain.h"
     "Texture.cpp"
     "Texture.h"
+    "TintUtils.cpp"
+    "TintUtils.h"
     "ToBackend.h"
     "Toggles.cpp"
     "Toggles.h"

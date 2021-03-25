@@ -22,6 +22,7 @@
 #include "dawn_native/PipelineLayout.h"
 #include "dawn_native/RenderPipeline.h"
 #include "dawn_native/SpirvUtils.h"
+#include "dawn_native/TintUtils.h"
 
 #include <spirv-tools/libspirv.hpp>
 #include <spirv-tools/optimizer.hpp>
@@ -946,6 +947,8 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR(
                 "Shader module descriptor chained nextInChain must be nullptr");
         }
+
+        ScopedTintICEHandler scopedICEHandler(device);
 
         ShaderModuleParseResult parseResult = {};
         switch (chainedDescriptor->sType) {

@@ -14,6 +14,7 @@
 
 #include "dawn_native/vulkan/ShaderModuleVk.h"
 
+#include "dawn_native/TintUtils.h"
 #include "dawn_native/vulkan/DeviceVk.h"
 #include "dawn_native/vulkan/FencedDeleter.h"
 #include "dawn_native/vulkan/VulkanError.h"
@@ -47,6 +48,8 @@ namespace dawn_native { namespace vulkan {
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
         std::vector<uint32_t> spirv;
         const std::vector<uint32_t>* spirvPtr;
+
+        ScopedTintICEHandler scopedICEHandler(GetDevice());
 
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
             std::ostringstream errorStream;

@@ -18,6 +18,7 @@
 #include "common/Platform.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/SpirvUtils.h"
+#include "dawn_native/TintUtils.h"
 #include "dawn_native/opengl/DeviceGL.h"
 #include "dawn_native/opengl/PipelineLayoutGL.h"
 
@@ -77,6 +78,8 @@ namespace dawn_native { namespace opengl {
     }
 
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
+        ScopedTintICEHandler scopedICEHandler(GetDevice());
+
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
             std::ostringstream errorStream;
             errorStream << "Tint SPIR-V (for GLSL) writer failure:" << std::endl;
