@@ -902,19 +902,6 @@ namespace dawn_native {
         return !IsDeviceIdle();
     }
 
-    void DeviceBase::Reference() {
-        ASSERT(mRefCount != 0);
-        mRefCount++;
-    }
-
-    void DeviceBase::Release() {
-        ASSERT(mRefCount != 0);
-        mRefCount--;
-        if (mRefCount == 0) {
-            delete this;
-        }
-    }
-
     QueueBase* DeviceBase::GetQueue() {
         // Backends gave the primary queue during initialization.
         ASSERT(mQueue != nullptr);
