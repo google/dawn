@@ -48,11 +48,8 @@ namespace dawn_native { namespace d3d12 {
       public:
         ExternalImageDescriptorDXGISharedHandle();
 
+        // Note: SharedHandle must be a handle to a texture object.
         HANDLE sharedHandle;
-
-        // Warning: depreciated, replaced by ExternalImageAccessDescriptorDXGIKeyedMutex.
-        uint64_t acquireMutexKey;
-        bool isSwapChainTexture = false;
     };
 
     struct DAWN_NATIVE_EXPORT ExternalImageAccessDescriptorDXGIKeyedMutex
@@ -87,11 +84,6 @@ namespace dawn_native { namespace d3d12 {
         uint32_t mMipLevelCount;
         uint32_t mSampleCount;
     };
-
-    // Warning: depreciated, replaced by ExternalImageDXGI::Create.
-    // Note: SharedHandle must be a handle to a texture object.
-    DAWN_NATIVE_EXPORT WGPUTexture
-    WrapSharedHandle(WGPUDevice device, const ExternalImageDescriptorDXGISharedHandle* descriptor);
 
     struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptionsBase {
         AdapterDiscoveryOptions(Microsoft::WRL::ComPtr<IDXGIAdapter> adapter);
