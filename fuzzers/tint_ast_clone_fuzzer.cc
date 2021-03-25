@@ -41,8 +41,17 @@
     }                                                  \
   } while (false)
 
+[[noreturn]] void TintInternalCompilerErrorReporter(
+    const tint::diag::List& diagnostics) {
+  auto printer = tint::diag::Printer::create(stderr, true);
+  tint::diag::Formatter{}.format(diagnostics, printer.get());
+  __builtin_trap();
+}
+
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   std::string str(reinterpret_cast<const char*>(data), size);
+
+  tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
   tint::Source::File file("test.wgsl", str);
 

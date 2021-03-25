@@ -26,6 +26,13 @@
 namespace tint {
 namespace fuzzers {
 
+[[noreturn]] void TintInternalCompilerErrorReporter(
+    const tint::diag::List& diagnostics) {
+  auto printer = tint::diag::Printer::create(stderr, true);
+  tint::diag::Formatter{}.format(diagnostics, printer.get());
+  __builtin_trap();
+}
+
 CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
     : input_(input),
       output_(output),
@@ -35,6 +42,8 @@ CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
 CommonFuzzer::~CommonFuzzer() = default;
 
 int CommonFuzzer::Run(const uint8_t* data, size_t size) {
+  tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
+
   Program program;
 
 #if TINT_BUILD_WGSL_READER
