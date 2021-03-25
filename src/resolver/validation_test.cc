@@ -666,12 +666,10 @@ TEST_F(ResolverValidationTest, Stmt_BreakInLoop) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInSwitch) {
-  WrapInFunction(Loop(Block(create<ast::SwitchStatement>(
-      Expr(1), ast::CaseStatementList{
-                   create<ast::CaseStatement>(
-                       ast::CaseSelectorList{Literal(1)},
-                       Block(create<ast::BreakStatement>(Source{{12, 34}}))),
-               }))));
+  WrapInFunction(Loop(Block(Switch(
+      Expr(1),
+      Case(Literal(1), Block(create<ast::BreakStatement>(Source{{12, 34}}))),
+      DefaultCase()))));
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 

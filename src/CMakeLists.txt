@@ -467,6 +467,7 @@ if(${TINT_BUILD_TESTS})
     program_test.cc
     resolver/assignment_validation_test.cc
     resolver/builtins_validation_test.cc
+    resolver/control_block_validation_test.cc
     resolver/decoration_validation_test.cc
     resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
@@ -510,7 +511,6 @@ if(${TINT_BUILD_TESTS})
     utils/tmpfile_test.cc
     utils/tmpfile.h
     utils/unique_vector_test.cc
-    validator/validator_control_block_test.cc
     validator/validator_decoration_test.cc
     validator/validator_function_test.cc
     validator/validator_test.cc

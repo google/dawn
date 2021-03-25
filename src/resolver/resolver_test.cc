@@ -248,14 +248,8 @@ TEST_F(ResolverTest, Stmt_Switch) {
   auto* lhs = Expr("v");
   auto* rhs = Expr(2.3f);
 
-  auto* body = Block(create<ast::AssignmentStatement>(lhs, rhs));
-  ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(ty.i32(), 3));
-
-  ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(lit, body));
-
-  auto* stmt = create<ast::SwitchStatement>(Expr(2), cases);
+  auto* stmt =
+      Switch(Expr(2), Case(Literal(3), Block(Assign(lhs, rhs))), DefaultCase());
   WrapInFunction(v, stmt);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

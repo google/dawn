@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2021 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,15 +13,17 @@
 // limitations under the License.
 
 #include "src/ast/fallthrough_statement.h"
-#include "src/validator/validator_test_helper.h"
+#include "src/ast/switch_statement.h"
+#include "src/resolver/resolver_test_helper.h"
 
 namespace tint {
 namespace {
 
-class ValidateControlBlockTest : public ValidatorTestHelper,
-                                 public testing::Test {};
+class ResolverControlBlockValidationTest : public resolver::TestHelper,
+                                           public testing::Test {};
 
-TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
+TEST_F(ResolverControlBlockValidationTest,
+       SwitchSelectorExpressionNoneIntegerType_Fail) {
   // var a : f32 = 3.14;
   // switch (a) {
   //   default: {}
@@ -41,15 +43,13 @@ TEST_F(ValidateControlBlockTest, SwitchSelectorExpressionNoneIntegerType_Fail) {
 
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.ValidateStatements(block));
-  EXPECT_EQ(v.error(),
-            "12:34 v-0025: switch statement selector expression must be "
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-0025: switch statement selector expression must be "
             "of a scalar integer type");
 }
 
-TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
+TEST_F(ResolverControlBlockValidationTest, SwitchWithoutDefault_Fail) {
   // var a : i32 = 2;
   // switch (a) {
   //   case 1: {}
@@ -71,15 +71,12 @@ TEST_F(ValidateControlBlockTest, SwitchWithoutDefault_Fail) {
 
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.ValidateStatements(block));
-  EXPECT_EQ(v.error(),
-            "12:34 v-0008: switch statement must have exactly one default "
-            "clause");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: switch statement must have a default clause");
 }
 
-TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
+TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
   // var a : i32 = 2;
   // switch (a) {
   //   default: {}
@@ -101,28 +98,26 @@ TEST_F(ValidateControlBlockTest, SwitchWithTwoDefault_Fail) {
 
   ast::CaseSelectorList default_csl_2;
   auto* block_default_2 = create<ast::BlockStatement>(ast::StatementList{});
-  switch_body.push_back(
-      create<ast::CaseStatement>(default_csl_2, block_default_2));
+  switch_body.push_back(create<ast::CaseStatement>(
+      Source{Source::Location{12, 34}}, default_csl_2, block_default_2));
 
   auto* block = create<ast::BlockStatement>(ast::StatementList{
       create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Source{Source::Location{12, 34}}, Expr("a"),
-                                   switch_body),
+      create<ast::SwitchStatement>(Expr("a"), switch_body),
   });
 
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.ValidateStatements(block));
-  EXPECT_EQ(v.error(),
-            "12:34 v-0008: switch statement must have exactly one default "
-            "clause");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error v-0008: switch statement must have exactly one default "
+      "clause");
 }
 
-TEST_F(ValidateControlBlockTest,
+TEST_F(ResolverControlBlockValidationTest,
        SwitchConditionTypeMustMatchSelectorType2_Fail) {
-  // var a : i32 = 2;
+  // var a : u32 = 2;
   // switch (a) {
   //   case 1: {}
   //   default: {}
@@ -146,15 +141,13 @@ TEST_F(ValidateControlBlockTest,
   });
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.ValidateStatements(block));
-  EXPECT_EQ(v.error(),
-            "12:34 v-0026: the case selector values must have the same "
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-0026: the case selector values must have the same "
             "type as the selector expression.");
 }
 
-TEST_F(ValidateControlBlockTest,
+TEST_F(ResolverControlBlockValidationTest,
        SwitchConditionTypeMustMatchSelectorType_Fail) {
   // var a : u32 = 2;
   // switch (a) {
@@ -180,15 +173,14 @@ TEST_F(ValidateControlBlockTest,
   });
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.ValidateStatements(block));
-  EXPECT_EQ(v.error(),
-            "12:34 v-0026: the case selector values must have the same "
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-0026: the case selector values must have the same "
             "type as the selector expression.");
 }
 
-TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
+TEST_F(ResolverControlBlockValidationTest,
+       NonUniqueCaseSelectorValueUint_Fail) {
   // var a : u32 = 3;
   // switch (a) {
   //   case 0: {}
@@ -220,15 +212,15 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueUint_Fail) {
   });
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.ValidateStatements(block));
-  EXPECT_EQ(v.error(),
-            "12:34 v-0027: a literal value must not appear more than once "
-            "in the case selectors for a switch statement: '2'");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error v-0027: a literal value must not appear more than once "
+      "in the case selectors for a switch statement: '2'");
 }
 
-TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
+TEST_F(ResolverControlBlockValidationTest,
+       NonUniqueCaseSelectorValueSint_Fail) {
   // var a : i32 = 2;
   // switch (a) {
   //   case 10: {}
@@ -262,15 +254,15 @@ TEST_F(ValidateControlBlockTest, NonUniqueCaseSelectorValueSint_Fail) {
   });
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.ValidateStatements(block));
-  EXPECT_EQ(v.error(),
-            "12:34 v-0027: a literal value must not appear more than once in "
-            "the case selectors for a switch statement: '10'");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error v-0027: a literal value must not appear more than once in "
+      "the case selectors for a switch statement: '10'");
 }
 
-TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
+TEST_F(ResolverControlBlockValidationTest,
+       LastClauseLastStatementIsFallthrough_Fail) {
   // var a : i32 = 2;
   // switch (a) {
   //   default: { fallthrough; }
@@ -292,15 +284,14 @@ TEST_F(ValidateControlBlockTest, LastClauseLastStatementIsFallthrough_Fail) {
   });
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.ValidateStatements(block));
-  EXPECT_EQ(v.error(),
-            "12:34 v-0028: a fallthrough statement must not appear as the "
-            "last statement in last clause of a switch");
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error v-0028: a fallthrough statement must not appear as the "
+      "last statement in last clause of a switch");
 }
 
-TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
+TEST_F(ResolverControlBlockValidationTest, SwitchCase_Pass) {
   // var a : i32 = 2;
   // switch (a) {
   //   default: {}
@@ -324,12 +315,10 @@ TEST_F(ValidateControlBlockTest, SwitchCase_Pass) {
   });
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateStatements(block)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
+TEST_F(ResolverControlBlockValidationTest, SwitchCaseAlias_Pass) {
   // type MyInt = u32;
   // var v: MyInt;
   // switch(v){
@@ -353,9 +342,7 @@ TEST_F(ValidateControlBlockTest, SwitchCaseAlias_Pass) {
 
   WrapInFunction(block);
 
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.ValidateStatements(block)) << v.error();
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 }  // namespace

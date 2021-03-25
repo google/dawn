@@ -409,15 +409,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
     return Return(r);
   }
   if (auto* s = stmt->As<ast::SwitchStatement>()) {
-    if (!Expression(s->condition())) {
-      return false;
-    }
-    for (auto* case_stmt : s->body()) {
-      if (!CaseStatement(case_stmt)) {
-        return false;
-      }
-    }
-    return true;
+    return Switch(s);
   }
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
     return VariableDeclStatement(v);
@@ -1674,6 +1666,91 @@ bool Resolver::Return(ast::ReturnStatement* ret) {
   // Validate after processing the return value expression so that its type is
   // available for validation
   return result && ValidateReturn(ret);
+}
+
+bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
+  auto* cond_type = TypeOf(s->condition())->UnwrapAll();
+  if (!cond_type->is_integer_scalar()) {
+    diagnostics_.add_error("v-0025",
+                           "switch statement selector expression must be of a "
+                           "scalar integer type",
+                           s->condition()->source());
+    return false;
+  }
+
+  bool has_default = false;
+  std::unordered_set<uint32_t> selector_set;
+
+  for (auto* case_stmt : s->body()) {
+    if (case_stmt->IsDefault()) {
+      if (has_default) {
+        // More than one default clause
+        diagnostics_.add_error(
+            "v-0008", "switch statement must have exactly one default clause",
+            case_stmt->source());
+        return false;
+      }
+      has_default = true;
+    }
+
+    for (auto* selector : case_stmt->selectors()) {
+      if (cond_type != selector->type()) {
+        diagnostics_.add_error("v-0026",
+                               "the case selector values must have the same "
+                               "type as the selector expression.",
+                               case_stmt->source());
+        return false;
+      }
+
+      auto v = selector->value_as_u32();
+      if (selector_set.find(v) != selector_set.end()) {
+        diagnostics_.add_error(
+            "v-0027",
+            "a literal value must not appear more than once in "
+            "the case selectors for a switch statement: '" +
+                builder_->str(selector) + "'",
+            case_stmt->source());
+        return false;
+      }
+      selector_set.emplace(v);
+    }
+  }
+
+  if (!has_default) {
+    // No default clause
+    diagnostics_.add_error("switch statement must have a default clause",
+                           s->source());
+    return false;
+  }
+
+  if (!s->body().empty()) {
+    auto* last_clause = s->body().back()->As<ast::CaseStatement>();
+    auto* last_stmt = last_clause->body()->last();
+    if (last_stmt && last_stmt->Is<ast::FallthroughStatement>()) {
+      diagnostics_.add_error("v-0028",
+                             "a fallthrough statement must not appear as "
+                             "the last statement in last clause of a switch",
+                             last_stmt->source());
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool Resolver::Switch(ast::SwitchStatement* s) {
+  if (!Expression(s->condition())) {
+    return false;
+  }
+  for (auto* case_stmt : s->body()) {
+    if (!CaseStatement(case_stmt)) {
+      return false;
+    }
+  }
+  if (!ValidateSwitch(s)) {
+    return false;
+  }
+  return true;
 }
 
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,

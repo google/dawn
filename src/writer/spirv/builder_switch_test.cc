@@ -25,10 +25,10 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Switch_Empty) {
   // switch (1) {
+  //   default: {}
   // }
 
-  auto* expr = create<ast::SwitchStatement>(Expr(1), ast::CaseStatementList{});
-
+  auto* expr = Switch(1, DefaultCase());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -54,29 +54,15 @@ TEST_F(BuilderTest, Switch_WithCase) {
   //     v = 1;
   //   case 2:
   //     v = 2;
+  //   default: {}
   // }
 
   auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
-  auto* case_1_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
-
-  auto* case_2_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
-
-  ast::CaseSelectorList selector_1;
-  selector_1.push_back(Literal(1));
-
-  ast::CaseSelectorList selector_2;
-  selector_2.push_back(Literal(2));
-
-  ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
-  cases.push_back(create<ast::CaseStatement>(selector_2, case_2_body));
-
-  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
-
+  auto* expr = Switch("a", /**/
+                      Case(Literal(1), Block(Assign("v", 1))),
+                      Case(Literal(2), Block(Assign("v", 2))), DefaultCase());
   WrapInFunction(expr);
 
   auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
@@ -127,28 +113,14 @@ TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
   //     v = 1;
   //   case 2u:
   //     v = 2;
+  //   default: {}
   // }
 
   auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* a = Global("a", ty.u32(), ast::StorageClass::kPrivate);
 
-  auto* case_1_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
-
-  auto* case_2_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
-
-  ast::CaseSelectorList selector_1;
-  selector_1.push_back(Literal(1u));
-
-  ast::CaseSelectorList selector_2;
-  selector_2.push_back(Literal(2u));
-
-  ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
-  cases.push_back(create<ast::CaseStatement>(selector_2, case_2_body));
-
-  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
+  auto* expr = Switch("a", Case(Literal(1u), Block(Assign("v", 1))),
+                      Case(Literal(2u), Block(Assign("v", 2))), DefaultCase());
 
   WrapInFunction(expr);
 
@@ -199,7 +171,7 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Switch_WithDefault) {
   // switch(true) {
-  //   default:
+  //   default: {}
   //     v = 1;
   //  }
 
@@ -259,7 +231,7 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   //      v = 1;
   //   case 2, 3:
   //      v = 2;
-  //   default:
+  //   default: {}
   //      v = 3;
   //  }
 
@@ -343,7 +315,7 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   //      fallthrough;
   //   case 2:
   //      v = 2;
-  //   default:
+  //   default: {}
   //      v = 3;
   //  }
 
@@ -420,43 +392,6 @@ OpFunctionEnd
 )");
 }
 
-TEST_F(BuilderTest, Switch_CaseFallthroughLastStatement) {
-  // switch(a) {
-  //   case 1:
-  //      v = 1;
-  //      fallthrough;
-  //  }
-
-  auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
-
-  auto* case_1_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1)),
-                         create<ast::FallthroughStatement>()});
-
-  ast::CaseSelectorList selector_1;
-  selector_1.push_back(Literal(1));
-
-  ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
-
-  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
-
-  WrapInFunction(expr);
-
-  auto* func = Func("a_func", {}, ty.void_(), ast::StatementList{},
-                    ast::DecorationList{});
-
-  spirv::Builder& b = Build();
-
-  ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
-  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-
-  EXPECT_FALSE(b.GenerateSwitchStatement(expr)) << b.error();
-  EXPECT_EQ(b.error(), "fallthrough of last case statement is disallowed");
-}
-
 TEST_F(BuilderTest, Switch_WithNestedBreak) {
   // switch (a) {
   //   case 1:
@@ -464,26 +399,19 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
   //       break;
   //     }
   //     v = 1;
-  //  }
+  //   default: {}
+  // }
 
   auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
-  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
-
-  auto* case_1_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{}),
-      create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
-
-  ast::CaseSelectorList selector_1;
-  selector_1.push_back(Literal(1));
-
-  ast::CaseStatementList cases;
-  cases.push_back(create<ast::CaseStatement>(selector_1, case_1_body));
-
-  auto* expr = create<ast::SwitchStatement>(Expr("a"), cases);
+  auto* expr =
+      Switch("a", /**/
+             Case(Literal(1),
+                  Block(/**/
+                        If(Expr(true), Block(create<ast::BreakStatement>())),
+                        Assign("v", 1))),
+             DefaultCase());
 
   WrapInFunction(expr);
 

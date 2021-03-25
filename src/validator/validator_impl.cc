@@ -253,63 +253,13 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
 }
 
 bool ValidatorImpl::ValidateSwitch(const ast::SwitchStatement* s) {
-  auto* cond_type = program_->Sem().Get(s->condition())->Type()->UnwrapAll();
-  if (!cond_type->is_integer_scalar()) {
-    add_error(s->condition()->source(), "v-0025",
-              "switch statement selector expression must be of a "
-              "scalar integer type");
-    return false;
-  }
-
-  int default_counter = 0;
-  std::unordered_set<int32_t> selector_set;
+  // TODO(amaiorano): Switch validation has moved to Resolver, but we need this
+  // logic to validate case statements for now. Remove once ValidateStatement()
+  // can be removed.
   for (auto* case_stmt : s->body()) {
     if (!ValidateStatement(case_stmt)) {
       return false;
     }
-
-    if (case_stmt->IsDefault()) {
-      default_counter++;
-    }
-
-    for (auto* selector : case_stmt->selectors()) {
-      if (cond_type != selector->type()) {
-        add_error(case_stmt->source(), "v-0026",
-                  "the case selector values must have the same "
-                  "type as the selector expression.");
-        return false;
-      }
-
-      auto v =
-          static_cast<int32_t>(selector->type()->Is<type::U32>()
-                                   ? selector->As<ast::UintLiteral>()->value()
-                                   : selector->As<ast::SintLiteral>()->value());
-      if (selector_set.count(v)) {
-        add_error(case_stmt->source(), "v-0027",
-                  "a literal value must not appear more than once in "
-                  "the case selectors for a switch statement: '" +
-                      program_->str(selector) + "'");
-        return false;
-      }
-      selector_set.emplace(v);
-    }
-  }
-
-  if (default_counter != 1) {
-    add_error(s->source(), "v-0008",
-              "switch statement must have exactly one default clause");
-    return false;
-  }
-
-  auto* last_clause = s->body().back();
-  auto* last_stmt_of_last_clause =
-      last_clause->As<ast::CaseStatement>()->body()->last();
-  if (last_stmt_of_last_clause &&
-      last_stmt_of_last_clause->Is<ast::FallthroughStatement>()) {
-    add_error(last_stmt_of_last_clause->source(), "v-0028",
-              "a fallthrough statement must not appear as "
-              "the last statement in last clause of a switch");
-    return false;
   }
   return true;
 }

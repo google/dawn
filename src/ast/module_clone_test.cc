@@ -84,10 +84,10 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
     }
   }
   switch(l2) {
-    case 0: {
+    case 0u: {
       break;
     }
-    case 1: {
+    case 1u: {
       return f0(true);
     }
     default: {

@@ -40,6 +40,7 @@ class Function;
 class IdentifierExpression;
 class MemberAccessorExpression;
 class ReturnStatement;
+class SwitchStatement;
 class UnaryOpExpression;
 class Variable;
 }  // namespace ast
@@ -220,6 +221,7 @@ class Resolver {
   bool UnaryOp(ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
   bool Return(ast::ReturnStatement* ret);
+  bool Switch(ast::SwitchStatement* s);
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
@@ -228,6 +230,7 @@ class Resolver {
   bool ValidateFunction(const ast::Function* func);
   bool ValidateStructure(const type::Struct* st);
   bool ValidateReturn(const ast::ReturnStatement* ret);
+  bool ValidateSwitch(const ast::SwitchStatement* s);
 
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is

@@ -23,6 +23,7 @@
 #include "src/ast/binary_expression.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_expression.h"
+#include "src/ast/case_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
@@ -35,6 +36,7 @@
 #include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/struct_member_size_decoration.h"
+#include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
@@ -1150,11 +1152,15 @@ class ProgramBuilder {
   }
 
   /// Creates a ast::AssignmentStatement with input lhs and rhs expressions
-  /// @param lhs the left hand side expression
-  /// @param rhs the right hand side expression
+  /// @param lhs the left hand side expression initializer
+  /// @param rhs the right hand side expression initializer
   /// @returns the assignment statement pointer
-  ast::AssignmentStatement* Assign(ast::Expression* lhs, ast::Expression* rhs) {
-    return create<ast::AssignmentStatement>(lhs, rhs);
+  template <typename LhsExpressionInit, typename RhsExpressionInit>
+  ast::AssignmentStatement* Assign(LhsExpressionInit&& lhs,
+                                   RhsExpressionInit&& rhs) {
+    return create<ast::AssignmentStatement>(
+        Expr(std::forward<LhsExpressionInit>(lhs)),
+        Expr(std::forward<RhsExpressionInit>(rhs)));
   }
 
   /// Creates a ast::LoopStatement with input body and optional continuing
@@ -1171,6 +1177,43 @@ class ProgramBuilder {
   /// @returns the variable decl statement pointer
   ast::VariableDeclStatement* Decl(ast::Variable* var) {
     return create<ast::VariableDeclStatement>(var);
+  }
+
+  /// Creates a ast::SwitchStatement with input expression and cases
+  /// @param condition the condition expression initializer
+  /// @param cases case statements
+  /// @returns the switch statement pointer
+  template <typename ExpressionInit, typename... Cases>
+  ast::SwitchStatement* Switch(ExpressionInit&& condition, Cases&&... cases) {
+    return create<ast::SwitchStatement>(
+        Expr(std::forward<ExpressionInit>(condition)),
+        ast::CaseStatementList{std::forward<Cases>(cases)...});
+  }
+
+  /// Creates a ast::CaseStatement with input list of selectors, and body
+  /// @param selectors list of selectors
+  /// @param body the case body
+  /// @returns the case statement pointer
+  ast::CaseStatement* Case(ast::CaseSelectorList selectors,
+                           ast::BlockStatement* body = nullptr) {
+    return create<ast::CaseStatement>(std::move(selectors),
+                                      body ? body : Block());
+  }
+
+  /// Convenient overload that takes a single selector
+  /// @param selector a single case selector
+  /// @param body the case body
+  /// @returns the case statement pointer
+  ast::CaseStatement* Case(ast::IntLiteral* selector,
+                           ast::BlockStatement* body = nullptr) {
+    return Case(ast::CaseSelectorList{selector}, body);
+  }
+
+  /// Convenience function that creates a 'default' ast::CaseStatement
+  /// @param body the case body
+  /// @returns the case statement pointer
+  ast::CaseStatement* DefaultCase(ast::BlockStatement* body = nullptr) {
+    return Case(ast::CaseSelectorList{}, body);
   }
 
   /// Sets the current builder source to `src`

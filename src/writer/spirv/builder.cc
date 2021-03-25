@@ -2726,7 +2726,8 @@ bool Builder::GenerateSwitchStatement(ast::SwitchStatement* stmt) {
 
     if (LastIsFallthrough(item->body())) {
       if (i == (body.size() - 1)) {
-        error_ = "fallthrough of last case statement is disallowed";
+        // This case is caught by Resolver validation
+        TINT_UNREACHABLE(builder_.Diagnostics());
         return false;
       }
       if (!push_function_inst(spv::Op::OpBranch,
