@@ -156,8 +156,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
 
       // Create a function that writes a return value to all output variables.
       auto* store_value =
-          ctx.dst->Var(store_value_symbol, ctx.Clone(func->return_type()),
-                       ast::StorageClass::kFunction, nullptr);
+          ctx.dst->Const(store_value_symbol, ctx.Clone(func->return_type()));
       auto return_func_symbol = ctx.dst->Symbols().New();
       auto* return_func = ctx.dst->create<ast::Function>(
           return_func_symbol, ast::VariableList{store_value},
@@ -268,11 +267,8 @@ Symbol Spirv::HoistToInputVariables(
   }
 
   // Create a function-scope variable for the struct.
-  // TODO(jrprice): Use Const when crbug.com/tint/662 is fixed
   auto* initializer = ctx.dst->Construct(ctx.Clone(ty), init_values);
-  auto* func_var =
-      ctx.dst->Var(func_var_symbol, ctx.Clone(ty), ast::StorageClass::kFunction,
-                   initializer, ast::DecorationList{});
+  auto* func_var = ctx.dst->Const(func_var_symbol, ctx.Clone(ty), initializer);
   ctx.InsertBefore(*func->body()->begin(), ctx.dst->WrapInStatement(func_var));
   return func_var_symbol;
 }

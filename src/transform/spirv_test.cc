@@ -214,7 +214,7 @@ struct FragmentInput {
 
 [[stage(fragment)]]
 fn frag_main() -> void {
-  var tint_symbol_6 : FragmentInput = FragmentInput(tint_symbol_4, tint_symbol_5);
+  const tint_symbol_6 : FragmentInput = FragmentInput(tint_symbol_4, tint_symbol_5);
   var col : f32 = (tint_symbol_6.coord.x * tint_symbol_6.value);
 }
 )";
@@ -282,10 +282,10 @@ struct FragmentInput {
 
 [[stage(fragment)]]
 fn frag_main() -> void {
-  var tint_symbol_13 : Builtins = Builtins(tint_symbol_12);
-  var tint_symbol_16 : Locations = Locations(tint_symbol_14, tint_symbol_15);
-  var tint_symbol_17 : Other = Other(tint_symbol_16);
-  var tint_symbol_19 : FragmentInput = FragmentInput(tint_symbol_13, tint_symbol_17, tint_symbol_18);
+  const tint_symbol_13 : Builtins = Builtins(tint_symbol_12);
+  const tint_symbol_16 : Locations = Locations(tint_symbol_14, tint_symbol_15);
+  const tint_symbol_17 : Other = Other(tint_symbol_16);
+  const tint_symbol_19 : FragmentInput = FragmentInput(tint_symbol_13, tint_symbol_17, tint_symbol_18);
   var col : f32 = (tint_symbol_19.b.coord.x * tint_symbol_19.value);
   var l : f32 = (tint_symbol_19.o.l.l2 + tint_symbol_19.o.l.l3);
 }
@@ -499,7 +499,7 @@ fn tint_symbol_7(tint_symbol_5 : Interface) -> void {
 
 [[stage(vertex)]]
 fn vert_main() -> void {
-  var tint_symbol_4 : Interface = Interface(tint_symbol_3);
+  const tint_symbol_4 : Interface = Interface(tint_symbol_3);
   tint_symbol_7(tint_symbol_4);
   return;
 }
@@ -548,7 +548,7 @@ fn vert_main() -> void {
 
 [[stage(fragment)]]
 fn frag_main() -> void {
-  var tint_symbol_8 : Interface = Interface(tint_symbol_7);
+  const tint_symbol_8 : Interface = Interface(tint_symbol_7);
   var x : f32 = tint_symbol_8.value;
 }
 )";
@@ -621,8 +621,8 @@ fn vert_main() -> void {
 
 [[stage(fragment)]]
 fn frag_main() -> void {
-  var tint_symbol_15 : Interface = Interface(tint_symbol_14);
-  var tint_symbol_16 : FragmentInput = FragmentInput(tint_symbol_13, tint_symbol_15);
+  const tint_symbol_15 : Interface = Interface(tint_symbol_14);
+  const tint_symbol_16 : FragmentInput = FragmentInput(tint_symbol_13, tint_symbol_15);
   var x : f32 = tint_symbol_16.interface.value;
 }
 )";
@@ -690,8 +690,8 @@ fn tint_symbol_17(tint_symbol_13 : MyVertexOutput) -> void {
 
 [[stage(vertex)]]
 fn vert_main() -> void {
-  var tint_symbol_9 : MyLocation = MyLocation(tint_symbol_8);
-  var tint_symbol_11 : MyVertexInput = MyVertexInput(tint_symbol_9, tint_symbol_10);
+  const tint_symbol_9 : MyLocation = MyLocation(tint_symbol_8);
+  const tint_symbol_11 : MyVertexInput = MyVertexInput(tint_symbol_9, tint_symbol_10);
   tint_symbol_17(tint_symbol_11);
   return;
 }
@@ -746,7 +746,7 @@ fn tint_symbol_10(tint_symbol_8 : FragmentOutput) -> void {
 
 [[stage(fragment)]]
 fn frag_main() -> void {
-  var tint_symbol_7 : FragmentInput = FragmentInput(tint_symbol_5, tint_symbol_6);
+  const tint_symbol_7 : FragmentInput = FragmentInput(tint_symbol_5, tint_symbol_6);
   tint_symbol_10(FragmentOutput((tint_symbol_7.coord.x * tint_symbol_7.value)));
   return;
 }
