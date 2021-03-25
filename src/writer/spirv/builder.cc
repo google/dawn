@@ -861,30 +861,43 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
   // If the data_type is a structure we're accessing a member, if it's a
   // vector we're accessing a swizzle.
   if (data_type->Is<type::Struct>()) {
-    if (!info->source_type->Is<type::Pointer>()) {
-      error_ =
-          "Attempting to access a struct member on a non-pointer. Something is "
-          "wrong";
-      return false;
-    }
-
     auto* strct = data_type->As<type::Struct>()->impl();
     auto symbol = expr->member()->symbol();
 
-    uint32_t i = 0;
-    for (; i < strct->members().size(); ++i) {
-      auto* member = strct->members()[i];
+    uint32_t idx = 0;
+    for (; idx < strct->members().size(); ++idx) {
+      auto* member = strct->members()[idx];
       if (member->symbol() == symbol) {
         break;
       }
     }
 
-    auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(i));
-    if (idx_id == 0) {
-      return 0;
+    if (info->source_type->Is<type::Pointer>()) {
+      auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(idx));
+      if (idx_id == 0) {
+        return 0;
+      }
+      info->access_chain_indices.push_back(idx_id);
+      info->source_type = expr_type;
+    } else {
+      auto result_type_id = GenerateTypeIfNeeded(expr_type);
+      if (result_type_id == 0) {
+        return false;
+      }
+
+      auto extract = result_op();
+      auto extract_id = extract.to_i();
+      if (!push_function_inst(
+              spv::Op::OpCompositeExtract,
+              {Operand::Int(result_type_id), extract,
+               Operand::Int(info->source_id), Operand::Int(idx)})) {
+        return false;
+      }
+
+      info->source_id = extract_id;
+      info->source_type = expr_type;
     }
-    info->access_chain_indices.push_back(idx_id);
-    info->source_type = expr_type;
+
     return true;
   }
 
