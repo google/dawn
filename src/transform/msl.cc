@@ -14,6 +14,7 @@
 
 #include "src/transform/msl.h"
 
+#include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -326,9 +327,10 @@ void Msl::HandleEntryPointIOTypes(CloneContext& ctx) const {
         continue;
       } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
         // Create a struct member with the location decoration.
-        struct_members.push_back(ctx.dst->Member(
-            ctx.src->Symbols().NameFor(param->symbol()),
-            ctx.Clone(param->type()), ast::DecorationList{ctx.Clone(loc)}));
+        std::string name = ctx.src->Symbols().NameFor(param->symbol());
+        auto* type = ctx.Clone(ctx.src->Sem().Get(param)->Type());
+        struct_members.push_back(
+            ctx.dst->Member(name, type, ast::DecorationList{ctx.Clone(loc)}));
       } else {
         TINT_ICE(ctx.dst->Diagnostics())
             << "Unsupported entry point parameter decoration";
@@ -368,9 +370,9 @@ void Msl::HandleEntryPointIOTypes(CloneContext& ctx) const {
       // Create a function-scope const to replace the parameter.
       // Initialize it with the value extracted from the struct parameter.
       auto func_const_symbol = ctx.dst->Symbols().Register(name);
-      auto* func_const =
-          ctx.dst->Const(func_const_symbol, ctx.Clone(param->type()),
-                         ctx.dst->MemberAccessor(struct_param_symbol, name));
+      auto* type = ctx.Clone(ctx.src->Sem().Get(param)->Type());
+      auto* constructor = ctx.dst->MemberAccessor(struct_param_symbol, name);
+      auto* func_const = ctx.dst->Const(func_const_symbol, type, constructor);
 
       new_body.push_back(ctx.dst->WrapInStatement(func_const));
 

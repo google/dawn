@@ -39,7 +39,7 @@ ast::Variable* clone_variable_with_new_name(CloneContext* ctx,
   // Clone arguments outside of create() call to have deterministic ordering
   auto source = ctx->Clone(in->source());
   auto symbol = ctx->dst->Symbols().Register(new_name);
-  auto* type = ctx->Clone(in->type());
+  auto* type = ctx->Clone(in->declared_type());
   auto* constructor = ctx->Clone(in->constructor());
   auto decorations = ctx->Clone(in->decorations());
   return ctx->dst->create<ast::Variable>(

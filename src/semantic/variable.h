@@ -37,9 +37,11 @@ class Variable : public Castable<Variable, Node> {
  public:
   /// Constructor
   /// @param declaration the AST declaration node
+  /// @param type the variable type
   /// @param storage_class the variable storage class
   /// @param users the expressions that use the variable
-  explicit Variable(ast::Variable* declaration,
+  explicit Variable(const ast::Variable* declaration,
+                    type::Type* type,
                     ast::StorageClass storage_class,
                     std::vector<const Expression*> users);
 
@@ -47,7 +49,10 @@ class Variable : public Castable<Variable, Node> {
   ~Variable() override;
 
   /// @returns the AST declaration node
-  ast::Variable* Declaration() const { return declaration_; }
+  const ast::Variable* Declaration() const { return declaration_; }
+
+  /// @returns the type for the variable
+  type::Type* Type() const { return type_; }
 
   /// @returns the storage class for the variable
   ast::StorageClass StorageClass() const { return storage_class_; }
@@ -56,7 +61,8 @@ class Variable : public Castable<Variable, Node> {
   const std::vector<const Expression*>& Users() const { return users_; }
 
  private:
-  ast::Variable* const declaration_;
+  const ast::Variable* const declaration_;
+  type::Type* const type_;
   ast::StorageClass const storage_class_;
   std::vector<const Expression*> const users_;
 };

@@ -25,20 +25,20 @@ namespace ast {
 
 Variable::Variable(const Source& source,
                    const Symbol& sym,
-                   StorageClass sc,
-                   type::Type* type,
+                   StorageClass declared_storage_class,
+                   type::Type* declared_type,
                    bool is_const,
                    Expression* constructor,
                    DecorationList decorations)
     : Base(source),
       symbol_(sym),
-      type_(type),
+      declared_type_(declared_type),
       is_const_(is_const),
       constructor_(constructor),
       decorations_(std::move(decorations)),
-      declared_storage_class_(sc) {
+      declared_storage_class_(declared_storage_class) {
   TINT_ASSERT(symbol_.IsValid());
-  TINT_ASSERT(type_);
+  TINT_ASSERT(declared_type_);
 }
 
 Variable::Variable(Variable&&) = default;
@@ -94,7 +94,7 @@ uint32_t Variable::constant_id() const {
 Variable* Variable::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto sym = ctx->Clone(symbol());
-  auto* ty = ctx->Clone(type());
+  auto* ty = ctx->Clone(declared_type());
   auto* ctor = ctx->Clone(constructor());
   auto decos = ctx->Clone(decorations());
   return ctx->dst->create<Variable>(src, sym, declared_storage_class(), ty,
@@ -111,7 +111,7 @@ void Variable::info_to_str(const semantic::Info& sem,
   out << (var_sem ? var_sem->StorageClass() : declared_storage_class())
       << std::endl;
   make_indent(out, indent);
-  out << type_->type_name() << std::endl;
+  out << declared_type_->type_name() << std::endl;
 }
 
 void Variable::constructor_to_str(const semantic::Info& sem,

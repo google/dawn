@@ -321,7 +321,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 
     out_ << program_->Symbols().NameFor(v->symbol()) << " : ";
 
-    if (!EmitType(v->type())) {
+    if (!EmitType(program_->Sem().Get(v)->Type())) {
       return false;
     }
   }
@@ -578,13 +578,13 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
     out_ << "var";
     if (sem->StorageClass() != ast::StorageClass::kNone &&
         sem->StorageClass() != ast::StorageClass::kFunction &&
-        !var->type()->UnwrapAll()->is_handle()) {
+        !sem->Type()->UnwrapAll()->is_handle()) {
       out_ << "<" << sem->StorageClass() << ">";
     }
   }
 
   out_ << " " << program_->Symbols().NameFor(var->symbol()) << " : ";
-  if (!EmitType(var->type())) {
+  if (!EmitType(sem->Type())) {
     return false;
   }
 

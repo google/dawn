@@ -137,8 +137,8 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
     }
 
     for (auto* param : func->params()) {
-      Symbol new_var =
-          HoistToInputVariables(ctx, func, param->type(), param->decorations());
+      Symbol new_var = HoistToInputVariables(
+          ctx, func, ctx.src->Sem().Get(param)->Type(), param->decorations());
 
       // Replace all uses of the function parameter with the new variable.
       for (auto* user : ctx.src->Sem().Get(param)->Users()) {

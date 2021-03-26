@@ -27,7 +27,7 @@ TEST_F(VariableTest, Creation) {
 
   EXPECT_EQ(v->symbol(), Symbol(1));
   EXPECT_EQ(v->declared_storage_class(), StorageClass::kFunction);
-  EXPECT_EQ(v->type(), ty.i32());
+  EXPECT_EQ(v->declared_type(), ty.i32());
   EXPECT_EQ(v->source().range.begin.line, 0u);
   EXPECT_EQ(v->source().range.begin.column, 0u);
   EXPECT_EQ(v->source().range.end.line, 0u);
@@ -41,7 +41,7 @@ TEST_F(VariableTest, CreationWithSource) {
 
   EXPECT_EQ(v->symbol(), Symbol(1));
   EXPECT_EQ(v->declared_storage_class(), StorageClass::kPrivate);
-  EXPECT_EQ(v->type(), ty.f32());
+  EXPECT_EQ(v->declared_type(), ty.f32());
   EXPECT_EQ(v->source().range.begin.line, 27u);
   EXPECT_EQ(v->source().range.begin.column, 4u);
   EXPECT_EQ(v->source().range.end.line, 27u);
@@ -55,7 +55,7 @@ TEST_F(VariableTest, CreationEmpty) {
 
   EXPECT_EQ(v->symbol(), Symbol(1));
   EXPECT_EQ(v->declared_storage_class(), StorageClass::kWorkgroup);
-  EXPECT_EQ(v->type(), ty.i32());
+  EXPECT_EQ(v->declared_type(), ty.i32());
   EXPECT_EQ(v->source().range.begin.line, 27u);
   EXPECT_EQ(v->source().range.begin.column, 4u);
   EXPECT_EQ(v->source().range.end.line, 27u);

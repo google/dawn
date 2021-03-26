@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, ParamList_Single) {
   EXPECT_EQ(e.value.size(), 1u);
 
   EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("a"));
-  EXPECT_EQ(e.value[0]->type(), i32);
+  EXPECT_EQ(e.value[0]->declared_type(), i32);
   EXPECT_TRUE(e.value[0]->is_const());
 
   ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   EXPECT_EQ(e.value.size(), 3u);
 
   EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("a"));
-  EXPECT_EQ(e.value[0]->type(), i32);
+  EXPECT_EQ(e.value[0]->declared_type(), i32);
   EXPECT_TRUE(e.value[0]->is_const());
 
   ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_EQ(e.value[0]->source().range.end.column, 2u);
 
   EXPECT_EQ(e.value[1]->symbol(), p->builder().Symbols().Get("b"));
-  EXPECT_EQ(e.value[1]->type(), f32);
+  EXPECT_EQ(e.value[1]->declared_type(), f32);
   EXPECT_TRUE(e.value[1]->is_const());
 
   ASSERT_EQ(e.value[1]->source().range.begin.line, 1u);
@@ -70,7 +70,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_EQ(e.value[1]->source().range.end.column, 11u);
 
   EXPECT_EQ(e.value[2]->symbol(), p->builder().Symbols().Get("c"));
-  EXPECT_EQ(e.value[2]->type(), vec2);
+  EXPECT_EQ(e.value[2]->declared_type(), vec2);
   EXPECT_TRUE(e.value[2]->is_const());
 
   ASSERT_EQ(e.value[2]->source().range.begin.line, 1u);
@@ -109,7 +109,7 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
   ASSERT_EQ(e.value.size(), 2u);
 
   EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("coord"));
-  EXPECT_EQ(e.value[0]->type(), vec4);
+  EXPECT_EQ(e.value[0]->declared_type(), vec4);
   EXPECT_TRUE(e.value[0]->is_const());
   auto decos0 = e.value[0]->decorations();
   ASSERT_EQ(decos0.size(), 1u);
@@ -123,7 +123,7 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
   ASSERT_EQ(e.value[0]->source().range.end.column, 30u);
 
   EXPECT_EQ(e.value[1]->symbol(), p->builder().Symbols().Get("loc1"));
-  EXPECT_EQ(e.value[1]->type(), f32);
+  EXPECT_EQ(e.value[1]->declared_type(), f32);
   EXPECT_TRUE(e.value[1]->is_const());
   auto decos1 = e.value[1]->decorations();
   ASSERT_EQ(decos1.size(), 1u);

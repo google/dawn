@@ -1515,11 +1515,13 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
     }
     first = false;
 
-    if (!EmitType(out, v->type(), builder_.Symbols().NameFor(v->symbol()))) {
+    auto* type = builder_.Sem().Get(v)->Type();
+
+    if (!EmitType(out, type, builder_.Symbols().NameFor(v->symbol()))) {
       return false;
     }
     // Array name is output as part of the type
-    if (!v->type()->Is<type::Array>()) {
+    if (!type->Is<type::Array>()) {
       out << " " << builder_.Symbols().NameFor(v->symbol());
     }
   }
@@ -1541,8 +1543,8 @@ bool GeneratorImpl::EmitEntryPointData(
     std::ostream& out,
     ast::Function* func,
     std::unordered_set<Symbol>& emitted_globals) {
-  std::vector<std::pair<ast::Variable*, ast::Decoration*>> in_variables;
-  std::vector<std::pair<ast::Variable*, ast::Decoration*>> outvariables;
+  std::vector<std::pair<const ast::Variable*, ast::Decoration*>> in_variables;
+  std::vector<std::pair<const ast::Variable*, ast::Decoration*>> outvariables;
   auto* func_sem = builder_.Sem().Get(func);
   auto func_sym = func->symbol();
 
@@ -1595,7 +1597,7 @@ bool GeneratorImpl::EmitEntryPointData(
     }
     // auto* set = data.second.set;
 
-    auto* type = decl->type()->UnwrapIfNeeded();
+    auto* type = var->Type()->UnwrapIfNeeded();
     if (auto* strct = type->As<type::Struct>()) {
       out << "ConstantBuffer<" << builder_.Symbols().NameFor(strct->symbol())
           << "> " << builder_.Symbols().NameFor(decl->symbol())
@@ -1638,7 +1640,7 @@ bool GeneratorImpl::EmitEntryPointData(
     }
 
     auto* binding = data.second.binding;
-    auto* ac = decl->type()->As<type::AccessControl>();
+    auto* ac = var->Type()->As<type::AccessControl>();
     if (ac == nullptr) {
       diagnostics_.add_error("access control type required for storage buffer");
       return false;
@@ -1672,10 +1674,10 @@ bool GeneratorImpl::EmitEntryPointData(
     for (auto& data : in_variables) {
       auto* var = data.first;
       auto* deco = data.second;
+      auto* type = builder_.Sem().Get(var)->Type();
 
       make_indent(out);
-      if (!EmitType(out, var->type(),
-                    builder_.Symbols().NameFor(var->symbol()))) {
+      if (!EmitType(out, type, builder_.Symbols().NameFor(var->symbol()))) {
         return false;
       }
 
@@ -1722,10 +1724,10 @@ bool GeneratorImpl::EmitEntryPointData(
     for (auto& data : outvariables) {
       auto* var = data.first;
       auto* deco = data.second;
+      auto* type = builder_.Sem().Get(var)->Type();
 
       make_indent(out);
-      if (!EmitType(out, var->type(),
-                    builder_.Symbols().NameFor(var->symbol()))) {
+      if (!EmitType(out, type, builder_.Symbols().NameFor(var->symbol()))) {
         return false;
       }
 
@@ -1766,7 +1768,7 @@ bool GeneratorImpl::EmitEntryPointData(
     for (auto* var : func_sem->ReferencedModuleVariables()) {
       auto* decl = var->Declaration();
 
-      auto* unwrapped_type = decl->type()->UnwrapAll();
+      auto* unwrapped_type = var->Type()->UnwrapAll();
       if (!unwrapped_type->Is<type::Texture>() &&
           !unwrapped_type->Is<type::Sampler>()) {
         continue;  // Not interested in this type
@@ -1776,7 +1778,7 @@ bool GeneratorImpl::EmitEntryPointData(
         continue;  // Global already emitted
       }
 
-      if (!EmitType(out, decl->type(), "")) {
+      if (!EmitType(out, var->Type(), "")) {
         return false;
       }
       out << " " << namer_.NameFor(builder_.Symbols().NameFor(decl->symbol()))
@@ -1861,7 +1863,8 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
 
   // Emit entry point parameters.
   for (auto* var : func->params()) {
-    if (!var->type()->Is<type::Struct>()) {
+    auto* type = builder_.Sem().Get(var)->Type();
+    if (!type->Is<type::Struct>()) {
       TINT_ICE(diagnostics_) << "Unsupported non-struct entry point parameter";
     }
 
@@ -1870,7 +1873,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     }
     first = false;
 
-    if (!EmitType(out, var->type(), "")) {
+    if (!EmitType(out, type, "")) {
       return false;
     }
 
@@ -2024,7 +2027,7 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
         if (var->constructor() != nullptr) {
           out << constructor_out.str();
         } else {
-          if (!EmitZeroValue(out, var->type())) {
+          if (!EmitZeroValue(out, builder_.Sem().Get(var)->Type())) {
             return false;
           }
         }
@@ -2678,10 +2681,11 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   if (var->is_const()) {
     out << "const ";
   }
-  if (!EmitType(out, var->type(), builder_.Symbols().NameFor(var->symbol()))) {
+  auto* type = builder_.Sem().Get(var)->Type();
+  if (!EmitType(out, type, builder_.Symbols().NameFor(var->symbol()))) {
     return false;
   }
-  if (!var->type()->Is<type::Array>()) {
+  if (!type->Is<type::Array>()) {
     out << " " << builder_.Symbols().NameFor(var->symbol());
   }
   out << constructor_out.str() << ";" << std::endl;
@@ -2713,6 +2717,8 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     out << pre.str();
   }
 
+  auto* type = builder_.Sem().Get(var)->Type();
+
   if (var->HasConstantIdDecoration()) {
     auto const_id = var->constant_id();
 
@@ -2727,8 +2733,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     }
     out << "#endif" << std::endl;
     out << "static const ";
-    if (!EmitType(out, var->type(),
-                  builder_.Symbols().NameFor(var->symbol()))) {
+    if (!EmitType(out, type, builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
     out << " " << builder_.Symbols().NameFor(var->symbol())
@@ -2736,11 +2741,10 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
     out << "#undef WGSL_SPEC_CONSTANT_" << const_id << std::endl;
   } else {
     out << "static const ";
-    if (!EmitType(out, var->type(),
-                  builder_.Symbols().NameFor(var->symbol()))) {
+    if (!EmitType(out, type, builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
-    if (!var->type()->Is<type::Array>()) {
+    if (!type->Is<type::Array>()) {
       out << " " << builder_.Symbols().NameFor(var->symbol());
     }
 

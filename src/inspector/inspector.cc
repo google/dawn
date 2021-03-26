@@ -211,7 +211,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       stage_variable.name = name;
 
       stage_variable.component_type = ComponentType::kUnknown;
-      auto* type = var->Declaration()->type()->UnwrapAll();
+      auto* type = var->Type()->UnwrapAll();
       if (type->is_float_scalar_or_vector() || type->is_float_matrix()) {
         stage_variable.component_type = ComponentType::kFloat;
       } else if (type->is_unsigned_scalar_or_vector()) {
@@ -367,10 +367,9 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
   auto* func_sem = program_->Sem().Get(func);
   for (auto& ruv : func_sem->ReferencedUniformVariables()) {
     auto* var = ruv.first;
-    auto* decl = var->Declaration();
     auto binding_info = ruv.second;
 
-    auto* unwrapped_type = decl->type()->UnwrapIfNeeded();
+    auto* unwrapped_type = var->Type()->UnwrapIfNeeded();
     auto* str = unwrapped_type->As<type::Struct>();
     if (str == nullptr) {
       continue;
@@ -492,7 +491,6 @@ std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
   auto* func_sem = program_->Sem().Get(func);
   for (auto& ref : func_sem->ReferencedDepthTextureVariables()) {
     auto* var = ref.first;
-    auto* decl = var->Declaration();
     auto binding_info = ref.second;
 
     ResourceBinding entry;
@@ -500,7 +498,7 @@ std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = decl->type()->UnwrapIfNeeded()->As<type::Texture>();
+    auto* texture_type = var->Type()->UnwrapIfNeeded()->As<type::Texture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
@@ -537,10 +535,9 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
   std::vector<ResourceBinding> result;
   for (auto& rsv : func_sem->ReferencedStorageBufferVariables()) {
     auto* var = rsv.first;
-    auto* decl = var->Declaration();
     auto binding_info = rsv.second;
 
-    auto* ac_type = decl->type()->As<type::AccessControl>();
+    auto* ac_type = var->Type()->As<type::AccessControl>();
     if (ac_type == nullptr) {
       continue;
     }
@@ -549,7 +546,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    auto* str = decl->type()->UnwrapIfNeeded()->As<type::Struct>();
+    auto* str = var->Type()->UnwrapIfNeeded()->As<type::Struct>();
     if (!str) {
       continue;
     }
@@ -591,7 +588,6 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
                         : func_sem->ReferencedSampledTextureVariables();
   for (auto& ref : referenced_variables) {
     auto* var = ref.first;
-    auto* decl = var->Declaration();
     auto binding_info = ref.second;
 
     ResourceBinding entry;
@@ -601,7 +597,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = decl->type()->UnwrapIfNeeded()->As<type::Texture>();
+    auto* texture_type = var->Type()->UnwrapIfNeeded()->As<type::Texture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
@@ -634,10 +630,9 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
   std::vector<ResourceBinding> result;
   for (auto& ref : func_sem->ReferencedStorageTextureVariables()) {
     auto* var = ref.first;
-    auto* decl = var->Declaration();
     auto binding_info = ref.second;
 
-    auto* ac_type = decl->type()->As<type::AccessControl>();
+    auto* ac_type = var->Type()->As<type::AccessControl>();
     if (ac_type == nullptr) {
       continue;
     }
@@ -654,7 +649,7 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     entry.binding = binding_info.binding->value();
 
     auto* texture_type =
-        decl->type()->UnwrapIfNeeded()->As<type::StorageTexture>();
+        var->Type()->UnwrapIfNeeded()->As<type::StorageTexture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 

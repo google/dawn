@@ -93,6 +93,7 @@ class Resolver {
     ~VariableInfo();
 
     ast::Variable* const declaration;
+    type::Type* type;
     ast::StorageClass storage_class;
     std::vector<ast::IdentifierExpression*> users;
   };
@@ -290,7 +291,7 @@ class Resolver {
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
   std::unordered_map<const ast::Function*, FunctionInfo*> function_to_info_;
-  std::unordered_map<ast::Variable*, VariableInfo*> variable_to_info_;
+  std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
   std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;
   std::unordered_map<type::Struct*, StructInfo*> struct_info_;

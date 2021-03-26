@@ -75,23 +75,24 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
-  auto* v =
-      Global("a", ty.f32(), ast::StorageClass::kNone, Expr("initializer"));
+  auto* v = Global("a", ty.f32(), ast::StorageClass::kNone, Expr(1.0f));
+  WrapInFunction(Decl(v));
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(var a : f32 = initializer;
+  EXPECT_EQ(gen.result(), R"(var a : f32 = 1.0;
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
-  auto* v = Const("a", ty.f32(), Expr("initializer"));
+  auto* v = Const("a", ty.f32(), Expr(1.0f));
+  WrapInFunction(Decl(v));
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(const a : f32 = initializer;
+  EXPECT_EQ(gen.result(), R"(const a : f32 = 1.0;
 )");
 }
 

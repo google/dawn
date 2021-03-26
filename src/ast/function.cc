@@ -125,7 +125,9 @@ std::string Function::type_name() const {
 
   out << "__func" + return_type_->type_name();
   for (auto* param : params_) {
-    out << param->type()->type_name();
+    // No need for the semantic::Variable here, functions params must have a
+    // type
+    out << param->declared_type()->type_name();
   }
 
   return out.str();

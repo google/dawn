@@ -24,6 +24,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
   auto* var = Const("pos", ty.array<f32, 3>(), array<f32, 3>(1.f, 2.f, 3.f));
+  WrapInFunction(Decl(var));
 
   GeneratorImpl& gen = Build();
 
@@ -36,6 +37,7 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
                     ast::DecorationList{
                         create<ast::ConstantIdDecoration>(23),
                     });
+  WrapInFunction(Decl(var));
 
   GeneratorImpl& gen = Build();
 

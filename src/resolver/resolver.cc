@@ -201,7 +201,8 @@ bool Resolver::ResolveInternal() {
         return false;
       }
     } else if (auto* var = decl->As<ast::Variable>()) {
-      variable_stack_.set_global(var->symbol(), CreateVariableInfo(var));
+      auto* info = CreateVariableInfo(var);
+      variable_stack_.set_global(var->symbol(), info);
 
       if (var->has_constructor()) {
         if (!Expression(var->constructor())) {
@@ -210,7 +211,7 @@ bool Resolver::ResolveInternal() {
       }
 
       if (!ApplyStorageClassUsageToType(var->declared_storage_class(),
-                                        var->type(), var->source())) {
+                                        info->type, var->source())) {
         diagnostics_.add_note("while instantiating variable " +
                                   builder_->Symbols().NameFor(var->symbol()),
                               var->source());
@@ -223,7 +224,8 @@ bool Resolver::ResolveInternal() {
 }
 
 bool Resolver::ValidateParameter(const ast::Variable* param) {
-  if (auto* r = param->type()->UnwrapAll()->As<type::Array>()) {
+  auto* type = variable_to_info_[param]->type;
+  if (auto* r = type->UnwrapAll()->As<type::Array>()) {
     if (r->IsRuntimeArray()) {
       diagnostics_.add_error(
           "v-0015",
@@ -277,10 +279,6 @@ bool Resolver::ValidateFunction(const ast::Function* func) {
 bool Resolver::Function(ast::Function* func) {
   auto* func_info = function_infos_.Create<FunctionInfo>(func);
 
-  if (!ValidateFunction(func)) {
-    return false;
-  }
-
   ScopedAssignment<FunctionInfo*> sa(current_function_, func_info);
 
   variable_stack_.push_scope();
@@ -292,6 +290,10 @@ bool Resolver::Function(ast::Function* func) {
     return false;
   }
   variable_stack_.pop_scope();
+
+  if (!ValidateFunction(func)) {
+    return false;
+  }
 
   // Register the function information _after_ processing the statements. This
   // allows us to catch a function calling itself when determining the call
@@ -780,12 +782,12 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
     // A constant is the type, but a variable is always a pointer so synthesize
     // the pointer around the variable type.
     if (var->declaration->is_const()) {
-      SetType(expr, var->declaration->type());
-    } else if (var->declaration->type()->Is<type::Pointer>()) {
-      SetType(expr, var->declaration->type());
+      SetType(expr, var->type);
+    } else if (var->type->Is<type::Pointer>()) {
+      SetType(expr, var->type);
     } else {
-      SetType(expr, builder_->create<type::Pointer>(var->declaration->type(),
-                                                    var->storage_class));
+      SetType(expr,
+              builder_->create<type::Pointer>(var->type, var->storage_class));
     }
 
     var->users.push_back(expr);
@@ -1200,15 +1202,18 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* expr) {
 }
 
 bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
+  ast::Variable* var = stmt->variable();
+  type::Type* type = var->declared_type();
+
   if (auto* ctor = stmt->variable()->constructor()) {
     if (!Expression(ctor)) {
       return false;
     }
-    auto* lhs_type = stmt->variable()->type();
     auto* rhs_type = TypeOf(ctor);
-    if (!IsValidAssignment(lhs_type, rhs_type)) {
+
+    if (!IsValidAssignment(type, rhs_type)) {
       diagnostics_.add_error(
-          "variable of type '" + lhs_type->FriendlyName(builder_->Symbols()) +
+          "variable of type '" + type->FriendlyName(builder_->Symbols()) +
               "' cannot be initialized with a value of type '" +
               rhs_type->FriendlyName(builder_->Symbols()) + "'",
           stmt->source());
@@ -1216,10 +1221,8 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     }
   }
 
-  auto* var = stmt->variable();
-
   auto* info = CreateVariableInfo(var);
-  variable_to_info_.emplace(var, info);
+  info->type = type;
   variable_stack_.set(var->symbol(), info);
   current_block_->decls.push_back(var);
 
@@ -1235,7 +1238,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     }
   }
 
-  if (!ApplyStorageClassUsageToType(info->storage_class, var->type(),
+  if (!ApplyStorageClassUsageToType(info->storage_class, info->type,
                                     var->source())) {
     diagnostics_.add_note("while instantiating variable " +
                               builder_->Symbols().NameFor(var->symbol()),
@@ -1303,8 +1306,8 @@ void Resolver::CreateSemanticNodes() const {
       }
       users.push_back(sem_expr);
     }
-    sem.Add(var, builder_->create<semantic::Variable>(var, info->storage_class,
-                                                      std::move(users)));
+    sem.Add(var, builder_->create<semantic::Variable>(
+                     var, info->type, info->storage_class, std::move(users)));
   }
 
   auto remap_vars = [&sem](const std::vector<VariableInfo*>& in) {
@@ -1812,7 +1815,9 @@ std::string Resolver::VectorPretty(uint32_t size, type::Type* element_type) {
 }
 
 Resolver::VariableInfo::VariableInfo(ast::Variable* decl)
-    : declaration(decl), storage_class(decl->declared_storage_class()) {}
+    : declaration(decl),
+      type(decl->declared_type()),
+      storage_class(decl->declared_storage_class()) {}
 
 Resolver::VariableInfo::~VariableInfo() = default;
 

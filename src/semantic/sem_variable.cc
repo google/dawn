@@ -19,10 +19,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::semantic::Variable);
 namespace tint {
 namespace semantic {
 
-Variable::Variable(ast::Variable* declaration,
+Variable::Variable(const ast::Variable* declaration,
+                   type::Type* type,
                    ast::StorageClass storage_class,
                    std::vector<const Expression*> users)
     : declaration_(declaration),
+      type_(type),
       storage_class_(storage_class),
       users_(std::move(users)) {}
 

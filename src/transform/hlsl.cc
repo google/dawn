@@ -145,7 +145,8 @@ void Hlsl::HandleEntryPointIOTypes(CloneContext& ctx) const {
     // Build a new structure to hold the non-struct input parameters.
     ast::StructMemberList struct_members;
     for (auto* param : func->params()) {
-      if (param->type()->Is<type::Struct>()) {
+      auto* type = ctx.src->Sem().Get(param)->Type();
+      if (type->Is<type::Struct>()) {
         // Already a struct, nothing to do.
         continue;
       }
@@ -159,14 +160,12 @@ void Hlsl::HandleEntryPointIOTypes(CloneContext& ctx) const {
       auto* deco = param->decorations()[0];
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         // Create a struct member with the builtin decoration.
-        struct_members.push_back(
-            ctx.dst->Member(name, ctx.Clone(param->type()),
-                            ast::DecorationList{ctx.Clone(builtin)}));
+        struct_members.push_back(ctx.dst->Member(
+            name, ctx.Clone(type), ast::DecorationList{ctx.Clone(builtin)}));
       } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
         // Create a struct member with the location decoration.
-        struct_members.push_back(
-            ctx.dst->Member(name, ctx.Clone(param->type()),
-                            ast::DecorationList{ctx.Clone(loc)}));
+        struct_members.push_back(ctx.dst->Member(
+            name, ctx.Clone(type), ast::DecorationList{ctx.Clone(loc)}));
       } else {
         TINT_ICE(ctx.dst->Diagnostics())
             << "Unsupported entry point parameter decoration";
@@ -195,7 +194,8 @@ void Hlsl::HandleEntryPointIOTypes(CloneContext& ctx) const {
 
     // Replace the original parameters with function-scope constants.
     for (auto* param : func->params()) {
-      if (param->type()->Is<type::Struct>()) {
+      auto* type = ctx.src->Sem().Get(param)->Type();
+      if (type->Is<type::Struct>()) {
         // Keep struct parameters unchanged.
         new_parameters.push_back(ctx.Clone(param));
         continue;
@@ -207,7 +207,7 @@ void Hlsl::HandleEntryPointIOTypes(CloneContext& ctx) const {
       // Initialize it with the value extracted from the struct parameter.
       auto func_const_symbol = ctx.dst->Symbols().Register(name);
       auto* func_const =
-          ctx.dst->Const(func_const_symbol, ctx.Clone(param->type()),
+          ctx.dst->Const(func_const_symbol, ctx.Clone(type),
                          ctx.dst->MemberAccessor(struct_param_symbol, name));
 
       new_body.push_back(ctx.dst->WrapInStatement(func_const));

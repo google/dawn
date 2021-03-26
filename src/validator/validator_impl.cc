@@ -219,7 +219,8 @@ bool ValidatorImpl::ValidateDeclStatement(
   //    storable.
   //  - types match or the RHS can be dereferenced to equal the LHS type.
   variable_stack_.set(symbol, decl->variable());
-  if (auto* arr = decl->variable()->type()->UnwrapAll()->As<type::Array>()) {
+  if (auto* arr =
+          decl->variable()->declared_type()->UnwrapAll()->As<type::Array>()) {
     if (arr->IsRuntimeArray()) {
       add_error(
           decl->source(), "v-0015",

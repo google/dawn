@@ -39,6 +39,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   auto* var = Const("a", ty.f32());
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 

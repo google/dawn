@@ -964,8 +964,8 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
 bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
   auto* func_sem = program_->Sem().Get(func);
 
-  std::vector<std::pair<ast::Variable*, uint32_t>> in_locations;
-  std::vector<std::pair<ast::Variable*, ast::Decoration*>> out_variables;
+  std::vector<std::pair<const ast::Variable*, uint32_t>> in_locations;
+  std::vector<std::pair<const ast::Variable*, ast::Decoration*>> out_variables;
 
   for (auto data : func_sem->ReferencedLocationVariables()) {
     auto* var = data.first;
@@ -1003,7 +1003,8 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
       uint32_t loc = data.second;
 
       make_indent();
-      if (!EmitType(var->type(), program_->Symbols().NameFor(var->symbol()))) {
+      if (!EmitType(program_->Sem().Get(var)->Type(),
+                    program_->Symbols().NameFor(var->symbol()))) {
         return false;
       }
 
@@ -1039,7 +1040,8 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
       auto* deco = data.second;
 
       make_indent();
-      if (!EmitType(var->type(), program_->Symbols().NameFor(var->symbol()))) {
+      if (!EmitType(program_->Sem().Get(var)->Type(),
+                    program_->Symbols().NameFor(var->symbol()))) {
         return false;
       }
 
@@ -1252,7 +1254,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     first = false;
 
     out_ << "thread ";
-    if (!EmitType(var->Declaration()->type(), "")) {
+    if (!EmitType(var->Type(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
@@ -1267,7 +1269,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
 
     out_ << "constant ";
     // TODO(dsinclair): Can arrays be uniform? If so, fix this ...
-    if (!EmitType(var->Declaration()->type(), "")) {
+    if (!EmitType(var->Type(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
@@ -1280,7 +1282,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
-    auto* ac = var->Declaration()->type()->As<type::AccessControl>();
+    auto* ac = var->Type()->As<type::AccessControl>();
     if (ac == nullptr) {
       diagnostics_.add_error(
           "invalid type for storage buffer, expected access control");
@@ -1303,11 +1305,13 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
-    if (!EmitType(v->type(), program_->Symbols().NameFor(v->symbol()))) {
+    auto* type = program_->Sem().Get(v)->Type();
+
+    if (!EmitType(type, program_->Symbols().NameFor(v->symbol()))) {
       return false;
     }
     // Array name is output as part of the type
-    if (!v->type()->Is<type::Array>()) {
+    if (!type->Is<type::Array>()) {
       out_ << " " << program_->Symbols().NameFor(v->symbol());
     }
   }
@@ -1394,13 +1398,15 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     }
     first = false;
 
-    if (!EmitType(var->type(), "")) {
+    auto* type = program_->Sem().Get(var)->Type();
+
+    if (!EmitType(type, "")) {
       return false;
     }
 
     out_ << " " << program_->Symbols().NameFor(var->symbol());
 
-    if (var->type()->Is<type::Struct>()) {
+    if (type->Is<type::Struct>()) {
       out_ << " [[stage_in]]";
     } else {
       auto& decos = var->decorations();
@@ -1440,7 +1446,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
     auto* builtin = data.second;
 
-    if (!EmitType(var->Declaration()->type(), "")) {
+    if (!EmitType(var->Type(), "")) {
       return false;
     }
 
@@ -1475,7 +1481,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     out_ << "constant ";
     // TODO(dsinclair): Can you have a uniform array? If so, this needs to be
     // updated to handle arrays property.
-    if (!EmitType(var->Declaration()->type(), "")) {
+    if (!EmitType(var->Type(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol())
@@ -1495,7 +1501,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     // auto* set = data.second.set;
 
-    auto* ac = var->Declaration()->type()->As<type::AccessControl>();
+    auto* ac = var->Type()->As<type::AccessControl>();
     if (ac == nullptr) {
       diagnostics_.add_error(
           "invalid type for storage buffer, expected access control");
@@ -1640,7 +1646,7 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
           return false;
         }
       } else {
-        if (!EmitZeroValue(var->type())) {
+        if (!EmitZeroValue(program_->Sem().Get(var)->Type())) {
           return false;
         }
       }
@@ -2156,10 +2162,10 @@ bool GeneratorImpl::EmitVariable(const semantic::Variable* var,
   if (decl->is_const()) {
     out_ << "const ";
   }
-  if (!EmitType(decl->type(), program_->Symbols().NameFor(decl->symbol()))) {
+  if (!EmitType(var->Type(), program_->Symbols().NameFor(decl->symbol()))) {
     return false;
   }
-  if (!decl->type()->Is<type::Array>()) {
+  if (!var->Type()->Is<type::Array>()) {
     out_ << " " << program_->Symbols().NameFor(decl->symbol());
   }
 
@@ -2173,7 +2179,7 @@ bool GeneratorImpl::EmitVariable(const semantic::Variable* var,
                var->StorageClass() == ast::StorageClass::kFunction ||
                var->StorageClass() == ast::StorageClass::kNone ||
                var->StorageClass() == ast::StorageClass::kOutput) {
-      if (!EmitZeroValue(decl->type())) {
+      if (!EmitZeroValue(var->Type())) {
         return false;
       }
     }
@@ -2198,10 +2204,11 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   }
 
   out_ << "constant ";
-  if (!EmitType(var->type(), program_->Symbols().NameFor(var->symbol()))) {
+  auto* type = program_->Sem().Get(var)->Type();
+  if (!EmitType(type, program_->Symbols().NameFor(var->symbol()))) {
     return false;
   }
-  if (!var->type()->Is<type::Array>()) {
+  if (!type->Is<type::Array>()) {
     out_ << " " << program_->Symbols().NameFor(var->symbol());
   }
 

@@ -32,7 +32,8 @@ ParameterList GetParameters(ast::Function* ast) {
   ParameterList parameters;
   parameters.reserve(ast->params().size());
   for (auto* param : ast->params()) {
-    parameters.emplace_back(Parameter{param->type(), Parameter::Usage::kNone});
+    parameters.emplace_back(
+        Parameter{param->declared_type(), Parameter::Usage::kNone});
   }
   return parameters;
 }
@@ -160,7 +161,8 @@ Function::VariableBindings Function::ReferencedStorageTextureVariables() const {
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Declaration()->type()->UnwrapIfNeeded();
+    auto* unwrapped_type =
+        var->Declaration()->declared_type()->UnwrapIfNeeded();
     auto* storage_texture = unwrapped_type->As<type::StorageTexture>();
     if (storage_texture == nullptr) {
       continue;
@@ -182,7 +184,8 @@ Function::VariableBindings Function::ReferencedDepthTextureVariables() const {
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Declaration()->type()->UnwrapIfNeeded();
+    auto* unwrapped_type =
+        var->Declaration()->declared_type()->UnwrapIfNeeded();
     auto* storage_texture = unwrapped_type->As<type::DepthTexture>();
     if (storage_texture == nullptr) {
       continue;
@@ -229,7 +232,8 @@ Function::VariableBindings Function::ReferencedSamplerVariablesImpl(
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Declaration()->type()->UnwrapIfNeeded();
+    auto* unwrapped_type =
+        var->Declaration()->declared_type()->UnwrapIfNeeded();
     auto* sampler = unwrapped_type->As<type::Sampler>();
     if (sampler == nullptr || sampler->kind() != kind) {
       continue;
@@ -252,7 +256,8 @@ Function::VariableBindings Function::ReferencedSampledTextureVariablesImpl(
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Declaration()->type()->UnwrapIfNeeded();
+    auto* unwrapped_type =
+        var->Declaration()->declared_type()->UnwrapIfNeeded();
     auto* texture = unwrapped_type->As<type::Texture>();
     if (texture == nullptr) {
       continue;

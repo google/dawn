@@ -207,7 +207,7 @@ void VertexPulling::State::ConvertVertexInputVariablesToPrivate() {
             Source{},                           // source
             ctx.dst->Symbols().Register(name),  // symbol
             ast::StorageClass::kPrivate,        // storage_class
-            ctx.Clone(v->type()),               // type
+            ctx.Clone(v->declared_type()),      // type
             false,                              // is_const
             nullptr,                            // constructor
             ast::DecorationList{});             // decorations

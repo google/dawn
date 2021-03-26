@@ -538,7 +538,8 @@ bool Builder::GenerateFunction(ast::Function* func) {
     auto param_op = result_op();
     auto param_id = param_op.to_i();
 
-    auto param_type_id = GenerateTypeIfNeeded(param->type());
+    auto param_type_id =
+        GenerateTypeIfNeeded(builder_.Sem().Get(param)->Type());
     if (param_type_id == 0) {
       return false;
     }
@@ -592,7 +593,8 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
 
   OperandList ops = {func_op, Operand::Int(ret_id)};
   for (auto* param : func->params()) {
-    auto param_type_id = GenerateTypeIfNeeded(param->type());
+    auto param_type_id =
+        GenerateTypeIfNeeded(builder_.Sem().Get(param)->Type());
     if (param_type_id == 0) {
       return 0;
     }
@@ -629,7 +631,8 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
   auto result = result_op();
   auto var_id = result.to_i();
   auto sc = ast::StorageClass::kFunction;
-  type::Pointer pt(var->type(), sc);
+  auto* type = builder_.Sem().Get(var)->Type();
+  type::Pointer pt(type, sc);
   auto type_id = GenerateTypeIfNeeded(&pt);
   if (type_id == 0) {
     return false;
@@ -641,7 +644,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
 
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
-  auto null_id = GenerateConstantNullIfNeeded(var->type()->UnwrapPtrIfNeeded());
+  auto null_id = GenerateConstantNullIfNeeded(type->UnwrapPtrIfNeeded());
   if (null_id == 0) {
     return 0;
   }
@@ -704,7 +707,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
                 ? ast::StorageClass::kPrivate
                 : sem->StorageClass();
 
-  type::Pointer pt(var->type(), sc);
+  type::Pointer pt(sem->Type(), sc);
   auto type_id = GenerateTypeIfNeeded(&pt);
   if (type_id == 0) {
     return false;
@@ -719,11 +722,11 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
 
   // Unwrap after emitting the access control as unwrap all removes access
   // control types.
-  auto* type = var->type()->UnwrapAll();
+  auto* type_no_ac = sem->Type()->UnwrapAll();
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
-  } else if (type->Is<type::Texture>()) {
-    if (auto* ac = var->type()->As<type::AccessControl>()) {
+  } else if (type_no_ac->Is<type::Texture>()) {
+    if (auto* ac = sem->Type()->As<type::AccessControl>()) {
       switch (ac->access_control()) {
         case ast::AccessControl::kWriteOnly:
           push_annot(
@@ -739,7 +742,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
           break;
       }
     }
-  } else if (!type->Is<type::Sampler>()) {
+  } else if (!type_no_ac->Is<type::Sampler>()) {
     // Certain cases require us to generate a constructor value.
     //
     // 1- ConstantId's must be attached to the OpConstant, if we have a
@@ -748,17 +751,17 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     // 2- If we don't have a constructor and we're an Output or Private variable
     //    then WGSL requires an initializer.
     if (var->HasConstantIdDecoration()) {
-      if (type->Is<type::F32>()) {
-        ast::FloatLiteral l(Source{}, type, 0.0f);
+      if (type_no_ac->Is<type::F32>()) {
+        ast::FloatLiteral l(Source{}, type_no_ac, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (type->Is<type::U32>()) {
-        ast::UintLiteral l(Source{}, type, 0);
+      } else if (type_no_ac->Is<type::U32>()) {
+        ast::UintLiteral l(Source{}, type_no_ac, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (type->Is<type::I32>()) {
-        ast::SintLiteral l(Source{}, type, 0);
+      } else if (type_no_ac->Is<type::I32>()) {
+        ast::SintLiteral l(Source{}, type_no_ac, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (type->Is<type::Bool>()) {
-        ast::BoolLiteral l(Source{}, type, false);
+      } else if (type_no_ac->Is<type::Bool>()) {
+        ast::BoolLiteral l(Source{}, type_no_ac, false);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else {
         error_ = "invalid type for constant_id, must be scalar";
@@ -771,7 +774,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     } else if (sem->StorageClass() == ast::StorageClass::kPrivate ||
                sem->StorageClass() == ast::StorageClass::kNone ||
                sem->StorageClass() == ast::StorageClass::kOutput) {
-      init_id = GenerateConstantNullIfNeeded(type);
+      init_id = GenerateConstantNullIfNeeded(type_no_ac);
       if (init_id == 0) {
         return 0;
       }

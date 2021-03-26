@@ -79,15 +79,15 @@ class Variable : public Castable<Variable, Node> {
   /// Create a variable
   /// @param source the variable source
   /// @param sym the variable symbol
-  /// @param sc the declared storage class
-  /// @param type the value type
+  /// @param declared_storage_class the declared storage class
+  /// @param declared_type the declared variable type
   /// @param is_const true if the variable is const
   /// @param constructor the constructor expression
   /// @param decorations the variable decorations
   Variable(const Source& source,
            const Symbol& sym,
-           StorageClass sc,
-           type::Type* type,
+           StorageClass declared_storage_class,
+           type::Type* declared_type,
            bool is_const,
            Expression* constructor,
            DecorationList decorations);
@@ -99,8 +99,8 @@ class Variable : public Castable<Variable, Node> {
   /// @returns the variable symbol
   const Symbol& symbol() const { return symbol_; }
 
-  /// @returns the variable's type.
-  type::Type* type() const { return type_; }
+  /// @returns the declared type
+  type::Type* declared_type() const { return declared_type_; }
 
   /// @returns the declared storage class
   StorageClass declared_storage_class() const {
@@ -166,7 +166,7 @@ class Variable : public Castable<Variable, Node> {
 
   Symbol const symbol_;
   // The value type if a const or formal paramter, and the store type if a var
-  type::Type* const type_;
+  type::Type* const declared_type_;
   bool const is_const_;
   Expression* const constructor_;
   DecorationList const decorations_;

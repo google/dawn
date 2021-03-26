@@ -412,6 +412,10 @@ a = (_tint_tmp_0);
 TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   // var a : bool = (b && c) || d;
 
+  auto* b_decl = Decl(Var("b", ty.bool_(), ast::StorageClass::kFunction));
+  auto* c_decl = Decl(Var("c", ty.bool_(), ast::StorageClass::kFunction));
+  auto* d_decl = Decl(Var("d", ty.bool_(), ast::StorageClass::kFunction));
+
   auto* b = Expr("b");
   auto* c = Expr("c");
   auto* d = Expr("d");
@@ -422,11 +426,12 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
           ast::BinaryOp::kLogicalOr,
           create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c), d));
 
-  auto* expr = create<ast::VariableDeclStatement>(var);
+  auto* decl = Decl(var);
+  WrapInFunction(b_decl, c_decl, d_decl, Decl(var));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(out, decl)) << gen.error();
   EXPECT_EQ(result(), R"(bool _tint_tmp = b;
 if (_tint_tmp) {
   _tint_tmp = c;
