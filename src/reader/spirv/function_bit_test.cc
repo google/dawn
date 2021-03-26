@@ -163,6 +163,49 @@ TEST_P(SpvBinaryBitTest, EmitExpression) {
       << assembly;
 }
 
+// Use this when the result might have extra bitcasts on the outside.
+struct BinaryDataGeneral {
+  const std::string res_type;
+  const std::string lhs;
+  const std::string op;
+  const std::string rhs;
+  const std::string expected;
+};
+inline std::ostream& operator<<(std::ostream& out, BinaryDataGeneral data) {
+  out << "BinaryDataGeneral{" << data.res_type << "," << data.lhs << ","
+      << data.op << "," << data.rhs << "," << data.expected << "}";
+  return out;
+}
+
+using SpvBinaryBitGeneralTest =
+    SpvParserTestBase<::testing::TestWithParam<BinaryDataGeneral>>;
+
+TEST_P(SpvBinaryBitGeneralTest, EmitExpression) {
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = )" + GetParam().op +
+                        " %" + GetParam().res_type + " %" + GetParam().lhs +
+                        " %" + GetParam().rhs + R"(
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  std::ostringstream ss;
+  ss << R"(VariableConst{
+    x_1
+    none
+    )"
+     << GetParam().expected;
+  auto got = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(got, HasSubstr(ss.str())) << "got:\n" << got << assembly;
+}
+
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_ShiftLeftLogical,
     SpvBinaryBitTest,
@@ -286,14 +329,6 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"int", "int_30", "OpBitwiseAnd", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "and",
                    "ScalarConstructor[not set]{40}"},
-        // Mixed, returning uint
-        BinaryData{"uint", "int_30", "OpBitwiseAnd", "uint_10", "__u32",
-                   "ScalarConstructor[not set]{30}", "and",
-                   "ScalarConstructor[not set]{10}"},
-        // Mixed, returning int
-        BinaryData{"int", "int_30", "OpBitwiseAnd", "uint_10", "__i32",
-                   "ScalarConstructor[not set]{30}", "and",
-                   "ScalarConstructor[not set]{10}"},
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseAnd", "v2uint_20_10",
                    "__vec_2__u32", AstFor("v2uint_10_20"), "and",
@@ -301,15 +336,110 @@ INSTANTIATE_TEST_SUITE_P(
         // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpBitwiseAnd", "v2int_40_30",
                    "__vec_2__i32", AstFor("v2int_30_40"), "and",
-                   AstFor("v2int_40_30")},
+                   AstFor("v2int_40_30")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_BitwiseAnd_MixedSignedness,
+    SpvBinaryBitGeneralTest,
+    ::testing::Values(
+        // Mixed, uint <- int uint
+        BinaryDataGeneral{"uint", "int_30", "OpBitwiseAnd", "uint_10",
+                          R"(__u32
+    {
+      Bitcast[not set]<__u32>{
+        Binary[not set]{
+          ScalarConstructor[not set]{30}
+          and
+          Bitcast[not set]<__i32>{
+            ScalarConstructor[not set]{10}
+          }
+        }
+      }
+    })"},
+        // Mixed, int <- int uint
+        BinaryDataGeneral{"int", "int_30", "OpBitwiseAnd", "uint_10",
+                          R"(__i32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{30}
+        and
+        Bitcast[not set]<__i32>{
+          ScalarConstructor[not set]{10}
+        }
+      }
+    })"},
+        // Mixed, uint <- uint int
+        BinaryDataGeneral{"uint", "uint_10", "OpBitwiseAnd", "int_30",
+                          R"(__u32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{10}
+        and
+        Bitcast[not set]<__u32>{
+          ScalarConstructor[not set]{30}
+        }
+      }
+    })"},
+        // Mixed, int <- uint uint
+        BinaryDataGeneral{"int", "uint_20", "OpBitwiseAnd", "uint_10",
+                          R"(__i32
+    {
+      Bitcast[not set]<__i32>{
+        Binary[not set]{
+          ScalarConstructor[not set]{20}
+          and
+          ScalarConstructor[not set]{10}
+        }
+      }
+    })"},
         // Mixed, returning v2uint
-        BinaryData{"v2uint", "v2int_30_40", "OpBitwiseAnd", "v2uint_10_20",
-                   "__vec_2__u32", AstFor("v2int_30_40"), "and",
-                   AstFor("v2uint_10_20")},
+        BinaryDataGeneral{"v2uint", "v2int_30_40", "OpBitwiseAnd",
+                          "v2uint_10_20",
+                          R"(__vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{30}
+            ScalarConstructor[not set]{40}
+          }
+          and
+          Bitcast[not set]<__vec_2__i32>{
+            TypeConstructor[not set]{
+              __vec_2__u32
+              ScalarConstructor[not set]{10}
+              ScalarConstructor[not set]{20}
+            }
+          }
+        }
+      }
+    })"},
         // Mixed, returning v2int
-        BinaryData{"v2int", "v2int_40_30", "OpBitwiseAnd", "v2uint_20_10",
-                   "__vec_2__i32", AstFor("v2int_40_30"), "and",
-                   AstFor("v2uint_20_10")}));
+        BinaryDataGeneral{"v2int", "v2uint_10_20", "OpBitwiseAnd",
+                          "v2int_40_30",
+                          R"(__vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{20}
+          }
+          and
+          Bitcast[not set]<__vec_2__u32>{
+            TypeConstructor[not set]{
+              __vec_2__i32
+              ScalarConstructor[not set]{40}
+              ScalarConstructor[not set]{30}
+            }
+          }
+        }
+      }
+    })"}
+
+        ));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_BitwiseOr,
@@ -323,14 +453,6 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"int", "int_30", "OpBitwiseOr", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "or",
                    "ScalarConstructor[not set]{40}"},
-        // Mixed, returning uint
-        BinaryData{"uint", "int_30", "OpBitwiseOr", "uint_10", "__u32",
-                   "ScalarConstructor[not set]{30}", "or",
-                   "ScalarConstructor[not set]{10}"},
-        // Mixed, returning int
-        BinaryData{"int", "int_30", "OpBitwiseOr", "uint_10", "__i32",
-                   "ScalarConstructor[not set]{30}", "or",
-                   "ScalarConstructor[not set]{10}"},
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseOr", "v2uint_20_10",
                    "__vec_2__u32", AstFor("v2uint_10_20"), "or",
@@ -338,15 +460,109 @@ INSTANTIATE_TEST_SUITE_P(
         // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpBitwiseOr", "v2int_40_30",
                    "__vec_2__i32", AstFor("v2int_30_40"), "or",
-                   AstFor("v2int_40_30")},
+                   AstFor("v2int_40_30")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_BitwiseOr_MixedSignedness,
+    SpvBinaryBitGeneralTest,
+    ::testing::Values(
+        // Mixed, uint <- int uint
+        BinaryDataGeneral{"uint", "int_30", "OpBitwiseOr", "uint_10",
+                          R"(__u32
+    {
+      Bitcast[not set]<__u32>{
+        Binary[not set]{
+          ScalarConstructor[not set]{30}
+          or
+          Bitcast[not set]<__i32>{
+            ScalarConstructor[not set]{10}
+          }
+        }
+      }
+    })"},
+        // Mixed, int <- int uint
+        BinaryDataGeneral{"int", "int_30", "OpBitwiseOr", "uint_10",
+                          R"(__i32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{30}
+        or
+        Bitcast[not set]<__i32>{
+          ScalarConstructor[not set]{10}
+        }
+      }
+    })"},
+        // Mixed, uint <- uint int
+        BinaryDataGeneral{"uint", "uint_10", "OpBitwiseOr", "int_30",
+                          R"(__u32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{10}
+        or
+        Bitcast[not set]<__u32>{
+          ScalarConstructor[not set]{30}
+        }
+      }
+    })"},
+        // Mixed, int <- uint uint
+        BinaryDataGeneral{"int", "uint_20", "OpBitwiseOr", "uint_10",
+                          R"(__i32
+    {
+      Bitcast[not set]<__i32>{
+        Binary[not set]{
+          ScalarConstructor[not set]{20}
+          or
+          ScalarConstructor[not set]{10}
+        }
+      }
+    })"},
         // Mixed, returning v2uint
-        BinaryData{"v2uint", "v2int_30_40", "OpBitwiseOr", "v2uint_10_20",
-                   "__vec_2__u32", AstFor("v2int_30_40"), "or",
-                   AstFor("v2uint_10_20")},
+        BinaryDataGeneral{"v2uint", "v2int_30_40", "OpBitwiseOr",
+                          "v2uint_10_20",
+                          R"(__vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{30}
+            ScalarConstructor[not set]{40}
+          }
+          or
+          Bitcast[not set]<__vec_2__i32>{
+            TypeConstructor[not set]{
+              __vec_2__u32
+              ScalarConstructor[not set]{10}
+              ScalarConstructor[not set]{20}
+            }
+          }
+        }
+      }
+    })"},
         // Mixed, returning v2int
-        BinaryData{"v2int", "v2int_40_30", "OpBitwiseOr", "v2uint_20_10",
-                   "__vec_2__i32", AstFor("v2int_40_30"), "or",
-                   AstFor("v2uint_20_10")}));
+        BinaryDataGeneral{"v2int", "v2uint_10_20", "OpBitwiseOr", "v2int_40_30",
+                          R"(__vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{20}
+          }
+          or
+          Bitcast[not set]<__vec_2__u32>{
+            TypeConstructor[not set]{
+              __vec_2__i32
+              ScalarConstructor[not set]{40}
+              ScalarConstructor[not set]{30}
+            }
+          }
+        }
+      }
+    })"}
+
+        ));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_BitwiseXor,
@@ -360,14 +576,6 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"int", "int_30", "OpBitwiseXor", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "xor",
                    "ScalarConstructor[not set]{40}"},
-        // Mixed, returning uint
-        BinaryData{"uint", "int_30", "OpBitwiseXor", "uint_10", "__u32",
-                   "ScalarConstructor[not set]{30}", "xor",
-                   "ScalarConstructor[not set]{10}"},
-        // Mixed, returning int
-        BinaryData{"int", "int_30", "OpBitwiseXor", "uint_10", "__i32",
-                   "ScalarConstructor[not set]{30}", "xor",
-                   "ScalarConstructor[not set]{10}"},
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseXor", "v2uint_20_10",
                    "__vec_2__u32", AstFor("v2uint_10_20"), "xor",
@@ -375,15 +583,110 @@ INSTANTIATE_TEST_SUITE_P(
         // Both v2int
         BinaryData{"v2int", "v2int_30_40", "OpBitwiseXor", "v2int_40_30",
                    "__vec_2__i32", AstFor("v2int_30_40"), "xor",
-                   AstFor("v2int_40_30")},
+                   AstFor("v2int_40_30")}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_BitwiseXor_MixedSignedness,
+    SpvBinaryBitGeneralTest,
+    ::testing::Values(
+        // Mixed, uint <- int uint
+        BinaryDataGeneral{"uint", "int_30", "OpBitwiseXor", "uint_10",
+                          R"(__u32
+    {
+      Bitcast[not set]<__u32>{
+        Binary[not set]{
+          ScalarConstructor[not set]{30}
+          xor
+          Bitcast[not set]<__i32>{
+            ScalarConstructor[not set]{10}
+          }
+        }
+      }
+    })"},
+        // Mixed, int <- int uint
+        BinaryDataGeneral{"int", "int_30", "OpBitwiseXor", "uint_10",
+                          R"(__i32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{30}
+        xor
+        Bitcast[not set]<__i32>{
+          ScalarConstructor[not set]{10}
+        }
+      }
+    })"},
+        // Mixed, uint <- uint int
+        BinaryDataGeneral{"uint", "uint_10", "OpBitwiseXor", "int_30",
+                          R"(__u32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{10}
+        xor
+        Bitcast[not set]<__u32>{
+          ScalarConstructor[not set]{30}
+        }
+      }
+    })"},
+        // Mixed, int <- uint uint
+        BinaryDataGeneral{"int", "uint_20", "OpBitwiseXor", "uint_10",
+                          R"(__i32
+    {
+      Bitcast[not set]<__i32>{
+        Binary[not set]{
+          ScalarConstructor[not set]{20}
+          xor
+          ScalarConstructor[not set]{10}
+        }
+      }
+    })"},
         // Mixed, returning v2uint
-        BinaryData{"v2uint", "v2int_30_40", "OpBitwiseXor", "v2uint_10_20",
-                   "__vec_2__u32", AstFor("v2int_30_40"), "xor",
-                   AstFor("v2uint_10_20")},
+        BinaryDataGeneral{"v2uint", "v2int_30_40", "OpBitwiseXor",
+                          "v2uint_10_20",
+                          R"(__vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{30}
+            ScalarConstructor[not set]{40}
+          }
+          xor
+          Bitcast[not set]<__vec_2__i32>{
+            TypeConstructor[not set]{
+              __vec_2__u32
+              ScalarConstructor[not set]{10}
+              ScalarConstructor[not set]{20}
+            }
+          }
+        }
+      }
+    })"},
         // Mixed, returning v2int
-        BinaryData{"v2int", "v2int_40_30", "OpBitwiseXor", "v2uint_20_10",
-                   "__vec_2__i32", AstFor("v2int_40_30"), "xor",
-                   AstFor("v2uint_20_10")}));
+        BinaryDataGeneral{"v2int", "v2uint_10_20", "OpBitwiseXor",
+                          "v2int_40_30",
+                          R"(__vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{20}
+          }
+          xor
+          Bitcast[not set]<__vec_2__u32>{
+            TypeConstructor[not set]{
+              __vec_2__i32
+              ScalarConstructor[not set]{40}
+              ScalarConstructor[not set]{30}
+            }
+          }
+        }
+      }
+    })"}
+
+        ));
 
 TEST_F(SpvUnaryBitTest, Not_Int_Int) {
   const auto assembly = CommonTypes() + R"(

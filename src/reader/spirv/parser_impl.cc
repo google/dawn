@@ -156,6 +156,29 @@ bool AssumesUnsignedOperands(GLSLstd450 extended_opcode) {
 }
 
 // Returns true if the corresponding WGSL operation requires
+// the signedness of the second operand to match the signedness of the
+// first operand, and it's not one of the OpU* or OpS* instructions.
+// (Those are handled via MakeOperand.)
+bool AssumesSecondOperandSignednessMatchesFirstOperand(SpvOp opcode) {
+  switch (opcode) {
+    // All the OpI* integer binary operations.
+    case SpvOpIAdd:
+    case SpvOpISub:
+    case SpvOpIMul:
+    case SpvOpIEqual:
+    case SpvOpINotEqual:
+    // All the bitwise integer binary operations.
+    case SpvOpBitwiseAnd:
+    case SpvOpBitwiseOr:
+    case SpvOpBitwiseXor:
+      return true;
+    default:
+      break;
+  }
+  return false;
+}
+
+// Returns true if the corresponding WGSL operation requires
 // the signedness of the result to match the signedness of the first operand.
 bool AssumesResultSignednessMatchesFirstOperand(SpvOp opcode) {
   switch (opcode) {
@@ -166,6 +189,12 @@ bool AssumesResultSignednessMatchesFirstOperand(SpvOp opcode) {
     case SpvOpSDiv:
     case SpvOpSMod:
     case SpvOpSRem:
+    case SpvOpIAdd:
+    case SpvOpISub:
+    case SpvOpIMul:
+    case SpvOpBitwiseAnd:
+    case SpvOpBitwiseOr:
+    case SpvOpBitwiseXor:
       return true;
     default:
       break;
@@ -1534,6 +1563,21 @@ TypedExpression ParserImpl::RectifyOperandSignedness(
   }
   // We should not reach here.
   return std::move(expr);
+}
+
+TypedExpression ParserImpl::RectifySecondOperandSignedness(
+    const spvtools::opt::Instruction& inst,
+    type::Type* first_operand_type,
+    TypedExpression&& second_operand_expr) {
+  if ((first_operand_type != second_operand_expr.type) &&
+      AssumesSecondOperandSignednessMatchesFirstOperand(inst.opcode())) {
+    // Conversion is required.
+    return {first_operand_type,
+            create<ast::BitcastExpression>(Source{}, first_operand_type,
+                                           second_operand_expr.expr)};
+  }
+  // No conversion necessary.
+  return std::move(second_operand_expr);
 }
 
 type::Type* ParserImpl::ForcedResultType(const spvtools::opt::Instruction& inst,

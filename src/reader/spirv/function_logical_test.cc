@@ -300,19 +300,31 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_IEqual,
     SpvBinaryLogicalTest,
     ::testing::Values(
-        // Both uint
+        // uint uint
         BinaryData{"bool", "uint_10", "OpIEqual", "uint_20", "__bool",
                    "ScalarConstructor[not set]{10}", "equal",
                    "ScalarConstructor[not set]{20}"},
-        // Both int
+        // int int
         BinaryData{"bool", "int_30", "OpIEqual", "int_40", "__bool",
                    "ScalarConstructor[not set]{30}", "equal",
                    "ScalarConstructor[not set]{40}"},
-        // Both v2uint
+        // uint int
+        BinaryData{"bool", "uint_10", "OpIEqual", "int_40", "__bool",
+                   "ScalarConstructor[not set]{10}", "equal",
+                   R"(Bitcast[not set]<__u32>{
+          ScalarConstructor[not set]{40}
+        })"},
+        // int uint
+        BinaryData{"bool", "int_40", "OpIEqual", "uint_10", "__bool",
+                   "ScalarConstructor[not set]{40}", "equal",
+                   R"(Bitcast[not set]<__i32>{
+          ScalarConstructor[not set]{10}
+        })"},
+        // v2uint v2uint
         BinaryData{"v2bool", "v2uint_10_20", "OpIEqual", "v2uint_20_10",
                    "__vec_2__bool", AstFor("v2uint_10_20"), "equal",
                    AstFor("v2uint_20_10")},
-        // Both v2int
+        // v2int v2int
         BinaryData{"v2bool", "v2int_30_40", "OpIEqual", "v2int_40_30",
                    "__vec_2__bool", AstFor("v2int_30_40"), "equal",
                    AstFor("v2int_40_30")}));
@@ -340,6 +352,18 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"bool", "int_30", "OpINotEqual", "int_40", "__bool",
                    "ScalarConstructor[not set]{30}", "not_equal",
                    "ScalarConstructor[not set]{40}"},
+        // uint int
+        BinaryData{"bool", "uint_10", "OpINotEqual", "int_40", "__bool",
+                   "ScalarConstructor[not set]{10}", "not_equal",
+                   R"(Bitcast[not set]<__u32>{
+          ScalarConstructor[not set]{40}
+        })"},
+        // int uint
+        BinaryData{"bool", "int_40", "OpINotEqual", "uint_10", "__bool",
+                   "ScalarConstructor[not set]{40}", "not_equal",
+                   R"(Bitcast[not set]<__i32>{
+          ScalarConstructor[not set]{10}
+        })"},
         // Both v2uint
         BinaryData{"v2bool", "v2uint_10_20", "OpINotEqual", "v2uint_20_10",
                    "__vec_2__bool", AstFor("v2uint_10_20"), "not_equal",

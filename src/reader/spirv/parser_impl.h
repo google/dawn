@@ -327,6 +327,19 @@ class ParserImpl : Reader {
       const spvtools::opt::Instruction& inst,
       TypedExpression&& expr);
 
+  /// Conversts a second operand to the signedness of the first operand
+  /// of a binary operator, if the WGSL operator requires they be the same.
+  /// Returns the converted expression, or the original expression if the
+  /// conversion is not needed.
+  /// @param inst the SPIR-V instruction
+  /// @param first_operand_type the type of the first operand to the instruction
+  /// @param second_operand_expr the second operand of the instruction
+  /// @returns second_operand_expr, or a cast of it
+  TypedExpression RectifySecondOperandSignedness(
+      const spvtools::opt::Instruction& inst,
+      type::Type* first_operand_type,
+      TypedExpression&& second_operand_expr);
+
   /// Returns the "forced" result type for the given SPIR-V instruction.
   /// If the WGSL result type for an operation has a more strict rule than
   /// requried by SPIR-V, then we say the result type is "forced".  This occurs
