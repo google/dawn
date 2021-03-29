@@ -260,7 +260,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0) {
+  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0, space1) {
   float4 coord;
 };
 
@@ -302,7 +302,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   float4 coord;
 };
 
-ConstantBuffer<Uniforms> uniforms : register(b0);
+ConstantBuffer<Uniforms> uniforms : register(b0, space1);
 
 void frag_main() {
   float v = uniforms.coord.x;
@@ -342,7 +342,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(RWByteAddressBuffer coord : register(u0);
+  EXPECT_THAT(result(),
+              HasSubstr(R"(RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
   float v = asfloat(coord.Load(4));
@@ -380,7 +381,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(ByteAddressBuffer coord : register(t0);
+  EXPECT_THAT(result(),
+              HasSubstr(R"(ByteAddressBuffer coord : register(t0, space1);
 
 void frag_main() {
   float v = asfloat(coord.Load(4));
@@ -416,7 +418,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(RWByteAddressBuffer coord : register(u0);
+  EXPECT_THAT(result(),
+              HasSubstr(R"(RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
   coord.Store(4, asuint(2.0f));
@@ -452,7 +455,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(RWByteAddressBuffer coord : register(u0);
+  EXPECT_THAT(result(),
+              HasSubstr(R"(RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
   coord.Store(4, asuint(2.0f));
@@ -666,7 +670,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0) {
+  EXPECT_EQ(result(), R"(cbuffer cbuffer_coord : register(b0, space1) {
   float4 coord;
 };
 
@@ -714,7 +718,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(RWByteAddressBuffer coord : register(u0);
+  EXPECT_THAT(result(),
+              HasSubstr(R"(RWByteAddressBuffer coord : register(u0, space1);
 
 float sub_func(float param) {
   return asfloat(coord.Load((4 * 0)));
@@ -915,7 +920,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   float d;
 };
 
-RWByteAddressBuffer data : register(u0);
+RWByteAddressBuffer data : register(u0, space0);
 
 [numthreads(1, 1, 1)]
 void a() {

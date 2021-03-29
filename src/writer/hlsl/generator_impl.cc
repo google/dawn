@@ -79,6 +79,22 @@ const char* image_format_to_rwtexture_type(type::ImageFormat image_format) {
   }
 }
 
+// Helper for writing " : register(RX, spaceY)", where R is the register, X is
+// the binding point binding value, and Y is the binding point group value.
+struct RegisterAndSpace {
+  RegisterAndSpace(char r, ast::Variable::BindingPoint bp)
+      : reg(r), binding_point(bp) {}
+
+  char const reg;
+  ast::Variable::BindingPoint const binding_point;
+};
+
+std::ostream& operator<<(std::ostream& s, const RegisterAndSpace& rs) {
+  s << " : register(" << rs.reg << rs.binding_point.binding->value()
+    << ", space" << rs.binding_point.group->value() << ")";
+  return s;
+}
+
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(const Program* program)
@@ -1579,29 +1595,18 @@ bool GeneratorImpl::EmitEntryPointData(
   bool emitted_uniform = false;
   for (auto data : func_sem->ReferencedUniformVariables()) {
     auto* var = data.first;
+    auto& binding_point = data.second;
     auto* decl = var->Declaration();
 
     if (!emitted_globals.emplace(decl->symbol()).second) {
       continue;  // Global already emitted
     }
 
-    // TODO(dsinclair): We're using the binding to make up the buffer number but
-    // we should instead be using a provided mapping that uses both buffer and
-    // set. https://bugs.chromium.org/p/tint/issues/detail?id=104
-    auto* binding = data.second.binding;
-    if (binding == nullptr) {
-      diagnostics_.add_error(
-          "unable to find binding information for uniform: " +
-          builder_.Symbols().NameFor(decl->symbol()));
-      return false;
-    }
-    // auto* set = data.second.set;
-
     auto* type = var->Type()->UnwrapIfNeeded();
     if (auto* strct = type->As<type::Struct>()) {
       out << "ConstantBuffer<" << builder_.Symbols().NameFor(strct->symbol())
           << "> " << builder_.Symbols().NameFor(decl->symbol())
-          << " : register(b" << binding->value() << ");" << std::endl;
+          << RegisterAndSpace('b', binding_point) << ";" << std::endl;
     } else {
       // TODO(dsinclair): There is outstanding spec work to require all uniform
       // buffers to be [[block]] decorated, which means structs. This is
@@ -1610,7 +1615,7 @@ bool GeneratorImpl::EmitEntryPointData(
       // Relevant: https://github.com/gpuweb/gpuweb/issues/1004
       //           https://github.com/gpuweb/gpuweb/issues/1008
       auto name = "cbuffer_" + builder_.Symbols().NameFor(decl->symbol());
-      out << "cbuffer " << name << " : register(b" << binding->value() << ") {"
+      out << "cbuffer " << name << RegisterAndSpace('b', binding_point) << " {"
           << std::endl;
 
       increment_indent();
@@ -1633,13 +1638,13 @@ bool GeneratorImpl::EmitEntryPointData(
   bool emitted_storagebuffer = false;
   for (auto data : func_sem->ReferencedStorageBufferVariables()) {
     auto* var = data.first;
+    auto& binding_point = data.second;
     auto* decl = var->Declaration();
 
     if (!emitted_globals.emplace(decl->symbol()).second) {
       continue;  // Global already emitted
     }
 
-    auto* binding = data.second.binding;
     auto* ac = var->Type()->As<type::AccessControl>();
     if (ac == nullptr) {
       diagnostics_.add_error("access control type required for storage buffer");
@@ -1650,8 +1655,8 @@ bool GeneratorImpl::EmitEntryPointData(
       out << "RW";
     }
     out << "ByteAddressBuffer " << builder_.Symbols().NameFor(decl->symbol())
-        << " : register(" << (ac->IsReadOnly() ? "t" : "u") << binding->value()
-        << ");" << std::endl;
+        << RegisterAndSpace(ac->IsReadOnly() ? 't' : 'u', binding_point) << ";"
+        << std::endl;
     emitted_storagebuffer = true;
   }
   if (emitted_storagebuffer) {
