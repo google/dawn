@@ -189,6 +189,7 @@ source_set("tint_unittests_core_src") {
     "../src/symbol_table_test.cc",
     "../src/symbol_test.cc",
     "../src/traits_test.cc",
+    "../src/transform/binding_remapper_test.cc",
     "../src/transform/bound_array_accessors_test.cc",
     "../src/transform/emit_vertex_point_size_test.cc",
     "../src/transform/first_index_offset_test.cc",

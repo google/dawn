@@ -211,10 +211,13 @@ set(TINT_LIB_SRCS
   symbol_table.cc
   symbol_table.h
   traits.h
-  transform/emit_vertex_point_size.cc
-  transform/emit_vertex_point_size.h
+  transform/binding_point.h
+  transform/binding_remapper.cc
+  transform/binding_remapper.h
   transform/bound_array_accessors.cc
   transform/bound_array_accessors.h
+  transform/emit_vertex_point_size.cc
+  transform/emit_vertex_point_size.h
   transform/first_index_offset.cc
   transform/first_index_offset.h
   transform/manager.cc
@@ -724,6 +727,7 @@ if(${TINT_BUILD_TESTS})
 
   if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
+      transform/binding_remapper_test.cc
       transform/bound_array_accessors_test.cc
       transform/emit_vertex_point_size_test.cc
       transform/first_index_offset_test.cc

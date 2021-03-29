@@ -20,6 +20,8 @@
 #include <cstring>
 #include <functional>
 
+#include "src/utils/hash.h"
+
 namespace tint {
 
 // Forward declarations
@@ -105,8 +107,7 @@ class hash<tint::writer::spirv::ScalarConstant> {
       const tint::writer::spirv::ScalarConstant& c) const {
     uint32_t value = 0;
     std::memcpy(&value, &c.value, sizeof(value));
-    return (static_cast<std::size_t>(value) << 2) |
-           (static_cast<std::size_t>(c.kind) & 3);
+    return tint::utils::Hash(value, c.kind);
   }
 };
 
