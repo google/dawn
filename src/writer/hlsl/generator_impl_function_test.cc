@@ -140,7 +140,7 @@ struct main_out {
 };
 
 main_out main(tint_symbol_2 tint_symbol_3) {
-  main_out tint_out;
+  main_out tint_out = (main_out)0;
   const float foo = tint_symbol_3.foo;
   tint_out.bar = foo;
   return tint_out;
@@ -183,7 +183,7 @@ struct frag_main_out {
 };
 
 frag_main_out frag_main(tint_symbol_2 tint_symbol_3) {
-  frag_main_out tint_out;
+  frag_main_out tint_out = (frag_main_out)0;
   const float foo = tint_symbol_3.foo;
   tint_out.bar = foo;
   return tint_out;
@@ -228,7 +228,7 @@ struct frag_main_out {
 };
 
 frag_main_out frag_main(tint_symbol_2 tint_symbol_3) {
-  frag_main_out tint_out;
+  frag_main_out tint_out = (frag_main_out)0;
   const float4 coord = tint_symbol_3.coord;
   tint_out.depth = coord.x;
   return tint_out;
@@ -522,7 +522,7 @@ float sub_func_ep_1(out ep_1_out tint_out, float param, float foo) {
 }
 
 ep_1_out ep_1(tint_symbol_2 tint_symbol_3) {
-  ep_1_out tint_out;
+  ep_1_out tint_out = (ep_1_out)0;
   const float foo = tint_symbol_3.foo;
   tint_out.bar = sub_func_ep_1(tint_out, 1.0f, foo);
   return tint_out;
@@ -568,7 +568,7 @@ float sub_func(float param) {
 }
 
 ep_1_out ep_1() {
-  ep_1_out tint_out;
+  ep_1_out tint_out = (ep_1_out)0;
   tint_out.depth = sub_func(1.0f);
   return tint_out;
 }
@@ -630,7 +630,7 @@ float sub_func_ep_1(out ep_1_out tint_out, float param, float4 coord) {
 }
 
 ep_1_out ep_1(tint_symbol_2 tint_symbol_3) {
-  ep_1_out tint_out;
+  ep_1_out tint_out = (ep_1_out)0;
   const float4 coord = tint_symbol_3.coord;
   tint_out.depth = sub_func_ep_1(tint_out, 1.0f, coord);
   return tint_out;
@@ -763,7 +763,7 @@ TEST_F(HlslGeneratorImplTest_Function,
 };
 
 ep_1_out ep_1() {
-  ep_1_out tint_out;
+  ep_1_out tint_out = (ep_1_out)0;
   tint_out.bar = 1.0f;
   if ((1 == 1)) {
     return tint_out;

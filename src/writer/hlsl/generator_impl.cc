@@ -1891,8 +1891,8 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
 
   if (has_outdata) {
     make_indent(out);
-    out << outdata->second.struct_name << " " << outdata->second.var_name << ";"
-        << std::endl;
+    out << outdata->second.struct_name << " " << outdata->second.var_name
+        << " = (" << outdata->second.struct_name << ")0;" << std::endl;
   }
 
   generating_entry_point_ = true;
