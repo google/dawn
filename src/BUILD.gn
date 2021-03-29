@@ -450,6 +450,8 @@ source_set("libtint_core_src") {
     "type/vector_type.h",
     "type/void_type.cc",
     "type/void_type.h",
+    "utils/hash.h",
+    "utils/math.h",
     "utils/unique_vector.h",
     "validator/validator.cc",
     "validator/validator.h",
