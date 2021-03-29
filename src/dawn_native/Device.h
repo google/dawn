@@ -139,45 +139,45 @@ namespace dawn_native {
         void UncacheAttachmentState(AttachmentState* obj);
 
         // Dawn API
-        BindGroupBase* CreateBindGroup(const BindGroupDescriptor* descriptor);
-        BindGroupLayoutBase* CreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
-        BufferBase* CreateBuffer(const BufferDescriptor* descriptor);
-        CommandEncoder* CreateCommandEncoder(const CommandEncoderDescriptor* descriptor);
-        ComputePipelineBase* CreateComputePipeline(const ComputePipelineDescriptor* descriptor);
-        PipelineLayoutBase* CreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
-        QuerySetBase* CreateQuerySet(const QuerySetDescriptor* descriptor);
-        void CreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
-                                        WGPUCreateComputePipelineAsyncCallback callback,
-                                        void* userdata);
-        void CreateRenderPipelineAsync(const RenderPipelineDescriptor2* descriptor,
-                                       WGPUCreateRenderPipelineAsyncCallback callback,
-                                       void* userdata);
-        RenderBundleEncoder* CreateRenderBundleEncoder(
+        BindGroupBase* APICreateBindGroup(const BindGroupDescriptor* descriptor);
+        BindGroupLayoutBase* APICreateBindGroupLayout(const BindGroupLayoutDescriptor* descriptor);
+        BufferBase* APICreateBuffer(const BufferDescriptor* descriptor);
+        CommandEncoder* APICreateCommandEncoder(const CommandEncoderDescriptor* descriptor);
+        ComputePipelineBase* APICreateComputePipeline(const ComputePipelineDescriptor* descriptor);
+        PipelineLayoutBase* APICreatePipelineLayout(const PipelineLayoutDescriptor* descriptor);
+        QuerySetBase* APICreateQuerySet(const QuerySetDescriptor* descriptor);
+        void APICreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
+                                           WGPUCreateComputePipelineAsyncCallback callback,
+                                           void* userdata);
+        void APICreateRenderPipelineAsync(const RenderPipelineDescriptor2* descriptor,
+                                          WGPUCreateRenderPipelineAsyncCallback callback,
+                                          void* userdata);
+        RenderBundleEncoder* APICreateRenderBundleEncoder(
             const RenderBundleEncoderDescriptor* descriptor);
-        RenderPipelineBase* CreateRenderPipeline(const RenderPipelineDescriptor* descriptor);
-        RenderPipelineBase* CreateRenderPipeline2(const RenderPipelineDescriptor2* descriptor);
-        SamplerBase* CreateSampler(const SamplerDescriptor* descriptor);
-        ShaderModuleBase* CreateShaderModule(const ShaderModuleDescriptor* descriptor);
-        SwapChainBase* CreateSwapChain(Surface* surface, const SwapChainDescriptor* descriptor);
-        TextureBase* CreateTexture(const TextureDescriptor* descriptor);
+        RenderPipelineBase* APICreateRenderPipeline(const RenderPipelineDescriptor* descriptor);
+        RenderPipelineBase* APICreateRenderPipeline2(const RenderPipelineDescriptor2* descriptor);
+        SamplerBase* APICreateSampler(const SamplerDescriptor* descriptor);
+        ShaderModuleBase* APICreateShaderModule(const ShaderModuleDescriptor* descriptor);
+        SwapChainBase* APICreateSwapChain(Surface* surface, const SwapChainDescriptor* descriptor);
+        TextureBase* APICreateTexture(const TextureDescriptor* descriptor);
         TextureViewBase* CreateTextureView(TextureBase* texture,
                                            const TextureViewDescriptor* descriptor);
         InternalPipelineStore* GetInternalPipelineStore();
 
         // For Dawn Wire
-        BufferBase* CreateErrorBuffer();
+        BufferBase* APICreateErrorBuffer();
 
         // TODO(dawn:22): Remove once the deprecation period is finished.
-        QueueBase* GetDefaultQueue();
-        QueueBase* GetQueue();
+        QueueBase* APIGetDefaultQueue();
+        QueueBase* APIGetQueue();
 
-        void InjectError(wgpu::ErrorType type, const char* message);
-        bool Tick();
+        void APIInjectError(wgpu::ErrorType type, const char* message);
+        bool APITick();
 
-        void SetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata);
-        void SetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata);
-        void PushErrorScope(wgpu::ErrorFilter filter);
-        bool PopErrorScope(wgpu::ErrorCallback callback, void* userdata);
+        void APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata);
+        void APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata);
+        void APIPushErrorScope(wgpu::ErrorFilter filter);
+        bool APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata);
 
         MaybeError ValidateIsAlive() const;
 
@@ -228,7 +228,7 @@ namespace dawn_native {
         void IncrementLazyClearCountForTesting();
         size_t GetDeprecationWarningCountForTesting();
         void EmitDeprecationWarning(const char* warning);
-        void LoseForTesting();
+        void APILoseForTesting();
 
         // AddFutureSerial is used to update the mFutureSerial with the max serial needed to be
         // ticked in order to clean up all pending callback work or to execute asynchronous resource

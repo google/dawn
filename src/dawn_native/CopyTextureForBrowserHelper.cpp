@@ -137,8 +137,9 @@ namespace dawn_native {
                     wgslDesc.source = sCopyTextureForBrowserVertex;
                     descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
 
+                    // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
                     store->copyTextureForBrowserVS =
-                        AcquireRef(device->CreateShaderModule(&descriptor));
+                        AcquireRef(device->APICreateShaderModule(&descriptor));
                 }
 
                 ShaderModuleBase* vertexModule = store->copyTextureForBrowserVS.Get();
@@ -149,8 +150,9 @@ namespace dawn_native {
                     ShaderModuleWGSLDescriptor wgslDesc;
                     wgslDesc.source = sCopyTextureForBrowserFragment;
                     descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
+                    // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
                     store->copyTextureForBrowserFS =
-                        AcquireRef(device->CreateShaderModule(&descriptor));
+                        AcquireRef(device->APICreateShaderModule(&descriptor));
                 }
 
                 ShaderModuleBase* fragmentModule = store->copyTextureForBrowserFS.Get();
@@ -183,8 +185,9 @@ namespace dawn_native {
                 fragment.targetCount = 1;
                 fragment.targets = &target;
 
+                // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
                 store->copyTextureForBrowserPipelines.insert(
-                    {dstFormat, AcquireRef(device->CreateRenderPipeline2(&renderPipelineDesc))});
+                    {dstFormat, AcquireRef(device->APICreateRenderPipeline2(&renderPipelineDesc))});
             }
 
             return GetCachedPipeline(store, dstFormat);
@@ -242,7 +245,8 @@ namespace dawn_native {
             device, destination->texture->GetFormat().format);
 
         // Prepare bind group layout.
-        Ref<BindGroupLayoutBase> layout = AcquireRef(pipeline->GetBindGroupLayout(0));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<BindGroupLayoutBase> layout = AcquireRef(pipeline->APIGetBindGroupLayout(0));
 
         // Prepare bind group descriptor
         BindGroupEntry bindGroupEntries[3] = {};
@@ -266,21 +270,27 @@ namespace dawn_native {
         BufferDescriptor uniformDesc = {};
         uniformDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
         uniformDesc.size = sizeof(uniformData);
-        Ref<BufferBase> uniformBuffer = AcquireRef(device->CreateBuffer(&uniformDesc));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<BufferBase> uniformBuffer = AcquireRef(device->APICreateBuffer(&uniformDesc));
 
-        device->GetQueue()->WriteBuffer(uniformBuffer.Get(), 0, uniformData, sizeof(uniformData));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        // TODO(dawn:723): propagate any errors from WriteBuffer.
+        device->APIGetQueue()->APIWriteBuffer(uniformBuffer.Get(), 0, uniformData,
+                                              sizeof(uniformData));
 
         // Prepare binding 1 resource: sampler
         // Use default configuration, filterMode set to Nearest for min and mag.
         SamplerDescriptor samplerDesc = {};
-        Ref<SamplerBase> sampler = AcquireRef(device->CreateSampler(&samplerDesc));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<SamplerBase> sampler = AcquireRef(device->APICreateSampler(&samplerDesc));
 
         // Prepare binding 2 resource: sampled texture
         TextureViewDescriptor srcTextureViewDesc = {};
         srcTextureViewDesc.baseMipLevel = source->mipLevel;
         srcTextureViewDesc.mipLevelCount = 1;
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
         Ref<TextureViewBase> srcTextureView =
-            AcquireRef(source->texture->CreateView(&srcTextureViewDesc));
+            AcquireRef(source->texture->APICreateView(&srcTextureViewDesc));
 
         // Set bind group entries.
         bindGroupEntries[0].binding = 0;
@@ -292,18 +302,21 @@ namespace dawn_native {
         bindGroupEntries[2].textureView = srcTextureView.Get();
 
         // Create bind group after all binding entries are set.
-        Ref<BindGroupBase> bindGroup = AcquireRef(device->CreateBindGroup(&bgDesc));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<BindGroupBase> bindGroup = AcquireRef(device->APICreateBindGroup(&bgDesc));
 
         // Create command encoder.
         CommandEncoderDescriptor encoderDesc = {};
-        Ref<CommandEncoder> encoder = AcquireRef(device->CreateCommandEncoder(&encoderDesc));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<CommandEncoder> encoder = AcquireRef(device->APICreateCommandEncoder(&encoderDesc));
 
         // Prepare dst texture view as color Attachment.
         TextureViewDescriptor dstTextureViewDesc;
         dstTextureViewDesc.baseMipLevel = destination->mipLevel;
         dstTextureViewDesc.mipLevelCount = 1;
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
         Ref<TextureViewBase> dstView =
-            AcquireRef(destination->texture->CreateView(&dstTextureViewDesc));
+            AcquireRef(destination->texture->APICreateView(&dstTextureViewDesc));
 
         // Prepare render pass color attachment descriptor.
         RenderPassColorAttachmentDescriptor colorAttachmentDesc;
@@ -317,22 +330,26 @@ namespace dawn_native {
         RenderPassDescriptor renderPassDesc;
         renderPassDesc.colorAttachmentCount = 1;
         renderPassDesc.colorAttachments = &colorAttachmentDesc;
-        Ref<RenderPassEncoder> passEncoder = AcquireRef(encoder->BeginRenderPass(&renderPassDesc));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<RenderPassEncoder> passEncoder =
+            AcquireRef(encoder->APIBeginRenderPass(&renderPassDesc));
 
         // Start pipeline  and encode commands to complete
         // the copy from src texture to dst texture with transformation.
-        passEncoder->SetPipeline(pipeline);
-        passEncoder->SetBindGroup(0, bindGroup.Get());
-        passEncoder->Draw(3);
-        passEncoder->EndPass();
+        passEncoder->APISetPipeline(pipeline);
+        passEncoder->APISetBindGroup(0, bindGroup.Get());
+        passEncoder->APIDraw(3);
+        passEncoder->APIEndPass();
 
         // Finsh encoding.
-        Ref<CommandBufferBase> commandBuffer = AcquireRef(encoder->Finish());
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<CommandBufferBase> commandBuffer = AcquireRef(encoder->APIFinish());
         CommandBufferBase* submitCommandBuffer = commandBuffer.Get();
 
         // Submit command buffer.
-        Ref<QueueBase> queue = AcquireRef(device->GetQueue());
-        queue->Submit(1, &submitCommandBuffer);
+        // TODO(dawn:723): do not get a new reference to the Queue.
+        Ref<QueueBase> queue = AcquireRef(device->APIGetQueue());
+        queue->APISubmit(1, &submitCommandBuffer);
 
         return {};
     }

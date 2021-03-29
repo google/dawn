@@ -30,13 +30,13 @@ namespace dawn_native {
                                              CommandEncoder* commandEncoder,
                                              EncodingContext* encodingContext);
 
-        void EndPass();
+        void APIEndPass();
 
-        void Dispatch(uint32_t x, uint32_t y = 1, uint32_t z = 1);
-        void DispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
-        void SetPipeline(ComputePipelineBase* pipeline);
+        void APIDispatch(uint32_t x, uint32_t y = 1, uint32_t z = 1);
+        void APIDispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
+        void APISetPipeline(ComputePipelineBase* pipeline);
 
-        void WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
+        void APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
 
       protected:
         ComputePassEncoder(DeviceBase* device,

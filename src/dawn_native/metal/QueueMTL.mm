@@ -31,7 +31,10 @@ namespace dawn_native { namespace metal {
 
     MaybeError Queue::SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) {
         Device* device = ToBackend(GetDevice());
-        device->Tick();
+
+        // TODO(dawn:723): propagate any errors from Tick.
+        device->APITick();
+
         CommandRecordingContext* commandContext = device->GetPendingCommandContext();
 
         TRACE_EVENT_BEGIN0(GetDevice()->GetPlatform(), Recording, "CommandBufferMTL::FillCommands");

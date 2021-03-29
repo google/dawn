@@ -45,7 +45,7 @@ namespace dawn_native {
         return new ComputePassEncoder(device, commandEncoder, encodingContext, ObjectBase::kError);
     }
 
-    void ComputePassEncoder::EndPass() {
+    void ComputePassEncoder::APIEndPass() {
         if (mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
                 if (IsValidationEnabled()) {
                     DAWN_TRY(ValidateProgrammableEncoderEnd());
@@ -59,7 +59,7 @@ namespace dawn_native {
         }
     }
 
-    void ComputePassEncoder::Dispatch(uint32_t x, uint32_t y, uint32_t z) {
+    void ComputePassEncoder::APIDispatch(uint32_t x, uint32_t y, uint32_t z) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(mCommandBufferState.ValidateCanDispatch());
@@ -78,7 +78,8 @@ namespace dawn_native {
         });
     }
 
-    void ComputePassEncoder::DispatchIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
+    void ComputePassEncoder::APIDispatchIndirect(BufferBase* indirectBuffer,
+                                                 uint64_t indirectOffset) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
@@ -116,7 +117,7 @@ namespace dawn_native {
         });
     }
 
-    void ComputePassEncoder::SetPipeline(ComputePipelineBase* pipeline) {
+    void ComputePassEncoder::APISetPipeline(ComputePipelineBase* pipeline) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(pipeline));
@@ -132,7 +133,7 @@ namespace dawn_native {
         });
     }
 
-    void ComputePassEncoder::WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex) {
+    void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(querySet));

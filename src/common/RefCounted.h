@@ -27,9 +27,11 @@ class RefCounted {
     uint64_t GetRefCountForTesting() const;
     uint64_t GetRefCountPayload() const;
 
-    // Dawn API
     void Reference();
     void Release();
+
+    void APIReference();
+    void APIRelease();
 
   protected:
     virtual ~RefCounted() = default;

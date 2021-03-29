@@ -375,21 +375,23 @@ namespace dawn_native { namespace null {
     SwapChain::~SwapChain() = default;
 
     MaybeError SwapChain::PresentImpl() {
-        mTexture->Destroy();
+        mTexture->APIDestroy();
         mTexture = nullptr;
         return {};
     }
 
     ResultOrError<TextureViewBase*> SwapChain::GetCurrentTextureViewImpl() {
         TextureDescriptor textureDesc = GetSwapChainBaseTextureDescriptor(this);
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
         mTexture = AcquireRef(
             new Texture(GetDevice(), &textureDesc, TextureBase::TextureState::OwnedInternal));
-        return mTexture->CreateView();
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        return mTexture->APICreateView();
     }
 
     void SwapChain::DetachFromSurfaceImpl() {
         if (mTexture != nullptr) {
-            mTexture->Destroy();
+            mTexture->APIDestroy();
             mTexture = nullptr;
         }
     }
@@ -412,7 +414,7 @@ namespace dawn_native { namespace null {
     }
 
     TextureBase* OldSwapChain::GetNextTextureImpl(const TextureDescriptor* descriptor) {
-        return GetDevice()->CreateTexture(descriptor);
+        return GetDevice()->APICreateTexture(descriptor);
     }
 
     MaybeError OldSwapChain::OnBeforePresent(TextureViewBase*) {

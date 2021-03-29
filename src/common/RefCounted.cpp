@@ -73,6 +73,14 @@ void RefCounted::Release() {
     }
 }
 
+void RefCounted::APIReference() {
+    Reference();
+}
+
+void RefCounted::APIRelease() {
+    Release();
+}
+
 void RefCounted::DeleteThis() {
     delete this;
 }

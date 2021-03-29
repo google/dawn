@@ -609,11 +609,11 @@ namespace dawn_native {
         return {clampedCopyExtentWidth, clampedCopyExtentHeight, extent.depthOrArrayLayers};
     }
 
-    TextureViewBase* TextureBase::CreateView(const TextureViewDescriptor* descriptor) {
+    TextureViewBase* TextureBase::APICreateView(const TextureViewDescriptor* descriptor) {
         return GetDevice()->CreateTextureView(this, descriptor);
     }
 
-    void TextureBase::Destroy() {
+    void TextureBase::APIDestroy() {
         if (GetDevice()->ConsumedError(ValidateDestroy())) {
             return;
         }

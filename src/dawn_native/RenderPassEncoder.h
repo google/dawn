@@ -40,23 +40,23 @@ namespace dawn_native {
         void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
         const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
 
-        void EndPass();
+        void APIEndPass();
 
-        void SetStencilReference(uint32_t reference);
-        void SetBlendColor(const Color* color);
-        void SetViewport(float x,
-                         float y,
-                         float width,
-                         float height,
-                         float minDepth,
-                         float maxDepth);
-        void SetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
-        void ExecuteBundles(uint32_t count, RenderBundleBase* const* renderBundles);
+        void APISetStencilReference(uint32_t reference);
+        void APISetBlendColor(const Color* color);
+        void APISetViewport(float x,
+                            float y,
+                            float width,
+                            float height,
+                            float minDepth,
+                            float maxDepth);
+        void APISetScissorRect(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
+        void APIExecuteBundles(uint32_t count, RenderBundleBase* const* renderBundles);
 
-        void BeginOcclusionQuery(uint32_t queryIndex);
-        void EndOcclusionQuery();
+        void APIBeginOcclusionQuery(uint32_t queryIndex);
+        void APIEndOcclusionQuery();
 
-        void WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
+        void APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
 
       protected:
         RenderPassEncoder(DeviceBase* device,

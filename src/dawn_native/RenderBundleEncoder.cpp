@@ -99,7 +99,7 @@ namespace dawn_native {
         return mBundleEncodingContext.AcquireCommands();
     }
 
-    RenderBundleBase* RenderBundleEncoder::Finish(const RenderBundleDescriptor* descriptor) {
+    RenderBundleBase* RenderBundleEncoder::APIFinish(const RenderBundleDescriptor* descriptor) {
         RenderBundleBase* result = nullptr;
 
         if (GetDevice()->ConsumedError(FinishImpl(descriptor), &result)) {

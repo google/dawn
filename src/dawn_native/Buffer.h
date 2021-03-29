@@ -62,15 +62,15 @@ namespace dawn_native {
         void SetIsDataInitialized();
 
         // Dawn API
-        void MapAsync(wgpu::MapMode mode,
-                      size_t offset,
-                      size_t size,
-                      WGPUBufferMapCallback callback,
-                      void* userdata);
-        void* GetMappedRange(size_t offset, size_t size);
-        const void* GetConstMappedRange(size_t offset, size_t size);
-        void Unmap();
-        void Destroy();
+        void APIMapAsync(wgpu::MapMode mode,
+                         size_t offset,
+                         size_t size,
+                         WGPUBufferMapCallback callback,
+                         void* userdata);
+        void* APIGetMappedRange(size_t offset, size_t size);
+        const void* APIGetConstMappedRange(size_t offset, size_t size);
+        void APIUnmap();
+        void APIDestroy();
 
       protected:
         BufferBase(DeviceBase* device,

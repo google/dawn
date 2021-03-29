@@ -34,14 +34,14 @@ namespace dawn_native {
                                 EncodingContext* encodingContext,
                                 PassType passType);
 
-        void InsertDebugMarker(const char* groupLabel);
-        void PopDebugGroup();
-        void PushDebugGroup(const char* groupLabel);
+        void APIInsertDebugMarker(const char* groupLabel);
+        void APIPopDebugGroup();
+        void APIPushDebugGroup(const char* groupLabel);
 
-        void SetBindGroup(uint32_t groupIndex,
-                          BindGroupBase* group,
-                          uint32_t dynamicOffsetCount = 0,
-                          const uint32_t* dynamicOffsets = nullptr);
+        void APISetBindGroup(uint32_t groupIndex,
+                             BindGroupBase* group,
+                             uint32_t dynamicOffsetCount = 0,
+                             const uint32_t* dynamicOffsets = nullptr);
 
       protected:
         bool IsValidationEnabled() const;

@@ -176,7 +176,7 @@ namespace dawn_native {
         return new ErrorQueue(device);
     }
 
-    void QueueBase::Submit(uint32_t commandCount, CommandBufferBase* const* commands) {
+    void QueueBase::APISubmit(uint32_t commandCount, CommandBufferBase* const* commands) {
         SubmitInternal(commandCount, commands);
 
         for (uint32_t i = 0; i < commandCount; ++i) {
@@ -184,7 +184,7 @@ namespace dawn_native {
         }
     }
 
-    void QueueBase::Signal(Fence* fence, uint64_t apiSignalValue) {
+    void QueueBase::APISignal(Fence* fence, uint64_t apiSignalValue) {
         FenceAPISerial signalValue(apiSignalValue);
 
         DeviceBase* device = GetDevice();
@@ -197,9 +197,9 @@ namespace dawn_native {
         fence->UpdateFenceOnComplete(fence, signalValue);
     }
 
-    void QueueBase::OnSubmittedWorkDone(uint64_t signalValue,
-                                        WGPUQueueWorkDoneCallback callback,
-                                        void* userdata) {
+    void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
+                                           WGPUQueueWorkDoneCallback callback,
+                                           void* userdata) {
         // The error status depends on the type of error so we let the validation function choose it
         WGPUQueueWorkDoneStatus status;
         if (GetDevice()->ConsumedError(ValidateOnSubmittedWorkDone(signalValue, &status))) {
@@ -236,7 +236,7 @@ namespace dawn_native {
         mTasksInFlight.Clear();
     }
 
-    Fence* QueueBase::CreateFence(const FenceDescriptor* descriptor) {
+    Fence* QueueBase::APICreateFence(const FenceDescriptor* descriptor) {
         // TODO(chromium:1177476): Remove once the deprecation period is finished.
         GetDevice()->EmitDeprecationWarning(
             "Fences are deprecated, use Queue::OnSubmittedWorkDone instead.");
@@ -252,10 +252,10 @@ namespace dawn_native {
         return new Fence(this, descriptor);
     }
 
-    void QueueBase::WriteBuffer(BufferBase* buffer,
-                                uint64_t bufferOffset,
-                                const void* data,
-                                size_t size) {
+    void QueueBase::APIWriteBuffer(BufferBase* buffer,
+                                   uint64_t bufferOffset,
+                                   const void* data,
+                                   size_t size) {
         GetDevice()->ConsumedError(WriteBufferInternal(buffer, bufferOffset, data, size));
     }
 
@@ -291,11 +291,11 @@ namespace dawn_native {
                                                buffer, bufferOffset, size);
     }
 
-    void QueueBase::WriteTexture(const ImageCopyTexture* destination,
-                                 const void* data,
-                                 size_t dataSize,
-                                 const TextureDataLayout* dataLayout,
-                                 const Extent3D* writeSize) {
+    void QueueBase::APIWriteTexture(const ImageCopyTexture* destination,
+                                    const void* data,
+                                    size_t dataSize,
+                                    const TextureDataLayout* dataLayout,
+                                    const Extent3D* writeSize) {
         GetDevice()->ConsumedError(
             WriteTextureInternal(destination, data, dataSize, dataLayout, writeSize));
     }
@@ -366,10 +366,10 @@ namespace dawn_native {
                                                 &textureCopy, writeSizePixel);
     }
 
-    void QueueBase::CopyTextureForBrowser(const ImageCopyTexture* source,
-                                          const ImageCopyTexture* destination,
-                                          const Extent3D* copySize,
-                                          const CopyTextureForBrowserOptions* options) {
+    void QueueBase::APICopyTextureForBrowser(const ImageCopyTexture* source,
+                                             const ImageCopyTexture* destination,
+                                             const Extent3D* copySize,
+                                             const CopyTextureForBrowserOptions* options) {
         GetDevice()->ConsumedError(
             CopyTextureForBrowserInternal(source, destination, copySize, options));
     }

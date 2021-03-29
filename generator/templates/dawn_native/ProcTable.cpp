@@ -64,7 +64,7 @@ namespace dawn_native {
                     {% if method.return_type.name.canonical_case() != "void" %}
                         auto result =
                     {%- endif %}
-                    self->{{method.name.CamelCase()}}(
+                    self->API{{method.name.CamelCase()}}(
                         {%- for arg in method.arguments -%}
                             {%- if not loop.first %}, {% endif -%}
                             {{as_varName(arg.name)}}_

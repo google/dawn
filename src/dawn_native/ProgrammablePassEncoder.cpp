@@ -111,7 +111,7 @@ namespace dawn_native {
         return {};
     }
 
-    void ProgrammablePassEncoder::InsertDebugMarker(const char* groupLabel) {
+    void ProgrammablePassEncoder::APIInsertDebugMarker(const char* groupLabel) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             InsertDebugMarkerCmd* cmd =
                 allocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
@@ -124,7 +124,7 @@ namespace dawn_native {
         });
     }
 
-    void ProgrammablePassEncoder::PopDebugGroup() {
+    void ProgrammablePassEncoder::APIPopDebugGroup() {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 if (mDebugGroupStackSize == 0) {
@@ -138,7 +138,7 @@ namespace dawn_native {
         });
     }
 
-    void ProgrammablePassEncoder::PushDebugGroup(const char* groupLabel) {
+    void ProgrammablePassEncoder::APIPushDebugGroup(const char* groupLabel) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
@@ -153,10 +153,10 @@ namespace dawn_native {
         });
     }
 
-    void ProgrammablePassEncoder::SetBindGroup(uint32_t groupIndexIn,
-                                               BindGroupBase* group,
-                                               uint32_t dynamicOffsetCountIn,
-                                               const uint32_t* dynamicOffsetsIn) {
+    void ProgrammablePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
+                                                  BindGroupBase* group,
+                                                  uint32_t dynamicOffsetCountIn,
+                                                  const uint32_t* dynamicOffsetsIn) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             BindGroupIndex groupIndex(groupIndexIn);
 

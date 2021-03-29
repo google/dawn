@@ -39,8 +39,10 @@ namespace dawn_native {
         const QueueBase* GetQueue() const;
 
         // Dawn API
-        uint64_t GetCompletedValue() const;
-        void OnCompletion(uint64_t value, wgpu::FenceOnCompletionCallback callback, void* userdata);
+        uint64_t APIGetCompletedValue() const;
+        void APIOnCompletion(uint64_t value,
+                             wgpu::FenceOnCompletionCallback callback,
+                             void* userdata);
 
       protected:
         friend class QueueBase;

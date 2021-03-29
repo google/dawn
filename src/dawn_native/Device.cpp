@@ -176,7 +176,8 @@ namespace dawn_native {
             // Tick the queue-related tasks since they should be complete. This must be done before
             // ShutDownImpl() it may relinquish resources that will be freed by backends in the
             // ShutDownImpl() call.
-            GetQueue()->Tick(GetCompletedCommandSerial());
+            // TODO(dawn:723): do not get a new reference to the Queue.
+            APIGetQueue()->Tick(GetCompletedCommandSerial());
             // Call TickImpl once last time to clean up resources
             // Ignore errors so that we can continue with destruction
             IgnoreErrors(TickImpl());
@@ -251,7 +252,7 @@ namespace dawn_native {
         }
     }
 
-    void DeviceBase::InjectError(wgpu::ErrorType type, const char* message) {
+    void DeviceBase::APIInjectError(wgpu::ErrorType type, const char* message) {
         if (ConsumedError(ValidateErrorType(type))) {
             return;
         }
@@ -278,24 +279,24 @@ namespace dawn_native {
         HandleError(error->GetType(), ss.str().c_str());
     }
 
-    void DeviceBase::SetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata) {
+    void DeviceBase::APISetUncapturedErrorCallback(wgpu::ErrorCallback callback, void* userdata) {
         mUncapturedErrorCallback = callback;
         mUncapturedErrorUserdata = userdata;
     }
 
-    void DeviceBase::SetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata) {
+    void DeviceBase::APISetDeviceLostCallback(wgpu::DeviceLostCallback callback, void* userdata) {
         mDeviceLostCallback = callback;
         mDeviceLostUserdata = userdata;
     }
 
-    void DeviceBase::PushErrorScope(wgpu::ErrorFilter filter) {
+    void DeviceBase::APIPushErrorScope(wgpu::ErrorFilter filter) {
         if (ConsumedError(ValidateErrorFilter(filter))) {
             return;
         }
         mErrorScopeStack->Push(filter);
     }
 
-    bool DeviceBase::PopErrorScope(wgpu::ErrorCallback callback, void* userdata) {
+    bool DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) {
         if (mErrorScopeStack->Empty()) {
             return false;
         }
@@ -331,7 +332,7 @@ namespace dawn_native {
         return DAWN_VALIDATION_ERROR("Device is lost");
     }
 
-    void DeviceBase::LoseForTesting() {
+    void DeviceBase::APILoseForTesting() {
         if (mState != State::Alive) {
             return;
         }
@@ -664,7 +665,7 @@ namespace dawn_native {
 
     // Object creation API methods
 
-    BindGroupBase* DeviceBase::CreateBindGroup(const BindGroupDescriptor* descriptor) {
+    BindGroupBase* DeviceBase::APICreateBindGroup(const BindGroupDescriptor* descriptor) {
         BindGroupBase* result = nullptr;
 
         if (ConsumedError(CreateBindGroupInternal(&result, descriptor))) {
@@ -673,7 +674,7 @@ namespace dawn_native {
 
         return result;
     }
-    BindGroupLayoutBase* DeviceBase::CreateBindGroupLayout(
+    BindGroupLayoutBase* DeviceBase::APICreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor) {
         BindGroupLayoutBase* result = nullptr;
 
@@ -683,7 +684,7 @@ namespace dawn_native {
 
         return result;
     }
-    BufferBase* DeviceBase::CreateBuffer(const BufferDescriptor* descriptor) {
+    BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* descriptor) {
         Ref<BufferBase> result = nullptr;
         if (ConsumedError(CreateBufferInternal(descriptor), &result)) {
             ASSERT(result == nullptr);
@@ -692,10 +693,11 @@ namespace dawn_native {
 
         return result.Detach();
     }
-    CommandEncoder* DeviceBase::CreateCommandEncoder(const CommandEncoderDescriptor* descriptor) {
+    CommandEncoder* DeviceBase::APICreateCommandEncoder(
+        const CommandEncoderDescriptor* descriptor) {
         return new CommandEncoder(this, descriptor);
     }
-    ComputePipelineBase* DeviceBase::CreateComputePipeline(
+    ComputePipelineBase* DeviceBase::APICreateComputePipeline(
         const ComputePipelineDescriptor* descriptor) {
         ComputePipelineBase* result = nullptr;
 
@@ -705,9 +707,9 @@ namespace dawn_native {
 
         return result;
     }
-    void DeviceBase::CreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
-                                                WGPUCreateComputePipelineAsyncCallback callback,
-                                                void* userdata) {
+    void DeviceBase::APICreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
+                                                   WGPUCreateComputePipelineAsyncCallback callback,
+                                                   void* userdata) {
         ComputePipelineBase* result = nullptr;
 
         if (IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
@@ -730,7 +732,7 @@ namespace dawn_native {
             std::make_unique<CreateComputePipelineAsyncTask>(result, callback, userdata);
         mCreatePipelineAsyncTracker->TrackTask(std::move(request), GetPendingCommandSerial());
     }
-    PipelineLayoutBase* DeviceBase::CreatePipelineLayout(
+    PipelineLayoutBase* DeviceBase::APICreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor) {
         PipelineLayoutBase* result = nullptr;
 
@@ -740,7 +742,7 @@ namespace dawn_native {
 
         return result;
     }
-    QuerySetBase* DeviceBase::CreateQuerySet(const QuerySetDescriptor* descriptor) {
+    QuerySetBase* DeviceBase::APICreateQuerySet(const QuerySetDescriptor* descriptor) {
         QuerySetBase* result = nullptr;
 
         if (ConsumedError(CreateQuerySetInternal(&result, descriptor))) {
@@ -749,7 +751,7 @@ namespace dawn_native {
 
         return result;
     }
-    SamplerBase* DeviceBase::CreateSampler(const SamplerDescriptor* descriptor) {
+    SamplerBase* DeviceBase::APICreateSampler(const SamplerDescriptor* descriptor) {
         SamplerBase* result = nullptr;
 
         if (ConsumedError(CreateSamplerInternal(&result, descriptor))) {
@@ -758,9 +760,9 @@ namespace dawn_native {
 
         return result;
     }
-    void DeviceBase::CreateRenderPipelineAsync(const RenderPipelineDescriptor2* descriptor,
-                                               WGPUCreateRenderPipelineAsyncCallback callback,
-                                               void* userdata) {
+    void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor2* descriptor,
+                                                  WGPUCreateRenderPipelineAsyncCallback callback,
+                                                  void* userdata) {
         RenderPipelineBase* result = nullptr;
 
         if (IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
@@ -783,7 +785,7 @@ namespace dawn_native {
             std::make_unique<CreateRenderPipelineAsyncTask>(result, callback, userdata);
         mCreatePipelineAsyncTracker->TrackTask(std::move(request), GetPendingCommandSerial());
     }
-    RenderBundleEncoder* DeviceBase::CreateRenderBundleEncoder(
+    RenderBundleEncoder* DeviceBase::APICreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor) {
         RenderBundleEncoder* result = nullptr;
 
@@ -793,7 +795,7 @@ namespace dawn_native {
 
         return result;
     }
-    RenderPipelineBase* DeviceBase::CreateRenderPipeline(
+    RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
         const RenderPipelineDescriptor* descriptor) {
         RenderPipelineBase* result = nullptr;
 
@@ -809,7 +811,7 @@ namespace dawn_native {
 
         return result;
     }
-    RenderPipelineBase* DeviceBase::CreateRenderPipeline2(
+    RenderPipelineBase* DeviceBase::APICreateRenderPipeline2(
         const RenderPipelineDescriptor2* descriptor) {
         RenderPipelineBase* result = nullptr;
 
@@ -819,7 +821,7 @@ namespace dawn_native {
 
         return result;
     }
-    ShaderModuleBase* DeviceBase::CreateShaderModule(const ShaderModuleDescriptor* descriptor) {
+    ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor* descriptor) {
         ShaderModuleBase* result = nullptr;
 
         if (ConsumedError(CreateShaderModuleInternal(&result, descriptor))) {
@@ -828,8 +830,8 @@ namespace dawn_native {
 
         return result;
     }
-    SwapChainBase* DeviceBase::CreateSwapChain(Surface* surface,
-                                               const SwapChainDescriptor* descriptor) {
+    SwapChainBase* DeviceBase::APICreateSwapChain(Surface* surface,
+                                                  const SwapChainDescriptor* descriptor) {
         SwapChainBase* result = nullptr;
 
         if (ConsumedError(CreateSwapChainInternal(&result, surface, descriptor))) {
@@ -838,7 +840,7 @@ namespace dawn_native {
 
         return result;
     }
-    TextureBase* DeviceBase::CreateTexture(const TextureDescriptor* descriptor) {
+    TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
         Ref<TextureBase> result;
 
         if (ConsumedError(CreateTextureInternal(descriptor), &result)) {
@@ -860,7 +862,7 @@ namespace dawn_native {
 
     // For Dawn Wire
 
-    BufferBase* DeviceBase::CreateErrorBuffer() {
+    BufferBase* DeviceBase::APICreateErrorBuffer() {
         BufferDescriptor desc = {};
         return BufferBase::MakeError(this, &desc);
     }
@@ -868,7 +870,7 @@ namespace dawn_native {
     // Other Device API methods
 
     // Returns true if future ticking is needed.
-    bool DeviceBase::Tick() {
+    bool DeviceBase::APITick() {
         if (ConsumedError(ValidateIsAlive())) {
             return false;
         }
@@ -894,7 +896,8 @@ namespace dawn_native {
             // tick the dynamic uploader before the backend resource allocators. This would allow
             // reclaiming resources one tick earlier.
             mDynamicUploader->Deallocate(mCompletedSerial);
-            GetQueue()->Tick(mCompletedSerial);
+            // TODO(dawn:723): do not get a new reference to the Queue.
+            APIGetQueue()->Tick(mCompletedSerial);
 
             mCreatePipelineAsyncTracker->Tick(mCompletedSerial);
         }
@@ -902,7 +905,7 @@ namespace dawn_native {
         return !IsDeviceIdle();
     }
 
-    QueueBase* DeviceBase::GetQueue() {
+    QueueBase* DeviceBase::APIGetQueue() {
         // Backends gave the primary queue during initialization.
         ASSERT(mQueue != nullptr);
 
@@ -911,10 +914,10 @@ namespace dawn_native {
         return mQueue.Get();
     }
 
-    QueueBase* DeviceBase::GetDefaultQueue() {
+    QueueBase* DeviceBase::APIGetDefaultQueue() {
         EmitDeprecationWarning(
             "Device::GetDefaultQueue is deprecated, use Device::GetQueue() instead");
-        return GetQueue();
+        return APIGetQueue();
     }
 
     void DeviceBase::ApplyExtensions(const DeviceDescriptor* deviceDescriptor) {

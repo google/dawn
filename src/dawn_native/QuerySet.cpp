@@ -153,7 +153,7 @@ namespace dawn_native {
         return {};
     }
 
-    void QuerySetBase::Destroy() {
+    void QuerySetBase::APIDestroy() {
         if (GetDevice()->ConsumedError(ValidateDestroy())) {
             return;
         }

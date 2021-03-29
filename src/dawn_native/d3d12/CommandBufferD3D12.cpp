@@ -240,8 +240,9 @@ namespace dawn_native { namespace d3d12 {
             tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
             tempBufferDescriptor.size = tempBufferSize.AcquireSuccess();
             Device* device = ToBackend(srcCopy.texture->GetDevice());
+            // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
             Ref<Buffer> tempBuffer =
-                AcquireRef(ToBackend(device->CreateBuffer(&tempBufferDescriptor)));
+                AcquireRef(ToBackend(device->APICreateBuffer(&tempBufferDescriptor)));
 
             // Copy from source texture into tempBuffer
             Texture* srcTexture = ToBackend(srcCopy.texture).Get();

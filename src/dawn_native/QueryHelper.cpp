@@ -116,7 +116,8 @@ namespace dawn_native {
                     wgslDesc.source = sConvertTimestampsToNanoseconds;
                     descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
 
-                    store->timestampCS = AcquireRef(device->CreateShaderModule(&descriptor));
+                    // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+                    store->timestampCS = AcquireRef(device->APICreateShaderModule(&descriptor));
                 }
 
                 // Create ComputePipeline.
@@ -126,8 +127,9 @@ namespace dawn_native {
                 computePipelineDesc.computeStage.module = store->timestampCS.Get();
                 computePipelineDesc.computeStage.entryPoint = "main";
 
+                // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
                 store->timestampComputePipeline =
-                    AcquireRef(device->CreateComputePipeline(&computePipelineDesc));
+                    AcquireRef(device->APICreateComputePipeline(&computePipelineDesc));
             }
 
             return store->timestampComputePipeline.Get();
@@ -144,7 +146,8 @@ namespace dawn_native {
         ComputePipelineBase* pipeline = GetOrCreateTimestampComputePipeline(device);
 
         // Prepare bind group layout.
-        Ref<BindGroupLayoutBase> layout = AcquireRef(pipeline->GetBindGroupLayout(0));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<BindGroupLayoutBase> layout = AcquireRef(pipeline->APIGetBindGroupLayout(0));
 
         // Prepare bind group descriptor
         std::array<BindGroupEntry, 3> bindGroupEntries = {};
@@ -165,15 +168,18 @@ namespace dawn_native {
         bindGroupEntries[2].size = params->GetSize();
 
         // Create bind group after all binding entries are set.
-        Ref<BindGroupBase> bindGroup = AcquireRef(device->CreateBindGroup(&bgDesc));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<BindGroupBase> bindGroup = AcquireRef(device->APICreateBindGroup(&bgDesc));
 
         // Create compute encoder and issue dispatch.
         ComputePassDescriptor passDesc = {};
-        Ref<ComputePassEncoder> pass = AcquireRef(encoder->BeginComputePass(&passDesc));
-        pass->SetPipeline(pipeline);
-        pass->SetBindGroup(0, bindGroup.Get());
-        pass->Dispatch(static_cast<uint32_t>((timestamps->GetSize() / sizeof(uint64_t) + 7) / 8));
-        pass->EndPass();
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<ComputePassEncoder> pass = AcquireRef(encoder->APIBeginComputePass(&passDesc));
+        pass->APISetPipeline(pipeline);
+        pass->APISetBindGroup(0, bindGroup.Get());
+        pass->APIDispatch(
+            static_cast<uint32_t>((timestamps->GetSize() / sizeof(uint64_t) + 7) / 8));
+        pass->APIEndPass();
     }
 
 }  // namespace dawn_native

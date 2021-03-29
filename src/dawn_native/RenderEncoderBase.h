@@ -27,28 +27,30 @@ namespace dawn_native {
                           EncodingContext* encodingContext,
                           Ref<AttachmentState> attachmentState);
 
-        void Draw(uint32_t vertexCount,
-                  uint32_t instanceCount = 1,
-                  uint32_t firstVertex = 0,
-                  uint32_t firstInstance = 0);
-        void DrawIndexed(uint32_t vertexCount,
-                         uint32_t instanceCount,
-                         uint32_t firstIndex,
-                         int32_t baseVertex,
-                         uint32_t firstInstance);
+        void APIDraw(uint32_t vertexCount,
+                     uint32_t instanceCount = 1,
+                     uint32_t firstVertex = 0,
+                     uint32_t firstInstance = 0);
+        void APIDrawIndexed(uint32_t vertexCount,
+                            uint32_t instanceCount,
+                            uint32_t firstIndex,
+                            int32_t baseVertex,
+                            uint32_t firstInstance);
 
-        void DrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
-        void DrawIndexedIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
+        void APIDrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
+        void APIDrawIndexedIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset);
 
-        void SetPipeline(RenderPipelineBase* pipeline);
+        void APISetPipeline(RenderPipelineBase* pipeline);
 
-        void SetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset, uint64_t size);
-        void SetIndexBuffer(BufferBase* buffer,
-                            wgpu::IndexFormat format,
-                            uint64_t offset,
-                            uint64_t size);
-        void SetIndexBufferWithFormat(BufferBase* buffer, wgpu::IndexFormat format, uint64_t offset,
-                                      uint64_t size);
+        void APISetVertexBuffer(uint32_t slot, BufferBase* buffer, uint64_t offset, uint64_t size);
+        void APISetIndexBuffer(BufferBase* buffer,
+                               wgpu::IndexFormat format,
+                               uint64_t offset,
+                               uint64_t size);
+        void APISetIndexBufferWithFormat(BufferBase* buffer,
+                                         wgpu::IndexFormat format,
+                                         uint64_t offset,
+                                         uint64_t size);
 
         const AttachmentState* GetAttachmentState() const;
         Ref<AttachmentState> AcquireAttachmentState();

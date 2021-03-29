@@ -238,7 +238,7 @@ namespace dawn_native {
 #endif  // defined(DAWN_USE_X11)
     }
 
-    Surface* InstanceBase::CreateSurface(const SurfaceDescriptor* descriptor) {
+    Surface* InstanceBase::APICreateSurface(const SurfaceDescriptor* descriptor) {
         if (ConsumedError(ValidateSurfaceDescriptor(this, descriptor))) {
             return nullptr;
         }

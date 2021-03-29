@@ -208,7 +208,7 @@ namespace dawn_native {
 
     DAWN_NATIVE_EXPORT bool DeviceTick(WGPUDevice device) {
         dawn_native::DeviceBase* deviceBase = reinterpret_cast<dawn_native::DeviceBase*>(device);
-        return deviceBase->Tick();
+        return deviceBase->APITick();
     }
 
     // ExternalImageDescriptor

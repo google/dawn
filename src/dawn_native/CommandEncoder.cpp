@@ -416,10 +416,13 @@ namespace dawn_native {
             BufferDescriptor availabilityDesc = {};
             availabilityDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
             availabilityDesc.size = querySet->GetQueryCount() * sizeof(uint32_t);
+            // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
             Ref<BufferBase> availabilityBuffer =
-                AcquireRef(device->CreateBuffer(&availabilityDesc));
-            device->GetQueue()->WriteBuffer(availabilityBuffer.Get(), 0, availability.data(),
-                                            availability.size() * sizeof(uint32_t));
+                AcquireRef(device->APICreateBuffer(&availabilityDesc));
+            // TODO(dawn:723): do not get a new reference to the Queue.
+            // TODO(dawn:723): propagate any errors from WriteBuffer.
+            device->APIGetQueue()->APIWriteBuffer(availabilityBuffer.Get(), 0, availability.data(),
+                                                  availability.size() * sizeof(uint32_t));
 
             // Timestamp params uniform buffer
             TimestampParams params = {queryCount, static_cast<uint32_t>(destinationOffset),
@@ -427,8 +430,11 @@ namespace dawn_native {
             BufferDescriptor parmsDesc = {};
             parmsDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
             parmsDesc.size = sizeof(params);
-            Ref<BufferBase> paramsBuffer = AcquireRef(device->CreateBuffer(&parmsDesc));
-            device->GetQueue()->WriteBuffer(paramsBuffer.Get(), 0, &params, sizeof(params));
+            // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+            Ref<BufferBase> paramsBuffer = AcquireRef(device->APICreateBuffer(&parmsDesc));
+            // TODO(dawn:723): do not get a new reference to the Queue.
+            // TODO(dawn:723): propagate any errors from WriteBuffer.
+            device->APIGetQueue()->APIWriteBuffer(paramsBuffer.Get(), 0, &params, sizeof(params));
 
             EncodeConvertTimestampsToNanoseconds(encoder, destination, availabilityBuffer.Get(),
                                                  paramsBuffer.Get());
@@ -476,7 +482,8 @@ namespace dawn_native {
 
     // Implementation of the API's command recording methods
 
-    ComputePassEncoder* CommandEncoder::BeginComputePass(const ComputePassDescriptor* descriptor) {
+    ComputePassEncoder* CommandEncoder::APIBeginComputePass(
+        const ComputePassDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
         bool success =
@@ -498,7 +505,7 @@ namespace dawn_native {
         return ComputePassEncoder::MakeError(device, this, &mEncodingContext);
     }
 
-    RenderPassEncoder* CommandEncoder::BeginRenderPass(const RenderPassDescriptor* descriptor) {
+    RenderPassEncoder* CommandEncoder::APIBeginRenderPass(const RenderPassDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
         PassResourceUsageTracker usageTracker(PassType::Render);
@@ -581,11 +588,11 @@ namespace dawn_native {
         return RenderPassEncoder::MakeError(device, this, &mEncodingContext);
     }
 
-    void CommandEncoder::CopyBufferToBuffer(BufferBase* source,
-                                            uint64_t sourceOffset,
-                                            BufferBase* destination,
-                                            uint64_t destinationOffset,
-                                            uint64_t size) {
+    void CommandEncoder::APICopyBufferToBuffer(BufferBase* source,
+                                               uint64_t sourceOffset,
+                                               BufferBase* destination,
+                                               uint64_t destinationOffset,
+                                               uint64_t size) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(source));
@@ -622,9 +629,9 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::CopyBufferToTexture(const ImageCopyBuffer* source,
-                                             const ImageCopyTexture* destination,
-                                             const Extent3D* copySize) {
+    void CommandEncoder::APICopyBufferToTexture(const ImageCopyBuffer* source,
+                                                const ImageCopyTexture* destination,
+                                                const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             Extent3D fixedCopySize = *copySize;
             DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(GetDevice(), &fixedCopySize));
@@ -681,9 +688,9 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::CopyTextureToBuffer(const ImageCopyTexture* source,
-                                             const ImageCopyBuffer* destination,
-                                             const Extent3D* copySize) {
+    void CommandEncoder::APICopyTextureToBuffer(const ImageCopyTexture* source,
+                                                const ImageCopyBuffer* destination,
+                                                const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             Extent3D fixedCopySize = *copySize;
             DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(GetDevice(), &fixedCopySize));
@@ -739,9 +746,9 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::CopyTextureToTexture(const ImageCopyTexture* source,
-                                              const ImageCopyTexture* destination,
-                                              const Extent3D* copySize) {
+    void CommandEncoder::APICopyTextureToTexture(const ImageCopyTexture* source,
+                                                 const ImageCopyTexture* destination,
+                                                 const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             Extent3D fixedCopySize = *copySize;
             DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(GetDevice(), &fixedCopySize));
@@ -786,13 +793,13 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::InjectValidationError(const char* message) {
+    void CommandEncoder::APIInjectValidationError(const char* message) {
         if (mEncodingContext.CheckCurrentEncoder(this)) {
             mEncodingContext.HandleError(InternalErrorType::Validation, message);
         }
     }
 
-    void CommandEncoder::InsertDebugMarker(const char* groupLabel) {
+    void CommandEncoder::APIInsertDebugMarker(const char* groupLabel) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             InsertDebugMarkerCmd* cmd =
                 allocator->Allocate<InsertDebugMarkerCmd>(Command::InsertDebugMarker);
@@ -805,7 +812,7 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::PopDebugGroup() {
+    void CommandEncoder::APIPopDebugGroup() {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
                 if (mDebugGroupStackSize == 0) {
@@ -819,7 +826,7 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::PushDebugGroup(const char* groupLabel) {
+    void CommandEncoder::APIPushDebugGroup(const char* groupLabel) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             PushDebugGroupCmd* cmd =
                 allocator->Allocate<PushDebugGroupCmd>(Command::PushDebugGroup);
@@ -834,11 +841,11 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::ResolveQuerySet(QuerySetBase* querySet,
-                                         uint32_t firstQuery,
-                                         uint32_t queryCount,
-                                         BufferBase* destination,
-                                         uint64_t destinationOffset) {
+    void CommandEncoder::APIResolveQuerySet(QuerySetBase* querySet,
+                                            uint32_t firstQuery,
+                                            uint32_t queryCount,
+                                            BufferBase* destination,
+                                            uint64_t destinationOffset) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(querySet));
@@ -872,7 +879,7 @@ namespace dawn_native {
         });
     }
 
-    void CommandEncoder::WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex) {
+    void CommandEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(querySet));
@@ -890,7 +897,7 @@ namespace dawn_native {
         });
     }
 
-    CommandBufferBase* CommandEncoder::Finish(const CommandBufferDescriptor* descriptor) {
+    CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
         // Even if mEncodingContext.Finish() validation fails, calling it will mutate the internal
         // state of the encoding context. The internal state is set to finished, and subsequent

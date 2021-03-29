@@ -40,7 +40,7 @@ namespace dawn_native {
 
         MaybeError ValidateCanUseInSubmitNow() const;
 
-        void Destroy();
+        void APIDestroy();
 
       protected:
         QuerySetBase(DeviceBase* device, ObjectBase::ErrorTag tag);

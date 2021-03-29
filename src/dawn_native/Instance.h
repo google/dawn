@@ -72,7 +72,7 @@ namespace dawn_native {
         const XlibXcbFunctions* GetOrCreateXlibXcbFunctions();
 
         // Dawn API
-        Surface* CreateSurface(const SurfaceDescriptor* descriptor);
+        Surface* APICreateSurface(const SurfaceDescriptor* descriptor);
 
       private:
         InstanceBase() = default;

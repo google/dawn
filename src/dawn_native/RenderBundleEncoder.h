@@ -32,7 +32,7 @@ namespace dawn_native {
 
         static RenderBundleEncoder* MakeError(DeviceBase* device);
 
-        RenderBundleBase* Finish(const RenderBundleDescriptor* descriptor);
+        RenderBundleBase* APIFinish(const RenderBundleDescriptor* descriptor);
 
         CommandIterator AcquireCommands();
 

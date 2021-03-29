@@ -56,10 +56,10 @@ namespace dawn_native {
         return std::move(mAttachmentState);
     }
 
-    void RenderEncoderBase::Draw(uint32_t vertexCount,
-                                 uint32_t instanceCount,
-                                 uint32_t firstVertex,
-                                 uint32_t firstInstance) {
+    void RenderEncoderBase::APIDraw(uint32_t vertexCount,
+                                    uint32_t instanceCount,
+                                    uint32_t firstVertex,
+                                    uint32_t firstInstance) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(mCommandBufferState.ValidateCanDraw());
@@ -79,11 +79,11 @@ namespace dawn_native {
         });
     }
 
-    void RenderEncoderBase::DrawIndexed(uint32_t indexCount,
-                                        uint32_t instanceCount,
-                                        uint32_t firstIndex,
-                                        int32_t baseVertex,
-                                        uint32_t firstInstance) {
+    void RenderEncoderBase::APIDrawIndexed(uint32_t indexCount,
+                                           uint32_t instanceCount,
+                                           uint32_t firstIndex,
+                                           int32_t baseVertex,
+                                           uint32_t firstInstance) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(mCommandBufferState.ValidateCanDrawIndexed());
@@ -115,7 +115,7 @@ namespace dawn_native {
         });
     }
 
-    void RenderEncoderBase::DrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
+    void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t indirectOffset) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
@@ -142,8 +142,8 @@ namespace dawn_native {
         });
     }
 
-    void RenderEncoderBase::DrawIndexedIndirect(BufferBase* indirectBuffer,
-                                                uint64_t indirectOffset) {
+    void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
+                                                   uint64_t indirectOffset) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(indirectBuffer));
@@ -181,7 +181,7 @@ namespace dawn_native {
         });
     }
 
-    void RenderEncoderBase::SetPipeline(RenderPipelineBase* pipeline) {
+    void RenderEncoderBase::APISetPipeline(RenderPipelineBase* pipeline) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(pipeline));
@@ -203,18 +203,20 @@ namespace dawn_native {
         });
     }
 
-    void RenderEncoderBase::SetIndexBufferWithFormat(BufferBase* buffer, wgpu::IndexFormat format,
-                                                     uint64_t offset, uint64_t size) {
+    void RenderEncoderBase::APISetIndexBufferWithFormat(BufferBase* buffer,
+                                                        wgpu::IndexFormat format,
+                                                        uint64_t offset,
+                                                        uint64_t size) {
         GetDevice()->EmitDeprecationWarning(
             "RenderEncoderBase::SetIndexBufferWithFormat is deprecated. Use "
             "RenderEncoderBase::SetIndexBuffer instead.");
-        SetIndexBuffer(buffer, format, offset, size);
+        APISetIndexBuffer(buffer, format, offset, size);
     }
 
-    void RenderEncoderBase::SetIndexBuffer(BufferBase* buffer,
-                                           wgpu::IndexFormat format,
-                                           uint64_t offset,
-                                           uint64_t size) {
+    void RenderEncoderBase::APISetIndexBuffer(BufferBase* buffer,
+                                              wgpu::IndexFormat format,
+                                              uint64_t offset,
+                                              uint64_t size) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(buffer));
@@ -259,10 +261,10 @@ namespace dawn_native {
         });
     }
 
-    void RenderEncoderBase::SetVertexBuffer(uint32_t slot,
-                                            BufferBase* buffer,
-                                            uint64_t offset,
-                                            uint64_t size) {
+    void RenderEncoderBase::APISetVertexBuffer(uint32_t slot,
+                                               BufferBase* buffer,
+                                               uint64_t offset,
+                                               uint64_t size) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(buffer));

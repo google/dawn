@@ -37,12 +37,12 @@ namespace dawn_native {
         static SwapChainBase* MakeError(DeviceBase* device);
 
         // Dawn API
-        virtual void Configure(wgpu::TextureFormat format,
-                               wgpu::TextureUsage allowedUsage,
-                               uint32_t width,
-                               uint32_t height) = 0;
-        virtual TextureViewBase* GetCurrentTextureView() = 0;
-        virtual void Present() = 0;
+        virtual void APIConfigure(wgpu::TextureFormat format,
+                                  wgpu::TextureUsage allowedUsage,
+                                  uint32_t width,
+                                  uint32_t height) = 0;
+        virtual TextureViewBase* APIGetCurrentTextureView() = 0;
+        virtual void APIPresent() = 0;
 
       protected:
         SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag);
@@ -57,12 +57,12 @@ namespace dawn_native {
         static SwapChainBase* MakeError(DeviceBase* device);
 
         // Dawn API
-        void Configure(wgpu::TextureFormat format,
-                       wgpu::TextureUsage allowedUsage,
-                       uint32_t width,
-                       uint32_t height) override;
-        TextureViewBase* GetCurrentTextureView() override;
-        void Present() override;
+        void APIConfigure(wgpu::TextureFormat format,
+                          wgpu::TextureUsage allowedUsage,
+                          uint32_t width,
+                          uint32_t height) override;
+        TextureViewBase* APIGetCurrentTextureView() override;
+        void APIPresent() override;
 
       protected:
         ~OldSwapChainBase() override;
@@ -114,12 +114,12 @@ namespace dawn_native {
         void SetIsAttached();
 
         // Dawn API
-        void Configure(wgpu::TextureFormat format,
-                       wgpu::TextureUsage allowedUsage,
-                       uint32_t width,
-                       uint32_t height) override;
-        TextureViewBase* GetCurrentTextureView() override;
-        void Present() override;
+        void APIConfigure(wgpu::TextureFormat format,
+                          wgpu::TextureUsage allowedUsage,
+                          uint32_t width,
+                          uint32_t height) override;
+        TextureViewBase* APIGetCurrentTextureView() override;
+        void APIPresent() override;
 
         uint32_t GetWidth() const;
         uint32_t GetHeight() const;

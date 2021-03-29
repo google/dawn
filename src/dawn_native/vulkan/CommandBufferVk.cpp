@@ -465,7 +465,9 @@ namespace dawn_native { namespace vulkan {
         tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
 
         Device* device = ToBackend(GetDevice());
-        Ref<Buffer> tempBuffer = AcquireRef(ToBackend(device->CreateBuffer(&tempBufferDescriptor)));
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        Ref<Buffer> tempBuffer =
+            AcquireRef(ToBackend(device->APICreateBuffer(&tempBufferDescriptor)));
 
         BufferCopy tempBufferCopy;
         tempBufferCopy.buffer = tempBuffer.Get();

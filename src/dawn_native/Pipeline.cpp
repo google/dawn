@@ -125,7 +125,7 @@ namespace dawn_native {
         return {};
     }
 
-    BindGroupLayoutBase* PipelineBase::GetBindGroupLayout(uint32_t groupIndexIn) {
+    BindGroupLayoutBase* PipelineBase::APIGetBindGroupLayout(uint32_t groupIndexIn) {
         if (GetDevice()->ConsumedError(ValidateGetBindGroupLayout(groupIndexIn))) {
             return BindGroupLayoutBase::MakeError(GetDevice());
         }

@@ -325,7 +325,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInPendingAndMultipleSubmits) {
 
     // Ensure switched-over heaps can be recycled by advancing the GPU by at-least |kFrameDepth|.
     for (uint32_t i = 0; i < kFrameDepth; i++) {
-        mD3DDevice->Tick();
+        mD3DDevice->APITick();
     }
 
     // Switch-over |kNumOfSwitches| again reusing the same heaps.
@@ -359,7 +359,7 @@ TEST_P(D3D12DescriptorHeapTests, GrowHeapsInMultipleSubmits) {
         ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
         heaps.insert(heap);
-        mD3DDevice->Tick();
+        mD3DDevice->APITick();
     }
 
     // Verify the number of switches equals the size of heaps allocated (minus the initial).
@@ -416,7 +416,7 @@ TEST_P(D3D12DescriptorHeapTests, GrowAndPoolHeapsInPendingAndMultipleSubmits) {
 
     // Ensure switched-over heaps can be recycled by advancing the GPU by at-least |kFrameDepth|.
     for (uint32_t i = 0; i < kFrameDepth; i++) {
-        mD3DDevice->Tick();
+        mD3DDevice->APITick();
     }
 
     // Switch-over the pool-allocated heaps.

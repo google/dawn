@@ -496,7 +496,7 @@ namespace dawn_native { namespace vulkan {
             // TODO(cwallez@chromium.org): Find a way to reuse the blit texture between frames
             // instead of creating a new one every time. This will involve "un-destroying" the
             // texture or making the blit texture "external".
-            mBlitTexture->Destroy();
+            mBlitTexture->APIDestroy();
             mBlitTexture = nullptr;
         }
 
@@ -523,7 +523,7 @@ namespace dawn_native { namespace vulkan {
         presentInfo.pResults = nullptr;
 
         // Free the texture before present so error handling doesn't skip that step.
-        mTexture->Destroy();
+        mTexture->APIDestroy();
         mTexture = nullptr;
 
         VkResult result =
@@ -620,7 +620,8 @@ namespace dawn_native { namespace vulkan {
 
         // In the happy path we can use the swapchain image directly.
         if (!mConfig.needsBlit) {
-            return mTexture->CreateView();
+            // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+            return mTexture->APICreateView();
         }
 
         // The blit texture always perfectly matches what the user requested for the swapchain.
@@ -628,17 +629,18 @@ namespace dawn_native { namespace vulkan {
         TextureDescriptor desc = GetSwapChainBaseTextureDescriptor(this);
         DAWN_TRY_ASSIGN(mBlitTexture,
                         Texture::Create(device, &desc, VK_IMAGE_USAGE_TRANSFER_SRC_BIT));
-        return mBlitTexture->CreateView();
+        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
+        return mBlitTexture->APICreateView();
     }
 
     void SwapChain::DetachFromSurfaceImpl() {
         if (mTexture != nullptr) {
-            mTexture->Destroy();
+            mTexture->APIDestroy();
             mTexture = nullptr;
         }
 
         if (mBlitTexture != nullptr) {
-            mBlitTexture->Destroy();
+            mBlitTexture->APIDestroy();
             mBlitTexture = nullptr;
         }
 

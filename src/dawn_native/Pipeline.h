@@ -49,7 +49,7 @@ namespace dawn_native {
         const ProgrammableStage& GetStage(SingleShaderStage stage) const;
         const PerStage<ProgrammableStage>& GetAllStages() const;
 
-        BindGroupLayoutBase* GetBindGroupLayout(uint32_t groupIndex);
+        BindGroupLayoutBase* APIGetBindGroupLayout(uint32_t groupIndex);
 
         // Helper functions for std::unordered_map-based pipeline caches.
         size_t ComputeContentHash() override;

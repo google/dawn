@@ -41,37 +41,37 @@ namespace dawn_native {
         const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
 
         // Dawn API
-        ComputePassEncoder* BeginComputePass(const ComputePassDescriptor* descriptor);
-        RenderPassEncoder* BeginRenderPass(const RenderPassDescriptor* descriptor);
+        ComputePassEncoder* APIBeginComputePass(const ComputePassDescriptor* descriptor);
+        RenderPassEncoder* APIBeginRenderPass(const RenderPassDescriptor* descriptor);
 
-        void CopyBufferToBuffer(BufferBase* source,
-                                uint64_t sourceOffset,
+        void APICopyBufferToBuffer(BufferBase* source,
+                                   uint64_t sourceOffset,
+                                   BufferBase* destination,
+                                   uint64_t destinationOffset,
+                                   uint64_t size);
+        void APICopyBufferToTexture(const ImageCopyBuffer* source,
+                                    const ImageCopyTexture* destination,
+                                    const Extent3D* copySize);
+        void APICopyTextureToBuffer(const ImageCopyTexture* source,
+                                    const ImageCopyBuffer* destination,
+                                    const Extent3D* copySize);
+        void APICopyTextureToTexture(const ImageCopyTexture* source,
+                                     const ImageCopyTexture* destination,
+                                     const Extent3D* copySize);
+
+        void APIInjectValidationError(const char* message);
+        void APIInsertDebugMarker(const char* groupLabel);
+        void APIPopDebugGroup();
+        void APIPushDebugGroup(const char* groupLabel);
+
+        void APIResolveQuerySet(QuerySetBase* querySet,
+                                uint32_t firstQuery,
+                                uint32_t queryCount,
                                 BufferBase* destination,
-                                uint64_t destinationOffset,
-                                uint64_t size);
-        void CopyBufferToTexture(const ImageCopyBuffer* source,
-                                 const ImageCopyTexture* destination,
-                                 const Extent3D* copySize);
-        void CopyTextureToBuffer(const ImageCopyTexture* source,
-                                 const ImageCopyBuffer* destination,
-                                 const Extent3D* copySize);
-        void CopyTextureToTexture(const ImageCopyTexture* source,
-                                  const ImageCopyTexture* destination,
-                                  const Extent3D* copySize);
+                                uint64_t destinationOffset);
+        void APIWriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
 
-        void InjectValidationError(const char* message);
-        void InsertDebugMarker(const char* groupLabel);
-        void PopDebugGroup();
-        void PushDebugGroup(const char* groupLabel);
-
-        void ResolveQuerySet(QuerySetBase* querySet,
-                             uint32_t firstQuery,
-                             uint32_t queryCount,
-                             BufferBase* destination,
-                             uint64_t destinationOffset);
-        void WriteTimestamp(QuerySetBase* querySet, uint32_t queryIndex);
-
-        CommandBufferBase* Finish(const CommandBufferDescriptor* descriptor = nullptr);
+        CommandBufferBase* APIFinish(const CommandBufferDescriptor* descriptor = nullptr);
 
       private:
         MaybeError ValidateFinish(CommandIterator* commands,

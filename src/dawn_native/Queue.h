@@ -37,22 +37,25 @@ namespace dawn_native {
         ~QueueBase() override;
 
         // Dawn API
-        void Submit(uint32_t commandCount, CommandBufferBase* const* commands);
-        void Signal(Fence* fence, uint64_t signalValue);
-        Fence* CreateFence(const FenceDescriptor* descriptor);
-        void OnSubmittedWorkDone(uint64_t signalValue,
-                                 WGPUQueueWorkDoneCallback callback,
-                                 void* userdata);
-        void WriteBuffer(BufferBase* buffer, uint64_t bufferOffset, const void* data, size_t size);
-        void WriteTexture(const ImageCopyTexture* destination,
-                          const void* data,
-                          size_t dataSize,
-                          const TextureDataLayout* dataLayout,
-                          const Extent3D* writeSize);
-        void CopyTextureForBrowser(const ImageCopyTexture* source,
-                                   const ImageCopyTexture* destination,
-                                   const Extent3D* copySize,
-                                   const CopyTextureForBrowserOptions* options);
+        void APISubmit(uint32_t commandCount, CommandBufferBase* const* commands);
+        void APISignal(Fence* fence, uint64_t signalValue);
+        Fence* APICreateFence(const FenceDescriptor* descriptor);
+        void APIOnSubmittedWorkDone(uint64_t signalValue,
+                                    WGPUQueueWorkDoneCallback callback,
+                                    void* userdata);
+        void APIWriteBuffer(BufferBase* buffer,
+                            uint64_t bufferOffset,
+                            const void* data,
+                            size_t size);
+        void APIWriteTexture(const ImageCopyTexture* destination,
+                             const void* data,
+                             size_t dataSize,
+                             const TextureDataLayout* dataLayout,
+                             const Extent3D* writeSize);
+        void APICopyTextureForBrowser(const ImageCopyTexture* source,
+                                      const ImageCopyTexture* destination,
+                                      const Extent3D* copySize,
+                                      const CopyTextureForBrowserOptions* options);
 
         void TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial);
         void Tick(ExecutionSerial finishedSerial);

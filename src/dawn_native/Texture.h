@@ -88,8 +88,8 @@ namespace dawn_native {
                                             const Extent3D& extent) const;
 
         // Dawn API
-        TextureViewBase* CreateView(const TextureViewDescriptor* descriptor = nullptr);
-        void Destroy();
+        TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
+        void APIDestroy();
 
       protected:
         void DestroyInternal();
