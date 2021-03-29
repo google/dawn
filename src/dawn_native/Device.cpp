@@ -176,8 +176,7 @@ namespace dawn_native {
             // Tick the queue-related tasks since they should be complete. This must be done before
             // ShutDownImpl() it may relinquish resources that will be freed by backends in the
             // ShutDownImpl() call.
-            // TODO(dawn:723): do not get a new reference to the Queue.
-            APIGetQueue()->Tick(GetCompletedCommandSerial());
+            mQueue->Tick(GetCompletedCommandSerial());
             // Call TickImpl once last time to clean up resources
             // Ignore errors so that we can continue with destruction
             IgnoreErrors(TickImpl());
@@ -896,8 +895,7 @@ namespace dawn_native {
             // tick the dynamic uploader before the backend resource allocators. This would allow
             // reclaiming resources one tick earlier.
             mDynamicUploader->Deallocate(mCompletedSerial);
-            // TODO(dawn:723): do not get a new reference to the Queue.
-            APIGetQueue()->Tick(mCompletedSerial);
+            mQueue->Tick(mCompletedSerial);
 
             mCreatePipelineAsyncTracker->Tick(mCompletedSerial);
         }
@@ -961,6 +959,10 @@ namespace dawn_native {
         if (mDeprecationWarnings->emitted.insert(warning).second) {
             dawn::WarningLog() << warning;
         }
+    }
+
+    QueueBase* DeviceBase::GetQueue() const {
+        return mQueue.Get();
     }
 
     // Implementation details of object creation

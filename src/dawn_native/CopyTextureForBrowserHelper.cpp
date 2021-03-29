@@ -273,10 +273,9 @@ namespace dawn_native {
         // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
         Ref<BufferBase> uniformBuffer = AcquireRef(device->APICreateBuffer(&uniformDesc));
 
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
         // TODO(dawn:723): propagate any errors from WriteBuffer.
-        device->APIGetQueue()->APIWriteBuffer(uniformBuffer.Get(), 0, uniformData,
-                                              sizeof(uniformData));
+        device->GetQueue()->APIWriteBuffer(uniformBuffer.Get(), 0, uniformData,
+                                           sizeof(uniformData));
 
         // Prepare binding 1 resource: sampler
         // Use default configuration, filterMode set to Nearest for min and mag.
@@ -347,9 +346,7 @@ namespace dawn_native {
         CommandBufferBase* submitCommandBuffer = commandBuffer.Get();
 
         // Submit command buffer.
-        // TODO(dawn:723): do not get a new reference to the Queue.
-        Ref<QueueBase> queue = AcquireRef(device->APIGetQueue());
-        queue->APISubmit(1, &submitCommandBuffer);
+        device->GetQueue()->APISubmit(1, &submitCommandBuffer);
 
         return {};
     }

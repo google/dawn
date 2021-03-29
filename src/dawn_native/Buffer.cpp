@@ -289,9 +289,8 @@ namespace dawn_native {
         }
         std::unique_ptr<MapRequestTask> request =
             std::make_unique<MapRequestTask>(this, mLastMapID);
-        // TODO(dawn:723): do not get a new reference to the Queue.
-        GetDevice()->APIGetQueue()->TrackTask(std::move(request),
-                                              GetDevice()->GetPendingCommandSerial());
+        GetDevice()->GetQueue()->TrackTask(std::move(request),
+                                           GetDevice()->GetPendingCommandSerial());
     }
 
     void* BufferBase::APIGetMappedRange(size_t offset, size_t size) {

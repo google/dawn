@@ -419,10 +419,9 @@ namespace dawn_native {
             // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
             Ref<BufferBase> availabilityBuffer =
                 AcquireRef(device->APICreateBuffer(&availabilityDesc));
-            // TODO(dawn:723): do not get a new reference to the Queue.
             // TODO(dawn:723): propagate any errors from WriteBuffer.
-            device->APIGetQueue()->APIWriteBuffer(availabilityBuffer.Get(), 0, availability.data(),
-                                                  availability.size() * sizeof(uint32_t));
+            device->GetQueue()->APIWriteBuffer(availabilityBuffer.Get(), 0, availability.data(),
+                                               availability.size() * sizeof(uint32_t));
 
             // Timestamp params uniform buffer
             TimestampParams params = {queryCount, static_cast<uint32_t>(destinationOffset),
@@ -432,9 +431,8 @@ namespace dawn_native {
             parmsDesc.size = sizeof(params);
             // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
             Ref<BufferBase> paramsBuffer = AcquireRef(device->APICreateBuffer(&parmsDesc));
-            // TODO(dawn:723): do not get a new reference to the Queue.
             // TODO(dawn:723): propagate any errors from WriteBuffer.
-            device->APIGetQueue()->APIWriteBuffer(paramsBuffer.Get(), 0, &params, sizeof(params));
+            device->GetQueue()->APIWriteBuffer(paramsBuffer.Get(), 0, &params, sizeof(params));
 
             EncodeConvertTimestampsToNanoseconds(encoder, destination, availabilityBuffer.Get(),
                                                  paramsBuffer.Get());

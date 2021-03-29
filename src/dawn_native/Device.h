@@ -229,6 +229,7 @@ namespace dawn_native {
         size_t GetDeprecationWarningCountForTesting();
         void EmitDeprecationWarning(const char* warning);
         void APILoseForTesting();
+        QueueBase* GetQueue() const;
 
         // AddFutureSerial is used to update the mFutureSerial with the max serial needed to be
         // ticked in order to clean up all pending callback work or to execute asynchronous resource
