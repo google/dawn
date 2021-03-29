@@ -45,6 +45,19 @@ Variable::Variable(Variable&&) = default;
 
 Variable::~Variable() = default;
 
+Variable::BindingPoint Variable::binding_point() const {
+  GroupDecoration* group = nullptr;
+  BindingDecoration* binding = nullptr;
+  for (auto* deco : decorations()) {
+    if (auto* g = deco->As<GroupDecoration>()) {
+      group = g;
+    } else if (auto* b = deco->As<BindingDecoration>()) {
+      binding = b;
+    }
+  }
+  return BindingPoint{group, binding};
+}
+
 bool Variable::HasLocationDecoration() const {
   for (auto* deco : decorations_) {
     if (deco->Is<LocationDecoration>()) {

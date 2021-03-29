@@ -25,6 +25,8 @@
 namespace tint {
 namespace ast {
 
+class BindingDecoration;
+class GroupDecoration;
 class LocationDecoration;
 
 /// A Variable statement.
@@ -76,6 +78,18 @@ class LocationDecoration;
 /// The storage class for a formal parameter is always StorageClass::kNone.
 class Variable : public Castable<Variable, Node> {
  public:
+  /// BindingPoint holds a group and binding decoration.
+  struct BindingPoint {
+    /// The `[[group]]` part of the binding point
+    GroupDecoration* group = nullptr;
+    /// The `[[binding]]` part of the binding point
+    BindingDecoration* binding = nullptr;
+
+    /// @returns true if the BindingPoint has a valid group and binding
+    /// decoration.
+    inline operator bool() const { return group && binding; }
+  };
+
   /// Create a variable
   /// @param source the variable source
   /// @param sym the variable symbol
@@ -116,6 +130,9 @@ class Variable : public Castable<Variable, Node> {
 
   /// @returns the decorations attached to this variable
   const DecorationList& decorations() const { return decorations_; }
+
+  /// @returns the binding point information for the variable
+  BindingPoint binding_point() const;
 
   /// @returns true if the decorations include a LocationDecoration
   bool HasLocationDecoration() const;

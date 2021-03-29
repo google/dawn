@@ -38,21 +38,6 @@ ParameterList GetParameters(ast::Function* ast) {
   return parameters;
 }
 
-std::tuple<ast::BindingDecoration*, ast::GroupDecoration*> GetBindingAndGroup(
-    const Variable* var) {
-  ast::BindingDecoration* binding = nullptr;
-  ast::GroupDecoration* group = nullptr;
-  for (auto* deco : var->Declaration()->decorations()) {
-    if (auto* b = deco->As<ast::BindingDecoration>()) {
-      binding = b;
-    }
-    if (auto* s = deco->As<ast::GroupDecoration>()) {
-      group = s;
-    }
-  }
-  return {binding, group};
-}
-
 }  // namespace
 
 Function::Function(ast::Function* declaration,
@@ -92,14 +77,9 @@ Function::VariableBindings Function::ReferencedUniformVariables() const {
       continue;
     }
 
-    ast::BindingDecoration* binding = nullptr;
-    ast::GroupDecoration* group = nullptr;
-    std::tie(binding, group) = GetBindingAndGroup(var);
-    if (binding == nullptr || group == nullptr) {
-      continue;
+    if (auto binding_point = var->Declaration()->binding_point()) {
+      ret.push_back({var, binding_point});
     }
-
-    ret.push_back({var, BindingInfo{binding, group}});
   }
   return ret;
 }
@@ -112,14 +92,9 @@ Function::VariableBindings Function::ReferencedStorageBufferVariables() const {
       continue;
     }
 
-    ast::BindingDecoration* binding = nullptr;
-    ast::GroupDecoration* group = nullptr;
-    std::tie(binding, group) = GetBindingAndGroup(var);
-    if (binding == nullptr || group == nullptr) {
-      continue;
+    if (auto binding_point = var->Declaration()->binding_point()) {
+      ret.push_back({var, binding_point});
     }
-
-    ret.push_back({var, BindingInfo{binding, group}});
   }
   return ret;
 }
@@ -168,14 +143,9 @@ Function::VariableBindings Function::ReferencedStorageTextureVariables() const {
       continue;
     }
 
-    ast::BindingDecoration* binding = nullptr;
-    ast::GroupDecoration* group = nullptr;
-    std::tie(binding, group) = GetBindingAndGroup(var);
-    if (binding == nullptr || group == nullptr) {
-      continue;
+    if (auto binding_point = var->Declaration()->binding_point()) {
+      ret.push_back({var, binding_point});
     }
-
-    ret.push_back({var, BindingInfo{binding, group}});
   }
   return ret;
 }
@@ -191,14 +161,9 @@ Function::VariableBindings Function::ReferencedDepthTextureVariables() const {
       continue;
     }
 
-    ast::BindingDecoration* binding = nullptr;
-    ast::GroupDecoration* group = nullptr;
-    std::tie(binding, group) = GetBindingAndGroup(var);
-    if (binding == nullptr || group == nullptr) {
-      continue;
+    if (auto binding_point = var->Declaration()->binding_point()) {
+      ret.push_back({var, binding_point});
     }
-
-    ret.push_back({var, BindingInfo{binding, group}});
   }
   return ret;
 }
@@ -239,14 +204,9 @@ Function::VariableBindings Function::ReferencedSamplerVariablesImpl(
       continue;
     }
 
-    ast::BindingDecoration* binding = nullptr;
-    ast::GroupDecoration* group = nullptr;
-    std::tie(binding, group) = GetBindingAndGroup(var);
-    if (binding == nullptr || group == nullptr) {
-      continue;
+    if (auto binding_point = var->Declaration()->binding_point()) {
+      ret.push_back({var, binding_point});
     }
-
-    ret.push_back({var, BindingInfo{binding, group}});
   }
   return ret;
 }
@@ -270,14 +230,9 @@ Function::VariableBindings Function::ReferencedSampledTextureVariablesImpl(
       continue;
     }
 
-    ast::BindingDecoration* binding = nullptr;
-    ast::GroupDecoration* group = nullptr;
-    std::tie(binding, group) = GetBindingAndGroup(var);
-    if (binding == nullptr || group == nullptr) {
-      continue;
+    if (auto binding_point = var->Declaration()->binding_point()) {
+      ret.push_back({var, binding_point});
     }
-
-    ret.push_back({var, BindingInfo{binding, group}});
   }
 
   return ret;

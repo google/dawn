@@ -18,6 +18,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/variable.h"
 #include "src/semantic/call_target.h"
 
 namespace tint {
@@ -39,16 +40,9 @@ class Variable;
 /// Function holds the semantic information for function nodes.
 class Function : public Castable<Function, CallTarget> {
  public:
-  /// Information about a binding
-  struct BindingInfo {
-    /// The binding decoration
-    ast::BindingDecoration* binding = nullptr;
-    /// The group decoration
-    ast::GroupDecoration* group = nullptr;
-  };
-
-  /// A vector of [Variable*, BindingInfo] pairs
-  using VariableBindings = std::vector<std::pair<const Variable*, BindingInfo>>;
+  /// A vector of [Variable*, ast::Variable::BindingPoint] pairs
+  using VariableBindings =
+      std::vector<std::pair<const Variable*, ast::Variable::BindingPoint>>;
 
   /// Constructor
   /// @param declaration the ast::Function

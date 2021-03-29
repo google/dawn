@@ -107,6 +107,47 @@ TEST_F(VariableTest, WithDecorations) {
   EXPECT_EQ(1u, location->value());
 }
 
+TEST_F(VariableTest, BindingPoint) {
+  auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
+                  DecorationList{
+                      create<BindingDecoration>(2),
+                      create<GroupDecoration>(1),
+                  });
+  EXPECT_TRUE(var->binding_point());
+  ASSERT_NE(var->binding_point().binding, nullptr);
+  ASSERT_NE(var->binding_point().group, nullptr);
+  EXPECT_EQ(var->binding_point().binding->value(), 2u);
+  EXPECT_EQ(var->binding_point().group->value(), 1u);
+}
+
+TEST_F(VariableTest, BindingPointoDecorations) {
+  auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
+                  DecorationList{});
+  EXPECT_FALSE(var->binding_point());
+  EXPECT_EQ(var->binding_point().group, nullptr);
+  EXPECT_EQ(var->binding_point().binding, nullptr);
+}
+
+TEST_F(VariableTest, BindingPointMissingGroupDecoration) {
+  auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
+                  DecorationList{
+                      create<BindingDecoration>(2),
+                  });
+  EXPECT_FALSE(var->binding_point());
+  ASSERT_NE(var->binding_point().binding, nullptr);
+  EXPECT_EQ(var->binding_point().binding->value(), 2u);
+  EXPECT_EQ(var->binding_point().group, nullptr);
+}
+
+TEST_F(VariableTest, BindingPointMissingBindingDecoration) {
+  auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
+                  DecorationList{create<GroupDecoration>(1)});
+  EXPECT_FALSE(var->binding_point());
+  ASSERT_NE(var->binding_point().group, nullptr);
+  EXPECT_EQ(var->binding_point().group->value(), 1u);
+  EXPECT_EQ(var->binding_point().binding, nullptr);
+}
+
 TEST_F(VariableTest, ConstantId) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
                   DecorationList{
