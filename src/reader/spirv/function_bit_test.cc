@@ -437,9 +437,7 @@ INSTANTIATE_TEST_SUITE_P(
           }
         }
       }
-    })"}
-
-        ));
+    })"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_BitwiseOr,
@@ -560,9 +558,7 @@ INSTANTIATE_TEST_SUITE_P(
           }
         }
       }
-    })"}
-
-        ));
+    })"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_BitwiseXor,
@@ -684,9 +680,7 @@ INSTANTIATE_TEST_SUITE_P(
           }
         }
       }
-    })"}
-
-        ));
+    })"}));
 
 TEST_F(SpvUnaryBitTest, Not_Int_Int) {
   const auto assembly = CommonTypes() + R"(

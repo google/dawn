@@ -648,9 +648,7 @@ INSTANTIATE_TEST_SUITE_P(
           }
         }
       }
-    })"}
-
-        ));
+    })"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_FAdd,
@@ -783,9 +781,7 @@ INSTANTIATE_TEST_SUITE_P(
           }
         }
       }
-    })"}
-
-        ));
+    })"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_FSub,
@@ -918,9 +914,7 @@ INSTANTIATE_TEST_SUITE_P(
           }
         }
       }
-    })"}
-
-        ));
+    })"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_FMul,
