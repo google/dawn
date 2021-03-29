@@ -42,8 +42,9 @@ class Manager : public Transform {
 
   /// Runs the transforms on `program`, returning the transformation result.
   /// @param program the source program to transform
+  /// @param data optional extra transform-specific input data
   /// @returns the transformed program and diagnostics
-  Output Run(const Program* program) override;
+  Output Run(const Program* program, const DataMap& data = {}) override;
 
  private:
   std::vector<std::unique_ptr<Transform>> transforms_;

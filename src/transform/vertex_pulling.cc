@@ -40,7 +40,7 @@ VertexPulling::VertexPulling(const Config& config) : cfg(config) {}
 
 VertexPulling::~VertexPulling() = default;
 
-Transform::Output VertexPulling::Run(const Program* in) {
+Transform::Output VertexPulling::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
 
   // Find entry point

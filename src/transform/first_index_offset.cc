@@ -67,7 +67,7 @@ FirstIndexOffset::FirstIndexOffset(uint32_t binding, uint32_t group)
 
 FirstIndexOffset::~FirstIndexOffset() = default;
 
-Transform::Output FirstIndexOffset::Run(const Program* in) {
+Transform::Output FirstIndexOffset::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
 
   // First do a quick check to see if the transform has already been applied.
@@ -190,7 +190,6 @@ ast::Variable* FirstIndexOffset::State::AddUniformBuffer() {
           dst->create<ast::BindingDecoration>(Source{}, binding),
           dst->create<ast::GroupDecoration>(Source{}, group),
       });
-
 
   dst->AST().AddConstructedType(struct_type);
 

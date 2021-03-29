@@ -29,7 +29,7 @@ namespace transform {
 Hlsl::Hlsl() = default;
 Hlsl::~Hlsl() = default;
 
-Transform::Output Hlsl::Run(const Program* in) {
+Transform::Output Hlsl::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
   PromoteArrayInitializerToConstVar(ctx);

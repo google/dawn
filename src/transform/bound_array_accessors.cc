@@ -26,7 +26,7 @@ namespace transform {
 BoundArrayAccessors::BoundArrayAccessors() = default;
 BoundArrayAccessors::~BoundArrayAccessors() = default;
 
-Transform::Output BoundArrayAccessors::Run(const Program* in) {
+Transform::Output BoundArrayAccessors::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
   ctx.ReplaceAll([&](ast::ArrayAccessorExpression* expr) {

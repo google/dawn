@@ -29,7 +29,7 @@ namespace transform {
 Spirv::Spirv() = default;
 Spirv::~Spirv() = default;
 
-Transform::Output Spirv::Run(const Program* in) {
+Transform::Output Spirv::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
   HandleEntryPointIOTypes(ctx);

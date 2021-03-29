@@ -60,6 +60,7 @@ namespace transform {
 ///
 class FirstIndexOffset : public Transform {
  public:
+  /// Data is outputted by the FirstIndexOffset transform.
   /// Data holds information about shader usage and constant buffer offsets.
   struct Data : public Castable<Data, transform::Data> {
     /// Constructor
@@ -96,8 +97,9 @@ class FirstIndexOffset : public Transform {
 
   /// Runs the transform on `program`, returning the transformation result.
   /// @param program the source program to transform
+  /// @param data optional extra transform-specific input data
   /// @returns the transformation result
-  Output Run(const Program* program) override;
+  Output Run(const Program* program, const DataMap& data = {}) override;
 
  private:
   struct State {

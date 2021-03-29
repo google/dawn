@@ -39,7 +39,7 @@ Renamer::Renamer(const Config& config) : cfg_(config) {}
 
 Renamer::~Renamer() = default;
 
-Transform::Output Renamer::Run(const Program* in) {
+Transform::Output Renamer::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
 

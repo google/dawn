@@ -24,8 +24,8 @@
 namespace tint {
 namespace transform {
 
-/// Data is the base class for transforms that emit extra output information
-/// along with a Program.
+/// Data is the base class for transforms that accept extra input or emit extra
+/// output information along with a Program.
 class Data : public Castable<Data> {
  public:
   /// Constructor
@@ -65,6 +65,14 @@ class DataMap {
     static_assert(std::is_base_of<Data, T>::value,
                   "T does not derive from Data");
     map_[&TypeInfo::Of<T>()] = std::move(data);
+  }
+
+  /// Creates the data of type `T` with the provided arguments and adds it into
+  /// DataMap keyed by the ClassID of type T.
+  /// @param args the arguments forwarded to the constructor for type T
+  template <typename T, typename... ARGS>
+  void Add(ARGS&&... args) {
+    Put(std::make_unique<T>(std::forward<ARGS>(args)...));
   }
 
   /// @returns a pointer to the Data placed into the DataMap with a call to
@@ -137,8 +145,9 @@ class Transform {
 
   /// Runs the transform on `program`, returning the transformation result.
   /// @param program the source program to transform
+  /// @param data optional extra transform-specific input data
   /// @returns the transformation result
-  virtual Output Run(const Program* program) = 0;
+  virtual Output Run(const Program* program, const DataMap& data = {}) = 0;
 
  protected:
   /// Clones the function `in` adding `statements` to the beginning of the

@@ -30,7 +30,7 @@ const char kPointSizeVar[] = "tint_pointsize";
 EmitVertexPointSize::EmitVertexPointSize() = default;
 EmitVertexPointSize::~EmitVertexPointSize() = default;
 
-Transform::Output EmitVertexPointSize::Run(const Program* in) {
+Transform::Output EmitVertexPointSize::Run(const Program* in, const DataMap&) {
   if (!in->AST().Functions().HasStage(ast::PipelineStage::kVertex)) {
     // If the module doesn't have any vertex stages, then there's nothing to do.
     return Output(Program(in->Clone()));

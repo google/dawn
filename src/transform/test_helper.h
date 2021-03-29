@@ -36,10 +36,12 @@ class TransformTestBase : public BASE {
   /// `transforms`.
   /// @param in the input WGSL source
   /// @param transforms the list of transforms to apply
+  /// @param data the optional DataMap to pass to Transform::Run()
   /// @return the transformed output
   Transform::Output Run(
       std::string in,
-      std::vector<std::unique_ptr<transform::Transform>> transforms) {
+      std::vector<std::unique_ptr<transform::Transform>> transforms,
+      DataMap data = {}) {
     auto file = std::make_unique<Source::File>("test", in);
     auto program = reader::wgsl::Parse(file.get());
 
@@ -54,30 +56,31 @@ class TransformTestBase : public BASE {
     for (auto& transform : transforms) {
       manager.append(std::move(transform));
     }
-    return manager.Run(&program);
+    return manager.Run(&program, data);
   }
 
   /// Transforms and returns the WGSL source `in`, transformed using
   /// `transform`.
   /// @param transform the transform to apply
   /// @param in the input WGSL source
+  /// @param data the optional DataMap to pass to Transform::Run()
   /// @return the transformed output
   Transform::Output Run(std::string in,
-                        std::unique_ptr<transform::Transform> transform) {
+                        std::unique_ptr<transform::Transform> transform,
+                        DataMap data = {}) {
     std::vector<std::unique_ptr<transform::Transform>> transforms;
     transforms.emplace_back(std::move(transform));
-    return Run(std::move(in), std::move(transforms));
+    return Run(std::move(in), std::move(transforms), std::move(data));
   }
 
   /// Transforms and returns the WGSL source `in`, transformed using
   /// a transform of type `TRANSFORM`.
   /// @param in the input WGSL source
-  /// @param args the TRANSFORM constructor arguments
+  /// @param data the optional DataMap to pass to Transform::Run()
   /// @return the transformed output
-  template <typename TRANSFORM, typename... ARGS>
-  Transform::Output Run(std::string in, ARGS&&... args) {
-    return Run(std::move(in),
-               std::make_unique<TRANSFORM>(std::forward<ARGS>(args)...));
+  template <typename TRANSFORM>
+  Transform::Output Run(std::string in, DataMap data = {}) {
+    return Run(std::move(in), std::make_unique<TRANSFORM>(), std::move(data));
   }
 
   /// @param output the output of the transform
