@@ -17,27 +17,37 @@
                 "isDefault": true
             },
             "type": "shell",
-            "command": "sh",
             "osx": {
+                "command": "sh",
                 "args": [
                     "-c",
                     "cmake --build . && echo Done"
-                ]
+                ],
+                "options": {
+                    "cwd": "${workspaceRoot}/build",
+                },
             },
             "linux": {
+                "command": "sh",
                 "args": [
                     "-c",
                     "cmake --build . && echo Done"
-                ]
+                ],
+                "options": {
+                    "cwd": "${workspaceRoot}/build",
+                },
             },
             "windows": {
+                // Invokes ninja in the 'out/active' directory, which is created
+                // with the 'generate' task (see below).
+                "command": "cmd",
                 "args": [
-                    "-c",
-                    "cmake --build . && echo Done"
-                ]
-            },
-            "options": {
-                "cwd": "${workspaceRoot}/build",
+                    "/C",
+                    "ninja && echo Done"
+                ],
+                "options": {
+                    "cwd": "${workspaceRoot}/out/active",
+                },
             },
             "presentation": {
                 "echo": false,
@@ -61,16 +71,40 @@
             }
         },
         {
-            "label": "cmake",
+            "label": "configure",
             "type": "shell",
-            "command": "cmake",
-            "args": [
-                "..",
-                "-GNinja",
-                "-DCMAKE_BUILD_TYPE=${input:buildType}",
-            ],
-            "options": {
-                "cwd": "${workspaceRoot}/build"
+            "osx": {
+                "command": "cmake",
+                "args": [
+                    "..",
+                    "-GNinja",
+                    "-DCMAKE_BUILD_TYPE=${input:buildType}",
+                ],
+                "options": {
+                    "cwd": "${workspaceRoot}/build"
+                },
+            },
+            "linux": {
+                "command": "cmake",
+                "args": [
+                    "..",
+                    "-GNinja",
+                    "-DCMAKE_BUILD_TYPE=${input:buildType}",
+                ],
+                "options": {
+                    "cwd": "${workspaceRoot}/build"
+                },
+            },
+            "windows": {
+                // Generates a GN build directory at 'out/<build-type>' with the
+                // is_debug argument set to to true iff the build-type is Debug.
+                // A symbolic link to this build directory is created at 'out/active'
+                // which is used to track the active build directory.
+                "command": "cmd",
+                "args": [
+                    "/C",
+                    "(IF \"${input:buildType}\" == \"Debug\" ( gn gen 'out\\${input:buildType}' --args=is_debug=true ) ELSE ( gn gen 'out\\${input:buildType}' --args=is_debug=false )) && (IF EXIST 'out\\active' rmdir 'out\\active' /q /s) && (mklink /j 'out\\active' 'out\\${input:buildType}')",
+                ],
             },
             "problemMatcher": [],
         },
