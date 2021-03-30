@@ -199,6 +199,48 @@ namespace dawn_native { namespace d3d12 {
 
         ScopedTintICEHandler scopedICEHandler(GetDevice());
 
+        using BindingRemapper = tint::transform::BindingRemapper;
+        using BindingPoint = tint::transform::BindingPoint;
+        BindingRemapper::BindingPoints bindingPoints;
+        BindingRemapper::AccessControls accessControls;
+
+        const EntryPointMetadata::BindingInfoArray& moduleBindingInfo =
+            GetEntryPoint(entryPointName).bindings;
+
+        // d3d12::BindGroupLayout packs the bindings per HLSL register-space.
+        // We modify the Tint AST to make the "bindings" decoration match the
+        // offset chosen by d3d12::BindGroupLayout so that Tint produces HLSL
+        // with the correct registers assigned to each interface variable.
+        for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
+            const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
+            const auto& bindingOffsets = bgl->GetBindingOffsets();
+            const auto& groupBindingInfo = moduleBindingInfo[group];
+            for (const auto& it : groupBindingInfo) {
+                BindingNumber binding = it.first;
+                auto const& bindingInfo = it.second;
+                BindingIndex bindingIndex = bgl->GetBindingIndex(binding);
+                uint32_t bindingOffset = bindingOffsets[bindingIndex];
+                BindingPoint srcBindingPoint{static_cast<uint32_t>(group),
+                                             static_cast<uint32_t>(binding)};
+                BindingPoint dstBindingPoint{static_cast<uint32_t>(group), bindingOffset};
+                if (srcBindingPoint != dstBindingPoint) {
+                    bindingPoints.emplace(srcBindingPoint, dstBindingPoint);
+                }
+
+                // Declaring a read-only storage buffer in HLSL but specifying a
+                // storage buffer in the BGL produces the wrong output.
+                // Force read-only storage buffer bindings to be treated as UAV
+                // instead of SRV.
+                const bool forceStorageBufferAsUAV =
+                    (bindingInfo.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage &&
+                     bgl->GetBindingInfo(bindingIndex).buffer.type ==
+                         wgpu::BufferBindingType::Storage);
+                if (forceStorageBufferAsUAV) {
+                    accessControls.emplace(srcBindingPoint, tint::ast::AccessControl::kReadWrite);
+                }
+            }
+        }
+
         std::ostringstream errorStream;
         errorStream << "Tint HLSL failure:" << std::endl;
 
@@ -209,10 +251,15 @@ namespace dawn_native { namespace d3d12 {
                 layout->GetFirstIndexOffsetShaderRegister(),
                 layout->GetFirstIndexOffsetRegisterSpace()));
         }
+        transformManager.append(std::make_unique<tint::transform::BindingRemapper>());
         transformManager.append(std::make_unique<tint::transform::Renamer>());
         transformManager.append(std::make_unique<tint::transform::Hlsl>());
 
-        tint::transform::Transform::Output output = transformManager.Run(GetTintProgram());
+        tint::transform::DataMap transformInputs;
+        transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
+                                                         std::move(accessControls));
+        tint::transform::Transform::Output output =
+            transformManager.Run(GetTintProgram(), transformInputs);
 
         tint::Program& program = output.program;
         if (!program.IsValid()) {
