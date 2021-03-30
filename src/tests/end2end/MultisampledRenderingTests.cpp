@@ -23,6 +23,9 @@ class MultisampledRenderingTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        // TODO(crbug.com/dawn/738): Test output is wrong with D3D12 + WARP.
+        DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+
         InitTexturesForTest();
     }
 
