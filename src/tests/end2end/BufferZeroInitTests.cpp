@@ -1186,6 +1186,9 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
 
 // Test the buffer will be lazily initialized correctly when its first use is in resolveQuerySet
 TEST_P(BufferZeroInitTest, ResolveQuerySet) {
+    // TODO(crbug.com/tint/682): error: runtime array not supported yet
+    DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
+
     // Timestamp query is not supported on OpenGL
     DAWN_SKIP_TEST_IF(IsOpenGL());
 

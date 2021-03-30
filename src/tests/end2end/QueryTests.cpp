@@ -314,6 +314,9 @@ class TimestampQueryTests : public QueryTests {
     void SetUp() override {
         DawnTest::SetUp();
 
+        // TODO(crbug.com/tint/682): error: runtime array not supported yet
+        DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
+
         // Skip all tests if timestamp extension is not supported
         DAWN_SKIP_TEST_IF(!SupportsExtensions({"timestamp_query"}));
     }
