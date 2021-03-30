@@ -478,6 +478,10 @@ TEST_P(D3D12SharedHandleUsageTests, ClearInD3D11ReadbackInD3D12) {
 // 2. Wrap it in a Dawn texture and clear it to a different color
 // 3. Readback the texture with D3D11 and ensure we receive the color we cleared with Dawn.
 TEST_P(D3D12SharedHandleUsageTests, ClearInD3D12ReadbackInD3D11) {
+    // TODO(crbug.com/dawn/735): This test appears to hang for
+    // D3D12_Microsoft_Basic_Render_Driver_CPU when validation is enabled.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP() && IsBackendValidationEnabled());
+
     DAWN_SKIP_TEST_IF(UsesWire());
 
     const wgpu::Color d3d11ClearColor{1.0f, 1.0f, 0.0f, 1.0f};
