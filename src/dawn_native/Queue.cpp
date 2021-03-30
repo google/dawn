@@ -223,10 +223,20 @@ namespace dawn_native {
     }
 
     void QueueBase::Tick(ExecutionSerial finishedSerial) {
+        // If a user calls Queue::Submit inside a task, for example in a Buffer::MapAsync callback,
+        // then the device will be ticked, which in turns ticks the queue, causing reentrance here.
+        // To prevent the reentrant call from invalidating mTasksInFlight while in use by the first
+        // call, we remove the tasks to finish from the queue, update mTasksInFlight, then run the
+        // callbacks.
+        std::vector<std::unique_ptr<TaskInFlight>> tasks;
         for (auto& task : mTasksInFlight.IterateUpTo(finishedSerial)) {
-            task->Finish();
+            tasks.push_back(std::move(task));
         }
         mTasksInFlight.ClearUpTo(finishedSerial);
+
+        for (auto& task : tasks) {
+            task->Finish();
+        }
     }
 
     void QueueBase::HandleDeviceLoss() {

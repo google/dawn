@@ -334,7 +334,13 @@ namespace dawn_native { namespace null {
     }
 
     MaybeError Queue::SubmitImpl(uint32_t, CommandBufferBase* const*) {
-        ToBackend(GetDevice())->SubmitPendingOperations();
+        Device* device = ToBackend(GetDevice());
+
+        // The Vulkan, D3D12 and Metal implementation all tick the device here,
+        // for testing purposes we should also tick in the null implementation.
+        DAWN_TRY(device->Tick());
+
+        device->SubmitPendingOperations();
         return {};
     }
 

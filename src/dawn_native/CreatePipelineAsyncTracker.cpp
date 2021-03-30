@@ -98,10 +98,20 @@ namespace dawn_native {
     }
 
     void CreatePipelineAsyncTracker::Tick(ExecutionSerial finishedSerial) {
+        // If a user calls Queue::Submit inside Create*PipelineAsync, then the device will be
+        // ticked, which in turns ticks the tracker, causing reentrance here. To prevent the
+        // reentrant call from invalidating mCreatePipelineAsyncTasksInFlight while in use by the
+        // first call, we remove the tasks to finish from the queue, update
+        // mCreatePipelineAsyncTasksInFlight, then run the callbacks.
+        std::vector<std::unique_ptr<CreatePipelineAsyncTaskBase>> tasks;
         for (auto& task : mCreatePipelineAsyncTasksInFlight.IterateUpTo(finishedSerial)) {
-            task->Finish(WGPUCreatePipelineAsyncStatus_Success);
+            tasks.push_back(std::move(task));
         }
         mCreatePipelineAsyncTasksInFlight.ClearUpTo(finishedSerial);
+
+        for (auto& task : tasks) {
+            task->Finish(WGPUCreatePipelineAsyncStatus_Success);
+        }
     }
 
     void CreatePipelineAsyncTracker::ClearForShutDown() {
