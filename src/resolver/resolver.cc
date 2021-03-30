@@ -248,6 +248,15 @@ bool Resolver::ValidateFunction(const ast::Function* func) {
   }
 
   for (auto* param : func->params()) {
+    if (!ApplyStorageClassUsageToType(param->declared_storage_class(),
+                                      param->declared_type(),
+                                      param->source())) {
+      diagnostics_.add_note("while instantiating parameter " +
+                                builder_->Symbols().NameFor(param->symbol()),
+                            param->source());
+      return false;
+    }
+
     if (!ValidateParameter(param)) {
       return false;
     }

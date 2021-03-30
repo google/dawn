@@ -36,6 +36,19 @@ TEST_F(ResolverStorageClassUseTest, UnreachableStruct) {
   EXPECT_TRUE(sem->StorageClassUsage().empty());
 }
 
+TEST_F(ResolverStorageClassUseTest, StructReachableFromParameter) {
+  auto* s = Structure("S", {Member("a", ty.f32())});
+
+  Func("f", {Var("param", s, ast::StorageClass::kNone)}, ty.void_(), {}, {});
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* sem = Sem().Get(s);
+  ASSERT_NE(sem, nullptr);
+  EXPECT_THAT(sem->StorageClassUsage(),
+              UnorderedElementsAre(ast::StorageClass::kNone));
+}
+
 TEST_F(ResolverStorageClassUseTest, StructReachableFromGlobal) {
   auto* s = Structure("S", {Member("a", ty.f32())});
 
