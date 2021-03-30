@@ -268,6 +268,8 @@ class SamplerFilterAnisotropicTest : public DawnTest {
 };
 
 TEST_P(SamplerFilterAnisotropicTest, SlantedPlaneMipmap) {
+    // TODO(crbug.com/tint/691): shader compiles, but output is unexpected
+    DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
     // TODO(crbug.com/dawn/740): Test output is wrong with D3D12 + WARP.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
 
