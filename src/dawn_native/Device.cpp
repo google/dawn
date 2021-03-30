@@ -870,18 +870,22 @@ namespace dawn_native {
 
     // Returns true if future ticking is needed.
     bool DeviceBase::APITick() {
-        if (ConsumedError(ValidateIsAlive())) {
+        if (ConsumedError(Tick())) {
             return false;
         }
+        return !IsDeviceIdle();
+    }
+
+    MaybeError DeviceBase::Tick() {
+        DAWN_TRY(ValidateIsAlive());
+
         // to avoid overly ticking, we only want to tick when:
         // 1. the last submitted serial has moved beyond the completed serial
         // 2. or the completed serial has not reached the future serial set by the trackers
         if (mLastSubmittedSerial > mCompletedSerial || mCompletedSerial < mFutureSerial) {
             CheckPassedSerials();
 
-            if (ConsumedError(TickImpl())) {
-                return false;
-            }
+            DAWN_TRY(TickImpl());
 
             // There is no GPU work in flight, we need to move the serials forward so that
             // so that CPU operations waiting on GPU completion can know they don't have to wait.
@@ -900,7 +904,7 @@ namespace dawn_native {
             mCreatePipelineAsyncTracker->Tick(mCompletedSerial);
         }
 
-        return !IsDeviceIdle();
+        return {};
     }
 
     QueueBase* DeviceBase::APIGetQueue() {

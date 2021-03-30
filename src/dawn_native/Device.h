@@ -89,7 +89,6 @@ namespace dawn_native {
         ExecutionSerial GetLastSubmittedCommandSerial() const;
         ExecutionSerial GetFutureSerial() const;
         ExecutionSerial GetPendingCommandSerial() const;
-        virtual MaybeError TickImpl() = 0;
 
         // Many Dawn objects are completely immutable once created which means that if two
         // creations are given the same arguments, they can return the same object. Reusing
@@ -242,6 +241,8 @@ namespace dawn_native {
         // Check for passed fences and set the new completed serial
         void CheckPassedSerials();
 
+        MaybeError Tick();
+
         virtual uint32_t GetOptimalBytesPerRowAlignment() const = 0;
         virtual uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const = 0;
 
@@ -289,6 +290,8 @@ namespace dawn_native {
         virtual ResultOrError<TextureViewBase*> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) = 0;
+
+        virtual MaybeError TickImpl() = 0;
 
         ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
 
