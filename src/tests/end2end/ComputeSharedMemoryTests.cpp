@@ -22,6 +22,13 @@ class ComputeSharedMemoryTests : public DawnTest {
   public:
     static constexpr uint32_t kInstances = 11;
 
+    void SetUp() override {
+        DawnTest::SetUp();
+
+        // TODO(crbug.com/tint/688): error: undeclared identifier '_tint_7'
+        DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
+    }
+
     void BasicTest(const char* shader);
 };
 
