@@ -28,7 +28,9 @@
 #include "src/semantic/struct.h"
 #include "src/semantic/variable.h"
 #include "src/type/access_control_type.h"
+#include "src/type/depth_texture_type.h"
 #include "src/type/multisampled_texture_type.h"
+#include "src/type/sampled_texture_type.h"
 #include "src/type/storage_texture_type.h"
 #include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
@@ -978,9 +980,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       break;
     case semantic::IntrinsicType::kTextureLoad:
       out << ".Load(";
-      if (!texture_type->Is<type::StorageTexture>()) {
-        pack_mip_in_coords = true;
-      }
+      pack_mip_in_coords = true;
       break;
     case semantic::IntrinsicType::kTextureStore:
       out << "[";
@@ -1781,8 +1781,7 @@ bool GeneratorImpl::EmitEntryPointData(
       auto* decl = var->Declaration();
 
       auto* unwrapped_type = var->Type()->UnwrapAll();
-      if (!unwrapped_type->Is<type::Texture>() &&
-          !unwrapped_type->Is<type::Sampler>()) {
+      if (!unwrapped_type->IsAnyOf<type::Texture, type::Sampler>()) {
         continue;  // Not interested in this type
       }
 
@@ -1793,8 +1792,32 @@ bool GeneratorImpl::EmitEntryPointData(
       if (!EmitType(out, var->Type(), "")) {
         return false;
       }
-      out << " " << namer_.NameFor(builder_.Symbols().NameFor(decl->symbol()))
-          << ";" << std::endl;
+      out << " " << namer_.NameFor(builder_.Symbols().NameFor(decl->symbol()));
+
+      const char* register_space = nullptr;
+
+      if (unwrapped_type->Is<type::Texture>()) {
+        register_space = "t";
+        if (unwrapped_type->Is<type::StorageTexture>()) {
+          if (auto* ac = var->Type()
+                             ->UnwrapAliasIfNeeded()
+                             ->As<type::AccessControl>()) {
+            if (!ac->IsReadOnly()) {
+              register_space = "u";
+            }
+          }
+        }
+      } else if (unwrapped_type->Is<type::Sampler>()) {
+        register_space = "s";
+      }
+
+      if (register_space) {
+        auto bp = decl->binding_point();
+        out << " : register(" << register_space << bp.binding->value()
+            << ", space" << bp.group->value() << ")";
+      }
+
+      out << ";" << std::endl;
 
       add_newline = true;
     }
@@ -2448,10 +2471,9 @@ bool GeneratorImpl::EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt) {
 bool GeneratorImpl::EmitType(std::ostream& out,
                              type::Type* type,
                              const std::string& name) {
-  // HLSL doesn't have the read/write only markings so just unwrap the access
-  // control type.
-  if (auto* ac = type->As<type::AccessControl>()) {
-    return EmitType(out, ac->type(), name);
+  auto* access = type->As<type::AccessControl>();
+  if (access) {
+    type = access->type();
   }
 
   if (auto* alias = type->As<type::Alias>()) {
@@ -2505,7 +2527,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     out << builder_.Symbols().NameFor(str->symbol());
   } else if (auto* tex = type->As<type::Texture>()) {
     if (tex->Is<type::StorageTexture>()) {
-      out << "RW";
+      if (access && !access->IsReadOnly()) {
+        out << "RW";
+      }
     }
     out << "Texture";
 
