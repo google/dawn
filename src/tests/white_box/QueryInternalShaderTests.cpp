@@ -86,6 +86,9 @@ class QueryInternalShaderTests : public DawnTest {};
 //   timestamp period (here use GPU frequency (HZ) on Intel D3D12 to calculate the period in
 //   ns for testing).
 TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
+    // TODO(crbug.com/dawn/741): Test output is wrong with D3D12 + WARP.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+
     DAWN_SKIP_TEST_IF(UsesWire());
 
     constexpr uint32_t kTimestampCount = 10u;
