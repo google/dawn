@@ -948,6 +948,9 @@ TEST_P(BindGroupTests, DynamicBindingNoneVisibility) {
 
 // Test that bind group bindings may have unbounded and arbitrary binding numbers
 TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
+    // TODO(crbug.com/dawn/736): Test output is wrong with D3D12 + WARP.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
