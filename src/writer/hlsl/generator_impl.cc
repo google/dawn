@@ -1781,12 +1781,14 @@ bool GeneratorImpl::EmitEntryPointData(
       auto* decl = var->Declaration();
 
       auto* unwrapped_type = var->Type()->UnwrapAll();
-      if (!unwrapped_type->IsAnyOf<type::Texture, type::Sampler>()) {
-        continue;  // Not interested in this type
-      }
-
       if (!emitted_globals.emplace(decl->symbol()).second) {
         continue;  // Global already emitted
+      }
+
+      if (var->StorageClass() == ast::StorageClass::kWorkgroup) {
+        out << "groupshared ";
+      } else if (!unwrapped_type->IsAnyOf<type::Texture, type::Sampler>()) {
+        continue;  // Not interested in this type
       }
 
       if (!EmitType(out, var->Type(), "")) {

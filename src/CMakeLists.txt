@@ -805,6 +805,7 @@ if(${TINT_BUILD_TESTS})
       writer/hlsl/generator_impl_type_test.cc
       writer/hlsl/generator_impl_unary_op_test.cc
       writer/hlsl/generator_impl_variable_decl_statement_test.cc
+      writer/hlsl/generator_impl_workgroup_var_test.cc
       writer/hlsl/namer_test.cc
       writer/hlsl/test_helper.cc
       writer/hlsl/test_helper.h
