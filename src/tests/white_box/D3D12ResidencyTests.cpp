@@ -330,6 +330,10 @@ TEST_P(D3D12ResourceResidencyTests, SetExternalReservation) {
 // Checks that when a descriptor heap is bound, it is locked resident. Also checks that when a
 // previous descriptor heap becomes unbound, it is unlocked, placed in the LRU and can be evicted.
 TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
+    // TODO(crbug.com/dawn/739):
+    // unknown file: error: SEH exception with code 0x87d thrown in the test body.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP() && IsBackendValidationEnabled());
+
     utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
 
     // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a
