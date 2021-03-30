@@ -30,6 +30,10 @@ class ColorStateTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        // TODO(crbug.com/dawn/489): D3D12_Microsoft_Basic_Render_Driver_CPU
+        // produces invalid results for these tests.
+        DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+
         vsModule = utils::CreateShaderModule(device, R"(
                 [[builtin(vertex_index)]] var<in> VertexIndex : u32;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
