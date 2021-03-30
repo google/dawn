@@ -2610,8 +2610,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
       out << " " << namer_.NameFor(builder_.Symbols().NameFor(mem->symbol()));
     }
 
-    if (mem->decorations().size() > 0) {
-      auto* deco = mem->decorations()[0];
+    for (auto* deco : mem->decorations()) {
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         out << " : TEXCOORD" << location->value();
       } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
@@ -2621,11 +2620,6 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
           return false;
         }
         out << " : " << attr;
-      } else if (deco->Is<ast::StructMemberOffsetDecoration>()) {
-        // Nothing to do, offsets are handled at the point of access.
-      } else {
-        diagnostics_.add_error("unsupported struct member decoration");
-        return false;
       }
     }
 
