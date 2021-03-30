@@ -95,6 +95,13 @@ std::ostream& operator<<(std::ostream& s, const RegisterAndSpace& rs) {
   return s;
 }
 
+// Helper for writting a '(' on construction and a ')' destruction.
+struct ScopedParen {
+  std::ostream& s_;
+  explicit ScopedParen(std::ostream& s) : s_(s) { s << "("; }
+  ~ScopedParen() { s_ << ")"; }
+};
+
 }  // namespace
 
 GeneratorImpl::GeneratorImpl(const Program* program)
@@ -2185,6 +2192,10 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
       out << "asint(";
     } else if (result_type->is_unsigned_scalar_or_vector()) {
       out << "asuint(";
+    } else {
+      TINT_UNIMPLEMENTED(diagnostics_)
+          << result_type->FriendlyName(builder_.Symbols());
+      return false;
     }
   }
 
@@ -2229,8 +2240,8 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
       return true;
     }
 
-    out << "uint" << mat->rows() << "x" << mat->columns() << "(";
-
+    out << "uint" << mat->rows() << "x" << mat->columns();
+    ScopedParen p(out);
     for (uint32_t i = 0; i < mat->columns(); i++) {
       if (i != 0) {
         out << ", ";
@@ -2239,29 +2250,22 @@ bool GeneratorImpl::EmitStorageBufferAccessor(std::ostream& pre,
       out << buffer_name << "." << access_method << "(" << idx << " + "
           << (i * stride) << ")";
     }
-
-    // Close the matrix type and outer cast
-    out << "))";
-
-    return true;
-  }
-
-  out << buffer_name << "." << access_method << "(" << idx;
-  if (is_store) {
-    out << ", asuint(";
-    if (!EmitExpression(pre, out, rhs)) {
-      return false;
+  } else {
+    out << buffer_name << "." << access_method;
+    ScopedParen p(out);
+    out << idx;
+    if (is_store) {
+      out << ", asuint";
+      ScopedParen p2(out);
+      if (!EmitExpression(pre, out, rhs)) {
+        return false;
+      }
     }
-    out << ")";
   }
 
-  out << ")";
-
-  // Close the outer cast.
   if (!is_store) {
     out << ")";
   }
-
   return true;
 }
 
