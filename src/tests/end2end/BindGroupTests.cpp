@@ -130,6 +130,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
         [[group(0), binding(0)]] var <uniform> contents: Contents;
 
         [[stage(compute)]] fn main() -> void {
+          var f : f32 = contents.f;
         })");
 
     wgpu::ComputePipelineDescriptor cpDesc;

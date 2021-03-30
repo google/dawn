@@ -159,7 +159,8 @@ namespace dawn_native {
             }
         }
 
-        SingleShaderStage PipelineStateToShaderStage(tint::ast::PipelineStage stage) {
+        ResultOrError<SingleShaderStage> TintPipelineStageToShaderStage(
+            tint::ast::PipelineStage stage) {
             switch (stage) {
                 case tint::ast::PipelineStage::kVertex:
                     return SingleShaderStage::Vertex;
@@ -167,8 +168,140 @@ namespace dawn_native {
                     return SingleShaderStage::Fragment;
                 case tint::ast::PipelineStage::kCompute:
                     return SingleShaderStage::Compute;
-                default:
+                case tint::ast::PipelineStage::kNone:
                     UNREACHABLE();
+            }
+        }
+
+        BindingInfoType TintResourceTypeToBindingInfoType(
+            tint::inspector::ResourceBinding::ResourceType type) {
+            switch (type) {
+                case tint::inspector::ResourceBinding::ResourceType::kUniformBuffer:
+                case tint::inspector::ResourceBinding::ResourceType::kStorageBuffer:
+                case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageBuffer:
+                    return BindingInfoType::Buffer;
+                case tint::inspector::ResourceBinding::ResourceType::kSampler:
+                case tint::inspector::ResourceBinding::ResourceType::kComparisonSampler:
+                    return BindingInfoType::Sampler;
+                case tint::inspector::ResourceBinding::ResourceType::kSampledTexture:
+                case tint::inspector::ResourceBinding::ResourceType::kMultisampledTexture:
+                case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
+                    return BindingInfoType::Texture;
+                case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
+                case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
+                    return BindingInfoType::StorageTexture;
+            }
+        }
+
+        wgpu::TextureFormat TintImageFormatToTextureFormat(
+            tint::inspector::ResourceBinding::ImageFormat format) {
+            switch (format) {
+                case tint::inspector::ResourceBinding::ImageFormat::kR8Unorm:
+                    return wgpu::TextureFormat::R8Unorm;
+                case tint::inspector::ResourceBinding::ImageFormat::kR8Snorm:
+                    return wgpu::TextureFormat::R8Snorm;
+                case tint::inspector::ResourceBinding::ImageFormat::kR8Uint:
+                    return wgpu::TextureFormat::R8Uint;
+                case tint::inspector::ResourceBinding::ImageFormat::kR8Sint:
+                    return wgpu::TextureFormat::R8Sint;
+                case tint::inspector::ResourceBinding::ImageFormat::kR16Uint:
+                    return wgpu::TextureFormat::R16Uint;
+                case tint::inspector::ResourceBinding::ImageFormat::kR16Sint:
+                    return wgpu::TextureFormat::R16Sint;
+                case tint::inspector::ResourceBinding::ImageFormat::kR16Float:
+                    return wgpu::TextureFormat::R16Float;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg8Unorm:
+                    return wgpu::TextureFormat::RG8Unorm;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg8Snorm:
+                    return wgpu::TextureFormat::RG8Snorm;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg8Uint:
+                    return wgpu::TextureFormat::RG8Uint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg8Sint:
+                    return wgpu::TextureFormat::RG8Sint;
+                case tint::inspector::ResourceBinding::ImageFormat::kR32Uint:
+                    return wgpu::TextureFormat::R32Uint;
+                case tint::inspector::ResourceBinding::ImageFormat::kR32Sint:
+                    return wgpu::TextureFormat::R32Sint;
+                case tint::inspector::ResourceBinding::ImageFormat::kR32Float:
+                    return wgpu::TextureFormat::R32Float;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg16Uint:
+                    return wgpu::TextureFormat::RG16Uint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg16Sint:
+                    return wgpu::TextureFormat::RG16Sint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg16Float:
+                    return wgpu::TextureFormat::RG16Float;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba8Unorm:
+                    return wgpu::TextureFormat::RGBA8Unorm;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba8UnormSrgb:
+                    return wgpu::TextureFormat::RGBA8UnormSrgb;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba8Snorm:
+                    return wgpu::TextureFormat::RGBA8Snorm;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba8Uint:
+                    return wgpu::TextureFormat::RGBA8Uint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba8Sint:
+                    return wgpu::TextureFormat::RGBA8Sint;
+                case tint::inspector::ResourceBinding::ImageFormat::kBgra8Unorm:
+                    return wgpu::TextureFormat::BGRA8Unorm;
+                case tint::inspector::ResourceBinding::ImageFormat::kBgra8UnormSrgb:
+                    return wgpu::TextureFormat::BGRA8UnormSrgb;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgb10A2Unorm:
+                    return wgpu::TextureFormat::RGB10A2Unorm;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg11B10Float:
+                    return wgpu::TextureFormat::RG11B10Ufloat;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg32Uint:
+                    return wgpu::TextureFormat::RG32Uint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg32Sint:
+                    return wgpu::TextureFormat::RG32Sint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRg32Float:
+                    return wgpu::TextureFormat::RG32Float;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba16Uint:
+                    return wgpu::TextureFormat::RGBA16Uint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba16Sint:
+                    return wgpu::TextureFormat::RGBA16Sint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba16Float:
+                    return wgpu::TextureFormat::RGBA16Float;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba32Uint:
+                    return wgpu::TextureFormat::RGBA32Uint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba32Sint:
+                    return wgpu::TextureFormat::RGBA32Sint;
+                case tint::inspector::ResourceBinding::ImageFormat::kRgba32Float:
+                    return wgpu::TextureFormat::RGBA32Float;
+                case tint::inspector::ResourceBinding::ImageFormat::kNone:
+                    return wgpu::TextureFormat::Undefined;
+            }
+        }
+
+        wgpu::TextureViewDimension TintTextureDimensionToTextureViewDimension(
+            tint::inspector::ResourceBinding::TextureDimension dim) {
+            switch (dim) {
+                case tint::inspector::ResourceBinding::TextureDimension::k1d:
+                    return wgpu::TextureViewDimension::e1D;
+                case tint::inspector::ResourceBinding::TextureDimension::k2d:
+                    return wgpu::TextureViewDimension::e2D;
+                case tint::inspector::ResourceBinding::TextureDimension::k2dArray:
+                    return wgpu::TextureViewDimension::e2DArray;
+                case tint::inspector::ResourceBinding::TextureDimension::k3d:
+                    return wgpu::TextureViewDimension::e3D;
+                case tint::inspector::ResourceBinding::TextureDimension::kCube:
+                    return wgpu::TextureViewDimension::Cube;
+                case tint::inspector::ResourceBinding::TextureDimension::kCubeArray:
+                    return wgpu::TextureViewDimension::CubeArray;
+                case tint::inspector::ResourceBinding::TextureDimension::kNone:
+                    return wgpu::TextureViewDimension::Undefined;
+            }
+        }
+
+        wgpu::TextureSampleType TintSampledKindToTextureSampleType(
+            tint::inspector::ResourceBinding::SampledKind s) {
+            switch (s) {
+                case tint::inspector::ResourceBinding::SampledKind::kSInt:
+                    return wgpu::TextureSampleType::Sint;
+                case tint::inspector::ResourceBinding::SampledKind::kUInt:
+                    return wgpu::TextureSampleType::Uint;
+                case tint::inspector::ResourceBinding::SampledKind::kFloat:
+                    return wgpu::TextureSampleType::Float;
+                case tint::inspector::ResourceBinding::SampledKind::kUnknown:
+                    return wgpu::TextureSampleType::Undefined;
             }
         }
 
@@ -181,12 +314,37 @@ namespace dawn_native {
                     return wgpu::TextureComponentType::Sint;
                 case tint::inspector::ComponentType::kUInt:
                     return wgpu::TextureComponentType::Uint;
-                default:
-                    break;
+                case tint::inspector::ComponentType::kUnknown:
+                    return DAWN_VALIDATION_ERROR(
+                        "Attempted to convert 'Unknown' component type from Tint");
             }
+        }
 
-            return DAWN_VALIDATION_ERROR(
-                "Attempted to convert unexpected component type from Tint");
+        ResultOrError<wgpu::BufferBindingType> TintResourceTypeToBufferBindingType(
+            tint::inspector::ResourceBinding::ResourceType resource_type) {
+            switch (resource_type) {
+                case tint::inspector::ResourceBinding::ResourceType::kUniformBuffer:
+                    return wgpu::BufferBindingType::Uniform;
+                case tint::inspector::ResourceBinding::ResourceType::kStorageBuffer:
+                    return wgpu::BufferBindingType::Storage;
+                case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageBuffer:
+                    return wgpu::BufferBindingType::ReadOnlyStorage;
+                default:
+                    return DAWN_VALIDATION_ERROR("Attempted to convert non-buffer resource type");
+            }
+        }
+
+        ResultOrError<wgpu::StorageTextureAccess> TintResourceTypeToStorageTextureAccess(
+            tint::inspector::ResourceBinding::ResourceType resource_type) {
+            switch (resource_type) {
+                case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
+                    return wgpu::StorageTextureAccess::ReadOnly;
+                case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
+                    return wgpu::StorageTextureAccess::WriteOnly;
+                default:
+                    return DAWN_VALIDATION_ERROR(
+                        "Attempted to convert non-storage texture resource type");
+            }
         }
 
         MaybeError ValidateSpirv(const uint32_t* code, uint32_t codeSize) {
@@ -741,8 +899,7 @@ namespace dawn_native {
 
                 auto metadata = std::make_unique<EntryPointMetadata>();
 
-                metadata->stage = PipelineStateToShaderStage(entryPoint.stage);
-
+                DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));
                 if (metadata->stage == SingleShaderStage::Vertex) {
                     for (auto& stage_input : entryPoint.input_variables) {
                         if (!stage_input.has_location_decoration) {
@@ -824,6 +981,61 @@ namespace dawn_native {
                     }
                 }
 
+                for (auto& resource : inspector.GetResourceBindings(entryPoint.name)) {
+                    BindingNumber bindingNumber(resource.binding);
+                    BindGroupIndex bindGroupIndex(resource.bind_group);
+                    if (bindGroupIndex >= kMaxBindGroupsTyped) {
+                        return DAWN_VALIDATION_ERROR("Shader has bind group index over limits");
+                    }
+
+                    const auto& it = metadata->bindings[bindGroupIndex].emplace(
+                        bindingNumber, EntryPointMetadata::ShaderBindingInfo{});
+                    if (!it.second) {
+                        return DAWN_VALIDATION_ERROR("Shader has duplicate bindings");
+                    }
+
+                    EntryPointMetadata::ShaderBindingInfo* info = &it.first->second;
+                    info->bindingType = TintResourceTypeToBindingInfoType(resource.resource_type);
+
+                    switch (info->bindingType) {
+                        case BindingInfoType::Buffer:
+                            info->buffer.minBindingSize = resource.size_no_padding;
+                            DAWN_TRY_ASSIGN(info->buffer.type, TintResourceTypeToBufferBindingType(
+                                                                   resource.resource_type));
+                            break;
+                        case BindingInfoType::Sampler:
+                            info->sampler.type = wgpu::SamplerBindingType::Filtering;
+                            break;
+                        case BindingInfoType::Texture:
+                            info->texture.viewDimension =
+                                TintTextureDimensionToTextureViewDimension(resource.dim);
+                            if (resource.resource_type ==
+                                tint::inspector::ResourceBinding::ResourceType::kDepthTexture) {
+                                info->texture.sampleType = wgpu::TextureSampleType::Depth;
+                            } else {
+                                info->texture.sampleType =
+                                    TintSampledKindToTextureSampleType(resource.sampled_kind);
+                            }
+                            info->texture.multisampled = resource.resource_type ==
+                                                         tint::inspector::ResourceBinding::
+                                                             ResourceType::kMultisampledTexture;
+
+                            break;
+                        case BindingInfoType::StorageTexture:
+                            DAWN_TRY_ASSIGN(
+                                info->storageTexture.access,
+                                TintResourceTypeToStorageTextureAccess(resource.resource_type));
+                            info->storageTexture.format =
+                                TintImageFormatToTextureFormat(resource.image_format);
+                            info->storageTexture.viewDimension =
+                                TintTextureDimensionToTextureViewDimension(resource.dim);
+
+                            break;
+                        default:
+                            return DAWN_VALIDATION_ERROR("Unknown binding type in Shader");
+                    }
+                }
+
                 result[entryPoint.name] = std::move(metadata);
             }
             return std::move(result);
@@ -865,6 +1077,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR(
                     "Tint and SPIRV-Cross returned different number of entry points");
             }
+
             for (auto& crossMember : crossTable) {
                 auto& name = crossMember.first;
                 auto& crossEntry = crossMember.second;
@@ -919,8 +1132,120 @@ namespace dawn_native {
                     }
                 }
 
-                // TODO(rharrison): Use the Inspector to get this data.
-                tintEntry->bindings = crossEntry->bindings;
+                // SPIRV-Cross does not reduce the list of bindings for a
+                // specific entry point only to those used by the entry point,
+                // so its list will vary from Tint's.
+                // The best that be done for validation is confirmation that all
+                // of the Tint bindings were also found by SPIRV-Cross.
+                //
+                // NOTE: This means that the case where Tint has missed some
+                // bindings cannot be effectively detected here, since there is
+                // no way to distinguish between Tint missing a binding and
+                // SPIRV-Cross including an unuseds binding. Missing bindings
+                // will often cause bind descriptor asserts in SwiftShader.
+                if (tintEntry->bindings.size() > crossEntry->bindings.size()) {
+                    return DAWN_VALIDATION_ERROR(
+                        "SPIRV-Cross returned fewer binding groups than Tint");
+                }
+
+                for (auto idx = BindGroupIndex(0); idx < tintEntry->bindings.size(); idx++) {
+                    auto crossGroup = crossEntry->bindings[idx];
+                    auto& tintGroup = tintEntry->bindings[idx];
+
+                    if (tintGroup.size() > crossGroup.size()) {
+                        return DAWN_VALIDATION_ERROR(
+                            "SPIRV-Cross returned fewer bindings in a group than Tint");
+                    }
+
+                    for (auto& tintIter : tintGroup) {
+                        auto crossIter = crossGroup.find(tintIter.first);
+                        if (crossIter == crossGroup.end()) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Tint returned a binding not found by SPIRV-Cross");
+                        }
+
+                        auto crossInfo = crossIter->second;
+                        auto& tintInfo = tintIter.second;
+
+                        // TODO(https://crbug.com/dawn/743): These values are SPIRV specific and
+                        // only needed when using SPIRV-Cross in the OpenGL backend.
+                        tintInfo.id = crossInfo.id;
+                        tintInfo.base_type_id = crossInfo.base_type_id;
+
+                        if (tintInfo.bindingType != crossInfo.bindingType) {
+                            return DAWN_VALIDATION_ERROR(
+                                "Tint and Dawn disagree about type for a binding");
+                        }
+
+                        if (tintInfo.bindingType == BindingInfoType::Buffer) {
+                            if (tintInfo.buffer.type != crossInfo.buffer.type) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about type for a buffer binding");
+                            }
+
+                            if (tintInfo.buffer.hasDynamicOffset !=
+                                crossInfo.buffer.hasDynamicOffset) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about whether a buffer binding has "
+                                    "dynamic offset");
+                            }
+
+                            if (tintInfo.buffer.minBindingSize != crossInfo.buffer.minBindingSize) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about minimum binding size for a "
+                                    "buffer binding");
+                            }
+                        }
+
+                        if (tintInfo.bindingType == BindingInfoType::Sampler) {
+                            if (tintInfo.sampler.type != crossInfo.sampler.type) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about type for a sampler binding");
+                            }
+                        }
+
+                        if (tintInfo.bindingType == BindingInfoType::Texture) {
+                            if (tintInfo.texture.sampleType != crossInfo.texture.sampleType) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about sample type for a texture "
+                                    "binding");
+                            }
+
+                            if (tintInfo.texture.viewDimension != crossInfo.texture.viewDimension) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about view dimension for a texture "
+                                    "binding");
+                            }
+
+                            if (tintInfo.texture.multisampled != crossInfo.texture.multisampled) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about if texture binding is "
+                                    "multisampled");
+                            }
+                        }
+
+                        if (tintInfo.bindingType == BindingInfoType::StorageTexture) {
+                            if (tintInfo.storageTexture.access != crossInfo.storageTexture.access) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about access to a storage texture "
+                                    "binding");
+                            }
+
+                            if (tintInfo.storageTexture.format != crossInfo.storageTexture.format) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about format for a storage texture "
+                                    "binding");
+                            }
+
+                            if (tintInfo.storageTexture.viewDimension !=
+                                crossInfo.storageTexture.viewDimension) {
+                                return DAWN_VALIDATION_ERROR(
+                                    "Tint and Dawn disagree about view dimension for a storage "
+                                    "texture binding");
+                            }
+                        }
+                    }
+                }
             }
             return {};
         }
