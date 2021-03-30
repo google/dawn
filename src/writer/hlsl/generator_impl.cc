@@ -2590,9 +2590,17 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 bool GeneratorImpl::EmitStructType(std::ostream& out,
                                    const type::Struct* str,
                                    const std::string& name) {
-  // TODO(dsinclair): Block decoration?
-  // if (str->impl()->decoration() != ast::Decoration::kNone) {
-  // }
+  auto* sem_str = builder_.Sem().Get(str);
+
+  auto storage_class_uses = sem_str->StorageClassUsage();
+  if (storage_class_uses.size() ==
+      storage_class_uses.count(ast::StorageClass::kStorage)) {
+    // The only use of the structure is as a storage buffer.
+    // Structures used as storage buffer are read and written to via a
+    // ByteAddressBuffer instead of true structure.
+    return true;
+  }
+
   out << "struct " << name << " {" << std::endl;
 
   increment_indent();

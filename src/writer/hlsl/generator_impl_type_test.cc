@@ -171,6 +171,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
                                Member("a", ty.i32()),
                                Member("b", ty.f32()),
                            });
+  Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
@@ -182,11 +183,25 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 )");
 }
 
+TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
+  Global("g", s, ast::StorageClass::kStorage);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitStructType(out, s, "S")) << gen.error();
+  EXPECT_EQ(result(), "");
+}
+
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
   auto* s = Structure("S", {
                                Member("a", ty.i32()),
                                Member("b", ty.f32()),
                            });
+  Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
@@ -203,6 +218,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
                Member("b", ty.f32()),
                Member("c", ty.f32(), {MemberAlign(128), MemberSize(128)}),
            });
+  Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
@@ -223,6 +239,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
                                Member("double", ty.i32()),
                                Member("float", ty.f32()),
                            });
+  Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
@@ -242,6 +259,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
                           Member("b", ty.f32()),
                       },
                       {create<ast::StructBlockDecoration>()});
+  Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 

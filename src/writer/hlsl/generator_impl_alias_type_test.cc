@@ -42,15 +42,13 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
 }
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
-  auto* str = create<ast::Struct>(
-      ast::StructMemberList{
-          Member("a", ty.f32()),
-          Member("b", ty.i32()),
-      },
-      ast::DecorationList{});
-
-  auto* s = ty.struct_("A", str);
+  auto* s = Structure("A", {
+                               Member("a", ty.f32()),
+                               Member("b", ty.i32()),
+                           });
   auto* alias = ty.alias("B", s);
+  AST().AddConstructedType(alias);
+  Global("g", alias, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
