@@ -514,6 +514,9 @@ TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
     DAWN_SKIP_TEST_IF(!mD3DDevice->IsToggleEnabled(
         dawn_native::Toggle::UseD3D12SmallShaderVisibleHeapForTesting));
 
+    // TODO(crbug.com/dawn/742): Test output is wrong with D3D12 + WARP.
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor(device);
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
