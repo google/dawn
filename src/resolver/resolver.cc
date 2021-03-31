@@ -1220,6 +1220,11 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     }
     auto* rhs_type = TypeOf(ctor);
 
+    // If the variable has no type, infer it from the rhs
+    if (type == nullptr) {
+      type = rhs_type->UnwrapPtrIfNeeded();
+    }
+
     if (!IsValidAssignment(type, rhs_type)) {
       diagnostics_.add_error(
           "variable of type '" + type->FriendlyName(builder_->Symbols()) +

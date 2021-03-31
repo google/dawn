@@ -52,29 +52,6 @@ using u32 = ProgramBuilder::u32;
 using f32 = ProgramBuilder::f32;
 using Op = ast::BinaryOp;
 
-type::Type* ty_bool_(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.bool_();
-}
-type::Type* ty_i32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.i32();
-}
-type::Type* ty_u32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.u32();
-}
-type::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.f32();
-}
-
-template <typename T>
-type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.vec3<T>();
-}
-
-template <typename T>
-type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.mat3x3<T>();
-}
-
 TEST_F(ResolverTest, Stmt_Assign) {
   auto* v = Var("v", ty.f32(), ast::StorageClass::kFunction);
   auto* lhs = Expr("v");
@@ -1014,9 +991,6 @@ TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
 }
 
 namespace ExprBinaryTest {
-
-using create_type_func_ptr =
-    type::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
 
 struct Params {
   ast::BinaryOp op;

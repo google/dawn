@@ -38,7 +38,8 @@ Variable::Variable(const Source& source,
       decorations_(std::move(decorations)),
       declared_storage_class_(declared_storage_class) {
   TINT_ASSERT(symbol_.IsValid());
-  TINT_ASSERT(declared_type_);
+  // no type means we must have a constructor to infer it
+  TINT_ASSERT(declared_type_ || constructor);
 }
 
 Variable::Variable(Variable&&) = default;

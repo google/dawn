@@ -449,12 +449,20 @@ class ProgramBuilder {
                                           type);
     }
 
+    /// @return the tint AST pointer to `type` with the given ast::StorageClass
+    /// @param type the type of the pointer
+    /// @param storage_class the storage class of the pointer
+    type::Pointer* pointer(type::Type* type,
+                           ast::StorageClass storage_class) const {
+      return builder->create<type::Pointer>(type, storage_class);
+    }
+
     /// @return the tint AST pointer to type `T` with the given
     /// ast::StorageClass.
     /// @param storage_class the storage class of the pointer
     template <typename T>
     type::Pointer* pointer(ast::StorageClass storage_class) const {
-      return builder->create<type::Pointer>(Of<T>(), storage_class);
+      return pointer(Of<T>(), storage_class);
     }
 
     /// @param name the struct name
@@ -618,6 +626,17 @@ class ProgramBuilder {
     return create<ast::TypeConstructorExpression>(
         type, ExprList(std::forward<ARGS>(args)...));
   }
+
+  /// Creates a constructor expression that constructs an object of
+  /// `type` filled with `elem_value`. For example,
+  /// ConstructValueFilledWith(ty.mat3x4<float>(), 5) returns a
+  /// TypeConstructorExpression for a Mat3x4 filled with 5.0f values.
+  /// @param type the type to construct
+  /// @param elem_value the initial or element value (for vec and mat) to
+  /// construct with
+  /// @return the constructor expression
+  ast::ConstructorExpression* ConstructValueFilledWith(type::Type* type,
+                                                       int elem_value = 0);
 
   /// @param args the arguments for the vector constructor
   /// @return an `ast::TypeConstructorExpression` of a 2-element vector of type

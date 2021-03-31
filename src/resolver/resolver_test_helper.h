@@ -77,6 +77,38 @@ template <typename T>
 class ResolverTestWithParam : public TestHelper,
                               public testing::TestWithParam<T> {};
 
+inline type::Type* ty_bool_(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.bool_();
+}
+inline type::Type* ty_i32(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.i32();
+}
+inline type::Type* ty_u32(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.u32();
+}
+inline type::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.f32();
+}
+
+template <typename T>
+type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec3<T>();
+}
+
+template <typename T>
+type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat3x3<T>();
+}
+
+using create_type_func_ptr =
+    type::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
+
+template <create_type_func_ptr create_type>
+type::Type* ty_alias(const ProgramBuilder::TypesBuilder& ty) {
+  auto* type = create_type(ty);
+  return ty.alias("alias_" + type->type_name(), type);
+}
+
 }  // namespace resolver
 }  // namespace tint
 

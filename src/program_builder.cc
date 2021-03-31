@@ -81,6 +81,44 @@ type::Type* ProgramBuilder::TypeOf(ast::Expression* expr) const {
   return sem ? sem->Type() : nullptr;
 }
 
+ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
+    type::Type* type,
+    int elem_value) {
+  auto* unwrapped_type = type->UnwrapAliasIfNeeded();
+  if (unwrapped_type->Is<type::Bool>()) {
+    return create<ast::ScalarConstructorExpression>(
+        create<ast::BoolLiteral>(type, elem_value == 0 ? false : true));
+  }
+  if (unwrapped_type->Is<type::I32>()) {
+    return create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
+        type, static_cast<ProgramBuilder::i32>(elem_value)));
+  }
+  if (unwrapped_type->Is<type::U32>()) {
+    return create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
+        type, static_cast<ProgramBuilder::u32>(elem_value)));
+  }
+  if (unwrapped_type->Is<type::F32>()) {
+    return create<ast::ScalarConstructorExpression>(create<ast::FloatLiteral>(
+        type, static_cast<ProgramBuilder::f32>(elem_value)));
+  }
+  if (auto* v = unwrapped_type->As<type::Vector>()) {
+    auto* elem_default_value = ConstructValueFilledWith(v->type(), elem_value);
+    ast::ExpressionList el(v->size());
+    std::fill(el.begin(), el.end(), elem_default_value);
+    return create<ast::TypeConstructorExpression>(type, std::move(el));
+  }
+  if (auto* m = unwrapped_type->As<type::Matrix>()) {
+    auto* col_vec_type = create<type::Vector>(m->type(), m->rows());
+    auto* vec_default_value =
+        ConstructValueFilledWith(col_vec_type, elem_value);
+    ast::ExpressionList el(m->columns());
+    std::fill(el.begin(), el.end(), vec_default_value);
+    return create<ast::TypeConstructorExpression>(type, std::move(el));
+  }
+  TINT_ASSERT(false);
+  return nullptr;
+}
+
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}
 
 ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(ast::Variable* v) {
