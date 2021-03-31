@@ -707,7 +707,7 @@ TEST_P(BufferTests, ZeroSizedBuffer) {
 
 // Test that creating a very large buffers fails gracefully.
 TEST_P(BufferTests, CreateBufferOOM) {
-    // TODO(http://crbug.com/dawn/27): Missing support.
+    // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     DAWN_SKIP_TEST_IF(IsAsan());
@@ -725,7 +725,7 @@ TEST_P(BufferTests, CreateBufferOOM) {
 
 // Test that a very large buffer mappedAtCreation fails gracefully.
 TEST_P(BufferTests, BufferMappedAtCreationOOM) {
-    // TODO(http://crbug.com/dawn/27): Missing support.
+    // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     DAWN_SKIP_TEST_IF(IsAsan());
@@ -771,7 +771,7 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM) {
 
 // Test that mapping an OOM buffer fails gracefully
 TEST_P(BufferTests, CreateBufferOOMMapAsync) {
-    // TODO(http://crbug.com/dawn/27): Missing support.
+    // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_SKIP_TEST_IF(IsOpenGL());
     DAWN_SKIP_TEST_IF(IsOpenGLES());
     DAWN_SKIP_TEST_IF(IsAsan());
