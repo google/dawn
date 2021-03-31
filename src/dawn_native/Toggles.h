@@ -50,7 +50,6 @@ namespace dawn_native {
         DisallowUnsafeAPIs,
         UseTintGenerator,
         FlushBeforeClientWaitSync,
-        ConvertTimestampsToNanoseconds,
         UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
 
         EnumCount,

@@ -167,12 +167,6 @@ namespace dawn_native {
              {"flush_before_client_wait_sync",
               "Call glFlush before glClientWaitSync to work around bugs in the latter",
               "https://crbug.com/dawn/633"}},
-            {Toggle::ConvertTimestampsToNanoseconds,
-             {"convert_timestamps_to_nanoseconds",
-              "If needed, use a compute shader to transform timestamp queries from ticks to "
-              "nanoseconds. This is temporarily needed to avoid requiring Tint to use timestamp "
-              "queries",
-              "https://crbug.com/dawn/686"}},
             {Toggle::UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
              {"use_temp_buffer_in_small_format_texture_to_texture_copy_from_greater_to_less_mip_"
               "level",
