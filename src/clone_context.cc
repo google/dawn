@@ -20,6 +20,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::Cloneable);
 
 namespace tint {
 
+CloneContext::ListTransforms::ListTransforms() = default;
+CloneContext::ListTransforms::~ListTransforms() = default;
+
 CloneContext::CloneContext(ProgramBuilder* to, Program const* from)
     : dst(to), src(from) {}
 CloneContext::~CloneContext() = default;

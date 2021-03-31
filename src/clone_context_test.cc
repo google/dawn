@@ -287,9 +287,10 @@ TEST(CloneContext, CloneWithInsertBefore) {
   ProgramBuilder cloned;
   auto* insertion = cloned.create<Node>(cloned.Symbols().Register("insertion"));
 
-  auto* cloned_root = CloneContext(&cloned, &original)
-                          .InsertBefore(original_root->b, insertion)
-                          .Clone(original_root);
+  auto* cloned_root =
+      CloneContext(&cloned, &original)
+          .InsertBefore(original_root->vec, original_root->b, insertion)
+          .Clone(original_root);
 
   EXPECT_EQ(cloned_root->vec.size(), 4u);
   EXPECT_EQ(cloned_root->vec[0], cloned_root->a);
@@ -300,6 +301,36 @@ TEST(CloneContext, CloneWithInsertBefore) {
   EXPECT_EQ(cloned_root->vec[0]->name, cloned.Symbols().Get("a"));
   EXPECT_EQ(cloned_root->vec[1]->name, cloned.Symbols().Get("insertion"));
   EXPECT_EQ(cloned_root->vec[2]->name, cloned.Symbols().Get("b"));
+  EXPECT_EQ(cloned_root->vec[3]->name, cloned.Symbols().Get("c"));
+}
+
+TEST(CloneContext, CloneWithInsertAfter) {
+  ProgramBuilder builder;
+  auto* original_root =
+      builder.create<Node>(builder.Symbols().Register("root"));
+  original_root->a = builder.create<Node>(builder.Symbols().Register("a"));
+  original_root->b = builder.create<Node>(builder.Symbols().Register("b"));
+  original_root->c = builder.create<Node>(builder.Symbols().Register("c"));
+  original_root->vec = {original_root->a, original_root->b, original_root->c};
+  Program original(std::move(builder));
+
+  ProgramBuilder cloned;
+  auto* insertion = cloned.create<Node>(cloned.Symbols().Register("insertion"));
+
+  auto* cloned_root =
+      CloneContext(&cloned, &original)
+          .InsertAfter(original_root->vec, original_root->b, insertion)
+          .Clone(original_root);
+
+  EXPECT_EQ(cloned_root->vec.size(), 4u);
+  EXPECT_EQ(cloned_root->vec[0], cloned_root->a);
+  EXPECT_EQ(cloned_root->vec[1], cloned_root->b);
+  EXPECT_EQ(cloned_root->vec[3], cloned_root->c);
+
+  EXPECT_EQ(cloned_root->name, cloned.Symbols().Get("root"));
+  EXPECT_EQ(cloned_root->vec[0]->name, cloned.Symbols().Get("a"));
+  EXPECT_EQ(cloned_root->vec[1]->name, cloned.Symbols().Get("b"));
+  EXPECT_EQ(cloned_root->vec[2]->name, cloned.Symbols().Get("insertion"));
   EXPECT_EQ(cloned_root->vec[3]->name, cloned.Symbols().Get("c"));
 }
 

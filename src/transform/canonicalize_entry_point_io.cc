@@ -18,6 +18,7 @@
 
 #include "src/program_builder.h"
 #include "src/semantic/function.h"
+#include "src/semantic/statement.h"
 #include "src/semantic/variable.h"
 
 namespace tint {
@@ -119,7 +120,7 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
         // Initialize it with the value extracted from the new struct parameter.
         auto* func_const = ctx.dst->Const(
             func_const_symbol, ctx.Clone(param_ty), func_const_initializer);
-        ctx.InsertBefore(*func->body()->begin(),
+        ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
                          ctx.dst->WrapInStatement(func_const));
 
         // Replace all uses of the function parameter with the function const.
@@ -134,7 +135,7 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
           ctx.dst->Symbols().New(),
           ctx.dst->create<ast::Struct>(new_struct_members,
                                        ast::DecorationList{}));
-      ctx.InsertBefore(func, in_struct);
+      ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, in_struct);
 
       // Create a new function parameter using this struct type.
       auto* struct_param = ctx.dst->Var(new_struct_param_symbol, in_struct,
@@ -177,12 +178,13 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
           ctx.dst->Symbols().New(),
           ctx.dst->create<ast::Struct>(new_struct_members,
                                        ast::DecorationList{}));
-      ctx.InsertBefore(func, out_struct);
+      ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, out_struct);
       new_ret_type = out_struct;
 
       // Replace all return statements.
       auto* sem_func = ctx.src->Sem().Get(func);
       for (auto* ret : sem_func->ReturnStatements()) {
+        auto* ret_sem = ctx.src->Sem().Get(ret);
         // Reconstruct the return value using the newly created struct.
         auto* new_ret_value = ctx.Clone(ret->value());
         ast::ExpressionList ret_values;
@@ -193,7 +195,7 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
             auto temp = ctx.dst->Symbols().New();
             auto* temp_var = ctx.dst->Decl(
                 ctx.dst->Const(temp, ctx.Clone(ret_type), new_ret_value));
-            ctx.InsertBefore(ret, temp_var);
+            ctx.InsertBefore(ret_sem->Block()->statements(), ret, temp_var);
             new_ret_value = ctx.dst->Expr(temp);
           }
 

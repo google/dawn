@@ -96,7 +96,8 @@ void Hlsl::PromoteArrayInitializerToConstVar(CloneContext& ctx) const {
         auto* dst_ident = ctx.dst->Expr(dst_symbol);
 
         // Insert the constant before the usage
-        ctx.InsertBefore(src_stmt, dst_var_decl);
+        ctx.InsertBefore(src_sem_stmt->Block()->statements(), src_stmt,
+                         dst_var_decl);
         // Replace the inlined array with a reference to the constant
         ctx.Replace(src_init, dst_ident);
       }

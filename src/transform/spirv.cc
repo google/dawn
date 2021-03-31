@@ -21,6 +21,7 @@
 #include "src/ast/return_statement.h"
 #include "src/program_builder.h"
 #include "src/semantic/function.h"
+#include "src/semantic/statement.h"
 #include "src/semantic/variable.h"
 
 namespace tint {
@@ -162,13 +163,15 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
           return_func_symbol, ast::VariableList{store_value},
           ctx.dst->ty.void_(), ctx.dst->create<ast::BlockStatement>(stores),
           ast::DecorationList{}, ast::DecorationList{});
-      ctx.InsertBefore(func, return_func);
+      ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, return_func);
 
       // Replace all return statements with calls to the output function.
       auto* sem_func = ctx.src->Sem().Get(func);
       for (auto* ret : sem_func->ReturnStatements()) {
+        auto* ret_sem = ctx.src->Sem().Get(ret);
         auto* call = ctx.dst->Call(return_func_symbol, ctx.Clone(ret->value()));
-        ctx.InsertBefore(ret, ctx.dst->create<ast::CallStatement>(call));
+        ctx.InsertBefore(ret_sem->Block()->statements(), ret,
+                         ctx.dst->create<ast::CallStatement>(call));
         ctx.Replace(ret, ctx.dst->create<ast::ReturnStatement>());
       }
     }
@@ -247,7 +250,7 @@ Symbol Spirv::HoistToInputVariables(
     auto* global_var =
         ctx.dst->Var(global_var_symbol, ctx.Clone(ty),
                      ast::StorageClass::kInput, nullptr, new_decorations);
-    ctx.InsertBefore(func, global_var);
+    ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, global_var);
     return global_var_symbol;
   }
 
@@ -269,7 +272,8 @@ Symbol Spirv::HoistToInputVariables(
   // Create a function-scope variable for the struct.
   auto* initializer = ctx.dst->Construct(ctx.Clone(ty), init_values);
   auto* func_var = ctx.dst->Const(func_var_symbol, ctx.Clone(ty), initializer);
-  ctx.InsertBefore(*func->body()->begin(), ctx.dst->WrapInStatement(func_var));
+  ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
+                   ctx.dst->WrapInStatement(func_var));
   return func_var_symbol;
 }
 
@@ -292,7 +296,7 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
     auto* global_var =
         ctx.dst->Var(global_var_symbol, ctx.Clone(ty),
                      ast::StorageClass::kOutput, nullptr, new_decorations);
-    ctx.InsertBefore(func, global_var);
+    ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, global_var);
 
     // Create the assignment instruction.
     ast::Expression* rhs = ctx.dst->Expr(store_value);

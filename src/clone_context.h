@@ -15,6 +15,7 @@
 #ifndef SRC_CLONE_CONTEXT_H_
 #define SRC_CLONE_CONTEXT_H_
 
+#include <algorithm>
 #include <functional>
 #include <unordered_map>
 #include <utility>
@@ -178,14 +179,29 @@ class CloneContext {
   std::vector<T*> Clone(const std::vector<T*>& v) {
     std::vector<T*> out;
     out.reserve(v.size());
-    for (auto& el : v) {
-      auto it = insert_before_.find(el);
-      if (it != insert_before_.end()) {
-        for (auto insert : it->second) {
-          out.emplace_back(CheckedCast<T>(insert));
+
+    auto list_transform_it = list_transforms_.find(&v);
+    if (list_transform_it != list_transforms_.end()) {
+      const auto& transforms = list_transform_it->second;
+      for (auto& el : v) {
+        auto insert_before_it = transforms.insert_before_.find(el);
+        if (insert_before_it != transforms.insert_before_.end()) {
+          for (auto insert : insert_before_it->second) {
+            out.emplace_back(CheckedCast<T>(insert));
+          }
+        }
+        out.emplace_back(Clone(el));
+        auto insert_after_it = transforms.insert_after_.find(el);
+        if (insert_after_it != transforms.insert_after_.end()) {
+          for (auto insert : insert_after_it->second) {
+            out.emplace_back(CheckedCast<T>(insert));
+          }
         }
       }
-      out.emplace_back(Clone(el));
+    } else {
+      for (auto& el : v) {
+        out.emplace_back(Clone(el));
+      }
     }
     return out;
   }
@@ -293,15 +309,46 @@ class CloneContext {
     return *this;
   }
 
-  /// Inserts `object` before `before` whenever a vector containing `object` is
-  /// cloned.
+  /// Inserts `object` before `before` whenever `vector` is cloned.
+  /// @param vector the vector in #src
   /// @param before a pointer to the object in #src
   /// @param object a pointer to the object in #dst that will be inserted before
   /// any occurrence of the clone of `before`
   /// @returns this CloneContext so calls can be chained
-  template <typename BEFORE, typename OBJECT>
-  CloneContext& InsertBefore(BEFORE* before, OBJECT* object) {
-    auto& list = insert_before_[before];
+  template <typename T, typename BEFORE, typename OBJECT>
+  CloneContext& InsertBefore(const std::vector<T>& vector,
+                             BEFORE* before,
+                             OBJECT* object) {
+    if (std::find(vector.begin(), vector.end(), before) == vector.end()) {
+      TINT_ICE(Diagnostics())
+          << "CloneContext::InsertBefore() vector does not contain before";
+      return *this;
+    }
+
+    auto& transforms = list_transforms_[&vector];
+    auto& list = transforms.insert_before_[before];
+    list.emplace_back(object);
+    return *this;
+  }
+
+  /// Inserts `object` after `after` whenever `vector` is cloned.
+  /// @param vector the vector in #src
+  /// @param after a pointer to the object in #src
+  /// @param object a pointer to the object in #dst that will be inserted after
+  /// any occurrence of the clone of `after`
+  /// @returns this CloneContext so calls can be chained
+  template <typename T, typename AFTER, typename OBJECT>
+  CloneContext& InsertAfter(const std::vector<T>& vector,
+                            AFTER* after,
+                            OBJECT* object) {
+    if (std::find(vector.begin(), vector.end(), after) == vector.end()) {
+      TINT_ICE(Diagnostics())
+          << "CloneContext::InsertAfter() vector does not contain after";
+      return *this;
+    }
+
+    auto& transforms = list_transforms_[&vector];
+    auto& list = transforms.insert_after_[after];
     list.emplace_back(object);
     return *this;
   }
@@ -380,16 +427,32 @@ class CloneContext {
   /// A vector of Cloneable*
   using CloneableList = std::vector<Cloneable*>;
 
+  // Transformations to be applied to a list (vector)
+  struct ListTransforms {
+    /// Constructor
+    ListTransforms();
+    /// Destructor
+    ~ListTransforms();
+
+    /// A map of object in #src to the list of cloned objects in #dst.
+    /// Clone(const std::vector<T*>& v) will use this to insert the map-value
+    /// list into the target vector before cloning and inserting the map-key.
+    std::unordered_map<const Cloneable*, CloneableList> insert_before_;
+
+    /// A map of object in #src to the list of cloned objects in #dst.
+    /// Clone(const std::vector<T*>& v) will use this to insert the map-value
+    /// list into the target vector after cloning and inserting the map-key.
+    std::unordered_map<const Cloneable*, CloneableList> insert_after_;
+  };
+
   /// A map of object in #src to their cloned equivalent in #dst
   std::unordered_map<const Cloneable*, Cloneable*> cloned_;
 
-  /// A map of object in #src to the list of cloned objects in #dst.
-  /// Clone(const std::vector<T*>& v) will use this to insert the map-value list
-  /// into the target vector/ before cloning and inserting the map-key.
-  std::unordered_map<const Cloneable*, CloneableList> insert_before_;
-
   /// Cloneable transform functions registered with ReplaceAll()
   std::vector<CloneableTransform> transforms_;
+
+  /// Map of std::vector pointer to transforms for that list
+  std::unordered_map<const void*, ListTransforms> list_transforms_;
 
   /// Symbol transform registered with ReplaceAll()
   SymbolTransform symbol_transform_;
