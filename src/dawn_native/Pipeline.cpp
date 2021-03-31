@@ -22,18 +22,18 @@
 
 namespace dawn_native {
 
-    MaybeError ValidateProgrammableStageDescriptor(DeviceBase* device,
-                                                   const ProgrammableStageDescriptor* descriptor,
-                                                   const PipelineLayoutBase* layout,
-                                                   SingleShaderStage stage) {
-        const ShaderModuleBase* module = descriptor->module;
+    MaybeError ValidateProgrammableStage(DeviceBase* device,
+                                         const ShaderModuleBase* module,
+                                         const std::string& entryPoint,
+                                         const PipelineLayoutBase* layout,
+                                         SingleShaderStage stage) {
         DAWN_TRY(device->ValidateObject(module));
 
-        if (!module->HasEntryPoint(descriptor->entryPoint)) {
+        if (!module->HasEntryPoint(entryPoint)) {
             return DAWN_VALIDATION_ERROR("Entry point doesn't exist in the module");
         }
 
-        const EntryPointMetadata& metadata = module->GetEntryPoint(descriptor->entryPoint);
+        const EntryPointMetadata& metadata = module->GetEntryPoint(entryPoint);
 
         if (metadata.stage != stage) {
             return DAWN_VALIDATION_ERROR("Entry point isn't for the correct stage");
@@ -56,9 +56,9 @@ namespace dawn_native {
 
         for (const StageAndDescriptor& stage : stages) {
             // Extract argument for this stage.
-            SingleShaderStage shaderStage = stage.first;
-            ShaderModuleBase* module = stage.second->module;
-            const char* entryPointName = stage.second->entryPoint;
+            SingleShaderStage shaderStage = stage.shaderStage;
+            ShaderModuleBase* module = stage.module;
+            const char* entryPointName = stage.entryPoint.c_str();
 
             const EntryPointMetadata& metadata = module->GetEntryPoint(entryPointName);
             ASSERT(metadata.stage == shaderStage);

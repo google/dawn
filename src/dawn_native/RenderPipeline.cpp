@@ -27,11 +27,10 @@ namespace dawn_native {
     // Helper functions
     namespace {
 
-        MaybeError ValidateVertexAttributeDescriptor(
-            DeviceBase* device,
-            const VertexAttributeDescriptor* attribute,
-            uint64_t vertexBufferStride,
-            std::bitset<kMaxVertexAttributes>* attributesSetMask) {
+        MaybeError ValidateVertexAttribute(DeviceBase* device,
+                                           const VertexAttribute* attribute,
+                                           uint64_t vertexBufferStride,
+                                           std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateVertexFormat(attribute->format));
 
             if (dawn::IsDeprecatedVertexFormat(attribute->format)) {
@@ -73,9 +72,9 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateVertexBufferLayoutDescriptor(
+        MaybeError ValidateVertexBufferLayout(
             DeviceBase* device,
-            const VertexBufferLayoutDescriptor* buffer,
+            const VertexBufferLayout* buffer,
             std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateInputStepMode(buffer->stepMode));
             if (buffer->arrayStride > kMaxVertexBufferStride) {
@@ -88,12 +87,192 @@ namespace dawn_native {
             }
 
             for (uint32_t i = 0; i < buffer->attributeCount; ++i) {
-                DAWN_TRY(ValidateVertexAttributeDescriptor(device, &buffer->attributes[i],
-                                                           buffer->arrayStride, attributesSetMask));
+                DAWN_TRY(ValidateVertexAttribute(device, &buffer->attributes[i],
+                                                 buffer->arrayStride, attributesSetMask));
             }
 
             return {};
         }
+
+        MaybeError ValidateVertexState(DeviceBase* device,
+                                       const VertexState* descriptor,
+                                       const PipelineLayoutBase* layout) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            }
+
+            if (descriptor->bufferCount > kMaxVertexBuffers) {
+                return DAWN_VALIDATION_ERROR("Vertex buffer count exceeds maximum");
+            }
+
+            std::bitset<kMaxVertexAttributes> attributesSetMask;
+            uint32_t totalAttributesNum = 0;
+            for (uint32_t i = 0; i < descriptor->bufferCount; ++i) {
+                DAWN_TRY(ValidateVertexBufferLayout(device, &descriptor->buffers[i],
+                                                    &attributesSetMask));
+                totalAttributesNum += descriptor->buffers[i].attributeCount;
+            }
+
+            // Every vertex attribute has a member called shaderLocation, and there are some
+            // requirements for shaderLocation: 1) >=0, 2) values are different across different
+            // attributes, 3) can't exceed kMaxVertexAttributes. So it can ensure that total
+            // attribute number never exceed kMaxVertexAttributes.
+            ASSERT(totalAttributesNum <= kMaxVertexAttributes);
+
+            DAWN_TRY(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
+                                               layout, SingleShaderStage::Vertex));
+            const EntryPointMetadata& vertexMetadata =
+                descriptor->module->GetEntryPoint(descriptor->entryPoint);
+            if (!IsSubset(vertexMetadata.usedVertexAttributes, attributesSetMask)) {
+                return DAWN_VALIDATION_ERROR(
+                    "Pipeline vertex stage uses vertex buffers not in the vertex state");
+            }
+
+            return {};
+        }
+
+        MaybeError ValidatePrimitiveState(const PrimitiveState* descriptor) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            }
+
+            DAWN_TRY(ValidatePrimitiveTopology(descriptor->topology));
+            DAWN_TRY(ValidateIndexFormat(descriptor->stripIndexFormat));
+            DAWN_TRY(ValidateFrontFace(descriptor->frontFace));
+            DAWN_TRY(ValidateCullMode(descriptor->cullMode));
+
+            // Pipeline descriptors must have stripIndexFormat != undefined IFF they are using strip
+            // topologies.
+            if (IsStripPrimitiveTopology(descriptor->topology)) {
+                if (descriptor->stripIndexFormat == wgpu::IndexFormat::Undefined) {
+                    return DAWN_VALIDATION_ERROR(
+                        "stripIndexFormat must not be undefined when using strip primitive "
+                        "topologies");
+                }
+            } else if (descriptor->stripIndexFormat != wgpu::IndexFormat::Undefined) {
+                return DAWN_VALIDATION_ERROR(
+                    "stripIndexFormat must be undefined when using non-strip primitive topologies");
+            }
+
+            return {};
+        }
+
+        MaybeError ValidateDepthStencilState(const DeviceBase* device,
+                                             const DepthStencilState* descriptor) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            }
+
+            DAWN_TRY(ValidateCompareFunction(descriptor->depthCompare));
+            DAWN_TRY(ValidateCompareFunction(descriptor->stencilFront.compare));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilFront.failOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilFront.depthFailOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilFront.passOp));
+            DAWN_TRY(ValidateCompareFunction(descriptor->stencilBack.compare));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.failOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.depthFailOp));
+            DAWN_TRY(ValidateStencilOperation(descriptor->stencilBack.passOp));
+
+            const Format* format;
+            DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
+            if (!format->HasDepthOrStencil() || !format->isRenderable) {
+                return DAWN_VALIDATION_ERROR(
+                    "Depth stencil format must be depth-stencil renderable");
+            }
+
+            if (std::isnan(descriptor->depthBiasSlopeScale) ||
+                std::isnan(descriptor->depthBiasClamp)) {
+                return DAWN_VALIDATION_ERROR("Depth bias parameters must not be NaN.");
+            }
+
+            return {};
+        }
+
+        MaybeError ValidateMultisampleState(const MultisampleState* descriptor) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            }
+
+            if (!IsValidSampleCount(descriptor->count)) {
+                return DAWN_VALIDATION_ERROR("Multisample count is not supported");
+            }
+
+            if (descriptor->alphaToCoverageEnabled && descriptor->count <= 1) {
+                return DAWN_VALIDATION_ERROR("Enabling alphaToCoverage requires sample count > 1");
+            }
+
+            return {};
+        }
+
+        MaybeError ValidateBlendState(const BlendState* descriptor) {
+            DAWN_TRY(ValidateBlendOperation(descriptor->alpha.operation));
+            DAWN_TRY(ValidateBlendFactor(descriptor->alpha.srcFactor));
+            DAWN_TRY(ValidateBlendFactor(descriptor->alpha.dstFactor));
+            DAWN_TRY(ValidateBlendOperation(descriptor->color.operation));
+            DAWN_TRY(ValidateBlendFactor(descriptor->color.srcFactor));
+            DAWN_TRY(ValidateBlendFactor(descriptor->color.dstFactor));
+
+            return {};
+        }
+
+        MaybeError ValidateColorTargetState(const DeviceBase* device,
+                                            const ColorTargetState* descriptor,
+                                            bool fragmentWritten,
+                                            wgpu::TextureComponentType fragmentOutputBaseType) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            }
+
+            if (descriptor->blend) {
+                DAWN_TRY(ValidateBlendState(descriptor->blend));
+            }
+
+            DAWN_TRY(ValidateColorWriteMask(descriptor->writeMask));
+
+            const Format* format;
+            DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
+            if (!format->IsColor() || !format->isRenderable) {
+                return DAWN_VALIDATION_ERROR("Color format must be color renderable");
+            }
+            if (fragmentWritten &&
+                fragmentOutputBaseType != format->GetAspectInfo(Aspect::Color).baseType) {
+                return DAWN_VALIDATION_ERROR(
+                    "Color format must match the fragment stage output type");
+            }
+
+            return {};
+        }
+
+        MaybeError ValidateFragmentState(DeviceBase* device,
+                                         const FragmentState* descriptor,
+                                         const PipelineLayoutBase* layout) {
+            if (descriptor->nextInChain != nullptr) {
+                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+            }
+
+            DAWN_TRY(ValidateProgrammableStage(device, descriptor->module, descriptor->entryPoint,
+                                               layout, SingleShaderStage::Fragment));
+
+            if (descriptor->targetCount > kMaxColorAttachments) {
+                return DAWN_VALIDATION_ERROR("Number of color targets exceeds maximum");
+            }
+
+            const EntryPointMetadata& fragmentMetadata =
+                descriptor->module->GetEntryPoint(descriptor->entryPoint);
+            for (ColorAttachmentIndex i(uint8_t(0));
+                 i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->targetCount)); ++i) {
+                DAWN_TRY(
+                    ValidateColorTargetState(device, &descriptor->targets[static_cast<uint8_t>(i)],
+                                             fragmentMetadata.fragmentOutputsWritten[i],
+                                             fragmentMetadata.fragmentOutputFormatBaseTypes[i]));
+            }
+
+            return {};
+        }
+
+        // TODO(dawn:642): Validation methods below here are for the deprecated
+        // RenderPipelineDescriptor format and should be removed once it is no longer necessary to
+        // validate that format.
 
         MaybeError ValidateVertexStateDescriptor(
             DeviceBase* device,
@@ -123,8 +302,8 @@ namespace dawn_native {
 
             uint32_t totalAttributesNum = 0;
             for (uint32_t i = 0; i < descriptor->vertexBufferCount; ++i) {
-                DAWN_TRY(ValidateVertexBufferLayoutDescriptor(device, &descriptor->vertexBuffers[i],
-                                                              attributesSetMask));
+                DAWN_TRY(ValidateVertexBufferLayout(device, &descriptor->vertexBuffers[i],
+                                                    attributesSetMask));
                 totalAttributesNum += descriptor->vertexBuffers[i].attributeCount;
             }
 
@@ -251,10 +430,12 @@ namespace dawn_native {
                 descriptor->vertexState, descriptor->primitiveTopology, &attributesSetMask));
         }
 
-        DAWN_TRY(ValidateProgrammableStageDescriptor(
-            device, &descriptor->vertexStage, descriptor->layout, SingleShaderStage::Vertex));
-        DAWN_TRY(ValidateProgrammableStageDescriptor(
-            device, descriptor->fragmentStage, descriptor->layout, SingleShaderStage::Fragment));
+        DAWN_TRY(ValidateProgrammableStage(device, descriptor->vertexStage.module,
+                                           descriptor->vertexStage.entryPoint, descriptor->layout,
+                                           SingleShaderStage::Vertex));
+        DAWN_TRY(ValidateProgrammableStage(device, descriptor->fragmentStage->module,
+                                           descriptor->fragmentStage->entryPoint,
+                                           descriptor->layout, SingleShaderStage::Fragment));
 
         if (descriptor->rasterizationState) {
             DAWN_TRY(ValidateRasterizationStateDescriptor(descriptor->rasterizationState));
@@ -302,6 +483,63 @@ namespace dawn_native {
         return {};
     }
 
+    MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
+                                                const RenderPipelineDescriptor2* descriptor) {
+        if (descriptor->nextInChain != nullptr) {
+            return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        }
+
+        if (descriptor->layout != nullptr) {
+            DAWN_TRY(device->ValidateObject(descriptor->layout));
+        }
+
+        // TODO(crbug.com/dawn/136): Support vertex-only pipelines.
+        if (descriptor->fragment == nullptr) {
+            return DAWN_VALIDATION_ERROR("Null fragment stage is not supported (yet)");
+        }
+
+        DAWN_TRY(ValidateVertexState(device, &descriptor->vertex, descriptor->layout));
+
+        DAWN_TRY(ValidatePrimitiveState(&descriptor->primitive));
+
+        if (descriptor->depthStencil) {
+            DAWN_TRY(ValidateDepthStencilState(device, descriptor->depthStencil));
+        }
+
+        DAWN_TRY(ValidateMultisampleState(&descriptor->multisample));
+
+        ASSERT(descriptor->fragment != nullptr);
+        DAWN_TRY(ValidateFragmentState(device, descriptor->fragment, descriptor->layout));
+
+        if (descriptor->fragment->targetCount == 0 && !descriptor->depthStencil) {
+            return DAWN_VALIDATION_ERROR("Should have at least one color target or a depthStencil");
+        }
+
+        return {};
+    }
+
+    std::vector<StageAndDescriptor> GetStages(const RenderPipelineDescriptor* descriptor) {
+        std::vector<StageAndDescriptor> stages;
+        stages.push_back({SingleShaderStage::Vertex, descriptor->vertexStage.module,
+                          descriptor->vertexStage.entryPoint});
+        if (descriptor->fragmentStage != nullptr) {
+            stages.push_back({SingleShaderStage::Fragment, descriptor->fragmentStage->module,
+                              descriptor->fragmentStage->entryPoint});
+        }
+        return stages;
+    }
+
+    std::vector<StageAndDescriptor> GetStages(const RenderPipelineDescriptor2* descriptor) {
+        std::vector<StageAndDescriptor> stages;
+        stages.push_back(
+            {SingleShaderStage::Vertex, descriptor->vertex.module, descriptor->vertex.entryPoint});
+        if (descriptor->fragment != nullptr) {
+            stages.push_back({SingleShaderStage::Fragment, descriptor->fragment->module,
+                              descriptor->fragment->entryPoint});
+        }
+        return stages;
+    }
+
     bool StencilTestEnabled(const DepthStencilState* mDepthStencil) {
         return mDepthStencil->stencilBack.compare != wgpu::CompareFunction::Always ||
                mDepthStencil->stencilBack.failOp != wgpu::StencilOperation::Keep ||
@@ -328,8 +566,10 @@ namespace dawn_native {
                                            const RenderPipelineDescriptor* descriptor)
         : PipelineBase(device,
                        descriptor->layout,
-                       {{SingleShaderStage::Vertex, &descriptor->vertexStage},
-                        {SingleShaderStage::Fragment, descriptor->fragmentStage}}),
+                       {{SingleShaderStage::Vertex, descriptor->vertexStage.module,
+                         descriptor->vertexStage.entryPoint},
+                        {SingleShaderStage::Fragment, descriptor->fragmentStage->module,
+                         descriptor->fragmentStage->entryPoint}}),
           mAttachmentState(device->GetOrCreateAttachmentState(descriptor)) {
         mPrimitive.topology = descriptor->primitiveTopology;
 

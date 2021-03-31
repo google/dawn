@@ -31,6 +31,12 @@ namespace dawn_native {
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor* descriptor);
+    MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
+                                                const RenderPipelineDescriptor2* descriptor);
+
+    std::vector<StageAndDescriptor> GetStages(const RenderPipelineDescriptor* descriptor);
+    std::vector<StageAndDescriptor> GetStages(const RenderPipelineDescriptor2* descriptor);
+
     size_t IndexFormatSize(wgpu::IndexFormat format);
 
     bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology);

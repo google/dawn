@@ -28,10 +28,11 @@
 
 namespace dawn_native {
 
-    MaybeError ValidateProgrammableStageDescriptor(DeviceBase* device,
-                                                   const ProgrammableStageDescriptor* descriptor,
-                                                   const PipelineLayoutBase* layout,
-                                                   SingleShaderStage stage);
+    MaybeError ValidateProgrammableStage(DeviceBase* device,
+                                         const ShaderModuleBase* module,
+                                         const std::string& entryPoint,
+                                         const PipelineLayoutBase* layout,
+                                         SingleShaderStage stage);
 
     struct ProgrammableStage {
         Ref<ShaderModuleBase> module;

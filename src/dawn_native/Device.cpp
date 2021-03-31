@@ -1022,12 +1022,15 @@ namespace dawn_native {
         if (descriptor->layout == nullptr) {
             ComputePipelineDescriptor descriptorWithDefaultLayout = *descriptor;
 
-            DAWN_TRY_ASSIGN(descriptorWithDefaultLayout.layout,
-                            PipelineLayoutBase::CreateDefault(
-                                this, {{SingleShaderStage::Compute, &descriptor->computeStage}}));
             // Ref will keep the pipeline layout alive until the end of the function where
             // the pipeline will take another reference.
-            Ref<PipelineLayoutBase> layoutRef = AcquireRef(descriptorWithDefaultLayout.layout);
+            Ref<PipelineLayoutBase> layoutRef;
+            DAWN_TRY_ASSIGN(layoutRef,
+                            PipelineLayoutBase::CreateDefault(
+                                this, {{SingleShaderStage::Compute, descriptor->computeStage.module,
+                                        descriptor->computeStage.entryPoint}}));
+
+            descriptorWithDefaultLayout.layout = layoutRef.Get();
 
             DAWN_TRY_ASSIGN(*result, GetOrCreateComputePipeline(&descriptorWithDefaultLayout));
         } else {
@@ -1071,6 +1074,11 @@ namespace dawn_native {
     MaybeError DeviceBase::CreateRenderPipelineInternal(
         RenderPipelineBase** result,
         const RenderPipelineDescriptor2* descriptor) {
+        DAWN_TRY(ValidateIsAlive());
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateRenderPipelineDescriptor(this, descriptor));
+        }
+
         // Convert descriptor to the older format it before proceeding.
         // TODO: Convert the rest of the code to operate on the newer format.
         RenderPipelineDescriptor normalizedDescriptor;
@@ -1147,7 +1155,18 @@ namespace dawn_native {
             normalizedDescriptor.colorStates = colorStates.data();
         }
 
-        return CreateRenderPipelineInternal(result, &normalizedDescriptor);
+        Ref<PipelineLayoutBase> layoutRef;
+        if (descriptor->layout == nullptr) {
+            // Ref will keep the pipeline layout alive until the end of the function where
+            // the pipeline will take another reference.
+            DAWN_TRY_ASSIGN(layoutRef,
+                            PipelineLayoutBase::CreateDefault(this, GetStages(descriptor)));
+            normalizedDescriptor.layout = layoutRef.Get();
+        }
+
+        DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(&normalizedDescriptor));
+
+        return {};
     }
 
     MaybeError DeviceBase::CreateRenderPipelineInternal(
@@ -1162,17 +1181,12 @@ namespace dawn_native {
         if (descriptor->layout == nullptr) {
             RenderPipelineDescriptor descriptorWithDefaultLayout = *descriptor;
 
-            std::vector<StageAndDescriptor> stages;
-            stages.emplace_back(SingleShaderStage::Vertex, &descriptor->vertexStage);
-            if (descriptor->fragmentStage != nullptr) {
-                stages.emplace_back(SingleShaderStage::Fragment, descriptor->fragmentStage);
-            }
-
-            DAWN_TRY_ASSIGN(descriptorWithDefaultLayout.layout,
-                            PipelineLayoutBase::CreateDefault(this, std::move(stages)));
             // Ref will keep the pipeline layout alive until the end of the function where
             // the pipeline will take another reference.
-            Ref<PipelineLayoutBase> layoutRef = AcquireRef(descriptorWithDefaultLayout.layout);
+            Ref<PipelineLayoutBase> layoutRef;
+            DAWN_TRY_ASSIGN(layoutRef,
+                            PipelineLayoutBase::CreateDefault(this, GetStages(descriptor)));
+            descriptorWithDefaultLayout.layout = layoutRef.Get();
 
             DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(&descriptorWithDefaultLayout));
         } else {

@@ -75,7 +75,7 @@ namespace dawn_native {
     }
 
     // static
-    ResultOrError<PipelineLayoutBase*> PipelineLayoutBase::CreateDefault(
+    ResultOrError<Ref<PipelineLayoutBase>> PipelineLayoutBase::CreateDefault(
         DeviceBase* device,
         std::vector<StageAndDescriptor> stages) {
         using EntryMap = std::map<BindingNumber, BindGroupLayoutEntry>;
@@ -177,7 +177,7 @@ namespace dawn_native {
         // Loops over all the reflected BindGroupLayoutEntries from shaders.
         for (const StageAndDescriptor& stage : stages) {
             const EntryPointMetadata::BindingInfoArray& info =
-                stage.second->module->GetEntryPoint(stage.second->entryPoint).bindings;
+                stage.module->GetEntryPoint(stage.entryPoint).bindings;
 
             for (BindGroupIndex group(0); group < info.size(); ++group) {
                 for (const auto& bindingIt : info[group]) {
@@ -187,7 +187,7 @@ namespace dawn_native {
                     // Create the BindGroupLayoutEntry
                     BindGroupLayoutEntry entry = ConvertMetadataToEntry(shaderBinding);
                     entry.binding = static_cast<uint32_t>(bindingNumber);
-                    entry.visibility = StageBit(stage.first);
+                    entry.visibility = StageBit(stage.shaderStage);
 
                     // Add it to our map of all entries, if there is an existing entry, then we
                     // need to merge, if we can.
@@ -213,7 +213,7 @@ namespace dawn_native {
         }
 
         // Create the deduced pipeline layout, validating if it is valid.
-        PipelineLayoutBase* pipelineLayout = nullptr;
+        Ref<PipelineLayoutBase> result = nullptr;
         {
             ityp::array<BindGroupIndex, BindGroupLayoutBase*, kMaxBindGroups> bgls = {};
             for (BindGroupIndex group(0); group < pipelineBGLCount; ++group) {
@@ -225,20 +225,24 @@ namespace dawn_native {
             desc.bindGroupLayoutCount = static_cast<uint32_t>(pipelineBGLCount);
 
             DAWN_TRY(ValidatePipelineLayoutDescriptor(device, &desc));
+
+            PipelineLayoutBase* pipelineLayout;
             DAWN_TRY_ASSIGN(pipelineLayout, device->GetOrCreatePipelineLayout(&desc));
 
+            result = AcquireRef(pipelineLayout);
+
             ASSERT(!pipelineLayout->IsError());
+
+            // Sanity check in debug that the pipeline layout is compatible with the current
+            // pipeline.
+            for (const StageAndDescriptor& stage : stages) {
+                const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
+                ASSERT(ValidateCompatibilityWithPipelineLayout(device, metadata, pipelineLayout)
+                           .IsSuccess());
+            }
         }
 
-        // Sanity check in debug that the pipeline layout is compatible with the current pipeline.
-        for (const StageAndDescriptor& stage : stages) {
-            const EntryPointMetadata& metadata =
-                stage.second->module->GetEntryPoint(stage.second->entryPoint);
-            ASSERT(ValidateCompatibilityWithPipelineLayout(device, metadata, pipelineLayout)
-                       .IsSuccess());
-        }
-
-        return pipelineLayout;
+        return std::move(result);
     }
 
     const BindGroupLayoutBase* PipelineLayoutBase::GetBindGroupLayout(BindGroupIndex group) const {

@@ -29,8 +29,9 @@ namespace dawn_native {
             DAWN_TRY(device->ValidateObject(descriptor->layout));
         }
 
-        DAWN_TRY(ValidateProgrammableStageDescriptor(
-            device, &descriptor->computeStage, descriptor->layout, SingleShaderStage::Compute));
+        DAWN_TRY(ValidateProgrammableStage(device, descriptor->computeStage.module,
+                                           descriptor->computeStage.entryPoint, descriptor->layout,
+                                           SingleShaderStage::Compute));
         return {};
     }
 
@@ -40,7 +41,8 @@ namespace dawn_native {
                                              const ComputePipelineDescriptor* descriptor)
         : PipelineBase(device,
                        descriptor->layout,
-                       {{SingleShaderStage::Compute, &descriptor->computeStage}}) {
+                       {{SingleShaderStage::Compute, descriptor->computeStage.module,
+                         descriptor->computeStage.entryPoint}}) {
     }
 
     ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
