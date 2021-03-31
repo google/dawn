@@ -401,6 +401,8 @@ source_set("libtint_core_src") {
     "transform/binding_remapper.h",
     "transform/bound_array_accessors.cc",
     "transform/bound_array_accessors.h",
+    "transform/canonicalize_entry_point_io.cc",
+    "transform/canonicalize_entry_point_io.h",
     "transform/emit_vertex_point_size.cc",
     "transform/emit_vertex_point_size.h",
     "transform/first_index_offset.cc",

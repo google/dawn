@@ -216,6 +216,8 @@ set(TINT_LIB_SRCS
   transform/binding_remapper.h
   transform/bound_array_accessors.cc
   transform/bound_array_accessors.h
+  transform/canonicalize_entry_point_io.cc
+  transform/canonicalize_entry_point_io.h
   transform/emit_vertex_point_size.cc
   transform/emit_vertex_point_size.h
   transform/first_index_offset.cc
@@ -731,6 +733,7 @@ if(${TINT_BUILD_TESTS})
     list(APPEND TINT_TEST_SRCS
       transform/binding_remapper_test.cc
       transform/bound_array_accessors_test.cc
+      transform/canonicalize_entry_point_io_test.cc
       transform/emit_vertex_point_size_test.cc
       transform/first_index_offset_test.cc
       transform/renamer_test.cc

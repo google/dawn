@@ -193,6 +193,7 @@ source_set("tint_unittests_core_src") {
     "../src/traits_test.cc",
     "../src/transform/binding_remapper_test.cc",
     "../src/transform/bound_array_accessors_test.cc",
+    "../src/transform/canonicalize_entry_point_io_test.cc",
     "../src/transform/emit_vertex_point_size_test.cc",
     "../src/transform/first_index_offset_test.cc",
     "../src/transform/renamer_test.cc",
