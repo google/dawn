@@ -1571,8 +1571,7 @@ bool GeneratorImpl::EmitEntryPointData(
   auto* func_sem = builder_.Sem().Get(func);
   auto func_sym = func->symbol();
 
-  // TODO(jrprice): Remove this when we remove support for entry point
-  // inputs/outputs as module-scope globals.
+  // TODO(crbug.com/tint/697): Remove this.
   for (auto data : func_sem->ReferencedLocationVariables()) {
     auto* var = data.first;
     auto* decl = var->Declaration();
@@ -1585,8 +1584,7 @@ bool GeneratorImpl::EmitEntryPointData(
     }
   }
 
-  // TODO(jrprice): Remove this when we remove support for entry point
-  // inputs/outputs as module-scope globals.
+  // TODO(crbug.com/tint/697): Remove this.
   for (auto data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
     auto* decl = var->Declaration();
@@ -1670,8 +1668,7 @@ bool GeneratorImpl::EmitEntryPointData(
     out << std::endl;
   }
 
-  // TODO(jrprice): Remove this when we remove support for entry point inputs as
-  // module-scope globals.
+  // TODO(crbug.com/tint/697): Remove this.
   if (!in_variables.empty()) {
     auto in_struct_name = generate_name(builder_.Symbols().NameFor(func_sym) +
                                         "_" + kInStructNameSuffix);
@@ -1721,8 +1718,7 @@ bool GeneratorImpl::EmitEntryPointData(
     out << "};" << std::endl << std::endl;
   }
 
-  // TODO(jrprice): Remove this when we remove support for entry point outputs
-  // as module-scope globals.
+  // TODO(crbug.com/tint/697): Remove this.
   if (!outvariables.empty()) {
     auto outstruct_name = generate_name(builder_.Symbols().NameFor(func_sym) +
                                         "_" + kOutStructNameSuffix);
@@ -1882,16 +1878,21 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   auto outdata = ep_sym_to_out_data_.find(current_ep_sym_);
   bool has_outdata = outdata != ep_sym_to_out_data_.end();
   if (has_outdata) {
+    // TODO(crbug.com/tint/697): Remove this.
+    if (!func->return_type()->Is<type::Void>()) {
+      TINT_ICE(diagnostics_) << "Mixing module-scope variables and return "
+                                "types for shader outputs";
+    }
     out << outdata->second.struct_name;
   } else {
-    out << "void";
+    out << func->return_type()->FriendlyName(builder_.Symbols());
   }
   // TODO(dsinclair): This should output the remapped name
   out << " " << namer_.NameFor(builder_.Symbols().NameFor(current_ep_sym_))
       << "(";
 
   bool first = true;
-  // TODO(jrprice): Remove this when we remove support for inputs as globals.
+  // TODO(crbug.com/tint/697): Remove this.
   auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
   if (in_data != ep_sym_to_in_data_.end()) {
     out << in_data->second.struct_name << " " << in_data->second.var_name;
@@ -2367,13 +2368,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& pre,
 bool GeneratorImpl::EmitReturn(std::ostream& out, ast::ReturnStatement* stmt) {
   make_indent(out);
 
-  if (generating_entry_point_) {
-    out << "return";
-    auto outdata = ep_sym_to_out_data_.find(current_ep_sym_);
-    if (outdata != ep_sym_to_out_data_.end()) {
-      out << " " << outdata->second.var_name;
-    }
-  } else if (stmt->has_value()) {
+  if (stmt->has_value()) {
     std::ostringstream pre;
     std::ostringstream ret_out;
     if (!EmitExpression(pre, ret_out, stmt->value())) {
@@ -2381,6 +2376,13 @@ bool GeneratorImpl::EmitReturn(std::ostream& out, ast::ReturnStatement* stmt) {
     }
     out << pre.str();
     out << "return " << ret_out.str();
+  } else if (generating_entry_point_) {
+    // TODO(crbug.com/tint/697): Remove this (and generating_entry_point_)
+    out << "return";
+    auto outdata = ep_sym_to_out_data_.find(current_ep_sym_);
+    if (outdata != ep_sym_to_out_data_.end()) {
+      out << " " << outdata->second.var_name;
+    }
   } else {
     out << "return";
   }
@@ -2650,7 +2652,27 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
 
     for (auto* deco : mem->decorations()) {
       if (auto* location = deco->As<ast::LocationDecoration>()) {
-        out << " : TEXCOORD" << location->value();
+        auto& pipeline_stage_uses =
+            builder_.Sem().Get(str)->PipelineStageUses();
+        if (pipeline_stage_uses.size() != 1) {
+          TINT_ICE(diagnostics_) << "invalid entry point IO struct uses";
+        }
+
+        if (pipeline_stage_uses.count(
+                semantic::PipelineStageUsage::kVertexInput)) {
+          out << " : TEXCOORD" + std::to_string(location->value());
+        } else if (pipeline_stage_uses.count(
+                       semantic::PipelineStageUsage::kVertexOutput)) {
+          out << " : TEXCOORD" + std::to_string(location->value());
+        } else if (pipeline_stage_uses.count(
+                       semantic::PipelineStageUsage::kFragmentInput)) {
+          out << " : TEXCOORD" + std::to_string(location->value());
+        } else if (pipeline_stage_uses.count(
+                       semantic::PipelineStageUsage::kFragmentOutput)) {
+          out << " : SV_Target" + std::to_string(location->value());
+        } else {
+          TINT_ICE(diagnostics_) << "invalid use of location decoration";
+        }
       } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         auto attr = builtin_to_attribute(builtin->value());
         if (attr.empty()) {

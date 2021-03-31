@@ -714,6 +714,8 @@ int main(int argc, const char** argv) {
 #endif  // TINT_BUILD_MSL_WRITER
 #if TINT_BUILD_HLSL_WRITER
     case Format::kHlsl:
+      transform_manager.append(
+          std::make_unique<tint::transform::CanonicalizeEntryPointIO>());
       transform_manager.append(std::make_unique<tint::transform::Hlsl>());
       break;
 #endif  // TINT_BUILD_HLSL_WRITER

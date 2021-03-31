@@ -44,9 +44,6 @@ class Hlsl : public Transform {
   /// the array usage statement.
   /// See crbug.com/tint/406 for more details
   void PromoteArrayInitializerToConstVar(CloneContext& ctx) const;
-
-  /// Hoist entry point parameters out to struct members.
-  void HandleEntryPointIOTypes(CloneContext& ctx) const;
 };
 
 }  // namespace transform
