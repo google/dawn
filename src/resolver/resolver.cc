@@ -321,6 +321,14 @@ bool Resolver::Function(ast::Function* func) {
 
   if (auto* str =
           func->return_type()->UnwrapAliasIfNeeded()->As<type::Struct>()) {
+    if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, str,
+                                      func->source())) {
+      diagnostics_.add_note("while instantiating return type for " +
+                                builder_->Symbols().NameFor(func->symbol()),
+                            func->source());
+      return false;
+    }
+
     auto* info = Structure(str);
     if (!info) {
       return false;
