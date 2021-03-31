@@ -21,7 +21,6 @@
 #include "common/Platform.h"
 #include "common/SystemUtils.h"
 #include "dawn/dawn_proc.h"
-#include "dawn_native/DawnNative.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"
 #include "utils/PlatformDebugLogger.h"
@@ -1003,26 +1002,23 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
                                                             int line,
                                                             detail::Expectation* expectation,
                                                             const wgpu::Texture& texture,
-                                                            uint32_t x,
-                                                            uint32_t y,
-                                                            uint32_t width,
-                                                            uint32_t height,
+                                                            wgpu::Origin3D origin,
+                                                            wgpu::Extent3D extent,
                                                             uint32_t level,
-                                                            uint32_t slice,
+                                                            uint32_t layer,
                                                             wgpu::TextureAspect aspect,
                                                             uint32_t dataSize,
                                                             uint32_t bytesPerRow) {
     if (bytesPerRow == 0) {
-        bytesPerRow = Align(width * dataSize, kTextureBytesPerRowAlignment);
+        bytesPerRow = Align(extent.width * dataSize, kTextureBytesPerRowAlignment);
     } else {
-        ASSERT(bytesPerRow >= width * dataSize);
+        ASSERT(bytesPerRow >= extent.width * dataSize);
         ASSERT(bytesPerRow == Align(bytesPerRow, kTextureBytesPerRowAlignment));
     }
 
-    uint32_t rowsPerImage = height;
-    uint32_t depth = 1;
-    uint32_t size =
-        utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, width, height, depth, dataSize);
+    uint32_t rowsPerImage = extent.height;
+    uint32_t size = utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, extent.width,
+                                               extent.height, extent.depth, dataSize);
 
     // TODO(enga): We should have the map async alignment in Contants.h. Also, it should change to 8
     // for Float64Array.
@@ -1031,13 +1027,12 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
     wgpu::ImageCopyTexture imageCopyTexture =
-        utils::CreateImageCopyTexture(texture, level, {x, y, slice}, aspect);
+        utils::CreateImageCopyTexture(texture, level, {origin.x, origin.y, layer}, aspect);
     wgpu::ImageCopyBuffer imageCopyBuffer =
         utils::CreateImageCopyBuffer(readback.buffer, readback.offset, bytesPerRow, rowsPerImage);
-    wgpu::Extent3D copySize = {width, height, 1};
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &copySize);
+    encoder.CopyTextureToBuffer(&imageCopyTexture, &imageCopyBuffer, &extent);
 
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
@@ -1048,7 +1043,7 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
     deferred.readbackSlot = readback.slot;
     deferred.readbackOffset = readback.offset;
     deferred.size = size;
-    deferred.rowBytes = width * dataSize;
+    deferred.rowBytes = extent.width * dataSize;
     deferred.bytesPerRow = bytesPerRow;
     deferred.expectation.reset(expectation);
 

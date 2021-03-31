@@ -176,6 +176,8 @@ namespace utils {
         const wgpu::BindGroupLayout& layout,
         std::initializer_list<BindingInitializationHelper> entriesInitializer);
 
+    wgpu::Origin3D MakeOrigin(uint32_t x = 0, uint32_t y = 0, uint32_t z = 0);
+    wgpu::Extent3D MakeExtent(uint32_t w = 1, uint32_t h = 1, uint32_t d = 1);
 }  // namespace utils
 
 #endif  // UTILS_DAWNHELPERS_H_

@@ -64,7 +64,7 @@ TEST_P(NonzeroTextureCreationTests, Depth32TextureCreationDepthClears) {
     // TODO(crbug.com/dawn/145): Test other formats via sampling.
     wgpu::Texture texture = device.CreateTexture(&descriptor);
     std::vector<float> expected(kSize * kSize, 1.f);
-    EXPECT_TEXTURE_EQ(expected.data(), texture, 0, 0, kSize, kSize, 0, 0);
+    EXPECT_TEXTURE_EQ(expected.data(), texture, {0, 0}, {kSize, kSize}, 0, 0);
 }
 
 // Test that non-zero mip level clears 0xFF because toggle is enabled.
@@ -88,7 +88,7 @@ TEST_P(NonzeroTextureCreationTests, MipMapClears) {
         expected.push_back(filled);
     }
     uint32_t mipSize = kSize >> 2;
-    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, 0, 0, mipSize, mipSize, 2, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, (0, 0), (mipSize, mipSize), 2, 0);
 }
 
 // Test that non-zero array layers clears 0xFF because toggle is enabled.
@@ -112,7 +112,7 @@ TEST_P(NonzeroTextureCreationTests, ArrayLayerClears) {
         expected.push_back(filled);
     }
 
-    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, 0, 0, kSize, kSize, 0, 2);
+    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, (0, 0), (kSize, kSize), 0, 2);
 }
 
 // Test that nonrenderable texture formats clear 0x01 because toggle is enabled
@@ -212,7 +212,7 @@ TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         for (uint32_t i = 0; i < descriptor.size.depthOrArrayLayers; ++i) {
-            EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, 0, i);
+            EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, (0, 0), (1, 1), 0, i);
         }
     }
 
@@ -222,7 +222,7 @@ TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         for (uint32_t i = 0; i < descriptor.mipLevelCount; ++i) {
-            EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, i, 0);
+            EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, (0, 0), (1, 1), i, 0);
         }
     }
 
@@ -236,7 +236,7 @@ TEST_P(NonzeroTextureCreationTests, AllSubresourcesFilled) {
 
         for (uint32_t i = 0; i < descriptor.size.depthOrArrayLayers; ++i) {
             for (uint32_t j = 0; j < descriptor.mipLevelCount; ++j) {
-                EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, j, i);
+                EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, (0, 0), (1, 1), j, i);
             }
         }
     }
@@ -264,7 +264,7 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         for (uint32_t i = 0; i < descriptor.size.depthOrArrayLayers; ++i) {
-            EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, 0, i);
+            EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, (0, 0), (1, 1), 0, i);
         }
     }
 
@@ -274,7 +274,7 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
         wgpu::Texture texture = device.CreateTexture(&descriptor);
 
         for (uint32_t i = 0; i < descriptor.mipLevelCount; ++i) {
-            EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, i, 0);
+            EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, (0, 0), (1, 1), i, 0);
         }
     }
 
@@ -288,7 +288,7 @@ TEST_P(NonzeroTextureCreationTests, NonRenderableAllSubresourcesFilled) {
 
         for (uint32_t i = 0; i < descriptor.size.depthOrArrayLayers; ++i) {
             for (uint32_t j = 0; j < descriptor.mipLevelCount; ++j) {
-                EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, 0, 0, 1, 1, j, i);
+                EXPECT_TEXTURE_RGBA8_EQ(&filled, texture, (0, 0), (1, 1), j, i);
             }
         }
     }

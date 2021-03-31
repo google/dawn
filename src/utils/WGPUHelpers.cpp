@@ -359,4 +359,11 @@ namespace utils {
         return device.CreateBindGroup(&descriptor);
     }
 
+    wgpu::Origin3D MakeOrigin(uint32_t x, uint32_t y, uint32_t z) {
+        return {x, y, z};
+    }
+
+    wgpu::Extent3D MakeExtent(uint32_t w, uint32_t h, uint32_t d) {
+        return {w, h, d};
+    }
 }  // namespace utils
