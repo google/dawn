@@ -26,9 +26,9 @@ namespace dawn_native { namespace vulkan {
 
     class ShaderModule final : public ShaderModuleBase {
       public:
-        static ResultOrError<ShaderModule*> Create(Device* device,
-                                                   const ShaderModuleDescriptor* descriptor,
-                                                   ShaderModuleParseResult* parseResult);
+        static ResultOrError<Ref<ShaderModule>> Create(Device* device,
+                                                       const ShaderModuleDescriptor* descriptor,
+                                                       ShaderModuleParseResult* parseResult);
 
         VkShaderModule GetHandle() const;
 

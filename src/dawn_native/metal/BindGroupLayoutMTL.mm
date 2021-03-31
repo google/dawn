@@ -18,15 +18,21 @@
 
 namespace dawn_native { namespace metal {
 
+    // static
+    Ref<BindGroupLayout> BindGroupLayout::Create(DeviceBase* device,
+                                                 const BindGroupLayoutDescriptor* descriptor) {
+        return AcquireRef(new BindGroupLayout(device, descriptor));
+    }
+
     BindGroupLayout::BindGroupLayout(DeviceBase* device,
                                      const BindGroupLayoutDescriptor* descriptor)
         : BindGroupLayoutBase(device, descriptor),
           mBindGroupAllocator(MakeFrontendBindGroupAllocator<BindGroup>(4096)) {
     }
 
-    BindGroup* BindGroupLayout::AllocateBindGroup(Device* device,
-                                                  const BindGroupDescriptor* descriptor) {
-        return mBindGroupAllocator.Allocate(device, descriptor);
+    Ref<BindGroup> BindGroupLayout::AllocateBindGroup(Device* device,
+                                                      const BindGroupDescriptor* descriptor) {
+        return AcquireRef(mBindGroupAllocator.Allocate(device, descriptor));
     }
 
     void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup) {

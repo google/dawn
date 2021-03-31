@@ -27,8 +27,8 @@
 namespace dawn_native { namespace vulkan {
 
     // static
-    ResultOrError<BindGroup*> BindGroup::Create(Device* device,
-                                                const BindGroupDescriptor* descriptor) {
+    ResultOrError<Ref<BindGroup>> BindGroup::Create(Device* device,
+                                                    const BindGroupDescriptor* descriptor) {
         return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
     }
 

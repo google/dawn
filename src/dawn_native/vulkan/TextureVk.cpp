@@ -1162,11 +1162,11 @@ namespace dawn_native { namespace vulkan {
     }
 
     // static
-    ResultOrError<TextureView*> TextureView::Create(TextureBase* texture,
-                                                    const TextureViewDescriptor* descriptor) {
+    ResultOrError<Ref<TextureView>> TextureView::Create(TextureBase* texture,
+                                                        const TextureViewDescriptor* descriptor) {
         Ref<TextureView> view = AcquireRef(new TextureView(texture, descriptor));
         DAWN_TRY(view->Initialize(descriptor));
-        return view.Detach();
+        return view;
     }
 
     MaybeError TextureView::Initialize(const TextureViewDescriptor* descriptor) {

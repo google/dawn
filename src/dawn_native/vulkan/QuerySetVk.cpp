@@ -64,11 +64,11 @@ namespace dawn_native { namespace vulkan {
     }  // anonymous namespace
 
     // static
-    ResultOrError<QuerySet*> QuerySet::Create(Device* device,
-                                              const QuerySetDescriptor* descriptor) {
+    ResultOrError<Ref<QuerySet>> QuerySet::Create(Device* device,
+                                                  const QuerySetDescriptor* descriptor) {
         Ref<QuerySet> queryset = AcquireRef(new QuerySet(device, descriptor));
         DAWN_TRY(queryset->Initialize());
-        return queryset.Detach();
+        return queryset;
     }
 
     MaybeError QuerySet::Initialize() {

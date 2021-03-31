@@ -29,7 +29,7 @@ namespace dawn_native { namespace vulkan {
 
     class OldSwapChain : public OldSwapChainBase {
       public:
-        static OldSwapChain* Create(Device* device, const SwapChainDescriptor* descriptor);
+        static Ref<OldSwapChain> Create(Device* device, const SwapChainDescriptor* descriptor);
 
       protected:
         OldSwapChain(Device* device, const SwapChainDescriptor* descriptor);
@@ -44,10 +44,10 @@ namespace dawn_native { namespace vulkan {
 
     class SwapChain : public NewSwapChainBase {
       public:
-        static ResultOrError<SwapChain*> Create(Device* device,
-                                                Surface* surface,
-                                                NewSwapChainBase* previousSwapChain,
-                                                const SwapChainDescriptor* descriptor);
+        static ResultOrError<Ref<SwapChain>> Create(Device* device,
+                                                    Surface* surface,
+                                                    NewSwapChainBase* previousSwapChain,
+                                                    const SwapChainDescriptor* descriptor);
         ~SwapChain() override;
 
       private:

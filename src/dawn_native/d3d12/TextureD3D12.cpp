@@ -1017,6 +1017,12 @@ namespace dawn_native { namespace d3d12 {
                isValidToDecay == other.isValidToDecay;
     }
 
+    // static
+    Ref<TextureView> TextureView::Create(TextureBase* texture,
+                                         const TextureViewDescriptor* descriptor) {
+        return AcquireRef(new TextureView(texture, descriptor));
+    }
+
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
         : TextureViewBase(texture, descriptor) {
         mSrvDesc.Format = D3D12TextureFormat(descriptor->format);

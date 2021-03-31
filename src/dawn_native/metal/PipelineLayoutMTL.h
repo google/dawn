@@ -42,7 +42,8 @@ namespace dawn_native { namespace metal {
 
     class PipelineLayout final : public PipelineLayoutBase {
       public:
-        PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
+        static Ref<PipelineLayout> Create(Device* device,
+                                          const PipelineLayoutDescriptor* descriptor);
 
         using BindingIndexInfo =
             ityp::array<BindGroupIndex,
@@ -54,6 +55,7 @@ namespace dawn_native { namespace metal {
         uint32_t GetBufferBindingCount(SingleShaderStage stage);
 
       private:
+        PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor);
         ~PipelineLayout() override = default;
         PerStage<BindingIndexInfo> mIndexInfo;
         PerStage<uint32_t> mBufferBindingCount;

@@ -897,18 +897,28 @@ namespace dawn_native {
     }
 
     CommandBufferBase* CommandEncoder::APIFinish(const CommandBufferDescriptor* descriptor) {
+        Ref<CommandBufferBase> commandBuffer;
+        if (GetDevice()->ConsumedError(FinishInternal(descriptor), &commandBuffer)) {
+            return CommandBufferBase::MakeError(GetDevice());
+        }
+        ASSERT(!IsError());
+        return commandBuffer.Detach();
+    }
+
+    ResultOrError<Ref<CommandBufferBase>> CommandEncoder::FinishInternal(
+        const CommandBufferDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
+
         // Even if mEncodingContext.Finish() validation fails, calling it will mutate the internal
         // state of the encoding context. The internal state is set to finished, and subsequent
         // calls to encode commands will generate errors.
-        if (device->ConsumedError(mEncodingContext.Finish()) ||
-            device->ConsumedError(device->ValidateIsAlive()) ||
-            (device->IsValidationEnabled() &&
-             device->ConsumedError(ValidateFinish(mEncodingContext.GetIterator(),
-                                                  mEncodingContext.GetPassUsages())))) {
-            return CommandBufferBase::MakeError(device);
+        DAWN_TRY(mEncodingContext.Finish());
+        DAWN_TRY(device->ValidateIsAlive());
+
+        if (device->IsValidationEnabled()) {
+            DAWN_TRY(
+                ValidateFinish(mEncodingContext.GetIterator(), mEncodingContext.GetPassUsages()));
         }
-        ASSERT(!IsError());
         return device->CreateCommandBuffer(this, descriptor);
     }
 

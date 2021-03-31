@@ -35,7 +35,9 @@ namespace dawn_native { namespace metal {
 
     class Texture final : public TextureBase {
       public:
-        Texture(Device* device, const TextureDescriptor* descriptor);
+        static ResultOrError<Ref<Texture>> Create(Device* device,
+                                                  const TextureDescriptor* descriptor);
+
         Texture(Device* device,
                 const TextureDescriptor* descriptor,
                 NSPRef<id<MTLTexture>> mtlTexture);
@@ -49,6 +51,7 @@ namespace dawn_native { namespace metal {
         void EnsureSubresourceContentInitialized(const SubresourceRange& range);
 
       private:
+        Texture(Device* device, const TextureDescriptor* descriptor);
         ~Texture() override;
 
         void DestroyImpl() override;
@@ -60,11 +63,14 @@ namespace dawn_native { namespace metal {
 
     class TextureView final : public TextureViewBase {
       public:
-        TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+        static ResultOrError<Ref<TextureView>> Create(TextureBase* texture,
+                                                      const TextureViewDescriptor* descriptor);
 
         id<MTLTexture> GetMTLTexture();
 
       private:
+        TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+
         NSPRef<id<MTLTexture>> mMtlTextureView;
     };
 

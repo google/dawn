@@ -51,13 +51,14 @@ namespace dawn_native { namespace metal {
     }
 
     // static
-    ResultOrError<Sampler*> Sampler::Create(Device* device, const SamplerDescriptor* descriptor) {
+    ResultOrError<Ref<Sampler>> Sampler::Create(Device* device,
+                                                const SamplerDescriptor* descriptor) {
         if (descriptor->compare != wgpu::CompareFunction::Undefined &&
             device->IsToggleEnabled(Toggle::MetalDisableSamplerCompare)) {
             return DAWN_VALIDATION_ERROR("Sampler compare function not supported.");
         }
 
-        return new Sampler(device, descriptor);
+        return AcquireRef(new Sampler(device, descriptor));
     }
 
     Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)

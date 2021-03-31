@@ -25,11 +25,12 @@ namespace dawn_native { namespace d3d12 {
 
     class Sampler final : public SamplerBase {
       public:
-        Sampler(Device* device, const SamplerDescriptor* descriptor);
+        static Ref<Sampler> Create(Device* device, const SamplerDescriptor* descriptor);
 
         const D3D12_SAMPLER_DESC& GetSamplerDescriptor() const;
 
       private:
+        Sampler(Device* device, const SamplerDescriptor* descriptor);
         ~Sampler() override = default;
         D3D12_SAMPLER_DESC mSamplerDesc = {};
     };

@@ -27,7 +27,7 @@ namespace dawn_native { namespace opengl {
       public:
         BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
 
-        BindGroup* AllocateBindGroup(Device* device, const BindGroupDescriptor* descriptor);
+        Ref<BindGroup> AllocateBindGroup(Device* device, const BindGroupDescriptor* descriptor);
         void DeallocateBindGroup(BindGroup* bindGroup);
 
       private:

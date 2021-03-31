@@ -32,6 +32,11 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // namespace
 
+    // static
+    Ref<Sampler> Sampler::Create(Device* device, const SamplerDescriptor* descriptor) {
+        return AcquireRef(new Sampler(device, descriptor));
+    }
+
     Sampler::Sampler(Device* device, const SamplerDescriptor* descriptor)
         : SamplerBase(device, descriptor) {
         D3D12_FILTER_TYPE minFilter;

@@ -213,33 +213,27 @@ namespace dawn_native {
         }
 
         // Create the deduced pipeline layout, validating if it is valid.
-        Ref<PipelineLayoutBase> result = nullptr;
-        {
-            ityp::array<BindGroupIndex, BindGroupLayoutBase*, kMaxBindGroups> bgls = {};
-            for (BindGroupIndex group(0); group < pipelineBGLCount; ++group) {
-                bgls[group] = bindGroupLayouts[group].Get();
-            }
+        ityp::array<BindGroupIndex, BindGroupLayoutBase*, kMaxBindGroups> bgls = {};
+        for (BindGroupIndex group(0); group < pipelineBGLCount; ++group) {
+            bgls[group] = bindGroupLayouts[group].Get();
+        }
 
-            PipelineLayoutDescriptor desc = {};
-            desc.bindGroupLayouts = bgls.data();
-            desc.bindGroupLayoutCount = static_cast<uint32_t>(pipelineBGLCount);
+        PipelineLayoutDescriptor desc = {};
+        desc.bindGroupLayouts = bgls.data();
+        desc.bindGroupLayoutCount = static_cast<uint32_t>(pipelineBGLCount);
 
-            DAWN_TRY(ValidatePipelineLayoutDescriptor(device, &desc));
+        DAWN_TRY(ValidatePipelineLayoutDescriptor(device, &desc));
 
-            PipelineLayoutBase* pipelineLayout;
-            DAWN_TRY_ASSIGN(pipelineLayout, device->GetOrCreatePipelineLayout(&desc));
+        Ref<PipelineLayoutBase> result;
+        DAWN_TRY_ASSIGN(result, device->GetOrCreatePipelineLayout(&desc));
+        ASSERT(!result->IsError());
 
-            result = AcquireRef(pipelineLayout);
-
-            ASSERT(!pipelineLayout->IsError());
-
-            // Sanity check in debug that the pipeline layout is compatible with the current
-            // pipeline.
-            for (const StageAndDescriptor& stage : stages) {
-                const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
-                ASSERT(ValidateCompatibilityWithPipelineLayout(device, metadata, pipelineLayout)
-                           .IsSuccess());
-            }
+        // Sanity check in debug that the pipeline layout is compatible with the current
+        // pipeline.
+        for (const StageAndDescriptor& stage : stages) {
+            const EntryPointMetadata& metadata = stage.module->GetEntryPoint(stage.entryPoint);
+            ASSERT(ValidateCompatibilityWithPipelineLayout(device, metadata, result.Get())
+                       .IsSuccess());
         }
 
         return std::move(result);

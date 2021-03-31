@@ -23,9 +23,10 @@ namespace dawn_native { namespace d3d12 {
 
     class SwapChain final : public OldSwapChainBase {
       public:
-        SwapChain(Device* device, const SwapChainDescriptor* descriptor);
+        static Ref<SwapChain> Create(Device* device, const SwapChainDescriptor* descriptor);
 
       protected:
+        SwapChain(Device* device, const SwapChainDescriptor* descriptor);
         ~SwapChain() override;
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
         MaybeError OnBeforePresent(TextureViewBase* view) override;

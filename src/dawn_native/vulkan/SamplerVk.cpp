@@ -53,10 +53,11 @@ namespace dawn_native { namespace vulkan {
     }  // anonymous namespace
 
     // static
-    ResultOrError<Sampler*> Sampler::Create(Device* device, const SamplerDescriptor* descriptor) {
+    ResultOrError<Ref<Sampler>> Sampler::Create(Device* device,
+                                                const SamplerDescriptor* descriptor) {
         Ref<Sampler> sampler = AcquireRef(new Sampler(device, descriptor));
         DAWN_TRY(sampler->Initialize(descriptor));
-        return sampler.Detach();
+        return sampler;
     }
 
     MaybeError Sampler::Initialize(const SamplerDescriptor* descriptor) {

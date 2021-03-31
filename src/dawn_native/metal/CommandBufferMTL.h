@@ -31,11 +31,14 @@ namespace dawn_native { namespace metal {
 
     class CommandBuffer final : public CommandBufferBase {
       public:
-        CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+        static Ref<CommandBuffer> Create(CommandEncoder* encoder,
+                                         const CommandBufferDescriptor* descriptor);
 
         MaybeError FillCommands(CommandRecordingContext* commandContext);
 
       private:
+        using CommandBufferBase::CommandBufferBase;
+
         MaybeError EncodeComputePass(CommandRecordingContext* commandContext);
         MaybeError EncodeRenderPass(CommandRecordingContext* commandContext,
                                     MTLRenderPassDescriptor* mtlRenderPass,

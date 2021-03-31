@@ -20,12 +20,12 @@
 namespace dawn_native { namespace metal {
 
     // static
-    ResultOrError<ComputePipeline*> ComputePipeline::Create(
+    ResultOrError<Ref<ComputePipeline>> ComputePipeline::Create(
         Device* device,
         const ComputePipelineDescriptor* descriptor) {
         Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
         DAWN_TRY(pipeline->Initialize(descriptor));
-        return pipeline.Detach();
+        return pipeline;
     }
 
     MaybeError ComputePipeline::Initialize(const ComputePipelineDescriptor* descriptor) {

@@ -56,6 +56,12 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // anonymous namespace
 
+    // static
+    Ref<BindGroupLayout> BindGroupLayout::Create(Device* device,
+                                                 const BindGroupLayoutDescriptor* descriptor) {
+        return AcquireRef(new BindGroupLayout(device, descriptor));
+    }
+
     BindGroupLayout::BindGroupLayout(Device* device, const BindGroupLayoutDescriptor* descriptor)
         : BindGroupLayoutBase(device, descriptor),
           mBindingOffsets(GetBindingCount()),
@@ -138,7 +144,7 @@ namespace dawn_native { namespace d3d12 {
             device->GetSamplerStagingDescriptorAllocator(GetSamplerDescriptorCount());
     }
 
-    ResultOrError<BindGroup*> BindGroupLayout::AllocateBindGroup(
+    ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
         Device* device,
         const BindGroupDescriptor* descriptor) {
         uint32_t viewSizeIncrement = 0;
@@ -158,7 +164,7 @@ namespace dawn_native { namespace d3d12 {
             bindGroup->SetSamplerAllocationEntry(std::move(samplerHeapCacheEntry));
         }
 
-        return bindGroup.Detach();
+        return bindGroup;
     }
 
     void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,

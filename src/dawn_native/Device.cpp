@@ -442,18 +442,17 @@ namespace dawn_native {
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
 
-        Ref<BindGroupLayoutBase> result = nullptr;
+        Ref<BindGroupLayoutBase> result;
         auto iter = mCaches->bindGroupLayouts.find(&blueprint);
         if (iter != mCaches->bindGroupLayouts.end()) {
             result = *iter;
         } else {
-            BindGroupLayoutBase* backendObj;
-            DAWN_TRY_ASSIGN(backendObj, CreateBindGroupLayoutImpl(descriptor));
-            backendObj->SetIsCachedReference();
-            backendObj->SetContentHash(blueprintHash);
-            mCaches->bindGroupLayouts.insert(backendObj);
-            result = AcquireRef(backendObj);
+            DAWN_TRY_ASSIGN(result, CreateBindGroupLayoutImpl(descriptor));
+            result->SetIsCachedReference();
+            result->SetContentHash(blueprintHash);
+            mCaches->bindGroupLayouts.insert(result.Get());
         }
+
         return std::move(result);
     }
 
@@ -477,25 +476,25 @@ namespace dawn_native {
         return mEmptyBindGroupLayout.Get();
     }
 
-    ResultOrError<ComputePipelineBase*> DeviceBase::GetOrCreateComputePipeline(
+    ResultOrError<Ref<ComputePipelineBase>> DeviceBase::GetOrCreateComputePipeline(
         const ComputePipelineDescriptor* descriptor) {
         ComputePipelineBase blueprint(this, descriptor);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
 
+        Ref<ComputePipelineBase> result;
         auto iter = mCaches->computePipelines.find(&blueprint);
         if (iter != mCaches->computePipelines.end()) {
-            (*iter)->Reference();
-            return *iter;
+            result = *iter;
+        } else {
+            DAWN_TRY_ASSIGN(result, CreateComputePipelineImpl(descriptor));
+            result->SetIsCachedReference();
+            result->SetContentHash(blueprintHash);
+            mCaches->computePipelines.insert(result.Get());
         }
 
-        ComputePipelineBase* backendObj;
-        DAWN_TRY_ASSIGN(backendObj, CreateComputePipelineImpl(descriptor));
-        backendObj->SetIsCachedReference();
-        backendObj->SetContentHash(blueprintHash);
-        mCaches->computePipelines.insert(backendObj);
-        return backendObj;
+        return std::move(result);
     }
 
     void DeviceBase::UncacheComputePipeline(ComputePipelineBase* obj) {
@@ -504,25 +503,25 @@ namespace dawn_native {
         ASSERT(removedCount == 1);
     }
 
-    ResultOrError<PipelineLayoutBase*> DeviceBase::GetOrCreatePipelineLayout(
+    ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::GetOrCreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor) {
         PipelineLayoutBase blueprint(this, descriptor);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
 
+        Ref<PipelineLayoutBase> result;
         auto iter = mCaches->pipelineLayouts.find(&blueprint);
         if (iter != mCaches->pipelineLayouts.end()) {
-            (*iter)->Reference();
-            return *iter;
+            result = *iter;
+        } else {
+            DAWN_TRY_ASSIGN(result, CreatePipelineLayoutImpl(descriptor));
+            result->SetIsCachedReference();
+            result->SetContentHash(blueprintHash);
+            mCaches->pipelineLayouts.insert(result.Get());
         }
 
-        PipelineLayoutBase* backendObj;
-        DAWN_TRY_ASSIGN(backendObj, CreatePipelineLayoutImpl(descriptor));
-        backendObj->SetIsCachedReference();
-        backendObj->SetContentHash(blueprintHash);
-        mCaches->pipelineLayouts.insert(backendObj);
-        return backendObj;
+        return std::move(result);
     }
 
     void DeviceBase::UncachePipelineLayout(PipelineLayoutBase* obj) {
@@ -531,25 +530,25 @@ namespace dawn_native {
         ASSERT(removedCount == 1);
     }
 
-    ResultOrError<RenderPipelineBase*> DeviceBase::GetOrCreateRenderPipeline(
+    ResultOrError<Ref<RenderPipelineBase>> DeviceBase::GetOrCreateRenderPipeline(
         const RenderPipelineDescriptor* descriptor) {
         RenderPipelineBase blueprint(this, descriptor);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
 
+        Ref<RenderPipelineBase> result;
         auto iter = mCaches->renderPipelines.find(&blueprint);
         if (iter != mCaches->renderPipelines.end()) {
-            (*iter)->Reference();
-            return *iter;
+            result = *iter;
+        } else {
+            DAWN_TRY_ASSIGN(result, CreateRenderPipelineImpl(descriptor));
+            result->SetIsCachedReference();
+            result->SetContentHash(blueprintHash);
+            mCaches->renderPipelines.insert(result.Get());
         }
 
-        RenderPipelineBase* backendObj;
-        DAWN_TRY_ASSIGN(backendObj, CreateRenderPipelineImpl(descriptor));
-        backendObj->SetIsCachedReference();
-        backendObj->SetContentHash(blueprintHash);
-        mCaches->renderPipelines.insert(backendObj);
-        return backendObj;
+        return std::move(result);
     }
 
     void DeviceBase::UncacheRenderPipeline(RenderPipelineBase* obj) {
@@ -558,25 +557,25 @@ namespace dawn_native {
         ASSERT(removedCount == 1);
     }
 
-    ResultOrError<SamplerBase*> DeviceBase::GetOrCreateSampler(
+    ResultOrError<Ref<SamplerBase>> DeviceBase::GetOrCreateSampler(
         const SamplerDescriptor* descriptor) {
         SamplerBase blueprint(this, descriptor);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
 
+        Ref<SamplerBase> result;
         auto iter = mCaches->samplers.find(&blueprint);
         if (iter != mCaches->samplers.end()) {
-            (*iter)->Reference();
-            return *iter;
+            result = *iter;
+        } else {
+            DAWN_TRY_ASSIGN(result, CreateSamplerImpl(descriptor));
+            result->SetIsCachedReference();
+            result->SetContentHash(blueprintHash);
+            mCaches->samplers.insert(result.Get());
         }
 
-        SamplerBase* backendObj;
-        DAWN_TRY_ASSIGN(backendObj, CreateSamplerImpl(descriptor));
-        backendObj->SetIsCachedReference();
-        backendObj->SetContentHash(blueprintHash);
-        mCaches->samplers.insert(backendObj);
-        return backendObj;
+        return std::move(result);
     }
 
     void DeviceBase::UncacheSampler(SamplerBase* obj) {
@@ -585,7 +584,7 @@ namespace dawn_native {
         ASSERT(removedCount == 1);
     }
 
-    ResultOrError<ShaderModuleBase*> DeviceBase::GetOrCreateShaderModule(
+    ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
         ShaderModuleParseResult* parseResult) {
         ShaderModuleBase blueprint(this, descriptor);
@@ -593,29 +592,29 @@ namespace dawn_native {
         const size_t blueprintHash = blueprint.ComputeContentHash();
         blueprint.SetContentHash(blueprintHash);
 
+        Ref<ShaderModuleBase> result;
         auto iter = mCaches->shaderModules.find(&blueprint);
         if (iter != mCaches->shaderModules.end()) {
-            (*iter)->Reference();
-            return *iter;
+            result = *iter;
+        } else {
+            if (parseResult == nullptr) {
+                // We skip the parse on creation if validation isn't enabled which let's us quickly
+                // lookup in the cache without validating and parsing. We need the parsed module
+                // now, so call validate. Most of |ValidateShaderModuleDescriptor| is parsing, but
+                // we can consider splitting it if additional validation is added.
+                ASSERT(!IsValidationEnabled());
+                ShaderModuleParseResult localParseResult =
+                    ValidateShaderModuleDescriptor(this, descriptor).AcquireSuccess();
+                DAWN_TRY_ASSIGN(result, CreateShaderModuleImpl(descriptor, &localParseResult));
+            } else {
+                DAWN_TRY_ASSIGN(result, CreateShaderModuleImpl(descriptor, parseResult));
+            }
+            result->SetIsCachedReference();
+            result->SetContentHash(blueprintHash);
+            mCaches->shaderModules.insert(result.Get());
         }
 
-        ShaderModuleBase* backendObj;
-        if (parseResult == nullptr) {
-            // We skip the parse on creation if validation isn't enabled which let's us quickly
-            // lookup in the cache without validating and parsing. We need the parsed module now, so
-            // call validate. Most of |ValidateShaderModuleDescriptor| is parsing, but we can
-            // consider splitting it if additional validation is added.
-            ASSERT(!IsValidationEnabled());
-            ShaderModuleParseResult localParseResult =
-                ValidateShaderModuleDescriptor(this, descriptor).AcquireSuccess();
-            DAWN_TRY_ASSIGN(backendObj, CreateShaderModuleImpl(descriptor, &localParseResult));
-        } else {
-            DAWN_TRY_ASSIGN(backendObj, CreateShaderModuleImpl(descriptor, parseResult));
-        }
-        backendObj->SetIsCachedReference();
-        backendObj->SetContentHash(blueprintHash);
-        mCaches->shaderModules.insert(backendObj);
-        return backendObj;
+        return std::move(result);
     }
 
     void DeviceBase::UncacheShaderModule(ShaderModuleBase* obj) {
@@ -665,23 +664,19 @@ namespace dawn_native {
     // Object creation API methods
 
     BindGroupBase* DeviceBase::APICreateBindGroup(const BindGroupDescriptor* descriptor) {
-        BindGroupBase* result = nullptr;
-
-        if (ConsumedError(CreateBindGroupInternal(&result, descriptor))) {
+        Ref<BindGroupBase> result;
+        if (ConsumedError(CreateBindGroupInternal(descriptor), &result)) {
             return BindGroupBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     BindGroupLayoutBase* DeviceBase::APICreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor) {
-        BindGroupLayoutBase* result = nullptr;
-
-        if (ConsumedError(CreateBindGroupLayoutInternal(&result, descriptor))) {
+        Ref<BindGroupLayoutBase> result;
+        if (ConsumedError(CreateBindGroupLayoutInternal(descriptor), &result)) {
             return BindGroupLayoutBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     BufferBase* DeviceBase::APICreateBuffer(const BufferDescriptor* descriptor) {
         Ref<BufferBase> result = nullptr;
@@ -689,7 +684,6 @@ namespace dawn_native {
             ASSERT(result == nullptr);
             return BufferBase::MakeError(this, descriptor);
         }
-
         return result.Detach();
     }
     CommandEncoder* DeviceBase::APICreateCommandEncoder(
@@ -698,19 +692,15 @@ namespace dawn_native {
     }
     ComputePipelineBase* DeviceBase::APICreateComputePipeline(
         const ComputePipelineDescriptor* descriptor) {
-        ComputePipelineBase* result = nullptr;
-
-        if (ConsumedError(CreateComputePipelineInternal(&result, descriptor))) {
+        Ref<ComputePipelineBase> result;
+        if (ConsumedError(CreateComputePipelineInternal(descriptor), &result)) {
             return ComputePipelineBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     void DeviceBase::APICreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
                                                    WGPUCreateComputePipelineAsyncCallback callback,
                                                    void* userdata) {
-        ComputePipelineBase* result = nullptr;
-
         if (IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
             callback(WGPUCreatePipelineAsyncStatus_Error, nullptr,
                      "CreateComputePipelineAsync is disallowed because it isn't completely "
@@ -719,51 +709,45 @@ namespace dawn_native {
             return;
         }
 
-        MaybeError maybeError = CreateComputePipelineInternal(&result, descriptor);
-        if (maybeError.IsError()) {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+        ResultOrError<Ref<ComputePipelineBase>> maybeResult =
+            CreateComputePipelineInternal(descriptor);
+        if (maybeResult.IsError()) {
+            std::unique_ptr<ErrorData> error = maybeResult.AcquireError();
             callback(WGPUCreatePipelineAsyncStatus_Error, nullptr, error->GetMessage().c_str(),
                      userdata);
             return;
         }
 
         std::unique_ptr<CreateComputePipelineAsyncTask> request =
-            std::make_unique<CreateComputePipelineAsyncTask>(result, callback, userdata);
+            std::make_unique<CreateComputePipelineAsyncTask>(maybeResult.AcquireSuccess().Detach(),
+                                                             callback, userdata);
         mCreatePipelineAsyncTracker->TrackTask(std::move(request), GetPendingCommandSerial());
     }
     PipelineLayoutBase* DeviceBase::APICreatePipelineLayout(
         const PipelineLayoutDescriptor* descriptor) {
-        PipelineLayoutBase* result = nullptr;
-
-        if (ConsumedError(CreatePipelineLayoutInternal(&result, descriptor))) {
+        Ref<PipelineLayoutBase> result;
+        if (ConsumedError(CreatePipelineLayoutInternal(descriptor), &result)) {
             return PipelineLayoutBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     QuerySetBase* DeviceBase::APICreateQuerySet(const QuerySetDescriptor* descriptor) {
-        QuerySetBase* result = nullptr;
-
-        if (ConsumedError(CreateQuerySetInternal(&result, descriptor))) {
+        Ref<QuerySetBase> result;
+        if (ConsumedError(CreateQuerySetInternal(descriptor), &result)) {
             return QuerySetBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     SamplerBase* DeviceBase::APICreateSampler(const SamplerDescriptor* descriptor) {
-        SamplerBase* result = nullptr;
-
-        if (ConsumedError(CreateSamplerInternal(&result, descriptor))) {
+        Ref<SamplerBase> result;
+        if (ConsumedError(CreateSamplerInternal(descriptor), &result)) {
             return SamplerBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor2* descriptor,
                                                   WGPUCreateRenderPipelineAsyncCallback callback,
                                                   void* userdata) {
-        RenderPipelineBase* result = nullptr;
-
         if (IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
             callback(WGPUCreatePipelineAsyncStatus_Error, nullptr,
                      "CreateRenderPipelineAsync is disallowed because it isn't completely "
@@ -772,91 +756,79 @@ namespace dawn_native {
             return;
         }
 
-        MaybeError maybeError = CreateRenderPipelineInternal(&result, descriptor);
-        if (maybeError.IsError()) {
-            std::unique_ptr<ErrorData> error = maybeError.AcquireError();
+        ResultOrError<Ref<RenderPipelineBase>> maybeResult =
+            CreateRenderPipelineInternal(descriptor);
+        if (maybeResult.IsError()) {
+            std::unique_ptr<ErrorData> error = maybeResult.AcquireError();
             callback(WGPUCreatePipelineAsyncStatus_Error, nullptr, error->GetMessage().c_str(),
                      userdata);
             return;
         }
 
         std::unique_ptr<CreateRenderPipelineAsyncTask> request =
-            std::make_unique<CreateRenderPipelineAsyncTask>(result, callback, userdata);
+            std::make_unique<CreateRenderPipelineAsyncTask>(maybeResult.AcquireSuccess().Detach(),
+                                                            callback, userdata);
         mCreatePipelineAsyncTracker->TrackTask(std::move(request), GetPendingCommandSerial());
     }
     RenderBundleEncoder* DeviceBase::APICreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor) {
-        RenderBundleEncoder* result = nullptr;
-
-        if (ConsumedError(CreateRenderBundleEncoderInternal(&result, descriptor))) {
+        Ref<RenderBundleEncoder> result;
+        if (ConsumedError(CreateRenderBundleEncoderInternal(descriptor), &result)) {
             return RenderBundleEncoder::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
         const RenderPipelineDescriptor* descriptor) {
-        RenderPipelineBase* result = nullptr;
-
         // TODO: Enable this warning once the tests have been converted to either use the new
         // format or expect the deprecation warning.
         /*EmitDeprecationWarning(
             "The format of RenderPipelineDescriptor has changed, and will soon require the "
             "new structure. Please begin using CreateRenderPipeline2() instead.");*/
 
-        if (ConsumedError(CreateRenderPipelineInternal(&result, descriptor))) {
+        Ref<RenderPipelineBase> result;
+        if (ConsumedError(CreateRenderPipelineInternal(descriptor), &result)) {
             return RenderPipelineBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     RenderPipelineBase* DeviceBase::APICreateRenderPipeline2(
         const RenderPipelineDescriptor2* descriptor) {
-        RenderPipelineBase* result = nullptr;
-
-        if (ConsumedError(CreateRenderPipelineInternal(&result, descriptor))) {
+        Ref<RenderPipelineBase> result;
+        if (ConsumedError(CreateRenderPipelineInternal(descriptor), &result)) {
             return RenderPipelineBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor* descriptor) {
-        ShaderModuleBase* result = nullptr;
-
-        if (ConsumedError(CreateShaderModuleInternal(&result, descriptor))) {
+        Ref<ShaderModuleBase> result;
+        if (ConsumedError(CreateShaderModuleInternal(descriptor), &result)) {
             return ShaderModuleBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     SwapChainBase* DeviceBase::APICreateSwapChain(Surface* surface,
                                                   const SwapChainDescriptor* descriptor) {
-        SwapChainBase* result = nullptr;
-
-        if (ConsumedError(CreateSwapChainInternal(&result, surface, descriptor))) {
+        Ref<SwapChainBase> result;
+        if (ConsumedError(CreateSwapChainInternal(surface, descriptor), &result)) {
             return SwapChainBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
     TextureBase* DeviceBase::APICreateTexture(const TextureDescriptor* descriptor) {
         Ref<TextureBase> result;
-
         if (ConsumedError(CreateTextureInternal(descriptor), &result)) {
             return TextureBase::MakeError(this);
         }
-
         return result.Detach();
     }
     TextureViewBase* DeviceBase::CreateTextureView(TextureBase* texture,
                                                    const TextureViewDescriptor* descriptor) {
-        TextureViewBase* result = nullptr;
-
-        if (ConsumedError(CreateTextureViewInternal(&result, texture, descriptor))) {
+        Ref<TextureViewBase> result;
+        if (ConsumedError(CreateTextureViewInternal(texture, descriptor), &result)) {
             return TextureViewBase::MakeError(this);
         }
-
-        return result;
+        return result.Detach();
     }
 
     // For Dawn Wire
@@ -971,27 +943,22 @@ namespace dawn_native {
 
     // Implementation details of object creation
 
-    MaybeError DeviceBase::CreateBindGroupInternal(BindGroupBase** result,
-                                                   const BindGroupDescriptor* descriptor) {
+    ResultOrError<Ref<BindGroupBase>> DeviceBase::CreateBindGroupInternal(
+        const BindGroupDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateBindGroupDescriptor(this, descriptor));
         }
-        DAWN_TRY_ASSIGN(*result, CreateBindGroupImpl(descriptor));
-        return {};
+        return CreateBindGroupImpl(descriptor);
     }
 
-    MaybeError DeviceBase::CreateBindGroupLayoutInternal(
-        BindGroupLayoutBase** result,
+    ResultOrError<Ref<BindGroupLayoutBase>> DeviceBase::CreateBindGroupLayoutInternal(
         const BindGroupLayoutDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateBindGroupLayoutDescriptor(this, descriptor));
         }
-        Ref<BindGroupLayoutBase> bgl;
-        DAWN_TRY_ASSIGN(bgl, GetOrCreateBindGroupLayout(descriptor));
-        *result = bgl.Detach();
-        return {};
+        return GetOrCreateBindGroupLayout(descriptor);
     }
 
     ResultOrError<Ref<BufferBase>> DeviceBase::CreateBufferInternal(
@@ -1011,8 +978,7 @@ namespace dawn_native {
         return std::move(buffer);
     }
 
-    MaybeError DeviceBase::CreateComputePipelineInternal(
-        ComputePipelineBase** result,
+    ResultOrError<Ref<ComputePipelineBase>> DeviceBase::CreateComputePipelineInternal(
         const ComputePipelineDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
@@ -1032,47 +998,40 @@ namespace dawn_native {
 
             descriptorWithDefaultLayout.layout = layoutRef.Get();
 
-            DAWN_TRY_ASSIGN(*result, GetOrCreateComputePipeline(&descriptorWithDefaultLayout));
+            return GetOrCreateComputePipeline(&descriptorWithDefaultLayout);
         } else {
-            DAWN_TRY_ASSIGN(*result, GetOrCreateComputePipeline(descriptor));
+            return GetOrCreateComputePipeline(descriptor);
         }
-        return {};
     }
 
-    MaybeError DeviceBase::CreatePipelineLayoutInternal(
-        PipelineLayoutBase** result,
+    ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreatePipelineLayoutInternal(
         const PipelineLayoutDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
         }
-        DAWN_TRY_ASSIGN(*result, GetOrCreatePipelineLayout(descriptor));
-        return {};
+        return GetOrCreatePipelineLayout(descriptor);
     }
 
-    MaybeError DeviceBase::CreateQuerySetInternal(QuerySetBase** result,
-                                                  const QuerySetDescriptor* descriptor) {
+    ResultOrError<Ref<QuerySetBase>> DeviceBase::CreateQuerySetInternal(
+        const QuerySetDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateQuerySetDescriptor(this, descriptor));
         }
-        DAWN_TRY_ASSIGN(*result, CreateQuerySetImpl(descriptor));
-        return {};
+        return CreateQuerySetImpl(descriptor);
     }
 
-    MaybeError DeviceBase::CreateRenderBundleEncoderInternal(
-        RenderBundleEncoder** result,
+    ResultOrError<Ref<RenderBundleEncoder>> DeviceBase::CreateRenderBundleEncoderInternal(
         const RenderBundleEncoderDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateRenderBundleEncoderDescriptor(this, descriptor));
         }
-        *result = new RenderBundleEncoder(this, descriptor);
-        return {};
+        return RenderBundleEncoder::Create(this, descriptor);
     }
 
-    MaybeError DeviceBase::CreateRenderPipelineInternal(
-        RenderPipelineBase** result,
+    ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipelineInternal(
         const RenderPipelineDescriptor2* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
@@ -1164,13 +1123,10 @@ namespace dawn_native {
             normalizedDescriptor.layout = layoutRef.Get();
         }
 
-        DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(&normalizedDescriptor));
-
-        return {};
+        return GetOrCreateRenderPipeline(&normalizedDescriptor);
     }
 
-    MaybeError DeviceBase::CreateRenderPipelineInternal(
-        RenderPipelineBase** result,
+    ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipelineInternal(
         const RenderPipelineDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
 
@@ -1188,27 +1144,25 @@ namespace dawn_native {
                             PipelineLayoutBase::CreateDefault(this, GetStages(descriptor)));
             descriptorWithDefaultLayout.layout = layoutRef.Get();
 
-            DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(&descriptorWithDefaultLayout));
+            return GetOrCreateRenderPipeline(&descriptorWithDefaultLayout);
         } else {
-            DAWN_TRY_ASSIGN(*result, GetOrCreateRenderPipeline(descriptor));
+            return GetOrCreateRenderPipeline(descriptor);
         }
-        return {};
     }
 
-    MaybeError DeviceBase::CreateSamplerInternal(SamplerBase** result,
-                                                 const SamplerDescriptor* descriptor) {
+    ResultOrError<Ref<SamplerBase>> DeviceBase::CreateSamplerInternal(
+        const SamplerDescriptor* descriptor) {
         const SamplerDescriptor defaultDescriptor = {};
         DAWN_TRY(ValidateIsAlive());
         descriptor = descriptor != nullptr ? descriptor : &defaultDescriptor;
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateSamplerDescriptor(this, descriptor));
         }
-        DAWN_TRY_ASSIGN(*result, GetOrCreateSampler(descriptor));
-        return {};
+        return GetOrCreateSampler(descriptor);
     }
 
-    MaybeError DeviceBase::CreateShaderModuleInternal(ShaderModuleBase** result,
-                                                      const ShaderModuleDescriptor* descriptor) {
+    ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModuleInternal(
+        const ShaderModuleDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
 
         ShaderModuleParseResult parseResult = {};
@@ -1218,13 +1172,12 @@ namespace dawn_native {
             parseResultPtr = &parseResult;
         }
 
-        DAWN_TRY_ASSIGN(*result, GetOrCreateShaderModule(descriptor, parseResultPtr));
-        return {};
+        return GetOrCreateShaderModule(descriptor, parseResultPtr);
     }
 
-    MaybeError DeviceBase::CreateSwapChainInternal(SwapChainBase** result,
-                                                   Surface* surface,
-                                                   const SwapChainDescriptor* descriptor) {
+    ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChainInternal(
+        Surface* surface,
+        const SwapChainDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateSwapChainDescriptor(this, surface, descriptor));
@@ -1232,26 +1185,25 @@ namespace dawn_native {
 
         // TODO(dawn:269): Remove this code path once implementation-based swapchains are removed.
         if (surface == nullptr) {
-            DAWN_TRY_ASSIGN(*result, CreateSwapChainImpl(descriptor));
+            return CreateSwapChainImpl(descriptor);
         } else {
             ASSERT(descriptor->implementation == 0);
 
             NewSwapChainBase* previousSwapChain = surface->GetAttachedSwapChain();
-            ResultOrError<NewSwapChainBase*> maybeNewSwapChain =
+            ResultOrError<Ref<NewSwapChainBase>> maybeNewSwapChain =
                 CreateSwapChainImpl(surface, previousSwapChain, descriptor);
 
             if (previousSwapChain != nullptr) {
                 previousSwapChain->DetachFromSurface();
             }
 
-            NewSwapChainBase* newSwapChain = nullptr;
+            Ref<NewSwapChainBase> newSwapChain;
             DAWN_TRY_ASSIGN(newSwapChain, std::move(maybeNewSwapChain));
 
             newSwapChain->SetIsAttached();
-            surface->SetAttachedSwapChain(newSwapChain);
-            *result = newSwapChain;
+            surface->SetAttachedSwapChain(newSwapChain.Get());
+            return newSwapChain;
         }
-        return {};
     }
 
     ResultOrError<Ref<TextureBase>> DeviceBase::CreateTextureInternal(
@@ -1265,17 +1217,16 @@ namespace dawn_native {
         return CreateTextureImpl(&fixedDescriptor);
     }
 
-    MaybeError DeviceBase::CreateTextureViewInternal(TextureViewBase** result,
-                                                     TextureBase* texture,
-                                                     const TextureViewDescriptor* descriptor) {
+    ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateTextureViewInternal(
+        TextureBase* texture,
+        const TextureViewDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         DAWN_TRY(ValidateObject(texture));
         TextureViewDescriptor desc = GetTextureViewDescriptorWithDefaults(texture, descriptor);
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateTextureViewDescriptor(texture, &desc));
         }
-        DAWN_TRY_ASSIGN(*result, CreateTextureViewImpl(texture, &desc));
-        return {};
+        return CreateTextureViewImpl(texture, &desc);
     }
 
     // Other implementation details

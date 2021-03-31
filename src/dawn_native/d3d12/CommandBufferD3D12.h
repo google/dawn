@@ -30,11 +30,14 @@ namespace dawn_native { namespace d3d12 {
 
     class CommandBuffer final : public CommandBufferBase {
       public:
-        CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+        static Ref<CommandBuffer> Create(CommandEncoder* encoder,
+                                         const CommandBufferDescriptor* descriptor);
 
         MaybeError RecordCommands(CommandRecordingContext* commandContext);
 
       private:
+        CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
+
         MaybeError RecordComputePass(CommandRecordingContext* commandContext,
                                      BindGroupStateTracker* bindingTracker);
         MaybeError RecordRenderPass(CommandRecordingContext* commandContext,

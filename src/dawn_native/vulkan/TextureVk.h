@@ -167,8 +167,8 @@ namespace dawn_native { namespace vulkan {
 
     class TextureView final : public TextureViewBase {
       public:
-        static ResultOrError<TextureView*> Create(TextureBase* texture,
-                                                  const TextureViewDescriptor* descriptor);
+        static ResultOrError<Ref<TextureView>> Create(TextureBase* texture,
+                                                      const TextureViewDescriptor* descriptor);
         VkImageView GetHandle() const;
 
       private:

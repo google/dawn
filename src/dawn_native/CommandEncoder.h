@@ -74,6 +74,9 @@ namespace dawn_native {
         CommandBufferBase* APIFinish(const CommandBufferDescriptor* descriptor = nullptr);
 
       private:
+        ResultOrError<Ref<CommandBufferBase>> FinishInternal(
+            const CommandBufferDescriptor* descriptor);
+
         MaybeError ValidateFinish(CommandIterator* commands,
                                   const PerPassUsages& perPassUsages) const;
 

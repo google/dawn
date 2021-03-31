@@ -65,12 +65,12 @@ namespace dawn_native { namespace opengl {
     }
 
     // static
-    ResultOrError<ShaderModule*> ShaderModule::Create(Device* device,
-                                                      const ShaderModuleDescriptor* descriptor,
-                                                      ShaderModuleParseResult* parseResult) {
+    ResultOrError<Ref<ShaderModule>> ShaderModule::Create(Device* device,
+                                                          const ShaderModuleDescriptor* descriptor,
+                                                          ShaderModuleParseResult* parseResult) {
         Ref<ShaderModule> module = AcquireRef(new ShaderModule(device, descriptor));
         DAWN_TRY(module->Initialize(parseResult));
-        return module.Detach();
+        return module;
     }
 
     ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor)

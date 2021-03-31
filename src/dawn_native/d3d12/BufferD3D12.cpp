@@ -94,6 +94,13 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // namespace
 
+    // static
+    ResultOrError<Ref<Buffer>> Buffer::Create(Device* device, const BufferDescriptor* descriptor) {
+        Ref<Buffer> buffer = AcquireRef(new Buffer(device, descriptor));
+        DAWN_TRY(buffer->Initialize(descriptor->mappedAtCreation));
+        return buffer;
+    }
+
     Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
         : BufferBase(device, descriptor) {
     }

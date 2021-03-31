@@ -544,8 +544,10 @@ namespace dawn_native { namespace metal {
 
     }  // anonymous namespace
 
-    CommandBuffer::CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor)
-        : CommandBufferBase(encoder, descriptor) {
+    // static
+    Ref<CommandBuffer> CommandBuffer::Create(CommandEncoder* encoder,
+                                             const CommandBufferDescriptor* descriptor) {
+        return AcquireRef(new CommandBuffer(encoder, descriptor));
     }
 
     MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) {

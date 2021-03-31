@@ -28,8 +28,8 @@ namespace dawn_native { namespace d3d12 {
 
     class BindGroup final : public BindGroupBase, public PlacementAllocated {
       public:
-        static ResultOrError<BindGroup*> Create(Device* device,
-                                                const BindGroupDescriptor* descriptor);
+        static ResultOrError<Ref<BindGroup>> Create(Device* device,
+                                                    const BindGroupDescriptor* descriptor);
 
         BindGroup(Device* device,
                   const BindGroupDescriptor* descriptor,

@@ -27,8 +27,9 @@ namespace dawn_native { namespace metal {
 
     class ComputePipeline final : public ComputePipelineBase {
       public:
-        static ResultOrError<ComputePipeline*> Create(Device* device,
-                                                      const ComputePipelineDescriptor* descriptor);
+        static ResultOrError<Ref<ComputePipeline>> Create(
+            Device* device,
+            const ComputePipelineDescriptor* descriptor);
 
         void Encode(id<MTLComputeCommandEncoder> encoder);
         MTLSize GetLocalWorkGroupSize() const;

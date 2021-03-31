@@ -26,8 +26,9 @@ namespace dawn_native { namespace vulkan {
 
     class ComputePipeline final : public ComputePipelineBase {
       public:
-        static ResultOrError<ComputePipeline*> Create(Device* device,
-                                                      const ComputePipelineDescriptor* descriptor);
+        static ResultOrError<Ref<ComputePipeline>> Create(
+            Device* device,
+            const ComputePipelineDescriptor* descriptor);
 
         VkPipeline GetHandle() const;
 

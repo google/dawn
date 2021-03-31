@@ -24,8 +24,8 @@ namespace dawn_native { namespace d3d12 {
 
     class QuerySet : public QuerySetBase {
       public:
-        static ResultOrError<QuerySet*> Create(Device* device,
-                                               const QuerySetDescriptor* descriptor);
+        static ResultOrError<Ref<QuerySet>> Create(Device* device,
+                                                   const QuerySetDescriptor* descriptor);
 
         ID3D12QueryHeap* GetQueryHeap() const;
 

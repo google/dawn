@@ -27,8 +27,9 @@ namespace dawn_native { namespace metal {
 
     class RenderPipeline final : public RenderPipelineBase {
       public:
-        static ResultOrError<RenderPipeline*> Create(Device* device,
-                                                     const RenderPipelineDescriptor* descriptor);
+        static ResultOrError<Ref<RenderPipeline>> Create(
+            Device* device,
+            const RenderPipelineDescriptor* descriptor);
 
         MTLPrimitiveType GetMTLPrimitiveTopology() const;
         MTLWinding GetMTLFrontFace() const;

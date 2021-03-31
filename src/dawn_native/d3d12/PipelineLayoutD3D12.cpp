@@ -54,12 +54,12 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // anonymous namespace
 
-    ResultOrError<PipelineLayout*> PipelineLayout::Create(
+    ResultOrError<Ref<PipelineLayout>> PipelineLayout::Create(
         Device* device,
         const PipelineLayoutDescriptor* descriptor) {
         Ref<PipelineLayout> layout = AcquireRef(new PipelineLayout(device, descriptor));
         DAWN_TRY(layout->Initialize());
-        return layout.Detach();
+        return layout;
     }
 
     MaybeError PipelineLayout::Initialize() {

@@ -32,8 +32,8 @@ namespace dawn_native { namespace vulkan {
 
     class CommandBuffer final : public CommandBufferBase {
       public:
-        static CommandBuffer* Create(CommandEncoder* encoder,
-                                     const CommandBufferDescriptor* descriptor);
+        static Ref<CommandBuffer> Create(CommandEncoder* encoder,
+                                         const CommandBufferDescriptor* descriptor);
 
         MaybeError RecordCommands(CommandRecordingContext* recordingContext);
 

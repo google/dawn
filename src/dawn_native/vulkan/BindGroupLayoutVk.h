@@ -45,15 +45,16 @@ namespace dawn_native { namespace vulkan {
     // expensive syscall.
     class BindGroupLayout final : public BindGroupLayoutBase {
       public:
-        static ResultOrError<BindGroupLayout*> Create(Device* device,
-                                                      const BindGroupLayoutDescriptor* descriptor);
+        static ResultOrError<Ref<BindGroupLayout>> Create(
+            Device* device,
+            const BindGroupLayoutDescriptor* descriptor);
 
         BindGroupLayout(DeviceBase* device, const BindGroupLayoutDescriptor* descriptor);
 
         VkDescriptorSetLayout GetHandle() const;
 
-        ResultOrError<BindGroup*> AllocateBindGroup(Device* device,
-                                                    const BindGroupDescriptor* descriptor);
+        ResultOrError<Ref<BindGroup>> AllocateBindGroup(Device* device,
+                                                        const BindGroupDescriptor* descriptor);
         void DeallocateBindGroup(BindGroup* bindGroup,
                                  DescriptorSetAllocation* descriptorSetAllocation);
         void FinishDeallocation(ExecutionSerial completedSerial);

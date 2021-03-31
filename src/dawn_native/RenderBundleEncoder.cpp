@@ -91,6 +91,13 @@ namespace dawn_native {
     }
 
     // static
+    Ref<RenderBundleEncoder> RenderBundleEncoder::Create(
+        DeviceBase* device,
+        const RenderBundleEncoderDescriptor* descriptor) {
+        return AcquireRef(new RenderBundleEncoder(device, descriptor));
+    }
+
+    // static
     RenderBundleEncoder* RenderBundleEncoder::MakeError(DeviceBase* device) {
         return new RenderBundleEncoder(device, ObjectBase::kError);
     }

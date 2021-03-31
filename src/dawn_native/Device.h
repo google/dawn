@@ -81,7 +81,7 @@ namespace dawn_native {
         // The reference returned has the same lifetime as the device.
         const Format& GetValidInternalFormat(wgpu::TextureFormat format) const;
 
-        virtual CommandBufferBase* CreateCommandBuffer(
+        virtual ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
             CommandEncoder* encoder,
             const CommandBufferDescriptor* descriptor) = 0;
 
@@ -110,22 +110,22 @@ namespace dawn_native {
 
         BindGroupLayoutBase* GetEmptyBindGroupLayout();
 
-        ResultOrError<ComputePipelineBase*> GetOrCreateComputePipeline(
+        ResultOrError<Ref<ComputePipelineBase>> GetOrCreateComputePipeline(
             const ComputePipelineDescriptor* descriptor);
         void UncacheComputePipeline(ComputePipelineBase* obj);
 
-        ResultOrError<PipelineLayoutBase*> GetOrCreatePipelineLayout(
+        ResultOrError<Ref<PipelineLayoutBase>> GetOrCreatePipelineLayout(
             const PipelineLayoutDescriptor* descriptor);
         void UncachePipelineLayout(PipelineLayoutBase* obj);
 
-        ResultOrError<RenderPipelineBase*> GetOrCreateRenderPipeline(
+        ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRenderPipeline(
             const RenderPipelineDescriptor* descriptor);
         void UncacheRenderPipeline(RenderPipelineBase* obj);
 
-        ResultOrError<SamplerBase*> GetOrCreateSampler(const SamplerDescriptor* descriptor);
+        ResultOrError<Ref<SamplerBase>> GetOrCreateSampler(const SamplerDescriptor* descriptor);
         void UncacheSampler(SamplerBase* obj);
 
-        ResultOrError<ShaderModuleBase*> GetOrCreateShaderModule(
+        ResultOrError<Ref<ShaderModuleBase>> GetOrCreateShaderModule(
             const ShaderModuleDescriptor* descriptor,
             ShaderModuleParseResult* parseResult);
         void UncacheShaderModule(ShaderModuleBase* obj);
@@ -259,35 +259,35 @@ namespace dawn_native {
         void IncrementLastSubmittedCommandSerial();
 
       private:
-        virtual ResultOrError<BindGroupBase*> CreateBindGroupImpl(
+        virtual ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
             const BindGroupDescriptor* descriptor) = 0;
-        virtual ResultOrError<BindGroupLayoutBase*> CreateBindGroupLayoutImpl(
+        virtual ResultOrError<Ref<BindGroupLayoutBase>> CreateBindGroupLayoutImpl(
             const BindGroupLayoutDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<BufferBase>> CreateBufferImpl(
             const BufferDescriptor* descriptor) = 0;
-        virtual ResultOrError<ComputePipelineBase*> CreateComputePipelineImpl(
+        virtual ResultOrError<Ref<ComputePipelineBase>> CreateComputePipelineImpl(
             const ComputePipelineDescriptor* descriptor) = 0;
-        virtual ResultOrError<PipelineLayoutBase*> CreatePipelineLayoutImpl(
+        virtual ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutImpl(
             const PipelineLayoutDescriptor* descriptor) = 0;
-        virtual ResultOrError<QuerySetBase*> CreateQuerySetImpl(
+        virtual ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
             const QuerySetDescriptor* descriptor) = 0;
-        virtual ResultOrError<RenderPipelineBase*> CreateRenderPipelineImpl(
+        virtual ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineImpl(
             const RenderPipelineDescriptor* descriptor) = 0;
-        virtual ResultOrError<SamplerBase*> CreateSamplerImpl(
+        virtual ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) = 0;
-        virtual ResultOrError<ShaderModuleBase*> CreateShaderModuleImpl(
+        virtual ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
             const ShaderModuleDescriptor* descriptor,
             ShaderModuleParseResult* parseResult) = 0;
-        virtual ResultOrError<SwapChainBase*> CreateSwapChainImpl(
+        virtual ResultOrError<Ref<SwapChainBase>> CreateSwapChainImpl(
             const SwapChainDescriptor* descriptor) = 0;
         // Note that previousSwapChain may be nullptr, or come from a different backend.
-        virtual ResultOrError<NewSwapChainBase*> CreateSwapChainImpl(
+        virtual ResultOrError<Ref<NewSwapChainBase>> CreateSwapChainImpl(
             Surface* surface,
             NewSwapChainBase* previousSwapChain,
             const SwapChainDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<TextureBase>> CreateTextureImpl(
             const TextureDescriptor* descriptor) = 0;
-        virtual ResultOrError<TextureViewBase*> CreateTextureViewImpl(
+        virtual ResultOrError<Ref<TextureViewBase>> CreateTextureViewImpl(
             TextureBase* texture,
             const TextureViewDescriptor* descriptor) = 0;
 
@@ -295,34 +295,33 @@ namespace dawn_native {
 
         ResultOrError<Ref<BindGroupLayoutBase>> CreateEmptyBindGroupLayout();
 
-        MaybeError CreateBindGroupInternal(BindGroupBase** result,
-                                           const BindGroupDescriptor* descriptor);
-        MaybeError CreateBindGroupLayoutInternal(BindGroupLayoutBase** result,
-                                                 const BindGroupLayoutDescriptor* descriptor);
+        ResultOrError<Ref<BindGroupBase>> CreateBindGroupInternal(
+            const BindGroupDescriptor* descriptor);
+        ResultOrError<Ref<BindGroupLayoutBase>> CreateBindGroupLayoutInternal(
+            const BindGroupLayoutDescriptor* descriptor);
         ResultOrError<Ref<BufferBase>> CreateBufferInternal(const BufferDescriptor* descriptor);
-        MaybeError CreateComputePipelineInternal(ComputePipelineBase** result,
-                                                 const ComputePipelineDescriptor* descriptor);
-        MaybeError CreatePipelineLayoutInternal(PipelineLayoutBase** result,
-                                                const PipelineLayoutDescriptor* descriptor);
-        MaybeError CreateQuerySetInternal(QuerySetBase** result,
-                                          const QuerySetDescriptor* descriptor);
-        MaybeError CreateRenderBundleEncoderInternal(
-            RenderBundleEncoder** result,
+        ResultOrError<Ref<ComputePipelineBase>> CreateComputePipelineInternal(
+            const ComputePipelineDescriptor* descriptor);
+        ResultOrError<Ref<PipelineLayoutBase>> CreatePipelineLayoutInternal(
+            const PipelineLayoutDescriptor* descriptor);
+        ResultOrError<Ref<QuerySetBase>> CreateQuerySetInternal(
+            const QuerySetDescriptor* descriptor);
+        ResultOrError<Ref<RenderBundleEncoder>> CreateRenderBundleEncoderInternal(
             const RenderBundleEncoderDescriptor* descriptor);
-        MaybeError CreateRenderPipelineInternal(RenderPipelineBase** result,
-                                                const RenderPipelineDescriptor2* descriptor);
-        MaybeError CreateRenderPipelineInternal(RenderPipelineBase** result,
-                                                const RenderPipelineDescriptor* descriptor);
-        MaybeError CreateSamplerInternal(SamplerBase** result, const SamplerDescriptor* descriptor);
-        MaybeError CreateShaderModuleInternal(ShaderModuleBase** result,
-                                              const ShaderModuleDescriptor* descriptor);
-        MaybeError CreateSwapChainInternal(SwapChainBase** result,
-                                           Surface* surface,
-                                           const SwapChainDescriptor* descriptor);
+        ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineInternal(
+            const RenderPipelineDescriptor2* descriptor);
+        ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineInternal(
+            const RenderPipelineDescriptor* descriptor);
+        ResultOrError<Ref<SamplerBase>> CreateSamplerInternal(const SamplerDescriptor* descriptor);
+        ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleInternal(
+            const ShaderModuleDescriptor* descriptor);
+        ResultOrError<Ref<SwapChainBase>> CreateSwapChainInternal(
+            Surface* surface,
+            const SwapChainDescriptor* descriptor);
         ResultOrError<Ref<TextureBase>> CreateTextureInternal(const TextureDescriptor* descriptor);
-        MaybeError CreateTextureViewInternal(TextureViewBase** result,
-                                             TextureBase* texture,
-                                             const TextureViewDescriptor* descriptor);
+        ResultOrError<Ref<TextureViewBase>> CreateTextureViewInternal(
+            TextureBase* texture,
+            const TextureViewDescriptor* descriptor);
 
         void ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor);
         void ApplyExtensions(const DeviceDescriptor* deviceDescriptor);

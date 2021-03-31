@@ -310,12 +310,12 @@ namespace dawn_native { namespace metal {
     }  // anonymous namespace
 
     // static
-    ResultOrError<RenderPipeline*> RenderPipeline::Create(
+    ResultOrError<Ref<RenderPipeline>> RenderPipeline::Create(
         Device* device,
         const RenderPipelineDescriptor* descriptor) {
         Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
         DAWN_TRY(pipeline->Initialize(descriptor));
-        return pipeline.Detach();
+        return pipeline;
     }
 
     MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {

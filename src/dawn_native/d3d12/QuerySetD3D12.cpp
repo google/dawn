@@ -33,11 +33,11 @@ namespace dawn_native { namespace d3d12 {
     }  // anonymous namespace
 
     // static
-    ResultOrError<QuerySet*> QuerySet::Create(Device* device,
-                                              const QuerySetDescriptor* descriptor) {
+    ResultOrError<Ref<QuerySet>> QuerySet::Create(Device* device,
+                                                  const QuerySetDescriptor* descriptor) {
         Ref<QuerySet> querySet = AcquireRef(new QuerySet(device, descriptor));
         DAWN_TRY(querySet->Initialize());
-        return querySet.Detach();
+        return querySet;
     }
 
     MaybeError QuerySet::Initialize() {

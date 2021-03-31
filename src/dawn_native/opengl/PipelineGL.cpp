@@ -99,8 +99,8 @@ namespace dawn_native { namespace opengl {
             ASSERT(desc.minFilter == wgpu::FilterMode::Nearest);
             ASSERT(desc.magFilter == wgpu::FilterMode::Nearest);
             ASSERT(desc.mipmapFilter == wgpu::FilterMode::Nearest);
-            mDummySampler = AcquireRef(
-                ToBackend(layout->GetDevice()->GetOrCreateSampler(&desc).AcquireSuccess()));
+            mDummySampler =
+                ToBackend(layout->GetDevice()->GetOrCreateSampler(&desc).AcquireSuccess());
         }
 
         // Link all the shaders together.

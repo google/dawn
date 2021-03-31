@@ -34,9 +34,9 @@ namespace dawn_native { namespace metal {
 
     class ShaderModule final : public ShaderModuleBase {
       public:
-        static ResultOrError<ShaderModule*> Create(Device* device,
-                                                   const ShaderModuleDescriptor* descriptor,
-                                                   ShaderModuleParseResult* parseResult);
+        static ResultOrError<Ref<ShaderModule>> Create(Device* device,
+                                                       const ShaderModuleDescriptor* descriptor,
+                                                       ShaderModuleParseResult* parseResult);
 
         struct MetalFunctionData {
             NSPRef<id<MTLFunction>> function;

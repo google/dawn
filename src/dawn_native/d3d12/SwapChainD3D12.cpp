@@ -21,6 +21,11 @@
 
 namespace dawn_native { namespace d3d12 {
 
+    // static
+    Ref<SwapChain> SwapChain::Create(Device* device, const SwapChainDescriptor* descriptor) {
+        return AcquireRef(new SwapChain(device, descriptor));
+    }
+
     SwapChain::SwapChain(Device* device, const SwapChainDescriptor* descriptor)
         : OldSwapChainBase(device, descriptor) {
         const auto& im = GetImplementation();

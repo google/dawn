@@ -74,12 +74,12 @@ namespace dawn_native { namespace vulkan {
     }
 
     // static
-    ResultOrError<BindGroupLayout*> BindGroupLayout::Create(
+    ResultOrError<Ref<BindGroupLayout>> BindGroupLayout::Create(
         Device* device,
         const BindGroupLayoutDescriptor* descriptor) {
         Ref<BindGroupLayout> bgl = AcquireRef(new BindGroupLayout(device, descriptor));
         DAWN_TRY(bgl->Initialize());
-        return bgl.Detach();
+        return bgl;
     }
 
     MaybeError BindGroupLayout::Initialize() {
@@ -158,13 +158,14 @@ namespace dawn_native { namespace vulkan {
         return mHandle;
     }
 
-    ResultOrError<BindGroup*> BindGroupLayout::AllocateBindGroup(
+    ResultOrError<Ref<BindGroup>> BindGroupLayout::AllocateBindGroup(
         Device* device,
         const BindGroupDescriptor* descriptor) {
         DescriptorSetAllocation descriptorSetAllocation;
         DAWN_TRY_ASSIGN(descriptorSetAllocation, mDescriptorSetAllocator->Allocate());
 
-        return mBindGroupAllocator.Allocate(device, descriptor, descriptorSetAllocation);
+        return AcquireRef(
+            mBindGroupAllocator.Allocate(device, descriptor, descriptorSetAllocation));
     }
 
     void BindGroupLayout::DeallocateBindGroup(BindGroup* bindGroup,

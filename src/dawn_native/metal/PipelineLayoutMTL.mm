@@ -20,6 +20,12 @@
 
 namespace dawn_native { namespace metal {
 
+    // static
+    Ref<PipelineLayout> PipelineLayout::Create(Device* device,
+                                               const PipelineLayoutDescriptor* descriptor) {
+        return AcquireRef(new PipelineLayout(device, descriptor));
+    }
+
     PipelineLayout::PipelineLayout(Device* device, const PipelineLayoutDescriptor* descriptor)
         : PipelineLayoutBase(device, descriptor) {
         // Each stage has its own numbering namespace in CompilerMSL.

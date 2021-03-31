@@ -128,7 +128,8 @@ namespace dawn_native { namespace d3d12 {
 
     class TextureView final : public TextureViewBase {
       public:
-        TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+        static Ref<TextureView> Create(TextureBase* texture,
+                                       const TextureViewDescriptor* descriptor);
 
         DXGI_FORMAT GetD3D12Format() const;
 
@@ -138,6 +139,8 @@ namespace dawn_native { namespace d3d12 {
         D3D12_UNORDERED_ACCESS_VIEW_DESC GetUAVDescriptor() const;
 
       private:
+        TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor);
+
         D3D12_SHADER_RESOURCE_VIEW_DESC mSrvDesc;
     };
 }}  // namespace dawn_native::d3d12

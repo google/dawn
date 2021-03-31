@@ -27,7 +27,7 @@ namespace dawn_native { namespace metal {
     }
 
     // static
-    BindGroup* BindGroup::Create(Device* device, const BindGroupDescriptor* descriptor) {
+    Ref<BindGroup> BindGroup::Create(Device* device, const BindGroupDescriptor* descriptor) {
         return ToBackend(descriptor->layout)->AllocateBindGroup(device, descriptor);
     }
 

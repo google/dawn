@@ -346,6 +346,12 @@ namespace dawn_native { namespace metal {
         return mtlDescRef;
     }
 
+    // static
+    ResultOrError<Ref<Texture>> Texture::Create(Device* device,
+                                                const TextureDescriptor* descriptor) {
+        return AcquireRef(new Texture(device, descriptor));
+    }
+
     Texture::Texture(Device* device, const TextureDescriptor* descriptor)
         : TextureBase(device, descriptor, TextureState::OwnedInternal) {
         NSRef<MTLTextureDescriptor> mtlDesc = CreateMetalTextureDescriptor(device, descriptor);
@@ -598,6 +604,12 @@ namespace dawn_native { namespace metal {
             // contain dirty bits from recycled memory
             GetDevice()->ConsumedError(ClearTexture(range, TextureBase::ClearValue::Zero));
         }
+    }
+
+    // static
+    ResultOrError<Ref<TextureView>> TextureView::Create(TextureBase* texture,
+                                                        const TextureViewDescriptor* descriptor) {
+        return AcquireRef(new TextureView(texture, descriptor));
     }
 
     TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* descriptor)
