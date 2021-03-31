@@ -78,9 +78,10 @@ Resolver::Resolver(ProgramBuilder* builder)
 
 Resolver::~Resolver() = default;
 
-Resolver::BlockInfo::BlockInfo(Resolver::BlockInfo::Type ty,
+Resolver::BlockInfo::BlockInfo(const ast::BlockStatement* b,
+                               Resolver::BlockInfo::Type ty,
                                Resolver::BlockInfo* p)
-    : type(ty), parent(p) {}
+    : block(b), type(ty), parent(p) {}
 
 Resolver::BlockInfo::~BlockInfo() = default;
 
@@ -370,7 +371,7 @@ bool Resolver::Function(ast::Function* func) {
 }
 
 bool Resolver::BlockStatement(const ast::BlockStatement* stmt) {
-  return BlockScope(BlockInfo::Type::kGeneric,
+  return BlockScope(stmt, BlockInfo::Type::kGeneric,
                     [&] { return Statements(stmt->list()); });
 }
 
@@ -384,7 +385,9 @@ bool Resolver::Statements(const ast::StatementList& stmts) {
 }
 
 bool Resolver::Statement(ast::Statement* stmt) {
-  auto* sem_statement = builder_->create<semantic::Statement>(stmt);
+  auto* sem_statement =
+      builder_->create<semantic::Statement>(stmt, current_block_->block);
+  builder_->Sem().Add(stmt, sem_statement);
 
   ScopedAssignment<semantic::Statement*> sa(current_statement_, sem_statement);
 
@@ -427,9 +430,6 @@ bool Resolver::Statement(ast::Statement* stmt) {
   if (stmt->Is<ast::DiscardStatement>()) {
     return true;
   }
-  if (auto* e = stmt->As<ast::ElseStatement>()) {
-    return Expression(e->condition()) && BlockStatement(e->body());
-  }
   if (stmt->Is<ast::FallthroughStatement>()) {
     return true;
   }
@@ -441,13 +441,13 @@ bool Resolver::Statement(ast::Statement* stmt) {
     // these would make their BlockInfo siblings as in the AST, but we want the
     // body BlockInfo to parent the continuing BlockInfo for semantics and
     // validation. Also, we need to set their types differently.
-    return BlockScope(BlockInfo::Type::kLoop, [&] {
+    return BlockScope(l->body(), BlockInfo::Type::kLoop, [&] {
       if (!Statements(l->body()->list())) {
         return false;
       }
 
       if (l->has_continuing()) {
-        if (!BlockScope(BlockInfo::Type::kLoopContinuing,
+        if (!BlockScope(l->continuing(), BlockInfo::Type::kLoopContinuing,
                         [&] { return Statements(l->continuing()->list()); })) {
           return false;
         }
@@ -473,7 +473,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
 }
 
 bool Resolver::CaseStatement(ast::CaseStatement* stmt) {
-  return BlockScope(BlockInfo::Type::kSwitchCase,
+  return BlockScope(stmt->body(), BlockInfo::Type::kSwitchCase,
                     [&] { return Statements(stmt->body()->list()); });
 }
 
@@ -495,7 +495,18 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
   }
 
   for (auto* else_stmt : stmt->else_statements()) {
-    if (!Statement(else_stmt)) {
+    // Else statements are a bit unusual - they're owned by the if-statement,
+    // not a BlockStatement.
+    constexpr ast::BlockStatement* no_block_statement = nullptr;
+    auto* sem_else_stmt =
+        builder_->create<semantic::Statement>(else_stmt, no_block_statement);
+    builder_->Sem().Add(else_stmt, sem_else_stmt);
+    ScopedAssignment<semantic::Statement*> sa(current_statement_,
+                                              sem_else_stmt);
+    if (!Expression(else_stmt->condition())) {
+      return false;
+    }
+    if (!BlockStatement(else_stmt->body())) {
       return false;
     }
   }
@@ -1923,8 +1934,10 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
 }
 
 template <typename F>
-bool Resolver::BlockScope(BlockInfo::Type type, F&& callback) {
-  BlockInfo block_info(type, current_block_);
+bool Resolver::BlockScope(const ast::BlockStatement* block,
+                          BlockInfo::Type type,
+                          F&& callback) {
+  BlockInfo block_info(block, type, current_block_);
   ScopedAssignment<BlockInfo*> sa(current_block_, &block_info);
   variable_stack_.push_scope();
   bool result = callback();

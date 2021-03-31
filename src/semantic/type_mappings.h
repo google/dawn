@@ -25,6 +25,7 @@ class CallExpression;
 class Expression;
 class Function;
 class MemberAccessorExpression;
+class Statement;
 class StructMember;
 class Variable;
 }  // namespace ast
@@ -41,6 +42,7 @@ class Call;
 class Expression;
 class Function;
 class MemberAccessorExpression;
+class Statement;
 class Struct;
 class StructMember;
 class Variable;
@@ -56,6 +58,7 @@ struct TypeMappings {
   Expression* operator()(ast::Expression*);
   Function* operator()(ast::Function*);
   MemberAccessorExpression* operator()(ast::MemberAccessorExpression*);
+  Statement* operator()(ast::Statement*);
   Struct* operator()(type::Struct*);
   StructMember* operator()(ast::StructMember*);
   Variable* operator()(ast::Variable*);

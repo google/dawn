@@ -44,9 +44,27 @@ class TestHelper : public ProgramBuilder {
   /// @param expr the ast::Expression
   /// @return the ast::Statement of the ast::Expression, or nullptr if the
   /// expression is not owned by a statement.
-  ast::Statement* StmtOf(ast::Expression* expr) {
+  const ast::Statement* StmtOf(ast::Expression* expr) {
     auto* sem_stmt = Sem().Get(expr)->Stmt();
     return sem_stmt ? sem_stmt->Declaration() : nullptr;
+  }
+
+  /// Returns the BlockStatement that holds the given statement.
+  /// @param stmt the ast::Statment
+  /// @return the ast::BlockStatement that holds the ast::Statement, or nullptr
+  /// if the statement is not owned by a BlockStatement.
+  const ast::BlockStatement* BlockOf(ast::Statement* stmt) {
+    auto* sem_stmt = Sem().Get(stmt);
+    return sem_stmt ? sem_stmt->Block() : nullptr;
+  }
+
+  /// Returns the BlockStatement that holds the given expression.
+  /// @param expr the ast::Expression
+  /// @return the ast::Statement of the ast::Expression, or nullptr if the
+  /// expression is not indirectly owned by a BlockStatement.
+  const ast::BlockStatement* BlockOf(ast::Expression* expr) {
+    auto* sem_stmt = Sem().Get(expr)->Stmt();
+    return sem_stmt ? sem_stmt->Block() : nullptr;
   }
 
   /// Checks that all the users of the given variable are as expected

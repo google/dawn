@@ -149,7 +149,7 @@ class Resolver {
   struct BlockInfo {
     enum class Type { kGeneric, kLoop, kLoopContinuing, kSwitchCase };
 
-    BlockInfo(Type type, BlockInfo* parent);
+    BlockInfo(const ast::BlockStatement* block, Type type, BlockInfo* parent);
     ~BlockInfo();
 
     template <typename Pred>
@@ -166,6 +166,7 @@ class Resolver {
           [ty](auto* block_info) { return block_info->type == ty; });
     }
 
+    ast::BlockStatement const* const block;
     Type const type;
     BlockInfo* const parent;
     std::vector<const ast::Variable*> decls;
@@ -279,7 +280,9 @@ class Resolver {
   /// its parent, assigns this to #current_block_, and then calls `callback`.
   /// The original #current_block_ is restored on exit.
   template <typename F>
-  bool BlockScope(BlockInfo::Type type, F&& callback);
+  bool BlockScope(const ast::BlockStatement* block,
+                  BlockInfo::Type type,
+                  F&& callback);
 
   /// Returns a human-readable string representation of the vector type name
   /// with the given parameters.

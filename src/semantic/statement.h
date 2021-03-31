@@ -21,6 +21,7 @@ namespace tint {
 
 // Forward declarations
 namespace ast {
+class BlockStatement;
 class Statement;
 }  // namespace ast
 
@@ -31,13 +32,19 @@ class Statement : public Castable<Statement, Node> {
  public:
   /// Constructor
   /// @param declaration the AST node for this statement
-  explicit Statement(ast::Statement* declaration);
+  /// @param block the owning AST block statement
+  Statement(const ast::Statement* declaration,
+            const ast::BlockStatement* block);
 
   /// @return the AST node for this statement
-  ast::Statement* Declaration() const { return declaration_; }
+  const ast::Statement* Declaration() const { return declaration_; }
+
+  /// @return the owning AST block statement for this statement
+  const ast::BlockStatement* Block() const { return block_; }
 
  private:
-  ast::Statement* const declaration_;
+  ast::Statement const* const declaration_;
+  ast::BlockStatement const* const block_;
 };
 
 }  // namespace semantic

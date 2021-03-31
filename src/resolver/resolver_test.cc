@@ -77,10 +77,10 @@ TEST_F(ResolverTest, Stmt_Case) {
   auto* rhs = Expr(2.3f);
 
   auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-  auto* body = Block(assign);
+  auto* block = Block(assign);
   ast::CaseSelectorList lit;
   lit.push_back(create<ast::SintLiteral>(ty.i32(), 3));
-  auto* cse = create<ast::CaseStatement>(lit, body);
+  auto* cse = create<ast::CaseStatement>(lit, block);
   WrapInFunction(v, cse);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -91,6 +91,7 @@ TEST_F(ResolverTest, Stmt_Case) {
   EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
   EXPECT_EQ(StmtOf(lhs), assign);
   EXPECT_EQ(StmtOf(rhs), assign);
+  EXPECT_EQ(BlockOf(assign), block);
 }
 
 TEST_F(ResolverTest, Stmt_Block) {
@@ -110,30 +111,9 @@ TEST_F(ResolverTest, Stmt_Block) {
   EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
   EXPECT_EQ(StmtOf(lhs), assign);
   EXPECT_EQ(StmtOf(rhs), assign);
-}
-
-TEST_F(ResolverTest, Stmt_Else) {
-  auto* v = Var("v", ty.f32(), ast::StorageClass::kFunction);
-  auto* lhs = Expr("v");
-  auto* rhs = Expr(2.3f);
-
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-  auto* body = Block(assign);
-  auto* cond = Expr(3);
-  auto* stmt = create<ast::ElseStatement>(cond, body);
-  WrapInFunction(v, stmt);
-
-  EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-  ASSERT_NE(TypeOf(stmt->condition()), nullptr);
-  ASSERT_NE(TypeOf(lhs), nullptr);
-  ASSERT_NE(TypeOf(rhs), nullptr);
-  EXPECT_TRUE(TypeOf(stmt->condition())->Is<type::I32>());
-  EXPECT_TRUE(TypeOf(lhs)->UnwrapAll()->Is<type::F32>());
-  EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
-  EXPECT_EQ(StmtOf(lhs), assign);
-  EXPECT_EQ(StmtOf(rhs), assign);
-  EXPECT_EQ(StmtOf(cond), stmt);
+  EXPECT_EQ(BlockOf(lhs), block);
+  EXPECT_EQ(BlockOf(rhs), block);
+  EXPECT_EQ(BlockOf(assign), block);
 }
 
 TEST_F(ResolverTest, Stmt_If) {
@@ -172,6 +152,10 @@ TEST_F(ResolverTest, Stmt_If) {
   EXPECT_EQ(StmtOf(rhs), assign);
   EXPECT_EQ(StmtOf(cond), stmt);
   EXPECT_EQ(StmtOf(else_cond), else_stmt);
+  EXPECT_EQ(BlockOf(lhs), body);
+  EXPECT_EQ(BlockOf(rhs), body);
+  EXPECT_EQ(BlockOf(else_lhs), else_body);
+  EXPECT_EQ(BlockOf(else_rhs), else_body);
 }
 
 TEST_F(ResolverTest, Stmt_Loop) {
@@ -199,6 +183,10 @@ TEST_F(ResolverTest, Stmt_Loop) {
   EXPECT_TRUE(TypeOf(body_rhs)->Is<type::F32>());
   EXPECT_TRUE(TypeOf(continuing_lhs)->UnwrapAll()->Is<type::F32>());
   EXPECT_TRUE(TypeOf(continuing_rhs)->Is<type::F32>());
+  EXPECT_EQ(BlockOf(body_lhs), body);
+  EXPECT_EQ(BlockOf(body_rhs), body);
+  EXPECT_EQ(BlockOf(continuing_lhs), continuing);
+  EXPECT_EQ(BlockOf(continuing_rhs), continuing);
 }
 
 TEST_F(ResolverTest, Stmt_Return) {
@@ -224,9 +212,8 @@ TEST_F(ResolverTest, Stmt_Switch) {
   auto* v = Var("v", ty.f32(), ast::StorageClass::kFunction);
   auto* lhs = Expr("v");
   auto* rhs = Expr(2.3f);
-
-  auto* stmt =
-      Switch(Expr(2), Case(Literal(3), Block(Assign(lhs, rhs))), DefaultCase());
+  auto* case_block = Block(Assign(lhs, rhs));
+  auto* stmt = Switch(Expr(2), Case(Literal(3), case_block), DefaultCase());
   WrapInFunction(v, stmt);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -238,6 +225,8 @@ TEST_F(ResolverTest, Stmt_Switch) {
   EXPECT_TRUE(TypeOf(stmt->condition())->Is<type::I32>());
   EXPECT_TRUE(TypeOf(lhs)->UnwrapAll()->Is<type::F32>());
   EXPECT_TRUE(TypeOf(rhs)->Is<type::F32>());
+  EXPECT_EQ(BlockOf(lhs), case_block);
+  EXPECT_EQ(BlockOf(rhs), case_block);
 }
 
 TEST_F(ResolverTest, Stmt_Call) {

@@ -65,6 +65,9 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
   /// @returns the ending iterator
   StatementList::const_iterator end() const { return statements_.end(); }
 
+  /// @returns the statement list
+  const StatementList& statements() const { return statements_; }
+
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.
   /// @param ctx the clone context
