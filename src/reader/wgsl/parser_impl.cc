@@ -233,7 +233,6 @@ Token ParserImpl::peek() {
 
 void ParserImpl::register_constructed(const std::string& name,
                                       type::Type* type) {
-  assert(type);
   registered_constructs_[name] = type;
 }
 
@@ -3156,7 +3155,9 @@ T ParserImpl::sync(Token::Type tok, F&& body) {
   auto result = body();
   --sync_depth_;
 
-  assert(sync_tokens_.back() == tok);
+  if (sync_tokens_.back() != tok) {
+    TINT_ICE(builder_.Diagnostics()) << "sync_tokens is out of sync";
+  }
   sync_tokens_.pop_back();
 
   if (result.errored) {

@@ -776,7 +776,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   };
 
   auto* texture = arg(Usage::kTexture);
-  assert(texture);
+  if (!texture) {
+    TINT_ICE(diagnostics_) << "missing texture argument";
+    return false;
+  }
 
   auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
 
@@ -934,8 +937,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
         pre << dims;
       } else {
         static constexpr char xyzw[] = {'x', 'y', 'z', 'w'};
-        assert(num_dimensions > 0);
-        assert(num_dimensions <= 4);
+        if (num_dimensions < 0 || num_dimensions > 4) {
+          TINT_ICE(diagnostics_) << "vector dimensions are " << num_dimensions;
+          return false;
+        }
         for (int i = 0; i < num_dimensions; i++) {
           if (i > 0) {
             pre << ", ";
@@ -999,7 +1004,10 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   }
 
   auto* param_coords = arg(Usage::kCoords);
-  assert(param_coords);
+  if (!param_coords) {
+    TINT_ICE(diagnostics_) << "missing coords argument";
+    return false;
+  }
 
   auto emit_vector_appended_with_i32_zero = [&](tint::ast::Expression* vector) {
     auto* i32 = builder_.create<type::I32>();

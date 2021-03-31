@@ -23,7 +23,7 @@ namespace type {
 
 MultisampledTexture::MultisampledTexture(TextureDimension dim, Type* type)
     : Base(dim), type_(type) {
-  assert(type_);
+  TINT_ASSERT(type_);
 }
 
 MultisampledTexture::MultisampledTexture(MultisampledTexture&&) = default;

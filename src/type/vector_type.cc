@@ -22,8 +22,8 @@ namespace tint {
 namespace type {
 
 Vector::Vector(Type* subtype, uint32_t size) : subtype_(subtype), size_(size) {
-  assert(size_ > 1);
-  assert(size_ < 5);
+  TINT_ASSERT(size_ > 1);
+  TINT_ASSERT(size_ < 5);
 }
 
 Vector::Vector(Vector&&) = default;

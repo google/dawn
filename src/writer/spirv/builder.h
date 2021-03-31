@@ -191,7 +191,10 @@ class Builder {
   /// Pushes a variable to the current function
   /// @param operands the variable operands
   void push_function_var(const OperandList& operands) {
-    assert(!functions_.empty());
+    if (functions_.empty()) {
+      TINT_ICE(builder_.Diagnostics())
+          << "push_function_var() called without a function";
+    }
     functions_.back().push_var(operands);
   }
 

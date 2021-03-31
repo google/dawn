@@ -23,7 +23,7 @@ namespace type {
 
 Alias::Alias(const Symbol& sym, Type* subtype)
     : symbol_(sym), subtype_(subtype) {
-  assert(subtype_);
+  TINT_ASSERT(subtype_);
 }
 
 Alias::Alias(Alias&&) = default;

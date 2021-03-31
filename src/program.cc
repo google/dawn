@@ -119,7 +119,7 @@ std::string Program::str(const ast::Node* node) const {
 }
 
 void Program::AssertNotMoved() const {
-  assert(!moved_);
+  TINT_ASSERT(!moved_);
 }
 
 }  // namespace tint

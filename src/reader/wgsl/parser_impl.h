@@ -109,7 +109,7 @@ class ParserImpl {
     /// return type will always be a pointer to a non-pointer type. #errored
     /// must be false to call.
     inline typename detail::OperatorArrow<T>::type operator->() {
-      assert(!errored);
+      TINT_ASSERT(!errored);
       return detail::OperatorArrow<T>::ptr(value);
     }
 
@@ -180,7 +180,7 @@ class ParserImpl {
     /// return type will always be a pointer to a non-pointer type. #errored
     /// must be false to call.
     inline typename detail::OperatorArrow<T>::type operator->() {
-      assert(!errored);
+      TINT_ASSERT(!errored);
       return detail::OperatorArrow<T>::ptr(value);
     }
 

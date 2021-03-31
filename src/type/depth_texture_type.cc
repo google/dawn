@@ -22,19 +22,15 @@ namespace tint {
 namespace type {
 namespace {
 
-#ifndef NDEBUG
-
 bool IsValidDepthDimension(TextureDimension dim) {
   return dim == TextureDimension::k2d || dim == TextureDimension::k2dArray ||
          dim == TextureDimension::kCube || dim == TextureDimension::kCubeArray;
 }
 
-#endif  // NDEBUG
-
 }  // namespace
 
 DepthTexture::DepthTexture(TextureDimension dim) : Base(dim) {
-  assert(IsValidDepthDimension(dim));
+  TINT_ASSERT(IsValidDepthDimension(dim));
 }
 
 DepthTexture::DepthTexture(DepthTexture&&) = default;

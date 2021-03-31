@@ -17,6 +17,7 @@
 #include "src/ast/assignment_statement.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/debug.h"
 #include "src/demangler.h"
 #include "src/semantic/expression.h"
 
@@ -74,7 +75,10 @@ void ProgramBuilder::MarkAsMoved() {
 }
 
 void ProgramBuilder::AssertNotMoved() const {
-  assert(!moved_);
+  if (moved_) {
+    TINT_ICE(const_cast<ProgramBuilder*>(this)->Diagnostics())
+        << "Attempting to use ProgramBuilder after it has been moved";
+  }
 }
 
 type::Type* ProgramBuilder::TypeOf(ast::Expression* expr) const {

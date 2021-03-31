@@ -23,7 +23,7 @@ namespace type {
 
 SampledTexture::SampledTexture(TextureDimension dim, Type* type)
     : Base(dim), type_(type) {
-  assert(type_);
+  TINT_ASSERT(type_);
 }
 
 SampledTexture::SampledTexture(SampledTexture&&) = default;

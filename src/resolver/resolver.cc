@@ -1329,7 +1329,10 @@ type::Type* Resolver::TypeOf(ast::Expression* expr) {
 }
 
 void Resolver::SetType(ast::Expression* expr, type::Type* type) {
-  assert(expr_info_.count(expr) == 0);
+  if (expr_info_.count(expr)) {
+    TINT_ICE(builder_->Diagnostics())
+        << "SetType() called twice for the same expression";
+  }
   expr_info_.emplace(expr, ExpressionInfo{type, current_statement_});
 }
 

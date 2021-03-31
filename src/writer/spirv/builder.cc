@@ -1007,8 +1007,11 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
 }
 
 uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
-  assert(expr->Is<ast::ArrayAccessorExpression>() ||
-         expr->Is<ast::MemberAccessorExpression>());
+  if (!expr->IsAnyOf<ast::ArrayAccessorExpression,
+                     ast::MemberAccessorExpression>()) {
+    TINT_ICE(builder_.Diagnostics()) << "expression is not an accessor";
+    return 0;
+  }
 
   // Gather a list of all the member and array accessors that are in this chain.
   // The list is built in reverse order as that's the order we need to access
@@ -2113,12 +2116,17 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
   // Generates the argument with the given usage, returning the operand ID
   auto gen_arg = [&](Usage usage) {
     auto* argument = arg(usage);
-    assert(argument);
+    if (!argument) {
+      TINT_ICE(builder_.Diagnostics())
+          << "missing argument " << static_cast<int>(usage);
+    }
     return gen(argument);
   };
 
   auto* texture = arg(Usage::kTexture);
-  assert(texture);
+  if (!texture) {
+    TINT_ICE(builder_.Diagnostics()) << "missing texture argument";
+  }
 
   auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
 
@@ -3007,8 +3015,7 @@ bool Builder::GenerateTextureType(type::Texture* texture,
     dim_literal = SpvDim1D;
     if (texture->Is<type::SampledTexture>()) {
       push_capability(SpvCapabilitySampled1D);
-    } else {
-      assert(texture->Is<type::StorageTexture>());
+    } else if (texture->Is<type::StorageTexture>()) {
       push_capability(SpvCapabilityImage1D);
     }
   }

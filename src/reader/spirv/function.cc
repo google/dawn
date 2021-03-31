@@ -734,7 +734,7 @@ FunctionEmitter::StatementBlock::StatementBlock(StatementBlock&& other) =
 FunctionEmitter::StatementBlock::~StatementBlock() = default;
 
 void FunctionEmitter::StatementBlock::Finalize(ProgramBuilder* pb) {
-  assert(!finalized_ /* Finalize() must only be called once */);
+  TINT_ASSERT(!finalized_ /* Finalize() must only be called once */);
 
   for (size_t i = 0; i < statements_.size(); i++) {
     if (auto* sb = statements_[i]->As<StatementBuilder>()) {
@@ -750,7 +750,7 @@ void FunctionEmitter::StatementBlock::Finalize(ProgramBuilder* pb) {
 }
 
 void FunctionEmitter::StatementBlock::Add(ast::Statement* statement) {
-  assert(!finalized_ /* Add() must not be called after Finalize() */);
+  TINT_ASSERT(!finalized_ /* Add() must not be called after Finalize() */);
   statements_.emplace_back(statement);
 }
 
@@ -762,8 +762,8 @@ void FunctionEmitter::PushNewStatementBlock(const Construct* construct,
 
 void FunctionEmitter::PushGuard(const std::string& guard_name,
                                 uint32_t end_id) {
-  assert(!statements_stack_.empty());
-  assert(!guard_name.empty());
+  TINT_ASSERT(!statements_stack_.empty());
+  TINT_ASSERT(!guard_name.empty());
   // Guard control flow by the guard variable.  Introduce a new
   // if-selection with a then-clause ending at the same block
   // as the statement block at the top of the stack.
@@ -780,7 +780,7 @@ void FunctionEmitter::PushGuard(const std::string& guard_name,
 }
 
 void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
-  assert(!statements_stack_.empty());
+  TINT_ASSERT(!statements_stack_.empty());
   const auto& top = statements_stack_.back();
 
   auto* cond = MakeTrue(Source{});
@@ -793,14 +793,14 @@ void FunctionEmitter::PushTrueGuard(uint32_t end_id) {
 }
 
 const ast::StatementList FunctionEmitter::ast_body() {
-  assert(!statements_stack_.empty());
+  TINT_ASSERT(!statements_stack_.empty());
   auto& entry = statements_stack_[0];
   entry.Finalize(&builder_);
   return entry.GetStatements();
 }
 
 ast::Statement* FunctionEmitter::AddStatement(ast::Statement* statement) {
-  assert(!statements_stack_.empty());
+  TINT_ASSERT(!statements_stack_.empty());
   if (statement != nullptr) {
     statements_stack_.back().Add(statement);
   }
@@ -808,9 +808,9 @@ ast::Statement* FunctionEmitter::AddStatement(ast::Statement* statement) {
 }
 
 ast::Statement* FunctionEmitter::LastStatement() {
-  assert(!statements_stack_.empty());
+  TINT_ASSERT(!statements_stack_.empty());
   auto& statement_list = statements_stack_.back().GetStatements();
-  assert(!statement_list.empty());
+  TINT_ASSERT(!statement_list.empty());
   return statement_list.back();
 }
 
@@ -1221,7 +1221,7 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
   //      block. Also mark the the most recent continue target for which we
   //      haven't reached the backedge block.
 
-  assert(block_order_.size() > 0);
+  TINT_ASSERT(block_order_.size() > 0);
   constructs_.clear();
   const auto entry_id = block_order_[0];
 
@@ -1242,8 +1242,8 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
     // A loop construct is added right after its associated continue construct.
     // In that case, adjust the parent up.
     if (k == Construct::kLoop) {
-      assert(parent);
-      assert(parent->kind == Construct::kContinue);
+      TINT_ASSERT(parent);
+      TINT_ASSERT(parent->kind == Construct::kContinue);
       scope_end_pos = parent->end_pos;
       parent = parent->parent;
     }
@@ -1262,9 +1262,9 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
 
   for (uint32_t i = 0; i < block_order_.size(); ++i) {
     const auto block_id = block_order_[i];
-    assert(block_id > 0);
+    TINT_ASSERT(block_id > 0);
     auto* block_info = GetBlockInfo(block_id);
-    assert(block_info);
+    TINT_ASSERT(block_info);
 
     if (enclosing.empty()) {
       return Fail() << "internal error: too many merge blocks before block "
@@ -1321,7 +1321,7 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
       }
     }
 
-    assert(top);
+    TINT_ASSERT(top);
     block_info->construct = top;
   }
 
@@ -1530,9 +1530,9 @@ bool FunctionEmitter::ClassifyCFGEdges() {
   //    NEC(S) is the parent of NEC(T).
 
   for (const auto src : block_order_) {
-    assert(src > 0);
+    TINT_ASSERT(src > 0);
     auto* src_info = GetBlockInfo(src);
-    assert(src_info);
+    TINT_ASSERT(src_info);
     const auto src_pos = src_info->pos;
     const auto& src_construct = *(src_info->construct);
 
@@ -1570,7 +1570,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
     for (const auto dest : successors) {
       const auto* dest_info = GetBlockInfo(dest);
       // We've already checked terminators are valid.
-      assert(dest_info);
+      TINT_ASSERT(dest_info);
       const auto dest_pos = dest_info->pos;
 
       // Insert the edge kind entry and keep a handle to update
@@ -1595,7 +1595,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
                         << " (violates post-dominance rule)";
         }
         const auto* ct_info = GetBlockInfo(continue_construct->begin_id);
-        assert(ct_info);
+        TINT_ASSERT(ct_info);
         if (ct_info->header_for_continue != dest) {
           return Fail()
                  << "Invalid backedge (" << src << "->" << dest
@@ -1874,7 +1874,7 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
       // The first clause might be a then-clause or an else-clause.
       const auto second_head = std::max(true_head_pos, false_head_pos);
       const auto end_first_clause_pos = second_head - 1;
-      assert(end_first_clause_pos < block_order_.size());
+      TINT_ASSERT(end_first_clause_pos < block_order_.size());
       const auto end_first_clause = block_order_[end_first_clause_pos];
       uint32_t premerge_id = 0;
       uint32_t if_break_id = 0;
@@ -2072,15 +2072,15 @@ bool FunctionEmitter::EmitFunctionBodyStatements() {
 
   // Upon entry, the statement stack has one entry representing the whole
   // function.
-  assert(!constructs_.empty());
+  TINT_ASSERT(!constructs_.empty());
   Construct* function_construct = constructs_[0].get();
-  assert(function_construct != nullptr);
-  assert(function_construct->kind == Construct::kFunction);
+  TINT_ASSERT(function_construct != nullptr);
+  TINT_ASSERT(function_construct->kind == Construct::kFunction);
   // Make the first entry valid by filling in the construct field, which
   // had not been computed at the time the entry was first created.
   // TODO(dneto): refactor how the first construct is created vs.
   // this statements stack entry is populated.
-  assert(statements_stack_.size() == 1);
+  TINT_ASSERT(statements_stack_.size() == 1);
   statements_stack_[0].SetConstruct(function_construct);
 
   for (auto block_id : block_order()) {
@@ -2270,8 +2270,8 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
 bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   // The block is the if-header block.  So its construct is the if construct.
   auto* construct = block_info.construct;
-  assert(construct->kind == Construct::kIfSelection);
-  assert(construct->begin_id == block_info.id);
+  TINT_ASSERT(construct->kind == Construct::kIfSelection);
+  TINT_ASSERT(construct->begin_id == block_info.id);
 
   const uint32_t true_head = block_info.true_head;
   const uint32_t false_head = block_info.false_head;
@@ -2396,8 +2396,8 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
 bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
   // The block is the if-header block.  So its construct is the if construct.
   auto* construct = block_info.construct;
-  assert(construct->kind == Construct::kSwitchSelection);
-  assert(construct->begin_id == block_info.id);
+  TINT_ASSERT(construct->kind == Construct::kSwitchSelection);
+  TINT_ASSERT(construct->begin_id == block_info.id);
   const auto* branch = block_info.basic_block->terminator();
 
   const auto selector_id = branch->GetSingleWordInOperand(0);
@@ -2443,7 +2443,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
       clause_heads[w] = clause_heads[r];
     }
     // We know it's not empty because it always has at least a default clause.
-    assert(!clause_heads.empty());
+    TINT_ASSERT(!clause_heads.empty());
     clause_heads.resize(w + 1);
   }
 
@@ -2652,9 +2652,9 @@ ast::Statement* FunctionEmitter::MakeBranchDetailed(
       // Unless forced, don't bother with a break at the end of a case/default
       // clause.
       const auto header = dest_info.header_for_merge;
-      assert(header != 0);
+      TINT_ASSERT(header != 0);
       const auto* exiting_construct = GetBlockInfo(header)->construct;
-      assert(exiting_construct->kind == Construct::kSwitchSelection);
+      TINT_ASSERT(exiting_construct->kind == Construct::kSwitchSelection);
       const auto candidate_next_case_pos = src_info.pos + 1;
       // Leaving the last block from the last case?
       if (candidate_next_case_pos == dest_info.pos) {
@@ -2798,7 +2798,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
   // Emit declarations of hoisted variables, in index order.
   for (auto id : sorted_by_index(block_info.hoisted_ids)) {
     const auto* def_inst = def_use_mgr_->GetDef(id);
-    assert(def_inst);
+    TINT_ASSERT(def_inst);
     auto* ast_type =
         RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
     AddStatement(create<ast::VariableDeclStatement>(
@@ -2811,9 +2811,9 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
   // Emit declarations of phi state variables, in index order.
   for (auto id : sorted_by_index(block_info.phis_needing_state_vars)) {
     const auto* def_inst = def_use_mgr_->GetDef(id);
-    assert(def_inst);
+    TINT_ASSERT(def_inst);
     const auto phi_var_name = GetDefInfo(id)->phi_var;
-    assert(!phi_var_name.empty());
+    TINT_ASSERT(!phi_var_name.empty());
     auto* var = create<ast::Variable>(
         Source{},                                       // source
         builder_.Symbols().Register(phi_var_name),      // symbol
@@ -3066,7 +3066,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       }
       auto expr = MakeExpression(ptr_id);
       // The load result type is the pointee type of its operand.
-      assert(expr.type->Is<type::Pointer>());
+      TINT_ASSERT(expr.type->Is<type::Pointer>());
       expr.type = expr.type->As<type::Pointer>()->type();
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
@@ -3550,8 +3550,8 @@ TypedExpression FunctionEmitter::MakeAccessChain(
     const auto pointer_type_id =
         type_mgr_->FindPointerToType(pointee_type_id, storage_class);
     auto* ast_pointer_type = parser_impl_.ConvertType(pointer_type_id);
-    assert(ast_pointer_type);
-    assert(ast_pointer_type->Is<type::Pointer>());
+    TINT_ASSERT(ast_pointer_type);
+    TINT_ASSERT(ast_pointer_type->Is<type::Pointer>());
     current_expr = TypedExpression{ast_pointer_type, next_expr};
   }
   return current_expr;
@@ -3746,7 +3746,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
           source, MakeExpression(vec0_id).expr, Swizzle(index)));
     } else if (index < vec0_len + vec1_len) {
       const auto sub_index = index - vec0_len;
-      assert(sub_index < kMaxVectorLen);
+      TINT_ASSERT(sub_index < kMaxVectorLen);
       values.emplace_back(create<ast::MemberAccessorExpression>(
           source, MakeExpression(vec1_id).expr, Swizzle(sub_index)));
     } else if (index == 0xFFFFFFFF) {
@@ -4045,7 +4045,7 @@ const Construct* FunctionEmitter::GetEnclosingScope(uint32_t first_pos,
                                                     uint32_t last_pos) const {
   const auto* enclosing_construct =
       GetBlockInfo(block_order_[first_pos])->construct;
-  assert(enclosing_construct != nullptr);
+  TINT_ASSERT(enclosing_construct != nullptr);
   // Constructs are strictly nesting, so follow parent pointers
   while (enclosing_construct &&
          !enclosing_construct->ScopeContainsPos(last_pos)) {
@@ -4057,7 +4057,7 @@ const Construct* FunctionEmitter::GetEnclosingScope(uint32_t first_pos,
         sibling_loop ? sibling_loop : enclosing_construct->parent;
   }
   // At worst, we go all the way out to the function construct.
-  assert(enclosing_construct != nullptr);
+  TINT_ASSERT(enclosing_construct != nullptr);
   return enclosing_construct;
 }
 

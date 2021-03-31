@@ -1386,7 +1386,11 @@ semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
   // This stage also populates the open_types and open_numbers.
   auto count = std::min(parameters.size(), args.size());
   for (size_t i = 0; i < count; i++) {
-    assert(args[i]);
+    if (!args[i]) {
+      TINT_ICE(diagnostics) << "args[" << i << "] is nullptr";
+      return nullptr;
+    }
+
     auto* arg_ty = args[i];
     if (auto* ptr = arg_ty->As<type::Pointer>()) {
       if (!parameters[i].matcher->ExpectsPointer()) {
@@ -1447,7 +1451,10 @@ semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
   Builder::BuildState builder_state{builder.Types(), matcher_state.open_types,
                                     matcher_state.open_numbers};
   auto* ret = return_type->Build(builder_state);
-  assert(ret);  // Build() must return a type
+  if (!ret) {
+    TINT_ICE(diagnostics) << "Build() did not return a type";
+    return nullptr;
+  }
 
   // Build the semantic parameters
   semantic::ParameterList params;

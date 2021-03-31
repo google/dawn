@@ -55,7 +55,10 @@ Module* Module::Clone(CloneContext* ctx) const {
 
 void Module::Copy(CloneContext* ctx, const Module* src) {
   for (auto* decl : ctx->Clone(src->global_declarations_)) {
-    assert(decl);
+    if (!decl) {
+      TINT_ICE(ctx->dst->Diagnostics()) << "src global declaration was nullptr";
+      continue;
+    }
     if (auto* ty = decl->As<type::Type>()) {
       AddConstructedType(ty);
     } else if (auto* func = decl->As<Function>()) {

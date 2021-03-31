@@ -44,7 +44,7 @@ namespace {
 
 void AppendResourceBindings(std::vector<ResourceBinding>* dest,
                             const std::vector<ResourceBinding>& orig) {
-  assert(dest);
+  TINT_ASSERT(dest);
   if (!dest) {
     return;
   }

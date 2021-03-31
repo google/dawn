@@ -474,7 +474,10 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
   };
 
   auto* texture = arg(Usage::kTexture);
-  assert(texture);
+  if (!texture) {
+    TINT_ICE(diagnostics_) << "missing texture arg";
+    return false;
+  }
 
   auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
 

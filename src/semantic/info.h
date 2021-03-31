@@ -15,10 +15,9 @@
 #ifndef SRC_SEMANTIC_INFO_H_
 #define SRC_SEMANTIC_INFO_H_
 
-#include <assert.h>
-
 #include <unordered_map>
 
+#include "src/debug.h"
 #include "src/semantic/node.h"
 #include "src/semantic/type_mappings.h"
 
@@ -63,7 +62,7 @@ class Info {
   void Add(const AST_OR_TYPE* node,
            const SemanticNodeTypeFor<AST_OR_TYPE>* sem_node) {
     // Check there's no semantic info already existing for the node
-    assert(Get(node) == nullptr);
+    TINT_ASSERT(Get(node) == nullptr);
     map.emplace(node, sem_node);
   }
 

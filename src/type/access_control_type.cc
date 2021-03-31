@@ -23,8 +23,8 @@ namespace type {
 
 AccessControl::AccessControl(ast::AccessControl access, Type* subtype)
     : access_(access), subtype_(subtype) {
-  assert(subtype_);
-  assert(!subtype_->Is<AccessControl>());
+  TINT_ASSERT(subtype_);
+  TINT_ASSERT(!subtype_->Is<AccessControl>());
 }
 
 AccessControl::AccessControl(AccessControl&&) = default;

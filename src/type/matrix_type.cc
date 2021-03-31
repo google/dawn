@@ -23,10 +23,10 @@ namespace type {
 
 Matrix::Matrix(Type* subtype, uint32_t rows, uint32_t columns)
     : subtype_(subtype), rows_(rows), columns_(columns) {
-  assert(rows > 1);
-  assert(rows < 5);
-  assert(columns > 1);
-  assert(columns < 5);
+  TINT_ASSERT(rows > 1);
+  TINT_ASSERT(rows < 5);
+  TINT_ASSERT(columns > 1);
+  TINT_ASSERT(columns < 5);
 }
 
 Matrix::Matrix(Matrix&&) = default;
