@@ -383,10 +383,8 @@ namespace dawn_native { namespace opengl {
             DAWN_TRY_ASSIGN(srcBuffer, Buffer::CreateInternalBuffer(device, &descriptor, false));
 
             // Fill the buffer with clear color
-            // TODO(dawn:723): propagate any errors from GetMappedRange.
-            memset(srcBuffer->APIGetMappedRange(0, descriptor.size), clearColor, descriptor.size);
-            // TODO(dawn:723): propagate any errors from Unmap.
-            srcBuffer->APIUnmap();
+            memset(srcBuffer->GetMappedRange(0, descriptor.size), clearColor, descriptor.size);
+            srcBuffer->Unmap();
 
             // Bind buffer and texture, and make the buffer to texture copy
             gl.PixelStorei(GL_UNPACK_ROW_LENGTH,

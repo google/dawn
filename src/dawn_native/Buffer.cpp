@@ -186,13 +186,11 @@ namespace dawn_native {
 
         DeviceBase* device = GetDevice();
         if (device->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
-            // TODO(dawn:723): propagate any errors from GetMappedRange.
-            memset(APIGetMappedRange(0, mSize), uint8_t(0u), mSize);
+            memset(GetMappedRange(0, mSize), uint8_t(0u), mSize);
             SetIsDataInitialized();
             device->IncrementLazyClearCountForTesting();
         } else if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-            // TODO(dawn:723): propagate any errors from GetMappedRange.
-            memset(APIGetMappedRange(0, mSize), uint8_t(1u), mSize);
+            memset(GetMappedRange(0, mSize), uint8_t(1u), mSize);
         }
 
         return {};
@@ -294,14 +292,14 @@ namespace dawn_native {
     }
 
     void* BufferBase::APIGetMappedRange(size_t offset, size_t size) {
-        return GetMappedRangeInternal(true, offset, size);
+        return GetMappedRange(offset, size, true);
     }
 
     const void* BufferBase::APIGetConstMappedRange(size_t offset, size_t size) {
-        return GetMappedRangeInternal(false, offset, size);
+        return GetMappedRange(offset, size, false);
     }
 
-    void* BufferBase::GetMappedRangeInternal(bool writable, size_t offset, size_t size) {
+    void* BufferBase::GetMappedRange(size_t offset, size_t size, bool writable) {
         if (!CanGetMappedRange(writable, offset, size)) {
             return nullptr;
         }
@@ -357,6 +355,10 @@ namespace dawn_native {
     }
 
     void BufferBase::APIUnmap() {
+        Unmap();
+    }
+
+    void BufferBase::Unmap() {
         UnmapInternal(WGPUBufferMapAsyncStatus_UnmappedBeforeCallback);
     }
 

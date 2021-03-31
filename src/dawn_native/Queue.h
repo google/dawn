@@ -57,6 +57,10 @@ namespace dawn_native {
                                       const Extent3D* copySize,
                                       const CopyTextureForBrowserOptions* options);
 
+        MaybeError WriteBuffer(BufferBase* buffer,
+                               uint64_t bufferOffset,
+                               const void* data,
+                               size_t size);
         void TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial);
         void Tick(ExecutionSerial finishedSerial);
         void HandleDeviceLoss();
@@ -66,10 +70,6 @@ namespace dawn_native {
         QueueBase(DeviceBase* device, ObjectBase::ErrorTag tag);
 
       private:
-        MaybeError WriteBufferInternal(BufferBase* buffer,
-                                       uint64_t bufferOffset,
-                                       const void* data,
-                                       size_t size);
         MaybeError WriteTextureInternal(const ImageCopyTexture* destination,
                                         const void* data,
                                         size_t dataSize,

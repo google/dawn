@@ -399,11 +399,11 @@ namespace dawn_native {
             return {};
         }
 
-        void EncodeTimestampsToNanosecondsConversion(CommandEncoder* encoder,
-                                                     QuerySetBase* querySet,
-                                                     uint32_t queryCount,
-                                                     BufferBase* destination,
-                                                     uint64_t destinationOffset) {
+        MaybeError EncodeTimestampsToNanosecondsConversion(CommandEncoder* encoder,
+                                                           QuerySetBase* querySet,
+                                                           uint32_t queryCount,
+                                                           BufferBase* destination,
+                                                           uint64_t destinationOffset) {
             DeviceBase* device = encoder->GetDevice();
 
             // The availability got from query set is a reference to vector<bool>, need to covert
@@ -419,9 +419,9 @@ namespace dawn_native {
             // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
             Ref<BufferBase> availabilityBuffer =
                 AcquireRef(device->APICreateBuffer(&availabilityDesc));
-            // TODO(dawn:723): propagate any errors from WriteBuffer.
-            device->GetQueue()->APIWriteBuffer(availabilityBuffer.Get(), 0, availability.data(),
-                                               availability.size() * sizeof(uint32_t));
+            DAWN_TRY(device->GetQueue()->WriteBuffer(availabilityBuffer.Get(), 0,
+                                                     availability.data(),
+                                                     availability.size() * sizeof(uint32_t)));
 
             // Timestamp params uniform buffer
             TimestampParams params = {queryCount, static_cast<uint32_t>(destinationOffset),
@@ -431,11 +431,12 @@ namespace dawn_native {
             parmsDesc.size = sizeof(params);
             // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
             Ref<BufferBase> paramsBuffer = AcquireRef(device->APICreateBuffer(&parmsDesc));
-            // TODO(dawn:723): propagate any errors from WriteBuffer.
-            device->GetQueue()->APIWriteBuffer(paramsBuffer.Get(), 0, &params, sizeof(params));
+            DAWN_TRY(
+                device->GetQueue()->WriteBuffer(paramsBuffer.Get(), 0, &params, sizeof(params)));
 
             EncodeConvertTimestampsToNanoseconds(encoder, destination, availabilityBuffer.Get(),
                                                  paramsBuffer.Get());
+            return {};
         }
 
     }  // namespace
@@ -869,8 +870,8 @@ namespace dawn_native {
             // Encode internal compute pipeline for timestamp query
             if (querySet->GetQueryType() == wgpu::QueryType::Timestamp &&
                 GetDevice()->IsToggleEnabled(Toggle::ConvertTimestampsToNanoseconds)) {
-                EncodeTimestampsToNanosecondsConversion(this, querySet, queryCount, destination,
-                                                        destinationOffset);
+                DAWN_TRY(EncodeTimestampsToNanosecondsConversion(this, querySet, queryCount,
+                                                                 destination, destinationOffset));
             }
 
             return {};
