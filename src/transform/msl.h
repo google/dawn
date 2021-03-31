@@ -34,10 +34,6 @@ class Msl : public Transform {
   /// @param data optional extra transform-specific input data
   /// @returns the transformation result
   Output Run(const Program* program, const DataMap& data = {}) override;
-
- private:
-  /// Hoist location-decorated entry point parameters out to struct members.
-  void HandleEntryPointIOTypes(CloneContext& ctx) const;
 };
 
 }  // namespace transform

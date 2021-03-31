@@ -707,6 +707,8 @@ int main(int argc, const char** argv) {
 #endif  // TINT_BUILD_SPV_WRITER
 #if TINT_BUILD_MSL_WRITER
     case Format::kMsl:
+      transform_manager.append(
+          std::make_unique<tint::transform::CanonicalizeEntryPointIO>());
       transform_manager.append(std::make_unique<tint::transform::Msl>());
       break;
 #endif  // TINT_BUILD_MSL_WRITER

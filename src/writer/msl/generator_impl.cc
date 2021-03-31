@@ -959,8 +959,8 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   return true;
 }
 
-// TODO(jrprice): Remove this when we remove support for entry point params as
-// module-scope globals.
+// TODO(crbug.com/tint/697): Remove this when we remove support for entry point
+// params as module-scope globals.
 bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
   auto* func_sem = program_->Sem().Get(func);
 
@@ -1376,14 +1376,19 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   auto out_data = ep_sym_to_out_data_.find(current_ep_sym_);
   bool has_out_data = out_data != ep_sym_to_out_data_.end();
   if (has_out_data) {
+    // TODO(crbug.com/tint/697): Remove this.
+    if (!func->return_type()->Is<type::Void>()) {
+      TINT_ICE(diagnostics_) << "Mixing module-scope variables and return "
+                                "types for shader outputs";
+    }
     out_ << out_data->second.struct_name;
   } else {
-    out_ << "void";
+    out_ << func->return_type()->FriendlyName(program_->Symbols());
   }
   out_ << " " << program_->Symbols().NameFor(func->symbol()) << "(";
 
   bool first = true;
-  // TODO(jrprice): Remove this when we remove support for builtins as globals.
+  // TODO(crbug.com/tint/697): Remove this.
   auto in_data = ep_sym_to_in_data_.find(current_ep_sym_);
   if (in_data != ep_sym_to_in_data_.end()) {
     out_ << in_data->second.struct_name << " " << in_data->second.var_name
@@ -1432,7 +1437,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     }
   }
 
-  // TODO(jrprice): Remove this when we remove support for builtins as globals.
+  // TODO(crbug.com/tint/697): Remove this.
   for (auto data : func_sem->ReferencedBuiltinVariables()) {
     auto* var = data.first;
     if (var->StorageClass() != ast::StorageClass::kInput) {
@@ -1740,12 +1745,14 @@ bool GeneratorImpl::EmitReturn(ast::ReturnStatement* stmt) {
 
   out_ << "return";
 
+  // TODO(crbug.com/tint/697): Remove this conditional.
   if (generating_entry_point_) {
     auto out_data = ep_sym_to_out_data_.find(current_ep_sym_);
     if (out_data != ep_sym_to_out_data_.end()) {
       out_ << " " << out_data->second.var_name;
     }
-  } else if (stmt->has_value()) {
+  }
+  if (stmt->has_value()) {
     out_ << " ";
     if (!EmitExpression(stmt->value())) {
       return false;
@@ -2095,8 +2102,35 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
 
     // Emit decorations
     for (auto* deco : mem->decorations()) {
-      if (auto* loc = deco->As<ast::LocationDecoration>()) {
-        out_ << " [[user(locn" + std::to_string(loc->value()) + ")]]";
+      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+        auto attr = builtin_to_attribute(builtin->value());
+        if (attr.empty()) {
+          diagnostics_.add_error("unknown builtin");
+          return false;
+        }
+        out_ << " [[" << attr << "]]";
+      } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
+        auto& pipeline_stage_uses =
+            program_->Sem().Get(str)->PipelineStageUses();
+        if (pipeline_stage_uses.size() != 1) {
+          TINT_ICE(diagnostics_) << "invalid entry point IO struct uses";
+        }
+
+        if (pipeline_stage_uses.count(
+                semantic::PipelineStageUsage::kVertexInput)) {
+          out_ << " [[attribute(" + std::to_string(loc->value()) + ")]]";
+        } else if (pipeline_stage_uses.count(
+                       semantic::PipelineStageUsage::kVertexOutput)) {
+          out_ << " [[user(locn" + std::to_string(loc->value()) + ")]]";
+        } else if (pipeline_stage_uses.count(
+                       semantic::PipelineStageUsage::kFragmentInput)) {
+          out_ << " [[user(locn" + std::to_string(loc->value()) + ")]]";
+        } else if (pipeline_stage_uses.count(
+                       semantic::PipelineStageUsage::kFragmentOutput)) {
+          out_ << " [[color(" + std::to_string(loc->value()) + ")]]";
+        } else {
+          TINT_ICE(diagnostics_) << "invalid use of location decoration";
+        }
       }
     }
 

@@ -20,6 +20,8 @@
 
 #include "gtest/gtest.h"
 #include "src/program_builder.h"
+#include "src/transform/canonicalize_entry_point_io.h"
+#include "src/transform/manager.h"
 #include "src/transform/msl.h"
 #include "src/writer/msl/generator_impl.h"
 
@@ -73,7 +75,12 @@ class TestHelperBase : public BASE, public ProgramBuilder {
       ASSERT_TRUE(program->IsValid())
           << diag::Formatter().format(program->Diagnostics());
     }();
-    auto result = transform::Msl().Run(program.get());
+
+    tint::transform::Manager transform_manager;
+    transform_manager.append(
+        std::make_unique<tint::transform::CanonicalizeEntryPointIO>());
+    transform_manager.append(std::make_unique<tint::transform::Msl>());
+    auto result = transform_manager.Run(program.get());
     [&]() {
       ASSERT_TRUE(result.program.IsValid())
           << diag::Formatter().format(result.program.Diagnostics());

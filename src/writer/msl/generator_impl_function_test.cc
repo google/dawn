@@ -92,60 +92,16 @@ fragment void main() {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_NoReturn_InOut) {
-  auto* foo_in = Var("foo", ty.f32(), ast::StorageClass::kNone, nullptr,
-                     ast::DecorationList{create<ast::LocationDecoration>(0)});
-
-  // TODO(jrprice): Make this the return value when supported.
-  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(1)});
-
-  Func("main", ast::VariableList{foo_in}, ty.void_(),
-       ast::StatementList{
-           create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
-           /* no explicit return */},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
-
-using namespace metal;
-struct tint_symbol_2 {
-  float foo [[user(locn0)]];
-};
-
-struct _tint_main_out {
-  float bar [[color(1)]];
-};
-
-fragment _tint_main_out _tint_main(tint_symbol_2 tint_symbol_3 [[stage_in]]) {
-  _tint_main_out _tint_out = {};
-  const float foo = tint_symbol_3.foo;
-  _tint_out.bar = foo;
-  return _tint_out;
-}
-
-)");
-}
-
 TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOutVars) {
-  auto* foo_in = Var("foo", ty.f32(), ast::StorageClass::kNone, nullptr,
-                     ast::DecorationList{create<ast::LocationDecoration>(0)});
-
-  // TODO(jrprice): Make this the return value when supported.
-  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(1)});
-
-  auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
-      create<ast::ReturnStatement>(),
-  };
-  Func("frag_main", ast::VariableList{foo_in}, ty.void_(), body,
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+  // fn frag_main([[location(0)]] foo : f32) -> [[location(1)]] f32 {
+  //   return foo;
+  // }
+  auto* foo_in =
+      Const("foo", ty.f32(), nullptr, {create<ast::LocationDecoration>(0)});
+  Func("frag_main", ast::VariableList{foo_in}, ty.f32(),
+       {create<ast::ReturnStatement>(Expr("foo"))},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)},
+       {create<ast::LocationDecoration>(1)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -153,45 +109,32 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOutVars) {
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol_2 {
+struct tint_symbol_3 {
   float foo [[user(locn0)]];
 };
-
-struct frag_main_out {
-  float bar [[color(1)]];
+struct tint_symbol_5 {
+  float value [[color(1)]];
 };
 
-fragment frag_main_out frag_main(tint_symbol_2 tint_symbol_3 [[stage_in]]) {
-  frag_main_out _tint_out = {};
-  const float foo = tint_symbol_3.foo;
-  _tint_out.bar = foo;
-  return _tint_out;
+fragment tint_symbol_5 frag_main(tint_symbol_3 tint_symbol_1 [[stage_in]]) {
+  const float foo = tint_symbol_1.foo;
+  return {foo};
 }
 
 )");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
+  // fn frag_main([[position(0)]] coord : vec4<f32>) -> [[frag_depth]] f32 {
+  //   return coord.x;
+  // }
   auto* coord_in =
-      Var("coord", ty.vec4<f32>(), ast::StorageClass::kNone, nullptr,
-          ast::DecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
-
-  // TODO(jrprice): Make this the return value when supported.
-  Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
-
-  auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("depth"),
-                                       MemberAccessor("coord", "x")),
-      create<ast::ReturnStatement>(),
-  };
-
-  Func("frag_main", ast::VariableList{coord_in}, ty.void_(), body,
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-       });
+      Const("coord", ty.vec4<f32>(), nullptr,
+            {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
+  Func("frag_main", ast::VariableList{coord_in}, ty.f32(),
+       {create<ast::ReturnStatement>(MemberAccessor("coord", "x"))},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)},
+       {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -199,45 +142,150 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-struct frag_main_out {
-  float depth [[depth(any)]];
+struct tint_symbol_3 {
+  float4 coord [[position]];
+};
+struct tint_symbol_5 {
+  float value [[depth(any)]];
 };
 
-fragment frag_main_out frag_main(float4 coord [[position]]) {
-  frag_main_out _tint_out = {};
-  _tint_out.depth = coord.x;
-  return _tint_out;
+fragment tint_symbol_5 frag_main(tint_symbol_3 tint_symbol_1 [[stage_in]]) {
+  const float4 coord = tint_symbol_1.coord;
+  return {coord.x};
 }
 
 )");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_With_Uniform) {
-  Global("coord", ty.vec4<f32>(), ast::StorageClass::kUniform, nullptr,
-         ast::DecorationList{create<ast::BindingDecoration>(0),
-                             create<ast::GroupDecoration>(1)});
+TEST_F(MslGeneratorImplTest,
+       Emit_Decoration_EntryPoint_SharedStruct_DifferentStages) {
+  // struct Interface {
+  //   [[location(1)]] col1 : f32;
+  //   [[location(2)]] col2 : f32;
+  // };
+  // fn vert_main() -> Interface {
+  //   return Interface(0.4, 0.6);
+  // }
+  // fn frag_main(colors : Interface) -> void {
+  //   const r = colors.col1;
+  //   const g = colors.col2;
+  // }
+  auto* interface_struct = Structure(
+      "Interface",
+      {Member("col1", ty.f32(), {create<ast::LocationDecoration>(1)}),
+       Member("col2", ty.f32(), {create<ast::LocationDecoration>(2)})});
 
-  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
-                  MemberAccessor("coord", "x"));
+  Func("vert_main", {}, interface_struct,
+       {create<ast::ReturnStatement>(
+           Construct(interface_struct, Expr(0.5f), Expr(0.25f)))},
+       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
 
-  Func("frag_main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
-           create<ast::ReturnStatement>(),
+  Func("frag_main", {Const("colors", interface_struct)}, ty.void_(),
+       {
+           WrapInStatement(
+               Const("r", ty.f32(), MemberAccessor(Expr("colors"), "col1"))),
+           WrapInStatement(
+               Const("g", ty.f32(), MemberAccessor(Expr("colors"), "col2"))),
        },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-       });
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-fragment void frag_main(constant float4& coord [[buffer(0)]]) {
-  float v = coord.x;
+struct Interface {
+  float col1;
+  float col2;
+};
+struct tint_symbol_4 {
+  float col1 [[user(locn1)]];
+  float col2 [[user(locn2)]];
+};
+struct tint_symbol_9 {
+  float col1 [[user(locn1)]];
+  float col2 [[user(locn2)]];
+};
+
+vertex tint_symbol_4 vert_main() {
+  const Interface tint_symbol_5 = {0.5f, 0.25f};
+  return {tint_symbol_5.col1, tint_symbol_5.col2};
+}
+
+fragment void frag_main(tint_symbol_9 tint_symbol_7 [[stage_in]]) {
+  const Interface colors = {tint_symbol_7.col1, tint_symbol_7.col2};
+  const float r = colors.col1;
+  const float g = colors.col2;
   return;
+}
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest,
+       Emit_Decoration_EntryPoint_SharedStruct_HelperFunction) {
+  // struct VertexOutput {
+  //   [[builtin(position)]] pos : vec4<f32>;
+  // };
+  // fn foo(x : f32) -> VertexOutput {
+  //   return VertexOutput(vec4<f32>(x, x, x, 1.0));
+  // }
+  // fn vert_main1() -> VertexOutput {
+  //   return foo(0.5);
+  // }
+  // fn vert_main2() -> VertexOutput {
+  //   return foo(0.25);
+  // }
+  auto* vertex_output_struct = Structure(
+      "VertexOutput",
+      {Member("pos", ty.vec4<f32>(),
+              {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)})});
+
+  Func("foo", {Const("x", ty.f32())}, vertex_output_struct,
+       {create<ast::ReturnStatement>(Construct(
+           vertex_output_struct, Construct(ty.vec4<f32>(), Expr("x"), Expr("x"),
+                                           Expr("x"), Expr(1.f))))},
+       {});
+
+  Func("vert_main1", {}, vertex_output_struct,
+       {create<ast::ReturnStatement>(
+           Construct(vertex_output_struct, Expr(Call("foo", Expr(0.5f)))))},
+       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+
+  Func("vert_main2", {}, vertex_output_struct,
+       {create<ast::ReturnStatement>(
+           Construct(vertex_output_struct, Expr(Call("foo", Expr(0.25f)))))},
+       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+struct VertexOutput {
+  float4 pos;
+};
+struct tint_symbol_3 {
+  float4 pos [[position]];
+};
+struct tint_symbol_7 {
+  float4 pos [[position]];
+};
+
+VertexOutput foo(float x) {
+  return {float4(x, x, x, 1.0f)};
+}
+
+vertex tint_symbol_3 vert_main1() {
+  const VertexOutput tint_symbol_5 = {foo(0.5f)};
+  return {tint_symbol_5.pos};
+}
+
+vertex tint_symbol_7 vert_main2() {
+  const VertexOutput tint_symbol_8 = {foo(0.25f)};
+  return {tint_symbol_8.pos};
 }
 
 )");
@@ -331,11 +379,12 @@ fragment void frag_main(const device Data& coord [[buffer(0)]]) {
 )");
 }
 
+// TODO(crbug.com/tint/697): Remove this test
 TEST_F(
     MslGeneratorImplTest,
     Emit_Decoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-  auto* foo_in = Var("foo", ty.f32(), ast::StorageClass::kNone, nullptr,
-                     ast::DecorationList{create<ast::LocationDecoration>(0)});
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
+         ast::DecorationList{create<ast::LocationDecoration>(0)});
 
   Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{create<ast::LocationDecoration>(1)});
@@ -345,7 +394,6 @@ TEST_F(
 
   ast::VariableList params;
   params.push_back(Var("param", ty.f32(), ast::StorageClass::kNone));
-  params.push_back(Var("foo", ty.f32(), ast::StorageClass::kNone));
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
@@ -355,23 +403,22 @@ TEST_F(
   Func("sub_func", params, ty.f32(), body, ast::DecorationList{});
 
   body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("bar"),
-                                       Call("sub_func", 1.0f, Expr("foo"))),
+      create<ast::AssignmentStatement>(Expr("bar"), Call("sub_func", 1.0f)),
       create<ast::ReturnStatement>(),
   };
 
-  Func("ep_1", ast::VariableList{foo_in}, ty.void_(), body,
+  Func("ep_1", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-struct tint_symbol_2 {
+struct ep_1_in {
   float foo [[user(locn0)]];
 };
 
@@ -380,22 +427,22 @@ struct ep_1_out {
   float val [[color(0)]];
 };
 
-float sub_func_ep_1(thread ep_1_out& _tint_out, float param, float foo) {
-  _tint_out.bar = foo;
+float sub_func_ep_1(thread ep_1_in& _tint_in, thread ep_1_out& _tint_out, float param) {
+  _tint_out.bar = _tint_in.foo;
   _tint_out.val = param;
-  return foo;
+  return _tint_in.foo;
 }
 
-fragment ep_1_out ep_1(tint_symbol_2 tint_symbol_3 [[stage_in]]) {
+fragment ep_1_out ep_1(ep_1_in _tint_in [[stage_in]]) {
   ep_1_out _tint_out = {};
-  const float foo = tint_symbol_3.foo;
-  _tint_out.bar = sub_func_ep_1(_tint_out, 1.0f, foo);
+  _tint_out.bar = sub_func_ep_1(_tint_in, _tint_out, 1.0f);
   return _tint_out;
 }
 
 )");
 }
 
+// TODO(crbug.com/tint/697): Remove this test
 TEST_F(MslGeneratorImplTest,
        Emit_Decoration_Called_By_EntryPoints_NoUsedGlobals) {
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
@@ -444,13 +491,13 @@ fragment ep_1_out ep_1() {
 )");
 }
 
+// TODO(crbug.com/tint/697): Remove this test
 TEST_F(
     MslGeneratorImplTest,
     Emit_Decoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
-  auto* coord_in =
-      Var("coord", ty.vec4<f32>(), ast::StorageClass::kNone, nullptr,
-          ast::DecorationList{
-              create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
+  Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
+         ast::DecorationList{
+             create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
 
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{
@@ -458,7 +505,6 @@ TEST_F(
 
   ast::VariableList params;
   params.push_back(Var("param", ty.f32(), ast::StorageClass::kNone));
-  params.push_back(Var("coord", ty.vec4<f32>(), ast::StorageClass::kNone));
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("depth"),
@@ -469,17 +515,16 @@ TEST_F(
   Func("sub_func", params, ty.f32(), body, ast::DecorationList{});
 
   body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("depth"),
-                                       Call("sub_func", 1.0f, Expr("coord"))),
+      create<ast::AssignmentStatement>(Expr("depth"), Call("sub_func", 1.0f)),
       create<ast::ReturnStatement>(),
   };
 
-  Func("ep_1", ast::VariableList{coord_in}, ty.void_(), body,
+  Func("ep_1", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = SanitizeAndBuild();
+  GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
@@ -489,14 +534,14 @@ struct ep_1_out {
   float depth [[depth(any)]];
 };
 
-float sub_func_ep_1(thread ep_1_out& _tint_out, float param, float4 coord) {
+float sub_func_ep_1(thread ep_1_out& _tint_out, thread float4& coord, float param) {
   _tint_out.depth = coord.x;
   return param;
 }
 
 fragment ep_1_out ep_1(float4 coord [[position]]) {
   ep_1_out _tint_out = {};
-  _tint_out.depth = sub_func_ep_1(_tint_out, 1.0f, coord);
+  _tint_out.depth = sub_func_ep_1(_tint_out, coord, 1.0f);
   return _tint_out;
 }
 
@@ -666,6 +711,7 @@ fragment void frag_main(const device Data& coord [[buffer(0)]]) {
 )");
 }
 
+// TODO(crbug.com/tint/697): Remove this test
 TEST_F(MslGeneratorImplTest,
        Emit_Decoration_EntryPoints_WithGlobal_Nested_Return) {
   Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
