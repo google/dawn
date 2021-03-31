@@ -40,6 +40,16 @@ class StructMember;
 /// A vector of StructMember pointers.
 using StructMemberList = std::vector<StructMember*>;
 
+/// Metadata to capture how a structure is used in a shader module.
+enum class PipelineStageUsage {
+  kVertexInput,
+  kVertexOutput,
+  kFragmentInput,
+  kFragmentOutput,
+  kComputeInput,
+  kComputeOutput,
+};
+
 /// Struct holds the semantic information for structures.
 class Struct : public Castable<Struct, Node> {
  public:
@@ -51,12 +61,14 @@ class Struct : public Castable<Struct, Node> {
   /// @param size_no_padding size of the members without the end of structure
   /// alignment padding
   /// @param storage_class_usage a set of all the storage class usages
+  /// @param pipeline_stage_uses a set of all the pipeline stage uses
   Struct(type::Struct* type,
          StructMemberList members,
          uint32_t align,
          uint32_t size,
          uint32_t size_no_padding,
-         std::unordered_set<ast::StorageClass> storage_class_usage);
+         std::unordered_set<ast::StorageClass> storage_class_usage,
+         std::unordered_set<PipelineStageUsage> pipeline_stage_uses);
 
   /// Destructor
   ~Struct() override;
@@ -105,6 +117,11 @@ class Struct : public Castable<Struct, Node> {
     return false;
   }
 
+  /// @returns the set of entry point uses of this structure
+  const std::unordered_set<PipelineStageUsage>& PipelineStageUses() const {
+    return pipeline_stage_uses_;
+  }
+
  private:
   type::Struct* const type_;
   StructMemberList const members_;
@@ -112,6 +129,7 @@ class Struct : public Castable<Struct, Node> {
   uint32_t const size_;
   uint32_t const size_no_padding_;
   std::unordered_set<ast::StorageClass> const storage_class_usage_;
+  std::unordered_set<PipelineStageUsage> const pipeline_stage_uses_;
 };
 
 /// StructMember holds the semantic information for structure members.

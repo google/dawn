@@ -293,6 +293,54 @@ bool Resolver::Function(ast::Function* func) {
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
     variable_stack_.set(param->symbol(), CreateVariableInfo(param));
+
+    if (auto* str =
+            param->declared_type()->UnwrapAliasIfNeeded()->As<type::Struct>()) {
+      auto* info = Structure(str);
+      if (!info) {
+        return false;
+      }
+      switch (func->pipeline_stage()) {
+        case ast::PipelineStage::kVertex:
+          info->pipeline_stage_uses.emplace(
+              semantic::PipelineStageUsage::kVertexInput);
+          break;
+        case ast::PipelineStage::kFragment:
+          info->pipeline_stage_uses.emplace(
+              semantic::PipelineStageUsage::kFragmentInput);
+          break;
+        case ast::PipelineStage::kCompute:
+          info->pipeline_stage_uses.emplace(
+              semantic::PipelineStageUsage::kComputeInput);
+          break;
+        case ast::PipelineStage::kNone:
+          break;
+      }
+    }
+  }
+
+  if (auto* str =
+          func->return_type()->UnwrapAliasIfNeeded()->As<type::Struct>()) {
+    auto* info = Structure(str);
+    if (!info) {
+      return false;
+    }
+    switch (func->pipeline_stage()) {
+      case ast::PipelineStage::kVertex:
+        info->pipeline_stage_uses.emplace(
+            semantic::PipelineStageUsage::kVertexOutput);
+        break;
+      case ast::PipelineStage::kFragment:
+        info->pipeline_stage_uses.emplace(
+            semantic::PipelineStageUsage::kFragmentOutput);
+        break;
+      case ast::PipelineStage::kCompute:
+        info->pipeline_stage_uses.emplace(
+            semantic::PipelineStageUsage::kComputeOutput);
+        break;
+      case ast::PipelineStage::kNone:
+        break;
+    }
   }
 
   if (!BlockStatement(func->body())) {
@@ -1359,7 +1407,8 @@ void Resolver::CreateSemanticNodes() const {
     builder_->Sem().Add(
         str, builder_->create<semantic::Struct>(
                  str, std::move(info->members), info->align, info->size,
-                 info->size_no_padding, info->storage_class_usage));
+                 info->size_no_padding, info->storage_class_usage,
+                 info->pipeline_stage_uses));
   }
 }
 

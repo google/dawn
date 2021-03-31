@@ -24,6 +24,7 @@
 #include "src/intrinsic_table.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
+#include "src/semantic/struct.h"
 #include "src/utils/unique_vector.h"
 
 namespace tint {
@@ -139,6 +140,7 @@ class Resolver {
     uint32_t size = 0;
     uint32_t size_no_padding = 0;
     std::unordered_set<ast::StorageClass> storage_class_usage;
+    std::unordered_set<semantic::PipelineStageUsage> pipeline_stage_uses;
   };
 
   /// Structure holding semantic information about a block (i.e. scope), such as

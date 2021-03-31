@@ -25,13 +25,15 @@ Struct::Struct(type::Struct* type,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding,
-               std::unordered_set<ast::StorageClass> storage_class_usage)
+               std::unordered_set<ast::StorageClass> storage_class_usage,
+               std::unordered_set<PipelineStageUsage> pipeline_stage_uses)
     : type_(type),
       members_(std::move(members)),
       align_(align),
       size_(size),
       size_no_padding_(size_no_padding),
-      storage_class_usage_(std::move(storage_class_usage)) {}
+      storage_class_usage_(std::move(storage_class_usage)),
+      pipeline_stage_uses_(std::move(pipeline_stage_uses)) {}
 
 Struct::~Struct() = default;
 
