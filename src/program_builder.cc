@@ -15,6 +15,7 @@
 #include "src/program_builder.h"
 
 #include "src/ast/assignment_statement.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/demangler.h"
 #include "src/semantic/expression.h"
@@ -126,9 +127,8 @@ ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(ast::Variable* v) {
 }
 
 ast::Statement* ProgramBuilder::WrapInStatement(ast::Expression* expr) {
-  // TODO(ben-clayton): This is valid enough for the Resolver, but the LHS
-  // may not be assignable, and so may not validate.
-  return create<ast::AssignmentStatement>(expr, expr);
+  // Create a temporary variable of inferred type from expr.
+  return Decl(Var(symbols_.New(), nullptr, ast::StorageClass::kFunction, expr));
 }
 
 ast::Statement* ProgramBuilder::WrapInStatement(ast::Statement* stmt) {

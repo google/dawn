@@ -333,23 +333,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
   ScopedAssignment<semantic::Statement*> sa(current_statement_, sem_statement);
 
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
-    if (!Expression(a->lhs()) || !Expression(a->rhs())) {
-      return false;
-    }
-    // TODO(crbug.com/tint/659): This logic needs updating once pointers are
-    // pinned down in the WGSL spec.
-    auto* lhs_type = TypeOf(a->lhs())->UnwrapAll();
-    auto* rhs_type = TypeOf(a->rhs());
-    if (!IsValidAssignment(lhs_type, rhs_type)) {
-      diagnostics_.add_error(
-          "invalid assignment: cannot assign value of type '" +
-              rhs_type->FriendlyName(builder_->Symbols()) +
-              "' to a variable of type '" +
-              lhs_type->FriendlyName(builder_->Symbols()) + "'",
-          stmt->source());
-      return false;
-    }
-    return true;
+    return Assignment(a);
   }
   if (auto* b = stmt->As<ast::BlockStatement>()) {
     return BlockStatement(b);
@@ -1768,6 +1752,74 @@ bool Resolver::Switch(ast::SwitchStatement* s) {
     return false;
   }
   return true;
+}
+
+bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
+  auto* lhs = a->lhs();
+  auto* rhs = a->rhs();
+
+  // TODO(crbug.com/tint/659): This logic needs updating once pointers are
+  // pinned down in the WGSL spec.
+  auto* lhs_type = TypeOf(lhs)->UnwrapAll();
+  auto* rhs_type = TypeOf(rhs);
+  if (!IsValidAssignment(lhs_type, rhs_type)) {
+    diagnostics_.add_error("invalid assignment: cannot assign value of type '" +
+                               rhs_type->FriendlyName(builder_->Symbols()) +
+                               "' to a variable of type '" +
+                               lhs_type->FriendlyName(builder_->Symbols()) +
+                               "'",
+                           a->source());
+    return false;
+  }
+
+  // Pointers are not storable in WGSL, but the right-hand side must be
+  // storable. The raw right-hand side might be a pointer value which must be
+  // loaded (dereferenced) to provide the value to be stored.
+  auto* rhs_result_type = TypeOf(rhs)->UnwrapAll();
+  if (!IsStorable(rhs_result_type)) {
+    diagnostics_.add_error(
+        "v-000x",
+        "invalid assignment: right-hand-side is not storable: " +
+            TypeOf(rhs)->FriendlyName(builder_->Symbols()),
+        a->source());
+    return false;
+  }
+
+  // lhs must be a pointer or a constant
+  auto* lhs_result_type = TypeOf(lhs)->UnwrapIfNeeded();
+  if (!lhs_result_type->Is<type::Pointer>()) {
+    // In case lhs is a constant identifier, output a nicer message as it's
+    // likely to be a common programmer error.
+    if (auto* ident = lhs->As<ast::IdentifierExpression>()) {
+      VariableInfo* var;
+      if (variable_stack_.get(ident->symbol(), &var) &&
+          var->declaration->is_const()) {
+        diagnostics_.add_error(
+            "v-0021",
+            "cannot re-assign a constant: '" +
+                builder_->Symbols().NameFor(ident->symbol()) + "'",
+            a->source());
+        return false;
+      }
+    }
+
+    // Issue a generic error.
+    diagnostics_.add_error(
+        "v-000x",
+        "invalid assignment: left-hand-side does not reference storage: " +
+            TypeOf(lhs)->FriendlyName(builder_->Symbols()),
+        a->source());
+    return false;
+  }
+
+  return true;
+}
+
+bool Resolver::Assignment(ast::AssignmentStatement* a) {
+  if (!Expression(a->lhs()) || !Expression(a->rhs())) {
+    return false;
+  }
+  return ValidateAssignment(a);
 }
 
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,

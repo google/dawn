@@ -223,6 +223,7 @@ class Resolver {
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
   bool Return(ast::ReturnStatement* ret);
   bool Switch(ast::SwitchStatement* s);
+  bool Assignment(ast::AssignmentStatement* a);
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
@@ -232,6 +233,7 @@ class Resolver {
   bool ValidateStructure(const type::Struct* st);
   bool ValidateReturn(const ast::ReturnStatement* ret);
   bool ValidateSwitch(const ast::SwitchStatement* s);
+  bool ValidateAssignment(const ast::AssignmentStatement* a);
 
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is

@@ -238,9 +238,6 @@ bool ValidatorImpl::ValidateStatement(const ast::Statement* stmt) {
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
     return ValidateDeclStatement(v);
   }
-  if (auto* a = stmt->As<ast::AssignmentStatement>()) {
-    return ValidateAssign(a);
-  }
   if (auto* s = stmt->As<ast::SwitchStatement>()) {
     return ValidateSwitch(s);
   }
@@ -269,66 +266,6 @@ bool ValidatorImpl::ValidateCase(const ast::CaseStatement* c) {
   if (!ValidateStatement(c->body())) {
     return false;
   }
-  return true;
-}
-
-bool ValidatorImpl::ValidateBadAssignmentToIdentifier(
-    const ast::AssignmentStatement* assign) {
-  auto* ident = assign->lhs()->As<ast::IdentifierExpression>();
-  if (!ident) {
-    // It wasn't an identifier in the first place.
-    return true;
-  }
-  const ast::Variable* var;
-  if (variable_stack_.get(ident->symbol(), &var)) {
-    // Give a nicer message if the LHS of the assignment is a const identifier.
-    // It's likely to be a common programmer error.
-    if (var->is_const()) {
-      add_error(assign->source(), "v-0021",
-                "cannot re-assign a constant: '" +
-                    program_->Symbols().NameFor(ident->symbol()) + "'");
-      return false;
-    }
-  } else {
-    // The identifier is not defined.
-    // Shouldn't reach here. This should already have been caught when
-    // validation expressions in the Resolver
-    TINT_UNREACHABLE(diagnostics());
-    return false;
-  }
-  return true;
-}
-
-bool ValidatorImpl::ValidateAssign(const ast::AssignmentStatement* assign) {
-  if (!assign) {
-    return false;
-  }
-  auto* lhs = assign->lhs();
-  auto* rhs = assign->rhs();
-
-  // Pointers are not storable in WGSL, but the right-hand side must be
-  // storable. The raw right-hand side might be a pointer value which must be
-  // loaded (dereferenced) to provide the value to be stored.
-  auto* rhs_result_type = program_->Sem().Get(rhs)->Type()->UnwrapAll();
-  if (!IsStorable(rhs_result_type)) {
-    add_error(assign->source(), "v-000x",
-              "invalid assignment: right-hand-side is not storable: " +
-                  program_->Sem().Get(rhs)->Type()->type_name());
-    return false;
-  }
-  auto* lhs_result_type = program_->Sem().Get(lhs)->Type()->UnwrapIfNeeded();
-  if (!Is<type::Pointer>(lhs_result_type)) {
-    if (!ValidateBadAssignmentToIdentifier(assign)) {
-      return false;
-    }
-    // Issue a generic error.
-    add_error(
-        assign->source(), "v-000x",
-        "invalid assignment: left-hand-side does not reference storage: " +
-            program_->Sem().Get(lhs)->Type()->type_name());
-    return false;
-  }
-
   return true;
 }
 

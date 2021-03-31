@@ -639,14 +639,13 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalConstant) {
 
 TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
   auto* my_var_a = Expr("my_var");
-  auto* my_var_b = Expr("my_var");
   auto* var = Const("my_var", ty.f32());
-  auto* assign = create<ast::AssignmentStatement>(my_var_a, my_var_b);
+  auto* decl = Decl(Var("b", ty.f32(), ast::StorageClass::kFunction, my_var_a));
 
   Func("my_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::VariableDeclStatement>(var),
-           assign,
+           decl,
        },
        ast::DecorationList{});
 
@@ -654,11 +653,8 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
 
   ASSERT_NE(TypeOf(my_var_a), nullptr);
   EXPECT_TRUE(TypeOf(my_var_a)->Is<type::F32>());
-  EXPECT_EQ(StmtOf(my_var_a), assign);
-  ASSERT_NE(TypeOf(my_var_b), nullptr);
-  EXPECT_TRUE(TypeOf(my_var_b)->Is<type::F32>());
-  EXPECT_EQ(StmtOf(my_var_b), assign);
-  EXPECT_TRUE(CheckVarUsers(var, {my_var_a, my_var_b}));
+  EXPECT_EQ(StmtOf(my_var_a), decl);
+  EXPECT_TRUE(CheckVarUsers(var, {my_var_a}));
 }
 
 TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {

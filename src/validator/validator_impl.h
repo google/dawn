@@ -84,16 +84,6 @@ class ValidatorImpl {
   /// @param stmt the statement to check
   /// @returns true if the validation was successful
   bool ValidateStatement(const ast::Statement* stmt);
-  /// Validates an assignment
-  /// @param assign the assignment to check
-  /// @returns true if the validation was successful
-  bool ValidateAssign(const ast::AssignmentStatement* assign);
-  /// Validates a bad assignment to an identifier. Issues an error
-  /// and returns false if the left hand side is an identifier.
-  /// @param assign the assignment to check
-  /// @returns true if the LHS of theassignment is not an identifier expression
-  bool ValidateBadAssignmentToIdentifier(
-      const ast::AssignmentStatement* assign);
   /// Validates declaration name uniqueness
   /// @param decl is the new declaration to be added
   /// @returns true if no previous declaration with the `decl` 's name
