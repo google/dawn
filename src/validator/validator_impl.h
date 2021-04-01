@@ -101,11 +101,6 @@ class ValidatorImpl {
   /// @param funcs the functions to check
   /// @returns true if the valdiation was successful
   bool ValidateEntryPoint(const ast::FunctionList& funcs);
-  /// Returns true if the given type is storable. This uses and
-  /// updates `storable_` and `not_storable_`.
-  /// @param type the given type
-  /// @returns true if the given type is storable.
-  bool IsStorable(type::Type* type);
 
   /// Testing method to inserting a given variable into the current scope.
   /// @param var the variable to register

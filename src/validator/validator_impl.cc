@@ -269,29 +269,4 @@ bool ValidatorImpl::ValidateCase(const ast::CaseStatement* c) {
   return true;
 }
 
-bool ValidatorImpl::IsStorable(type::Type* type) {
-  if (type == nullptr) {
-    return false;
-  }
-  if (type->is_scalar() || type->Is<type::Vector>() ||
-      type->Is<type::Matrix>()) {
-    return true;
-  }
-  if (type::Array* array_type = type->As<type::Array>()) {
-    return IsStorable(array_type->type());
-  }
-  if (type::Struct* struct_type = type->As<type::Struct>()) {
-    for (const auto* member : struct_type->impl()->members()) {
-      if (!IsStorable(member->type())) {
-        return false;
-      }
-    }
-    return true;
-  }
-  if (type::Alias* alias_type = type->As<type::Alias>()) {
-    return IsStorable(alias_type->type());
-  }
-  return false;
-}
-
 }  // namespace tint
