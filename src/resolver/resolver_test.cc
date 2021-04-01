@@ -1143,6 +1143,11 @@ TEST_P(Expr_Binary_Test_Valid, All) {
   auto* rhs_type = params.create_rhs_type(ty);
   auto* result_type = params.create_result_type(ty);
 
+  std::stringstream ss;
+  ss << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
+     << rhs_type->FriendlyName(Symbols());
+  SCOPED_TRACE(ss.str());
+
   Global("lhs", lhs_type, ast::StorageClass::kNone);
   Global("rhs", rhs_type, ast::StorageClass::kNone);
 
@@ -1157,6 +1162,70 @@ TEST_P(Expr_Binary_Test_Valid, All) {
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          Expr_Binary_Test_Valid,
                          testing::ValuesIn(all_valid_cases));
+
+enum class BinaryExprSide { Left, Right, Both };
+using Expr_Binary_Test_WithAlias_Valid =
+    ResolverTestWithParam<std::tuple<Params, BinaryExprSide>>;
+TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
+  const Params& params = std::get<0>(GetParam());
+  BinaryExprSide side = std::get<1>(GetParam());
+
+  auto* lhs_type = params.create_lhs_type(ty);
+  auto* rhs_type = params.create_rhs_type(ty);
+
+  std::stringstream ss;
+  ss << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
+     << rhs_type->FriendlyName(Symbols());
+
+  // For vectors and matrices, wrap the sub type in an alias
+  auto make_alias = [this](type::Type* type) -> type::Type* {
+    type::Type* result;
+    if (auto* v = type->As<type::Vector>()) {
+      result = create<type::Vector>(
+          create<type::Alias>(Symbols().New(), v->type()), v->size());
+    } else if (auto* m = type->As<type::Matrix>()) {
+      result =
+          create<type::Matrix>(create<type::Alias>(Symbols().New(), m->type()),
+                               m->rows(), m->columns());
+    } else {
+      result = create<type::Alias>(Symbols().New(), type);
+    }
+    return result;
+  };
+
+  // Wrap in alias
+  if (side == BinaryExprSide::Left || side == BinaryExprSide::Both) {
+    lhs_type = make_alias(lhs_type);
+  }
+  if (side == BinaryExprSide::Right || side == BinaryExprSide::Both) {
+    rhs_type = make_alias(rhs_type);
+  }
+
+  ss << ", After aliasing: " << lhs_type->FriendlyName(Symbols()) << " "
+     << params.op << " " << rhs_type->FriendlyName(Symbols());
+  SCOPED_TRACE(ss.str());
+
+  Global("lhs", lhs_type, ast::StorageClass::kNone);
+  Global("rhs", rhs_type, ast::StorageClass::kNone);
+
+  auto* expr =
+      create<ast::BinaryExpression>(params.op, Expr("lhs"), Expr("rhs"));
+  WrapInFunction(expr);
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_NE(TypeOf(expr), nullptr);
+  // TODO(amaiorano): Bring this back once we have a way to get the canonical
+  // type
+  // auto* result_type = params.create_result_type(ty);
+  // ASSERT_TRUE(TypeOf(expr) == result_type);
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverTest,
+    Expr_Binary_Test_WithAlias_Valid,
+    testing::Combine(testing::ValuesIn(all_valid_cases),
+                     testing::Values(BinaryExprSide::Left,
+                                     BinaryExprSide::Right,
+                                     BinaryExprSide::Both)));
 
 using Expr_Binary_Test_Invalid =
     ResolverTestWithParam<std::tuple<Params, create_type_func_ptr>>;
@@ -1185,6 +1254,11 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
       rhs_type->is_float_scalar_or_vector_or_matrix()) {
     return;
   }
+
+  std::stringstream ss;
+  ss << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
+     << rhs_type->FriendlyName(Symbols());
+  SCOPED_TRACE(ss.str());
 
   Global("lhs", lhs_type, ast::StorageClass::kNone);
   Global("rhs", rhs_type, ast::StorageClass::kNone);

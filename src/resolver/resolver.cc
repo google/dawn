@@ -1030,17 +1030,20 @@ bool Resolver::ValidateBinary(ast::BinaryExpression* expr) {
   using Matrix = type::Matrix;
   using Vector = type::Vector;
 
-  auto* lhs_type = TypeOf(expr->lhs())->UnwrapPtrIfNeeded();
-  auto* rhs_type = TypeOf(expr->rhs())->UnwrapPtrIfNeeded();
+  auto* lhs_type = TypeOf(expr->lhs())->UnwrapAll();
+  auto* rhs_type = TypeOf(expr->rhs())->UnwrapAll();
 
   auto* lhs_vec = lhs_type->As<Vector>();
-  auto* lhs_vec_elem_type = lhs_vec ? lhs_vec->type() : nullptr;
+  auto* lhs_vec_elem_type =
+      lhs_vec ? lhs_vec->type()->UnwrapAliasIfNeeded() : nullptr;
   auto* rhs_vec = rhs_type->As<Vector>();
-  auto* rhs_vec_elem_type = rhs_vec ? rhs_vec->type() : nullptr;
+  auto* rhs_vec_elem_type =
+      rhs_vec ? rhs_vec->type()->UnwrapAliasIfNeeded() : nullptr;
 
-  const bool matching_types = lhs_type == rhs_type;
   const bool matching_vec_elem_types = lhs_vec_elem_type && rhs_vec_elem_type &&
                                        (lhs_vec_elem_type == rhs_vec_elem_type);
+
+  const bool matching_types = matching_vec_elem_types || (lhs_type == rhs_type);
 
   // Binary logical expressions
   if (expr->IsLogicalAnd() || expr->IsLogicalOr()) {
@@ -1085,9 +1088,11 @@ bool Resolver::ValidateBinary(ast::BinaryExpression* expr) {
     }
 
     auto* lhs_mat = lhs_type->As<Matrix>();
-    auto* lhs_mat_elem_type = lhs_mat ? lhs_mat->type() : nullptr;
+    auto* lhs_mat_elem_type =
+        lhs_mat ? lhs_mat->type()->UnwrapAliasIfNeeded() : nullptr;
     auto* rhs_mat = rhs_type->As<Matrix>();
-    auto* rhs_mat_elem_type = rhs_mat ? rhs_mat->type() : nullptr;
+    auto* rhs_mat_elem_type =
+        rhs_mat ? rhs_mat->type()->UnwrapAliasIfNeeded() : nullptr;
 
     // Multiplication of a matrix and a scalar
     if (lhs_type->Is<F32>() && rhs_mat_elem_type &&
@@ -1195,7 +1200,7 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
       expr->IsNotEqual() || expr->IsLessThan() || expr->IsGreaterThan() ||
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
     auto* bool_type = builder_->create<type::Bool>();
-    auto* param_type = TypeOf(expr->lhs())->UnwrapPtrIfNeeded();
+    auto* param_type = TypeOf(expr->lhs())->UnwrapAll();
     type::Type* result_type = bool_type;
     if (auto* vec = param_type->As<type::Vector>()) {
       result_type = builder_->create<type::Vector>(bool_type, vec->size());
@@ -1204,8 +1209,8 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     return true;
   }
   if (expr->IsMultiply()) {
-    auto* lhs_type = TypeOf(expr->lhs())->UnwrapPtrIfNeeded();
-    auto* rhs_type = TypeOf(expr->rhs())->UnwrapPtrIfNeeded();
+    auto* lhs_type = TypeOf(expr->lhs())->UnwrapAll();
+    auto* rhs_type = TypeOf(expr->rhs())->UnwrapAll();
 
     // Note, the ordering here matters. The later checks depend on the prior
     // checks having been done.

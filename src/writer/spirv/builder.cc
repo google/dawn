@@ -1723,8 +1723,8 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
 
   // Handle int and float and the vectors of those types. Other types
   // should have been rejected by validation.
-  auto* lhs_type = TypeOf(expr->lhs())->UnwrapPtrIfNeeded();
-  auto* rhs_type = TypeOf(expr->rhs())->UnwrapPtrIfNeeded();
+  auto* lhs_type = TypeOf(expr->lhs())->UnwrapAll();
+  auto* rhs_type = TypeOf(expr->rhs())->UnwrapAll();
   bool lhs_is_float_or_vec = lhs_type->is_float_scalar_or_vector();
   bool lhs_is_unsigned = lhs_type->is_unsigned_scalar_or_vector();
 
@@ -1820,6 +1820,7 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
       // float matrix * matrix
       op = spv::Op::OpMatrixTimesMatrix;
     } else {
+      error_ = "invalid multiply expression";
       return 0;
     }
   } else if (expr->IsNotEqual()) {
