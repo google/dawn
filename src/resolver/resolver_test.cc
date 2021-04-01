@@ -1270,7 +1270,10 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
   ASSERT_FALSE(r()->Resolve()) << r()->error();
   ASSERT_EQ(r()->error(),
             "12:34 error: Binary expression operand types are invalid for "
-            "this operation");
+            "this operation: " +
+                lhs_type->FriendlyName(Symbols()) + " " +
+                FriendlyName(expr->op()) + " " +
+                rhs_type->FriendlyName(Symbols()));
 }
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,

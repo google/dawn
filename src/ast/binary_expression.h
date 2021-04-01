@@ -182,66 +182,52 @@ inline bool BinaryExpression::IsBitshift() const {
   }
 }
 
-inline std::ostream& operator<<(std::ostream& out, BinaryOp op) {
+constexpr const char* FriendlyName(BinaryOp op) {
   switch (op) {
     case BinaryOp::kNone:
-      out << "none";
-      break;
+      return "none";
     case BinaryOp::kAnd:
-      out << "and";
-      break;
+      return "and";
     case BinaryOp::kOr:
-      out << "or";
-      break;
+      return "or";
     case BinaryOp::kXor:
-      out << "xor";
-      break;
+      return "xor";
     case BinaryOp::kLogicalAnd:
-      out << "logical_and";
-      break;
+      return "logical_and";
     case BinaryOp::kLogicalOr:
-      out << "logical_or";
-      break;
+      return "logical_or";
     case BinaryOp::kEqual:
-      out << "equal";
-      break;
+      return "equal";
     case BinaryOp::kNotEqual:
-      out << "not_equal";
-      break;
+      return "not_equal";
     case BinaryOp::kLessThan:
-      out << "less_than";
-      break;
+      return "less_than";
     case BinaryOp::kGreaterThan:
-      out << "greater_than";
-      break;
+      return "greater_than";
     case BinaryOp::kLessThanEqual:
-      out << "less_than_equal";
-      break;
+      return "less_than_equal";
     case BinaryOp::kGreaterThanEqual:
-      out << "greater_than_equal";
-      break;
+      return "greater_than_equal";
     case BinaryOp::kShiftLeft:
-      out << "shift_left";
-      break;
+      return "shift_left";
     case BinaryOp::kShiftRight:
-      out << "shift_right";
-      break;
+      return "shift_right";
     case BinaryOp::kAdd:
-      out << "add";
-      break;
+      return "add";
     case BinaryOp::kSubtract:
-      out << "subtract";
-      break;
+      return "subtract";
     case BinaryOp::kMultiply:
-      out << "multiply";
-      break;
+      return "multiply";
     case BinaryOp::kDivide:
-      out << "divide";
-      break;
+      return "divide";
     case BinaryOp::kModulo:
-      out << "modulo";
-      break;
+      return "modulo";
   }
+  return "INVALID";
+}
+
+inline std::ostream& operator<<(std::ostream& out, BinaryOp op) {
+  out << FriendlyName(op);
   return out;
 }
 

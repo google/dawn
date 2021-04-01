@@ -1174,7 +1174,10 @@ bool Resolver::ValidateBinary(ast::BinaryExpression* expr) {
   }
 
   diagnostics_.add_error(
-      "Binary expression operand types are invalid for this operation",
+      "Binary expression operand types are invalid for this operation: " +
+          lhs_type->FriendlyName(builder_->Symbols()) + " " +
+          FriendlyName(expr->op()) + " " +
+          rhs_type->FriendlyName(builder_->Symbols()),
       expr->source());
   return false;
 }
