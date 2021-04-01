@@ -1263,11 +1263,11 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
   Global("lhs", lhs_type, ast::StorageClass::kNone);
   Global("rhs", rhs_type, ast::StorageClass::kNone);
 
-  auto* expr = create<ast::BinaryExpression>(
-      Source{Source::Location{12, 34}}, params.op, Expr("lhs"), Expr("rhs"));
+  auto* expr = create<ast::BinaryExpression>(Source{{12, 34}}, params.op,
+                                             Expr("lhs"), Expr("rhs"));
   WrapInFunction(expr);
 
-  ASSERT_FALSE(r()->Resolve()) << r()->error();
+  ASSERT_FALSE(r()->Resolve());
   ASSERT_EQ(r()->error(),
             "12:34 error: Binary expression operand types are invalid for "
             "this operation: " +
@@ -1280,6 +1280,99 @@ INSTANTIATE_TEST_SUITE_P(
     Expr_Binary_Test_Invalid,
     testing::Combine(testing::ValuesIn(all_valid_cases),
                      testing::ValuesIn(all_create_type_funcs)));
+
+using Expr_Binary_Test_Invalid_VectorMatrixMultiply =
+    ResolverTestWithParam<std::tuple<bool, uint32_t, uint32_t, uint32_t>>;
+TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
+  bool vec_by_mat = std::get<0>(GetParam());
+  uint32_t vec_size = std::get<1>(GetParam());
+  uint32_t mat_rows = std::get<2>(GetParam());
+  uint32_t mat_cols = std::get<3>(GetParam());
+
+  type::Type* lhs_type;
+  type::Type* rhs_type;
+  type::Type* result_type;
+  bool is_valid_expr;
+
+  if (vec_by_mat) {
+    lhs_type = create<type::Vector>(ty.f32(), vec_size);
+    rhs_type = create<type::Matrix>(ty.f32(), mat_rows, mat_cols);
+    result_type = create<type::Vector>(ty.f32(), mat_cols);
+    is_valid_expr = vec_size == mat_rows;
+  } else {
+    lhs_type = create<type::Matrix>(ty.f32(), mat_rows, mat_cols);
+    rhs_type = create<type::Vector>(ty.f32(), vec_size);
+    result_type = create<type::Vector>(ty.f32(), mat_rows);
+    is_valid_expr = vec_size == mat_cols;
+  }
+
+  Global("lhs", lhs_type, ast::StorageClass::kNone);
+  Global("rhs", rhs_type, ast::StorageClass::kNone);
+
+  auto* expr = Mul(Source{{12, 34}}, Expr("lhs"), Expr("rhs"));
+  WrapInFunction(expr);
+
+  if (is_valid_expr) {
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(TypeOf(expr) == result_type);
+  } else {
+    ASSERT_FALSE(r()->Resolve());
+    ASSERT_EQ(r()->error(),
+              "12:34 error: Binary expression operand types are invalid for "
+              "this operation: " +
+                  lhs_type->FriendlyName(Symbols()) + " " +
+                  FriendlyName(expr->op()) + " " +
+                  rhs_type->FriendlyName(Symbols()));
+  }
+}
+auto all_dimension_values = testing::Values(2u, 3u, 4u);
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
+                         Expr_Binary_Test_Invalid_VectorMatrixMultiply,
+                         testing::Combine(testing::Values(true, false),
+                                          all_dimension_values,
+                                          all_dimension_values,
+                                          all_dimension_values));
+
+using Expr_Binary_Test_Invalid_MatrixMatrixMultiply =
+    ResolverTestWithParam<std::tuple<uint32_t, uint32_t, uint32_t, uint32_t>>;
+TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
+  uint32_t lhs_mat_rows = std::get<0>(GetParam());
+  uint32_t lhs_mat_cols = std::get<1>(GetParam());
+  uint32_t rhs_mat_rows = std::get<2>(GetParam());
+  uint32_t rhs_mat_cols = std::get<3>(GetParam());
+
+  auto* lhs_type = create<type::Matrix>(ty.f32(), lhs_mat_rows, lhs_mat_cols);
+  auto* rhs_type = create<type::Matrix>(ty.f32(), rhs_mat_rows, rhs_mat_cols);
+  auto* result_type =
+      create<type::Matrix>(ty.f32(), lhs_mat_rows, rhs_mat_cols);
+
+  Global("lhs", lhs_type, ast::StorageClass::kNone);
+  Global("rhs", rhs_type, ast::StorageClass::kNone);
+
+  auto* expr = Mul(Source{{12, 34}}, Expr("lhs"), Expr("rhs"));
+  WrapInFunction(expr);
+
+  bool is_valid_expr = lhs_mat_cols == rhs_mat_rows;
+  if (is_valid_expr) {
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(TypeOf(expr) == result_type);
+  } else {
+    ASSERT_FALSE(r()->Resolve());
+    ASSERT_EQ(r()->error(),
+              "12:34 error: Binary expression operand types are invalid for "
+              "this operation: " +
+                  lhs_type->FriendlyName(Symbols()) + " " +
+                  FriendlyName(expr->op()) + " " +
+                  rhs_type->FriendlyName(Symbols()));
+  }
+}
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
+                         Expr_Binary_Test_Invalid_MatrixMatrixMultiply,
+                         testing::Combine(all_dimension_values,
+                                          all_dimension_values,
+                                          all_dimension_values,
+                                          all_dimension_values));
+
 }  // namespace ExprBinaryTest
 
 using UnaryOpExpressionTest = ResolverTestWithParam<ast::UnaryOp>;

@@ -1040,8 +1040,10 @@ bool Resolver::ValidateBinary(ast::BinaryExpression* expr) {
   auto* rhs_vec_elem_type =
       rhs_vec ? rhs_vec->type()->UnwrapAliasIfNeeded() : nullptr;
 
-  const bool matching_vec_elem_types = lhs_vec_elem_type && rhs_vec_elem_type &&
-                                       (lhs_vec_elem_type == rhs_vec_elem_type);
+  const bool matching_vec_elem_types =
+      lhs_vec_elem_type && rhs_vec_elem_type &&
+      (lhs_vec_elem_type == rhs_vec_elem_type) &&
+      (lhs_vec->size() == rhs_vec->size());
 
   const bool matching_types = matching_vec_elem_types || (lhs_type == rhs_type);
 
@@ -1106,19 +1108,22 @@ bool Resolver::ValidateBinary(ast::BinaryExpression* expr) {
 
     // Vector times matrix
     if (lhs_vec_elem_type && lhs_vec_elem_type->Is<F32>() &&
-        rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>()) {
+        rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>() &&
+        (lhs_vec->size() == rhs_mat->rows())) {
       return true;
     }
 
     // Matrix times vector
     if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() &&
-        rhs_vec_elem_type && rhs_vec_elem_type->Is<F32>()) {
+        rhs_vec_elem_type && rhs_vec_elem_type->Is<F32>() &&
+        (lhs_mat->columns() == rhs_vec->size())) {
       return true;
     }
 
     // Matrix times matrix
     if (lhs_mat_elem_type && lhs_mat_elem_type->Is<F32>() &&
-        rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>()) {
+        rhs_mat_elem_type && rhs_mat_elem_type->Is<F32>() &&
+        (lhs_mat->columns() == rhs_mat->rows())) {
       return true;
     }
   }

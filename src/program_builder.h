@@ -928,7 +928,7 @@ class ProgramBuilder {
   /// @param rhs the right hand argument to the addition operation
   /// @returns a `ast::BinaryExpression` summing the arguments `lhs` and `rhs`
   template <typename LHS, typename RHS>
-  ast::Expression* Add(LHS&& lhs, RHS&& rhs) {
+  ast::BinaryExpression* Add(LHS&& lhs, RHS&& rhs) {
     return create<ast::BinaryExpression>(ast::BinaryOp::kAdd,
                                          Expr(std::forward<LHS>(lhs)),
                                          Expr(std::forward<RHS>(rhs)));
@@ -938,7 +938,7 @@ class ProgramBuilder {
   /// @param rhs the right hand argument to the subtraction operation
   /// @returns a `ast::BinaryExpression` subtracting `rhs` from `lhs`
   template <typename LHS, typename RHS>
-  ast::Expression* Sub(LHS&& lhs, RHS&& rhs) {
+  ast::BinaryExpression* Sub(LHS&& lhs, RHS&& rhs) {
     return create<ast::BinaryExpression>(ast::BinaryOp::kSubtract,
                                          Expr(std::forward<LHS>(lhs)),
                                          Expr(std::forward<RHS>(rhs)));
@@ -948,8 +948,19 @@ class ProgramBuilder {
   /// @param rhs the right hand argument to the multiplication operation
   /// @returns a `ast::BinaryExpression` multiplying `rhs` from `lhs`
   template <typename LHS, typename RHS>
-  ast::Expression* Mul(LHS&& lhs, RHS&& rhs) {
+  ast::BinaryExpression* Mul(LHS&& lhs, RHS&& rhs) {
     return create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
+  /// @param source the source information
+  /// @param lhs the left hand argument to the multiplication operation
+  /// @param rhs the right hand argument to the multiplication operation
+  /// @returns a `ast::BinaryExpression` multiplying `rhs` from `lhs`
+  template <typename LHS, typename RHS>
+  ast::BinaryExpression* Mul(const Source& source, LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(source, ast::BinaryOp::kMultiply,
                                          Expr(std::forward<LHS>(lhs)),
                                          Expr(std::forward<RHS>(rhs)));
   }
@@ -958,7 +969,7 @@ class ProgramBuilder {
   /// @param idx the index argument for the array accessor expression
   /// @returns a `ast::ArrayAccessorExpression` that indexes `arr` with `idx`
   template <typename ARR, typename IDX>
-  ast::Expression* IndexAccessor(ARR&& arr, IDX&& idx) {
+  ast::ArrayAccessorExpression* IndexAccessor(ARR&& arr, IDX&& idx) {
     return create<ast::ArrayAccessorExpression>(Expr(std::forward<ARR>(arr)),
                                                 Expr(std::forward<IDX>(idx)));
   }
