@@ -46,6 +46,20 @@ namespace dawn_native {
         }
     }
 
+    AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPipelineDescriptor2* descriptor)
+        : mSampleCount(descriptor->multisample.count) {
+        ASSERT(descriptor->fragment->targetCount <= kMaxColorAttachments);
+        for (ColorAttachmentIndex i(uint8_t(0));
+             i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->fragment->targetCount));
+             ++i) {
+            mColorAttachmentsSet.set(i);
+            mColorFormats[i] = descriptor->fragment->targets[static_cast<uint8_t>(i)].format;
+        }
+        if (descriptor->depthStencil != nullptr) {
+            mDepthStencilFormat = descriptor->depthStencil->format;
+        }
+    }
+
     AttachmentStateBlueprint::AttachmentStateBlueprint(const RenderPassDescriptor* descriptor) {
         for (ColorAttachmentIndex i(uint8_t(0));
              i < ColorAttachmentIndex(static_cast<uint8_t>(descriptor->colorAttachmentCount));

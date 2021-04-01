@@ -120,6 +120,8 @@ namespace dawn_native {
 
         ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRenderPipeline(
             const RenderPipelineDescriptor* descriptor);
+        ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRenderPipeline(
+            const RenderPipelineDescriptor2* descriptor);
         void UncacheRenderPipeline(RenderPipelineBase* obj);
 
         ResultOrError<Ref<SamplerBase>> GetOrCreateSampler(const SamplerDescriptor* descriptor);
@@ -134,6 +136,8 @@ namespace dawn_native {
         Ref<AttachmentState> GetOrCreateAttachmentState(
             const RenderBundleEncoderDescriptor* descriptor);
         Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor);
+        Ref<AttachmentState> GetOrCreateAttachmentState(
+            const RenderPipelineDescriptor2* descriptor);
         Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPassDescriptor* descriptor);
         void UncacheAttachmentState(AttachmentState* obj);
 

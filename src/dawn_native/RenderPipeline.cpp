@@ -674,6 +674,84 @@ namespace dawn_native {
         // attachment are set?
     }
 
+    RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
+                                           const RenderPipelineDescriptor2* descriptor)
+        : PipelineBase(device,
+                       descriptor->layout,
+                       {{SingleShaderStage::Vertex, descriptor->vertex.module,
+                         descriptor->vertex.entryPoint},
+                        {SingleShaderStage::Fragment, descriptor->fragment->module,
+                         descriptor->fragment->entryPoint}}),
+          mAttachmentState(device->GetOrCreateAttachmentState(descriptor)) {
+        mVertexBufferCount = descriptor->vertex.bufferCount;
+        const VertexBufferLayout* buffers = descriptor->vertex.buffers;
+        for (uint8_t slot = 0; slot < mVertexBufferCount; ++slot) {
+            if (buffers[slot].attributeCount == 0) {
+                continue;
+            }
+
+            VertexBufferSlot typedSlot(slot);
+
+            mVertexBufferSlotsUsed.set(typedSlot);
+            mVertexBufferInfos[typedSlot].arrayStride = buffers[slot].arrayStride;
+            mVertexBufferInfos[typedSlot].stepMode = buffers[slot].stepMode;
+
+            for (uint32_t i = 0; i < buffers[slot].attributeCount; ++i) {
+                VertexAttributeLocation location = VertexAttributeLocation(
+                    static_cast<uint8_t>(buffers[slot].attributes[i].shaderLocation));
+                mAttributeLocationsUsed.set(location);
+                mAttributeInfos[location].shaderLocation = location;
+                mAttributeInfos[location].vertexBufferSlot = typedSlot;
+                mAttributeInfos[location].offset = buffers[slot].attributes[i].offset;
+
+                mAttributeInfos[location].format =
+                    dawn::NormalizeVertexFormat(buffers[slot].attributes[i].format);
+            }
+        }
+
+        mPrimitive = descriptor->primitive;
+        mMultisample = descriptor->multisample;
+
+        if (mAttachmentState->HasDepthStencilAttachment()) {
+            mDepthStencil = *descriptor->depthStencil;
+        } else {
+            // These default values below are useful for backends to fill information.
+            // The values indicate that depth and stencil test are disabled when backends
+            // set their own depth stencil states/descriptors according to the values in
+            // mDepthStencil.
+            mDepthStencil.format = wgpu::TextureFormat::Undefined;
+            mDepthStencil.depthWriteEnabled = false;
+            mDepthStencil.depthCompare = wgpu::CompareFunction::Always;
+            mDepthStencil.stencilBack.compare = wgpu::CompareFunction::Always;
+            mDepthStencil.stencilBack.failOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilBack.depthFailOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilBack.passOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilFront.compare = wgpu::CompareFunction::Always;
+            mDepthStencil.stencilFront.failOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilFront.depthFailOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilFront.passOp = wgpu::StencilOperation::Keep;
+            mDepthStencil.stencilReadMask = 0xff;
+            mDepthStencil.stencilWriteMask = 0xff;
+            mDepthStencil.depthBias = 0;
+            mDepthStencil.depthBiasSlopeScale = 0.0f;
+            mDepthStencil.depthBiasClamp = 0.0f;
+        }
+
+        for (ColorAttachmentIndex i : IterateBitSet(mAttachmentState->GetColorAttachmentsMask())) {
+            const ColorTargetState* target =
+                &descriptor->fragment->targets[static_cast<uint8_t>(i)];
+            mTargets[i] = *target;
+
+            if (target->blend != nullptr) {
+                mTargetBlend[i] = *target->blend;
+                mTargets[i].blend = &mTargetBlend[i];
+            }
+        }
+
+        // TODO(cwallez@chromium.org): Check against the shader module that the correct color
+        // attachment are set?
+    }
+
     RenderPipelineBase::RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)
         : PipelineBase(device, tag) {
     }

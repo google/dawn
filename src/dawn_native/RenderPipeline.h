@@ -58,6 +58,7 @@ namespace dawn_native {
     class RenderPipelineBase : public PipelineBase {
       public:
         RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
+        RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor2* descriptor);
         ~RenderPipelineBase() override;
 
         static RenderPipelineBase* MakeError(DeviceBase* device);
