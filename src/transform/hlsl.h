@@ -44,6 +44,8 @@ class Hlsl : public Transform {
   /// the array usage statement.
   /// See crbug.com/tint/406 for more details
   void PromoteArrayInitializerToConstVar(CloneContext& ctx) const;
+  /// Add an empty shader entry point if none exist in the module.
+  void AddEmptyEntryPoint(CloneContext& ctx) const;
 };
 
 }  // namespace transform

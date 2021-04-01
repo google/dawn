@@ -65,7 +65,7 @@ TEST_F(ValidatorTest, GlobalConstNoStorageClass_Pass) {
 
   ValidatorImpl& v = Build();
 
-  EXPECT_FALSE(v.Validate()) << v.error();
+  EXPECT_TRUE(v.Validate()) << v.error();
 }
 
 TEST_F(ValidatorTest, GlobalVariableUnique_Pass) {

@@ -19,6 +19,7 @@
 
 #include "src/ast/call_statement.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/stage_decoration.h"
 #include "src/program_builder.h"
 #include "src/semantic/function.h"
 #include "src/semantic/statement.h"
@@ -42,6 +43,7 @@ Transform::Output Spirv::Run(const Program* in, const DataMap&) {
   ProgramBuilder out2;
   CloneContext ctx2(&out2, &tmp);
   HandleSampleMaskBuiltins(ctx2);
+  AddEmptyEntryPoint(ctx2);
   ctx2.Clone();
 
   return Output{Program(std::move(out2))};
@@ -232,6 +234,17 @@ void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
       }
     }
   }
+}
+
+void Spirv::AddEmptyEntryPoint(CloneContext& ctx) const {
+  for (auto* func : ctx.src->AST().Functions()) {
+    if (func->IsEntryPoint()) {
+      return;
+    }
+  }
+  ctx.dst->Func(
+      "_tint_unused_entry_point", {}, ctx.dst->ty.void_(), {},
+      {ctx.dst->create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
 }
 
 Symbol Spirv::HoistToInputVariables(

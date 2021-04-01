@@ -47,6 +47,8 @@ class Spirv : public Transform {
   void HandleEntryPointIOTypes(CloneContext& ctx) const;
   /// Change type of sample mask builtin variables to single element arrays.
   void HandleSampleMaskBuiltins(CloneContext& ctx) const;
+  /// Add an empty shader entry point if none exist in the module.
+  void AddEmptyEntryPoint(CloneContext& ctx) const;
 
   /// Recursively create module-scope input variables for `ty` and add
   /// function-scope variables for structs to `func`.

@@ -143,6 +143,20 @@ fn main() -> void {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(HlslTest, AddEmptyEntryPoint) {
+  auto* src = R"()";
+
+  auto* expect = R"(
+[[stage(vertex)]]
+fn _tint_unused_entry_point() -> void {
+}
+)";
+
+  auto got = Run<Hlsl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

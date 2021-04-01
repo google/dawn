@@ -138,10 +138,8 @@ bool ValidatorImpl::ValidateGlobalVariable(const ast::Variable* var) {
 }
 
 bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
-  auto shader_is_present = false;
   for (auto* func : funcs) {
     if (func->IsEntryPoint()) {
-      shader_is_present = true;
       auto stage_deco_count = 0;
       for (auto* deco : func->decorations()) {
         if (deco->Is<ast::StageDecoration>()) {
@@ -157,12 +155,6 @@ bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
         return false;
       }
     }
-  }
-  if (!shader_is_present) {
-    add_error(Source{}, "v-0003",
-              "At least one of vertex, fragment or compute shader must "
-              "be present");
-    return false;
   }
   return true;
 }

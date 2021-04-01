@@ -833,6 +833,20 @@ fn main() -> void {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SpirvTest, AddEmptyEntryPoint) {
+  auto* src = R"()";
+
+  auto* expect = R"(
+[[stage(compute)]]
+fn _tint_unused_entry_point() -> void {
+}
+)";
+
+  auto got = Run<Spirv>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 // Test that different transforms within the sanitizer interact correctly.
 TEST_F(SpirvTest, MultipleTransforms) {
   auto* src = R"(

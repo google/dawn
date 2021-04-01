@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "src/ast/stage_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/semantic/expression.h"
@@ -32,6 +33,7 @@ Transform::Output Hlsl::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
   PromoteArrayInitializerToConstVar(ctx);
+  AddEmptyEntryPoint(ctx);
   ctx.Clone();
   return Output{Program(std::move(out))};
 }
@@ -103,6 +105,17 @@ void Hlsl::PromoteArrayInitializerToConstVar(CloneContext& ctx) const {
       }
     }
   }
+}
+
+void Hlsl::AddEmptyEntryPoint(CloneContext& ctx) const {
+  for (auto* func : ctx.src->AST().Functions()) {
+    if (func->IsEntryPoint()) {
+      return;
+    }
+  }
+  ctx.dst->Func(
+      "_tint_unused_entry_point", {}, ctx.dst->ty.void_(), {},
+      {ctx.dst->create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
 }
 
 }  // namespace transform

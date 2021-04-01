@@ -78,25 +78,7 @@ TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
       "12:34 v-0020: only one stage decoration permitted per entry point");
 }
 
-TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Pass) {
-  // [[stage(vertex)]]
-  // fn vtx_func() -> void { return; }
-
-  Func("vtx_func", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(),
-       },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_TRUE(v.Validate()) << v.error();
-}
-
-TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
-  // fn vtx_func() -> void { return; }
+TEST_F(ValidateFunctionTest, NoPipelineEntryPoints) {
   Func("vtx_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::ReturnStatement>(),
@@ -105,10 +87,7 @@ TEST_F(ValidateFunctionTest, OnePipelineStageFunctionMustBePresent_Fail) {
 
   ValidatorImpl& v = Build();
 
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(v.error(),
-            "v-0003: At least one of vertex, fragment or compute shader must "
-            "be present");
+  EXPECT_TRUE(v.Validate()) << v.error();
 }
 
 TEST_F(ValidateFunctionTest, FunctionVarInitWithParam) {
