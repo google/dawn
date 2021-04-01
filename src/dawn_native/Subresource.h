@@ -94,6 +94,10 @@ namespace dawn_native {
     uint8_t GetAspectIndex(Aspect aspect);
     uint8_t GetAspectCount(Aspect aspects);
 
+    // The maximum number of planes per format Dawn knows about. Asserts in BuildFormatTable that
+    // the per plane index does not exceed the known maximum plane count.
+    static constexpr uint32_t kMaxPlanesPerFormat = 3;
+
 }  // namespace dawn_native
 
 namespace wgpu {

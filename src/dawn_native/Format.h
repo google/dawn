@@ -20,6 +20,7 @@
 #include "common/ityp_bitset.h"
 #include "dawn_native/EnumClassBitmasks.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/Subresource.h"
 
 #include <array>
 
@@ -74,10 +75,6 @@ namespace dawn_native {
     // The number of formats Dawn knows about. Asserts in BuildFormatTable ensure that this is the
     // exact number of known format.
     static constexpr size_t kKnownFormatCount = 55;
-
-    // The maximum number of planes per format Dawn knows about. Asserts in BuildFormatTable that
-    // the per plane index does not exceed the known maximum plane count
-    static constexpr uint32_t kMaxPlanesPerFormat = 2;
 
     struct Format;
     using FormatTable = std::array<Format, kKnownFormatCount>;

@@ -88,6 +88,8 @@ target_sources(dawn_native PRIVATE
     "ErrorScope.h"
     "Extensions.cpp"
     "Extensions.h"
+    "ExternalTexture.cpp"
+    "ExternalTexture.h"
     "ObjectContentHasher.cpp"
     "ObjectContentHasher.h"
     "Fence.cpp"

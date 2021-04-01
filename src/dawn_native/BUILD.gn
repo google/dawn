@@ -220,6 +220,8 @@ source_set("dawn_native_sources") {
     "ErrorScope.h",
     "Extensions.cpp",
     "Extensions.h",
+    "ExternalTexture.cpp",
+    "ExternalTexture.h",
     "Fence.cpp",
     "Fence.h",
     "Format.cpp",

@@ -27,6 +27,7 @@
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/ErrorScope.h"
+#include "dawn_native/ExternalTexture.h"
 #include "dawn_native/Fence.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/InternalPipelineStore.h"
@@ -997,6 +998,16 @@ namespace dawn_native {
         return APIGetQueue();
     }
 
+    ExternalTextureBase* DeviceBase::APICreateExternalTexture(
+        const ExternalTextureDescriptor* descriptor) {
+        Ref<ExternalTextureBase> result = nullptr;
+        if (ConsumedError(CreateExternalTextureInternal(descriptor), &result)) {
+            return ExternalTextureBase::MakeError(this);
+        }
+
+        return result.Detach();
+    }
+
     void DeviceBase::ApplyExtensions(const DeviceDescriptor* deviceDescriptor) {
         ASSERT(deviceDescriptor);
         ASSERT(GetAdapter()->SupportsAllRequestedExtensions(deviceDescriptor->requiredExtensions));
@@ -1114,6 +1125,15 @@ namespace dawn_native {
             DAWN_TRY(ValidatePipelineLayoutDescriptor(this, descriptor));
         }
         return GetOrCreatePipelineLayout(descriptor);
+    }
+
+    ResultOrError<Ref<ExternalTextureBase>> DeviceBase::CreateExternalTextureInternal(
+        const ExternalTextureDescriptor* descriptor) {
+        if (IsValidationEnabled()) {
+            DAWN_TRY(ValidateExternalTextureDescriptor(this, descriptor));
+        }
+
+        return ExternalTextureBase::Create(this, descriptor);
     }
 
     ResultOrError<Ref<QuerySetBase>> DeviceBase::CreateQuerySetInternal(

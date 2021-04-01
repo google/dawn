@@ -767,6 +767,13 @@
                 "returns": "queue"
             },
             {
+                "name": "create external texture",
+                "returns": "external texture",
+                "args": [
+                    {"name": "external texture descriptor", "type": "external texture descriptor", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "inject error",
                 "args": [
                     {"name": "type", "type": "error type"},
@@ -877,6 +884,23 @@
             {"name": "height", "type": "uint32_t", "default": 1},
             {"name": "depth or array layers", "type": "uint32_t", "default": 1},
             {"name": "depth", "type": "uint32_t", "default": 1}
+        ]
+    },
+    "external texture": {
+        "category": "object",
+        "methods": [
+            {
+                "name": "destroy",
+                "returns": "void"
+            }
+        ]
+    },
+    "external texture descriptor": {
+        "category": "structure",
+        "extensible": true,
+        "members": [
+            {"name": "plane 0", "type": "texture view"},
+            {"name": "format", "type": "texture format"}
         ]
     },
     "fence": {
