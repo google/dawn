@@ -80,7 +80,7 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
             [[location(0)]] var<out> FragColor : vec4<f32>;
             [[group(0), binding(0)]] var materials : texture_2d<f32>;
             [[stage(fragment)]] fn main() -> void {
-                textureDimensions(materials);
+                const foo : vec2<i32> = textureDimensions(materials);
                 FragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )");
