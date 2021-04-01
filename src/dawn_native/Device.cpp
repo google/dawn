@@ -805,14 +805,6 @@ namespace dawn_native {
     void DeviceBase::APICreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
                                                    WGPUCreateComputePipelineAsyncCallback callback,
                                                    void* userdata) {
-        if (IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-            callback(WGPUCreatePipelineAsyncStatus_Error, nullptr,
-                     "CreateComputePipelineAsync is disallowed because it isn't completely "
-                     "implemented yet.",
-                     userdata);
-            return;
-        }
-
         ResultOrError<Ref<ComputePipelineBase>> maybeResult =
             CreateComputePipelineInternal(descriptor);
         if (maybeResult.IsError()) {
@@ -852,14 +844,6 @@ namespace dawn_native {
     void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor2* descriptor,
                                                   WGPUCreateRenderPipelineAsyncCallback callback,
                                                   void* userdata) {
-        if (IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-            callback(WGPUCreatePipelineAsyncStatus_Error, nullptr,
-                     "CreateRenderPipelineAsync is disallowed because it isn't completely "
-                     "implemented yet.",
-                     userdata);
-            return;
-        }
-
         ResultOrError<Ref<RenderPipelineBase>> maybeResult =
             CreateRenderPipelineInternal(descriptor);
         if (maybeResult.IsError()) {
