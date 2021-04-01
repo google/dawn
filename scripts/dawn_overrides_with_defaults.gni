@@ -73,6 +73,6 @@ if (!defined(dawn_vulkan_validation_layers_dir)) {
 }
 
 if (!defined(dawn_tint_dir)) {
-  # Default to Tint not being available.
-  dawn_tint_dir = ""
+  # Default to Tint being Dawn's DEPS
+  dawn_tint_dir = "${dawn_root}/third_party/tint"
 }
