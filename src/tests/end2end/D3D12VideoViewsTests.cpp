@@ -93,14 +93,14 @@ namespace {
 
         // Returns a pre-prepared multi-planar formatted texture
         // The encoded texture data represents a 4x4 converted image. When |isCheckerboard| is true,
-        // the upper left and bottom right fill a 2x2 grey block, from RGB(128, 128, 128), while the
-        // upper right and bottom left fill a 2x2 white block, from RGB(255, 255, 255). When
-        // |isCheckerboard| is false, the image is converted from a solid grey 4x4 block.
+        // the top left is a 2x2 yellow block, bottom right is a 2x2 red block, top right is a 2x2
+        // blue block, and bottom left is a 2x2 white block. When |isCheckerboard| is false, the
+        // image is converted from a solid yellow 4x4 block.
         static std::vector<uint8_t> GetTestTextureData(wgpu::TextureFormat format,
                                                        bool isCheckerboard) {
-            constexpr uint8_t Y1 = kGreyYUVColor[kYUVLumaPlaneIndex].r;
-            constexpr uint8_t U1 = kGreyYUVColor[kYUVChromaPlaneIndex].r;
-            constexpr uint8_t V1 = kGreyYUVColor[kYUVChromaPlaneIndex].g;
+            constexpr uint8_t Yy = kYellowYUVColor[kYUVLumaPlaneIndex].r;
+            constexpr uint8_t Yu = kYellowYUVColor[kYUVChromaPlaneIndex].r;
+            constexpr uint8_t Yv = kYellowYUVColor[kYUVChromaPlaneIndex].g;
 
             switch (format) {
                 // The first 16 bytes is the luma plane (Y), followed by the chroma plane (UV) which
@@ -108,28 +108,37 @@ namespace {
                 // plane.
                 case wgpu::TextureFormat::R8BG8Biplanar420Unorm:
                     if (isCheckerboard) {
-                        constexpr uint8_t Y2 = kWhiteYUVColor[kYUVLumaPlaneIndex].r;
-                        constexpr uint8_t U2 = kWhiteYUVColor[kYUVChromaPlaneIndex].r;
-                        constexpr uint8_t V2 = kWhiteYUVColor[kYUVChromaPlaneIndex].g;
+                        constexpr uint8_t Wy = kWhiteYUVColor[kYUVLumaPlaneIndex].r;
+                        constexpr uint8_t Wu = kWhiteYUVColor[kYUVChromaPlaneIndex].r;
+                        constexpr uint8_t Wv = kWhiteYUVColor[kYUVChromaPlaneIndex].g;
+
+                        constexpr uint8_t Ry = kRedYUVColor[kYUVLumaPlaneIndex].r;
+                        constexpr uint8_t Ru = kRedYUVColor[kYUVChromaPlaneIndex].r;
+                        constexpr uint8_t Rv = kRedYUVColor[kYUVChromaPlaneIndex].g;
+
+                        constexpr uint8_t By = kBlueYUVColor[kYUVLumaPlaneIndex].r;
+                        constexpr uint8_t Bu = kBlueYUVColor[kYUVChromaPlaneIndex].r;
+                        constexpr uint8_t Bv = kBlueYUVColor[kYUVChromaPlaneIndex].g;
+
                         // clang-format off
                         return {
-                            Y2, Y2, Y1, Y1, // plane 0, start + 0
-                            Y2, Y2, Y1, Y1,
-                            Y1, Y1, Y2, Y2,
-                            Y1, Y1, Y2, Y2,
-                            U1, V1, U2, V2, // plane 1, start + 16
-                            U2, V2, U1, V1,
+                            Wy, Wy, Ry, Ry, // plane 0, start + 0
+                            Wy, Wy, Ry, Ry,
+                            Yy, Yy, By, By,
+                            Yy, Yy, By, By,
+                            Wu, Wv, Ru, Rv, // plane 1, start + 16
+                            Yu, Yv, Bu, Bv,
                         };
                         // clang-format on
                     } else {
                         // clang-format off
                         return {
-                            Y1, Y1, Y1, Y1,  // plane 0, start + 0
-                            Y1, Y1, Y1, Y1,
-                            Y1, Y1, Y1, Y1,
-                            Y1, Y1, Y1, Y1,
-                            U1, V1, U1, V1,  // plane 1, start + 16
-                            U1, V1, U1, V1,
+                            Yy, Yy, Yy, Yy,  // plane 0, start + 0
+                            Yy, Yy, Yy, Yy,
+                            Yy, Yy, Yy, Yy,
+                            Yy, Yy, Yy, Yy,
+                            Yu, Yv, Yu, Yv,  // plane 1, start + 16
+                            Yu, Yv, Yu, Yv,
                         };
                         // clang-format on
                     }
@@ -249,11 +258,19 @@ namespace {
         static constexpr size_t kYUVChromaPlaneIndex = 1;
 
         // RGB colors converted into YUV (per plane), for testing.
-        static constexpr std::array<RGBA8, 2> kGreyYUVColor = {RGBA8{126, 0, 0, 0xFF},     // Y
-                                                               RGBA8{128, 128, 0, 0xFF}};  // UV
+        // RGB colors are mapped to the BT.601 definition of luma.
+        // https://docs.microsoft.com/en-us/windows/win32/medfound/about-yuv-video
+        static constexpr std::array<RGBA8, 2> kYellowYUVColor = {RGBA8{210, 0, 0, 0xFF},    // Y
+                                                                 RGBA8{16, 146, 0, 0xFF}};  // UV
 
         static constexpr std::array<RGBA8, 2> kWhiteYUVColor = {RGBA8{235, 0, 0, 0xFF},     // Y
                                                                 RGBA8{128, 128, 0, 0xFF}};  // UV
+
+        static constexpr std::array<RGBA8, 2> kBlueYUVColor = {RGBA8{41, 0, 0, 0xFF},      // Y
+                                                               RGBA8{240, 110, 0, 0xFF}};  // UV
+
+        static constexpr std::array<RGBA8, 2> kRedYUVColor = {RGBA8{81, 0, 0, 0xFF},     // Y
+                                                              RGBA8{90, 240, 0, 0xFF}};  // UV
 
         ComPtr<ID3D11Device> mD3d11Device;
 
@@ -310,8 +327,8 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    // Test the luma plane in the top left corner of grey RGB image.
-    EXPECT_PIXEL_RGBA8_EQ(kGreyYUVColor[kYUVLumaPlaneIndex], renderPass.color, 0, 0);
+    // Test the luma plane in the top left corner of RGB image.
+    EXPECT_PIXEL_RGBA8_EQ(kYellowYUVColor[kYUVLumaPlaneIndex], renderPass.color, 0, 0);
 }
 
 // Samples the chrominance (UV) plane from an imported texture into two channels of an RGBA output
@@ -364,8 +381,8 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    // Test the chroma plane in the top left corner of grey RGB image.
-    EXPECT_PIXEL_RGBA8_EQ(kGreyYUVColor[kYUVChromaPlaneIndex], renderPass.color, 0, 0);
+    // Test the chroma plane in the top left corner of RGB image.
+    EXPECT_PIXEL_RGBA8_EQ(kYellowYUVColor[kYUVChromaPlaneIndex], renderPass.color, 0, 0);
 }
 
 // Renders a NV12 "checkerboard" texture into a RGB quad then checks the color at specific
@@ -424,18 +441,23 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    // Test four corners of the grey-white checkerboard image (YUV color space).
-    RGBA8 greyYUV(kGreyYUVColor[kYUVLumaPlaneIndex].r, kGreyYUVColor[kYUVChromaPlaneIndex].r,
-                  kGreyYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
-    EXPECT_PIXEL_RGBA8_EQ(greyYUV, renderPass.color, 0, 0);  // top left
-    EXPECT_PIXEL_RGBA8_EQ(greyYUV, renderPass.color, kYUVImageDataWidthInTexels - 1,
+    // Test four corners of the checkerboard image (YUV color space).
+    RGBA8 yellowYUV(kYellowYUVColor[kYUVLumaPlaneIndex].r, kYellowYUVColor[kYUVChromaPlaneIndex].r,
+                    kYellowYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
+    EXPECT_PIXEL_RGBA8_EQ(yellowYUV, renderPass.color, 0, 0);  // top left
+
+    RGBA8 redYUV(kRedYUVColor[kYUVLumaPlaneIndex].r, kRedYUVColor[kYUVChromaPlaneIndex].r,
+                 kRedYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
+    EXPECT_PIXEL_RGBA8_EQ(redYUV, renderPass.color, kYUVImageDataWidthInTexels - 1,
                           kYUVImageDataHeightInTexels - 1);  // bottom right
+
+    RGBA8 blueYUV(kBlueYUVColor[kYUVLumaPlaneIndex].r, kBlueYUVColor[kYUVChromaPlaneIndex].r,
+                  kBlueYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
+    EXPECT_PIXEL_RGBA8_EQ(blueYUV, renderPass.color, kYUVImageDataWidthInTexels - 1,
+                          0);  // top right
 
     RGBA8 whiteYUV(kWhiteYUVColor[kYUVLumaPlaneIndex].r, kWhiteYUVColor[kYUVChromaPlaneIndex].r,
                    kWhiteYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
-
-    EXPECT_PIXEL_RGBA8_EQ(whiteYUV, renderPass.color, kYUVImageDataWidthInTexels - 1,
-                          0);  // top right
     EXPECT_PIXEL_RGBA8_EQ(whiteYUV, renderPass.color, 0,
                           kYUVImageDataHeightInTexels - 1);  // bottom left
 }
