@@ -293,7 +293,7 @@ namespace dawn_native {
         if (descriptor->dimension != wgpu::TextureDimension::e2D &&
             device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
             return DAWN_VALIDATION_ERROR(
-                "1D and 3D textures are disallowed because they are not fully implemented ");
+                "1D and 3D textures are disallowed because they are not fully implemented");
         }
 
         if (descriptor->dimension != wgpu::TextureDimension::e2D && format->isCompressed) {
@@ -421,7 +421,7 @@ namespace dawn_native {
           mUsage(descriptor->usage),
           mState(state) {
         uint32_t subresourceCount =
-            mMipLevelCount * mSize.depthOrArrayLayers * GetAspectCount(mFormat.aspects);
+            mMipLevelCount * GetArrayLayers() * GetAspectCount(mFormat.aspects);
         mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 
         // Add readonly storage usage if the texture has a storage usage. The validation rules in

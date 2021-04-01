@@ -1018,7 +1018,7 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
 
     uint32_t rowsPerImage = extent.height;
     uint32_t size = utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, extent.width,
-                                               extent.height, extent.depth, dataSize);
+                                               extent.height, extent.depthOrArrayLayers, dataSize);
 
     // TODO(enga): We should have the map async alignment in Contants.h. Also, it should change to 8
     // for Float64Array.
@@ -1026,8 +1026,8 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
-    wgpu::ImageCopyTexture imageCopyTexture =
-        utils::CreateImageCopyTexture(texture, level, {origin.x, origin.y, layer}, aspect);
+    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
+        texture, level, {origin.x, origin.y, origin.z + layer}, aspect);
     wgpu::ImageCopyBuffer imageCopyBuffer =
         utils::CreateImageCopyBuffer(readback.buffer, readback.offset, bytesPerRow, rowsPerImage);
 

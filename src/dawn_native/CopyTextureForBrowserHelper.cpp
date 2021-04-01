@@ -208,8 +208,8 @@ namespace dawn_native {
 
         DAWN_TRY(ValidateCopyTextureForBrowserRestrictions(*source, *destination, *copySize));
 
-        DAWN_TRY(ValidateTextureCopyRange(*source, *copySize));
-        DAWN_TRY(ValidateTextureCopyRange(*destination, *copySize));
+        DAWN_TRY(ValidateTextureCopyRange(device, *source, *copySize));
+        DAWN_TRY(ValidateTextureCopyRange(device, *destination, *copySize));
 
         DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
         DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));

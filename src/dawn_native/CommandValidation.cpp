@@ -308,19 +308,29 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateTextureCopyRange(const ImageCopyTexture& textureCopy,
+    MaybeError ValidateTextureCopyRange(DeviceBase const* device,
+                                        const ImageCopyTexture& textureCopy,
                                         const Extent3D& copySize) {
         // TODO(jiawei.shao@intel.com): add validations on the texture-to-texture copies within the
         // same texture.
         const TextureBase* texture = textureCopy.texture;
 
+        ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
+
+        // Disallow copy to/from a 3D texture as unsafe until it is fully implemented.
+        if (texture->GetDimension() == wgpu::TextureDimension::e3D &&
+            device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+            return DAWN_VALIDATION_ERROR(
+                "Copy to/from a 3D texture is disallowed because it is not fully implemented");
+        }
+
         // Validation for the copy being in-bounds:
         Extent3D mipSize = texture->GetMipLevelPhysicalSize(textureCopy.mipLevel);
-        // For 2D textures, include the array layer as depth so it can be checked with other
+        // For 1D/2D textures, include the array layer as depth so it can be checked with other
         // dimensions.
-        ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
-        mipSize.depthOrArrayLayers = texture->GetArrayLayers();
-
+        if (texture->GetDimension() != wgpu::TextureDimension::e3D) {
+            mipSize.depthOrArrayLayers = texture->GetArrayLayers();
+        }
         // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
         // overflows.
         if (static_cast<uint64_t>(textureCopy.origin.x) + static_cast<uint64_t>(copySize.width) >

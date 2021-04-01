@@ -48,7 +48,8 @@ namespace dawn_native {
                                          uint64_t byteSize,
                                          const TexelBlockInfo& blockInfo,
                                          const Extent3D& copyExtent);
-    MaybeError ValidateTextureCopyRange(const ImageCopyTexture& imageCopyTexture,
+    MaybeError ValidateTextureCopyRange(DeviceBase const* device,
+                                        const ImageCopyTexture& imageCopyTexture,
                                         const Extent3D& copySize);
     ResultOrError<Aspect> SingleAspectUsedByImageCopyTexture(const ImageCopyTexture& view);
     MaybeError ValidateLinearToDepthStencilCopyRestrictions(const ImageCopyTexture& dst);

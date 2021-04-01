@@ -648,7 +648,7 @@ namespace dawn_native {
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
                 // checked in validating texture copy range.
-                DAWN_TRY(ValidateTextureCopyRange(*destination, fixedCopySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *destination, fixedCopySize));
             }
             const TexelBlockInfo& blockInfo =
                 destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
@@ -707,7 +707,7 @@ namespace dawn_native {
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
                 // checked in validating texture copy range.
-                DAWN_TRY(ValidateTextureCopyRange(*source, fixedCopySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *source, fixedCopySize));
             }
             const TexelBlockInfo& blockInfo =
                 source->texture->GetFormat().GetAspectInfo(source->aspect).block;
@@ -761,8 +761,8 @@ namespace dawn_native {
                 DAWN_TRY(
                     ValidateTextureToTextureCopyRestrictions(*source, *destination, fixedCopySize));
 
-                DAWN_TRY(ValidateTextureCopyRange(*source, fixedCopySize));
-                DAWN_TRY(ValidateTextureCopyRange(*destination, fixedCopySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *source, fixedCopySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *destination, fixedCopySize));
 
                 DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));

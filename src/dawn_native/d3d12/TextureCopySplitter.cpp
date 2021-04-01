@@ -209,7 +209,8 @@ namespace dawn_native { namespace d3d12 {
                                                const TexelBlockInfo& blockInfo,
                                                uint64_t offset,
                                                uint32_t bytesPerRow,
-                                               uint32_t rowsPerImage) {
+                                               uint32_t rowsPerImage,
+                                               bool is3DTexture) {
         TextureCopySplits copies;
 
         const uint64_t bytesPerSlice = bytesPerRow * rowsPerImage;
@@ -225,15 +226,19 @@ namespace dawn_native { namespace d3d12 {
         // slice. Moreover, if "rowsPerImage" is even, both the first and second copy layers can
         // share the same copy split, so in this situation we just need to compute copy split once
         // and reuse it for all the slices.
-        const dawn_native::Extent3D copyOneLayerSize = {copySize.width, copySize.height, 1};
-        const dawn_native::Origin3D copyFirstLayerOrigin = {origin.x, origin.y, 0};
+        Extent3D copyOneLayerSize = copySize;
+        Origin3D copyFirstLayerOrigin = origin;
+        if (!is3DTexture) {
+            copyOneLayerSize.depthOrArrayLayers = 1;
+            copyFirstLayerOrigin.z = 0;
+        }
 
         copies.copies2D[0] = ComputeTextureCopySplit(copyFirstLayerOrigin, copyOneLayerSize,
                                                      blockInfo, offset, bytesPerRow, rowsPerImage);
 
-        // When the copy only refers one texture 2D array layer copies.copies2D[1] will never be
-        // used so we can safely early return here.
-        if (copySize.depthOrArrayLayers == 1) {
+        // When the copy only refers one texture 2D array layer or a 3D texture, copies.copies2D[1]
+        // will never be used so we can safely early return here.
+        if (copySize.depthOrArrayLayers == 1 || is3DTexture) {
             return copies;
         }
 

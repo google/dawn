@@ -61,7 +61,8 @@ namespace dawn_native { namespace d3d12 {
                                                const TexelBlockInfo& blockInfo,
                                                uint64_t offset,
                                                uint32_t bytesPerRow,
-                                               uint32_t rowsPerImage);
+                                               uint32_t rowsPerImage,
+                                               bool is3DTexture = false);
 }}  // namespace dawn_native::d3d12
 
 #endif  // DAWNNATIVE_D3D12_TEXTURECOPYSPLITTER_H_

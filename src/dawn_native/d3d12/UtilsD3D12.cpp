@@ -174,15 +174,15 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
-    void CopyBufferToTextureWithCopySplit(CommandRecordingContext* commandContext,
-                                          const TextureCopy& textureCopy,
-                                          ID3D12Resource* bufferResource,
-                                          const uint64_t offset,
-                                          const uint32_t bytesPerRow,
-                                          const uint32_t rowsPerImage,
-                                          const Extent3D& copySize,
-                                          Texture* texture,
-                                          Aspect aspect) {
+    void CopyBufferTo2DTextureWithCopySplit(CommandRecordingContext* commandContext,
+                                            const TextureCopy& textureCopy,
+                                            ID3D12Resource* bufferResource,
+                                            const uint64_t offset,
+                                            const uint32_t bytesPerRow,
+                                            const uint32_t rowsPerImage,
+                                            const Extent3D& copySize,
+                                            Texture* texture,
+                                            Aspect aspect) {
         ASSERT(HasOneBit(aspect));
         // See comments in ComputeTextureCopySplits() for more details.
         const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(aspect).block;
@@ -217,6 +217,26 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
+    void CopyBufferTo3DTexture(CommandRecordingContext* commandContext,
+                               const TextureCopy& textureCopy,
+                               ID3D12Resource* bufferResource,
+                               const uint64_t offset,
+                               const uint32_t bytesPerRow,
+                               const uint32_t rowsPerImage,
+                               const Extent3D& copySize,
+                               Texture* texture,
+                               Aspect aspect) {
+        ASSERT(HasOneBit(aspect));
+        // See comments in ComputeTextureCopySplits() for more details.
+        const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(aspect).block;
+        const TextureCopySplits copySplits = ComputeTextureCopySplits(
+            textureCopy.origin, copySize, blockInfo, offset, bytesPerRow, rowsPerImage, true);
+
+        RecordCopyBufferToTextureFromTextureCopySplit(
+            commandContext->GetCommandList(), copySplits.copies2D[0], bufferResource, 0,
+            bytesPerRow, texture, textureCopy.mipLevel, textureCopy.origin.z, aspect);
+    }
+
     void RecordCopyTextureToBufferFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
                                                        const Texture2DCopySplit& baseCopySplit,
                                                        Buffer* buffer,
@@ -249,12 +269,13 @@ namespace dawn_native { namespace d3d12 {
         }
     }
 
-    void CopyTextureToBufferWithCopySplit(ID3D12GraphicsCommandList* commandList,
-                                          const TextureCopy& textureCopy,
-                                          const BufferCopy& bufferCopy,
-                                          Texture* texture,
-                                          Buffer* buffer,
-                                          const Extent3D& copySize) {
+    void Copy2DTextureToBufferWithCopySplit(ID3D12GraphicsCommandList* commandList,
+                                            const TextureCopy& textureCopy,
+                                            const BufferCopy& bufferCopy,
+                                            Texture* texture,
+                                            Buffer* buffer,
+                                            const Extent3D& copySize) {
+        ASSERT(HasOneBit(textureCopy.aspect));
         const TexelBlockInfo& blockInfo =
             texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
 
@@ -288,6 +309,26 @@ namespace dawn_native { namespace d3d12 {
 
             bufferOffsetsForNextSlice[splitIndex] += bytesPerSlice * copySplits.copies2D.size();
         }
+    }
+
+    void Copy3DTextureToBuffer(ID3D12GraphicsCommandList* commandList,
+                               const TextureCopy& textureCopy,
+                               const BufferCopy& bufferCopy,
+                               Texture* texture,
+                               Buffer* buffer,
+                               const Extent3D& copySize) {
+        ASSERT(HasOneBit(textureCopy.aspect));
+        const TexelBlockInfo& blockInfo =
+            texture->GetFormat().GetAspectInfo(textureCopy.aspect).block;
+
+        // See comments around ComputeTextureCopySplits() for more details.
+        const TextureCopySplits copySplits =
+            ComputeTextureCopySplits(textureCopy.origin, copySize, blockInfo, bufferCopy.offset,
+                                     bufferCopy.bytesPerRow, bufferCopy.rowsPerImage, true);
+
+        RecordCopyTextureToBufferFromTextureCopySplit(
+            commandList, copySplits.copies2D[0], buffer, 0, bufferCopy.bytesPerRow, texture,
+            textureCopy.mipLevel, textureCopy.origin.z, textureCopy.aspect);
     }
 
 }}  // namespace dawn_native::d3d12

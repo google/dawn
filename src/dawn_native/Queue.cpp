@@ -528,7 +528,7 @@ namespace dawn_native {
         // because in the latter we divide copyExtent.width by blockWidth and
         // copyExtent.height by blockHeight while the divisibility conditions are
         // checked in validating texture copy range.
-        DAWN_TRY(ValidateTextureCopyRange(*destination, *writeSize));
+        DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *destination, *writeSize));
 
         const TexelBlockInfo& blockInfo =
             destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
