@@ -231,7 +231,5 @@ hooks = [
 ]
 
 recursedeps = [
-  # buildtools provides clang_format, libc++, and libc++abi
-  'buildtools',
   'third_party/vulkan-deps',
 ]
