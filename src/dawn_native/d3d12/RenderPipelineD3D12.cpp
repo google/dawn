@@ -297,13 +297,13 @@ namespace dawn_native { namespace d3d12 {
 
     ResultOrError<Ref<RenderPipeline>> RenderPipeline::Create(
         Device* device,
-        const RenderPipelineDescriptor* descriptor) {
+        const RenderPipelineDescriptor2* descriptor) {
         Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
         DAWN_TRY(pipeline->Initialize(descriptor));
         return pipeline;
     }
 
-    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {
+    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor2* descriptor) {
         Device* device = ToBackend(GetDevice());
         uint32_t compileFlags = 0;
 #if defined(_DEBUG)
@@ -316,12 +316,12 @@ namespace dawn_native { namespace d3d12 {
         D3D12_GRAPHICS_PIPELINE_STATE_DESC descriptorD3D12 = {};
 
         PerStage<const char*> entryPoints;
-        entryPoints[SingleShaderStage::Vertex] = descriptor->vertexStage.entryPoint;
-        entryPoints[SingleShaderStage::Fragment] = descriptor->fragmentStage->entryPoint;
+        entryPoints[SingleShaderStage::Vertex] = descriptor->vertex.entryPoint;
+        entryPoints[SingleShaderStage::Fragment] = descriptor->fragment->entryPoint;
 
         PerStage<ShaderModule*> modules;
-        modules[SingleShaderStage::Vertex] = ToBackend(descriptor->vertexStage.module);
-        modules[SingleShaderStage::Fragment] = ToBackend(descriptor->fragmentStage->module);
+        modules[SingleShaderStage::Vertex] = ToBackend(descriptor->vertex.module);
+        modules[SingleShaderStage::Fragment] = ToBackend(descriptor->fragment->module);
 
         PerStage<D3D12_SHADER_BYTECODE*> shaders;
         shaders[SingleShaderStage::Vertex] = &descriptorD3D12.VS;
@@ -377,7 +377,7 @@ namespace dawn_native { namespace d3d12 {
         }
         descriptorD3D12.NumRenderTargets = static_cast<uint32_t>(GetColorAttachmentsMask().count());
 
-        descriptorD3D12.BlendState.AlphaToCoverageEnable = descriptor->alphaToCoverageEnabled;
+        descriptorD3D12.BlendState.AlphaToCoverageEnable = IsAlphaToCoverageEnabled();
         descriptorD3D12.BlendState.IndependentBlendEnable = TRUE;
 
         descriptorD3D12.DepthStencilState = ComputeDepthStencilDesc(GetDepthStencilState());

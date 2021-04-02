@@ -321,13 +321,13 @@ namespace dawn_native { namespace vulkan {
     // static
     ResultOrError<Ref<RenderPipeline>> RenderPipeline::Create(
         Device* device,
-        const RenderPipelineDescriptor* descriptor) {
+        const RenderPipelineDescriptor2* descriptor) {
         Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
         DAWN_TRY(pipeline->Initialize(descriptor));
         return pipeline;
     }
 
-    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {
+    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor2* descriptor) {
         Device* device = ToBackend(GetDevice());
 
         VkPipelineShaderStageCreateInfo shaderStages[2];
@@ -337,16 +337,16 @@ namespace dawn_native { namespace vulkan {
             shaderStages[0].flags = 0;
             shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
             shaderStages[0].pSpecializationInfo = nullptr;
-            shaderStages[0].module = ToBackend(descriptor->vertexStage.module)->GetHandle();
-            shaderStages[0].pName = descriptor->vertexStage.entryPoint;
+            shaderStages[0].module = ToBackend(descriptor->vertex.module)->GetHandle();
+            shaderStages[0].pName = descriptor->vertex.entryPoint;
 
             shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStages[1].pNext = nullptr;
             shaderStages[1].flags = 0;
             shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
             shaderStages[1].pSpecializationInfo = nullptr;
-            shaderStages[1].module = ToBackend(descriptor->fragmentStage->module)->GetHandle();
-            shaderStages[1].pName = descriptor->fragmentStage->entryPoint;
+            shaderStages[1].module = ToBackend(descriptor->fragment->module)->GetHandle();
+            shaderStages[1].pName = descriptor->fragment->entryPoint;
         }
 
         PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;
@@ -411,7 +411,7 @@ namespace dawn_native { namespace vulkan {
         ASSERT(multisample.rasterizationSamples <= 32);
         VkSampleMask sampleMask = GetSampleMask();
         multisample.pSampleMask = &sampleMask;
-        multisample.alphaToCoverageEnable = descriptor->alphaToCoverageEnabled;
+        multisample.alphaToCoverageEnable = IsAlphaToCoverageEnabled();
         multisample.alphaToOneEnable = VK_FALSE;
 
         VkPipelineDepthStencilStateCreateInfo depthStencilState =

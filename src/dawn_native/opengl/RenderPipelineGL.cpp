@@ -210,16 +210,16 @@ namespace dawn_native { namespace opengl {
 
     }  // anonymous namespace
 
-    RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor)
+    RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor2* descriptor)
         : RenderPipelineBase(device, descriptor),
           mVertexArrayObject(0),
           mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {
         PerStage<const ShaderModule*> modules(nullptr);
-        modules[SingleShaderStage::Vertex] = ToBackend(descriptor->vertexStage.module);
-        modules[SingleShaderStage::Fragment] = ToBackend(descriptor->fragmentStage->module);
+        modules[SingleShaderStage::Vertex] = ToBackend(descriptor->vertex.module);
+        modules[SingleShaderStage::Fragment] = ToBackend(descriptor->fragment->module);
 
         PipelineGL::Initialize(device->gl, ToBackend(GetLayout()), GetAllStages());
-        CreateVAOForVertexState(descriptor->vertexState);
+        CreateVAOForVertexState();
     }
 
     RenderPipeline::~RenderPipeline() {
@@ -238,7 +238,7 @@ namespace dawn_native { namespace opengl {
         return mAttributesUsingVertexBuffer[slot];
     }
 
-    void RenderPipeline::CreateVAOForVertexState(const VertexStateDescriptor* vertexState) {
+    void RenderPipeline::CreateVAOForVertexState() {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
         gl.GenVertexArrays(1, &mVertexArrayObject);

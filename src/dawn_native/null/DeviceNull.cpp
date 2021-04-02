@@ -122,7 +122,7 @@ namespace dawn_native { namespace null {
         return AcquireRef(new QuerySet(this, descriptor));
     }
     ResultOrError<Ref<RenderPipelineBase>> Device::CreateRenderPipelineImpl(
-        const RenderPipelineDescriptor* descriptor) {
+        const RenderPipelineDescriptor2* descriptor) {
         return AcquireRef(new RenderPipeline(this, descriptor));
     }
     ResultOrError<Ref<SamplerBase>> Device::CreateSamplerImpl(const SamplerDescriptor* descriptor) {

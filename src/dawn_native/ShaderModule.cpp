@@ -1145,14 +1145,14 @@ namespace dawn_native {
     }
 
     std::unique_ptr<tint::transform::VertexPulling> MakeVertexPullingTransform(
-        const VertexStateDescriptor& vertexState,
+        const VertexState& vertexState,
         const std::string& entryPoint,
         BindGroupIndex pullingBufferBindingSet) {
         tint::transform::VertexPulling::Config cfg;
         cfg.entry_point_name = entryPoint;
         cfg.pulling_group = static_cast<uint32_t>(pullingBufferBindingSet);
-        for (uint32_t i = 0; i < vertexState.vertexBufferCount; ++i) {
-            const auto& vertexBuffer = vertexState.vertexBuffers[i];
+        for (uint32_t i = 0; i < vertexState.bufferCount; ++i) {
+            const auto& vertexBuffer = vertexState.buffers[i];
             tint::transform::VertexBufferLayoutDescriptor layout;
             layout.array_stride = vertexBuffer.arrayStride;
             layout.step_mode = ToTintInputStepMode(vertexBuffer.stepMode);
@@ -1267,7 +1267,7 @@ namespace dawn_native {
 
     ResultOrError<std::vector<uint32_t>> ShaderModuleBase::GeneratePullingSpirv(
         const std::vector<uint32_t>& spirv,
-        const VertexStateDescriptor& vertexState,
+        const VertexState& vertexState,
         const std::string& entryPoint,
         BindGroupIndex pullingBufferBindingSet) const {
         tint::Program program;
@@ -1278,7 +1278,7 @@ namespace dawn_native {
 
     ResultOrError<std::vector<uint32_t>> ShaderModuleBase::GeneratePullingSpirv(
         const tint::Program* programIn,
-        const VertexStateDescriptor& vertexState,
+        const VertexState& vertexState,
         const std::string& entryPoint,
         BindGroupIndex pullingBufferBindingSet) const {
         std::ostringstream errorStream;

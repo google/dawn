@@ -58,7 +58,7 @@ namespace dawn_native { namespace metal {
         // TODO(crbug.com/tint/387): AND in a fixed sample mask in the shader.
         uint32_t sampleMask,
         const RenderPipeline* renderPipeline,
-        const VertexStateDescriptor* vertexState,
+        const VertexState* vertexState,
         std::string* remappedEntryPointName,
         bool* needsStorageBufferLength) {
         // TODO(crbug.com/tint/256): Set this accordingly if arrayLength(..) is used.
@@ -122,7 +122,7 @@ namespace dawn_native { namespace metal {
         const PipelineLayout* layout,
         uint32_t sampleMask,
         const RenderPipeline* renderPipeline,
-        const VertexStateDescriptor* vertexState,
+        const VertexState* vertexState,
         std::string* remappedEntryPointName,
         bool* needsStorageBufferLength) {
         const std::vector<uint32_t>* spirv = &GetSpirv();
@@ -232,7 +232,7 @@ namespace dawn_native { namespace metal {
                                             ShaderModule::MetalFunctionData* out,
                                             uint32_t sampleMask,
                                             const RenderPipeline* renderPipeline,
-                                            const VertexStateDescriptor* vertexState) {
+                                            const VertexState* vertexState) {
         ASSERT(!IsError());
         ASSERT(out);
 

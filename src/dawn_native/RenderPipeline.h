@@ -30,11 +30,8 @@ namespace dawn_native {
     class DeviceBase;
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
-                                                const RenderPipelineDescriptor* descriptor);
-    MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
                                                 const RenderPipelineDescriptor2* descriptor);
 
-    std::vector<StageAndDescriptor> GetStages(const RenderPipelineDescriptor* descriptor);
     std::vector<StageAndDescriptor> GetStages(const RenderPipelineDescriptor2* descriptor);
 
     size_t IndexFormatSize(wgpu::IndexFormat format);
@@ -42,6 +39,8 @@ namespace dawn_native {
     bool IsStripPrimitiveTopology(wgpu::PrimitiveTopology primitiveTopology);
 
     bool StencilTestEnabled(const DepthStencilState* mDepthStencil);
+
+    bool BlendEnabled(const ColorStateDescriptor* mColorState);
 
     struct VertexAttributeInfo {
         wgpu::VertexFormat format;
@@ -57,7 +56,6 @@ namespace dawn_native {
 
     class RenderPipelineBase : public PipelineBase {
       public:
-        RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor* descriptor);
         RenderPipelineBase(DeviceBase* device, const RenderPipelineDescriptor2* descriptor);
         ~RenderPipelineBase() override;
 

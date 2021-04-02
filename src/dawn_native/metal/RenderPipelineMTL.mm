@@ -312,13 +312,13 @@ namespace dawn_native { namespace metal {
     // static
     ResultOrError<Ref<RenderPipeline>> RenderPipeline::Create(
         Device* device,
-        const RenderPipelineDescriptor* descriptor) {
+        const RenderPipelineDescriptor2* descriptor) {
         Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
         DAWN_TRY(pipeline->Initialize(descriptor));
         return pipeline;
     }
 
-    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {
+    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor2* descriptor) {
         mMtlPrimitiveTopology = MTLPrimitiveTopology(GetPrimitiveTopology());
         mMtlFrontFace = MTLFrontFace(GetFrontFace());
         mMtlCullMode = ToMTLCullMode(GetCullMode());
@@ -338,12 +338,12 @@ namespace dawn_native { namespace metal {
         }
         descriptorMTL.vertexDescriptor = vertexDesc.Get();
 
-        ShaderModule* vertexModule = ToBackend(descriptor->vertexStage.module);
-        const char* vertexEntryPoint = descriptor->vertexStage.entryPoint;
+        ShaderModule* vertexModule = ToBackend(descriptor->vertex.module);
+        const char* vertexEntryPoint = descriptor->vertex.entryPoint;
         ShaderModule::MetalFunctionData vertexData;
 
-        const VertexStateDescriptor* vertexStatePtr = descriptor->vertexState;
-        VertexStateDescriptor vertexState;
+        const VertexState* vertexStatePtr = &descriptor->vertex;
+        VertexState vertexState;
         if (vertexStatePtr == nullptr) {
             vertexState = {};
             vertexStatePtr = &vertexState;
@@ -358,12 +358,12 @@ namespace dawn_native { namespace metal {
             mStagesRequiringStorageBufferLength |= wgpu::ShaderStage::Vertex;
         }
 
-        ShaderModule* fragmentModule = ToBackend(descriptor->fragmentStage->module);
-        const char* fragmentEntryPoint = descriptor->fragmentStage->entryPoint;
+        ShaderModule* fragmentModule = ToBackend(descriptor->fragment->module);
+        const char* fragmentEntryPoint = descriptor->fragment->entryPoint;
         ShaderModule::MetalFunctionData fragmentData;
         DAWN_TRY(fragmentModule->CreateFunction(fragmentEntryPoint, SingleShaderStage::Fragment,
                                                 ToBackend(GetLayout()), &fragmentData,
-                                                descriptor->sampleMask));
+                                                GetSampleMask()));
 
         descriptorMTL.fragmentFunction = fragmentData.function.Get();
         if (fragmentData.needsStorageBufferLength) {
@@ -395,7 +395,7 @@ namespace dawn_native { namespace metal {
 
         descriptorMTL.inputPrimitiveTopology = MTLInputPrimitiveTopology(GetPrimitiveTopology());
         descriptorMTL.sampleCount = GetSampleCount();
-        descriptorMTL.alphaToCoverageEnabled = descriptor->alphaToCoverageEnabled;
+        descriptorMTL.alphaToCoverageEnabled = IsAlphaToCoverageEnabled();
 
         {
             NSError* error = nullptr;

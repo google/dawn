@@ -120,8 +120,6 @@ namespace dawn_native {
         void UncachePipelineLayout(PipelineLayoutBase* obj);
 
         ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRenderPipeline(
-            const RenderPipelineDescriptor* descriptor);
-        ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRenderPipeline(
             const RenderPipelineDescriptor2* descriptor);
         void UncacheRenderPipeline(RenderPipelineBase* obj);
 
@@ -278,7 +276,7 @@ namespace dawn_native {
         virtual ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
             const QuerySetDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineImpl(
-            const RenderPipelineDescriptor* descriptor) = 0;
+            const RenderPipelineDescriptor2* descriptor) = 0;
         virtual ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(
@@ -318,8 +316,6 @@ namespace dawn_native {
             const RenderBundleEncoderDescriptor* descriptor);
         ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineInternal(
             const RenderPipelineDescriptor2* descriptor);
-        ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineInternal(
-            const RenderPipelineDescriptor* descriptor);
         ResultOrError<Ref<SamplerBase>> CreateSamplerInternal(const SamplerDescriptor* descriptor);
         ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleInternal(
             const ShaderModuleDescriptor* descriptor);

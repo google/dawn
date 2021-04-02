@@ -77,7 +77,7 @@ namespace dawn_native {
                                                const tint::Program* program);
 
     std::unique_ptr<tint::transform::VertexPulling> MakeVertexPullingTransform(
-        const VertexStateDescriptor& vertexState,
+        const VertexState& vertexState,
         const std::string& entryPoint,
         BindGroupIndex pullingBufferBindingSet);
 
@@ -145,13 +145,13 @@ namespace dawn_native {
 
         ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
             const std::vector<uint32_t>& spirv,
-            const VertexStateDescriptor& vertexState,
+            const VertexState& vertexState,
             const std::string& entryPoint,
             BindGroupIndex pullingBufferBindingSet) const;
 
         ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
             const tint::Program* program,
-            const VertexStateDescriptor& vertexState,
+            const VertexState& vertexState,
             const std::string& entryPoint,
             BindGroupIndex pullingBufferBindingSet) const;
 
