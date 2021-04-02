@@ -268,15 +268,6 @@ namespace dawn_native { namespace vulkan {
         IgnoreSignalSemaphore(texture);
     }
 
-    // Test an error occurs if the texture descriptor is missing
-    TEST_P(VulkanImageWrappingValidationTests, MissingTextureDescriptor) {
-        DAWN_SKIP_TEST_IF(UsesWire());
-        ASSERT_DEVICE_ERROR(wgpu::Texture texture =
-                                WrapVulkanImage(device, nullptr, defaultFd, defaultAllocationSize,
-                                                defaultMemoryTypeIndex, {}, true, false));
-        EXPECT_EQ(texture.Get(), nullptr);
-    }
-
     // Test an error occurs if the texture descriptor is invalid
     TEST_P(VulkanImageWrappingValidationTests, InvalidTextureDescriptor) {
         DAWN_SKIP_TEST_IF(UsesWire());
