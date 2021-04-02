@@ -48,13 +48,6 @@ namespace dawn_native { namespace d3d12 {
                         // Enable additional debug layers.
                         dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
                     }
-
-                    ComPtr<IDXGIDebug1> dxgiDebug;
-                    if (SUCCEEDED(functions->dxgiGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug)))) {
-                        ASSERT(dxgiDebug != nullptr);
-                        dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL,
-                                                     DXGI_DEBUG_RLO_FLAGS(DXGI_DEBUG_RLO_ALL));
-                    }
                 }
 
                 if (beginCaptureOnStartup) {
