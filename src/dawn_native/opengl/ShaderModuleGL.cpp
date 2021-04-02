@@ -80,36 +80,21 @@ namespace dawn_native { namespace opengl {
     MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult) {
         ScopedTintICEHandler scopedICEHandler(GetDevice());
 
+        DAWN_TRY(InitializeBase(parseResult));
+        // Tint currently does not support emitting GLSL, so when provided a Tint program need to
+        // generate SPIRV and SPIRV-Cross reflection data to be used in this backend.
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            std::ostringstream errorStream;
-            errorStream << "Tint SPIR-V (for GLSL) writer failure:" << std::endl;
-
-            tint::transform::Manager transformManager;
-            transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
-            transformManager.append(std::make_unique<tint::transform::EmitVertexPointSize>());
-            transformManager.append(std::make_unique<tint::transform::Spirv>());
-
-            tint::Program program;
-            DAWN_TRY_ASSIGN(program,
-                            RunTransforms(&transformManager, parseResult->tintProgram.get()));
-
-            tint::writer::spirv::Generator generator(&program);
+            tint::writer::spirv::Generator generator(GetTintProgram());
             if (!generator.Generate()) {
+                std::ostringstream errorStream;
                 errorStream << "Generator: " << generator.error() << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
             }
 
-            mSpirv = generator.result();
-
-            ShaderModuleParseResult transformedParseResult;
-            transformedParseResult.tintProgram =
-                std::make_unique<tint::Program>(std::move(program));
-            transformedParseResult.spirv = mSpirv;
-
-            DAWN_TRY(InitializeBase(&transformedParseResult));
-        } else {
-            DAWN_TRY(InitializeBase(parseResult));
+            mGLSpirv = generator.result();
+            DAWN_TRY_ASSIGN(mGLEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), mGLSpirv));
         }
+
         return {};
     }
 
@@ -138,7 +123,7 @@ namespace dawn_native { namespace opengl {
         options.version = version.GetMajor() * 100 + version.GetMinor() * 10;
 
         spirv_cross::CompilerGLSL compiler(
-            GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator) ? mSpirv : GetSpirv());
+            GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator) ? mGLSpirv : GetSpirv());
         compiler.set_common_options(options);
         compiler.set_entry_point(entryPointName, ShaderStageToExecutionModel(stage));
 
@@ -177,7 +162,9 @@ namespace dawn_native { namespace opengl {
         }
 
         const EntryPointMetadata::BindingInfoArray& bindingInfo =
-            GetEntryPoint(entryPointName).bindings;
+            GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)
+                ? (*mGLEntryPoints.at(entryPointName)).bindings
+                : GetEntryPoint(entryPointName).bindings;
 
         // Change binding names to be "dawn_binding_<group>_<binding>".
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which

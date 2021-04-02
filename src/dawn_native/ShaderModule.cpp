@@ -874,10 +874,6 @@ namespace dawn_native {
             return {std::move(metadata)};
         }
 
-        // Currently only partially populated the reflection data, needs to be
-        // completed using PopulateMetadataUsingSPIRVCross. In the future, once
-        // this function is complete, ReflectShaderUsingSPIRVCross and
-        // PopulateMetadataUsingSPIRVCross will be removed.
         ResultOrError<EntryPointMetadataTable> ReflectShaderUsingTint(
             DeviceBase*,
             const tint::Program* program) {
@@ -1040,216 +1036,6 @@ namespace dawn_native {
             }
             return std::move(result);
         }
-
-        // Uses SPIRV-Cross, which is planned for removal, but until
-        // ReflectShaderUsingTint is completed, will be kept as a
-        // fallback/source of truth.
-        ResultOrError<EntryPointMetadataTable> ReflectShaderUsingSPIRVCross(
-            DeviceBase* device,
-            const std::vector<uint32_t>& spirv) {
-            EntryPointMetadataTable result;
-            spirv_cross::Compiler compiler(spirv);
-            for (const spirv_cross::EntryPoint& entryPoint :
-                 compiler.get_entry_points_and_stages()) {
-                ASSERT(result.count(entryPoint.name) == 0);
-
-                SingleShaderStage stage = ExecutionModelToShaderStage(entryPoint.execution_model);
-                compiler.set_entry_point(entryPoint.name, entryPoint.execution_model);
-
-                std::unique_ptr<EntryPointMetadata> metadata;
-                DAWN_TRY_ASSIGN(metadata,
-                                ExtractSpirvInfo(device, compiler, entryPoint.name, stage));
-                result[entryPoint.name] = std::move(metadata);
-            }
-            return std::move(result);
-        }
-
-        // Temporary utility method that allows for polyfilling like behaviour,
-        // specifically data missing from the Tint implementation is filled in
-        // using the SPIRV-Cross implementation. Once the Tint implementation is
-        // completed, this function will be removed.
-        MaybeError PopulateMetadataUsingSPIRVCross(DeviceBase* device,
-                                                   const std::vector<uint32_t>& spirv,
-                                                   EntryPointMetadataTable* tintTable) {
-            EntryPointMetadataTable crossTable;
-            DAWN_TRY_ASSIGN(crossTable, ReflectShaderUsingSPIRVCross(device, spirv));
-            if (tintTable->size() != crossTable.size()) {
-                return DAWN_VALIDATION_ERROR(
-                    "Tint and SPIRV-Cross returned different number of entry points");
-            }
-
-            for (auto& crossMember : crossTable) {
-                auto& name = crossMember.first;
-                auto& crossEntry = crossMember.second;
-
-                auto tintMember = tintTable->find(name);
-                if (tintMember == tintTable->end()) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Tint and SPIRV-Cross returned different entry point names");
-                }
-
-                auto& tintEntry = tintMember->second;
-                if (tintEntry->stage != crossEntry->stage) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Tint and SPIRV-Cross returned different stages for entry point");
-                }
-
-                if (tintEntry->stage == SingleShaderStage::Vertex) {
-                    if (tintEntry->usedVertexAttributes != crossEntry->usedVertexAttributes) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Tint and SPIRV-Cross returned different used vertex attributes for "
-                            "entry point");
-                    }
-                }
-
-                if (tintEntry->stage == SingleShaderStage::Compute) {
-                    if (tintEntry->localWorkgroupSize.x != crossEntry->localWorkgroupSize.x ||
-                        tintEntry->localWorkgroupSize.y != crossEntry->localWorkgroupSize.y ||
-                        tintEntry->localWorkgroupSize.z != crossEntry->localWorkgroupSize.z) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Tint and SPIRV-Cross returned different values for local workgroup "
-                            "size");
-                    }
-                }
-
-                if (tintEntry->stage == SingleShaderStage::Vertex) {
-                    if (tintEntry->usedVertexAttributes != crossEntry->usedVertexAttributes) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Tint and SPIRV-Cross returned different values for used vertex "
-                            "attributes");
-                    }
-                }
-
-                if (tintEntry->stage == SingleShaderStage::Fragment) {
-                    // Equality is explictly not being tested, since SPIRV-Cross will include unused
-                    // variables in the written bitset. Instead testing that Tint's bitset is
-                    // a subset of SPIRV-Cross's.
-                    if (tintEntry->fragmentOutputsWritten !=
-                        (tintEntry->fragmentOutputsWritten & crossEntry->fragmentOutputsWritten)) {
-                        return DAWN_VALIDATION_ERROR(
-                            "Tint and SPIRV-Cross returned different values for used fragment "
-                            "output base type");
-                    }
-                }
-
-                // SPIRV-Cross does not reduce the list of bindings for a
-                // specific entry point only to those used by the entry point,
-                // so its list will vary from Tint's.
-                // The best that be done for validation is confirmation that all
-                // of the Tint bindings were also found by SPIRV-Cross.
-                //
-                // NOTE: This means that the case where Tint has missed some
-                // bindings cannot be effectively detected here, since there is
-                // no way to distinguish between Tint missing a binding and
-                // SPIRV-Cross including an unuseds binding. Missing bindings
-                // will often cause bind descriptor asserts in SwiftShader.
-                if (tintEntry->bindings.size() > crossEntry->bindings.size()) {
-                    return DAWN_VALIDATION_ERROR(
-                        "SPIRV-Cross returned fewer binding groups than Tint");
-                }
-
-                for (auto idx = BindGroupIndex(0); idx < tintEntry->bindings.size(); idx++) {
-                    auto crossGroup = crossEntry->bindings[idx];
-                    auto& tintGroup = tintEntry->bindings[idx];
-
-                    if (tintGroup.size() > crossGroup.size()) {
-                        return DAWN_VALIDATION_ERROR(
-                            "SPIRV-Cross returned fewer bindings in a group than Tint");
-                    }
-
-                    for (auto& tintIter : tintGroup) {
-                        auto crossIter = crossGroup.find(tintIter.first);
-                        if (crossIter == crossGroup.end()) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Tint returned a binding not found by SPIRV-Cross");
-                        }
-
-                        auto crossInfo = crossIter->second;
-                        auto& tintInfo = tintIter.second;
-
-                        // TODO(https://crbug.com/dawn/743): These values are SPIRV specific and
-                        // only needed when using SPIRV-Cross in the OpenGL backend.
-                        tintInfo.id = crossInfo.id;
-                        tintInfo.base_type_id = crossInfo.base_type_id;
-
-                        if (tintInfo.bindingType != crossInfo.bindingType) {
-                            return DAWN_VALIDATION_ERROR(
-                                "Tint and Dawn disagree about type for a binding");
-                        }
-
-                        if (tintInfo.bindingType == BindingInfoType::Buffer) {
-                            if (tintInfo.buffer.type != crossInfo.buffer.type) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about type for a buffer binding");
-                            }
-
-                            if (tintInfo.buffer.hasDynamicOffset !=
-                                crossInfo.buffer.hasDynamicOffset) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about whether a buffer binding has "
-                                    "dynamic offset");
-                            }
-
-                            if (tintInfo.buffer.minBindingSize != crossInfo.buffer.minBindingSize) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about minimum binding size for a "
-                                    "buffer binding");
-                            }
-                        }
-
-                        if (tintInfo.bindingType == BindingInfoType::Sampler) {
-                            if (tintInfo.sampler.type != crossInfo.sampler.type) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about type for a sampler binding");
-                            }
-                        }
-
-                        if (tintInfo.bindingType == BindingInfoType::Texture) {
-                            if (tintInfo.texture.sampleType != crossInfo.texture.sampleType) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about sample type for a texture "
-                                    "binding");
-                            }
-
-                            if (tintInfo.texture.viewDimension != crossInfo.texture.viewDimension) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about view dimension for a texture "
-                                    "binding");
-                            }
-
-                            if (tintInfo.texture.multisampled != crossInfo.texture.multisampled) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about if texture binding is "
-                                    "multisampled");
-                            }
-                        }
-
-                        if (tintInfo.bindingType == BindingInfoType::StorageTexture) {
-                            if (tintInfo.storageTexture.access != crossInfo.storageTexture.access) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about access to a storage texture "
-                                    "binding");
-                            }
-
-                            if (tintInfo.storageTexture.format != crossInfo.storageTexture.format) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about format for a storage texture "
-                                    "binding");
-                            }
-
-                            if (tintInfo.storageTexture.viewDimension !=
-                                crossInfo.storageTexture.viewDimension) {
-                                return DAWN_VALIDATION_ERROR(
-                                    "Tint and Dawn disagree about view dimension for a storage "
-                                    "texture binding");
-                            }
-                        }
-                    }
-                }
-            }
-            return {};
-        }
-
     }  // anonymous namespace
 
     ShaderModuleParseResult::ShaderModuleParseResult() = default;
@@ -1525,29 +1311,37 @@ namespace dawn_native {
         mTintProgram = std::move(parseResult->tintProgram);
         mSpirv = std::move(parseResult->spirv);
 
-        // If not using Tint to generate backend code, run the robust buffer access pass now since
-        // all backends will use this SPIR-V. If Tint is used, the robustness pass should be run
-        // per-backend.
-        if (!GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator) &&
-            GetDevice()->IsRobustnessEnabled()) {
-            DAWN_TRY_ASSIGN(mSpirv, RunRobustBufferAccessPass(mSpirv));
-        }
-
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
-            // We still need the spirv for reflection. Remove this when we use the Tint inspector
-            // completely.
-            std::vector<uint32_t> reflectionSpirv;
-            DAWN_TRY_ASSIGN(reflectionSpirv, ModuleToSPIRV(mTintProgram.get()));
-            DAWN_TRY(ValidateSpirv(reflectionSpirv.data(), reflectionSpirv.size()));
-
-            EntryPointMetadataTable table;
-            DAWN_TRY_ASSIGN(table, ReflectShaderUsingTint(GetDevice(), mTintProgram.get()));
-            DAWN_TRY(PopulateMetadataUsingSPIRVCross(GetDevice(), reflectionSpirv, &table));
-            mEntryPoints = std::move(table);
+            DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingTint(GetDevice(), mTintProgram.get()));
         } else {
+            // If not using Tint to generate backend code, run the robust buffer access pass now
+            // since all backends will use this SPIR-V. If Tint is used, the robustness pass should
+            // be run per-backend.
+            if (GetDevice()->IsRobustnessEnabled()) {
+                DAWN_TRY_ASSIGN(mSpirv, RunRobustBufferAccessPass(mSpirv));
+            }
             DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingSPIRVCross(GetDevice(), mSpirv));
         }
 
         return {};
     }
+
+    ResultOrError<EntryPointMetadataTable> ShaderModuleBase::ReflectShaderUsingSPIRVCross(
+        DeviceBase* device,
+        const std::vector<uint32_t>& spirv) {
+        EntryPointMetadataTable result;
+        spirv_cross::Compiler compiler(spirv);
+        for (const spirv_cross::EntryPoint& entryPoint : compiler.get_entry_points_and_stages()) {
+            ASSERT(result.count(entryPoint.name) == 0);
+
+            SingleShaderStage stage = ExecutionModelToShaderStage(entryPoint.execution_model);
+            compiler.set_entry_point(entryPoint.name, entryPoint.execution_model);
+
+            std::unique_ptr<EntryPointMetadata> metadata;
+            DAWN_TRY_ASSIGN(metadata, ExtractSpirvInfo(device, compiler, entryPoint.name, stage));
+            result[entryPoint.name] = std::move(metadata);
+        }
+        return std::move(result);
+    }
+
 }  // namespace dawn_native

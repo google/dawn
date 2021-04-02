@@ -61,7 +61,8 @@ namespace dawn_native { namespace opengl {
         ~ShaderModule() override = default;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
 
-        std::vector<uint32_t> mSpirv;
+        std::vector<uint32_t> mGLSpirv;
+        EntryPointMetadataTable mGLEntryPoints;
     };
 
 }}  // namespace dawn_native::opengl
