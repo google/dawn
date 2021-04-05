@@ -49,10 +49,25 @@ namespace dawn_native {
             [[stage(vertex)]] fn main() -> void {
                 Position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
 
+                // Y component of scale is calculated by the copySizeHeight / textureHeight. Only
+                // flipY case can get negative number.
+                var flipY : bool = uniforms.u_scale.y < 0.0;
+
                 // Texture coordinate takes top-left as origin point. We need to map the
                 // texture to triangle carefully.
-                v_texcoord = (texcoord[VertexIndex] * vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0)) *
-                    uniforms.u_scale + uniforms.u_offset;
+                if (flipY) {
+                    // We need to get the mirror positions(mirrored based on y = 0.5) on flip cases.
+                    // Adopt transform to src texture and then mapping it to triangle coord which
+                    // do a +1 shift on Y dimension will help us got that mirror position perfectly.
+                    v_texcoord = (texcoord[VertexIndex] * uniforms.u_scale + uniforms.u_offset) *
+                                  vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0);
+                } else {
+                    // For the normal case, we need to get the exact position.
+                    // So mapping texture to triangle firstly then adopt the transform.
+                    v_texcoord = (texcoord[VertexIndex] *
+                                  vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0)) *
+                                  uniforms.u_scale + uniforms.u_offset;
+                }
             }
         )";
 
@@ -219,17 +234,6 @@ namespace dawn_native {
 
         DAWN_TRY(ValidateCopyTextureForBrowserOptions(options));
 
-        // TODO(shaobo.yan@intel.com): Support the simplest case for now that source and destination
-        // texture has the same size and do full texture blit. Will address sub texture blit in
-        // future and remove these validations.
-        if (source->origin.x != 0 || source->origin.y != 0 || source->origin.z != 0 ||
-            destination->origin.x != 0 || destination->origin.y != 0 ||
-            destination->origin.z != 0 || source->mipLevel != 0 || destination->mipLevel != 0 ||
-            source->texture->GetWidth() != destination->texture->GetWidth() ||
-            source->texture->GetHeight() != destination->texture->GetHeight()) {
-            return DAWN_VALIDATION_ERROR("Cannot support sub blit now.");
-        }
-
         return {};
     }
 
@@ -255,16 +259,22 @@ namespace dawn_native {
         bgDesc.entryCount = 3;
         bgDesc.entries = bindGroupEntries;
 
+        Extent3D srcTextureSize = source->texture->GetSize();
+
         // Prepare binding 0 resource: uniform buffer.
         float uniformData[] = {
-            1.0, 1.0,  // scale
-            0.0, 0.0   // offset
+            copySize->width / static_cast<float>(srcTextureSize.width),
+            copySize->height / static_cast<float>(srcTextureSize.height),  // scale
+            source->origin.x / static_cast<float>(srcTextureSize.width),
+            source->origin.y / static_cast<float>(srcTextureSize.height)  // offset
         };
 
-        // Handle flipY
+        // Handle flipY. FlipY here means we flip the source texture firstly and then
+        // do copy. This helps on the case which source texture is flipped and the copy
+        // need to unpack the flip.
         if (options && options->flipY) {
             uniformData[1] *= -1.0;
-            uniformData[3] += 1.0;
+            uniformData[3] += copySize->height / static_cast<float>(srcTextureSize.height);
         }
 
         BufferDescriptor uniformDesc = {};
@@ -336,6 +346,8 @@ namespace dawn_native {
         // the copy from src texture to dst texture with transformation.
         passEncoder->APISetPipeline(pipeline);
         passEncoder->APISetBindGroup(0, bindGroup.Get());
+        passEncoder->APISetViewport(destination->origin.x, destination->origin.y, copySize->width,
+                                    copySize->height, 0.0, 1.0);
         passEncoder->APIDraw(3);
         passEncoder->APIEndPass();
 
