@@ -19,7 +19,7 @@
 
 namespace dawn_wire {
 
-    enum DAWN_NO_DISCARD class WireResult {
+    enum class WireResult {
         Success,
         FatalError,
     };
