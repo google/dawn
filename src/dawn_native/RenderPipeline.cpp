@@ -131,9 +131,16 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidatePrimitiveState(const PrimitiveState* descriptor) {
-            if (descriptor->nextInChain != nullptr) {
-                return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
+        MaybeError ValidatePrimitiveState(const DeviceBase* device,
+                                          const PrimitiveState* descriptor) {
+            const ChainedStruct* chained = descriptor->nextInChain;
+            if (chained != nullptr) {
+                if (chained->sType != wgpu::SType::PrimitiveDepthClampingState) {
+                    return DAWN_VALIDATION_ERROR("Unsupported sType");
+                }
+                if (!device->IsExtensionEnabled(Extension::DepthClamping)) {
+                    return DAWN_VALIDATION_ERROR("The depth clamping feature is not supported");
+                }
             }
 
             DAWN_TRY(ValidatePrimitiveTopology(descriptor->topology));
@@ -269,7 +276,6 @@ namespace dawn_native {
 
             return {};
         }
-
     }  // anonymous namespace
 
     // Helper functions
@@ -306,7 +312,7 @@ namespace dawn_native {
 
         DAWN_TRY(ValidateVertexState(device, &descriptor->vertex, descriptor->layout));
 
-        DAWN_TRY(ValidatePrimitiveState(&descriptor->primitive));
+        DAWN_TRY(ValidatePrimitiveState(device, &descriptor->primitive));
 
         if (descriptor->depthStencil) {
             DAWN_TRY(ValidateDepthStencilState(device, descriptor->depthStencil));
@@ -393,6 +399,12 @@ namespace dawn_native {
         }
 
         mPrimitive = descriptor->primitive;
+        const ChainedStruct* chained = mPrimitive.nextInChain;
+        if (chained != nullptr) {
+            ASSERT(chained->sType == wgpu::SType::PrimitiveDepthClampingState);
+            const auto* clampState = static_cast<const PrimitiveDepthClampingState*>(chained);
+            mClampDepth = clampState->clampDepth;
+        }
         mMultisample = descriptor->multisample;
 
         if (mAttachmentState->HasDepthStencilAttachment()) {
@@ -532,6 +544,11 @@ namespace dawn_native {
         return mDepthStencil.depthBiasClamp;
     }
 
+    bool RenderPipelineBase::ShouldClampDepth() const {
+        ASSERT(!IsError());
+        return mClampDepth;
+    }
+
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>
     RenderPipelineBase::GetColorAttachmentsMask() const {
         ASSERT(!IsError());
@@ -624,7 +641,7 @@ namespace dawn_native {
 
         // Record primitive state
         recorder.Record(mPrimitive.topology, mPrimitive.stripIndexFormat, mPrimitive.frontFace,
-                        mPrimitive.cullMode);
+                        mPrimitive.cullMode, mClampDepth);
 
         // Record multisample state
         // Sample count hashed as part of the attachment state
@@ -738,7 +755,8 @@ namespace dawn_native {
             const PrimitiveState& stateB = b->mPrimitive;
             if (stateA.topology != stateB.topology ||
                 stateA.stripIndexFormat != stateB.stripIndexFormat ||
-                stateA.frontFace != stateB.frontFace || stateA.cullMode != stateB.cullMode) {
+                stateA.frontFace != stateB.frontFace || stateA.cullMode != stateB.cullMode ||
+                a->mClampDepth != b->mClampDepth) {
                 return false;
             }
         }

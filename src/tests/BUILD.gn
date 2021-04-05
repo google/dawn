@@ -321,6 +321,7 @@ source_set("dawn_end2end_tests_sources") {
     "end2end/ObjectCachingTests.cpp",
     "end2end/OpArrayLengthTests.cpp",
     "end2end/PipelineLayoutTests.cpp",
+    "end2end/PrimitiveStateTests.cpp",
     "end2end/PrimitiveTopologyTests.cpp",
     "end2end/QueryTests.cpp",
     "end2end/QueueTests.cpp",

@@ -550,6 +550,28 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatRequired) {
     }
 }
 
+// Test that specifying a clampDepth value results in an error if the feature is not enabled.
+TEST_F(RenderPipelineValidationTest, ClampDepthWithoutExtension) {
+    {
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::PrimitiveDepthClampingState clampingState;
+        clampingState.clampDepth = true;
+        descriptor.primitive.nextInChain = &clampingState;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+    }
+    {
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::PrimitiveDepthClampingState clampingState;
+        clampingState.clampDepth = false;
+        descriptor.primitive.nextInChain = &clampingState;
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+    }
+}
+
 // Test that the entryPoint names must be present for the correct stage in the shader module.
 TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
@@ -738,4 +760,35 @@ TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
     descriptor.vertex.entryPoint = "vertex0";
     descriptor.layout = layout1;
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+}
+
+class DepthClampingValidationTest : public RenderPipelineValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice() override {
+        dawn_native::DeviceDescriptor descriptor;
+        descriptor.requiredExtensions = {"depth_clamping"};
+        return adapter.CreateDevice(&descriptor);
+    }
+};
+
+// Tests that specifying a clampDepth value succeeds if the extension is enabled.
+TEST_F(DepthClampingValidationTest, Success) {
+    {
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::PrimitiveDepthClampingState clampingState;
+        clampingState.clampDepth = true;
+        descriptor.primitive.nextInChain = &clampingState;
+        device.CreateRenderPipeline2(&descriptor);
+    }
+    {
+        utils::ComboRenderPipelineDescriptor2 descriptor;
+        descriptor.vertex.module = vsModule;
+        descriptor.cFragment.module = fsModule;
+        wgpu::PrimitiveDepthClampingState clampingState;
+        clampingState.clampDepth = false;
+        descriptor.primitive.nextInChain = &clampingState;
+        device.CreateRenderPipeline2(&descriptor);
+    }
 }

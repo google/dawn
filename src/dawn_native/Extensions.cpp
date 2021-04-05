@@ -52,7 +52,11 @@ namespace dawn_native {
               {"multiplanar_formats",
                "Import and use multi-planar texture formats with per plane views",
                "https://bugs.chromium.org/p/dawn/issues/detail?id=551"},
-              &WGPUDeviceProperties::multiPlanarFormats}}};
+              &WGPUDeviceProperties::multiPlanarFormats},
+             {Extension::DepthClamping,
+              {"depth_clamping", "Clamp depth to [0, 1] in NDC space instead of clipping",
+               "https://bugs.chromium.org/p/dawn/issues/detail?id=716"},
+              &WGPUDeviceProperties::depthClamping}}};
 
     }  // anonymous namespace
 

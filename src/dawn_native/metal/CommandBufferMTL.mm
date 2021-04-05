@@ -1193,6 +1193,11 @@ namespace dawn_native { namespace metal {
                     [encoder setDepthBias:newPipeline->GetDepthBias()
                                slopeScale:newPipeline->GetDepthBiasSlopeScale()
                                     clamp:newPipeline->GetDepthBiasClamp()];
+                    if (@available(macOS 10.11, iOS 11.0, *)) {
+                        MTLDepthClipMode clipMode = newPipeline->ShouldClampDepth() ?
+                            MTLDepthClipModeClamp : MTLDepthClipModeClip;
+                        [encoder setDepthClipMode:clipMode];
+                    }
                     newPipeline->Encode(encoder);
 
                     lastPipeline = newPipeline;

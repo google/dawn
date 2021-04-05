@@ -29,6 +29,7 @@ namespace dawn_native {
         PipelineStatisticsQuery,
         TimestampQuery,
         MultiPlanarFormats,
+        DepthClamping,
 
         EnumCount,
         InvalidEnum = EnumCount,

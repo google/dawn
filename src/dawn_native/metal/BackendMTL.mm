@@ -227,6 +227,9 @@ namespace dawn_native { namespace metal {
                     // See https://github.com/gpuweb/gpuweb/issues/1325
                 }
             }
+            if (@available(macOS 10.11, iOS 11.0, *)) {
+                mSupportedExtensions.EnableExtension(Extension::DepthClamping);
+            }
 
             mSupportedExtensions.EnableExtension(Extension::ShaderFloat16);
         }

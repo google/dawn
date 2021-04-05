@@ -832,7 +832,8 @@
             {"name": "shader float16", "type": "bool", "default": "false"},
             {"name": "pipeline statistics query", "type": "bool", "default": "false"},
             {"name": "timestamp query", "type": "bool", "default": "false"},
-            {"name": "multi planar formats", "type": "bool", "default": "false"}
+            {"name": "multi planar formats", "type": "bool", "default": "false"},
+            {"name": "depth clamping", "type": "bool", "default": "false"}
         ]
     },
     "depth stencil state descriptor": {
@@ -1598,6 +1599,14 @@
         ]
     },
 
+    "primitive depth clamping state": {
+        "category": "structure",
+        "chained": true,
+        "members": [
+            {"name": "clamp depth", "type": "bool", "default": "false"}
+        ]
+    },
+
     "depth stencil state": {
         "category": "structure",
         "extensible": true,
@@ -1866,7 +1875,8 @@
             {"value": 5, "name": "shader module SPIRV descriptor"},
             {"value": 6, "name": "shader module WGSL descriptor"},
             {"value": 7, "name": "sampler descriptor dummy anisotropic filtering"},
-            {"value": 8, "name": "render pipeline descriptor dummy extension"}
+            {"value": 8, "name": "render pipeline descriptor dummy extension"},
+            {"value": 9, "name": "primitive depth clamping state"}
         ]
     },
     "texture": {
