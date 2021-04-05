@@ -85,6 +85,8 @@ dawn_component("dawn_wire") {
     "client/ObjectAllocator.h",
     "client/Queue.cpp",
     "client/Queue.h",
+    "client/ShaderModule.cpp",
+    "client/ShaderModule.h",
     "server/ObjectStorage.h",
     "server/Server.cpp",
     "server/Server.h",
@@ -93,6 +95,7 @@ dawn_component("dawn_wire") {
     "server/ServerFence.cpp",
     "server/ServerInlineMemoryTransferService.cpp",
     "server/ServerQueue.cpp",
+    "server/ServerShaderModule.cpp",
   ]
 
   # Make headers publicly visible

@@ -194,6 +194,8 @@ source_set("dawn_native_sources") {
     "CommandValidation.h",
     "Commands.cpp",
     "Commands.h",
+    "CompilationMessages.cpp",
+    "CompilationMessages.h",
     "ComputePassEncoder.cpp",
     "ComputePassEncoder.h",
     "ComputePipeline.cpp",

@@ -48,6 +48,7 @@ namespace spirv_cross {
 
 namespace dawn_native {
 
+    class OwnedCompilationMessages;
     struct EntryPointMetadata;
 
     // A map from name to EntryPointMetadata.
@@ -143,6 +144,8 @@ namespace dawn_native {
         const std::vector<uint32_t>& GetSpirv() const;
         const tint::Program* GetTintProgram() const;
 
+        void APIGetCompilationInfo(wgpu::CompilationInfoCallback callback, void* userdata);
+
         ResultOrError<std::vector<uint32_t>> GeneratePullingSpirv(
             const std::vector<uint32_t>& spirv,
             const VertexState& vertexState,
@@ -154,6 +157,10 @@ namespace dawn_native {
             const VertexState& vertexState,
             const std::string& entryPoint,
             BindGroupIndex pullingBufferBindingSet) const;
+
+        OwnedCompilationMessages* CompilationMessages() {
+            return mCompilationMessages.get();
+        }
 
       protected:
         MaybeError InitializeBase(ShaderModuleParseResult* parseResult);
@@ -175,6 +182,8 @@ namespace dawn_native {
         EntryPointMetadataTable mEntryPoints;
         std::vector<uint32_t> mSpirv;
         std::unique_ptr<tint::Program> mTintProgram;
+
+        std::unique_ptr<OwnedCompilationMessages> mCompilationMessages;
     };
 
 }  // namespace dawn_native

@@ -141,6 +141,13 @@ namespace dawn_wire { namespace server {
         uint64_t requestSerial;
     };
 
+    struct ShaderModuleGetCompilationInfoUserdata : CallbackUserdata {
+        using CallbackUserdata::CallbackUserdata;
+
+        ObjectHandle shaderModule;
+        uint64_t requestSerial;
+    };
+
     struct QueueWorkDoneUserdata : CallbackUserdata {
         using CallbackUserdata::CallbackUserdata;
 
@@ -218,6 +225,9 @@ namespace dawn_wire { namespace server {
                                                  WGPURenderPipeline pipeline,
                                                  const char* message,
                                                  CreatePipelineAsyncUserData* userdata);
+        void OnShaderModuleGetCompilationInfo(WGPUCompilationInfoRequestStatus status,
+                                              const WGPUCompilationInfo* info,
+                                              ShaderModuleGetCompilationInfoUserdata* userdata);
 
 #include "dawn_wire/server/ServerPrototypes_autogen.inc"
 

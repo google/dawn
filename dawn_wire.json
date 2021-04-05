@@ -83,6 +83,10 @@
             {"name": "data size", "type": "uint64_t"},
             {"name": "data layout", "type": "texture data layout", "annotation": "const*"},
             {"name": "writeSize", "type": "extent 3D", "annotation": "const*"}
+        ],
+        "shader module get compilation info": [
+            { "name": "shader module id", "type": "ObjectId" },
+            { "name": "request serial", "type": "uint64_t" }
         ]
     },
     "return commands": {
@@ -133,6 +137,12 @@
             { "name": "queue", "type": "ObjectHandle", "handle_type": "queue" },
             { "name": "request serial", "type": "uint64_t" },
             { "name": "status", "type": "queue work done status" }
+        ],
+        "shader module get compilation info callback": [
+            { "name": "shader module", "type": "ObjectHandle", "handle_type": "shader module" },
+            { "name": "request serial", "type": "uint64_t" },
+            { "name": "status", "type": "compilation info request status" },
+            { "name": "info", "type": "compilation info", "annotation": "const*", "optional": true }
         ]
     },
     "special items": {
@@ -153,6 +163,7 @@
             "DeviceSetUncapturedErrorCallback",
             "FenceGetCompletedValue",
             "FenceOnCompletion",
+            "ShaderModuleGetCompilationInfo",
             "QueueOnSubmittedWorkDone",
             "QueueWriteBuffer",
             "QueueWriteTexture"
@@ -171,7 +182,8 @@
             "Buffer",
             "Device",
             "Fence",
-            "Queue"
+            "Queue",
+            "ShaderModule"
         ],
         "server_custom_pre_handler_commands": [
             "BufferDestroy",

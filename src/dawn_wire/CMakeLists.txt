@@ -57,6 +57,8 @@ target_sources(dawn_wire PRIVATE
     "client/ObjectAllocator.h"
     "client/Queue.cpp"
     "client/Queue.h"
+    "client/ShaderModule.cpp"
+    "client/ShaderModule.h"
     "server/ObjectStorage.h"
     "server/Server.cpp"
     "server/Server.h"
@@ -65,6 +67,7 @@ target_sources(dawn_wire PRIVATE
     "server/ServerFence.cpp"
     "server/ServerInlineMemoryTransferService.cpp"
     "server/ServerQueue.cpp"
+    "server/ServerShaderModule.cpp"
 )
 target_link_libraries(dawn_wire
     PUBLIC dawn_headers

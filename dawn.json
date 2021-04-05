@@ -501,6 +501,49 @@
             {"value": 8, "name": "always"}
         ]
     },
+    "compilation info": {
+        "category": "structure",
+        "extensible": false,
+        "members": [
+            {"name": "message count", "type": "uint32_t"},
+            {"name": "messages", "type": "compilation message", "annotation": "const*", "length": "message count"}
+        ]
+    },
+    "compilation info callback": {
+        "category": "callback",
+        "args": [
+            {"name": "status", "type": "compilation info request status"},
+            {"name": "compilation info", "type": "compilation info", "annotation": "const*"},
+            {"name": "userdata", "type": "void", "annotation": "*"}
+        ]
+    },
+    "compilation info request status": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "success"},
+            {"value": 1, "name": "error"},
+            {"value": 2, "name": "device lost"},
+            {"value": 3, "name": "unknown"}
+        ]
+    },
+    "compilation message": {
+        "category": "structure",
+        "extensible": false,
+        "members": [
+            {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
+            {"name": "type", "type": "compilation message type"},
+            {"name": "line num", "type": "uint64_t"},
+            {"name": "line pos", "type": "uint64_t"}
+        ]
+    },
+    "compilation message type": {
+        "category": "enum",
+        "values": [
+            {"value": 0, "name": "error"},
+            {"value": 1, "name": "warning"},
+            {"value": 2, "name": "info"}
+        ]
+    },
     "compute pass descriptor": {
         "category": "structure",
         "extensible": true,
@@ -1731,7 +1774,16 @@
         ]
     },
     "shader module": {
-        "category": "object"
+        "category": "object",
+        "methods": [
+            {
+                "name": "get compilation info",
+                "args": [
+                    {"name": "callback", "type": "compilation info callback"},
+                    {"name": "userdata", "type": "void", "annotation": "*"}
+                ]
+            }
+        ]
     },
     "shader module descriptor": {
         "category": "structure",

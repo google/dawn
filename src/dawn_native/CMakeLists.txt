@@ -62,6 +62,8 @@ target_sources(dawn_native PRIVATE
     "CommandValidation.h"
     "Commands.cpp"
     "Commands.h"
+    "CompilationMessages.cpp",
+    "CompilationMessages.h",
     "ComputePassEncoder.cpp"
     "ComputePassEncoder.h"
     "ComputePipeline.cpp"

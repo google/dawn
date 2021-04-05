@@ -16,6 +16,7 @@
 
 #include "common/VertexFormatUtils.h"
 #include "dawn_native/BindGroupLayout.h"
+#include "dawn_native/CompilationMessages.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/Pipeline.h"
@@ -1195,7 +1196,9 @@ namespace dawn_native {
     // ShaderModuleBase
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
-        : CachedObject(device), mType(Type::Undefined) {
+        : CachedObject(device),
+          mType(Type::Undefined),
+          mCompilationMessages(std::make_unique<OwnedCompilationMessages>()) {
         ASSERT(descriptor->nextInChain != nullptr);
         switch (descriptor->nextInChain->sType) {
             case wgpu::SType::ShaderModuleSPIRVDescriptor: {
@@ -1218,7 +1221,9 @@ namespace dawn_native {
     }
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-        : CachedObject(device, tag), mType(Type::Undefined) {
+        : CachedObject(device, tag),
+          mType(Type::Undefined),
+          mCompilationMessages(std::make_unique<OwnedCompilationMessages>()) {
     }
 
     ShaderModuleBase::~ShaderModuleBase() {
@@ -1263,6 +1268,16 @@ namespace dawn_native {
     const tint::Program* ShaderModuleBase::GetTintProgram() const {
         ASSERT(GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator));
         return mTintProgram.get();
+    }
+
+    void ShaderModuleBase::APIGetCompilationInfo(wgpu::CompilationInfoCallback callback,
+                                                 void* userdata) {
+        if (callback == nullptr) {
+            return;
+        }
+
+        callback(WGPUCompilationInfoRequestStatus_Success,
+                 mCompilationMessages->GetCompilationInfo(), userdata);
     }
 
     ResultOrError<std::vector<uint32_t>> ShaderModuleBase::GeneratePullingSpirv(
