@@ -25,7 +25,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kNone);
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kInput);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   WrapInFunction(stmt);
@@ -35,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var a : f32;\n");
+  EXPECT_EQ(gen.result(), "  var<in> a : f32;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {

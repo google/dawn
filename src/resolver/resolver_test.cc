@@ -275,7 +275,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
 
 TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScope) {
   auto* init = Expr(2);
-  Global("my_var", ty.i32(), ast::StorageClass::kNone, init);
+  Global("my_var", ty.i32(), ast::StorageClass::kInput, init);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -352,19 +352,20 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   ast::VariableList params;
 
   // Declare i32 "foo" inside a function
-  auto* fn_i32 = Var("foo", ty.i32(), ast::StorageClass::kNone, Expr(2));
+  auto* fn_i32 = Var("foo", ty.i32(), ast::StorageClass::kFunction, Expr(2));
   auto* fn_i32_init = fn_i32->constructor();
   auto* fn_i32_decl = create<ast::VariableDeclStatement>(fn_i32);
   Func("func_i32", params, ty.void_(), ast::StatementList{fn_i32_decl},
        ast::DecorationList{});
 
   // Declare f32 "foo" at module scope
-  auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kNone, Expr(2.f));
+  auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kInput, Expr(2.f));
   auto* mod_init = mod_f32->constructor();
   AST().AddGlobalVariable(mod_f32);
 
   // Reference "foo" in another function
-  auto* fn_f32 = Var("bar", ty.f32(), ast::StorageClass::kNone, Expr("foo"));
+  auto* fn_f32 =
+      Var("bar", ty.f32(), ast::StorageClass::kFunction, Expr("foo"));
   auto* fn_f32_init = fn_f32->constructor();
   auto* fn_f32_decl = create<ast::VariableDeclStatement>(fn_f32);
   Func("func_f32", params, ty.void_(), ast::StatementList{fn_f32_decl},
@@ -430,7 +431,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Array_Constant) {
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix) {
-  Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kNone);
+  Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kInput);
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
@@ -446,7 +447,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix) {
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
-  Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kNone);
+  Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kInput);
 
   auto* acc = IndexAccessor(IndexAccessor("my_var", 2), 1);
   WrapInFunction(acc);
@@ -461,7 +462,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Vector) {
-  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kInput);
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
@@ -600,7 +601,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec4) {
 }
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
-  auto* my_var = Global("my_var", ty.f32(), ast::StorageClass::kNone);
+  auto* my_var = Global("my_var", ty.f32(), ast::StorageClass::kInput);
 
   auto* ident = Expr("my_var");
   WrapInFunction(ident);
@@ -838,7 +839,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
       ast::DecorationList{});
 
   auto* st = ty.struct_("S", strct);
-  Global("my_struct", st, ast::StorageClass::kNone);
+  Global("my_struct", st, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
   WrapInFunction(mem);
@@ -860,7 +861,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
 
   auto* st = ty.struct_("alias", strct);
   auto* alias = ty.alias("alias", st);
-  Global("my_struct", alias, ast::StorageClass::kNone);
+  Global("my_struct", alias, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
   WrapInFunction(mem);
@@ -875,7 +876,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
-  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_vec", "xzyw");
   WrapInFunction(mem);
@@ -890,7 +891,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
-  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_vec", "b");
   WrapInFunction(mem);
@@ -941,7 +942,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
       ast::StructMemberList{Member("mem", &vecB)}, ast::DecorationList{});
 
   auto* stA = ty.struct_("A", strctA);
-  Global("c", stA, ast::StorageClass::kNone);
+  Global("c", stA, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor(
       MemberAccessor(IndexAccessor(MemberAccessor("c", "mem"), 0), "foo"),
@@ -963,7 +964,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
       ast::DecorationList{});
 
   auto* st = ty.struct_("S", strct);
-  Global("my_struct", st, ast::StorageClass::kNone);
+  Global("my_struct", st, ast::StorageClass::kInput);
 
   auto* expr = Add(MemberAccessor("my_struct", "first_member"),
                    MemberAccessor("my_struct", "second_member"));
@@ -1148,8 +1149,8 @@ TEST_P(Expr_Binary_Test_Valid, All) {
      << rhs_type->FriendlyName(Symbols());
   SCOPED_TRACE(ss.str());
 
-  Global("lhs", lhs_type, ast::StorageClass::kNone);
-  Global("rhs", rhs_type, ast::StorageClass::kNone);
+  Global("lhs", lhs_type, ast::StorageClass::kInput);
+  Global("rhs", rhs_type, ast::StorageClass::kInput);
 
   auto* expr =
       create<ast::BinaryExpression>(params.op, Expr("lhs"), Expr("rhs"));
@@ -1205,8 +1206,8 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
      << params.op << " " << rhs_type->FriendlyName(Symbols());
   SCOPED_TRACE(ss.str());
 
-  Global("lhs", lhs_type, ast::StorageClass::kNone);
-  Global("rhs", rhs_type, ast::StorageClass::kNone);
+  Global("lhs", lhs_type, ast::StorageClass::kInput);
+  Global("rhs", rhs_type, ast::StorageClass::kInput);
 
   auto* expr =
       create<ast::BinaryExpression>(params.op, Expr("lhs"), Expr("rhs"));
@@ -1260,8 +1261,8 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
      << rhs_type->FriendlyName(Symbols());
   SCOPED_TRACE(ss.str());
 
-  Global("lhs", lhs_type, ast::StorageClass::kNone);
-  Global("rhs", rhs_type, ast::StorageClass::kNone);
+  Global("lhs", lhs_type, ast::StorageClass::kInput);
+  Global("rhs", rhs_type, ast::StorageClass::kInput);
 
   auto* expr = create<ast::BinaryExpression>(Source{{12, 34}}, params.op,
                                              Expr("lhs"), Expr("rhs"));
@@ -1306,8 +1307,8 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
     is_valid_expr = vec_size == mat_cols;
   }
 
-  Global("lhs", lhs_type, ast::StorageClass::kNone);
-  Global("rhs", rhs_type, ast::StorageClass::kNone);
+  Global("lhs", lhs_type, ast::StorageClass::kInput);
+  Global("rhs", rhs_type, ast::StorageClass::kInput);
 
   auto* expr = Mul(Source{{12, 34}}, Expr("lhs"), Expr("rhs"));
   WrapInFunction(expr);
@@ -1346,8 +1347,8 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
   auto* result_type =
       create<type::Matrix>(ty.f32(), lhs_mat_rows, rhs_mat_cols);
 
-  Global("lhs", lhs_type, ast::StorageClass::kNone);
-  Global("rhs", rhs_type, ast::StorageClass::kNone);
+  Global("lhs", lhs_type, ast::StorageClass::kInput);
+  Global("rhs", rhs_type, ast::StorageClass::kInput);
 
   auto* expr = Mul(Source{{12, 34}}, Expr("lhs"), Expr("rhs"));
   WrapInFunction(expr);
@@ -1379,7 +1380,7 @@ using UnaryOpExpressionTest = ResolverTestWithParam<ast::UnaryOp>;
 TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
   auto op = GetParam();
 
-  Global("ident", ty.vec4<f32>(), ast::StorageClass::kNone);
+  Global("ident", ty.vec4<f32>(), ast::StorageClass::kInput);
   auto* der = create<ast::UnaryOpExpression>(op, Expr("ident"));
   WrapInFunction(der);
 

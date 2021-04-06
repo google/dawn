@@ -23,7 +23,7 @@ namespace {
 using HlslGeneratorImplTest_VariableDecl = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kNone);
+  auto* var = Global("a", ty.f32(), ast::StorageClass::kInput);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
@@ -50,7 +50,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
-  auto* var = Global("a", ty.array<f32, 5>(), ast::StorageClass::kNone);
+  auto* var = Global("a", ty.array<f32, 5>(), ast::StorageClass::kInput);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
 
@@ -91,7 +91,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_Private) {
-  Global("initializer", ty.f32(), ast::StorageClass::kNone);
+  Global("initializer", ty.f32(), ast::StorageClass::kInput);
   auto* var =
       Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
 

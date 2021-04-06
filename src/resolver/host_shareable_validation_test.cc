@@ -37,14 +37,14 @@ TEST_F(ResolverHostShareableValidationTest, Bool) {
 }
 
 TEST_F(ResolverHostShareableValidationTest, Pointer) {
-  Global(Source{{56, 78}}, "g", ty.pointer<i32>(ast::StorageClass::kNone),
+  Global(Source{{56, 78}}, "g", ty.pointer<i32>(ast::StorageClass::kInput),
          ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
 
   EXPECT_EQ(
       r()->error(),
-      R"(56:78 error: Type 'ptr<i32>' cannot be used in storage class 'storage' as it is non-host-shareable
+      R"(56:78 error: Type 'ptr<in, i32>' cannot be used in storage class 'storage' as it is non-host-shareable
 56:78 note: while instantiating variable g)");
 }
 

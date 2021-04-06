@@ -97,42 +97,6 @@ bool ValidatorImpl::Validate() {
 }
 
 bool ValidatorImpl::ValidateGlobalVariable(const ast::Variable* var) {
-  auto* sem = program_->Sem().Get(var);
-  if (!sem) {
-    add_error(var->source(), "no semantic information for variable '" +
-                                 program_->Symbols().NameFor(var->symbol()) +
-                                 "'");
-    return false;
-  }
-
-  if (variable_stack_.has(var->symbol())) {
-    add_error(var->source(), "v-0011",
-              "redeclared global identifier '" +
-                  program_->Symbols().NameFor(var->symbol()) + "'");
-    return false;
-  }
-  if (!var->is_const() && sem->StorageClass() == ast::StorageClass::kNone) {
-    add_error(var->source(), "v-0022",
-              "global variables must have a storage class");
-    return false;
-  }
-  if (var->is_const() && !(sem->StorageClass() == ast::StorageClass::kNone)) {
-    add_error(var->source(), "v-global01",
-              "global constants shouldn't have a storage class");
-    return false;
-  }
-
-  for (auto* deco : var->decorations()) {
-    if (!(deco->Is<ast::BindingDecoration>() ||
-          deco->Is<ast::BuiltinDecoration>() ||
-          deco->Is<ast::ConstantIdDecoration>() ||
-          deco->Is<ast::GroupDecoration>() ||
-          deco->Is<ast::LocationDecoration>())) {
-      add_error(deco->source(), "decoration is not valid for variables");
-      return false;
-    }
-  }
-
   variable_stack_.set_global(var->symbol(), var);
   return true;
 }

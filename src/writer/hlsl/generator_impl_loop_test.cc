@@ -73,8 +73,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
-  Global("lhs", ty.f32(), ast::StorageClass::kNone);
-  Global("rhs", ty.f32(), ast::StorageClass::kNone);
+  Global("lhs", ty.f32(), ast::StorageClass::kInput);
+  Global("rhs", ty.f32(), ast::StorageClass::kInput);
 
   auto* body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::DiscardStatement>(),
@@ -149,7 +149,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
   //   }
   // }
 
-  Global("rhs", ty.f32(), ast::StorageClass::kNone);
+  Global("rhs", ty.f32(), ast::StorageClass::kInput);
 
   auto* var = Var("lhs", ty.f32(), ast::StorageClass::kFunction, Expr(2.4f));
 

@@ -832,7 +832,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R16Float) {
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
                                          type::ImageFormat::kR16Float, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -854,7 +854,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8SNorm) {
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
                                          type::ImageFormat::kR8Snorm, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -876,7 +876,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8UNorm) {
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
                                          type::ImageFormat::kR8Unorm, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -898,7 +898,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Uint) {
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
                                          type::ImageFormat::kR8Uint, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -915,7 +915,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Sint) {
   auto* s = create<type::StorageTexture>(type::TextureDimension::k1d,
                                          type::ImageFormat::kR8Sint, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -932,7 +932,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2d,
                                          type::ImageFormat::kR16Float, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -949,7 +949,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2dArray,
                                          type::ImageFormat::kR16Float, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -966,7 +966,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
   auto* s = create<type::StorageTexture>(type::TextureDimension::k3d,
                                          type::ImageFormat::kR16Float, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -984,7 +984,7 @@ TEST_F(BuilderTest_Type,
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2d,
                                          type::ImageFormat::kR32Float, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -1002,7 +1002,7 @@ TEST_F(BuilderTest_Type,
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2d,
                                          type::ImageFormat::kR32Sint, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 
@@ -1020,7 +1020,7 @@ TEST_F(BuilderTest_Type,
   auto* s = create<type::StorageTexture>(type::TextureDimension::k2d,
                                          type::ImageFormat::kR32Uint, subtype);
 
-  Global("test_var", s, ast::StorageClass::kNone);
+  Global("test_var", s, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 

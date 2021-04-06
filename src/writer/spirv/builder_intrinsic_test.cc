@@ -373,9 +373,9 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   type::Sampler s(type::SamplerKind::kComparisonSampler);
   type::DepthTexture t(type::TextureDimension::k2d);
 
-  auto* tex = Global("texture", &t, ast::StorageClass::kNone);
+  auto* tex = Global("texture", &t, ast::StorageClass::kInput);
 
-  auto* sampler = Global("sampler", &s, ast::StorageClass::kNone);
+  auto* sampler = Global("sampler", &s, ast::StorageClass::kInput);
 
   auto* expr1 = Call("textureSampleCompare", "texture", "sampler",
                      vec2<f32>(1.0f, 2.0f), 2.0f);
@@ -397,11 +397,11 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeImage %4 2D 1 0 0 1 Unknown
-%2 = OpTypePointer Private %3
-%1 = OpVariable %2 Private
+%2 = OpTypePointer Input %3
+%1 = OpVariable %2 Input
 %7 = OpTypeSampler
-%6 = OpTypePointer Private %7
-%5 = OpVariable %6 Private
+%6 = OpTypePointer Input %7
+%5 = OpVariable %6 Input
 %11 = OpTypeSampledImage %3
 %13 = OpTypeVector %4 2
 %14 = OpConstant %4 1

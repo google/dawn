@@ -122,7 +122,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
-  Global("initializer", ty.f32(), ast::StorageClass::kNone);
+  Global("initializer", ty.f32(), ast::StorageClass::kInput);
   auto* var =
       Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
   auto* stmt = create<ast::VariableDeclStatement>(var);

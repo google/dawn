@@ -26,6 +26,85 @@ namespace {
 class ResolverTypeValidationTest : public resolver::TestHelper,
                                    public testing::Test {};
 
+TEST_F(ResolverTypeValidationTest, GlobalVariableWithStorageClass_Pass) {
+  // var<in> global_var: f32;
+  Global(Source{{12, 34}}, "global_var", ty.f32(), ast::StorageClass::kInput);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTypeValidationTest, GlobalVariableNoStorageClass_Fail) {
+  // var global_var: f32;
+  Global(Source{{12, 34}}, "global_var", ty.f32(), ast::StorageClass::kNone);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-0022: global variables must have a storage class");
+}
+
+TEST_F(ResolverTypeValidationTest, GlobalConstantWithStorageClass_Fail) {
+  // const<in> global_var: f32;
+  AST().AddGlobalVariable(
+      create<ast::Variable>(Source{{12, 34}}, Symbols().Register("global_var"),
+                            ast::StorageClass::kInput, ty.f32(), true, nullptr,
+                            ast::DecorationList{}));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-global01: global constants shouldn't have a storage "
+            "class");
+}
+
+TEST_F(ResolverTypeValidationTest, GlobalConstNoStorageClass_Pass) {
+  // const global_var: f32;
+  GlobalConst(Source{{12, 34}}, "global_var", ty.f32());
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTypeValidationTest, GlobalVariableUnique_Pass) {
+  // var global_var0 : f32 = 0.1;
+  // var global_var1 : i32 = 0;
+
+  Global("global_var0", ty.f32(), ast::StorageClass::kPrivate, Expr(0.1f));
+
+  Global(Source{{12, 34}}, "global_var1", ty.f32(), ast::StorageClass::kPrivate,
+         Expr(0));
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTypeValidationTest, GlobalVariableNotUnique_Fail) {
+  // var global_var : f32 = 0.1;
+  // var global_var : i32 = 0;
+  Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(0.1f));
+
+  Global(Source{{12, 34}}, "global_var", ty.i32(), ast::StorageClass::kPrivate,
+         Expr(0));
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-0011: redeclared global identifier 'global_var'");
+}
+
+TEST_F(ResolverTypeValidationTest,
+       GlobalVariableFunctionVariableNotUnique_Pass) {
+  // fn my_func -> void {
+  //   var a: f32 = 2.0;
+  // }
+  // var a: f32 = 2.1;
+
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+
+  Func("my_func", ast::VariableList{}, ty.void_(), {Decl(var)},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+
+  Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverTypeValidationTest,
        GlobalVariableFunctionVariableNotUnique_Fail) {
   // var a: f32 = 2.1;
@@ -40,8 +119,7 @@ TEST_F(ResolverTypeValidationTest,
 
   Func("my_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
-                                              var),
+           create<ast::VariableDeclStatement>(Source{{12, 34}}, var),
        },
        ast::DecorationList{});
 
@@ -61,8 +139,7 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifier_Fail) {
   Func("my_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::VariableDeclStatement>(var),
-           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
-                                              var_a_float),
+           create<ast::VariableDeclStatement>(Source{{12, 34}}, var_a_float),
        },
        ast::DecorationList{});
 
@@ -86,8 +163,7 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScope_Pass) {
 
   auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
       create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
-      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
-                                         var_a_float),
+      create<ast::VariableDeclStatement>(Source{{12, 34}}, var_a_float),
   });
 
   WrapInFunction(outer_body);
@@ -109,7 +185,7 @@ TEST_F(ResolverTypeValidationTest,
 
   auto* cond = Expr(true);
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}}, var),
+      create<ast::VariableDeclStatement>(Source{{12, 34}}, var),
   });
 
   auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
@@ -130,8 +206,7 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Pass) {
   // }
   auto* var_inner = Var("a", ty.f32(), ast::StorageClass::kNone);
   auto* inner = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
-                                         var_inner),
+      create<ast::VariableDeclStatement>(Source{{12, 34}}, var_inner),
   });
 
   auto* var_outer = Var("a", ty.f32(), ast::StorageClass::kNone);
@@ -152,8 +227,7 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Fail) {
   // }
   auto* var_inner = Var("a", ty.f32(), ast::StorageClass::kNone);
   auto* inner = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
-                                         var_inner),
+      create<ast::VariableDeclStatement>(Source{{12, 34}}, var_inner),
   });
 
   auto* var_outer = Var("a", ty.f32(), ast::StorageClass::kNone);
@@ -178,16 +252,14 @@ TEST_F(ResolverTypeValidationTest,
 
   Func("func0", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
-                                              var0),
+           create<ast::VariableDeclStatement>(Source{{12, 34}}, var0),
            create<ast::ReturnStatement>(),
        },
        ast::DecorationList{});
 
   Func("func1", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(Source{Source::Location{13, 34}},
-                                              var1),
+           create<ast::VariableDeclStatement>(Source{{13, 34}}, var1),
            create<ast::ReturnStatement>(),
        },
        ast::DecorationList{
@@ -294,8 +366,8 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
   // fn func(a : array<u32>) {}
   // [[stage(vertex)]] fn main() {}
 
-  auto* param = Var(Source{Source::Location{12, 34}}, "a", ty.array<i32>(),
-                    ast::StorageClass::kNone);
+  auto* param =
+      Var(Source{{12, 34}}, "a", ty.array<i32>(), ast::StorageClass::kNone);
 
   Func("func", ast::VariableList{param}, ty.void_(),
        ast::StatementList{

@@ -21,6 +21,7 @@
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_statement.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
@@ -202,23 +203,63 @@ bool Resolver::ResolveInternal() {
         return false;
       }
     } else if (auto* var = decl->As<ast::Variable>()) {
-      auto* info = CreateVariableInfo(var);
-      variable_stack_.set_global(var->symbol(), info);
-
-      if (var->has_constructor()) {
-        if (!Expression(var->constructor())) {
-          return false;
-        }
-      }
-
-      if (!ApplyStorageClassUsageToType(var->declared_storage_class(),
-                                        info->type, var->source())) {
-        diagnostics_.add_note("while instantiating variable " +
-                                  builder_->Symbols().NameFor(var->symbol()),
-                              var->source());
+      if (!GlobalVariable(var)) {
         return false;
       }
     }
+  }
+
+  return true;
+}
+
+bool Resolver::GlobalVariable(ast::Variable* var) {
+  if (variable_stack_.has(var->symbol())) {
+    diagnostics_.add_error("v-0011",
+                           "redeclared global identifier '" +
+                               builder_->Symbols().NameFor(var->symbol()) + "'",
+                           var->source());
+    return false;
+  }
+
+  auto* info = CreateVariableInfo(var);
+  variable_stack_.set_global(var->symbol(), info);
+
+  if (!var->is_const() && info->storage_class == ast::StorageClass::kNone) {
+    diagnostics_.add_error(
+        "v-0022", "global variables must have a storage class", var->source());
+    return false;
+  }
+  if (var->is_const() && !(info->storage_class == ast::StorageClass::kNone)) {
+    diagnostics_.add_error("v-global01",
+                           "global constants shouldn't have a storage class",
+                           var->source());
+    return false;
+  }
+
+  for (auto* deco : var->decorations()) {
+    if (!(deco->Is<ast::BindingDecoration>() ||
+          deco->Is<ast::BuiltinDecoration>() ||
+          deco->Is<ast::ConstantIdDecoration>() ||
+          deco->Is<ast::GroupDecoration>() ||
+          deco->Is<ast::LocationDecoration>())) {
+      diagnostics_.add_error("decoration is not valid for variables",
+                             deco->source());
+      return false;
+    }
+  }
+
+  if (var->has_constructor()) {
+    if (!Expression(var->constructor())) {
+      return false;
+    }
+  }
+
+  if (!ApplyStorageClassUsageToType(var->declared_storage_class(), info->type,
+                                    var->source())) {
+    diagnostics_.add_note("while instantiating variable " +
+                              builder_->Symbols().NameFor(var->symbol()),
+                          var->source());
+    return false;
   }
 
   return true;

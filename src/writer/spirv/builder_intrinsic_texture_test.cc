@@ -3646,8 +3646,6 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
 
   auto* texture = param.buildTextureVariable(this);
   auto* sampler = param.buildSamplerVariable(this);
-  AST().AddGlobalVariable(texture);
-  AST().AddGlobalVariable(sampler);
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));

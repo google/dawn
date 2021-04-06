@@ -52,7 +52,7 @@ using ResolverIntrinsicDerivativeTest = ResolverTestWithParam<std::string>;
 TEST_P(ResolverIntrinsicDerivativeTest, Scalar) {
   auto name = GetParam();
 
-  Global("ident", ty.f32(), ast::StorageClass::kNone);
+  Global("ident", ty.f32(), ast::StorageClass::kInput);
 
   auto* expr = Call(name, "ident");
   WrapInFunction(expr);
@@ -65,7 +65,7 @@ TEST_P(ResolverIntrinsicDerivativeTest, Scalar) {
 
 TEST_P(ResolverIntrinsicDerivativeTest, Vector) {
   auto name = GetParam();
-  Global("ident", ty.vec4<f32>(), ast::StorageClass::kNone);
+  Global("ident", ty.vec4<f32>(), ast::StorageClass::kInput);
 
   auto* expr = Call(name, "ident");
   WrapInFunction(expr);
@@ -109,7 +109,7 @@ using ResolverIntrinsic = ResolverTestWithParam<std::string>;
 TEST_P(ResolverIntrinsic, Test) {
   auto name = GetParam();
 
-  Global("my_var", ty.vec3<bool>(), ast::StorageClass::kNone);
+  Global("my_var", ty.vec3<bool>(), ast::StorageClass::kInput);
 
   auto* expr = Call(name, "my_var");
   WrapInFunction(expr);
@@ -127,7 +127,7 @@ using ResolverIntrinsicTest_FloatMethod = ResolverTestWithParam<std::string>;
 TEST_P(ResolverIntrinsicTest_FloatMethod, Vector) {
   auto name = GetParam();
 
-  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kInput);
 
   auto* expr = Call(name, "my_var");
   WrapInFunction(expr);
@@ -143,7 +143,7 @@ TEST_P(ResolverIntrinsicTest_FloatMethod, Vector) {
 TEST_P(ResolverIntrinsicTest_FloatMethod, Scalar) {
   auto name = GetParam();
 
-  Global("my_var", ty.f32(), ast::StorageClass::kNone);
+  Global("my_var", ty.f32(), ast::StorageClass::kInput);
 
   auto* expr = Call(name, "my_var");
   WrapInFunction(expr);
@@ -157,7 +157,7 @@ TEST_P(ResolverIntrinsicTest_FloatMethod, Scalar) {
 TEST_P(ResolverIntrinsicTest_FloatMethod, MissingParam) {
   auto name = GetParam();
 
-  Global("my_var", ty.f32(), ast::StorageClass::kNone);
+  Global("my_var", ty.f32(), ast::StorageClass::kInput);
 
   auto* expr = Call(name);
   WrapInFunction(expr);
@@ -174,7 +174,7 @@ TEST_P(ResolverIntrinsicTest_FloatMethod, MissingParam) {
 TEST_P(ResolverIntrinsicTest_FloatMethod, TooManyParams) {
   auto name = GetParam();
 
-  Global("my_var", ty.f32(), ast::StorageClass::kNone);
+  Global("my_var", ty.f32(), ast::StorageClass::kInput);
 
   auto* expr = Call(name, "my_var", 1.23f);
   WrapInFunction(expr);
@@ -182,7 +182,7 @@ TEST_P(ResolverIntrinsicTest_FloatMethod, TooManyParams) {
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(), "error: no matching call to " + name +
-                              "(ptr<f32>, f32)\n\n"
+                              "(ptr<in, f32>, f32)\n\n"
                               "2 candidate functions:\n  " +
                               name + "(f32) -> bool\n  " + name +
                               "(vecN<f32>) -> vecN<bool>\n");
@@ -242,7 +242,7 @@ class ResolverIntrinsicTest_TextureOperation
   void add_call_param(std::string name,
                       type::Type* type,
                       ast::ExpressionList* call_params) {
-    Global(name, type, ast::StorageClass::kNone);
+    Global(name, type, ast::StorageClass::kInput);
     call_params->push_back(Expr(name));
   }
   type::Type* subtype(Texture type) {
@@ -370,7 +370,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TextureTestParams{type::TextureDimension::k3d}));
 
 TEST_F(ResolverIntrinsicTest, Dot_Vec2) {
-  Global("my_var", ty.vec2<f32>(), ast::StorageClass::kNone);
+  Global("my_var", ty.vec2<f32>(), ast::StorageClass::kInput);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
@@ -382,7 +382,7 @@ TEST_F(ResolverIntrinsicTest, Dot_Vec2) {
 }
 
 TEST_F(ResolverIntrinsicTest, Dot_Vec3) {
-  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kInput);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
@@ -394,7 +394,7 @@ TEST_F(ResolverIntrinsicTest, Dot_Vec3) {
 }
 
 TEST_F(ResolverIntrinsicTest, Dot_Vec4) {
-  Global("my_var", ty.vec4<f32>(), ast::StorageClass::kNone);
+  Global("my_var", ty.vec4<f32>(), ast::StorageClass::kInput);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
@@ -420,15 +420,16 @@ TEST_F(ResolverIntrinsicTest, Dot_Error_Scalar) {
 }
 
 TEST_F(ResolverIntrinsicTest, Dot_Error_VectorInt) {
-  Global("my_var", ty.vec4<i32>(), ast::StorageClass::kNone);
+  Global("my_var", ty.vec4<i32>(), ast::StorageClass::kInput);
 
   auto* expr = Call("dot", "my_var", "my_var");
   WrapInFunction(expr);
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            R"(error: no matching call to dot(ptr<vec4<i32>>, ptr<vec4<i32>>)
+  EXPECT_EQ(
+      r()->error(),
+      R"(error: no matching call to dot(ptr<in, vec4<i32>>, ptr<in, vec4<i32>>)
 
 1 candidate function:
   dot(vecN<f32>, vecN<f32>) -> f32
@@ -436,9 +437,9 @@ TEST_F(ResolverIntrinsicTest, Dot_Error_VectorInt) {
 }
 
 TEST_F(ResolverIntrinsicTest, Select) {
-  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("my_var", ty.vec3<f32>(), ast::StorageClass::kInput);
 
-  Global("bool_var", ty.vec3<bool>(), ast::StorageClass::kNone);
+  Global("bool_var", ty.vec3<bool>(), ast::StorageClass::kInput);
 
   auto* expr = Call("select", "my_var", "my_var", "bool_var");
   WrapInFunction(expr);
@@ -756,7 +757,7 @@ INSTANTIATE_TEST_SUITE_P(
 using ResolverIntrinsicDataTest = ResolverTest;
 
 TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
-  Global("arr", ty.array<int>(), ast::StorageClass::kNone);
+  Global("arr", ty.array<int>(), ast::StorageClass::kInput);
   auto* call = Call("arrayLength", "arr");
   WrapInFunction(call);
 
@@ -767,14 +768,14 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
 }
 
 TEST_F(ResolverIntrinsicDataTest, ArrayLength_Error_ArraySized) {
-  Global("arr", ty.array<int, 4>(), ast::StorageClass::kNone);
+  Global("arr", ty.array<int, 4>(), ast::StorageClass::kInput);
   auto* call = Call("arrayLength", "arr");
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "error: no matching call to arrayLength(ptr<array<i32, 4>>)\n\n"
+            "error: no matching call to arrayLength(ptr<in, array<i32, 4>>)\n\n"
             "1 candidate function:\n"
             "  arrayLength(array<T>) -> u32\n");
 }

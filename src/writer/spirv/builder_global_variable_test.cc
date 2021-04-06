@@ -24,21 +24,6 @@ namespace {
 
 using BuilderTest = TestHelper;
 
-TEST_F(BuilderTest, GlobalVar_NoStorageClass) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kNone);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
-)");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypePointer Private %3
-%4 = OpConstantNull %3
-%1 = OpVariable %2 Private %4
-)");
-}
-
 TEST_F(BuilderTest, GlobalVar_WithStorageClass) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput);
 
@@ -218,7 +203,7 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
-  auto* v = Global("var", ty.bool_(), ast::StorageClass::kNone, Expr(true),
+  auto* v = Global("var", ty.bool_(), ast::StorageClass::kInput, Expr(true),
                    ast::DecorationList{
                        create<ast::ConstantIdDecoration>(1200),
                    });
@@ -232,13 +217,13 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
 %2 = OpSpecConstantTrue %1
-%4 = OpTypePointer Private %1
-%3 = OpVariable %4 Private %2
+%4 = OpTypePointer Input %1
+%3 = OpVariable %4 Input %2
 )");
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
-  auto* v = Global("var", ty.bool_(), ast::StorageClass::kNone, nullptr,
+  auto* v = Global("var", ty.bool_(), ast::StorageClass::kInput, nullptr,
                    ast::DecorationList{
                        create<ast::ConstantIdDecoration>(1200),
                    });
@@ -251,14 +236,14 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 1200
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Input %3
 %4 = OpSpecConstantFalse %3
-%1 = OpVariable %2 Private %4
+%1 = OpVariable %2 Input %4
 )");
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kNone, Expr(2.f),
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kInput, Expr(2.f),
                    ast::DecorationList{
                        create<ast::ConstantIdDecoration>(0),
                    });
@@ -272,13 +257,13 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
 %2 = OpSpecConstant %1 2
-%4 = OpTypePointer Private %1
-%3 = OpVariable %4 Private %2
+%4 = OpTypePointer Input %1
+%3 = OpVariable %4 Input %2
 )");
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kNone, nullptr,
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kInput, nullptr,
                    ast::DecorationList{
                        create<ast::ConstantIdDecoration>(0),
                    });
@@ -291,14 +276,14 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Input %3
 %4 = OpSpecConstant %3 0
-%1 = OpVariable %2 Private %4
+%1 = OpVariable %2 Input %4
 )");
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
-  auto* v = Global("var", ty.i32(), ast::StorageClass::kNone, nullptr,
+  auto* v = Global("var", ty.i32(), ast::StorageClass::kInput, nullptr,
                    ast::DecorationList{
                        create<ast::ConstantIdDecoration>(0),
                    });
@@ -311,14 +296,14 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Input %3
 %4 = OpSpecConstant %3 0
-%1 = OpVariable %2 Private %4
+%1 = OpVariable %2 Input %4
 )");
 }
 
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
-  auto* v = Global("var", ty.u32(), ast::StorageClass::kNone, nullptr,
+  auto* v = Global("var", ty.u32(), ast::StorageClass::kInput, nullptr,
                    ast::DecorationList{
                        create<ast::ConstantIdDecoration>(0),
                    });
@@ -331,9 +316,9 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 0
-%2 = OpTypePointer Private %3
+%2 = OpTypePointer Input %3
 %4 = OpSpecConstant %3 0
-%1 = OpVariable %2 Private %4
+%1 = OpVariable %2 Input %4
 )");
 }
 
@@ -545,7 +530,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
       type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, Types());
   auto* type = create<type::StorageTexture>(
       type::TextureDimension::k2d, type::ImageFormat::kR32Uint, subtype);
-  Global("test_var", type, ast::StorageClass::kNone);
+  Global("test_var", type, ast::StorageClass::kInput);
 
   auto* ac = create<type::AccessControl>(ast::AccessControl::kWriteOnly, type);
 
@@ -575,7 +560,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
   auto* st = create<type::StorageTexture>(type::TextureDimension::k2d,
                                           type::ImageFormat::kR32Uint, subtype);
 
-  Global("test_var", st, ast::StorageClass::kNone);
+  Global("test_var", st, ast::StorageClass::kInput);
 
   auto* type_a = create<type::AccessControl>(ast::AccessControl::kReadOnly, st);
   auto* var_a = Global("a", type_a, ast::StorageClass::kUniformConstant);

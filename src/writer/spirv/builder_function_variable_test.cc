@@ -23,7 +23,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kNone);
+  auto* v = Global("var", ty.f32(), ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
 

@@ -477,10 +477,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::DecorationList{});
-  Global("a", ty.bool_(), ast::StorageClass::kNone);
-  Global("b", ty.bool_(), ast::StorageClass::kNone);
-  Global("c", ty.bool_(), ast::StorageClass::kNone);
-  Global("d", ty.bool_(), ast::StorageClass::kNone);
+  Global("a", ty.bool_(), ast::StorageClass::kInput);
+  Global("b", ty.bool_(), ast::StorageClass::kInput);
+  Global("c", ty.bool_(), ast::StorageClass::kInput);
+  Global("d", ty.bool_(), ast::StorageClass::kInput);
 
   ast::ExpressionList params;
   params.push_back(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,

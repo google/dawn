@@ -121,38 +121,5 @@ INSTANTIATE_TEST_SUITE_P(
                     DecorationTestParams{DecorationKind::kStructBlock, false},
                     DecorationTestParams{DecorationKind::kWorkgroup, true}));
 
-using VariableDecorationTest = ValidatorDecorationsTestWithParams;
-TEST_P(VariableDecorationTest, Decoration_IsValid) {
-  auto params = GetParam();
-
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kInput, nullptr,
-                     ast::DecorationList{createDecoration(*this, params.kind)});
-
-  ValidatorImpl& v = Build();
-
-  if (params.should_pass) {
-    EXPECT_TRUE(v.ValidateGlobalVariable(var));
-  } else {
-    EXPECT_FALSE(v.ValidateGlobalVariable(var));
-    EXPECT_EQ(v.error(), "decoration is not valid for variables");
-  }
-}
-INSTANTIATE_TEST_SUITE_P(
-    ValidatorTest,
-    VariableDecorationTest,
-    testing::Values(DecorationTestParams{DecorationKind::kAccess, false},
-                    DecorationTestParams{DecorationKind::kAlign, false},
-                    DecorationTestParams{DecorationKind::kBinding, true},
-                    DecorationTestParams{DecorationKind::kBuiltin, true},
-                    DecorationTestParams{DecorationKind::kConstantId, true},
-                    DecorationTestParams{DecorationKind::kGroup, true},
-                    DecorationTestParams{DecorationKind::kLocation, true},
-                    DecorationTestParams{DecorationKind::kOffset, false},
-                    DecorationTestParams{DecorationKind::kSize, false},
-                    DecorationTestParams{DecorationKind::kStage, false},
-                    DecorationTestParams{DecorationKind::kStride, false},
-                    DecorationTestParams{DecorationKind::kStructBlock, false},
-                    DecorationTestParams{DecorationKind::kWorkgroup, false}));
-
 }  // namespace
 }  // namespace tint

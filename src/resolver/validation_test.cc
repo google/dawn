@@ -381,7 +381,7 @@ TEST_F(ResolverValidationTest, StorageClass_NonFunctionClassError) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
-  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
 
   auto* ident = create<ast::IdentifierExpression>(
       Source{{Source::Location{3, 3}, Source::Location{3, 7}}},
@@ -395,7 +395,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
-  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
 
   auto* ident = create<ast::IdentifierExpression>(
       Source{{Source::Location{3, 3}, Source::Location{3, 7}}},
@@ -411,7 +411,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
-  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kNone);
+  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
 
   auto* ident = create<ast::IdentifierExpression>(
       Source{{Source::Location{3, 3}, Source::Location{3, 8}}},
@@ -1705,7 +1705,7 @@ TEST_F(ResolverValidationTest,
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
   auto* alias = ty.alias("UnsignedInt", ty.u32());
-  Global("uint_var", alias, ast::StorageClass::kNone);
+  Global("uint_var", alias, ast::StorageClass::kInput);
 
   auto* tc = vec2<f32>(Expr(Source{{12, 34}}, "uint_var"));
   WrapInFunction(tc);
@@ -1719,8 +1719,8 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
   auto* f32_alias = ty.alias("Float32", ty.f32());
   auto* vec2_alias = ty.alias("VectorFloat2", ty.vec2<f32>());
-  Global("my_f32", f32_alias, ast::StorageClass::kNone);
-  Global("my_vec2", vec2_alias, ast::StorageClass::kNone);
+  Global("my_f32", f32_alias, ast::StorageClass::kInput);
+  Global("my_vec2", vec2_alias, ast::StorageClass::kInput);
 
   auto* tc = vec3<f32>("my_vec2", "my_f32");
   WrapInFunction(tc);

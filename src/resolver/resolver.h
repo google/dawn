@@ -227,6 +227,7 @@ class Resolver {
   bool Return(ast::ReturnStatement* ret);
   bool Switch(ast::SwitchStatement* s);
   bool Assignment(ast::AssignmentStatement* a);
+  bool GlobalVariable(ast::Variable* var);
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
