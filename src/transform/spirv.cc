@@ -324,7 +324,7 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
   // Recurse into struct members.
   auto* struct_ty = ty->UnwrapAliasIfNeeded()->As<type::Struct>();
   for (auto* member : struct_ty->impl()->members()) {
-    member_accesses.push_back(member->symbol());
+    member_accesses.push_back(ctx.Clone(member->symbol()));
     HoistToOutputVariables(ctx, func, member->type(), member->decorations(),
                            member_accesses, store_value, stores);
     member_accesses.pop_back();

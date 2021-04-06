@@ -442,6 +442,47 @@ fn frag_main() -> void {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SpirvTest, HandleEntryPointIOTypes_WithPrivateGlobalVariable) {
+  // Test with a global variable to ensure that symbols are cloned correctly.
+  // crbug.com/tint/701
+  auto* src = R"(
+var<private> x : f32;
+
+struct VertexOutput {
+  [[builtin(position)]] Position : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> VertexOutput {
+    return VertexOutput(vec4<f32>());
+}
+)";
+
+  auto* expect = R"(
+var<private> x : f32;
+
+struct VertexOutput {
+  Position : vec4<f32>;
+};
+
+[[builtin(position)]] var<out> tint_symbol_4 : vec4<f32>;
+
+fn tint_symbol_5(tint_symbol_3 : VertexOutput) -> void {
+  tint_symbol_4 = tint_symbol_3.Position;
+}
+
+[[stage(vertex)]]
+fn main() -> void {
+  tint_symbol_5(VertexOutput(vec4<f32>()));
+  return;
+}
+)";
+
+  auto got = Run<Spirv>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(SpirvTest, HandleSampleMaskBuiltins_Basic) {
   auto* src = R"(
 [[builtin(sample_index)]] var<in> sample_index : u32;
