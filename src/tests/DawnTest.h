@@ -67,9 +67,9 @@
 #define EXPECT_PIXEL_RGBA8_EQ(expected, texture, x, y) \
     AddTextureExpectation(__FILE__, __LINE__, expected, texture, {x, y})
 
-#define EXPECT_TEXTURE_RGBA8_EQ(expected, texture, origin, extent, level, layer)           \
+#define EXPECT_TEXTURE_RGBA8_EQ(expected, texture, origin, extent, level)                  \
     AddTextureExpectation(__FILE__, __LINE__, expected, texture, utils::MakeOrigin origin, \
-                          utils::MakeExtent extent, level, layer)
+                          utils::MakeExtent extent, level)
 
 #define EXPECT_PIXEL_FLOAT_EQ(expected, texture, x, y) \
     AddTextureExpectation(__FILE__, __LINE__, expected, texture, {x, y})

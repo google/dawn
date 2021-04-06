@@ -199,7 +199,7 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
         EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color,
                                 (expectedOrigin.x, expectedOrigin.y),
-                                (expectedExtent.width, expectedExtent.height), 0, 0);
+                                (expectedExtent.width, expectedExtent.height), 0);
     }
 
     // Run the tests that copies pre-prepared BC format data into a BC texture and verifies if we

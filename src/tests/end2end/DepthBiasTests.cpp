@@ -324,7 +324,7 @@ TEST_P(DepthBiasTests, PositiveBiasOn24bit) {
         RGBA8::kRed, RGBA8::kRed,  //
     };
 
-    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), mRenderTarget, (0, 0), (kRTSize, kRTSize), 0, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), mRenderTarget, (0, 0), (kRTSize, kRTSize), 0);
 }
 
 // Test adding positive bias to output with a clamp
@@ -345,7 +345,7 @@ TEST_P(DepthBiasTests, PositiveBiasOn24bitWithClamp) {
         RGBA8::kZero, RGBA8::kZero,  //
     };
 
-    EXPECT_TEXTURE_RGBA8_EQ(zero.data(), mRenderTarget, (0, 0), (kRTSize, kRTSize), 0, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(zero.data(), mRenderTarget, (0, 0), (kRTSize, kRTSize), 0);
 }
 
 // Test adding positive bias to output
@@ -360,7 +360,7 @@ TEST_P(DepthBiasTests, PositiveSlopeBiasOn24bit) {
         RGBA8::kZero, RGBA8::kZero,  //
     };
 
-    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), mRenderTarget, (0, 0), (kRTSize, kRTSize), 0, 0);
+    EXPECT_TEXTURE_RGBA8_EQ(expected.data(), mRenderTarget, (0, 0), (kRTSize, kRTSize), 0);
 }
 
 DAWN_INSTANTIATE_TEST(DepthBiasTests,
