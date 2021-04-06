@@ -181,5 +181,25 @@ TEST_F(ResolverFunctionValidationTest,
             "return type, returned 'u32', expected 'myf32'");
 }
 
+TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
+  // [[stage(fragment)]]
+  // [[stage(vertex)]]
+  // fn main() -> void { return; }
+  Func(Source{Source::Location{12, 34}}, "main", ast::VariableList{},
+       ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-0020: only one stage decoration permitted per entry "
+            "point");
+}
+
 }  // namespace
 }  // namespace tint

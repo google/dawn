@@ -272,5 +272,39 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStructBlock, false},
                     TestParams{DecorationKind::kWorkgroup, false}));
 
+using FunctionDecorationTest = TestWithParams;
+TEST_P(FunctionDecorationTest, IsValid) {
+  auto params = GetParam();
+
+  Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           createDecoration(Source{{12, 34}}, *this, params.kind)});
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              "12:34 error: decoration is not valid for functions");
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ValidatorTest,
+    FunctionDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAccess, false},
+                    TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, false},
+                    TestParams{DecorationKind::kConstantId, false},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    // Skip kStage as we always apply it in this test
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, true}));
+
 }  // namespace
 }  // namespace tint

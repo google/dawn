@@ -225,7 +225,6 @@ source_set("tint_unittests_core_src") {
     "../src/utils/tmpfile.h",
     "../src/utils/tmpfile_test.cc",
     "../src/utils/unique_vector_test.cc",
-    "../src/validator/validator_decoration_test.cc",
     "../src/validator/validator_function_test.cc",
     "../src/validator/validator_test.cc",
     "../src/validator/validator_test_helper.cc",

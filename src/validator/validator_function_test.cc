@@ -56,28 +56,6 @@ TEST_F(ValidateFunctionTest,
   EXPECT_TRUE(v.Validate());
 }
 
-TEST_F(ValidateFunctionTest, PipelineStage_MustBeUnique_Fail) {
-  // [[stage(fragment)]]
-  // [[stage(vertex)]]
-  // fn main() -> void { return; }
-  Func(Source{Source::Location{12, 34}}, "main", ast::VariableList{},
-       ty.void_(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(),
-       },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-       });
-
-  ValidatorImpl& v = Build();
-
-  EXPECT_FALSE(v.Validate());
-  EXPECT_EQ(
-      v.error(),
-      "12:34 v-0020: only one stage decoration permitted per entry point");
-}
-
 TEST_F(ValidateFunctionTest, NoPipelineEntryPoints) {
   Func("vtx_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{

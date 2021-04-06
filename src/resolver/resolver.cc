@@ -32,6 +32,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/workgroup_decoration.h"
 #include "src/semantic/array.h"
 #include "src/semantic/call.h"
 #include "src/semantic/function.h"
@@ -328,6 +329,23 @@ bool Resolver::ValidateFunction(const ast::Function* func) {
 }
 
 bool Resolver::ValidateEntryPoint(const ast::Function* func) {
+  auto stage_deco_count = 0;
+  for (auto* deco : func->decorations()) {
+    if (deco->Is<ast::StageDecoration>()) {
+      stage_deco_count++;
+    } else if (!deco->Is<ast::WorkgroupDecoration>()) {
+      diagnostics_.add_error("decoration is not valid for functions",
+                             deco->source());
+      return false;
+    }
+  }
+  if (stage_deco_count > 1) {
+    diagnostics_.add_error(
+        "v-0020", "only one stage decoration permitted per entry point",
+        func->source());
+    return false;
+  }
+
   // Use a lambda to validate the entry point decorations for a type.
   // Persistent state is used to track which builtins and locations have already
   // been seen, in order to catch conflicts.

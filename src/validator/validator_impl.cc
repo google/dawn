@@ -101,25 +101,7 @@ bool ValidatorImpl::ValidateGlobalVariable(const ast::Variable* var) {
   return true;
 }
 
-bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList& funcs) {
-  for (auto* func : funcs) {
-    if (func->IsEntryPoint()) {
-      auto stage_deco_count = 0;
-      for (auto* deco : func->decorations()) {
-        if (deco->Is<ast::StageDecoration>()) {
-          stage_deco_count++;
-        } else if (!deco->Is<ast::WorkgroupDecoration>()) {
-          add_error(func->source(), "decoration is not valid for functions");
-          return false;
-        }
-      }
-      if (stage_deco_count > 1) {
-        add_error(func->source(), "v-0020",
-                  "only one stage decoration permitted per entry point");
-        return false;
-      }
-    }
-  }
+bool ValidatorImpl::ValidateEntryPoint(const ast::FunctionList&) {
   return true;
 }
 
