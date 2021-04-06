@@ -81,9 +81,9 @@ TEST_F(ResolverAssignmentValidationTest,
       create<ast::VariableDeclStatement>(var),
       create<ast::AssignmentStatement>(Source{{12, 34}}, lhs, rhs),
   });
-  WrapInFunction(var, body);
+  WrapInFunction(body);
 
-  ASSERT_TRUE(r()->Resolve());
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAssignmentValidationTest,
@@ -101,7 +101,7 @@ TEST_F(ResolverAssignmentValidationTest,
       create<ast::VariableDeclStatement>(var),
       create<ast::AssignmentStatement>(Source{{12, 34}}, lhs, rhs),
   });
-  WrapInFunction(var, block);
+  WrapInFunction(block);
 
   ASSERT_FALSE(r()->Resolve());
 
@@ -132,7 +132,7 @@ TEST_F(ResolverAssignmentValidationTest,
       inner_block,
   });
 
-  WrapInFunction(var, outer_block);
+  WrapInFunction(outer_block);
 
   ASSERT_FALSE(r()->Resolve());
 

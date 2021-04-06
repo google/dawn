@@ -195,31 +195,7 @@ bool ValidatorImpl::ValidateStatements(const ast::BlockStatement* block) {
 bool ValidatorImpl::ValidateDeclStatement(
     const ast::VariableDeclStatement* decl) {
   auto symbol = decl->variable()->symbol();
-  bool is_global = false;
-  if (variable_stack_.get(symbol, nullptr, &is_global)) {
-    const char* error_code = "v-0014";
-    if (is_global) {
-      error_code = "v-0013";
-    }
-    add_error(
-        decl->source(), error_code,
-        "redeclared identifier '" + program_->Symbols().NameFor(symbol) + "'");
-    return false;
-  }
-  // TODO(dneto): Check type compatibility of the initializer.
-  //  - if it's non-constant, then is storable or can be dereferenced to be
-  //    storable.
-  //  - types match or the RHS can be dereferenced to equal the LHS type.
   variable_stack_.set(symbol, decl->variable());
-  if (auto* arr =
-          decl->variable()->declared_type()->UnwrapAll()->As<type::Array>()) {
-    if (arr->IsRuntimeArray()) {
-      add_error(
-          decl->source(), "v-0015",
-          "runtime arrays may only appear as the last member of a struct");
-      return false;
-    }
-  }
   return true;
 }
 

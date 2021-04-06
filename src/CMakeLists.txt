@@ -524,7 +524,6 @@ if(${TINT_BUILD_TESTS})
     validator/validator_decoration_test.cc
     validator/validator_function_test.cc
     validator/validator_test.cc
-    validator/validator_type_test.cc
     validator/validator_test_helper.cc
     validator/validator_test_helper.h
     writer/append_vector_test.cc

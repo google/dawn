@@ -231,6 +231,7 @@ class Resolver {
   // AST and Type validation methods
   // Each return true on success, false on failure.
   bool ValidateBinary(ast::BinaryExpression* expr);
+  bool ValidateVariable(const ast::Variable* param);
   bool ValidateParameter(const ast::Variable* param);
   bool ValidateFunction(const ast::Function* func);
   bool ValidateStructure(const type::Struct* st);

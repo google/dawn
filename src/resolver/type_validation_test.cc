@@ -26,6 +26,199 @@ namespace {
 class ResolverTypeValidationTest : public resolver::TestHelper,
                                    public testing::Test {};
 
+TEST_F(ResolverTypeValidationTest,
+       GlobalVariableFunctionVariableNotUnique_Fail) {
+  // var a: f32 = 2.1;
+  // fn my_func -> void {
+  //   var a: f32 = 2.0;
+  //   return 0;
+  // }
+
+  Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
+
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                              var),
+       },
+       ast::DecorationList{});
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(), "12:34 error v-0013: redeclared identifier 'a'");
+}
+
+TEST_F(ResolverTypeValidationTest, RedeclaredIdentifier_Fail) {
+  // fn my_func() -> void {
+  //  var a :i32 = 2;
+  //  var a :f21 = 2.0;
+  // }
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
+
+  auto* var_a_float = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(0.1f));
+
+  Func("my_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                              var_a_float),
+       },
+       ast::DecorationList{});
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'a'");
+}
+
+TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScope_Pass) {
+  // {
+  // if (true) { var a : f32 = 2.0; }
+  // var a : f32 = 3.14;
+  // }
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+
+  auto* cond = Expr(true);
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+  });
+
+  auto* var_a_float = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.1f));
+
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
+      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                         var_a_float),
+  });
+
+  WrapInFunction(outer_body);
+
+  EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverTypeValidationTest,
+       DISABLED_RedeclaredIdentifierInnerScope_False) {
+  // TODO(sarahM0): remove DISABLED after implementing ValidateIfStatement
+  // and it should just work
+  // {
+  // var a : f32 = 3.14;
+  // if (true) { var a : f32 = 2.0; }
+  // }
+  auto* var_a_float = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.1f));
+
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+
+  auto* cond = Expr(true);
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}}, var),
+  });
+
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var_a_float),
+      create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
+  });
+
+  WrapInFunction(outer_body);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'a'");
+}
+
+TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Pass) {
+  // {
+  //  { var a : f32; }
+  //  var a : f32;
+  // }
+  auto* var_inner = Var("a", ty.f32(), ast::StorageClass::kNone);
+  auto* inner = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                         var_inner),
+  });
+
+  auto* var_outer = Var("a", ty.f32(), ast::StorageClass::kNone);
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      inner,
+      create<ast::VariableDeclStatement>(var_outer),
+  });
+
+  WrapInFunction(outer_body);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Fail) {
+  // {
+  //  var a : f32;
+  //  { var a : f32; }
+  // }
+  auto* var_inner = Var("a", ty.f32(), ast::StorageClass::kNone);
+  auto* inner = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                         var_inner),
+  });
+
+  auto* var_outer = Var("a", ty.f32(), ast::StorageClass::kNone);
+  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var_outer),
+      inner,
+  });
+
+  WrapInFunction(outer_body);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'a'");
+}
+
+TEST_F(ResolverTypeValidationTest,
+       RedeclaredIdentifierDifferentFunctions_Pass) {
+  // func0 { var a : f32 = 2.0; return; }
+  // func1 { var a : f32 = 3.0; return; }
+  auto* var0 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
+
+  auto* var1 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(1.0f));
+
+  Func("func0", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(Source{Source::Location{12, 34}},
+                                              var0),
+           create<ast::ReturnStatement>(),
+       },
+       ast::DecorationList{});
+
+  Func("func1", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(Source{Source::Location{13, 34}},
+                                              var1),
+           create<ast::ReturnStatement>(),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
+  /// [[stage(vertex)]]
+  // fn func -> void { var a : array<i32>; }
+
+  auto* var =
+      Var(Source{{12, 34}}, "a", ty.array<i32>(), ast::StorageClass::kNone);
+
+  Func("func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error v-0015: runtime arrays may only appear as the last member "
+      "of a struct");
+}
+
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
   // [[Block]]
   // struct Foo {

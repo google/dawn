@@ -224,18 +224,22 @@ bool Resolver::ResolveInternal() {
   return true;
 }
 
-bool Resolver::ValidateParameter(const ast::Variable* param) {
-  auto* type = variable_to_info_[param]->type;
+bool Resolver::ValidateVariable(const ast::Variable* var) {
+  auto* type = variable_to_info_[var]->type;
   if (auto* r = type->UnwrapAll()->As<type::Array>()) {
     if (r->IsRuntimeArray()) {
       diagnostics_.add_error(
           "v-0015",
           "runtime arrays may only appear as the last member of a struct",
-          param->source());
+          var->source());
       return false;
     }
   }
   return true;
+}
+
+bool Resolver::ValidateParameter(const ast::Variable* param) {
+  return ValidateVariable(param);
 }
 
 bool Resolver::ValidateFunction(const ast::Function* func) {
@@ -1278,6 +1282,16 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   ast::Variable* var = stmt->variable();
   type::Type* type = var->declared_type();
 
+  bool is_global = false;
+  if (variable_stack_.get(var->symbol(), nullptr, &is_global)) {
+    const char* error_code = is_global ? "v-0013" : "v-0014";
+    diagnostics_.add_error(error_code,
+                           "redeclared identifier '" +
+                               builder_->Symbols().NameFor(var->symbol()) + "'",
+                           stmt->source());
+    return false;
+  }
+
   if (auto* ctor = stmt->variable()->constructor()) {
     if (!Expression(ctor)) {
       return false;
@@ -1303,6 +1317,10 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   info->type = type;
   variable_stack_.set(var->symbol(), info);
   current_block_->decls.push_back(var);
+
+  if (!ValidateVariable(var)) {
+    return false;
+  }
 
   if (!var->is_const()) {
     if (info->storage_class != ast::StorageClass::kFunction) {
