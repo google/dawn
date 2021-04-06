@@ -141,7 +141,6 @@ static constexpr Params from_arithmetic_expression_cases[] = {
     // Params{ty_alias<ty_f32>},
     // Params{ty_alias<ty_vec3<f32>>},
     // Params{ty_alias<ty_mat3x3<f32>>},
-
 };
 INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,
                          InferTypeTest_FromArithmeticExpression,
@@ -198,7 +197,6 @@ static constexpr Params from_call_expression_cases[] = {
     Params{ty_alias<ty_mat3x3<i32>>},
     Params{ty_alias<ty_mat3x3<u32>>},
     Params{ty_alias<ty_mat3x3<f32>>},
-
 };
 INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,
                          InferTypeTest_FromCallExpression,

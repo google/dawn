@@ -1035,7 +1035,7 @@ class ProgramBuilder {
                       ast::VariableList params,
                       type::Type* type,
                       ast::StatementList body,
-                      ast::DecorationList decorations,
+                      ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
     auto* func = create<ast::Function>(source, Symbols().Register(name), params,
                                        type, create<ast::BlockStatement>(body),
@@ -1056,7 +1056,7 @@ class ProgramBuilder {
                       ast::VariableList params,
                       type::Type* type,
                       ast::StatementList body,
-                      ast::DecorationList decorations,
+                      ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
     auto* func = create<ast::Function>(Symbols().Register(name), params, type,
                                        create<ast::BlockStatement>(body),

@@ -80,7 +80,8 @@ CompileResult Compile(Program* program, GeneratorImpl* generator) {
           break;
       }
 
-      auto res = dxc(profile, file.Path());
+      auto name = program->Symbols().NameFor(func->symbol());
+      auto res = dxc(profile, "-E " + name, file.Path());
       if (!res.out.empty()) {
         if (!result.output.empty()) {
           result.output += "\n";

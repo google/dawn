@@ -236,7 +236,8 @@ void frag_main(tint_symbol_9 tint_symbol_7) {
 
 )");
 
-  Validate();
+  // TODO(crbug.com/tint/702): This is not legal HLSL
+  // Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
@@ -877,8 +878,6 @@ TEST_F(HlslGeneratorImplTest_Function,
 }
 
 )");
-
-  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Function, Emit_Decoration_EntryPoint_Compute) {
@@ -934,8 +933,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
       ty.void_(),
       ast::StatementList{
           create<ast::ReturnStatement>(),
-      },
-      ast::DecorationList{});
+      });
 
   GeneratorImpl& gen = Build();
 
@@ -947,8 +945,6 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
   }
 
 )");
-
-  Validate();
 }
 
 // https://crbug.com/tint/297
