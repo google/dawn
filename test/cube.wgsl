@@ -19,22 +19,28 @@
 
 [[binding(0), group(0)]] var<uniform> uniforms : [[access(read)]] Uniforms;
 
-[[location(0)]] var<in> cur_position : vec4<f32>;
-[[location(1)]] var<in> color : vec4<f32>;
-[[location(0)]] var<out> vtxFragColor : vec4<f32>;
-[[builtin(position)]] var<out> Position : vec4<f32>;
+struct VertexInput {
+  [[location(0)]] cur_position : vec4<f32>;
+  [[location(1)]] color : vec4<f32>;
+};
+
+struct VertexOutput {
+  [[location(0)]] vtxFragColor : vec4<f32>;
+  [[builtin(position)]] Position : vec4<f32>;
+};
 
 [[stage(vertex)]]
-fn vtx_main() -> void {
-   Position = uniforms.modelViewProjectionMatrix * cur_position;
-   vtxFragColor = color;
+fn vtx_main(input : VertexInput) -> VertexOutput {
+  var output : VertexOutput;
+  output.Position = uniforms.modelViewProjectionMatrix * input.cur_position;
+  output.vtxFragColor = input.color;
+  return output;
 }
 
 // Fragment shader
-[[location(0)]] var<in> fragColor : vec4<f32>;
-[[location(0)]] var<out> outColor : vec4<f32>;
 
 [[stage(fragment)]]
-fn frag_main() -> void {
-  outColor = fragColor;
+fn frag_main([[location(0)]] fragColor : vec4<f32>)
+          -> [[location(0)]] vec4<f32> {
+  return fragColor;
 }
