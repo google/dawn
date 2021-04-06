@@ -522,8 +522,6 @@ if(${TINT_BUILD_TESTS})
     utils/tmpfile_test.cc
     utils/tmpfile.h
     utils/unique_vector_test.cc
-    validator/validator_function_test.cc
-    validator/validator_test.cc
     validator/validator_test_helper.cc
     validator/validator_test_helper.h
     writer/append_vector_test.cc

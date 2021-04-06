@@ -45,6 +45,24 @@ TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
             "12:34 error v-0016: function names must be unique 'func'");
 }
 
+TEST_F(ResolverFunctionValidationTest,
+       VoidFunctionEndWithoutReturnStatement_Pass) {
+  // [[stage(vertex)]]
+  // fn func -> void { var a:i32 = 2; }
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
+
+  Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
+       ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(var),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
   // fn func -> int { var a:i32 = 2; }
 
@@ -60,6 +78,20 @@ TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
   EXPECT_EQ(
       r()->error(),
       "12:34 error v-0002: non-void function must end with a return statement");
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       VoidFunctionEndWithoutReturnStatementEmptyBody_Pass) {
+  // [[stage(vertex)]]
+  // fn func -> void {}
+
+  Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
+       ty.void_(), ast::StatementList{},
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverFunctionValidationTest,
@@ -199,6 +231,44 @@ TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
   EXPECT_EQ(r()->error(),
             "12:34 error v-0020: only one stage decoration permitted per entry "
             "point");
+}
+
+TEST_F(ResolverFunctionValidationTest, NoPipelineEntryPoints) {
+  Func("vtx_func", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::ReturnStatement>(),
+       },
+       ast::DecorationList{});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
+  // fn foo(bar : f32) -> void{
+  //   var baz : f32 = bar;
+  // }
+
+  auto* bar = Var("bar", ty.f32(), ast::StorageClass::kFunction);
+  auto* baz = Var("baz", ty.f32(), ast::StorageClass::kFunction, Expr("bar"));
+
+  Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
+       ast::DecorationList{});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
+  // fn foo(bar : f32) -> void{
+  //   const baz : f32 = bar;
+  // }
+
+  auto* bar = Var("bar", ty.f32(), ast::StorageClass::kFunction);
+  auto* baz = Const("baz", ty.f32(), Expr("bar"));
+
+  Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
+       ast::DecorationList{});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 }  // namespace

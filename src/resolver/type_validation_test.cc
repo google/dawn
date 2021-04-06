@@ -26,6 +26,28 @@ namespace {
 class ResolverTypeValidationTest : public resolver::TestHelper,
                                    public testing::Test {};
 
+TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
+  // {
+  // var a :i32;
+  // a = 2;
+  // }
+  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, nullptr);
+  auto* lhs = Expr("a");
+  auto* rhs = Expr(2);
+
+  auto* body = create<ast::BlockStatement>(ast::StatementList{
+      create<ast::VariableDeclStatement>(var),
+      create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
+                                       rhs),
+  });
+
+  WrapInFunction(body);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+  ASSERT_NE(TypeOf(lhs), nullptr);
+  ASSERT_NE(TypeOf(rhs), nullptr);
+}
+
 TEST_F(ResolverTypeValidationTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> global_var: f32;
   Global(Source{{12, 34}}, "global_var", ty.f32(), ast::StorageClass::kInput);
