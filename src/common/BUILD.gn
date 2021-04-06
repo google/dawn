@@ -106,6 +106,7 @@ config("dawn_internal") {
       "-Wnon-c-typedef-for-linkage",
       "-Wpessimizing-move",
       "-Wrange-loop-analysis",
+      "-Wredundant-move",
       "-Wshadow-field",
       "-Wstrict-prototypes",
       "-Wtautological-unsigned-zero-compare",
