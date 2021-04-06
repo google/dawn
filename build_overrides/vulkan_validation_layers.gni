@@ -12,16 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build_overrides/vulkan_common.gni")
+
 # These are variables that are overridable by projects that include Dawn.
 # The values in this file are the defaults for when we are building from
 # Dawn's repository.
-vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
 vvl_spirv_tools_dir = "//third_party/vulkan-deps/spirv-tools/src"
 vvl_glslang_dir = "//third_party/vulkan-deps/glslang/src"
-
-# Subdirectories for generated files
-vulkan_data_subdir = "vulkandata"
-vulkan_gen_subdir = ""
 
 # Fake the use_x11 when inside Dawn's repository
 import("../scripts/dawn_features.gni")

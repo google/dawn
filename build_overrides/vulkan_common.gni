@@ -12,4 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build_overrides/vulkan_common.gni")
+vulkan_headers_dir = "//third_party/vulkan-deps/vulkan-headers/src"
+
+# Subdirectories for generated files
+vulkan_data_subdir = "vulkandata"
+vulkan_gen_subdir = ""
