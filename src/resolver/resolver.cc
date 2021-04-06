@@ -268,13 +268,192 @@ bool Resolver::ValidateFunction(const ast::Function* func) {
     }
 
     for (auto* deco : func->return_type_decorations()) {
-      if (!(deco->Is<ast::BuiltinDecoration>() ||
-            deco->Is<ast::LocationDecoration>())) {
+      if (!deco->IsAnyOf<ast::BuiltinDecoration, ast::LocationDecoration>()) {
         diagnostics_.add_error(
             "decoration is not valid for function return types",
             deco->source());
         return false;
       }
+    }
+  }
+
+  if (func->IsEntryPoint()) {
+    if (!ValidateEntryPoint(func)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool Resolver::ValidateEntryPoint(const ast::Function* func) {
+  // Use a lambda to validate the entry point decorations for a type.
+  // Persistent state is used to track which builtins and locations have already
+  // been seen, in order to catch conflicts.
+  // TODO(jrprice): This state could be stored in FunctionInfo instead, and then
+  // passed to semantic::Function since it would be useful there too.
+  std::unordered_set<ast::Builtin> builtins;
+  std::unordered_set<uint32_t> locations;
+  enum class ParamOrRetType {
+    kParameter,
+    kReturnType,
+  };
+  // Helper to stringify a pipeline IO decoration.
+  auto deco_to_str = [](const ast::Decoration* deco) {
+    std::stringstream str;
+    if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+      str << "builtin(" << builtin->value() << ")";
+    } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+      str << "location(" << location->value() << ")";
+    }
+    return str.str();
+  };
+  // Inner lambda that is applied to a type and all of its members.
+  auto validate_entry_point_decorations_inner =
+      [&](const ast::DecorationList& decos, type::Type* ty, Source source,
+          ParamOrRetType param_or_ret, bool is_struct_member) {
+        // Scan decorations for pipeline IO attributes.
+        // Check for overlap with attributes that have been seen previously.
+        ast::Decoration* pipeline_io_attribute = nullptr;
+        for (auto* deco : decos) {
+          if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
+            if (pipeline_io_attribute) {
+              diagnostics_.add_error("multiple entry point IO attributes",
+                                     deco->source());
+              diagnostics_.add_note(
+                  "previously consumed " + deco_to_str(pipeline_io_attribute),
+                  pipeline_io_attribute->source());
+              return false;
+            }
+            pipeline_io_attribute = deco;
+
+            if (builtins.count(builtin->value())) {
+              diagnostics_.add_error(
+                  deco_to_str(builtin) +
+                      " attribute appears multiple times as pipeline " +
+                      (param_or_ret == ParamOrRetType::kParameter ? "input"
+                                                                  : "output"),
+                  func->source());
+              return false;
+            }
+            builtins.emplace(builtin->value());
+
+          } else if (auto* location = deco->As<ast::LocationDecoration>()) {
+            if (pipeline_io_attribute) {
+              diagnostics_.add_error("multiple entry point IO attributes",
+                                     deco->source());
+              diagnostics_.add_note(
+                  "previously consumed " + deco_to_str(pipeline_io_attribute),
+                  pipeline_io_attribute->source());
+              return false;
+            }
+            pipeline_io_attribute = deco;
+
+            if (locations.count(location->value())) {
+              diagnostics_.add_error(
+                  deco_to_str(location) +
+                      " attribute appears multiple times as pipeline " +
+                      (param_or_ret == ParamOrRetType::kParameter ? "input"
+                                                                  : "output"),
+                  func->source());
+              return false;
+            }
+            locations.emplace(location->value());
+          }
+        }
+
+        // Check that we saw a pipeline IO attribute iff we need one.
+        if (ty->UnwrapAliasIfNeeded()->Is<type::Struct>()) {
+          if (pipeline_io_attribute) {
+            diagnostics_.add_error(
+                "entry point IO attributes must not be used on structure " +
+                    std::string(param_or_ret == ParamOrRetType::kParameter
+                                    ? "parameters"
+                                    : "return types"),
+                pipeline_io_attribute->source());
+            return false;
+          }
+        } else {
+          if (!pipeline_io_attribute) {
+            std::string err = "missing entry point IO attribute";
+            if (!is_struct_member) {
+              err += (param_or_ret == ParamOrRetType::kParameter
+                          ? " on parameter"
+                          : " on return type");
+            }
+            diagnostics_.add_error(err, source);
+            return false;
+          }
+        }
+
+        return true;
+      };
+
+  // Outer lambda for validating the entry point decorations for a type.
+  auto validate_entry_point_decorations = [&](const ast::DecorationList& decos,
+                                              type::Type* ty, Source source,
+                                              ParamOrRetType param_or_ret) {
+    // Validate the decorations for the type.
+    if (!validate_entry_point_decorations_inner(decos, ty, source, param_or_ret,
+                                                false)) {
+      return false;
+    }
+
+    if (auto* struct_ty = ty->UnwrapAliasIfNeeded()->As<type::Struct>()) {
+      // Validate the decorations for each struct members, and also check for
+      // invalid member types.
+      for (auto* member : struct_ty->impl()->members()) {
+        auto* member_ty = member->type()->UnwrapAliasIfNeeded();
+        if (member_ty->Is<type::Struct>()) {
+          diagnostics_.add_error(
+              "entry point IO types cannot contain nested structures",
+              member->source());
+          diagnostics_.add_note("while analysing entry point " +
+                                    builder_->Symbols().NameFor(func->symbol()),
+                                func->source());
+          return false;
+        } else if (auto* arr = member_ty->As<type::Array>()) {
+          if (arr->IsRuntimeArray()) {
+            diagnostics_.add_error(
+                "entry point IO types cannot contain runtime sized arrays",
+                member->source());
+            diagnostics_.add_note(
+                "while analysing entry point " +
+                    builder_->Symbols().NameFor(func->symbol()),
+                func->source());
+            return false;
+          }
+        }
+
+        if (!validate_entry_point_decorations_inner(member->decorations(),
+                                                    member_ty, member->source(),
+                                                    param_or_ret, true)) {
+          diagnostics_.add_note("while analysing entry point " +
+                                    builder_->Symbols().NameFor(func->symbol()),
+                                func->source());
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  for (auto* param : func->params()) {
+    if (!validate_entry_point_decorations(
+            param->decorations(), param->declared_type(), param->source(),
+            ParamOrRetType::kParameter)) {
+      return false;
+    }
+  }
+
+  if (!func->return_type()->Is<type::Void>()) {
+    builtins.clear();
+    locations.clear();
+    if (!validate_entry_point_decorations(func->return_type_decorations(),
+                                          func->return_type(), func->source(),
+                                          ParamOrRetType::kReturnType)) {
+      return false;
     }
   }
 

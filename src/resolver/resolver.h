@@ -234,6 +234,7 @@ class Resolver {
   bool ValidateVariable(const ast::Variable* param);
   bool ValidateParameter(const ast::Variable* param);
   bool ValidateFunction(const ast::Function* func);
+  bool ValidateEntryPoint(const ast::Function* func);
   bool ValidateStructure(const type::Struct* st);
   bool ValidateReturn(const ast::ReturnStatement* ret);
   bool ValidateSwitch(const ast::SwitchStatement* s);

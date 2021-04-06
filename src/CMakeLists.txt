@@ -476,6 +476,7 @@ if(${TINT_BUILD_TESTS})
     resolver/builtins_validation_test.cc
     resolver/control_block_validation_test.cc
     resolver/decoration_validation_test.cc
+    resolver/entry_point_validation_test.cc
     resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
     resolver/intrinsic_test.cc

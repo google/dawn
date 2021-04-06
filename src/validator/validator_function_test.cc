@@ -99,9 +99,7 @@ TEST_F(ValidateFunctionTest, FunctionVarInitWithParam) {
   auto* baz = Var("baz", ty.f32(), ast::StorageClass::kFunction, Expr("bar"));
 
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
+       ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 
@@ -117,9 +115,7 @@ TEST_F(ValidateFunctionTest, FunctionConstInitWithParam) {
   auto* baz = Const("baz", ty.f32(), Expr("bar"));
 
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
+       ast::DecorationList{});
 
   ValidatorImpl& v = Build();
 

@@ -32,6 +32,7 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
+#include "src/ast/stage_decoration.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -1244,6 +1245,51 @@ class ProgramBuilder {
   /// @returns the case statement pointer
   ast::CaseStatement* DefaultCase(ast::BlockStatement* body = nullptr) {
     return Case(ast::CaseSelectorList{}, body);
+  }
+
+  /// Creates an ast::BuiltinDecoration
+  /// @param source the source information
+  /// @param builtin the builtin value
+  /// @returns the builtin decoration pointer
+  ast::BuiltinDecoration* Builtin(Source source, ast::Builtin builtin) {
+    return create<ast::BuiltinDecoration>(source, builtin);
+  }
+
+  /// Creates an ast::BuiltinDecoration
+  /// @param builtin the builtin value
+  /// @returns the builtin decoration pointer
+  ast::BuiltinDecoration* Builtin(ast::Builtin builtin) {
+    return create<ast::BuiltinDecoration>(source_, builtin);
+  }
+
+  /// Creates an ast::LocationDecoration
+  /// @param source the source information
+  /// @param location the location value
+  /// @returns the location decoration pointer
+  ast::LocationDecoration* Location(Source source, uint32_t location) {
+    return create<ast::LocationDecoration>(source, location);
+  }
+
+  /// Creates an ast::LocationDecoration
+  /// @param location the location value
+  /// @returns the location decoration pointer
+  ast::LocationDecoration* Location(uint32_t location) {
+    return create<ast::LocationDecoration>(source_, location);
+  }
+
+  /// Creates an ast::StageDecoration
+  /// @param source the source information
+  /// @param stage the pipeline stage
+  /// @returns the stage decoration pointer
+  ast::StageDecoration* Stage(Source source, ast::PipelineStage stage) {
+    return create<ast::StageDecoration>(source, stage);
+  }
+
+  /// Creates an ast::StageDecoration
+  /// @param stage the pipeline stage
+  /// @returns the stage decoration pointer
+  ast::StageDecoration* Stage(ast::PipelineStage stage) {
+    return create<ast::StageDecoration>(source_, stage);
   }
 
   /// Sets the current builder source to `src`

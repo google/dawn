@@ -178,74 +178,37 @@ OpFunctionEnd
   Validate(b);
 }
 
-TEST_F(BuilderTest, EntryPoint_SharedSubStruct) {
+TEST_F(BuilderTest, EntryPoint_SharedStruct) {
   // struct Interface {
   //   [[location(1)]] value : f32;
   // };
   //
-  // struct VertexOutput {
-  //   [[builtin(position)]] pos : vec4<f32>;
-  //   interface : Interface;
-  // };
-  //
-  // struct FragmentInput {
-  //   [[location(0)]] mul : f32;
-  //   interface : Interface;
-  // };
-  //
   // [[stage(vertex)]]
-  // fn vert_main() -> VertexOutput {
-  //   return VertexOutput(vec4<f32>(), Interface(42.0));
+  // fn vert_main() -> Interface {
+  //   return Interface(42.0);
   // }
   //
   // [[stage(fragment)]]
-  // fn frag_main(inputs : FragmentInput) -> [[builtin(frag_depth)]] f32 {
-  //   return inputs.mul * inputs.interface.value;
+  // fn frag_main(inputs : Interface) -> [[builtin(frag_depth)]] f32 {
+  //   return inputs.value;
   // }
 
-  auto* interface =
-      Structure("Interface",
-                ast::StructMemberList{Member(
-                    "value", ty.f32(),
-                    ast::DecorationList{create<ast::LocationDecoration>(1u)})});
-  auto* vertex_output = Structure(
-      "VertexOutput",
-      ast::StructMemberList{
-          Member("pos", ty.vec4<f32>(),
-                 ast::DecorationList{
-                     create<ast::BuiltinDecoration>(ast::Builtin::kPosition)}),
-          Member("interface", interface)});
-  auto* fragment_input = Structure(
-      "FragmentInput",
-      ast::StructMemberList{
-          Member("mul", ty.f32(),
-                 ast::DecorationList{create<ast::LocationDecoration>(0u)}),
-          Member("interface", interface)});
+  auto* interface = Structure(
+      "Interface",
+      {Member("value", ty.f32(),
+              ast::DecorationList{create<ast::LocationDecoration>(1u)})});
 
-  auto* vert_retval = Construct(vertex_output, Construct(ty.vec4<f32>()),
-                                Construct(interface, 42.f));
-  Func("vert_main", ast::VariableList{}, vertex_output,
-       ast::StatementList{
-           create<ast::ReturnStatement>(vert_retval),
-       },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
+  auto* vert_retval = Construct(interface, 42.f);
+  Func("vert_main", ast::VariableList{}, interface,
+       {create<ast::ReturnStatement>(vert_retval)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
 
-  auto* frag_retval =
-      Mul(MemberAccessor(Expr("inputs"), "mul"),
-          MemberAccessor(MemberAccessor(Expr("inputs"), "interface"), "value"));
   auto* frag_inputs =
-      Var("inputs", fragment_input, ast::StorageClass::kFunction, nullptr);
+      Var("inputs", interface, ast::StorageClass::kFunction, nullptr);
   Func("frag_main", ast::VariableList{frag_inputs}, ty.f32(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(frag_retval),
-       },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-       },
-       ast::DecorationList{
-           create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
+       {create<ast::ReturnStatement>(MemberAccessor(Expr("inputs"), "value"))},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)},
+       {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 
   spirv::Builder& b = SanitizeAndBuild();
 
@@ -253,93 +216,63 @@ TEST_F(BuilderTest, EntryPoint_SharedSubStruct) {
 
   EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
-OpEntryPoint Vertex %24 "vert_main" %1 %6
-OpEntryPoint Fragment %34 "frag_main" %11 %9 %12
-OpExecutionMode %34 OriginUpperLeft
-OpExecutionMode %34 DepthReplacing
-OpName %1 "tint_symbol_9"
-OpName %6 "tint_symbol_10"
-OpName %9 "tint_symbol_13"
-OpName %11 "tint_symbol_14"
-OpName %12 "tint_symbol_18"
-OpName %15 "VertexOutput"
-OpMemberName %15 0 "pos"
-OpMemberName %15 1 "interface"
-OpName %16 "Interface"
-OpMemberName %16 0 "value"
-OpName %17 "tint_symbol_11"
-OpName %18 "tint_symbol_8"
-OpName %24 "vert_main"
-OpName %31 "tint_symbol_19"
-OpName %32 "tint_symbol_17"
-OpName %34 "frag_main"
-OpName %38 "FragmentInput"
-OpMemberName %38 0 "mul"
-OpMemberName %38 1 "interface"
-OpDecorate %1 BuiltIn Position
-OpDecorate %6 Location 1
-OpDecorate %9 Location 0
-OpDecorate %11 Location 1
-OpDecorate %12 BuiltIn FragDepth
-OpMemberDecorate %15 0 Offset 0
-OpMemberDecorate %15 1 Offset 16
-OpMemberDecorate %16 0 Offset 0
-OpMemberDecorate %38 0 Offset 0
-OpMemberDecorate %38 1 Offset 4
-%4 = OpTypeFloat 32
-%3 = OpTypeVector %4 4
+OpEntryPoint Vertex %16 "vert_main" %1
+OpEntryPoint Fragment %25 "frag_main" %5 %7
+OpExecutionMode %25 OriginUpperLeft
+OpExecutionMode %25 DepthReplacing
+OpName %1 "tint_symbol_4"
+OpName %5 "tint_symbol_7"
+OpName %7 "tint_symbol_10"
+OpName %10 "Interface"
+OpMemberName %10 0 "value"
+OpName %11 "tint_symbol_5"
+OpName %12 "tint_symbol_3"
+OpName %16 "vert_main"
+OpName %22 "tint_symbol_11"
+OpName %23 "tint_symbol_9"
+OpName %25 "frag_main"
+OpDecorate %1 Location 1
+OpDecorate %5 Location 1
+OpDecorate %7 BuiltIn FragDepth
+OpMemberDecorate %10 0 Offset 0
+%3 = OpTypeFloat 32
 %2 = OpTypePointer Output %3
-%5 = OpConstantNull %3
-%1 = OpVariable %2 Output %5
-%7 = OpTypePointer Output %4
-%8 = OpConstantNull %4
-%6 = OpVariable %7 Output %8
-%10 = OpTypePointer Input %4
-%9 = OpVariable %10 Input
-%11 = OpVariable %10 Input
-%12 = OpVariable %7 Output %8
-%14 = OpTypeVoid
-%16 = OpTypeStruct %4
-%15 = OpTypeStruct %3 %16
-%13 = OpTypeFunction %14 %15
-%23 = OpTypeFunction %14
-%27 = OpConstant %4 42
-%28 = OpConstantComposite %16 %27
-%29 = OpConstantComposite %15 %5 %28
-%30 = OpTypeFunction %14 %4
-%38 = OpTypeStruct %4 %16
-%17 = OpFunction %14 None %13
-%18 = OpFunctionParameter %15
-%19 = OpLabel
-%20 = OpCompositeExtract %3 %18 0
-OpStore %1 %20
-%21 = OpCompositeExtract %16 %18 1
-%22 = OpCompositeExtract %4 %21 0
-OpStore %6 %22
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Output %4
+%6 = OpTypePointer Input %3
+%5 = OpVariable %6 Input
+%7 = OpVariable %2 Output %4
+%9 = OpTypeVoid
+%10 = OpTypeStruct %3
+%8 = OpTypeFunction %9 %10
+%15 = OpTypeFunction %9
+%19 = OpConstant %3 42
+%20 = OpConstantComposite %10 %19
+%21 = OpTypeFunction %9 %3
+%11 = OpFunction %9 None %8
+%12 = OpFunctionParameter %10
+%13 = OpLabel
+%14 = OpCompositeExtract %3 %12 0
+OpStore %1 %14
 OpReturn
 OpFunctionEnd
-%24 = OpFunction %14 None %23
-%25 = OpLabel
-%26 = OpFunctionCall %14 %17 %29
+%16 = OpFunction %9 None %15
+%17 = OpLabel
+%18 = OpFunctionCall %9 %11 %20
 OpReturn
 OpFunctionEnd
-%31 = OpFunction %14 None %30
-%32 = OpFunctionParameter %4
-%33 = OpLabel
-OpStore %12 %32
+%22 = OpFunction %9 None %21
+%23 = OpFunctionParameter %3
+%24 = OpLabel
+OpStore %7 %23
 OpReturn
 OpFunctionEnd
-%34 = OpFunction %14 None %23
-%35 = OpLabel
-%36 = OpLoad %4 %11
-%37 = OpCompositeConstruct %16 %36
-%39 = OpLoad %4 %9
-%40 = OpCompositeConstruct %38 %39 %37
-%42 = OpCompositeExtract %4 %40 0
-%43 = OpCompositeExtract %16 %40 1
-%44 = OpCompositeExtract %4 %43 0
-%45 = OpFMul %4 %42 %44
-%41 = OpFunctionCall %14 %31 %45
+%25 = OpFunction %9 None %15
+%26 = OpLabel
+%27 = OpLoad %3 %5
+%28 = OpCompositeConstruct %10 %27
+%30 = OpCompositeExtract %3 %28 0
+%29 = OpFunctionCall %9 %22 %30
 OpReturn
 OpFunctionEnd
 )");

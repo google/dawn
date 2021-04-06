@@ -172,6 +172,7 @@ source_set("tint_unittests_core_src") {
     "../src/resolver/builtins_validation_test.cc",
     "../src/resolver/control_block_validation_test.cc",
     "../src/resolver/decoration_validation_test.cc",
+    "../src/resolver/entry_point_validation_test.cc",
     "../src/resolver/function_validation_test.cc",
     "../src/resolver/host_shareable_validation_test.cc",
     "../src/resolver/intrinsic_test.cc",

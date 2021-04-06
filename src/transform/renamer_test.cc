@@ -83,7 +83,7 @@ fn _tint_3() -> void {
 TEST_F(RenamerTest, PreserveSwizzles) {
   auto* src = R"(
 [[stage(vertex)]]
-fn entry() -> vec4<f32> {
+fn entry() -> [[builtin(position)]] vec4<f32> {
   var v : vec4<f32>;
   var rgba : f32;
   var xyzw : f32;
@@ -93,7 +93,7 @@ fn entry() -> vec4<f32> {
 
   auto* expect = R"(
 [[stage(vertex)]]
-fn _tint_1() -> vec4<f32> {
+fn _tint_1() -> [[builtin(position)]] vec4<f32> {
   var _tint_2 : vec4<f32>;
   var _tint_3 : f32;
   var _tint_4 : f32;
@@ -120,7 +120,7 @@ fn _tint_1() -> vec4<f32> {
 TEST_F(RenamerTest, PreserveIntrinsics) {
   auto* src = R"(
 [[stage(vertex)]]
-fn entry() -> vec4<f32> {
+fn entry() -> [[builtin(position)]] vec4<f32> {
   var blah : vec4<f32>;
   return abs(blah);
 }
@@ -128,7 +128,7 @@ fn entry() -> vec4<f32> {
 
   auto* expect = R"(
 [[stage(vertex)]]
-fn _tint_1() -> vec4<f32> {
+fn _tint_1() -> [[builtin(position)]] vec4<f32> {
   var _tint_2 : vec4<f32>;
   return abs(_tint_2);
 }
