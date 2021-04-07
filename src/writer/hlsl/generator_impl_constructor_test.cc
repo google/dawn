@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
+
+using ::testing::HasSubstr;
 
 using HlslGeneratorImplTest_Constructor = TestHelper;
 
@@ -113,19 +116,19 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Vec_Empty) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
-  // WGSL matrix is mat2x3 (it flips for AST, sigh). With a type constructor
-  // of <vec3, vec3>
-
-  auto* expr = mat2x3<f32>(vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(3.f, 4.f, 5.f));
+  WrapInFunction(
+      mat2x3<f32>(vec3<f32>(1.f, 2.f, 3.f), vec3<f32>(3.f, 4.f, 5.f)));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(pre, out, expr)) << gen.error();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
 
-  // A matrix of type T with n columns and m rows can also be constructed from
-  // n vectors of type T with m components.
-  EXPECT_EQ(result(),
-            "float3x2(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f))");
+  EXPECT_THAT(
+      result(),
+      HasSubstr(
+          "float2x3(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f))"));
+
+  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {

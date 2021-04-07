@@ -35,7 +35,8 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  fn test_function() -> void {
+  EXPECT_EQ(gen.result(), R"(  [[stage(compute)]]
+  fn test_function() -> void {
     var a : f32;
   }
 

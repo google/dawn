@@ -104,7 +104,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // mat2x3<f32> b;
   // data.a = b;
   //
-  // -> float3x2 _tint_tmp = b;
+  // -> float2x3 _tint_tmp = b;
   //    data.Store3(4 + 0, asuint(_tint_tmp[0]));
   //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
 
@@ -126,7 +126,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   gen.register_global(b_var);
 
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(result(), R"(float3x2 _tint_tmp = b;
+  EXPECT_EQ(result(), R"(float2x3 _tint_tmp = b;
 data.Store3(16 + 0, asuint(_tint_tmp[0]));
 data.Store3(16 + 16, asuint(_tint_tmp[1]));
 )");
@@ -141,7 +141,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage> data : Data;
   // data.a = mat2x3<f32>();
   //
-  // -> float3x2 _tint_tmp = float3x2(0.0f, 0.0f, 0.0f,
+  // -> float2x3 _tint_tmp = float2x3(0.0f, 0.0f, 0.0f,
   // 0.0f, 0.0f, 0.0f);
   //    data.Store3(16 + 0, asuint(_tint_tmp[0]);
   //    data.Store3(16 + 16, asuint(_tint_tmp[1]));
@@ -164,7 +164,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
   EXPECT_EQ(
       result(),
-      R"(float3x2 _tint_tmp = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+      R"(float2x3 _tint_tmp = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 data.Store3(16 + 0, asuint(_tint_tmp[0]));
 data.Store3(16 + 16, asuint(_tint_tmp[1]));
 )");

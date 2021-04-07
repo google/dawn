@@ -370,12 +370,13 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
       ((lhs_type->Is<type::Vector>() && rhs_type->Is<type::Matrix>()) ||
        (lhs_type->Is<type::Matrix>() && rhs_type->Is<type::Vector>()) ||
        (lhs_type->Is<type::Matrix>() && rhs_type->Is<type::Matrix>()))) {
+    // Matrices are transposed, so swap LHS and RHS.
     out << "mul(";
-    if (!EmitExpression(pre, out, expr->lhs())) {
+    if (!EmitExpression(pre, out, expr->rhs())) {
       return false;
     }
     out << ", ";
-    if (!EmitExpression(pre, out, expr->rhs())) {
+    if (!EmitExpression(pre, out, expr->lhs())) {
       return false;
     }
     out << ")";
@@ -2529,7 +2530,14 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     if (!EmitType(out, mat->type(), "")) {
       return false;
     }
-    out << mat->rows() << "x" << mat->columns();
+    // Note: HLSL's matrices are declared as <type>NxM, where N is the number of
+    // rows and M is the number of columns. Despite HLSL's matrices being
+    // column-major by default, the index operator and constructors actually
+    // operate on row-vectors, where as WGSL operates on column vectors.
+    // To simplify everything we use the transpose of the matrices.
+    // See:
+    // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-per-component-math#matrix-ordering
+    out << mat->columns() << "x" << mat->rows();
   } else if (type->Is<type::Pointer>()) {
     // TODO(dsinclair): What do we do with pointers in HLSL?
     // https://bugs.chromium.org/p/tint/issues/detail?id=183

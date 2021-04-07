@@ -158,7 +158,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(out, mat2x3, "")) << gen.error();
-  EXPECT_EQ(result(), "float3x2");
+  EXPECT_EQ(result(), "float2x3");
 }
 
 // TODO(dsinclair): How to annotate as workgroup?

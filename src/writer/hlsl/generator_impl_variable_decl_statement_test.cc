@@ -131,7 +131,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
   EXPECT_EQ(result(),
-            R"(float3x2 a = float3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+            R"(float2x3 a = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 )");
 }
 

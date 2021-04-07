@@ -140,7 +140,8 @@ ast::Statement* ProgramBuilder::WrapInStatement(ast::Statement* stmt) {
 }
 
 ast::Function* ProgramBuilder::WrapInFunction(ast::StatementList stmts) {
-  return Func("test_function", {}, ty.void_(), std::move(stmts), {});
+  return Func("test_function", {}, ty.void_(), std::move(stmts),
+              {create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
 }
 
 }  // namespace tint
