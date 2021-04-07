@@ -51,6 +51,45 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
   EXPECT_EQ(expect, got);
 }
 
+TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
+  auto* str = Structure("S", {
+                                 Member("a", ty.i32()),
+                                 Member("b", ty.vec3<f32>()),
+                                 Member("c", ty.i32()),
+                             });
+  auto* struct_init = Construct(str, 1, vec3<f32>(2.f, 3.f, 4.f), 4);
+  auto* struct_access = MemberAccessor(struct_init, "b");
+  auto* pos =
+      Var("pos", ty.vec3<f32>(), ast::StorageClass::kFunction, struct_access);
+
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::VariableDeclStatement>(pos),
+       },
+       ast::DecorationList{
+           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+       });
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+
+  auto got = result();
+  auto* expect = R"(struct S {
+  int a;
+  float3 b;
+  int c;
+};
+
+void main() {
+  const S tint_symbol_1 = {1, float3(2.0f, 3.0f, 4.0f), 4};
+  float3 pos = tint_symbol_1.b;
+  return;
+}
+
+)";
+  EXPECT_EQ(expect, got);
+}
 }  // namespace
 }  // namespace hlsl
 }  // namespace writer

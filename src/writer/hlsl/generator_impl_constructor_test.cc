@@ -194,6 +194,40 @@ TEST_F(HlslGeneratorImplTest_Constructor,
   Validate();
 }
 
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {
+  auto* str = Structure("S", {
+                                 Member("a", ty.i32()),
+                                 Member("b", ty.f32()),
+                                 Member("c", ty.vec3<i32>()),
+                             });
+
+  WrapInFunction(Construct(str, 1, 2.0f, vec3<i32>(3, 4, 5)));
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("{1, 2.0f, int3(3, 4, 5)}"));
+
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct_Empty) {
+  auto* str = Structure("S", {
+                                 Member("a", ty.i32()),
+                                 Member("b", ty.f32()),
+                                 Member("c", ty.vec3<i32>()),
+                             });
+
+  WrapInFunction(Construct(str));
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("{0, 0.0f, int3(0, 0, 0)}"));
+
+  Validate();
+}
+
 }  // namespace
 }  // namespace hlsl
 }  // namespace writer

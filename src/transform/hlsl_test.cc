@@ -51,6 +51,39 @@ fn main() -> void {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(HlslTest, PromoteStructureInitializerToConstVar_Basic) {
+  auto* src = R"(
+struct S {
+  a : i32;
+  b : f32;
+  c : vec3<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> void {
+  var x : f32 = S(1, 2.0, vec3<f32>()).b;
+}
+)";
+
+  auto* expect = R"(
+struct S {
+  a : i32;
+  b : f32;
+  c : vec3<f32>;
+};
+
+[[stage(vertex)]]
+fn main() -> void {
+  const tint_symbol_1 : S = S(1, 2.0, vec3<f32>());
+  var x : f32 = tint_symbol_1.b;
+}
+)";
+
+  auto got = Run<Hlsl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(HlslTest, PromoteArrayInitializerToConstVar_ArrayInArray) {
   auto* src = R"(
 [[stage(vertex)]]
@@ -74,14 +107,115 @@ fn main() -> void {
   EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(HlslTest, PromoteArrayInitializerToConstVar_NoChangeOnArrayVarDecl) {
+TEST_F(HlslTest, PromoteStructureInitializerToConstVar_Nested) {
   auto* src = R"(
+struct S1 {
+  a : i32;
+};
+
+struct S2 {
+  a : i32;
+  b : S1;
+  c : i32;
+};
+
+struct S3 {
+  a : S2;
+};
+
+[[stage(vertex)]]
+fn main() -> void {
+  var x : i32 = S3(S2(1, S1(2), 3)).a.b.a;
+}
+)";
+
+  auto* expect = R"(
+struct S1 {
+  a : i32;
+};
+
+struct S2 {
+  a : i32;
+  b : S1;
+  c : i32;
+};
+
+struct S3 {
+  a : S2;
+};
+
+[[stage(vertex)]]
+fn main() -> void {
+  const tint_symbol_1 : S1 = S1(2);
+  const tint_symbol_4 : S2 = S2(1, tint_symbol_1, 3);
+  const tint_symbol_8 : S3 = S3(tint_symbol_4);
+  var x : i32 = tint_symbol_8.a.b.a;
+}
+)";
+
+  auto got = Run<Hlsl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(HlslTest, PromoteInitializerToConstVar_Mixed) {
+  auto* src = R"(
+struct S1 {
+  a : i32;
+};
+
+struct S2 {
+  a : array<S1, 3>;
+};
+
+[[stage(vertex)]]
+fn main() -> void {
+  var x : i32 = S2(array<S1, 3>(S1(1), S1(2), S1(3))).a[1].a;
+}
+)";
+
+  auto* expect = R"(
+struct S1 {
+  a : i32;
+};
+
+struct S2 {
+  a : array<S1, 3>;
+};
+
+[[stage(vertex)]]
+fn main() -> void {
+  const tint_symbol_1 : S1 = S1(1);
+  const tint_symbol_4 : S1 = S1(2);
+  const tint_symbol_5 : S1 = S1(3);
+  const tint_symbol_6 : array<S1, 3> = array<S1, 3>(tint_symbol_1, tint_symbol_4, tint_symbol_5);
+  const tint_symbol_7 : S2 = S2(tint_symbol_6);
+  var x : i32 = tint_symbol_7.a[1].a;
+}
+)";
+
+  auto got = Run<Hlsl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(HlslTest, PromoteInitializerToConstVar_NoChangeOnVarDecl) {
+  auto* src = R"(
+struct S {
+  a : i32;
+  b : f32;
+  c : i32;
+};
+
 [[stage(vertex)]]
 fn main() -> void {
   var local_arr : array<f32, 4> = array<f32, 4>(0.0, 1.0, 2.0, 3.0);
+  var local_str : S = S(1, 2.0, 3);
 }
 
 const module_arr : array<f32, 4> = array<f32, 4>(0.0, 1.0, 2.0, 3.0);
+
+const module_str : S = S(1, 2.0, 3);
 )";
 
   auto* expect = src;

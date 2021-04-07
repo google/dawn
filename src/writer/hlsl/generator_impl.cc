@@ -1229,7 +1229,16 @@ bool GeneratorImpl::EmitScalarConstructor(
 bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
                                         std::ostream& out,
                                         ast::TypeConstructorExpression* expr) {
-  if (expr->type()->Is<type::Array>()) {
+  // If the type constructor is empty then we need to construct with the zero
+  // value for all components.
+  if (expr->values().empty()) {
+    return EmitZeroValue(out, expr->type());
+  }
+
+  bool brackets =
+      expr->type()->UnwrapAliasIfNeeded()->IsAnyOf<type::Array, type::Struct>();
+
+  if (brackets) {
     out << "{";
   } else {
     if (!EmitType(out, expr->type(), "")) {
@@ -1238,31 +1247,19 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
     out << "(";
   }
 
-  // If the type constructor is empty then we need to construct with the zero
-  // value for all components.
-  if (expr->values().empty()) {
-    if (!EmitZeroValue(out, expr->type())) {
+  bool first = true;
+  for (auto* e : expr->values()) {
+    if (!first) {
+      out << ", ";
+    }
+    first = false;
+
+    if (!EmitExpression(pre, out, e)) {
       return false;
     }
-  } else {
-    bool first = true;
-    for (auto* e : expr->values()) {
-      if (!first) {
-        out << ", ";
-      }
-      first = false;
-
-      if (!EmitExpression(pre, out, e)) {
-        return false;
-      }
-    }
   }
 
-  if (expr->type()->Is<type::Array>()) {
-    out << "}";
-  } else {
-    out << ")";
-  }
+  out << (brackets ? "}" : ")");
   return true;
 }
 
@@ -1994,6 +1991,10 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, type::Type* type) {
   } else if (type->Is<type::U32>()) {
     out << "0u";
   } else if (auto* vec = type->As<type::Vector>()) {
+    if (!EmitType(out, type, "")) {
+      return false;
+    }
+    ScopedParen sp(out);
     for (uint32_t i = 0; i < vec->size(); i++) {
       if (i != 0) {
         out << ", ";
@@ -2003,6 +2004,10 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, type::Type* type) {
       }
     }
   } else if (auto* mat = type->As<type::Matrix>()) {
+    if (!EmitType(out, type, "")) {
+      return false;
+    }
+    ScopedParen sp(out);
     for (uint32_t i = 0; i < (mat->rows() * mat->columns()); i++) {
       if (i != 0) {
         out << ", ";
@@ -2011,6 +2016,19 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, type::Type* type) {
         return false;
       }
     }
+  } else if (auto* str = type->As<type::Struct>()) {
+    out << "{";
+    bool first = true;
+    for (auto* member : str->impl()->members()) {
+      if (!first) {
+        out << ", ";
+      }
+      first = false;
+      if (!EmitZeroValue(out, member->type())) {
+        return false;
+      }
+    }
+    out << "}";
   } else {
     diagnostics_.add_error("Invalid type for zero emission: " +
                            type->type_name());

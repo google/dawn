@@ -32,24 +32,24 @@ Hlsl::~Hlsl() = default;
 Transform::Output Hlsl::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
-  PromoteArrayInitializerToConstVar(ctx);
+  PromoteInitializersToConstVar(ctx);
   AddEmptyEntryPoint(ctx);
   ctx.Clone();
   return Output{Program(std::move(out))};
 }
 
-void Hlsl::PromoteArrayInitializerToConstVar(CloneContext& ctx) const {
-  // Scan the AST nodes for array initializers which need to be promoted to
-  // their own constant declaration.
+void Hlsl::PromoteInitializersToConstVar(CloneContext& ctx) const {
+  // Scan the AST nodes for array and structure initializers which
+  // need to be promoted to their own constant declaration.
 
-  // Note: Correct handling of arrays-of-arrays is guaranteed due to the
+  // Note: Correct handling of nested expressions is guaranteed due to the
   // depth-first traversal of the ast::Node::Clone() methods:
   //
-  // The inner-most array initializers are traversed first, and they are hoisted
+  // The inner-most initializers are traversed first, and they are hoisted
   // to const variables declared just above the statement of use. The outer
-  // array initializer will then be hoisted, inserting themselves between the
-  // inner array declaration and the statement of use. This pattern applies
-  // correctly to any nested depth.
+  // initializer will then be hoisted, inserting themselves between the
+  // inner declaration and the statement of use. This pattern applies correctly
+  // to any nested depth.
   //
   // Depth-first traversal of the AST is guaranteed because AST nodes are fully
   // immutable and require their children to be constructed first so their
@@ -75,22 +75,23 @@ void Hlsl::PromoteArrayInitializerToConstVar(CloneContext& ctx) const {
 
       if (auto* src_var_decl = src_stmt->As<ast::VariableDeclStatement>()) {
         if (src_var_decl->variable()->constructor() == src_init) {
-          // This statement is just a variable declaration with the array
-          // initializer as the constructor value. This is what we're
-          // attempting to transform to, and so ignore.
+          // This statement is just a variable declaration with the initializer
+          // as the constructor value. This is what we're attempting to
+          // transform to, and so ignore.
           continue;
         }
       }
 
-      if (auto* src_array_ty = src_sem_expr->Type()->As<type::Array>()) {
+      auto* src_ty = src_sem_expr->Type();
+      if (src_ty->IsAnyOf<type::Array, type::Struct>()) {
         // Create a new symbol for the constant
         auto dst_symbol = ctx.dst->Symbols().New();
-        // Clone the array type
-        auto* dst_array_ty = ctx.Clone(src_array_ty);
-        // Clone the array initializer
+        // Clone the type
+        auto* dst_ty = ctx.Clone(src_ty);
+        // Clone the initializer
         auto* dst_init = ctx.Clone(src_init);
-        // Construct the constant that holds the array
-        auto* dst_var = ctx.dst->Const(dst_symbol, dst_array_ty, dst_init);
+        // Construct the constant that holds the hoisted initializer
+        auto* dst_var = ctx.dst->Const(dst_symbol, dst_ty, dst_init);
         // Construct the variable declaration statement
         auto* dst_var_decl =
             ctx.dst->create<ast::VariableDeclStatement>(dst_var);
@@ -100,7 +101,7 @@ void Hlsl::PromoteArrayInitializerToConstVar(CloneContext& ctx) const {
         // Insert the constant before the usage
         ctx.InsertBefore(src_sem_stmt->Block()->statements(), src_stmt,
                          dst_var_decl);
-        // Replace the inlined array with a reference to the constant
+        // Replace the inlined initializer with a reference to the constant
         ctx.Replace(src_init, dst_ident);
       }
     }
