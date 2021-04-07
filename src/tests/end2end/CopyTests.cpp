@@ -130,14 +130,15 @@ class CopyTests_T2B : public CopyTests {
   protected:
     void DoTest(const TextureSpec& textureSpec,
                 const BufferSpec& bufferSpec,
-                const wgpu::Extent3D& copySize) {
+                const wgpu::Extent3D& copySize,
+                wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D) {
         // TODO(jiawei.shao@intel.com): support testing arbitrary formats
         ASSERT_EQ(kDefaultFormat, textureSpec.format);
 
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(textureSpec.format);
         // Create a texture that is `width` x `height` with (`level` + 1) mip levels.
         wgpu::TextureDescriptor descriptor;
-        descriptor.dimension = wgpu::TextureDimension::e2D;
+        descriptor.dimension = dimension;
         descriptor.size = textureSpec.textureSize;
         descriptor.sampleCount = 1;
         descriptor.format = textureSpec.format;
@@ -186,11 +187,18 @@ class CopyTests_T2B : public CopyTests {
 
         uint64_t bufferOffset = bufferSpec.offset;
 
-        const wgpu::Extent3D copySizePerSlice = {copySize.width, copySize.height, 1};
+        uint32_t copyLayer = copySize.depthOrArrayLayers;
+        uint32_t copyDepth = 1;
+        if (dimension == wgpu::TextureDimension::e3D) {
+            copyLayer = 1;
+            copyDepth = copySize.depthOrArrayLayers;
+        }
+
+        const wgpu::Extent3D copySizePerLayer = {copySize.width, copySize.height, copyDepth};
         // Texels in single slice.
         const uint32_t texelCountInCopyRegion = utils::GetTexelCountInCopyRegion(
-            bufferSpec.bytesPerRow, bufferSpec.rowsPerImage, copySizePerSlice, textureSpec.format);
-        const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copySize.depthOrArrayLayers;
+            bufferSpec.bytesPerRow, bufferSpec.rowsPerImage, copySizePerLayer, textureSpec.format);
+        const uint32_t maxArrayLayer = textureSpec.copyOrigin.z + copyLayer;
         std::vector<RGBA8> expected(texelCountInCopyRegion);
         for (uint32_t slice = textureSpec.copyOrigin.z; slice < maxArrayLayer; ++slice) {
             // Pack the data used to create the upload buffer in the specified copy region to have
@@ -203,7 +211,7 @@ class CopyTests_T2B : public CopyTests {
 
             PackTextureData(bytesPerTexel,
                             textureArrayData.data() + expectedTexelArrayDataStartIndex,
-                            copySize.width, copySize.height, 1, copyLayout.bytesPerRow,
+                            copySize.width, copySize.height, copyDepth, copyLayout.bytesPerRow,
                             expected.data(), bufferSpec.bytesPerRow);
 
             EXPECT_BUFFER_U32_RANGE_EQ(reinterpret_cast<const uint32_t*>(expected.data()), buffer,
@@ -314,12 +322,13 @@ class CopyTests_T2T : public CopyTests {
     void DoTest(const TextureSpec& srcSpec,
                 const TextureSpec& dstSpec,
                 const wgpu::Extent3D& copySize,
-                bool copyWithinSameTexture = false) {
+                bool copyWithinSameTexture = false,
+                wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D) {
         ASSERT_EQ(srcSpec.format, dstSpec.format);
         const wgpu::TextureFormat format = srcSpec.format;
 
         wgpu::TextureDescriptor srcDescriptor;
-        srcDescriptor.dimension = wgpu::TextureDimension::e2D;
+        srcDescriptor.dimension = dimension;
         srcDescriptor.size = srcSpec.textureSize;
         srcDescriptor.sampleCount = 1;
         srcDescriptor.format = format;
@@ -332,7 +341,7 @@ class CopyTests_T2T : public CopyTests {
             dstTexture = srcTexture;
         } else {
             wgpu::TextureDescriptor dstDescriptor;
-            dstDescriptor.dimension = wgpu::TextureDimension::e2D;
+            dstDescriptor.dimension = dimension;
             dstDescriptor.size = dstSpec.textureSize;
             dstDescriptor.sampleCount = 1;
             dstDescriptor.format = format;
@@ -393,14 +402,21 @@ class CopyTests_T2T : public CopyTests {
         // Validate if the data in outputBuffer is what we expected, including the untouched data
         // outside of the copy.
         {
+            uint32_t copyLayer = copySize.depthOrArrayLayers;
+            uint32_t copyDepth = 1;
+            if (dimension == wgpu::TextureDimension::e3D) {
+                copyLayer = 1;
+                copyDepth = copySize.depthOrArrayLayers;
+            }
+
             const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
             const uint64_t validDataSizePerDstTextureLayer = utils::RequiredBytesInCopy(
                 dstDataCopyLayout.bytesPerRow, dstDataCopyLayout.mipSize.height,
-                dstDataCopyLayout.mipSize.width, dstDataCopyLayout.mipSize.height, 1,
+                dstDataCopyLayout.mipSize.width, dstDataCopyLayout.mipSize.height, copyDepth,
                 bytesPerTexel);
 
             std::vector<uint8_t> expectedDstDataPerSlice(validDataSizePerDstTextureLayer);
-            for (uint32_t slice = 0; slice < copySize.depthOrArrayLayers; ++slice) {
+            for (uint32_t slice = 0; slice < copyLayer; ++slice) {
                 // For each source texture array slice involved in the copy, emulate the T2T copy
                 // on the CPU side by "copying" the copy data from the "source texture"
                 // (srcTextureCopyData) to the "destination texture" (expectedDstDataPerSlice).
@@ -419,10 +435,10 @@ class CopyTests_T2T : public CopyTests {
                      dstSpec.copyOrigin.y * dstDataCopyLayout.mipSize.width) *
                     bytesPerTexel;
                 // Do the T2T "copy" on the CPU side to get the expected texel value at the
-                PackTextureData(bytesPerTexel, &srcTextureCopyData[srcTexelDataOffset],
-                                copySize.width, copySize.height, 1, srcDataCopyLayout.bytesPerRow,
-                                &expectedDstDataPerSlice[expectedDstDataOffset],
-                                dstDataCopyLayout.bytesPerRow);
+                PackTextureData(
+                    bytesPerTexel, &srcTextureCopyData[srcTexelDataOffset], copySize.width,
+                    copySize.height, copyDepth, srcDataCopyLayout.bytesPerRow,
+                    &expectedDstDataPerSlice[expectedDstDataOffset], dstDataCopyLayout.bytesPerRow);
 
                 // Compare the content of the destination texture at the (dstSpec.copyOrigin.z +
                 // slice)-th layer to its expected data after the copy (the outputBuffer contains
@@ -820,7 +836,7 @@ TEST_P(CopyTests_T2B, StrideSpecialCases) {
 }
 
 // Test that copying whole texture 2D array layers in one texture-to-buffer-copy works.
-TEST_P(CopyTests_T2B, Texture2DArrayRegion) {
+TEST_P(CopyTests_T2B, Texture2DArrayFull) {
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -930,7 +946,24 @@ TEST_P(CopyTests_T2B, Texture2DArrayRegionWithOffsetEvenRowsPerImage) {
     DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kCopyLayers});
 }
 
-// TODO(yunchao.he@intel.com): add T2B tests for 3D textures, like entire texture copy, RowPitch,
+// Test that copying whole 3D texture in one texture-to-buffer-copy works.
+TEST_P(CopyTests_T2B, Texture3DFull) {
+    // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
+    // backend.
+    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    constexpr uint32_t kDepth = 6u;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kDepth), {kWidth, kHeight, kDepth},
+           wgpu::TextureDimension::e3D);
+}
+
+// TODO(yunchao.he@intel.com): add T2B tests for 3D textures, like RowPitch,
 // RowsPerImage, buffer offset, partial depth range, non-zero level, etc.
 
 DAWN_INSTANTIATE_TEST(CopyTests_T2B,
@@ -1279,7 +1312,7 @@ TEST_P(CopyTests_B2T, StrideSpecialCases) {
 }
 
 // Test that copying whole texture 2D array layers in one texture-to-buffer-copy works.
-TEST_P(CopyTests_B2T, Texture2DArrayRegion) {
+TEST_P(CopyTests_B2T, Texture2DArrayFull) {
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -1370,20 +1403,20 @@ TEST_P(CopyTests_B2T, Texture2DArrayRegionWithOffsetEvenRowsPerImage) {
     DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kCopyLayers});
 }
 
-// Test that copying whole texture 3D in one texture-to-buffer-copy works.
-TEST_P(CopyTests_B2T, Texture3DRegion) {
+// Test that copying whole texture 3D in one buffer-to-texture-copy works.
+TEST_P(CopyTests_B2T, Texture3DFull) {
     // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
     // backend.
     DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
-    constexpr uint32_t kLayers = 6u;
+    constexpr uint32_t kDepth = 6u;
 
     TextureSpec textureSpec;
-    textureSpec.textureSize = {kWidth, kHeight, kLayers};
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
 
-    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kLayers), {kWidth, kHeight, kLayers},
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kDepth), {kWidth, kHeight, kDepth},
            wgpu::TextureDimension::e3D);
 }
 
@@ -1434,7 +1467,7 @@ TEST_P(CopyTests_T2T, TextureRegion) {
 }
 
 // Test copying the whole 2D array texture.
-TEST_P(CopyTests_T2T, Texture2DArray) {
+TEST_P(CopyTests_T2T, Texture2DArrayFull) {
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kLayers = 6u;
@@ -1700,7 +1733,23 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
     }
 }
 
-// TODO(yunchao.he@intel.com): add T2T tests for 3D textures, like entire texture copy, RowPitch,
+// Test that copying whole 3D texture in one texture-to-texture-copy works.
+TEST_P(CopyTests_T2T, Texture3DFull) {
+    // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
+    // backend.
+    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    constexpr uint32_t kDepth = 6u;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+
+    DoTest(textureSpec, textureSpec, {kWidth, kHeight, kDepth}, false, wgpu::TextureDimension::e3D);
+}
+
+// TODO(yunchao.he@intel.com): add T2T tests for 3D textures, like RowPitch,
 // RowsPerImage, buffer offset, partial depth range, non-zero level, etc.
 
 DAWN_INSTANTIATE_TEST(

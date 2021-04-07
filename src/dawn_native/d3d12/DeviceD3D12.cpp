@@ -405,7 +405,7 @@ namespace dawn_native { namespace d3d12 {
         CommandRecordingContext* commandContext;
         DAWN_TRY_ASSIGN(commandContext, GetPendingCommandContext());
         Texture* texture = ToBackend(dst->texture.Get());
-        ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+        ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
 
         SubresourceRange range = GetSubresourcesAffectedByCopy(*dst, copySizePixels);
 
@@ -417,10 +417,9 @@ namespace dawn_native { namespace d3d12 {
 
         texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst, range);
 
-        // compute the copySplits and record the CopyTextureRegion commands
-        CopyBufferTo2DTextureWithCopySplit(commandContext, *dst, ToBackend(source)->GetResource(),
-                                           src.offset, src.bytesPerRow, src.rowsPerImage,
-                                           copySizePixels, texture, range.aspects);
+        RecordCopyBufferToTexture(commandContext, *dst, ToBackend(source)->GetResource(),
+                                  src.offset, src.bytesPerRow, src.rowsPerImage, copySizePixels,
+                                  texture, range.aspects);
 
         return {};
     }

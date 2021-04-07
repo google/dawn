@@ -237,6 +237,29 @@ namespace dawn_native { namespace d3d12 {
             bytesPerRow, texture, textureCopy.mipLevel, textureCopy.origin.z, aspect);
     }
 
+    void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
+                                   const TextureCopy& textureCopy,
+                                   ID3D12Resource* bufferResource,
+                                   const uint64_t offset,
+                                   const uint32_t bytesPerRow,
+                                   const uint32_t rowsPerImage,
+                                   const Extent3D& copySize,
+                                   Texture* texture,
+                                   Aspect aspect) {
+        // Record the CopyTextureRegion commands for 3D textures. Multiple depths of 3D
+        // textures can be copied in one shot and copySplits are not needed.
+        if (texture->GetDimension() == wgpu::TextureDimension::e3D) {
+            CopyBufferTo3DTexture(commandContext, textureCopy, bufferResource, offset, bytesPerRow,
+                                  rowsPerImage, copySize, texture, aspect);
+        } else {
+            // Compute the copySplits and record the CopyTextureRegion commands for 2D
+            // textures.
+            CopyBufferTo2DTextureWithCopySplit(commandContext, textureCopy, bufferResource, offset,
+                                               bytesPerRow, rowsPerImage, copySize, texture,
+                                               aspect);
+        }
+    }
+
     void RecordCopyTextureToBufferFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
                                                        const Texture2DCopySplit& baseCopySplit,
                                                        Buffer* buffer,
@@ -329,6 +352,20 @@ namespace dawn_native { namespace d3d12 {
         RecordCopyTextureToBufferFromTextureCopySplit(
             commandList, copySplits.copies2D[0], buffer, 0, bufferCopy.bytesPerRow, texture,
             textureCopy.mipLevel, textureCopy.origin.z, textureCopy.aspect);
+    }
+
+    void RecordCopyTextureToBuffer(ID3D12GraphicsCommandList* commandList,
+                                   const TextureCopy& textureCopy,
+                                   const BufferCopy& bufferCopy,
+                                   Texture* texture,
+                                   Buffer* buffer,
+                                   const Extent3D& copySize) {
+        if (texture->GetDimension() == wgpu::TextureDimension::e3D) {
+            Copy3DTextureToBuffer(commandList, textureCopy, bufferCopy, texture, buffer, copySize);
+        } else {
+            Copy2DTextureToBufferWithCopySplit(commandList, textureCopy, bufferCopy, texture,
+                                               buffer, copySize);
+        }
     }
 
 }}  // namespace dawn_native::d3d12
