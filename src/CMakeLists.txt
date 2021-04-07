@@ -276,10 +276,7 @@ set(TINT_LIB_SRCS
   utils/hash.h
   utils/math.h
   utils/unique_vector.h
-  validator/validator.cc
   validator/validator.h
-  validator/validator_impl.cc
-  validator/validator_impl.h
   writer/append_vector.cc
   writer/append_vector.h
   writer/float_to_string.cc
@@ -526,8 +523,6 @@ if(${TINT_BUILD_TESTS})
     utils/tmpfile_test.cc
     utils/tmpfile.h
     utils/unique_vector_test.cc
-    validator/validator_test_helper.cc
-    validator/validator_test_helper.h
     writer/append_vector_test.cc
     writer/float_to_string_test.cc
   )

@@ -17,29 +17,30 @@
 
 #include <string>
 
-#include "src/program.h"
+#include "src/diagnostic/diagnostic.h"
 
 namespace tint {
 
+class Program;
+
+// TODO(amaiorano): This class is deprecated. Delete after removing its usage in
+// Dawn.
 /// Determines if the program is complete and valid
 class Validator {
  public:
-  /// Constructor
-  Validator();
-  ~Validator();
-
   /// Runs the validator
   /// @param program the program to validate
   /// @returns true if the validation was successful
-  bool Validate(const Program* program);
+  bool Validate(const Program* program) {
+    (void)program;
+    return true;
+  }
 
   /// @returns error messages from the validator
-  std::string error() {
-    diag::Formatter formatter{{false, false, false, false}};
-    return formatter.format(diags_);
-  }
+  std::string error() { return {}; }
   /// @returns true if an error was encountered
-  bool has_error() const { return diags_.contains_errors(); }
+  bool has_error() const { return false; }
+
   /// @returns the full list of diagnostic messages.
   const diag::List& diagnostics() const { return diags_; }
 
