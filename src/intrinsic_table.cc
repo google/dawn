@@ -778,7 +778,7 @@ class Impl : public IntrinsicTable {
                 Builder* return_type,
                 std::vector<Parameter> parameters) {
     Overload overload{type, return_type, std::move(parameters), {}};
-    overloads_.emplace_back(overload);
+    overloads_.emplace_back(std::move(overload));
   }
 
   /// Registers an overload with the given intrinsic type, return type Matcher /
@@ -791,7 +791,7 @@ class Impl : public IntrinsicTable {
                 std::pair<OpenType, Matcher*> open_type_matcher) {
     Overload overload{
         type, return_type, std::move(parameters), {open_type_matcher}};
-    overloads_.emplace_back(overload);
+    overloads_.emplace_back(std::move(overload));
   }
 };
 
@@ -823,6 +823,9 @@ Impl::Impl() {
   auto* ptr_f32 = ptr(f32);            // ptr<f32>
   auto* ptr_vecN_T = ptr(vecN_T);      // ptr<vecN<T>>
   auto* ptr_vecN_f32 = ptr(vecN_f32);  // ptr<vecN<f32>>
+
+  constexpr size_t overloads_reserve_size = 300;
+  overloads_.reserve(overloads_reserve_size);
 
   // Intrinsic overloads are registered with a call to the Register().
   //
@@ -1252,6 +1255,9 @@ Impl::Impl() {
   Register(I::kTextureLoad, vec4_T, {{t, tex_storage_ro_3d_FT},      {coords, vec3_i32},                                                         }); // NOLINT
 
   // clang-format on
+
+  // If this assert trips, increase the reserve size.
+  TINT_ASSERT(overloads_.size() <= overloads_reserve_size);
 }
 
 /// @returns a human readable string representation of the overload

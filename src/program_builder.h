@@ -955,7 +955,8 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param val the size value
   /// @returns the size decoration pointer
-  ast::StructMemberSizeDecoration* MemberSize(Source source, uint32_t val) {
+  ast::StructMemberSizeDecoration* MemberSize(const Source& source,
+                                              uint32_t val) {
     return create<ast::StructMemberSizeDecoration>(source, val);
   }
 
@@ -970,7 +971,8 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param val the align value
   /// @returns the align decoration pointer
-  ast::StructMemberAlignDecoration* MemberAlign(Source source, uint32_t val) {
+  ast::StructMemberAlignDecoration* MemberAlign(const Source& source,
+                                                uint32_t val) {
     return create<ast::StructMemberAlignDecoration>(source, val);
   }
 
@@ -992,7 +994,7 @@ class ProgramBuilder {
   /// decorations
   /// @returns the function pointer
   template <typename NAME>
-  ast::Function* Func(Source source,
+  ast::Function* Func(const Source& source,
                       NAME&& name,
                       ast::VariableList params,
                       type::Type* type,
@@ -1217,7 +1219,7 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param builtin the builtin value
   /// @returns the builtin decoration pointer
-  ast::BuiltinDecoration* Builtin(Source source, ast::Builtin builtin) {
+  ast::BuiltinDecoration* Builtin(const Source& source, ast::Builtin builtin) {
     return create<ast::BuiltinDecoration>(source, builtin);
   }
 
@@ -1232,7 +1234,7 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param location the location value
   /// @returns the location decoration pointer
-  ast::LocationDecoration* Location(Source source, uint32_t location) {
+  ast::LocationDecoration* Location(const Source& source, uint32_t location) {
     return create<ast::LocationDecoration>(source, location);
   }
 
@@ -1247,7 +1249,7 @@ class ProgramBuilder {
   /// @param source the source information
   /// @param stage the pipeline stage
   /// @returns the stage decoration pointer
-  ast::StageDecoration* Stage(Source source, ast::PipelineStage stage) {
+  ast::StageDecoration* Stage(const Source& source, ast::PipelineStage stage) {
     return create<ast::StageDecoration>(source, stage);
   }
 
