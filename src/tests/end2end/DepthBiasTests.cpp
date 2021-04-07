@@ -162,7 +162,7 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloat) {
         0.5, 0.5,  //
     };
 
-    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0, 0,
+    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -182,7 +182,7 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloatWithClamp) {
         0.375, 0.375,  //
     };
 
-    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0, 0,
+    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -204,7 +204,7 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloat) {
         0.0, 0.0,  //
     };
 
-    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0, 0,
+    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -224,7 +224,7 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloatWithClamp) {
         0.125, 0.125,  //
     };
 
-    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0, 0,
+    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -243,7 +243,7 @@ TEST_P(DepthBiasTests, PositiveInfinitySlopeBiasOnFloat) {
         1.0, 1.0,  //
     };
 
-    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0, 0,
+    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -262,7 +262,7 @@ TEST_P(DepthBiasTests, NegativeInfinityBiasOnFloat) {
         0.0, 0.0,  //
     };
 
-    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0, 0,
+    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -277,7 +277,7 @@ TEST_P(DepthBiasTests, NoBiasTiltedXOnFloat) {
         0.125, 0.125,  //
     };
 
-    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0, 0,
+    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -292,7 +292,7 @@ TEST_P(DepthBiasTests, PositiveSlopeBiasOnFloat) {
         0.375, 0.375,  //
     };
 
-    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0, 0,
+    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -307,7 +307,7 @@ TEST_P(DepthBiasTests, NegativeHalfSlopeBiasOnFloat) {
         0.0, 0.0,    //
     };
 
-    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0, 0,
+    EXPECT_TEXTURE_EQ(expected.data(), mDepthTexture, {0, 0}, {kRTSize, kRTSize}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 

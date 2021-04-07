@@ -300,7 +300,7 @@ class DepthStencilCopyTests : public DawnTest {
         queue.Submit(1, &commands);
 
         std::vector<uint32_t> colorData(width * height, 1u);
-        EXPECT_TEXTURE_EQ(colorData.data(), colorTexture, {0, 0}, {width, height}, 0, 0);
+        EXPECT_TEXTURE_EQ(colorData.data(), colorTexture, {0, 0}, {width, height});
     }
 
     wgpu::ShaderModule mVertexModule;
@@ -323,7 +323,7 @@ TEST_P(DepthStencilCopyTests, FromDepthAspect) {
         0.3, 0.3, 0.0, 0.0,  //
         0.3, 0.3, 0.0, 0.0,  //
     };
-    EXPECT_TEXTURE_EQ(expectedData.data(), depthTexture, {0, 0}, {kWidth, kHeight}, 0, 0,
+    EXPECT_TEXTURE_EQ(expectedData.data(), depthTexture, {0, 0}, {kWidth, kHeight}, 0,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -348,7 +348,7 @@ TEST_P(DepthStencilCopyTests, FromStencilAspect) {
         1u, 1u, 0u, 0u,  //
         1u, 1u, 0u, 0u,  //
     };
-    EXPECT_TEXTURE_EQ(expectedData.data(), depthStencilTexture, {0, 0}, {kWidth, kHeight}, 0, 0,
+    EXPECT_TEXTURE_EQ(expectedData.data(), depthStencilTexture, {0, 0}, {kWidth, kHeight}, 0,
                       wgpu::TextureAspect::StencilOnly);
 }
 
@@ -373,7 +373,7 @@ TEST_P(DepthStencilCopyTests, FromNonZeroMipStencilAspect) {
         1u, 1u, 0u, 0u,  //
         1u, 1u, 0u, 0u,  //
     };
-    EXPECT_TEXTURE_EQ(expectedData.data(), depthStencilTexture, {0, 0}, {4, 4}, 1, 0,
+    EXPECT_TEXTURE_EQ(expectedData.data(), depthStencilTexture, {0, 0}, {4, 4}, 1,
                       wgpu::TextureAspect::StencilOnly);
 }
 
@@ -391,7 +391,7 @@ TEST_P(DepthStencilCopyTests, FromNonZeroMipDepthAspect) {
         0.4, 0.4, 0.0, 0.0,  //
         0.4, 0.4, 0.0, 0.0,  //
     };
-    EXPECT_TEXTURE_EQ(expectedData.data(), depthTexture, {0, 0}, {4, 4}, 1, 0,
+    EXPECT_TEXTURE_EQ(expectedData.data(), depthTexture, {0, 0}, {4, 4}, 1,
                       wgpu::TextureAspect::DepthOnly);
 }
 
@@ -420,7 +420,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
         3u, 3u, 1u, 1u,  //
         3u, 3u, 1u, 1u,  //
     };
-    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {kWidth, kHeight}, 0, 0,
+    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {kWidth, kHeight}, 0,
                       wgpu::TextureAspect::StencilOnly);
 }
 
@@ -443,7 +443,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableStencil) {
         3u, 3u, 1u, 1u,  //
         3u, 3u, 1u, 1u,  //
     };
-    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {kWidth, kHeight}, 0, 0,
+    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {kWidth, kHeight}, 0,
                       wgpu::TextureAspect::StencilOnly);
 }
 
@@ -469,7 +469,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableNonZeroMipStenc
         3u, 3u, 1u, 1u,  //
         3u, 3u, 1u, 1u,  //
     };
-    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {4, 4}, 1, 0,
+    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {4, 4}, 1,
                       wgpu::TextureAspect::StencilOnly);
 }
 
@@ -525,7 +525,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencilThenDepth) {
         3u, 3u, 1u, 1u,  //
         3u, 3u, 1u, 1u,  //
     };
-    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {kWidth, kHeight}, 0, 0,
+    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {kWidth, kHeight}, 0,
                       wgpu::TextureAspect::StencilOnly);
 
     // Check the depth
@@ -574,7 +574,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepthThenStencil) {
         3u, 3u, 1u, 1u,  //
         3u, 3u, 1u, 1u,  //
     };
-    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {kWidth, kHeight}, 0, 0,
+    EXPECT_TEXTURE_EQ(expectedData.data(), texture, {0, 0}, {kWidth, kHeight}, 0,
                       wgpu::TextureAspect::StencilOnly);
 }
 
@@ -673,7 +673,7 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
 
     // Copy back the stencil data and check it is correct.
     EXPECT_TEXTURE_EQ(expectedStencilData.data(), depthStencilTexture, {0, 0}, {kWidth, kHeight}, 0,
-                      0, wgpu::TextureAspect::StencilOnly);
+                      wgpu::TextureAspect::StencilOnly);
 
     ExpectDepthData(depthStencilTexture, wgpu::TextureFormat::Depth24PlusStencil8, kWidth, kHeight,
                     0,

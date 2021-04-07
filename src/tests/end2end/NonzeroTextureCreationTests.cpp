@@ -64,7 +64,7 @@ TEST_P(NonzeroTextureCreationTests, Depth32TextureCreationDepthClears) {
     // TODO(crbug.com/dawn/145): Test other formats via sampling.
     wgpu::Texture texture = device.CreateTexture(&descriptor);
     std::vector<float> expected(kSize * kSize, 1.f);
-    EXPECT_TEXTURE_EQ(expected.data(), texture, {0, 0}, {kSize, kSize}, 0, 0);
+    EXPECT_TEXTURE_EQ(expected.data(), texture, {0, 0}, {kSize, kSize});
 }
 
 // Test that non-zero mip level clears 0xFF because toggle is enabled.

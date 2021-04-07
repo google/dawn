@@ -85,8 +85,8 @@ class SubresourceRenderAttachmentTest : public DawnTest {
             }
             case Type::Depth: {
                 std::vector<float> expected(renderTargetSize * renderTargetSize, expectedDepth);
-                EXPECT_TEXTURE_FLOAT_EQ(expected.data(), renderTarget, 0, 0, renderTargetSize,
-                                        renderTargetSize, baseMipLevel, baseArrayLayer);
+                EXPECT_TEXTURE_FLOAT_EQ(expected.data(), renderTarget, (0, 0, baseArrayLayer),
+                                        (renderTargetSize, renderTargetSize), baseMipLevel);
                 break;
             }
             case Type::Stencil:

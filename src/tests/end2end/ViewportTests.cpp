@@ -144,7 +144,7 @@ class ViewportTest : public DawnTest {
             (maxDepth + minDepth) / 2,
             minDepth,
         };
-        EXPECT_TEXTURE_EQ(expected.data(), depthTexture, {0, 0}, {3, 1}, 0, 0);
+        EXPECT_TEXTURE_EQ(expected.data(), depthTexture, {0, 0}, {3, 1});
     }
 };
 

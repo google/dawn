@@ -74,9 +74,9 @@
 #define EXPECT_PIXEL_FLOAT_EQ(expected, texture, x, y) \
     AddTextureExpectation(__FILE__, __LINE__, expected, texture, {x, y})
 
-#define EXPECT_TEXTURE_FLOAT_EQ(expected, texture, x, y, width, height, level, layer)            \
-    AddTextureExpectation(__FILE__, __LINE__, expected, texture, {x, y}, {width, height}, level, \
-                          layer)
+#define EXPECT_TEXTURE_FLOAT_EQ(expected, texture, origin, extent, level)                  \
+    AddTextureExpectation(__FILE__, __LINE__, expected, texture, utils::MakeOrigin origin, \
+                          utils::MakeExtent extent, level)
 
 #define EXPECT_PIXEL_RGBA8_BETWEEN(color0, color1, texture, x, y) \
     AddTextureBetweenColorsExpectation(__FILE__, __LINE__, color0, color1, texture, x, y)
@@ -327,14 +327,13 @@ class DawnTestBase {
                                               wgpu::Origin3D origin,
                                               wgpu::Extent3D extent,
                                               uint32_t level = 0,
-                                              uint32_t layer = 0,
                                               wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
                                               uint32_t bytesPerRow = 0) {
         return AddTextureExpectationImpl(
             file, line,
             new detail::ExpectEq<T>(expectedData,
                                     extent.width * extent.height * extent.depthOrArrayLayers),
-            texture, origin, extent, level, layer, aspect, sizeof(T), bytesPerRow);
+            texture, origin, extent, level, aspect, sizeof(T), bytesPerRow);
     }
 
     template <typename T>
@@ -344,12 +343,10 @@ class DawnTestBase {
                                               const wgpu::Texture& texture,
                                               wgpu::Origin3D origin,
                                               uint32_t level = 0,
-                                              uint32_t layer = 0,
                                               wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
                                               uint32_t bytesPerRow = 0) {
         return AddTextureExpectationImpl(file, line, new detail::ExpectEq<T>(expectedData), texture,
-                                         origin, {1, 1}, level, layer, aspect, sizeof(T),
-                                         bytesPerRow);
+                                         origin, {1, 1}, level, aspect, sizeof(T), bytesPerRow);
     }
 
     template <typename T>
@@ -362,12 +359,11 @@ class DawnTestBase {
         uint32_t x,
         uint32_t y,
         uint32_t level = 0,
-        uint32_t layer = 0,
         wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
         uint32_t bytesPerRow = 0) {
         return AddTextureExpectationImpl(
             file, line, new detail::ExpectBetweenColors<T>(color0, color1), texture, {x, y}, {1, 1},
-            level, layer, aspect, sizeof(T), bytesPerRow);
+            level, aspect, sizeof(T), bytesPerRow);
     }
 
     void WaitABit();
@@ -401,7 +397,6 @@ class DawnTestBase {
                                                   wgpu::Origin3D origin,
                                                   wgpu::Extent3D extent,
                                                   uint32_t level,
-                                                  uint32_t layer,
                                                   wgpu::TextureAspect aspect,
                                                   uint32_t dataSize,
                                                   uint32_t bytesPerRow);

@@ -1005,7 +1005,6 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
                                                             wgpu::Origin3D origin,
                                                             wgpu::Extent3D extent,
                                                             uint32_t level,
-                                                            uint32_t layer,
                                                             wgpu::TextureAspect aspect,
                                                             uint32_t dataSize,
                                                             uint32_t bytesPerRow) {
@@ -1026,8 +1025,8 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
     // the texture might have been modified.
-    wgpu::ImageCopyTexture imageCopyTexture = utils::CreateImageCopyTexture(
-        texture, level, {origin.x, origin.y, origin.z + layer}, aspect);
+    wgpu::ImageCopyTexture imageCopyTexture =
+        utils::CreateImageCopyTexture(texture, level, origin, aspect);
     wgpu::ImageCopyBuffer imageCopyBuffer =
         utils::CreateImageCopyBuffer(readback.buffer, readback.offset, bytesPerRow, rowsPerImage);
 
