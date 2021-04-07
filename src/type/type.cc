@@ -56,9 +56,9 @@ Type* Type::UnwrapIfNeeded() {
   auto* where = this;
   while (true) {
     if (auto* alias = where->As<type::Alias>()) {
-          where = alias->type();
+      where = alias->type();
     } else if (auto* access = where->As<type::AccessControl>()) {
-          where = access->type();
+      where = access->type();
     } else {
       break;
     }
