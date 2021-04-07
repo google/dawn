@@ -125,7 +125,9 @@ void Variable::info_to_str(const semantic::Info& sem,
   out << (var_sem ? var_sem->StorageClass() : declared_storage_class())
       << std::endl;
   make_indent(out, indent);
-  out << declared_type_->type_name() << std::endl;
+  if (declared_type_) {
+    out << declared_type_->type_name() << std::endl;
+  }
 }
 
 void Variable::constructor_to_str(const semantic::Info& sem,
