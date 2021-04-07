@@ -53,6 +53,10 @@ class SymbolTable {
   /// @returns the symbol for the name or symbol::kInvalid if not found.
   Symbol Get(const std::string& name) const;
 
+  /// @returns true if the symbol has a name
+  /// @param symbol the symbol to query
+  bool HasName(const Symbol symbol) const;
+
   /// Returns the name for the given symbol
   /// @param symbol the symbol to retrieve the name for
   /// @returns the symbol name or "" if not found

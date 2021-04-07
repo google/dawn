@@ -272,6 +272,7 @@ set(TINT_LIB_SRCS
   type/vector_type.h
   type/void_type.cc
   type/void_type.h
+  utils/get_or_create.h
   utils/hash.h
   utils/math.h
   utils/unique_vector.h
@@ -519,6 +520,7 @@ if(${TINT_BUILD_TESTS})
     type/vector_type_test.cc
     utils/command_test.cc
     utils/command.h
+    utils/get_or_create_test.cc
     utils/hash_test.cc
     utils/math_test.cc
     utils/tmpfile_test.cc

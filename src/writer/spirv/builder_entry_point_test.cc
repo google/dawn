@@ -134,9 +134,9 @@ OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %14 "frag_main" %1 %4
 OpExecutionMode %14 OriginUpperLeft
 OpName %1 "tint_symbol_1"
-OpName %4 "tint_symbol_3"
-OpName %10 "tint_symbol_4"
-OpName %11 "tint_symbol_2"
+OpName %4 "tint_symbol_2"
+OpName %10 "tint_symbol_3"
+OpName %11 "tint_symbol_4"
 OpName %14 "frag_main"
 OpDecorate %1 Location 0
 OpDecorate %4 Location 0
@@ -220,16 +220,16 @@ OpEntryPoint Vertex %16 "vert_main" %1
 OpEntryPoint Fragment %25 "frag_main" %5 %7
 OpExecutionMode %25 OriginUpperLeft
 OpExecutionMode %25 DepthReplacing
-OpName %1 "tint_symbol_4"
+OpName %1 "tint_symbol_3"
 OpName %5 "tint_symbol_7"
-OpName %7 "tint_symbol_10"
+OpName %7 "tint_symbol_8"
 OpName %10 "Interface"
 OpMemberName %10 0 "value"
-OpName %11 "tint_symbol_5"
-OpName %12 "tint_symbol_3"
+OpName %11 "tint_symbol_4"
+OpName %12 "tint_symbol_5"
 OpName %16 "vert_main"
-OpName %22 "tint_symbol_11"
-OpName %23 "tint_symbol_9"
+OpName %22 "tint_symbol_9"
+OpName %23 "tint_symbol_10"
 OpName %25 "frag_main"
 OpDecorate %1 Location 1
 OpDecorate %5 Location 1

@@ -45,7 +45,7 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
                   ->IsAnyOf<ast::BuiltinDecoration, ast::LocationDecoration>();
             });
         new_struct_members.push_back(
-            ctx.dst->Member(ctx.src->Symbols().NameFor(member->symbol()),
+            ctx.dst->Member(ctx.Clone(member->symbol()),
                             ctx.Clone(member->type()), new_decorations));
       }
 
@@ -70,10 +70,9 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
       auto new_struct_param_symbol = ctx.dst->Symbols().New();
       ast::StructMemberList new_struct_members;
       for (auto* param : func->params()) {
-        auto param_name = ctx.src->Symbols().NameFor(param->symbol());
+        auto param_name = ctx.Clone(param->symbol());
         auto* param_ty = ctx.src->Sem().Get(param)->Type();
 
-        auto func_const_symbol = ctx.dst->Symbols().Register(param_name);
         ast::Expression* func_const_initializer = nullptr;
 
         if (auto* struct_ty =
@@ -90,7 +89,7 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
                   return !deco->IsAnyOf<ast::BuiltinDecoration,
                                         ast::LocationDecoration>();
                 });
-            auto member_name = ctx.src->Symbols().NameFor(member->symbol());
+            auto member_name = ctx.Clone(member->symbol());
             new_struct_members.push_back(ctx.dst->Member(
                 member_name, ctx.Clone(member->type()), new_decorations));
             init_values.push_back(
@@ -118,15 +117,15 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
 
         // Create a function-scope const to replace the parameter.
         // Initialize it with the value extracted from the new struct parameter.
-        auto* func_const = ctx.dst->Const(
-            func_const_symbol, ctx.Clone(param_ty), func_const_initializer);
+        auto* func_const = ctx.dst->Const(param_name, ctx.Clone(param_ty),
+                                          func_const_initializer);
         ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
                          ctx.dst->WrapInStatement(func_const));
 
         // Replace all uses of the function parameter with the function const.
         for (auto* user : ctx.src->Sem().Get(param)->Users()) {
           ctx.Replace<ast::Expression>(user->Declaration(),
-                                       ctx.dst->Expr(func_const_symbol));
+                                       ctx.dst->Expr(param_name));
         }
       }
 
@@ -163,9 +162,9 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
                 return !deco->IsAnyOf<ast::BuiltinDecoration,
                                       ast::LocationDecoration>();
               });
-          auto member_name = ctx.src->Symbols().NameFor(member->symbol());
-          new_struct_members.push_back(ctx.dst->Member(
-              member_name, ctx.Clone(member->type()), new_decorations));
+          new_struct_members.push_back(
+              ctx.dst->Member(ctx.Clone(member->symbol()),
+                              ctx.Clone(member->type()), new_decorations));
         }
       } else {
         new_struct_members.push_back(

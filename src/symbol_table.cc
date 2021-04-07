@@ -50,6 +50,11 @@ Symbol SymbolTable::Get(const std::string& name) const {
   return it != name_to_symbol_.end() ? it->second : Symbol();
 }
 
+bool SymbolTable::HasName(const Symbol symbol) const {
+  auto it = symbol_to_name_.find(symbol);
+  return it != symbol_to_name_.end();
+}
+
 std::string SymbolTable::NameFor(const Symbol symbol) const {
   auto it = symbol_to_name_.find(symbol);
   if (it == symbol_to_name_.end()) {

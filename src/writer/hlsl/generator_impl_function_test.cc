@@ -124,16 +124,16 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct tint_symbol_3 {
+  EXPECT_EQ(result(), R"(struct tint_symbol_1 {
   float foo : TEXCOORD0;
 };
-struct tint_symbol_5 {
+struct tint_symbol_3 {
   float value : SV_Target1;
 };
 
-tint_symbol_5 frag_main(tint_symbol_3 tint_symbol_1) {
-  const float foo = tint_symbol_1.foo;
-  return tint_symbol_5(foo);
+tint_symbol_3 frag_main(tint_symbol_1 tint_symbol_6) {
+  const float foo = tint_symbol_6.foo;
+  return tint_symbol_3(foo);
 }
 
 )");
@@ -157,16 +157,16 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(struct tint_symbol_3 {
+  EXPECT_EQ(result(), R"(struct tint_symbol_1 {
   float4 coord : SV_Position;
 };
-struct tint_symbol_5 {
+struct tint_symbol_3 {
   float value : SV_Depth;
 };
 
-tint_symbol_5 frag_main(tint_symbol_3 tint_symbol_1) {
-  const float4 coord = tint_symbol_1.coord;
-  return tint_symbol_5(coord.x);
+tint_symbol_3 frag_main(tint_symbol_1 tint_symbol_6) {
+  const float4 coord = tint_symbol_6.coord;
+  return tint_symbol_3(coord.x);
 }
 
 )");
@@ -217,18 +217,18 @@ struct tint_symbol_4 {
   float col1 : TEXCOORD1;
   float col2 : TEXCOORD2;
 };
-struct tint_symbol_9 {
+struct tint_symbol_7 {
   float col1 : TEXCOORD1;
   float col2 : TEXCOORD2;
 };
 
 tint_symbol_4 vert_main() {
-  const Interface tint_symbol_5 = Interface(0.5f, 0.25f);
-  return tint_symbol_4(tint_symbol_5.col1, tint_symbol_5.col2);
+  const Interface tint_symbol_6 = Interface(0.5f, 0.25f);
+  return tint_symbol_4(tint_symbol_6.col1, tint_symbol_6.col2);
 }
 
-void frag_main(tint_symbol_9 tint_symbol_7) {
-  const Interface colors = Interface(tint_symbol_7.col1, tint_symbol_7.col2);
+void frag_main(tint_symbol_7 tint_symbol_9) {
+  const Interface colors = Interface(tint_symbol_9.col1, tint_symbol_9.col2);
   const float r = colors.col1;
   const float g = colors.col2;
   return;
@@ -281,10 +281,10 @@ TEST_F(HlslGeneratorImplTest_Function,
   EXPECT_EQ(result(), R"(struct VertexOutput {
   float4 pos;
 };
-struct tint_symbol_3 {
+struct tint_symbol_5 {
   float4 pos : SV_Position;
 };
-struct tint_symbol_7 {
+struct tint_symbol_8 {
   float4 pos : SV_Position;
 };
 
@@ -292,14 +292,14 @@ VertexOutput foo(float x) {
   return VertexOutput(float4(x, x, x, 1.0f));
 }
 
-tint_symbol_3 vert_main1() {
-  const VertexOutput tint_symbol_5 = VertexOutput(foo(0.5f));
-  return tint_symbol_3(tint_symbol_5.pos);
+tint_symbol_5 vert_main1() {
+  const VertexOutput tint_symbol_7 = VertexOutput(foo(0.5f));
+  return tint_symbol_5(tint_symbol_7.pos);
 }
 
-tint_symbol_7 vert_main2() {
-  const VertexOutput tint_symbol_8 = VertexOutput(foo(0.25f));
-  return tint_symbol_7(tint_symbol_8.pos);
+tint_symbol_8 vert_main2() {
+  const VertexOutput tint_symbol_10 = VertexOutput(foo(0.25f));
+  return tint_symbol_8(tint_symbol_10.pos);
 }
 
 )");

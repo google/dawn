@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "gtest/gtest-spi.h"
+#include <unordered_set>
 
+#include "gtest/gtest-spi.h"
 #include "src/program_builder.h"
 
 namespace tint {
@@ -414,6 +415,27 @@ TEST(CloneContext, CloneWithReplace_WithNotANode) {
         ctx.Clone(original_root);
       },
       "internal compiler error");
+}
+
+TEST(CloneContext, CloneUnnamedSymbols) {
+  ProgramBuilder builder;
+  Symbol old_a = builder.Symbols().New();
+  Symbol old_b = builder.Symbols().New();
+  Symbol old_c = builder.Symbols().New();
+
+  Program original(std::move(builder));
+
+  ProgramBuilder cloned;
+  CloneContext ctx(&cloned, &original);
+  Symbol new_a = ctx.Clone(old_a);
+  Symbol new_x = cloned.Symbols().New();
+  Symbol new_b = ctx.Clone(old_b);
+  Symbol new_y = cloned.Symbols().New();
+  Symbol new_c = ctx.Clone(old_c);
+  Symbol new_z = cloned.Symbols().New();
+
+  std::unordered_set<Symbol> all{new_a, new_x, new_b, new_y, new_c, new_z};
+  EXPECT_EQ(all.size(), 6u);
 }
 
 }  // namespace

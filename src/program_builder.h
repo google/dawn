@@ -413,7 +413,7 @@ class ProgramBuilder {
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array.
     /// @return the tint AST type for a array of size `n` of type `T`
-    type::Array* array(type::Type* subtype, uint32_t n) const {
+    type::Array* array(type::Type* subtype, uint32_t n = 0) const {
       return builder->create<type::Array>(subtype, n, ast::DecorationList{});
     }
 
@@ -489,6 +489,14 @@ class ProgramBuilder {
   //////////////////////////////////////////////////////////////////////////////
   // AST helper methods
   //////////////////////////////////////////////////////////////////////////////
+
+  /// @param name the symbol string
+  /// @return a Symbol with the given name
+  Symbol Sym(const std::string& name) { return Symbols().Register(name); }
+
+  /// @param sym the symbol
+  /// @return `sym`
+  Symbol Sym(Symbol sym) { return sym; }
 
   /// @param expr the expression
   /// @return expr
@@ -775,13 +783,14 @@ class ProgramBuilder {
   /// @param constructor constructor expression
   /// @param decorations variable decorations
   /// @returns a `ast::Variable` with the given name, storage and type
-  ast::Variable* Var(const std::string& name,
+  template <typename NAME>
+  ast::Variable* Var(NAME&& name,
                      type::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
-    return create<ast::Variable>(Symbols().Register(name), storage, type, false,
-                                 constructor, decorations);
+    return create<ast::Variable>(Sym(std::forward<NAME>(name)), storage, type,
+                                 false, constructor, decorations);
   }
 
   /// @param source the variable source
@@ -791,58 +800,28 @@ class ProgramBuilder {
   /// @param constructor constructor expression
   /// @param decorations variable decorations
   /// @returns a `ast::Variable` with the given name, storage and type
+  template <typename NAME>
   ast::Variable* Var(const Source& source,
-                     const std::string& name,
+                     NAME&& name,
                      type::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
-    return create<ast::Variable>(source, Symbols().Register(name), storage,
+    return create<ast::Variable>(source, Sym(std::forward<NAME>(name)), storage,
                                  type, false, constructor, decorations);
   }
 
-  /// @param symbol the variable symbol
-  /// @param type the variable type
-  /// @param storage the variable storage class
-  /// @param constructor constructor expression
-  /// @param decorations variable decorations
-  /// @returns a `ast::Variable` with the given symbol, storage and type
-  ast::Variable* Var(Symbol symbol,
-                     type::Type* type,
-                     ast::StorageClass storage,
-                     ast::Expression* constructor = nullptr,
-                     ast::DecorationList decorations = {}) {
-    return create<ast::Variable>(symbol, storage, type, false, constructor,
-                                 decorations);
-  }
-
-  /// @param source the variable source
-  /// @param symbol the variable symbol
-  /// @param type the variable type
-  /// @param storage the variable storage class
-  /// @param constructor constructor expression
-  /// @param decorations variable decorations
-  /// @returns a `ast::Variable` with the given symbol, storage and type
-  ast::Variable* Var(const Source& source,
-                     Symbol symbol,
-                     type::Type* type,
-                     ast::StorageClass storage,
-                     ast::Expression* constructor = nullptr,
-                     ast::DecorationList decorations = {}) {
-    return create<ast::Variable>(source, symbol, storage, type, false,
-                                 constructor, decorations);
-  }
-
   /// @param name the variable name
   /// @param type the variable type
   /// @param constructor optional constructor expression
   /// @param decorations optional variable decorations
   /// @returns a constant `ast::Variable` with the given name, storage and type
-  ast::Variable* Const(const std::string& name,
+  template <typename NAME>
+  ast::Variable* Const(NAME&& name,
                        type::Type* type,
                        ast::Expression* constructor = nullptr,
                        ast::DecorationList decorations = {}) {
-    return create<ast::Variable>(Symbols().Register(name),
+    return create<ast::Variable>(Sym(std::forward<NAME>(name)),
                                  ast::StorageClass::kNone, type, true,
                                  constructor, decorations);
   }
@@ -853,44 +832,15 @@ class ProgramBuilder {
   /// @param constructor optional constructor expression
   /// @param decorations optional variable decorations
   /// @returns a constant `ast::Variable` with the given name, storage and type
+  template <typename NAME>
   ast::Variable* Const(const Source& source,
-                       const std::string& name,
+                       NAME&& name,
                        type::Type* type,
                        ast::Expression* constructor = nullptr,
                        ast::DecorationList decorations = {}) {
-    return create<ast::Variable>(source, Symbols().Register(name),
+    return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
                                  ast::StorageClass::kNone, type, true,
                                  constructor, decorations);
-  }
-
-  /// @param symbol the variable symbol
-  /// @param type the variable type
-  /// @param constructor optional constructor expression
-  /// @param decorations optional variable decorations
-  /// @returns a constant `ast::Variable` with the given symbol, storage and
-  /// type
-  ast::Variable* Const(Symbol symbol,
-                       type::Type* type,
-                       ast::Expression* constructor = nullptr,
-                       ast::DecorationList decorations = {}) {
-    return create<ast::Variable>(symbol, ast::StorageClass::kNone, type, true,
-                                 constructor, decorations);
-  }
-
-  /// @param source the variable source
-  /// @param symbol the variable symbol
-  /// @param type the variable type
-  /// @param constructor optional constructor expression
-  /// @param decorations optional variable decorations
-  /// @returns a constant `ast::Variable` with the given symbol, storage and
-  /// type
-  ast::Variable* Const(const Source& source,
-                       Symbol symbol,
-                       type::Type* type,
-                       ast::Expression* constructor = nullptr,
-                       ast::DecorationList decorations = {}) {
-    return create<ast::Variable>(source, symbol, ast::StorageClass::kNone, type,
-                                 true, constructor, decorations);
   }
 
   /// @param args the arguments to pass to Var()
@@ -966,6 +916,16 @@ class ProgramBuilder {
                                          Expr(std::forward<RHS>(rhs)));
   }
 
+  /// @param lhs the left hand argument to the division operation
+  /// @param rhs the right hand argument to the division operation
+  /// @returns a `ast::BinaryExpression` dividing `lhs` by `rhs`
+  template <typename LHS, typename RHS>
+  ast::Expression* Div(LHS&& lhs, RHS&& rhs) {
+    return create<ast::BinaryExpression>(ast::BinaryOp::kDivide,
+                                         Expr(std::forward<LHS>(lhs)),
+                                         Expr(std::forward<RHS>(rhs)));
+  }
+
   /// @param arr the array argument for the array accessor expression
   /// @param idx the index argument for the array accessor expression
   /// @returns a `ast::ArrayAccessorExpression` that indexes `arr` with `idx`
@@ -1027,19 +987,22 @@ class ProgramBuilder {
   /// @param params the function parameters
   /// @param type the function return type
   /// @param body the function body
-  /// @param decorations the function decorations
-  /// @param return_type_decorations the function return type decorations
+  /// @param decorations the optional function decorations
+  /// @param return_type_decorations the optional function return type
+  /// decorations
   /// @returns the function pointer
+  template <typename NAME>
   ast::Function* Func(Source source,
-                      std::string name,
+                      NAME&& name,
                       ast::VariableList params,
                       type::Type* type,
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
-    auto* func = create<ast::Function>(source, Symbols().Register(name), params,
-                                       type, create<ast::BlockStatement>(body),
-                                       decorations, return_type_decorations);
+    auto* func =
+        create<ast::Function>(source, Sym(std::forward<NAME>(name)), params,
+                              type, create<ast::BlockStatement>(body),
+                              decorations, return_type_decorations);
     AST().AddFunction(func);
     return func;
   }
@@ -1049,17 +1012,19 @@ class ProgramBuilder {
   /// @param params the function parameters
   /// @param type the function return type
   /// @param body the function body
-  /// @param decorations the function decorations
-  /// @param return_type_decorations the function return type decorations
+  /// @param decorations the optional function decorations
+  /// @param return_type_decorations the optional function return type
+  /// decorations
   /// @returns the function pointer
-  ast::Function* Func(std::string name,
+  template <typename NAME>
+  ast::Function* Func(NAME&& name,
                       ast::VariableList params,
                       type::Type* type,
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
-    auto* func = create<ast::Function>(Symbols().Register(name), params, type,
-                                       create<ast::BlockStatement>(body),
+    auto* func = create<ast::Function>(Sym(std::forward<NAME>(name)), params,
+                                       type, create<ast::BlockStatement>(body),
                                        decorations, return_type_decorations);
     AST().AddFunction(func);
     return func;
@@ -1113,12 +1078,13 @@ class ProgramBuilder {
   /// @param type the struct member type
   /// @param decorations the optional struct member decorations
   /// @returns the struct member pointer
+  template <typename NAME>
   ast::StructMember* Member(const Source& source,
-                            const std::string& name,
+                            NAME&& name,
                             type::Type* type,
                             ast::DecorationList decorations = {}) {
-    return create<ast::StructMember>(source, Symbols().Register(name), type,
-                                     std::move(decorations));
+    return create<ast::StructMember>(source, Sym(std::forward<NAME>(name)),
+                                     type, std::move(decorations));
   }
 
   /// Creates a ast::StructMember
@@ -1126,11 +1092,12 @@ class ProgramBuilder {
   /// @param type the struct member type
   /// @param decorations the optional struct member decorations
   /// @returns the struct member pointer
-  ast::StructMember* Member(const std::string& name,
+  template <typename NAME>
+  ast::StructMember* Member(NAME&& name,
                             type::Type* type,
                             ast::DecorationList decorations = {}) {
-    return create<ast::StructMember>(source_, Symbols().Register(name), type,
-                                     std::move(decorations));
+    return create<ast::StructMember>(source_, Sym(std::forward<NAME>(name)),
+                                     type, std::move(decorations));
   }
 
   /// Creates a ast::StructMember with the given byte offset
@@ -1138,11 +1105,10 @@ class ProgramBuilder {
   /// @param name the struct member name
   /// @param type the struct member type
   /// @returns the struct member pointer
-  ast::StructMember* Member(uint32_t offset,
-                            const std::string& name,
-                            type::Type* type) {
+  template <typename NAME>
+  ast::StructMember* Member(uint32_t offset, NAME&& name, type::Type* type) {
     return create<ast::StructMember>(
-        source_, Symbols().Register(name), type,
+        source_, Sym(std::forward<NAME>(name)), type,
         ast::DecorationList{
             create<ast::StructMemberOffsetDecoration>(offset),
         });

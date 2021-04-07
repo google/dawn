@@ -121,7 +121,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
                   ->IsAnyOf<ast::BuiltinDecoration, ast::LocationDecoration>();
             });
         new_struct_members.push_back(
-            ctx.dst->Member(ctx.src->Symbols().NameFor(member->symbol()),
+            ctx.dst->Member(ctx.Clone(member->symbol()),
                             ctx.Clone(member->type()), new_decorations));
       }
 
@@ -215,7 +215,7 @@ void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
         }
 
         // Use the same name as the old variable.
-        std::string var_name = ctx.src->Symbols().NameFor(var->symbol());
+        auto var_name = ctx.Clone(var->symbol());
         // Use `array<u32, 1>` for the new variable.
         auto* type = ctx.dst->ty.array(ctx.dst->ty.u32(), 1u);
         // Create the new variable.

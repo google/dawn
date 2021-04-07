@@ -148,7 +148,7 @@ class CloneContext {
   ///
   /// @param s the Symbol to clone
   /// @return the cloned source
-  Symbol Clone(const Symbol& s) const;
+  Symbol Clone(Symbol s);
 
   /// Clones each of the elements of the vector `v` into the ProgramBuilder
   /// #dst.
@@ -447,6 +447,9 @@ class CloneContext {
 
   /// A map of object in #src to their cloned equivalent in #dst
   std::unordered_map<const Cloneable*, Cloneable*> cloned_;
+
+  /// A map of symbol in #src to their cloned equivalent in #dst
+  std::unordered_map<Symbol, Symbol> cloned_symbols_;
 
   /// Cloneable transform functions registered with ReplaceAll()
   std::vector<CloneableTransform> transforms_;
