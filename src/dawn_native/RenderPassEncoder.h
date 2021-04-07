@@ -37,9 +37,6 @@ namespace dawn_native {
                                             CommandEncoder* commandEncoder,
                                             EncodingContext* encodingContext);
 
-        void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
-        const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
-
         void APIEndPass();
 
         void APISetStencilReference(uint32_t reference);
@@ -65,17 +62,14 @@ namespace dawn_native {
                           ErrorTag errorTag);
 
       private:
+        void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
+
         // For render and compute passes, the encoding context is borrowed from the command encoder.
         // Keep a reference to the encoder to make sure the context isn't freed.
         Ref<CommandEncoder> mCommandEncoder;
 
         uint32_t mRenderTargetWidth;
         uint32_t mRenderTargetHeight;
-
-        // This map is to indicate the availability of the queries used in render pass. The same
-        // query cannot be written twice in same render pass, so each render pass also need to have
-        // its own query availability map.
-        QueryAvailabilityMap mQueryAvailabilityMap;
 
         // The resources for occlusion query
         Ref<QuerySetBase> mOcclusionQuerySet;

@@ -24,7 +24,10 @@
 namespace dawn_native {
 
     class BufferBase;
+    class QuerySetBase;
     class TextureBase;
+
+    using QueryAvailabilityMap = std::map<QuerySetBase*, std::vector<bool>>;
 
     // Helper class to encapsulate the logic of tracking per-resource usage during the
     // validation of command buffer passes. It is used both to know if there are validation
@@ -36,6 +39,8 @@ namespace dawn_native {
         void BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage);
         void TextureViewUsedAs(TextureViewBase* texture, wgpu::TextureUsage usage);
         void AddTextureUsage(TextureBase* texture, const PassTextureUsage& textureUsage);
+        void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
+        const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
 
         // Returns the per-pass usage for use by backends for APIs with explicit barriers.
         PassResourceUsage AcquireResourceUsage();
@@ -44,6 +49,10 @@ namespace dawn_native {
         PassType mPassType;
         std::map<BufferBase*, wgpu::BufferUsage> mBufferUsages;
         std::map<TextureBase*, PassTextureUsage> mTextureUsages;
+        // Dedicated to track the availability of the queries used on render pass. The same query
+        // cannot be written twice in same render pass, so each render pass also need to have its
+        // own query availability map for validation.
+        QueryAvailabilityMap mQueryAvailabilities;
     };
 
 }  // namespace dawn_native

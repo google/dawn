@@ -42,6 +42,9 @@ namespace dawn_native {
 
         std::vector<TextureBase*> textures;
         std::vector<PassTextureUsage> textureUsages;
+
+        std::vector<QuerySetBase*> querySets;
+        std::vector<std::vector<bool>> queryAvailabilities;
     };
 
     using PerPassUsages = std::vector<PassResourceUsage>;

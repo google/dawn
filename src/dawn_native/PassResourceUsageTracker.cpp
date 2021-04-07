@@ -17,6 +17,7 @@
 #include "dawn_native/Buffer.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/Format.h"
+#include "dawn_native/QuerySet.h"
 #include "dawn_native/Texture.h"
 
 #include <utility>
@@ -65,6 +66,23 @@ namespace dawn_native {
                              const wgpu::TextureUsage& addedUsage) { *storedUsage |= addedUsage; });
     }
 
+    void PassResourceUsageTracker::TrackQueryAvailability(QuerySetBase* querySet,
+                                                          uint32_t queryIndex) {
+        // The query availability only need to be tracked again on render pass for checking query
+        // overwrite on render pass and resetting query set on Vulkan backend.
+        DAWN_ASSERT(mPassType == PassType::Render);
+        DAWN_ASSERT(querySet != nullptr);
+
+        // Gets the iterator for that querySet or create a new vector of bool set to false
+        // if the querySet wasn't registered.
+        auto it = mQueryAvailabilities.emplace(querySet, querySet->GetQueryCount()).first;
+        it->second[queryIndex] = true;
+    }
+
+    const QueryAvailabilityMap& PassResourceUsageTracker::GetQueryAvailabilityMap() const {
+        return mQueryAvailabilities;
+    }
+
     // Returns the per-pass usage for use by backends for APIs with explicit barriers.
     PassResourceUsage PassResourceUsageTracker::AcquireResourceUsage() {
         PassResourceUsage result;
@@ -73,6 +91,8 @@ namespace dawn_native {
         result.bufferUsages.reserve(mBufferUsages.size());
         result.textures.reserve(mTextureUsages.size());
         result.textureUsages.reserve(mTextureUsages.size());
+        result.querySets.reserve(mQueryAvailabilities.size());
+        result.queryAvailabilities.reserve(mQueryAvailabilities.size());
 
         for (auto& it : mBufferUsages) {
             result.buffers.push_back(it.first);
@@ -84,8 +104,14 @@ namespace dawn_native {
             result.textureUsages.push_back(std::move(it.second));
         }
 
+        for (auto& it : mQueryAvailabilities) {
+            result.querySets.push_back(it.first);
+            result.queryAvailabilities.push_back(std::move(it.second));
+        }
+
         mBufferUsages.clear();
         mTextureUsages.clear();
+        mQueryAvailabilities.clear();
 
         return result;
     }

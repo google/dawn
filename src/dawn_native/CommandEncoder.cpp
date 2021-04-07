@@ -467,16 +467,7 @@ namespace dawn_native {
         }
 
         // Set the query at queryIndex to available for resolving in query set.
-        querySet->SetQueryAvailability(queryIndex, 1);
-
-        // Gets the iterator for that querySet or create a new vector of bool set to false
-        // if the querySet wasn't registered.
-        auto it = mQueryAvailabilityMap.emplace(querySet, querySet->GetQueryCount()).first;
-        it->second[queryIndex] = 1;
-    }
-
-    const QueryAvailabilityMap& CommandEncoder::GetQueryAvailabilityMap() const {
-        return mQueryAvailabilityMap;
+        querySet->SetQueryAvailability(queryIndex, true);
     }
 
     // Implementation of the API's command recording methods

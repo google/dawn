@@ -80,17 +80,12 @@ namespace dawn_native {
     void RenderPassEncoder::TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex) {
         DAWN_ASSERT(querySet != nullptr);
 
-        // Gets the iterator for that querySet or create a new vector of bool set to false
-        // if the querySet wasn't registered.
-        auto it = mQueryAvailabilityMap.emplace(querySet, querySet->GetQueryCount()).first;
-        it->second[queryIndex] = 1;
+        // Track the query availability with true on render pass for rewrite validation and query
+        // reset on render pass on Vulkan
+        mUsageTracker.TrackQueryAvailability(querySet, queryIndex);
 
         // Track it again on command encoder for zero-initializing when resolving unused queries.
         mCommandEncoder->TrackQueryAvailability(querySet, queryIndex);
-    }
-
-    const QueryAvailabilityMap& RenderPassEncoder::GetQueryAvailabilityMap() const {
-        return mQueryAvailabilityMap;
     }
 
     void RenderPassEncoder::APIEndPass() {
@@ -254,9 +249,7 @@ namespace dawn_native {
                 }
 
                 DAWN_TRY(ValidateQueryIndexOverwrite(mOcclusionQuerySet.Get(), queryIndex,
-                                                     GetQueryAvailabilityMap()));
-
-                mCommandEncoder->TrackUsedQuerySet(mOcclusionQuerySet.Get());
+                                                     mUsageTracker.GetQueryAvailabilityMap()));
             }
 
             // Record the current query index for endOcclusionQuery.
@@ -283,6 +276,7 @@ namespace dawn_native {
             }
 
             TrackQueryAvailability(mOcclusionQuerySet.Get(), mCurrentOcclusionQueryIndex);
+
             mOcclusionQueryActive = false;
 
             EndOcclusionQueryCmd* cmd =
@@ -299,8 +293,8 @@ namespace dawn_native {
             if (IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(querySet));
                 DAWN_TRY(ValidateTimestampQuery(querySet, queryIndex));
-                DAWN_TRY(
-                    ValidateQueryIndexOverwrite(querySet, queryIndex, GetQueryAvailabilityMap()));
+                DAWN_TRY(ValidateQueryIndexOverwrite(querySet, queryIndex,
+                                                     mUsageTracker.GetQueryAvailabilityMap()));
             }
 
             TrackQueryAvailability(querySet, queryIndex);
