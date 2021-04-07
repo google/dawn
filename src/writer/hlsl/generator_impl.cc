@@ -1994,7 +1994,14 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, type::Type* type) {
   } else if (type->Is<type::U32>()) {
     out << "0u";
   } else if (auto* vec = type->As<type::Vector>()) {
-    return EmitZeroValue(out, vec->type());
+    for (uint32_t i = 0; i < vec->size(); i++) {
+      if (i != 0) {
+        out << ", ";
+      }
+      if (!EmitZeroValue(out, vec->type())) {
+        return false;
+      }
+    }
   } else if (auto* mat = type->As<type::Matrix>()) {
     for (uint32_t i = 0; i < (mat->rows() * mat->columns()); i++) {
       if (i != 0) {
