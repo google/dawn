@@ -402,8 +402,9 @@ namespace dawn_native {
         }
     }
 
-    void DeviceBase::CheckPassedSerials() {
-        ExecutionSerial completedSerial = CheckAndUpdateCompletedSerials();
+    MaybeError DeviceBase::CheckPassedSerials() {
+        ExecutionSerial completedSerial;
+        DAWN_TRY_ASSIGN(completedSerial, CheckAndUpdateCompletedSerials());
 
         ASSERT(completedSerial <= mLastSubmittedSerial);
         // completedSerial should not be less than mCompletedSerial unless it is 0.
@@ -413,6 +414,8 @@ namespace dawn_native {
         if (completedSerial > mCompletedSerial) {
             mCompletedSerial = completedSerial;
         }
+
+        return {};
     }
 
     ResultOrError<const Format*> DeviceBase::GetInternalFormat(wgpu::TextureFormat format) const {
@@ -932,8 +935,7 @@ namespace dawn_native {
         // 1. the last submitted serial has moved beyond the completed serial
         // 2. or the completed serial has not reached the future serial set by the trackers
         if (mLastSubmittedSerial > mCompletedSerial || mCompletedSerial < mFutureSerial) {
-            CheckPassedSerials();
-
+            DAWN_TRY(CheckPassedSerials());
             DAWN_TRY(TickImpl());
 
             // There is no GPU work in flight, we need to move the serials forward so that

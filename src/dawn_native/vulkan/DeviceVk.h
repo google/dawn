@@ -174,7 +174,7 @@ namespace dawn_native { namespace vulkan {
         std::unique_ptr<external_semaphore::Service> mExternalSemaphoreService;
 
         ResultOrError<VkFence> GetUnusedFence();
-        ExecutionSerial CheckAndUpdateCompletedSerials() override;
+        ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
         // We track which operations are in flight on the GPU with an increasing serial.
         // This works only because we have a single queue. Each submit to a queue is associated

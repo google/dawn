@@ -243,7 +243,7 @@ namespace dawn_native {
         // reaching the serial the work will be executed on.
         void AddFutureSerial(ExecutionSerial serial);
         // Check for passed fences and set the new completed serial
-        void CheckPassedSerials();
+        MaybeError CheckPassedSerials();
 
         MaybeError Tick();
 
@@ -336,7 +336,7 @@ namespace dawn_native {
 
         // Each backend should implement to check their passed fences if there are any and return a
         // completed serial. Return 0 should indicate no fences to check.
-        virtual ExecutionSerial CheckAndUpdateCompletedSerials() = 0;
+        virtual ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() = 0;
         // During shut down of device, some operations might have been started since the last submit
         // and waiting on a serial that doesn't have a corresponding fence enqueued. Fake serials to
         // make all commands look completed.

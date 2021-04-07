@@ -245,7 +245,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
         EXPECT_TRUE(std::find(heaps.begin(), heaps.end(), heap) == heaps.end());
         heaps.push_back(heap);
         // CheckPassedSerials() will update the last internally completed serial.
-        mD3DDevice->CheckPassedSerials();
+        EXPECT_TRUE(mD3DDevice->CheckPassedSerials().IsSuccess());
         // NextSerial() will increment the last internally submitted serial.
         EXPECT_TRUE(mD3DDevice->NextSerial().IsSuccess());
     }
@@ -258,7 +258,7 @@ TEST_P(D3D12DescriptorHeapTests, PoolHeapsInMultipleSubmits) {
         ComPtr<ID3D12DescriptorHeap> heap = allocator->GetShaderVisibleHeap();
         EXPECT_TRUE(heaps.front() == heap);
         heaps.pop_front();
-        mD3DDevice->CheckPassedSerials();
+        EXPECT_TRUE(mD3DDevice->CheckPassedSerials().IsSuccess());
         EXPECT_TRUE(mD3DDevice->NextSerial().IsSuccess());
     }
 

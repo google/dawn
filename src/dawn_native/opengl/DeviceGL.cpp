@@ -180,7 +180,7 @@ namespace dawn_native { namespace opengl {
         return {};
     }
 
-    ExecutionSerial Device::CheckAndUpdateCompletedSerials() {
+    ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
         ExecutionSerial fenceSerial{0};
         while (!mFencesInFlight.empty()) {
             GLsync sync = mFencesInFlight.front().first;
@@ -234,7 +234,7 @@ namespace dawn_native { namespace opengl {
 
     MaybeError Device::WaitForIdleForDestruction() {
         gl.Finish();
-        CheckPassedSerials();
+        DAWN_TRY(CheckPassedSerials());
         ASSERT(mFencesInFlight.empty());
 
         return {};

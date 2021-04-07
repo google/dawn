@@ -513,21 +513,22 @@ namespace dawn_native { namespace vulkan {
         return fence;
     }
 
-    ExecutionSerial Device::CheckAndUpdateCompletedSerials() {
+    ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
         ExecutionSerial fenceSerial(0);
         while (!mFencesInFlight.empty()) {
             VkFence fence = mFencesInFlight.front().first;
             ExecutionSerial tentativeSerial = mFencesInFlight.front().second;
             VkResult result = VkResult::WrapUnsafe(
                 INJECT_ERROR_OR_RUN(fn.GetFenceStatus(mVkDevice, fence), VK_ERROR_DEVICE_LOST));
-            // TODO: Handle DeviceLost error.
-            ASSERT(result == VK_SUCCESS || result == VK_NOT_READY);
 
             // Fence are added in order, so we can stop searching as soon
             // as we see one that's not ready.
             if (result == VK_NOT_READY) {
                 return fenceSerial;
+            } else {
+                DAWN_TRY(CheckVkSuccess(::VkResult(result), "GetFenceStatus"));
             }
+
             // Update fenceSerial since fence is ready.
             fenceSerial = tentativeSerial;
 

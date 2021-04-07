@@ -269,17 +269,17 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError Device::WaitForSerial(ExecutionSerial serial) {
-        CheckPassedSerials();
+        DAWN_TRY(CheckPassedSerials());
         if (GetCompletedCommandSerial() < serial) {
             DAWN_TRY(CheckHRESULT(mFence->SetEventOnCompletion(uint64_t(serial), mFenceEvent),
                                   "D3D12 set event on completion"));
             WaitForSingleObject(mFenceEvent, INFINITE);
-            CheckPassedSerials();
+            DAWN_TRY(CheckPassedSerials());
         }
         return {};
     }
 
-    ExecutionSerial Device::CheckAndUpdateCompletedSerials() {
+    ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
         ExecutionSerial completeSerial = ExecutionSerial(mFence->GetCompletedValue());
 
         if (completeSerial <= GetCompletedCommandSerial()) {

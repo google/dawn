@@ -218,25 +218,27 @@ namespace dawn_native { namespace null {
     }
 
     MaybeError Device::TickImpl() {
-        SubmitPendingOperations();
-        return {};
+        return SubmitPendingOperations();
     }
 
-    ExecutionSerial Device::CheckAndUpdateCompletedSerials() {
+    ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
         return GetLastSubmittedCommandSerial();
     }
 
     void Device::AddPendingOperation(std::unique_ptr<PendingOperation> operation) {
         mPendingOperations.emplace_back(std::move(operation));
     }
-    void Device::SubmitPendingOperations() {
+
+    MaybeError Device::SubmitPendingOperations() {
         for (auto& operation : mPendingOperations) {
             operation->Execute();
         }
         mPendingOperations.clear();
 
-        CheckPassedSerials();
+        DAWN_TRY(CheckPassedSerials());
         IncrementLastSubmittedCommandSerial();
+
+        return {};
     }
 
     // BindGroupDataHolder
@@ -342,8 +344,7 @@ namespace dawn_native { namespace null {
         // for testing purposes we should also tick in the null implementation.
         DAWN_TRY(device->Tick());
 
-        device->SubmitPendingOperations();
-        return {};
+        return device->SubmitPendingOperations();
     }
 
     MaybeError Queue::WriteBufferImpl(BufferBase* buffer,

@@ -176,7 +176,7 @@ namespace dawn_native { namespace metal {
         return TextureView::Create(texture, descriptor);
     }
 
-    ExecutionSerial Device::CheckAndUpdateCompletedSerials() {
+    ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
         uint64_t frontendCompletedSerial{GetCompletedCommandSerial()};
         if (frontendCompletedSerial > mCompletedSerial) {
             // sometimes we increase the serials, in which case the completed serial in
@@ -375,12 +375,12 @@ namespace dawn_native { namespace metal {
     MaybeError Device::WaitForIdleForDestruction() {
         // Forget all pending commands.
         mCommandContext.AcquireCommands();
-        CheckPassedSerials();
+        DAWN_TRY(CheckPassedSerials());
 
         // Wait for all commands to be finished so we can free resources
         while (GetCompletedCommandSerial() != GetLastSubmittedCommandSerial()) {
             usleep(100);
-            CheckPassedSerials();
+            DAWN_TRY(CheckPassedSerials());
         }
 
         return {};

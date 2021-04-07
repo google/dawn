@@ -181,7 +181,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<ID3D12Fence> mFence;
         HANDLE mFenceEvent = nullptr;
-        ExecutionSerial CheckAndUpdateCompletedSerials() override;
+        ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
         ComPtr<ID3D12Device> mD3d12Device;  // Device is owned by adapter and will not be outlived.
         ComPtr<ID3D12CommandQueue> mCommandQueue;

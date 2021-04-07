@@ -112,7 +112,7 @@ namespace dawn_native { namespace metal {
         void InitTogglesFromDriver();
         void ShutDownImpl() override;
         MaybeError WaitForIdleForDestruction() override;
-        ExecutionSerial CheckAndUpdateCompletedSerials() override;
+        ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
         NSPRef<id<MTLDevice>> mMtlDevice;
         NSPRef<id<MTLCommandQueue>> mCommandQueue;
