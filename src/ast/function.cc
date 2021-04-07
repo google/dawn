@@ -40,7 +40,6 @@ Function::Function(const Source& source,
   for (auto* param : params_) {
     TINT_ASSERT(param);
   }
-  TINT_ASSERT(body_);
   TINT_ASSERT(symbol_.IsValid());
   TINT_ASSERT(return_type_);
 }

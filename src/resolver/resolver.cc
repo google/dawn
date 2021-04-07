@@ -26,6 +26,7 @@
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
+#include "src/ast/internal_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/struct_block_decoration.h"
@@ -301,12 +302,18 @@ bool Resolver::ValidateFunction(const ast::Function* func) {
   }
 
   if (!func->return_type()->Is<type::Void>()) {
-    if (!func->get_last_statement() ||
-        !func->get_last_statement()->Is<ast::ReturnStatement>()) {
-      diagnostics_.add_error(
-          "v-0002", "non-void function must end with a return statement",
-          func->source());
-      return false;
+    if (func->body()) {
+      if (!func->get_last_statement() ||
+          !func->get_last_statement()->Is<ast::ReturnStatement>()) {
+        diagnostics_.add_error(
+            "v-0002", "non-void function must end with a return statement",
+            func->source());
+        return false;
+      }
+    } else if (!func->find_decoration<ast::InternalDecoration>()) {
+      TINT_ICE(diagnostics_)
+          << "Function " << builder_->Symbols().NameFor(func->symbol())
+          << " has no body and does not have the [[internal]] decoration";
     }
 
     for (auto* deco : func->return_type_decorations()) {
@@ -594,8 +601,10 @@ bool Resolver::Function(ast::Function* func) {
     }
   }
 
-  if (!BlockStatement(func->body())) {
-    return false;
+  if (func->body()) {
+    if (!BlockStatement(func->body())) {
+      return false;
+    }
   }
   variable_stack_.pop_scope();
 

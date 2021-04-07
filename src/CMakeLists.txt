@@ -96,6 +96,8 @@ set(TINT_LIB_SRCS
   ast/if_statement.h
   ast/int_literal.cc
   ast/int_literal.h
+  ast/internal_decoration.cc
+  ast/internal_decoration.h
   ast/literal.cc
   ast/literal.h
   ast/location_decoration.cc

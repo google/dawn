@@ -21,6 +21,7 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/internal_decoration.h"
 #include "src/ast/module.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
@@ -299,6 +300,9 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     if (auto* stage = deco->As<ast::StageDecoration>()) {
       out_ << "stage(" << stage->value() << ")";
     }
+    if (auto* internal = deco->As<ast::InternalDecoration>()) {
+      out_ << "internal(" << internal->Name() << ")";
+    }
     out_ << "]]" << std::endl;
   }
 
@@ -339,8 +343,14 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     return false;
   }
 
-  out_ << " ";
-  return EmitBlockAndNewline(func->body());
+  if (func->body()) {
+    out_ << " ";
+    return EmitBlockAndNewline(func->body());
+  } else {
+    out_ << std::endl;
+  }
+
+  return true;
 }
 
 bool GeneratorImpl::EmitImageFormat(const type::ImageFormat fmt) {

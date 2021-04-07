@@ -20,6 +20,7 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/internal_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/semantic/array.h"
 #include "src/semantic/call.h"
@@ -1463,6 +1464,11 @@ bool GeneratorImpl::EmitFunction(std::ostream& out, ast::Function* func) {
   }
 
   auto* func_sem = builder_.Sem().Get(func);
+
+  if (func->find_decoration<ast::InternalDecoration>()) {
+    // An internal function. Do not emit.
+    return true;
+  }
 
   // TODO(dsinclair): This could be smarter. If the input/outputs for multiple
   // entry points are the same we could generate a single struct and then have
