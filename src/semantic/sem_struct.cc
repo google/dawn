@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/struct_member.h"
 #include "src/semantic/struct.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::semantic::Struct);
@@ -36,6 +37,15 @@ Struct::Struct(type::Struct* type,
       pipeline_stage_uses_(std::move(pipeline_stage_uses)) {}
 
 Struct::~Struct() = default;
+
+const StructMember* Struct::FindMember(Symbol name) const {
+  for (auto* member : members_) {
+    if (member->Declaration()->symbol() == name) {
+      return member;
+    }
+  }
+  return nullptr;
+}
 
 StructMember::StructMember(ast::StructMember* declaration,
                            uint32_t offset,

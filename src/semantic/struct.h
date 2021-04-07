@@ -79,6 +79,10 @@ class Struct : public Castable<Struct, Node> {
   /// @returns the members of the structure
   const StructMemberList& Members() const { return members_; }
 
+  /// @param name the member name to look for
+  /// @returns the member with the given name, or nullptr if it was not found.
+  const StructMember* FindMember(Symbol name) const;
+
   /// @returns the byte alignment of the structure
   /// @note this may differ from the alignment of a structure member of this
   /// structure type, if the member is annotated with the `[[align(n)]]`
