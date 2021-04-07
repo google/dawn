@@ -137,7 +137,6 @@ TEST_P(EntryPointTests, TwoComputeInModule) {
 
 DAWN_INSTANTIATE_TEST(EntryPointTests,
                       D3D12Backend(),
-                      D3D12Backend({"use_tint_generator"}),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),
