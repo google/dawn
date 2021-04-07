@@ -122,10 +122,14 @@ namespace dawn_native {
                     return DAWN_VALIDATION_ERROR("Multisampled texture must be 2D with depth=1");
                 }
 
-                if (format->isCompressed) {
-                    return DAWN_VALIDATION_ERROR(
-                        "The sample counts of the textures in BC formats must be 1.");
+                // If a format can support multisample, it must be renderable. Because Vulkan
+                // requires that if the format is not color-renderable or depth/stencil renderable,
+                // sampleCount must be 1.
+                if (!format->isRenderable) {
+                    return DAWN_VALIDATION_ERROR("This format cannot support multisample.");
                 }
+                // Compressed formats are not renderable. They cannot support multisample.
+                ASSERT(!format->isCompressed);
 
                 if (descriptor->usage & wgpu::TextureUsage::Storage) {
                     return DAWN_VALIDATION_ERROR(

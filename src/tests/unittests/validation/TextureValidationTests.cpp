@@ -21,6 +21,12 @@
 
 namespace {
 
+    constexpr wgpu::TextureFormat kNonRenderableColorFormats[] = {
+        wgpu::TextureFormat::RG11B10Ufloat, wgpu::TextureFormat::RGB9E5Ufloat,
+        wgpu::TextureFormat::R8Snorm,       wgpu::TextureFormat::RG8Snorm,
+        wgpu::TextureFormat::RGBA8Snorm,
+    };
+
     class TextureValidationTest : public ValidationTest {
       protected:
         void SetUp() override {
@@ -103,6 +109,19 @@ namespace {
 
             descriptor.dimension = wgpu::TextureDimension::e3D;
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+        }
+
+        // It is an error to create a multisample texture when the format cannot support
+        // multisample.
+        {
+            wgpu::TextureDescriptor descriptor = defaultDescriptor;
+            descriptor.sampleCount = 4;
+
+            for (wgpu::TextureFormat format : kNonRenderableColorFormats) {
+                // If a format can support multisample, it must be renderable.
+                descriptor.format = format;
+                ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
+            }
         }
 
         // Currently we do not support multisampled 2D textures with depth>1.
@@ -453,14 +472,7 @@ namespace {
         descriptor.format = wgpu::TextureFormat::RGBA8Unorm;
         device.CreateTexture(&descriptor);
 
-        wgpu::TextureFormat nonRenderableFormats[] = {
-            wgpu::TextureFormat::RG11B10Ufloat,
-            wgpu::TextureFormat::R8Snorm,
-            wgpu::TextureFormat::RG8Snorm,
-            wgpu::TextureFormat::RGBA8Snorm,
-        };
-
-        for (wgpu::TextureFormat format : nonRenderableFormats) {
+        for (wgpu::TextureFormat format : kNonRenderableColorFormats) {
             // Fails because `format` is non-renderable
             descriptor.format = format;
             ASSERT_DEVICE_ERROR(device.CreateTexture(&descriptor));
