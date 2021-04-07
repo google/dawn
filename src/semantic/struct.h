@@ -38,7 +38,7 @@ namespace semantic {
 class StructMember;
 
 /// A vector of StructMember pointers.
-using StructMemberList = std::vector<StructMember*>;
+using StructMemberList = std::vector<const StructMember*>;
 
 /// Metadata to capture how a structure is used in a shader module.
 enum class PipelineStageUsage {

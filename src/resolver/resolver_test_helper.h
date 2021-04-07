@@ -67,6 +67,17 @@ class TestHelper : public ProgramBuilder {
     return sem_stmt ? sem_stmt->Block() : nullptr;
   }
 
+  /// Returns the semantic variable for the given identifier expression.
+  /// @param expr the identifier expression
+  /// @return the resolved semantic::Variable of the identifier, or nullptr if
+  /// the expression did not resolve to a variable.
+  const semantic::Variable* VarOf(ast::Expression* expr) {
+    auto* sem_ident = Sem().Get(expr);
+    auto* var_user =
+        sem_ident ? sem_ident->As<semantic::VariableUser>() : nullptr;
+    return var_user ? var_user->Variable() : nullptr;
+  }
+
   /// Checks that all the users of the given variable are as expected
   /// @param var the variable to check
   /// @param expected_users the expected users of the variable

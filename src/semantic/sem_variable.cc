@@ -14,21 +14,26 @@
 
 #include "src/semantic/variable.h"
 
+#include "src/ast/identifier_expression.h"
+
 TINT_INSTANTIATE_TYPEINFO(tint::semantic::Variable);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::VariableUser);
 
 namespace tint {
 namespace semantic {
 
 Variable::Variable(const ast::Variable* declaration,
                    type::Type* type,
-                   ast::StorageClass storage_class,
-                   std::vector<const Expression*> users)
-    : declaration_(declaration),
-      type_(type),
-      storage_class_(storage_class),
-      users_(std::move(users)) {}
+                   ast::StorageClass storage_class)
+    : declaration_(declaration), type_(type), storage_class_(storage_class) {}
 
 Variable::~Variable() = default;
+
+VariableUser::VariableUser(ast::IdentifierExpression* declaration,
+                           type::Type* type,
+                           Statement* statement,
+                           semantic::Variable* variable)
+    : Base(declaration, type, statement), variable_(variable) {}
 
 }  // namespace semantic
 }  // namespace tint

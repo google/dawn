@@ -135,7 +135,7 @@ class Resolver {
     StructInfo();
     ~StructInfo();
 
-    std::vector<semantic::StructMember*> members;
+    std::vector<const semantic::StructMember*> members;
     uint32_t align = 0;
     uint32_t size = 0;
     uint32_t size_no_padding = 0;

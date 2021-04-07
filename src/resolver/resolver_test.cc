@@ -338,6 +338,10 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
   EXPECT_EQ(StmtOf(bar_f32_init), bar_f32_decl);
   EXPECT_TRUE(CheckVarUsers(foo_i32, {bar_i32->constructor()}));
   EXPECT_TRUE(CheckVarUsers(foo_f32, {bar_f32->constructor()}));
+  ASSERT_NE(VarOf(bar_i32->constructor()), nullptr);
+  EXPECT_EQ(VarOf(bar_i32->constructor())->Declaration(), foo_i32);
+  ASSERT_NE(VarOf(bar_f32->constructor()), nullptr);
+  EXPECT_EQ(VarOf(bar_f32->constructor())->Declaration(), foo_f32);
 }
 
 TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
@@ -383,6 +387,8 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
   EXPECT_EQ(StmtOf(fn_f32_init), fn_f32_decl);
   EXPECT_TRUE(CheckVarUsers(fn_i32, {}));
   EXPECT_TRUE(CheckVarUsers(mod_f32, {fn_f32->constructor()}));
+  ASSERT_NE(VarOf(fn_f32->constructor()), nullptr);
+  EXPECT_EQ(VarOf(fn_f32->constructor())->Declaration(), mod_f32);
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Array) {
@@ -612,6 +618,8 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
   EXPECT_TRUE(TypeOf(ident)->Is<type::Pointer>());
   EXPECT_TRUE(TypeOf(ident)->As<type::Pointer>()->type()->Is<type::F32>());
   EXPECT_TRUE(CheckVarUsers(my_var, {ident}));
+  ASSERT_NE(VarOf(ident), nullptr);
+  EXPECT_EQ(VarOf(ident)->Declaration(), my_var);
 }
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalConstant) {
@@ -625,6 +633,8 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalConstant) {
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<type::F32>());
   EXPECT_TRUE(CheckVarUsers(my_var, {ident}));
+  ASSERT_NE(VarOf(ident), nullptr);
+  EXPECT_EQ(VarOf(ident)->Declaration(), my_var);
 }
 
 TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
@@ -645,6 +655,8 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
   EXPECT_TRUE(TypeOf(my_var_a)->Is<type::F32>());
   EXPECT_EQ(StmtOf(my_var_a), decl);
   EXPECT_TRUE(CheckVarUsers(var, {my_var_a}));
+  ASSERT_NE(VarOf(my_var_a), nullptr);
+  EXPECT_EQ(VarOf(my_var_a)->Declaration(), var);
 }
 
 TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
@@ -672,6 +684,10 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
   EXPECT_TRUE(TypeOf(my_var_b)->As<type::Pointer>()->type()->Is<type::F32>());
   EXPECT_EQ(StmtOf(my_var_b), assign);
   EXPECT_TRUE(CheckVarUsers(var, {my_var_a, my_var_b}));
+  ASSERT_NE(VarOf(my_var_a), nullptr);
+  EXPECT_EQ(VarOf(my_var_a)->Declaration(), var);
+  ASSERT_NE(VarOf(my_var_b), nullptr);
+  EXPECT_EQ(VarOf(my_var_b)->Declaration(), var);
 }
 
 TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {

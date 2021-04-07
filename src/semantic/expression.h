@@ -37,9 +37,9 @@ class Expression : public Castable<Expression, Node> {
   /// @param declaration the AST node
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
-  explicit Expression(ast::Expression* declaration,
-                      type::Type* type,
-                      Statement* statement);
+  Expression(ast::Expression* declaration,
+             type::Type* type,
+             Statement* statement);
 
   /// @return the resolved type of the expression
   type::Type* Type() const { return type_; }

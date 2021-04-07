@@ -1631,20 +1631,30 @@ void Resolver::CreateSemanticNodes() const {
   for (auto it : variable_to_info_) {
     auto* var = it.first;
     auto* info = it.second;
-    std::vector<const semantic::Expression*> users;
+    auto* sem_var = builder_->create<semantic::Variable>(var, info->type,
+                                                         info->storage_class);
+    std::vector<const semantic::VariableUser*> users;
     for (auto* user : info->users) {
       // Create semantic node for the identifier expression if necessary
       auto* sem_expr = sem.Get(user);
       if (sem_expr == nullptr) {
         auto* type = expr_info_.at(user).type;
         auto* stmt = expr_info_.at(user).statement;
-        sem_expr = builder_->create<semantic::Expression>(user, type, stmt);
-        sem.Add(user, sem_expr);
+        auto* sem_user =
+            builder_->create<semantic::VariableUser>(user, type, stmt, sem_var);
+        sem_var->AddUser(sem_user);
+        sem.Add(user, sem_user);
+      } else {
+        auto* sem_user = sem_expr->As<semantic::VariableUser>();
+        if (!sem_user) {
+          TINT_ICE(builder_->Diagnostics())
+              << "expected semantic::VariableUser, got "
+              << sem_expr->TypeInfo().name;
+        }
+        sem_var->AddUser(sem_user);
       }
-      users.push_back(sem_expr);
     }
-    sem.Add(var, builder_->create<semantic::Variable>(
-                     var, info->type, info->storage_class, std::move(users)));
+    sem.Add(var, sem_var);
   }
 
   auto remap_vars = [&sem](const std::vector<VariableInfo*>& in) {
