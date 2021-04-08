@@ -28,7 +28,7 @@ var<storage> a : array<f32, 3>;
 
 const c : u32 = 1u;
 
-fn f() -> void {
+fn f() {
   const b : ptr<storage, f32> = a[c];
 }
 )";
@@ -38,7 +38,7 @@ var<storage> a : array<f32, 3>;
 
 const c : u32 = 1u;
 
-fn f() -> void {
+fn f() {
   const b : ptr<storage, f32> = a[min(u32(c), 2u)];
 }
 )";
@@ -56,7 +56,7 @@ var<in> b : array<f32, 5>;
 
 var<in> i : u32;
 
-fn f() -> void {
+fn f() {
   var c : f32 = a[ b[i] ];
 }
 )";
@@ -68,7 +68,7 @@ var<in> b : array<f32, 5>;
 
 var<in> i : u32;
 
-fn f() -> void {
+fn f() {
   var c : f32 = a[min(u32(b[min(u32(i), 4u)]), 2u)];
 }
 )";
@@ -82,7 +82,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Scalar) {
   auto* src = R"(
 var<in> a : array<f32, 3>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[1];
 }
 )";
@@ -90,7 +90,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : array<f32, 3>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[1];
 }
 )";
@@ -106,7 +106,7 @@ var<in> a : array<f32, 3>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[c + 2 - 3];
 }
 )";
@@ -116,7 +116,7 @@ var<in> a : array<f32, 3>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[min(u32(((c + 2) - 3)), 2u)];
 }
 )";
@@ -130,7 +130,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_Negative) {
   auto* src = R"(
 var<in> a : array<f32, 3>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[-1];
 }
 )";
@@ -138,7 +138,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : array<f32, 3>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[0];
 }
 )";
@@ -152,7 +152,7 @@ TEST_F(BoundArrayAccessorsTest, Array_Idx_OutOfBounds) {
   auto* src = R"(
 var<in> a : array<f32, 3>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[3];
 }
 )";
@@ -160,7 +160,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : array<f32, 3>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[2];
 }
 )";
@@ -174,7 +174,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Scalar) {
   auto* src = R"(
 var<in> a : vec3<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[1];
 }
 )";
@@ -182,7 +182,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : vec3<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[1];
 }
 )";
@@ -198,7 +198,7 @@ var<in> a : vec3<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[c + 2 - 3];
 }
 )";
@@ -208,7 +208,7 @@ var<in> a : vec3<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[min(u32(((c + 2) - 3)), 2u)];
 }
 )";
@@ -222,7 +222,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Swizzle_Idx_Scalar) {
   auto* src = R"(
 var<in> a : vec3<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a.xy[2];
 }
 )";
@@ -230,7 +230,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : vec3<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a.xy[1];
 }
 )";
@@ -246,7 +246,7 @@ var<in> a : vec3<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a.xy[c];
 }
 )";
@@ -256,7 +256,7 @@ var<in> a : vec3<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a.xy[min(u32(c), 1u)];
 }
 )";
@@ -271,7 +271,7 @@ var<in> a : vec3<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a.xy[c + 2 - 3];
 }
 )";
@@ -281,7 +281,7 @@ var<in> a : vec3<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a.xy[min(u32(((c + 2) - 3)), 1u)];
 }
 )";
@@ -295,7 +295,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_Negative) {
   auto* src = R"(
 var<in> a : vec3<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[-1];
 }
 )";
@@ -303,7 +303,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : vec3<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[0];
 }
 )";
@@ -317,7 +317,7 @@ TEST_F(BoundArrayAccessorsTest, Vector_Idx_OutOfBounds) {
   auto* src = R"(
 var<in> a : vec3<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[3];
 }
 )";
@@ -325,7 +325,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : vec3<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[2];
 }
 )";
@@ -339,7 +339,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Scalar) {
   auto* src = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[2][1];
 }
 )";
@@ -347,7 +347,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[2][1];
 }
 )";
@@ -363,7 +363,7 @@ var<in> a : mat3x2<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[c + 2 - 3][1];
 }
 )";
@@ -373,7 +373,7 @@ var<in> a : mat3x2<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[min(u32(((c + 2) - 3)), 2u)][1];
 }
 )";
@@ -389,7 +389,7 @@ var<in> a : mat3x2<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[1][c + 2 - 3];
 }
 )";
@@ -399,7 +399,7 @@ var<in> a : mat3x2<f32>;
 
 var<in> c : i32;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[1][min(u32(((c + 2) - 3)), 1u)];
 }
 )";
@@ -413,7 +413,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Column) {
   auto* src = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[-1][1];
 }
 )";
@@ -421,7 +421,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[0][1];
 }
 )";
@@ -435,7 +435,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_Negative_Row) {
   auto* src = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[2][-1];
 }
 )";
@@ -443,7 +443,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[2][0];
 }
 )";
@@ -457,7 +457,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Column) {
   auto* src = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[5][1];
 }
 )";
@@ -465,7 +465,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[2][1];
 }
 )";
@@ -479,7 +479,7 @@ TEST_F(BoundArrayAccessorsTest, Matrix_Idx_OutOfBounds_Row) {
   auto* src = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[2][5];
 }
 )";
@@ -487,7 +487,7 @@ fn f() -> void {
   auto* expect = R"(
 var<in> a : mat3x2<f32>;
 
-fn f() -> void {
+fn f() {
   var b : f32 = a[2][1];
 }
 )";
@@ -542,7 +542,7 @@ struct S {
 };
 var<in> s : S;
 
-fn f() -> void {
+fn f() {
   var d : f32 = s.b[25];
 }
 )";
@@ -556,7 +556,7 @@ struct S {
 
 var<in> s : S;
 
-fn f() -> void {
+fn f() {
   var d : f32 = s.b[min(u32(25), (arrayLength(s.b) - 1u))];
 }
 )";

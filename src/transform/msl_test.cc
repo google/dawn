@@ -31,7 +31,7 @@ struct class {
 };
 
 [[stage(fragment)]]
-fn main() -> void {
+fn main() {
   var foo : i32;
   var half : f32;
   var half1 : f32;
@@ -46,7 +46,7 @@ struct _tint_class {
 };
 
 [[stage(fragment)]]
-fn _tint_main() -> void {
+fn _tint_main() {
   var foo : i32;
   var _tint_half : f32;
   var half1 : f32;
@@ -65,7 +65,7 @@ TEST_P(MslReservedKeywordTest, Keywords) {
 
   auto src = R"(
 [[stage(fragment)]]
-fn main() -> void {
+fn main() {
   var )" + keyword +
              R"( : i32;
 }
@@ -73,7 +73,7 @@ fn main() -> void {
 
   auto expect = R"(
 [[stage(fragment)]]
-fn _tint_main() -> void {
+fn _tint_main() {
   var _tint_)" + keyword +
                 R"( : i32;
 }

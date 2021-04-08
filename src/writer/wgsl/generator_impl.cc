@@ -330,17 +330,22 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
     }
   }
 
-  out_ << ") -> ";
+  out_ << ")";
 
-  if (!func->return_type_decorations().empty()) {
-    if (!EmitDecorations(func->return_type_decorations())) {
+  if (!func->return_type()->Is<type::Void>() ||
+      !func->return_type_decorations().empty()) {
+    out_ << " -> ";
+
+    if (!func->return_type_decorations().empty()) {
+      if (!EmitDecorations(func->return_type_decorations())) {
+        return false;
+      }
+      out_ << " ";
+    }
+
+    if (!EmitType(func->return_type())) {
       return false;
     }
-    out_ << " ";
-  }
-
-  if (!EmitType(func->return_type())) {
-    return false;
   }
 
   if (func->body()) {

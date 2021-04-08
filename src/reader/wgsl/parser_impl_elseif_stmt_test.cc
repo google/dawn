@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, ElseIfStmt_Multiple) {
 }
 
 TEST_F(ParserImplTest, ElseIfStmt_InvalidBody) {
-  auto p = parser("elseif (true) { fn main() -> void {}}");
+  auto p = parser("elseif (true) { fn main() {}}");
   auto e = p->elseif_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);

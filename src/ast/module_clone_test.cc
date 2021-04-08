@@ -98,7 +98,7 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
 }
 
 [[stage(fragment)]]
-fn main() -> void {
+fn main() {
   f1(1.0, 2);
 }
 
@@ -106,7 +106,7 @@ const declaration_order_check_0 : i32 = 1;
 
 type declaration_order_check_1 = f32;
 
-fn declaration_order_check_2() -> void {}
+fn declaration_order_check_2() {}
 
 type declaration_order_check_2 = f32;
 

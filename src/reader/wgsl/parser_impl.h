@@ -320,7 +320,11 @@ class ParserImpl {
   /// @return `Failure::Errored::kError` so that you can combine an add_error()
   /// call and return on the same line.
   Failure::Errored add_error(const Source& source, const std::string& msg);
-
+  /// Appends a deprecated-language-feature warning at `source` with the message
+  /// `msg`
+  /// @param source the source to associate the error with
+  /// @param msg the warning message
+  void deprecated(const Source& source, const std::string& msg);
   /// Registers a constructed type into the parser
   /// @param name the constructed name
   /// @param type the constructed type

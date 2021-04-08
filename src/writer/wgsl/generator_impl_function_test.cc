@@ -39,7 +39,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitFunction(func));
-  EXPECT_EQ(gen.result(), R"(  fn my_func() -> void {
+  EXPECT_EQ(gen.result(), R"(  fn my_func() {
     discard;
     return;
   }
@@ -63,7 +63,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitFunction(func));
-  EXPECT_EQ(gen.result(), R"(  fn my_func(a : f32, b : i32) -> void {
+  EXPECT_EQ(gen.result(), R"(  fn my_func(a : f32, b : i32) {
     discard;
     return;
   }
@@ -86,7 +86,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
 
   ASSERT_TRUE(gen.EmitFunction(func));
   EXPECT_EQ(gen.result(), R"(  [[workgroup_size(2, 4, 6)]]
-  fn my_func() -> void {
+  fn my_func() {
     discard;
     return;
   }
@@ -110,7 +110,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 
   ASSERT_TRUE(gen.EmitFunction(func));
   EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
-  fn my_func() -> void {
+  fn my_func() {
     discard;
     return;
   }
@@ -136,7 +136,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
   ASSERT_TRUE(gen.EmitFunction(func));
   EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
   [[workgroup_size(2, 4, 6)]]
-  fn my_func() -> void {
+  fn my_func() {
     discard;
     return;
   }
@@ -162,7 +162,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
 
   ASSERT_TRUE(gen.EmitFunction(func));
   EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
-  fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>, [[location(1)]] loc1 : f32) -> void {
+  fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>, [[location(1)]] loc1 : f32) {
   }
 )");
 }
@@ -201,12 +201,12 @@ TEST_F(WgslGeneratorImplTest,
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
   // [[stage(compute)]]
-  // fn a() -> void {
+  // fn a() {
   //   return;
   // }
   //
   // [[stage(compute)]]
-  // fn b() -> void {
+  // fn b() {
   //   return;
   // }
 
@@ -263,13 +263,13 @@ struct Data {
 Data;
 
 [[stage(compute)]]
-fn a() -> void {
+fn a() {
   var v : f32 = data.d;
   return;
 }
 
 [[stage(compute)]]
-fn b() -> void {
+fn b() {
   var v : f32 = data.d;
   return;
 }

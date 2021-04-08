@@ -36,7 +36,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
 
   ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  [[stage(compute)]]
-  fn test_function() -> void {
+  fn test_function() {
     var a : f32;
   }
 
@@ -103,7 +103,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
   };
 
   [[stage(compute)]]
-  fn main() -> void {
+  fn main() {
     var s0 : S0;
     var s1 : S1;
     a1 = func();

@@ -48,7 +48,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
 TEST_F(ResolverFunctionValidationTest,
        VoidFunctionEndWithoutReturnStatement_Pass) {
   // [[stage(vertex)]]
-  // fn func -> void { var a:i32 = 2; }
+  // fn func { var a:i32 = 2; }
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
@@ -83,7 +83,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
 TEST_F(ResolverFunctionValidationTest,
        VoidFunctionEndWithoutReturnStatementEmptyBody_Pass) {
   // [[stage(vertex)]]
-  // fn func -> void {}
+  // fn func {}
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
        ty.void_(), ast::StatementList{},
@@ -110,7 +110,7 @@ TEST_F(ResolverFunctionValidationTest,
 TEST_F(ResolverFunctionValidationTest,
        FunctionTypeMustMatchReturnStatementType_Pass) {
   // [[stage(vertex)]]
-  // fn func -> void { return; }
+  // fn func { return; }
 
   Func("func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -125,7 +125,7 @@ TEST_F(ResolverFunctionValidationTest,
 
 TEST_F(ResolverFunctionValidationTest,
        FunctionTypeMustMatchReturnStatementType_fail) {
-  // fn func -> void { return 2; }
+  // fn func { return 2; }
   Func("func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
@@ -216,7 +216,7 @@ TEST_F(ResolverFunctionValidationTest,
 TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
   // [[stage(fragment)]]
   // [[stage(vertex)]]
-  // fn main() -> void { return; }
+  // fn main() { return; }
   Func(Source{Source::Location{12, 34}}, "main", ast::VariableList{},
        ty.void_(),
        ast::StatementList{
@@ -244,7 +244,7 @@ TEST_F(ResolverFunctionValidationTest, NoPipelineEntryPoints) {
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
-  // fn foo(bar : f32) -> void{
+  // fn foo(bar : f32){
   //   var baz : f32 = bar;
   // }
 
@@ -258,7 +258,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
-  // fn foo(bar : f32) -> void{
+  // fn foo(bar : f32){
   //   const baz : f32 = bar;
   // }
 

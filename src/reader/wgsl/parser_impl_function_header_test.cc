@@ -20,7 +20,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, FunctionHeader) {
-  auto p = parser("fn main(a : i32, b: f32) -> void");
+  auto p = parser("fn main(a : i32, b: f32)");
   auto f = p->function_header();
   ASSERT_FALSE(p->has_error()) << p->error();
   EXPECT_TRUE(f.matched);
@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingIdent) {
-  auto p = parser("fn () -> void");
+  auto p = parser("fn ()");
   auto f = p->function_header();
   EXPECT_FALSE(f.matched);
   EXPECT_TRUE(f.errored);
@@ -94,15 +94,6 @@ TEST_F(ParserImplTest, FunctionHeader_MissingParenRight) {
   EXPECT_EQ(p->error(), "1:10: expected ')' for function declaration");
 }
 
-TEST_F(ParserImplTest, FunctionHeader_MissingArrow) {
-  auto p = parser("fn main() i32");
-  auto f = p->function_header();
-  EXPECT_FALSE(f.matched);
-  EXPECT_TRUE(f.errored);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:11: expected '->' for function declaration");
-}
-
 TEST_F(ParserImplTest, FunctionHeader_InvalidReturnType) {
   auto p = parser("fn main() -> invalid");
   auto f = p->function_header();
@@ -119,6 +110,19 @@ TEST_F(ParserImplTest, FunctionHeader_MissingReturnType) {
   EXPECT_TRUE(f.errored);
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:13: unable to determine function return type");
+}
+
+TEST_F(ParserImplTest, FunctionHeader_ArrowVoid) {
+  auto p = parser("fn main() -> void");
+  auto f = p->function_header();
+  EXPECT_TRUE(f.matched);
+  EXPECT_FALSE(f.errored);
+  EXPECT_EQ(
+      p->builder().Diagnostics().str(),
+      R"(test.wgsl:1:14 warning: use of deprecated language feature: omit '-> void' for functions that do not return a value
+fn main() -> void
+             ^^^^
+)");
 }
 
 }  // namespace

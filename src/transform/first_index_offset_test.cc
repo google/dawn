@@ -35,7 +35,7 @@ fn test() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   test();
 }
 )";
@@ -86,7 +86,7 @@ fn test() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   test();
 }
 )";
@@ -107,7 +107,7 @@ fn test() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   test();
 }
 )";
@@ -134,7 +134,7 @@ fn test() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   test();
 }
 )";
@@ -155,7 +155,7 @@ fn test() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   test();
 }
 )";
@@ -183,7 +183,7 @@ fn test() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   test();
 }
 )";
@@ -208,7 +208,7 @@ fn test() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   test();
 }
 )";
@@ -239,7 +239,7 @@ fn func2() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   func2();
 }
 )";
@@ -264,7 +264,7 @@ fn func2() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   func2();
 }
 )";

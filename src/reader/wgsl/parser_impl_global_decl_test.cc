@@ -127,7 +127,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias_MissingSemicolon) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function) {
-  auto p = parser("fn main() -> void { return; }");
+  auto p = parser("fn main() { return; }");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
@@ -138,7 +138,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Function_WithDecoration) {
-  auto p = parser("[[workgroup_size(2)]] fn main() -> void { return; }");
+  auto p = parser("[[workgroup_size(2)]] fn main() { return; }");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 

@@ -199,7 +199,7 @@ type example struct {
 func tryCompile(compiler, wd string, e example) error {
 	code := e.code
 	if e.functionScope {
-		code = "\n[[stage(vertex)]] fn main() -> void {\n" + code + "}\n"
+		code = "\n[[stage(vertex)]] fn main() {\n" + code + "}\n"
 	}
 
 	addedStubFunction := false
@@ -212,7 +212,7 @@ func tryCompile(compiler, wd string, e example) error {
 		if !addedStubFunction && strings.Contains(err.Error(), "error v-0003") {
 			// error v-0003: At least one of vertex, fragment or compute shader
 			// must be present. Add a stub entry point to satisfy the compiler.
-			code += "\n[[stage(vertex)]] fn main() -> void {}\n"
+			code += "\n[[stage(vertex)]] fn main() {}\n"
 			addedStubFunction = true
 			continue
 		}

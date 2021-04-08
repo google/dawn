@@ -2244,7 +2244,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           ValidTextureOverload::kStoreWO1dRgba32float,
           "textureStore(t      : texture_storage_1d<rgba32float>,\n"
           "             coords : i32,\n"
-          "             value  : vec4<T>) -> void",
+          "             value  : vec4<T>)",
           ast::AccessControl::kWriteOnly,
           type::ImageFormat::kRgba32Float,
           type::TextureDimension::k1d,
@@ -2260,7 +2260,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           ValidTextureOverload::kStoreWO2dRgba32float,
           "textureStore(t      : texture_storage_2d<rgba32float>,\n"
           "             coords : vec2<i32>,\n"
-          "             value  : vec4<T>) -> void",
+          "             value  : vec4<T>)",
           ast::AccessControl::kWriteOnly,
           type::ImageFormat::kRgba32Float,
           type::TextureDimension::k2d,
@@ -2277,7 +2277,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           "textureStore(t           : texture_storage_2d_array<rgba32float>,\n"
           "             coords      : vec2<i32>,\n"
           "             array_index : i32,\n"
-          "             value       : vec4<T>) -> void",
+          "             value       : vec4<T>)",
           ast::AccessControl::kWriteOnly,
           type::ImageFormat::kRgba32Float,
           type::TextureDimension::k2dArray,
@@ -2294,7 +2294,7 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           ValidTextureOverload::kStoreWO3dRgba32float,
           "textureStore(t      : texture_storage_3d<rgba32float>,\n"
           "             coords : vec3<i32>,\n"
-          "             value  : vec4<T>) -> void",
+          "             value  : vec4<T>)",
           ast::AccessControl::kWriteOnly,
           type::ImageFormat::kRgba32Float,
           type::TextureDimension::k3d,

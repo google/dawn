@@ -78,7 +78,7 @@ TEST_F(ParserImplTest, IfStmt_MissingCondition) {
 }
 
 TEST_F(ParserImplTest, IfStmt_InvalidBody) {
-  auto p = parser("if (a) { fn main() -> void {}}");
+  auto p = parser("if (a) { fn main() {}}");
   auto e = p->if_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);

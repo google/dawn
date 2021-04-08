@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, ElseStmt) {
 }
 
 TEST_F(ParserImplTest, ElseStmt_InvalidBody) {
-  auto p = parser("else { fn main() -> void {}}");
+  auto p = parser("else { fn main() {}}");
   auto e = p->else_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);

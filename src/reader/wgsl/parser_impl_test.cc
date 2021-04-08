@@ -29,7 +29,7 @@ TEST_F(ParserImplTest, Parses) {
 [[location(0)]] var<out> gl_FragColor : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   gl_FragColor = vec4<f32>(.4, .2, .3, 1);
 }
 )");

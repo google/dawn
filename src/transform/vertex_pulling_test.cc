@@ -41,7 +41,7 @@ TEST_F(VertexPullingTest, Error_NoEntryPoint) {
 TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
   auto* src = R"(
 [[stage(vertex)]]
-fn main() -> void {}
+fn main() {}
 )";
 
   auto* expect = "error: Vertex stage entry point not found";
@@ -59,7 +59,7 @@ fn main() -> void {}
 TEST_F(VertexPullingTest, Error_EntryPointWrongStage) {
   auto* src = R"(
 [[stage(fragment)]]
-fn main() -> void {}
+fn main() {}
 )";
 
   auto* expect = "error: Vertex stage entry point not found";
@@ -77,7 +77,7 @@ fn main() -> void {}
 TEST_F(VertexPullingTest, BasicModule) {
   auto* src = R"(
 [[stage(vertex)]]
-fn main() -> void {}
+fn main() {}
 )";
 
   auto* expect = R"(
@@ -87,7 +87,7 @@ struct TintVertexData {
 };
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   {
     var _tint_pulling_pos : u32;
   }
@@ -109,7 +109,7 @@ TEST_F(VertexPullingTest, OneAttribute) {
 [[location(0)]] var<in> var_a : f32;
 
 [[stage(vertex)]]
-fn main() -> void {}
+fn main() {}
 )";
 
   auto* expect = R"(
@@ -125,7 +125,7 @@ struct TintVertexData {
 var<private> var_a : f32;
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   {
     var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 4u) + 0u);
@@ -151,7 +151,7 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
 [[location(0)]] var<in> var_a : f32;
 
 [[stage(vertex)]]
-fn main() -> void {}
+fn main() {}
 )";
 
   auto* expect = R"(
@@ -167,7 +167,7 @@ struct TintVertexData {
 var<private> var_a : f32;
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   {
     var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_instance_index * 4u) + 0u);
@@ -193,7 +193,7 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
 [[location(0)]] var<in> var_a : f32;
 
 [[stage(vertex)]]
-fn main() -> void {}
+fn main() {}
 )";
 
   auto* expect = R"(
@@ -209,7 +209,7 @@ struct TintVertexData {
 var<private> var_a : f32;
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   {
     var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 4u) + 0u);
@@ -240,7 +240,7 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
 [[builtin(instance_index)]] var<in> custom_instance_index : u32;
 
 [[stage(vertex)]]
-fn main() -> void {}
+fn main() {}
 )";
 
   auto* expect = R"(
@@ -262,7 +262,7 @@ var<private> var_b : f32;
 [[builtin(instance_index)]] var<in> custom_instance_index : u32;
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   {
     var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((custom_vertex_index * 4u) + 0u);
@@ -301,7 +301,7 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
 [[location(1)]] var<in> var_b : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() -> void {}
+fn main() {}
 )";
 
   auto* expect = R"(
@@ -319,7 +319,7 @@ var<private> var_a : f32;
 var<private> var_b : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   {
     var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 16u) + 0u);
@@ -351,7 +351,7 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
 [[location(2)]] var<in> var_c : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() -> void {}
+fn main() {}
 )";
 
   auto* expect = R"(
@@ -375,7 +375,7 @@ var<private> var_b : vec3<f32>;
 var<private> var_c : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   {
     var _tint_pulling_pos : u32;
     _tint_pulling_pos = ((_tint_pulling_vertex_index * 8u) + 0u);

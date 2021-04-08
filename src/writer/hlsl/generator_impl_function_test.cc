@@ -185,7 +185,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   // fn vert_main() -> Interface {
   //   return Interface(0.4, 0.6);
   // }
-  // fn frag_main(colors : Interface) -> void {
+  // fn frag_main(colors : Interface) {
   //   const r = colors.col1;
   //   const g = colors.col2;
   // }
@@ -961,12 +961,12 @@ TEST_F(HlslGeneratorImplTest_Function,
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
   // [[stage(compute)]]
-  // fn a() -> void {
+  // fn a() {
   //   return;
   // }
   //
   // [[stage(compute)]]
-  // fn b() -> void {
+  // fn b() {
   //   return;
   // }
 

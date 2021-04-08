@@ -38,179 +38,179 @@ class ParserImplErrorTest : public ParserImplTest {};
   } while (false)
 
 TEST_F(ParserImplErrorTest, AdditiveInvalidExpr) {
-  EXPECT("fn f() -> void { return 1.0 + <; }",
-         "test.wgsl:1:31 error: unable to parse right side of + expression\n"
-         "fn f() -> void { return 1.0 + <; }\n"
-         "                              ^\n");
+  EXPECT("fn f() { return 1.0 + <; }",
+         "test.wgsl:1:23 error: unable to parse right side of + expression\n"
+         "fn f() { return 1.0 + <; }\n"
+         "                      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, AndInvalidExpr) {
-  EXPECT("fn f() -> void { return 1 & >; }",
-         "test.wgsl:1:29 error: unable to parse right side of & expression\n"
-         "fn f() -> void { return 1 & >; }\n"
-         "                            ^\n");
+  EXPECT("fn f() { return 1 & >; }",
+         "test.wgsl:1:21 error: unable to parse right side of & expression\n"
+         "fn f() { return 1 & >; }\n"
+         "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ArrayIndexExprInvalidExpr) {
-  EXPECT("fn f() -> void { x = y[^]; }",
-         "test.wgsl:1:24 error: unable to parse expression inside []\n"
-         "fn f() -> void { x = y[^]; }\n"
-         "                       ^\n");
+  EXPECT("fn f() { x = y[^]; }",
+         "test.wgsl:1:16 error: unable to parse expression inside []\n"
+         "fn f() { x = y[^]; }\n"
+         "               ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ArrayIndexExprMissingRBracket) {
-  EXPECT("fn f() -> void { x = y[1; }",
-         "test.wgsl:1:25 error: expected ']' for array accessor\n"
-         "fn f() -> void { x = y[1; }\n"
-         "                        ^\n");
+  EXPECT("fn f() { x = y[1; }",
+         "test.wgsl:1:17 error: expected ']' for array accessor\n"
+         "fn f() { x = y[1; }\n"
+         "                ^\n");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingAssignment) {
-  EXPECT("fn f() -> void { a; }",
-         "test.wgsl:1:19 error: expected '=' for assignment\n"
-         "fn f() -> void { a; }\n"
-         "                  ^\n");
+  EXPECT("fn f() { a; }",
+         "test.wgsl:1:11 error: expected '=' for assignment\n"
+         "fn f() { a; }\n"
+         "          ^\n");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingAssignment2) {
-  EXPECT("fn f() -> void { a : i32; }",
-         "test.wgsl:1:18 error: expected 'var' for variable declaration\n"
-         "fn f() -> void { a : i32; }\n"
-         "                 ^\n");
+  EXPECT("fn f() { a : i32; }",
+         "test.wgsl:1:10 error: expected 'var' for variable declaration\n"
+         "fn f() { a : i32; }\n"
+         "         ^\n");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtMissingSemicolon) {
-  EXPECT("fn f() -> void { a = 1 }",
-         "test.wgsl:1:24 error: expected ';' for assignment statement\n"
-         "fn f() -> void { a = 1 }\n"
-         "                       ^\n");
+  EXPECT("fn f() { a = 1 }",
+         "test.wgsl:1:16 error: expected ';' for assignment statement\n"
+         "fn f() { a = 1 }\n"
+         "               ^\n");
 }
 
 TEST_F(ParserImplErrorTest, AssignmentStmtInvalidRHS) {
-  EXPECT("fn f() -> void { a = >; }",
-         "test.wgsl:1:22 error: unable to parse right side of assignment\n"
-         "fn f() -> void { a = >; }\n"
-         "                     ^\n");
+  EXPECT("fn f() { a = >; }",
+         "test.wgsl:1:14 error: unable to parse right side of assignment\n"
+         "fn f() { a = >; }\n"
+         "             ^\n");
 }
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingLessThan) {
-  EXPECT("fn f() -> void { x = bitcast(y); }",
-         "test.wgsl:1:29 error: expected '<' for bitcast expression\n"
-         "fn f() -> void { x = bitcast(y); }\n"
-         "                            ^\n");
+  EXPECT("fn f() { x = bitcast(y); }",
+         "test.wgsl:1:21 error: expected '<' for bitcast expression\n"
+         "fn f() { x = bitcast(y); }\n"
+         "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingGreaterThan) {
-  EXPECT("fn f() -> void { x = bitcast<u32(y); }",
-         "test.wgsl:1:33 error: expected '>' for bitcast expression\n"
-         "fn f() -> void { x = bitcast<u32(y); }\n"
-         "                                ^\n");
+  EXPECT("fn f() { x = bitcast<u32(y); }",
+         "test.wgsl:1:25 error: expected '>' for bitcast expression\n"
+         "fn f() { x = bitcast<u32(y); }\n"
+         "                        ^\n");
 }
 
 TEST_F(ParserImplErrorTest, BitcastExprMissingType) {
-  EXPECT("fn f() -> void { x = bitcast<>(y); }",
-         "test.wgsl:1:30 error: invalid type for bitcast expression\n"
-         "fn f() -> void { x = bitcast<>(y); }\n"
-         "                             ^\n");
-}
-
-TEST_F(ParserImplErrorTest, BreakStmtMissingSemicolon) {
-  EXPECT("fn f() -> void { loop { break } }",
-         "test.wgsl:1:31 error: expected ';' for break statement\n"
-         "fn f() -> void { loop { break } }\n"
-         "                              ^\n");
-}
-
-TEST_F(ParserImplErrorTest, CallExprMissingRParen) {
-  EXPECT("fn f() -> void { x = f(1.; }",
-         "test.wgsl:1:26 error: expected ')' for call expression\n"
-         "fn f() -> void { x = f(1.; }\n"
-         "                         ^\n");
-}
-
-TEST_F(ParserImplErrorTest, CallStmtMissingRParen) {
-  EXPECT("fn f() -> void { f(1.; }",
-         "test.wgsl:1:22 error: expected ')' for call statement\n"
-         "fn f() -> void { f(1.; }\n"
+  EXPECT("fn f() { x = bitcast<>(y); }",
+         "test.wgsl:1:22 error: invalid type for bitcast expression\n"
+         "fn f() { x = bitcast<>(y); }\n"
          "                     ^\n");
 }
 
+TEST_F(ParserImplErrorTest, BreakStmtMissingSemicolon) {
+  EXPECT("fn f() { loop { break } }",
+         "test.wgsl:1:23 error: expected ';' for break statement\n"
+         "fn f() { loop { break } }\n"
+         "                      ^\n");
+}
+
+TEST_F(ParserImplErrorTest, CallExprMissingRParen) {
+  EXPECT("fn f() { x = f(1.; }",
+         "test.wgsl:1:18 error: expected ')' for call expression\n"
+         "fn f() { x = f(1.; }\n"
+         "                 ^\n");
+}
+
+TEST_F(ParserImplErrorTest, CallStmtMissingRParen) {
+  EXPECT("fn f() { f(1.; }",
+         "test.wgsl:1:14 error: expected ')' for call statement\n"
+         "fn f() { f(1.; }\n"
+         "             ^\n");
+}
+
 TEST_F(ParserImplErrorTest, CallStmtInvalidArgument0) {
-  EXPECT("fn f() -> void { f(<); }",
-         "test.wgsl:1:20 error: unable to parse argument expression\n"
-         "fn f() -> void { f(<); }\n"
-         "                   ^\n");
+  EXPECT("fn f() { f(<); }",
+         "test.wgsl:1:12 error: unable to parse argument expression\n"
+         "fn f() { f(<); }\n"
+         "           ^\n");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtInvalidArgument1) {
   EXPECT(
-      "fn f() -> void { f(1.0, <); }",
-      "test.wgsl:1:25 error: unable to parse argument expression after comma\n"
-      "fn f() -> void { f(1.0, <); }\n"
-      "                        ^\n");
+      "fn f() { f(1.0, <); }",
+      "test.wgsl:1:17 error: unable to parse argument expression after comma\n"
+      "fn f() { f(1.0, <); }\n"
+      "                ^\n");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtMissingSemicolon) {
-  EXPECT("fn f() -> void { f() }",
-         "test.wgsl:1:22 error: expected ';' for function call\n"
-         "fn f() -> void { f() }\n"
-         "                     ^\n");
+  EXPECT("fn f() { f() }",
+         "test.wgsl:1:14 error: expected ';' for function call\n"
+         "fn f() { f() }\n"
+         "             ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ConstructorExprMissingLParen) {
-  EXPECT("fn f() -> void { x = vec2<u32>1,2); }",
-         "test.wgsl:1:31 error: expected '(' for type constructor\n"
-         "fn f() -> void { x = vec2<u32>1,2); }\n"
-         "                              ^\n");
+  EXPECT("fn f() { x = vec2<u32>1,2); }",
+         "test.wgsl:1:23 error: expected '(' for type constructor\n"
+         "fn f() { x = vec2<u32>1,2); }\n"
+         "                      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ConstructorExprMissingRParen) {
-  EXPECT("fn f() -> void { x = vec2<u32>(1,2; }",
-         "test.wgsl:1:35 error: expected ')' for type constructor\n"
-         "fn f() -> void { x = vec2<u32>(1,2; }\n"
-         "                                  ^\n");
+  EXPECT("fn f() { x = vec2<u32>(1,2; }",
+         "test.wgsl:1:27 error: expected ')' for type constructor\n"
+         "fn f() { x = vec2<u32>(1,2; }\n"
+         "                          ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtInvalid) {
-  EXPECT("fn f() -> void { const >; }",
-         "test.wgsl:1:24 error: expected identifier for constant declaration\n"
-         "fn f() -> void { const >; }\n"
-         "                       ^\n");
+  EXPECT("fn f() { const >; }",
+         "test.wgsl:1:16 error: expected identifier for constant declaration\n"
+         "fn f() { const >; }\n"
+         "               ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtMissingAssignment) {
-  EXPECT("fn f() -> void { const a : i32; }",
-         "test.wgsl:1:31 error: expected '=' for constant declaration\n"
-         "fn f() -> void { const a : i32; }\n"
-         "                              ^\n");
+  EXPECT("fn f() { const a : i32; }",
+         "test.wgsl:1:23 error: expected '=' for constant declaration\n"
+         "fn f() { const a : i32; }\n"
+         "                      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtMissingConstructor) {
-  EXPECT("fn f() -> void { const a : i32 = >; }",
-         "test.wgsl:1:34 error: missing constructor for const declaration\n"
-         "fn f() -> void { const a : i32 = >; }\n"
-         "                                 ^\n");
-}
-
-TEST_F(ParserImplErrorTest, ContinueStmtMissingSemicolon) {
-  EXPECT("fn f() -> void { loop { continue } }",
-         "test.wgsl:1:34 error: expected ';' for continue statement\n"
-         "fn f() -> void { loop { continue } }\n"
-         "                                 ^\n");
-}
-
-TEST_F(ParserImplErrorTest, DiscardStmtMissingSemicolon) {
-  EXPECT("fn f() -> void { discard }",
-         "test.wgsl:1:26 error: expected ';' for discard statement\n"
-         "fn f() -> void { discard }\n"
+  EXPECT("fn f() { const a : i32 = >; }",
+         "test.wgsl:1:26 error: missing constructor for const declaration\n"
+         "fn f() { const a : i32 = >; }\n"
          "                         ^\n");
 }
 
+TEST_F(ParserImplErrorTest, ContinueStmtMissingSemicolon) {
+  EXPECT("fn f() { loop { continue } }",
+         "test.wgsl:1:26 error: expected ';' for continue statement\n"
+         "fn f() { loop { continue } }\n"
+         "                         ^\n");
+}
+
+TEST_F(ParserImplErrorTest, DiscardStmtMissingSemicolon) {
+  EXPECT("fn f() { discard }",
+         "test.wgsl:1:18 error: expected ';' for discard statement\n"
+         "fn f() { discard }\n"
+         "                 ^\n");
+}
+
 TEST_F(ParserImplErrorTest, EqualityInvalidExpr) {
-  EXPECT("fn f() -> void { return 1 == >; }",
-         "test.wgsl:1:30 error: unable to parse right side of == expression\n"
-         "fn f() -> void { return 1 == >; }\n"
-         "                             ^\n");
+  EXPECT("fn f() { return 1 == >; }",
+         "test.wgsl:1:22 error: unable to parse right side of == expression\n"
+         "fn f() { return 1 == >; }\n"
+         "                     ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FloatLiteralSuffixedWithF) {
@@ -221,52 +221,52 @@ TEST_F(ParserImplErrorTest, FloatLiteralSuffixedWithF) {
 }
 
 TEST_F(ParserImplErrorTest, ForLoopInitializerMissingSemicolon) {
-  EXPECT("fn f() -> void { for (var i : i32 = 0 i < 8; i=i+1) {} }",
-         "test.wgsl:1:39 error: expected ';' for initializer in for loop\n"
-         "fn f() -> void { for (var i : i32 = 0 i < 8; i=i+1) {} }\n"
-         "                                      ^\n");
+  EXPECT("fn f() { for (var i : i32 = 0 i < 8; i=i+1) {} }",
+         "test.wgsl:1:31 error: expected ';' for initializer in for loop\n"
+         "fn f() { for (var i : i32 = 0 i < 8; i=i+1) {} }\n"
+         "                              ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopInitializerMissingVar) {
-  EXPECT("fn f() -> void { for (i : i32 = 0; i < 8; i=i+1) {} }",
-         "test.wgsl:1:23 error: expected 'var' for variable declaration\n"
-         "fn f() -> void { for (i : i32 = 0; i < 8; i=i+1) {} }\n"
-         "                      ^\n");
+  EXPECT("fn f() { for (i : i32 = 0; i < 8; i=i+1) {} }",
+         "test.wgsl:1:15 error: expected 'var' for variable declaration\n"
+         "fn f() { for (i : i32 = 0; i < 8; i=i+1) {} }\n"
+         "              ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopConditionMissingSemicolon) {
-  EXPECT("fn f() -> void { for (var i : i32 = 0; i < 8 i=i+1) {} }",
-         "test.wgsl:1:46 error: expected ';' for condition in for loop\n"
-         "fn f() -> void { for (var i : i32 = 0; i < 8 i=i+1) {} }\n"
-         "                                             ^\n");
+  EXPECT("fn f() { for (var i : i32 = 0; i < 8 i=i+1) {} }",
+         "test.wgsl:1:38 error: expected ';' for condition in for loop\n"
+         "fn f() { for (var i : i32 = 0; i < 8 i=i+1) {} }\n"
+         "                                     ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingLParen) {
-  EXPECT("fn f() -> void { for var i : i32 = 0; i < 8; i=i+1) {} }",
-         "test.wgsl:1:22 error: expected '(' for for loop\n"
-         "fn f() -> void { for var i : i32 = 0; i < 8; i=i+1) {} }\n"
-         "                     ^^^\n");
+  EXPECT("fn f() { for var i : i32 = 0; i < 8; i=i+1) {} }",
+         "test.wgsl:1:14 error: expected '(' for for loop\n"
+         "fn f() { for var i : i32 = 0; i < 8; i=i+1) {} }\n"
+         "             ^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingRParen) {
-  EXPECT("fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1 {} }",
-         "test.wgsl:1:53 error: expected ')' for for loop\n"
-         "fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1 {} }\n"
-         "                                                    ^\n");
+  EXPECT("fn f() { for (var i : i32 = 0; i < 8; i=i+1 {} }",
+         "test.wgsl:1:45 error: expected ')' for for loop\n"
+         "fn f() { for (var i : i32 = 0; i < 8; i=i+1 {} }\n"
+         "                                            ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingLBrace) {
-  EXPECT("fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) }",
-         "test.wgsl:1:54 error: expected '{' for for loop\n"
-         "fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) }\n"
-         "                                                     ^\n");
+  EXPECT("fn f() { for (var i : i32 = 0; i < 8; i=i+1) }",
+         "test.wgsl:1:46 error: expected '{' for for loop\n"
+         "fn f() { for (var i : i32 = 0; i < 8; i=i+1) }\n"
+         "                                             ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ForLoopMissingRBrace) {
-  EXPECT("fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) {",
-         "test.wgsl:1:55 error: expected '}' for for loop\n"
-         "fn f() -> void { for (var i : i32 = 0; i < 8; i=i+1) {\n"
-         "                                                      ^\n");
+  EXPECT("fn f() { for (var i : i32 = 0; i < 8; i=i+1) {",
+         "test.wgsl:1:47 error: expected '}' for for loop\n"
+         "fn f() { for (var i : i32 = 0; i < 8; i=i+1) {\n"
+         "                                              ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclInvalid) {
@@ -277,150 +277,150 @@ TEST_F(ParserImplErrorTest, FunctionDeclInvalid) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoMissingEnd) {
-  EXPECT("[[stage(vertex) fn f() -> void {}",
+  EXPECT("[[stage(vertex) fn f() {}",
          "test.wgsl:1:17 error: expected ']]' for decoration list\n"
-         "[[stage(vertex) fn f() -> void {}\n"
+         "[[stage(vertex) fn f() {}\n"
          "                ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageMissingLParen) {
-  EXPECT("[[stage vertex]] fn f() -> void {}",
+  EXPECT("[[stage vertex]] fn f() {}",
          "test.wgsl:1:9 error: expected '(' for stage decoration\n"
-         "[[stage vertex]] fn f() -> void {}\n"
+         "[[stage vertex]] fn f() {}\n"
          "        ^^^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageMissingRParen) {
-  EXPECT("[[stage(vertex]] fn f() -> void {}",
+  EXPECT("[[stage(vertex]] fn f() {}",
          "test.wgsl:1:15 error: expected ')' for stage decoration\n"
-         "[[stage(vertex]] fn f() -> void {}\n"
+         "[[stage(vertex]] fn f() {}\n"
          "              ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageInvalid) {
-  EXPECT("[[stage(x)]] fn f() -> void {}",
+  EXPECT("[[stage(x)]] fn f() {}",
          "test.wgsl:1:9 error: invalid value for stage decoration\n"
-         "[[stage(x)]] fn f() -> void {}\n"
+         "[[stage(x)]] fn f() {}\n"
          "        ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoStageTypeInvalid) {
-  EXPECT("[[shader(vertex)]] fn main() -> void {}",
+  EXPECT("[[shader(vertex)]] fn main() {}",
          "test.wgsl:1:3 error: expected decoration\n"
-         "[[shader(vertex)]] fn main() -> void {}\n"
+         "[[shader(vertex)]] fn main() {}\n"
          "  ^^^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeMissingLParen) {
-  EXPECT("[[workgroup_size 1]] fn f() -> void {}",
+  EXPECT("[[workgroup_size 1]] fn f() {}",
          "test.wgsl:1:18 error: expected '(' for workgroup_size decoration\n"
-         "[[workgroup_size 1]] fn f() -> void {}\n"
+         "[[workgroup_size 1]] fn f() {}\n"
          "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeMissingRParen) {
-  EXPECT("[[workgroup_size(1]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(1]] fn f() {}",
          "test.wgsl:1:19 error: expected ')' for workgroup_size decoration\n"
-         "[[workgroup_size(1]] fn f() -> void {}\n"
+         "[[workgroup_size(1]] fn f() {}\n"
          "                  ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXInvalid) {
-  EXPECT("[[workgroup_size(x)]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(x)]] fn f() {}",
          "test.wgsl:1:18 error: expected signed integer literal for "
          "workgroup_size x parameter\n"
-         "[[workgroup_size(x)]] fn f() -> void {}\n"
+         "[[workgroup_size(x)]] fn f() {}\n"
          "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXNegative) {
-  EXPECT("[[workgroup_size(-1)]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(-1)]] fn f() {}",
          "test.wgsl:1:18 error: workgroup_size x parameter must be greater "
          "than 0\n"
-         "[[workgroup_size(-1)]] fn f() -> void {}\n"
+         "[[workgroup_size(-1)]] fn f() {}\n"
          "                 ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXZero) {
-  EXPECT("[[workgroup_size(0)]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(0)]] fn f() {}",
          "test.wgsl:1:18 error: workgroup_size x parameter must be greater "
          "than 0\n"
-         "[[workgroup_size(0)]] fn f() -> void {}\n"
+         "[[workgroup_size(0)]] fn f() {}\n"
          "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYInvalid) {
-  EXPECT("[[workgroup_size(1, x)]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(1, x)]] fn f() {}",
          "test.wgsl:1:21 error: expected signed integer literal for "
          "workgroup_size y parameter\n"
-         "[[workgroup_size(1, x)]] fn f() -> void {}\n"
+         "[[workgroup_size(1, x)]] fn f() {}\n"
          "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYNegative) {
-  EXPECT("[[workgroup_size(1, -1)]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(1, -1)]] fn f() {}",
          "test.wgsl:1:21 error: workgroup_size y parameter must be greater "
          "than 0\n"
-         "[[workgroup_size(1, -1)]] fn f() -> void {}\n"
+         "[[workgroup_size(1, -1)]] fn f() {}\n"
          "                    ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYZero) {
-  EXPECT("[[workgroup_size(1, 0)]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(1, 0)]] fn f() {}",
          "test.wgsl:1:21 error: workgroup_size y parameter must be greater "
          "than 0\n"
-         "[[workgroup_size(1, 0)]] fn f() -> void {}\n"
+         "[[workgroup_size(1, 0)]] fn f() {}\n"
          "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZInvalid) {
-  EXPECT("[[workgroup_size(1, 2, x)]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(1, 2, x)]] fn f() {}",
          "test.wgsl:1:24 error: expected signed integer literal for "
          "workgroup_size z parameter\n"
-         "[[workgroup_size(1, 2, x)]] fn f() -> void {}\n"
+         "[[workgroup_size(1, 2, x)]] fn f() {}\n"
          "                       ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZNegative) {
-  EXPECT("[[workgroup_size(1, 2, -1)]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(1, 2, -1)]] fn f() {}",
          "test.wgsl:1:24 error: workgroup_size z parameter must be greater "
          "than 0\n"
-         "[[workgroup_size(1, 2, -1)]] fn f() -> void {}\n"
+         "[[workgroup_size(1, 2, -1)]] fn f() {}\n"
          "                       ^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZZero) {
-  EXPECT("[[workgroup_size(1, 2, 0)]] fn f() -> void {}",
+  EXPECT("[[workgroup_size(1, 2, 0)]] fn f() {}",
          "test.wgsl:1:24 error: workgroup_size z parameter must be greater "
          "than 0\n"
-         "[[workgroup_size(1, 2, 0)]] fn f() -> void {}\n"
+         "[[workgroup_size(1, 2, 0)]] fn f() {}\n"
          "                       ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingIdentifier) {
-  EXPECT("fn () -> void {}",
+  EXPECT("fn () {}",
          "test.wgsl:1:4 error: expected identifier for function declaration\n"
-         "fn () -> void {}\n"
+         "fn () {}\n"
          "   ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingLParen) {
-  EXPECT("fn f) -> void {}",
+  EXPECT("fn f) {}",
          "test.wgsl:1:5 error: expected '(' for function declaration\n"
-         "fn f) -> void {}\n"
+         "fn f) {}\n"
          "    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingRParen) {
-  EXPECT("fn f( -> void {}",
+  EXPECT("fn f( {}",
          "test.wgsl:1:7 error: expected ')' for function declaration\n"
-         "fn f( -> void {}\n"
-         "      ^^\n");
+         "fn f( {}\n"
+         "      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingArrow) {
   EXPECT("fn f() void {}",
-         "test.wgsl:1:8 error: expected '->' for function declaration\n"
+         "test.wgsl:1:8 error: expected '{'\n"
          "fn f() void {}\n"
          "       ^^^^\n");
 }
@@ -433,38 +433,38 @@ TEST_F(ParserImplErrorTest, FunctionDeclInvalidReturnType) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamMissingColon) {
-  EXPECT("fn f(x) -> void {}",
+  EXPECT("fn f(x) {}",
          "test.wgsl:1:7 error: expected ':' for parameter\n"
-         "fn f(x) -> void {}\n"
+         "fn f(x) {}\n"
          "      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamInvalidType) {
-  EXPECT("fn f(x : 1) -> void {}",
+  EXPECT("fn f(x : 1) {}",
          "test.wgsl:1:10 error: invalid type for parameter\n"
-         "fn f(x : 1) -> void {}\n"
+         "fn f(x : 1) {}\n"
          "         ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamMissing) {
-  EXPECT("fn f(x : i32, ) -> void {}",
+  EXPECT("fn f(x : i32, ) {}",
          "test.wgsl:1:15 error: expected identifier for parameter\n"
-         "fn f(x : i32, ) -> void {}\n"
+         "fn f(x : i32, ) {}\n"
          "              ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingLBrace) {
-  EXPECT("fn f() -> void }",
-         "test.wgsl:1:16 error: expected '{'\n"
-         "fn f() -> void }\n"
-         "               ^\n");
+  EXPECT("fn f() }",
+         "test.wgsl:1:8 error: expected '{'\n"
+         "fn f() }\n"
+         "       ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingRBrace) {
-  EXPECT("fn f() -> void {",
-         "test.wgsl:1:17 error: expected '}'\n"
-         "fn f() -> void {\n"
-         "                ^\n");
+  EXPECT("fn f() {",
+         "test.wgsl:1:9 error: expected '}'\n"
+         "fn f() {\n"
+         "        ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionMissingOpenLine) {
@@ -1127,52 +1127,52 @@ TEST_F(ParserImplErrorTest, GlobalDeclTextureExplicitStorageClass) {
 }
 
 TEST_F(ParserImplErrorTest, IfStmtMissingLParen) {
-  EXPECT("fn f() -> void { if true) {} }",
-         "test.wgsl:1:21 error: expected '('\n"
-         "fn f() -> void { if true) {} }\n"
-         "                    ^^^^\n");
+  EXPECT("fn f() { if true) {} }",
+         "test.wgsl:1:13 error: expected '('\n"
+         "fn f() { if true) {} }\n"
+         "            ^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, IfStmtMissingRParen) {
-  EXPECT("fn f() -> void { if (true {} }",
-         "test.wgsl:1:27 error: expected ')'\n"
-         "fn f() -> void { if (true {} }\n"
-         "                          ^\n");
+  EXPECT("fn f() { if (true {} }",
+         "test.wgsl:1:19 error: expected ')'\n"
+         "fn f() { if (true {} }\n"
+         "                  ^\n");
 }
 
 TEST_F(ParserImplErrorTest, IfStmtInvalidCond) {
-  EXPECT("fn f() -> void { if (>) {} }",
-         "test.wgsl:1:22 error: unable to parse expression\n"
-         "fn f() -> void { if (>) {} }\n"
-         "                     ^\n");
+  EXPECT("fn f() { if (>) {} }",
+         "test.wgsl:1:14 error: unable to parse expression\n"
+         "fn f() { if (>) {} }\n"
+         "             ^\n");
 }
 
 TEST_F(ParserImplErrorTest, LogicalAndInvalidExpr) {
-  EXPECT("fn f() -> void { return 1 && >; }",
-         "test.wgsl:1:30 error: unable to parse right side of && expression\n"
-         "fn f() -> void { return 1 && >; }\n"
-         "                             ^\n");
+  EXPECT("fn f() { return 1 && >; }",
+         "test.wgsl:1:22 error: unable to parse right side of && expression\n"
+         "fn f() { return 1 && >; }\n"
+         "                     ^\n");
 }
 
 TEST_F(ParserImplErrorTest, LogicalOrInvalidExpr) {
-  EXPECT("fn f() -> void { return 1 || >; }",
-         "test.wgsl:1:30 error: unable to parse right side of || expression\n"
-         "fn f() -> void { return 1 || >; }\n"
-         "                             ^\n");
+  EXPECT("fn f() { return 1 || >; }",
+         "test.wgsl:1:22 error: unable to parse right side of || expression\n"
+         "fn f() { return 1 || >; }\n"
+         "                     ^\n");
 }
 
 TEST_F(ParserImplErrorTest, LoopMissingLBrace) {
-  EXPECT("fn f() -> void { loop }",
-         "test.wgsl:1:23 error: expected '{' for loop\n"
-         "fn f() -> void { loop }\n"
-         "                      ^\n");
+  EXPECT("fn f() { loop }",
+         "test.wgsl:1:15 error: expected '{' for loop\n"
+         "fn f() { loop }\n"
+         "              ^\n");
 }
 
 TEST_F(ParserImplErrorTest, LoopMissingRBrace) {
-  EXPECT("fn f() -> void { loop {",
-         "test.wgsl:1:24 error: expected '}' for loop\n"
-         "fn f() -> void { loop {\n"
-         "                       ^\n");
+  EXPECT("fn f() { loop {",
+         "test.wgsl:1:16 error: expected '}' for loop\n"
+         "fn f() { loop {\n"
+         "               ^\n");
 }
 
 TEST_F(ParserImplErrorTest, MaxErrorsReached) {
@@ -1196,123 +1196,123 @@ TEST_F(ParserImplErrorTest, MaxErrorsReached) {
 }
 
 TEST_F(ParserImplErrorTest, MemberExprMissingIdentifier) {
-  EXPECT("fn f() -> void { x = a.; }",
-         "test.wgsl:1:24 error: expected identifier for member accessor\n"
-         "fn f() -> void { x = a.; }\n"
-         "                       ^\n");
+  EXPECT("fn f() { x = a.; }",
+         "test.wgsl:1:16 error: expected identifier for member accessor\n"
+         "fn f() { x = a.; }\n"
+         "               ^\n");
 }
 
 TEST_F(ParserImplErrorTest, MultiplicativeInvalidExpr) {
-  EXPECT("fn f() -> void { return 1.0 * <; }",
-         "test.wgsl:1:31 error: unable to parse right side of * expression\n"
-         "fn f() -> void { return 1.0 * <; }\n"
-         "                              ^\n");
+  EXPECT("fn f() { return 1.0 * <; }",
+         "test.wgsl:1:23 error: unable to parse right side of * expression\n"
+         "fn f() { return 1.0 * <; }\n"
+         "                      ^\n");
 }
 
 TEST_F(ParserImplErrorTest, OrInvalidExpr) {
-  EXPECT("fn f() -> void { return 1 | >; }",
-         "test.wgsl:1:29 error: unable to parse right side of | expression\n"
-         "fn f() -> void { return 1 | >; }\n"
-         "                            ^\n");
+  EXPECT("fn f() { return 1 | >; }",
+         "test.wgsl:1:21 error: unable to parse right side of | expression\n"
+         "fn f() { return 1 | >; }\n"
+         "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, RelationalInvalidExpr) {
-  EXPECT("fn f() -> void { return 1 < >; }",
-         "test.wgsl:1:29 error: unable to parse right side of < expression\n"
-         "fn f() -> void { return 1 < >; }\n"
-         "                            ^\n");
+  EXPECT("fn f() { return 1 < >; }",
+         "test.wgsl:1:21 error: unable to parse right side of < expression\n"
+         "fn f() { return 1 < >; }\n"
+         "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ReturnStmtMissingSemicolon) {
-  EXPECT("fn f() -> void { return }",
-         "test.wgsl:1:25 error: expected ';' for return statement\n"
-         "fn f() -> void { return }\n"
-         "                        ^\n");
+  EXPECT("fn f() { return }",
+         "test.wgsl:1:17 error: expected ';' for return statement\n"
+         "fn f() { return }\n"
+         "                ^\n");
 }
 
 TEST_F(ParserImplErrorTest, ShiftInvalidExpr) {
-  EXPECT("fn f() -> void { return 1 << >; }",
-         "test.wgsl:1:30 error: unable to parse right side of << expression\n"
-         "fn f() -> void { return 1 << >; }\n"
-         "                             ^\n");
+  EXPECT("fn f() { return 1 << >; }",
+         "test.wgsl:1:22 error: unable to parse right side of << expression\n"
+         "fn f() { return 1 << >; }\n"
+         "                     ^\n");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtMissingLBrace) {
-  EXPECT("fn f() -> void { switch(1) }",
-         "test.wgsl:1:28 error: expected '{' for switch statement\n"
-         "fn f() -> void { switch(1) }\n"
-         "                           ^\n");
+  EXPECT("fn f() { switch(1) }",
+         "test.wgsl:1:20 error: expected '{' for switch statement\n"
+         "fn f() { switch(1) }\n"
+         "                   ^\n");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtMissingRBrace) {
-  EXPECT("fn f() -> void { switch(1) {",
-         "test.wgsl:1:29 error: expected '}' for switch statement\n"
-         "fn f() -> void { switch(1) {\n"
-         "                            ^\n");
+  EXPECT("fn f() { switch(1) {",
+         "test.wgsl:1:21 error: expected '}' for switch statement\n"
+         "fn f() { switch(1) {\n"
+         "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtInvalidCase) {
-  EXPECT("fn f() -> void { switch(1) { case ^: } }",
-         "test.wgsl:1:35 error: unable to parse case selectors\n"
-         "fn f() -> void { switch(1) { case ^: } }\n"
-         "                                  ^\n");
+  EXPECT("fn f() { switch(1) { case ^: } }",
+         "test.wgsl:1:27 error: unable to parse case selectors\n"
+         "fn f() { switch(1) { case ^: } }\n"
+         "                          ^\n");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtInvalidCase2) {
   EXPECT(
-      "fn f() -> void { switch(1) { case false: } }",
-      "test.wgsl:1:35 error: invalid case selector must be an integer value\n"
-      "fn f() -> void { switch(1) { case false: } }\n"
-      "                                  ^^^^^\n");
+      "fn f() { switch(1) { case false: } }",
+      "test.wgsl:1:27 error: invalid case selector must be an integer value\n"
+      "fn f() { switch(1) { case false: } }\n"
+      "                          ^^^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingColon) {
-  EXPECT("fn f() -> void { switch(1) { case 1 {} } }",
-         "test.wgsl:1:37 error: expected ':' for case statement\n"
-         "fn f() -> void { switch(1) { case 1 {} } }\n"
-         "                                    ^\n");
+  EXPECT("fn f() { switch(1) { case 1 {} } }",
+         "test.wgsl:1:29 error: expected ':' for case statement\n"
+         "fn f() { switch(1) { case 1 {} } }\n"
+         "                            ^\n");
 }
 
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingLBrace) {
-  EXPECT("fn f() -> void { switch(1) { case 1: } }",
-         "test.wgsl:1:38 error: expected '{' for case statement\n"
-         "fn f() -> void { switch(1) { case 1: } }\n"
-         "                                     ^\n");
-}
-
-TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingRBrace) {
-  EXPECT("fn f() -> void { switch(1) { case 1: {",
-         "test.wgsl:1:39 error: expected '}' for case statement\n"
-         "fn f() -> void { switch(1) { case 1: {\n"
-         "                                      ^\n");
-}
-
-TEST_F(ParserImplErrorTest, SwitchStmtCaseFallthroughMissingSemicolon) {
-  EXPECT("fn f() -> void { switch(1) { case 1: { fallthrough } case 2: {} } }",
-         "test.wgsl:1:52 error: expected ';' for fallthrough statement\n"
-         "fn f() -> void { switch(1) { case 1: { fallthrough } case 2: {} } }\n"
-         "                                                   ^\n");
-}
-
-TEST_F(ParserImplErrorTest, VarStmtMissingSemicolon) {
-  EXPECT("fn f() -> void { var a : u32 }",
-         "test.wgsl:1:30 error: expected ';' for variable declaration\n"
-         "fn f() -> void { var a : u32 }\n"
+  EXPECT("fn f() { switch(1) { case 1: } }",
+         "test.wgsl:1:30 error: expected '{' for case statement\n"
+         "fn f() { switch(1) { case 1: } }\n"
          "                             ^\n");
 }
 
+TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingRBrace) {
+  EXPECT("fn f() { switch(1) { case 1: {",
+         "test.wgsl:1:31 error: expected '}' for case statement\n"
+         "fn f() { switch(1) { case 1: {\n"
+         "                              ^\n");
+}
+
+TEST_F(ParserImplErrorTest, SwitchStmtCaseFallthroughMissingSemicolon) {
+  EXPECT("fn f() { switch(1) { case 1: { fallthrough } case 2: {} } }",
+         "test.wgsl:1:44 error: expected ';' for fallthrough statement\n"
+         "fn f() { switch(1) { case 1: { fallthrough } case 2: {} } }\n"
+         "                                           ^\n");
+}
+
+TEST_F(ParserImplErrorTest, VarStmtMissingSemicolon) {
+  EXPECT("fn f() { var a : u32 }",
+         "test.wgsl:1:22 error: expected ';' for variable declaration\n"
+         "fn f() { var a : u32 }\n"
+         "                     ^\n");
+}
+
 TEST_F(ParserImplErrorTest, VarStmtInvalidAssignment) {
-  EXPECT("fn f() -> void { var a : u32 = >; }",
-         "test.wgsl:1:32 error: missing constructor for variable declaration\n"
-         "fn f() -> void { var a : u32 = >; }\n"
-         "                               ^\n");
+  EXPECT("fn f() { var a : u32 = >; }",
+         "test.wgsl:1:24 error: missing constructor for variable declaration\n"
+         "fn f() { var a : u32 = >; }\n"
+         "                       ^\n");
 }
 
 TEST_F(ParserImplErrorTest, UnaryInvalidExpr) {
-  EXPECT("fn f() -> void { return !<; }",
-         "test.wgsl:1:26 error: unable to parse right side of ! expression\n"
-         "fn f() -> void { return !<; }\n"
-         "                         ^\n");
+  EXPECT("fn f() { return !<; }",
+         "test.wgsl:1:18 error: unable to parse right side of ! expression\n"
+         "fn f() { return !<; }\n"
+         "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, UnexpectedToken) {
@@ -1323,10 +1323,10 @@ TEST_F(ParserImplErrorTest, UnexpectedToken) {
 }
 
 TEST_F(ParserImplErrorTest, XorInvalidExpr) {
-  EXPECT("fn f() -> void { return 1 ^ >; }",
-         "test.wgsl:1:29 error: unable to parse right side of ^ expression\n"
-         "fn f() -> void { return 1 ^ >; }\n"
-         "                            ^\n");
+  EXPECT("fn f() { return 1 ^ >; }",
+         "test.wgsl:1:21 error: unable to parse right side of ^ expression\n"
+         "fn f() { return 1 ^ >; }\n"
+         "                    ^\n");
 }
 
 }  // namespace

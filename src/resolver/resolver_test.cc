@@ -285,7 +285,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScope) {
 }
 
 TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
-  // fn func_i32() -> void {
+  // fn func_i32() {
   //   {
   //     var foo : i32 = 2;
   //     var bar : i32 = foo;
@@ -345,11 +345,11 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
 }
 
 TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
-  // fn func_i32() -> void {
+  // fn func_i32() {
   //   var foo : i32 = 2;
   // }
   // var foo : f32 = 2.0;
-  // fn func_f32() -> void {
+  // fn func_f32() {
   //   var bar : f32 = foo;
   // }
 

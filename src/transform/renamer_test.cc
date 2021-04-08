@@ -47,7 +47,7 @@ fn test() -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   test();
 }
 )";
@@ -60,7 +60,7 @@ fn _tint_2() -> u32 {
 }
 
 [[stage(vertex)]]
-fn _tint_3() -> void {
+fn _tint_3() {
   _tint_2();
 }
 )";

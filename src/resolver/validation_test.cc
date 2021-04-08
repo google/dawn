@@ -83,8 +83,8 @@ TEST_F(ResolverValidationTest, Stmt_Error_Unknown) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_Call_undeclared) {
-  // fn main() -> void {func(); return; }
-  // fn func() -> void { return; }
+  // fn main() {func(); return; }
+  // fn func() { return; }
 
   SetSource(Source::Location{12, 34});
   auto* call_expr = Call("func");
@@ -110,7 +110,7 @@ TEST_F(ResolverValidationTest, Stmt_Call_undeclared) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_Call_recursive) {
-  // fn main() -> void {main(); }
+  // fn main() {main(); }
 
   SetSource(Source::Location{12, 34});
   auto* call_expr = Call("main");
@@ -241,7 +241,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
 }
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
-  // fn my_func() -> void {
+  // fn my_func() {
   //   global_var = 3.14f;
   // }
   // var global_var: f32 = 2.1;
@@ -266,7 +266,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
 
 TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
   // var global_var: f32 = 2.1;
-  // fn my_func() -> void {
+  // fn my_func() {
   //   global_var = 3.14;
   //   return;
   // }

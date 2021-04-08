@@ -211,6 +211,11 @@ ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
   return Failure::kErrored;
 }
 
+void ParserImpl::deprecated(const Source& source, const std::string& msg) {
+  builder_.Diagnostics().add_warning(
+      "use of deprecated language feature: " + msg, source);
+}
+
 Token ParserImpl::next() {
   if (!token_queue_.empty()) {
     auto t = token_queue_.front();
@@ -1207,8 +1212,9 @@ Maybe<type::Type*> ParserImpl::function_type_decl() {
 //   : FN IDENT PAREN_LEFT param_list PAREN_RIGHT ARROW function_type_decl
 Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
   Source source;
-  if (!match(Token::Type::kFn, &source))
+  if (!match(Token::Type::kFn, &source)) {
     return Failure::kNoMatch;
+  }
 
   const char* use = "function declaration";
   bool errored = false;
@@ -1216,37 +1222,56 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
   auto name = expect_ident(use);
   if (name.errored) {
     errored = true;
-    if (!sync_to(Token::Type::kParenLeft, /* consume: */ false))
+    if (!sync_to(Token::Type::kParenLeft, /* consume: */ false)) {
       return Failure::kErrored;
+    }
   }
 
   auto params = expect_paren_block(use, [&] { return expect_param_list(); });
   if (params.errored) {
     errored = true;
-    if (!synchronized_)
+    if (!synchronized_) {
       return Failure::kErrored;
+    }
   }
 
-  if (!expect(use, Token::Type::kArrow))
-    return Failure::kErrored;
+  type::Type* return_type = nullptr;
+  ast::DecorationList return_decorations;
 
-  auto decos = decoration_list();
-  if (decos.errored) {
+  if (match(Token::Type::kArrow)) {
+    auto decos = decoration_list();
+    if (decos.errored) {
+      return Failure::kErrored;
+    }
+    return_decorations = decos.value;
+
+    auto tok = peek();
+
+    auto type = function_type_decl();
+    if (type.errored) {
+      errored = true;
+    } else if (!type.matched) {
+      return add_error(peek(), "unable to determine function return type");
+    } else {
+      return_type = type.value;
+    }
+
+    if (return_type->Is<type::Void>()) {
+      // crbug.com/tint/677: void has been removed from the language
+      deprecated(tok.source(),
+                 "omit '-> void' for functions that do not return a value");
+    }
+
+  } else {
+    return_type = builder_.ty.void_();
+  }
+
+  if (errored) {
     return Failure::kErrored;
   }
 
-  auto type = function_type_decl();
-  if (type.errored) {
-    errored = true;
-  } else if (!type.matched) {
-    return add_error(peek(), "unable to determine function return type");
-  }
-
-  if (errored)
-    return Failure::kErrored;
-
-  return FunctionHeader{source, name.value, std::move(params.value), type.value,
-                        std::move(decos.value)};
+  return FunctionHeader{source, name.value, std::move(params.value),
+                        return_type, std::move(return_decorations)};
 }
 
 // param_list

@@ -24,31 +24,31 @@ using EmitVertexPointSizeTest = TransformTest;
 
 TEST_F(EmitVertexPointSizeTest, VertexStageBasic) {
   auto* src = R"(
-fn non_entry_a() -> void {
+fn non_entry_a() {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   var builtin_assignments_should_happen_before_this : f32;
 }
 
-fn non_entry_b() -> void {
+fn non_entry_b() {
 }
 )";
 
   auto* expect = R"(
 [[builtin(pointsize)]] var<out> tint_pointsize : f32;
 
-fn non_entry_a() -> void {
+fn non_entry_a() {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   tint_pointsize = 1.0;
   var builtin_assignments_should_happen_before_this : f32;
 }
 
-fn non_entry_b() -> void {
+fn non_entry_b() {
 }
 )";
 
@@ -59,29 +59,29 @@ fn non_entry_b() -> void {
 
 TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
   auto* src = R"(
-fn non_entry_a() -> void {
+fn non_entry_a() {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
 }
 
-fn non_entry_b() -> void {
+fn non_entry_b() {
 }
 )";
 
   auto* expect = R"(
 [[builtin(pointsize)]] var<out> tint_pointsize : f32;
 
-fn non_entry_a() -> void {
+fn non_entry_a() {
 }
 
 [[stage(vertex)]]
-fn entry() -> void {
+fn entry() {
   tint_pointsize = 1.0;
 }
 
-fn non_entry_b() -> void {
+fn non_entry_b() {
 }
 )";
 
@@ -93,21 +93,21 @@ fn non_entry_b() -> void {
 TEST_F(EmitVertexPointSizeTest, NonVertexStage) {
   auto* src = R"(
 [[stage(fragment)]]
-fn fragment_entry() -> void {
+fn fragment_entry() {
 }
 
 [[stage(compute)]]
-fn compute_entry() -> void {
+fn compute_entry() {
 }
 )";
 
   auto* expect = R"(
 [[stage(fragment)]]
-fn fragment_entry() -> void {
+fn fragment_entry() {
 }
 
 [[stage(compute)]]
-fn compute_entry() -> void {
+fn compute_entry() {
 }
 )";
 

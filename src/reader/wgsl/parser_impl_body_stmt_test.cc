@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, BodyStmt_Empty) {
 }
 
 TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {
-  auto p = parser("{fn main() -> void {}}");
+  auto p = parser("{fn main() {}}");
   auto e = p->expect_body_stmt();
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);

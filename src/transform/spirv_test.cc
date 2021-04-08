@@ -26,13 +26,13 @@ TEST_F(SpirvTest, HandleEntryPointIOTypes_Parameters) {
   auto* src = R"(
 [[stage(fragment)]]
 fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
-             [[location(1)]] loc1 : f32) -> void {
+             [[location(1)]] loc1 : f32) {
   var col : f32 = (coord.x * loc1);
 }
 
 [[stage(compute)]]
 fn compute_main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
-                [[builtin(local_invocation_index)]] local_index : u32) -> void {
+                [[builtin(local_invocation_index)]] local_index : u32) {
   var id_x : u32 = local_id.x;
 }
 )";
@@ -43,7 +43,7 @@ fn compute_main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
 [[location(1)]] var<in> tint_symbol_2 : f32;
 
 [[stage(fragment)]]
-fn frag_main() -> void {
+fn frag_main() {
   var col : f32 = (tint_symbol_1.x * tint_symbol_2);
 }
 
@@ -52,7 +52,7 @@ fn frag_main() -> void {
 [[builtin(local_invocation_index)]] var<in> tint_symbol_7 : u32;
 
 [[stage(compute)]]
-fn compute_main() -> void {
+fn compute_main() {
   var id_x : u32 = tint_symbol_6.x;
 }
 )";
@@ -67,7 +67,7 @@ TEST_F(SpirvTest, HandleEntryPointIOTypes_Parameter_TypeAlias) {
 type myf32 = f32;
 
 [[stage(fragment)]]
-fn frag_main([[location(1)]] loc1 : myf32) -> void {
+fn frag_main([[location(1)]] loc1 : myf32) {
 }
 )";
 
@@ -77,7 +77,7 @@ type myf32 = f32;
 [[location(1)]] var<in> tint_symbol_2 : myf32;
 
 [[stage(fragment)]]
-fn frag_main() -> void {
+fn frag_main() {
 }
 )";
 
@@ -97,12 +97,12 @@ fn vert_main() -> [[builtin(position)]] vec4<f32> {
   auto* expect = R"(
 [[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
 
-fn tint_symbol_2(tint_symbol_3 : vec4<f32>) -> void {
+fn tint_symbol_2(tint_symbol_3 : vec4<f32>) {
   tint_symbol_1 = tint_symbol_3;
 }
 
 [[stage(vertex)]]
-fn vert_main() -> void {
+fn vert_main() {
   tint_symbol_2(vec4<f32>(1.0, 2.0, 3.0, 0.0));
   return;
 }
@@ -129,12 +129,12 @@ fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] f32 {
 
 [[location(0)]] var<out> tint_symbol_2 : f32;
 
-fn tint_symbol_3(tint_symbol_4 : f32) -> void {
+fn tint_symbol_3(tint_symbol_4 : f32) {
   tint_symbol_2 = tint_symbol_4;
 }
 
 [[stage(fragment)]]
-fn frag_main() -> void {
+fn frag_main() {
   if ((tint_symbol_1 > 10u)) {
     tint_symbol_3(0.5);
     return;
@@ -169,12 +169,12 @@ type myf32 = f32;
 
 [[location(0)]] var<out> tint_symbol_3 : myf32;
 
-fn tint_symbol_4(tint_symbol_5 : myf32) -> void {
+fn tint_symbol_4(tint_symbol_5 : myf32) {
   tint_symbol_3 = tint_symbol_5;
 }
 
 [[stage(fragment)]]
-fn frag_main() -> void {
+fn frag_main() {
   if ((tint_symbol_2 > 10u)) {
     tint_symbol_4(0.5);
     return;
@@ -197,7 +197,7 @@ struct FragmentInput {
 };
 
 [[stage(fragment)]]
-fn frag_main(inputs : FragmentInput) -> void {
+fn frag_main(inputs : FragmentInput) {
   var col : f32 = inputs.coord.x * inputs.value;
 }
 )";
@@ -213,7 +213,7 @@ struct FragmentInput {
 [[location(1)]] var<in> tint_symbol_5 : f32;
 
 [[stage(fragment)]]
-fn frag_main() -> void {
+fn frag_main() {
   const tint_symbol_7 : FragmentInput = FragmentInput(tint_symbol_4, tint_symbol_5);
   var col : f32 = (tint_symbol_7.coord.x * tint_symbol_7.value);
 }
@@ -231,7 +231,7 @@ struct FragmentInput {
 };
 
 [[stage(fragment)]]
-fn frag_main(inputs : FragmentInput) -> void {
+fn frag_main(inputs : FragmentInput) {
 }
 )";
 
@@ -243,7 +243,7 @@ struct FragmentInput {
 [[location(1)]] var<in> tint_symbol_3 : f32;
 
 [[stage(fragment)]]
-fn frag_main() -> void {
+fn frag_main() {
 }
 )";
 
@@ -279,13 +279,13 @@ struct VertexOutput {
 
 [[location(1)]] var<out> tint_symbol_5 : f32;
 
-fn tint_symbol_6(tint_symbol_7 : VertexOutput) -> void {
+fn tint_symbol_6(tint_symbol_7 : VertexOutput) {
   tint_symbol_4 = tint_symbol_7.pos;
   tint_symbol_5 = tint_symbol_7.value;
 }
 
 [[stage(vertex)]]
-fn vert_main() -> void {
+fn vert_main() {
   if (false) {
     tint_symbol_6(VertexOutput());
     return;
@@ -322,12 +322,12 @@ struct Interface {
 
 [[location(1)]] var<out> tint_symbol_4 : f32;
 
-fn tint_symbol_5(tint_symbol_6 : Interface) -> void {
+fn tint_symbol_5(tint_symbol_6 : Interface) {
   tint_symbol_4 = tint_symbol_6.value;
 }
 
 [[stage(vertex)]]
-fn vert_main() -> void {
+fn vert_main() {
   const tint_symbol_8 : Interface = Interface(tint_symbol_3);
   tint_symbol_5(tint_symbol_8);
   return;
@@ -351,7 +351,7 @@ fn vert_main() -> Interface {
 }
 
 [[stage(fragment)]]
-fn frag_main(inputs : Interface) -> void {
+fn frag_main(inputs : Interface) {
   var x : f32 = inputs.value;
 }
 )";
@@ -363,12 +363,12 @@ struct Interface {
 
 [[location(1)]] var<out> tint_symbol_3 : f32;
 
-fn tint_symbol_4(tint_symbol_5 : Interface) -> void {
+fn tint_symbol_4(tint_symbol_5 : Interface) {
   tint_symbol_3 = tint_symbol_5.value;
 }
 
 [[stage(vertex)]]
-fn vert_main() -> void {
+fn vert_main() {
   tint_symbol_4(Interface(42.0));
   return;
 }
@@ -376,7 +376,7 @@ fn vert_main() -> void {
 [[location(1)]] var<in> tint_symbol_7 : f32;
 
 [[stage(fragment)]]
-fn frag_main() -> void {
+fn frag_main() {
   const tint_symbol_9 : Interface = Interface(tint_symbol_7);
   var x : f32 = tint_symbol_9.value;
 }
@@ -425,12 +425,12 @@ struct FragmentOutput {
 
 [[location(1)]] var<out> tint_symbol_7 : f32;
 
-fn tint_symbol_8(tint_symbol_9 : FragmentOutput) -> void {
+fn tint_symbol_8(tint_symbol_9 : FragmentOutput) {
   tint_symbol_7 = tint_symbol_9.value;
 }
 
 [[stage(fragment)]]
-fn frag_main() -> void {
+fn frag_main() {
   const tint_symbol_11 : FragmentInput = FragmentInput(tint_symbol_5, tint_symbol_6);
   tint_symbol_8(FragmentOutput((tint_symbol_11.coord.x * tint_symbol_11.value)));
   return;
@@ -467,12 +467,12 @@ struct VertexOutput {
 
 [[builtin(position)]] var<out> tint_symbol_4 : vec4<f32>;
 
-fn tint_symbol_5(tint_symbol_6 : VertexOutput) -> void {
+fn tint_symbol_5(tint_symbol_6 : VertexOutput) {
   tint_symbol_4 = tint_symbol_6.Position;
 }
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   tint_symbol_5(VertexOutput(vec4<f32>()));
   return;
 }
@@ -492,7 +492,7 @@ TEST_F(SpirvTest, HandleSampleMaskBuiltins_Basic) {
 [[builtin(sample_mask_out)]] var<out> mask_out : u32;
 
 [[stage(fragment)]]
-fn main() -> void {
+fn main() {
   mask_out = mask_in;
 }
 )";
@@ -505,7 +505,7 @@ fn main() -> void {
 [[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
 
 [[stage(fragment)]]
-fn main() -> void {
+fn main() {
   mask_out[0] = mask_in[0];
 }
 )";
@@ -525,12 +525,12 @@ fn filter(mask: u32) -> u32 {
   return (mask & 3u);
 }
 
-fn set_mask(input : u32) -> void {
+fn set_mask(input : u32) {
   mask_out = input;
 }
 
 [[stage(fragment)]]
-fn main() -> void {
+fn main() {
   set_mask(filter(mask_in));
 }
 )";
@@ -544,12 +544,12 @@ fn filter(mask : u32) -> u32 {
   return (mask & 3u);
 }
 
-fn set_mask(input : u32) -> void {
+fn set_mask(input : u32) {
   mask_out[0] = input;
 }
 
 [[stage(fragment)]]
-fn main() -> void {
+fn main() {
   set_mask(filter(mask_in[0]));
 }
 )";
@@ -564,7 +564,7 @@ TEST_F(SpirvTest, AddEmptyEntryPoint) {
 
   auto* expect = R"(
 [[stage(compute)]]
-fn _tint_unused_entry_point() -> void {
+fn _tint_unused_entry_point() {
 }
 )";
 
@@ -591,12 +591,12 @@ fn main([[builtin(sample_index)]] sample_index : u32,
 
 [[builtin(sample_mask_out)]] var<out> tint_symbol_2 : array<u32, 1>;
 
-fn tint_symbol_4(tint_symbol_5 : u32) -> void {
+fn tint_symbol_4(tint_symbol_5 : u32) {
   tint_symbol_2[0] = tint_symbol_5;
 }
 
 [[stage(fragment)]]
-fn main() -> void {
+fn main() {
   tint_symbol_4(tint_symbol_1[0]);
   return;
 }

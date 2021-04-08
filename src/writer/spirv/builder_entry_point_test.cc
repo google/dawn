@@ -39,7 +39,7 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, EntryPoint_Parameters) {
   // [[stage(fragment)]]
   // fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
-  //              [[location(1)]] loc1 : f32) -> void {
+  //              [[location(1)]] loc1 : f32) {
   //   var col : f32 = (coord.x * loc1);
   // }
   auto* f32 = ty.f32();

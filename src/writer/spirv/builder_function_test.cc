@@ -196,12 +196,12 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   // [[binding(0), group(0)]] var<storage> data : Data;
   //
   // [[stage(compute)]]
-  // fn a() -> void {
+  // fn a() {
   //   return;
   // }
   //
   // [[stage(compute)]]
-  // fn b() -> void {
+  // fn b() {
   //   return;
   // }
 

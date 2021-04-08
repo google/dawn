@@ -93,7 +93,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MissingBracketRight) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidCaseBody) {
-  auto p = parser("case 1: { fn main() -> void {} }");
+  auto p = parser("case 1: { fn main() {} }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
@@ -201,7 +201,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_MissingBracketRight) {
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default_InvalidCaseBody) {
-  auto p = parser("default: { fn main() -> void {} }");
+  auto p = parser("default: { fn main() {} }");
   auto e = p->switch_body();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);

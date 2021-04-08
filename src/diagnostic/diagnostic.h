@@ -108,6 +108,17 @@ class List {
     add(std::move(error));
   }
 
+  /// adds the warning message with the given Source to the end of this list.
+  /// @param warning_msg the warning message
+  /// @param source the source of the warning diagnostic
+  void add_warning(const std::string& warning_msg, const Source& source) {
+    diag::Diagnostic error{};
+    error.severity = diag::Severity::Warning;
+    error.source = source;
+    error.message = warning_msg;
+    add(std::move(error));
+  }
+
   /// adds the error message without a source to the end of this list.
   /// @param err_msg the error message
   void add_error(std::string err_msg) {

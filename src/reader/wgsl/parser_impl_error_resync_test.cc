@@ -39,9 +39,9 @@ class ParserImplErrorResyncTest : public ParserImplTest {};
 TEST_F(ParserImplErrorResyncTest, BadFunctionDecls) {
   EXPECT(R"(
 fn .() -> . {}
-fn x(.) . {}
+fn x(.) {}
 [[.,.]] fn -> {}
-fn good() -> void {}
+fn good() {}
 )",
          "test.wgsl:2:4 error: expected identifier for function declaration\n"
          "fn .() -> . {}\n"
@@ -52,12 +52,8 @@ fn good() -> void {}
          "          ^\n"
          "\n"
          "test.wgsl:3:6 error: expected ')' for function declaration\n"
-         "fn x(.) . {}\n"
+         "fn x(.) {}\n"
          "     ^\n"
-         "\n"
-         "test.wgsl:3:9 error: expected '->' for function declaration\n"
-         "fn x(.) . {}\n"
-         "        ^\n"
          "\n"
          "test.wgsl:4:3 error: expected decoration\n"
          "[[.,.]] fn -> {}\n"
@@ -74,7 +70,7 @@ fn good() -> void {}
 
 TEST_F(ParserImplErrorResyncTest, AssignmentStatement) {
   EXPECT(R"(
-fn f() -> void {
+fn f() {
   blah blah blah blah;
   good = 1;
   blah blah blah blah;
@@ -97,7 +93,7 @@ fn f() -> void {
 
 TEST_F(ParserImplErrorResyncTest, DiscardStatement) {
   EXPECT(R"(
-fn f() -> void {
+fn f() {
   discard blah blah blah;
   a = 1;
   discard blah blah blah;
@@ -142,7 +138,7 @@ struct S {
 // scope.
 TEST_F(ParserImplErrorResyncTest, NestedSyncPoints) {
   EXPECT(R"(
-fn f() -> void {
+fn f() {
   x = 1;
   discard
 }
@@ -160,7 +156,7 @@ struct S { blah };
 TEST_F(ParserImplErrorResyncTest, BracketCounting) {
   EXPECT(R"(
 [[woof[[[[]]]]]]
-fn f(x(((())))) -> void {
+fn f(x(((())))) {
   meow = {{{}}}
 }
 struct S { blah };
@@ -170,7 +166,7 @@ struct S { blah };
          "  ^^^^\n"
          "\n"
          "test.wgsl:3:7 error: expected ':' for parameter\n"
-         "fn f(x(((())))) -> void {\n"
+         "fn f(x(((())))) {\n"
          "      ^\n"
          "\n"
          "test.wgsl:4:10 error: unable to parse right side of assignment\n"

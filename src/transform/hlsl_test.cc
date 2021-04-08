@@ -25,7 +25,7 @@ using HlslTest = TransformTest;
 TEST_F(HlslTest, PromoteArrayInitializerToConstVar_Basic) {
   auto* src = R"(
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   var f0 : f32 = 1.0;
   var f1 : f32 = 2.0;
   var f2 : f32 = 3.0;
@@ -36,7 +36,7 @@ fn main() -> void {
 
   auto* expect = R"(
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   var f0 : f32 = 1.0;
   var f1 : f32 = 2.0;
   var f2 : f32 = 3.0;
@@ -60,7 +60,7 @@ struct S {
 };
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   var x : f32 = S(1, 2.0, vec3<f32>()).b;
 }
 )";
@@ -73,7 +73,7 @@ struct S {
 };
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   const tint_symbol_1 : S = S(1, 2.0, vec3<f32>());
   var x : f32 = tint_symbol_1.b;
 }
@@ -87,14 +87,14 @@ fn main() -> void {
 TEST_F(HlslTest, PromoteArrayInitializerToConstVar_ArrayInArray) {
   auto* src = R"(
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   var i : f32 = array<array<f32, 2>, 2>(array<f32, 2>(1.0, 2.0), array<f32, 2>(3.0, 4.0))[0][1];
 }
 )";
 
   auto* expect = R"(
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   const tint_symbol_1 : array<f32, 2> = array<f32, 2>(1.0, 2.0);
   const tint_symbol_2 : array<f32, 2> = array<f32, 2>(3.0, 4.0);
   const tint_symbol_3 : array<array<f32, 2>, 2> = array<array<f32, 2>, 2>(tint_symbol_1, tint_symbol_2);
@@ -124,7 +124,7 @@ struct S3 {
 };
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   var x : i32 = S3(S2(1, S1(2), 3)).a.b.a;
 }
 )";
@@ -145,7 +145,7 @@ struct S3 {
 };
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   const tint_symbol_1 : S1 = S1(2);
   const tint_symbol_4 : S2 = S2(1, tint_symbol_1, 3);
   const tint_symbol_8 : S3 = S3(tint_symbol_4);
@@ -169,7 +169,7 @@ struct S2 {
 };
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   var x : i32 = S2(array<S1, 3>(S1(1), S1(2), S1(3))).a[1].a;
 }
 )";
@@ -184,7 +184,7 @@ struct S2 {
 };
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   const tint_symbol_1 : S1 = S1(1);
   const tint_symbol_4 : S1 = S1(2);
   const tint_symbol_5 : S1 = S1(3);
@@ -208,7 +208,7 @@ struct S {
 };
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   var local_arr : array<f32, 4> = array<f32, 4>(0.0, 1.0, 2.0, 3.0);
   var local_str : S = S(1, 2.0, 3);
 }
@@ -240,7 +240,7 @@ struct Uniforms {
 [[builtin(position)]] var<out> position : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   const transform : mat2x2<f32> = ubo.transform;
   var coord : vec2<f32> = array<vec2<f32>, 3>(
       vec2<f32>(-1.0,  1.0),
@@ -264,7 +264,7 @@ struct Uniforms {
 [[builtin(position)]] var<out> position : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() -> void {
+fn main() {
   const transform : mat2x2<f32> = ubo.transform;
   const tint_symbol_1 : array<vec2<f32>, 3> = array<vec2<f32>, 3>(vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(-1.0, -1.0));
   var coord : vec2<f32> = tint_symbol_1[vertex_index];
@@ -282,7 +282,7 @@ TEST_F(HlslTest, AddEmptyEntryPoint) {
 
   auto* expect = R"(
 [[stage(vertex)]]
-fn _tint_unused_entry_point() -> void {
+fn _tint_unused_entry_point() {
 }
 )";
 

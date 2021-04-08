@@ -612,7 +612,7 @@ TEST_F(BuilderTest, SampleMask) {
   // [[builtin(sample_mask_in)]] var<in> mask_in : u32;
   // [[builtin(sample_mask_out)]] var<out> mask_out : u32;
   // [[stage(fragment)]]
-  // fn main() -> void {
+  // fn main() {
   //   mask_out = mask_in;
   // }
 
@@ -620,7 +620,7 @@ TEST_F(BuilderTest, SampleMask) {
   // [[builtin(sample_mask_in)]] var<in> mask_in : array<u32, 1>;
   // [[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
   // [[stage(fragment)]]
-  // fn main() -> void {
+  // fn main() {
   //   mask_out[0] = mask_in[0];
   // }
 

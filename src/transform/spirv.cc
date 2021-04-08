@@ -94,13 +94,13 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   // [[builtin(frag_depth)]] var<out> depth: f32;
   // [[builtin(sample_mask_out)]] var<out> mask_out : u32;
   //
-  // fn frag_main_ret(retval : FragmentOutput) -> void {
+  // fn frag_main_ret(retval : FragmentOutput) {
   //   depth = reval.depth;
   //   mask_out = retval.mask_out;
   // }
   //
   // [[stage(fragment)]]
-  // fn frag_main() -> void {
+  // fn frag_main() {
   //   const samples : FragmentInput(sample_index, sample_mask_in);
   //   var output : FragmentOutput = FragmentOutput(1.0,
   //                                                samples.sample_mask_in);
@@ -194,14 +194,14 @@ void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
   // Before:
   // ```
   // [[builtin(sample_mask_out)]] var<out> mask_out : u32;
-  // fn main() -> void {
+  // fn main() {
   //   mask_out = 1u;
   // }
   // ```
   // After:
   // ```
   // [[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
-  // fn main() -> void {
+  // fn main() {
   //   mask_out[0] = 1u;
   // }
   // ```

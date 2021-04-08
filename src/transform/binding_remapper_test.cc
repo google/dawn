@@ -35,7 +35,7 @@ struct S {
 [[group(3), binding(2)]] var<storage> b : S;
 
 [[stage(compute)]]
-fn f() -> void {
+fn f() {
 }
 )";
 
@@ -60,7 +60,7 @@ struct S {
 [[group(3), binding(2)]] var<storage> b : S;
 
 [[stage(compute)]]
-fn f() -> void {
+fn f() {
 }
 )";
 
@@ -74,7 +74,7 @@ struct S {
 [[group(3), binding(2)]] var<storage> b : S;
 
 [[stage(compute)]]
-fn f() -> void {
+fn f() {
 }
 )";
 
@@ -106,7 +106,7 @@ S;
 [[group(4), binding(3)]] var<storage> c : S;
 
 [[stage(compute)]]
-fn f() -> void {
+fn f() {
 }
 )";
 
@@ -125,7 +125,7 @@ S;
 S;
 
 [[stage(compute)]]
-fn f() -> void {
+fn f() {
 }
 )";
 
@@ -165,7 +165,7 @@ type A = S;
 [[group(4), binding(3)]] var<storage> c : A;
 
 [[stage(compute)]]
-fn f() -> void {
+fn f() {
 }
 )";
 
@@ -190,7 +190,7 @@ S;
 [[group(4), binding(3)]] var<storage> c : [[access(write)]] S;
 
 [[stage(compute)]]
-fn f() -> void {
+fn f() {
 }
 )";
 
@@ -219,7 +219,7 @@ S;
 [[group(3), binding(2)]] var<storage> b : S;
 
 [[stage(compute)]]
-fn f() -> void {
+fn f() {
 }
 )";
 
@@ -235,7 +235,7 @@ S;
 S;
 
 [[stage(compute)]]
-fn f() -> void {
+fn f() {
 }
 )";
 
@@ -264,7 +264,7 @@ struct S {
 [[group(3), binding(2)]] var<storage> b : S;
 
 [[stage(compute)]]
-fn f() -> void {}
+fn f() {}
 )";
 
   auto* expect = "error: BindingRemapper did not find the remapping data";

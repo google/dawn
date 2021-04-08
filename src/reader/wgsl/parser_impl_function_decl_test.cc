@@ -21,7 +21,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, FunctionDecl) {
-  auto p = parser("fn main(a : i32, b : f32) -> void { return; }");
+  auto p = parser("fn main(a : i32, b : f32) { return; }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, FunctionDecl) {
 }
 
 TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
-  auto p = parser("[[workgroup_size(2, 3, 4)]] fn main() -> void { return; }");
+  auto p = parser("[[workgroup_size(2, 3, 4)]] fn main() { return; }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
 TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleEntries) {
   auto p = parser(R"(
 [[workgroup_size(2, 3, 4), workgroup_size(5, 6, 7)]]
-fn main() -> void { return; })");
+fn main() { return; })");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -132,7 +132,7 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList_MultipleLists) {
   auto p = parser(R"(
 [[workgroup_size(2, 3, 4)]]
 [[workgroup_size(5, 6, 7)]]
-fn main() -> void { return; })");
+fn main() { return; })");
   auto decorations = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decorations.errored);
@@ -219,7 +219,7 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidHeader) {
 }
 
 TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
-  auto p = parser("fn main() -> void { return }");
+  auto p = parser("fn main() { return }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -229,11 +229,11 @@ TEST_F(ParserImplTest, FunctionDecl_InvalidBody) {
   EXPECT_FALSE(f.matched);
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(f.value, nullptr);
-  EXPECT_EQ(p->error(), "1:28: expected ';' for return statement");
+  EXPECT_EQ(p->error(), "1:20: expected ';' for return statement");
 }
 
 TEST_F(ParserImplTest, FunctionDecl_MissingLeftBrace) {
-  auto p = parser("fn main() -> void return; }");
+  auto p = parser("fn main() return; }");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(decos.errored);
@@ -243,7 +243,7 @@ TEST_F(ParserImplTest, FunctionDecl_MissingLeftBrace) {
   EXPECT_FALSE(f.matched);
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(f.value, nullptr);
-  EXPECT_EQ(p->error(), "1:19: expected '{'");
+  EXPECT_EQ(p->error(), "1:11: expected '{'");
 }
 
 }  // namespace

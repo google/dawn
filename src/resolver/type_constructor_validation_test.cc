@@ -154,7 +154,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
   //   return vec3<f32>(0.0, 0.0, 0.0);
   // }
   //
-  // fn bar() -> void
+  // fn bar()
   // {
   //   var a = foo();
   // }

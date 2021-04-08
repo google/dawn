@@ -48,11 +48,11 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_UnusedFunction) {
   ASSERT_TRUE(
       gen.GenerateEntryPoint(tint::ast::PipelineStage::kCompute, "main"))
       << gen.error();
-  EXPECT_EQ(gen.result(), R"(  fn func_used() -> void {
+  EXPECT_EQ(gen.result(), R"(  fn func_used() {
   }
 
   [[stage(compute)]]
-  fn main() -> void {
+  fn main() {
     func_used();
   }
 )");
@@ -85,7 +85,7 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_UnusedVariable) {
   EXPECT_EQ(gen.result(), R"(  var<in> global_used : f32;
 
   [[stage(compute)]]
-  fn main() -> void {
+  fn main() {
     global_used = 1.0;
   }
 )");
@@ -152,7 +152,7 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_GlobalsInterleaved) {
   };
 
   [[stage(compute)]]
-  fn main() -> void {
+  fn main() {
     var s0 : S0;
     var s1 : S1;
     a1 = func();

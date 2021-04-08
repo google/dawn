@@ -111,7 +111,7 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableNotUnique_Fail) {
 
 TEST_F(ResolverTypeValidationTest,
        GlobalVariableFunctionVariableNotUnique_Pass) {
-  // fn my_func -> void {
+  // fn my_func() {
   //   var a: f32 = 2.0;
   // }
   // var a: f32 = 2.1;
@@ -130,7 +130,7 @@ TEST_F(ResolverTypeValidationTest,
 TEST_F(ResolverTypeValidationTest,
        GlobalVariableFunctionVariableNotUnique_Fail) {
   // var a: f32 = 2.1;
-  // fn my_func -> void {
+  // fn my_func() {
   //   var a: f32 = 2.0;
   //   return 0;
   // }
@@ -150,7 +150,7 @@ TEST_F(ResolverTypeValidationTest,
 }
 
 TEST_F(ResolverTypeValidationTest, RedeclaredIdentifier_Fail) {
-  // fn my_func() -> void {
+  // fn my_func()() {
   //  var a :i32 = 2;
   //  var a :f21 = 2.0;
   // }
@@ -293,7 +293,7 @@ TEST_F(ResolverTypeValidationTest,
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
   /// [[stage(vertex)]]
-  // fn func -> void { var a : array<i32>; }
+  // fn func() { var a : array<i32>; }
 
   auto* var =
       Var(Source{{12, 34}}, "a", ty.array<i32>(), ast::StorageClass::kNone);

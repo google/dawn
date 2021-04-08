@@ -274,7 +274,7 @@ TEST_F(ForStmtErrorTest, InvalidBody) {
 
 // Test a for loop with a body not matching statements
 TEST_F(ForStmtErrorTest, InvalidBodyMatch) {
-  std::string for_str = "for (;;) { fn main() -> void {} }";
+  std::string for_str = "for (;;) { fn main() {} }";
   std::string error_str = "1:12: expected '}' for for loop";
 
   TestForWithError(for_str, error_str);

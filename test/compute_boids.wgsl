@@ -60,7 +60,7 @@ fn frag_main() -> [[location(0)]] vec4<f32> {
 // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
 [[stage(compute)]]
 fn comp_main(
-  [[builtin(global_invocation_id)]] gl_GlobalInvocationID : vec3<u32>) -> void {
+  [[builtin(global_invocation_id)]] gl_GlobalInvocationID : vec3<u32>) {
   var index : u32 = gl_GlobalInvocationID.x;
   if (index >= 5u) {
     return;
