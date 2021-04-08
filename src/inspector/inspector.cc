@@ -262,8 +262,8 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
     }
 
     // If there are conflicting defintions for a constant id, that is invalid
-    // WGSL, so the validator should catch it. Thus here the inspector just
-    // assumes all definitians of the constant id are the same, so only needs
+    // WGSL, so the resolver should catch it. Thus here the inspector just
+    // assumes all definitions of the constant id are the same, so only needs
     // to find the first reference to constant id.
     uint32_t constant_id = var->constant_id();
     if (result.find(constant_id) != result.end()) {

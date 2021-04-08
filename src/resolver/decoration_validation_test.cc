@@ -256,7 +256,7 @@ TEST_P(VariableDecorationTest, IsValid) {
   }
 }
 INSTANTIATE_TEST_SUITE_P(
-    ValidatorTest,
+    ResolverDecorationValidationTest,
     VariableDecorationTest,
     testing::Values(TestParams{DecorationKind::kAccess, false},
                     TestParams{DecorationKind::kAlign, false},
@@ -290,7 +290,7 @@ TEST_P(FunctionDecorationTest, IsValid) {
   }
 }
 INSTANTIATE_TEST_SUITE_P(
-    ValidatorTest,
+    ResolverDecorationValidationTest,
     FunctionDecorationTest,
     testing::Values(TestParams{DecorationKind::kAccess, false},
                     TestParams{DecorationKind::kAlign, false},

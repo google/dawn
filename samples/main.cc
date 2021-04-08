@@ -671,12 +671,6 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-  tint::Validator v;
-  if (!v.Validate(program.get())) {
-    diag_formatter.format(v.diagnostics(), diag_printer.get());
-    return 1;
-  }
-
   tint::transform::Manager transform_manager;
   for (const auto& name : options.transforms) {
     // TODO(dsinclair): The vertex pulling transform requires setup code to

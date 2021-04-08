@@ -36,9 +36,9 @@
       ┃       ┃  ┗━━━━━┛ ┗━━━━━━━┛ ┗━━━━━━━━━━┛ ┗━━━━━━━━━┛  ┃
       ┃       ┗━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┛
       ▲                               ▼
-┏━━━━━┻━━━━━┓                   ┏━━━━━┻━━━━━┓       ┏━━━━━━━━━━━┓
-┃ Transform ┃◄━━━━━━━━━━━━━━━━━◄┃ Validator ┣━━━━━━►┃ Inspector ┃
-┗━━━━━━━━━━━┛                   ┗━━━━━┳━━━━━┛       ┗━━━━━━━━━━━┛
+┏━━━━━┻━━━━━┓                         ┃             ┏━━━━━━━━━━━┓
+┃ Transform ┃◄━━━━━━━━━━━━━━━━━━━━━━━━╋━━━━━━━━━━━━►┃ Inspector ┃
+┗━━━━━━━━━━━┛                         ┃             ┗━━━━━━━━━━━┛
                                       ▼
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃                                  Writer                                  ┃
@@ -148,11 +148,8 @@ The `Resolver` will automatically run when a `Program` is built.
 A `Resolver` creates the `Program`s semantic information by analyzing the
 `Program`s AST and type information.
 
-The `Resolver` will do the minimal amount of validation required in order
-to always be accessing valid nodes, reporting any errors found in the
-`Program`'s diagnostics. Even if the `Resolver` doesn't generate any
-errors doesn't mean the generated `Program` is semantically valid. Use the
-`Validator` to check for a `Program`'s final validity.
+The `Resolver` will validate to make sure the generated `Program` is
+semantically valid.
 
 ## Program
 
@@ -161,20 +158,12 @@ A `Program` holds an immutable version of the information from the
 `Resolver`.
 
 Like `ProgramBuilder`, `Program::IsValid()` may be called to ensure the AST is
-structurally correct and that the `Resolver` did not report any errors.
-`Program::IsValid()` does not perform semantic validation, use the `Validator`
-to check for a `Program`'s final validity.
+structurally correct and semantically valid, and that the `Resolver` did not
+report any errors.
 
 Unlike the `ProgramBuilder`, a `Program` is fully immutable, and is part of the
 public Tint API. The immutable nature of `Program`s make these entirely safe
 to share between multiple threads without the use of synchronization primitives.
-
-## Validation
-
-The `Validator` checks a `Program` for static validity as specified by the WGSL
-language, and reports any validation errors found. Attempting to pass a
-`Program` that does not pass validation on to later stages will result in
-undefined behavior.
 
 ## Inspector
 

@@ -84,11 +84,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     return 0;
   }
 
-  Validator v;
-  if (!v.Validate(&program)) {
-    return 0;
-  }
-
   if (inspector_enabled_) {
     inspector::Inspector inspector(&program);
 

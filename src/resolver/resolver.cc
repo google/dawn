@@ -1252,8 +1252,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
       }
     } else {
       // The vector will have a number of components equal to the length of
-      // the swizzle. This assumes the validator will check that the swizzle
-      // is correct.
+      // the swizzle.
       ret = builder_->create<type::Vector>(vec->type(),
                                            static_cast<uint32_t>(size));
     }
