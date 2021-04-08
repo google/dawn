@@ -42,7 +42,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointParam) {
   auto* s = Structure(
       "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
 
-  Func("foo", {Const("param", s)}, ty.void_(), {}, {});
+  Func("foo", {Param("param", s)}, ty.void_(), {}, {});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -68,7 +68,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
   auto* s = Structure(
       "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
 
-  Func("main", {Const("param", s)}, ty.void_(), {},
+  Func("main", {Param("param", s)}, ty.void_(), {},
        {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -99,7 +99,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
   auto* s = Structure(
       "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
 
-  Func("main", {Const("param", s)}, ty.void_(), {},
+  Func("main", {Param("param", s)}, ty.void_(), {},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -132,7 +132,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
                                    {create<ast::BuiltinDecoration>(
                                        ast::Builtin::kLocalInvocationIndex)})});
 
-  Func("main", {Const("param", s)}, ty.void_(), {},
+  Func("main", {Param("param", s)}, ty.void_(), {},
        {create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -148,10 +148,10 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
   auto* s = Structure(
       "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
 
-  Func("vert_main", {Const("param", s)}, s, {Return(Construct(s, Expr(0.f)))},
+  Func("vert_main", {Param("param", s)}, s, {Return(Construct(s, Expr(0.f)))},
        {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
 
-  Func("frag_main", {Const("param", s)}, ty.void_(), {},
+  Func("frag_main", {Param("param", s)}, ty.void_(), {},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -170,7 +170,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
       "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
   auto* s_alias = ty.alias("S_alias", s);
 
-  Func("main", {Const("param", s_alias)}, ty.void_(), {},
+  Func("main", {Param("param", s_alias)}, ty.void_(), {},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();

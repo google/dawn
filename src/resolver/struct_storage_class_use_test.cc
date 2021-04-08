@@ -39,7 +39,7 @@ TEST_F(ResolverStorageClassUseTest, UnreachableStruct) {
 TEST_F(ResolverStorageClassUseTest, StructReachableFromParameter) {
   auto* s = Structure("S", {Member("a", ty.f32())});
 
-  Func("f", {Var("param", s, ast::StorageClass::kNone)}, ty.void_(), {}, {});
+  Func("f", {Param("param", s)}, ty.void_(), {}, {});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 

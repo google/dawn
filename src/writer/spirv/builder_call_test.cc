@@ -26,8 +26,8 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Expression_Call) {
   ast::VariableList func_params;
-  func_params.push_back(Var("a", ty.f32(), ast::StorageClass::kFunction));
-  func_params.push_back(Var("b", ty.f32(), ast::StorageClass::kFunction));
+  func_params.push_back(Param("a", ty.f32()));
+  func_params.push_back(Param("b", ty.f32()));
 
   auto* a_func =
       Func("a_func", func_params, ty.f32(),
@@ -46,28 +46,26 @@ TEST_F(BuilderTest, Expression_Call) {
   ASSERT_TRUE(b.GenerateFunction(a_func)) << b.error();
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
-  EXPECT_EQ(b.GenerateCallExpression(expr), 14u) << b.error();
+  EXPECT_EQ(b.GenerateCallExpression(expr), 12u) << b.error();
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 OpName %4 "a"
 OpName %5 "b"
-OpName %12 "main"
+OpName %10 "main"
 %2 = OpTypeFloat 32
 %1 = OpTypeFunction %2 %2 %2
-%11 = OpTypeVoid
-%10 = OpTypeFunction %11
-%15 = OpConstant %2 1
+%9 = OpTypeVoid
+%8 = OpTypeFunction %9
+%13 = OpConstant %2 1
 %3 = OpFunction %2 None %1
 %4 = OpFunctionParameter %2
 %5 = OpFunctionParameter %2
 %6 = OpLabel
-%7 = OpLoad %2 %4
-%8 = OpLoad %2 %5
-%9 = OpFAdd %2 %7 %8
-OpReturnValue %9
+%7 = OpFAdd %2 %4 %5
+OpReturnValue %7
 OpFunctionEnd
-%12 = OpFunction %11 None %10
-%13 = OpLabel
-%14 = OpFunctionCall %2 %3 %15 %15
+%10 = OpFunction %9 None %8
+%11 = OpLabel
+%12 = OpFunctionCall %2 %3 %13 %13
 OpReturn
 OpFunctionEnd
 )");
@@ -75,8 +73,8 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Statement_Call) {
   ast::VariableList func_params;
-  func_params.push_back(Var("a", ty.f32(), ast::StorageClass::kFunction));
-  func_params.push_back(Var("b", ty.f32(), ast::StorageClass::kFunction));
+  func_params.push_back(Param("a", ty.f32()));
+  func_params.push_back(Param("b", ty.f32()));
 
   auto* a_func =
       Func("a_func", func_params, ty.f32(),
@@ -99,24 +97,22 @@ TEST_F(BuilderTest, Statement_Call) {
   EXPECT_EQ(DumpBuilder(b), R"(OpName %3 "a_func"
 OpName %4 "a"
 OpName %5 "b"
-OpName %12 "main"
+OpName %10 "main"
 %2 = OpTypeFloat 32
 %1 = OpTypeFunction %2 %2 %2
-%11 = OpTypeVoid
-%10 = OpTypeFunction %11
-%15 = OpConstant %2 1
+%9 = OpTypeVoid
+%8 = OpTypeFunction %9
+%13 = OpConstant %2 1
 %3 = OpFunction %2 None %1
 %4 = OpFunctionParameter %2
 %5 = OpFunctionParameter %2
 %6 = OpLabel
-%7 = OpLoad %2 %4
-%8 = OpLoad %2 %5
-%9 = OpFAdd %2 %7 %8
-OpReturnValue %9
+%7 = OpFAdd %2 %4 %5
+OpReturnValue %7
 OpFunctionEnd
-%12 = OpFunction %11 None %10
-%13 = OpLabel
-%14 = OpFunctionCall %2 %3 %15 %15
+%10 = OpFunction %9 None %8
+%11 = OpLabel
+%12 = OpFunctionCall %2 %3 %13 %13
 OpReturn
 OpFunctionEnd
 )");

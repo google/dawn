@@ -113,8 +113,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithParams) {
-  ast::VariableList params = {Var("a", ty.f32(), ast::StorageClass::kFunction),
-                              Var("b", ty.i32(), ast::StorageClass::kFunction)};
+  ast::VariableList params = {Param("a", ty.f32()), Param("b", ty.i32())};
 
   Func("a_func", params, ty.f32(),
        ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
@@ -134,8 +133,7 @@ OpName %6 "b"
 %5 = OpFunctionParameter %2
 %6 = OpFunctionParameter %3
 %7 = OpLabel
-%8 = OpLoad %2 %5
-OpReturnValue %8
+OpReturnValue %5
 OpFunctionEnd
 )") << DumpBuilder(b);
 }

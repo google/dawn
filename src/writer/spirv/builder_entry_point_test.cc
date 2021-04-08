@@ -44,10 +44,10 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
   // }
   auto* f32 = ty.f32();
   auto* vec4 = ty.vec4<float>();
-  auto* coord = Var("coord", vec4, ast::StorageClass::kInput, nullptr,
-                    {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
-  auto* loc1 = Var("loc1", f32, ast::StorageClass::kInput, nullptr,
-                   {create<ast::LocationDecoration>(1u)});
+  auto* coord =
+      Param("coord", vec4,
+            {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
+  auto* loc1 = Param("loc1", f32, {create<ast::LocationDecoration>(1u)});
   auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
   auto* col = Var("col", f32, ast::StorageClass::kFunction, mul, {});
   Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
@@ -109,8 +109,7 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
   // }
   auto* f32 = ty.f32();
   auto* u32 = ty.u32();
-  auto* loc_in = Var("loc_in", u32, ast::StorageClass::kFunction, nullptr,
-                     {create<ast::LocationDecoration>(0)});
+  auto* loc_in = Param("loc_in", u32, {create<ast::LocationDecoration>(0)});
   auto* cond = create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan,
                                              Expr("loc_in"), Expr(10u));
   Func("frag_main", ast::VariableList{loc_in}, f32,
@@ -203,8 +202,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
        {create<ast::ReturnStatement>(vert_retval)},
        {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
 
-  auto* frag_inputs =
-      Var("inputs", interface, ast::StorageClass::kFunction, nullptr);
+  auto* frag_inputs = Param("inputs", interface);
   Func("frag_main", ast::VariableList{frag_inputs}, ty.f32(),
        {create<ast::ReturnStatement>(MemberAccessor(Expr("inputs"), "value"))},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)},

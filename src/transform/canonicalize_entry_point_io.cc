@@ -137,8 +137,7 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
       ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, in_struct);
 
       // Create a new function parameter using this struct type.
-      auto* struct_param = ctx.dst->Var(new_struct_param_symbol, in_struct,
-                                        ast::StorageClass::kNone);
+      auto* struct_param = ctx.dst->Param(new_struct_param_symbol, in_struct);
       new_parameters.push_back(struct_param);
     }
 

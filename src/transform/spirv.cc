@@ -159,7 +159,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
 
       // Create a function that writes a return value to all output variables.
       auto* store_value =
-          ctx.dst->Const(store_value_symbol, ctx.Clone(func->return_type()));
+          ctx.dst->Param(store_value_symbol, ctx.Clone(func->return_type()));
       auto return_func_symbol = ctx.dst->Symbols().New();
       auto* return_func = ctx.dst->create<ast::Function>(
           return_func_symbol, ast::VariableList{store_value},

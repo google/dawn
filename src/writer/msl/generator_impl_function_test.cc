@@ -49,8 +49,8 @@ using namespace metal;
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithParams) {
   ast::VariableList params;
-  params.push_back(Var("a", ty.f32(), ast::StorageClass::kNone));
-  params.push_back(Var("b", ty.i32(), ast::StorageClass::kNone));
+  params.push_back(Param("a", ty.f32()));
+  params.push_back(Param("b", ty.i32()));
 
   Func("my_func", params, ty.void_(),
        ast::StatementList{
@@ -96,8 +96,7 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOutVars) {
   // fn frag_main([[location(0)]] foo : f32) -> [[location(1)]] f32 {
   //   return foo;
   // }
-  auto* foo_in =
-      Const("foo", ty.f32(), nullptr, {create<ast::LocationDecoration>(0)});
+  auto* foo_in = Param("foo", ty.f32(), {create<ast::LocationDecoration>(0)});
   Func("frag_main", ast::VariableList{foo_in}, ty.f32(),
        {create<ast::ReturnStatement>(Expr("foo"))},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)},
@@ -129,7 +128,7 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
   //   return coord.x;
   // }
   auto* coord_in =
-      Const("coord", ty.vec4<f32>(), nullptr,
+      Param("coord", ty.vec4<f32>(),
             {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
   Func("frag_main", ast::VariableList{coord_in}, ty.f32(),
        {create<ast::ReturnStatement>(MemberAccessor("coord", "x"))},
@@ -180,7 +179,7 @@ TEST_F(MslGeneratorImplTest,
            Construct(interface_struct, Expr(0.5f), Expr(0.25f)))},
        {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
 
-  Func("frag_main", {Const("colors", interface_struct)}, ty.void_(),
+  Func("frag_main", {Param("colors", interface_struct)}, ty.void_(),
        {
            WrapInStatement(
                Const("r", ty.f32(), MemberAccessor(Expr("colors"), "col1"))),
@@ -242,7 +241,7 @@ TEST_F(MslGeneratorImplTest,
       {Member("pos", ty.vec4<f32>(),
               {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)})});
 
-  Func("foo", {Const("x", ty.f32())}, vertex_output_struct,
+  Func("foo", {Param("x", ty.f32())}, vertex_output_struct,
        {create<ast::ReturnStatement>(Construct(
            vertex_output_struct, Construct(ty.vec4<f32>(), Expr("x"), Expr("x"),
                                            Expr("x"), Expr(1.f))))},
@@ -393,7 +392,7 @@ TEST_F(
          ast::DecorationList{create<ast::LocationDecoration>(0)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ty.f32(), ast::StorageClass::kNone));
+  params.push_back(Param("param", ty.f32()));
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
@@ -450,7 +449,7 @@ TEST_F(MslGeneratorImplTest,
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
+  params.push_back(Param("param", ty.f32()));
 
   Func("sub_func", params, ty.f32(),
        ast::StatementList{
@@ -504,7 +503,7 @@ TEST_F(
              create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ty.f32(), ast::StorageClass::kNone));
+  params.push_back(Param("param", ty.f32()));
 
   auto body = ast::StatementList{
       create<ast::AssignmentStatement>(Expr("depth"),
@@ -555,7 +554,7 @@ TEST_F(MslGeneratorImplTest,
                              create<ast::GroupDecoration>(1)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
+  params.push_back(Param("param", ty.f32()));
 
   auto body = ast::StatementList{
       create<ast::ReturnStatement>(MemberAccessor("coord", "x")),
@@ -610,7 +609,7 @@ TEST_F(MslGeneratorImplTest,
                              create<ast::GroupDecoration>(1)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
+  params.push_back(Param("param", ty.f32()));
 
   auto body = ast::StatementList{
       create<ast::ReturnStatement>(MemberAccessor("coord", "b"))};
@@ -666,7 +665,7 @@ TEST_F(MslGeneratorImplTest,
                              create<ast::GroupDecoration>(1)});
 
   ast::VariableList params;
-  params.push_back(Var("param", ty.f32(), ast::StorageClass::kFunction));
+  params.push_back(Param("param", ty.f32()));
 
   auto body = ast::StatementList{
       create<ast::ReturnStatement>(MemberAccessor("coord", "b"))};
@@ -758,7 +757,7 @@ fragment ep_1_out ep_1() {
 
 TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   ast::VariableList params;
-  params.push_back(Var("a", ty.array<f32, 5>(), ast::StorageClass::kNone));
+  params.push_back(Param("a", ty.array<f32, 5>()));
 
   Func("my_func", params, ty.void_(),
        ast::StatementList{

@@ -38,7 +38,7 @@ Function::Function(const Source& source,
       decorations_(std::move(decorations)),
       return_type_decorations_(std::move(return_type_decorations)) {
   for (auto* param : params_) {
-    TINT_ASSERT(param);
+    TINT_ASSERT(param && param->is_const());
   }
   TINT_ASSERT(symbol_.IsValid());
   TINT_ASSERT(return_type_);

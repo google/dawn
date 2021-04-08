@@ -47,16 +47,14 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
-  auto* func =
-      Func("my_func",
-           ast::VariableList{Var("a", ty.f32(), ast::StorageClass::kNone),
-                             Var("b", ty.i32(), ast::StorageClass::kNone)},
-           ty.void_(),
-           ast::StatementList{
-               create<ast::DiscardStatement>(),
-               create<ast::ReturnStatement>(),
-           },
-           ast::DecorationList{});
+  auto* func = Func(
+      "my_func", ast::VariableList{Param("a", ty.f32()), Param("b", ty.i32())},
+      ty.void_(),
+      ast::StatementList{
+          create<ast::DiscardStatement>(),
+          create<ast::ReturnStatement>(),
+      },
+      ast::DecorationList{});
 
   GeneratorImpl& gen = Build();
 
@@ -145,10 +143,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
   auto* vec4 = ty.vec4<f32>();
-  auto* coord = Var("coord", vec4, ast::StorageClass::kInput, nullptr,
-                    {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
-  auto* loc1 = Var("loc1", ty.f32(), ast::StorageClass::kInput, nullptr,
-                   {create<ast::LocationDecoration>(1u)});
+  auto* coord =
+      Param("coord", vec4,
+            {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
+  auto* loc1 = Param("loc1", ty.f32(), {create<ast::LocationDecoration>(1u)});
   auto* func =
       Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
            ast::StatementList{},

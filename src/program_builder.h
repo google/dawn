@@ -815,7 +815,7 @@ class ProgramBuilder {
   /// @param type the variable type
   /// @param constructor optional constructor expression
   /// @param decorations optional variable decorations
-  /// @returns a constant `ast::Variable` with the given name, storage and type
+  /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Const(NAME&& name,
                        type::Type* type,
@@ -831,7 +831,7 @@ class ProgramBuilder {
   /// @param type the variable type
   /// @param constructor optional constructor expression
   /// @param decorations optional variable decorations
-  /// @returns a constant `ast::Variable` with the given name, storage and type
+  /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Const(const Source& source,
                        NAME&& name,
@@ -841,6 +841,34 @@ class ProgramBuilder {
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
                                  ast::StorageClass::kNone, type, true,
                                  constructor, decorations);
+  }
+
+  /// @param name the parameter name
+  /// @param type the parameter type
+  /// @param decorations optional parameter decorations
+  /// @returns a constant `ast::Variable` with the given name and type
+  template <typename NAME>
+  ast::Variable* Param(NAME&& name,
+                       type::Type* type,
+                       ast::DecorationList decorations = {}) {
+    return create<ast::Variable>(Sym(std::forward<NAME>(name)),
+                                 ast::StorageClass::kNone, type, true, nullptr,
+                                 decorations);
+  }
+
+  /// @param source the parameter source
+  /// @param name the parameter name
+  /// @param type the parameter type
+  /// @param decorations optional parameter decorations
+  /// @returns a constant `ast::Variable` with the given name and type
+  template <typename NAME>
+  ast::Variable* Param(const Source& source,
+                       NAME&& name,
+                       type::Type* type,
+                       ast::DecorationList decorations = {}) {
+    return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
+                                 ast::StorageClass::kNone, type, true, nullptr,
+                                 decorations);
   }
 
   /// @param args the arguments to pass to Var()

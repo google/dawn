@@ -388,8 +388,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
   // fn func(a : array<u32>) {}
   // [[stage(vertex)]] fn main() {}
 
-  auto* param =
-      Var(Source{{12, 34}}, "a", ty.array<i32>(), ast::StorageClass::kNone);
+  auto* param = Param(Source{{12, 34}}, "a", ty.array<i32>());
 
   Func("func", ast::VariableList{param}, ty.void_(),
        ast::StatementList{

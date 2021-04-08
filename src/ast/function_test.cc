@@ -26,7 +26,7 @@ using FunctionTest = TestHelper;
 
 TEST_F(FunctionTest, Creation) {
   VariableList params;
-  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
+  params.push_back(Param("var", ty.i32()));
   auto* var = params[0];
 
   auto* f = Func("func", params, ty.void_(), StatementList{}, DecorationList{});
@@ -38,7 +38,7 @@ TEST_F(FunctionTest, Creation) {
 
 TEST_F(FunctionTest, Creation_WithSource) {
   VariableList params;
-  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
+  params.push_back(Param("var", ty.i32()));
 
   auto* f = Func(Source{Source::Location{20, 2}}, "func", params, ty.void_(),
                  StatementList{}, DecorationList{});
@@ -71,8 +71,20 @@ TEST_F(FunctionTest, Assert_NullParam) {
       {
         ProgramBuilder b;
         VariableList params;
-        params.push_back(b.Var("var", b.ty.i32(), StorageClass::kNone));
+        params.push_back(b.Param("var", b.ty.i32()));
         params.push_back(nullptr);
+
+        b.Func("f", params, b.ty.void_(), StatementList{}, DecorationList{});
+      },
+      "internal compiler error");
+}
+
+TEST_F(FunctionTest, Assert_NonConstParam) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        VariableList params;
+        params.push_back(b.Var("var", b.ty.i32(), ast::StorageClass::kNone));
 
         b.Func("f", params, b.ty.void_(), StatementList{}, DecorationList{});
       },
@@ -112,7 +124,7 @@ WorkgroupDecoration{2 4 6}
 
 TEST_F(FunctionTest, ToStr_WithParams) {
   VariableList params;
-  params.push_back(Var("var", ty.i32(), StorageClass::kNone));
+  params.push_back(Param("var", ty.i32()));
 
   auto* f = Func("func", params, ty.void_(),
                  StatementList{
@@ -122,7 +134,7 @@ TEST_F(FunctionTest, ToStr_WithParams) {
 
   EXPECT_EQ(str(f), R"(Function func -> __void
 (
-  Variable{
+  VariableConst{
     var
     none
     __i32
@@ -142,8 +154,8 @@ TEST_F(FunctionTest, TypeName) {
 
 TEST_F(FunctionTest, TypeName_WithParams) {
   VariableList params;
-  params.push_back(Var("var1", ty.i32(), StorageClass::kNone));
-  params.push_back(Var("var2", ty.f32(), StorageClass::kNone));
+  params.push_back(Param("var1", ty.i32()));
+  params.push_back(Param("var2", ty.f32()));
 
   auto* f = Func("func", params, ty.void_(), StatementList{}, DecorationList{});
   EXPECT_EQ(f->type_name(), "__func__void__i32__f32");

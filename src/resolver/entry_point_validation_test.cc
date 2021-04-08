@@ -253,7 +253,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateLocation) {
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Location) {
   // [[stage(fragment)]]
   // fn main([[location(0)]] param : f32) {}
-  auto* param = Const("param", ty.f32(), nullptr, {Location(0)});
+  auto* param = Param("param", ty.f32(), {Location(0)});
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -263,8 +263,8 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Location) {
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Builtin) {
   // [[stage(fragment)]]
   // fn main([[builtin(frag_depth)]] param : f32) {}
-  auto* param = Const("param", ty.vec4<f32>(), nullptr,
-                      {Builtin(ast::Builtin::kFragDepth)});
+  auto* param =
+      Param("param", ty.vec4<f32>(), {Builtin(ast::Builtin::kFragDepth)});
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -274,7 +274,7 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Builtin) {
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Missing) {
   // [[stage(fragment)]]
   // fn main(param : f32) {}
-  auto* param = Const(Source{{13, 43}}, "param", ty.vec4<f32>(), nullptr);
+  auto* param = Param(Source{{13, 43}}, "param", ty.vec4<f32>());
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -286,7 +286,7 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Missing) {
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Multiple) {
   // [[stage(fragment)]]
   // fn main([[location(0)]] [[builtin(vertex_index)]] param : u32) {}
-  auto* param = Const("param", ty.u32(), nullptr,
+  auto* param = Param("param", ty.u32(),
                       {Location(Source{{13, 43}}, 0),
                        Builtin(Source{{14, 52}}, ast::Builtin::kVertexIndex)});
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
@@ -303,7 +303,7 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Struct) {
   // [[stage(fragment)]]
   // fn main([[location(0)]] param : Input) {}
   auto* input = Structure("Input", {});
-  auto* param = Const("param", input, nullptr, {Location(Source{{13, 43}}, 0)});
+  auto* param = Param("param", input, {Location(Source{{13, 43}}, 0)});
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -324,7 +324,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_Valid) {
   auto* input = Structure(
       "Input", {Member("a", ty.f32(), {Location(0)}),
                 Member("b", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
-  auto* param = Const("param", input);
+  auto* param = Param("param", input);
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -343,7 +343,7 @@ TEST_F(ResolverEntryPointValidationTest,
       {Member("a", ty.f32(),
               {Location(Source{{13, 43}}, 0),
                Builtin(Source{{14, 52}}, ast::Builtin::kSampleIndex)})});
-  auto* param = Const("param", input);
+  auto* param = Param("param", input);
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -364,7 +364,7 @@ TEST_F(ResolverEntryPointValidationTest,
   auto* input = Structure(
       "Input", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)}),
                 Member(Source{{14, 52}}, "b", ty.f32(), {})});
-  auto* param = Const("param", input);
+  auto* param = Param("param", input);
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -386,7 +386,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_NestedStruct) {
       "Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
   auto* input =
       Structure("Input", {Member(Source{{14, 52}}, "a", inner, {Location(0)})});
-  auto* param = Const("param", input);
+  auto* param = Param("param", input);
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -408,7 +408,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_RuntimeArray) {
       "Input",
       {Member(Source{{13, 43}}, "a", ty.array<float>(), {Location(0)})},
       {create<ast::StructBlockDecoration>()});
-  auto* param = Const("param", input);
+  auto* param = Param("param", input);
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -423,10 +423,10 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateBuiltins) {
   // [[stage(fragment)]]
   // fn main([[builtin(sample_index)]] param_a : u32,
   //         [[builtin(sample_index)]] param_b : u32) {}
-  auto* param_a = Const("param_a", ty.u32(), nullptr,
-                        {Builtin(ast::Builtin::kSampleIndex)});
-  auto* param_b = Const("param_b", ty.u32(), nullptr,
-                        {Builtin(ast::Builtin::kSampleIndex)});
+  auto* param_a =
+      Param("param_a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)});
+  auto* param_b =
+      Param("param_b", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)});
   Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -450,8 +450,8 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
       "InputA", {Member("a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
   auto* input_b = Structure(
       "InputB", {Member("a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
-  auto* param_a = Const("param_a", input_a);
-  auto* param_b = Const("param_b", input_b);
+  auto* param_a = Param("param_a", input_a);
+  auto* param_b = Param("param_b", input_b);
   Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -466,8 +466,8 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateLocation) {
   // [[stage(fragment)]]
   // fn main([[location(1)]] param_a : f32,
   //         [[location(1)]] param_b : f32) {}
-  auto* param_a = Const("param_a", ty.u32(), nullptr, {Location(1)});
-  auto* param_b = Const("param_b", ty.u32(), nullptr, {Location(1)});
+  auto* param_a = Param("param_a", ty.u32(), {Location(1)});
+  auto* param_b = Param("param_b", ty.u32(), {Location(1)});
   Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -488,8 +488,8 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateLocation) {
   // fn main(param_a : InputA, param_b : InputB) {}
   auto* input_a = Structure("InputA", {Member("a", ty.f32(), {Location(1)})});
   auto* input_b = Structure("InputB", {Member("a", ty.f32(), {Location(1)})});
-  auto* param_a = Const("param_a", input_a);
-  auto* param_b = Const("param_b", input_b);
+  auto* param_a = Param("param_a", input_a);
+  auto* param_b = Param("param_b", input_b);
   Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
 

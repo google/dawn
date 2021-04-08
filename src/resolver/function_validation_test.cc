@@ -248,7 +248,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
   //   var baz : f32 = bar;
   // }
 
-  auto* bar = Var("bar", ty.f32(), ast::StorageClass::kFunction);
+  auto* bar = Param("bar", ty.f32());
   auto* baz = Var("baz", ty.f32(), ast::StorageClass::kFunction, Expr("bar"));
 
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
@@ -262,7 +262,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
   //   let baz : f32 = bar;
   // }
 
-  auto* bar = Var("bar", ty.f32(), ast::StorageClass::kFunction);
+  auto* bar = Param("bar", ty.f32());
   auto* baz = Const("baz", ty.f32(), Expr("bar"));
 
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
