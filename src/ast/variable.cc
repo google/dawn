@@ -59,49 +59,11 @@ Variable::BindingPoint Variable::binding_point() const {
   return BindingPoint{group, binding};
 }
 
-bool Variable::HasLocationDecoration() const {
-  for (auto* deco : decorations_) {
-    if (deco->Is<LocationDecoration>()) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool Variable::HasBuiltinDecoration() const {
-  for (auto* deco : decorations_) {
-    if (deco->Is<BuiltinDecoration>()) {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool Variable::HasConstantIdDecoration() const {
-  for (auto* deco : decorations_) {
-    if (deco->Is<ConstantIdDecoration>()) {
-      return true;
-    }
-  }
-  return false;
-}
-
-LocationDecoration* Variable::GetLocationDecoration() const {
-  for (auto* deco : decorations_) {
-    if (deco->Is<LocationDecoration>()) {
-      return deco->As<LocationDecoration>();
-    }
-  }
-  return nullptr;
-}
-
 uint32_t Variable::constant_id() const {
-  TINT_ASSERT(HasConstantIdDecoration());
-  for (auto* deco : decorations_) {
-    if (auto* cid = deco->As<ConstantIdDecoration>()) {
-      return cid->value();
-    }
+  if (auto* cid = GetDecoration<ConstantIdDecoration>(decorations_)) {
+    return cid->value();
   }
+  TINT_ASSERT(false);
   return 0;
 }
 

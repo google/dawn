@@ -50,12 +50,7 @@ StructMember* Struct::get_member(const Symbol& symbol) const {
 }
 
 bool Struct::IsBlockDecorated() const {
-  for (auto* deco : decorations_) {
-    if (deco->Is<StructBlockDecoration>()) {
-      return true;
-    }
-  }
-  return false;
+  return HasDecoration<StructBlockDecoration>(decorations_);
 }
 
 Struct* Struct::Clone(CloneContext* ctx) const {

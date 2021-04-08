@@ -1310,8 +1310,9 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
 }
 
 bool GeneratorImpl::global_is_in_struct(const semantic::Variable* var) const {
-  if (var->Declaration()->HasLocationDecoration() ||
-      var->Declaration()->HasBuiltinDecoration()) {
+  auto& decorations = var->Declaration()->decorations();
+  if (ast::HasDecoration<ast::LocationDecoration>(decorations) ||
+      ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
     return var->StorageClass() == ast::StorageClass::kInput ||
            var->StorageClass() == ast::StorageClass::kOutput;
   }
@@ -1463,7 +1464,7 @@ bool GeneratorImpl::EmitFunction(std::ostream& out, ast::Function* func) {
 
   auto* func_sem = builder_.Sem().Get(func);
 
-  if (func->find_decoration<ast::InternalDecoration>()) {
+  if (ast::HasDecoration<ast::InternalDecoration>(func->decorations())) {
     // An internal function. Do not emit.
     return true;
   }
@@ -2825,7 +2826,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
 
   auto* type = builder_.Sem().Get(var)->Type();
 
-  if (var->HasConstantIdDecoration()) {
+  if (ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
     auto const_id = var->constant_id();
 
     out << "#ifndef WGSL_SPEC_CONSTANT_" << const_id << std::endl;

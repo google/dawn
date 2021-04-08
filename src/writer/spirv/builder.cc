@@ -750,7 +750,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     //    one
     // 2- If we don't have a constructor and we're an Output or Private variable
     //    then WGSL requires an initializer.
-    if (var->HasConstantIdDecoration()) {
+    if (ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
       if (type_no_ac->Is<type::F32>()) {
         ast::FloatLiteral l(Source{}, type_no_ac, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
@@ -1490,7 +1490,8 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
                                           ast::Literal* lit) {
   ScalarConstant constant;
 
-  if (var && var->HasConstantIdDecoration()) {
+  if (var &&
+      ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
     constant.is_spec_op = true;
     constant.constant_id = var->constant_id();
   }

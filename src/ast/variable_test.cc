@@ -98,11 +98,12 @@ TEST_F(VariableTest, WithDecorations) {
                       create<ConstantIdDecoration>(1200),
                   });
 
-  EXPECT_TRUE(var->HasLocationDecoration());
-  EXPECT_TRUE(var->HasBuiltinDecoration());
-  EXPECT_TRUE(var->HasConstantIdDecoration());
+  auto& decorations = var->decorations();
+  EXPECT_TRUE(ast::HasDecoration<ast::LocationDecoration>(decorations));
+  EXPECT_TRUE(ast::HasDecoration<ast::BuiltinDecoration>(decorations));
+  EXPECT_TRUE(ast::HasDecoration<ast::ConstantIdDecoration>(decorations));
 
-  auto* location = var->GetLocationDecoration();
+  auto* location = ast::GetDecoration<ast::LocationDecoration>(decorations);
   ASSERT_NE(nullptr, location);
   EXPECT_EQ(1u, location->value());
 }

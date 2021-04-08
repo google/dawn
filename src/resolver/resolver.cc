@@ -310,7 +310,8 @@ bool Resolver::ValidateFunction(const ast::Function* func) {
             func->source());
         return false;
       }
-    } else if (!func->find_decoration<ast::InternalDecoration>()) {
+    } else if (!ast::HasDecoration<ast::InternalDecoration>(
+                   func->decorations())) {
       TINT_ICE(diagnostics_)
           << "Function " << builder_->Symbols().NameFor(func->symbol())
           << " has no body and does not have the [[internal]] decoration";

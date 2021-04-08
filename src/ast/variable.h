@@ -134,18 +134,8 @@ class Variable : public Castable<Variable, Node> {
   /// @returns the binding point information for the variable
   BindingPoint binding_point() const;
 
-  /// @returns true if the decorations include a LocationDecoration
-  bool HasLocationDecoration() const;
-  /// @returns true if the decorations include a BuiltinDecoration
-  bool HasBuiltinDecoration() const;
-  /// @returns true if the decorations include a ConstantIdDecoration
-  bool HasConstantIdDecoration() const;
-
-  /// @returns pointer to LocationDecoration in decorations, otherwise NULL.
-  LocationDecoration* GetLocationDecoration() const;
-
-  /// @returns the constant_id value for the variable. Assumes that
-  /// HasConstantIdDecoration() has been called first.
+  /// @returns the constant_id value for the variable. Assumes that this
+  /// variable has a constant ID decoration.
   uint32_t constant_id() const;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`

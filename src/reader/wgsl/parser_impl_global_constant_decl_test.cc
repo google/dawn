@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/constant_id_decoration.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
@@ -43,7 +44,8 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   ASSERT_NE(e->constructor(), nullptr);
   EXPECT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
 
-  EXPECT_FALSE(e.value->HasConstantIdDecoration());
+  EXPECT_FALSE(
+      ast::HasDecoration<ast::ConstantIdDecoration>(e.value->decorations()));
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
@@ -123,7 +125,8 @@ TEST_F(ParserImplTest, GlobalConstantDec_ConstantId) {
   ASSERT_NE(e->constructor(), nullptr);
   EXPECT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
 
-  EXPECT_TRUE(e.value->HasConstantIdDecoration());
+  EXPECT_TRUE(
+      ast::HasDecoration<ast::ConstantIdDecoration>(e.value->decorations()));
   EXPECT_EQ(e.value->constant_id(), 7u);
 }
 

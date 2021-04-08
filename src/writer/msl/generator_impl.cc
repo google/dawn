@@ -1562,12 +1562,15 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 }
 
 bool GeneratorImpl::global_is_in_struct(const semantic::Variable* var) const {
+  auto& decorations = var->Declaration()->decorations();
   bool in_or_out_struct_has_location =
-      var != nullptr && var->Declaration()->HasLocationDecoration() &&
+      var != nullptr &&
+      ast::HasDecoration<ast::LocationDecoration>(decorations) &&
       (var->StorageClass() == ast::StorageClass::kInput ||
        var->StorageClass() == ast::StorageClass::kOutput);
   bool in_struct_has_builtin =
-      var != nullptr && var->Declaration()->HasBuiltinDecoration() &&
+      var != nullptr &&
+      ast::HasDecoration<ast::BuiltinDecoration>(decorations) &&
       var->StorageClass() == ast::StorageClass::kOutput;
   return in_or_out_struct_has_location || in_struct_has_builtin;
 }
@@ -2249,7 +2252,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     out_ << " " << program_->Symbols().NameFor(var->symbol());
   }
 
-  if (var->HasConstantIdDecoration()) {
+  if (ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
     out_ << " [[function_constant(" << var->constant_id() << ")]]";
   } else if (var->constructor() != nullptr) {
     out_ << " = ";

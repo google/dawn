@@ -18,6 +18,7 @@
 
 #include "src/ast/bool_literal.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/constant_id_decoration.h"
 #include "src/ast/module.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
@@ -203,7 +204,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       auto* decl = var->Declaration();
 
       auto name = program_->Symbols().NameFor(decl->symbol());
-      if (decl->HasBuiltinDecoration()) {
+      if (ast::HasDecoration<ast::BuiltinDecoration>(decl->decorations())) {
         continue;
       }
 
@@ -220,7 +221,8 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
         stage_variable.component_type = ComponentType::kSInt;
       }
 
-      auto* location_decoration = decl->GetLocationDecoration();
+      auto* location_decoration =
+          ast::GetDecoration<ast::LocationDecoration>(decl->decorations());
       if (location_decoration) {
         stage_variable.has_location_decoration = true;
         stage_variable.location_decoration = location_decoration->value();
@@ -257,7 +259,7 @@ std::string Inspector::GetRemappedNameForEntryPoint(
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
   for (auto* var : program_->AST().GlobalVariables()) {
-    if (!var->HasConstantIdDecoration()) {
+    if (!ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
       continue;
     }
 

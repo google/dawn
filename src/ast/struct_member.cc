@@ -41,19 +41,13 @@ StructMember::StructMember(StructMember&&) = default;
 StructMember::~StructMember() = default;
 
 bool StructMember::has_offset_decoration() const {
-  for (auto* deco : decorations_) {
-    if (deco->Is<StructMemberOffsetDecoration>()) {
-      return true;
-    }
-  }
-  return false;
+  return HasDecoration<StructMemberOffsetDecoration>(decorations_);
 }
 
 uint32_t StructMember::offset() const {
-  for (auto* deco : decorations_) {
-    if (auto* offset = deco->As<StructMemberOffsetDecoration>()) {
-      return offset->offset();
-    }
+  if (auto* offset =
+          GetDecoration<StructMemberOffsetDecoration>(decorations_)) {
+    return offset->offset();
   }
   return 0;
 }
