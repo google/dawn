@@ -58,7 +58,14 @@ namespace dawn_native {
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeU));
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeV));
         DAWN_TRY(ValidateAddressMode(descriptor->addressModeW));
-        DAWN_TRY(ValidateCompareFunction(descriptor->compare));
+
+        // CompareFunction::Undefined is tagged as invalid because it can't be used, except for the
+        // SamplerDescriptor where it is a special value that means the sampler is not a
+        // comparison-sampler.
+        if (descriptor->compare != wgpu::CompareFunction::Undefined) {
+            DAWN_TRY(ValidateCompareFunction(descriptor->compare));
+        }
+
         return {};
     }
 

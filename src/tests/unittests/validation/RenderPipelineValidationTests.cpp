@@ -572,6 +572,22 @@ TEST_F(RenderPipelineValidationTest, ClampDepthWithoutExtension) {
     }
 }
 
+// Test that depthStencil.depthCompare must not be undefiend.
+TEST_F(RenderPipelineValidationTest, DepthCompareUndefinedIsError) {
+    utils::ComboRenderPipelineDescriptor2 descriptor;
+    descriptor.vertex.module = vsModule;
+    descriptor.cFragment.module = fsModule;
+    descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth32Float);
+
+    // Control case: Always is valid.
+    descriptor.cDepthStencil.depthCompare = wgpu::CompareFunction::Always;
+    device.CreateRenderPipeline2(&descriptor);
+
+    // Error case: Undefined is invalid.
+    descriptor.cDepthStencil.depthCompare = wgpu::CompareFunction::Undefined;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+}
+
 // Test that the entryPoint names must be present for the correct stage in the shader module.
 TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
