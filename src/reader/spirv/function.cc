@@ -3961,7 +3961,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             // of the predecessor block.
             pred_block_info->phi_assignments.push_back({phi_id, value_id});
             first_pos = std::min(first_pos, pred_block_info->pos);
-            last_pos = std::min(last_pos, pred_block_info->pos);
+            last_pos = std::max(last_pos, pred_block_info->pos);
           }
         }
 

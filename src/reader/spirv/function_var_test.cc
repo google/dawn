@@ -1811,19 +1811,19 @@ VariableDeclStatement{
   }
 }
 Loop{
+  VariableDeclStatement{
+    Variable{
+      x_2_phi
+      function
+      __u32
+    }
+  }
   If{
     (
       Identifier[not set]{x_101}
     )
     {
       Break{}
-    }
-  }
-  VariableDeclStatement{
-    Variable{
-      x_2_phi
-      function
-      __u32
     }
   }
   If{
@@ -1865,7 +1865,7 @@ Loop{
 }
 Return{}
 )";
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, got) << got;
 }
 
 TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
@@ -1933,19 +1933,19 @@ VariableDeclStatement{
   }
 }
 Loop{
+  VariableDeclStatement{
+    Variable{
+      x_2_phi
+      function
+      __u32
+    }
+  }
   If{
     (
       Identifier[not set]{x_101}
     )
     {
       Break{}
-    }
-  }
-  VariableDeclStatement{
-    Variable{
-      x_2_phi
-      function
-      __u32
     }
   }
   Assignment{
@@ -1982,7 +1982,108 @@ Loop{
 }
 Return{}
 )";
-  EXPECT_EQ(expect, got);
+  EXPECT_EQ(expect, got) << got;
+}
+
+TEST_F(SpvParserTest,
+       EmitStatement_Phi_InMerge_PredecessorsDominatdByNestedSwitchCase) {
+  // This is the essence of the bug report from crbug.com/tint/495
+  auto assembly = Preamble() + R"(
+     %cond = OpConstantTrue %bool
+     %pty = OpTypePointer Private %uint
+     %1 = OpVariable %pty Private
+     %boolpty = OpTypePointer Private %bool
+     %7 = OpVariable %boolpty Private
+     %8 = OpVariable %boolpty Private
+
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %uint_1 %20 0 %20 1 %30
+
+       %20 = OpLabel ; case 0
+       OpBranch %30 ;; fall through
+
+       %30 = OpLabel ; case 1
+       OpSelectionMerge %50 None
+       OpBranchConditional %true %40 %45
+
+         %40 = OpLabel
+         OpBranch %50
+
+         %45 = OpLabel
+         OpBranch %99 ; break
+
+       %50 = OpLabel ; end the case
+       OpBranch %99
+
+     %99 = OpLabel
+     ; predecessors are all dominated by case construct head at %30
+     %phi = OpPhi %uint %uint_0 %45 %uint_1 %50
+     OpReturn
+
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
+  Variable{
+    x_35_phi
+    function
+    __u32
+  }
+}
+Switch{
+  ScalarConstructor[not set]{1}
+  {
+    Default{
+      Fallthrough{}
+    }
+    Case 0{
+      Fallthrough{}
+    }
+    Case 1{
+      If{
+        (
+          ScalarConstructor[not set]{true}
+        )
+        {
+        }
+      }
+      Else{
+        {
+          Assignment{
+            Identifier[not set]{x_35_phi}
+            ScalarConstructor[not set]{0}
+          }
+          Break{}
+        }
+      }
+      Assignment{
+        Identifier[not set]{x_35_phi}
+        ScalarConstructor[not set]{1}
+      }
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_35
+    none
+    __u32
+    {
+      Identifier[not set]{x_35_phi}
+    }
+  }
+}
+Return{}
+)";
+  EXPECT_EQ(expect, got) << got << assembly;
 }
 
 TEST_F(SpvParserTest, EmitStatement_UseInPhiCountsAsUse) {
