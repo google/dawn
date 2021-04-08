@@ -15,11 +15,13 @@
 #ifndef DAWNNATIVE_CREATEPIPELINEASYNCTRACKER_H_
 #define DAWNNATIVE_CREATEPIPELINEASYNCTRACKER_H_
 
+#include "common/RefCounted.h"
 #include "common/SerialQueue.h"
 #include "dawn/webgpu.h"
 #include "dawn_native/IntegerTypes.h"
 
 #include <memory>
+#include <string>
 
 namespace dawn_native {
 
@@ -28,42 +30,51 @@ namespace dawn_native {
     class RenderPipelineBase;
 
     struct CreatePipelineAsyncTaskBase {
-        CreatePipelineAsyncTaskBase(void* userData);
+        CreatePipelineAsyncTaskBase(std::string errorMessage, void* userData);
         virtual ~CreatePipelineAsyncTaskBase();
 
-        virtual void Finish(WGPUCreatePipelineAsyncStatus status) = 0;
+        virtual void Finish() = 0;
+        virtual void HandleShutDown() = 0;
+        virtual void HandleDeviceLoss() = 0;
 
       protected:
+        std::string mErrorMessage;
         void* mUserData;
     };
 
     struct CreateComputePipelineAsyncTask final : public CreatePipelineAsyncTaskBase {
-        CreateComputePipelineAsyncTask(ComputePipelineBase* pipeline,
+        CreateComputePipelineAsyncTask(Ref<ComputePipelineBase> pipeline,
+                                       std::string errorMessage,
                                        WGPUCreateComputePipelineAsyncCallback callback,
                                        void* userdata);
 
-        void Finish(WGPUCreatePipelineAsyncStatus status) final;
+        void Finish() final;
+        void HandleShutDown() final;
+        void HandleDeviceLoss() final;
 
       private:
-        ComputePipelineBase* mPipeline;
+        Ref<ComputePipelineBase> mPipeline;
         WGPUCreateComputePipelineAsyncCallback mCreateComputePipelineAsyncCallback;
     };
 
     struct CreateRenderPipelineAsyncTask final : public CreatePipelineAsyncTaskBase {
-        CreateRenderPipelineAsyncTask(RenderPipelineBase* pipeline,
+        CreateRenderPipelineAsyncTask(Ref<RenderPipelineBase> pipeline,
+                                      std::string errorMessage,
                                       WGPUCreateRenderPipelineAsyncCallback callback,
                                       void* userdata);
 
-        void Finish(WGPUCreatePipelineAsyncStatus status) final;
+        void Finish() final;
+        void HandleShutDown() final;
+        void HandleDeviceLoss() final;
 
       private:
-        RenderPipelineBase* mPipeline;
+        Ref<RenderPipelineBase> mPipeline;
         WGPUCreateRenderPipelineAsyncCallback mCreateRenderPipelineAsyncCallback;
     };
 
     class CreatePipelineAsyncTracker {
       public:
-        CreatePipelineAsyncTracker(DeviceBase* device);
+        explicit CreatePipelineAsyncTracker(DeviceBase* device);
         ~CreatePipelineAsyncTracker();
 
         void TrackTask(std::unique_ptr<CreatePipelineAsyncTaskBase> task, ExecutionSerial serial);
