@@ -20,10 +20,7 @@ again.
 All submissions, including submissions by project members, require review. We
 use [Dawn's Gerrit](https://dawn-review.googlesource.com/) for this purpose.
 
-Tint generally follows the Google C++ style guide. There is a clang-format file
-provided and a `tools/format` script which will run the formatter. There is also
-a `tools/lint` script to run a linter. Overall try to use the same style and
-convention as code around your change.
+Submissions should follow the [Tint style guide](docs/style_guide.md).
 
 ## Community Guidelines
 
