@@ -197,9 +197,8 @@ class CompressedTextureBCFormatTest : public DawnTest {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderPass.color,
-                                (expectedOrigin.x, expectedOrigin.y),
-                                (expectedExtent.width, expectedExtent.height), 0);
+        EXPECT_TEXTURE_EQ(expected.data(), renderPass.color, {expectedOrigin.x, expectedOrigin.y},
+                          {expectedExtent.width, expectedExtent.height});
     }
 
     // Run the tests that copies pre-prepared BC format data into a BC texture and verifies if we

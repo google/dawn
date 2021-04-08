@@ -532,8 +532,8 @@ class TextureViewRenderingTest : public DawnTest {
             bytesPerRow / kBytesPerTexel * (textureWidthLevel0 - 1) + textureHeightLevel0;
         constexpr RGBA8 kExpectedPixel(0, 255, 0, 255);
         std::vector<RGBA8> expected(expectedDataSize, kExpectedPixel);
-        EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture, (0, 0, textureViewBaseLayer),
-                                (textureViewWidth, textureViewHeight), textureViewBaseLevel);
+        EXPECT_TEXTURE_EQ(expected.data(), texture, {0, 0, textureViewBaseLayer},
+                          {textureViewWidth, textureViewHeight}, textureViewBaseLevel);
     }
 };
 

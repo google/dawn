@@ -169,8 +169,8 @@ TEST_P(TextureSubresourceTest, MipmapLevelsTest) {
     // black in render view (mip level 1).
     RGBA8 topRight = RGBA8::kBlack;
     RGBA8 bottomLeft = RGBA8::kRed;
-    EXPECT_TEXTURE_RGBA8_EQ(&topRight, texture, (kSize / 2 - 1, 0), (1, 1), 1);
-    EXPECT_TEXTURE_RGBA8_EQ(&bottomLeft, texture, (0, kSize / 2 - 1), (1, 1), 1);
+    EXPECT_TEXTURE_EQ(&topRight, texture, {kSize / 2 - 1, 0}, {1, 1}, 1);
+    EXPECT_TEXTURE_EQ(&bottomLeft, texture, {0, kSize / 2 - 1}, {1, 1}, 1);
 }
 
 // Test different array layers
@@ -197,8 +197,8 @@ TEST_P(TextureSubresourceTest, ArrayLayersTest) {
     // black in render view (array layer 1).
     RGBA8 topRight = RGBA8::kBlack;
     RGBA8 bottomLeft = RGBA8::kRed;
-    EXPECT_TEXTURE_RGBA8_EQ(&topRight, texture, (kSize - 1, 0, 1), (1, 1), 0);
-    EXPECT_TEXTURE_RGBA8_EQ(&bottomLeft, texture, (0, kSize - 1, 1), (1, 1), 0);
+    EXPECT_TEXTURE_EQ(&topRight, texture, {kSize - 1, 0, 1}, {1, 1});
+    EXPECT_TEXTURE_EQ(&bottomLeft, texture, {0, kSize - 1, 1}, {1, 1});
 }
 
 // TODO (yunchao.he@intel.com):

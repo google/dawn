@@ -308,9 +308,9 @@ class QueueWriteTextureTests : public DawnTest {
             PackTextureData(data.data() + dataOffset, copySize.width, copySize.height,
                             dataSpec.bytesPerRow, expected.data(), copySize.width, bytesPerTexel);
 
-            EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture,
-                                    (textureSpec.copyOrigin.x, textureSpec.copyOrigin.y, slice),
-                                    (copySize.width, copySize.height), textureSpec.level)
+            EXPECT_TEXTURE_EQ(expected.data(), texture,
+                              {textureSpec.copyOrigin.x, textureSpec.copyOrigin.y, slice},
+                              {copySize.width, copySize.height}, textureSpec.level)
                 << "Write to texture failed copying " << dataSpec.size << "-byte data with offset "
                 << dataSpec.offset << " and bytes per row " << dataSpec.bytesPerRow << " to [("
                 << textureSpec.copyOrigin.x << ", " << textureSpec.copyOrigin.y << "), ("
@@ -346,7 +346,7 @@ class QueueWriteTextureTests : public DawnTest {
         device.GetQueue().WriteTexture(&imageCopyTexture, data.data(), width * height * kPixelSize,
                                        &textureDataLayout, &copyExtent);
 
-        EXPECT_TEXTURE_RGBA8_EQ(data.data(), texture, (0, 0), (width, height), 0);
+        EXPECT_TEXTURE_EQ(data.data(), texture, {0, 0}, {width, height});
     }
 };
 

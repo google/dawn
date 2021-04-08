@@ -79,14 +79,14 @@ class SubresourceRenderAttachmentTest : public DawnTest {
         switch (type) {
             case Type::Color: {
                 std::vector<RGBA8> expected(renderTargetSize * renderTargetSize, expectedColor);
-                EXPECT_TEXTURE_RGBA8_EQ(expected.data(), renderTarget, (0, 0, baseArrayLayer),
-                                        (renderTargetSize, renderTargetSize), baseMipLevel);
+                EXPECT_TEXTURE_EQ(expected.data(), renderTarget, {0, 0, baseArrayLayer},
+                                  {renderTargetSize, renderTargetSize}, baseMipLevel);
                 break;
             }
             case Type::Depth: {
                 std::vector<float> expected(renderTargetSize * renderTargetSize, expectedDepth);
-                EXPECT_TEXTURE_FLOAT_EQ(expected.data(), renderTarget, (0, 0, baseArrayLayer),
-                                        (renderTargetSize, renderTargetSize), baseMipLevel);
+                EXPECT_TEXTURE_EQ(expected.data(), renderTarget, {0, 0, baseArrayLayer},
+                                  {renderTargetSize, renderTargetSize}, baseMipLevel);
                 break;
             }
             case Type::Stencil:

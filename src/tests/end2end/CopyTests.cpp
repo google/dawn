@@ -299,11 +299,10 @@ class CopyTests_B2T : public CopyTests {
                             copySize.width, copySize.height, copyDepth, bufferSpec.bytesPerRow,
                             expected.data(), copySize.width * bytesPerTexel);
 
-            EXPECT_TEXTURE_RGBA8_EQ(expected.data(), texture,
-                                    (textureSpec.copyOrigin.x, textureSpec.copyOrigin.y,
-                                     textureSpec.copyOrigin.z + layer),
-                                    (copySize.width, copySize.height, copyDepth),
-                                    textureSpec.copyLevel)
+            EXPECT_TEXTURE_EQ(expected.data(), texture,
+                              {textureSpec.copyOrigin.x, textureSpec.copyOrigin.y,
+                               textureSpec.copyOrigin.z + layer},
+                              {copySize.width, copySize.height, copyDepth}, textureSpec.copyLevel)
                 << "Buffer to Texture copy failed copying " << bufferSpec.size
                 << "-byte buffer with offset " << bufferSpec.offset << " and bytes per row "
                 << bufferSpec.bytesPerRow << " to [(" << textureSpec.copyOrigin.x << ", "
