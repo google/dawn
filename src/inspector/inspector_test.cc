@@ -59,6 +59,23 @@ class InspectorHelper : public ProgramBuilder {
     Func(caller, ast::VariableList(), ty.void_(), body, decorations);
   }
 
+  /// Generates a struct that contains user-defined IO members
+  /// @param name the name of the generated struct
+  /// @param inout_vars tuples of {name, loc} that will be the struct members
+  type::Struct* MakeInOutStruct(
+      std::string name,
+      std::vector<std::tuple<std::string, uint32_t>> inout_vars) {
+    ast::StructMemberList members;
+    for (auto var : inout_vars) {
+      std::string member_name;
+      uint32_t location;
+      std::tie(member_name, location) = var;
+      members.push_back(Member(member_name, ty.u32(), {Location(location)}));
+    }
+    return Structure(name, members);
+  }
+
+  // TODO(crbug.com/tint/697): Remove this.
   /// Add In/Out variables to the global variables
   /// @param inout_vars tuples of {in, out} that will be added as entries to the
   ///                   global variables
@@ -76,6 +93,7 @@ class InspectorHelper : public ProgramBuilder {
     }
   }
 
+  // TODO(crbug.com/tint/697): Remove this.
   /// Generates a function that references in/out variables
   /// @param name name of the function created
   /// @param inout_vars tuples of {in, out} that will be converted into out = in
@@ -95,6 +113,7 @@ class InspectorHelper : public ProgramBuilder {
     Func(name, ast::VariableList(), ty.void_(), stmts, decorations);
   }
 
+  // TODO(crbug.com/tint/697): Remove this.
   /// Generates a function that references in/out variables and calls another
   /// function.
   /// @param caller name of the function created
@@ -671,6 +690,9 @@ class InspectorHelper : public ProgramBuilder {
 
 class InspectorGetEntryPointTest : public InspectorHelper,
                                    public testing::Test {};
+class InspectorGetEntryPointTestWithComponentTypeParam
+    : public InspectorHelper,
+      public testing::TestWithParam<ComponentType> {};
 class InspectorGetRemappedNameForEntryPointTest : public InspectorHelper,
                                                   public testing::Test {};
 class InspectorGetConstantIDsTest : public InspectorHelper,
@@ -893,7 +915,270 @@ TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
   EXPECT_EQ(0u, result[0].output_variables.size());
 }
 
-TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
+TEST_P(InspectorGetEntryPointTestWithComponentTypeParam, InOutVariables) {
+  ComponentType inspector_type = GetParam();
+  type::Type* tint_type = nullptr;
+  switch (inspector_type) {
+    case ComponentType::kFloat:
+      tint_type = ty.f32();
+      break;
+    case ComponentType::kSInt:
+      tint_type = ty.i32();
+      break;
+    case ComponentType::kUInt:
+      tint_type = ty.u32();
+      break;
+    case ComponentType::kUnknown:
+      return;
+  }
+
+  auto* in_var = Param("in_var", tint_type, {Location(0u)});
+  Func("foo", {in_var}, tint_type, {Return(Expr("in_var"))},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(1u, result[0].input_variables.size());
+  EXPECT_EQ("in_var", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(inspector_type, result[0].input_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[0].output_variables.size());
+  EXPECT_EQ("<retval>", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(inspector_type, result[0].output_variables[0].component_type);
+}
+INSTANTIATE_TEST_SUITE_P(InspectorGetEntryPointTest,
+                         InspectorGetEntryPointTestWithComponentTypeParam,
+                         testing::Values(ComponentType::kFloat,
+                                         ComponentType::kSInt,
+                                         ComponentType::kUInt));
+
+TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
+  auto* in_var0 = Param("in_var0", ty.u32(), {Location(0u)});
+  auto* in_var1 = Param("in_var1", ty.u32(), {Location(1u)});
+  auto* in_var4 = Param("in_var4", ty.u32(), {Location(4u)});
+  Func("foo", {in_var0, in_var1, in_var4}, ty.u32(), {Return(Expr("in_var0"))},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(3u, result[0].input_variables.size());
+  EXPECT_EQ("in_var0", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+  EXPECT_EQ("in_var1", result[0].input_variables[1].name);
+  EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
+  EXPECT_EQ(1u, result[0].input_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[1].component_type);
+  EXPECT_EQ("in_var4", result[0].input_variables[2].name);
+  EXPECT_TRUE(result[0].input_variables[2].has_location_decoration);
+  EXPECT_EQ(4u, result[0].input_variables[2].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[2].component_type);
+
+  ASSERT_EQ(1u, result[0].output_variables.size());
+  EXPECT_EQ("<retval>", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+}
+
+TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
+  auto* in_var_foo = Param("in_var_foo", ty.u32(), {Location(0u)});
+  Func("foo", {in_var_foo}, ty.u32(), {Return(Expr("in_var_foo"))},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
+
+  auto* in_var_bar = Param("in_var_bar", ty.u32(), {Location(0u)});
+  Func("bar", {in_var_bar}, ty.u32(), {Return(Expr("in_var_bar"))},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(1u)});
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(2u, result.size());
+
+  ASSERT_EQ(1u, result[0].input_variables.size());
+  EXPECT_EQ("in_var_foo", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[0].output_variables.size());
+  EXPECT_EQ("<retval>", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[1].input_variables.size());
+  EXPECT_EQ("in_var_bar", result[1].input_variables[0].name);
+  EXPECT_TRUE(result[1].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[1].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[1].input_variables[0].component_type);
+
+  ASSERT_EQ(1u, result[1].output_variables.size());
+  EXPECT_EQ("<retval>", result[1].output_variables[0].name);
+  EXPECT_TRUE(result[1].output_variables[0].has_location_decoration);
+  EXPECT_EQ(1u, result[1].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[1].output_variables[0].component_type);
+}
+
+TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
+  auto* in_var0 =
+      Param("in_var0", ty.u32(), {Builtin(ast::Builtin::kInstanceIndex)});
+  auto* in_var1 = Param("in_var1", ty.u32(), {Location(0u)});
+  Func("foo", {in_var0, in_var1}, ty.u32(), {Return(Expr("in_var1"))},
+       {Stage(ast::PipelineStage::kFragment)},
+       {Builtin(ast::Builtin::kSampleMaskOut)});
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(1u, result[0].input_variables.size());
+  EXPECT_EQ("in_var1", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+
+  ASSERT_EQ(0u, result[0].output_variables.size());
+}
+
+TEST_F(InspectorGetEntryPointTest, InOutStruct) {
+  auto* interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
+  Func("foo", {Param("param", interface)}, interface, {Return(Expr("param"))},
+       {Stage(ast::PipelineStage::kFragment)});
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(2u, result[0].input_variables.size());
+  EXPECT_EQ("param.a", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+  EXPECT_EQ("param.b", result[0].input_variables[1].name);
+  EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
+  EXPECT_EQ(1u, result[0].input_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[1].component_type);
+
+  ASSERT_EQ(2u, result[0].output_variables.size());
+  EXPECT_EQ("<retval>.a", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+  EXPECT_EQ("<retval>.b", result[0].output_variables[1].name);
+  EXPECT_TRUE(result[0].output_variables[1].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
+}
+
+TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutSharedStruct) {
+  auto* interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
+  Func("foo", {}, interface, {Return(Construct(interface))},
+       {Stage(ast::PipelineStage::kFragment)});
+  Func("bar", {Param("param", interface)}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(2u, result.size());
+
+  ASSERT_EQ(0u, result[0].input_variables.size());
+
+  ASSERT_EQ(2u, result[0].output_variables.size());
+  EXPECT_EQ("<retval>.a", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+  EXPECT_EQ("<retval>.b", result[0].output_variables[1].name);
+  EXPECT_TRUE(result[0].output_variables[1].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
+
+  ASSERT_EQ(2u, result[1].input_variables.size());
+  EXPECT_EQ("param.a", result[1].input_variables[0].name);
+  EXPECT_TRUE(result[1].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[1].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[1].input_variables[0].component_type);
+  EXPECT_EQ("param.b", result[1].input_variables[1].name);
+  EXPECT_TRUE(result[1].input_variables[1].has_location_decoration);
+  EXPECT_EQ(1u, result[1].input_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[1].input_variables[1].component_type);
+
+  ASSERT_EQ(0u, result[1].output_variables.size());
+}
+
+TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
+  auto* struct_a = MakeInOutStruct("struct_a", {{"a", 0u}, {"b", 1u}});
+  auto* struct_b = MakeInOutStruct("struct_b", {{"a", 2u}});
+  Func("foo",
+       {Param("param_a", struct_a), Param("param_b", struct_b),
+        Param("param_c", ty.f32(), {Location(3u)}),
+        Param("param_d", ty.f32(), {Location(4u)})},
+       struct_a, {Return(Expr("param_a"))},
+       {Stage(ast::PipelineStage::kFragment)});
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetEntryPoints();
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+
+  ASSERT_EQ(1u, result.size());
+
+  ASSERT_EQ(5u, result[0].input_variables.size());
+  EXPECT_EQ("param_a.a", result[0].input_variables[0].name);
+  EXPECT_TRUE(result[0].input_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].input_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[0].component_type);
+  EXPECT_EQ("param_a.b", result[0].input_variables[1].name);
+  EXPECT_TRUE(result[0].input_variables[1].has_location_decoration);
+  EXPECT_EQ(1u, result[0].input_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[1].component_type);
+  EXPECT_EQ("param_b.a", result[0].input_variables[2].name);
+  EXPECT_TRUE(result[0].input_variables[2].has_location_decoration);
+  EXPECT_EQ(2u, result[0].input_variables[2].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].input_variables[2].component_type);
+  EXPECT_EQ("param_c", result[0].input_variables[3].name);
+  EXPECT_TRUE(result[0].input_variables[3].has_location_decoration);
+  EXPECT_EQ(3u, result[0].input_variables[3].location_decoration);
+  EXPECT_EQ(ComponentType::kFloat, result[0].input_variables[3].component_type);
+  EXPECT_EQ("param_d", result[0].input_variables[4].name);
+  EXPECT_TRUE(result[0].input_variables[4].has_location_decoration);
+  EXPECT_EQ(4u, result[0].input_variables[4].location_decoration);
+  EXPECT_EQ(ComponentType::kFloat, result[0].input_variables[4].component_type);
+
+  ASSERT_EQ(2u, result[0].output_variables.size());
+  EXPECT_EQ("<retval>.a", result[0].output_variables[0].name);
+  EXPECT_TRUE(result[0].output_variables[0].has_location_decoration);
+  EXPECT_EQ(0u, result[0].output_variables[0].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
+  EXPECT_EQ("<retval>.b", result[0].output_variables[1].name);
+  EXPECT_TRUE(result[0].output_variables[1].has_location_decoration);
+  EXPECT_EQ(1u, result[0].output_variables[1].location_decoration);
+  EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
+}
+
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables_Legacy) {
   AddInOutVariables({{"in_var", "out_var"}});
 
   MakeInOutVariableBodyFunction(
@@ -922,7 +1207,8 @@ TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables) {
   EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
 }
 
-TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables_Legacy) {
   AddInOutVariables({{"in_var", "out_var"}});
 
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
@@ -953,7 +1239,8 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables) {
   EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
 }
 
-TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables_Legacy) {
   AddInOutVariables({{"in_var", "out_var"}});
 
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
@@ -984,7 +1271,8 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables) {
   EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[0].component_type);
 }
 
-TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables_Legacy) {
   AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
 
   MakeInOutVariableBodyFunction(
@@ -1021,7 +1309,8 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables) {
   EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
 }
 
-TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables_Legacy) {
   AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
 
   MakeInOutVariableBodyFunction(
@@ -1061,7 +1350,8 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables) {
   EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
 }
 
-TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables_Legacy) {
   AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
 
   MakeInOutVariableBodyFunction(
@@ -1117,7 +1407,9 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
   EXPECT_EQ(ComponentType::kUInt, result[1].output_variables[0].component_type);
 }
 
-TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest,
+       MultipleEntryPointsSharedInOutVariables_Legacy) {
   AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
 
   MakeInOutVariableBodyFunction("func", {{"in2_var", "out2_var"}}, {});
@@ -1183,7 +1475,8 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsSharedInOutVariables) {
   EXPECT_EQ(ComponentType::kUInt, result[1].output_variables[0].component_type);
 }
 
-TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
+// TODO(crbug.com/tint/697): Remove this.
+TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables_Legacy) {
   Global("in_var", ty.u32(), ast::StorageClass::kInput, nullptr,
          ast::DecorationList{
              create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});

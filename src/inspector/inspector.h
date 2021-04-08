@@ -215,6 +215,18 @@ class Inspector {
   ///          nullptr and sets the error string.
   ast::Function* FindEntryPointByName(const std::string& name);
 
+  /// Recursively add entry point IO variables.
+  /// If `type` is a struct, recurse into members, appending the member name.
+  /// Otherwise, add the variable unless it is a builtin.
+  /// @param name the name of the variable being added
+  /// @param type the type of the variable
+  /// @param decorations the variable decorations
+  /// @param variables the list to add the variables to
+  void AddEntryPointInOutVariables(std::string name,
+                                   type::Type* type,
+                                   const ast::DecorationList& decorations,
+                                   std::vector<StageVariable>& variables) const;
+
   /// @param entry_point name of the entry point to get information about.
   /// @param read_only if true get only read-only bindings, if false get
   ///                  write-only bindings.

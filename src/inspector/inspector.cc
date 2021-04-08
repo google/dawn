@@ -37,6 +37,7 @@
 #include "src/type/struct_type.h"
 #include "src/type/u32_type.h"
 #include "src/type/vector_type.h"
+#include "src/type/void_type.h"
 
 namespace tint {
 namespace inspector {
@@ -200,6 +201,19 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();
 
+    for (auto* param : func->params()) {
+      AddEntryPointInOutVariables(program_->Symbols().NameFor(param->symbol()),
+                                  param->declared_type(), param->decorations(),
+                                  entry_point.input_variables);
+    }
+
+    if (!func->return_type()->Is<type::Void>()) {
+      AddEntryPointInOutVariables("<retval>", func->return_type(),
+                                  func->return_type_decorations(),
+                                  entry_point.output_variables);
+    }
+
+    // TODO(crbug.com/tint/697): Remove this.
     for (auto* var : program_->Sem().Get(func)->ReferencedModuleVariables()) {
       auto* decl = var->Declaration();
 
@@ -523,6 +537,50 @@ ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
   }
 
   return func;
+}
+
+void Inspector::AddEntryPointInOutVariables(
+    std::string name,
+    type::Type* type,
+    const ast::DecorationList& decorations,
+    std::vector<StageVariable>& variables) const {
+  // Skip builtins.
+  if (ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
+    return;
+  }
+
+  auto* unwrapped_type = type->UnwrapAll();
+
+  if (auto* struct_ty = unwrapped_type->As<type::Struct>()) {
+    // Recurse into members.
+    for (auto* member : struct_ty->impl()->members()) {
+      AddEntryPointInOutVariables(
+          name + "." + program_->Symbols().NameFor(member->symbol()),
+          member->type(), member->decorations(), variables);
+    }
+    return;
+  }
+
+  // Base case: add the variable.
+
+  StageVariable stage_variable;
+  stage_variable.name = name;
+  stage_variable.component_type = ComponentType::kUnknown;
+  if (unwrapped_type->is_float_scalar_or_vector() ||
+      unwrapped_type->is_float_matrix()) {
+    stage_variable.component_type = ComponentType::kFloat;
+  } else if (unwrapped_type->is_unsigned_scalar_or_vector()) {
+    stage_variable.component_type = ComponentType::kUInt;
+  } else if (unwrapped_type->is_signed_scalar_or_vector()) {
+    stage_variable.component_type = ComponentType::kSInt;
+  }
+
+  auto* location = ast::GetDecoration<ast::LocationDecoration>(decorations);
+  TINT_ASSERT(location != nullptr);
+  stage_variable.has_location_decoration = true;
+  stage_variable.location_decoration = location->value();
+
+  variables.push_back(stage_variable);
 }
 
 std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
