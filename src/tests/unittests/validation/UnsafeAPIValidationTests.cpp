@@ -28,6 +28,22 @@ class UnsafeAPIValidationTest : public ValidationTest {
     }
 };
 
+// Check that 3D Texture creation is disallowed as part of unsafe APIs.
+TEST_F(UnsafeAPIValidationTest, 3DTextureCreationDisallowed) {
+    wgpu::TextureDescriptor baseDesc;
+    baseDesc.size = {32, 32, 6};
+    baseDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    baseDesc.usage = wgpu::TextureUsage::Sampled;
+
+    // Control case: 2D (array) texture creation is allowed.
+    device.CreateTexture(&baseDesc);
+
+    // 3D texture creation is disallowed.
+    wgpu::TextureDescriptor texture3DDesc = baseDesc;
+    texture3DDesc.dimension = wgpu::TextureDimension::e3D;
+    ASSERT_DEVICE_ERROR(device.CreateTexture(&texture3DDesc));
+}
+
 // Check that DrawIndexedIndirect is disallowed as part of unsafe APIs.
 TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
     // Create the index and indirect buffers.

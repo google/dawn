@@ -306,7 +306,8 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError ValidateTextureViewDescriptor(const TextureBase* texture,
+    MaybeError ValidateTextureViewDescriptor(const DeviceBase* device,
+                                             const TextureBase* texture,
                                              const TextureViewDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
@@ -322,6 +323,13 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureViewDimension(descriptor->dimension));
         if (descriptor->dimension == wgpu::TextureViewDimension::e1D) {
             return DAWN_VALIDATION_ERROR("1D texture views aren't supported (yet).");
+        }
+
+        // Disallow 3D views as unsafe until they are fully implemented.
+        if (descriptor->dimension == wgpu::TextureViewDimension::e3D &&
+            device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+            return DAWN_VALIDATION_ERROR(
+                "3D views are disallowed because they are not fully implemented");
         }
 
         DAWN_TRY(ValidateTextureFormat(descriptor->format));
