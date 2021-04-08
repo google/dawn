@@ -124,14 +124,14 @@ class CloneContext {
     // version instead of making yet another copy.
     auto it = cloned_.find(a);
     if (it != cloned_.end()) {
-      return CheckedCast(it->second);
+      return CheckedCast<T>(it->second);
     }
 
     // First time clone and no replacer transforms matched.
     // Clone with T::Clone().
     auto* c = a->Clone(this);
     cloned_.emplace(a, c);
-    return CheckedCast(c);
+    return CheckedCast<T>(c);
   }
 
   /// Clones the Source `s` into `dst`

@@ -243,6 +243,24 @@ TEST(CloneContext, CloneWithReplaceAll_Symbols) {
   EXPECT_EQ(cloned_root->b->b->name, cloned.Symbols().Get("transformed<b->b>"));
 }
 
+TEST(CloneContext, CloneWithoutTransform) {
+  ProgramBuilder builder;
+  auto* original_node =
+      builder.create<Node>(builder.Symbols().Register("root"));
+  Program original(std::move(builder));
+
+  ProgramBuilder cloned;
+  CloneContext ctx(&cloned, &original);
+  ctx.ReplaceAll([&](Node*) {
+    return cloned.create<Replacement>(
+        builder.Symbols().Register("<unexpected-node>"));
+  });
+
+  auto* cloned_node = ctx.CloneWithoutTransform(original_node);
+  EXPECT_NE(cloned_node, original_node);
+  EXPECT_EQ(cloned_node->name, cloned.Symbols().Get("root"));
+}
+
 TEST(CloneContext, CloneWithReplace) {
   ProgramBuilder builder;
   auto* original_root =
