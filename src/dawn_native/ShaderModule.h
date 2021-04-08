@@ -19,6 +19,7 @@
 #include "common/ityp_array.h"
 #include "dawn_native/BindingInfo.h"
 #include "dawn_native/CachedObject.h"
+#include "dawn_native/CompilationMessages.h"
 #include "dawn_native/Error.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/Forward.h"
@@ -48,7 +49,6 @@ namespace spirv_cross {
 
 namespace dawn_native {
 
-    class OwnedCompilationMessages;
     struct EntryPointMetadata;
 
     // A map from name to EntryPointMetadata.
@@ -61,13 +61,16 @@ namespace dawn_native {
         ShaderModuleParseResult(ShaderModuleParseResult&& rhs);
         ShaderModuleParseResult& operator=(ShaderModuleParseResult&& rhs);
 
+        bool HasParsedShader() const;
+
         std::unique_ptr<tint::Program> tintProgram;
         std::vector<uint32_t> spirv;
+        std::unique_ptr<OwnedCompilationMessages> compilationMessages;
     };
 
-    ResultOrError<ShaderModuleParseResult> ValidateShaderModuleDescriptor(
-        DeviceBase* device,
-        const ShaderModuleDescriptor* descriptor);
+    MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
+                                              const ShaderModuleDescriptor* descriptor,
+                                              ShaderModuleParseResult* parseResult);
     MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                        const EntryPointMetadata& entryPoint,
                                                        const PipelineLayoutBase* layout);
@@ -75,7 +78,8 @@ namespace dawn_native {
     RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
                                                             const PipelineLayoutBase* layout);
     ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
-                                               const tint::Program* program);
+                                               const tint::Program* program,
+                                               OwnedCompilationMessages* messages);
 
     std::unique_ptr<tint::transform::VertexPulling> MakeVertexPullingTransform(
         const VertexState& vertexState,
@@ -125,7 +129,9 @@ namespace dawn_native {
         ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModuleBase() override;
 
-        static ShaderModuleBase* MakeError(DeviceBase* device);
+        static ShaderModuleBase* MakeError(
+            DeviceBase* device,
+            std::unique_ptr<OwnedCompilationMessages> compilationMessages);
 
         // Return true iff the program has an entrypoint called `entryPoint`.
         bool HasEntryPoint(const std::string& entryPoint) const;
@@ -169,7 +175,9 @@ namespace dawn_native {
             const std::vector<uint32_t>& spirv);
 
       private:
-        ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+        ShaderModuleBase(DeviceBase* device,
+                         ObjectBase::ErrorTag tag,
+                         std::unique_ptr<OwnedCompilationMessages> compilationMessages);
 
         // The original data in the descriptor for caching.
         enum class Type { Undefined, Spirv, Wgsl };

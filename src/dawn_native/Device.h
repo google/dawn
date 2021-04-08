@@ -38,6 +38,7 @@ namespace dawn_native {
     class DynamicUploader;
     class ErrorScopeStack;
     class ExternalTextureBase;
+    class OwnedCompilationMessages;
     class PersistentCache;
     class StagingBufferBase;
     struct InternalPipelineStore;
@@ -321,7 +322,8 @@ namespace dawn_native {
             const RenderPipelineDescriptor2* descriptor);
         ResultOrError<Ref<SamplerBase>> CreateSamplerInternal(const SamplerDescriptor* descriptor);
         ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleInternal(
-            const ShaderModuleDescriptor* descriptor);
+            const ShaderModuleDescriptor* descriptor,
+            ShaderModuleParseResult* parseResult);
         ResultOrError<Ref<SwapChainBase>> CreateSwapChainInternal(
             Surface* surface,
             const SwapChainDescriptor* descriptor);

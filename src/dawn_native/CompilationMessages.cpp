@@ -57,7 +57,11 @@ namespace dawn_native {
         // Cannot add messages after GetCompilationInfo has been called.
         ASSERT(mCompilationInfo.messages == nullptr);
 
-        mMessageStrings.push_back(diagnostic.message);
+        if (diagnostic.code) {
+            mMessageStrings.push_back(std::string(diagnostic.code) + ": " + diagnostic.message);
+        } else {
+            mMessageStrings.push_back(diagnostic.message);
+        }
         mMessages.push_back({nullptr, tintSeverityToMessageType(diagnostic.severity),
                              diagnostic.source.range.begin.line,
                              diagnostic.source.range.begin.column});

@@ -390,11 +390,15 @@ namespace dawn_native {
             return {};
         }
 
-        ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file) {
+        ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
+                                               OwnedCompilationMessages* outMessages) {
             std::ostringstream errorStream;
             errorStream << "Tint WGSL reader failure:" << std::endl;
 
             tint::Program program = tint::reader::wgsl::Parse(file);
+            if (outMessages != nullptr) {
+                outMessages->AddMessages(program.Diagnostics());
+            }
             if (!program.IsValid()) {
                 auto err = program.Diagnostics().str();
                 errorStream << "Parser: " << err << std::endl
@@ -406,11 +410,15 @@ namespace dawn_native {
             return std::move(program);
         }
 
-        ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv) {
+        ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
+                                                OwnedCompilationMessages* outMessages) {
             std::ostringstream errorStream;
             errorStream << "Tint SPIRV reader failure:" << std::endl;
 
             tint::Program program = tint::reader::spirv::Parse(spirv);
+            if (outMessages != nullptr) {
+                outMessages->AddMessages(program.Diagnostics());
+            }
             if (!program.IsValid()) {
                 auto err = program.Diagnostics().str();
                 errorStream << "Parser: " << err << std::endl;
@@ -420,12 +428,17 @@ namespace dawn_native {
             return std::move(program);
         }
 
-        MaybeError ValidateModule(const tint::Program* program) {
+        MaybeError ValidateModule(const tint::Program* program,
+                                  OwnedCompilationMessages* outMessages) {
             std::ostringstream errorStream;
             errorStream << "Tint program validation" << std::endl;
 
             tint::Validator validator;
-            if (!validator.Validate(program)) {
+            bool isValid = validator.Validate(program);
+            if (outMessages != nullptr) {
+                outMessages->AddMessages(validator.diagnostics());
+            }
+            if (!isValid) {
                 auto err = validator.diagnostics().str();
                 errorStream << "Validation: " << err << std::endl;
                 return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
@@ -1039,7 +1052,9 @@ namespace dawn_native {
         }
     }  // anonymous namespace
 
-    ShaderModuleParseResult::ShaderModuleParseResult() = default;
+    ShaderModuleParseResult::ShaderModuleParseResult()
+        : compilationMessages(new OwnedCompilationMessages()) {
+    }
     ShaderModuleParseResult::~ShaderModuleParseResult() = default;
 
     ShaderModuleParseResult::ShaderModuleParseResult(ShaderModuleParseResult&& rhs) = default;
@@ -1047,9 +1062,15 @@ namespace dawn_native {
     ShaderModuleParseResult& ShaderModuleParseResult::operator=(ShaderModuleParseResult&& rhs) =
         default;
 
-    ResultOrError<ShaderModuleParseResult> ValidateShaderModuleDescriptor(
-        DeviceBase* device,
-        const ShaderModuleDescriptor* descriptor) {
+    bool ShaderModuleParseResult::HasParsedShader() const {
+        return tintProgram != nullptr || spirv.size() > 0;
+    }
+
+    MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
+                                              const ShaderModuleDescriptor* descriptor,
+                                              ShaderModuleParseResult* parseResult) {
+        ASSERT(parseResult != nullptr);
+
         const ChainedStruct* chainedDescriptor = descriptor->nextInChain;
         if (chainedDescriptor == nullptr) {
             return DAWN_VALIDATION_ERROR("Shader module descriptor missing chained descriptor");
@@ -1060,9 +1081,10 @@ namespace dawn_native {
                 "Shader module descriptor chained nextInChain must be nullptr");
         }
 
+        OwnedCompilationMessages* outMessages = parseResult->compilationMessages.get();
+
         ScopedTintICEHandler scopedICEHandler(device);
 
-        ShaderModuleParseResult parseResult = {};
         switch (chainedDescriptor->sType) {
             case wgpu::SType::ShaderModuleSPIRVDescriptor: {
                 const auto* spirvDesc =
@@ -1070,16 +1092,16 @@ namespace dawn_native {
                 std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
                 if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
                     tint::Program program;
-                    DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv));
+                    DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, outMessages));
                     if (device->IsValidationEnabled()) {
-                        DAWN_TRY(ValidateModule(&program));
+                        DAWN_TRY(ValidateModule(&program, outMessages));
                     }
-                    parseResult.tintProgram = std::make_unique<tint::Program>(std::move(program));
+                    parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
                 } else {
                     if (device->IsValidationEnabled()) {
                         DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
                     }
-                    parseResult.spirv = std::move(spirv);
+                    parseResult->spirv = std::move(spirv);
                 }
                 break;
             }
@@ -1091,29 +1113,30 @@ namespace dawn_native {
                 tint::Source::File file("", wgslDesc->source);
 
                 tint::Program program;
-                DAWN_TRY_ASSIGN(program, ParseWGSL(&file));
+                DAWN_TRY_ASSIGN(program, ParseWGSL(&file, outMessages));
 
                 if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
                     if (device->IsValidationEnabled()) {
-                        DAWN_TRY(ValidateModule(&program));
+                        DAWN_TRY(ValidateModule(&program, outMessages));
                     }
-                    parseResult.tintProgram = std::make_unique<tint::Program>(std::move(program));
+                    parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
                 } else {
                     tint::transform::Manager transformManager;
                     transformManager.append(
                         std::make_unique<tint::transform::EmitVertexPointSize>());
                     transformManager.append(std::make_unique<tint::transform::Spirv>());
-                    DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program));
+                    DAWN_TRY_ASSIGN(program,
+                                    RunTransforms(&transformManager, &program, outMessages));
 
                     if (device->IsValidationEnabled()) {
-                        DAWN_TRY(ValidateModule(&program));
+                        DAWN_TRY(ValidateModule(&program, outMessages));
                     }
 
                     std::vector<uint32_t> spirv;
                     DAWN_TRY_ASSIGN(spirv, ModuleToSPIRV(&program));
                     DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
 
-                    parseResult.spirv = std::move(spirv);
+                    parseResult->spirv = std::move(spirv);
                 }
                 break;
             }
@@ -1121,7 +1144,7 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("Unsupported sType");
         }
 
-        return std::move(parseResult);
+        return {};
     }
 
     RequiredBufferSizes ComputeRequiredBufferSizesForLayout(const EntryPointMetadata& entryPoint,
@@ -1136,8 +1159,12 @@ namespace dawn_native {
     }
 
     ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
-                                               const tint::Program* program) {
+                                               const tint::Program* program,
+                                               OwnedCompilationMessages* outMessages) {
         tint::transform::Transform::Output output = transform->Run(program);
+        if (outMessages != nullptr) {
+            outMessages->AddMessages(output.program.Diagnostics());
+        }
         if (!output.program.IsValid()) {
             std::string err = "Tint program failure: " + output.program.Diagnostics().str();
             return DAWN_VALIDATION_ERROR(err.c_str());
@@ -1196,9 +1223,7 @@ namespace dawn_native {
     // ShaderModuleBase
 
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
-        : CachedObject(device),
-          mType(Type::Undefined),
-          mCompilationMessages(std::make_unique<OwnedCompilationMessages>()) {
+        : CachedObject(device), mType(Type::Undefined) {
         ASSERT(descriptor->nextInChain != nullptr);
         switch (descriptor->nextInChain->sType) {
             case wgpu::SType::ShaderModuleSPIRVDescriptor: {
@@ -1220,10 +1245,13 @@ namespace dawn_native {
         }
     }
 
-    ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag)
+    ShaderModuleBase::ShaderModuleBase(
+        DeviceBase* device,
+        ObjectBase::ErrorTag tag,
+        std::unique_ptr<OwnedCompilationMessages> compilationMessages)
         : CachedObject(device, tag),
           mType(Type::Undefined),
-          mCompilationMessages(std::make_unique<OwnedCompilationMessages>()) {
+          mCompilationMessages(std::move(compilationMessages)) {
     }
 
     ShaderModuleBase::~ShaderModuleBase() {
@@ -1233,8 +1261,10 @@ namespace dawn_native {
     }
 
     // static
-    ShaderModuleBase* ShaderModuleBase::MakeError(DeviceBase* device) {
-        return new ShaderModuleBase(device, ObjectBase::kError);
+    ShaderModuleBase* ShaderModuleBase::MakeError(
+        DeviceBase* device,
+        std::unique_ptr<OwnedCompilationMessages> compilationMessages) {
+        return new ShaderModuleBase(device, ObjectBase::kError, std::move(compilationMessages));
     }
 
     bool ShaderModuleBase::HasEntryPoint(const std::string& entryPoint) const {
@@ -1286,7 +1316,7 @@ namespace dawn_native {
         const std::string& entryPoint,
         BindGroupIndex pullingBufferBindingSet) const {
         tint::Program program;
-        DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv));
+        DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, nullptr));
 
         return GeneratePullingSpirv(&program, vertexState, entryPoint, pullingBufferBindingSet);
     }
@@ -1308,8 +1338,11 @@ namespace dawn_native {
             transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
         }
 
+        // A nullptr is passed in for the CompilationMessages here since this method is called
+        // during RenderPipeline creation, by which point the shader module's CompilationInfo may
+        // have already been queried.
         tint::Program program;
-        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, programIn));
+        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, programIn, nullptr));
 
         tint::writer::spirv::Generator generator(&program);
         if (!generator.Generate()) {
@@ -1325,6 +1358,7 @@ namespace dawn_native {
     MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult) {
         mTintProgram = std::move(parseResult->tintProgram);
         mSpirv = std::move(parseResult->spirv);
+        mCompilationMessages = std::move(parseResult->compilationMessages);
 
         if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
             DAWN_TRY_ASSIGN(mEntryPoints, ReflectShaderUsingTint(GetDevice(), mTintProgram.get()));

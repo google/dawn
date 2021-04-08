@@ -22,6 +22,7 @@
 #include "dawn_native/Buffer.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/CommandEncoder.h"
+#include "dawn_native/CompilationMessages.h"
 #include "dawn_native/ComputePipeline.h"
 #include "dawn_native/CreatePipelineAsyncTracker.h"
 #include "dawn_native/DynamicUploader.h"
@@ -599,6 +600,8 @@ namespace dawn_native {
     ResultOrError<Ref<ShaderModuleBase>> DeviceBase::GetOrCreateShaderModule(
         const ShaderModuleDescriptor* descriptor,
         ShaderModuleParseResult* parseResult) {
+        ASSERT(parseResult != nullptr);
+
         ShaderModuleBase blueprint(this, descriptor);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
@@ -609,18 +612,15 @@ namespace dawn_native {
         if (iter != mCaches->shaderModules.end()) {
             result = *iter;
         } else {
-            if (parseResult == nullptr) {
+            if (!parseResult->HasParsedShader()) {
                 // We skip the parse on creation if validation isn't enabled which let's us quickly
                 // lookup in the cache without validating and parsing. We need the parsed module
                 // now, so call validate. Most of |ValidateShaderModuleDescriptor| is parsing, but
                 // we can consider splitting it if additional validation is added.
                 ASSERT(!IsValidationEnabled());
-                ShaderModuleParseResult localParseResult =
-                    ValidateShaderModuleDescriptor(this, descriptor).AcquireSuccess();
-                DAWN_TRY_ASSIGN(result, CreateShaderModuleImpl(descriptor, &localParseResult));
-            } else {
-                DAWN_TRY_ASSIGN(result, CreateShaderModuleImpl(descriptor, parseResult));
+                DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor, parseResult));
             }
+            DAWN_TRY_ASSIGN(result, CreateShaderModuleImpl(descriptor, parseResult));
             result->SetIsCachedReference();
             result->SetContentHash(blueprintHash);
             mCaches->shaderModules.insert(result.Get());
@@ -888,8 +888,9 @@ namespace dawn_native {
     }
     ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModuleBase> result;
-        if (ConsumedError(CreateShaderModuleInternal(descriptor), &result)) {
-            return ShaderModuleBase::MakeError(this);
+        ShaderModuleParseResult parseResult = {};
+        if (ConsumedError(CreateShaderModuleInternal(descriptor, &parseResult), &result)) {
+            return ShaderModuleBase::MakeError(this, std::move(parseResult.compilationMessages));
         }
         return result.Detach();
     }
@@ -1242,17 +1243,15 @@ namespace dawn_native {
     }
 
     ResultOrError<Ref<ShaderModuleBase>> DeviceBase::CreateShaderModuleInternal(
-        const ShaderModuleDescriptor* descriptor) {
+        const ShaderModuleDescriptor* descriptor,
+        ShaderModuleParseResult* parseResult) {
         DAWN_TRY(ValidateIsAlive());
 
-        ShaderModuleParseResult parseResult = {};
-        ShaderModuleParseResult* parseResultPtr = nullptr;
         if (IsValidationEnabled()) {
-            DAWN_TRY_ASSIGN(parseResult, ValidateShaderModuleDescriptor(this, descriptor));
-            parseResultPtr = &parseResult;
+            DAWN_TRY(ValidateShaderModuleDescriptor(this, descriptor, parseResult));
         }
 
-        return GetOrCreateShaderModule(descriptor, parseResultPtr);
+        return GetOrCreateShaderModule(descriptor, parseResult);
     }
 
     ResultOrError<Ref<SwapChainBase>> DeviceBase::CreateSwapChainInternal(

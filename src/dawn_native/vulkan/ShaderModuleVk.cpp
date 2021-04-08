@@ -59,7 +59,8 @@ namespace dawn_native { namespace vulkan {
 
             tint::Program program;
             DAWN_TRY_ASSIGN(program,
-                            RunTransforms(&transformManager, parseResult->tintProgram.get()));
+                            RunTransforms(&transformManager, parseResult->tintProgram.get(),
+                                          CompilationMessages()));
 
             tint::writer::spirv::Generator generator(&program);
             if (!generator.Generate()) {
