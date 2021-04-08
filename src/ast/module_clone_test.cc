@@ -33,8 +33,8 @@ struct S {
   m1 : array<u32>;
 };
 
-const c0 : i32 = 10;
-const c1 : bool = true;
+let c0 : i32 = 10;
+let c1 : bool = true;
 
 type t0 = [[stride(16)]] array<vec4<f32>>;
 type t1 = array<vec4<f32>>;
@@ -102,7 +102,7 @@ fn main() {
   f1(1.0, 2);
 }
 
-const declaration_order_check_0 : i32 = 1;
+let declaration_order_check_0 : i32 = 1;
 
 type declaration_order_check_1 = f32;
 
@@ -110,7 +110,7 @@ fn declaration_order_check_2() {}
 
 type declaration_order_check_2 = f32;
 
-const declaration_order_check_3 : i32 = 1;
+let declaration_order_check_3 : i32 = 1;
 
 )");
 

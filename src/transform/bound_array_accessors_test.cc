@@ -26,20 +26,20 @@ TEST_F(BoundArrayAccessorsTest, Ptrs_Clamp) {
   auto* src = R"(
 var<storage> a : array<f32, 3>;
 
-const c : u32 = 1u;
+let c : u32 = 1u;
 
 fn f() {
-  const b : ptr<storage, f32> = a[c];
+  let b : ptr<storage, f32> = a[c];
 }
 )";
 
   auto* expect = R"(
 var<storage> a : array<f32, 3>;
 
-const c : u32 = 1u;
+let c : u32 = 1u;
 
 fn f() {
-  const b : ptr<storage, f32> = a[min(u32(c), 2u)];
+  let b : ptr<storage, f32> = a[min(u32(c), 2u)];
 }
 )";
 
@@ -499,7 +499,7 @@ fn f() {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(BoundArrayAccessorsTest, DISABLED_Vector_Constant_Id_Clamps) {
-  // [[constant_id(1300)]] const idx : i32;
+  // [[constant_id(1300)]] let idx : i32;
   // var a : vec3<f32>
   // var b : f32 = a[idx]
   //
@@ -508,7 +508,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Vector_Constant_Id_Clamps) {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(BoundArrayAccessorsTest, DISABLED_Array_Constant_Id_Clamps) {
-  // [[constant_id(1300)]] const idx : i32;
+  // [[constant_id(1300)]] let idx : i32;
   // var a : array<f32, 4>
   // var b : f32 = a[idx]
   //
@@ -517,7 +517,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Array_Constant_Id_Clamps) {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
-  // [[constant_id(1300)]] const idx : i32;
+  // [[constant_id(1300)]] let idx : i32;
   // var a : mat3x2<f32>
   // var b : f32 = a[idx][1]
   //
@@ -526,7 +526,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
-  // [[constant_id(1300)]] const idx : i32;
+  // [[constant_id(1300)]] let idx : i32;
   // var a : mat3x2<f32>
   // var b : f32 = a[1][idx]
   //

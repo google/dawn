@@ -584,6 +584,8 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kImport, source, "import"};
   if (str == "in")
     return {Token::Type::kIn, source, "in"};
+  if (str == "let")
+    return {Token::Type::kLet, source, "let"};
   if (str == "loop")
     return {Token::Type::kLoop, source, "loop"};
   if (str == "mat2x2")
@@ -709,8 +711,6 @@ Token Lexer::check_reserved(const Source& source, const std::string& str) {
     return {Token::Type::kReservedKeyword, source, "i16"};
   if (str == "i64")
     return {Token::Type::kReservedKeyword, source, "i64"};
-  if (str == "let")
-    return {Token::Type::kReservedKeyword, source, "let"};
   if (str == "premerge")
     return {Token::Type::kReservedKeyword, source, "premerge"};
   if (str == "regardless")

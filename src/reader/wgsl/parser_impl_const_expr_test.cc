@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_HangingComma) {
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
   ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:14: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:14: unable to parse constant literal");
 }
 
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
@@ -89,7 +89,7 @@ TEST_F(ParserImplTest, ConstExpr_MissingExpr) {
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
   ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:11: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:11: unable to parse constant literal");
 }
 
 TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {
@@ -98,7 +98,7 @@ TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
   ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:15: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:15: unable to parse constant literal");
 }
 
 TEST_F(ParserImplTest, ConstExpr_ConstLiteral) {

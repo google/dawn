@@ -306,7 +306,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       return Failure::kErrored;
 
     if (gc.matched) {
-      if (!expect("constant declaration", Token::Type::kSemicolon))
+      if (!expect("let declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
       builder_.AST().AddGlobalVariable(gc.value);
@@ -418,10 +418,17 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
 //  : variable_decoration_list* CONST variable_ident_decl EQUAL const_expr
 Maybe<ast::Variable*> ParserImpl::global_constant_decl(
     ast::DecorationList& decos) {
-  if (!match(Token::Type::kConst))
-    return Failure::kNoMatch;
+  if (!match(Token::Type::kLet)) {
+    Source source;
+    if (match(Token::Type::kConst, &source)) {
+      // crbug.com/tint/699: 'const' renamed to 'let'
+      deprecated(source, "use 'let' instead of 'const'");
+    } else {
+      return Failure::kNoMatch;
+    }
+  }
 
-  const char* use = "constant declaration";
+  const char* use = "let declaration";
 
   auto decl = expect_variable_ident_decl(use);
   if (decl.errored)
@@ -1555,19 +1562,29 @@ Maybe<ast::ReturnStatement*> ParserImpl::return_stmt() {
 //   | variable_decl EQUAL logical_or_expression
 //   | CONST variable_ident_decl EQUAL logical_or_expression
 Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
-  if (match(Token::Type::kConst)) {
-    auto decl = expect_variable_ident_decl("constant declaration");
+  bool is_const = match(Token::Type::kLet);
+  if (!is_const) {
+    Source source;
+    if (match(Token::Type::kConst, &source)) {
+      // crbug.com/tint/699: 'const' renamed to 'let'
+      deprecated(source, "use 'let' instead of 'const'");
+      is_const = true;
+    }
+  }
+
+  if (is_const) {
+    auto decl = expect_variable_ident_decl("let declaration");
     if (decl.errored)
       return Failure::kErrored;
 
-    if (!expect("constant declaration", Token::Type::kEqual))
+    if (!expect("let declaration", Token::Type::kEqual))
       return Failure::kErrored;
 
     auto constructor = logical_or_expression();
     if (constructor.errored)
       return Failure::kErrored;
     if (!constructor.matched)
-      return add_error(peek(), "missing constructor for const declaration");
+      return add_error(peek(), "missing constructor for let declaration");
 
     auto* var = create<ast::Variable>(
         decl->source,                             // source
@@ -2746,7 +2763,7 @@ Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr() {
   if (lit.errored)
     return Failure::kErrored;
   if (!lit.matched)
-    return add_error(peek(), "unable to parse const literal");
+    return add_error(peek(), "unable to parse constant literal");
 
   return create<ast::ScalarConstructorExpression>(source, lit.value);
 }

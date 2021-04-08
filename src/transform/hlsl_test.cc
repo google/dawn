@@ -41,7 +41,7 @@ fn main() {
   var f1 : f32 = 2.0;
   var f2 : f32 = 3.0;
   var f3 : f32 = 4.0;
-  const tint_symbol_1 : array<f32, 4> = array<f32, 4>(f0, f1, f2, f3);
+  let tint_symbol_1 : array<f32, 4> = array<f32, 4>(f0, f1, f2, f3);
   var i : f32 = tint_symbol_1[2];
 }
 )";
@@ -74,7 +74,7 @@ struct S {
 
 [[stage(vertex)]]
 fn main() {
-  const tint_symbol_1 : S = S(1, 2.0, vec3<f32>());
+  let tint_symbol_1 : S = S(1, 2.0, vec3<f32>());
   var x : f32 = tint_symbol_1.b;
 }
 )";
@@ -95,9 +95,9 @@ fn main() {
   auto* expect = R"(
 [[stage(vertex)]]
 fn main() {
-  const tint_symbol_1 : array<f32, 2> = array<f32, 2>(1.0, 2.0);
-  const tint_symbol_2 : array<f32, 2> = array<f32, 2>(3.0, 4.0);
-  const tint_symbol_3 : array<array<f32, 2>, 2> = array<array<f32, 2>, 2>(tint_symbol_1, tint_symbol_2);
+  let tint_symbol_1 : array<f32, 2> = array<f32, 2>(1.0, 2.0);
+  let tint_symbol_2 : array<f32, 2> = array<f32, 2>(3.0, 4.0);
+  let tint_symbol_3 : array<array<f32, 2>, 2> = array<array<f32, 2>, 2>(tint_symbol_1, tint_symbol_2);
   var i : f32 = tint_symbol_3[0][1];
 }
 )";
@@ -146,9 +146,9 @@ struct S3 {
 
 [[stage(vertex)]]
 fn main() {
-  const tint_symbol_1 : S1 = S1(2);
-  const tint_symbol_4 : S2 = S2(1, tint_symbol_1, 3);
-  const tint_symbol_8 : S3 = S3(tint_symbol_4);
+  let tint_symbol_1 : S1 = S1(2);
+  let tint_symbol_4 : S2 = S2(1, tint_symbol_1, 3);
+  let tint_symbol_8 : S3 = S3(tint_symbol_4);
   var x : i32 = tint_symbol_8.a.b.a;
 }
 )";
@@ -185,11 +185,11 @@ struct S2 {
 
 [[stage(vertex)]]
 fn main() {
-  const tint_symbol_1 : S1 = S1(1);
-  const tint_symbol_4 : S1 = S1(2);
-  const tint_symbol_5 : S1 = S1(3);
-  const tint_symbol_6 : array<S1, 3> = array<S1, 3>(tint_symbol_1, tint_symbol_4, tint_symbol_5);
-  const tint_symbol_7 : S2 = S2(tint_symbol_6);
+  let tint_symbol_1 : S1 = S1(1);
+  let tint_symbol_4 : S1 = S1(2);
+  let tint_symbol_5 : S1 = S1(3);
+  let tint_symbol_6 : array<S1, 3> = array<S1, 3>(tint_symbol_1, tint_symbol_4, tint_symbol_5);
+  let tint_symbol_7 : S2 = S2(tint_symbol_6);
   var x : i32 = tint_symbol_7.a[1].a;
 }
 )";
@@ -213,9 +213,9 @@ fn main() {
   var local_str : S = S(1, 2.0, 3);
 }
 
-const module_arr : array<f32, 4> = array<f32, 4>(0.0, 1.0, 2.0, 3.0);
+let module_arr : array<f32, 4> = array<f32, 4>(0.0, 1.0, 2.0, 3.0);
 
-const module_str : S = S(1, 2.0, 3);
+let module_str : S = S(1, 2.0, 3);
 )";
 
   auto* expect = src;
@@ -241,7 +241,7 @@ struct Uniforms {
 
 [[stage(vertex)]]
 fn main() {
-  const transform : mat2x2<f32> = ubo.transform;
+  let transform : mat2x2<f32> = ubo.transform;
   var coord : vec2<f32> = array<vec2<f32>, 3>(
       vec2<f32>(-1.0,  1.0),
       vec2<f32>( 1.0,  1.0),
@@ -265,8 +265,8 @@ struct Uniforms {
 
 [[stage(vertex)]]
 fn main() {
-  const transform : mat2x2<f32> = ubo.transform;
-  const tint_symbol_1 : array<vec2<f32>, 3> = array<vec2<f32>, 3>(vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(-1.0, -1.0));
+  let transform : mat2x2<f32> = ubo.transform;
+  let tint_symbol_1 : array<vec2<f32>, 3> = array<vec2<f32>, 3>(vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(-1.0, -1.0));
   var coord : vec2<f32> = tint_symbol_1[vertex_index];
   position = vec4<f32>((transform * coord), 0.0, 1.0);
 }

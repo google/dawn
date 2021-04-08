@@ -44,9 +44,9 @@ struct tint_symbol_5 {
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol_1 : tint_symbol_5) {
-  const coord : vec4<f32> = tint_symbol_1.coord;
-  const loc1 : f32 = tint_symbol_1.loc1;
-  const loc2 : vec4<u32> = tint_symbol_1.loc2;
+  let coord : vec4<f32> = tint_symbol_1.coord;
+  let loc1 : f32 = tint_symbol_1.loc1;
+  let loc2 : vec4<u32> = tint_symbol_1.loc2;
   var col : f32 = (coord.x * loc1);
 }
 )";
@@ -76,7 +76,7 @@ struct tint_symbol_4 {
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol_1 : tint_symbol_4) {
-  const loc1 : myf32 = tint_symbol_1.loc1;
+  let loc1 : myf32 = tint_symbol_1.loc1;
   var x : myf32 = loc1;
 }
 )";
@@ -156,9 +156,9 @@ struct tint_symbol_10 {
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol_6 : tint_symbol_10) {
-  const builtins : FragBuiltins = FragBuiltins(tint_symbol_6.coord);
-  const locations : FragLocations = FragLocations(tint_symbol_6.loc1, tint_symbol_6.loc2);
-  const loc0 : f32 = tint_symbol_6.loc0;
+  let builtins : FragBuiltins = FragBuiltins(tint_symbol_6.coord);
+  let locations : FragLocations = FragLocations(tint_symbol_6.loc1, tint_symbol_6.loc2);
+  let loc0 : f32 = tint_symbol_6.loc0;
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 )";
@@ -283,7 +283,7 @@ struct tint_symbol_6 {
 
 [[stage(fragment)]]
 fn frag_main1(tint_symbol_4 : tint_symbol_6) {
-  const inputs : FragmentInput = FragmentInput(tint_symbol_4.value, tint_symbol_4.mul);
+  let inputs : FragmentInput = FragmentInput(tint_symbol_4.value, tint_symbol_4.mul);
   var x : f32 = foo(inputs);
 }
 
@@ -296,7 +296,7 @@ struct tint_symbol_11 {
 
 [[stage(fragment)]]
 fn frag_main2(tint_symbol_10 : tint_symbol_11) {
-  const inputs : FragmentInput = FragmentInput(tint_symbol_10.value, tint_symbol_10.mul);
+  let inputs : FragmentInput = FragmentInput(tint_symbol_10.value, tint_symbol_10.mul);
   var x : f32 = foo(inputs);
 }
 )";
@@ -356,7 +356,7 @@ struct tint_symbol_6 {
 
 [[stage(fragment)]]
 fn frag_main1(tint_symbol_4 : tint_symbol_6) {
-  const inputs : FragmentInput = FragmentInput(tint_symbol_4.col1, tint_symbol_4.col2);
+  let inputs : FragmentInput = FragmentInput(tint_symbol_4.col1, tint_symbol_4.col2);
   global_inputs = inputs;
   var r : f32 = foo();
   var g : f32 = bar();
@@ -434,9 +434,9 @@ struct tint_symbol_10 {
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol_6 : tint_symbol_9) -> tint_symbol_10 {
-  const inputs : MyFragmentInput = MyFragmentInput(tint_symbol_6.col1, tint_symbol_6.col2);
+  let inputs : MyFragmentInput = MyFragmentInput(tint_symbol_6.col1, tint_symbol_6.col2);
   var x : myf32 = foo(inputs);
-  const tint_symbol_13 : FragmentOutput = MyFragmentOutput(x, inputs.col2);
+  let tint_symbol_13 : FragmentOutput = MyFragmentOutput(x, inputs.col2);
   return tint_symbol_10(tint_symbol_13.col1, tint_symbol_13.col2);
 }
 )";
@@ -492,8 +492,8 @@ struct tint_symbol_8 {
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol_5 : tint_symbol_7) -> tint_symbol_8 {
-  const inputs : FragmentInput = FragmentInput(tint_symbol_5.value, tint_symbol_5.coord);
-  const tint_symbol_10 : FragmentOutput = FragmentOutput((inputs.coord.x * inputs.value));
+  let inputs : FragmentInput = FragmentInput(tint_symbol_5.value, tint_symbol_5.coord);
+  let tint_symbol_10 : FragmentOutput = FragmentOutput((inputs.coord.x * inputs.value));
   return tint_symbol_8(tint_symbol_10.value);
 }
 )";

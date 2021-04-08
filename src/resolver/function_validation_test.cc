@@ -259,7 +259,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
 
 TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
   // fn foo(bar : f32){
-  //   const baz : f32 = bar;
+  //   let baz : f32 = bar;
   // }
 
   auto* bar = Var("bar", ty.f32(), ast::StorageClass::kFunction);

@@ -20,7 +20,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, GlobalConstantDecl) {
-  auto p = parser("const a : f32 = 1.");
+  auto p = parser("let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -36,9 +36,9 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   EXPECT_TRUE(e->declared_type()->Is<type::F32>());
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 7u);
+  EXPECT_EQ(e->source().range.begin.column, 5u);
   EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 8u);
+  EXPECT_EQ(e->source().range.end.column, 6u);
 
   ASSERT_NE(e->constructor(), nullptr);
   EXPECT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
@@ -47,7 +47,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
-  auto p = parser("const a: f32 1.");
+  auto p = parser("let a : f32 1.");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -56,11 +56,11 @@ TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:14: expected '=' for constant declaration");
+  EXPECT_EQ(p->error(), "1:13: expected '=' for let declaration");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {
-  auto p = parser("const a: invalid = 1.");
+  auto p = parser("let a : invalid = 1.");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -69,11 +69,11 @@ TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:10: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:9: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {
-  auto p = parser("const a: f32 = if (a) {}");
+  auto p = parser("let a : f32 = if (a) {}");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -82,11 +82,11 @@ TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:16: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:15: unable to parse constant literal");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
-  auto p = parser("const a: f32 =");
+  auto p = parser("let a : f32 =");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -95,11 +95,11 @@ TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:15: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:14: unable to parse constant literal");
 }
 
 TEST_F(ParserImplTest, GlobalConstantDec_ConstantId) {
-  auto p = parser("[[constant_id(7)]] const a : f32 = 1.");
+  auto p = parser("[[constant_id(7)]] let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -116,9 +116,9 @@ TEST_F(ParserImplTest, GlobalConstantDec_ConstantId) {
   EXPECT_TRUE(e->declared_type()->Is<type::F32>());
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 26u);
+  EXPECT_EQ(e->source().range.begin.column, 24u);
   EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 27u);
+  EXPECT_EQ(e->source().range.end.column, 25u);
 
   ASSERT_NE(e->constructor(), nullptr);
   EXPECT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
@@ -128,7 +128,7 @@ TEST_F(ParserImplTest, GlobalConstantDec_ConstantId) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Missing) {
-  auto p = parser("[[constant_id()]] const a : f32 = 1.");
+  auto p = parser("[[constant_id()]] let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -144,7 +144,7 @@ TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Missing) {
 }
 
 TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Invalid) {
-  auto p = parser("[[constant_id(-7)]] const a : f32 = 1.");
+  auto p = parser("[[constant_id(-7)]] let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -156,6 +156,23 @@ TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Invalid) {
 
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:15: constant_id decoration must be positive");
+}
+
+TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Const) {
+  auto p = parser("const a : i32 = 1");
+  auto decos = p->decoration_list();
+  EXPECT_FALSE(decos.errored);
+  EXPECT_FALSE(decos.matched);
+
+  auto e = p->global_constant_decl(decos.value);
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_EQ(
+      p->builder().Diagnostics().str(),
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: use 'let' instead of 'const'
+const a : i32 = 1
+^^^^^
+)");
 }
 
 }  // namespace

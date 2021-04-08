@@ -101,7 +101,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   //
   // [[stage(fragment)]]
   // fn frag_main() {
-  //   const samples : FragmentInput(sample_index, sample_mask_in);
+  //   let samples : FragmentInput(sample_index, sample_mask_in);
   //   var output : FragmentOutput = FragmentOutput(1.0,
   //                                                samples.sample_mask_in);
   //   frag_main_ret(output);

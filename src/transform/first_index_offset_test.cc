@@ -102,7 +102,7 @@ struct TintFirstIndexOffsetData {
 [[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
 
 fn test() -> u32 {
-  const vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
+  let vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
   return vert_idx;
 }
 
@@ -150,7 +150,7 @@ struct TintFirstIndexOffsetData {
 [[builtin(instance_index)]] var<in> tint_first_index_offset_inst_idx : u32;
 
 fn test() -> u32 {
-  const inst_idx : u32 = (tint_first_index_offset_inst_idx + tint_first_index_data.tint_first_instance_index);
+  let inst_idx : u32 = (tint_first_index_offset_inst_idx + tint_first_index_data.tint_first_instance_index);
   return inst_idx;
 }
 
@@ -202,8 +202,8 @@ struct TintFirstIndexOffsetData {
 [[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
 
 fn test() -> u32 {
-  const instance_idx : u32 = (tint_first_index_offset_instance_idx + tint_first_index_data.tint_first_instance_index);
-  const vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
+  let instance_idx : u32 = (tint_first_index_offset_instance_idx + tint_first_index_data.tint_first_instance_index);
+  let vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
   return (instance_idx + vert_idx);
 }
 
@@ -255,7 +255,7 @@ struct TintFirstIndexOffsetData {
 [[builtin(vertex_index)]] var<in> tint_first_index_offset_vert_idx : u32;
 
 fn func1() -> u32 {
-  const vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
+  let vert_idx : u32 = (tint_first_index_offset_vert_idx + tint_first_index_data.tint_first_vertex_index);
   return vert_idx;
 }
 

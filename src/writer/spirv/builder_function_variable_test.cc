@@ -137,7 +137,7 @@ OpStore %7 %6
 
 TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   // var v : f32 = 1.0;
-  // const v2 : f32 = v; // Should generate the load
+  // let v2 : f32 = v; // Should generate the load
 
   auto* v = Global("v", ty.f32(), ast::StorageClass::kFunction, Expr(1.f));
 

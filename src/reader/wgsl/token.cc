@@ -221,6 +221,8 @@ std::string Token::TypeToName(Type type) {
       return "import";
     case Token::Type::kIn:
       return "in";
+    case Token::Type::kLet:
+      return "let";
     case Token::Type::kLoop:
       return "loop";
     case Token::Type::kMat2x2:

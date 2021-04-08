@@ -48,7 +48,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignIncompatibleTypes) {
 TEST_F(ResolverAssignmentValidationTest,
        AssignThroughPointerWrongeStoreType_Fail) {
   // var a : f32;
-  // const b : ptr<function,f32> = a;
+  // let b : ptr<function,f32> = a;
   // b = 2;
   const auto priv = ast::StorageClass::kFunction;
   auto* var_a = Var("a", ty.f32(), priv);
@@ -211,7 +211,7 @@ TEST_F(ResolverAssignmentValidationTest,
 
 TEST_F(ResolverAssignmentValidationTest, AssignThroughPointer_Pass) {
   // var a :i32;
-  // const b : ptr<function,i32> = a;
+  // let b : ptr<function,i32> = a;
   // b = 2;
   const auto func = ast::StorageClass::kFunction;
   auto* var_a = Var("a", ty.i32(), func, Expr(2), {});
@@ -229,7 +229,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignThroughPointer_Pass) {
 
 TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
   // {
-  //  const a :i32 = 2;
+  //  let a : i32 = 2;
   //  a = 2
   // }
   auto* var = Const("a", ty.i32(), Expr(2));

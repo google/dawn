@@ -73,8 +73,8 @@ TEST_F(ForStmtTest, InitializerStatementDeclEqual) {
 
 // Test a for loop declaring a const variable in the initializer statement.
 TEST_F(ForStmtTest, InitializerStatementConstDecl) {
-  std::string for_str = "for (const i: i32 = 0 ;;) { }";
-  std::string loop_str = "{ const i: i32 = 0; loop { } }";
+  std::string for_str = "for (let i: i32 = 0 ;;) { }";
+  std::string loop_str = "{ let i: i32 = 0; loop { } }";
 
   TestForLoop(loop_str, for_str);
 }
@@ -215,8 +215,8 @@ TEST_F(ForStmtErrorTest, MissingRightBrace) {
 
 // Test a for loop with an invalid initializer statement.
 TEST_F(ForStmtErrorTest, InvalidInitializerAsConstDecl) {
-  std::string for_str = "for (const x: i32;;) { }";
-  std::string error_str = "1:18: expected '=' for constant declaration";
+  std::string for_str = "for (let x: i32;;) { }";
+  std::string error_str = "1:16: expected '=' for let declaration";
 
   TestForWithError(for_str, error_str);
 }
@@ -266,8 +266,8 @@ TEST_F(ForStmtErrorTest, InvalidContinuingMatch) {
 
 // Test a for loop with an invalid body.
 TEST_F(ForStmtErrorTest, InvalidBody) {
-  std::string for_str = "for (;;) { const x: i32; }";
-  std::string error_str = "1:24: expected '=' for constant declaration";
+  std::string for_str = "for (;;) { let x: i32; }";
+  std::string error_str = "1:22: expected '=' for let declaration";
 
   TestForWithError(for_str, error_str);
 }

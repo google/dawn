@@ -214,7 +214,7 @@ struct FragmentInput {
 
 [[stage(fragment)]]
 fn frag_main() {
-  const tint_symbol_7 : FragmentInput = FragmentInput(tint_symbol_4, tint_symbol_5);
+  let tint_symbol_7 : FragmentInput = FragmentInput(tint_symbol_4, tint_symbol_5);
   var col : f32 = (tint_symbol_7.coord.x * tint_symbol_7.value);
 }
 )";
@@ -328,7 +328,7 @@ fn tint_symbol_5(tint_symbol_6 : Interface) {
 
 [[stage(vertex)]]
 fn vert_main() {
-  const tint_symbol_8 : Interface = Interface(tint_symbol_3);
+  let tint_symbol_8 : Interface = Interface(tint_symbol_3);
   tint_symbol_5(tint_symbol_8);
   return;
 }
@@ -377,7 +377,7 @@ fn vert_main() {
 
 [[stage(fragment)]]
 fn frag_main() {
-  const tint_symbol_9 : Interface = Interface(tint_symbol_7);
+  let tint_symbol_9 : Interface = Interface(tint_symbol_7);
   var x : f32 = tint_symbol_9.value;
 }
 )";
@@ -431,7 +431,7 @@ fn tint_symbol_8(tint_symbol_9 : FragmentOutput) {
 
 [[stage(fragment)]]
 fn frag_main() {
-  const tint_symbol_11 : FragmentInput = FragmentInput(tint_symbol_5, tint_symbol_6);
+  let tint_symbol_11 : FragmentInput = FragmentInput(tint_symbol_5, tint_symbol_6);
   tint_symbol_8(FragmentOutput((tint_symbol_11.coord.x * tint_symbol_11.value)));
   return;
 }

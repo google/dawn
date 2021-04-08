@@ -229,6 +229,8 @@ class Token {
     kImport,
     /// A 'in'
     kIn,
+    /// A 'let'
+    kLet,
     /// A 'loop'
     kLoop,
     /// A 'mat2x2'
@@ -574,6 +576,8 @@ class Token {
   bool IsImport() const { return type_ == Type::kImport; }
   /// @returns true if token is a 'in'
   bool IsIn() const { return type_ == Type::kIn; }
+  /// @returns true if token is a 'let'
+  bool IsLet() const { return type_ == Type::kLet; }
   /// @returns true if token is a 'loop'
   bool IsLoop() const { return type_ == Type::kLoop; }
   /// @returns true if token is a 'mat2x2'

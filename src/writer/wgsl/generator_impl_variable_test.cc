@@ -92,7 +92,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(const a : f32 = 1.0;
+  EXPECT_EQ(gen.result(), R"(let a : f32 = 1.0;
 )");
 }
 

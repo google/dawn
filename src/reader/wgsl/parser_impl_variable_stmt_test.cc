@@ -138,8 +138,8 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
   EXPECT_TRUE(e->variable()->constructor()->Is<ast::ConstructorExpression>());
 }
 
-TEST_F(ParserImplTest, VariableStmt_Const) {
-  auto p = parser("const a : i32 = 1");
+TEST_F(ParserImplTest, VariableStmt_Let) {
+  auto p = parser("let a : i32 = 1");
   auto e = p->variable_stmt();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -148,49 +148,62 @@ TEST_F(ParserImplTest, VariableStmt_Const) {
   ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
 
   ASSERT_EQ(e->source().range.begin.line, 1u);
-  ASSERT_EQ(e->source().range.begin.column, 7u);
+  ASSERT_EQ(e->source().range.begin.column, 5u);
   ASSERT_EQ(e->source().range.end.line, 1u);
-  ASSERT_EQ(e->source().range.end.column, 8u);
+  ASSERT_EQ(e->source().range.end.column, 6u);
 }
 
-TEST_F(ParserImplTest, VariableStmt_Const_InvalidVarIdent) {
-  auto p = parser("const a : invalid = 1");
+TEST_F(ParserImplTest, VariableStmt_Let_InvalidVarIdent) {
+  auto p = parser("let a : invalid = 1");
   auto e = p->variable_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:11: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:9: unknown constructed type 'invalid'");
 }
 
-TEST_F(ParserImplTest, VariableStmt_Const_MissingEqual) {
-  auto p = parser("const a : i32 1");
+TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {
+  auto p = parser("let a : i32 1");
   auto e = p->variable_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:15: expected '=' for constant declaration");
+  EXPECT_EQ(p->error(), "1:13: expected '=' for let declaration");
 }
 
-TEST_F(ParserImplTest, VariableStmt_Const_MissingConstructor) {
-  auto p = parser("const a : i32 =");
+TEST_F(ParserImplTest, VariableStmt_Let_MissingConstructor) {
+  auto p = parser("let a : i32 =");
   auto e = p->variable_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: missing constructor for const declaration");
+  EXPECT_EQ(p->error(), "1:14: missing constructor for let declaration");
 }
 
-TEST_F(ParserImplTest, VariableStmt_Const_InvalidConstructor) {
-  auto p = parser("const a : i32 = if (a) {}");
+TEST_F(ParserImplTest, VariableStmt_Let_InvalidConstructor) {
+  auto p = parser("let a : i32 = if (a) {}");
   auto e = p->variable_stmt();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:17: missing constructor for const declaration");
+  EXPECT_EQ(p->error(), "1:15: missing constructor for let declaration");
+}
+
+TEST_F(ParserImplTest, VariableStmt_Const) {
+  auto p = parser("const a : i32 = 1");
+  auto e = p->variable_stmt();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_EQ(
+      p->builder().Diagnostics().str(),
+      R"(test.wgsl:1:1 warning: use of deprecated language feature: use 'let' instead of 'const'
+const a : i32 = 1
+^^^^^
+)");
 }
 
 }  // namespace

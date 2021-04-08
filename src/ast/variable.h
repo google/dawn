@@ -46,9 +46,9 @@ class LocationDecoration;
 ///       var computed_depth : i32;
 ///       var area : i32 = compute_area(width, height);
 ///
-/// 2. A "const" declaration is a name for a typed value.  Examples:
+/// 2. A "let" declaration is a name for a typed value.  Examples:
 ///
-///       const twice_depth : i32 = width + width;  // Must have initializer
+///       let twice_depth : i32 = width + width;  // Must have initializer
 ///
 /// 3. A formal parameter to a function is a name for a typed value to
 ///    be passed into a function.  Example:

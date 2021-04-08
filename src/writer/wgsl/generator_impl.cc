@@ -588,7 +588,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   }
 
   if (var->is_const()) {
-    out_ << "const";
+    out_ << "let";
   } else {
     out_ << "var";
     if (sem->StorageClass() != ast::StorageClass::kNone &&

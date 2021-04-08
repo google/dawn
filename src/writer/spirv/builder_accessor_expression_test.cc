@@ -304,7 +304,7 @@ TEST_F(BuilderTest, MemberAccessor_NonPointer) {
   //   a : f32
   //   b : f32
   // }
-  // const ident : my_struct = my_struct();
+  // let ident : my_struct = my_struct();
   // ident.b
 
   auto* s = Structure("my_struct", {
@@ -343,7 +343,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_NonPointer) {
   //   inner : inner_struct
   // }
   //
-  // const ident : my_struct = my_struct();
+  // let ident : my_struct = my_struct();
   // ident.inner.a
   auto* inner_struct = Structure("Inner", {
                                               Member("a", ty.f32()),
@@ -748,7 +748,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 }
 
 TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
-  // const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+  // let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
   //   vec2<f32>(0.0, 0.5),
   //   vec2<f32>(-0.5, -0.5),
   //   vec2<f32>(0.5, -0.5));
@@ -797,7 +797,7 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
 }
 
 TEST_F(BuilderTest, Accessor_Const_Vec) {
-  // const pos : vec2<f32> = vec2<f32>(0.0, 0.5);
+  // let pos : vec2<f32> = vec2<f32>(0.0, 0.5);
   // pos[1]
 
   auto* var = GlobalConst("pos", ty.vec2<f32>(), vec2<f32>(0.0f, 0.5f));
@@ -826,7 +826,7 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
 }
 
 TEST_F(BuilderTest, DISABLED_Accessor_Array_NonPointer) {
-  // const a : array<f32, 3>;
+  // let a : array<f32, 3>;
   // a[2]
   //
   // This has to generate an OpConstantExtract and will need to read the 3 value

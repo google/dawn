@@ -4948,7 +4948,7 @@ bool FunctionEmitter::MakeVectorInsertDynamic(
   //
   //    var temp : type = src_vector;
   //    temp[index] = component;
-  //    const result : type = temp;
+  //    let result : type = temp;
   //
   // Then use result everywhere the original SPIR-V id is used.  Using a const
   // like this avoids constantly reloading the value many times.
@@ -4989,7 +4989,7 @@ bool FunctionEmitter::MakeCompositeInsert(
   //
   //    var temp : type = composite;
   //    temp[index].x = object;
-  //    const result : type = temp;
+  //    let result : type = temp;
   //
   // Then use result everywhere the original SPIR-V id is used.  Using a const
   // like this avoids constantly reloading the value many times.

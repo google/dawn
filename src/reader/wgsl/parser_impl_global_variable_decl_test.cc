@@ -152,7 +152,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:20: unable to parse const literal");
+  EXPECT_EQ(p->error(), "1:20: unable to parse constant literal");
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {

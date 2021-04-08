@@ -78,7 +78,7 @@ TEST_F(ResolverTypeValidationTest, GlobalConstantWithStorageClass_Fail) {
 }
 
 TEST_F(ResolverTypeValidationTest, GlobalConstNoStorageClass_Pass) {
-  // const global_var: f32;
+  // let global_var: f32;
   GlobalConst(Source{{12, 34}}, "global_var", ty.f32());
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
