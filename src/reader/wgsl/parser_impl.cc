@@ -2964,6 +2964,9 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
   }
 
   if (s == kOffsetDecoration) {
+    deprecated(t.source(),
+               "[[offset]] has been replaced with [[size]] and [[align]]");
+
     const char* use = "offset decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
