@@ -218,6 +218,8 @@ set(TINT_LIB_SRCS
   transform/binding_remapper.h
   transform/bound_array_accessors.cc
   transform/bound_array_accessors.h
+  transform/calculate_array_length.cc
+  transform/calculate_array_length.h
   transform/canonicalize_entry_point_io.cc
   transform/canonicalize_entry_point_io.h
   transform/decompose_storage_access.cc
@@ -731,6 +733,7 @@ if(${TINT_BUILD_TESTS})
     list(APPEND TINT_TEST_SRCS
       transform/binding_remapper_test.cc
       transform/bound_array_accessors_test.cc
+      transform/calculate_array_length_test.cc
       transform/canonicalize_entry_point_io_test.cc
       transform/decompose_storage_access_test.cc
       transform/emit_vertex_point_size_test.cc
