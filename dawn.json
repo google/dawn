@@ -1739,13 +1739,6 @@
         ]
     },
 
-    "render pipeline descriptor dummy extension": {
-        "category": "structure",
-        "chained": true,
-        "members": [
-            {"name": "dummy stage", "type": "programmable stage descriptor"}
-        ]
-    },
     "sampler": {
         "category": "object"
     },
@@ -1764,13 +1757,6 @@
             {"name": "lod max clamp", "type": "float", "default": "1000.0f"},
             {"name": "compare", "type": "compare function", "default": "undefined"},
             {"name": "max anisotropy", "type": "uint16_t", "default": "1"}
-        ]
-    },
-    "sampler descriptor dummy anisotropic filtering": {
-        "category": "structure",
-        "chained": true,
-        "members": [
-            {"name": "max anisotropy", "type": "float"}
         ]
     },
     "shader module": {
@@ -1926,9 +1912,7 @@
             {"value": 4, "name": "surface descriptor from canvas HTML selector"},
             {"value": 5, "name": "shader module SPIRV descriptor"},
             {"value": 6, "name": "shader module WGSL descriptor"},
-            {"value": 7, "name": "sampler descriptor dummy anisotropic filtering"},
-            {"value": 8, "name": "render pipeline descriptor dummy extension"},
-            {"value": 9, "name": "primitive depth clamping state"}
+            {"value": 7, "name": "primitive depth clamping state"}
         ]
     },
     "texture": {
