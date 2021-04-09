@@ -171,9 +171,6 @@ TEST_P(D3D12DescriptorHeapTests, SwitchOverViewHeap) {
 
 // Verify the shader visible sampler heaps does not switch over within a single submit.
 TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
-    // TODO(crbug.com/tint/704): Fails for D3D12 with use_tint_generator
-    DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
-
     utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
 
     // Fill in a sampler heap with "sampler only" bindgroups (1x sampler per group) by creating a
@@ -181,14 +178,15 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     // because the sampler heap allocations are de-duplicated.
     renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> FragColor : vec4<f32>;
             [[group(0), binding(0)]] var sampler0 : sampler;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
+                let referenceSampler : sampler = sampler0;
                 FragColor = vec4<f32>(0.0, 0.0, 0.0, 0.0);
             })");
 
