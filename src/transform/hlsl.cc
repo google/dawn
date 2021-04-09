@@ -22,6 +22,9 @@
 #include "src/semantic/expression.h"
 #include "src/semantic/statement.h"
 #include "src/semantic/variable.h"
+#include "src/transform/calculate_array_length.h"
+#include "src/transform/decompose_storage_access.h"
+#include "src/transform/manager.h"
 
 namespace tint {
 namespace transform {
@@ -29,13 +32,21 @@ namespace transform {
 Hlsl::Hlsl() = default;
 Hlsl::~Hlsl() = default;
 
-Transform::Output Hlsl::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
+Transform::Output Hlsl::Run(const Program* in, const DataMap& data) {
+  Manager manager;
+  manager.Add<DecomposeStorageAccess>();
+  manager.Add<CalculateArrayLength>();
+  auto out = manager.Run(in, data);
+  if (!out.program.IsValid()) {
+    return out;
+  }
+
+  ProgramBuilder builder;
+  CloneContext ctx(&builder, &out.program);
   PromoteInitializersToConstVar(ctx);
   AddEmptyEntryPoint(ctx);
   ctx.Clone();
-  return Output{Program(std::move(out))};
+  return Output{Program(std::move(builder))};
 }
 
 void Hlsl::PromoteInitializersToConstVar(CloneContext& ctx) const {

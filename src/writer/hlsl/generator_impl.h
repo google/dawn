@@ -37,6 +37,9 @@
 namespace tint {
 
 // Forward declarations
+namespace type {
+class AccessControl;
+}  // namespace type
 namespace semantic {
 class Call;
 class Intrinsic;
@@ -266,16 +269,6 @@ class GeneratorImpl : public TextGenerator {
   bool EmitMemberAccessor(std::ostream& pre,
                           std::ostream& out,
                           ast::MemberAccessorExpression* expr);
-  /// Handles a storage buffer accessor expression
-  /// @param pre the preamble for the expression stream
-  /// @param out the output of the expression stream
-  /// @param expr the storage buffer accessor expression
-  /// @param rhs the right side of a store expression. Set to nullptr for a load
-  /// @returns true if the storage buffer accessor was emitted
-  bool EmitStorageBufferAccessor(std::ostream& pre,
-                                 std::ostream& out,
-                                 ast::Expression* expr,
-                                 ast::Expression* rhs);
   /// Handles return statements
   /// @param out the output stream
   /// @param stmt the statement to emit
@@ -294,9 +287,13 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating type
   /// @param out the output stream
   /// @param type the type to generate
+  /// @param storage_class the storage class of the variable
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitType(std::ostream& out, type::Type* type, const std::string& name);
+  bool EmitType(std::ostream& out,
+                type::Type* type,
+                ast::StorageClass storage_class,
+                const std::string& name);
   /// Handles generating a structure declaration
   /// @param out the output stream
   /// @param ty the struct to generate
@@ -332,15 +329,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the variable was emitted
   bool EmitProgramConstVariable(std::ostream& out, const ast::Variable* var);
 
-  /// Returns true if the accessor is accessing a storage buffer.
-  /// @param expr the expression to check
-  /// @returns true if the accessor is accessing a storage buffer for which
-  /// we need to execute a Load instruction.
-  bool is_storage_buffer_access(ast::MemberAccessorExpression* expr);
-  /// Returns true if the accessor is accessing a storage buffer.
-  /// @param expr the expression to check
-  /// @returns true if the accessor is accessing a storage buffer
-  bool is_storage_buffer_access(ast::ArrayAccessorExpression* expr);
   /// Registers the given global with the generator
   /// @param global the global to register
   void register_global(ast::Variable* global);
@@ -348,12 +336,6 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the variable to check
   /// @returns true if the global is in an input or output struct
   bool global_is_in_struct(const semantic::Variable* var) const;
-  /// Creates a text string representing the index into a storage buffer
-  /// @param pre the pre stream
-  /// @param expr the expression to use as the index
-  /// @returns the index string, or blank if unable to generate
-  std::string generate_storage_buffer_index_expression(std::ostream& pre,
-                                                       ast::Expression* expr);
   /// Handles generating a builtin method name
   /// @param intrinsic the semantic info for the intrinsic
   /// @returns the name or "" if not valid

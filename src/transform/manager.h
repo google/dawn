@@ -40,6 +40,14 @@ class Manager : public Transform {
     transforms_.push_back(std::move(transform));
   }
 
+  /// Add pass to the manager of type `T`, constructed with the provided
+  /// arguments.
+  /// @param args the arguments to forward to the `T` constructor
+  template <typename T, typename... ARGS>
+  void Add(ARGS&&... args) {
+    transforms_.emplace_back(std::make_unique<T>(std::forward<ARGS>(args)...));
+  }
+
   /// Runs the transforms on `program`, returning the transformation result.
   /// @param program the source program to transform
   /// @param data optional extra transform-specific input data

@@ -280,28 +280,28 @@ TEST_F(HlslGeneratorImplTest_Function,
   EXPECT_EQ(result(), R"(struct VertexOutput {
   float4 pos;
 };
-struct tint_symbol_2 {
+struct tint_symbol_6 {
   float4 pos : SV_Position;
 };
-struct tint_symbol_6 {
+struct tint_symbol_9 {
   float4 pos : SV_Position;
 };
 
 VertexOutput foo(float x) {
-  const VertexOutput tint_symbol_8 = {float4(x, x, x, 1.0f)};
-  return tint_symbol_8;
-}
-
-tint_symbol_2 vert_main1() {
-  const VertexOutput tint_symbol_4 = {foo(0.5f)};
-  const tint_symbol_2 tint_symbol_1 = {tint_symbol_4.pos};
+  const VertexOutput tint_symbol_1 = {float4(x, x, x, 1.0f)};
   return tint_symbol_1;
 }
 
-tint_symbol_6 vert_main2() {
-  const VertexOutput tint_symbol_7 = {foo(0.25f)};
+tint_symbol_6 vert_main1() {
+  const VertexOutput tint_symbol_7 = {foo(0.5f)};
   const tint_symbol_6 tint_symbol_5 = {tint_symbol_7.pos};
   return tint_symbol_5;
+}
+
+tint_symbol_9 vert_main2() {
+  const VertexOutput tint_symbol_10 = {foo(0.25f)};
+  const tint_symbol_9 tint_symbol_8 = {tint_symbol_10.pos};
+  return tint_symbol_8;
 }
 
 )");
@@ -415,16 +415,19 @@ TEST_F(HlslGeneratorImplTest_Function,
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(),
-              HasSubstr(R"(RWByteAddressBuffer coord : register(u0, space1);
+  EXPECT_EQ(result(),
+            R"(
+RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
-  float v = asfloat(coord.Load(4));
+  float v = asfloat(coord.Load(4u));
   return;
-})"));
+}
+
+)");
 
   Validate();
 }
@@ -456,16 +459,19 @@ TEST_F(HlslGeneratorImplTest_Function,
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(),
-              HasSubstr(R"(ByteAddressBuffer coord : register(t0, space1);
+  EXPECT_EQ(result(),
+            R"(
+ByteAddressBuffer coord : register(t0, space1);
 
 void frag_main() {
-  float v = asfloat(coord.Load(4));
+  float v = asfloat(coord.Load(4u));
   return;
-})"));
+}
+
+)");
 
   Validate();
 }
@@ -495,16 +501,19 @@ TEST_F(HlslGeneratorImplTest_Function,
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(),
-              HasSubstr(R"(RWByteAddressBuffer coord : register(u0, space1);
+  EXPECT_EQ(result(),
+            R"(
+RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
-  coord.Store(4, asuint(2.0f));
+  coord.Store(4u, asuint(2.0f));
   return;
-})"));
+}
+
+)");
 
   Validate();
 }
@@ -534,16 +543,19 @@ TEST_F(HlslGeneratorImplTest_Function,
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(),
-              HasSubstr(R"(RWByteAddressBuffer coord : register(u0, space1);
+  EXPECT_EQ(result(),
+            R"(
+RWByteAddressBuffer coord : register(u0, space1);
 
 void frag_main() {
-  coord.Store(4, asuint(2.0f));
+  coord.Store(4u, asuint(2.0f));
   return;
-})"));
+}
+
+)");
 
   Validate();
 }
@@ -792,20 +804,22 @@ TEST_F(HlslGeneratorImplTest_Function,
            create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(),
-              HasSubstr(R"(RWByteAddressBuffer coord : register(u0, space1);
+  EXPECT_EQ(result(),
+            R"(RWByteAddressBuffer coord : register(u0, space1);
 
 float sub_func(float param) {
-  return asfloat(coord.Load((4 * 0)));
+  return asfloat(coord.Load(0u));
 }
 
 void frag_main() {
   float v = sub_func(1.0f);
   return;
-})"));
+}
+
+)");
 
   Validate();
 }
@@ -946,11 +960,13 @@ TEST_F(HlslGeneratorImplTest_Function,
   //
   // [[stage(compute)]]
   // fn a() {
+  //   var v = data.d;
   //   return;
   // }
   //
   // [[stage(compute)]]
   // fn b() {
+  //   var v = data.d;
   //   return;
   // }
 
@@ -994,7 +1010,7 @@ TEST_F(HlslGeneratorImplTest_Function,
          });
   }
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(
@@ -1002,13 +1018,13 @@ RWByteAddressBuffer data : register(u0, space0);
 
 [numthreads(1, 1, 1)]
 void a() {
-  float v = asfloat(data.Load(0));
+  float v = asfloat(data.Load(0u));
   return;
 }
 
 [numthreads(1, 1, 1)]
 void b() {
-  float v = asfloat(data.Load(0));
+  float v = asfloat(data.Load(0u));
   return;
 }
 

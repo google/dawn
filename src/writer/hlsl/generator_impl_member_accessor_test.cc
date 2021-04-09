@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
+#include "src/ast/stage_decoration.h"
+#include "src/ast/struct_block_decoration.h"
+#include "src/type/access_control_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
@@ -19,276 +23,388 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-using HlslGeneratorImplTest_MemberAccessor = TestHelper;
+using ::testing::HasSubstr;
+
+using create_type_func_ptr =
+    type::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
+
+inline type::Type* ty_i32(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.i32();
+}
+inline type::Type* ty_u32(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.u32();
+}
+inline type::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.f32();
+}
+template <typename T>
+inline type::Type* ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec2<T>();
+}
+template <typename T>
+inline type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec3<T>();
+}
+template <typename T>
+inline type::Type* ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec4<T>();
+}
+template <typename T>
+inline type::Type* ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat2x2<T>();
+}
+template <typename T>
+inline type::Type* ty_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat2x3<T>();
+}
+template <typename T>
+inline type::Type* ty_mat2x4(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat2x4<T>();
+}
+template <typename T>
+inline type::Type* ty_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat3x2<T>();
+}
+template <typename T>
+inline type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat3x3<T>();
+}
+template <typename T>
+inline type::Type* ty_mat3x4(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat3x4<T>();
+}
+template <typename T>
+inline type::Type* ty_mat4x2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat4x2<T>();
+}
+template <typename T>
+inline type::Type* ty_mat4x3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat4x3<T>();
+}
+template <typename T>
+inline type::Type* ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat4x4<T>();
+}
+
+using i32 = ProgramBuilder::i32;
+using u32 = ProgramBuilder::u32;
+using f32 = ProgramBuilder::f32;
+
+template <typename BASE>
+class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
+ public:
+  void SetupStorageBuffer(ast::StructMemberList members) {
+    ProgramBuilder& b = *this;
+
+    auto* s =
+        b.Structure("Data", members, {b.create<ast::StructBlockDecoration>()});
+
+    auto* ac_ty =
+        b.create<type::AccessControl>(ast::AccessControl::kReadWrite, s);
+
+    b.Global("data", ac_ty, ast::StorageClass::kStorage, nullptr,
+             ast::DecorationList{
+                 b.create<ast::BindingDecoration>(0),
+                 b.create<ast::GroupDecoration>(1),
+             });
+  }
+
+  void SetupFunction(ast::StatementList statements) {
+    ProgramBuilder& b = *this;
+    b.Func("main", ast::VariableList{}, b.ty.void_(), statements,
+           ast::DecorationList{
+               b.create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           });
+  }
+};
+
+using HlslGeneratorImplTest_MemberAccessor =
+    HlslGeneratorImplTest_MemberAccessorBase<TestHelper>;
+
+template <typename T>
+using HlslGeneratorImplTest_MemberAccessorWithParam =
+    HlslGeneratorImplTest_MemberAccessorBase<TestParamHelper<T>>;
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   auto* s = Structure("Data", {Member("mem", ty.f32())});
-  auto* str_var = Global("str", s, ast::StorageClass::kPrivate);
+  Global("str", s, ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("str", "mem");
   WrapInFunction(expr);
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  gen.register_global(str_var);
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_EQ(result(), R"(struct Data {
+  float mem;
+};
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "str.mem");
+[numthreads(1, 1, 1)]
+void test_function() {
+  float tint_symbol_5 = str.mem;
+  return;
 }
 
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Load) {
-  // struct Data {
-  //   a : i32;
-  //   b : f32;
-  // };
-  // var<storage> data : Data;
-  // data.b;
-  //
-  // -> asfloat(data.Load(4));
-
-  auto* s = Structure("data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
-
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* expr = MemberAccessor("data", "b");
-  WrapInFunction(expr);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asfloat(data.Load(4))");
-}
-
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Load_Int) {
-  // struct Data {
-  //   a : i32;
-  //   b : f32;
-  // };
-  // var<storage> data : Data;
-  // data.a;
-  //
-  // -> asint(data.Load(0));
-
-  auto* s = Structure("data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
-
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* expr = MemberAccessor("data", "a");
-  WrapInFunction(expr);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asint(data.Load(0))");
-}
-
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Store_Matrix) {
-  // struct Data {
-  //   z : f32;
-  //   a : mat2x3<f32>;
-  // };
-  // var<storage> data : Data;
-  // mat2x3<f32> b;
-  // data.a = b;
-  //
-  // -> float2x3 _tint_tmp = b;
-  //    data.Store3(4 + 0, asuint(_tint_tmp[0]));
-  //    data.Store3(4 + 16, asuint(_tint_tmp[1]));
-
-  auto* s =
-      Structure("Data", {Member("z", ty.i32()), Member("a", ty.mat2x3<f32>())});
-
-  auto* b_var = Global("b", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* lhs = MemberAccessor("data", "a");
-  auto* rhs = Expr("b");
-
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-  WrapInFunction(assign);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-  gen.register_global(b_var);
-
-  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(result(), R"(float2x3 _tint_tmp = b;
-data.Store3(16 + 0, asuint(_tint_tmp[0]));
-data.Store3(16 + 16, asuint(_tint_tmp[1]));
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Store_Matrix_Empty) {
+struct TypeCase {
+  create_type_func_ptr member_type;
+  std::string expected;
+};
+inline std::ostream& operator<<(std::ostream& out, TypeCase c) {
+  ProgramBuilder b;
+  auto* ty = c.member_type(b.ty);
+  out << ty->FriendlyName(b.Symbols());
+  return out;
+}
+
+using HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad =
+    HlslGeneratorImplTest_MemberAccessorWithParam<TypeCase>;
+TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad, Test) {
+  // struct Data {
+  //   a : i32;
+  //   b : <type>;
+  // };
+  // var<storage> data : Data;
+  // data.b;
+
+  auto p = GetParam();
+
+  SetupStorageBuffer({
+      Member("a", ty.i32()),
+      Member("b", p.member_type(ty)),
+  });
+
+  SetupFunction({
+      create<ast::VariableDeclStatement>(Var("x", nullptr,
+                                             ast::StorageClass::kFunction,
+                                             MemberAccessor("data", "b"))),
+  });
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(p.expected));
+
+  Validate();
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    HlslGeneratorImplTest_MemberAccessor,
+    HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad,
+    testing::Values(
+        TypeCase{ty_u32, "data.Load(4u)"},
+        TypeCase{ty_f32, "asfloat(data.Load(4u))"},
+        TypeCase{ty_i32, "asint(data.Load(4u))"},
+        TypeCase{ty_vec2<u32>, "data.Load2(8u)"},
+        TypeCase{ty_vec2<f32>, "asfloat(data.Load2(8u))"},
+        TypeCase{ty_vec2<i32>, "asint(data.Load2(8u))"},
+        TypeCase{ty_vec3<u32>, "data.Load3(16u)"},
+        TypeCase{ty_vec3<f32>, "asfloat(data.Load3(16u))"},
+        TypeCase{ty_vec3<i32>, "asint(data.Load3(16u))"},
+        TypeCase{ty_vec4<u32>, "data.Load4(16u)"},
+        TypeCase{ty_vec4<f32>, "asfloat(data.Load4(16u))"},
+        TypeCase{ty_vec4<i32>, "asint(data.Load4(16u))"},
+        TypeCase{
+            ty_mat2x2<u32>,
+            R"(return uint2x2(buffer.Load2((offset + 0u)), buffer.Load2((offset + 8u)));)"},
+        TypeCase{
+            ty_mat2x3<f32>,
+            R"(return float2x3(asfloat(buffer.Load3((offset + 0u))), asfloat(buffer.Load3((offset + 16u))));)"},
+        TypeCase{
+            ty_mat2x4<i32>,
+            R"(return int2x4(asint(buffer.Load4((offset + 0u))), asint(buffer.Load4((offset + 16u))));)"},
+        TypeCase{
+            ty_mat3x2<u32>,
+            R"(return uint3x2(buffer.Load2((offset + 0u)), buffer.Load2((offset + 8u)), buffer.Load2((offset + 16u)));)"},
+        TypeCase{
+            ty_mat3x3<f32>,
+            R"(return float3x3(asfloat(buffer.Load3((offset + 0u))), asfloat(buffer.Load3((offset + 16u))), asfloat(buffer.Load3((offset + 32u))));)"},
+        TypeCase{
+            ty_mat3x4<i32>,
+            R"(return int3x4(asint(buffer.Load4((offset + 0u))), asint(buffer.Load4((offset + 16u))), asint(buffer.Load4((offset + 32u))));)"},
+        TypeCase{
+            ty_mat4x2<u32>,
+            R"(return uint4x2(buffer.Load2((offset + 0u)), buffer.Load2((offset + 8u)), buffer.Load2((offset + 16u)), buffer.Load2((offset + 24u)));)"},
+        TypeCase{
+            ty_mat4x3<f32>,
+            R"(return float4x3(asfloat(buffer.Load3((offset + 0u))), asfloat(buffer.Load3((offset + 16u))), asfloat(buffer.Load3((offset + 32u))), asfloat(buffer.Load3((offset + 48u))));)"},
+        TypeCase{
+            ty_mat4x4<i32>,
+            R"(return int4x4(asint(buffer.Load4((offset + 0u))), asint(buffer.Load4((offset + 16u))), asint(buffer.Load4((offset + 32u))), asint(buffer.Load4((offset + 48u))));)"}));
+
+using HlslGeneratorImplTest_MemberAccessor_StorageBufferStore =
+    HlslGeneratorImplTest_MemberAccessorWithParam<TypeCase>;
+TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
+  // struct Data {
+  //   a : i32;
+  //   b : <type>;
+  // };
+  // var<storage> data : Data;
+  // data.b = <type>();
+
+  auto p = GetParam();
+
+  auto* type = p.member_type(ty);
+
+  SetupStorageBuffer({
+      Member("a", ty.i32()),
+      Member("b", type),
+  });
+
+  SetupFunction({
+      create<ast::VariableDeclStatement>(
+          Var("value", type, ast::StorageClass::kFunction, Construct(type))),
+      Assign(MemberAccessor("data", "b"), Expr("value")),
+  });
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(p.expected));
+
+  Validate();
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    HlslGeneratorImplTest_MemberAccessor,
+    HlslGeneratorImplTest_MemberAccessor_StorageBufferStore,
+    testing::Values(TypeCase{ty_u32, "data.Store(4u, asuint(value))"},
+                    TypeCase{ty_f32, "data.Store(4u, asuint(value))"},
+                    TypeCase{ty_i32, "data.Store(4u, asuint(value))"},
+                    TypeCase{ty_vec2<u32>, "data.Store2(8u, asuint(value))"},
+                    TypeCase{ty_vec2<f32>, "data.Store2(8u, asuint(value))"},
+                    TypeCase{ty_vec2<i32>, "data.Store2(8u, asuint(value))"},
+                    TypeCase{ty_vec3<u32>, "data.Store3(16u, asuint(value))"},
+                    TypeCase{ty_vec3<f32>, "data.Store3(16u, asuint(value))"},
+                    TypeCase{ty_vec3<i32>, "data.Store3(16u, asuint(value))"},
+                    TypeCase{ty_vec4<u32>, "data.Store4(16u, asuint(value))"},
+                    TypeCase{ty_vec4<f32>, "data.Store4(16u, asuint(value))"},
+                    TypeCase{ty_vec4<i32>, "data.Store4(16u, asuint(value))"},
+                    TypeCase{ty_mat2x2<u32>, R"({
+  buffer.Store2((offset + 0u), asuint(value[0u]));
+  buffer.Store2((offset + 8u), asuint(value[1u]));
+})"},
+                    TypeCase{ty_mat2x3<f32>, R"({
+  buffer.Store3((offset + 0u), asuint(value[0u]));
+  buffer.Store3((offset + 16u), asuint(value[1u]));
+})"},
+                    TypeCase{ty_mat2x4<i32>, R"({
+  buffer.Store4((offset + 0u), asuint(value[0u]));
+  buffer.Store4((offset + 16u), asuint(value[1u]));
+})"},
+                    TypeCase{ty_mat3x2<u32>, R"({
+  buffer.Store2((offset + 0u), asuint(value[0u]));
+  buffer.Store2((offset + 8u), asuint(value[1u]));
+  buffer.Store2((offset + 16u), asuint(value[2u]));
+})"},
+                    TypeCase{ty_mat3x3<f32>, R"({
+  buffer.Store3((offset + 0u), asuint(value[0u]));
+  buffer.Store3((offset + 16u), asuint(value[1u]));
+  buffer.Store3((offset + 32u), asuint(value[2u]));
+})"},
+                    TypeCase{ty_mat3x4<i32>, R"({
+  buffer.Store4((offset + 0u), asuint(value[0u]));
+  buffer.Store4((offset + 16u), asuint(value[1u]));
+  buffer.Store4((offset + 32u), asuint(value[2u]));
+})"},
+                    TypeCase{ty_mat4x2<u32>, R"({
+  buffer.Store2((offset + 0u), asuint(value[0u]));
+  buffer.Store2((offset + 8u), asuint(value[1u]));
+  buffer.Store2((offset + 16u), asuint(value[2u]));
+  buffer.Store2((offset + 24u), asuint(value[3u]));
+})"},
+                    TypeCase{ty_mat4x3<f32>, R"({
+  buffer.Store3((offset + 0u), asuint(value[0u]));
+  buffer.Store3((offset + 16u), asuint(value[1u]));
+  buffer.Store3((offset + 32u), asuint(value[2u]));
+  buffer.Store3((offset + 48u), asuint(value[3u]));
+})"},
+                    TypeCase{ty_mat4x4<i32>, R"({
+  buffer.Store4((offset + 0u), asuint(value[0u]));
+  buffer.Store4((offset + 16u), asuint(value[1u]));
+  buffer.Store4((offset + 32u), asuint(value[2u]));
+  buffer.Store4((offset + 48u), asuint(value[3u]));
+})"}));
+
+TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
   // struct Data {
   //   z : f32;
   //   a : mat2x3<f32>;
   // };
   // var<storage> data : Data;
   // data.a = mat2x3<f32>();
-  //
-  // -> float2x3 _tint_tmp = float2x3(0.0f, 0.0f, 0.0f,
-  // 0.0f, 0.0f, 0.0f);
-  //    data.Store3(16 + 0, asuint(_tint_tmp[0]);
-  //    data.Store3(16 + 16, asuint(_tint_tmp[1]));
 
-  auto* s =
-      Structure("Data", {Member("z", ty.i32()), Member("a", ty.mat2x3<f32>())});
+  SetupStorageBuffer({
+      Member("a", ty.i32()),
+      Member("b", ty.mat2x3<f32>()),
+  });
 
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
+  SetupFunction({
+      Assign(MemberAccessor("data", "b"),
+             Construct(ty.mat2x3<f32>(), ast::ExpressionList{})),
+  });
 
-  auto* lhs = MemberAccessor("data", "a");
-  auto* rhs = Construct(ty.mat2x3<f32>(), ast::ExpressionList{});
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-  WrapInFunction(assign);
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  GeneratorImpl& gen = Build();
+void tint_symbol_8(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
+  buffer.Store3((offset + 0u), asuint(value[0u]));
+  buffer.Store3((offset + 16u), asuint(value[1u]));
+}
 
-  gen.register_global(coord_var);
+void main() {
+  tint_symbol_8(data, 16u, float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  return;
+}
 
-  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(
-      result(),
-      R"(float2x3 _tint_tmp = float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-data.Store3(16 + 0, asuint(_tint_tmp[0]));
-data.Store3(16 + 16, asuint(_tint_tmp[1]));
-)");
+)";
+  EXPECT_EQ(result(), expected);
+
+  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix) {
-  // struct Data {
-  //   z : f32;
-  //   a : mat3x2<f32>;
-  // };
-  // var<storage> data : Data;
-  // data.a;
-  //
-  // -> asfloat(uint2x3(data.Load2(4 + 0), data.Load2(4 + 8),
-  // data.Load2(4 + 16)));
-
-  auto* s =
-      Structure("Data", {Member("z", ty.i32()), Member("a", ty.mat3x2<f32>())});
-
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* expr = MemberAccessor("data", "a");
-  WrapInFunction(expr);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(),
-            "asfloat(uint2x3(data.Load2(8 + 0), data.Load2(8 + 8), "
-            "data.Load2(8 + 16)))");
-}
-
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_Nested) {
-  // struct Data {
-  //   z : f32;
-  //   a : mat2x3<f32>
-  // };
-  // var<storage> data : Outer;
-  // data.b.a;
-  //
-  // -> asfloat(uint3x2(data.Load3(4 + 0), data.Load3(16 + 16)));
-
-  auto* s = Structure("Data", {
-                                  Member("z", ty.i32()),
-                                  Member("a", ty.mat2x3<f32>()),
-                              });
-
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* expr = MemberAccessor("data", "a");
-  WrapInFunction(expr);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(),
-            "asfloat(uint3x2(data.Load3(16 + 0), data.Load3(16 + 16)))");
-}
-
-TEST_F(
-    HlslGeneratorImplTest_MemberAccessor,
-    EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_By3_Is_16_Bytes) {
-  // struct Data {
-  //   a : mat3x3<f32>
-  // };
-  // var<storage> data : Data;
-  // data.a;
-  //
-  // -> asfloat(uint3x3(data.Load3(0), data.Load3(16),
-  // data.Load3(32)));
-
-  auto* s = Structure("Data", {
-                                  Member("a", ty.mat3x3<f32>()),
-                              });
-
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* expr = MemberAccessor("data", "a");
-  WrapInFunction(expr);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(),
-            "asfloat(uint3x3(data.Load3(0 + 0), data.Load3(0 + 16), "
-            "data.Load3(0 + 32)))");
-}
-
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Load_Matrix_Single_Element) {
+       StorageBuffer_Load_Matrix_Single_Element) {
   // struct Data {
   //   z : f32;
   //   a : mat4x3<f32>;
   // };
   // var<storage> data : Data;
   // data.a[2][1];
-  //
-  // -> asfloat(data.Load((2 * 16) + (1 * 4) + 16)))
 
-  auto* s = Structure("Data", {
-                                  Member("z", ty.i32()),
-                                  Member("a", ty.mat4x3<f32>()),
-                              });
+  SetupStorageBuffer({
+      Member("z", ty.f32()),
+      Member("a", ty.mat4x3<f32>()),
+  });
 
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
+  SetupFunction({
+      create<ast::VariableDeclStatement>(
+          Var("x", nullptr, ast::StorageClass::kFunction,
+              IndexAccessor(IndexAccessor(MemberAccessor("data", "a"), 2), 1))),
+  });
 
-  auto* expr = IndexAccessor(
-      IndexAccessor(MemberAccessor("data", "a"), Expr(2)), Expr(1));
-  WrapInFunction(expr);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  GeneratorImpl& gen = Build();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  gen.register_global(coord_var);
+void main() {
+  float x = asfloat(data.Load(52u));
+  return;
+}
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + (16 * 2) + 16))");
+)";
+  EXPECT_EQ(result(), expected);
+
+  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -298,26 +414,32 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // };
   // var<storage> data : Data;
   // data.a[2];
-  //
-  // -> asint(data.Load((2 * 4));
-  type::Array ary(ty.i32(), 5,
-                  ast::DecorationList{
-                      create<ast::StrideDecoration>(4),
-                  });
 
-  auto* s = Structure("Data", {Member("a", &ary)});
+  SetupStorageBuffer({
+      Member("z", ty.f32()),
+      Member("a", ty.array<i32, 5>(4)),
+  });
 
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
+  SetupFunction({
+      create<ast::VariableDeclStatement>(
+          Var("x", nullptr, ast::StorageClass::kFunction,
+              IndexAccessor(MemberAccessor("data", "a"), 2))),
+  });
 
-  auto* expr = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
-  WrapInFunction(expr);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  GeneratorImpl& gen = Build();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  gen.register_global(coord_var);
+void main() {
+  int x = asint(data.Load(12u));
+  return;
+}
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asint(data.Load((4 * 2) + 0))");
+)";
+  EXPECT_EQ(result(), expected);
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
@@ -327,473 +449,374 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // };
   // var<storage> data : Data;
   // data.a[(2 + 4) - 3];
-  //
-  // -> asint(data.Load((4 * ((2 + 4) - 3)));
-  type::Array ary(ty.i32(), 5,
-                  ast::DecorationList{
-                      create<ast::StrideDecoration>(4),
-                  });
 
-  auto* s = Structure("Data", {Member("a", &ary)});
+  SetupStorageBuffer({
+      Member("z", ty.f32()),
+      Member("a", ty.array<i32, 5>(4)),
+  });
 
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
+  SetupFunction({
+      create<ast::VariableDeclStatement>(
+          Var("x", nullptr, ast::StorageClass::kFunction,
+              IndexAccessor(MemberAccessor("data", "a"),
+                            Sub(Add(2, Expr(4)), Expr(3))))),
+  });
 
-  auto* expr = IndexAccessor(MemberAccessor("data", "a"),
-                             Sub(Add(Expr(2), Expr(4)), Expr(3)));
-  WrapInFunction(expr);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  GeneratorImpl& gen = Build();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asint(data.Load((4 * ((2 + 4) - 3)) + 0))");
+void main() {
+  int x = asint(data.Load((4u + (4u * uint(((2 + 4) - 3))))));
+  return;
 }
 
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Store) {
-  // struct Data {
-  //   a : i32;
-  //   b : f32;
-  // };
-  // var<storage> data : Data;
-  // data.b = 2.3f;
-  //
-  // -> data.Store(0, asuint(2.0f));
-
-  auto* s = Structure("data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
-
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* lhs = MemberAccessor("data", "b");
-  auto* rhs = Expr(2.0f);
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-  WrapInFunction(assign);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(result(), R"(data.Store(4, asuint(2.0f));
-)");
+)";
+  EXPECT_EQ(result(), expected);
 }
 
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Store_ToArray) {
+TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
   // struct Data {
   //   a : [[stride(4)]] array<i32, 5>;
   // };
   // var<storage> data : Data;
   // data.a[2] = 2;
-  //
-  // -> data.Store((2 * 4), asuint(2.3f));
 
-  type::Array ary(ty.i32(), 5,
-                  ast::DecorationList{
-                      create<ast::StrideDecoration>(4),
-                  });
+  SetupStorageBuffer({
+      Member("z", ty.f32()),
+      Member("a", ty.array<i32, 5>(4)),
+  });
 
-  auto* s = Structure("Data", {Member("a", &ary)});
+  SetupFunction({
+      Assign(IndexAccessor(MemberAccessor("data", "a"), 2), 2),
+  });
 
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  auto* lhs = IndexAccessor(MemberAccessor("data", "a"), Expr(2));
-  auto* rhs = Expr(2);
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-  WrapInFunction(assign);
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(result(), R"(data.Store((4 * 2) + 0, asuint(2));
-)");
+void main() {
+  data.Store(12u, asuint(2));
+  return;
 }
 
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Store_Int) {
-  // struct Data {
-  //   a : i32;
-  //   b : f32;
-  // };
-  // var<storage> data : Data;
-  // data.a = 2;
-  //
-  // -> data.Store(0, asuint(2));
-
-  auto* s = Structure("data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
-
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* lhs = MemberAccessor("data", "a");
-  auto* rhs = Expr(2);
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-  WrapInFunction(assign);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(result(), R"(data.Store(0, asuint(2));
-)");
+)";
+  EXPECT_EQ(result(), expected);
 }
 
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Load_Vec3) {
-  // struct Data {
+TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
+  // struct Inner {
   //   a : vec3<i32>;
   //   b : vec3<f32>;
   // };
-  // var<storage> data : Data;
-  // data.b;
-  //
-  // -> asfloat(data.Load(16));
-
-  auto* s = Structure("Data", {
-                                  Member("a", ty.vec3<i32>()),
-                                  Member("b", ty.vec3<f32>()),
-                              });
-
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* expr = MemberAccessor("data", "b");
-  WrapInFunction(expr);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asfloat(data.Load3(16))");
-}
-
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Store_Vec3) {
   // struct Data {
-  //   a : vec3<i32>;
-  //   b : vec3<f32>;
-  // };
-  // var<storage> data : Data;
-  // data.b = vec3<f32>(2.3f, 1.2f, 0.2f);
-  //
-  // -> data.Store(16, asuint(float3(2.3f, 1.2f, 0.2f)));
-
-  auto* s = Structure("Data", {
-                                  Member("a", ty.vec3<i32>()),
-                                  Member("b", ty.vec3<f32>()),
-                              });
-
-  auto* coord_var = Global("data", s, ast::StorageClass::kStorage);
-
-  auto* lhs = MemberAccessor("data", "b");
-  auto* rhs = vec3<f32>(1.f, 2.f, 3.f);
-
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-
-  WrapInFunction(assign);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(result(),
-            R"(data.Store3(16, asuint(float3(1.0f, 2.0f, 3.0f)));
-)");
-}
-
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel) {
-  // struct Data {
-  //   a : vec3<i32>;
-  //   b : vec3<f32>;
-  // };
-  // struct Pre {
-  //   var c : [[stride(32)]] array<Data, 4>;
+  //   var c : [[stride(32)]] array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
   // data.c[2].b
-  //
-  // -> asfloat(data.Load3(16 + (2 * 32)))
 
-  auto* data = Structure("Data", {
-                                     Member("a", ty.vec3<i32>()),
-                                     Member("b", ty.vec3<f32>()),
-                                 });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
-  type::Array ary(data, 4,
-                  ast::DecorationList{
-                      create<ast::StrideDecoration>(32),
-                  });
+  SetupStorageBuffer({
+      Member("c", ty.array(inner, 4, 32)),
+  });
 
-  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
+  SetupFunction({
+      create<ast::VariableDeclStatement>(Var(
+          "x", nullptr, ast::StorageClass::kFunction,
+          MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2), "b"))),
+  });
 
-  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  auto* expr =
-      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
-  WrapInFunction(expr);
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  GeneratorImpl& gen = Build();
+void main() {
+  float3 x = asfloat(data.Load3(80u));
+  return;
+}
 
-  gen.register_global(coord_var);
+)";
+  EXPECT_EQ(result(), expected);
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0))");
+  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle) {
-  // struct Data {
+       StorageBuffer_Load_MultiLevel_Swizzle) {
+  // struct Inner {
   //   a : vec3<i32>;
   //   b : vec3<f32>;
   // };
-  // struct Pre {
-  //   var c : [[stride(32)]] array<Data, 4>;
+  // struct Data {
+  //   var c : [[stride(32)]] array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
   // data.c[2].b.xy
-  //
-  // -> asfloat(data.Load3(16 + (2 * 32))).xy
 
-  auto* data = Structure("Data", {
-                                     Member("a", ty.vec3<i32>()),
-                                     Member("b", ty.vec3<f32>()),
-                                 });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
-  type::Array ary(data, 4,
-                  ast::DecorationList{create<ast::StrideDecoration>(32)});
+  SetupStorageBuffer({
+      Member("c", ty.array(inner, 4, 32)),
+  });
 
-  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
+  SetupFunction({
+      create<ast::VariableDeclStatement>(
+          Var("x", nullptr, ast::StorageClass::kFunction,
+              MemberAccessor(
+                  MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2),
+                                 "b"),
+                  "xy"))),
+  });
 
-  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  auto* expr = MemberAccessor(
-      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
-      "xy");
-  WrapInFunction(expr);
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asfloat(data.Load3(16 + (32 * 2) + 0)).xy");
+void main() {
+  float2 x = asfloat(data.Load3(80u)).xy;
+  return;
 }
 
-TEST_F(
-    HlslGeneratorImplTest_MemberAccessor,
-    EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Swizzle_SingleLetter) {  // NOLINT
-  // struct Data {
+)";
+  EXPECT_EQ(result(), expected);
+
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_MemberAccessor,
+       StorageBuffer_Load_MultiLevel_Swizzle_SingleLetter) {  // NOLINT
+  // struct Inner {
   //   a : vec3<i32>;
   //   b : vec3<f32>;
   // };
-  // struct Pre {
-  //   var c : [[stride(32)]] array<Data, 4>;
+  // struct Data {
+  //   var c : [[stride(32)]] array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
   // data.c[2].b.g
-  //
-  // -> asfloat(data.Load((4 * 1) + 16 + (2 * 32) + 0))
 
-  auto* data = Structure("Data", {
-                                     Member("a", ty.vec3<i32>()),
-                                     Member("b", ty.vec3<f32>()),
-                                 });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
-  type::Array ary(data, 4,
-                  ast::DecorationList{
-                      create<ast::StrideDecoration>(32),
-                  });
+  SetupStorageBuffer({
+      Member("c", ty.array(inner, 4, 32)),
+  });
 
-  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
+  SetupFunction({
+      create<ast::VariableDeclStatement>(
+          Var("x", nullptr, ast::StorageClass::kFunction,
+              MemberAccessor(
+                  MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2),
+                                 "b"),
+                  "g"))),
+  });
 
-  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  auto* expr = MemberAccessor(
-      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
-      "g");
-  WrapInFunction(expr);
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  GeneratorImpl& gen = Build();
+void main() {
+  float x = asfloat(data.Load(84u));
+  return;
+}
 
-  gen.register_global(coord_var);
+)";
+  EXPECT_EQ(result(), expected);
 
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
+  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Load_MultiLevel_Index) {
-  // struct Data {
+       StorageBuffer_Load_MultiLevel_Index) {
+  // struct Inner {
   //   a : vec3<i32>;
   //   b : vec3<f32>;
   // };
-  // struct Pre {
-  //   var c : [[stride(32)]] array<Data, 4>;
+  // struct Data {
+  //   var c : [[stride(32)]] array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
   // data.c[2].b[1]
-  //
-  // -> asfloat(data.Load(4 + 16 + (2 * 32)))
 
-  auto* data = Structure("Data", {
-                                     Member("a", ty.vec3<i32>()),
-                                     Member("b", ty.vec3<f32>()),
-                                 });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
-  type::Array ary(data, 4,
-                  ast::DecorationList{
-                      create<ast::StrideDecoration>(32),
-                  });
+  SetupStorageBuffer({
+      Member("c", ty.array(inner, 4, 32)),
+  });
 
-  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
+  SetupFunction({
+      create<ast::VariableDeclStatement>(Var(
+          "x", nullptr, ast::StorageClass::kFunction,
+          IndexAccessor(MemberAccessor(
+                            IndexAccessor(MemberAccessor("data", "c"), 2), "b"),
+                        1))),
+  });
 
-  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  auto* expr = IndexAccessor(
-      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
-      Expr(1));
-  WrapInFunction(expr);
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "asfloat(data.Load((4 * 1) + 16 + (32 * 2) + 0))");
+void main() {
+  float x = asfloat(data.Load(84u));
+  return;
 }
 
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Store_MultiLevel) {
-  // struct Data {
+)";
+  EXPECT_EQ(result(), expected);
+
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
+  // struct Inner {
   //   a : vec3<i32>;
   //   b : vec3<f32>;
   // };
-  // struct Pre {
-  //   var c : [[stride(32)]] array<Data, 4>;
+  // struct Data {
+  //   var c : [[stride(32)]] array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
   // data.c[2].b = vec3<f32>(1.f, 2.f, 3.f);
-  //
-  // -> data.Store3(16 + (2 * 32), asuint(float3(1.0f, 2.0f, 3.0f)));
 
-  auto* data = Structure("Data", {
-                                     Member("a", ty.vec3<i32>()),
-                                     Member("b", ty.vec3<f32>()),
-                                 });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
-  type::Array ary(data, 4,
-                  ast::DecorationList{
-                      create<ast::StrideDecoration>(32),
-                  });
+  SetupStorageBuffer({
+      Member("c", ty.array(inner, 4, 32)),
+  });
 
-  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
+  SetupFunction({
+      Assign(MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2), "b"),
+             vec3<f32>(1.f, 2.f, 3.f)),
+  });
 
-  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  auto* lhs =
-      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b");
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  auto* assign =
-      create<ast::AssignmentStatement>(lhs, vec3<f32>(1.f, 2.f, 3.f));
+void main() {
+  data.Store3(80u, asuint(float3(1.0f, 2.0f, 3.0f)));
+  return;
+}
 
-  WrapInFunction(assign);
+)";
+  EXPECT_EQ(result(), expected);
 
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(result(),
-            R"(data.Store3(16 + (32 * 2) + 0, asuint(float3(1.0f, 2.0f, 3.0f)));
-)");
+  Validate();
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_StorageBuffer_Store_Swizzle_SingleLetter) {
-  // struct Data {
+       StorageBuffer_Store_Swizzle_SingleLetter) {
+  // struct Inner {
   //   a : vec3<i32>;
   //   b : vec3<f32>;
   // };
-  // struct Pre {
-  //   var c : [[stride(32)]] array<Data, 4>;
+  // struct Data {
+  //   var c : [[stride(32)]] array<Inner, 4>;
   // };
   //
   // var<storage> data : Pre;
   // data.c[2].b.y = 1.f;
-  //
-  // -> data.Store((4 * 1) + 16 + (2 * 32) + 0, asuint(1.0f));
 
-  auto* data = Structure("Data", {
-                                     Member("a", ty.vec3<i32>()),
-                                     Member("b", ty.vec3<f32>()),
-                                 });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<i32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
-  type::Array ary(data, 4,
-                  ast::DecorationList{
-                      create<ast::StrideDecoration>(32),
-                  });
+  SetupStorageBuffer({
+      Member("c", ty.array(inner, 4, 32)),
+  });
 
-  auto* pre_struct = Structure("Pre", {Member("c", &ary)});
+  SetupFunction({
+      Assign(MemberAccessor(
+                 MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2),
+                                "b"),
+                 "y"),
+             Expr(1.f)),
+  });
 
-  auto* coord_var = Global("data", pre_struct, ast::StorageClass::kStorage);
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  auto* lhs = MemberAccessor(
-      MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), Expr(2)), "b"),
-      "y");
-  auto* rhs = Expr(1.f);
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  auto* expected =
+      R"(
+RWByteAddressBuffer data : register(u0, space1);
 
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
-
-  WrapInFunction(assign);
-
-  GeneratorImpl& gen = Build();
-
-  gen.register_global(coord_var);
-
-  ASSERT_TRUE(gen.EmitStatement(out, assign)) << gen.error();
-  EXPECT_EQ(result(),
-            R"(data.Store((4 * 1) + 16 + (32 * 2) + 0, asuint(1.0f));
-)");
+void main() {
+  data.Store(84u, asuint(1.0f));
+  return;
 }
 
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_Swizzle_xyz) {
-  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+)";
+  EXPECT_EQ(result(), expected);
 
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
+  auto* var = Var("my_vec", ty.vec4<f32>(), ast::StorageClass::kFunction,
+                  vec4<f32>(1.f, 2.f, 3.f, 4.f));
   auto* expr = MemberAccessor("my_vec", "xyz");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
-  GeneratorImpl& gen = Build();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "my_vec.xyz");
+  GeneratorImpl& gen = SanitizeAndBuild();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("my_vec.xyz"));
+
+  Validate();
 }
 
-TEST_F(HlslGeneratorImplTest_MemberAccessor,
-       EmitExpression_MemberAccessor_Swizzle_gbr) {
-  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
-
+TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
+  auto* var = Var("my_vec", ty.vec4<f32>(), ast::StorageClass::kFunction,
+                  vec4<f32>(1.f, 2.f, 3.f, 4.f));
   auto* expr = MemberAccessor("my_vec", "gbr");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
-  GeneratorImpl& gen = Build();
-  ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "my_vec.gbr");
+  GeneratorImpl& gen = SanitizeAndBuild();
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("my_vec.gbr"));
+
+  Validate();
 }
 
 }  // namespace
