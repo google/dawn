@@ -659,8 +659,10 @@ int main(int argc, const char** argv) {
               << options.input_filename << std::endl;
     return 1;
   }
-  if (!program->IsValid()) {
+  if (program->Diagnostics().count() > 0) {
     diag_formatter.format(program->Diagnostics(), diag_printer.get());
+  }
+  if (!program->IsValid()) {
     return 1;
   }
 
