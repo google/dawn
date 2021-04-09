@@ -17,21 +17,69 @@
 
 #include "dawn_native/SwapChain.h"
 
+#include "dawn_native/IntegerTypes.h"
+#include "dawn_native/d3d12/d3d12_platform.h"
+
 namespace dawn_native { namespace d3d12 {
 
     class Device;
+    class Texture;
 
-    class SwapChain final : public OldSwapChainBase {
+    class OldSwapChain final : public OldSwapChainBase {
       public:
-        static Ref<SwapChain> Create(Device* device, const SwapChainDescriptor* descriptor);
+        static Ref<OldSwapChain> Create(Device* device, const SwapChainDescriptor* descriptor);
 
       protected:
-        SwapChain(Device* device, const SwapChainDescriptor* descriptor);
-        ~SwapChain() override;
+        OldSwapChain(Device* device, const SwapChainDescriptor* descriptor);
+        ~OldSwapChain() override;
         TextureBase* GetNextTextureImpl(const TextureDescriptor* descriptor) override;
         MaybeError OnBeforePresent(TextureViewBase* view) override;
 
         wgpu::TextureUsage mTextureUsage;
+    };
+
+    class SwapChain final : public NewSwapChainBase {
+      public:
+        static ResultOrError<Ref<SwapChain>> Create(Device* device,
+                                                Surface* surface,
+                                                NewSwapChainBase* previousSwapChain,
+                                                const SwapChainDescriptor* descriptor);
+
+      private:
+        ~SwapChain() override;
+
+        using NewSwapChainBase::NewSwapChainBase;
+        MaybeError Initialize(NewSwapChainBase* previousSwapChain);
+
+        struct Config {
+            // Information that's passed to the D3D12 swapchain creation call.
+            UINT bufferCount;
+            UINT swapChainFlags;
+            DXGI_FORMAT format;
+            DXGI_USAGE usage;
+        };
+
+        // NewSwapChainBase implementation
+        MaybeError PresentImpl() override;
+        ResultOrError<TextureViewBase*> GetCurrentTextureViewImpl() override;
+        void DetachFromSurfaceImpl() override;
+
+        // Does the swapchain initialization steps assuming there is nothing we can reuse.
+        MaybeError InitializeSwapChainFromScratch();
+        // Does the swapchain initialization step of gathering the buffers.
+        MaybeError CollectSwapChainBuffers();
+        // Calls DetachFromSurface but also synchronously waits until all references to the
+        // swapchain and buffers are removed, as that's a constraint for some DXGI operations.
+        MaybeError DetachAndWaitForDeallocation();
+
+        Config mConfig;
+
+        ComPtr<IDXGISwapChain3> mDXGISwapChain;
+        std::vector<ComPtr<ID3D12Resource>> mBuffers;
+        std::vector<ExecutionSerial> mBufferLastUsedSerials;
+        uint32_t mCurrentBuffer = 0;
+
+        Ref<Texture> mApiTexture;
     };
 
 }}  // namespace dawn_native::d3d12

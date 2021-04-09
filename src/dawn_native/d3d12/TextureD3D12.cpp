@@ -530,9 +530,6 @@ namespace dawn_native { namespace d3d12 {
         // texture is owned externally. The texture's owning entity must remain responsible for
         // memory management.
         mResourceAllocation = { info, 0, std::move(d3d12Texture), nullptr };
-
-        SetIsSubresourceContentInitialized(true, GetAllSubresources());
-
         return {};
     }
 
