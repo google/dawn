@@ -41,12 +41,14 @@ ParameterList GetParameters(ast::Function* ast) {
 }  // namespace
 
 Function::Function(ast::Function* declaration,
+                   std::vector<const Variable*> parameters,
                    std::vector<const Variable*> referenced_module_vars,
                    std::vector<const Variable*> local_referenced_module_vars,
                    std::vector<const ast::ReturnStatement*> return_statements,
                    std::vector<Symbol> ancestor_entry_points)
     : Base(declaration->return_type(), GetParameters(declaration)),
       declaration_(declaration),
+      parameters_(std::move(parameters)),
       referenced_module_vars_(std::move(referenced_module_vars)),
       local_referenced_module_vars_(std::move(local_referenced_module_vars)),
       return_statements_(std::move(return_statements)),

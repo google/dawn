@@ -1737,7 +1737,7 @@ bool GeneratorImpl::EmitMemberAccessor(ast::MemberAccessorExpression* expr) {
   out_ << ".";
 
   // Swizzles get written out directly
-  if (program_->Sem().Get(expr)->IsSwizzle()) {
+  if (program_->Sem().Get(expr)->Is<semantic::Swizzle>()) {
     out_ << program_->Symbols().NameFor(expr->member()->symbol());
   } else if (!EmitExpression(expr->member())) {
     return false;

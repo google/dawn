@@ -46,12 +46,14 @@ class Function : public Castable<Function, CallTarget> {
 
   /// Constructor
   /// @param declaration the ast::Function
+  /// @param parameters the parameters to the function
   /// @param referenced_module_vars the referenced module variables
   /// @param local_referenced_module_vars the locally referenced module
   /// @param return_statements the function return statements
   /// variables
   /// @param ancestor_entry_points the ancestor entry points
   Function(ast::Function* declaration,
+           std::vector<const Variable*> parameters,
            std::vector<const Variable*> referenced_module_vars,
            std::vector<const Variable*> local_referenced_module_vars,
            std::vector<const ast::ReturnStatement*> return_statements,
@@ -62,6 +64,9 @@ class Function : public Castable<Function, CallTarget> {
 
   /// @returns the ast::Function declaration
   ast::Function* Declaration() const { return declaration_; }
+
+  /// @return the parameters to the function
+  const std::vector<const Variable*> Parameters() const { return parameters_; }
 
   /// Note: If this function calls other functions, the return will also include
   /// all of the referenced variables from the callees.
@@ -147,6 +152,7 @@ class Function : public Castable<Function, CallTarget> {
       bool multisampled) const;
 
   ast::Function* const declaration_;
+  std::vector<const Variable*> const parameters_;
   std::vector<const Variable*> const referenced_module_vars_;
   std::vector<const Variable*> const local_referenced_module_vars_;
   std::vector<const ast::ReturnStatement*> const return_statements_;

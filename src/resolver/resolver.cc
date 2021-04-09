@@ -534,7 +534,9 @@ bool Resolver::Function(ast::Function* func) {
 
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
-    variable_stack_.set(param->symbol(), CreateVariableInfo(param));
+    auto* param_info = CreateVariableInfo(param);
+    variable_stack_.set(param->symbol(), param_info);
+    func_info->parameters.emplace_back(param_info);
 
     if (!ApplyStorageClassUsageToType(param->declared_storage_class(),
                                       param->declared_type(),
@@ -1171,12 +1173,14 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
   std::vector<uint32_t> swizzle;
 
   if (auto* ty = data_type->As<type::Struct>()) {
-    auto* strct = ty->impl();
+    auto* str = Structure(ty);
     auto symbol = expr->member()->symbol();
 
-    for (auto* member : strct->members()) {
-      if (member->symbol() == symbol) {
-        ret = member->type();
+    const semantic::StructMember* member = nullptr;
+    for (auto* m : str->members) {
+      if (m->Declaration()->symbol() == symbol) {
+        ret = m->Declaration()->type();
+        member = m;
         break;
       }
     }
@@ -1192,6 +1196,9 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     if (auto* ptr = res->As<type::Pointer>()) {
       ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
     }
+
+    builder_->Sem().Add(expr, builder_->create<semantic::StructMemberAccess>(
+                                  expr, ret, current_statement_, member));
   } else if (auto* vec = data_type->As<type::Vector>()) {
     std::string str = builder_->Symbols().NameFor(expr->member()->symbol());
     auto size = str.size();
@@ -1257,6 +1264,9 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
       ret = builder_->create<type::Vector>(vec->type(),
                                            static_cast<uint32_t>(size));
     }
+    builder_->Sem().Add(
+        expr, builder_->create<semantic::Swizzle>(expr, ret, current_statement_,
+                                                  std::move(swizzle)));
   } else {
     diagnostics_.add_error(
         "invalid use of member accessor on a non-vector/non-struct " +
@@ -1265,9 +1275,6 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     return false;
   }
 
-  builder_->Sem().Add(expr,
-                      builder_->create<semantic::MemberAccessorExpression>(
-                          expr, ret, current_statement_, std::move(swizzle)));
   SetType(expr, ret);
 
   return true;
@@ -1682,7 +1689,8 @@ void Resolver::CreateSemanticNodes() const {
     auto* info = it.second;
 
     auto* sem_func = builder_->create<semantic::Function>(
-        info->declaration, remap_vars(info->referenced_module_vars),
+        info->declaration, remap_vars(info->parameters),
+        remap_vars(info->referenced_module_vars),
         remap_vars(info->local_referenced_module_vars), info->return_statements,
         ancestor_entry_points[func->symbol()]);
     func_info_to_sem_func.emplace(info, sem_func);

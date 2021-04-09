@@ -106,6 +106,7 @@ class Resolver {
     ~FunctionInfo();
 
     ast::Function* const declaration;
+    std::vector<VariableInfo*> parameters;
     UniqueVector<VariableInfo*> referenced_module_vars;
     UniqueVector<VariableInfo*> local_referenced_module_vars;
     std::vector<const ast::ReturnStatement*> return_statements;

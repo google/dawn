@@ -2246,7 +2246,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& pre,
   out << ".";
 
   // Swizzles output the name directly
-  if (builder_.Sem().Get(expr)->IsSwizzle()) {
+  if (builder_.Sem().Get(expr)->Is<semantic::Swizzle>()) {
     out << builder_.Symbols().NameFor(expr->member()->symbol());
   } else if (!EmitExpression(pre, out, expr->member())) {
     return false;

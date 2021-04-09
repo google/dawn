@@ -20,7 +20,17 @@
 #include "src/semantic/expression.h"
 
 namespace tint {
+
+/// Forward declarations
+namespace ast {
+class MemberAccessorExpression;
+}  // namespace ast
+
 namespace semantic {
+
+/// Forward declarations
+class Struct;
+class StructMember;
 
 /// MemberAccessorExpression holds the semantic information for a
 /// ast::MemberAccessorExpression node.
@@ -31,24 +41,60 @@ class MemberAccessorExpression
   /// @param declaration the AST node
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
-  /// @param swizzle if this member access is for a vector swizzle, the swizzle
-  /// indices
-  MemberAccessorExpression(ast::Expression* declaration,
+  MemberAccessorExpression(ast::MemberAccessorExpression* declaration,
                            type::Type* type,
-                           Statement* statement,
-                           std::vector<uint32_t> swizzle);
+                           Statement* statement);
 
   /// Destructor
   ~MemberAccessorExpression() override;
+};
 
-  /// @return true if this member access is for a vector swizzle
-  bool IsSwizzle() const { return !swizzle_.empty(); }
+/// StructMemberAccess holds the semantic information for a
+/// ast::MemberAccessorExpression node that represents an access to a structure
+/// member.
+class StructMemberAccess
+    : public Castable<StructMemberAccess, MemberAccessorExpression> {
+ public:
+  /// Constructor
+  /// @param declaration the AST node
+  /// @param type the resolved type of the expression
+  /// @param member the structure member
+  StructMemberAccess(ast::MemberAccessorExpression* declaration,
+                     type::Type* type,
+                     Statement* statement,
+                     const StructMember* member);
 
-  /// @return the swizzle indices, if this is a vector swizzle
-  const std::vector<uint32_t>& Swizzle() const { return swizzle_; }
+  /// Destructor
+  ~StructMemberAccess() override;
+
+  /// @returns the structure member
+  StructMember const* Member() const { return member_; }
 
  private:
-  std::vector<uint32_t> const swizzle_;
+  StructMember const* const member_;
+};
+
+/// Swizzle holds the semantic information for a ast::MemberAccessorExpression
+/// node that represents a vector swizzle.
+class Swizzle : public Castable<Swizzle, MemberAccessorExpression> {
+ public:
+  /// Constructor
+  /// @param declaration the AST node
+  /// @param type the resolved type of the expression
+  /// @param indices the swizzle indices
+  Swizzle(ast::MemberAccessorExpression* declaration,
+          type::Type* type,
+          Statement* statement,
+          std::vector<uint32_t> indices);
+
+  /// Destructor
+  ~Swizzle() override;
+
+  /// @return the swizzle indices, if this is a vector swizzle
+  const std::vector<uint32_t>& Indices() const { return indices_; }
+
+ private:
+  std::vector<uint32_t> const indices_;
 };
 
 }  // namespace semantic

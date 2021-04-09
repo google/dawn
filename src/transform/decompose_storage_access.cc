@@ -644,27 +644,12 @@ Transform::Output DecomposeStorageAccess::Run(const Program* in,
     if (auto* accessor = node->As<ast::MemberAccessorExpression>()) {
       // X.Y
       auto* accessor_sem = sem.Get(accessor);
-      auto swizzle = accessor_sem->Swizzle();
-      switch (swizzle.size()) {
-        case 0: {
-          if (auto access = state.TakeAccess(accessor->structure())) {
-            auto* str_ty = access.type->As<type::Struct>();
-            auto* member =
-                sem.Get(str_ty)->FindMember(accessor->member()->symbol());
-            auto offset = member->Offset();
-            state.AddAccesss(
-                accessor, {
-                              access.var,
-                              Add(std::move(access.offset), std::move(offset)),
-                              member->Declaration()->type()->UnwrapAll(),
-                          });
-          }
-          break;
-        }
-        case 1: {
+      if (auto* swizzle = accessor_sem->As<semantic::Swizzle>()) {
+        if (swizzle->Indices().size() == 1) {
           if (auto access = state.TakeAccess(accessor->structure())) {
             auto* vec_ty = access.type->As<type::Vector>();
-            auto offset = Mul(ScalarSize(vec_ty->type()), swizzle[0]);
+            auto offset =
+                Mul(ScalarSize(vec_ty->type()), swizzle->Indices()[0]);
             state.AddAccesss(
                 accessor, {
                               access.var,
@@ -672,7 +657,19 @@ Transform::Output DecomposeStorageAccess::Run(const Program* in,
                               vec_ty->type()->UnwrapAll(),
                           });
           }
-          break;
+        }
+      } else {
+        if (auto access = state.TakeAccess(accessor->structure())) {
+          auto* str_ty = access.type->As<type::Struct>();
+          auto* member =
+              sem.Get(str_ty)->FindMember(accessor->member()->symbol());
+          auto offset = member->Offset();
+          state.AddAccesss(accessor,
+                           {
+                               access.var,
+                               Add(std::move(access.offset), std::move(offset)),
+                               member->Declaration()->type()->UnwrapAll(),
+                           });
         }
       }
       continue;

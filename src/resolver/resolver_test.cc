@@ -736,6 +736,32 @@ TEST_F(ResolverTest, Expr_Identifier_Unknown) {
   EXPECT_FALSE(r()->Resolve());
 }
 
+TEST_F(ResolverTest, Function_Parameters) {
+  auto* param_a = Param("a", ty.f32());
+  auto* param_b = Param("b", ty.i32());
+  auto* param_c = Param("c", ty.u32());
+
+  auto* func = Func("my_func",
+                    ast::VariableList{
+                        param_a,
+                        param_b,
+                        param_c,
+                    },
+                    ty.void_(), {});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+  EXPECT_EQ(func_sem->Parameters().size(), 3u);
+  EXPECT_EQ(func_sem->Parameters()[0]->Type(), ty.f32());
+  EXPECT_EQ(func_sem->Parameters()[1]->Type(), ty.i32());
+  EXPECT_EQ(func_sem->Parameters()[2]->Type(), ty.u32());
+  EXPECT_EQ(func_sem->Parameters()[0]->Declaration(), param_a);
+  EXPECT_EQ(func_sem->Parameters()[1]->Declaration(), param_b);
+  EXPECT_EQ(func_sem->Parameters()[2]->Declaration(), param_c);
+}
+
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
@@ -757,6 +783,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
+  EXPECT_EQ(func_sem->Parameters().size(), 0u);
 
   const auto& vars = func_sem->ReferencedModuleVariables();
   ASSERT_EQ(vars.size(), 5u);
@@ -794,6 +821,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
 
   auto* func2_sem = Sem().Get(func2);
   ASSERT_NE(func2_sem, nullptr);
+  EXPECT_EQ(func2_sem->Parameters().size(), 0u);
 
   const auto& vars = func2_sem->ReferencedModuleVariables();
   ASSERT_EQ(vars.size(), 5u);
@@ -842,6 +870,7 @@ TEST_F(ResolverTest, Function_ReturnStatements) {
 
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
+  EXPECT_EQ(func_sem->Parameters().size(), 0u);
 
   EXPECT_EQ(func_sem->ReturnStatements().size(), 2u);
   EXPECT_EQ(func_sem->ReturnStatements()[0], ret_1);
@@ -867,6 +896,14 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 
   auto* ptr = TypeOf(mem)->As<type::Pointer>();
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
+  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::StructMemberAccess>());
+  EXPECT_EQ(Sem()
+                .Get(mem)
+                ->As<semantic::StructMemberAccess>()
+                ->Member()
+                ->Declaration()
+                ->symbol(),
+            Symbols().Get("second_member"));
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
@@ -889,6 +926,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
 
   auto* ptr = TypeOf(mem)->As<type::Pointer>();
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
+  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::StructMemberAccess>());
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
@@ -903,7 +941,9 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(mem)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(mem)->As<type::Vector>()->size(), 4u);
-  EXPECT_THAT(Sem().Get(mem)->Swizzle(), ElementsAre(0, 2, 1, 3));
+  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::Swizzle>());
+  EXPECT_THAT(Sem().Get(mem)->As<semantic::Swizzle>()->Indices(),
+              ElementsAre(0, 2, 1, 3));
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
@@ -919,7 +959,9 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
 
   auto* ptr = TypeOf(mem)->As<type::Pointer>();
   ASSERT_TRUE(ptr->type()->Is<type::F32>());
-  EXPECT_THAT(Sem().Get(mem)->Swizzle(), ElementsAre(2));
+  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::Swizzle>());
+  EXPECT_THAT(Sem().Get(mem)->As<semantic::Swizzle>()->Indices(),
+              ElementsAre(2));
 }
 
 TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
@@ -971,6 +1013,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(mem)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(mem)->As<type::Vector>()->size(), 2u);
+  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::Swizzle>());
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
@@ -1501,6 +1544,10 @@ TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
   ASSERT_NE(func_c_sem, nullptr);
   ASSERT_NE(ep_1_sem, nullptr);
   ASSERT_NE(ep_2_sem, nullptr);
+
+  EXPECT_EQ(func_b_sem->Parameters().size(), 0u);
+  EXPECT_EQ(func_a_sem->Parameters().size(), 0u);
+  EXPECT_EQ(func_c_sem->Parameters().size(), 0u);
 
   const auto& b_eps = func_b_sem->AncestorEntryPoints();
   ASSERT_EQ(2u, b_eps.size());

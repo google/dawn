@@ -12,21 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/member_accessor_expression.h"
 #include "src/semantic/member_accessor_expression.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::semantic::MemberAccessorExpression);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::StructMemberAccess);
+TINT_INSTANTIATE_TYPEINFO(tint::semantic::Swizzle);
 
 namespace tint {
 namespace semantic {
 
 MemberAccessorExpression::MemberAccessorExpression(
-    ast::Expression* declaration,
+    ast::MemberAccessorExpression* declaration,
     type::Type* type,
-    Statement* statement,
-    std::vector<uint32_t> swizzle)
-    : Base(declaration, type, statement), swizzle_(std::move(swizzle)) {}
+    Statement* statement)
+    : Base(declaration, type, statement) {}
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
+
+StructMemberAccess::StructMemberAccess(
+    ast::MemberAccessorExpression* declaration,
+    type::Type* type,
+    Statement* statement,
+    const StructMember* member)
+    : Base(declaration, type, statement), member_(member) {}
+
+StructMemberAccess::~StructMemberAccess() = default;
+
+Swizzle::Swizzle(ast::MemberAccessorExpression* declaration,
+                 type::Type* type,
+                 Statement* statement,
+                 std::vector<uint32_t> indices)
+    : Base(declaration, type, statement), indices_(std::move(indices)) {}
+
+Swizzle::~Swizzle() = default;
 
 }  // namespace semantic
 }  // namespace tint

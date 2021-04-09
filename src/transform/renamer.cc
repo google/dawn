@@ -53,7 +53,7 @@ Transform::Output Renamer::Run(const Program* in, const DataMap&) {
             << "MemberAccessorExpression has no semantic info";
         continue;
       }
-      if (sem->IsSwizzle()) {
+      if (sem->Is<semantic::Swizzle>()) {
         preserve.emplace(member->member());
       }
     } else if (auto* call = node->As<ast::CallExpression>()) {
