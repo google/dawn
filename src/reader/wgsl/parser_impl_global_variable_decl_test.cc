@@ -20,7 +20,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
-  auto p = parser("var<out> a : f32");
+  auto p = parser("var<private> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -32,18 +32,18 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
 
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_TRUE(e->declared_type()->Is<type::F32>());
-  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kPrivate);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 10u);
+  EXPECT_EQ(e->source().range.begin.column, 14u);
   EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 11u);
+  EXPECT_EQ(e->source().range.end.column, 15u);
 
   ASSERT_EQ(e->constructor(), nullptr);
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
-  auto p = parser("var<out> a : f32 = 1.");
+  auto p = parser("var<private> a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -55,12 +55,12 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_TRUE(e->declared_type()->Is<type::F32>());
-  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kPrivate);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 10u);
+  EXPECT_EQ(e->source().range.begin.column, 14u);
   EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 11u);
+  EXPECT_EQ(e->source().range.end.column, 15u);
 
   ASSERT_NE(e->constructor(), nullptr);
   ASSERT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
-  auto p = parser("[[binding(2), group(1)]] var<out> a : f32");
+  auto p = parser("[[binding(2), group(1)]] var<uniform> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -81,12 +81,12 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   ASSERT_NE(e->declared_type(), nullptr);
   EXPECT_TRUE(e->declared_type()->Is<type::F32>());
-  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kUniform);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 35u);
+  EXPECT_EQ(e->source().range.begin.column, 39u);
   EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 36u);
+  EXPECT_EQ(e->source().range.end.column, 40u);
 
   ASSERT_EQ(e->constructor(), nullptr);
 
@@ -97,7 +97,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
-  auto p = parser("[[binding(2)]] [[group(1)]] var<out> a : f32");
+  auto p = parser("[[binding(2)]] [[group(1)]] var<uniform> a : f32");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -111,12 +111,12 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   ASSERT_NE(e->declared_type(), nullptr);
   EXPECT_TRUE(e->declared_type()->Is<type::F32>());
-  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kUniform);
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 38u);
+  EXPECT_EQ(e->source().range.begin.column, 42u);
   EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 39u);
+  EXPECT_EQ(e->source().range.end.column, 43u);
 
   ASSERT_EQ(e->constructor(), nullptr);
 
@@ -127,7 +127,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithDecoration_MulitpleGroups) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
-  auto p = parser("[[binding()]] var<out> a : f32");
+  auto p = parser("[[binding()]] var<uniform> a : f32");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -143,7 +143,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidDecoration) {
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
-  auto p = parser("var<out> a : f32 = if (a) {}");
+  auto p = parser("var<private> a : f32 = if (a) {}");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -152,7 +152,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:20: unable to parse constant literal");
+  EXPECT_EQ(p->error(), "1:24: unable to parse constant literal");
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
@@ -198,6 +198,48 @@ TEST_F(ParserImplTest, GlobalVariableDecl_TextureImplicitStorageClass) {
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("s"));
   EXPECT_TRUE(e->declared_type()->UnwrapAll()->Is<type::Texture>());
   EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kUniformConstant);
+}
+
+TEST_F(ParserImplTest, GlobalVariableDecl_StorageClassIn_Deprecated) {
+  auto p = parser("[[location(0)]] var<in> a : f32");
+  auto f = p->function_header();
+  auto decos = p->decoration_list();
+  EXPECT_FALSE(decos.errored);
+  EXPECT_TRUE(decos.matched);
+  auto e = p->global_variable_decl(decos.value);
+  ASSERT_FALSE(p->has_error()) << p->error();
+
+  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
+  EXPECT_TRUE(e->declared_type()->Is<type::F32>());
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kInput);
+
+  EXPECT_EQ(
+      p->builder().Diagnostics().str(),
+      R"(test.wgsl:1:21 warning: use of deprecated language feature: use an entry point parameter instead of a variable in the `in` storage class
+[[location(0)]] var<in> a : f32
+                    ^^
+)");
+}
+
+TEST_F(ParserImplTest, GlobalVariableDecl_StorageClassOut_Deprecated) {
+  auto p = parser("[[location(0)]] var<out> a : f32");
+  auto f = p->function_header();
+  auto decos = p->decoration_list();
+  EXPECT_FALSE(decos.errored);
+  EXPECT_TRUE(decos.matched);
+  auto e = p->global_variable_decl(decos.value);
+  ASSERT_FALSE(p->has_error()) << p->error();
+
+  EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
+  EXPECT_TRUE(e->declared_type()->Is<type::F32>());
+  EXPECT_EQ(e->declared_storage_class(), ast::StorageClass::kOutput);
+
+  EXPECT_EQ(
+      p->builder().Diagnostics().str(),
+      R"(test.wgsl:1:21 warning: use of deprecated language feature: use an entry point return value instead of a variable in the `out` storage class
+[[location(0)]] var<out> a : f32
+                    ^^^
+)");
 }
 
 }  // namespace

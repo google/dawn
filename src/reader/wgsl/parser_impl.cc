@@ -461,8 +461,21 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
   auto explicit_sc = variable_storage_decoration();
   if (explicit_sc.errored)
     return Failure::kErrored;
-  if (explicit_sc.matched)
+  if (explicit_sc.matched) {
     sc = explicit_sc.value;
+
+    // TODO(crbug.com/tint/697): Remove this.
+    if (sc == ast::StorageClass::kInput) {
+      deprecated(explicit_sc.source,
+                 "use an entry point parameter instead of a variable in the "
+                 "`in` storage class");
+    }
+    if (sc == ast::StorageClass::kOutput) {
+      deprecated(explicit_sc.source,
+                 "use an entry point return value instead of a variable in the "
+                 "`out` storage class");
+    }
+  }
 
   auto decl = expect_variable_ident_decl("variable declaration");
   if (decl.errored)

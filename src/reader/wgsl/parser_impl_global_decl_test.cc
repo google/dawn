@@ -26,7 +26,7 @@ TEST_F(ParserImplTest, GlobalDecl_Semicolon) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
-  auto p = parser("var<out> a : vec2<i32> = vec2<i32>(1, 2);");
+  auto p = parser("var<private> a : vec2<i32> = vec2<i32>(1, 2);");
   p->expect_global_decl();
   ASSERT_FALSE(p->has_error()) << p->error();
 
@@ -38,17 +38,17 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Invalid) {
-  auto p = parser("var<out> a : vec2<invalid>;");
+  auto p = parser("var<private> a : vec2<invalid>;");
   p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:19: unknown constructed type 'invalid'");
+  EXPECT_EQ(p->error(), "1:23: unknown constructed type 'invalid'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
-  auto p = parser("var<out> a : vec2<i32>");
+  auto p = parser("var<private> a : vec2<i32>");
   p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:23: expected ';' for variable declaration");
+  EXPECT_EQ(p->error(), "1:27: expected ';' for variable declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
