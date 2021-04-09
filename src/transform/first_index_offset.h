@@ -15,9 +15,6 @@
 #ifndef SRC_TRANSFORM_FIRST_INDEX_OFFSET_H_
 #define SRC_TRANSFORM_FIRST_INDEX_OFFSET_H_
 
-#include <string>
-
-#include "src/ast/variable_decl_statement.h"
 #include "src/transform/transform.h"
 
 namespace tint {
@@ -60,6 +57,27 @@ namespace transform {
 ///
 class FirstIndexOffset : public Transform {
  public:
+  /// BindingPoint is consumed by the FirstIndexOffset transform.
+  /// BindingPoint specifies the binding point of the first index uniform
+  /// buffer.
+  struct BindingPoint : public Castable<BindingPoint, transform::Data> {
+    /// Constructor
+    BindingPoint();
+
+    /// Constructor
+    /// @param b the binding index
+    /// @param g the binding group
+    BindingPoint(uint32_t b, uint32_t g);
+
+    /// Destructor
+    ~BindingPoint() override;
+
+    /// [[binding()]] for the first vertex / first instance uniform buffer
+    uint32_t binding = 0;
+    /// [[group()]] for the first vertex / first instance uniform buffer
+    uint32_t group = 0;
+  };
+
   /// Data is outputted by the FirstIndexOffset transform.
   /// Data holds information about shader usage and constant buffer offsets.
   struct Data : public Castable<Data, transform::Data> {
@@ -90,6 +108,9 @@ class FirstIndexOffset : public Transform {
   };
 
   /// Constructor
+  FirstIndexOffset();
+  /// Constructor
+  /// [DEPRECATED] - pass BindingPoint as part of the `data` to Run()
   /// @param binding the binding() for firstVertex/Instance uniform
   /// @param group the group() for firstVertex/Instance uniform
   FirstIndexOffset(uint32_t binding, uint32_t group);
@@ -102,32 +123,10 @@ class FirstIndexOffset : public Transform {
   Output Run(const Program* program, const DataMap& data = {}) override;
 
  private:
-  struct State {
-    /// Adds uniform buffer with firstVertex/Instance to the program builder
-    /// @returns variable of new uniform buffer
-    ast::Variable* AddUniformBuffer();
-    /// Adds constant with modified original_name builtin to func
-    /// @param original_name the name of the original builtin used in function
-    /// @param field_name name of field in firstVertex/Instance buffer
-    /// @param buffer_var variable of firstVertex/Instance buffer
-    ast::VariableDeclStatement* CreateFirstIndexOffset(
-        const std::string& original_name,
-        const std::string& field_name,
-        ast::Variable* buffer_var);
-
-    ProgramBuilder* const dst;
-    uint32_t const binding;
-    uint32_t const group;
-
-    bool has_vertex_index = false;
-    bool has_instance_index = false;
-    uint32_t vertex_index_offset = 0;
-    uint32_t instance_index_offset = 0;
-  };
-
-  uint32_t binding_;
-  uint32_t group_;
+  uint32_t binding_ = 0;
+  uint32_t group_ = 0;
 };
+
 }  // namespace transform
 }  // namespace tint
 

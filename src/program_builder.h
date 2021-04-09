@@ -445,9 +445,10 @@ class ProgramBuilder {
     /// @param name the alias name
     /// @param type the alias type
     /// @returns the alias pointer
-    type::Alias* alias(const std::string& name, type::Type* type) const {
-      return builder->create<type::Alias>(builder->Symbols().Register(name),
-                                          type);
+    template <typename NAME>
+    type::Alias* alias(NAME&& name, type::Type* type) const {
+      return builder->create<type::Alias>(
+          builder->Sym(std::forward<NAME>(name)), type);
     }
 
     /// @return the tint AST pointer to `type` with the given ast::StorageClass
@@ -469,9 +470,10 @@ class ProgramBuilder {
     /// @param name the struct name
     /// @param impl the struct implementation
     /// @returns a struct pointer
-    type::Struct* struct_(const std::string& name, ast::Struct* impl) const {
-      return builder->create<type::Struct>(builder->Symbols().Register(name),
-                                           impl);
+    template <typename NAME>
+    type::Struct* struct_(NAME&& name, ast::Struct* impl) const {
+      return builder->create<type::Struct>(
+          builder->Sym(std::forward<NAME>(name)), impl);
     }
 
    private:
@@ -1075,13 +1077,14 @@ class ProgramBuilder {
   /// @param members the struct members
   /// @param decorations the optional struct decorations
   /// @returns the struct type
+  template <typename NAME>
   type::Struct* Structure(const Source& source,
-                          const std::string& name,
+                          NAME&& name,
                           ast::StructMemberList members,
                           ast::DecorationList decorations = {}) {
     auto* impl =
         create<ast::Struct>(source, std::move(members), std::move(decorations));
-    auto* type = ty.struct_(name, impl);
+    auto* type = ty.struct_(Sym(std::forward<NAME>(name)), impl);
     AST().AddConstructedType(type);
     return type;
   }
@@ -1092,12 +1095,13 @@ class ProgramBuilder {
   /// @param members the struct members
   /// @param decorations the optional struct decorations
   /// @returns the struct type
-  type::Struct* Structure(const std::string& name,
+  template <typename NAME>
+  type::Struct* Structure(NAME&& name,
                           ast::StructMemberList members,
                           ast::DecorationList decorations = {}) {
     auto* impl =
         create<ast::Struct>(std::move(members), std::move(decorations));
-    auto* type = ty.struct_(name, impl);
+    auto* type = ty.struct_(Sym(std::forward<NAME>(name)), impl);
     AST().AddConstructedType(type);
     return type;
   }
