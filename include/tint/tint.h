@@ -32,7 +32,6 @@
 #include "src/transform/renamer.h"
 #include "src/transform/vertex_pulling.h"
 #include "src/type/type_manager.h"
-#include "src/validator/validator.h"
 #include "src/writer/writer.h"
 
 #if TINT_BUILD_SPV_READER
