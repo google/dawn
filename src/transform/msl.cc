@@ -23,6 +23,7 @@
 namespace tint {
 namespace transform {
 namespace {
+// This list is used for a binary search and must be kept in sorted order.
 const char* kReservedKeywords[] = {"access",
                                    "alignas",
                                    "alignof",

@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
 namespace writer {
 namespace hlsl {
 namespace {
+
+using ::testing::HasSubstr;
 
 using HlslGeneratorImplTest_Alias = TestHelper;
 
@@ -32,13 +35,13 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
-  auto* alias = ty.alias("float", ty.f32());
+  AST().AddConstructedType(ty.alias("float", ty.f32()));
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.EmitConstructedType(out, alias)) << gen.error();
-  EXPECT_EQ(result(), R"(typedef float float_tint_0;
-)");
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(R"(typedef float _tint_float;
+)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {

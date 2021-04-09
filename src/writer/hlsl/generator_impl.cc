@@ -176,14 +176,18 @@ void GeneratorImpl::register_global(ast::Variable* global) {
 }
 
 std::string GeneratorImpl::generate_name(const std::string& prefix) {
-  std::string name = prefix;
-  uint32_t i = 0;
-  while (namer_.IsMapped(name) || namer_.IsRemapped(name)) {
-    name = prefix + "_" + std::to_string(i);
-    ++i;
+  if (!builder_.Symbols().Get(prefix).IsValid()) {
+    builder_.Symbols().Register(prefix);
+    return prefix;
   }
-  namer_.RegisterRemappedName(name);
-  return name;
+  for (uint32_t i = 0;; i++) {
+    std::string name = prefix + "_" + std::to_string(i);
+    if (builder_.Symbols().Get(name).IsValid()) {
+      continue;
+    }
+    builder_.Symbols().Register(name);
+    return name;
+  }
 }
 
 std::string GeneratorImpl::current_ep_var_name(VarType type) {
@@ -225,8 +229,8 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     if (!EmitType(out, alias->type(), ast::StorageClass::kNone, "")) {
       return false;
     }
-    out << " " << namer_.NameFor(builder_.Symbols().NameFor(alias->symbol()))
-        << ";" << std::endl;
+    out << " " << builder_.Symbols().NameFor(alias->symbol()) << ";"
+        << std::endl;
   } else if (auto* str = ty->As<type::Struct>()) {
     if (!EmitStructType(out, str, builder_.Symbols().NameFor(str->symbol()))) {
       return false;
@@ -1428,7 +1432,7 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
     }
   }
 
-  out << namer_.NameFor(builder_.Symbols().NameFor(ident->symbol()));
+  out << builder_.Symbols().NameFor(ident->symbol());
 
   return true;
 }
@@ -1604,8 +1608,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
                          builder_.Symbols().NameFor(ep_sym));
     ep_func_name_remapped_[ep_name + "_" + func_name] = name;
   } else {
-    // TODO(dsinclair): this should be updated to a remapped name
-    name = namer_.NameFor(builder_.Symbols().NameFor(func->symbol()));
+    name = builder_.Symbols().NameFor(func->symbol());
   }
 
   out << name << "(";
@@ -1905,7 +1908,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (!EmitType(out, var->Type(), var->StorageClass(), "")) {
         return false;
       }
-      out << " " << namer_.NameFor(builder_.Symbols().NameFor(decl->symbol()));
+      out << " " << builder_.Symbols().NameFor(decl->symbol());
 
       const char* register_space = nullptr;
 
@@ -2003,8 +2006,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
     out << func->return_type()->FriendlyName(builder_.Symbols());
   }
   // TODO(dsinclair): This should output the remapped name
-  out << " " << namer_.NameFor(builder_.Symbols().NameFor(current_ep_sym_))
-      << "(";
+  out << " " << builder_.Symbols().NameFor(current_ep_sym_) << "(";
 
   bool first = true;
   // TODO(crbug.com/tint/697): Remove this.
@@ -2144,8 +2146,8 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, type::Type* type) {
 bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
   loop_emission_counter_++;
 
-  std::string guard = namer_.NameFor("tint_hlsl_is_first_" +
-                                     std::to_string(loop_emission_counter_));
+  std::string guard = generate_name("tint_hlsl_is_first_" +
+                                    std::to_string(loop_emission_counter_));
 
   if (stmt->has_continuing()) {
     make_indent(out);
@@ -2385,7 +2387,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   }
 
   if (auto* alias = type->As<type::Alias>()) {
-    out << namer_.NameFor(builder_.Symbols().NameFor(alias->symbol()));
+    out << builder_.Symbols().NameFor(alias->symbol());
   } else if (auto* ary = type->As<type::Array>()) {
     type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
@@ -2403,7 +2405,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       return false;
     }
     if (!name.empty()) {
-      out << " " << namer_.NameFor(name);
+      out << " " << name;
     }
     for (uint32_t size : sizes) {
       out << "[" << size << "]";
@@ -2557,7 +2559,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
     }
     // Array member name will be output with the type
     if (!mem->type()->Is<type::Array>()) {
-      out << " " << namer_.NameFor(builder_.Symbols().NameFor(mem->symbol()));
+      out << " " << builder_.Symbols().NameFor(mem->symbol());
     }
 
     for (auto* deco : mem->decorations()) {

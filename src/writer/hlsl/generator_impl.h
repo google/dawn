@@ -31,7 +31,6 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
-#include "src/writer/hlsl/namer.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -358,9 +357,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if an input or output struct is required.
   bool has_referenced_var_needing_struct(const semantic::Function* func);
 
-  /// @returns the namer for testing
-  Namer* namer_for_testing() { return &namer_; }
-
   /// Generate a unique name
   /// @param prefix the name prefix
   /// @returns a unique name
@@ -383,7 +379,6 @@ class GeneratorImpl : public TextGenerator {
     return builder_.TypeOf(expr);
   }
 
-  Namer namer_;
   ProgramBuilder builder_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;

@@ -42,16 +42,6 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
   EXPECT_EQ(result(), "alias");
 }
 
-TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias_NameCollision) {
-  auto* alias = ty.alias("bool", ty.f32());
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(out, alias, ast::StorageClass::kNone, ""))
-      << gen.error();
-  EXPECT_EQ(result(), "bool_tint_0");
-}
-
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
   auto* arr = ty.array<bool, 4>();
 
@@ -94,16 +84,6 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
   EXPECT_EQ(result(), "bool ary[6][5][4]");
 }
 
-TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_NameCollision) {
-  auto* arr = ty.array<bool, 4>();
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(out, arr, ast::StorageClass::kNone, "bool"))
-      << gen.error();
-  EXPECT_EQ(result(), "bool bool_tint_0[4]");
-}
-
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
   auto* arr = ty.array<bool, 4>();
 
@@ -122,17 +102,6 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
   ASSERT_TRUE(gen.EmitType(out, arr, ast::StorageClass::kNone, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[]");
-}
-
-TEST_F(HlslGeneratorImplTest_Type,
-       DISABLED_EmitType_RuntimeArray_NameCollision) {
-  auto* arr = ty.array<bool>();
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(out, arr, ast::StorageClass::kNone, "double"))
-      << gen.error();
-  EXPECT_EQ(result(), "bool double_tint_0[]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
@@ -263,14 +232,14 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
                            });
   Global("g", s, ast::StorageClass::kPrivate);
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
-  ASSERT_TRUE(gen.EmitStructType(out, s, "S")) << gen.error();
-  EXPECT_EQ(result(), R"(struct S {
-  int double_tint_0;
-  float float_tint_0;
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(R"(struct S {
+  int _tint_double;
+  float _tint_float;
 };
-)");
+)"));
 }
 
 // TODO(dsinclair): How to translate [[block]]

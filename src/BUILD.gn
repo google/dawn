@@ -646,8 +646,6 @@ source_set("libtint_hlsl_writer_src") {
     "writer/hlsl/generator.h",
     "writer/hlsl/generator_impl.cc",
     "writer/hlsl/generator_impl.h",
-    "writer/hlsl/namer.cc",
-    "writer/hlsl/namer.h",
   ]
 
   configs += [ ":tint_common_config" ]

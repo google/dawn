@@ -41,23 +41,15 @@ TEST_F(HlslGeneratorImplTest, InputStructName) {
 }
 
 TEST_F(HlslGeneratorImplTest, InputStructName_ConflictWithExisting) {
-  // Register the struct name as existing.
+  Symbols().Register("func_main_out_1");
+  Symbols().Register("func_main_out_2");
+
   GeneratorImpl& gen = Build();
 
-  auto* namer = gen.namer_for_testing();
-  namer->NameFor("func_main_out");
-
+  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out");
   ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_0");
-}
-
-TEST_F(HlslGeneratorImplTest, NameConflictWith_InputStructName) {
-  auto* expr = Expr("func_main_in");
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_EQ(gen.generate_name("func_main_in"), "func_main_in");
-  ASSERT_TRUE(gen.EmitIdentifier(pre, out, expr));
-  EXPECT_EQ(result(), "func_main_in_0");
+  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_3");
+  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_4");
 }
 
 struct HlslBuiltinData {

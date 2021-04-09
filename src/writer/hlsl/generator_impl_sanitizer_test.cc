@@ -62,10 +62,10 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
 ByteAddressBuffer sb : register(t0, space1);
 
 void main() {
-  uint tint_symbol_9 = 0u;
-  sb.GetDimensions(tint_symbol_9);
-  const uint tint_symbol_10 = ((tint_symbol_9 - 16u) / 16u);
-  uint len = tint_symbol_10;
+  uint tint_symbol_7 = 0u;
+  sb.GetDimensions(tint_symbol_7);
+  const uint tint_symbol_9 = ((tint_symbol_7 - 16u) / 16u);
+  uint len = tint_symbol_9;
   return;
 }
 
