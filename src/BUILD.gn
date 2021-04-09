@@ -405,6 +405,8 @@ source_set("libtint_core_src") {
     "transform/bound_array_accessors.h",
     "transform/canonicalize_entry_point_io.cc",
     "transform/canonicalize_entry_point_io.h",
+    "transform/decompose_storage_access.cc",
+    "transform/decompose_storage_access.h",
     "transform/emit_vertex_point_size.cc",
     "transform/emit_vertex_point_size.h",
     "transform/first_index_offset.cc",
