@@ -23,6 +23,9 @@ namespace ast {
 /// The unary op
 enum class UnaryOp { kNegation = 0, kNot };
 
+/// @param out the std::ostream to write to
+/// @param mod the UnaryOp
+/// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, UnaryOp mod);
 
 }  // namespace ast

@@ -23,6 +23,9 @@ namespace ast {
 /// The pipeline stage
 enum class PipelineStage { kNone = -1, kVertex, kFragment, kCompute };
 
+/// @param out the std::ostream to write to
+/// @param stage the PipelineStage
+/// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, PipelineStage stage);
 
 }  // namespace ast

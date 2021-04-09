@@ -30,6 +30,9 @@ enum class AccessControl {
   kReadWrite
 };
 
+/// @param out the std::ostream to write to
+/// @param access the AccessControl
+/// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, AccessControl access);
 
 }  // namespace ast

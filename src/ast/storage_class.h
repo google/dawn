@@ -35,11 +35,15 @@ enum class StorageClass {
 };
 
 /// @returns true if the StorageClass is host-shareable
+/// @param sc the StorageClass
 /// @see https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable
 inline bool IsHostShareable(StorageClass sc) {
   return sc == ast::StorageClass::kUniform || sc == ast::StorageClass::kStorage;
 }
 
+/// @param out the std::ostream to write to
+/// @param sc the StorageClass
+/// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, StorageClass sc);
 
 }  // namespace ast

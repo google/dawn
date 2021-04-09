@@ -41,6 +41,9 @@ enum class Builtin {
   kPointSize,
 };
 
+/// @param out the std::ostream to write to
+/// @param builtin the Builtin
+/// @return the std::ostream so calls can be chained
 std::ostream& operator<<(std::ostream& out, Builtin builtin);
 
 }  // namespace ast

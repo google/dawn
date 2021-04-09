@@ -787,7 +787,6 @@ WARN_LOGFILE           =
 
 INPUT                  = README.md  \
                          CODE_OF_CONDUCT.md \
-                         CONTRIBUTING.md \
                          src
 
 # This tag can be used to specify the character encoding of the source files

@@ -182,6 +182,8 @@ inline bool BinaryExpression::IsBitshift() const {
   }
 }
 
+/// @returns the human readable name of the given BinaryOp
+/// @param op the BinaryOp
 constexpr const char* FriendlyName(BinaryOp op) {
   switch (op) {
     case BinaryOp::kNone:
@@ -226,6 +228,9 @@ constexpr const char* FriendlyName(BinaryOp op) {
   return "INVALID";
 }
 
+/// @param out the std::ostream to write to
+/// @param op the BinaryOp
+/// @return the std::ostream so calls can be chained
 inline std::ostream& operator<<(std::ostream& out, BinaryOp op) {
   out << FriendlyName(op);
   return out;

@@ -21,11 +21,14 @@
 namespace tint {
 namespace ast {
 
-/// Helper class for testing
+/// Helper base class for testing
 template <typename BASE>
 class TestHelperBase : public BASE, public ProgramBuilder {};
+
+/// Helper class for testing that derives from testing::Test.
 using TestHelper = TestHelperBase<testing::Test>;
 
+/// Helper class for testing that derives from `T`.
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
