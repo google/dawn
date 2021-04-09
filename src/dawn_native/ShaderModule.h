@@ -55,6 +55,9 @@ namespace dawn_native {
     using EntryPointMetadataTable =
         std::unordered_map<std::string, std::unique_ptr<EntryPointMetadata>>;
 
+    // Source for a tint program
+    class TintSource;
+
     struct ShaderModuleParseResult {
         ShaderModuleParseResult();
         ~ShaderModuleParseResult();
@@ -64,6 +67,7 @@ namespace dawn_native {
         bool HasParsedShader() const;
 
         std::unique_ptr<tint::Program> tintProgram;
+        std::unique_ptr<TintSource> tintSource;
         std::vector<uint32_t> spirv;
         std::unique_ptr<OwnedCompilationMessages> compilationMessages;
     };

@@ -1047,6 +1047,17 @@ namespace dawn_native {
         return tintProgram != nullptr || spirv.size() > 0;
     }
 
+    // TintSource is a PIMPL container for a tint::Source::File, which needs to be kept alive for as
+    // long as tint diagnostics are inspected.
+    class TintSource {
+      public:
+        template <typename... ARGS>
+        TintSource(ARGS&&... args) : file(std::forward<ARGS>(args)...) {
+        }
+
+        tint::Source::File file;
+    };
+
     MaybeError ValidateShaderModuleDescriptor(DeviceBase* device,
                                               const ShaderModuleDescriptor* descriptor,
                                               ShaderModuleParseResult* parseResult) {
@@ -1088,13 +1099,14 @@ namespace dawn_native {
                 const auto* wgslDesc =
                     static_cast<const ShaderModuleWGSLDescriptor*>(chainedDescriptor);
 
-                tint::Source::File file("", wgslDesc->source);
+                auto tintSource = std::make_unique<TintSource>("", wgslDesc->source);
 
                 tint::Program program;
-                DAWN_TRY_ASSIGN(program, ParseWGSL(&file, outMessages));
+                DAWN_TRY_ASSIGN(program, ParseWGSL(&tintSource->file, outMessages));
 
                 if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
                     parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
+                    parseResult->tintSource = std::move(tintSource);
                 } else {
                     tint::transform::Manager transformManager;
                     transformManager.append(
