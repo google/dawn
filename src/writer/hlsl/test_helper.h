@@ -20,9 +20,7 @@
 #include <utility>
 
 #include "gtest/gtest.h"
-#include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/hlsl.h"
-#include "src/transform/manager.h"
 #include "src/writer/hlsl/generator_impl.h"
 
 namespace tint {
@@ -101,11 +99,7 @@ class TestHelperBase : public BODY, public ProgramBuilder {
           << formatter.format(program->Diagnostics());
     }();
 
-    tint::transform::Manager transform_manager;
-    transform_manager.append(
-        std::make_unique<tint::transform::CanonicalizeEntryPointIO>());
-    transform_manager.append(std::make_unique<tint::transform::Hlsl>());
-    auto result = transform_manager.Run(program.get());
+    auto result = transform::Hlsl().Run(program.get());
     [&]() {
       ASSERT_TRUE(result.program.IsValid())
           << formatter.format(result.program.Diagnostics());

@@ -23,6 +23,7 @@
 #include "src/semantic/statement.h"
 #include "src/semantic/variable.h"
 #include "src/transform/calculate_array_length.h"
+#include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/decompose_storage_access.h"
 #include "src/transform/manager.h"
 
@@ -34,6 +35,7 @@ Hlsl::~Hlsl() = default;
 
 Transform::Output Hlsl::Run(const Program* in, const DataMap& data) {
   Manager manager;
+  manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<DecomposeStorageAccess>();
   manager.Add<CalculateArrayLength>();
   auto out = manager.Run(in, data);

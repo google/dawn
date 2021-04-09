@@ -17,6 +17,8 @@
 #include <utility>
 
 #include "src/program_builder.h"
+#include "src/transform/canonicalize_entry_point_io.h"
+#include "src/transform/manager.h"
 
 namespace tint {
 namespace transform {
@@ -262,12 +264,19 @@ const char* kReservedKeywords[] = {"access",
 Msl::Msl() = default;
 Msl::~Msl() = default;
 
-Transform::Output Msl::Run(const Program* in, const DataMap&) {
-  ProgramBuilder out;
-  CloneContext ctx(&out, in);
+Transform::Output Msl::Run(const Program* in, const DataMap& data) {
+  Manager manager;
+  manager.Add<CanonicalizeEntryPointIO>();
+  auto out = manager.Run(in, data);
+  if (!out.program.IsValid()) {
+    return out;
+  }
+
+  ProgramBuilder builder;
+  CloneContext ctx(&builder, &out.program);
   RenameReservedKeywords(&ctx, kReservedKeywords);
   ctx.Clone();
-  return Output{Program(std::move(out))};
+  return Output{Program(std::move(builder))};
 }
 
 }  // namespace transform

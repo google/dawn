@@ -25,7 +25,6 @@
 #include "src/reader/reader.h"
 #include "src/transform/binding_remapper.h"
 #include "src/transform/bound_array_accessors.h"
-#include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/emit_vertex_point_size.h"
 #include "src/transform/first_index_offset.h"
 #include "src/transform/manager.h"
