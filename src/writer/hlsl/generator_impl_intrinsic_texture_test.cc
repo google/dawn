@@ -290,17 +290,17 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kSampleGradCubeArrayF32:
       return R"(_tint_texture.SampleGrad(_tint_sampler, float4(1.0f, 2.0f, 3.0f, float(4)), float3(5.0f, 6.0f, 7.0f), float3(8.0f, 9.0f, 10.0f)))";
     case ValidTextureOverload::kSampleCompareDepth2dF32:
-      return R"(_tint_texture.SampleCmp(_tint_sampler, float2(1.0f, 2.0f), 3.0f))";
+      return R"(_tint_texture.SampleCmpLevelZero(_tint_sampler, float2(1.0f, 2.0f), 3.0f))";
     case ValidTextureOverload::kSampleCompareDepth2dOffsetF32:
-      return R"(_tint_texture.SampleCmp(_tint_sampler, float2(1.0f, 2.0f), 3.0f, int2(4, 5)))";
+      return R"(_tint_texture.SampleCmpLevelZero(_tint_sampler, float2(1.0f, 2.0f), 3.0f, int2(4, 5)))";
     case ValidTextureOverload::kSampleCompareDepth2dArrayF32:
-      return R"(_tint_texture.SampleCmp(_tint_sampler, float3(1.0f, 2.0f, float(4)), 3.0f))";
+      return R"(_tint_texture.SampleCmpLevelZero(_tint_sampler, float3(1.0f, 2.0f, float(4)), 3.0f))";
     case ValidTextureOverload::kSampleCompareDepth2dArrayOffsetF32:
-      return R"(_tint_texture.SampleCmp(_tint_sampler, float3(1.0f, 2.0f, float(4)), 3.0f, int2(5, 6)))";
+      return R"(_tint_texture.SampleCmpLevelZero(_tint_sampler, float3(1.0f, 2.0f, float(4)), 3.0f, int2(5, 6)))";
     case ValidTextureOverload::kSampleCompareDepthCubeF32:
-      return R"(_tint_texture.SampleCmp(_tint_sampler, float3(1.0f, 2.0f, 3.0f), 4.0f))";
+      return R"(_tint_texture.SampleCmpLevelZero(_tint_sampler, float3(1.0f, 2.0f, 3.0f), 4.0f))";
     case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
-      return R"(_tint_texture.SampleCmp(_tint_sampler, float4(1.0f, 2.0f, 3.0f, float(4)), 5.0f))";
+      return R"(_tint_texture.SampleCmpLevelZero(_tint_sampler, float4(1.0f, 2.0f, 3.0f, float(4)), 5.0f))";
     case ValidTextureOverload::kLoad1dLevelF32:
       return R"(_tint_texture.Load(int2(1, 0), 3))";
     case ValidTextureOverload::kLoad1dLevelU32:
