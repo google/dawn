@@ -94,6 +94,22 @@ namespace {
             externalDesc.format = kUnsupportedFormat;
             ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
         }
+
+        // Creating an external texture with an error texture view should fail.
+        {
+            wgpu::Texture internalTexture = device.CreateTexture(&textureDescriptor);
+            wgpu::TextureViewDescriptor errorViewDescriptor;
+            errorViewDescriptor.format = kDefaultTextureFormat;
+            errorViewDescriptor.dimension = wgpu::TextureViewDimension::e2D;
+            errorViewDescriptor.mipLevelCount = 1;
+            errorViewDescriptor.arrayLayerCount = 2;
+            ASSERT_DEVICE_ERROR(wgpu::TextureView errorTextureView =
+                                    internalTexture.CreateView(&errorViewDescriptor));
+
+            externalDesc.plane0 = errorTextureView;
+            externalDesc.format = kDefaultTextureFormat;
+            ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
+        }
     }
 
 }  // namespace

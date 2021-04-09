@@ -55,6 +55,8 @@ namespace dawn_native {
         ASSERT(descriptor);
         ASSERT(descriptor->plane0);
 
+        DAWN_TRY(device->ValidateObject(descriptor->plane0));
+
         const Format* format;
         DAWN_TRY_ASSIGN(format, device->GetInternalFormat(descriptor->format));
 
