@@ -170,21 +170,6 @@ Function::VariableBindings Function::ReferencedDepthTextureVariables() const {
   return ret;
 }
 
-std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
-Function::LocalReferencedBuiltinVariables() const {
-  std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>> ret;
-
-  for (auto* var : LocalReferencedModuleVariables()) {
-    for (auto* deco : var->Declaration()->decorations()) {
-      if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        ret.push_back({var, builtin});
-        break;
-      }
-    }
-  }
-  return ret;
-}
-
 bool Function::HasAncestorEntryPoint(Symbol symbol) const {
   for (const auto& point : ancestor_entry_points_) {
     if (point == symbol) {

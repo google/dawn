@@ -136,11 +136,6 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns the referenced storage textures
   VariableBindings ReferencedDepthTextureVariables() const;
 
-  /// Retrieves any locally referenced builtin variables
-  /// @returns the <variable, decoration> pairs.
-  std::vector<std::pair<const Variable*, ast::BuiltinDecoration*>>
-  LocalReferencedBuiltinVariables() const;
-
   /// Checks if the given entry point is an ancestor
   /// @param sym the entry point symbol
   /// @returns true if `sym` is an ancestor entry point of this function
