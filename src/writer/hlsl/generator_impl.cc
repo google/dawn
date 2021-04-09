@@ -2442,24 +2442,26 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   } else if (auto* str = type->As<type::Struct>()) {
     out << builder_.Symbols().NameFor(str->symbol());
   } else if (auto* tex = type->As<type::Texture>()) {
-    if (tex->Is<type::StorageTexture>()) {
+    auto* storage = tex->As<type::StorageTexture>();
+    auto* multism = tex->As<type::MultisampledTexture>();
+    auto* sampled = tex->As<type::SampledTexture>();
+
+    if (storage) {
       if (access && !access->IsReadOnly()) {
         out << "RW";
       }
     }
     out << "Texture";
 
-    auto* ms = tex->As<type::MultisampledTexture>();
-
     switch (tex->dim()) {
       case type::TextureDimension::k1d:
         out << "1D";
         break;
       case type::TextureDimension::k2d:
-        out << (ms ? "2DMS" : "2D");
+        out << (multism ? "2DMS" : "2D");
         break;
       case type::TextureDimension::k2dArray:
-        out << (ms ? "2DMSArray" : "2DArray");
+        out << (multism ? "2DMSArray" : "2DArray");
         break;
       case type::TextureDimension::k3d:
         out << "3D";
@@ -2476,33 +2478,28 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         return false;
     }
 
-    if (ms) {
+    if (storage) {
+      auto* component = image_format_to_rwtexture_type(storage->image_format());
+      if (component == nullptr) {
+        TINT_ICE(diagnostics_) << "Unsupported StorageTexture ImageFormat: "
+                               << static_cast<int>(storage->image_format());
+        return false;
+      }
+      out << "<" << component << ">";
+    } else if (sampled || multism) {
+      auto* subtype = sampled ? sampled->type() : multism->type();
       out << "<";
-      if (ms->type()->Is<type::F32>()) {
+      if (subtype->Is<type::F32>()) {
         out << "float4";
-      } else if (ms->type()->Is<type::I32>()) {
+      } else if (subtype->Is<type::I32>()) {
         out << "int4";
-      } else if (ms->type()->Is<type::U32>()) {
+      } else if (subtype->Is<type::U32>()) {
         out << "uint4";
       } else {
         TINT_ICE(diagnostics_) << "Unsupported multisampled texture type";
         return false;
       }
-
-      // TODO(ben-clayton): The HLSL docs claim that the MS texture type should
-      // also contain the number of samples, which is not part of the WGSL type.
-      // However, DXC seems to consider this optional.
-      // See: https://github.com/gpuweb/gpuweb/issues/1445
-
       out << ">";
-    } else if (auto* st = tex->As<type::StorageTexture>()) {
-      auto* component = image_format_to_rwtexture_type(st->image_format());
-      if (component == nullptr) {
-        TINT_ICE(diagnostics_) << "Unsupported StorageTexture ImageFormat: "
-                               << static_cast<int>(st->image_format());
-        return false;
-      }
-      out << "<" << component << ">";
     }
   } else if (type->Is<type::U32>()) {
     out << "uint";

@@ -355,8 +355,10 @@ INSTANTIATE_TEST_SUITE_P(
         HlslDepthTextureData{type::TextureDimension::kCubeArray,
                              "TextureCubeArray tex : register(t1, space2);"}));
 
+enum class TextureDataType { F32, U32, I32 };
 struct HlslSampledTextureData {
   type::TextureDimension dim;
+  TextureDataType datatype;
   std::string result;
 };
 inline std::ostream& operator<<(std::ostream& out,
@@ -368,7 +370,19 @@ using HlslSampledTexturesTest = TestParamHelper<HlslSampledTextureData>;
 TEST_P(HlslSampledTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto* t = create<type::SampledTexture>(params.dim, ty.f32());
+  type::Type* datatype = nullptr;
+  switch (params.datatype) {
+    case TextureDataType::F32:
+      datatype = ty.f32();
+      break;
+    case TextureDataType::U32:
+      datatype = ty.u32();
+      break;
+    case TextureDataType::I32:
+      datatype = ty.i32();
+      break;
+  }
+  auto* t = create<type::SampledTexture>(params.dim, datatype);
 
   Global("tex", t, ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
@@ -391,19 +405,96 @@ INSTANTIATE_TEST_SUITE_P(
     HlslGeneratorImplTest_Type,
     HlslSampledTexturesTest,
     testing::Values(
-        HlslSampledTextureData{type::TextureDimension::k1d,
-                               "Texture1D tex : register(t1, space2);"},
-        HlslSampledTextureData{type::TextureDimension::k2d,
-                               "Texture2D tex : register(t1, space2);"},
-        HlslSampledTextureData{type::TextureDimension::k2dArray,
-                               "Texture2DArray tex : register(t1, space2);"},
-        HlslSampledTextureData{type::TextureDimension::k3d,
-                               "Texture3D tex : register(t1, space2);"},
-        HlslSampledTextureData{type::TextureDimension::kCube,
-                               "TextureCube tex : register(t1, space2);"},
+        HlslSampledTextureData{
+            type::TextureDimension::k1d,
+            TextureDataType::F32,
+            "Texture1D<float4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k2d,
+            TextureDataType::F32,
+            "Texture2D<float4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k2dArray,
+            TextureDataType::F32,
+            "Texture2DArray<float4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k3d,
+            TextureDataType::F32,
+            "Texture3D<float4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::kCube,
+            TextureDataType::F32,
+            "TextureCube<float4> tex : register(t1, space2);",
+        },
         HlslSampledTextureData{
             type::TextureDimension::kCubeArray,
-            "TextureCubeArray tex : register(t1, space2);"}));
+            TextureDataType::F32,
+            "TextureCubeArray<float4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k1d,
+            TextureDataType::U32,
+            "Texture1D<uint4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k2d,
+            TextureDataType::U32,
+            "Texture2D<uint4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k2dArray,
+            TextureDataType::U32,
+            "Texture2DArray<uint4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k3d,
+            TextureDataType::U32,
+            "Texture3D<uint4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::kCube,
+            TextureDataType::U32,
+            "TextureCube<uint4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::kCubeArray,
+            TextureDataType::U32,
+            "TextureCubeArray<uint4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k1d,
+            TextureDataType::I32,
+            "Texture1D<int4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k2d,
+            TextureDataType::I32,
+            "Texture2D<int4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k2dArray,
+            TextureDataType::I32,
+            "Texture2DArray<int4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::k3d,
+            TextureDataType::I32,
+            "Texture3D<int4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::kCube,
+            TextureDataType::I32,
+            "TextureCube<int4> tex : register(t1, space2);",
+        },
+        HlslSampledTextureData{
+            type::TextureDimension::kCubeArray,
+            TextureDataType::I32,
+            "TextureCubeArray<int4> tex : register(t1, space2);",
+        }));
 
 TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
   type::MultisampledTexture s(type::TextureDimension::k2d, ty.f32());
