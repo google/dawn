@@ -113,13 +113,6 @@ class ExpectFloat16 : public detail::Expectation {
 
 class TextureFormatTest : public DawnTest {
   protected:
-    void SetUp() {
-        DawnTest::SetUp();
-
-        // TODO(crbug.com/tint/689): shaders compile, but produces unexpected output.
-        DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
-    }
-
     // Structure containing all the information that tests need to know about the format.
     struct FormatTestInfo {
         wgpu::TextureFormat format;
