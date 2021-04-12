@@ -5632,6 +5632,132 @@ INSTANTIATE_TEST_SUITE_P(
          "WGSL does not support querying the level of detail of an image: ",
          {}}}));
 
+TEST_F(SpvParserTest, NeverGenerateConstDeclForHandle_UseVariableDirectly) {
+  // An ad-hoc test to prove we never had the issue
+  // feared in crbug.com/tint/265.
+  // Never create a const-declaration for a pointer to
+  // a texture or sampler. Code generation always
+  // traces back to the memory object declaration.
+  const auto assembly = Preamble() + R"(
+     OpEntryPoint Fragment %100 "main"
+     OpExecutionMode %100 OriginUpperLeft
+
+     OpName %var "var"
+     OpDecorate %var_im DescriptorSet 0
+     OpDecorate %var_im Binding 0
+     OpDecorate %var_s DescriptorSet 0
+     OpDecorate %var_s Binding 1
+  %float = OpTypeFloat 32
+  %v4float = OpTypeVector %float 4
+  %v2float = OpTypeVector %float 2
+  %v2_0 = OpConstantNull %v2float
+     %im = OpTypeImage %float 2D 0 0 0 1 Unknown
+     %si = OpTypeSampledImage %im
+      %s = OpTypeSampler
+ %ptr_im = OpTypePointer UniformConstant %im
+  %ptr_s = OpTypePointer UniformConstant %s
+ %var_im = OpVariable %ptr_im UniformConstant
+  %var_s = OpVariable %ptr_s UniformConstant
+   %void = OpTypeVoid
+ %voidfn = OpTypeFunction %void
+ %ptr_v4 = OpTypePointer Function %v4float
+
+    %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+    %var = OpVariable %ptr_v4 Function
+
+; Try to induce generating a const-declaration of a pointer to
+; a sampler or texture.
+
+ %var_im_copy = OpCopyObject %ptr_im %var_im
+  %var_s_copy = OpCopyObject %ptr_s %var_s
+
+         %im0 = OpLoad %im %var_im_copy
+          %s0 = OpLoad %s %var_s_copy
+         %si0 = OpSampledImage %si %im0 %s0
+          %t0 = OpImageSampleImplicitLod %v4float %si0 %v2_0
+
+
+         %im1 = OpLoad %im %var_im_copy
+          %s1 = OpLoad %s %var_s_copy
+         %si1 = OpSampledImage %si %im1 %s1
+          %t1 = OpImageSampleImplicitLod %v4float %si1 %v2_0
+
+         %sum = OpFAdd %v4float %t0 %t1
+           OpStore %var %sum
+
+           OpReturn
+           OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  std::cout << assembly << std::endl;
+  EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_TRUE(p->error().empty()) << p->error();
+  const auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(VariableDeclStatement{
+  Variable{
+    var_1
+    function
+    __vec_4__f32
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_22
+    none
+    __vec_4__f32
+    {
+      Call[not set]{
+        Identifier[not set]{textureSample}
+        (
+          Identifier[not set]{x_2}
+          Identifier[not set]{x_3}
+          TypeConstructor[not set]{
+            __vec_2__f32
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+          }
+        )
+      }
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_26
+    none
+    __vec_4__f32
+    {
+      Call[not set]{
+        Identifier[not set]{textureSample}
+        (
+          Identifier[not set]{x_2}
+          Identifier[not set]{x_3}
+          TypeConstructor[not set]{
+            __vec_2__f32
+            ScalarConstructor[not set]{0.000000}
+            ScalarConstructor[not set]{0.000000}
+          }
+        )
+      }
+    }
+  }
+}
+Assignment{
+  Identifier[not set]{var_1}
+  Binary[not set]{
+    Identifier[not set]{x_22}
+    add
+    Identifier[not set]{x_26}
+  }
+}
+Return{}
+)";
+  ASSERT_EQ(expect, got) << got;
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
