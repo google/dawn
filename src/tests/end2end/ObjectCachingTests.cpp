@@ -17,15 +17,7 @@
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
-class ObjectCachingTest : public DawnTest {
-  protected:
-    void SetUp() override {
-        DawnTest::SetUp();
-
-        // TODO(crbug.com/tint/688): error: undeclared identifier '_tint_7'
-        DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
-    }
-};
+class ObjectCachingTest : public DawnTest {};
 
 // Test that BindGroupLayouts are correctly deduplicated.
 TEST_P(ObjectCachingTest, BindGroupLayoutDeduplication) {
