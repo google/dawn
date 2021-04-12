@@ -216,9 +216,6 @@ TEST_P(OpArrayLengthTest, Vertex) {
     DAWN_SKIP_TEST_IF(IsNvidia() && IsOpenGL());
     DAWN_SKIP_TEST_IF(IsOpenGLES());
 
-    // TODO(crbug.com/dawn/657): Returned data is slightly incorrect in this case.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") && IsIntel() && IsOpenGL());
-
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
 
     // Create the pipeline that computes the length of the buffers and writes it to the only render
