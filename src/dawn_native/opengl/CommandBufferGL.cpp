@@ -628,6 +628,11 @@ namespace dawn_native { namespace opengl {
                     }
 
                     gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
+
+                    TextureDataLayout dataLayout;
+                    dataLayout.offset = 0;
+                    dataLayout.bytesPerRow = src.bytesPerRow;
+                    dataLayout.rowsPerImage = src.rowsPerImage;
                     gl.ActiveTexture(GL_TEXTURE0);
                     gl.BindTexture(target, texture->GetHandle());
 
@@ -645,52 +650,8 @@ namespace dawn_native { namespace opengl {
                         // See OpenGL ES 3.2 SPEC Chapter 8.4.1, "Pixel Storage Modes and Pixel
                         // Buffer Objects" for more details.
                         if (gl.GetVersion().IsES()) {
-                            uint64_t copyDataSizePerBlockRow =
-                                (copySize.width / blockInfo.width) * blockInfo.byteSize;
-                            size_t copyBlockRowsPerImage = copySize.height / blockInfo.height;
-
-                            if (texture->GetArrayLayers() > 1) {
-                                // TODO(jiawei.shao@intel.com): do a single copy when the data is
-                                // correctly packed.
-                                for (size_t copyZ = 0; copyZ < copyExtent.depthOrArrayLayers;
-                                     ++copyZ) {
-                                    uintptr_t offsetPerImage = static_cast<uintptr_t>(
-                                        src.offset + copyZ * src.bytesPerRow * src.rowsPerImage);
-                                    uint32_t dstOriginY = dst.origin.y;
-                                    uint32_t dstOriginZ = dst.origin.z + copyZ;
-
-                                    for (size_t copyBlockRow = 0;
-                                         copyBlockRow < copyBlockRowsPerImage; ++copyBlockRow) {
-                                        gl.CompressedTexSubImage3D(
-                                            target, dst.mipLevel, dst.origin.x, dstOriginY,
-                                            dstOriginZ, copyExtent.width, blockInfo.height, 1,
-                                            format.internalFormat, copyDataSizePerBlockRow,
-                                            reinterpret_cast<void*>(
-                                                static_cast<uintptr_t>(offsetPerImage)));
-
-                                        offsetPerImage += src.bytesPerRow;
-                                        dstOriginY += blockInfo.height;
-                                    }
-                                }
-                            } else {
-                                uintptr_t offset = static_cast<uintptr_t>(src.offset);
-                                uint32_t dstOriginY = dst.origin.y;
-
-                                // TODO(jiawei.shao@intel.com): do a single copy when the data is
-                                // correctly packed.
-                                for (size_t copyBlockRow = 0; copyBlockRow < copyBlockRowsPerImage;
-                                     ++copyBlockRow) {
-                                    gl.CompressedTexSubImage2D(
-                                        target, dst.mipLevel, dst.origin.x, dstOriginY,
-                                        copyExtent.width, blockInfo.height, format.internalFormat,
-                                        copyDataSizePerBlockRow,
-                                        reinterpret_cast<void*>(static_cast<uintptr_t>(offset)));
-
-                                    offset += src.bytesPerRow;
-                                    dstOriginY += blockInfo.height;
-                                }
-                            }
-
+                            DoTexSubImage(gl, dst, reinterpret_cast<void*>(src.offset), dataLayout,
+                                          copySize);
                         } else {
                             gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
                                            src.bytesPerRow / blockInfo.byteSize * blockInfo.width);
@@ -1395,6 +1356,106 @@ namespace dawn_native { namespace opengl {
 
         // EndRenderPass should have been called
         UNREACHABLE();
+    }
+
+    void DoTexSubImage(const OpenGLFunctions& gl,
+                       const TextureCopy& destination,
+                       const void* data,
+                       const TextureDataLayout& dataLayout,
+                       const Extent3D& writeSizePixel) {
+        Texture* texture = ToBackend(destination.texture.Get());
+        SubresourceRange range(Aspect::Color,
+                               {destination.origin.z, writeSizePixel.depthOrArrayLayers},
+                               {destination.mipLevel, 1});
+        if (IsCompleteSubresourceCopiedTo(texture, writeSizePixel, destination.mipLevel)) {
+            texture->SetIsSubresourceContentInitialized(true, range);
+        } else {
+            texture->EnsureSubresourceContentInitialized(range);
+        }
+
+        const GLFormat& format = texture->GetGLFormat();
+        GLenum target = texture->GetGLTarget();
+        data = static_cast<const uint8_t*>(data) + dataLayout.offset;
+        gl.BindTexture(target, texture->GetHandle());
+        const TexelBlockInfo& blockInfo =
+            texture->GetFormat().GetAspectInfo(destination.aspect).block;
+
+        if (texture->GetFormat().isCompressed) {
+            size_t imageSize = writeSizePixel.width / blockInfo.width * blockInfo.byteSize;
+            Extent3D virtSize = texture->GetMipLevelVirtualSize(destination.mipLevel);
+            uint32_t width = std::min(writeSizePixel.width, virtSize.width - destination.origin.x);
+            uint32_t x = destination.origin.x;
+
+            // For now, we use row-by-row texture uploads of compressed textures in all cases.
+            // TODO(crbug.com/dawn/684): For contiguous cases, we should be able to use a single
+            // texture upload per layer, as we do in the non-compressed case.
+            if (texture->GetArrayLayers() == 1) {
+                const uint8_t* d = static_cast<const uint8_t*>(data);
+
+                for (uint32_t y = destination.origin.y;
+                     y < destination.origin.y + writeSizePixel.height; y += blockInfo.height) {
+                    uint32_t height = std::min(blockInfo.height, virtSize.height - y);
+                    gl.CompressedTexSubImage2D(target, destination.mipLevel, x, y, width, height,
+                                               format.internalFormat, imageSize, d);
+                    d += dataLayout.bytesPerRow;
+                }
+            } else {
+                const uint8_t* slice = static_cast<const uint8_t*>(data);
+
+                for (uint32_t z = destination.origin.z;
+                     z < destination.origin.z + writeSizePixel.depthOrArrayLayers; ++z) {
+                    const uint8_t* d = slice;
+
+                    for (uint32_t y = destination.origin.y;
+                         y < destination.origin.y + writeSizePixel.height; y += blockInfo.height) {
+                        uint32_t height = std::min(blockInfo.height, virtSize.height - y);
+                        gl.CompressedTexSubImage3D(target, destination.mipLevel, x, y, z, width,
+                                                   height, 1, format.internalFormat, imageSize, d);
+                        d += dataLayout.bytesPerRow;
+                    }
+
+                    slice += dataLayout.rowsPerImage * dataLayout.bytesPerRow;
+                }
+            }
+        } else if (dataLayout.bytesPerRow % blockInfo.byteSize == 0) {
+            gl.PixelStorei(GL_UNPACK_ROW_LENGTH,
+                           dataLayout.bytesPerRow / blockInfo.byteSize * blockInfo.width);
+            if (texture->GetArrayLayers() == 1) {
+                gl.TexSubImage2D(target, destination.mipLevel, destination.origin.x,
+                                 destination.origin.y, writeSizePixel.width, writeSizePixel.height,
+                                 format.format, format.type, data);
+            } else {
+                gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, dataLayout.rowsPerImage * blockInfo.height);
+                gl.TexSubImage3D(target, destination.mipLevel, destination.origin.x,
+                                 destination.origin.y, destination.origin.z, writeSizePixel.width,
+                                 writeSizePixel.height, writeSizePixel.depthOrArrayLayers,
+                                 format.format, format.type, data);
+                gl.PixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
+            }
+            gl.PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        } else {
+            if (texture->GetArrayLayers() == 1) {
+                const uint8_t* d = static_cast<const uint8_t*>(data);
+                for (uint32_t y = 0; y < writeSizePixel.height; ++y) {
+                    gl.TexSubImage2D(target, destination.mipLevel, destination.origin.x,
+                                     destination.origin.y + y, writeSizePixel.width, 1,
+                                     format.format, format.type, d);
+                    d += dataLayout.bytesPerRow;
+                }
+            } else {
+                const uint8_t* slice = static_cast<const uint8_t*>(data);
+                for (uint32_t z = 0; z < writeSizePixel.depthOrArrayLayers; ++z) {
+                    const uint8_t* d = slice;
+                    for (uint32_t y = 0; y < writeSizePixel.height; ++y) {
+                        gl.TexSubImage3D(target, destination.mipLevel, destination.origin.x,
+                                         destination.origin.y + y, destination.origin.z + z,
+                                         writeSizePixel.width, 1, 1, format.format, format.type, d);
+                        d += dataLayout.bytesPerRow;
+                    }
+                    slice += dataLayout.rowsPerImage * dataLayout.bytesPerRow;
+                }
+            }
+        }
     }
 
 }}  // namespace dawn_native::opengl
