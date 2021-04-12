@@ -141,9 +141,6 @@ TEST_P(ComputeCopyStorageBufferTests, SizedArrayOfStruct) {
 
 // Test that a trivial compute-shader memcpy implementation works.
 TEST_P(ComputeCopyStorageBufferTests, UnsizedArrayOfBasic) {
-    // TODO(crbug.com/tint/682): error: runtime array not supported yet
-    DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
-
     BasicTest(R"(
         [[block]] struct Buf1 {
             s : array<vec4<u32>>;

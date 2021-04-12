@@ -86,7 +86,7 @@ class QueryInternalShaderTests : public DawnTest {};
 //   timestamp period (here use GPU frequency (HZ) on Intel D3D12 to calculate the period in
 //   ns for testing).
 TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
-    // TODO(crbug.com/tint/682): error: runtime array not supported yet
+    // TODO(crbug.com/tint/683): internal compiler error: TINT_UNIMPLEMENTED
     DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
     // TODO(crbug.com/dawn/741): Test output is wrong with D3D12 + WARP.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());

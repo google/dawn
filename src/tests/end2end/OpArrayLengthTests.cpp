@@ -23,9 +23,6 @@ class OpArrayLengthTest : public DawnTest {
     void SetUp() {
         DawnTest::SetUp();
 
-        // TODO(crbug.com/tint/682): error: runtime array not supported yet
-        DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
-
         // Create buffers of various size to check the length() implementation
         wgpu::BufferDescriptor bufferDesc;
         bufferDesc.size = 4;
