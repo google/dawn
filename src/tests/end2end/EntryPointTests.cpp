@@ -66,10 +66,6 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
 
 // Test creating two compute pipelines from the same module.
 TEST_P(EntryPointTests, TwoComputeInModule) {
-    // TODO: Reenable once Tint's HLSL writer supports multiple entryPoints on a single stage.
-    // https://crbug.com/tint/297
-    DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
-
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Data {
             data : u32;
