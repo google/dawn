@@ -493,13 +493,6 @@ constexpr int kVertexBufferStride = 4 * sizeof(float);
 
 class MultipleWriteThenMultipleReadTests : public DawnTest {
   protected:
-    void SetUp() {
-        DawnTest::SetUp();
-
-        // TODO(crbug.com/tint/686): error: unsupported struct member decoration
-        DAWN_SKIP_TEST_IF(IsD3D12() && HasToggleEnabled("use_tint_generator"));
-    }
-
     wgpu::Buffer CreateZeroedBuffer(uint64_t size, wgpu::BufferUsage usage) {
         wgpu::BufferDescriptor srcDesc;
         srcDesc.size = size;
