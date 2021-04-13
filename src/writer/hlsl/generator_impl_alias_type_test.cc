@@ -40,7 +40,7 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(typedef float _tint_float;
+  EXPECT_THAT(result(), HasSubstr(R"(typedef float tint_float;
 )"));
 }
 

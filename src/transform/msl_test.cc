@@ -36,22 +36,22 @@ fn main() {
   var half : f32;
   var half1 : f32;
   var half2 : f32;
-  var _tint_half2 : f32;
+  var tint_half2 : f32;
 }
 )";
 
   auto* expect = R"(
-struct _tint_class {
-  _tint_delete : i32;
+struct tint_class {
+  tint_delete : i32;
 };
 
 [[stage(fragment)]]
-fn _tint_main() {
+fn tint_main() {
   var foo : i32;
-  var _tint_half : f32;
+  var tint_half : f32;
   var half1 : f32;
-  var _tint_half2 : f32;
-  var _tint_half2_1 : f32;
+  var tint_half2 : f32;
+  var tint_half2_1 : f32;
 }
 )";
 
@@ -73,8 +73,8 @@ fn main() {
 
   auto expect = R"(
 [[stage(fragment)]]
-fn _tint_main() {
-  var _tint_)" + keyword +
+fn tint_main() {
+  var tint_)" + keyword +
                 R"( : i32;
 }
 )";
@@ -83,6 +83,51 @@ fn _tint_main() {
 
   EXPECT_EQ(expect, str(got));
 }
+
+TEST_P(MslReservedKeywordTest, AttemptSymbolCollision) {
+  auto keyword = GetParam();
+
+  auto src = R"(
+[[stage(fragment)]]
+fn frag_main() {
+  var tint_)" +
+             keyword +
+             R"( : i32;
+  var tint_)" +
+             keyword +
+             R"(_1 : i32;
+  var )" + keyword +
+             R"( : i32;
+  var tint_)" +
+             keyword +
+             R"(_2 : i32;
+  var tint_)" +
+             keyword +
+             R"(_3 : i32;
+}
+)";
+
+  auto expect = R"(
+[[stage(fragment)]]
+fn frag_main() {
+  var tint_)" + keyword +
+                R"( : i32;
+  var tint_)" + keyword +
+                R"(_1 : i32;
+  var tint_)" + keyword +
+                R"(_2 : i32;
+  var tint_)" + keyword +
+                R"(_2_1 : i32;
+  var tint_)" + keyword +
+                R"(_3 : i32;
+}
+)";
+
+  auto got = Run<Msl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 INSTANTIATE_TEST_SUITE_P(MslReservedKeywordTest,
                          MslReservedKeywordTest,
                          testing::Values(

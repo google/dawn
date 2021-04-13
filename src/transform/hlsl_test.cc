@@ -309,7 +309,7 @@ fn main() {
   auto expect = R"(
 [[stage(fragment)]]
 fn main() {
-  var _tint_)" + keyword +
+  var tint_)" + keyword +
                 R"( : i32;
 }
 )";
@@ -318,6 +318,51 @@ fn main() {
 
   EXPECT_EQ(expect, str(got));
 }
+
+TEST_P(HlslReservedKeywordTest, AttemptSymbolCollision) {
+  auto keyword = GetParam();
+
+  auto src = R"(
+[[stage(fragment)]]
+fn main() {
+  var tint_)" +
+             keyword +
+             R"( : i32;
+  var tint_)" +
+             keyword +
+             R"(_1 : i32;
+  var )" + keyword +
+             R"( : i32;
+  var tint_)" +
+             keyword +
+             R"(_2 : i32;
+  var tint_)" +
+             keyword +
+             R"(_3 : i32;
+}
+)";
+
+  auto expect = R"(
+[[stage(fragment)]]
+fn main() {
+  var tint_)" + keyword +
+                R"( : i32;
+  var tint_)" + keyword +
+                R"(_1 : i32;
+  var tint_)" + keyword +
+                R"(_2 : i32;
+  var tint_)" + keyword +
+                R"(_2_1 : i32;
+  var tint_)" + keyword +
+                R"(_3 : i32;
+}
+)";
+
+  auto got = Run<Hlsl>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 INSTANTIATE_TEST_SUITE_P(HlslReservedKeywordTest,
                          HlslReservedKeywordTest,
                          testing::Values("AddressU",

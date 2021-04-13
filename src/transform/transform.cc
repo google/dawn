@@ -63,7 +63,7 @@ void Transform::RenameReservedKeywords(CloneContext* ctx,
   ctx->ReplaceAll([=](Symbol in) {
     auto name_in = ctx->src->Symbols().NameFor(in);
     if (std::binary_search(names, names + count, name_in)) {
-      return ctx->dst->Symbols().New("_tint_" + name_in);
+      return ctx->dst->Symbols().New("tint_" + name_in);
     }
     return ctx->dst->Symbols().New(name_in);
   });
