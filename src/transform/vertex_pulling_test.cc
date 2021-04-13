@@ -81,13 +81,13 @@ fn main() {}
   auto* expect = R"(
 [[block]]
 struct TintVertexData {
-  _tint_vertex_data : [[stride(4)]] array<u32>;
+  tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
 [[stage(vertex)]]
 fn main() {
   {
-    var _tint_pulling_pos : u32;
+    var tint_pulling_pos : u32;
   }
 }
 )";
@@ -111,23 +111,23 @@ fn main() {}
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : u32;
+[[builtin(vertex_index)]] var<in> tint_pulling_vertex_index : u32;
 
 [[block]]
 struct TintVertexData {
-  _tint_vertex_data : [[stride(4)]] array<u32>;
+  tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 var<private> var_a : f32;
 
 [[stage(vertex)]]
 fn main() {
   {
-    var _tint_pulling_pos : u32;
-    _tint_pulling_pos = ((_tint_pulling_vertex_index * 4u) + 0u);
-    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
+    var tint_pulling_pos : u32;
+    tint_pulling_pos = ((tint_pulling_vertex_index * 4u) + 0u);
+    var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(tint_pulling_pos / 4u)]);
   }
 }
 )";
@@ -153,23 +153,23 @@ fn main() {}
 )";
 
   auto* expect = R"(
-[[builtin(instance_index)]] var<in> _tint_pulling_instance_index : u32;
+[[builtin(instance_index)]] var<in> tint_pulling_instance_index : u32;
 
 [[block]]
 struct TintVertexData {
-  _tint_vertex_data : [[stride(4)]] array<u32>;
+  tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 var<private> var_a : f32;
 
 [[stage(vertex)]]
 fn main() {
   {
-    var _tint_pulling_pos : u32;
-    _tint_pulling_pos = ((_tint_pulling_instance_index * 4u) + 0u);
-    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
+    var tint_pulling_pos : u32;
+    tint_pulling_pos = ((tint_pulling_instance_index * 4u) + 0u);
+    var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(tint_pulling_pos / 4u)]);
   }
 }
 )";
@@ -195,23 +195,23 @@ fn main() {}
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : u32;
+[[builtin(vertex_index)]] var<in> tint_pulling_vertex_index : u32;
 
 [[block]]
 struct TintVertexData {
-  _tint_vertex_data : [[stride(4)]] array<u32>;
+  tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(5)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(5)]] var<storage> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 var<private> var_a : f32;
 
 [[stage(vertex)]]
 fn main() {
   {
-    var _tint_pulling_pos : u32;
-    _tint_pulling_pos = ((_tint_pulling_vertex_index * 4u) + 0u);
-    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
+    var tint_pulling_pos : u32;
+    tint_pulling_pos = ((tint_pulling_vertex_index * 4u) + 0u);
+    var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(tint_pulling_pos / 4u)]);
   }
 }
 )";
@@ -244,12 +244,12 @@ fn main() {}
   auto* expect = R"(
 [[block]]
 struct TintVertexData {
-  _tint_vertex_data : [[stride(4)]] array<u32>;
+  tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-[[binding(1), group(4)]] var<storage> _tint_pulling_vertex_buffer_1 : TintVertexData;
+[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : TintVertexData;
 
 var<private> var_a : f32;
 
@@ -262,11 +262,11 @@ var<private> var_b : f32;
 [[stage(vertex)]]
 fn main() {
   {
-    var _tint_pulling_pos : u32;
-    _tint_pulling_pos = ((custom_vertex_index * 4u) + 0u);
-    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
-    _tint_pulling_pos = ((custom_instance_index * 4u) + 0u);
-    var_b = bitcast<f32>(_tint_pulling_vertex_buffer_1._tint_vertex_data[(_tint_pulling_pos / 4u)]);
+    var tint_pulling_pos : u32;
+    tint_pulling_pos = ((custom_vertex_index * 4u) + 0u);
+    var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(tint_pulling_pos / 4u)]);
+    tint_pulling_pos = ((custom_instance_index * 4u) + 0u);
+    var_b = bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[(tint_pulling_pos / 4u)]);
   }
 }
 )";
@@ -303,14 +303,14 @@ fn main() {}
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : u32;
+[[builtin(vertex_index)]] var<in> tint_pulling_vertex_index : u32;
 
 [[block]]
 struct TintVertexData {
-  _tint_vertex_data : [[stride(4)]] array<u32>;
+  tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : TintVertexData;
 
 var<private> var_a : f32;
 
@@ -319,11 +319,11 @@ var<private> var_b : vec4<f32>;
 [[stage(vertex)]]
 fn main() {
   {
-    var _tint_pulling_pos : u32;
-    _tint_pulling_pos = ((_tint_pulling_vertex_index * 16u) + 0u);
-    var_a = bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[(_tint_pulling_pos / 4u)]);
-    _tint_pulling_pos = ((_tint_pulling_vertex_index * 16u) + 0u);
-    var_b = vec4<f32>(bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 8u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 12u) / 4u)]));
+    var tint_pulling_pos : u32;
+    tint_pulling_pos = ((tint_pulling_vertex_index * 16u) + 0u);
+    var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(tint_pulling_pos / 4u)]);
+    tint_pulling_pos = ((tint_pulling_vertex_index * 16u) + 0u);
+    var_b = vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 8u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 12u) / 4u)]));
   }
 }
 )";
@@ -353,18 +353,18 @@ fn main() {}
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> _tint_pulling_vertex_index : u32;
+[[builtin(vertex_index)]] var<in> tint_pulling_vertex_index : u32;
 
 [[block]]
 struct TintVertexData {
-  _tint_vertex_data : [[stride(4)]] array<u32>;
+  tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> _tint_pulling_vertex_buffer_0 : TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : TintVertexData;
 
-[[binding(1), group(4)]] var<storage> _tint_pulling_vertex_buffer_1 : TintVertexData;
+[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : TintVertexData;
 
-[[binding(2), group(4)]] var<storage> _tint_pulling_vertex_buffer_2 : TintVertexData;
+[[binding(2), group(4)]] var<storage> tint_pulling_vertex_buffer_2 : TintVertexData;
 
 var<private> var_a : vec2<f32>;
 
@@ -375,13 +375,13 @@ var<private> var_c : vec4<f32>;
 [[stage(vertex)]]
 fn main() {
   {
-    var _tint_pulling_pos : u32;
-    _tint_pulling_pos = ((_tint_pulling_vertex_index * 8u) + 0u);
-    var_a = vec2<f32>(bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_0._tint_vertex_data[((_tint_pulling_pos + 4u) / 4u)]));
-    _tint_pulling_pos = ((_tint_pulling_vertex_index * 12u) + 0u);
-    var_b = vec3<f32>(bitcast<f32>(_tint_pulling_vertex_buffer_1._tint_vertex_data[((_tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_1._tint_vertex_data[((_tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_1._tint_vertex_data[((_tint_pulling_pos + 8u) / 4u)]));
-    _tint_pulling_pos = ((_tint_pulling_vertex_index * 16u) + 0u);
-    var_c = vec4<f32>(bitcast<f32>(_tint_pulling_vertex_buffer_2._tint_vertex_data[((_tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_2._tint_vertex_data[((_tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_2._tint_vertex_data[((_tint_pulling_pos + 8u) / 4u)]), bitcast<f32>(_tint_pulling_vertex_buffer_2._tint_vertex_data[((_tint_pulling_pos + 12u) / 4u)]));
+    var tint_pulling_pos : u32;
+    tint_pulling_pos = ((tint_pulling_vertex_index * 8u) + 0u);
+    var_a = vec2<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 4u) / 4u)]));
+    tint_pulling_pos = ((tint_pulling_vertex_index * 12u) + 0u);
+    var_b = vec3<f32>(bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[((tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[((tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[((tint_pulling_pos + 8u) / 4u)]));
+    tint_pulling_pos = ((tint_pulling_vertex_index * 16u) + 0u);
+    var_c = vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_2.tint_vertex_data[((tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_2.tint_vertex_data[((tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_2.tint_vertex_data[((tint_pulling_pos + 8u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_2.tint_vertex_data[((tint_pulling_pos + 12u) / 4u)]));
   }
 }
 )";
@@ -401,6 +401,63 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(VertexPullingTest, AttemptSymbolCollision) {
+  auto* src = R"(
+[[location(0)]] var<in> var_a : f32;
+[[location(1)]] var<in> var_b : vec4<f32>;
+
+[[stage(vertex)]]
+fn main() {
+  var tint_pulling_vertex_index : i32;
+  var tint_pulling_vertex_buffer_0 : i32;
+  var tint_vertex_data : i32;
+  var tint_pulling_pos : i32;
+}
+)";
+
+  auto* expect = R"(
+[[builtin(vertex_index)]] var<in> tint_pulling_vertex_index_1 : u32;
+
+[[block]]
+struct TintVertexData {
+  tint_vertex_data_1 : [[stride(4)]] array<u32>;
+};
+
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0_1 : TintVertexData;
+
+var<private> var_a : f32;
+
+var<private> var_b : vec4<f32>;
+
+[[stage(vertex)]]
+fn main() {
+  {
+    var tint_pulling_pos_1 : u32;
+    tint_pulling_pos_1 = ((tint_pulling_vertex_index_1 * 16u) + 0u);
+    var_a = bitcast<f32>(tint_pulling_vertex_buffer_0_1.tint_vertex_data_1[(tint_pulling_pos_1 / 4u)]);
+    tint_pulling_pos_1 = ((tint_pulling_vertex_index_1 * 16u) + 0u);
+    var_b = vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0_1.tint_vertex_data_1[((tint_pulling_pos_1 + 0u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0_1.tint_vertex_data_1[((tint_pulling_pos_1 + 4u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0_1.tint_vertex_data_1[((tint_pulling_pos_1 + 8u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0_1.tint_vertex_data_1[((tint_pulling_pos_1 + 12u) / 4u)]));
+  }
+  var tint_pulling_vertex_index : i32;
+  var tint_pulling_vertex_buffer_0 : i32;
+  var tint_vertex_data : i32;
+  var tint_pulling_pos : i32;
+}
+)";
+
+  VertexPulling::Config cfg;
+  cfg.vertex_state = {
+      {{16,
+        InputStepMode::kVertex,
+        {{VertexFormat::kF32, 0, 0}, {VertexFormat::kVec4F32, 0, 1}}}}};
+  cfg.entry_point_name = "main";
+
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, std::move(data));
+
+  EXPECT_EQ(expect, str(got));
+}
 }  // namespace
 }  // namespace transform
 }  // namespace tint

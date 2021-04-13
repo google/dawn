@@ -48,7 +48,6 @@ struct State {
   CloneContext& ctx;
   VertexPulling::Config const cfg;
   std::unordered_map<uint32_t, ast::Variable*> location_to_var;
-  std::vector<LocationReplacement> location_replacements;
   Symbol vertex_index_name;
   Symbol instance_index_name;
   Symbol pulling_position_name;
@@ -60,7 +59,7 @@ struct State {
   Symbol GetVertexBufferName(uint32_t index) {
     return utils::GetOrCreate(vertex_buffer_names, index, [&] {
       static const char kVertexBufferNamePrefix[] =
-          "_tint_pulling_vertex_buffer_";
+          "tint_pulling_vertex_buffer_";
       return ctx.dst->Symbols().New(kVertexBufferNamePrefix +
                                     std::to_string(index));
     });
@@ -69,7 +68,7 @@ struct State {
   /// Lazily generates the pulling position symbol
   Symbol GetPullingPositionName() {
     if (!pulling_position_name.IsValid()) {
-      static const char kPullingPosVarName[] = "_tint_pulling_pos";
+      static const char kPullingPosVarName[] = "tint_pulling_pos";
       pulling_position_name = ctx.dst->Symbols().New(kPullingPosVarName);
     }
     return pulling_position_name;
@@ -78,7 +77,7 @@ struct State {
   /// Lazily generates the structure buffer symbol
   Symbol GetStructBufferName() {
     if (!struct_buffer_name.IsValid()) {
-      static const char kStructBufferName[] = "_tint_vertex_data";
+      static const char kStructBufferName[] = "tint_vertex_data";
       struct_buffer_name = ctx.dst->Symbols().New(kStructBufferName);
     }
     return struct_buffer_name;
@@ -115,7 +114,7 @@ struct State {
     }
 
     // We didn't find a vertex index builtin, so create one
-    static const char kDefaultVertexIndexName[] = "_tint_pulling_vertex_index";
+    static const char kDefaultVertexIndexName[] = "tint_pulling_vertex_index";
     vertex_index_name = ctx.dst->Symbols().New(kDefaultVertexIndexName);
 
     ctx.dst->Global(
@@ -158,7 +157,7 @@ struct State {
 
     // We didn't find an instance index builtin, so create one
     static const char kDefaultInstanceIndexName[] =
-        "_tint_pulling_instance_index";
+        "tint_pulling_instance_index";
     instance_index_name = ctx.dst->Symbols().New(kDefaultInstanceIndexName);
 
     ctx.dst->Global(instance_index_name, ctx.dst->ty.u32(),
@@ -187,8 +186,7 @@ struct State {
                                            ctx.Clone(v->declared_type()),
                                            ast::StorageClass::kPrivate);
           location_to_var[location] = replacement;
-          location_replacements.emplace_back(
-              LocationReplacement{v, replacement});
+          ctx.Replace(v, replacement);
           break;
         }
       }
@@ -415,15 +413,17 @@ Transform::Output VertexPulling::Run(const Program* in, const DataMap& data) {
   // following stages will pass
 
   CloneContext ctx(&out, in);
+
+  // Start by cloning all the symbols. This ensures that the authored symbols
+  // won't get renamed if they collide with new symbols below.
+  ctx.CloneSymbols();
+
   State state{ctx, cfg};
   state.FindOrInsertVertexIndexIfUsed();
   state.FindOrInsertInstanceIndexIfUsed();
   state.ConvertVertexInputVariablesToPrivate();
   state.AddVertexStorageBuffers();
 
-  for (auto& replacement : state.location_replacements) {
-    ctx.Replace(replacement.from, replacement.to);
-  }
   ctx.ReplaceAll([&](ast::Function* f) -> ast::Function* {
     if (f == func) {
       return CloneWithStatementsAtStart(&ctx, f,
