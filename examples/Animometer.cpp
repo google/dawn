@@ -66,11 +66,12 @@ void init() {
         };
         [[set(0), binding(0)]] var<uniform> c : Constants;
 
-        [[location(0)]] var<out> v_color : vec4<f32>;
-        [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
-        [[builtin(position)]] var<out> Position : vec4<f32>;
+        struct VertexOut {
+            [[location(0)]] v_color : vec4<f32>;
+            [[builtin(position)]] Position : vec4<f32>;
+        };
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main([[builtin(vertex_idx)]] VertexIndex : u32) -> VertexOut {
             var positions : array<vec4<f32>, 3> = array<vec4<f32>, 3>(
                 vec4<f32>( 0.0,  0.1, 0.0, 1.0),
                 vec4<f32>(-0.1, -0.1, 0.0, 1.0),
@@ -97,22 +98,22 @@ void init() {
 
             var xpos : f32 = position.x * c.scale;
             var ypos : f32 = position.y * c.scale;
-            const angle : f32 = 3.14159 * 2.0 * fade;
-            const xrot : f32 = xpos * cos(angle) - ypos * sin(angle);
-            const yrot : f32 = xpos * sin(angle) + ypos * cos(angle);
+            let angle : f32 = 3.14159 * 2.0 * fade;
+            let xrot : f32 = xpos * cos(angle) - ypos * sin(angle);
+            let yrot : f32 = xpos * sin(angle) + ypos * cos(angle);
             xpos = xrot + c.offsetX;
             ypos = yrot + c.offsetY;
 
-            v_color = vec4<f32>(fade, 1.0 - fade, 0.0, 1.0) + color;
-            Position = vec4<f32>(xpos, ypos, 0.0, 1.0);
+            var output : VertexOut;
+            output.v_color = vec4<f32>(fade, 1.0 - fade, 0.0, 1.0) + color;
+            output.Position = vec4<f32>(xpos, ypos, 0.0, 1.0);
+            return output;
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[location(0)]] var<out> FragColor : vec4<f32>;
-        [[location(0)]] var<in> v_color : vec4<f32>;
-
-        [[stage(fragment)]] fn main() {
-            FragColor = v_color;
+        [[stage(fragment)]] fn main([[location(0)]] v_color : vec4<f32>)
+                                 -> [[location(0)]] vec4<f32> {
+            return v_color;
         })");
 
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(

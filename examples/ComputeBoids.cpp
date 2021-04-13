@@ -96,28 +96,26 @@ void initBuffers() {
 
 void initRender() {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        [[location(0)]] var<in> a_particlePos : vec2<f32>;
-        [[location(1)]] var<in> a_particleVel : vec2<f32>;
-        [[location(2)]] var<in> a_pos : vec2<f32>;
-        [[builtin(position)]] var<out> Position : vec4<f32>;
+        struct VertexIn {
+            [[location(0)]] a_particlePos : vec2<f32>;
+            [[location(1)]] a_particleVel : vec2<f32>;
+            [[location(2)]] a_pos : vec2<f32>;
+        };
 
         [[stage(vertex)]]
-        fn main() {
-            var angle : f32 = -atan2(a_particleVel.x, a_particleVel.y);
+        fn main(input : VertexIn) -> [[builtin(position)]] vec4<f32> {
+            var angle : f32 = -atan2(input.a_particleVel.x, input.a_particleVel.y);
             var pos : vec2<f32> = vec2<f32>(
-                (a_pos.x * cos(angle)) - (a_pos.y * sin(angle)),
-                (a_pos.x * sin(angle)) + (a_pos.y * cos(angle)));
-            Position = vec4<f32>(pos + a_particlePos, 0.0, 1.0);
-            return;
+                (input.a_pos.x * cos(angle)) - (input.a_pos.y * sin(angle)),
+                (input.a_pos.x * sin(angle)) + (input.a_pos.y * cos(angle)));
+            return vec4<f32>(pos + input.a_particlePos, 0.0, 1.0);
         }
     )");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-        [[location(0)]] var<out> FragColor : vec4<f32>;
         [[stage(fragment)]]
-        fn main() {
-            FragColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-            return;
+        fn main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(1.0, 1.0, 1.0, 1.0);
         }
     )");
 
@@ -170,11 +168,10 @@ void initSim() {
         [[binding(0), group(0)]] var<uniform> params : SimParams;
         [[binding(1), group(0)]] var<storage> particlesA : [[access(read)]] Particles;
         [[binding(2), group(0)]] var<storage> particlesB : [[access(read_write)]] Particles;
-        [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
         // https://github.com/austinEng/Project6-Vulkan-Flocking/blob/master/data/shaders/computeparticles/particle.comp
         [[stage(compute)]]
-        fn main() {
+        fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
             var index : u32 = GlobalInvocationID.x;
             if (index >= params.particleCount) {
                 return;

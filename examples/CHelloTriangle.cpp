@@ -37,24 +37,21 @@ void init() {
     wgpuSwapChainConfigure(swapchain, swapChainFormat, WGPUTextureUsage_RenderAttachment, 640, 480);
 
     const char* vs =
-        "[[builtin(vertex_index)]] var<in> VertexIndex : u32;\n"
-        "[[builtin(position)]] var<out> Position : vec4<f32>;\n"
-        "const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(\n"
+        "let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(\n"
         "    vec2<f32>( 0.0,  0.5),\n"
         "    vec2<f32>(-0.5, -0.5),\n"
         "    vec2<f32>( 0.5, -0.5)\n"
         ");\n"
-        "[[stage(vertex)]] fn main() {\n"
-        "    Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);\n"
-        "    return;\n"
+        "[[stage(vertex)]] fn main(\n"
+        "    [[builtin(vertex_index)]] VertexIndex : u32\n"
+        ") -> [[builtin(position)]] vec4<f32> {\n"
+        "    return vec4<f32>(pos[VertexIndex], 0.0, 1.0);\n"
         "}\n";
     WGPUShaderModule vsModule = utils::CreateShaderModule(device, vs).Release();
 
     const char* fs =
-        "[[location(0)]] var<out> fragColor : vec4<f32>;\n"
-        "[[stage(fragment)]] fn main() {\n"
-        "    fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);\n"
-        "    return;\n"
+        "[[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {\n"
+        "    return vec4<f32>(1.0, 0.0, 0.0, 1.0);\n"
         "}\n";
     WGPUShaderModule fsModule = utils::CreateShaderModule(device, fs).Release();
 
