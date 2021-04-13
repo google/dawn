@@ -1358,7 +1358,7 @@ bool FunctionEmitter::FindSwitchCaseHeaders() {
     if (construct->begin_pos >= default_block->pos) {
       // An OpSwitch must dominate its cases.  Also, it can't be a self-loop
       // as that would be a backedge, and backedges can only target a loop,
-      // and loops use an OpLoopMerge instruction, which can't preceded an
+      // and loops use an OpLoopMerge instruction, which can't precede an
       // OpSwitch.
       return Fail() << "Switch branch from block " << construct->begin_id
                     << " to default target block " << default_id
@@ -1553,7 +1553,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
     uint32_t num_backedges = 0;
 
     // Track destinations for normal forward edges, either kForward
-    // or kCaseFallThroughkIfBreak. These count toward the need
+    // or kCaseFallThrough. These count toward the need
     // to have a merge instruction.  We also track kIfBreak edges
     // because when used with normal forward edges, we'll need
     // to generate a flow guard variable.
@@ -1797,6 +1797,15 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
     const bool contains_true = construct->ContainsPos(true_head_pos);
     const bool contains_false = construct->ContainsPos(false_head_pos);
 
+    // The cases for each edge are:
+    //  - kBack: invalid because it's an invalid exit from the selection
+    //  - kSwitchBreak
+    //  - kLoopBreak
+    //  - kLoopContinue
+    //  - kIfBreak; normal case, may require a guard variable.
+    //  - kFallThrough; invalid exit from the selection
+    //  - kForward; normal case
+
     if (contains_true) {
       if_header_info->true_head = true_head;
     }
@@ -1804,11 +1813,12 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
       if_header_info->false_head = false_head;
     }
 
-    if ((true_head_info->header_for_merge != 0) &&
+    if (contains_true && (true_head_info->header_for_merge != 0) &&
         (true_head_info->header_for_merge != construct->begin_id)) {
       // The OpBranchConditional instruction for the true head block is an
-      // alternate path to the merge block, and hence the merge block is not
-      // dominated by its own (different) header.
+      // alternate path to the merge block of a construct nested inside the
+      // selection, and hence the merge block is not dominated by its own
+      // (different) header.
       return Fail() << "Block " << true_head
                     << " is the true branch for if-selection header "
                     << construct->begin_id
@@ -1816,11 +1826,12 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
                     << true_head_info->header_for_merge
                     << " (violates dominance rule)";
     }
-    if ((false_head_info->header_for_merge != 0) &&
+    if (contains_false && (false_head_info->header_for_merge != 0) &&
         (false_head_info->header_for_merge != construct->begin_id)) {
       // The OpBranchConditional instruction for the false head block is an
-      // alternate path to the merge block, and hence the merge block is not
-      // dominated by its own (different) header.
+      // alternate path to the merge block of a construct nested inside the
+      // selection, and hence the merge block is not dominated by its own
+      // (different) header.
       return Fail() << "Block " << false_head
                     << " is the false branch for if-selection header "
                     << construct->begin_id

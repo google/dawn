@@ -7220,8 +7220,9 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge) {
   EXPECT_THAT(p->error(), Eq(""));
 }
 
-TEST_F(SpvParserTest,
-       FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeTrueHeader) {
+TEST_F(
+    SpvParserTest,
+    FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeTrueHeader) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7252,8 +7253,9 @@ TEST_F(SpvParserTest,
          "merge block for header block 20 (violates dominance rule)"));
 }
 
-TEST_F(SpvParserTest,
-       FindIfSelectionInternalHeaders_DomViolation_Merge_CantBeFalseHeader) {
+TEST_F(
+    SpvParserTest,
+    FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeFalseHeader) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7284,8 +7286,9 @@ TEST_F(SpvParserTest,
          "merge block for header block 20 (violates dominance rule)"));
 }
 
-TEST_F(SpvParserTest,
-       FindIfSelectionInternalHeaders_DomViolation_Merge_CantBePremerge) {
+TEST_F(
+    SpvParserTest,
+    FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBePremerge) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7321,6 +7324,208 @@ TEST_F(SpvParserTest,
                  "reaching it, starting from blocks 20 and 50 which are the "
                  "true and false branches for the if-selection header block 10 "
                  "(violates dominance rule)"));
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_TrueBranch_LoopBreak_Ok) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     %10 = OpLabel
+     OpLoopMerge %99 %90 None
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %99 %30 ; true branch breaking is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; selection merge
+     OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpBranch %10 ; backedge
+
+     %99 = OpLabel ; loop merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(p->error(), Eq(""));
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_TrueBranch_LoopContinue_Ok) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     %10 = OpLabel
+     OpLoopMerge %99 %90 None
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %90 %30 ; true branch continue is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; selection merge
+     OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpBranch %10 ; backedge
+
+     %99 = OpLabel ; loop merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(p->error(), Eq(""));
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_TrueBranch_SwitchBreak_Ok) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %uint_20 %99 20 %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %99 %30 ; true branch switch break is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; if-selection merge
+     OpBranch %99
+
+     %99 = OpLabel ; switch merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(p->error(), Eq(""));
+}
+
+TEST_F(SpvParserTest, FindIfSelectionInternalHeaders_FalseBranch_LoopBreak_Ok) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     %10 = OpLabel
+     OpLoopMerge %99 %90 None
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %30 %99 ; false branch breaking is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; selection merge
+     OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpBranch %10 ; backedge
+
+     %99 = OpLabel ; loop merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(p->error(), Eq(""));
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_FalseBranch_LoopContinue_Ok) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     %10 = OpLabel
+     OpLoopMerge %99 %90 None
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %30 %90 ; false branch continue is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; selection merge
+     OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpBranch %10 ; backedge
+
+     %99 = OpLabel ; loop merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(p->error(), Eq(""));
+}
+
+TEST_F(SpvParserTest,
+       FindIfSelectionInternalHeaders_FalseBranch_SwitchBreak_Ok) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %uint_20 %99 20 %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %30 %99 ; false branch switch break is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; if-selection merge
+     OpBranch %99
+
+     %99 = OpLabel ; switch merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(FlowFindIfSelectionInternalHeaders(&fe));
+  EXPECT_THAT(p->error(), Eq(""));
 }
 
 TEST_F(SpvParserTest, EmitBody_IfBreak_FromThen_ForwardWithinThen) {
