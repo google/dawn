@@ -339,16 +339,15 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
     // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a
     // view bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps must switch over.
     renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-
-            [[stage(vertex)]] fn main() {
+            [[stage(vertex)]] fn main(
+                [[builtin(vertex_index)]] VertexIndex : u32
+            ) -> [[builtin(position)]] vec4<f32> {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
                     vec2<f32>(-1.0, -1.0)
                 );
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
@@ -356,10 +355,9 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
                 color : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> colorBuffer : U;
-            [[location(0)]] var<out> FragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() {
-                FragColor = colorBuffer.color;
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return colorBuffer.color;
             })");
 
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);

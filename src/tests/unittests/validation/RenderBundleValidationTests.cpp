@@ -28,14 +28,12 @@ namespace {
             ValidationTest::SetUp();
 
             vsModule = utils::CreateShaderModule(device, R"(
-                [[location(0)]] var<in> pos : vec2<f32>;
-
                 [[block]] struct S {
                     transform : mat2x2<f32>;
                 };
                 [[group(0), binding(0)]] var<uniform> uniforms : S;
 
-                [[stage(vertex)]] fn main() {
+                [[stage(vertex)]] fn main([[location(0)]] pos : vec2<f32>) {
                 })");
 
             fsModule = utils::CreateShaderModule(device, R"(

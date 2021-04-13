@@ -40,16 +40,16 @@ class D3D12DescriptorHeapTests : public DawnTest {
         mD3DDevice = reinterpret_cast<Device*>(device.Get());
 
         mSimpleVSModule = utils::CreateShaderModule(device, R"(
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-            [[stage(vertex)]] fn main() {
+            [[stage(vertex)]] fn main(
+                [[builtin(vertex_index)]] VertexIndex : u32
+            ) -> [[builtin(position)]] vec4<f32> {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
                     vec2<f32>(-1.0, -1.0)
                 );
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
         mSimpleFSModule = utils::CreateShaderModule(device, R"(
@@ -57,10 +57,9 @@ class D3D12DescriptorHeapTests : public DawnTest {
                 color : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> colorBuffer : U;
-            [[location(0)]] var<out> FragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() {
-                FragColor = colorBuffer.color;
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return colorBuffer.color;
             })");
     }
 
@@ -177,17 +176,15 @@ TEST_P(D3D12DescriptorHeapTests, NoSwitchOverSamplerHeap) {
     // sampler bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps WILL NOT switch over
     // because the sampler heap allocations are de-duplicated.
     renderPipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() {
-                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[location(0)]] var<out> FragColor : vec4<f32>;
             [[group(0), binding(0)]] var sampler0 : sampler;
-            [[stage(fragment)]] fn main() {
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
                 let referenceSampler : sampler = sampler0;
-                FragColor = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+                return vec4<f32>(0.0, 0.0, 0.0, 0.0);
             })");
 
     wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
@@ -787,16 +784,16 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
                 transform : mat2x2<f32>;
             };
             [[group(0), binding(0)]] var<uniform> buffer0 : U;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-            [[stage(vertex)]] fn main() {
+            [[stage(vertex)]] fn main(
+                [[builtin(vertex_index)]] VertexIndex : u32
+            ) -> [[builtin(position)]] vec4<f32> {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
                     vec2<f32>(-1.0, -1.0)
                 );
-                Position = vec4<f32>(buffer0.transform * (pos[VertexIndex]), 0.0, 1.0);
+                return vec4<f32>(buffer0.transform * (pos[VertexIndex]), 0.0, 1.0);
             })");
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[block]] struct U {
@@ -806,11 +803,10 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
             [[group(0), binding(2)]] var texture0 : texture_2d<f32>;
             [[group(0), binding(3)]] var<uniform> buffer0 : U;
 
-            [[location(0)]] var<out> FragColor : vec4<f32>;
-            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-                FragColor = textureSample(texture0, sampler0, FragCoord.xy) + buffer0.color;
+            [[stage(fragment)]] fn main(
+                [[builtin(frag_coord)]] FragCoord : vec4<f32>
+            ) -> [[location(0)]] vec4<f32> {
+                return textureSample(texture0, sampler0, FragCoord.xy) + buffer0.color;
             })");
 
         utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);

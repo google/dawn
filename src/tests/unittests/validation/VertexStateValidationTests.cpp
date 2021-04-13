@@ -24,9 +24,8 @@ class VertexStateTest : public ValidationTest {
                         const char* vertexSource) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexSource);
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() {
-                fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )");
 
@@ -45,9 +44,8 @@ class VertexStateTest : public ValidationTest {
     }
 
     const char* kDummyVertexShader = R"(
-        [[builtin(position)]] var<out> Position : vec4<f32>;
-        [[stage(vertex)]] fn main() {
-            Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )";
 };
@@ -99,29 +97,29 @@ TEST_F(VertexStateTest, PipelineCompatibility) {
 
     // Control case: pipeline with one input per attribute
     CreatePipeline(true, state, R"(
-        [[location(0)]] var<in> a : vec4<f32>;
-        [[location(1)]] var<in> b : vec4<f32>;
-        [[builtin(position)]] var<out> Position : vec4<f32>;
-        [[stage(vertex)]] fn main() {
-            Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        [[stage(vertex)]] fn main(
+            [[location(0)]] a : vec4<f32>,
+            [[location(1)]] b : vec4<f32>
+        ) -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )");
 
     // Check it is valid for the pipeline to use a subset of the VertexState
     CreatePipeline(true, state, R"(
-        [[location(0)]] var<in> a : vec4<f32>;
-        [[builtin(position)]] var<out> Position : vec4<f32>;
-        [[stage(vertex)]] fn main() {
-            Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        [[stage(vertex)]] fn main(
+            [[location(0)]] a : vec4<f32>
+        ) -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )");
 
     // Check for an error when the pipeline uses an attribute not in the vertex input
     CreatePipeline(false, state, R"(
-        [[location(2)]] var<in> a : vec4<f32>;
-        [[builtin(position)]] var<out> Position : vec4<f32>;
-        [[stage(vertex)]] fn main() {
-            Position = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        [[stage(vertex)]] fn main(
+            [[location(2)]] a : vec4<f32>
+        ) -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
     )");
 }

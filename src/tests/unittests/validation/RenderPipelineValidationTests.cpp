@@ -27,15 +27,13 @@ class RenderPipelineValidationTest : public ValidationTest {
         ValidationTest::SetUp();
 
         vsModule = utils::CreateShaderModule(device, R"(
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() {
-                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
         fsModule = utils::CreateShaderModule(device, R"(
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() {
-                fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
     }
 
@@ -191,9 +189,11 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
 
             std::ostringstream stream;
             stream << R"(
-                [[location(0)]] var<out> fragColor : vec4<)"
+                [[stage(fragment)]] fn main() -> [[location(0)]] vec4<)"
+                   << kScalarTypes[i] << R"(> {
+                    var result : vec4<)"
                    << kScalarTypes[i] << R"(>;
-                [[stage(fragment)]] fn main() {
+                    return result;
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
@@ -484,8 +484,7 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
             data : array<u32, 100>;
         };
         [[group(0), binding(0)]] var<storage> dst : [[access(read_write)]] Dst;
-        [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main([[builtin(vertex_index)]] VertexIndex : u32) {
             dst.data[VertexIndex] = 0x1234u;
         })");
 
@@ -591,16 +590,12 @@ TEST_F(RenderPipelineValidationTest, DepthCompareUndefinedIsError) {
 // Test that the entryPoint names must be present for the correct stage in the shader module.
 TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[builtin(position)]] var<out> position : vec4<f32>;
-        [[stage(vertex)]] fn vertex_main() {
-            position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-            return;
+        [[stage(vertex)]] fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        [[location(0)]] var<out> color : vec4<f32>;
-        [[stage(fragment)]] fn fragment_main() {
-            color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-            return;
+        [[stage(fragment)]] fn fragment_main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
 
@@ -641,17 +636,13 @@ TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
 // Test that vertex attrib validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[builtin(position)]] var<out> position : vec4<f32>;
-        [[location(0)]] var<in> attrib0 : vec4<f32>;
-        [[location(1)]] var<in> attrib1 : vec4<f32>;
-
-        [[stage(vertex)]] fn vertex0() {
-            position = attrib0;
-            return;
+        [[stage(vertex)]] fn vertex0([[location(0)]] attrib0 : vec4<f32>)
+                                    -> [[builtin(position)]] vec4<f32> {
+            return attrib0;
         }
-        [[stage(vertex)]] fn vertex1() {
-            position = attrib1;
-            return;
+        [[stage(vertex)]] fn vertex1([[location(1)]] attrib1 : vec4<f32>)
+                                    -> [[builtin(position)]] vec4<f32> {
+            return attrib1;
         }
     )");
 
@@ -687,16 +678,11 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
 // Test that fragment output validation is for the correct entryPoint
 TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[location(0)]] var<out> colorFloat : vec4<f32>;
-        [[location(0)]] var<out> colorUint : vec4<u32>;
-
-        [[stage(fragment)]] fn fragmentFloat() {
-            colorFloat = vec4<f32>(0.0, 0.0, 0.0, 0.0);
-            return;
+        [[stage(fragment)]] fn fragmentFloat() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
         }
-        [[stage(fragment)]] fn fragmentUint() {
-            colorUint = vec4<u32>(0u, 0u, 0u, 0u);
-            return;
+        [[stage(fragment)]] fn fragmentUint() -> [[location(0)]] vec4<u32> {
+            return vec4<u32>(0u, 0u, 0u, 0u);
         }
     )");
 
@@ -730,21 +716,15 @@ TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
         [[block]] struct Uniforms {
             data : vec4<f32>;
         };
-        [[binding 0, set 0]] var<uniform> var0 : Uniforms;
-        [[binding 1, set 0]] var<uniform> var1 : Uniforms;
-        [[builtin(position)]] var<out> position : vec4<f32>;
+        [[group(0), binding(0)]] var<uniform> var0 : Uniforms;
+        [[group(0), binding(1)]] var<uniform> var1 : Uniforms;
 
-        fn vertex0() {
-            position = var0.data;
-            return;
+        [[stage(vertex)]] fn vertex0() -> [[builtin(position)]] vec4<f32> {
+            return var0.data;
         }
-        fn vertex1() {
-            position = var1.data;
-            return;
+        [[stage(vertex)]] fn vertex1() -> [[builtin(position)]] vec4<f32> {
+            return var1.data;
         }
-
-        entry_point vertex = vertex0;
-        entry_point vertex = vertex1;
     )");
 
     wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(

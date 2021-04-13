@@ -26,9 +26,8 @@ class VertexBufferValidationTest : public ValidationTest {
         ValidationTest::SetUp();
 
         fsModule = utils::CreateShaderModule(device, R"(
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() {
-                fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
     }
 
@@ -42,13 +41,18 @@ class VertexBufferValidationTest : public ValidationTest {
 
     wgpu::ShaderModule MakeVertexShader(unsigned int bufferCount) {
         std::ostringstream vs;
+        vs << "[[stage(vertex)]] fn main(\n";
         for (unsigned int i = 0; i < bufferCount; ++i) {
-            vs << "[[location(" << i << ")]] var<in> a_position" << i << " : vec3<f32>;\n";
+            // TODO(cwallez@chromium.org): remove this special handling of 0 once Tint supports
+            // trailing commas in argument lists.
+            if (i != 0) {
+                vs << ", ";
+            }
+            vs << "[[location(" << i << ")]] a_position" << i << " : vec3<f32>\n";
         }
-        vs << "[[builtin(position)]] var<out> Position : vec4<f32>;";
-        vs << "[[stage(vertex)]] fn main() {\n";
+        vs << ") -> [[builtin(position)]] vec4<f32> {";
 
-        vs << "Position = vec4<f32>(";
+        vs << "return vec4<f32>(";
         for (unsigned int i = 0; i < bufferCount; ++i) {
             vs << "a_position" << i;
             if (i != bufferCount - 1) {
