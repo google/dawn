@@ -72,15 +72,11 @@ Transform::Output Renamer::Run(const Program* in, const DataMap&) {
 
   switch (cfg_.method) {
     case Method::kMonotonic:
-      ctx.ReplaceAll([&](Symbol sym) {
-        auto str_in = in->Symbols().NameFor(sym);
-        auto it = remappings.find(str_in);
-        if (it != remappings.end()) {
-          return out.Symbols().Get(it->second);
-        }
-        auto str_out = "_tint_" + std::to_string(remappings.size() + 1);
-        remappings.emplace(str_in, str_out);
-        return out.Symbols().Register(str_out);
+      ctx.ReplaceAll([&](Symbol sym_in) {
+        auto sym_out = ctx.dst->Symbols().New();
+        remappings.emplace(ctx.src->Symbols().NameFor(sym_in),
+                           ctx.dst->Symbols().NameFor(sym_out));
+        return sym_out;
       });
 
       ctx.ReplaceAll(

@@ -53,15 +53,15 @@ fn entry() {
 )";
 
   auto* expect = R"(
-[[builtin(vertex_index)]] var<in> _tint_1 : u32;
+[[builtin(vertex_index)]] var<in> tint_symbol : u32;
 
-fn _tint_2() -> u32 {
-  return _tint_1;
+fn tint_symbol_1() -> u32 {
+  return tint_symbol;
 }
 
 [[stage(vertex)]]
-fn _tint_3() {
-  _tint_2();
+fn tint_symbol_2() {
+  tint_symbol_1();
 }
 )";
 
@@ -73,9 +73,9 @@ fn _tint_3() {
 
   ASSERT_NE(data, nullptr);
   Renamer::Data::Remappings expected_remappings = {
-      {"vert_idx", "_tint_1"},
-      {"test", "_tint_2"},
-      {"entry", "_tint_3"},
+      {"vert_idx", "tint_symbol"},
+      {"test", "tint_symbol_1"},
+      {"entry", "tint_symbol_2"},
   };
   EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
@@ -93,11 +93,11 @@ fn entry() -> [[builtin(position)]] vec4<f32> {
 
   auto* expect = R"(
 [[stage(vertex)]]
-fn _tint_1() -> [[builtin(position)]] vec4<f32> {
-  var _tint_2 : vec4<f32>;
-  var _tint_3 : f32;
-  var _tint_4 : f32;
-  return (_tint_2.zyxw + _tint_2.rgab);
+fn tint_symbol() -> [[builtin(position)]] vec4<f32> {
+  var tint_symbol_1 : vec4<f32>;
+  var tint_symbol_2 : f32;
+  var tint_symbol_3 : f32;
+  return (tint_symbol_1.zyxw + tint_symbol_1.rgab);
 }
 )";
 
@@ -109,10 +109,10 @@ fn _tint_1() -> [[builtin(position)]] vec4<f32> {
 
   ASSERT_NE(data, nullptr);
   Renamer::Data::Remappings expected_remappings = {
-      {"entry", "_tint_1"},
-      {"v", "_tint_2"},
-      {"rgba", "_tint_3"},
-      {"xyzw", "_tint_4"},
+      {"entry", "tint_symbol"},
+      {"v", "tint_symbol_1"},
+      {"rgba", "tint_symbol_2"},
+      {"xyzw", "tint_symbol_3"},
   };
   EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
@@ -128,9 +128,9 @@ fn entry() -> [[builtin(position)]] vec4<f32> {
 
   auto* expect = R"(
 [[stage(vertex)]]
-fn _tint_1() -> [[builtin(position)]] vec4<f32> {
-  var _tint_2 : vec4<f32>;
-  return abs(_tint_2);
+fn tint_symbol() -> [[builtin(position)]] vec4<f32> {
+  var tint_symbol_1 : vec4<f32>;
+  return abs(tint_symbol_1);
 }
 )";
 
@@ -142,8 +142,45 @@ fn _tint_1() -> [[builtin(position)]] vec4<f32> {
 
   ASSERT_NE(data, nullptr);
   Renamer::Data::Remappings expected_remappings = {
-      {"entry", "_tint_1"},
-      {"blah", "_tint_2"},
+      {"entry", "tint_symbol"},
+      {"blah", "tint_symbol_1"},
+  };
+  EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
+}
+
+TEST_F(RenamerTest, AttemptSymbolCollision) {
+  auto* src = R"(
+[[stage(vertex)]]
+fn entry() -> [[builtin(position)]] vec4<f32> {
+  var tint_symbol : vec4<f32>;
+  var tint_symbol_2 : vec4<f32>;
+  var tint_symbol_4 : vec4<f32>;
+  return tint_symbol + tint_symbol_2 + tint_symbol_4;
+}
+)";
+
+  auto* expect = R"(
+[[stage(vertex)]]
+fn tint_symbol() -> [[builtin(position)]] vec4<f32> {
+  var tint_symbol_1 : vec4<f32>;
+  var tint_symbol_2 : vec4<f32>;
+  var tint_symbol_3 : vec4<f32>;
+  return ((tint_symbol_1 + tint_symbol_2) + tint_symbol_3);
+}
+)";
+
+  auto got = Run<Renamer>(src);
+
+  EXPECT_EQ(expect, str(got));
+
+  auto* data = got.data.Get<Renamer::Data>();
+
+  ASSERT_NE(data, nullptr);
+  Renamer::Data::Remappings expected_remappings = {
+      {"entry", "tint_symbol"},
+      {"tint_symbol", "tint_symbol_1"},
+      {"tint_symbol_2", "tint_symbol_2"},
+      {"tint_symbol_4", "tint_symbol_3"},
   };
   EXPECT_THAT(data->remappings, ContainerEq(expected_remappings));
 }
