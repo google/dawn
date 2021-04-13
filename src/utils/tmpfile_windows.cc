@@ -32,7 +32,7 @@ std::string TmpFilePath() {
 
 }  // namespace
 
-TmpFile::TmpFile() : path_(TmpFilePath()) {}
+TmpFile::TmpFile(std::string ext) : path_(TmpFilePath() + ext) {}
 
 TmpFile::~TmpFile() {
   if (!path_.empty()) {

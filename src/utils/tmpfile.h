@@ -28,7 +28,9 @@ class TmpFile {
   /// Constructor.
   /// Creates a new temporary file which can be written to.
   /// The temporary file will be automatically deleted on destruction.
-  TmpFile();
+  /// @param extension optional file extension to use with the file. The file
+  /// have no extension by default.
+  explicit TmpFile(std::string extension = "");
 
   /// Destructor.
   /// Deletes the temporary file.

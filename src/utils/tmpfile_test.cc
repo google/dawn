@@ -66,6 +66,25 @@ TEST(TmpFileTest, WriteReadAppendDelete) {
   ASSERT_FALSE(file);
 }
 
+TEST(TmpFileTest, FileExtension) {
+  const std::string kExt = ".foo";
+  std::string path;
+  {
+    TmpFile tmp(kExt);
+    if (!tmp) {
+      GTEST_SKIP() << "Unable create a temporary file";
+    }
+    path = tmp.Path();
+  }
+
+  ASSERT_GT(path.length(), kExt.length());
+  EXPECT_EQ(kExt, path.substr(path.length() - kExt.length()));
+
+  // Check the file has been deleted when it fell out of scope
+  std::ifstream file(path);
+  ASSERT_FALSE(file);
+}
+
 }  // namespace
 }  // namespace utils
 }  // namespace tint

@@ -15,15 +15,25 @@
 #include "src/utils/tmpfile.h"
 
 #include <unistd.h>
+#include <limits>
+
+#include "src/debug.h"
 
 namespace tint {
 namespace utils {
 
 namespace {
 
-std::string TmpFilePath() {
-  char name[] = "tint_XXXXXX";
-  int file = mkstemp(name);
+std::string TmpFilePath(std::string ext) {
+  // mkstemps requires an `int` for the file extension name but STL represents
+  // size_t. Pre-C++20 there the behavior for unsigned-to-signed conversion
+  // (when the source value exceeds the representable range) is implementation
+  // defined. While such a large file extension is unlikely in practice, we
+  // enforce this here at runtime.
+  TINT_ASSERT(ext.length() <=
+              static_cast<size_t>(std::numeric_limits<int>::max()));
+  std::string name = "tint_XXXXXX" + ext;
+  int file = mkstemps(&name[0], static_cast<int>(ext.length()));
   if (file != -1) {
     close(file);
     return name;
@@ -33,7 +43,8 @@ std::string TmpFilePath() {
 
 }  // namespace
 
-TmpFile::TmpFile() : path_(TmpFilePath()) {}
+TmpFile::TmpFile(std::string extension)
+    : path_(TmpFilePath(std::move(extension))) {}
 
 TmpFile::~TmpFile() {
   if (!path_.empty()) {
