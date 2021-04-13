@@ -72,6 +72,38 @@ namespace dawn_wire { namespace server {
         return true;
     }
 
+    bool Server::InjectSwapChain(WGPUSwapChain swapchain,
+                                 uint32_t id,
+                                 uint32_t generation,
+                                 uint32_t deviceId,
+                                 uint32_t deviceGeneration) {
+        ASSERT(swapchain != nullptr);
+        ObjectData<WGPUDevice>* device = DeviceObjects().Get(deviceId);
+        if (device == nullptr || device->generation != deviceGeneration) {
+            return false;
+        }
+
+        ObjectData<WGPUSwapChain>* data = SwapChainObjects().Allocate(id);
+        if (data == nullptr) {
+            return false;
+        }
+
+        data->handle = swapchain;
+        data->generation = generation;
+        data->state = AllocationState::Allocated;
+        data->deviceInfo = device->info.get();
+
+        if (!TrackDeviceChild(data->deviceInfo, ObjectType::SwapChain, id)) {
+            return false;
+        }
+
+        // The texture is externally owned so it shouldn't be destroyed when we receive a destroy
+        // message from the client. Add a reference to counterbalance the eventual release.
+        mProcs.swapChainReference(swapchain);
+
+        return true;
+    }
+
     bool Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
         ASSERT(device != nullptr);
         ObjectData<WGPUDevice>* data = DeviceObjects().Allocate(id);

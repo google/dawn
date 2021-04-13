@@ -96,6 +96,18 @@ namespace dawn_wire { namespace client {
         return result;
     }
 
+    ReservedSwapChain Client::ReserveSwapChain(WGPUDevice device) {
+        auto* allocation = SwapChainAllocator().New(this);
+
+        ReservedSwapChain result;
+        result.swapchain = ToAPI(allocation->object.get());
+        result.id = allocation->object->id;
+        result.generation = allocation->generation;
+        result.deviceId = FromAPI(device)->id;
+        result.deviceGeneration = DeviceAllocator().GetGeneration(FromAPI(device)->id);
+        return result;
+    }
+
     ReservedDevice Client::ReserveDevice() {
         auto* allocation = DeviceAllocator().New(this);
 
@@ -108,6 +120,10 @@ namespace dawn_wire { namespace client {
 
     void Client::ReclaimTextureReservation(const ReservedTexture& reservation) {
         TextureAllocator().Free(FromAPI(reservation.texture));
+    }
+
+    void Client::ReclaimSwapChainReservation(const ReservedSwapChain& reservation) {
+        SwapChainAllocator().Free(FromAPI(reservation.swapchain));
     }
 
     void Client::ReclaimDeviceReservation(const ReservedDevice& reservation) {

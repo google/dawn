@@ -42,12 +42,16 @@ namespace dawn_wire {
         const volatile char* HandleCommands(const volatile char* commands,
                                             size_t size) override final;
 
-        // TODO(enga): Remove defaults after updating Chrome.
         bool InjectTexture(WGPUTexture texture,
                            uint32_t id,
                            uint32_t generation,
-                           uint32_t deviceId = 1,
-                           uint32_t deviceGeneration = 0);
+                           uint32_t deviceId,
+                           uint32_t deviceGeneration);
+        bool InjectSwapChain(WGPUSwapChain swapchain,
+                             uint32_t id,
+                             uint32_t generation,
+                             uint32_t deviceId,
+                             uint32_t deviceGeneration);
 
         bool InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation);
 

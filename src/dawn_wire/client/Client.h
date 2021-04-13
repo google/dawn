@@ -44,9 +44,11 @@ namespace dawn_wire { namespace client {
         }
 
         ReservedTexture ReserveTexture(WGPUDevice device);
+        ReservedSwapChain ReserveSwapChain(WGPUDevice device);
         ReservedDevice ReserveDevice();
 
         void ReclaimTextureReservation(const ReservedTexture& reservation);
+        void ReclaimSwapChainReservation(const ReservedSwapChain& reservation);
         void ReclaimDeviceReservation(const ReservedDevice& reservation);
 
         template <typename Cmd>

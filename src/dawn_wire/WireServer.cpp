@@ -39,6 +39,14 @@ namespace dawn_wire {
         return mImpl->InjectTexture(texture, id, generation, deviceId, deviceGeneration);
     }
 
+    bool WireServer::InjectSwapChain(WGPUSwapChain swapchain,
+                                     uint32_t id,
+                                     uint32_t generation,
+                                     uint32_t deviceId,
+                                     uint32_t deviceGeneration) {
+        return mImpl->InjectSwapChain(swapchain, id, generation, deviceId, deviceGeneration);
+    }
+
     bool WireServer::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
         return mImpl->InjectDevice(device, id, generation);
     }

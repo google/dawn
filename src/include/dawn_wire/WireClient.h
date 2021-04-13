@@ -38,6 +38,14 @@ namespace dawn_wire {
         uint32_t deviceGeneration;
     };
 
+    struct ReservedSwapChain {
+        WGPUSwapChain swapchain;
+        uint32_t id;
+        uint32_t generation;
+        uint32_t deviceId;
+        uint32_t deviceGeneration;
+    };
+
     struct ReservedDevice {
         WGPUDevice device;
         uint32_t id;
@@ -58,9 +66,11 @@ namespace dawn_wire {
                                             size_t size) override final;
 
         ReservedTexture ReserveTexture(WGPUDevice device);
+        ReservedSwapChain ReserveSwapChain(WGPUDevice device);
         ReservedDevice ReserveDevice();
 
         void ReclaimTextureReservation(const ReservedTexture& reservation);
+        void ReclaimSwapChainReservation(const ReservedSwapChain& reservation);
         void ReclaimDeviceReservation(const ReservedDevice& reservation);
 
         // Disconnects the client.

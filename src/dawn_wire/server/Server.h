@@ -180,6 +180,12 @@ namespace dawn_wire { namespace server {
                            uint32_t deviceId,
                            uint32_t deviceGeneration);
 
+        bool InjectSwapChain(WGPUSwapChain swapchain,
+                             uint32_t id,
+                             uint32_t generation,
+                             uint32_t deviceId,
+                             uint32_t deviceGeneration);
+
         bool InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation);
 
         WGPUDevice GetDevice(uint32_t id, uint32_t generation);

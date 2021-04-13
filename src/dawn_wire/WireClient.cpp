@@ -33,12 +33,20 @@ namespace dawn_wire {
         return mImpl->ReserveTexture(device);
     }
 
+    ReservedSwapChain WireClient::ReserveSwapChain(WGPUDevice device) {
+        return mImpl->ReserveSwapChain(device);
+    }
+
     ReservedDevice WireClient::ReserveDevice() {
         return mImpl->ReserveDevice();
     }
 
     void WireClient::ReclaimTextureReservation(const ReservedTexture& reservation) {
         mImpl->ReclaimTextureReservation(reservation);
+    }
+
+    void WireClient::ReclaimSwapChainReservation(const ReservedSwapChain& reservation) {
+        mImpl->ReclaimSwapChainReservation(reservation);
     }
 
     void WireClient::ReclaimDeviceReservation(const ReservedDevice& reservation) {
