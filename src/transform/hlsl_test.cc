@@ -284,7 +284,7 @@ TEST_F(HlslTest, AddEmptyEntryPoint) {
 
   auto* expect = R"(
 [[stage(vertex)]]
-fn _tint_unused_entry_point() {
+fn tint_unused_entry_point() {
 }
 )";
 
