@@ -116,6 +116,29 @@ fn compute_entry() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(EmitVertexPointSizeTest, AttemptSymbolCollision) {
+  auto* src = R"(
+[[stage(vertex)]]
+fn entry() {
+  var tint_pointsize : f32;
+}
+)";
+
+  auto* expect = R"(
+[[builtin(pointsize)]] var<out> tint_pointsize_1 : f32;
+
+[[stage(vertex)]]
+fn entry() {
+  tint_pointsize_1 = 1.0;
+  var tint_pointsize : f32;
+}
+)";
+
+  auto got = Run<EmitVertexPointSize>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint

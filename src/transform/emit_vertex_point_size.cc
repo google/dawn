@@ -21,11 +21,6 @@
 
 namespace tint {
 namespace transform {
-namespace {
-
-const char kPointSizeVar[] = "tint_pointsize";
-
-}  // namespace
 
 EmitVertexPointSize::EmitVertexPointSize() = default;
 EmitVertexPointSize::~EmitVertexPointSize() = default;
@@ -37,38 +32,31 @@ Transform::Output EmitVertexPointSize::Run(const Program* in, const DataMap&) {
   }
 
   ProgramBuilder out;
-  auto* f32 = out.create<type::F32>();
+
+  CloneContext ctx(&out, in);
+
+  // Start by cloning all the symbols. This ensures that the authored symbols
+  // won't get renamed if they collide with new symbols below.
+  ctx.CloneSymbols();
+
+  Symbol pointsize = out.Symbols().New("tint_pointsize");
 
   // Declare the pointsize builtin output variable.
-  auto* pointsize_var = out.create<ast::Variable>(
-      Source{},                               // source
-      out.Symbols().Register(kPointSizeVar),  // symbol
-      ast::StorageClass::kOutput,             // storage_class
-      f32,                                    // type
-      false,                                  // is_const
-      nullptr,                                // constructor
-      ast::DecorationList{
-          out.create<ast::BuiltinDecoration>(Source{},
-                                             ast::Builtin::kPointSize),
-      });
-  out.AST().AddGlobalVariable(pointsize_var);
+  out.Global(pointsize, out.ty.f32(), ast::StorageClass::kOutput, nullptr,
+             ast::DecorationList{
+                 out.create<ast::BuiltinDecoration>(ast::Builtin::kPointSize),
+             });
 
   // Add the pointsize assignment statement to the front of all vertex stages.
-  CloneContext ctx(&out, in);
   ctx.ReplaceAll([&](ast::Function* func) -> ast::Function* {
     if (func->pipeline_stage() != ast::PipelineStage::kVertex) {
       return nullptr;  // Just clone func
     }
 
-    // Build the AST expression & statement for assigning pointsize one.
-    auto* one = out.create<ast::ScalarConstructorExpression>(
-        Source{}, out.create<ast::FloatLiteral>(Source{}, f32, 1.0f));
-    auto* pointsize_ident = out.create<ast::IdentifierExpression>(
-        Source{}, out.Symbols().Register(kPointSizeVar));
-    auto* pointsize_assign =
-        out.create<ast::AssignmentStatement>(Source{}, pointsize_ident, one);
-
-    return CloneWithStatementsAtStart(&ctx, func, {pointsize_assign});
+    return CloneWithStatementsAtStart(&ctx, func,
+                                      {
+                                          out.Assign(pointsize, 1.0f),
+                                      });
   });
   ctx.Clone();
 
