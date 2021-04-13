@@ -1799,13 +1799,15 @@ bool FunctionEmitter::FindIfSelectionInternalHeaders() {
 
     // The cases for each edge are:
     //  - kBack: invalid because it's an invalid exit from the selection
-    //  - kSwitchBreak
-    //  - kLoopBreak
-    //  - kLoopContinue
+    //  - kSwitchBreak ; record this for later special processing
+    //  - kLoopBreak ; record this for later special processing
+    //  - kLoopContinue ; record this for later special processing
     //  - kIfBreak; normal case, may require a guard variable.
     //  - kFallThrough; invalid exit from the selection
     //  - kForward; normal case
 
+    if_header_info->true_kind = if_header_info->succ_edge[true_head];
+    if_header_info->false_kind = if_header_info->succ_edge[false_head];
     if (contains_true) {
       if_header_info->true_head = true_head;
     }
@@ -2344,9 +2346,19 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
   //   ends at the premerge head (if it exists) or at the selection end.
   const uint32_t else_end = premerge_head ? premerge_head : intended_merge;
 
+  const bool true_is_break = (block_info.true_kind == EdgeKind::kSwitchBreak) ||
+                             (block_info.true_kind == EdgeKind::kLoopBreak);
+  const bool false_is_break =
+      (block_info.false_kind == EdgeKind::kSwitchBreak) ||
+      (block_info.false_kind == EdgeKind::kLoopBreak);
+  const bool true_is_continue = block_info.true_kind == EdgeKind::kLoopContinue;
+  const bool false_is_continue =
+      block_info.false_kind == EdgeKind::kLoopContinue;
+
   // Push statement blocks for the then-clause and the else-clause.
   // But make sure we do it in the right order.
-  auto push_else = [this, builder, else_end, construct]() {
+  auto push_else = [this, builder, else_end, construct, false_is_break,
+                    false_is_continue]() {
     // Push the else clause onto the stack first.
     PushNewStatementBlock(
         construct, else_end, [=](const ast::StatementList& stmts) {
@@ -2359,9 +2371,16 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
                 create<ast::ElseStatement>(Source{}, nullptr, else_body));
           }
         });
+    if (false_is_break) {
+      AddStatement(create<ast::BreakStatement>(Source{}));
+    }
+    if (false_is_continue) {
+      AddStatement(create<ast::ContinueStatement>(Source{}));
+    }
   };
 
-  if (GetBlockInfo(else_end)->pos < GetBlockInfo(then_end)->pos) {
+  if (!true_is_break && !true_is_continue &&
+      (GetBlockInfo(else_end)->pos < GetBlockInfo(then_end)->pos)) {
     // Process the else-clause first.  The then-clause will be empty so avoid
     // pushing onto the stack at all.
     push_else();
@@ -2382,7 +2401,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
         // just like in the original SPIR-V.
         PushTrueGuard(construct->end_id);
       } else {
-        // Add a flow guard around the blocks in the premrege area.
+        // Add a flow guard around the blocks in the premege area.
         PushGuard(guard_name, construct->end_id);
       }
     }
@@ -2399,6 +2418,12 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
         construct, then_end, [=](const ast::StatementList& stmts) {
           builder->body = create<ast::BlockStatement>(Source{}, stmts);
         });
+    if (true_is_break) {
+      AddStatement(create<ast::BreakStatement>(Source{}));
+    }
+    if (true_is_continue) {
+      AddStatement(create<ast::ContinueStatement>(Source{}));
+    }
   }
 
   return success();

@@ -128,6 +128,12 @@ struct BlockInfo {
   /// The following fields record relationships among blocks in a selection
   /// construct for an OpBranchConditional instruction.
 
+  /// When this block is an if-selection header, this is the edge kind
+  /// for the true branch.
+  EdgeKind true_kind = EdgeKind::kForward;
+  /// When this block is an if-selection header, this is the edge kind
+  /// for the false branch.
+  EdgeKind false_kind = EdgeKind::kForward;
   /// If not 0, then this block is an if-selection header, and `true_head` is
   /// the target id of the true branch on the OpBranchConditional, and that
   /// target is inside the if-selection.

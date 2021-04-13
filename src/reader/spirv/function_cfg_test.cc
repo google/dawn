@@ -13955,6 +13955,310 @@ TEST_F(SpvParserTest, SiblingLoopConstruct_HasSiblingLoop) {
                  "parent:Function@10 scope:[1,3) in-l:Loop@20 }"));
 }
 
+TEST_F(SpvParserTest, EmitBody_IfSelection_TrueBranch_LoopBreak) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     %10 = OpLabel
+     OpLoopMerge %99 %90 None
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %99 %30 ; true branch breaking is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; selection merge
+     OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpBranch %10 ; backedge
+
+     %99 = OpLabel ; loop merge
+     OpReturn
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(Loop{
+  If{
+    (
+      ScalarConstructor[not set]{false}
+    )
+    {
+      Break{}
+    }
+  }
+}
+Return{}
+)";
+  ASSERT_EQ(expect, got);
+}
+
+TEST_F(SpvParserTest, EmitBody_TrueBranch_LoopContinue) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     %10 = OpLabel
+     OpLoopMerge %99 %90 None
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %90 %30 ; true branch continue is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; selection merge
+     OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpBranch %10 ; backedge
+
+     %99 = OpLabel ; loop merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(Loop{
+  If{
+    (
+      ScalarConstructor[not set]{false}
+    )
+    {
+      Continue{}
+    }
+  }
+}
+Return{}
+)";
+  ASSERT_EQ(expect, got);
+}
+
+TEST_F(SpvParserTest, EmitBody_TrueBranch_SwitchBreak) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %uint_20 %99 20 %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %99 %30 ; true branch switch break is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; if-selection merge
+     OpBranch %99
+
+     %99 = OpLabel ; switch merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(Switch{
+  ScalarConstructor[not set]{20}
+  {
+    Case 20{
+      If{
+        (
+          ScalarConstructor[not set]{false}
+        )
+        {
+          Break{}
+        }
+      }
+    }
+    Default{
+    }
+  }
+}
+Return{}
+)";
+  ASSERT_EQ(expect, got);
+}
+
+TEST_F(SpvParserTest, EmitBody_FalseBranch_LoopBreak) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     %10 = OpLabel
+     OpLoopMerge %99 %90 None
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %30 %99 ; false branch breaking is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; selection merge
+     OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpBranch %10 ; backedge
+
+     %99 = OpLabel ; loop merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(Loop{
+  If{
+    (
+      ScalarConstructor[not set]{false}
+    )
+    {
+    }
+  }
+  Else{
+    {
+      Break{}
+    }
+  }
+}
+Return{}
+)";
+  ASSERT_EQ(expect, got);
+}
+
+TEST_F(SpvParserTest, EmitBody_FalseBranch_LoopContinue) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %5 = OpLabel
+     OpBranch %10
+
+     %10 = OpLabel
+     OpLoopMerge %99 %90 None
+     OpBranch %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %30 %90 ; false branch continue is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; selection merge
+     OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpBranch %10 ; backedge
+
+     %99 = OpLabel ; loop merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(Loop{
+  If{
+    (
+      ScalarConstructor[not set]{false}
+    )
+    {
+    }
+  }
+  Else{
+    {
+      Continue{}
+    }
+  }
+}
+Return{}
+)";
+  ASSERT_EQ(expect, got) << p->error();
+}
+
+TEST_F(SpvParserTest, EmitBody_FalseBranch_SwitchBreak) {
+  // crbug.com/tint/243
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpSelectionMerge %99 None
+     OpSwitch %uint_20 %99 20 %20
+
+     %20 = OpLabel
+     OpSelectionMerge %40 None
+     OpBranchConditional %cond %30 %99 ; false branch switch break is ok
+
+     %30 = OpLabel
+     OpBranch %40
+
+     %40 = OpLabel ; if-selection merge
+     OpBranch %99
+
+     %99 = OpLabel ; switch merge
+     OpReturn
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(Switch{
+  ScalarConstructor[not set]{20}
+  {
+    Case 20{
+      If{
+        (
+          ScalarConstructor[not set]{false}
+        )
+        {
+        }
+      }
+      Else{
+        {
+          Break{}
+        }
+      }
+    }
+    Default{
+    }
+  }
+}
+Return{}
+)";
+  ASSERT_EQ(expect, got);
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
