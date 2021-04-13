@@ -25,10 +25,12 @@ class MemberAccessorExpression
     : public Castable<MemberAccessorExpression, Expression> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the member accessor expression source
   /// @param structure the structure
   /// @param member the member
-  MemberAccessorExpression(const Source& source,
+  MemberAccessorExpression(ProgramID program_id,
+                           const Source& source,
                            Expression* structure,
                            IdentifierExpression* member);
   /// Move constructor

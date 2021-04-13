@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ConstantIdDecoration);
 namespace tint {
 namespace ast {
 
-ConstantIdDecoration::ConstantIdDecoration(const Source& source, uint32_t val)
-    : Base(source), value_(val) {}
+ConstantIdDecoration::ConstantIdDecoration(ProgramID program_id,
+                                           const Source& source,
+                                           uint32_t val)
+    : Base(program_id, source), value_(val) {}
 
 ConstantIdDecoration::~ConstantIdDecoration() = default;
 

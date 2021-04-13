@@ -24,9 +24,12 @@ namespace ast {
 class ConstantIdDecoration : public Castable<ConstantIdDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param val the constant_id value
-  ConstantIdDecoration(const Source& source, uint32_t val);
+  ConstantIdDecoration(ProgramID program_id,
+                       const Source& source,
+                       uint32_t val);
   ~ConstantIdDecoration() override;
 
   /// @returns the constant id value

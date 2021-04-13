@@ -91,6 +91,7 @@ class Variable : public Castable<Variable, Node> {
   };
 
   /// Create a variable
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the variable source
   /// @param sym the variable symbol
   /// @param declared_storage_class the declared storage class
@@ -98,7 +99,8 @@ class Variable : public Castable<Variable, Node> {
   /// @param is_const true if the variable is const
   /// @param constructor the constructor expression
   /// @param decorations the variable decorations
-  Variable(const Source& source,
+  Variable(ProgramID program_id,
+           const Source& source,
            const Symbol& sym,
            StorageClass declared_storage_class,
            type::Type* declared_type,

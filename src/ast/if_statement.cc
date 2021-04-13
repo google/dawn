@@ -21,11 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IfStatement);
 namespace tint {
 namespace ast {
 
-IfStatement::IfStatement(const Source& source,
+IfStatement::IfStatement(ProgramID program_id,
+                         const Source& source,
                          Expression* condition,
                          BlockStatement* body,
                          ElseStatementList else_stmts)
-    : Base(source),
+    : Base(program_id, source),
       condition_(condition),
       body_(body),
       else_statements_(std::move(else_stmts)) {

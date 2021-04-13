@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StageDecoration);
 namespace tint {
 namespace ast {
 
-StageDecoration::StageDecoration(const Source& source, PipelineStage stage)
-    : Base(source), stage_(stage) {}
+StageDecoration::StageDecoration(ProgramID program_id,
+                                 const Source& source,
+                                 PipelineStage stage)
+    : Base(program_id, source), stage_(stage) {}
 
 StageDecoration::~StageDecoration() = default;
 

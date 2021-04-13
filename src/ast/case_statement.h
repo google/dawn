@@ -30,10 +30,12 @@ using CaseSelectorList = std::vector<IntLiteral*>;
 class CaseStatement : public Castable<CaseStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source information
   /// @param selectors the case selectors
   /// @param body the case body
-  CaseStatement(const Source& source,
+  CaseStatement(ProgramID program_id,
+                const Source& source,
                 CaseSelectorList selectors,
                 BlockStatement* body);
   /// Move constructor

@@ -24,8 +24,9 @@ namespace ast {
 class FallthroughStatement : public Castable<FallthroughStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source information
-  explicit FallthroughStatement(const Source& source);
+  FallthroughStatement(ProgramID program_id, const Source& source);
   /// Move constructor
   FallthroughStatement(FallthroughStatement&&);
   ~FallthroughStatement() override;

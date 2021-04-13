@@ -21,7 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BreakStatement);
 namespace tint {
 namespace ast {
 
-BreakStatement::BreakStatement(const Source& source) : Base(source) {}
+BreakStatement::BreakStatement(ProgramID program_id, const Source& source)
+    : Base(program_id, source) {}
 
 BreakStatement::BreakStatement(BreakStatement&&) = default;
 

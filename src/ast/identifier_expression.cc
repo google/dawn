@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IdentifierExpression);
 namespace tint {
 namespace ast {
 
-IdentifierExpression::IdentifierExpression(const Source& source, Symbol sym)
-    : Base(source), sym_(sym) {
+IdentifierExpression::IdentifierExpression(ProgramID program_id,
+                                           const Source& source,
+                                           Symbol sym)
+    : Base(program_id, source), sym_(sym) {
   TINT_ASSERT(sym_.IsValid());
 }
 

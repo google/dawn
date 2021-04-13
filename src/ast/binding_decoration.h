@@ -24,9 +24,10 @@ namespace ast {
 class BindingDecoration : public Castable<BindingDecoration, Decoration> {
  public:
   /// constructor
-  /// @param value the binding value
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
-  BindingDecoration(const Source& source, uint32_t value);
+  /// @param value the binding value
+  BindingDecoration(ProgramID program_id, const Source& source, uint32_t value);
   ~BindingDecoration() override;
 
   /// @returns the binding value

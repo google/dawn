@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallStatement);
 namespace tint {
 namespace ast {
 
-CallStatement::CallStatement(const Source& source, CallExpression* call)
-    : Base(source), call_(call) {
+CallStatement::CallStatement(ProgramID program_id,
+                             const Source& source,
+                             CallExpression* call)
+    : Base(program_id, source), call_(call) {
   TINT_ASSERT(call_);
 }
 

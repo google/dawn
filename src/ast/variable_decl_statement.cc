@@ -21,9 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::VariableDeclStatement);
 namespace tint {
 namespace ast {
 
-VariableDeclStatement::VariableDeclStatement(const Source& source,
+VariableDeclStatement::VariableDeclStatement(ProgramID program_id,
+                                             const Source& source,
                                              Variable* variable)
-    : Base(source), variable_(variable) {
+    : Base(program_id, source), variable_(variable) {
   TINT_ASSERT(variable_);
 }
 

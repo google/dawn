@@ -26,11 +26,13 @@ namespace ast {
 class IfStatement : public Castable<IfStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source information
   /// @param condition the if condition
   /// @param body the if body
   /// @param else_stmts the else statements
-  IfStatement(const Source& source,
+  IfStatement(ProgramID program_id,
+              const Source& source,
               Expression* condition,
               BlockStatement* body,
               ElseStatementList else_stmts);

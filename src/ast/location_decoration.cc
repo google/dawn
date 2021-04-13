@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::LocationDecoration);
 namespace tint {
 namespace ast {
 
-LocationDecoration::LocationDecoration(const Source& source, uint32_t val)
-    : Base(source), value_(val) {}
+LocationDecoration::LocationDecoration(ProgramID program_id,
+                                       const Source& source,
+                                       uint32_t val)
+    : Base(program_id, source), value_(val) {}
 
 LocationDecoration::~LocationDecoration() = default;
 

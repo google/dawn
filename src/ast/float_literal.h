@@ -26,10 +26,14 @@ namespace ast {
 class FloatLiteral : public Castable<FloatLiteral, Literal> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the input source
   /// @param type the type of the literal
   /// @param value the float literals value
-  FloatLiteral(const Source& source, type::Type* type, float value);
+  FloatLiteral(ProgramID program_id,
+               const Source& source,
+               type::Type* type,
+               float value);
   ~FloatLiteral() override;
 
   /// @returns the float literal value

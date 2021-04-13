@@ -27,11 +27,13 @@ namespace ast {
 class StructMember : public Castable<StructMember, Node> {
  public:
   /// Create a new struct member statement
+  /// @param program_id the identifier of the program that owns this node
   /// @param source The input source for the struct member statement
   /// @param sym The struct member symbol
   /// @param type The struct member type
   /// @param decorations The struct member decorations
-  StructMember(const Source& source,
+  StructMember(ProgramID program_id,
+               const Source& source,
                const Symbol& sym,
                type::Type* type,
                DecorationList decorations);

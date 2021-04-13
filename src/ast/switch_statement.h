@@ -25,10 +25,12 @@ namespace ast {
 class SwitchStatement : public Castable<SwitchStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source information
   /// @param condition the switch condition
   /// @param body the switch body
-  SwitchStatement(const Source& source,
+  SwitchStatement(ProgramID program_id,
+                  const Source& source,
                   Expression* condition,
                   CaseStatementList body);
   /// Move constructor

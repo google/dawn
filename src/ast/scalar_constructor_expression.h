@@ -26,9 +26,12 @@ class ScalarConstructorExpression
     : public Castable<ScalarConstructorExpression, ConstructorExpression> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the constructor source
   /// @param literal the const literal
-  ScalarConstructorExpression(const Source& source, Literal* literal);
+  ScalarConstructorExpression(ProgramID program_id,
+                              const Source& source,
+                              Literal* literal);
   /// Move constructor
   ScalarConstructorExpression(ScalarConstructorExpression&&);
   ~ScalarConstructorExpression() override;

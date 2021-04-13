@@ -32,8 +32,8 @@ class ForStmtTest : public ParserImplTest {
     EXPECT_FALSE(e_for.errored);
     EXPECT_FALSE(p_for->has_error()) << p_for->error();
 
-    std::string loop = ast::BlockStatement({}, e_loop.value).str(Sem());
-    std::string for_ = ast::BlockStatement({}, e_for.value).str(Sem());
+    std::string loop = ast::BlockStatement({}, {}, e_loop.value).str(Sem());
+    std::string for_ = ast::BlockStatement({}, {}, e_for.value).str(Sem());
     EXPECT_EQ(loop, for_);
   }
 };

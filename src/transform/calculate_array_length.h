@@ -37,7 +37,8 @@ class CalculateArrayLength : public Transform {
       : public Castable<BufferSizeIntrinsic, ast::InternalDecoration> {
    public:
     /// Constructor
-    BufferSizeIntrinsic();
+    /// @param program_id the identifier of the program that owns this node
+    explicit BufferSizeIntrinsic(ProgramID program_id);
     /// Destructor
     ~BufferSizeIntrinsic() override;
 

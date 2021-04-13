@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CallExpression);
 namespace tint {
 namespace ast {
 
-CallExpression::CallExpression(const Source& source,
+CallExpression::CallExpression(ProgramID program_id,
+                               const Source& source,
                                Expression* func,
                                ExpressionList params)
-    : Base(source), func_(func), params_(params) {
+    : Base(program_id, source), func_(func), params_(params) {
   TINT_ASSERT(func_);
   for (auto* param : params_) {
     TINT_ASSERT(param);

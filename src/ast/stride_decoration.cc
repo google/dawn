@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StrideDecoration);
 namespace tint {
 namespace ast {
 
-StrideDecoration::StrideDecoration(const Source& source, uint32_t stride)
-    : Base(source), stride_(stride) {}
+StrideDecoration::StrideDecoration(ProgramID program_id,
+                                   const Source& source,
+                                   uint32_t stride)
+    : Base(program_id, source), stride_(stride) {}
 
 StrideDecoration::~StrideDecoration() = default;
 

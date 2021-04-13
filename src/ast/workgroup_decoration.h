@@ -26,20 +26,30 @@ namespace ast {
 class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param x the workgroup x dimension size
-  WorkgroupDecoration(const Source& source, uint32_t x);
+  WorkgroupDecoration(ProgramID program_id, const Source& source, uint32_t x);
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param x the workgroup x dimension size
   /// @param y the workgroup x dimension size
-  WorkgroupDecoration(const Source& source, uint32_t x, uint32_t y);
+  WorkgroupDecoration(ProgramID program_id,
+                      const Source& source,
+                      uint32_t x,
+                      uint32_t y);
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param x the workgroup x dimension size
   /// @param y the workgroup x dimension size
   /// @param z the workgroup x dimension size
-  WorkgroupDecoration(const Source& source, uint32_t x, uint32_t y, uint32_t z);
+  WorkgroupDecoration(ProgramID program_id,
+                      const Source& source,
+                      uint32_t x,
+                      uint32_t y,
+                      uint32_t z);
   ~WorkgroupDecoration() override;
 
   /// @returns the workgroup dimensions

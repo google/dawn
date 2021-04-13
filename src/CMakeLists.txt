@@ -179,6 +179,8 @@ set(TINT_LIB_SRCS
   inspector/scalar.h
   program_builder.cc
   program_builder.h
+  program_id.cc
+  program_id.h
   program.cc
   program.h
   reader/reader.cc

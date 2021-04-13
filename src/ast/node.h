@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/clone_context.h"
+#include "src/program_id.h"
 
 namespace tint {
 
@@ -37,6 +38,9 @@ class Node : public Castable<Node, Cloneable> {
  public:
   ~Node() override;
 
+  /// @returns the identifier of the program that owns this node
+  ProgramID program_id() const { return program_id_; }
+
   /// @returns the node source data
   const Source& source() const { return source_; }
 
@@ -55,8 +59,9 @@ class Node : public Castable<Node, Cloneable> {
 
  protected:
   /// Create a new node
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the input source for the node
-  explicit Node(const Source& source);
+  Node(ProgramID program_id, const Source& source);
   /// Move constructor
   Node(Node&&);
 
@@ -68,6 +73,7 @@ class Node : public Castable<Node, Cloneable> {
  private:
   Node(const Node&) = delete;
 
+  ProgramID const program_id_;
   Source const source_;
 };
 

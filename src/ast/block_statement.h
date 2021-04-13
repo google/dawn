@@ -26,9 +26,12 @@ namespace ast {
 class BlockStatement : public Castable<BlockStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the block statement source
   /// @param statements the statements
-  BlockStatement(const Source& source, const StatementList& statements);
+  BlockStatement(ProgramID program_id,
+                 const Source& source,
+                 const StatementList& statements);
   /// Move constructor
   BlockStatement(BlockStatement&&);
   ~BlockStatement() override;

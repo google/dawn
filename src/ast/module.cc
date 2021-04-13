@@ -23,10 +23,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Module);
 namespace tint {
 namespace ast {
 
-Module::Module(const Source& source) : Base(source) {}
+Module::Module(ProgramID program_id, const Source& source)
+    : Base(program_id, source) {}
 
-Module::Module(const Source& source, std::vector<Cloneable*> global_decls)
-    : Base(source), global_declarations_(std::move(global_decls)) {
+Module::Module(ProgramID program_id,
+               const Source& source,
+               std::vector<Cloneable*> global_decls)
+    : Base(program_id, source), global_declarations_(std::move(global_decls)) {
   for (auto* decl : global_declarations_) {
     if (decl == nullptr) {
       continue;

@@ -21,9 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberOffsetDecoration);
 namespace tint {
 namespace ast {
 
-StructMemberOffsetDecoration::StructMemberOffsetDecoration(const Source& source,
+StructMemberOffsetDecoration::StructMemberOffsetDecoration(ProgramID program_id,
+                                                           const Source& source,
                                                            uint32_t offset)
-    : Base(source), offset_(offset) {}
+    : Base(program_id, source), offset_(offset) {}
 
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;
 

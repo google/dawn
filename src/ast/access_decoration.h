@@ -25,9 +25,12 @@ namespace ast {
 class AccessDecoration : public Castable<AccessDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param value the access value
-  explicit AccessDecoration(const Source& source, AccessControl value);
+  AccessDecoration(ProgramID program_id,
+                   const Source& source,
+                   AccessControl value);
   ~AccessDecoration() override;
 
   /// @returns the access control value

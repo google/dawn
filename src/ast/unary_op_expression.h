@@ -25,10 +25,14 @@ namespace ast {
 class UnaryOpExpression : public Castable<UnaryOpExpression, Expression> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the unary op expression source
   /// @param op the op
   /// @param expr the expr
-  UnaryOpExpression(const Source& source, UnaryOp op, Expression* expr);
+  UnaryOpExpression(ProgramID program_id,
+                    const Source& source,
+                    UnaryOp op,
+                    Expression* expr);
   /// Move constructor
   UnaryOpExpression(UnaryOpExpression&&);
   ~UnaryOpExpression() override;

@@ -31,8 +31,9 @@ class Expression : public Castable<Expression, Node> {
 
  protected:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of the expression
-  explicit Expression(const Source& source);
+  Expression(ProgramID program_id, const Source& source);
   /// Move constructor
   Expression(Expression&&);
 

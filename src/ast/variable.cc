@@ -23,14 +23,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Variable);
 namespace tint {
 namespace ast {
 
-Variable::Variable(const Source& source,
+Variable::Variable(ProgramID program_id,
+                   const Source& source,
                    const Symbol& sym,
                    StorageClass declared_storage_class,
                    type::Type* declared_type,
                    bool is_const,
                    Expression* constructor,
                    DecorationList decorations)
-    : Base(source),
+    : Base(program_id, source),
       symbol_(sym),
       declared_type_(declared_type),
       is_const_(is_const),

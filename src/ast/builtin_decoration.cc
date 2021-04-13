@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BuiltinDecoration);
 namespace tint {
 namespace ast {
 
-BuiltinDecoration::BuiltinDecoration(const Source& source, Builtin builtin)
-    : Base(source), builtin_(builtin) {}
+BuiltinDecoration::BuiltinDecoration(ProgramID program_id,
+                                     const Source& source,
+                                     Builtin builtin)
+    : Base(program_id, source), builtin_(builtin) {}
 
 BuiltinDecoration::~BuiltinDecoration() = default;
 

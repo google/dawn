@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CaseStatement);
 namespace tint {
 namespace ast {
 
-CaseStatement::CaseStatement(const Source& source,
+CaseStatement::CaseStatement(ProgramID program_id,
+                             const Source& source,
                              CaseSelectorList selectors,
                              BlockStatement* body)
-    : Base(source), selectors_(selectors), body_(body) {
+    : Base(program_id, source), selectors_(selectors), body_(body) {
   TINT_ASSERT(body_);
 }
 

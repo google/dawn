@@ -27,9 +27,12 @@ class StructMemberSizeDecoration
     : public Castable<StructMemberSizeDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param size the size value
-  StructMemberSizeDecoration(const Source& source, uint32_t size);
+  StructMemberSizeDecoration(ProgramID program_id,
+                             const Source& source,
+                             uint32_t size);
   ~StructMemberSizeDecoration() override;
 
   /// @returns the size value

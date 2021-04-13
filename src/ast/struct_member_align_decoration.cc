@@ -22,9 +22,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberAlignDecoration);
 namespace tint {
 namespace ast {
 
-StructMemberAlignDecoration::StructMemberAlignDecoration(const Source& source,
+StructMemberAlignDecoration::StructMemberAlignDecoration(ProgramID program_id,
+                                                         const Source& source,
                                                          uint32_t align)
-    : Base(source), align_(align) {}
+    : Base(program_id, source), align_(align) {}
 
 StructMemberAlignDecoration::~StructMemberAlignDecoration() = default;
 

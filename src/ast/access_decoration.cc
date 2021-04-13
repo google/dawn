@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::AccessDecoration);
 namespace tint {
 namespace ast {
 
-AccessDecoration::AccessDecoration(const Source& source, AccessControl val)
-    : Base(source), value_(val) {}
+AccessDecoration::AccessDecoration(ProgramID program_id,
+                                   const Source& source,
+                                   AccessControl val)
+    : Base(program_id, source), value_(val) {}
 
 AccessDecoration::~AccessDecoration() = default;
 

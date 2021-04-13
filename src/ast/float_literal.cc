@@ -23,8 +23,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::FloatLiteral);
 namespace tint {
 namespace ast {
 
-FloatLiteral::FloatLiteral(const Source& source, type::Type* type, float value)
-    : Base(source, type), value_(value) {}
+FloatLiteral::FloatLiteral(ProgramID program_id,
+                           const Source& source,
+                           type::Type* type,
+                           float value)
+    : Base(program_id, source, type), value_(value) {}
 
 FloatLiteral::~FloatLiteral() = default;
 

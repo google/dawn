@@ -752,16 +752,16 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     //    then WGSL requires an initializer.
     if (ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
       if (type_no_ac->Is<type::F32>()) {
-        ast::FloatLiteral l(Source{}, type_no_ac, 0.0f);
+        ast::FloatLiteral l(ProgramID(), Source{}, type_no_ac, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type_no_ac->Is<type::U32>()) {
-        ast::UintLiteral l(Source{}, type_no_ac, 0);
+        ast::UintLiteral l(ProgramID(), Source{}, type_no_ac, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type_no_ac->Is<type::I32>()) {
-        ast::SintLiteral l(Source{}, type_no_ac, 0);
+        ast::SintLiteral l(ProgramID(), Source{}, type_no_ac, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else if (type_no_ac->Is<type::Bool>()) {
-        ast::BoolLiteral l(Source{}, type_no_ac, false);
+        ast::BoolLiteral l(ProgramID(), Source{}, type_no_ac, false);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else {
         error_ = "invalid type for constant_id, must be scalar";
@@ -2303,7 +2303,8 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(gen(level));
       } else {
-        ast::SintLiteral i32_0(Source{}, builder_.create<type::I32>(), 0);
+        ast::SintLiteral i32_0(ProgramID(), Source{},
+                               builder_.create<type::I32>(), 0);
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(
             Operand::Int(GenerateLiteralIfNeeded(nullptr, &i32_0)));
@@ -2335,7 +2336,8 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
           texture_type->Is<type::StorageTexture>()) {
         op = spv::Op::OpImageQuerySize;
       } else {
-        ast::SintLiteral i32_0(Source{}, builder_.create<type::I32>(), 0);
+        ast::SintLiteral i32_0(ProgramID(), Source{},
+                               builder_.create<type::I32>(), 0);
         op = spv::Op::OpImageQuerySizeLod;
         spirv_params.emplace_back(
             Operand::Int(GenerateLiteralIfNeeded(nullptr, &i32_0)));
@@ -2413,7 +2415,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
         // Depth textures have i32 parameters for the level, but SPIR-V expects
         // F32. Cast.
         auto* f32 = builder_.create<type::F32>();
-        ast::TypeConstructorExpression cast(Source{}, f32,
+        ast::TypeConstructorExpression cast(ProgramID(), Source{}, f32,
                                             {arg(Usage::kLevel)});
         level = Operand::Int(GenerateExpression(&cast));
         if (level.to_i() == 0) {
@@ -2446,7 +2448,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
       spirv_params.emplace_back(gen_arg(Usage::kDepthRef));
 
       type::F32 f32;
-      ast::FloatLiteral float_0(Source{}, &f32, 0.0);
+      ast::FloatLiteral float_0(ProgramID(), Source{}, &f32, 0.0);
       image_operands.emplace_back(ImageOperand{
           SpvImageOperandsLodMask,
           Operand::Int(GenerateLiteralIfNeeded(nullptr, &float_0))});

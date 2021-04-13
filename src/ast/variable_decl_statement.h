@@ -26,9 +26,12 @@ class VariableDeclStatement
     : public Castable<VariableDeclStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the variable statement source
   /// @param variable the variable
-  VariableDeclStatement(const Source& source, Variable* variable);
+  VariableDeclStatement(ProgramID program_id,
+                        const Source& source,
+                        Variable* variable);
   /// Move constructor
   VariableDeclStatement(VariableDeclStatement&&);
   ~VariableDeclStatement() override;

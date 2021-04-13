@@ -29,8 +29,10 @@ class Decoration : public Castable<Decoration, Node> {
 
  protected:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
-  explicit Decoration(const Source& source) : Base(source) {}
+  Decoration(ProgramID program_id, const Source& source)
+      : Base(program_id, source) {}
 };
 
 /// A list of decorations

@@ -21,9 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BlockStatement);
 namespace tint {
 namespace ast {
 
-BlockStatement::BlockStatement(const Source& source,
+BlockStatement::BlockStatement(ProgramID program_id,
+                               const Source& source,
                                const StatementList& statements)
-    : Base(source), statements_(std::move(statements)) {
+    : Base(program_id, source), statements_(std::move(statements)) {
   for (auto* stmt : *this) {
     TINT_ASSERT(stmt);
   }

@@ -24,9 +24,10 @@ namespace ast {
 class StrideDecoration : public Castable<StrideDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param stride the stride value
   /// @param source the source of this decoration
-  StrideDecoration(const Source& source, uint32_t stride);
+  StrideDecoration(ProgramID program_id, const Source& source, uint32_t stride);
   ~StrideDecoration() override;
 
   /// @returns the stride value

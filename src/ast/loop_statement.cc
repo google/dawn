@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::LoopStatement);
 namespace tint {
 namespace ast {
 
-LoopStatement::LoopStatement(const Source& source,
+LoopStatement::LoopStatement(ProgramID program_id,
+                             const Source& source,
                              BlockStatement* body,
                              BlockStatement* continuing)
-    : Base(source), body_(body), continuing_(continuing) {
+    : Base(program_id, source), body_(body), continuing_(continuing) {
   TINT_ASSERT(body_);
 }
 

@@ -27,10 +27,12 @@ namespace ast {
 class Struct : public Castable<Struct, Node> {
  public:
   /// Create a new struct statement
+  /// @param program_id the identifier of the program that owns this node
   /// @param source The input source for the import statement
   /// @param members The struct members
   /// @param decorations The struct decorations
-  Struct(const Source& source,
+  Struct(ProgramID program_id,
+         const Source& source,
          StructMemberList members,
          DecorationList decorations);
   /// Move constructor

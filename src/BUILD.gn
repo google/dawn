@@ -362,6 +362,8 @@ source_set("libtint_core_src") {
     "inspector/scalar.h",
     "intrinsic_table.cc",
     "intrinsic_table.h",
+    "program_id.cc",
+    "program_id.h",
     "program.cc",
     "program.h",
     "program_builder.cc",

@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/internal_decoration.h"
+#include "src/program_id.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::InternalDecoration);
+#include <atomic>
 
 namespace tint {
-namespace ast {
 
-InternalDecoration::InternalDecoration(ProgramID program_id)
-    : Base(program_id, Source{}) {}
+namespace {
 
-InternalDecoration::~InternalDecoration() = default;
+std::atomic<uint32_t> next_program_id{1};
 
-void InternalDecoration::to_str(const semantic::Info&,
-                                std::ostream& out,
-                                size_t indent) const {
-  make_indent(out, indent);
-  out << "tint_internal(" << Name() << ")" << std::endl;
+}  // namespace
+
+ProgramID::ProgramID() = default;
+
+ProgramID::ProgramID(uint32_t id) : val(id) {}
+
+ProgramID ProgramID::New() {
+  return ProgramID(next_program_id++);
 }
 
-}  // namespace ast
 }  // namespace tint

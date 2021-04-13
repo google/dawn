@@ -25,9 +25,10 @@ namespace ast {
 class IdentifierExpression : public Castable<IdentifierExpression, Expression> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source
   /// @param sym the symbol for the identifier
-  IdentifierExpression(const Source& source, Symbol sym);
+  IdentifierExpression(ProgramID program_id, const Source& source, Symbol sym);
   /// Move constructor
   IdentifierExpression(IdentifierExpression&&);
   ~IdentifierExpression() override;

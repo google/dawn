@@ -21,6 +21,15 @@ namespace {
 
 using ProgramBuilderTest = testing::Test;
 
+TEST_F(ProgramBuilderTest, IDsAreUnique) {
+  Program program_a(ProgramBuilder{});
+  Program program_b(ProgramBuilder{});
+  Program program_c(ProgramBuilder{});
+  EXPECT_NE(program_a.ID(), program_b.ID());
+  EXPECT_NE(program_b.ID(), program_c.ID());
+  EXPECT_NE(program_c.ID(), program_a.ID());
+}
+
 TEST_F(ProgramBuilderTest, WrapDoesntAffectInner) {
   Program inner([] {
     ProgramBuilder builder;

@@ -24,8 +24,9 @@ namespace ast {
 class ContinueStatement : public Castable<ContinueStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the continue statement source
-  explicit ContinueStatement(const Source& source);
+  ContinueStatement(ProgramID program_id, const Source& source);
   /// Move constructor
   ContinueStatement(ContinueStatement&&);
   ~ContinueStatement() override;

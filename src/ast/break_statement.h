@@ -24,8 +24,9 @@ namespace ast {
 class BreakStatement : public Castable<BreakStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the break statement source
-  explicit BreakStatement(const Source& source);
+  BreakStatement(ProgramID program_id, const Source& source);
   /// Move constructor
   BreakStatement(BreakStatement&&);
   ~BreakStatement() override;

@@ -24,10 +24,12 @@ namespace ast {
 class LoopStatement : public Castable<LoopStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the loop statement source
   /// @param body the body statements
   /// @param continuing the continuing statements
-  LoopStatement(const Source& source,
+  LoopStatement(ProgramID program_id,
+                const Source& source,
                 BlockStatement* body,
                 BlockStatement* continuing);
   /// Move constructor

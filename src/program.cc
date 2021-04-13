@@ -25,7 +25,8 @@ namespace tint {
 Program::Program() = default;
 
 Program::Program(Program&& program)
-    : types_(std::move(program.types_)),
+    : id_(std::move(program.id_)),
+      types_(std::move(program.types_)),
       ast_nodes_(std::move(program.ast_nodes_)),
       sem_nodes_(std::move(program.sem_nodes_)),
       ast_(std::move(program.ast_)),
@@ -38,6 +39,8 @@ Program::Program(Program&& program)
 }
 
 Program::Program(ProgramBuilder&& builder) {
+  id_ = builder.ID();
+
   is_valid_ = builder.IsValid();
   if (builder.ResolveOnBuild() && builder.IsValid()) {
     resolver::Resolver resolver(&builder);
@@ -48,12 +51,10 @@ Program::Program(ProgramBuilder&& builder) {
   }
 
   // The above must be called *before* the calls to std::move() below
-
   types_ = std::move(builder.Types());
   ast_nodes_ = std::move(builder.ASTNodes());
   sem_nodes_ = std::move(builder.SemNodes());
-  ast_ = ast_nodes_.Create<ast::Module>(
-      Source{}, std::move(builder.AST().GlobalDeclarations()));
+  ast_ = &builder.AST();  // ast::Module is actually a heap allocation.
   sem_ = std::move(builder.Sem());
   symbols_ = std::move(builder.Symbols());
   diagnostics_.add(std::move(builder.Diagnostics()));
@@ -72,6 +73,7 @@ Program::~Program() = default;
 Program& Program::operator=(Program&& program) {
   program.AssertNotMoved();
   program.moved_ = true;
+  id_ = std::move(program.id_);
   types_ = std::move(program.types_);
   ast_nodes_ = std::move(program.ast_nodes_);
   sem_nodes_ = std::move(program.sem_nodes_);

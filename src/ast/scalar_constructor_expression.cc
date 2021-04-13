@@ -21,9 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ScalarConstructorExpression);
 namespace tint {
 namespace ast {
 
-ScalarConstructorExpression::ScalarConstructorExpression(const Source& source,
+ScalarConstructorExpression::ScalarConstructorExpression(ProgramID program_id,
+                                                         const Source& source,
                                                          Literal* literal)
-    : Base(source), literal_(literal) {
+    : Base(program_id, source), literal_(literal) {
   TINT_ASSERT(literal);
 }
 

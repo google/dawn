@@ -22,9 +22,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMemberSizeDecoration);
 namespace tint {
 namespace ast {
 
-StructMemberSizeDecoration::StructMemberSizeDecoration(const Source& source,
+StructMemberSizeDecoration::StructMemberSizeDecoration(ProgramID program_id,
+                                                       const Source& source,
                                                        uint32_t size)
-    : Base(source), size_(size) {}
+    : Base(program_id, source), size_(size) {}
 
 StructMemberSizeDecoration::~StructMemberSizeDecoration() = default;
 

@@ -21,7 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ContinueStatement);
 namespace tint {
 namespace ast {
 
-ContinueStatement::ContinueStatement(const Source& source) : Base(source) {}
+ContinueStatement::ContinueStatement(ProgramID program_id, const Source& source)
+    : Base(program_id, source) {}
 
 ContinueStatement::ContinueStatement(ContinueStatement&&) = default;
 

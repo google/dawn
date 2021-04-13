@@ -27,8 +27,9 @@ class StructBlockDecoration
     : public Castable<StructBlockDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
-  explicit StructBlockDecoration(const Source& source);
+  StructBlockDecoration(ProgramID program_id, const Source& source);
   ~StructBlockDecoration() override;
 
   /// Outputs the decoration to the given stream

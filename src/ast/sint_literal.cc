@@ -21,8 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::SintLiteral);
 namespace tint {
 namespace ast {
 
-SintLiteral::SintLiteral(const Source& source, type::Type* type, int32_t value)
-    : Base(source, type, static_cast<uint32_t>(value)) {}
+SintLiteral::SintLiteral(ProgramID program_id,
+                         const Source& source,
+                         type::Type* type,
+                         int32_t value)
+    : Base(program_id, source, type, static_cast<uint32_t>(value)) {}
 
 SintLiteral::~SintLiteral() = default;
 

@@ -21,8 +21,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructBlockDecoration);
 namespace tint {
 namespace ast {
 
-StructBlockDecoration::StructBlockDecoration(const Source& source)
-    : Base(source) {}
+StructBlockDecoration::StructBlockDecoration(ProgramID program_id,
+                                             const Source& source)
+    : Base(program_id, source) {}
 
 StructBlockDecoration::~StructBlockDecoration() = default;
 

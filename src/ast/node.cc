@@ -19,7 +19,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Node);
 namespace tint {
 namespace ast {
 
-Node::Node(const Source& source) : source_(source) {}
+Node::Node(ProgramID program_id, const Source& source)
+    : program_id_(program_id), source_(source) {}
 
 Node::Node(Node&&) = default;
 

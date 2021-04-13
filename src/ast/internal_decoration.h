@@ -29,7 +29,8 @@ namespace ast {
 class InternalDecoration : public Castable<InternalDecoration, Decoration> {
  public:
   /// Constructor
-  InternalDecoration();
+  /// @param program_id the identifier of the program that owns this node
+  explicit InternalDecoration(ProgramID program_id);
 
   /// Destructor
   ~InternalDecoration() override;

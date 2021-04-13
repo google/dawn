@@ -51,7 +51,9 @@ struct ArrayUsage {
 
 }  // namespace
 
-CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic() = default;
+CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(
+    ProgramID program_id)
+    : Base(program_id) {}
 CalculateArrayLength::BufferSizeIntrinsic::~BufferSizeIntrinsic() = default;
 std::string CalculateArrayLength::BufferSizeIntrinsic::Name() const {
   return "intrinsic_buffer_size";
@@ -59,8 +61,8 @@ std::string CalculateArrayLength::BufferSizeIntrinsic::Name() const {
 
 CalculateArrayLength::BufferSizeIntrinsic*
 CalculateArrayLength::BufferSizeIntrinsic::Clone(CloneContext* ctx) const {
-  return ctx->dst->ASTNodes()
-      .Create<CalculateArrayLength::BufferSizeIntrinsic>();
+  return ctx->dst->ASTNodes().Create<CalculateArrayLength::BufferSizeIntrinsic>(
+      ctx->dst->ID());
 }
 
 CalculateArrayLength::CalculateArrayLength() = default;
@@ -93,7 +95,7 @@ Transform::Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
           },
           ctx.dst->ty.void_(), nullptr,
           ast::DecorationList{
-              ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(),
+              ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID()),
           },
           ast::DecorationList{});
       ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), buffer_type, func);

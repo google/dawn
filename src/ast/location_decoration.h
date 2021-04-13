@@ -24,9 +24,12 @@ namespace ast {
 class LocationDecoration : public Castable<LocationDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param value the location value
-  LocationDecoration(const Source& source, uint32_t value);
+  LocationDecoration(ProgramID program_id,
+                     const Source& source,
+                     uint32_t value);
   ~LocationDecoration() override;
 
   /// @returns the location value

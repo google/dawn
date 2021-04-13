@@ -25,9 +25,12 @@ namespace ast {
 class BuiltinDecoration : public Castable<BuiltinDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param builtin the builtin value
-  BuiltinDecoration(const Source& source, Builtin builtin);
+  BuiltinDecoration(ProgramID program_id,
+                    const Source& source,
+                    Builtin builtin);
   ~BuiltinDecoration() override;
 
   /// @returns the builtin value

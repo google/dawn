@@ -25,9 +25,12 @@ namespace ast {
 class CallStatement : public Castable<CallStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the input source for the statement
   /// @param call the function
-  CallStatement(const Source& source, CallExpression* call);
+  CallStatement(ProgramID program_id,
+                const Source& source,
+                CallExpression* call);
   /// Move constructor
   CallStatement(CallStatement&&);
   ~CallStatement() override;

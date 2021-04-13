@@ -24,10 +24,14 @@ namespace ast {
 class CallExpression : public Castable<CallExpression, Expression> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the call expression source
   /// @param func the function
   /// @param params the parameters
-  CallExpression(const Source& source, Expression* func, ExpressionList params);
+  CallExpression(ProgramID program_id,
+                 const Source& source,
+                 Expression* func,
+                 ExpressionList params);
   /// Move constructor
   CallExpression(CallExpression&&);
   ~CallExpression() override;

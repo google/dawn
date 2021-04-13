@@ -47,11 +47,13 @@ enum class BinaryOp {
 class BinaryExpression : public Castable<BinaryExpression, Expression> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the binary expression source
   /// @param op the operation type
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
-  BinaryExpression(const Source& source,
+  BinaryExpression(ProgramID program_id,
+                   const Source& source,
                    BinaryOp op,
                    Expression* lhs,
                    Expression* rhs);

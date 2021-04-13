@@ -48,7 +48,8 @@ using ResolverValidationTest = ResolverTest;
 
 class FakeStmt : public ast::Statement {
  public:
-  explicit FakeStmt(Source source) : ast::Statement(source) {}
+  FakeStmt(ProgramID program_id, Source source)
+      : ast::Statement(program_id, source) {}
   FakeStmt* Clone(CloneContext*) const override { return nullptr; }
   void to_str(const semantic::Info&, std::ostream& out, size_t) const override {
     out << "Fake";
@@ -57,7 +58,8 @@ class FakeStmt : public ast::Statement {
 
 class FakeExpr : public ast::Expression {
  public:
-  explicit FakeExpr(Source source) : ast::Expression(source) {}
+  FakeExpr(ProgramID program_id, Source source)
+      : ast::Expression(program_id, source) {}
   FakeExpr* Clone(CloneContext*) const override { return nullptr; }
   void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
 };
@@ -179,8 +181,8 @@ TEST_F(ResolverValidationTest,
 }
 
 TEST_F(ResolverValidationTest, Expr_Error_Unknown) {
-  FakeExpr e(Source{Source::Location{2, 30}});
-  WrapInFunction(&e);
+  auto* e = create<FakeExpr>(Source{Source::Location{2, 30}});
+  WrapInFunction(e);
 
   EXPECT_FALSE(r()->Resolve());
 

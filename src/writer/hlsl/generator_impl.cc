@@ -2053,7 +2053,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   auto* last_statement = func->get_last_statement();
   if (last_statement == nullptr ||
       !last_statement->Is<ast::ReturnStatement>()) {
-    ast::ReturnStatement ret(Source{});
+    ast::ReturnStatement ret(ProgramID(), Source{});
     if (!EmitStatement(out, &ret)) {
       return false;
     }

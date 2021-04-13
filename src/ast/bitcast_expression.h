@@ -24,10 +24,14 @@ namespace ast {
 class BitcastExpression : public Castable<BitcastExpression, Expression> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the bitcast expression source
   /// @param type the type
   /// @param expr the expr
-  BitcastExpression(const Source& source, type::Type* type, Expression* expr);
+  BitcastExpression(ProgramID program_id,
+                    const Source& source,
+                    type::Type* type,
+                    Expression* expr);
   /// Move constructor
   BitcastExpression(BitcastExpression&&);
   ~BitcastExpression() override;

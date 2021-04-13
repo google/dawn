@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/ast/function.h"
+#include "src/program_id.h"
 #include "src/semantic/info.h"
 #include "src/symbol_table.h"
 #include "src/type/type_manager.h"
@@ -60,6 +61,9 @@ class Program {
   /// @param rhs the Program to move
   /// @return this Program
   Program& operator=(Program&& rhs);
+
+  /// @returns the unique identifier for this program
+  ProgramID ID() const { return id_; }
 
   /// @returns a reference to the program's types
   const type::Manager& Types() const {
@@ -155,6 +159,7 @@ class Program {
   /// Asserts that the program has not been moved.
   void AssertNotMoved() const;
 
+  ProgramID id_;
   type::Manager types_;
   ASTNodeAllocator ast_nodes_;
   SemNodeAllocator sem_nodes_;

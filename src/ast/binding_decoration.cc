@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BindingDecoration);
 namespace tint {
 namespace ast {
 
-BindingDecoration::BindingDecoration(const Source& source, uint32_t val)
-    : Base(source), value_(val) {}
+BindingDecoration::BindingDecoration(ProgramID program_id,
+                                     const Source& source,
+                                     uint32_t val)
+    : Base(program_id, source), value_(val) {}
 
 BindingDecoration::~BindingDecoration() = default;
 

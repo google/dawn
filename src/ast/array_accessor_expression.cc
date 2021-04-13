@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ArrayAccessorExpression);
 namespace tint {
 namespace ast {
 
-ArrayAccessorExpression::ArrayAccessorExpression(const Source& source,
+ArrayAccessorExpression::ArrayAccessorExpression(ProgramID program_id,
+                                                 const Source& source,
                                                  Expression* array,
                                                  Expression* idx_expr)
-    : Base(source), array_(array), idx_expr_(idx_expr) {
+    : Base(program_id, source), array_(array), idx_expr_(idx_expr) {
   TINT_ASSERT(array_);
   TINT_ASSERT(idx_expr_);
 }

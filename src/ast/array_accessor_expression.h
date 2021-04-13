@@ -25,10 +25,12 @@ class ArrayAccessorExpression
     : public Castable<ArrayAccessorExpression, Expression> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the array accessor source
   /// @param array the array
   /// @param idx_expr the index expression
-  ArrayAccessorExpression(const Source& source,
+  ArrayAccessorExpression(ProgramID program_id,
+                          const Source& source,
                           Expression* array,
                           Expression* idx_expr);
   /// Move constructor

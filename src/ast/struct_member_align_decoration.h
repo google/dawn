@@ -27,9 +27,12 @@ class StructMemberAlignDecoration
     : public Castable<StructMemberAlignDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param align the align value
-  StructMemberAlignDecoration(const Source& source, uint32_t align);
+  StructMemberAlignDecoration(ProgramID program_id,
+                              const Source& source,
+                              uint32_t align);
   ~StructMemberAlignDecoration() override;
 
   /// @returns the align value

@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::SwitchStatement);
 namespace tint {
 namespace ast {
 
-SwitchStatement::SwitchStatement(const Source& source,
+SwitchStatement::SwitchStatement(ProgramID program_id,
+                                 const Source& source,
                                  Expression* condition,
                                  CaseStatementList body)
-    : Base(source), condition_(condition), body_(body) {
+    : Base(program_id, source), condition_(condition), body_(body) {
   TINT_ASSERT(condition_);
   for (auto* stmt : body_) {
     TINT_ASSERT(stmt);

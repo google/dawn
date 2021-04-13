@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::GroupDecoration);
 namespace tint {
 namespace ast {
 
-GroupDecoration::GroupDecoration(const Source& source, uint32_t val)
-    : Base(source), value_(val) {}
+GroupDecoration::GroupDecoration(ProgramID program_id,
+                                 const Source& source,
+                                 uint32_t val)
+    : Base(program_id, source), value_(val) {}
 
 GroupDecoration::~GroupDecoration() = default;
 

@@ -28,14 +28,18 @@ namespace ast {
 class Module : public Castable<Module, Node> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of the module
-  explicit Module(const Source& source);
+  Module(ProgramID program_id, const Source& source);
 
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source of the module
   /// @param global_decls the list of global types, functions, and variables, in
   /// the order they were declared in the source program
-  Module(const Source& source, std::vector<Cloneable*> global_decls);
+  Module(ProgramID program_id,
+         const Source& source,
+         std::vector<Cloneable*> global_decls);
 
   /// Destructor
   ~Module() override;

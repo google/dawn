@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::MemberAccessorExpression);
 namespace tint {
 namespace ast {
 
-MemberAccessorExpression::MemberAccessorExpression(const Source& source,
+MemberAccessorExpression::MemberAccessorExpression(ProgramID program_id,
+                                                   const Source& source,
                                                    Expression* structure,
                                                    IdentifierExpression* member)
-    : Base(source), struct_(structure), member_(member) {
+    : Base(program_id, source), struct_(structure), member_(member) {
   TINT_ASSERT(structure);
   TINT_ASSERT(member);
 }

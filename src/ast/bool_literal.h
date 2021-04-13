@@ -26,10 +26,14 @@ namespace ast {
 class BoolLiteral : public Castable<BoolLiteral, Literal> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the input source
   /// @param type the type of the literal
   /// @param value the bool literals value
-  BoolLiteral(const Source& source, type::Type* type, bool value);
+  BoolLiteral(ProgramID program_id,
+              const Source& source,
+              type::Type* type,
+              bool value);
   ~BoolLiteral() override;
 
   /// @returns true if the bool literal is true

@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BitcastExpression);
 namespace tint {
 namespace ast {
 
-BitcastExpression::BitcastExpression(const Source& source,
+BitcastExpression::BitcastExpression(ProgramID program_id,
+                                     const Source& source,
                                      type::Type* type,
                                      Expression* expr)
-    : Base(source), type_(type), expr_(expr) {
+    : Base(program_id, source), type_(type), expr_(expr) {
   TINT_ASSERT(type_);
   TINT_ASSERT(expr_);
 }

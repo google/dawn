@@ -21,11 +21,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ReturnStatement);
 namespace tint {
 namespace ast {
 
-ReturnStatement::ReturnStatement(const Source& source)
-    : Base(source), value_(nullptr) {}
+ReturnStatement::ReturnStatement(ProgramID program_id, const Source& source)
+    : Base(program_id, source), value_(nullptr) {}
 
-ReturnStatement::ReturnStatement(const Source& source, Expression* value)
-    : Base(source), value_(value) {}
+ReturnStatement::ReturnStatement(ProgramID program_id,
+                                 const Source& source,
+                                 Expression* value)
+    : Base(program_id, source), value_(value) {}
 
 ReturnStatement::ReturnStatement(ReturnStatement&&) = default;
 

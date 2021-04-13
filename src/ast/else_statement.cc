@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ElseStatement);
 namespace tint {
 namespace ast {
 
-ElseStatement::ElseStatement(const Source& source,
+ElseStatement::ElseStatement(ProgramID program_id,
+                             const Source& source,
                              Expression* condition,
                              BlockStatement* body)
-    : Base(source), condition_(condition), body_(body) {
+    : Base(program_id, source), condition_(condition), body_(body) {
   TINT_ASSERT(body_);
 }
 

@@ -42,6 +42,7 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program.h"
+#include "src/program_id.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -117,6 +118,9 @@ class ProgramBuilder {
   /// @param program the immutable Program to wrap
   /// @return the ProgramBuilder that wraps `program`
   static ProgramBuilder Wrap(const Program* program);
+
+  /// @returns the unique identifier for this program
+  ProgramID ID() const { return id_; }
 
   /// @returns a reference to the program's types
   type::Manager& Types() {
@@ -237,7 +241,7 @@ class ProgramBuilder {
   traits::EnableIfIsType<T, ast::Node>* create(const Source& source,
                                                ARGS&&... args) {
     AssertNotMoved();
-    return ast_nodes_.Create<T>(source, std::forward<ARGS>(args)...);
+    return ast_nodes_.Create<T>(id_, source, std::forward<ARGS>(args)...);
   }
 
   /// Creates a new ast::Node owned by the ProgramBuilder, injecting the current
@@ -249,7 +253,7 @@ class ProgramBuilder {
   template <typename T>
   traits::EnableIfIsType<T, ast::Node>* create() {
     AssertNotMoved();
-    return ast_nodes_.Create<T>(source_);
+    return ast_nodes_.Create<T>(id_, source_);
   }
 
   /// Creates a new ast::Node owned by the ProgramBuilder, injecting the current
@@ -267,7 +271,7 @@ class ProgramBuilder {
                    T>*
   create(ARG0&& arg0, ARGS&&... args) {
     AssertNotMoved();
-    return ast_nodes_.Create<T>(source_, std::forward<ARG0>(arg0),
+    return ast_nodes_.Create<T>(id_, source_, std::forward<ARG0>(arg0),
                                 std::forward<ARGS>(args)...);
   }
 
@@ -1425,6 +1429,7 @@ class ProgramBuilder {
   void AssertNotMoved() const;
 
  private:
+  ProgramID id_;
   type::Manager types_;
   ASTNodeAllocator ast_nodes_;
   SemNodeAllocator sem_nodes_;

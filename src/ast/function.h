@@ -36,6 +36,7 @@ namespace ast {
 class Function : public Castable<Function, Node> {
  public:
   /// Create a function
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the variable source
   /// @param symbol the function symbol
   /// @param params the function parameters
@@ -43,7 +44,8 @@ class Function : public Castable<Function, Node> {
   /// @param body the function body
   /// @param decorations the function decorations
   /// @param return_type_decorations the return type decorations
-  Function(const Source& source,
+  Function(ProgramID program_id,
+           const Source& source,
            Symbol symbol,
            VariableList params,
            type::Type* return_type,

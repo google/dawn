@@ -30,10 +30,14 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
 
  protected:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the input source
   /// @param type the type of the literal
   /// @param value value of the literal
-  IntLiteral(const Source& source, type::Type* type, uint32_t value);
+  IntLiteral(ProgramID program_id,
+             const Source& source,
+             type::Type* type,
+             uint32_t value);
 
  private:
   uint32_t const value_;

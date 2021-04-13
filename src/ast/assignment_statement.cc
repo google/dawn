@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::AssignmentStatement);
 namespace tint {
 namespace ast {
 
-AssignmentStatement::AssignmentStatement(const Source& source,
+AssignmentStatement::AssignmentStatement(ProgramID program_id,
+                                         const Source& source,
                                          Expression* lhs,
                                          Expression* rhs)
-    : Base(source), lhs_(lhs), rhs_(rhs) {
+    : Base(program_id, source), lhs_(lhs), rhs_(rhs) {
   TINT_ASSERT(lhs_);
   TINT_ASSERT(rhs_);
 }

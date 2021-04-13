@@ -21,7 +21,8 @@ namespace tint {
 namespace {
 
 struct Node : public Castable<Node, ast::Node> {
-  explicit Node(const Source& source, Symbol n) : Base(source), name(n) {}
+  Node(ProgramID program_id, const Source& source, Symbol n)
+      : Base(program_id, source), name(n) {}
 
   Symbol name;
   Node* a = nullptr;
@@ -42,14 +43,17 @@ struct Node : public Castable<Node, ast::Node> {
 };
 
 struct Replaceable : public Castable<Replaceable, Node> {
-  explicit Replaceable(const Source& source, Symbol n) : Base(source, n) {}
+  Replaceable(ProgramID program_id, const Source& source, Symbol n)
+      : Base(program_id, source, n) {}
 };
 struct Replacement : public Castable<Replacement, Replaceable> {
-  explicit Replacement(const Source& source, Symbol n) : Base(source, n) {}
+  Replacement(ProgramID program_id, const Source& source, Symbol n)
+      : Base(program_id, source, n) {}
 };
 
 struct NotANode : public Castable<NotANode, ast::Node> {
-  explicit NotANode(const Source& source) : Base(source) {}
+  NotANode(ProgramID program_id, const Source& source)
+      : Base(program_id, source) {}
 
   NotANode* Clone(CloneContext* ctx) const override {
     return ctx->dst->create<NotANode>();

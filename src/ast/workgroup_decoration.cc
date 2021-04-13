@@ -21,19 +21,23 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::WorkgroupDecoration);
 namespace tint {
 namespace ast {
 
-WorkgroupDecoration::WorkgroupDecoration(const Source& source, uint32_t x)
-    : WorkgroupDecoration(source, x, 1, 1) {}
+WorkgroupDecoration::WorkgroupDecoration(ProgramID program_id,
+                                         const Source& source,
+                                         uint32_t x)
+    : WorkgroupDecoration(program_id, source, x, 1, 1) {}
 
-WorkgroupDecoration::WorkgroupDecoration(const Source& source,
+WorkgroupDecoration::WorkgroupDecoration(ProgramID program_id,
+                                         const Source& source,
                                          uint32_t x,
                                          uint32_t y)
-    : WorkgroupDecoration(source, x, y, 1) {}
+    : WorkgroupDecoration(program_id, source, x, y, 1) {}
 
-WorkgroupDecoration::WorkgroupDecoration(const Source& source,
+WorkgroupDecoration::WorkgroupDecoration(ProgramID program_id,
+                                         const Source& source,
                                          uint32_t x,
                                          uint32_t y,
                                          uint32_t z)
-    : Base(source), x_(x), y_(y), z_(z) {}
+    : Base(program_id, source), x_(x), y_(y), z_(z) {}
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
 

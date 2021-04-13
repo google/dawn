@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::UnaryOpExpression);
 namespace tint {
 namespace ast {
 
-UnaryOpExpression::UnaryOpExpression(const Source& source,
+UnaryOpExpression::UnaryOpExpression(ProgramID program_id,
+                                     const Source& source,
                                      UnaryOp op,
                                      Expression* expr)
-    : Base(source), op_(op), expr_(expr) {
+    : Base(program_id, source), op_(op), expr_(expr) {
   TINT_ASSERT(expr_);
 }
 

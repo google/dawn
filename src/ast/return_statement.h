@@ -25,12 +25,17 @@ namespace ast {
 class ReturnStatement : public Castable<ReturnStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source information
-  explicit ReturnStatement(const Source& source);
+  ReturnStatement(ProgramID program_id, const Source& source);
+
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the return statement source
   /// @param value the return value
-  ReturnStatement(const Source& source, Expression* value);
+  ReturnStatement(ProgramID program_id,
+                  const Source& source,
+                  Expression* value);
   /// Move constructor
   ReturnStatement(ReturnStatement&&);
   ~ReturnStatement() override;

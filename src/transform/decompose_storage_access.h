@@ -66,8 +66,9 @@ class DecomposeStorageAccess : public Transform {
     };
 
     /// Constructor
+    /// @param program_id the identifier of the program that owns this node
     /// @param ty the type of the intrinsic
-    explicit Intrinsic(Type ty);
+    Intrinsic(ProgramID program_id, Type ty);
     /// Destructor
     ~Intrinsic() override;
 

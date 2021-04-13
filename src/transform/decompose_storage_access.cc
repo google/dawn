@@ -203,48 +203,52 @@ DecomposeStorageAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
                                                     type::Type* ty) {
   using Intrinsic = DecomposeStorageAccess::Intrinsic;
 
+  auto intrinsic = [builder](Intrinsic::Type type) {
+    return builder->ASTNodes().Create<Intrinsic>(builder->ID(), type);
+  };
+
   if (ty->Is<type::I32>()) {
-    return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadI32);
+    return intrinsic(Intrinsic::kLoadI32);
   }
   if (ty->Is<type::U32>()) {
-    return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadU32);
+    return intrinsic(Intrinsic::kLoadU32);
   }
   if (ty->Is<type::F32>()) {
-    return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadF32);
+    return intrinsic(Intrinsic::kLoadF32);
   }
   if (auto* vec = ty->As<type::Vector>()) {
     switch (vec->size()) {
       case 2:
         if (vec->type()->Is<type::I32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadVec2I32);
+          return intrinsic(Intrinsic::kLoadVec2I32);
         }
         if (vec->type()->Is<type::U32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadVec2U32);
+          return intrinsic(Intrinsic::kLoadVec2U32);
         }
         if (vec->type()->Is<type::F32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadVec2F32);
+          return intrinsic(Intrinsic::kLoadVec2F32);
         }
         break;
       case 3:
         if (vec->type()->Is<type::I32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadVec3I32);
+          return intrinsic(Intrinsic::kLoadVec3I32);
         }
         if (vec->type()->Is<type::U32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadVec3U32);
+          return intrinsic(Intrinsic::kLoadVec3U32);
         }
         if (vec->type()->Is<type::F32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadVec3F32);
+          return intrinsic(Intrinsic::kLoadVec3F32);
         }
         break;
       case 4:
         if (vec->type()->Is<type::I32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadVec4I32);
+          return intrinsic(Intrinsic::kLoadVec4I32);
         }
         if (vec->type()->Is<type::U32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadVec4U32);
+          return intrinsic(Intrinsic::kLoadVec4U32);
         }
         if (vec->type()->Is<type::F32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kLoadVec4F32);
+          return intrinsic(Intrinsic::kLoadVec4F32);
         }
         break;
     }
@@ -258,57 +262,52 @@ DecomposeStorageAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
                                                      type::Type* ty) {
   using Intrinsic = DecomposeStorageAccess::Intrinsic;
 
+  auto intrinsic = [builder](Intrinsic::Type type) {
+    return builder->ASTNodes().Create<Intrinsic>(builder->ID(), type);
+  };
+
   if (ty->Is<type::I32>()) {
-    return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kStoreI32);
+    return intrinsic(Intrinsic::kStoreI32);
   }
   if (ty->Is<type::U32>()) {
-    return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kStoreU32);
+    return intrinsic(Intrinsic::kStoreU32);
   }
   if (ty->Is<type::F32>()) {
-    return builder->ASTNodes().Create<Intrinsic>(Intrinsic::kStoreF32);
+    return intrinsic(Intrinsic::kStoreF32);
   }
   if (auto* vec = ty->As<type::Vector>()) {
     switch (vec->size()) {
       case 2:
         if (vec->type()->Is<type::I32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(
-              Intrinsic::kStoreVec2U32);
+          return intrinsic(Intrinsic::kStoreVec2U32);
         }
         if (vec->type()->Is<type::U32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(
-              Intrinsic::kStoreVec2F32);
+          return intrinsic(Intrinsic::kStoreVec2F32);
         }
         if (vec->type()->Is<type::F32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(
-              Intrinsic::kStoreVec2I32);
+          return intrinsic(Intrinsic::kStoreVec2I32);
         }
         break;
       case 3:
         if (vec->type()->Is<type::I32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(
-              Intrinsic::kStoreVec3U32);
+          return intrinsic(Intrinsic::kStoreVec3U32);
         }
         if (vec->type()->Is<type::U32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(
-              Intrinsic::kStoreVec3F32);
+          return intrinsic(Intrinsic::kStoreVec3F32);
         }
         if (vec->type()->Is<type::F32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(
-              Intrinsic::kStoreVec3I32);
+          return intrinsic(Intrinsic::kStoreVec3I32);
         }
         break;
       case 4:
         if (vec->type()->Is<type::I32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(
-              Intrinsic::kStoreVec4U32);
+          return intrinsic(Intrinsic::kStoreVec4U32);
         }
         if (vec->type()->Is<type::U32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(
-              Intrinsic::kStoreVec4F32);
+          return intrinsic(Intrinsic::kStoreVec4F32);
         }
         if (vec->type()->Is<type::F32>()) {
-          return builder->ASTNodes().Create<Intrinsic>(
-              Intrinsic::kStoreVec4I32);
+          return intrinsic(Intrinsic::kStoreVec4I32);
         }
         break;
     }
@@ -544,7 +543,8 @@ struct State {
 
 }  // namespace
 
-DecomposeStorageAccess::Intrinsic::Intrinsic(Type ty) : type(ty) {}
+DecomposeStorageAccess::Intrinsic::Intrinsic(ProgramID program_id, Type ty)
+    : Base(program_id), type(ty) {}
 DecomposeStorageAccess::Intrinsic::~Intrinsic() = default;
 std::string DecomposeStorageAccess::Intrinsic::Name() const {
   switch (type) {
@@ -602,7 +602,8 @@ std::string DecomposeStorageAccess::Intrinsic::Name() const {
 
 DecomposeStorageAccess::Intrinsic* DecomposeStorageAccess::Intrinsic::Clone(
     CloneContext* ctx) const {
-  return ctx->dst->ASTNodes().Create<DecomposeStorageAccess::Intrinsic>(type);
+  return ctx->dst->ASTNodes().Create<DecomposeStorageAccess::Intrinsic>(
+      ctx->dst->ID(), type);
 }
 
 DecomposeStorageAccess::DecomposeStorageAccess() = default;

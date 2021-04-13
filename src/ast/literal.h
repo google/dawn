@@ -47,9 +47,12 @@ class Literal : public Castable<Literal, Node> {
 
  protected:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the input source
   /// @param type the type of the literal
-  explicit Literal(const Source& source, type::Type* type);
+  explicit Literal(ProgramID program_id,
+                   const Source& source,
+                   type::Type* type);
 
  private:
   type::Type* const type_;

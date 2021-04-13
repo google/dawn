@@ -21,11 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BinaryExpression);
 namespace tint {
 namespace ast {
 
-BinaryExpression::BinaryExpression(const Source& source,
+BinaryExpression::BinaryExpression(ProgramID program_id,
+                                   const Source& source,
                                    BinaryOp op,
                                    Expression* lhs,
                                    Expression* rhs)
-    : Base(source), op_(op), lhs_(lhs), rhs_(rhs) {
+    : Base(program_id, source), op_(op), lhs_(lhs), rhs_(rhs) {
   TINT_ASSERT(lhs_);
   TINT_ASSERT(rhs_);
   TINT_ASSERT(op_ != BinaryOp::kNone);

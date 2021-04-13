@@ -25,10 +25,14 @@ namespace ast {
 class AssignmentStatement : public Castable<AssignmentStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the assignment statement source
   /// @param lhs the left side of the expression
   /// @param rhs the right side of the expression
-  AssignmentStatement(const Source& source, Expression* lhs, Expression* rhs);
+  AssignmentStatement(ProgramID program_id,
+                      const Source& source,
+                      Expression* lhs,
+                      Expression* rhs);
   /// Move constructor
   AssignmentStatement(AssignmentStatement&&);
   ~AssignmentStatement() override;

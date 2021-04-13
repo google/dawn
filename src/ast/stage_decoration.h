@@ -25,9 +25,12 @@ namespace ast {
 class StageDecoration : public Castable<StageDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param stage the pipeline stage
   /// @param source the source of this decoration
-  StageDecoration(const Source& source, PipelineStage stage);
+  StageDecoration(ProgramID program_id,
+                  const Source& source,
+                  PipelineStage stage);
   ~StageDecoration() override;
 
   /// @returns the stage

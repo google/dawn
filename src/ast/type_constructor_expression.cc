@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeConstructorExpression);
 namespace tint {
 namespace ast {
 
-TypeConstructorExpression::TypeConstructorExpression(const Source& source,
+TypeConstructorExpression::TypeConstructorExpression(ProgramID program_id,
+                                                     const Source& source,
                                                      type::Type* type,
                                                      ExpressionList values)
-    : Base(source), type_(type), values_(std::move(values)) {
+    : Base(program_id, source), type_(type), values_(std::move(values)) {
   TINT_ASSERT(type);
   for (auto* val : values_) {
     TINT_ASSERT(val);

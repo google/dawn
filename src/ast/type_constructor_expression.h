@@ -27,10 +27,12 @@ class TypeConstructorExpression
     : public Castable<TypeConstructorExpression, ConstructorExpression> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the constructor source
   /// @param type the type
   /// @param values the constructor values
-  TypeConstructorExpression(const Source& source,
+  TypeConstructorExpression(ProgramID program_id,
+                            const Source& source,
                             type::Type* type,
                             ExpressionList values);
   /// Move constructor

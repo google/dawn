@@ -21,11 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMember);
 namespace tint {
 namespace ast {
 
-StructMember::StructMember(const Source& source,
+StructMember::StructMember(ProgramID program_id,
+                           const Source& source,
                            const Symbol& sym,
                            type::Type* type,
                            DecorationList decorations)
-    : Base(source),
+    : Base(program_id, source),
       symbol_(sym),
       type_(type),
       decorations_(std::move(decorations)) {

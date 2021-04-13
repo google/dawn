@@ -21,8 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BoolLiteral);
 namespace tint {
 namespace ast {
 
-BoolLiteral::BoolLiteral(const Source& source, type::Type* type, bool value)
-    : Base(source, type), value_(value) {}
+BoolLiteral::BoolLiteral(ProgramID program_id,
+                         const Source& source,
+                         type::Type* type,
+                         bool value)
+    : Base(program_id, source, type), value_(value) {}
 
 BoolLiteral::~BoolLiteral() = default;
 

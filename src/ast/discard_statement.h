@@ -24,8 +24,9 @@ namespace ast {
 class DiscardStatement : public Castable<DiscardStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the discard statement source
-  explicit DiscardStatement(const Source& source);
+  DiscardStatement(ProgramID program_id, const Source& source);
   /// Move constructor
   DiscardStatement(DiscardStatement&&);
   ~DiscardStatement() override;

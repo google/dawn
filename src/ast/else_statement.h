@@ -27,10 +27,12 @@ namespace ast {
 class ElseStatement : public Castable<ElseStatement, Statement> {
  public:
   /// Constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param source the source information
   /// @param condition the else condition
   /// @param body the else body
-  ElseStatement(const Source& source,
+  ElseStatement(ProgramID program_id,
+                const Source& source,
                 Expression* condition,
                 BlockStatement* body);
   /// Move constructor

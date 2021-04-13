@@ -24,9 +24,10 @@ namespace ast {
 class GroupDecoration : public Castable<GroupDecoration, Decoration> {
  public:
   /// constructor
+  /// @param program_id the identifier of the program that owns this node
   /// @param value the group value
   /// @param source the source of this decoration
-  GroupDecoration(const Source& source, uint32_t value);
+  GroupDecoration(ProgramID program_id, const Source& source, uint32_t value);
   ~GroupDecoration() override;
 
   /// @returns the group value

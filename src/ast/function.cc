@@ -23,14 +23,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Function);
 namespace tint {
 namespace ast {
 
-Function::Function(const Source& source,
+Function::Function(ProgramID program_id,
+                   const Source& source,
                    Symbol symbol,
                    VariableList params,
                    type::Type* return_type,
                    BlockStatement* body,
                    DecorationList decorations,
                    DecorationList return_type_decorations)
-    : Base(source),
+    : Base(program_id, source),
       symbol_(symbol),
       params_(std::move(params)),
       return_type_(return_type),
