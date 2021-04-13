@@ -278,10 +278,10 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Snorm) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("int4 _tint_tmp = int4(round(clamp(p1, "
+  EXPECT_THAT(pre_result(), HasSubstr("int4 tint_tmp = int4(round(clamp(p1, "
                                       "-1.0, 1.0) * 127.0)) & 0xff;"));
-  EXPECT_THAT(result(), HasSubstr("asuint(_tint_tmp.x | _tint_tmp.y << 8 | "
-                                  "_tint_tmp.z << 16 | _tint_tmp.w << 24)"));
+  EXPECT_THAT(result(), HasSubstr("asuint(tint_tmp.x | tint_tmp.y << 8 | "
+                                  "tint_tmp.z << 16 | tint_tmp.w << 24)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Unorm) {
@@ -292,10 +292,10 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Unorm) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint4 _tint_tmp = uint4(round(clamp(p1, "
+  EXPECT_THAT(pre_result(), HasSubstr("uint4 tint_tmp = uint4(round(clamp(p1, "
                                       "0.0, 1.0) * 255.0));"));
-  EXPECT_THAT(result(), HasSubstr("(_tint_tmp.x | _tint_tmp.y << 8 | "
-                                  "_tint_tmp.z << 16 | _tint_tmp.w << 24)"));
+  EXPECT_THAT(result(), HasSubstr("(tint_tmp.x | tint_tmp.y << 8 | "
+                                  "tint_tmp.z << 16 | tint_tmp.w << 24)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Snorm) {
@@ -306,9 +306,9 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Snorm) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("int2 _tint_tmp = int2(round(clamp(p1, "
+  EXPECT_THAT(pre_result(), HasSubstr("int2 tint_tmp = int2(round(clamp(p1, "
                                       "-1.0, 1.0) * 32767.0)) & 0xffff;"));
-  EXPECT_THAT(result(), HasSubstr("asuint(_tint_tmp.x | _tint_tmp.y << 16)"));
+  EXPECT_THAT(result(), HasSubstr("asuint(tint_tmp.x | tint_tmp.y << 16)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Unorm) {
@@ -319,9 +319,9 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Unorm) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint2 _tint_tmp = uint2(round(clamp(p1, "
+  EXPECT_THAT(pre_result(), HasSubstr("uint2 tint_tmp = uint2(round(clamp(p1, "
                                       "0.0, 1.0) * 65535.0));"));
-  EXPECT_THAT(result(), HasSubstr("(_tint_tmp.x | _tint_tmp.y << 16)"));
+  EXPECT_THAT(result(), HasSubstr("(tint_tmp.x | tint_tmp.y << 16)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Float) {
@@ -332,8 +332,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Pack2x16Float) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint2 _tint_tmp = f32tof16(p1);"));
-  EXPECT_THAT(result(), HasSubstr("(_tint_tmp.x | _tint_tmp.y << 16)"));
+  EXPECT_THAT(pre_result(), HasSubstr("uint2 tint_tmp = f32tof16(p1);"));
+  EXPECT_THAT(result(), HasSubstr("(tint_tmp.x | tint_tmp.y << 16)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack4x8Snorm) {
@@ -344,12 +344,12 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack4x8Snorm) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("int _tint_tmp_0 = int(p1);"));
+  EXPECT_THAT(pre_result(), HasSubstr("int tint_tmp_1 = int(p1);"));
   EXPECT_THAT(pre_result(),
-              HasSubstr("int4 _tint_tmp = int4(_tint_tmp_0 << 24, _tint_tmp_0 "
-                        "<< 16, _tint_tmp_0 << 8, _tint_tmp_0) >> 24;"));
+              HasSubstr("int4 tint_tmp = int4(tint_tmp_1 << 24, tint_tmp_1 "
+                        "<< 16, tint_tmp_1 << 8, tint_tmp_1) >> 24;"));
   EXPECT_THAT(result(),
-              HasSubstr("clamp(float4(_tint_tmp) / 127.0, -1.0, 1.0)"));
+              HasSubstr("clamp(float4(tint_tmp) / 127.0, -1.0, 1.0)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack4x8Unorm) {
@@ -360,12 +360,12 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack4x8Unorm) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint _tint_tmp_0 = p1;"));
+  EXPECT_THAT(pre_result(), HasSubstr("uint tint_tmp_1 = p1;"));
   EXPECT_THAT(
       pre_result(),
-      HasSubstr("uint4 _tint_tmp = uint4(_tint_tmp_0 & 0xff, (_tint_tmp_0 >> "
-                "8) & 0xff, (_tint_tmp_0 >> 16) & 0xff, _tint_tmp_0 >> 24);"));
-  EXPECT_THAT(result(), HasSubstr("float4(_tint_tmp) / 255.0"));
+      HasSubstr("uint4 tint_tmp = uint4(tint_tmp_1 & 0xff, (tint_tmp_1 >> "
+                "8) & 0xff, (tint_tmp_1 >> 16) & 0xff, tint_tmp_1 >> 24);"));
+  EXPECT_THAT(result(), HasSubstr("float4(tint_tmp) / 255.0"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Snorm) {
@@ -376,13 +376,12 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Snorm) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("int _tint_tmp_0 = int(p1);"));
+  EXPECT_THAT(pre_result(), HasSubstr("int tint_tmp_1 = int(p1);"));
   EXPECT_THAT(
       pre_result(),
-      HasSubstr(
-          "int2 _tint_tmp = int2(_tint_tmp_0 << 16, _tint_tmp_0) >> 16;"));
+      HasSubstr("int2 tint_tmp = int2(tint_tmp_1 << 16, tint_tmp_1) >> 16;"));
   EXPECT_THAT(result(),
-              HasSubstr("clamp(float2(_tint_tmp) / 32767.0, -1.0, 1.0)"));
+              HasSubstr("clamp(float2(tint_tmp) / 32767.0, -1.0, 1.0)"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Unorm) {
@@ -393,12 +392,12 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Unorm) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint _tint_tmp_0 = p1;"));
+  EXPECT_THAT(pre_result(), HasSubstr("uint tint_tmp_1 = p1;"));
   EXPECT_THAT(
       pre_result(),
       HasSubstr(
-          "uint2 _tint_tmp = uint2(_tint_tmp_0 & 0xffff, _tint_tmp_0 >> 16);"));
-  EXPECT_THAT(result(), HasSubstr("float2(_tint_tmp) / 65535.0"));
+          "uint2 tint_tmp = uint2(tint_tmp_1 & 0xffff, tint_tmp_1 >> 16);"));
+  EXPECT_THAT(result(), HasSubstr("float2(tint_tmp) / 65535.0"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Float) {
@@ -409,10 +408,9 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Unpack2x16Float) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_THAT(pre_result(), HasSubstr("uint _tint_tmp = p1;"));
-  EXPECT_THAT(
-      result(),
-      HasSubstr("f16tof32(uint2(_tint_tmp & 0xffff, _tint_tmp >> 16))"));
+  EXPECT_THAT(pre_result(), HasSubstr("uint tint_tmp = p1;"));
+  EXPECT_THAT(result(),
+              HasSubstr("f16tof32(uint2(tint_tmp & 0xffff, tint_tmp >> 16))"));
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, StorageBarrier) {

@@ -241,10 +241,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(_tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
-if (_tint_tmp) {
-  _tint_tmp = right;
+  EXPECT_EQ(result(), "(tint_tmp)");
+  EXPECT_EQ(pre_result(), R"(bool tint_tmp = left;
+if (tint_tmp) {
+  tint_tmp = right;
 }
 )");
 }
@@ -264,18 +264,18 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(_tint_tmp_0)");
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
-if (_tint_tmp) {
-  _tint_tmp = b;
+  EXPECT_EQ(result(), "(tint_tmp_1)");
+  EXPECT_EQ(pre_result(), R"(bool tint_tmp = a;
+if (tint_tmp) {
+  tint_tmp = b;
 }
-bool _tint_tmp_0 = (_tint_tmp);
-if (!_tint_tmp_0) {
-  bool _tint_tmp_1 = c;
-  if (!_tint_tmp_1) {
-    _tint_tmp_1 = d;
+bool tint_tmp_1 = (tint_tmp);
+if (!tint_tmp_1) {
+  bool tint_tmp_2 = c;
+  if (!tint_tmp_2) {
+    tint_tmp_2 = d;
   }
-  _tint_tmp_0 = (_tint_tmp_1);
+  tint_tmp_1 = (tint_tmp_2);
 }
 )");
 }
@@ -290,10 +290,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "(_tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = left;
-if (!_tint_tmp) {
-  _tint_tmp = right;
+  EXPECT_EQ(result(), "(tint_tmp)");
+  EXPECT_EQ(pre_result(), R"(bool tint_tmp = left;
+if (!tint_tmp) {
+  tint_tmp = right;
 }
 )");
 }
@@ -336,18 +336,18 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = a;
-if (_tint_tmp) {
-  _tint_tmp = b;
+  EXPECT_EQ(result(), R"(bool tint_tmp = a;
+if (tint_tmp) {
+  tint_tmp = b;
 }
-if ((_tint_tmp)) {
+if ((tint_tmp)) {
   return 1;
 } else {
-  bool _tint_tmp_0 = b;
-  if (!_tint_tmp_0) {
-    _tint_tmp_0 = c;
+  bool tint_tmp_1 = b;
+  if (!tint_tmp_1) {
+    tint_tmp_1 = c;
   }
-  if ((_tint_tmp_0)) {
+  if ((tint_tmp_1)) {
     return 2;
   } else {
     return 3;
@@ -369,15 +369,15 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = a;
-if (_tint_tmp) {
-  _tint_tmp = b;
+  EXPECT_EQ(result(), R"(bool tint_tmp = a;
+if (tint_tmp) {
+  tint_tmp = b;
 }
-bool _tint_tmp_0 = (_tint_tmp);
-if (!_tint_tmp_0) {
-  _tint_tmp_0 = c;
+bool tint_tmp_1 = (tint_tmp);
+if (!tint_tmp_1) {
+  tint_tmp_1 = c;
 }
-return (_tint_tmp_0);
+return (tint_tmp_1);
 )");
 }
 
@@ -397,15 +397,15 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = b;
-if (!_tint_tmp) {
-  _tint_tmp = c;
+  EXPECT_EQ(result(), R"(bool tint_tmp = b;
+if (!tint_tmp) {
+  tint_tmp = c;
 }
-bool _tint_tmp_0 = (_tint_tmp);
-if (_tint_tmp_0) {
-  _tint_tmp_0 = d;
+bool tint_tmp_1 = (tint_tmp);
+if (tint_tmp_1) {
+  tint_tmp_1 = d;
 }
-a = (_tint_tmp_0);
+a = (tint_tmp_1);
 )");
 }
 
@@ -432,15 +432,15 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStatement(out, decl)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = b;
-if (_tint_tmp) {
-  _tint_tmp = c;
+  EXPECT_EQ(result(), R"(bool tint_tmp = b;
+if (tint_tmp) {
+  tint_tmp = c;
 }
-bool _tint_tmp_0 = (_tint_tmp);
-if (!_tint_tmp_0) {
-  _tint_tmp_0 = d;
+bool tint_tmp_1 = (tint_tmp);
+if (!tint_tmp_1) {
+  tint_tmp_1 = d;
 }
-bool a = (_tint_tmp_0);
+bool a = (tint_tmp_1);
 )");
 }
 
@@ -460,16 +460,16 @@ TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(pre_result(), R"(bool _tint_tmp = a;
-if (_tint_tmp) {
-  bool _tint_tmp_0 = b;
-  if (!_tint_tmp_0) {
-    _tint_tmp_0 = c;
+  EXPECT_EQ(pre_result(), R"(bool tint_tmp = a;
+if (tint_tmp) {
+  bool tint_tmp_1 = b;
+  if (!tint_tmp_1) {
+    tint_tmp_1 = c;
   }
-  _tint_tmp = (_tint_tmp_0);
+  tint_tmp = (tint_tmp_1);
 }
 )");
-  EXPECT_EQ(result(), R"(asint((_tint_tmp)))");
+  EXPECT_EQ(result(), R"(asint((tint_tmp)))");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
@@ -500,27 +500,27 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStatement(out, expr)) << gen.error();
-  EXPECT_EQ(result(), R"(bool _tint_tmp = a;
-if (_tint_tmp) {
-  _tint_tmp = b;
+  EXPECT_EQ(result(), R"(bool tint_tmp = a;
+if (tint_tmp) {
+  tint_tmp = b;
 }
-bool _tint_tmp_0 = c;
-if (!_tint_tmp_0) {
-  _tint_tmp_0 = d;
+bool tint_tmp_1 = c;
+if (!tint_tmp_1) {
+  tint_tmp_1 = d;
 }
-bool _tint_tmp_1 = a;
-if (!_tint_tmp_1) {
-  _tint_tmp_1 = c;
+bool tint_tmp_2 = a;
+if (!tint_tmp_2) {
+  tint_tmp_2 = c;
 }
-bool _tint_tmp_2 = (_tint_tmp_1);
-if (_tint_tmp_2) {
-  bool _tint_tmp_3 = b;
-  if (!_tint_tmp_3) {
-    _tint_tmp_3 = d;
+bool tint_tmp_3 = (tint_tmp_2);
+if (tint_tmp_3) {
+  bool tint_tmp_4 = b;
+  if (!tint_tmp_4) {
+    tint_tmp_4 = d;
   }
-  _tint_tmp_2 = (_tint_tmp_3);
+  tint_tmp_3 = (tint_tmp_4);
 }
-foo((_tint_tmp), (_tint_tmp_0), (_tint_tmp_2));
+foo((tint_tmp), (tint_tmp_1), (tint_tmp_3));
 )");
 }
 

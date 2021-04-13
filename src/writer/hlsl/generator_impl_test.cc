@@ -47,9 +47,9 @@ TEST_F(HlslGeneratorImplTest, InputStructName_ConflictWithExisting) {
   GeneratorImpl& gen = Build();
 
   ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out");
-  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_0");
   ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_3");
   ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_4");
+  ASSERT_EQ(gen.generate_name("func_main_out"), "func_main_out_5");
 }
 
 struct HlslBuiltinData {

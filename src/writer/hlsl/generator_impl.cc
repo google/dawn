@@ -47,7 +47,7 @@ const char kInStructNameSuffix[] = "in";
 const char kOutStructNameSuffix[] = "out";
 const char kTintStructInVarPrefix[] = "tint_in";
 const char kTintStructOutVarPrefix[] = "tint_out";
-const char kTempNamePrefix[] = "_tint_tmp";
+const char kTempNamePrefix[] = "tint_tmp";
 
 bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
   if (stmts->empty()) {
@@ -176,18 +176,7 @@ void GeneratorImpl::register_global(ast::Variable* global) {
 }
 
 std::string GeneratorImpl::generate_name(const std::string& prefix) {
-  if (!builder_.Symbols().Get(prefix).IsValid()) {
-    builder_.Symbols().Register(prefix);
-    return prefix;
-  }
-  for (uint32_t i = 0;; i++) {
-    std::string name = prefix + "_" + std::to_string(i);
-    if (builder_.Symbols().Get(name).IsValid()) {
-      continue;
-    }
-    builder_.Symbols().Register(name);
-    return name;
-  }
+  return builder_.Symbols().NameFor(builder_.Symbols().New(prefix));
 }
 
 std::string GeneratorImpl::current_ep_var_name(VarType type) {

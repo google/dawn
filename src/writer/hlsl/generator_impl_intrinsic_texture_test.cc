@@ -41,27 +41,27 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kDimensionsStorageRO1d:
     case ValidTextureOverload::kDimensionsStorageWO1d:
       return {
-          R"(int _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp);
+          R"(int tint_tmp;
+  tint_texture.GetDimensions(tint_tmp);
 )",
-          "_tint_tmp",
+          "tint_tmp",
       };
     case ValidTextureOverload::kDimensions2d:
     case ValidTextureOverload::kDimensionsDepth2d:
     case ValidTextureOverload::kDimensionsStorageRO2d:
     case ValidTextureOverload::kDimensionsStorageWO2d:
       return {
-          R"(int2 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y);
+          R"(int2 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y);
 )",
-          "_tint_tmp",
+          "tint_tmp",
       };
     case ValidTextureOverload::kDimensionsMultisampled2d:
       return {
-          R"(int3 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z);
+          R"(int3 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "_tint_tmp.xy",
+          "tint_tmp.xy",
       };
 
     case ValidTextureOverload::kDimensions2dArray:
@@ -69,81 +69,81 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kDimensionsStorageRO2dArray:
     case ValidTextureOverload::kDimensionsStorageWO2dArray:
       return {
-          R"(int3 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z);
+          R"(int3 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "_tint_tmp.xy",
+          "tint_tmp.xy",
       };
     case ValidTextureOverload::kDimensionsMultisampled2dArray:
       return {
-          R"(int4 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);
+          R"(int4 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
 )",
-          "_tint_tmp.xy",
+          "tint_tmp.xy",
       };
     case ValidTextureOverload::kDimensions3d:
     case ValidTextureOverload::kDimensionsStorageRO3d:
     case ValidTextureOverload::kDimensionsStorageWO3d:
       return {
-          R"(int3 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z);
+          R"(int3 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "_tint_tmp",
+          "tint_tmp",
       };
     case ValidTextureOverload::kDimensionsCube:
     case ValidTextureOverload::kDimensionsDepthCube:
       return {
-          R"(int2 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y);
+          R"(int2 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y);
 )",
-          "_tint_tmp.xyy",
+          "tint_tmp.xyy",
       };
     case ValidTextureOverload::kDimensionsCubeArray:
     case ValidTextureOverload::kDimensionsDepthCubeArray:
       return {
-          R"(int3 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z);
+          R"(int3 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "_tint_tmp.xyy",
+          "tint_tmp.xyy",
       };
     case ValidTextureOverload::kDimensions2dLevel:
     case ValidTextureOverload::kDimensionsDepth2dLevel:
       return {
-          R"(int3 _tint_tmp;
-  tint_texture.GetDimensions(1, _tint_tmp.x, _tint_tmp.y, _tint_tmp.z);
+          R"(int3 tint_tmp;
+  tint_texture.GetDimensions(1, tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "_tint_tmp.xy",
+          "tint_tmp.xy",
       };
     case ValidTextureOverload::kDimensions2dArrayLevel:
     case ValidTextureOverload::kDimensionsDepth2dArrayLevel:
       return {
-          R"(int4 _tint_tmp;
-  tint_texture.GetDimensions(1, _tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);
+          R"(int4 tint_tmp;
+  tint_texture.GetDimensions(1, tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
 )",
-          "_tint_tmp.xy",
+          "tint_tmp.xy",
       };
     case ValidTextureOverload::kDimensions3dLevel:
       return {
-          R"(int4 _tint_tmp;
-  tint_texture.GetDimensions(1, _tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);
+          R"(int4 tint_tmp;
+  tint_texture.GetDimensions(1, tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
 )",
-          "_tint_tmp.xyz",
+          "tint_tmp.xyz",
       };
     case ValidTextureOverload::kDimensionsCubeLevel:
     case ValidTextureOverload::kDimensionsDepthCubeLevel:
       return {
-          R"(int3 _tint_tmp;
-  tint_texture.GetDimensions(1, _tint_tmp.x, _tint_tmp.y, _tint_tmp.z);
+          R"(int3 tint_tmp;
+  tint_texture.GetDimensions(1, tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "_tint_tmp.xyy",
+          "tint_tmp.xyy",
       };
     case ValidTextureOverload::kDimensionsCubeArrayLevel:
     case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
       return {
-          R"(int4 _tint_tmp;
-  tint_texture.GetDimensions(1, _tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);
+          R"(int4 tint_tmp;
+  tint_texture.GetDimensions(1, tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
 )",
-          "_tint_tmp.xyy",
+          "tint_tmp.xyy",
       };
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
@@ -151,17 +151,17 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kNumLayersDepthCubeArray:
     case ValidTextureOverload::kNumLayersStorageWO2dArray:
       return {
-          R"(int3 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z);
+          R"(int3 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "_tint_tmp.z",
+          "tint_tmp.z",
       };
     case ValidTextureOverload::kNumLayersMultisampled2dArray:
       return {
-          R"(int4 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);
+          R"(int4 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
 )",
-          "_tint_tmp.z",
+          "tint_tmp.z",
       };
 
     case ValidTextureOverload::kNumLevels2d:
@@ -169,10 +169,10 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kNumLevelsDepth2d:
     case ValidTextureOverload::kNumLevelsDepthCube:
       return {
-          R"(int3 _tint_tmp;
-  tint_texture.GetDimensions(0, _tint_tmp.x, _tint_tmp.y, _tint_tmp.z);
+          R"(int3 tint_tmp;
+  tint_texture.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "_tint_tmp.z",
+          "tint_tmp.z",
       };
     case ValidTextureOverload::kNumLevels2dArray:
     case ValidTextureOverload::kNumLevels3d:
@@ -180,24 +180,24 @@ ExpectedResult expected_texture_overload(
     case ValidTextureOverload::kNumLevelsDepth2dArray:
     case ValidTextureOverload::kNumLevelsDepthCubeArray:
       return {
-          R"(int4 _tint_tmp;
-  tint_texture.GetDimensions(0, _tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);
+          R"(int4 tint_tmp;
+  tint_texture.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
 )",
-          "_tint_tmp.w",
+          "tint_tmp.w",
       };
     case ValidTextureOverload::kNumSamplesMultisampled2d:
       return {
-          R"(int3 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z);
+          R"(int3 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
-          "_tint_tmp.z",
+          "tint_tmp.z",
       };
     case ValidTextureOverload::kNumSamplesMultisampled2dArray:
       return {
-          R"(int4 _tint_tmp;
-  tint_texture.GetDimensions(_tint_tmp.x, _tint_tmp.y, _tint_tmp.z, _tint_tmp.w);
+          R"(int4 tint_tmp;
+  tint_texture.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
 )",
-          "_tint_tmp.w",
+          "tint_tmp.w",
       };
     case ValidTextureOverload::kSample1dF32:
       return R"(tint_texture.Sample(tint_sampler, 1.0f))";
