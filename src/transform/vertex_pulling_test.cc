@@ -29,11 +29,9 @@ TEST_F(VertexPullingTest, Error_NoEntryPoint) {
 
   auto* expect = "error: Vertex stage entry point not found";
 
-  VertexPulling::Config cfg;
-
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>();
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -49,9 +47,9 @@ fn main() {}
   VertexPulling::Config cfg;
   cfg.entry_point_name = "_";
 
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -67,9 +65,9 @@ fn main() {}
   VertexPulling::Config cfg;
   cfg.entry_point_name = "main";
 
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -97,9 +95,9 @@ fn main() {
   VertexPulling::Config cfg;
   cfg.entry_point_name = "main";
 
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -139,9 +137,9 @@ fn main() {
       {{4, InputStepMode::kVertex, {{VertexFormat::kF32, 0, 0}}}}};
   cfg.entry_point_name = "main";
 
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -181,9 +179,9 @@ fn main() {
       {{4, InputStepMode::kInstance, {{VertexFormat::kF32, 0, 0}}}}};
   cfg.entry_point_name = "main";
 
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -224,9 +222,9 @@ fn main() {
   cfg.pulling_group = 5;
   cfg.entry_point_name = "main";
 
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -288,9 +286,9 @@ fn main() {
   }};
   cfg.entry_point_name = "main";
 
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -337,9 +335,9 @@ fn main() {
         {{VertexFormat::kF32, 0, 0}, {VertexFormat::kVec4F32, 0, 1}}}}};
   cfg.entry_point_name = "main";
 
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -396,9 +394,9 @@ fn main() {
   }};
   cfg.entry_point_name = "main";
 
-  auto transform = std::make_unique<VertexPulling>(cfg);
-
-  auto got = Run(src, std::move(transform));
+  DataMap data;
+  data.Add<VertexPulling::Config>(cfg);
+  auto got = Run<VertexPulling>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }

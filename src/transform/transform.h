@@ -36,6 +36,10 @@ class Data : public Castable<Data> {
 
   /// Destructor
   ~Data() override;
+
+  /// Assignment operator
+  /// @returns this Data
+  Data& operator=(const Data&);
 };
 
 /// DataMap is a map of Data unique pointers keyed by the Data's ClassID.

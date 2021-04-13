@@ -24,23 +24,17 @@ namespace tint {
 namespace transform {
 
 Data::Data() = default;
-
 Data::Data(const Data&) = default;
-
 Data::~Data() = default;
+Data& Data::operator=(const Data&) = default;
 
 DataMap::DataMap() = default;
-
 DataMap::DataMap(DataMap&&) = default;
-
 DataMap::~DataMap() = default;
 
 Transform::Output::Output() = default;
-
 Transform::Output::Output(Program&& p) : program(std::move(p)) {}
-
 Transform::Transform() = default;
-
 Transform::~Transform() = default;
 
 ast::Function* Transform::CloneWithStatementsAtStart(

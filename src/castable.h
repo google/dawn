@@ -158,9 +158,6 @@ class CastableBase {
   /// Copy constructor
   CastableBase(const CastableBase&) = default;
 
-  /// Move constructor
-  CastableBase(CastableBase&&) = default;
-
   virtual ~CastableBase() = default;
 
   /// @returns the TypeInfo of the object

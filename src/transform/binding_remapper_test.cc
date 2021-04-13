@@ -44,7 +44,7 @@ fn f() {
   DataMap data;
   data.Add<BindingRemapper::Remappings>(BindingRemapper::BindingPoints{},
                                         BindingRemapper::AccessControls{});
-  auto got = Run<BindingRemapper>(src, std::move(data));
+  auto got = Run<BindingRemapper>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -86,7 +86,7 @@ fn f() {
                              // Keep [[group(3), binding(2)]] as is
       },
       BindingRemapper::AccessControls{});
-  auto got = Run<BindingRemapper>(src, std::move(data));
+  auto got = Run<BindingRemapper>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -137,7 +137,7 @@ fn f() {
           // Keep [[group(3), binding(2)]] as is
           {{4, 3}, ast::AccessControl::kReadOnly},  // Add access control
       });
-  auto got = Run<BindingRemapper>(src, std::move(data));
+  auto got = Run<BindingRemapper>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -202,7 +202,7 @@ fn f() {
           // Keep [[group(3), binding(2)]] as is
           {{4, 3}, ast::AccessControl::kReadOnly},  // Add access control
       });
-  auto got = Run<BindingRemapper>(src, std::move(data));
+  auto got = Run<BindingRemapper>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }
@@ -249,7 +249,7 @@ fn f() {
           {{2, 1}, ast::AccessControl::kWriteOnly},
           {{3, 2}, ast::AccessControl::kWriteOnly},
       });
-  auto got = Run<BindingRemapper>(src, std::move(data));
+  auto got = Run<BindingRemapper>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }

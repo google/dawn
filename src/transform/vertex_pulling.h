@@ -132,7 +132,7 @@ using VertexStateDescriptor = std::vector<VertexBufferLayoutDescriptor>;
 class VertexPulling : public Transform {
  public:
   /// Configuration options for the transform
-  struct Config {
+  struct Config : public Castable<Config, Data> {
     /// Constructor
     Config();
 
@@ -140,7 +140,11 @@ class VertexPulling : public Transform {
     Config(const Config&);
 
     /// Destructor
-    ~Config();
+    ~Config() override;
+
+    /// Assignment operator
+    /// @returns this Config
+    Config& operator=(const Config&);
 
     /// The entry point to add assignments into
     std::string entry_point_name;
@@ -154,6 +158,10 @@ class VertexPulling : public Transform {
   };
 
   /// Constructor
+  VertexPulling();
+
+  /// Constructor
+  /// [DEPRECATED] - pass Config as part of the `data` to Run()
   /// @param config the configuration options for the transform
   explicit VertexPulling(const Config& config);
 
@@ -167,7 +175,7 @@ class VertexPulling : public Transform {
   Output Run(const Program* program, const DataMap& data = {}) override;
 
  private:
-  Config cfg;
+  Config cfg_;
 
   struct State {
     State(CloneContext& ctx, const Config& c);

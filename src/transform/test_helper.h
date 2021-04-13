@@ -41,7 +41,7 @@ class TransformTestBase : public BASE {
   Transform::Output Run(
       std::string in,
       std::vector<std::unique_ptr<transform::Transform>> transforms,
-      DataMap data = {}) {
+      const DataMap& data = {}) {
     auto file = std::make_unique<Source::File>("test", in);
     auto program = reader::wgsl::Parse(file.get());
 
@@ -67,10 +67,10 @@ class TransformTestBase : public BASE {
   /// @return the transformed output
   Transform::Output Run(std::string in,
                         std::unique_ptr<transform::Transform> transform,
-                        DataMap data = {}) {
+                        const DataMap& data = {}) {
     std::vector<std::unique_ptr<transform::Transform>> transforms;
     transforms.emplace_back(std::move(transform));
-    return Run(std::move(in), std::move(transforms), std::move(data));
+    return Run(std::move(in), std::move(transforms), data);
   }
 
   /// Transforms and returns the WGSL source `in`, transformed using
@@ -79,8 +79,8 @@ class TransformTestBase : public BASE {
   /// @param data the optional DataMap to pass to Transform::Run()
   /// @return the transformed output
   template <typename TRANSFORM>
-  Transform::Output Run(std::string in, DataMap data = {}) {
-    return Run(std::move(in), std::make_unique<TRANSFORM>(), std::move(data));
+  Transform::Output Run(std::string in, const DataMap& data = {}) {
+    return Run(std::move(in), std::make_unique<TRANSFORM>(), data);
   }
 
   /// @param output the output of the transform

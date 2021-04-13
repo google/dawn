@@ -23,6 +23,8 @@
 #include "src/program_builder.h"
 #include "src/semantic/variable.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling::Config);
+
 namespace tint {
 namespace transform {
 namespace {
@@ -36,12 +38,18 @@ static const char kDefaultInstanceIndexName[] = "_tint_pulling_instance_index";
 
 }  // namespace
 
-VertexPulling::VertexPulling(const Config& config) : cfg(config) {}
+VertexPulling::VertexPulling() = default;
+VertexPulling::VertexPulling(const Config& config) : cfg_(config) {}
 
 VertexPulling::~VertexPulling() = default;
 
-Transform::Output VertexPulling::Run(const Program* in, const DataMap&) {
+Transform::Output VertexPulling::Run(const Program* in, const DataMap& data) {
   ProgramBuilder out;
+
+  auto cfg = cfg_;
+  if (auto* cfg_data = data.Get<Config>()) {
+    cfg = *cfg_data;
+  }
 
   // Find entry point
   auto* func = in->AST().Functions().Find(
@@ -80,16 +88,14 @@ Transform::Output VertexPulling::Run(const Program* in, const DataMap&) {
 }
 
 VertexPulling::Config::Config() = default;
-
 VertexPulling::Config::Config(const Config&) = default;
-
 VertexPulling::Config::~Config() = default;
+VertexPulling::Config& VertexPulling::Config::operator=(const Config&) =
+    default;
 
 VertexPulling::State::State(CloneContext& context, const Config& c)
     : ctx(context), cfg(c) {}
-
 VertexPulling::State::State(const State&) = default;
-
 VertexPulling::State::~State() = default;
 
 std::string VertexPulling::State::GetVertexBufferName(uint32_t index) const {
