@@ -35,7 +35,7 @@ bool Symbol::operator==(const Symbol& other) const {
 }
 
 std::string Symbol::to_str() const {
-  return "tint_symbol_" + std::to_string(val_);
+  return "$" + std::to_string(val_);
 }
 
 }  // namespace tint

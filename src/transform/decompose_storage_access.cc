@@ -613,6 +613,10 @@ Transform::Output DecomposeStorageAccess::Run(const Program* in,
   ProgramBuilder out;
   CloneContext ctx(&out, in);
 
+  // Start by cloning all the symbols. This ensures that the authored symbols
+  // won't get renamed if they collide with new symbols below.
+  ctx.CloneSymbols();
+
   auto& sem = ctx.src->Sem();
 
   State state;

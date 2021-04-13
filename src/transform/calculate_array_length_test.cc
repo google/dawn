@@ -46,16 +46,16 @@ struct SB {
 };
 
 [[internal(intrinsic_buffer_size)]]
-fn tint_symbol_1(buffer : SB, result : ptr<function, u32>)
+fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
 var<storage> sb : SB;
 
 [[stage(vertex)]]
 fn main() {
-  var tint_symbol_7 : u32 = 0u;
-  tint_symbol_1(sb, tint_symbol_7);
-  let tint_symbol_9 : u32 = ((tint_symbol_7 - 4u) / 4u);
-  var len : u32 = tint_symbol_9;
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(sb, tint_symbol_1);
+  let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
+  var len : u32 = tint_symbol_2;
 }
 )";
 
@@ -90,18 +90,18 @@ struct SB {
 };
 
 [[internal(intrinsic_buffer_size)]]
-fn tint_symbol_1(buffer : SB, result : ptr<function, u32>)
+fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
 var<storage> sb : SB;
 
 [[stage(vertex)]]
 fn main() {
-  var tint_symbol_7 : u32 = 0u;
-  tint_symbol_1(sb, tint_symbol_7);
-  let tint_symbol_9 : u32 = ((tint_symbol_7 - 4u) / 4u);
-  var a : u32 = tint_symbol_9;
-  var b : u32 = tint_symbol_9;
-  var c : u32 = tint_symbol_9;
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(sb, tint_symbol_1);
+  let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
+  var a : u32 = tint_symbol_2;
+  var b : u32 = tint_symbol_2;
+  var c : u32 = tint_symbol_2;
 }
 )";
 
@@ -136,16 +136,16 @@ struct SB {
 };
 
 [[internal(intrinsic_buffer_size)]]
-fn tint_symbol_1(buffer : SB, result : ptr<function, u32>)
+fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
 var<storage> sb : SB;
 
 [[stage(vertex)]]
 fn main() {
-  var tint_symbol_8 : u32 = 0u;
-  tint_symbol_1(sb, tint_symbol_8);
-  let tint_symbol_10 : u32 = ((tint_symbol_8 - 8u) / 64u);
-  var len : u32 = tint_symbol_10;
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(sb, tint_symbol_1);
+  let tint_symbol_2 : u32 = ((tint_symbol_1 - 8u) / 64u);
+  var len : u32 = tint_symbol_2;
 }
 )";
 
@@ -184,23 +184,23 @@ struct SB {
 };
 
 [[internal(intrinsic_buffer_size)]]
-fn tint_symbol_1(buffer : SB, result : ptr<function, u32>)
+fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
 var<storage> sb : SB;
 
 [[stage(vertex)]]
 fn main() {
   if (true) {
-    var tint_symbol_7 : u32 = 0u;
-    tint_symbol_1(sb, tint_symbol_7);
-    let tint_symbol_9 : u32 = ((tint_symbol_7 - 4u) / 4u);
-    var len : u32 = tint_symbol_9;
+    var tint_symbol_1 : u32 = 0u;
+    tint_symbol(sb, tint_symbol_1);
+    let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
+    var len : u32 = tint_symbol_2;
   } else {
     if (true) {
-      var tint_symbol_10 : u32 = 0u;
-      tint_symbol_1(sb, tint_symbol_10);
-      let tint_symbol_11 : u32 = ((tint_symbol_10 - 4u) / 4u);
-      var len : u32 = tint_symbol_11;
+      var tint_symbol_3 : u32 = 0u;
+      tint_symbol(sb, tint_symbol_3);
+      let tint_symbol_4 : u32 = ((tint_symbol_3 - 4u) / 4u);
+      var len : u32 = tint_symbol_4;
     }
   }
 }
@@ -245,7 +245,7 @@ struct SB1 {
 };
 
 [[internal(intrinsic_buffer_size)]]
-fn tint_symbol_1(buffer : SB1, result : ptr<function, u32>)
+fn tint_symbol(buffer : SB1, result : ptr<function, u32>)
 
 [[block]]
 struct SB2 {
@@ -254,7 +254,7 @@ struct SB2 {
 };
 
 [[internal(intrinsic_buffer_size)]]
-fn tint_symbol_10(buffer : SB2, result : ptr<function, u32>)
+fn tint_symbol_3(buffer : SB2, result : ptr<function, u32>)
 
 var<storage> sb1 : SB1;
 
@@ -262,14 +262,14 @@ var<storage> sb2 : SB2;
 
 [[stage(vertex)]]
 fn main() {
-  var tint_symbol_7 : u32 = 0u;
-  tint_symbol_1(sb1, tint_symbol_7);
-  let tint_symbol_9 : u32 = ((tint_symbol_7 - 4u) / 4u);
-  var tint_symbol_13 : u32 = 0u;
-  tint_symbol_10(sb2, tint_symbol_13);
-  let tint_symbol_15 : u32 = ((tint_symbol_13 - 16u) / 16u);
-  var len1 : u32 = tint_symbol_9;
-  var len2 : u32 = tint_symbol_15;
+  var tint_symbol_1 : u32 = 0u;
+  tint_symbol(sb1, tint_symbol_1);
+  let tint_symbol_2 : u32 = ((tint_symbol_1 - 4u) / 4u);
+  var tint_symbol_4 : u32 = 0u;
+  tint_symbol_3(sb2, tint_symbol_4);
+  let tint_symbol_5 : u32 = ((tint_symbol_4 - 16u) / 16u);
+  var len1 : u32 = tint_symbol_2;
+  var len2 : u32 = tint_symbol_5;
   var x : u32 = (len1 + len2);
 }
 )";

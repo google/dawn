@@ -19,7 +19,7 @@
 namespace tint {
 namespace {
 
-constexpr char kSymbol[] = "tint_symbol_";
+constexpr char kSymbol[] = "$";
 constexpr size_t kSymbolLen = sizeof(kSymbol) - 1;
 
 }  // namespace

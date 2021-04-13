@@ -44,16 +44,16 @@ TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error();
   const auto got = p->program().to_str(false);
   const char* expect = R"(Module{
-  Function tint_symbol_1 -> __void
+  Function $1 -> __void
   ()
   {
     Return{}
   }
-  Function tint_symbol_2 -> __void
+  Function $2 -> __void
   ()
   {
     Call[not set]{
-      Identifier[not set]{tint_symbol_1}
+      Identifier[not set]{$1}
       (
       )
     }

@@ -60,15 +60,12 @@ struct NotANode : public Castable<NotANode, ast::Node> {
 
 TEST(CloneContext, Clone) {
   ProgramBuilder builder;
-  auto* original_root =
-      builder.create<Node>(builder.Symbols().Register("root"));
-  original_root->a = builder.create<Node>(builder.Symbols().Register("a"));
-  original_root->a->b =
-      builder.create<Node>(builder.Symbols().Register("a->b"));
-  original_root->b = builder.create<Node>(builder.Symbols().Register("b"));
+  auto* original_root = builder.create<Node>(builder.Symbols().New("root"));
+  original_root->a = builder.create<Node>(builder.Symbols().New("a"));
+  original_root->a->b = builder.create<Node>(builder.Symbols().New("a->b"));
+  original_root->b = builder.create<Node>(builder.Symbols().New("b"));
   original_root->b->a = original_root->a;  // Aliased
-  original_root->b->b =
-      builder.create<Node>(builder.Symbols().Register("b->b"));
+  original_root->b->b = builder.create<Node>(builder.Symbols().New("b->b"));
   original_root->c = original_root->b;  // Aliased
   Program original(std::move(builder));
 
@@ -114,13 +111,11 @@ TEST(CloneContext, Clone) {
 
 TEST(CloneContext, CloneWithReplaceAll_Cloneable) {
   ProgramBuilder builder;
-  auto* original_root =
-      builder.create<Node>(builder.Symbols().Register("root"));
-  original_root->a = builder.create<Node>(builder.Symbols().Register("a"));
+  auto* original_root = builder.create<Node>(builder.Symbols().New("root"));
+  original_root->a = builder.create<Node>(builder.Symbols().New("a"));
   original_root->a->b =
-      builder.create<Replaceable>(builder.Symbols().Register("a->b"));
-  original_root->b =
-      builder.create<Replaceable>(builder.Symbols().Register("b"));
+      builder.create<Replaceable>(builder.Symbols().New("a->b"));
+  original_root->b = builder.create<Replaceable>(builder.Symbols().New("b"));
   original_root->b->a = original_root->a;  // Aliased
   original_root->c = original_root->b;     // Aliased
   Program original(std::move(builder));
@@ -140,10 +135,10 @@ TEST(CloneContext, CloneWithReplaceAll_Cloneable) {
 
   CloneContext ctx(&cloned, &original);
   ctx.ReplaceAll([&](Replaceable* in) {
-    auto out_name = cloned.Symbols().Register(
-        "replacement:" + original.Symbols().NameFor(in->name));
-    auto b_name = cloned.Symbols().Register(
-        "replacement-child:" + original.Symbols().NameFor(in->name));
+    auto out_name = cloned.Symbols().New("replacement:" +
+                                         original.Symbols().NameFor(in->name));
+    auto b_name = cloned.Symbols().New("replacement-child:" +
+                                       original.Symbols().NameFor(in->name));
     auto* out = cloned.create<Replacement>(out_name);
     out->b = cloned.create<Node>(b_name);
     out->c = ctx.Clone(in->a);
@@ -205,15 +200,12 @@ TEST(CloneContext, CloneWithReplaceAll_Cloneable) {
 
 TEST(CloneContext, CloneWithReplaceAll_Symbols) {
   ProgramBuilder builder;
-  auto* original_root =
-      builder.create<Node>(builder.Symbols().Register("root"));
-  original_root->a = builder.create<Node>(builder.Symbols().Register("a"));
-  original_root->a->b =
-      builder.create<Node>(builder.Symbols().Register("a->b"));
-  original_root->b = builder.create<Node>(builder.Symbols().Register("b"));
+  auto* original_root = builder.create<Node>(builder.Symbols().New("root"));
+  original_root->a = builder.create<Node>(builder.Symbols().New("a"));
+  original_root->a->b = builder.create<Node>(builder.Symbols().New("a->b"));
+  original_root->b = builder.create<Node>(builder.Symbols().New("b"));
   original_root->b->a = original_root->a;  // Aliased
-  original_root->b->b =
-      builder.create<Node>(builder.Symbols().Register("b->b"));
+  original_root->b->b = builder.create<Node>(builder.Symbols().New("b->b"));
   original_root->c = original_root->b;  // Aliased
   Program original(std::move(builder));
 
@@ -232,7 +224,7 @@ TEST(CloneContext, CloneWithReplaceAll_Symbols) {
                           .ReplaceAll([&](Symbol sym) {
                             auto in = original.Symbols().NameFor(sym);
                             auto out = "transformed<" + in + ">";
-                            return cloned.Symbols().Register(out);
+                            return cloned.Symbols().New(out);
                           })
                           .Clone(original_root);
 
@@ -245,15 +237,14 @@ TEST(CloneContext, CloneWithReplaceAll_Symbols) {
 
 TEST(CloneContext, CloneWithoutTransform) {
   ProgramBuilder builder;
-  auto* original_node =
-      builder.create<Node>(builder.Symbols().Register("root"));
+  auto* original_node = builder.create<Node>(builder.Symbols().New("root"));
   Program original(std::move(builder));
 
   ProgramBuilder cloned;
   CloneContext ctx(&cloned, &original);
   ctx.ReplaceAll([&](Node*) {
     return cloned.create<Replacement>(
-        builder.Symbols().Register("<unexpected-node>"));
+        builder.Symbols().New("<unexpected-node>"));
   });
 
   auto* cloned_node = ctx.CloneWithoutTransform(original_node);
@@ -263,11 +254,10 @@ TEST(CloneContext, CloneWithoutTransform) {
 
 TEST(CloneContext, CloneWithReplace) {
   ProgramBuilder builder;
-  auto* original_root =
-      builder.create<Node>(builder.Symbols().Register("root"));
-  original_root->a = builder.create<Node>(builder.Symbols().Register("a"));
-  original_root->b = builder.create<Node>(builder.Symbols().Register("b"));
-  original_root->c = builder.create<Node>(builder.Symbols().Register("c"));
+  auto* original_root = builder.create<Node>(builder.Symbols().New("root"));
+  original_root->a = builder.create<Node>(builder.Symbols().New("a"));
+  original_root->b = builder.create<Node>(builder.Symbols().New("b"));
+  original_root->c = builder.create<Node>(builder.Symbols().New("c"));
   Program original(std::move(builder));
 
   //                          root
@@ -276,8 +266,7 @@ TEST(CloneContext, CloneWithReplace) {
   //                        Replaced
 
   ProgramBuilder cloned;
-  auto* replacement =
-      cloned.create<Node>(cloned.Symbols().Register("replacement"));
+  auto* replacement = cloned.create<Node>(cloned.Symbols().New("replacement"));
 
   auto* cloned_root = CloneContext(&cloned, &original)
                           .Replace(original_root->b, replacement)
@@ -295,16 +284,15 @@ TEST(CloneContext, CloneWithReplace) {
 
 TEST(CloneContext, CloneWithInsertBefore) {
   ProgramBuilder builder;
-  auto* original_root =
-      builder.create<Node>(builder.Symbols().Register("root"));
-  original_root->a = builder.create<Node>(builder.Symbols().Register("a"));
-  original_root->b = builder.create<Node>(builder.Symbols().Register("b"));
-  original_root->c = builder.create<Node>(builder.Symbols().Register("c"));
+  auto* original_root = builder.create<Node>(builder.Symbols().New("root"));
+  original_root->a = builder.create<Node>(builder.Symbols().New("a"));
+  original_root->b = builder.create<Node>(builder.Symbols().New("b"));
+  original_root->c = builder.create<Node>(builder.Symbols().New("c"));
   original_root->vec = {original_root->a, original_root->b, original_root->c};
   Program original(std::move(builder));
 
   ProgramBuilder cloned;
-  auto* insertion = cloned.create<Node>(cloned.Symbols().Register("insertion"));
+  auto* insertion = cloned.create<Node>(cloned.Symbols().New("insertion"));
 
   auto* cloned_root =
       CloneContext(&cloned, &original)
@@ -325,16 +313,15 @@ TEST(CloneContext, CloneWithInsertBefore) {
 
 TEST(CloneContext, CloneWithInsertAfter) {
   ProgramBuilder builder;
-  auto* original_root =
-      builder.create<Node>(builder.Symbols().Register("root"));
-  original_root->a = builder.create<Node>(builder.Symbols().Register("a"));
-  original_root->b = builder.create<Node>(builder.Symbols().Register("b"));
-  original_root->c = builder.create<Node>(builder.Symbols().Register("c"));
+  auto* original_root = builder.create<Node>(builder.Symbols().New("root"));
+  original_root->a = builder.create<Node>(builder.Symbols().New("a"));
+  original_root->b = builder.create<Node>(builder.Symbols().New("b"));
+  original_root->c = builder.create<Node>(builder.Symbols().New("c"));
   original_root->vec = {original_root->a, original_root->b, original_root->c};
   Program original(std::move(builder));
 
   ProgramBuilder cloned;
-  auto* insertion = cloned.create<Node>(cloned.Symbols().Register("insertion"));
+  auto* insertion = cloned.create<Node>(cloned.Symbols().New("insertion"));
 
   auto* cloned_root =
       CloneContext(&cloned, &original)
@@ -410,13 +397,10 @@ TEST(CloneContext, CloneWithReplace_WithNotANode) {
       {
         ProgramBuilder builder;
         auto* original_root =
-            builder.create<Node>(builder.Symbols().Register("root"));
-        original_root->a =
-            builder.create<Node>(builder.Symbols().Register("a"));
-        original_root->b =
-            builder.create<Node>(builder.Symbols().Register("b"));
-        original_root->c =
-            builder.create<Node>(builder.Symbols().Register("c"));
+            builder.create<Node>(builder.Symbols().New("root"));
+        original_root->a = builder.create<Node>(builder.Symbols().New("a"));
+        original_root->b = builder.create<Node>(builder.Symbols().New("b"));
+        original_root->c = builder.create<Node>(builder.Symbols().New("c"));
         Program original(std::move(builder));
 
         //                          root
@@ -435,25 +419,89 @@ TEST(CloneContext, CloneWithReplace_WithNotANode) {
       "internal compiler error");
 }
 
-TEST(CloneContext, CloneUnnamedSymbols) {
+TEST(CloneContext, CloneNewUnnamedSymbols) {
   ProgramBuilder builder;
   Symbol old_a = builder.Symbols().New();
   Symbol old_b = builder.Symbols().New();
   Symbol old_c = builder.Symbols().New();
+  EXPECT_EQ(builder.Symbols().NameFor(old_a), "tint_symbol");
+  EXPECT_EQ(builder.Symbols().NameFor(old_b), "tint_symbol_1");
+  EXPECT_EQ(builder.Symbols().NameFor(old_c), "tint_symbol_2");
 
   Program original(std::move(builder));
 
   ProgramBuilder cloned;
   CloneContext ctx(&cloned, &original);
-  Symbol new_a = ctx.Clone(old_a);
   Symbol new_x = cloned.Symbols().New();
-  Symbol new_b = ctx.Clone(old_b);
+  Symbol new_a = ctx.Clone(old_a);
   Symbol new_y = cloned.Symbols().New();
-  Symbol new_c = ctx.Clone(old_c);
+  Symbol new_b = ctx.Clone(old_b);
   Symbol new_z = cloned.Symbols().New();
+  Symbol new_c = ctx.Clone(old_c);
 
-  std::unordered_set<Symbol> all{new_a, new_x, new_b, new_y, new_c, new_z};
-  EXPECT_EQ(all.size(), 6u);
+  EXPECT_EQ(cloned.Symbols().NameFor(new_x), "tint_symbol");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_a), "tint_symbol_1");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_y), "tint_symbol_2");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_b), "tint_symbol_1_1");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_z), "tint_symbol_3");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_c), "tint_symbol_2_1");
+}
+
+TEST(CloneContext, CloneNewSymbols) {
+  ProgramBuilder builder;
+  Symbol old_a = builder.Symbols().New("a");
+  Symbol old_b = builder.Symbols().New("b");
+  Symbol old_c = builder.Symbols().New("c");
+  EXPECT_EQ(builder.Symbols().NameFor(old_a), "a");
+  EXPECT_EQ(builder.Symbols().NameFor(old_b), "b");
+  EXPECT_EQ(builder.Symbols().NameFor(old_c), "c");
+
+  Program original(std::move(builder));
+
+  ProgramBuilder cloned;
+  CloneContext ctx(&cloned, &original);
+  Symbol new_x = cloned.Symbols().New("a");
+  Symbol new_a = ctx.Clone(old_a);
+  Symbol new_y = cloned.Symbols().New("b");
+  Symbol new_b = ctx.Clone(old_b);
+  Symbol new_z = cloned.Symbols().New("c");
+  Symbol new_c = ctx.Clone(old_c);
+
+  EXPECT_EQ(cloned.Symbols().NameFor(new_x), "a");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_a), "a_1");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_y), "b");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_b), "b_1");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_z), "c");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_c), "c_1");
+}
+
+TEST(CloneContext, CloneNewSymbols_AfterCloneSymbols) {
+  ProgramBuilder builder;
+  Symbol old_a = builder.Symbols().New("a");
+  Symbol old_b = builder.Symbols().New("b");
+  Symbol old_c = builder.Symbols().New("c");
+  EXPECT_EQ(builder.Symbols().NameFor(old_a), "a");
+  EXPECT_EQ(builder.Symbols().NameFor(old_b), "b");
+  EXPECT_EQ(builder.Symbols().NameFor(old_c), "c");
+
+  Program original(std::move(builder));
+
+  ProgramBuilder cloned;
+  CloneContext ctx(&cloned, &original);
+  ctx.CloneSymbols();
+  Symbol new_x = cloned.Symbols().New("a");
+  Symbol new_a = ctx.Clone(old_a);
+  Symbol new_y = cloned.Symbols().New("b");
+  Symbol new_b = ctx.Clone(old_b);
+  Symbol new_z = cloned.Symbols().New("c");
+  Symbol new_c = ctx.Clone(old_c);
+
+  EXPECT_EQ(cloned.Symbols().NameFor(new_x), "a_1");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_a), "a");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_y), "b_1");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_b), "b");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_z), "c_1");
+  EXPECT_EQ(cloned.Symbols().NameFor(new_c), "c");
 }
 
 }  // namespace

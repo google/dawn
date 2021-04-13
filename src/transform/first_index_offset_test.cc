@@ -59,11 +59,11 @@ fn entry([[builtin(vertex_index)]] vert_idx : u32) {
 
   auto* expect = R"(
 [[block]]
-struct tint_symbol_2 {
+struct tint_symbol {
   first_vertex_index : u32;
 };
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_3 : tint_symbol_2;
+[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 fn test(vert_idx : u32) -> u32 {
   return vert_idx;
@@ -71,7 +71,7 @@ fn test(vert_idx : u32) -> u32 {
 
 [[stage(vertex)]]
 fn entry([[builtin(vertex_index)]] vert_idx : u32) {
-  test((vert_idx + tint_symbol_3.first_vertex_index));
+  test((vert_idx + tint_symbol_1.first_vertex_index));
 }
 )";
 
@@ -104,11 +104,11 @@ fn entry([[builtin(instance_index)]] inst_idx : u32) {
 
   auto* expect = R"(
 [[block]]
-struct tint_symbol_2 {
+struct tint_symbol {
   first_instance_index : u32;
 };
 
-[[binding(1), group(7)]] var<uniform> tint_symbol_3 : tint_symbol_2;
+[[binding(1), group(7)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 fn test(inst_idx : u32) -> u32 {
   return inst_idx;
@@ -116,7 +116,7 @@ fn test(inst_idx : u32) -> u32 {
 
 [[stage(vertex)]]
 fn entry([[builtin(instance_index)]] inst_idx : u32) {
-  test((inst_idx + tint_symbol_3.first_instance_index));
+  test((inst_idx + tint_symbol_1.first_instance_index));
 }
 )";
 
@@ -154,12 +154,12 @@ fn entry(inputs : Inputs) {
 
   auto* expect = R"(
 [[block]]
-struct tint_symbol_3 {
+struct tint_symbol {
   first_vertex_index : u32;
   first_instance_index : u32;
 };
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_4 : tint_symbol_3;
+[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 fn test(instance_idx : u32, vert_idx : u32) -> u32 {
   return (instance_idx + vert_idx);
@@ -174,7 +174,7 @@ struct Inputs {
 
 [[stage(vertex)]]
 fn entry(inputs : Inputs) {
-  test((inputs.instance_idx + tint_symbol_4.first_instance_index), (inputs.vert_idx + tint_symbol_4.first_vertex_index));
+  test((inputs.instance_idx + tint_symbol_1.first_instance_index), (inputs.vert_idx + tint_symbol_1.first_vertex_index));
 }
 )";
 
@@ -211,11 +211,11 @@ fn entry([[builtin(vertex_index)]] vert_idx : u32) {
 
   auto* expect = R"(
 [[block]]
-struct tint_symbol_2 {
+struct tint_symbol {
   first_vertex_index : u32;
 };
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_3 : tint_symbol_2;
+[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 fn func1(vert_idx : u32) -> u32 {
   return vert_idx;
@@ -227,7 +227,7 @@ fn func2(vert_idx : u32) -> u32 {
 
 [[stage(vertex)]]
 fn entry([[builtin(vertex_index)]] vert_idx : u32) {
-  func2((vert_idx + tint_symbol_3.first_vertex_index));
+  func2((vert_idx + tint_symbol_1.first_vertex_index));
 }
 )";
 
@@ -270,12 +270,12 @@ fn entry_c([[builtin(instance_index)]] inst_idx : u32) {
 
   auto* expect = R"(
 [[block]]
-struct tint_symbol_3 {
+struct tint_symbol {
   first_vertex_index : u32;
   first_instance_index : u32;
 };
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_4 : tint_symbol_3;
+[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 fn func(i : u32) -> u32 {
   return i;
@@ -283,17 +283,17 @@ fn func(i : u32) -> u32 {
 
 [[stage(vertex)]]
 fn entry_a([[builtin(vertex_index)]] vert_idx : u32) {
-  func((vert_idx + tint_symbol_4.first_vertex_index));
+  func((vert_idx + tint_symbol_1.first_vertex_index));
 }
 
 [[stage(vertex)]]
 fn entry_b([[builtin(vertex_index)]] vert_idx : u32, [[builtin(instance_index)]] inst_idx : u32) {
-  func(((vert_idx + tint_symbol_4.first_vertex_index) + (inst_idx + tint_symbol_4.first_instance_index)));
+  func(((vert_idx + tint_symbol_1.first_vertex_index) + (inst_idx + tint_symbol_1.first_instance_index)));
 }
 
 [[stage(vertex)]]
 fn entry_c([[builtin(instance_index)]] inst_idx : u32) {
-  func((inst_idx + tint_symbol_4.first_instance_index));
+  func((inst_idx + tint_symbol_1.first_instance_index));
 }
 )";
 
@@ -328,16 +328,16 @@ fn entry() {
 
   auto* expect = R"(
 [[block]]
-struct tint_symbol_2 {
+struct tint_symbol {
   first_vertex_index : u32;
 };
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_3 : tint_symbol_2;
+[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 [[builtin(vertex_index)]] var<in> vert_idx : u32;
 
 fn test() -> u32 {
-  return (vert_idx + tint_symbol_3.first_vertex_index);
+  return (vert_idx + tint_symbol_1.first_vertex_index);
 }
 
 [[stage(vertex)]]
@@ -375,16 +375,16 @@ fn entry() {
 
   auto* expect = R"(
 [[block]]
-struct tint_symbol_2 {
+struct tint_symbol {
   first_instance_index : u32;
 };
 
-[[binding(1), group(7)]] var<uniform> tint_symbol_3 : tint_symbol_2;
+[[binding(1), group(7)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 [[builtin(instance_index)]] var<in> inst_idx : u32;
 
 fn test() -> u32 {
-  return (inst_idx + tint_symbol_3.first_instance_index);
+  return (inst_idx + tint_symbol_1.first_instance_index);
 }
 
 [[stage(vertex)]]
@@ -423,19 +423,19 @@ fn entry() {
 
   auto* expect = R"(
 [[block]]
-struct tint_symbol_3 {
+struct tint_symbol {
   first_vertex_index : u32;
   first_instance_index : u32;
 };
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_4 : tint_symbol_3;
+[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 [[builtin(instance_index)]] var<in> instance_idx : u32;
 
 [[builtin(vertex_index)]] var<in> vert_idx : u32;
 
 fn test() -> u32 {
-  return ((instance_idx + tint_symbol_4.first_instance_index) + (vert_idx + tint_symbol_4.first_vertex_index));
+  return ((instance_idx + tint_symbol_1.first_instance_index) + (vert_idx + tint_symbol_1.first_vertex_index));
 }
 
 [[stage(vertex)]]
@@ -477,16 +477,16 @@ fn entry() {
 
   auto* expect = R"(
 [[block]]
-struct tint_symbol_2 {
+struct tint_symbol {
   first_vertex_index : u32;
 };
 
-[[binding(1), group(2)]] var<uniform> tint_symbol_3 : tint_symbol_2;
+[[binding(1), group(2)]] var<uniform> tint_symbol_1 : tint_symbol;
 
 [[builtin(vertex_index)]] var<in> vert_idx : u32;
 
 fn func1() -> u32 {
-  return (vert_idx + tint_symbol_3.first_vertex_index);
+  return (vert_idx + tint_symbol_1.first_vertex_index);
 }
 
 fn func2() -> u32 {

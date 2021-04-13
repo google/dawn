@@ -53,17 +53,28 @@ class SymbolTable {
   /// @returns the symbol for the name or symbol::kInvalid if not found.
   Symbol Get(const std::string& name) const;
 
-  /// @returns true if the symbol has a name
-  /// @param symbol the symbol to query
-  bool HasName(const Symbol symbol) const;
-
   /// Returns the name for the given symbol
   /// @param symbol the symbol to retrieve the name for
   /// @returns the symbol name or "" if not found
   std::string NameFor(const Symbol symbol) const;
 
-  /// @returns a new, unnamed symbol
-  Symbol New();
+  /// Returns a new unique symbol with the given name, possibly suffixed with a
+  /// unique number.
+  /// @param name the symbol name
+  /// @returns a new, unnamed symbol with the given name. If the name is already
+  /// taken then this will be suffixed with an underscore and a unique numerical
+  /// value
+  Symbol New(std::string name = "tint_symbol");
+
+  /// Foreach calls the callback function `F` for each symbol in the table.
+  /// @param callback must be a function or function-like object with the
+  /// signature: `void(Symbol, const std::string&)`
+  template <typename F>
+  void Foreach(F&& callback) const {
+    for (auto it : symbol_to_name_) {
+      callback(it.first, it.second);
+    }
+  }
 
  private:
   // The value to be associated to the next registered symbol table entry.

@@ -111,12 +111,12 @@ using namespace metal;
 struct tint_symbol_1 {
   float foo [[user(locn0)]];
 };
-struct tint_symbol_3 {
+struct tint_symbol_2 {
   float value [[color(1)]];
 };
 
-fragment tint_symbol_3 frag_main(tint_symbol_1 tint_symbol_6 [[stage_in]]) {
-  const float foo = tint_symbol_6.foo;
+fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
+  const float foo = tint_symbol.foo;
   return {foo};
 }
 
@@ -144,12 +144,12 @@ using namespace metal;
 struct tint_symbol_1 {
   float4 coord [[position]];
 };
-struct tint_symbol_3 {
+struct tint_symbol_2 {
   float value [[depth(any)]];
 };
 
-fragment tint_symbol_3 frag_main(tint_symbol_1 tint_symbol_6 [[stage_in]]) {
-  const float4 coord = tint_symbol_6.coord;
+fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
+  const float4 coord = tint_symbol.coord;
   return {coord.x};
 }
 
@@ -198,22 +198,22 @@ struct Interface {
   float col1;
   float col2;
 };
-struct tint_symbol_4 {
+struct tint_symbol {
   float col1 [[user(locn1)]];
   float col2 [[user(locn2)]];
 };
-struct tint_symbol_7 {
+struct tint_symbol_3 {
   float col1 [[user(locn1)]];
   float col2 [[user(locn2)]];
 };
 
-vertex tint_symbol_4 vert_main() {
-  const Interface tint_symbol_6 = {0.5f, 0.25f};
-  return {tint_symbol_6.col1, tint_symbol_6.col2};
+vertex tint_symbol vert_main() {
+  const Interface tint_symbol_1 = {0.5f, 0.25f};
+  return {tint_symbol_1.col1, tint_symbol_1.col2};
 }
 
-fragment void frag_main(tint_symbol_7 tint_symbol_9 [[stage_in]]) {
-  const Interface colors = {tint_symbol_9.col1, tint_symbol_9.col2};
+fragment void frag_main(tint_symbol_3 tint_symbol_2 [[stage_in]]) {
+  const Interface colors = {tint_symbol_2.col1, tint_symbol_2.col2};
   const float r = colors.col1;
   const float g = colors.col2;
   return;
@@ -266,10 +266,10 @@ using namespace metal;
 struct VertexOutput {
   float4 pos;
 };
-struct tint_symbol_5 {
+struct tint_symbol {
   float4 pos [[position]];
 };
-struct tint_symbol_8 {
+struct tint_symbol_2 {
   float4 pos [[position]];
 };
 
@@ -277,14 +277,14 @@ VertexOutput foo(float x) {
   return {float4(x, x, x, 1.0f)};
 }
 
-vertex tint_symbol_5 vert_main1() {
-  const VertexOutput tint_symbol_7 = {foo(0.5f)};
-  return {tint_symbol_7.pos};
+vertex tint_symbol vert_main1() {
+  const VertexOutput tint_symbol_1 = {foo(0.5f)};
+  return {tint_symbol_1.pos};
 }
 
-vertex tint_symbol_8 vert_main2() {
-  const VertexOutput tint_symbol_10 = {foo(0.25f)};
-  return {tint_symbol_10.pos};
+vertex tint_symbol_2 vert_main2() {
+  const VertexOutput tint_symbol_3 = {foo(0.25f)};
+  return {tint_symbol_3.pos};
 }
 
 )");

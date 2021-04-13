@@ -14,6 +14,8 @@
 
 #include "src/clone_context.h"
 
+#include <string>
+
 #include "src/program_builder.h"
 #include "src/utils/get_or_create.h"
 
@@ -33,11 +35,13 @@ Symbol CloneContext::Clone(Symbol s) {
     if (symbol_transform_) {
       return symbol_transform_(s);
     }
-    if (!src->Symbols().HasName(s)) {
-      return dst->Symbols().New();
-    }
-    return dst->Symbols().Register(src->Symbols().NameFor(s));
+    return dst->Symbols().New(src->Symbols().NameFor(s));
   });
+}
+
+CloneContext& CloneContext::CloneSymbols() {
+  src->Symbols().Foreach([&](Symbol s, const std::string&) { Clone(s); });
+  return *this;
 }
 
 void CloneContext::Clone() {

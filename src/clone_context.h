@@ -134,7 +134,7 @@ class CloneContext {
     return CheckedCast<T>(c);
   }
 
-  /// Clones the Source `s` into `dst`
+  /// Clones the Source `s` into #dst
   /// TODO(bclayton) - Currently this 'clone' is a shallow copy. If/when
   /// `Source.File`s are owned by the Program this should make a copy of the
   /// file.
@@ -142,13 +142,19 @@ class CloneContext {
   /// @return the cloned source
   Source Clone(const Source& s) const { return s; }
 
-  /// Clones the Symbol `s` into `dst`
+  /// Clones the Symbol `s` into #dst
   ///
   /// The Symbol `s` must be owned by the Program #src.
   ///
   /// @param s the Symbol to clone
   /// @return the cloned source
   Symbol Clone(Symbol s);
+
+  /// Clones all the Symbols in `src->Symbols()` into #dst.
+  /// This may be used to ensure that authored symbols are not suffixed with a
+  /// unique identifier if they collide with other symbols.
+  /// @returns this CloneContext so calls can be chained
+  CloneContext& CloneSymbols();
 
   /// Clones each of the elements of the vector `v` into the ProgramBuilder
   /// #dst.

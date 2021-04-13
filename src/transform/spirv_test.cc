@@ -38,22 +38,22 @@ fn compute_main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
 )";
 
   auto* expect = R"(
-[[builtin(frag_coord)]] var<in> tint_symbol_1 : vec4<f32>;
+[[builtin(frag_coord)]] var<in> tint_symbol : vec4<f32>;
 
-[[location(1)]] var<in> tint_symbol_2 : f32;
+[[location(1)]] var<in> tint_symbol_1 : f32;
 
 [[stage(fragment)]]
 fn frag_main() {
-  var col : f32 = (tint_symbol_1.x * tint_symbol_2);
+  var col : f32 = (tint_symbol.x * tint_symbol_1);
 }
 
-[[builtin(local_invocation_id)]] var<in> tint_symbol_6 : vec3<u32>;
+[[builtin(local_invocation_id)]] var<in> tint_symbol_2 : vec3<u32>;
 
-[[builtin(local_invocation_index)]] var<in> tint_symbol_7 : u32;
+[[builtin(local_invocation_index)]] var<in> tint_symbol_3 : u32;
 
 [[stage(compute)]]
 fn compute_main() {
-  var id_x : u32 = tint_symbol_6.x;
+  var id_x : u32 = tint_symbol_2.x;
 }
 )";
 
@@ -74,7 +74,7 @@ fn frag_main([[location(1)]] loc1 : myf32) {
   auto* expect = R"(
 type myf32 = f32;
 
-[[location(1)]] var<in> tint_symbol_2 : myf32;
+[[location(1)]] var<in> tint_symbol : myf32;
 
 [[stage(fragment)]]
 fn frag_main() {
@@ -97,8 +97,8 @@ fn vert_main() -> [[builtin(position)]] vec4<f32> {
   auto* expect = R"(
 [[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
 
-fn tint_symbol_2(tint_symbol_3 : vec4<f32>) {
-  tint_symbol_1 = tint_symbol_3;
+fn tint_symbol_2(tint_symbol : vec4<f32>) {
+  tint_symbol_1 = tint_symbol;
 }
 
 [[stage(vertex)]]
@@ -125,17 +125,17 @@ fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] f32 {
 )";
 
   auto* expect = R"(
-[[location(0)]] var<in> tint_symbol_1 : u32;
+[[location(0)]] var<in> tint_symbol : u32;
 
 [[location(0)]] var<out> tint_symbol_2 : f32;
 
-fn tint_symbol_3(tint_symbol_4 : f32) {
-  tint_symbol_2 = tint_symbol_4;
+fn tint_symbol_3(tint_symbol_1 : f32) {
+  tint_symbol_2 = tint_symbol_1;
 }
 
 [[stage(fragment)]]
 fn frag_main() {
-  if ((tint_symbol_1 > 10u)) {
+  if ((tint_symbol > 10u)) {
     tint_symbol_3(0.5);
     return;
   }
@@ -165,21 +165,21 @@ fn frag_main([[location(0)]] loc_in : u32) -> [[location(0)]] myf32 {
   auto* expect = R"(
 type myf32 = f32;
 
-[[location(0)]] var<in> tint_symbol_2 : u32;
+[[location(0)]] var<in> tint_symbol : u32;
 
-[[location(0)]] var<out> tint_symbol_3 : myf32;
+[[location(0)]] var<out> tint_symbol_2 : myf32;
 
-fn tint_symbol_4(tint_symbol_5 : myf32) {
-  tint_symbol_3 = tint_symbol_5;
+fn tint_symbol_3(tint_symbol_1 : myf32) {
+  tint_symbol_2 = tint_symbol_1;
 }
 
 [[stage(fragment)]]
 fn frag_main() {
-  if ((tint_symbol_2 > 10u)) {
-    tint_symbol_4(0.5);
+  if ((tint_symbol > 10u)) {
+    tint_symbol_3(0.5);
     return;
   }
-  tint_symbol_4(1.0);
+  tint_symbol_3(1.0);
   return;
 }
 )";
@@ -208,14 +208,14 @@ struct FragmentInput {
   value : f32;
 };
 
-[[builtin(frag_coord)]] var<in> tint_symbol_4 : vec4<f32>;
+[[builtin(frag_coord)]] var<in> tint_symbol : vec4<f32>;
 
-[[location(1)]] var<in> tint_symbol_5 : f32;
+[[location(1)]] var<in> tint_symbol_1 : f32;
 
 [[stage(fragment)]]
 fn frag_main() {
-  let tint_symbol_7 : FragmentInput = FragmentInput(tint_symbol_4, tint_symbol_5);
-  var col : f32 = (tint_symbol_7.coord.x * tint_symbol_7.value);
+  let tint_symbol_2 : FragmentInput = FragmentInput(tint_symbol, tint_symbol_1);
+  var col : f32 = (tint_symbol_2.coord.x * tint_symbol_2.value);
 }
 )";
 
@@ -240,7 +240,7 @@ struct FragmentInput {
   value : f32;
 };
 
-[[location(1)]] var<in> tint_symbol_3 : f32;
+[[location(1)]] var<in> tint_symbol : f32;
 
 [[stage(fragment)]]
 fn frag_main() {
@@ -275,23 +275,23 @@ struct VertexOutput {
   value : f32;
 };
 
-[[builtin(position)]] var<out> tint_symbol_4 : vec4<f32>;
+[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
 
-[[location(1)]] var<out> tint_symbol_5 : f32;
+[[location(1)]] var<out> tint_symbol_2 : f32;
 
-fn tint_symbol_6(tint_symbol_7 : VertexOutput) {
-  tint_symbol_4 = tint_symbol_7.pos;
-  tint_symbol_5 = tint_symbol_7.value;
+fn tint_symbol_3(tint_symbol : VertexOutput) {
+  tint_symbol_1 = tint_symbol.pos;
+  tint_symbol_2 = tint_symbol.value;
 }
 
 [[stage(vertex)]]
 fn vert_main() {
   if (false) {
-    tint_symbol_6(VertexOutput());
+    tint_symbol_3(VertexOutput());
     return;
   }
   var pos : vec4<f32> = vec4<f32>(1.0, 2.0, 3.0, 0.0);
-  tint_symbol_6(VertexOutput(pos, 2.0));
+  tint_symbol_3(VertexOutput(pos, 2.0));
   return;
 }
 )";
@@ -318,18 +318,18 @@ struct Interface {
   value : f32;
 };
 
-[[location(1)]] var<in> tint_symbol_3 : f32;
+[[location(1)]] var<in> tint_symbol : f32;
 
-[[location(1)]] var<out> tint_symbol_4 : f32;
+[[location(1)]] var<out> tint_symbol_3 : f32;
 
-fn tint_symbol_5(tint_symbol_6 : Interface) {
-  tint_symbol_4 = tint_symbol_6.value;
+fn tint_symbol_4(tint_symbol_2 : Interface) {
+  tint_symbol_3 = tint_symbol_2.value;
 }
 
 [[stage(vertex)]]
 fn vert_main() {
-  let tint_symbol_8 : Interface = Interface(tint_symbol_3);
-  tint_symbol_5(tint_symbol_8);
+  let tint_symbol_1 : Interface = Interface(tint_symbol);
+  tint_symbol_4(tint_symbol_1);
   return;
 }
 )";
@@ -361,24 +361,24 @@ struct Interface {
   value : f32;
 };
 
-[[location(1)]] var<out> tint_symbol_3 : f32;
+[[location(1)]] var<out> tint_symbol_1 : f32;
 
-fn tint_symbol_4(tint_symbol_5 : Interface) {
-  tint_symbol_3 = tint_symbol_5.value;
+fn tint_symbol_2(tint_symbol : Interface) {
+  tint_symbol_1 = tint_symbol.value;
 }
 
 [[stage(vertex)]]
 fn vert_main() {
-  tint_symbol_4(Interface(42.0));
+  tint_symbol_2(Interface(42.0));
   return;
 }
 
-[[location(1)]] var<in> tint_symbol_7 : f32;
+[[location(1)]] var<in> tint_symbol_3 : f32;
 
 [[stage(fragment)]]
 fn frag_main() {
-  let tint_symbol_9 : Interface = Interface(tint_symbol_7);
-  var x : f32 = tint_symbol_9.value;
+  let tint_symbol_4 : Interface = Interface(tint_symbol_3);
+  var x : f32 = tint_symbol_4.value;
 }
 )";
 
@@ -419,20 +419,20 @@ struct FragmentOutput {
   value : f32;
 };
 
-[[location(1)]] var<in> tint_symbol_5 : f32;
+[[location(1)]] var<in> tint_symbol : f32;
 
-[[builtin(frag_coord)]] var<in> tint_symbol_6 : vec4<f32>;
+[[builtin(frag_coord)]] var<in> tint_symbol_1 : vec4<f32>;
 
-[[location(1)]] var<out> tint_symbol_7 : f32;
+[[location(1)]] var<out> tint_symbol_4 : f32;
 
-fn tint_symbol_8(tint_symbol_9 : FragmentOutput) {
-  tint_symbol_7 = tint_symbol_9.value;
+fn tint_symbol_5(tint_symbol_3 : FragmentOutput) {
+  tint_symbol_4 = tint_symbol_3.value;
 }
 
 [[stage(fragment)]]
 fn frag_main() {
-  let tint_symbol_11 : FragmentInput = FragmentInput(tint_symbol_5, tint_symbol_6);
-  tint_symbol_8(FragmentOutput((tint_symbol_11.coord.x * tint_symbol_11.value)));
+  let tint_symbol_2 : FragmentInput = FragmentInput(tint_symbol, tint_symbol_1);
+  tint_symbol_5(FragmentOutput((tint_symbol_2.coord.x * tint_symbol_2.value)));
   return;
 }
 )";
@@ -465,15 +465,15 @@ struct VertexOutput {
   Position : vec4<f32>;
 };
 
-[[builtin(position)]] var<out> tint_symbol_4 : vec4<f32>;
+[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
 
-fn tint_symbol_5(tint_symbol_6 : VertexOutput) {
-  tint_symbol_4 = tint_symbol_6.Position;
+fn tint_symbol_2(tint_symbol : VertexOutput) {
+  tint_symbol_1 = tint_symbol.Position;
 }
 
 [[stage(vertex)]]
 fn main() {
-  tint_symbol_5(VertexOutput(vec4<f32>()));
+  tint_symbol_2(VertexOutput(vec4<f32>()));
   return;
 }
 )";
@@ -585,14 +585,14 @@ fn main([[builtin(sample_index)]] sample_index : u32,
 )";
 
   auto* expect = R"(
-[[builtin(sample_index)]] var<in> tint_symbol_3 : u32;
+[[builtin(sample_index)]] var<in> tint_symbol : u32;
 
 [[builtin(sample_mask_in)]] var<in> tint_symbol_1 : array<u32, 1>;
 
-[[builtin(sample_mask_out)]] var<out> tint_symbol_2 : array<u32, 1>;
+[[builtin(sample_mask_out)]] var<out> tint_symbol_3 : array<u32, 1>;
 
-fn tint_symbol_4(tint_symbol_5 : u32) {
-  tint_symbol_2[0] = tint_symbol_5;
+fn tint_symbol_4(tint_symbol_2 : u32) {
+  tint_symbol_3[0] = tint_symbol_2;
 }
 
 [[stage(fragment)]]

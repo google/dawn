@@ -23,7 +23,7 @@ using SymbolTest = testing::Test;
 
 TEST_F(SymbolTest, ToStr) {
   Symbol sym(1);
-  EXPECT_EQ("tint_symbol_1", sym.to_str());
+  EXPECT_EQ("$1", sym.to_str());
 }
 
 TEST_F(SymbolTest, CopyAssign) {

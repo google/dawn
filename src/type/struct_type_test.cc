@@ -54,7 +54,7 @@ TEST_F(StructTypeTest, TypeName) {
   auto* impl =
       create<ast::Struct>(ast::StructMemberList{}, ast::DecorationList{});
   auto* s = ty.struct_("my_struct", impl);
-  EXPECT_EQ(s->type_name(), "__struct_tint_symbol_1");
+  EXPECT_EQ(s->type_name(), "__struct_$1");
 }
 
 TEST_F(StructTypeTest, FriendlyName) {

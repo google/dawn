@@ -62,10 +62,10 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
 ByteAddressBuffer sb : register(t0, space1);
 
 void main() {
-  uint tint_symbol_9 = 0u;
-  sb.GetDimensions(tint_symbol_9);
-  const uint tint_symbol_10 = ((tint_symbol_9 - 16u) / 16u);
-  uint len = tint_symbol_10;
+  uint tint_symbol_1 = 0u;
+  sb.GetDimensions(tint_symbol_1);
+  const uint tint_symbol_2 = ((tint_symbol_1 - 16u) / 16u);
+  uint len = tint_symbol_2;
   return;
 }
 
@@ -92,8 +92,8 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 
   auto got = result();
   auto* expect = R"(void main() {
-  const int tint_symbol_1[4] = {1, 2, 3, 4};
-  int pos = tint_symbol_1[3];
+  const int tint_symbol[4] = {1, 2, 3, 4};
+  int pos = tint_symbol[3];
   return;
 }
 
@@ -132,8 +132,8 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
 };
 
 void main() {
-  const S tint_symbol_1 = {1, float3(2.0f, 3.0f, 4.0f), 4};
-  float3 pos = tint_symbol_1.b;
+  const S tint_symbol = {1, float3(2.0f, 3.0f, 4.0f), 4};
+  float3 pos = tint_symbol.b;
   return;
 }
 

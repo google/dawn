@@ -42,7 +42,7 @@ TEST_F(SymbolTableTest, ReturnsNameForSymbol) {
 
 TEST_F(SymbolTableTest, ReturnsBlankForMissingSymbol) {
   SymbolTable s;
-  EXPECT_EQ("tint_symbol_2", s.NameFor(Symbol(2)));
+  EXPECT_EQ("$2", s.NameFor(Symbol(2)));
 }
 
 TEST_F(SymbolTableTest, ReturnsInvalidForBlankString) {

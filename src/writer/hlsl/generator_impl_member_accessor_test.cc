@@ -141,7 +141,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  float tint_symbol_5 = str.mem;
+  float tint_symbol = str.mem;
   return;
 }
 
@@ -353,13 +353,13 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
       R"(
 RWByteAddressBuffer data : register(u0, space1);
 
-void tint_symbol_8(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
+void tint_symbol_1(RWByteAddressBuffer buffer, uint offset, float2x3 value) {
   buffer.Store3((offset + 0u), asuint(value[0u]));
   buffer.Store3((offset + 16u), asuint(value[1u]));
 }
 
 void main() {
-  tint_symbol_8(data, 16u, float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+  tint_symbol_1(data, 16u, float2x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
   return;
 }
 

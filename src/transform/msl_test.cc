@@ -50,8 +50,8 @@ fn _tint_main() {
   var foo : i32;
   var _tint_half : f32;
   var half1 : f32;
-  var _tint_half2_0 : f32;
   var _tint_half2 : f32;
+  var _tint_half2_1 : f32;
 }
 )";
 

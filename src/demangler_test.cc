@@ -35,7 +35,7 @@ TEST_F(DemanglerTest, Symbol) {
   t.Register("sym1");
 
   Demangler d;
-  EXPECT_EQ("test sym1 str", d.Demangle(t, "test tint_symbol_1 str"));
+  EXPECT_EQ("test sym1 str", d.Demangle(t, "test $1 str"));
 }
 
 TEST_F(DemanglerTest, MultipleSymbols) {
@@ -44,9 +44,7 @@ TEST_F(DemanglerTest, MultipleSymbols) {
   t.Register("sym2");
 
   Demangler d;
-  EXPECT_EQ(
-      "test sym1 sym2 sym1 str",
-      d.Demangle(t, "test tint_symbol_1 tint_symbol_2 tint_symbol_1 str"));
+  EXPECT_EQ("test sym1 sym2 sym1 str", d.Demangle(t, "test $1 $2 $1 str"));
 }
 
 }  // namespace

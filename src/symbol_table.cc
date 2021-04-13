@@ -50,11 +50,6 @@ Symbol SymbolTable::Get(const std::string& name) const {
   return it != name_to_symbol_.end() ? it->second : Symbol();
 }
 
-bool SymbolTable::HasName(const Symbol symbol) const {
-  auto it = symbol_to_name_.find(symbol);
-  return it != symbol_to_name_.end();
-}
-
 std::string SymbolTable::NameFor(const Symbol symbol) const {
   auto it = symbol_to_name_.find(symbol);
   if (it == symbol_to_name_.end()) {
@@ -64,8 +59,17 @@ std::string SymbolTable::NameFor(const Symbol symbol) const {
   return it->second;
 }
 
-Symbol SymbolTable::New() {
-  return Symbol(next_symbol_++);
+Symbol SymbolTable::New(std::string prefix /* = "tint_symbol" */) {
+  auto it = name_to_symbol_.find(prefix);
+  if (it == name_to_symbol_.end()) {
+    return Register(prefix);
+  }
+  std::string name;
+  size_t i = 1;
+  do {
+    name = prefix + "_" + std::to_string(i++);
+  } while (name_to_symbol_.count(name));
+  return Register(name);
 }
 
 }  // namespace tint
