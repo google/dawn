@@ -83,7 +83,7 @@ class VertexStateTest : public DawnTest {
         vs << "[[builtin(instance_index)]] var<in> InstanceIndex : u32;\n";
         vs << "[[location(0)]] var<out> color : vec4<f32>;\n";
         vs << "[[builtin(position)]] var<out> Position : vec4<f32>;\n";
-        vs << "[[stage(vertex)]] fn main() -> void {\n";
+        vs << "[[stage(vertex)]] fn main() {\n";
 
         // Hard code the triangle in the shader so that we don't have to add a vertex input for it.
         // Also this places the triangle in the grid based on its VertexID and InstanceID
@@ -127,7 +127,7 @@ class VertexStateTest : public DawnTest {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<in> color : vec4<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = color;
             }
         )");
@@ -578,7 +578,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
         [[location(0)]] var<out> color : vec4<f32>;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
 
             var success : bool = (
@@ -598,7 +598,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<in> color : vec4<f32>;
         [[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = color;
         })");
     pipelineDesc.vertex.bufferCount = vertexState.vertexBufferCount;
@@ -643,13 +643,13 @@ TEST_P(OptionalVertexStateTest, Basic) {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
 

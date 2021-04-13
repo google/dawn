@@ -119,7 +119,7 @@ void init() {
         [[location(2)]] var<out> f_col : vec3<f32>;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             f_col = col;
             Position = camera.proj * camera.view * model.matrix * vec4<f32>(pos, 1.0);
             return;
@@ -129,7 +129,7 @@ void init() {
         [[location(0)]] var<out> FragColor : vec4<f32>;
         [[location(2)]] var<in> f_col : vec3<f32>;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             FragColor = vec4<f32>(f_col, 1.0);
             return;
         })");
@@ -138,7 +138,7 @@ void init() {
         [[location(0)]] var<out> FragColor : vec4<f32>;
         [[location(2)]] var<in> f_col : vec3<f32>;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             FragColor = vec4<f32>(mix(f_col, vec3<f32>(0.5, 0.5, 0.5), vec3<f32>(0.5, 0.5, 0.5)), 1.0);
             return;
         })");

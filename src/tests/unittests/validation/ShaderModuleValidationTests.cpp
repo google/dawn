@@ -61,7 +61,7 @@ TEST_F(ShaderModuleValidationTest, CreationSuccess) {
 TEST_F(ShaderModuleValidationTest, FragmentOutputLocationExceedsMaxColorAttachments) {
     std::ostringstream stream;
     stream << "[[location(" << kMaxColorAttachments << R"()]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })";
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, stream.str().c_str()));
@@ -164,7 +164,7 @@ TEST_F(ShaderModuleValidationTest, CompilationMessages) {
 
     std::ostringstream stream;
     stream << R"([[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })";
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, stream.str().c_str());

@@ -47,11 +47,11 @@ namespace {
         // pipeline. But those bind groups in caller can be used for validation for other purposes.
         wgpu::RenderPipeline CreateNoOpRenderPipeline() {
             wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]] fn main() -> void {
+                [[stage(vertex)]] fn main() {
                 })");
 
             wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                 })");
             utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
             pipelineDescriptor.vertex.module = vsModule;
@@ -62,7 +62,7 @@ namespace {
 
         wgpu::ComputePipeline CreateNoOpComputePipeline() {
             wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
-                [[stage(compute)]] fn main() -> void {
+                [[stage(compute)]] fn main() {
                 })");
             wgpu::ComputePipelineDescriptor pipelineDescriptor;
             pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, nullptr);
@@ -772,7 +772,7 @@ namespace {
 
             // Create a passthrough render pipeline with a readonly buffer
             wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]] fn main() -> void {
+                [[stage(vertex)]] fn main() {
                 })");
 
             wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -780,7 +780,7 @@ namespace {
                     value : f32;
                 };
                 [[group(0), binding(0)]] var<storage> rBuffer : [[access(read)]] RBuffer;
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                 })");
             utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
             pipelineDescriptor.vertex.module = vsModule;
@@ -820,7 +820,7 @@ namespace {
                     value : f32;
                 };
                 [[group(0), binding(0)]] var<storage> rBuffer : [[access(read)]] RBuffer;
-                [[stage(compute)]] fn main() -> void {
+                [[stage(compute)]] fn main() {
                 })");
             wgpu::ComputePipelineDescriptor pipelineDescriptor;
             pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl0);
@@ -1550,12 +1550,12 @@ namespace {
         {
             // Create a passthrough render pipeline with a readonly storage texture
             wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]] fn main() -> void {
+                [[stage(vertex)]] fn main() {
                 })");
 
             wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[group(0), binding(0)]] var tex : [[access(read)]] texture_storage_2d<rgba8unorm>;
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                 })");
             utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
             pipelineDescriptor.vertex.module = vsModule;
@@ -1581,7 +1581,7 @@ namespace {
             // Create a passthrough compute pipeline with a readonly storage texture
             wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
                 [[group(0), binding(0)]] var tex : [[access(read)]] texture_storage_2d<rgba8unorm>;
-                [[stage(compute)]] fn main() -> void {
+                [[stage(compute)]] fn main() {
                 })");
             wgpu::ComputePipelineDescriptor pipelineDescriptor;
             pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &readBGL);

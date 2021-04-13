@@ -25,12 +25,12 @@ class StorageTextureValidationTests : public ValidationTest {
 
         mDefaultVSModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
         mDefaultFSModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             })");
     }
@@ -88,7 +88,7 @@ class StorageTextureValidationTests : public ValidationTest {
                 << "[[access(" << access << ")]] " << imageTypeDeclaration << "<"
                 << imageFormatQualifier
                 << ">;\n"
-                   "[[stage(compute)]] fn main() -> void {\n"
+                   "[[stage(compute)]] fn main() {\n"
                    "}\n";
 
         return ostream.str();
@@ -124,7 +124,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
             [[group(0), binding(0)]] var image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = textureLoad(image0, vec2<i32>(i32(VertexIndex), 0));
             })");
 
@@ -141,7 +141,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
             [[group(0), binding(0)]] var image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = textureLoad(image0, vec2<i32>(FragCoord.xy));
             })");
 
@@ -157,7 +157,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(vertex_index)]] var<in> vertex_index : u32;
             [[group(0), binding(0)]] var image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 textureStore(image0, vec2<i32>(i32(vertex_index), 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
 
@@ -173,7 +173,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[builtin(frag_coord)]] var<in> frag_coord : vec4<f32>;
             [[group(0), binding(0)]] var image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 textureStore(image0, vec2<i32>(frag_coord.xy), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
 
@@ -199,7 +199,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
             };
             [[group(0), binding(1)]] var<storage> buf : [[access(read_write)]] Buf;
 
-            [[stage(compute)]] fn main() -> void {
+            [[stage(compute)]] fn main() {
                  buf.data = textureLoad(image0, vec2<i32>(LocalInvocationID.xy)).x;
             })");
 
@@ -217,7 +217,7 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
             [[group(0), binding(0)]] var image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
             [[builtin(local_invocation_id)]] var<in> LocalInvocationID : vec3<u32>;
 
-            [[stage(compute)]] fn main() -> void {
+            [[stage(compute)]] fn main() {
                 textureStore(image0, vec2<i32>(LocalInvocationID.xy), vec4<f32>(0.0, 0.0, 0.0, 0.0));
             })");
 
@@ -236,7 +236,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : [[access(read_write)]] texture_storage_2d<rgba8unorm>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
             })"));
     }
 
@@ -244,7 +244,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : [[access(read_write)]] texture_storage_2d<rgba8unorm>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
             })"));
     }
 
@@ -252,7 +252,7 @@ TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : [[access(read_write)]] texture_storage_2d<rgba8unorm>;
-            [[stage(compute)]] fn main() -> void {
+            [[stage(compute)]] fn main() {
             })"));
     }
 }

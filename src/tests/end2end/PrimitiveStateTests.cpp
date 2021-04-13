@@ -52,7 +52,7 @@ class DepthClampingTest : public DawnTest {
             [[group(0), binding(0)]] var<uniform> ubo : UBO;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>(0.0, 0.0, ubo.depth, 1.0);
             })");
 
@@ -65,7 +65,7 @@ class DepthClampingTest : public DawnTest {
 
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(ubo.color, 1.0);
             })");
     }

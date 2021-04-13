@@ -223,12 +223,12 @@ TEST_P(SwapChainValidationTests, ReturnedViewCharacteristics) {
     utils::ComboRenderPipelineDescriptor2 pipelineDesc;
     pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
         })");
     // Validation will check that the sample count of the view matches this format.

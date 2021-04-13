@@ -32,7 +32,7 @@ class DepthStencilCopyTests : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>( 0.0, -1.0),
@@ -75,7 +75,7 @@ class DepthStencilCopyTests : public DawnTest {
 
         std::string fsSource = R"(
         [[builtin(frag_depth)]] var<out> FragDepth : f32;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             FragDepth = )" + std::to_string(regionDepth) +
                                ";\n}";
 
@@ -242,7 +242,7 @@ class DepthStencilCopyTests : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>( 3.0, -1.0),
@@ -259,7 +259,7 @@ class DepthStencilCopyTests : public DawnTest {
             [[location(0)]] var<out> result : u32;
             [[builtin(frag_depth)]] var<out> FragDepth : f32;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 result = 1u;
                 FragDepth = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0)[0];
             })");
@@ -646,7 +646,7 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
         utils::ComboRenderPipelineDescriptor2 renderPipelineDesc;
         renderPipelineDesc.vertex.module = mVertexModule;
         renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
             })");
         wgpu::DepthStencilState* depthStencil =
             renderPipelineDesc.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);

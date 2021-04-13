@@ -330,7 +330,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         std::ostringstream ostream;
         ostream << GetImageDeclaration(format, "write", is2DArray, 0) << "\n";
         ostream << "[[stage(" << stage << ")]]\n";
-        ostream << "fn main() -> void {\n";
+        ostream << "fn main() {\n";
         ostream << "  var size : vec2<i32> = textureDimensions(storageImage0);\n";
         ostream << "  const layerCount : i32 = " << layerCount << ";\n";
         ostream << "  for (var layer : i32 = 0; layer < layerCount; layer = layer + 1) {\n";
@@ -358,7 +358,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         std::ostringstream ostream;
         ostream << GetImageDeclaration(format, "write", is2DArray, 0) << "\n";
         ostream << GetImageDeclaration(format, "read", is2DArray, 1) << "\n";
-        ostream << "[[stage(compute)]] fn main() -> void {\n";
+        ostream << "[[stage(compute)]] fn main() {\n";
         ostream << "  var size : vec2<i32> = textureDimensions(storageImage0);\n";
         ostream << "  const layerCount : i32 = " << layerCount << ";\n";
         ostream << "  for (var layer : i32 = 0; layer < layerCount; layer = layer + 1) {\n";
@@ -649,7 +649,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
 
     const char* kSimpleVertexShader = R"(
 [[builtin(position)]] var<out> position : vec4<f32>;
-[[stage(vertex)]] fn main() -> void {
+[[stage(vertex)]] fn main() {
   position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
 })";
 
@@ -715,7 +715,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInComputeShader) {
 [[group(0), binding(1)]] var<storage> dstBuffer : [[access(read_write)]] DstBuffer;
 )" << CommonReadOnlyTestCode(format)
                  << R"(
-[[stage(compute)]] fn main() -> void {
+[[stage(compute)]] fn main() {
   if (doTest()) {
     dstBuffer.result = 1u;
   } else {
@@ -750,7 +750,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInVertexShader) {
 [[location(0)]] var<out> o_color : vec4<f32>;
 )" << CommonReadOnlyTestCode(format)
                  << R"(
-[[stage(vertex)]] fn main() -> void {
+[[stage(vertex)]] fn main() {
   position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
   if (doTest()) {
     o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
@@ -761,7 +761,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInVertexShader) {
         const char* kFragmentShader = R"(
 [[location(0)]] var<in> o_color : vec4<f32>;
 [[location(0)]] var<out> fragColor : vec4<f32>;
-[[stage(fragment)]] fn main() -> void {
+[[stage(fragment)]] fn main() {
   fragColor = o_color;
 })";
         CheckDrawsGreen(vsStream.str().c_str(), kFragmentShader, readonlyStorageTexture);
@@ -795,7 +795,7 @@ TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
 [[location(0)]] var<out> o_color : vec4<f32>;
 )" << CommonReadOnlyTestCode(format)
                  << R"(
-[[stage(fragment)]] fn main() -> void {
+[[stage(fragment)]] fn main() {
   if (doTest()) {
     o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
   } else {
@@ -940,7 +940,7 @@ TEST_P(StorageTextureTests, Readonly2DArrayStorageTexture) {
 [[group(0), binding(1)]] var<storage> dstBuffer : [[access(read_write)]] DstBuffer;
 )" << CommonReadOnlyTestCode(kTextureFormat, true)
              << R"(
-[[stage(compute)]] fn main() -> void {
+[[stage(compute)]] fn main() {
   if (doTest()) {
     dstBuffer.result = 1u;
   } else {
@@ -985,7 +985,7 @@ TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 [[group(0), binding(0)]] var Src : [[access(read)]]  texture_storage_2d<r32uint>;
 [[group(0), binding(1)]] var Dst : [[access(write)]] texture_storage_2d<r32uint>;
-[[stage(compute)]] fn main() -> void {
+[[stage(compute)]] fn main() {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0));
   srcValue.x = srcValue.x + 1u;
   textureStore(Dst, vec2<i32>(0, 0), srcValue);
@@ -1059,7 +1059,7 @@ TEST_P(StorageTextureTests, SampledAndWriteonlyStorageTexturePingPong) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
 [[group(0), binding(0)]] var Src : texture_2d<u32>;
 [[group(0), binding(1)]] var Dst : [[access(write)]] texture_storage_2d<r32uint>;
-[[stage(compute)]] fn main() -> void {
+[[stage(compute)]] fn main() {
   var srcValue : vec4<u32> = textureLoad(Src, vec2<i32>(0, 0), 0);
   srcValue.x = srcValue.x + 1u;
   textureStore(Dst, vec2<i32>(0, 0), srcValue);
@@ -1158,13 +1158,13 @@ fn doTest() -> bool {
     const char* kCommonWriteOnlyZeroInitTestCodeFragment = R"(
 [[group(0), binding(0)]] var dstImage : [[access(write)]] texture_storage_2d<r32uint>;
 
-[[stage(fragment)]] fn main() -> void {
+[[stage(fragment)]] fn main() {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
 })";
     const char* kCommonWriteOnlyZeroInitTestCodeCompute = R"(
 [[group(0), binding(0)]] var dstImage : [[access(write)]] texture_storage_2d<r32uint>;
 
-[[stage(compute)]] fn main() -> void {
+[[stage(compute)]] fn main() {
   textureStore(dstImage, vec2<i32>(0, 0), vec4<u32>(1u, 0u, 0u, 1u));
 })";
 };
@@ -1183,7 +1183,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInRenderPa
 [[location(0)]] var<out> o_color : vec4<f32>;
 )") + kCommonReadOnlyZeroInitTestCode +
                                         R"(
-[[stage(fragment)]] fn main() -> void {
+[[stage(fragment)]] fn main() {
   if (doTest()) {
     o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
   } else {
@@ -1209,7 +1209,7 @@ TEST_P(StorageTextureZeroInitTests, ReadonlyStorageTextureClearsToZeroInComputeP
 [[group(0), binding(0)]] var srcImage : [[access(read)]] texture_storage_2d<r32uint>;
 [[group(0), binding(1)]] var<storage> dstBuffer : [[access(read_write)]] DstBuffer;
 )") + kCommonReadOnlyZeroInitTestCode + R"(
-[[stage(compute)]] fn main() -> void {
+[[stage(compute)]] fn main() {
   if (doTest()) {
     dstBuffer.result = 1u;
   } else {

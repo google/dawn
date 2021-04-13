@@ -320,13 +320,13 @@ int main(int argc, const char* argv[]) {
             vec2<f32>(-0.5, -0.5),
             vec2<f32>( 0.5, -0.5)
         );
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             return;
         })");
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             return;
         })");

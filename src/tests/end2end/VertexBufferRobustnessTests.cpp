@@ -35,7 +35,7 @@ class VertexBufferRobustnessTest : public DawnTest {
         return utils::CreateShaderModule(device, (attributes + R"(
                 [[builtin(position)]] var<out> Position : vec4<f32>;
 
-                [[stage(vertex)]] fn main() -> void {
+                [[stage(vertex)]] fn main() {
                     if ()" + successExpression + R"() {
                         // Success case, move the vertex out of the viewport
                         Position = vec4<f32>(-10.0, 0.0, 0.0, 1.0);
@@ -60,7 +60,7 @@ class VertexBufferRobustnessTest : public DawnTest {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<out> outColor : vec4<f32>;
 
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                     outColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
                     return;
                 }

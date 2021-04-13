@@ -99,19 +99,17 @@ namespace {
     // Creates a compute shader with given bindings
     std::string CreateComputeShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
         return kStructs + GenerateBindingString(bindings) +
-               "[[stage(compute), workgroup_size(1,1,1)]] fn main() -> void {}";
+               "[[stage(compute), workgroup_size(1,1,1)]] fn main() {}";
     }
 
     // Creates a vertex shader with given bindings
     std::string CreateVertexShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
-        return kStructs + GenerateBindingString(bindings) +
-               "[[stage(vertex)]] fn main() -> void {}";
+        return kStructs + GenerateBindingString(bindings) + "[[stage(vertex)]] fn main() {}";
     }
 
     // Creates a fragment shader with given bindings
     std::string CreateFragmentShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
-        return kStructs + GenerateBindingString(bindings) +
-               "[[stage(fragment)]] fn main() -> void {}";
+        return kStructs + GenerateBindingString(bindings) + "[[stage(fragment)]] fn main() {}";
     }
 
     // Concatenates vectors containing BindingDescriptor

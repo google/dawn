@@ -53,7 +53,7 @@ class MultisampledRenderingTest : public DawnTest {
             [[location(0)]] var<out> FragColor : vec4<f32>;
             [[builtin(frag_depth)]] var<out> FragDepth : f32;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 FragColor = uBuffer.color;
                 FragDepth = uBuffer.depth;
             })";
@@ -65,7 +65,7 @@ class MultisampledRenderingTest : public DawnTest {
             [[group(0), binding(0)]] var<uniform> uBuffer : U;
             [[location(0)]] var<out> FragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 FragColor = uBuffer.color;
             })";
 
@@ -87,7 +87,7 @@ class MultisampledRenderingTest : public DawnTest {
             [[location(0)]] var<out> FragColor0 : vec4<f32>;
             [[location(1)]] var<out> FragColor1 : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 FragColor0 = uBuffer.color0;
                 FragColor1 = uBuffer.color1;
             })";
@@ -217,7 +217,7 @@ class MultisampledRenderingTest : public DawnTest {
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
@@ -231,7 +231,7 @@ class MultisampledRenderingTest : public DawnTest {
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
@@ -779,7 +779,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
         [[location(0)]] var<out> FragColor : vec4<f32>;
         [[builtin(sample_mask_out)]] var<out> SampleMask : u32;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             FragColor = uBuffer.color;
             SampleMask = 6u;
         })";
@@ -837,7 +837,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
         [[location(1)]] var<out> FragColor1 : vec4<f32>;
         [[builtin(sample_mask_out)]] var<out> SampleMask : u32;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             FragColor0 = uBuffer.color0;
             FragColor1 = uBuffer.color1;
             SampleMask = 6u;

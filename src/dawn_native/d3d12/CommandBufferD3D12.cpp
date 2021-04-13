@@ -664,7 +664,7 @@ namespace dawn_native { namespace d3d12 {
         // TODO(jiawei.shao@intel.com): move the resource lazy clearing inside the barrier tracking
         // for compute passes.
         auto PrepareResourcesForComputePass = [](CommandRecordingContext* commandContext,
-                                                 const PassResourceUsage& usages) -> void {
+                                                 const PassResourceUsage& usages) {
             for (size_t i = 0; i < usages.buffers.size(); ++i) {
                 Buffer* buffer = ToBackend(usages.buffers[i]);
 

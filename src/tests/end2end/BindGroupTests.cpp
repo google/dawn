@@ -49,7 +49,7 @@ class BindGroupTests : public DawnTest {
         [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
              const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
@@ -84,7 +84,7 @@ class BindGroupTests : public DawnTest {
             }
         }
 
-        fs << "\n[[stage(fragment)]] fn main() -> void {\n";
+        fs << "\n[[stage(fragment)]] fn main() {\n";
         for (size_t i = 0; i < bindingTypes.size(); ++i) {
             fs << "fragColor = fragColor + buffer" << i << ".color;\n";
         }
@@ -129,7 +129,7 @@ TEST_P(BindGroupTests, ReusedBindGroupSingleSubmit) {
         };
         [[group(0), binding(0)]] var <uniform> contents: Contents;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
           var f : f32 = contents.f;
         })");
 
@@ -168,7 +168,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
         [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
@@ -186,7 +186,7 @@ TEST_P(BindGroupTests, ReusedUBO) {
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = fragmentUbo.color;
         })");
 
@@ -249,7 +249,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
         [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
@@ -266,7 +266,7 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = textureSample(tex, samp, FragCoord.xy);
         })");
 
@@ -364,7 +364,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
         [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
@@ -392,7 +392,7 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = fragmentUbo1.color + fragmentUbo2.color;
         })");
 
@@ -855,7 +855,7 @@ TEST_P(BindGroupTests, DynamicOffsetOrder) {
         [[group(0), binding(0)]] var<storage> buffer0 : [[access(read)]] Buffer0;
         [[group(0), binding(4)]] var<storage> outputBuffer : [[access(read_write)]] OutputBuffer;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             outputBuffer.value = vec3<u32>(buffer0.value, buffer2.value, buffer3.value);
         })");
     pipelineDescriptor.computeStage.entryPoint = "main";
@@ -954,7 +954,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
         [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
@@ -984,7 +984,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = ubo1.color + 2.0 * ubo2.color + 4.0 * ubo3.color;
         })");
 
@@ -1084,7 +1084,7 @@ TEST_P(BindGroupTests, EmptyLayout) {
     pipelineDesc.layout = utils::MakeBasicPipelineLayout(device, &bgl);
     pipelineDesc.computeStage.entryPoint = "main";
     pipelineDesc.computeStage.module = utils::CreateShaderModule(device, R"(
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
         })");
 
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
@@ -1110,7 +1110,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
         [[builtin(vertex_index)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                 vec2<f32>(-1.0, 1.0),
                 vec2<f32>( 1.0, 1.0),
@@ -1126,7 +1126,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
         [[group(0), binding(0)]] var<storage> buffer0 : [[access(read)]] Buffer0;
 
         [[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = buffer0.color;
         })");
 
@@ -1282,8 +1282,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
 
     body << "result.value = 1u;\n";
 
-    std::string shader =
-        interface.str() + "[[stage(compute)]] fn main() -> void {\n" + body.str() + "}\n";
+    std::string shader = interface.str() + "[[stage(compute)]] fn main() {\n" + body.str() + "}\n";
     wgpu::ComputePipelineDescriptor cpDesc;
     cpDesc.computeStage.module = utils::CreateShaderModule(device, shader.c_str());
     cpDesc.computeStage.entryPoint = "main";

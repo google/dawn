@@ -28,13 +28,13 @@ class RenderPipelineValidationTest : public ValidationTest {
 
         vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
         fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
     }
@@ -193,7 +193,7 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputFormatCompatibility) {
             stream << R"(
                 [[location(0)]] var<out> fragColor : vec4<)"
                    << kScalarTypes[i] << R"(>;
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
@@ -411,7 +411,7 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
                 [[group(0), binding(0)]] var myTexture : texture_2d<)"
                    << kScalarTypes[i] << R"(>;
 
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
@@ -458,7 +458,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
             stream << R"(
                 [[group(0), binding(0)]] var myTexture : )"
                    << kTextureKeywords[i] << R"(<f32>;
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
@@ -485,7 +485,7 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
         };
         [[group(0), binding(0)]] var<storage> dst : [[access(read_write)]] Dst;
         [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             dst.data[VertexIndex] = 0x1234u;
         })");
 
@@ -592,13 +592,13 @@ TEST_F(RenderPipelineValidationTest, DepthCompareUndefinedIsError) {
 TEST_F(RenderPipelineValidationTest, EntryPointNameValidation) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> position : vec4<f32>;
-        [[stage(vertex)]] fn vertex_main() -> void {
+        [[stage(vertex)]] fn vertex_main() {
             position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             return;
         }
 
         [[location(0)]] var<out> color : vec4<f32>;
-        [[stage(fragment)]] fn fragment_main() -> void {
+        [[stage(fragment)]] fn fragment_main() {
             color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             return;
         }
@@ -645,11 +645,11 @@ TEST_F(RenderPipelineValidationTest, VertexAttribCorrectEntryPoint) {
         [[location(0)]] var<in> attrib0 : vec4<f32>;
         [[location(1)]] var<in> attrib1 : vec4<f32>;
 
-        [[stage(vertex)]] fn vertex0() -> void {
+        [[stage(vertex)]] fn vertex0() {
             position = attrib0;
             return;
         }
-        [[stage(vertex)]] fn vertex1() -> void {
+        [[stage(vertex)]] fn vertex1() {
             position = attrib1;
             return;
         }
@@ -690,11 +690,11 @@ TEST_F(RenderPipelineValidationTest, FragmentOutputCorrectEntryPoint) {
         [[location(0)]] var<out> colorFloat : vec4<f32>;
         [[location(0)]] var<out> colorUint : vec4<u32>;
 
-        [[stage(fragment)]] fn fragmentFloat() -> void {
+        [[stage(fragment)]] fn fragmentFloat() {
             colorFloat = vec4<f32>(0.0, 0.0, 0.0, 0.0);
             return;
         }
-        [[stage(fragment)]] fn fragmentUint() -> void {
+        [[stage(fragment)]] fn fragmentUint() {
             colorUint = vec4<u32>(0u, 0u, 0u, 0u);
             return;
         }
@@ -734,11 +734,11 @@ TEST_F(RenderPipelineValidationTest, DISABLED_BindingsFromCorrectEntryPoint) {
         [[binding 1, set 0]] var<uniform> var1 : Uniforms;
         [[builtin(position)]] var<out> position : vec4<f32>;
 
-        fn vertex0() -> void {
+        fn vertex0() {
             position = var0.data;
             return;
         }
-        fn vertex1() -> void {
+        fn vertex1() {
             position = var1.data;
             return;
         }

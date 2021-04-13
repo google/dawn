@@ -40,7 +40,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddIncrement) {
 
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             buf.data[GlobalInvocationID.x] = buf.data[GlobalInvocationID.x] + 0x1234u;
         }
     )");
@@ -96,7 +96,7 @@ TEST_P(ComputeStorageBufferBarrierTests, AddPingPong) {
         [[group(0), binding(1)]] var<storage> dst : [[access(read_write)]] Dst;
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] + 0x1234u;
         }
     )");
@@ -168,7 +168,7 @@ TEST_P(ComputeStorageBufferBarrierTests, StorageAndReadonlyStoragePingPongInOneP
 
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] + 0x1234u;
         }
     )");
@@ -236,7 +236,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPong) {
         [[group(0), binding(1)]] var<storage> dst : [[access(read_write)]] Buf;
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] +
                 vec4<u32>(0x1234u, 0x1234u, 0x1234u, 0x1234u);
         }
@@ -304,7 +304,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
         [[group(0), binding(1)]] var<storage> dst : [[access(read_write)]] Buf;
         [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             dst.data[GlobalInvocationID.x] = src.data[GlobalInvocationID.x] +
                 vec4<u32>(0x1234u, 0x1234u, 0x1234u, 0x1234u);
         }

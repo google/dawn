@@ -64,7 +64,7 @@ namespace {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[location(0)]] var<out> TexCoord : vec2<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                                             vec2<f32>(-2., -2.),
                                             vec2<f32>(-2.,  2.),
@@ -219,7 +219,7 @@ class TextureViewSamplingTest : public DawnTest {
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = textureSample(texture0, sampler0, texCoord);
             }
         )";
@@ -258,7 +258,7 @@ class TextureViewSamplingTest : public DawnTest {
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = textureSample(texture0, sampler0, texCoord, 0) +
                             textureSample(texture0, sampler0, texCoord, 1) +
                             textureSample(texture0, sampler0, texCoord, 2);
@@ -295,7 +295,7 @@ class TextureViewSamplingTest : public DawnTest {
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 var sc : f32 = 2.0 * texCoord.x - 1.0;
                 var tc : f32 = 2.0 * texCoord.y - 1.0;
                 fragColor = textureSample(texture0, sampler0, vec3<f32>()"
@@ -368,7 +368,7 @@ TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = textureSample(texture0, sampler0, texCoord, 0) +
                             textureSample(texture0, sampler0, texCoord, 1) +
                             textureSample(texture0, sampler0, texCoord, 2);
@@ -498,7 +498,7 @@ class TextureViewRenderingTest : public DawnTest {
         const char* oneColorFragmentShader = R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
             }
         )";

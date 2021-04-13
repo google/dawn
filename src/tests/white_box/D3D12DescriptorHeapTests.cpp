@@ -43,7 +43,7 @@ class D3D12DescriptorHeapTests : public DawnTest {
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
@@ -59,7 +59,7 @@ class D3D12DescriptorHeapTests : public DawnTest {
             [[group(0), binding(0)]] var<uniform> colorBuffer : U;
             [[location(0)]] var<out> FragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 FragColor = colorBuffer.color;
             })");
     }
@@ -453,7 +453,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
         [[group(0), binding(0)]] var<uniform> buffer0 : U;
         [[location(0)]] var<out> FragColor : f32;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             FragColor = buffer0.heapSize;
         })");
 
@@ -790,7 +790,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
@@ -809,7 +809,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
             [[location(0)]] var<out> FragColor : vec4<f32>;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 FragColor = textureSample(texture0, sampler0, FragCoord.xy) + buffer0.color;
             })");
 

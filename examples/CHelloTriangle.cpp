@@ -44,7 +44,7 @@ void init() {
         "    vec2<f32>(-0.5, -0.5),\n"
         "    vec2<f32>( 0.5, -0.5)\n"
         ");\n"
-        "[[stage(vertex)]] fn main() -> void {\n"
+        "[[stage(vertex)]] fn main() {\n"
         "    Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);\n"
         "    return;\n"
         "}\n";
@@ -52,7 +52,7 @@ void init() {
 
     const char* fs =
         "[[location(0)]] var<out> fragColor : vec4<f32>;\n"
-        "[[stage(fragment)]] fn main() -> void {\n"
+        "[[stage(fragment)]] fn main() {\n"
         "    fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);\n"
         "    return;\n"
         "}\n";

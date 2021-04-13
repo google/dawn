@@ -64,7 +64,7 @@ class DepthStencilStateTest : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                         vec2<f32>(-1.0,  1.0),
                         vec2<f32>(-1.0, -1.0),
@@ -84,7 +84,7 @@ class DepthStencilStateTest : public DawnTest {
 
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(ubo.color, 1.0);
             })");
     }

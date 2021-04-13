@@ -53,7 +53,7 @@ class TextureSubresourceTest : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>(-1.0, -1.0),
@@ -64,7 +64,7 @@ class TextureSubresourceTest : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             })");
 
@@ -93,7 +93,7 @@ class TextureSubresourceTest : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>( 1.0,  1.0),
@@ -113,7 +113,7 @@ class TextureSubresourceTest : public DawnTest {
 
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = textureSample(tex, samp, FragCoord.xy / vec2<f32>(4.0, 4.0));
             })");
 

@@ -70,7 +70,7 @@ class TextureZeroInitTest : public DawnTest {
         pipelineDescriptor.vertex.module = CreateBasicVertexShaderForTest(depth);
         const char* fs = R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )";
@@ -95,7 +95,7 @@ class TextureZeroInitTest : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>(pos[VertexIndex], )" +
                              std::to_string(depth) + R"(, 1.0);
             })";
@@ -106,7 +106,7 @@ class TextureZeroInitTest : public DawnTest {
             [[group(0), binding(0)]] var texture0 : texture_2d<f32>;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0);
             }
         )");
@@ -977,7 +977,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
             value : vec4<f32>;
         };
         [[group(0), binding(1)]] var<storage> result : [[access(read_write)]] Result;
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
            result.value = textureLoad(tex, vec2<i32>(0,0), 0);
         }
     )";

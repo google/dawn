@@ -30,7 +30,7 @@ class RenderPassTest : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0, -1.0),
@@ -41,7 +41,7 @@ class RenderPassTest : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(0.0, 0.0, 1.0, 1.0);
             })");
 
@@ -141,7 +141,7 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
     {
         // Next we use a pipeline whose fragment shader has no outputs.
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
             })");
         utils::ComboRenderPipelineDescriptor2 descriptor;
         descriptor.vertex.module = mVSModule;

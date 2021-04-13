@@ -34,7 +34,7 @@ class RenderBundleTest : public DawnTest {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<in> pos : vec4<f32>;
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = pos;
             })");
 
@@ -45,7 +45,7 @@ class RenderBundleTest : public DawnTest {
             };
             [[group(0), binding(0)]] var<uniform> fragmentUniformBuffer : Ubo;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = fragmentUniformBuffer.color;
             })");
 

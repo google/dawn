@@ -65,10 +65,8 @@ TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
     bundleDesc.cColorFormats[0] = renderPass.attachmentFormat;
 
     utils::ComboRenderPipelineDescriptor2 desc;
-    desc.vertex.module =
-        utils::CreateShaderModule(device, "[[stage(vertex)]] fn main() -> void {}");
-    desc.cFragment.module =
-        utils::CreateShaderModule(device, "[[stage(fragment)]] fn main() -> void {}");
+    desc.vertex.module = utils::CreateShaderModule(device, "[[stage(vertex)]] fn main() {}");
+    desc.cFragment.module = utils::CreateShaderModule(device, "[[stage(fragment)]] fn main() {}");
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
 
     // Control cases: DrawIndirect and DrawIndexed are allowed inside a render pass.
@@ -134,7 +132,7 @@ TEST_F(UnsafeAPIValidationTest, DispatchIndirectDisallowed) {
     wgpu::ComputePipelineDescriptor pipelineDesc;
     pipelineDesc.computeStage.entryPoint = "main";
     pipelineDesc.computeStage.module =
-        utils::CreateShaderModule(device, "[[stage(compute)]] fn main() -> void {}");
+        utils::CreateShaderModule(device, "[[stage(compute)]] fn main() {}");
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
 
     // Control case: dispatch is allowed.

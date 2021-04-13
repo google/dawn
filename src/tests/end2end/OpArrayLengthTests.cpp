@@ -130,7 +130,7 @@ TEST_P(OpArrayLengthTest, Compute) {
         };
         [[group(1), binding(0)]] var<storage> result : [[access(read_write)]] ResultBuffer;
         )" + mShaderInterface + R"(
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             result.data[0] = arrayLength(buffer1.data);
             result.data[1] = arrayLength(buffer2.data);
             result.data[2] = arrayLength(buffer3.data);
@@ -166,13 +166,13 @@ TEST_P(OpArrayLengthTest, Fragment) {
     // pass pixel.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[builtin(position)]] var<out> Position : vec4<f32>;
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor.r = f32(arrayLength(buffer1.data)) / 255.0;
             fragColor.g = f32(arrayLength(buffer2.data)) / 255.0;
             fragColor.b = f32(arrayLength(buffer3.data)) / 255.0;
@@ -220,7 +220,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, (mShaderInterface + R"(
         [[location(0)]] var<out> pointColor : vec4<f32>;
         [[builtin(position)]] var<out> Position : vec4<f32>;
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             pointColor.r = f32(arrayLength(buffer1.data)) / 255.0;
             pointColor.g = f32(arrayLength(buffer2.data)) / 255.0;
             pointColor.b = f32(arrayLength(buffer3.data)) / 255.0;
@@ -233,7 +233,7 @@ TEST_P(OpArrayLengthTest, Vertex) {
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[location(0)]] var<out> fragColor : vec4<f32>;
         [[location(0)]] var<in> pointColor : vec4<f32>;
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             fragColor = pointColor;
         })");
 

@@ -255,7 +255,7 @@ class VertexFormatTest : public DawnTest {
 
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>( 2.0,  0.0),
@@ -343,7 +343,7 @@ class VertexFormatTest : public DawnTest {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<in> color : vec4<f32>;
                 [[location(0)]] var<out> FragColor : vec4<f32>;
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                     FragColor = color;
                 })");
 

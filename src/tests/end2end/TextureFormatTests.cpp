@@ -146,7 +146,7 @@ class TextureFormatTest : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-3.0, -1.0),
                     vec2<f32>( 3.0, -1.0),
@@ -162,7 +162,7 @@ class TextureFormatTest : public DawnTest {
         fsSource << "[[group(0), binding(0)]] var myTexture : texture_2d<" << type << ">;\n";
         fsSource << "[[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;\n";
         fsSource << "[[location(0)]] var<out> fragColor : vec4<" << type << ">;\n";
-        fsSource << "[[stage(fragment)]] fn main() -> void {\n";
+        fsSource << "[[stage(fragment)]] fn main() {\n";
         fsSource << "    fragColor = textureLoad(myTexture, vec2<i32>(FragCoord.xy), 0);\n";
         fsSource << "}";
 

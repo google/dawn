@@ -27,7 +27,7 @@ class VertexBufferValidationTest : public ValidationTest {
 
         fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
     }
@@ -46,7 +46,7 @@ class VertexBufferValidationTest : public ValidationTest {
             vs << "[[location(" << i << ")]] var<in> a_position" << i << " : vec3<f32>;\n";
         }
         vs << "[[builtin(position)]] var<out> Position : vec4<f32>;";
-        vs << "[[stage(vertex)]] fn main() -> void {\n";
+        vs << "[[stage(vertex)]] fn main() {\n";
 
         vs << "Position = vec4<f32>(";
         for (unsigned int i = 0; i < bufferCount; ++i) {

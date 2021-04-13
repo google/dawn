@@ -84,7 +84,7 @@ TEST_P(ComputeSharedMemoryTests, Basic) {
         var<workgroup> tmp : u32;
 
         [[stage(compute), workgroup_size(4,4,1)]]
-        fn main() -> void {
+        fn main() {
             var index : u32 = LocalInvocationID.y * kTileSize + LocalInvocationID.x;
             if (index == 0u) {
                 tmp = 0u;

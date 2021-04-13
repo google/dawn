@@ -42,7 +42,7 @@ class ComputeDispatchTests : public DawnTest {
             [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
             [[stage(compute), workgroup_size(1, 1, 1)]]
-            fn main() -> void {
+            fn main() {
                 const dispatch : vec3<u32> = input.expectedDispatch;
 
                 if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {

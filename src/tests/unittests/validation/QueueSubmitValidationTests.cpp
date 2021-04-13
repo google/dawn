@@ -176,13 +176,13 @@ namespace {
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 
@@ -213,7 +213,7 @@ namespace {
 
         wgpu::ComputePipelineDescriptor descriptor;
         descriptor.computeStage.module = utils::CreateShaderModule(device, R"(
-            [[stage(compute)]] fn main() -> void {
+            [[stage(compute)]] fn main() {
             })");
         descriptor.computeStage.entryPoint = "main";
         device.CreateComputePipelineAsync(&descriptor, callback, &callbackData);

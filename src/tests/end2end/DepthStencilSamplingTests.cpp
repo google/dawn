@@ -67,7 +67,7 @@ class DepthStencilSamplingTest : public DawnTest {
                                                       uint32_t componentIndex) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
@@ -106,7 +106,7 @@ class DepthStencilSamplingTest : public DawnTest {
             index++;
         }
 
-        shaderSource << "[[stage(fragment)]] fn main() -> void { " << shaderBody.str() << "\n}";
+        shaderSource << "[[stage(fragment)]] fn main() { " << shaderBody.str() << "\n}";
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
         pipelineDescriptor.vertex.module = vsModule;
@@ -160,7 +160,7 @@ class DepthStencilSamplingTest : public DawnTest {
             index++;
         }
 
-        shaderSource << "[[stage(compute)]] fn main() -> void { " << shaderBody.str() << "\n}";
+        shaderSource << "[[stage(compute)]] fn main() { " << shaderBody.str() << "\n}";
 
         wgpu::ShaderModule csModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
 
@@ -174,7 +174,7 @@ class DepthStencilSamplingTest : public DawnTest {
     wgpu::RenderPipeline CreateComparisonRenderPipeline() {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
@@ -188,7 +188,7 @@ class DepthStencilSamplingTest : public DawnTest {
 
             [[location(0)]] var<out> samplerResult : f32;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 samplerResult = textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);
             })");
 
@@ -223,7 +223,7 @@ class DepthStencilSamplingTest : public DawnTest {
             };
             [[group(0), binding(3)]] var<storage> samplerResult : [[access(read_write)]] SamplerResult;
 
-            [[stage(compute)]] fn main() -> void {
+            [[stage(compute)]] fn main() {
                 samplerResult.value = textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);
             })");
 

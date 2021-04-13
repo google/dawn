@@ -56,14 +56,14 @@ class MultisampledSamplingTest : public DawnTest {
             desc.vertex.module = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<in> pos : vec2<f32>;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
-                [[stage(vertex)]] fn main() -> void {
+                [[stage(vertex)]] fn main() {
                     Position = vec4<f32>(pos, 0.0, 1.0);
                 })");
 
             desc.cFragment.module = utils::CreateShaderModule(device, R"(
                 [[location(0)]] var<out> fragColor : f32;
                 [[builtin(frag_depth)]] var<out> FragDepth : f32;
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                     fragColor = 1.0;
                     FragDepth = 0.7;
                 })");
@@ -98,7 +98,7 @@ class MultisampledSamplingTest : public DawnTest {
                 };
                 [[group(0), binding(2)]] var<storage> results : [[access(read_write)]] Results;
 
-                [[stage(compute)]] fn main() -> void {
+                [[stage(compute)]] fn main() {
                     for (var i : i32 = 0; i < 4; i = i + 1) {
                         results.colorSamples[i] = textureLoad(texture0, vec2<i32>(0, 0), i).x;
                         results.depthSamples[i] = textureLoad(texture1, vec2<i32>(0, 0), i).x;

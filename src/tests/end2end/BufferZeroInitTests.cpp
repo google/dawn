@@ -210,7 +210,7 @@ class BufferZeroInitTest : public DawnTest {
             [[location(0)]] var<in> i_color : vec4<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = i_color;
             })");
 
@@ -253,7 +253,7 @@ class BufferZeroInitTest : public DawnTest {
 
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 if (all(pos == vec4<f32>(0.0, 0.0, 0.0, 0.0))) {
                     o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
                 } else {
@@ -295,7 +295,7 @@ class BufferZeroInitTest : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 if (VertexIndex == 0u) {
                     o_color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
                 } else {
@@ -341,7 +341,7 @@ class BufferZeroInitTest : public DawnTest {
 
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 o_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })",
@@ -379,7 +379,7 @@ class BufferZeroInitTest : public DawnTest {
 
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 o_color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
                 Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })",
@@ -418,7 +418,7 @@ class BufferZeroInitTest : public DawnTest {
         const char* computeShader = R"(
             [[group(0), binding(0)]] var outImage : [[access(write)]] texture_storage_2d<rgba8unorm>;
 
-            [[stage(compute)]] fn main() -> void {
+            [[stage(compute)]] fn main() {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })";
 
@@ -990,7 +990,7 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
         [[group(0), binding(0)]] var<uniform> ubo : UBO;
         [[group(0), binding(1)]] var outImage : [[access(write)]] texture_storage_2d<rgba8unorm>;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             if (all(ubo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
             } else {
@@ -1029,7 +1029,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
         [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] SSBO;
         [[group(0), binding(1)]] var outImage : [[access(write)]] texture_storage_2d<rgba8unorm>;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             if (all(ssbo.value == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));
             } else {
@@ -1068,7 +1068,7 @@ TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
         [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] SSBO;
         [[group(0), binding(1)]] var outImage : [[access(write)]] texture_storage_2d<rgba8unorm>;
 
-        [[stage(compute)]] fn main() -> void {
+        [[stage(compute)]] fn main() {
             if (all(ssbo.value[0] == vec4<u32>(0u, 0u, 0u, 0u)) &&
                 all(ssbo.value[1] == vec4<u32>(0u, 0u, 0u, 0u))) {
                 textureStore(outImage, vec2<i32>(0, 0), vec4<f32>(0.0, 1.0, 0.0, 1.0));

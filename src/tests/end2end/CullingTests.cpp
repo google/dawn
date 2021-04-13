@@ -37,7 +37,7 @@ class CullingTest : public DawnTest {
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
                 return;
             })");
@@ -49,7 +49,7 @@ class CullingTest : public DawnTest {
             [[location(0)]] var<out> fragColor : vec4<f32>;;
             [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(
                     (FragCoord.xy - vec2<f32>(0.5, 0.5)) / vec2<f32>(255.0, 255.0),
                     0.0, 1.0);

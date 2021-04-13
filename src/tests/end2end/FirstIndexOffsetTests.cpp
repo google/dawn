@@ -112,7 +112,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
         [[builtin(position)]] var<out> position : vec4<f32>;
         [[location(0)]] var<in> pos : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {)";
+        [[stage(vertex)]] fn main() {)";
     fragmentShader << R"(
          [[block]] struct IndexVals {
              vertex_index : u32;
@@ -121,7 +121,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
 
         [[group(0), binding(0)]] var<storage> idx_vals : [[access(read_write)]] IndexVals;
 
-        [[stage(fragment)]] fn main() -> void  {
+        [[stage(fragment)]] fn main()  {
         )";
 
     if ((checkIndex & CheckIndex::Vertex) != 0) {

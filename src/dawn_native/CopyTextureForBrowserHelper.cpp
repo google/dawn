@@ -46,7 +46,7 @@ namespace dawn_native {
             [[builtin(position)]] var<out> Position : vec4<f32>;
             [[builtin(vertex_index)]] var<in> VertexIndex : u32;
             [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 Position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
 
                 // Y component of scale is calculated by the copySizeHeight / textureHeight. Only
@@ -76,7 +76,7 @@ namespace dawn_native {
             [[binding(2), group(0)]] var myTexture: texture_2d<f32>;
             [[location(0)]] var<in> v_texcoord : vec2<f32>;
             [[location(0)]] var<out> outputColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 // Clamp the texcoord and discard the out-of-bound pixels.
                 var clampedTexcoord : vec2<f32> =
                     clamp(v_texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));

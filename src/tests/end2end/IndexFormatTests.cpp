@@ -36,7 +36,7 @@ class IndexFormatTest : public DawnTest {
             [[location(0)]] var<in> pos : vec4<f32>;
             [[builtin(vertex_index)]] var<in> idx : u32;
             [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() -> void {
+            [[stage(vertex)]] fn main() {
                 // 0xFFFFFFFE is a designated invalid index used by some tests.
                 if (idx == 0xFFFFFFFEu) {
                     Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -47,7 +47,7 @@ class IndexFormatTest : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                 fragColor = vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 

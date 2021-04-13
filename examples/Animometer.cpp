@@ -70,7 +70,7 @@ void init() {
         [[builtin(vertex_idx)]] var<in> VertexIndex : u32;
         [[builtin(position)]] var<out> Position : vec4<f32>;
 
-        [[stage(vertex)]] fn main() -> void {
+        [[stage(vertex)]] fn main() {
             var positions : array<vec4<f32>, 3> = array<vec4<f32>, 3>(
                 vec4<f32>( 0.0,  0.1, 0.0, 1.0),
                 vec4<f32>(-0.1, -0.1, 0.0, 1.0),
@@ -111,7 +111,7 @@ void init() {
         [[location(0)]] var<out> FragColor : vec4<f32>;
         [[location(0)]] var<in> v_color : vec4<f32>;
 
-        [[stage(fragment)]] fn main() -> void {
+        [[stage(fragment)]] fn main() {
             FragColor = v_color;
         })");
 

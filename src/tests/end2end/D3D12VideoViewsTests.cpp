@@ -236,7 +236,7 @@ namespace {
 
                 [[builtin(vertex_index)]] var<in> VertexIndex : u32;
 
-                [[stage(vertex)]] fn main() -> void {
+                [[stage(vertex)]] fn main() {
                     const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                         vec2<f32>(-1.0, 1.0),
                         vec2<f32>(-1.0, -1.0),
@@ -300,7 +300,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                var y : f32 = textureSample(texture, sampler0, texCoord).r;
                fragColor = vec4<f32>(y, 0.0, 0.0, 1.0);
             })");
@@ -353,7 +353,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                var u : f32 = textureSample(texture, sampler0, texCoord).r;
                var v : f32 = textureSample(texture, sampler0, texCoord).g;
                fragColor = vec4<f32>(u, v, 0.0, 1.0);
@@ -416,7 +416,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
             [[location(0)]] var<in> texCoord : vec2<f32>;
             [[location(0)]] var<out> fragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() -> void {
+            [[stage(fragment)]] fn main() {
                var y : f32 = textureSample(lumaTexture, sampler0, texCoord).r;
                var u : f32 = textureSample(chromaTexture, sampler0, texCoord).r;
                var v : f32 = textureSample(chromaTexture, sampler0, texCoord).g;

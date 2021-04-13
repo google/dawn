@@ -38,7 +38,7 @@ class DepthBiasTests : public DawnTest {
                 vertexSource = R"(
     [[builtin(vertex_index)]] var<in> VertexIndex : u32;
     [[builtin(position)]] var<out> Position : vec4<f32>;
-    [[stage(vertex)]] fn main() -> void {
+    [[stage(vertex)]] fn main() {
         const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
             vec2<f32>(-1.0, -1.0),
             vec2<f32>( 1.0, -1.0),
@@ -56,7 +56,7 @@ class DepthBiasTests : public DawnTest {
                 vertexSource = R"(
     [[builtin(vertex_index)]] var<in> VertexIndex : u32;
     [[builtin(position)]] var<out> Position : vec4<f32>;
-    [[stage(vertex)]] fn main() -> void {
+    [[stage(vertex)]] fn main() {
         const pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
             vec3<f32>(-1.0, -1.0, 0.0),
             vec3<f32>( 1.0, -1.0, 0.0),
@@ -74,7 +74,7 @@ class DepthBiasTests : public DawnTest {
 
         wgpu::ShaderModule fragmentModule = utils::CreateShaderModule(device, R"(
     [[location(0)]] var<out> fragColor : vec4<f32>;;
-    [[stage(fragment)]] fn main() -> void {
+    [[stage(fragment)]] fn main() {
         fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
         return;
     })");

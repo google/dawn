@@ -153,7 +153,7 @@ class CopyTextureForBrowserTests : public DawnTest {
                 // The value diff should be smaller than the hard coded tolerance.
                 return abs(value - expect) < 0.001;
             }
-            [[stage(compute), workgroup_size(1, 1, 1)]] fn main() -> void {
+            [[stage(compute), workgroup_size(1, 1, 1)]] fn main() {
                 var srcSize : vec2<i32> = textureDimensions(src);
                 var dstSize : vec2<i32> = textureDimensions(dst);
                 var dstTexCoord : vec2<u32> = vec2<u32>(GlobalInvocationID.xy);

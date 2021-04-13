@@ -252,7 +252,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                 [[location(0)]] var<out> o_texCoord : vec2<f32>;
                 [[builtin(position)]] var<out> Position : vec4<f32>;
 
-                [[stage(vertex)]] fn main() -> void {
+                [[stage(vertex)]] fn main() {
                     const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                         vec2<f32>(-2.0, -2.0),
                         vec2<f32>(-2.0,  2.0),
@@ -280,7 +280,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                 [[location(0)]] var<in> texCoord : vec2<f32>;
                 [[location(0)]] var<out> fragColor : vec4<f32>;
 
-                [[stage(fragment)]] fn main() -> void {
+                [[stage(fragment)]] fn main() {
                     fragColor = textureSample(texture0, sampler0, texCoord);
                 }
             )");
