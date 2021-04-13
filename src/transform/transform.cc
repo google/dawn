@@ -67,6 +67,9 @@ void Transform::RenameReservedKeywords(CloneContext* ctx,
                                        const char* names[],
                                        size_t count) {
   ctx->ReplaceAll([=](Symbol in) {
+    if (!ctx->src->Symbols().HasName(in)) {
+      return ctx->dst->Symbols().New();
+    }
     auto name_in = ctx->src->Symbols().NameFor(in);
     if (!std::binary_search(names, names + count, name_in)) {
       return ctx->dst->Symbols().Register(name_in);
