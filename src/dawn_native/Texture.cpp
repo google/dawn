@@ -301,6 +301,13 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Compressed texture must be 2D");
         }
 
+        // Depth/stencil formats are valid for 2D textures only. Metal has this limit. And D3D12
+        // doesn't support depth/stencil formats on 3D textures.
+        if (descriptor->dimension != wgpu::TextureDimension::e2D &&
+            (format->aspects & (Aspect::Depth | Aspect::Stencil)) != 0) {
+            return DAWN_VALIDATION_ERROR("Depth/stencil formats are valid for 2D textures only");
+        }
+
         DAWN_TRY(ValidateTextureSize(descriptor, format));
 
         return {};
