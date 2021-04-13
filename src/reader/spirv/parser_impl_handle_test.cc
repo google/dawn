@@ -5690,7 +5690,6 @@ TEST_F(SpvParserTest, NeverGenerateConstDeclForHandle_UseVariableDirectly) {
            OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  std::cout << assembly << std::endl;
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
