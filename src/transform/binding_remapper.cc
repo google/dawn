@@ -65,8 +65,7 @@ Transform::Output BindingRemapper::Run(const Program* in,
       auto ac_it = remappings->access_controls.find(from);
       if (ac_it != remappings->access_controls.end()) {
         ast::AccessControl ac = ac_it->second;
-        auto* var_ty = in->Sem().Get(var)->Type();
-        auto* ty = var_ty->UnwrapAliasIfNeeded();
+        auto* ty = in->Sem().Get(var)->Type();
         type::Type* inner_ty = nullptr;
         if (auto* old_ac = ty->As<type::AccessControl>()) {
           inner_ty = ctx.Clone(old_ac->type());

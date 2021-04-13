@@ -21,6 +21,7 @@
 #include "gmock/gmock.h"
 
 namespace tint {
+namespace resolver {
 namespace {
 
 class ResolverTypeValidationTest : public resolver::TestHelper,
@@ -463,5 +464,51 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+namespace GetCanonicalTests {
+struct Params {
+  create_type_func_ptr create_type;
+  create_type_func_ptr create_canonical_type;
+};
+
+static constexpr Params cases[] = {
+    Params{ty_bool_, ty_bool_},
+    Params{ty_alias<ty_bool_>, ty_bool_},
+    Params{ty_alias<ty_alias<ty_bool_>>, ty_bool_},
+
+    Params{ty_vec3<ty_f32>, ty_vec3<ty_f32>},
+    Params{ty_alias<ty_vec3<ty_f32>>, ty_vec3<ty_f32>},
+    Params{ty_alias<ty_alias<ty_vec3<ty_f32>>>, ty_vec3<ty_f32>},
+
+    Params{ty_vec3<ty_alias<ty_f32>>, ty_vec3<ty_f32>},
+    Params{ty_alias<ty_vec3<ty_alias<ty_f32>>>, ty_vec3<ty_f32>},
+    Params{ty_alias<ty_alias<ty_vec3<ty_alias<ty_f32>>>>, ty_vec3<ty_f32>},
+    Params{ty_alias<ty_alias<ty_vec3<ty_alias<ty_alias<ty_f32>>>>>,
+           ty_vec3<ty_f32>},
+
+    Params{ty_mat3x3<ty_alias<ty_f32>>, ty_mat3x3<ty_f32>},
+    Params{ty_alias<ty_mat3x3<ty_alias<ty_f32>>>, ty_mat3x3<ty_f32>},
+    Params{ty_alias<ty_alias<ty_mat3x3<ty_alias<ty_f32>>>>, ty_mat3x3<ty_f32>},
+    Params{ty_alias<ty_alias<ty_mat3x3<ty_alias<ty_alias<ty_f32>>>>>,
+           ty_mat3x3<ty_f32>},
+};
+
+using CanonicalTest = ResolverTestWithParam<Params>;
+TEST_P(CanonicalTest, All) {
+  auto& params = GetParam();
+
+  auto* type = params.create_type(ty);
+  auto* expected_canonical_type = params.create_canonical_type(ty);
+
+  auto* canonical_type = r()->Canonical(type);
+
+  EXPECT_EQ(canonical_type, expected_canonical_type);
+}
+INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
+                         CanonicalTest,
+                         testing::ValuesIn(cases));
+
+}  // namespace GetCanonicalTests
+
 }  // namespace
+}  // namespace resolver
 }  // namespace tint

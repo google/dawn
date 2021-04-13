@@ -86,11 +86,17 @@ class Resolver {
   /// structure member or array element of type `lhs`
   static bool IsValidAssignment(type::Type* lhs, type::Type* rhs);
 
+  /// @param type the input type
+  /// @returns the canonical type for `type`; that is, a type with all aliases
+  /// removed. For example, `Canonical(alias<alias<vec3<alias<f32>>>>)` is
+  /// `vec3<f32>`.
+  type::Type* Canonical(type::Type* type);
+
  private:
   /// Structure holding semantic information about a variable.
   /// Used to build the semantic::Variable nodes at the end of resolving.
   struct VariableInfo {
-    explicit VariableInfo(ast::Variable* decl);
+    VariableInfo(ast::Variable* decl, type::Type* type);
     ~VariableInfo();
 
     ast::Variable* const declaration;
@@ -306,6 +312,7 @@ class Resolver {
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
   std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;
   std::unordered_map<type::Struct*, StructInfo*> struct_info_;
+  std::unordered_map<type::Type*, type::Type*> type_to_canonical_;
   FunctionInfo* current_function_ = nullptr;
   semantic::Statement* current_statement_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;

@@ -119,9 +119,18 @@ inline type::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.f32();
 }
 
+using create_type_func_ptr =
+    type::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
+
 template <typename T>
 type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.vec3<T>();
+}
+
+template <create_type_func_ptr create_type>
+type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
+  auto* type = create_type(ty);
+  return ty.vec3(type);
 }
 
 template <typename T>
@@ -129,8 +138,11 @@ type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat3x3<T>();
 }
 
-using create_type_func_ptr =
-    type::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
+template <create_type_func_ptr create_type>
+type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
+  auto* type = create_type(ty);
+  return ty.mat3x3(type);
+}
 
 template <create_type_func_ptr create_type>
 type::Type* ty_alias(const ProgramBuilder::TypesBuilder& ty) {

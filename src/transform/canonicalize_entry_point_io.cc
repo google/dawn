@@ -72,11 +72,11 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
       for (auto* param : func->params()) {
         auto param_name = ctx.Clone(param->symbol());
         auto* param_ty = ctx.src->Sem().Get(param)->Type();
+        auto* param_declared_ty = ctx.src->Sem().Get(param)->DeclaredType();
 
         ast::Expression* func_const_initializer = nullptr;
 
-        if (auto* struct_ty =
-                param_ty->UnwrapAliasIfNeeded()->As<type::Struct>()) {
+        if (auto* struct_ty = param_ty->As<type::Struct>()) {
           // Pull out all struct members and build initializer list.
           ast::ExpressionList init_values;
           for (auto* member : struct_ty->impl()->members()) {
@@ -97,7 +97,7 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
           }
 
           func_const_initializer =
-              ctx.dst->Construct(ctx.Clone(param_ty), init_values);
+              ctx.dst->Construct(ctx.Clone(param_declared_ty), init_values);
         } else {
           ast::DecorationList new_decorations = RemoveDecorations(
               &ctx, param->decorations(), [](const ast::Decoration* deco) {
@@ -105,7 +105,7 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
                                       ast::LocationDecoration>();
               });
           new_struct_members.push_back(ctx.dst->Member(
-              param_name, ctx.Clone(param_ty), new_decorations));
+              param_name, ctx.Clone(param_declared_ty), new_decorations));
           func_const_initializer =
               ctx.dst->MemberAccessor(new_struct_param_symbol, param_name);
         }
@@ -117,8 +117,8 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
 
         // Create a function-scope const to replace the parameter.
         // Initialize it with the value extracted from the new struct parameter.
-        auto* func_const = ctx.dst->Const(param_name, ctx.Clone(param_ty),
-                                          func_const_initializer);
+        auto* func_const = ctx.dst->Const(
+            param_name, ctx.Clone(param_declared_ty), func_const_initializer);
         ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
                          ctx.dst->WrapInStatement(func_const));
 

@@ -52,8 +52,11 @@ class Variable : public Castable<Variable, Node> {
   /// @returns the AST declaration node
   const ast::Variable* Declaration() const { return declaration_; }
 
-  /// @returns the type for the variable
+  /// @returns the canonical type for the variable
   type::Type* Type() const { return type_; }
+
+  /// @returns the AST node's type. May be nullptr.
+  type::Type* DeclaredType() const;
 
   /// @returns the storage class for the variable
   ast::StorageClass StorageClass() const { return storage_class_; }

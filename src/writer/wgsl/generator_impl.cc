@@ -325,7 +325,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 
     out_ << program_->Symbols().NameFor(v->symbol()) << " : ";
 
-    if (!EmitType(program_->Sem().Get(v)->Type())) {
+    if (!EmitType(program_->Sem().Get(v)->DeclaredType())) {
       return false;
     }
   }
@@ -599,7 +599,7 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
   }
 
   out_ << " " << program_->Symbols().NameFor(var->symbol()) << " : ";
-  if (!EmitType(sem->Type())) {
+  if (!EmitType(sem->DeclaredType())) {
     return false;
   }
 

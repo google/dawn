@@ -141,7 +141,8 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
 
     for (auto* param : func->params()) {
       Symbol new_var = HoistToInputVariables(
-          ctx, func, ctx.src->Sem().Get(param)->Type(), param->decorations());
+          ctx, func, ctx.src->Sem().Get(param)->Type(),
+          ctx.src->Sem().Get(param)->DeclaredType(), param->decorations());
 
       // Replace all uses of the function parameter with the new variable.
       for (auto* user : ctx.src->Sem().Get(param)->Users()) {
@@ -153,9 +154,9 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
     if (!func->return_type()->Is<type::Void>()) {
       ast::StatementList stores;
       auto store_value_symbol = ctx.dst->Symbols().New();
-      HoistToOutputVariables(ctx, func, func->return_type(),
-                             func->return_type_decorations(), {},
-                             store_value_symbol, stores);
+      HoistToOutputVariables(
+          ctx, func, func->return_type(), func->return_type(),
+          func->return_type_decorations(), {}, store_value_symbol, stores);
 
       // Create a function that writes a return value to all output variables.
       auto* store_value =
@@ -251,8 +252,9 @@ Symbol Spirv::HoistToInputVariables(
     CloneContext& ctx,
     const ast::Function* func,
     type::Type* ty,
+    type::Type* declared_ty,
     const ast::DecorationList& decorations) const {
-  if (!ty->UnwrapAliasIfNeeded()->Is<type::Struct>()) {
+  if (!ty->Is<type::Struct>()) {
     // Base case: create a global variable and return.
     ast::DecorationList new_decorations =
         RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
@@ -261,7 +263,7 @@ Symbol Spirv::HoistToInputVariables(
         });
     auto global_var_symbol = ctx.dst->Symbols().New();
     auto* global_var =
-        ctx.dst->Var(global_var_symbol, ctx.Clone(ty),
+        ctx.dst->Var(global_var_symbol, ctx.Clone(declared_ty),
                      ast::StorageClass::kInput, nullptr, new_decorations);
     ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, global_var);
     return global_var_symbol;
@@ -269,10 +271,10 @@ Symbol Spirv::HoistToInputVariables(
 
   // Recurse into struct members and build the initializer list.
   ast::ExpressionList init_values;
-  auto* struct_ty = ty->UnwrapAliasIfNeeded()->As<type::Struct>();
+  auto* struct_ty = ty->As<type::Struct>();
   for (auto* member : struct_ty->impl()->members()) {
-    auto member_var =
-        HoistToInputVariables(ctx, func, member->type(), member->decorations());
+    auto member_var = HoistToInputVariables(
+        ctx, func, member->type(), member->type(), member->decorations());
     init_values.push_back(ctx.dst->Expr(member_var));
   }
 
@@ -283,8 +285,9 @@ Symbol Spirv::HoistToInputVariables(
   }
 
   // Create a function-scope variable for the struct.
-  auto* initializer = ctx.dst->Construct(ctx.Clone(ty), init_values);
-  auto* func_var = ctx.dst->Const(func_var_symbol, ctx.Clone(ty), initializer);
+  auto* initializer = ctx.dst->Construct(ctx.Clone(declared_ty), init_values);
+  auto* func_var =
+      ctx.dst->Const(func_var_symbol, ctx.Clone(declared_ty), initializer);
   ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
                    ctx.dst->WrapInStatement(func_var));
   return func_var_symbol;
@@ -293,12 +296,13 @@ Symbol Spirv::HoistToInputVariables(
 void Spirv::HoistToOutputVariables(CloneContext& ctx,
                                    const ast::Function* func,
                                    type::Type* ty,
+                                   type::Type* declared_ty,
                                    const ast::DecorationList& decorations,
                                    std::vector<Symbol> member_accesses,
                                    Symbol store_value,
                                    ast::StatementList& stores) const {
   // Base case.
-  if (!ty->UnwrapAliasIfNeeded()->Is<type::Struct>()) {
+  if (!ty->Is<type::Struct>()) {
     // Create a global variable.
     ast::DecorationList new_decorations =
         RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
@@ -307,7 +311,7 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
         });
     auto global_var_symbol = ctx.dst->Symbols().New();
     auto* global_var =
-        ctx.dst->Var(global_var_symbol, ctx.Clone(ty),
+        ctx.dst->Var(global_var_symbol, ctx.Clone(declared_ty),
                      ast::StorageClass::kOutput, nullptr, new_decorations);
     ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, global_var);
 
@@ -322,11 +326,12 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
   }
 
   // Recurse into struct members.
-  auto* struct_ty = ty->UnwrapAliasIfNeeded()->As<type::Struct>();
+  auto* struct_ty = ty->As<type::Struct>();
   for (auto* member : struct_ty->impl()->members()) {
     member_accesses.push_back(ctx.Clone(member->symbol()));
-    HoistToOutputVariables(ctx, func, member->type(), member->decorations(),
-                           member_accesses, store_value, stores);
+    HoistToOutputVariables(ctx, func, member->type(), member->type(),
+                           member->decorations(), member_accesses, store_value,
+                           stores);
     member_accesses.pop_back();
   }
 }

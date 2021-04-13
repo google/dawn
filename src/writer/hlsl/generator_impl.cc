@@ -1894,7 +1894,7 @@ bool GeneratorImpl::EmitEntryPointData(
     for (auto* var : func_sem->ReferencedModuleVariables()) {
       auto* decl = var->Declaration();
 
-      auto* unwrapped_type = var->Type()->UnwrapAll();
+      auto* unwrapped_type = var->DeclaredType()->UnwrapAll();
       if (!emitted_globals.emplace(decl->symbol()).second) {
         continue;  // Global already emitted
       }
@@ -1905,7 +1905,7 @@ bool GeneratorImpl::EmitEntryPointData(
         continue;  // Not interested in this type
       }
 
-      if (!EmitType(out, var->Type(), var->StorageClass(), "")) {
+      if (!EmitType(out, var->DeclaredType(), var->StorageClass(), "")) {
         return false;
       }
       out << " " << builder_.Symbols().NameFor(decl->symbol());
@@ -1915,9 +1915,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (unwrapped_type->Is<type::Texture>()) {
         register_space = "t";
         if (unwrapped_type->Is<type::StorageTexture>()) {
-          if (auto* ac = var->Type()
-                             ->UnwrapAliasIfNeeded()
-                             ->As<type::AccessControl>()) {
+          if (auto* ac = var->Type()->As<type::AccessControl>()) {
             if (!ac->IsReadOnly()) {
               register_space = "u";
             }

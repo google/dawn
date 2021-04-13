@@ -357,6 +357,23 @@ TEST_F(IntrinsicTableTest, MatchWithAliasUnwrapping) {
   EXPECT_THAT(result.intrinsic->Parameters(), ElementsAre(Parameter{ty.f32()}));
 }
 
+TEST_F(IntrinsicTableTest, MatchWithNestedAliasUnwrapping) {
+  auto* alias_a = ty.alias("alias_a", ty.bool_());
+  auto* alias_b = ty.alias("alias_b", alias_a);
+  auto* alias_c = ty.alias("alias_c", alias_b);
+  auto* vec4_of_c = ty.vec4(alias_c);
+  auto* alias_d = ty.alias("alias_d", vec4_of_c);
+  auto* alias_e = ty.alias("alias_e", alias_d);
+
+  auto result = table->Lookup(*this, IntrinsicType::kAll, {alias_e}, Source{});
+  ASSERT_NE(result.intrinsic, nullptr);
+  ASSERT_EQ(result.diagnostics.str(), "");
+  EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kAll);
+  EXPECT_THAT(result.intrinsic->ReturnType(), ty.bool_());
+  EXPECT_THAT(result.intrinsic->Parameters(),
+              ElementsAre(Parameter{ty.vec4<bool>()}));
+}
+
 TEST_F(IntrinsicTableTest, MatchOpenType) {
   auto result = table->Lookup(*this, IntrinsicType::kClamp,
                               {ty.f32(), ty.f32(), ty.f32()}, Source{});

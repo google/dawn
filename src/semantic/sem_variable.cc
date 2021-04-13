@@ -15,6 +15,7 @@
 #include "src/semantic/variable.h"
 
 #include "src/ast/identifier_expression.h"
+#include "src/ast/variable.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::semantic::Variable);
 TINT_INSTANTIATE_TYPEINFO(tint::semantic::VariableUser);
@@ -28,6 +29,10 @@ Variable::Variable(const ast::Variable* declaration,
     : declaration_(declaration), type_(type), storage_class_(storage_class) {}
 
 Variable::~Variable() = default;
+
+type::Type* Variable::DeclaredType() const {
+  return declaration_->declared_type();
+}
 
 VariableUser::VariableUser(ast::IdentifierExpression* declaration,
                            type::Type* type,

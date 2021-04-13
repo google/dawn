@@ -338,76 +338,148 @@ class ProgramBuilder {
     /// @returns a void type
     type::Void* void_() const { return builder->create<type::Void>(); }
 
+    /// @param type vector subtype
+    /// @return the tint AST type for a 2-element vector of `type`.
+    type::Vector* vec2(type::Type* type) const {
+      return builder->create<type::Vector>(type, 2u);
+    }
+
+    /// @param type vector subtype
+    /// @return the tint AST type for a 3-element vector of `type`.
+    type::Vector* vec3(type::Type* type) const {
+      return builder->create<type::Vector>(type, 3u);
+    }
+
+    /// @param type vector subtype
+    /// @return the tint AST type for a 4-element vector of `type`.
+    type::Type* vec4(type::Type* type) const {
+      return builder->create<type::Vector>(type, 4u);
+    }
+
     /// @return the tint AST type for a 2-element vector of the C type `T`.
     template <typename T>
     type::Vector* vec2() const {
-      return builder->create<type::Vector>(Of<T>(), 2);
+      return vec2(Of<T>());
     }
 
     /// @return the tint AST type for a 3-element vector of the C type `T`.
     template <typename T>
     type::Vector* vec3() const {
-      return builder->create<type::Vector>(Of<T>(), 3);
+      return vec3(Of<T>());
     }
 
     /// @return the tint AST type for a 4-element vector of the C type `T`.
     template <typename T>
     type::Type* vec4() const {
-      return builder->create<type::Vector>(Of<T>(), 4);
+      return vec4(Of<T>());
+    }
+
+    /// @param type matrix subtype
+    /// @return the tint AST type for a 2x3 matrix of `type`.
+    type::Matrix* mat2x2(type::Type* type) const {
+      return builder->create<type::Matrix>(type, 2u, 2u);
+    }
+
+    /// @param type matrix subtype
+    /// @return the tint AST type for a 2x3 matrix of `type`.
+    type::Matrix* mat2x3(type::Type* type) const {
+      return builder->create<type::Matrix>(type, 3u, 2u);
+    }
+
+    /// @param type matrix subtype
+    /// @return the tint AST type for a 2x4 matrix of `type`.
+    type::Matrix* mat2x4(type::Type* type) const {
+      return builder->create<type::Matrix>(type, 4u, 2u);
+    }
+
+    /// @param type matrix subtype
+    /// @return the tint AST type for a 3x2 matrix of `type`.
+    type::Matrix* mat3x2(type::Type* type) const {
+      return builder->create<type::Matrix>(type, 2u, 3u);
+    }
+
+    /// @param type matrix subtype
+    /// @return the tint AST type for a 3x3 matrix of `type`.
+    type::Matrix* mat3x3(type::Type* type) const {
+      return builder->create<type::Matrix>(type, 3u, 3u);
+    }
+
+    /// @param type matrix subtype
+    /// @return the tint AST type for a 3x4 matrix of `type`.
+    type::Matrix* mat3x4(type::Type* type) const {
+      return builder->create<type::Matrix>(type, 4u, 3u);
+    }
+
+    /// @param type matrix subtype
+    /// @return the tint AST type for a 4x2 matrix of `type`.
+    type::Matrix* mat4x2(type::Type* type) const {
+      return builder->create<type::Matrix>(type, 2u, 4u);
+    }
+
+    /// @param type matrix subtype
+    /// @return the tint AST type for a 4x3 matrix of `type`.
+    type::Matrix* mat4x3(type::Type* type) const {
+      return builder->create<type::Matrix>(type, 3u, 4u);
+    }
+
+    /// @param type matrix subtype
+    /// @return the tint AST type for a 4x4 matrix of `type`.
+    type::Matrix* mat4x4(type::Type* type) const {
+      return builder->create<type::Matrix>(type, 4u, 4u);
     }
 
     /// @return the tint AST type for a 2x3 matrix of the C type `T`.
     template <typename T>
     type::Matrix* mat2x2() const {
-      return builder->create<type::Matrix>(Of<T>(), 2, 2);
+      return mat2x2(Of<T>());
     }
 
     /// @return the tint AST type for a 2x3 matrix of the C type `T`.
     template <typename T>
     type::Matrix* mat2x3() const {
-      return builder->create<type::Matrix>(Of<T>(), 3, 2);
+      return mat2x3(Of<T>());
     }
 
     /// @return the tint AST type for a 2x4 matrix of the C type `T`.
     template <typename T>
     type::Matrix* mat2x4() const {
-      return builder->create<type::Matrix>(Of<T>(), 4, 2);
+      return mat2x4(Of<T>());
     }
 
     /// @return the tint AST type for a 3x2 matrix of the C type `T`.
     template <typename T>
     type::Matrix* mat3x2() const {
-      return builder->create<type::Matrix>(Of<T>(), 2, 3);
+      return mat3x2(Of<T>());
     }
 
     /// @return the tint AST type for a 3x3 matrix of the C type `T`.
     template <typename T>
     type::Matrix* mat3x3() const {
-      return builder->create<type::Matrix>(Of<T>(), 3, 3);
+      return mat3x3(Of<T>());
     }
 
     /// @return the tint AST type for a 3x4 matrix of the C type `T`.
     template <typename T>
     type::Matrix* mat3x4() const {
-      return builder->create<type::Matrix>(Of<T>(), 4, 3);
+      return mat3x4(Of<T>());
     }
 
     /// @return the tint AST type for a 4x2 matrix of the C type `T`.
     template <typename T>
     type::Matrix* mat4x2() const {
-      return builder->create<type::Matrix>(Of<T>(), 2, 4);
+      return mat4x2(Of<T>());
     }
 
     /// @return the tint AST type for a 4x3 matrix of the C type `T`.
     template <typename T>
     type::Matrix* mat4x3() const {
-      return builder->create<type::Matrix>(Of<T>(), 3, 4);
+      return mat4x3(Of<T>());
     }
 
     /// @return the tint AST type for a 4x4 matrix of the C type `T`.
     template <typename T>
     type::Matrix* mat4x4() const {
-      return builder->create<type::Matrix>(Of<T>(), 4, 4);
+      return mat4x4(Of<T>());
     }
 
     /// @param subtype the array element type
