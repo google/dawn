@@ -23,6 +23,11 @@
 namespace dawn_native { namespace vulkan {
 
     class Device;
+    class PipelineLayout;
+
+    using TransformedShaderModuleCache = std::unordered_map<PipelineLayoutEntryPointPair,
+                                                            VkShaderModule,
+                                                            PipelineLayoutEntryPointPairHashFunc>;
 
     class ShaderModule final : public ShaderModuleBase {
       public:
@@ -32,12 +37,19 @@ namespace dawn_native { namespace vulkan {
 
         VkShaderModule GetHandle() const;
 
+        // This is only called when UseTintGenerator is on
+        ResultOrError<VkShaderModule> GetTransformedModuleHandle(const char* entryPointName,
+                                                                 PipelineLayout* layout);
+
       private:
         ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
         ~ShaderModule() override;
         MaybeError Initialize(ShaderModuleParseResult* parseResult);
 
         VkShaderModule mHandle = VK_NULL_HANDLE;
+
+        // New handles created by GetTransformedModuleHandle at pipeline creation time
+        TransformedShaderModuleCache mTransformedShaderModuleCache;
     };
 
 }}  // namespace dawn_native::vulkan

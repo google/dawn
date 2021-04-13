@@ -332,12 +332,27 @@ namespace dawn_native { namespace vulkan {
 
         VkPipelineShaderStageCreateInfo shaderStages[2];
         {
+            if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
+                // Generate a new VkShaderModule with BindingRemapper tint transform for each
+                // pipeline
+                DAWN_TRY_ASSIGN(shaderStages[0].module,
+                                ToBackend(descriptor->vertex.module)
+                                    ->GetTransformedModuleHandle(descriptor->vertex.entryPoint,
+                                                                 ToBackend(GetLayout())));
+                DAWN_TRY_ASSIGN(shaderStages[1].module,
+                                ToBackend(descriptor->fragment->module)
+                                    ->GetTransformedModuleHandle(descriptor->fragment->entryPoint,
+                                                                 ToBackend(GetLayout())));
+            } else {
+                shaderStages[0].module = ToBackend(descriptor->vertex.module)->GetHandle();
+                shaderStages[1].module = ToBackend(descriptor->fragment->module)->GetHandle();
+            }
+
             shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
             shaderStages[0].pNext = nullptr;
             shaderStages[0].flags = 0;
             shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
             shaderStages[0].pSpecializationInfo = nullptr;
-            shaderStages[0].module = ToBackend(descriptor->vertex.module)->GetHandle();
             shaderStages[0].pName = descriptor->vertex.entryPoint;
 
             shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -345,7 +360,6 @@ namespace dawn_native { namespace vulkan {
             shaderStages[1].flags = 0;
             shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
             shaderStages[1].pSpecializationInfo = nullptr;
-            shaderStages[1].module = ToBackend(descriptor->fragment->module)->GetHandle();
             shaderStages[1].pName = descriptor->fragment->entryPoint;
         }
 

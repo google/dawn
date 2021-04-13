@@ -51,6 +51,11 @@ namespace dawn_native {
 
     struct EntryPointMetadata;
 
+    using PipelineLayoutEntryPointPair = std::pair<PipelineLayoutBase*, std::string>;
+    struct PipelineLayoutEntryPointPairHashFunc {
+        size_t operator()(const PipelineLayoutEntryPointPair& pair) const;
+    };
+
     // A map from name to EntryPointMetadata.
     using EntryPointMetadataTable =
         std::unordered_map<std::string, std::unique_ptr<EntryPointMetadata>>;

@@ -43,6 +43,10 @@ namespace dawn_native { namespace vulkan {
     // the pools are reused when no longer used. Minimizing the number of descriptor pool allocation
     // is important because creating them can incur GPU memory allocation which is usually an
     // expensive syscall.
+    //
+    // The Vulkan BindGroupLayout is dependent on UseTintGenerator or not.
+    // When UseTintGenerator is on, VkDescriptorSetLayoutBinding::binding is set to BindingIndex,
+    // otherwise it is set to BindingNumber.
     class BindGroupLayout final : public BindGroupLayoutBase {
       public:
         static ResultOrError<Ref<BindGroupLayout>> Create(

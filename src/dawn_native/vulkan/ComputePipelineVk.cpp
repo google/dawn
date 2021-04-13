@@ -45,7 +45,15 @@ namespace dawn_native { namespace vulkan {
         createInfo.stage.pNext = nullptr;
         createInfo.stage.flags = 0;
         createInfo.stage.stage = VK_SHADER_STAGE_COMPUTE_BIT;
-        createInfo.stage.module = ToBackend(descriptor->computeStage.module)->GetHandle();
+        if (GetDevice()->IsToggleEnabled(Toggle::UseTintGenerator)) {
+            // Generate a new VkShaderModule with BindingRemapper tint transform for each pipeline
+            DAWN_TRY_ASSIGN(createInfo.stage.module,
+                            ToBackend(descriptor->computeStage.module)
+                                ->GetTransformedModuleHandle(descriptor->computeStage.entryPoint,
+                                                             ToBackend(GetLayout())));
+        } else {
+            createInfo.stage.module = ToBackend(descriptor->computeStage.module)->GetHandle();
+        }
         createInfo.stage.pName = descriptor->computeStage.entryPoint;
         createInfo.stage.pSpecializationInfo = nullptr;
 

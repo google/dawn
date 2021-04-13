@@ -261,7 +261,7 @@ namespace dawn_native { namespace d3d12 {
         tint::transform::Transform::Output output =
             transformManager.Run(GetTintProgram(), transformInputs);
 
-        tint::Program& program = output.program;
+        const tint::Program& program = output.program;
         if (!program.IsValid()) {
             errorStream << "Tint program transform error: " << program.Diagnostics().str()
                         << std::endl;
