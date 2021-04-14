@@ -197,7 +197,7 @@ TEST_F(CanonicalizeEntryPointIOTest, Return_Struct) {
   auto* src = R"(
 struct FragOutput {
   [[builtin(frag_depth)]] depth : f32;
-  [[builtin(sample_mask_out)]] mask : u32;
+  [[builtin(sample_mask)]] mask : u32;
   [[location(0)]] color : vec4<f32>;
 };
 
@@ -221,7 +221,7 @@ struct FragOutput {
 struct tint_symbol {
   [[builtin(frag_depth)]]
   depth : f32;
-  [[builtin(sample_mask_out)]]
+  [[builtin(sample_mask)]]
   mask : u32;
   [[location(0)]]
   color : vec4<f32>;

@@ -1304,7 +1304,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
         default:
           break;
       }
-      auto ast_builtin = enum_converter_.ToBuiltin(spv_builtin, sc);
+      auto ast_builtin = enum_converter_.ToBuiltin(spv_builtin);
       if (ast_builtin == ast::Builtin::kNone) {
         return nullptr;
       }

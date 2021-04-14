@@ -122,6 +122,7 @@ INSTANTIATE_TEST_SUITE_P(
                     ast::Builtin::kLocalInvocationIndex},
         BuiltinData{"global_invocation_id", ast::Builtin::kGlobalInvocationId},
         BuiltinData{"sample_index", ast::Builtin::kSampleIndex},
+        BuiltinData{"sample_mask", ast::Builtin::kSampleMask},
         BuiltinData{"sample_mask_in", ast::Builtin::kSampleMaskIn},
         BuiltinData{"sample_mask_out", ast::Builtin::kSampleMaskOut}));
 
@@ -324,6 +325,50 @@ TEST_F(ParserImplTest, Decoration_FragCoord_Deprecated) {
       R"(test.wgsl:1:9 warning: use of deprecated language feature: use 'position' instead of 'frag_coord'
 builtin(frag_coord)
         ^^^^^^^^^^
+)");
+}
+
+TEST_F(ParserImplTest, Decoration_SampleMaskIn_Deprecated) {
+  auto p = parser("builtin(sample_mask_in)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto* var_deco = deco.value->As<ast::Decoration>();
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(var_deco->Is<ast::BuiltinDecoration>());
+
+  auto* builtin = var_deco->As<ast::BuiltinDecoration>();
+  EXPECT_EQ(builtin->value(), ast::Builtin::kSampleMaskIn);
+
+  EXPECT_EQ(
+      p->builder().Diagnostics().str(),
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: use 'sample_mask' instead of 'sample_mask_in'
+builtin(sample_mask_in)
+        ^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(ParserImplTest, Decoration_SampleMaskOut_Deprecated) {
+  auto p = parser("builtin(sample_mask_out)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto* var_deco = deco.value->As<ast::Decoration>();
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(var_deco->Is<ast::BuiltinDecoration>());
+
+  auto* builtin = var_deco->As<ast::BuiltinDecoration>();
+  EXPECT_EQ(builtin->value(), ast::Builtin::kSampleMaskOut);
+
+  EXPECT_EQ(
+      p->builder().Diagnostics().str(),
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: use 'sample_mask' instead of 'sample_mask_out'
+builtin(sample_mask_out)
+        ^^^^^^^^^^^^^^^
 )");
 }
 

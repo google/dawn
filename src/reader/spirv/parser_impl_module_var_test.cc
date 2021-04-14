@@ -2473,7 +2473,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_Direct) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_in}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     in
@@ -2515,7 +2515,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_CopyObject) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_in}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     in
@@ -2557,7 +2557,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_U32_AccessChain) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_in}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     in
@@ -2598,7 +2598,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_Direct) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_in}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     in
@@ -2643,7 +2643,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_CopyObject) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_in}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     in
@@ -2688,7 +2688,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_In_I32_AccessChain) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_in}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     in
@@ -2751,7 +2751,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_Direct) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_out}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     out
@@ -2787,7 +2787,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_CopyObject) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_out}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     out
@@ -2823,7 +2823,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_U32_AccessChain) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_out}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     out
@@ -2858,7 +2858,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_Direct) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_out}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     out
@@ -2900,7 +2900,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_CopyObject) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_out}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     out
@@ -2942,7 +2942,7 @@ TEST_F(SpvModuleScopeVarParserTest, SampleMask_Out_I32_AccessChain) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   Variable{
     Decorations{
-      BuiltinDecoration{sample_mask_out}
+      BuiltinDecoration{sample_mask}
     }
     x_1
     out

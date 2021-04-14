@@ -59,11 +59,11 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   // ```
   // struct FragmentInput {
   //   [[builtin(sample_index)]] sample_index : u32;
-  //   [[builtin(sample_mask_in)]] sample_mask_in : u32;
+  //   [[builtin(sample_mask)]] sample_mask : u32;
   // };
   // struct FragmentOutput {
   //   [[builtin(frag_depth)]] depth: f32;
-  //   [[builtin(sample_mask_out)]] mask_out : u32;
+  //   [[builtin(sample_mask)]] mask_out : u32;
   // };
   //
   // [[stage(fragment)]]
@@ -72,7 +72,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   //   samples : FragmentInput
   // ) -> FragmentOutput {
   //   var output : FragmentOutput = FragmentOutput(1.0,
-  //                                                samples.sample_mask_in);
+  //                                                samples.sample_mask);
   //   return output;
   // }
   // ```
@@ -81,7 +81,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   // ```
   // struct FragmentInput {
   //   sample_index : u32;
-  //   sample_mask_in : u32;
+  //   sample_mask : u32;
   // };
   // struct FragmentOutput {
   //   depth: f32;
@@ -90,9 +90,9 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   //
   // [[builtin(position)]] var<in> coord : vec4<f32>,
   // [[builtin(sample_index)]] var<in> sample_index : u32,
-  // [[builtin(sample_mask_in)]] var<in> sample_mask_in : u32,
+  // [[builtin(sample_mask)]] var<in> sample_mask : u32,
   // [[builtin(frag_depth)]] var<out> depth: f32;
-  // [[builtin(sample_mask_out)]] var<out> mask_out : u32;
+  // [[builtin(sample_mask)]] var<out> mask_out : u32;
   //
   // fn frag_main_ret(retval : FragmentOutput) {
   //   depth = reval.depth;
@@ -101,9 +101,9 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   //
   // [[stage(fragment)]]
   // fn frag_main() {
-  //   let samples : FragmentInput(sample_index, sample_mask_in);
+  //   let samples : FragmentInput(sample_index, sample_mask);
   //   var output : FragmentOutput = FragmentOutput(1.0,
-  //                                                samples.sample_mask_in);
+  //                                                samples.sample_mask);
   //   frag_main_ret(output);
   //   return;
   // }
@@ -189,19 +189,19 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
 }
 
 void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
-  // Find global variables decorated with [[builtin(sample_mask_{in,out})]] and
+  // Find global variables decorated with [[builtin(sample_mask)]] and
   // change their type from `u32` to `array<u32, 1>`, as required by Vulkan.
   //
   // Before:
   // ```
-  // [[builtin(sample_mask_out)]] var<out> mask_out : u32;
+  // [[builtin(sample_mask)]] var<out> mask_out : u32;
   // fn main() {
   //   mask_out = 1u;
   // }
   // ```
   // After:
   // ```
-  // [[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
+  // [[builtin(sample_mask)]] var<out> mask_out : array<u32, 1>;
   // fn main() {
   //   mask_out[0] = 1u;
   // }
@@ -210,7 +210,8 @@ void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
   for (auto* var : ctx.src->AST().GlobalVariables()) {
     for (auto* deco : var->decorations()) {
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        if (builtin->value() != ast::Builtin::kSampleMaskIn &&
+        if (builtin->value() != ast::Builtin::kSampleMask &&
+            builtin->value() != ast::Builtin::kSampleMaskIn &&
             builtin->value() != ast::Builtin::kSampleMaskOut) {
           continue;
         }

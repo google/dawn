@@ -63,6 +63,10 @@ std::ostream& operator<<(std::ostream& out, Builtin builtin) {
       out << "sample_index";
       break;
     }
+    case Builtin::kSampleMask: {
+      out << "sample_mask";
+      break;
+    }
     case Builtin::kSampleMaskIn: {
       out << "sample_mask_in";
       break;

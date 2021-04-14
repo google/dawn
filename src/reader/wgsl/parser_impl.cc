@@ -88,6 +88,9 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "sample_index") {
     return ast::Builtin::kSampleIndex;
   }
+  if (str == "sample_mask") {
+    return ast::Builtin::kSampleMask;
+  }
   if (str == "sample_mask_in") {
     return ast::Builtin::kSampleMaskIn;
   }
@@ -1381,6 +1384,12 @@ Expect<ast::Builtin> ParserImpl::expect_builtin() {
 
   if (builtin == ast::Builtin::kFragCoord) {
     deprecated(ident.source, "use 'position' instead of 'frag_coord'");
+  }
+  if (builtin == ast::Builtin::kSampleMaskIn) {
+    deprecated(ident.source, "use 'sample_mask' instead of 'sample_mask_in'");
+  }
+  if (builtin == ast::Builtin::kSampleMaskOut) {
+    deprecated(ident.source, "use 'sample_mask' instead of 'sample_mask_out'");
   }
 
   return {builtin, ident.source};

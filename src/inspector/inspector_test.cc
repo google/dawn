@@ -1041,7 +1041,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
   auto* in_var1 = Param("in_var1", ty.u32(), {Location(0u)});
   Func("foo", {in_var0, in_var1}, ty.u32(), {Return(Expr("in_var1"))},
        {Stage(ast::PipelineStage::kFragment)},
-       {Builtin(ast::Builtin::kSampleMaskOut)});
+       {Builtin(ast::Builtin::kSampleMask)});
   Inspector& inspector = Build();
 
   auto result = inspector.GetEntryPoints();

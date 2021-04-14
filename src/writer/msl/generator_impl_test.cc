@@ -74,6 +74,7 @@ INSTANTIATE_TEST_SUITE_P(
                     MslBuiltinData{ast::Builtin::kGlobalInvocationId,
                                    "thread_position_in_grid"},
                     MslBuiltinData{ast::Builtin::kSampleIndex, "sample_id"},
+                    MslBuiltinData{ast::Builtin::kSampleMask, "sample_mask"},
                     MslBuiltinData{ast::Builtin::kSampleMaskIn, "sample_mask"},
                     MslBuiltinData{ast::Builtin::kSampleMaskOut,
                                    "sample_mask"}));

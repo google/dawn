@@ -1954,6 +1954,8 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "SV_DispatchThreadID";
     case ast::Builtin::kSampleIndex:
       return "SV_SampleIndex";
+    case ast::Builtin::kSampleMask:
+      return "SV_Coverage";
     case ast::Builtin::kSampleMaskIn:
       return "SV_Coverage";
     case ast::Builtin::kSampleMaskOut:

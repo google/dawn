@@ -370,6 +370,10 @@ INSTANTIATE_TEST_SUITE_P(
                     ast::StorageClass::kInput, SpvBuiltInGlobalInvocationId},
         BuiltinData{ast::Builtin::kSampleIndex, ast::StorageClass::kInput,
                     SpvBuiltInSampleId},
+        BuiltinData{ast::Builtin::kSampleMask, ast::StorageClass::kInput,
+                    SpvBuiltInSampleMask},
+        BuiltinData{ast::Builtin::kSampleMask, ast::StorageClass::kOutput,
+                    SpvBuiltInSampleMask},
         BuiltinData{ast::Builtin::kSampleMaskIn, ast::StorageClass::kInput,
                     SpvBuiltInSampleMask},
         BuiltinData{ast::Builtin::kSampleMaskOut, ast::StorageClass::kOutput,
@@ -622,16 +626,16 @@ TEST_F(BuilderTest, SampleIndex) {
 
 TEST_F(BuilderTest, SampleMask) {
   // Input:
-  // [[builtin(sample_mask_in)]] var<in> mask_in : u32;
-  // [[builtin(sample_mask_out)]] var<out> mask_out : u32;
+  // [[builtin(sample_mask)]] var<in> mask_in : u32;
+  // [[builtin(sample_mask)]] var<out> mask_out : u32;
   // [[stage(fragment)]]
   // fn main() {
   //   mask_out = mask_in;
   // }
 
   // After sanitization:
-  // [[builtin(sample_mask_in)]] var<in> mask_in : array<u32, 1>;
-  // [[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
+  // [[builtin(sample_mask)]] var<in> mask_in : array<u32, 1>;
+  // [[builtin(sample_mask)]] var<out> mask_out : array<u32, 1>;
   // [[stage(fragment)]]
   // fn main() {
   //   mask_out[0] = mask_in[0];
@@ -639,11 +643,11 @@ TEST_F(BuilderTest, SampleMask) {
 
   Global("mask_in", ty.u32(), ast::StorageClass::kInput, nullptr,
          ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kSampleMaskIn),
+             create<ast::BuiltinDecoration>(ast::Builtin::kSampleMask),
          });
   Global("mask_out", ty.u32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kSampleMaskOut),
+             create<ast::BuiltinDecoration>(ast::Builtin::kSampleMask),
          });
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{

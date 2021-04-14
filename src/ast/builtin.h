@@ -33,8 +33,9 @@ enum class Builtin {
   kLocalInvocationIndex,
   kGlobalInvocationId,
   kSampleIndex,
-  kSampleMaskIn,
-  kSampleMaskOut,
+  kSampleMask,
+  kSampleMaskIn,   // TODO(crbug.com/tint/715): Remove this
+  kSampleMaskOut,  // TODO(crbug.com/tint/715): Remove this
 
   // Below are not currently WGSL builtins, but are included in this enum as
   // they are used by certain backends.

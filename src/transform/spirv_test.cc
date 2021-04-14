@@ -487,9 +487,9 @@ TEST_F(SpirvTest, HandleSampleMaskBuiltins_Basic) {
   auto* src = R"(
 [[builtin(sample_index)]] var<in> sample_index : u32;
 
-[[builtin(sample_mask_in)]] var<in> mask_in : u32;
+[[builtin(sample_mask)]] var<in> mask_in : u32;
 
-[[builtin(sample_mask_out)]] var<out> mask_out : u32;
+[[builtin(sample_mask)]] var<out> mask_out : u32;
 
 [[stage(fragment)]]
 fn main() {
@@ -500,9 +500,9 @@ fn main() {
   auto* expect = R"(
 [[builtin(sample_index)]] var<in> sample_index : u32;
 
-[[builtin(sample_mask_in)]] var<in> mask_in : array<u32, 1>;
+[[builtin(sample_mask)]] var<in> mask_in : array<u32, 1>;
 
-[[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
+[[builtin(sample_mask)]] var<out> mask_out : array<u32, 1>;
 
 [[stage(fragment)]]
 fn main() {
@@ -517,9 +517,9 @@ fn main() {
 
 TEST_F(SpirvTest, HandleSampleMaskBuiltins_FunctionArg) {
   auto* src = R"(
-[[builtin(sample_mask_in)]] var<in> mask_in : u32;
+[[builtin(sample_mask)]] var<in> mask_in : u32;
 
-[[builtin(sample_mask_out)]] var<out> mask_out : u32;
+[[builtin(sample_mask)]] var<out> mask_out : u32;
 
 fn filter(mask: u32) -> u32 {
   return (mask & 3u);
@@ -536,9 +536,9 @@ fn main() {
 )";
 
   auto* expect = R"(
-[[builtin(sample_mask_in)]] var<in> mask_in : array<u32, 1>;
+[[builtin(sample_mask)]] var<in> mask_in : array<u32, 1>;
 
-[[builtin(sample_mask_out)]] var<out> mask_out : array<u32, 1>;
+[[builtin(sample_mask)]] var<out> mask_out : array<u32, 1>;
 
 fn filter(mask : u32) -> u32 {
   return (mask & 3u);
@@ -578,8 +578,8 @@ TEST_F(SpirvTest, MultipleTransforms) {
   auto* src = R"(
 [[stage(fragment)]]
 fn main([[builtin(sample_index)]] sample_index : u32,
-        [[builtin(sample_mask_in)]] mask_in : u32)
-        -> [[builtin(sample_mask_out)]] u32 {
+        [[builtin(sample_mask)]] mask_in : u32)
+        -> [[builtin(sample_mask)]] u32 {
   return mask_in;
 }
 )";
@@ -587,9 +587,9 @@ fn main([[builtin(sample_index)]] sample_index : u32,
   auto* expect = R"(
 [[builtin(sample_index)]] var<in> tint_symbol : u32;
 
-[[builtin(sample_mask_in)]] var<in> tint_symbol_1 : array<u32, 1>;
+[[builtin(sample_mask)]] var<in> tint_symbol_1 : array<u32, 1>;
 
-[[builtin(sample_mask_out)]] var<out> tint_symbol_3 : array<u32, 1>;
+[[builtin(sample_mask)]] var<out> tint_symbol_3 : array<u32, 1>;
 
 fn tint_symbol_4(tint_symbol_2 : u32) {
   tint_symbol_3[0] = tint_symbol_2;

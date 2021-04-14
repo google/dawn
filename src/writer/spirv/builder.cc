@@ -3308,6 +3308,8 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin,
     case ast::Builtin::kSampleIndex:
       push_capability(SpvCapabilitySampleRateShading);
       return SpvBuiltInSampleId;
+    case ast::Builtin::kSampleMask:
+      return SpvBuiltInSampleMask;
     case ast::Builtin::kSampleMaskIn:
       return SpvBuiltInSampleMask;
     case ast::Builtin::kSampleMaskOut:

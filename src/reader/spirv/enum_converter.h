@@ -50,9 +50,8 @@ class EnumConverter {
   /// Converts a SPIR-V Builtin value a Tint Builtin.
   /// On failure, logs an error and returns kNone
   /// @param b the SPIR-V builtin
-  /// @param sc the Tint storage class
   /// @returns a Tint AST builtin
-  ast::Builtin ToBuiltin(SpvBuiltIn b, ast::StorageClass sc);
+  ast::Builtin ToBuiltin(SpvBuiltIn b);
 
   /// Converts a possibly arrayed SPIR-V Dim to a Tint texture dimension.
   /// On failure, logs an error and returns kNone
