@@ -14,6 +14,7 @@
 
 #include "src/transform/canonicalize_entry_point_io.h"
 
+#include <algorithm>
 #include <utility>
 
 #include "src/program_builder.h"
@@ -26,6 +27,36 @@ namespace transform {
 
 CanonicalizeEntryPointIO::CanonicalizeEntryPointIO() = default;
 CanonicalizeEntryPointIO::~CanonicalizeEntryPointIO() = default;
+
+namespace {
+
+// Comparison function used to reorder struct members such that all members with
+// location attributes appear first (ordered by location slot), followed by
+// those with builtin attributes.
+bool StructMemberComparator(const ast::StructMember* a,
+                            const ast::StructMember* b) {
+  auto* a_loc = ast::GetDecoration<ast::LocationDecoration>(a->decorations());
+  auto* b_loc = ast::GetDecoration<ast::LocationDecoration>(b->decorations());
+  auto* a_blt = ast::GetDecoration<ast::BuiltinDecoration>(a->decorations());
+  auto* b_blt = ast::GetDecoration<ast::BuiltinDecoration>(b->decorations());
+  if (a_loc) {
+    if (!b_loc) {
+      // `a` has location attribute and `b` does not: `a` goes first.
+      return true;
+    }
+    // Both have location attributes: smallest goes first.
+    return a_loc->value() < b_loc->value();
+  } else {
+    if (b_loc) {
+      // `b` has location attribute and `a` does not: `b` goes first.
+      return false;
+    }
+    // Both are builtins: order doesn't matter, just use enum value.
+    return a_blt->value() < b_blt->value();
+  }
+}
+
+}  // namespace
 
 Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
                                                 const DataMap&) {
@@ -133,6 +164,10 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
         }
       }
 
+      // Sort struct members to satisfy HLSL interfacing matching rules.
+      std::sort(new_struct_members.begin(), new_struct_members.end(),
+                StructMemberComparator);
+
       // Create the new struct type.
       auto* in_struct = ctx.dst->create<type::Struct>(
           ctx.dst->Symbols().New(),
@@ -175,6 +210,10 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
                             ctx.Clone(func->return_type_decorations())));
       }
 
+      // Sort struct members to satisfy HLSL interfacing matching rules.
+      std::sort(new_struct_members.begin(), new_struct_members.end(),
+                StructMemberComparator);
+
       // Create the new struct type.
       auto* out_struct = ctx.dst->create<type::Struct>(
           ctx.dst->Symbols().New(),
@@ -190,7 +229,7 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
         // Reconstruct the return value using the newly created struct.
         auto* new_ret_value = ctx.Clone(ret->value());
         ast::ExpressionList ret_values;
-        if (auto* struct_ty = ret_type->As<type::Struct>()) {
+        if (ret_type->Is<type::Struct>()) {
           if (!ret->value()->Is<ast::IdentifierExpression>()) {
             // Create a const to hold the return value expression to avoid
             // re-evaluating it multiple times.
@@ -201,9 +240,9 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
             new_ret_value = ctx.dst->Expr(temp);
           }
 
-          for (auto* member : struct_ty->impl()->members()) {
-            ret_values.push_back(ctx.dst->MemberAccessor(
-                new_ret_value, ctx.Clone(member->symbol())));
+          for (auto* member : new_struct_members) {
+            ret_values.push_back(
+                ctx.dst->MemberAccessor(new_ret_value, member->symbol()));
           }
         } else {
           ret_values.push_back(new_ret_value);

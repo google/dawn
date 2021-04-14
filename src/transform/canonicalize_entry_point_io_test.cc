@@ -25,28 +25,28 @@ using CanonicalizeEntryPointIOTest = TransformTest;
 TEST_F(CanonicalizeEntryPointIOTest, Parameters) {
   auto* src = R"(
 [[stage(fragment)]]
-fn frag_main([[builtin(position)]] coord : vec4<f32>,
-             [[location(1)]] loc1 : f32,
-             [[location(2)]] loc2 : vec4<u32>) {
+fn frag_main([[location(1)]] loc1 : f32,
+             [[location(2)]] loc2 : vec4<u32>,
+             [[builtin(position)]] coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  [[builtin(position)]]
-  coord : vec4<f32>;
   [[location(1)]]
   loc1 : f32;
   [[location(2)]]
   loc2 : vec4<u32>;
+  [[builtin(position)]]
+  coord : vec4<f32>;
 };
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) {
-  let coord : vec4<f32> = tint_symbol.coord;
   let loc1 : f32 = tint_symbol.loc1;
   let loc2 : vec4<u32> = tint_symbol.loc2;
+  let coord : vec4<f32> = tint_symbol.coord;
   var col : f32 = (coord.x * loc1);
 }
 )";
@@ -89,20 +89,20 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_EmptyBody) {
   auto* src = R"(
 [[stage(fragment)]]
-fn frag_main([[builtin(position)]] coord : vec4<f32>,
-             [[location(1)]] loc1 : f32,
-             [[location(2)]] loc2 : vec4<u32>) {
+fn frag_main([[location(1)]] loc1 : f32,
+             [[location(2)]] loc2 : vec4<u32>,
+             [[builtin(position)]] coord : vec4<f32>) {
 }
 )";
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  [[builtin(position)]]
-  coord : vec4<f32>;
   [[location(1)]]
   loc1 : f32;
   [[location(2)]]
   loc2 : vec4<u32>;
+  [[builtin(position)]]
+  coord : vec4<f32>;
 };
 
 [[stage(fragment)]]
@@ -126,9 +126,9 @@ struct FragLocations {
 };
 
 [[stage(fragment)]]
-fn frag_main(builtins : FragBuiltins,
+fn frag_main([[location(0)]] loc0 : f32,
              locations : FragLocations,
-             [[location(0)]] loc0 : f32) {
+             builtins : FragBuiltins) {
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 )";
@@ -144,21 +144,21 @@ struct FragLocations {
 };
 
 struct tint_symbol_1 {
-  [[builtin(position)]]
-  coord : vec4<f32>;
+  [[location(0)]]
+  loc0 : f32;
   [[location(1)]]
   loc1 : f32;
   [[location(2)]]
   loc2 : vec4<u32>;
-  [[location(0)]]
-  loc0 : f32;
+  [[builtin(position)]]
+  coord : vec4<f32>;
 };
 
 [[stage(fragment)]]
 fn frag_main(tint_symbol : tint_symbol_1) {
-  let builtins : FragBuiltins = FragBuiltins(tint_symbol.coord);
-  let locations : FragLocations = FragLocations(tint_symbol.loc1, tint_symbol.loc2);
   let loc0 : f32 = tint_symbol.loc0;
+  let locations : FragLocations = FragLocations(tint_symbol.loc1, tint_symbol.loc2);
+  let builtins : FragBuiltins = FragBuiltins(tint_symbol.coord);
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
 }
 )";
@@ -196,9 +196,9 @@ fn frag_main() -> tint_symbol {
 TEST_F(CanonicalizeEntryPointIOTest, Return_Struct) {
   auto* src = R"(
 struct FragOutput {
+  [[location(0)]] color : vec4<f32>;
   [[builtin(frag_depth)]] depth : f32;
   [[builtin(sample_mask)]] mask : u32;
-  [[location(0)]] color : vec4<f32>;
 };
 
 [[stage(fragment)]]
@@ -213,18 +213,18 @@ fn frag_main() -> FragOutput {
 
   auto* expect = R"(
 struct FragOutput {
+  color : vec4<f32>;
   depth : f32;
   mask : u32;
-  color : vec4<f32>;
 };
 
 struct tint_symbol {
+  [[location(0)]]
+  color : vec4<f32>;
   [[builtin(frag_depth)]]
   depth : f32;
   [[builtin(sample_mask)]]
   mask : u32;
-  [[location(0)]]
-  color : vec4<f32>;
 };
 
 [[stage(fragment)]]
@@ -233,7 +233,7 @@ fn frag_main() -> tint_symbol {
   output.depth = 1.0;
   output.mask = 7u;
   output.color = vec4<f32>(0.5, 0.5, 0.5, 1.0);
-  return tint_symbol(output.depth, output.mask, output.color);
+  return tint_symbol(output.color, output.depth, output.mask);
 }
 )";
 
@@ -495,6 +495,94 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   let inputs : FragmentInput = FragmentInput(tint_symbol.value, tint_symbol.coord);
   let tint_symbol_3 : FragmentOutput = FragmentOutput((inputs.coord.x * inputs.value));
   return tint_symbol_2(tint_symbol_3.value);
+}
+)";
+
+  auto got = Run<CanonicalizeEntryPointIO>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(CanonicalizeEntryPointIOTest, SortedMembers) {
+  auto* src = R"(
+struct VertexOutput {
+  [[location(1)]] b : u32;
+  [[builtin(position)]] pos : vec4<f32>;
+  [[location(3)]] d : bool;
+  [[location(0)]] a : f32;
+  [[location(2)]] c : i32;
+};
+
+struct FragmentInputExtra {
+  [[location(3)]] d : bool;
+  [[builtin(position)]] pos : vec4<f32>;
+  [[location(0)]] a : f32;
+};
+
+[[stage(vertex)]]
+fn vert_main() -> VertexOutput {
+  return VertexOutput();
+}
+
+[[stage(fragment)]]
+fn frag_main([[builtin(front_facing)]] ff : bool,
+             [[location(2)]] c : i32,
+             inputs : FragmentInputExtra,
+             [[location(1)]] b : u32) {
+}
+)";
+
+  auto* expect = R"(
+struct VertexOutput {
+  b : u32;
+  pos : vec4<f32>;
+  d : bool;
+  a : f32;
+  c : i32;
+};
+
+struct FragmentInputExtra {
+  d : bool;
+  pos : vec4<f32>;
+  a : f32;
+};
+
+struct tint_symbol {
+  [[location(0)]]
+  a : f32;
+  [[location(1)]]
+  b : u32;
+  [[location(2)]]
+  c : i32;
+  [[location(3)]]
+  d : bool;
+  [[builtin(position)]]
+  pos : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vert_main() -> tint_symbol {
+  let tint_symbol_1 : VertexOutput = VertexOutput();
+  return tint_symbol(tint_symbol_1.a, tint_symbol_1.b, tint_symbol_1.c, tint_symbol_1.d, tint_symbol_1.pos);
+}
+
+struct tint_symbol_3 {
+  [[location(0)]]
+  a : f32;
+  [[location(1)]]
+  b : u32;
+  [[location(2)]]
+  c : i32;
+  [[location(3)]]
+  d : bool;
+  [[builtin(position)]]
+  pos : vec4<f32>;
+  [[builtin(front_facing)]]
+  ff : bool;
+};
+
+[[stage(fragment)]]
+fn frag_main(tint_symbol_2 : tint_symbol_3) {
 }
 )";
 
