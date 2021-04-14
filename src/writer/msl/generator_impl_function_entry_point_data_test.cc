@@ -234,7 +234,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   // Output builtins go in the output struct, input builtins will be passed
   // as input parameters to the entry point function.
 
-  // [[builtin frag_coord]] var<in> coord : vec4<f32>;
+  // [[builtin position]] var<in> coord : vec4<f32>;
   // [[builtin frag_depth]] var<out> depth : f32;
   //
   // struct main_out {
@@ -243,7 +243,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
 
   Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
          ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
+             create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
 
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{

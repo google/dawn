@@ -25,7 +25,7 @@ using CanonicalizeEntryPointIOTest = TransformTest;
 TEST_F(CanonicalizeEntryPointIOTest, Parameters) {
   auto* src = R"(
 [[stage(fragment)]]
-fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
+fn frag_main([[builtin(position)]] coord : vec4<f32>,
              [[location(1)]] loc1 : f32,
              [[location(2)]] loc2 : vec4<u32>) {
   var col : f32 = (coord.x * loc1);
@@ -34,7 +34,7 @@ fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  [[builtin(frag_coord)]]
+  [[builtin(position)]]
   coord : vec4<f32>;
   [[location(1)]]
   loc1 : f32;
@@ -89,7 +89,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 TEST_F(CanonicalizeEntryPointIOTest, Parameters_EmptyBody) {
   auto* src = R"(
 [[stage(fragment)]]
-fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
+fn frag_main([[builtin(position)]] coord : vec4<f32>,
              [[location(1)]] loc1 : f32,
              [[location(2)]] loc2 : vec4<u32>) {
 }
@@ -97,7 +97,7 @@ fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
 
   auto* expect = R"(
 struct tint_symbol_1 {
-  [[builtin(frag_coord)]]
+  [[builtin(position)]]
   coord : vec4<f32>;
   [[location(1)]]
   loc1 : f32;
@@ -118,7 +118,7 @@ fn frag_main(tint_symbol : tint_symbol_1) {
 TEST_F(CanonicalizeEntryPointIOTest, StructParameters) {
   auto* src = R"(
 struct FragBuiltins {
-  [[builtin(frag_coord)]] coord : vec4<f32>;
+  [[builtin(position)]] coord : vec4<f32>;
 };
 struct FragLocations {
   [[location(1)]] loc1 : f32;
@@ -144,7 +144,7 @@ struct FragLocations {
 };
 
 struct tint_symbol_1 {
-  [[builtin(frag_coord)]]
+  [[builtin(position)]]
   coord : vec4<f32>;
   [[location(1)]]
   loc1 : f32;
@@ -451,7 +451,7 @@ TEST_F(CanonicalizeEntryPointIOTest, Struct_LayoutDecorations) {
 [[block]]
 struct FragmentInput {
   [[size(16), location(1)]] value : f32;
-  [[builtin(frag_coord)]] [[align(32)]] coord : vec4<f32>;
+  [[builtin(position)]] [[align(32)]] coord : vec4<f32>;
 };
 
 struct FragmentOutput {
@@ -481,7 +481,7 @@ struct FragmentOutput {
 struct tint_symbol_1 {
   [[location(1)]]
   value : f32;
-  [[builtin(frag_coord)]]
+  [[builtin(position)]]
   coord : vec4<f32>;
 };
 

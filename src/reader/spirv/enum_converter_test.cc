@@ -214,7 +214,7 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinCase{SpvBuiltInFrontFacing, ast::StorageClass::kInput, true,
                     ast::Builtin::kFrontFacing},
         BuiltinCase{SpvBuiltInFragCoord, ast::StorageClass::kInput, true,
-                    ast::Builtin::kFragCoord},
+                    ast::Builtin::kPosition},
         BuiltinCase{SpvBuiltInLocalInvocationId, ast::StorageClass::kInput,
                     true, ast::Builtin::kLocalInvocationId},
         BuiltinCase{SpvBuiltInLocalInvocationIndex, ast::StorageClass::kInput,

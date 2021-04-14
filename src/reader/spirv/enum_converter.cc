@@ -77,7 +77,7 @@ ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b, ast::StorageClass sc) {
     case SpvBuiltInFrontFacing:
       return ast::Builtin::kFrontFacing;
     case SpvBuiltInFragCoord:
-      return ast::Builtin::kFragCoord;
+      return ast::Builtin::kPosition;
     case SpvBuiltInFragDepth:
       return ast::Builtin::kFragDepth;
     case SpvBuiltInLocalInvocationId:

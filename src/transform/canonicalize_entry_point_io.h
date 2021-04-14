@@ -34,7 +34,7 @@ namespace transform {
 /// };
 ///
 /// [[stage(fragment)]]
-/// fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
+/// fn frag_main([[builtin(position)]] coord : vec4<f32>,
 ///              locations : Locations) -> [[location(0)]] f32 {
 ///   var col : f32 = (coord.x * locations.loc1);
 ///   return col;
@@ -49,7 +49,7 @@ namespace transform {
 /// };
 ///
 /// struct frag_main_in {
-///   [[builtin(frag_coord)]] coord : vec4<f32>;
+///   [[builtin(position)]] coord : vec4<f32>;
 ///   [[location(1)]] loc1 : f32;
 ///   [[location(2)]] loc2 : vec4<u32>
 /// };

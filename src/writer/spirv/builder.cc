@@ -788,7 +788,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
-                  Operand::Int(ConvertBuiltin(builtin->value()))});
+                  Operand::Int(ConvertBuiltin(builtin->value(),
+                                              var->declared_storage_class()))});
     } else if (auto* location = deco->As<ast::LocationDecoration>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
@@ -3274,10 +3275,18 @@ SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
   return SpvStorageClassMax;
 }
 
-SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin) {
+SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin,
+                                   ast::StorageClass storage) {
   switch (builtin) {
     case ast::Builtin::kPosition:
-      return SpvBuiltInPosition;
+      if (storage == ast::StorageClass::kInput) {
+        return SpvBuiltInFragCoord;
+      } else if (storage == ast::StorageClass::kOutput) {
+        return SpvBuiltInPosition;
+      } else {
+        TINT_ICE(builder_.Diagnostics()) << "invalid storage class for builtin";
+        break;
+      }
     case ast::Builtin::kVertexIndex:
       return SpvBuiltInVertexIndex;
     case ast::Builtin::kInstanceIndex:

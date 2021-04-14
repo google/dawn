@@ -129,7 +129,7 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
   // }
   auto* coord_in =
       Param("coord", ty.vec4<f32>(),
-            {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
+            {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
   Func("frag_main", ast::VariableList{coord_in}, ty.f32(),
        {create<ast::ReturnStatement>(MemberAccessor("coord", "x"))},
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)},
@@ -496,7 +496,7 @@ TEST_F(
     Emit_Decoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
   Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
          ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
+             create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
 
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{

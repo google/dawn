@@ -268,7 +268,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
 TEST_F(HlslGeneratorImplTest_EntryPoint,
        Emit_Function_EntryPointData_Builtins) {
-  // [[builtin frag_coord]] var<in> coord : vec4<f32>;
+  // [[builtin position]] var<in> coord : vec4<f32>;
   // [[builtin frag_depth]] var<out> depth : f32;
   //
   // struct main_in {
@@ -281,7 +281,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
 
   Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
          ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord),
+             create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
          });
 
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,

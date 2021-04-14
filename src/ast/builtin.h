@@ -27,7 +27,7 @@ enum class Builtin {
   kVertexIndex,
   kInstanceIndex,
   kFrontFacing,
-  kFragCoord,
+  kFragCoord,  // TODO(crbug.com/tint/714): Remove this
   kFragDepth,
   kLocalInvocationId,
   kLocalInvocationIndex,

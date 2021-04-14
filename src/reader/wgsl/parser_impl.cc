@@ -1379,6 +1379,10 @@ Expect<ast::Builtin> ParserImpl::expect_builtin() {
   if (builtin == ast::Builtin::kNone)
     return add_error(ident.source, "invalid value for builtin decoration");
 
+  if (builtin == ast::Builtin::kFragCoord) {
+    deprecated(ident.source, "use 'position' instead of 'frag_coord'");
+  }
+
   return {builtin, ident.source};
 }
 

@@ -305,6 +305,28 @@ TEST_F(ParserImplTest, Decoration_Group_MissingInvalid) {
             "1:7: expected signed integer literal for group decoration");
 }
 
+TEST_F(ParserImplTest, Decoration_FragCoord_Deprecated) {
+  auto p = parser("builtin(frag_coord)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr);
+  auto* var_deco = deco.value->As<ast::Decoration>();
+  ASSERT_NE(var_deco, nullptr);
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(var_deco->Is<ast::BuiltinDecoration>());
+
+  auto* builtin = var_deco->As<ast::BuiltinDecoration>();
+  EXPECT_EQ(builtin->value(), ast::Builtin::kFragCoord);
+
+  EXPECT_EQ(
+      p->builder().Diagnostics().str(),
+      R"(test.wgsl:1:9 warning: use of deprecated language feature: use 'position' instead of 'frag_coord'
+builtin(frag_coord)
+        ^^^^^^^^^^
+)");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

@@ -25,7 +25,7 @@ using SpirvTest = TransformTest;
 TEST_F(SpirvTest, HandleEntryPointIOTypes_Parameters) {
   auto* src = R"(
 [[stage(fragment)]]
-fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>,
+fn frag_main([[builtin(position)]] coord : vec4<f32>,
              [[location(1)]] loc1 : f32) {
   var col : f32 = (coord.x * loc1);
 }
@@ -38,7 +38,7 @@ fn compute_main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
 )";
 
   auto* expect = R"(
-[[builtin(frag_coord)]] var<in> tint_symbol : vec4<f32>;
+[[builtin(position)]] var<in> tint_symbol : vec4<f32>;
 
 [[location(1)]] var<in> tint_symbol_1 : f32;
 
@@ -192,7 +192,7 @@ fn frag_main() {
 TEST_F(SpirvTest, HandleEntryPointIOTypes_StructParameters) {
   auto* src = R"(
 struct FragmentInput {
-  [[builtin(frag_coord)]] coord : vec4<f32>;
+  [[builtin(position)]] coord : vec4<f32>;
   [[location(1)]] value : f32;
 };
 
@@ -208,7 +208,7 @@ struct FragmentInput {
   value : f32;
 };
 
-[[builtin(frag_coord)]] var<in> tint_symbol : vec4<f32>;
+[[builtin(position)]] var<in> tint_symbol : vec4<f32>;
 
 [[location(1)]] var<in> tint_symbol_1 : f32;
 
@@ -392,7 +392,7 @@ TEST_F(SpirvTest, HandleEntryPointIOTypes_StructLayoutDecorations) {
 [[block]]
 struct FragmentInput {
   [[size(16), location(1)]] value : f32;
-  [[builtin(frag_coord)]] [[align(32)]] coord : vec4<f32>;
+  [[builtin(position)]] [[align(32)]] coord : vec4<f32>;
 };
 
 struct FragmentOutput {
@@ -421,7 +421,7 @@ struct FragmentOutput {
 
 [[location(1)]] var<in> tint_symbol : f32;
 
-[[builtin(frag_coord)]] var<in> tint_symbol_1 : vec4<f32>;
+[[builtin(position)]] var<in> tint_symbol_1 : vec4<f32>;
 
 [[location(1)]] var<out> tint_symbol_4 : f32;
 

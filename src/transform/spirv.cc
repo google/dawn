@@ -68,7 +68,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   //
   // [[stage(fragment)]]
   // fn frag_main(
-  //   [[builtin(frag_coord)]] coord : vec4<f32>,
+  //   [[builtin(position)]] coord : vec4<f32>,
   //   samples : FragmentInput
   // ) -> FragmentOutput {
   //   var output : FragmentOutput = FragmentOutput(1.0,
@@ -88,7 +88,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
   //   mask_out : u32;
   // };
   //
-  // [[builtin(frag_coord)]] var<in> coord : vec4<f32>,
+  // [[builtin(position)]] var<in> coord : vec4<f32>,
   // [[builtin(sample_index)]] var<in> sample_index : u32,
   // [[builtin(sample_mask_in)]] var<in> sample_mask_in : u32,
   // [[builtin(frag_depth)]] var<out> depth: f32;

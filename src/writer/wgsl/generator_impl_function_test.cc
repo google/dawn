@@ -143,9 +143,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
   auto* vec4 = ty.vec4<f32>();
-  auto* coord =
-      Param("coord", vec4,
-            {create<ast::BuiltinDecoration>(ast::Builtin::kFragCoord)});
+  auto* coord = Param(
+      "coord", vec4, {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
   auto* loc1 = Param("loc1", ty.f32(), {create<ast::LocationDecoration>(1u)});
   auto* func =
       Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
@@ -160,7 +159,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
 
   ASSERT_TRUE(gen.EmitFunction(func));
   EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
-  fn frag_main([[builtin(frag_coord)]] coord : vec4<f32>, [[location(1)]] loc1 : f32) {
+  fn frag_main([[builtin(position)]] coord : vec4<f32>, [[location(1)]] loc1 : f32) {
   }
 )");
 }
