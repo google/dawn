@@ -121,6 +121,8 @@ fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
 }
 
 )");
+
+  Validate();
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
@@ -154,6 +156,8 @@ fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
 }
 
 )");
+
+  Validate();
 }
 
 TEST_F(MslGeneratorImplTest,
@@ -161,9 +165,10 @@ TEST_F(MslGeneratorImplTest,
   // struct Interface {
   //   [[location(1)]] col1 : f32;
   //   [[location(2)]] col2 : f32;
+  //   [[builtin(position)]] pos : vec4<f32>;
   // };
   // fn vert_main() -> Interface {
-  //   return Interface(0.4, 0.6);
+  //   return Interface(0.4, 0.6, vec4<f32>());
   // }
   // fn frag_main(colors : Interface) {
   //   const r = colors.col1;
@@ -171,13 +176,16 @@ TEST_F(MslGeneratorImplTest,
   // }
   auto* interface_struct = Structure(
       "Interface",
-      {Member("col1", ty.f32(), {create<ast::LocationDecoration>(1)}),
-       Member("col2", ty.f32(), {create<ast::LocationDecoration>(2)})});
+      {
+          Member("col1", ty.f32(), {Location(1)}),
+          Member("col2", ty.f32(), {Location(2)}),
+          Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
+      });
 
   Func("vert_main", {}, interface_struct,
-       {create<ast::ReturnStatement>(
-           Construct(interface_struct, Expr(0.5f), Expr(0.25f)))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+       {Return(Construct(interface_struct, Expr(0.5f), Expr(0.25f),
+                         Construct(ty.vec4<f32>())))},
+       {Stage(ast::PipelineStage::kVertex)});
 
   Func("frag_main", {Param("colors", interface_struct)}, ty.void_(),
        {
@@ -197,29 +205,34 @@ using namespace metal;
 struct Interface {
   float col1;
   float col2;
+  float4 pos;
 };
 struct tint_symbol {
   float col1 [[user(locn1)]];
   float col2 [[user(locn2)]];
+  float4 pos [[position]];
 };
 struct tint_symbol_3 {
   float col1 [[user(locn1)]];
   float col2 [[user(locn2)]];
+  float4 pos [[position]];
 };
 
 vertex tint_symbol vert_main() {
-  const Interface tint_symbol_1 = {0.5f, 0.25f};
-  return {tint_symbol_1.col1, tint_symbol_1.col2};
+  const Interface tint_symbol_1 = {0.5f, 0.25f, float4(0.0f)};
+  return {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
 }
 
 fragment void frag_main(tint_symbol_3 tint_symbol_2 [[stage_in]]) {
-  const Interface colors = {tint_symbol_2.col1, tint_symbol_2.col2};
+  const Interface colors = {tint_symbol_2.col1, tint_symbol_2.col2, tint_symbol_2.pos};
   const float r = colors.col1;
   const float g = colors.col2;
   return;
 }
 
 )");
+
+  Validate();
 }
 
 TEST_F(MslGeneratorImplTest,
@@ -288,6 +301,8 @@ vertex tint_symbol_2 vert_main2() {
 }
 
 )");
+
+  Validate();
 }
 
 TEST_F(MslGeneratorImplTest,
