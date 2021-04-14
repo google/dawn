@@ -315,6 +315,8 @@ TEST_F(MinBufferSizePipelineCreationTests, ZeroMinBufferSize) {
 
 // Fail if layout given has non-zero minimum sizes smaller than shader requirements
 TEST_F(MinBufferSizePipelineCreationTests, LayoutSizesTooSmall) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     std::vector<BindingDescriptor> bindings = {{0, 0, "a : f32; b : f32;", 8},
                                                {0, 1, "c : f32;", 4}};
 
@@ -336,6 +338,8 @@ TEST_F(MinBufferSizePipelineCreationTests, LayoutSizesTooSmall) {
 
 // Fail if layout given has non-zero minimum sizes smaller than shader requirements
 TEST_F(MinBufferSizePipelineCreationTests, LayoutSizesTooSmallMultipleGroups) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     std::vector<BindingDescriptor> bg0Bindings = {{0, 0, "a : f32; b : f32;", 8},
                                                   {0, 1, "c : f32;", 4}};
     std::vector<BindingDescriptor> bg1Bindings = {{1, 0, "d : f32; e : f32; f : f32;", 12},
@@ -398,6 +402,8 @@ class MinBufferSizeDrawTimeValidationTests : public MinBufferSizeTestsBase {};
 
 // Fail if binding sizes are too small at draw time
 TEST_F(MinBufferSizeDrawTimeValidationTests, ZeroMinSizeAndTooSmallBinding) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     std::vector<BindingDescriptor> bindings = {{0, 0, "a : f32; b : f32;", 8},
                                                {0, 1, "c : f32;", 4}};
 
@@ -419,6 +425,8 @@ TEST_F(MinBufferSizeDrawTimeValidationTests, ZeroMinSizeAndTooSmallBinding) {
 
 // Draw time validation works for non-contiguous bindings
 TEST_F(MinBufferSizeDrawTimeValidationTests, UnorderedBindings) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     std::vector<BindingDescriptor> bindings = {{0, 2, "a : f32; b : f32;", 8},
                                                {0, 0, "c : f32;", 4},
                                                {0, 4, "d : f32; e : f32; f : f32;", 12}};
@@ -441,6 +449,8 @@ TEST_F(MinBufferSizeDrawTimeValidationTests, UnorderedBindings) {
 
 // Draw time validation works for multiple bind groups
 TEST_F(MinBufferSizeDrawTimeValidationTests, MultipleGroups) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     std::vector<BindingDescriptor> bg0Bindings = {{0, 0, "a : f32; b : f32;", 8},
                                                   {0, 1, "c : f32;", 4}};
     std::vector<BindingDescriptor> bg1Bindings = {{1, 0, "d : f32; e : f32; f : f32;", 12},
@@ -512,6 +522,8 @@ class MinBufferSizeDefaultLayoutTests : public MinBufferSizeTestsBase {
 
 // Test the minimum size computations for various WGSL types.
 TEST_F(MinBufferSizeDefaultLayoutTests, DefaultLayoutVariousWGSLTypes) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     CheckShaderBindingSizeReflection(
         {{{0, 0, "a : f32;", 4}, {0, 1, "b : array<f32>;", 4}, {0, 2, "c : mat2x2<f32>;", 16}}});
     CheckShaderBindingSizeReflection({{{0, 3, "d : u32; e : array<f32>;", 8},
@@ -521,6 +533,8 @@ TEST_F(MinBufferSizeDefaultLayoutTests, DefaultLayoutVariousWGSLTypes) {
 
 // Test the minimum size computations for various buffer binding types.
 TEST_F(MinBufferSizeDefaultLayoutTests, DefaultLayoutVariousBindingTypes) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     CheckShaderBindingSizeReflection(
         {{{0, 0, "a : f32;", 4, wgpu::BufferBindingType::Uniform},
           {0, 1, "a : f32; b : f32;", 8, wgpu::BufferBindingType::Storage},
@@ -529,6 +543,8 @@ TEST_F(MinBufferSizeDefaultLayoutTests, DefaultLayoutVariousBindingTypes) {
 
 // Test the minimum size computations works with multiple bind groups.
 TEST_F(MinBufferSizeDefaultLayoutTests, MultipleBindGroups) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     CheckShaderBindingSizeReflection(
         {{{0, 0, "a : f32;", 4, wgpu::BufferBindingType::Uniform}},
          {{1, 0, "a : f32; b : f32;", 8, wgpu::BufferBindingType::Storage}},
@@ -537,6 +553,8 @@ TEST_F(MinBufferSizeDefaultLayoutTests, MultipleBindGroups) {
 
 // Test the minimum size computations with manual size/align/stride decorations.
 TEST_F(MinBufferSizeDefaultLayoutTests, NonDefaultLayout) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     CheckShaderBindingSizeReflection({{{0, 0, "[[size(256)]] a : u32; b : u32;", 260},
                                        {0, 1, "c : u32; [[align(16)]] d : u32;", 20},
                                        {0, 2, "d : [[stride(40)]] array<u32, 3>;", 120},
@@ -545,6 +563,8 @@ TEST_F(MinBufferSizeDefaultLayoutTests, NonDefaultLayout) {
 
 // Minimum size should be the max requirement of both vertex and fragment stages.
 TEST_F(MinBufferSizeDefaultLayoutTests, RenderPassConsidersBothStages) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     std::string vertexShader = CreateVertexShaderWithBindings(
         {{0, 0, "a : f32;", 4, wgpu::BufferBindingType::Uniform},
          {0, 1, "b : vec4<f32>;", 16, wgpu::BufferBindingType::Uniform}});

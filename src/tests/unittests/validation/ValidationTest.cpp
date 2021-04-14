@@ -19,6 +19,7 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/webgpu.h"
 #include "dawn_native/NullBackend.h"
+#include "tests/ToggleParser.h"
 #include "utils/WireHelper.h"
 
 #include <algorithm>
@@ -27,10 +28,13 @@ namespace {
 
     bool gUseWire = false;
     std::string gWireTraceDir = "";
+    std::unique_ptr<ToggleParser> gToggleParser = nullptr;
 
 }  // namespace
 
 void InitDawnValidationTestEnvironment(int argc, char** argv) {
+    gToggleParser = std::make_unique<ToggleParser>();
+
     for (int i = 1; i < argc; ++i) {
         if (strcmp("-w", argv[i]) == 0 || strcmp("--use-wire", argv[i]) == 0) {
             gUseWire = true;
@@ -41,6 +45,26 @@ void InitDawnValidationTestEnvironment(int argc, char** argv) {
         size_t argLen = sizeof(kWireTraceDirArg) - 1;
         if (strncmp(argv[i], kWireTraceDirArg, argLen) == 0) {
             gWireTraceDir = argv[i] + argLen;
+            continue;
+        }
+
+        if (gToggleParser->ParseEnabledToggles(argv[i])) {
+            continue;
+        }
+
+        if (gToggleParser->ParseDisabledToggles(argv[i])) {
+            continue;
+        }
+
+        if (strcmp("-h", argv[i]) == 0 || strcmp("--help", argv[i]) == 0) {
+            dawn::InfoLog()
+                << "\n\nUsage: " << argv[0]
+                << " [GTEST_FLAGS...] [-w]\n"
+                   "    [--enable-toggles=toggles] [--disable-toggles=toggles]\n"
+                   "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
+                   "  --enable-toggles: Comma-delimited list of Dawn toggles to enable.\n"
+                   "    ex.) skip_validation,use_tint_generator,disable_robustness,turn_off_vsync\n"
+                   "  --disable-toggles: Comma-delimited list of Dawn toggles to disable\n";
             continue;
         }
 
@@ -159,6 +183,15 @@ WGPUDevice ValidationTest::CreateTestDevice() {
     // Disabled disallowing unsafe APIs so we can test them.
     dawn_native::DeviceDescriptor deviceDescriptor;
     deviceDescriptor.forceDisabledToggles.push_back("disallow_unsafe_apis");
+
+    for (const std::string& toggle : gToggleParser->GetEnabledToggles()) {
+        deviceDescriptor.forceEnabledToggles.push_back(toggle.c_str());
+    }
+
+    for (const std::string& toggle : gToggleParser->GetDisabledToggles()) {
+        deviceDescriptor.forceDisabledToggles.push_back(toggle.c_str());
+    }
+
     return adapter.CreateDevice(&deviceDescriptor);
 }
 

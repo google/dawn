@@ -19,6 +19,7 @@
 #include "dawn/dawn_proc_table.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
+#include "tests/ToggleParser.h"
 
 #include <dawn_platform/DawnPlatform.h>
 #include <gtest/gtest.h>
@@ -232,8 +233,8 @@ class DawnTestEnvironment : public testing::Environment {
     wgpu::BackendType mBackendTypeFilter;
     std::string mWireTraceDir;
 
-    std::vector<std::string> mEnabledToggles;
-    std::vector<std::string> mDisabledToggles;
+    ToggleParser mToggleParser;
+
     std::vector<dawn_native::DeviceType> mDevicePreferences;
     std::vector<TestAdapterProperties> mAdapterProperties;
 

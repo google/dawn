@@ -18,7 +18,8 @@
 #include "common/Log.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
-#include "gtest/gtest.h"
+
+#include <gtest/gtest.h>
 
 #define ASSERT_DEVICE_ERROR(statement)                          \
     FlushWire();                                                \

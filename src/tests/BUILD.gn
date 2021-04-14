@@ -151,6 +151,8 @@ test("dawn_unittests") {
     "${dawn_root}/src/dawn_wire/server/ServerMemoryTransferService_mock.cpp",
     "${dawn_root}/src/dawn_wire/server/ServerMemoryTransferService_mock.h",
     "MockCallback.h",
+    "ToggleParser.cpp",
+    "ToggleParser.h",
     "unittests/BitSetIteratorTests.cpp",
     "unittests/BuddyAllocatorTests.cpp",
     "unittests/BuddyMemoryAllocatorTests.cpp",
@@ -280,6 +282,8 @@ source_set("dawn_end2end_tests_sources") {
   sources = [
     "DawnTest.h",
     "MockCallback.h",
+    "ToggleParser.cpp",
+    "ToggleParser.h",
     "end2end/BasicTests.cpp",
     "end2end/BindGroupTests.cpp",
     "end2end/BufferTests.cpp",
@@ -404,7 +408,10 @@ source_set("dawn_white_box_tests_sources") {
     "${dawn_root}/src/utils:dawn_utils",
   ]
 
-  sources = [ "DawnTest.h" ]
+  sources = [
+    "DawnTest.h",
+    "ToggleParser.h",
+  ]
 
   if (dawn_enable_vulkan) {
     deps += [ "${dawn_root}/third_party/khronos:vulkan_headers" ]
@@ -505,6 +512,8 @@ test("dawn_perf_tests") {
     "DawnTest.cpp",
     "DawnTest.h",
     "ParamGenerator.h",
+    "ToggleParser.cpp",
+    "ToggleParser.h",
     "perf_tests/BufferUploadPerf.cpp",
     "perf_tests/DawnPerfTest.cpp",
     "perf_tests/DawnPerfTest.h",

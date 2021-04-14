@@ -1772,6 +1772,8 @@ TEST_F(BindGroupLayoutCompatibilityTest, RWStorageInBGLWithROStorageInShader) {
 // Test that it is invalid to pass a readonly storage buffer in the pipeline layout when the shader
 // uses the binding as a writable storage buffer.
 TEST_F(BindGroupLayoutCompatibilityTest, ROStorageInBGLWithRWStorageInShader) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // Set up the bind group layout.
     wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
@@ -1786,6 +1788,8 @@ TEST_F(BindGroupLayoutCompatibilityTest, ROStorageInBGLWithRWStorageInShader) {
 }
 
 TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     constexpr char kTexture2DShaderFS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[stage(fragment)]] fn main() {
@@ -1929,6 +1933,8 @@ TEST_F(BindingsValidationTest, PipelineLayoutWithMoreBindingsThanPipeline) {
 // Test that it is invalid to set a pipeline layout that doesn't have all necessary bindings
 // required by the pipeline.
 TEST_F(BindingsValidationTest, PipelineLayoutWithLessBindingsThanPipeline) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // Set up bind group layout.
     wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,

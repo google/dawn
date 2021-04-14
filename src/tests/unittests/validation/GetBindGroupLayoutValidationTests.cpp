@@ -38,6 +38,8 @@ class GetBindGroupLayoutTests : public ValidationTest {
 // Test that GetBindGroupLayout returns the same object for the same index
 // and for matching layouts.
 TEST_F(GetBindGroupLayoutTests, SameObject) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -91,6 +93,8 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
 // - shader stage visibility is the stage that adds the binding.
 // - dynamic offsets is false
 TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -134,6 +138,8 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
 
 // Test GetBindGroupLayout works with a compute pipeline
 TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -171,6 +177,8 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
 
 // Test that the binding type matches the shader.
 TEST_F(GetBindGroupLayoutTests, BindingType) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -262,6 +270,8 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
 
 // Test that texture view dimension matches the shader.
 TEST_F(GetBindGroupLayoutTests, ViewDimension) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -339,6 +349,8 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
 
 // Test that texture component type matches the shader.
 TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -385,6 +397,8 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
 
 // Test that binding= indices match.
 TEST_F(GetBindGroupLayoutTests, BindingIndices) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -471,6 +485,8 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
 
 // Test that minBufferSize is set on the BGL and that the max of the min buffer sizes is used.
 TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -557,6 +573,8 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
 // Test that the visibility is correctly aggregated if two stages have the exact same binding.
 TEST_F(GetBindGroupLayoutTests, StageAggregation) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -625,6 +643,8 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
 
 // Test it is invalid to have conflicting binding types in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[block]] struct S {
             pos : vec4<f32>;
@@ -653,6 +673,8 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
 
 // Test it is invalid to have conflicting binding texture multisampling in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
@@ -675,6 +697,8 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
 
 // Test it is invalid to have conflicting binding texture dimension in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
@@ -697,6 +721,8 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
 
 // Test it is invalid to have conflicting binding texture component type in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
@@ -732,6 +758,8 @@ TEST_F(GetBindGroupLayoutTests, OutOfRangeIndex) {
 
 // Test that unused indices return the empty bind group layout.
 TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.

@@ -226,6 +226,8 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
 
 // Validate read-write storage textures are not currently supported.
 TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // Read-write storage textures cannot be declared in a vertex shader by default.
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
@@ -286,6 +288,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
 // Validate it is an error to declare a read-only or write-only storage texture in shaders with any
 // format that doesn't support TextureUsage::Storage texture usages.
 TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     // Not include RGBA8UnormSrgb, BGRA8Unorm, BGRA8UnormSrgb because they are not related to any
     // SPIR-V Image Formats.
     constexpr std::array<wgpu::TextureFormat, 32> kWGPUTextureFormatSupportedAsSPIRVImageFormats = {
@@ -322,6 +326,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
 // Verify that declaring a storage texture format that is not supported in WebGPU causes validation
 // error.
 TEST_F(StorageTextureValidationTests, UnsupportedWGSLStorageTextureFormat) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     constexpr std::array<wgpu::TextureFormat, 16> kUnsupportedTextureFormats = {
         wgpu::TextureFormat::R8Unorm,      wgpu::TextureFormat::R8Snorm,
         wgpu::TextureFormat::R8Uint,       wgpu::TextureFormat::R8Sint,
@@ -378,6 +384,8 @@ TEST_F(StorageTextureValidationTests, UnsupportedTextureViewDimensionInBindGroup
 // render and compute pipeline, the binding type in the bind group layout must match the
 // declaration in the shader.
 TEST_F(StorageTextureValidationTests, BindGroupLayoutEntryTypeMatchesShaderDeclaration) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     constexpr wgpu::TextureFormat kStorageTextureFormat = wgpu::TextureFormat::R32Float;
 
     std::initializer_list<utils::BindingLayoutEntryInitializationHelper> kSupportedBindingTypes = {
@@ -461,6 +469,8 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInBindGroupLayout) {
 
 // Verify the storage texture format in the bind group layout must match the declaration in shader.
 TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatchesShaderDeclaration) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     for (wgpu::StorageTextureAccess bindingType : kSupportedStorageTextureAccess) {
         for (wgpu::TextureFormat storageTextureFormatInShader : utils::kAllTextureFormats) {
             if (!utils::TextureFormatSupportsStorageTexture(storageTextureFormatInShader)) {
@@ -517,6 +527,8 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutStorageTextureFormatMatches
 // Verify the dimension of the bind group layout with storage textures must match the one declared
 // in shader.
 TEST_F(StorageTextureValidationTests, BindGroupLayoutViewDimensionMatchesShaderDeclaration) {
+    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
+
     constexpr std::array<wgpu::TextureViewDimension, 4> kSupportedDimensions = {
         wgpu::TextureViewDimension::e1D, wgpu::TextureViewDimension::e2D,
         wgpu::TextureViewDimension::e2DArray, wgpu::TextureViewDimension::e3D};

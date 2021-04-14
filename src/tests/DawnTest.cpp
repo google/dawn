@@ -265,25 +265,11 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             continue;
         }
 
-        constexpr const char kEnableTogglesSwitch[] = "--enable-toggles=";
-        argLen = sizeof(kEnableTogglesSwitch) - 1;
-        if (strncmp(argv[i], kEnableTogglesSwitch, argLen) == 0) {
-            std::string toggle;
-            std::stringstream toggles(argv[i] + argLen);
-            while (getline(toggles, toggle, ',')) {
-                mEnabledToggles.push_back(toggle);
-            }
+        if (mToggleParser.ParseEnabledToggles(argv[i])) {
             continue;
         }
 
-        constexpr const char kDisableTogglesSwitch[] = "--disable-toggles=";
-        argLen = sizeof(kDisableTogglesSwitch) - 1;
-        if (strncmp(argv[i], kDisableTogglesSwitch, argLen) == 0) {
-            std::string toggle;
-            std::stringstream toggles(argv[i] + argLen);
-            while (getline(toggles, toggle, ',')) {
-                mDisabledToggles.push_back(toggle);
-            }
+        if (mToggleParser.ParseDisabledToggles(argv[i])) {
             continue;
         }
 
@@ -667,11 +653,11 @@ const char* DawnTestEnvironment::GetWireTraceDir() const {
 }
 
 const std::vector<std::string>& DawnTestEnvironment::GetEnabledToggles() const {
-    return mEnabledToggles;
+    return mToggleParser.GetEnabledToggles();
 }
 
 const std::vector<std::string>& DawnTestEnvironment::GetDisabledToggles() const {
-    return mDisabledToggles;
+    return mToggleParser.GetDisabledToggles();
 }
 
 // Implementation of DawnTest
