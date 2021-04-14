@@ -14,7 +14,7 @@
 
 #include "tests/DawnTest.h"
 
-#include "tests/DawnTest.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
 #include <vector>
@@ -93,6 +93,219 @@ TEST_P(ShaderTests, BadWGSL) {
 I am an invalid shader and should never pass validation!
 })";
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, shader.c_str()));
+}
+
+// Tests that shaders using non-struct function parameters and return values for shader stage I/O
+// can compile and link successfully.
+TEST_P(ShaderTests, WGSLParamIO) {
+    std::string vertexShader = R"(
+[[stage(vertex)]]
+fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+    let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+        vec2<f32>(-1.0,  1.0),
+        vec2<f32>( 1.0,  1.0),
+        vec2<f32>( 0.0, -1.0));
+    return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+})";
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader.c_str());
+
+    std::string fragmentShader = R"(
+[[stage(fragment)]]
+fn main([[builtin(frag_coord)]] fragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+    return vec4<f32>(fragCoord.xy, 0.0, 1.0);
+})";
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
+
+    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    rpDesc.vertex.module = vsModule;
+    rpDesc.cFragment.module = fsModule;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+}
+
+// Tests that a vertex shader using struct function parameters and return values for shader stage
+// I/O can compile and link successfully against a fragement shader using compatible non-struct I/O.
+TEST_P(ShaderTests, WGSLMixedStructParamIO) {
+    std::string vertexShader = R"(
+struct VertexIn {
+    [[location(0)]] position : vec3<f32>;
+    [[location(1)]] color : vec4<f32>;
+};
+
+struct VertexOut {
+    [[location(0)]] color : vec4<f32>;
+    [[builtin(position)]] position : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main(input : VertexIn) -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4<f32>(input.position, 1.0);
+    output.color = input.color;
+    return output;
+})";
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader.c_str());
+
+    std::string fragmentShader = R"(
+[[stage(fragment)]]
+fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
+    return color;
+})";
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
+
+    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    rpDesc.vertex.module = vsModule;
+    rpDesc.cFragment.module = fsModule;
+    rpDesc.vertex.bufferCount = 1;
+    rpDesc.cBuffers[0].attributeCount = 2;
+    rpDesc.cBuffers[0].arrayStride = 28;
+    rpDesc.cAttributes[0].shaderLocation = 0;
+    rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x3;
+    rpDesc.cAttributes[1].shaderLocation = 1;
+    rpDesc.cAttributes[1].format = wgpu::VertexFormat::Float32x4;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+}
+
+// Tests that shaders using struct function parameters and return values for shader stage I/O
+// can compile and link successfully.
+TEST_P(ShaderTests, WGSLStructIO) {
+    std::string vertexShader = R"(
+struct VertexIn {
+    [[location(0)]] position : vec3<f32>;
+    [[location(1)]] color : vec4<f32>;
+};
+
+struct VertexOut {
+    [[location(0)]] color : vec4<f32>;
+    [[builtin(position)]] position : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main(input : VertexIn) -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4<f32>(input.position, 1.0);
+    output.color = input.color;
+    return output;
+})";
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader.c_str());
+
+    std::string fragmentShader = R"(
+struct FragmentIn {
+    [[location(0)]] color : vec4<f32>;
+    [[builtin(frag_coord)]] fragCoord : vec4<f32>;
+};
+
+[[stage(fragment)]]
+fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
+    return input.color * input.fragCoord;
+})";
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
+
+    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    rpDesc.vertex.module = vsModule;
+    rpDesc.cFragment.module = fsModule;
+    rpDesc.vertex.bufferCount = 1;
+    rpDesc.cBuffers[0].attributeCount = 2;
+    rpDesc.cBuffers[0].arrayStride = 28;
+    rpDesc.cAttributes[0].shaderLocation = 0;
+    rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x3;
+    rpDesc.cAttributes[1].shaderLocation = 1;
+    rpDesc.cAttributes[1].format = wgpu::VertexFormat::Float32x4;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+}
+
+// Tests that shaders I/O structs that us compatible locations but are not sorted by hand can link.
+TEST_P(ShaderTests, WGSLUnsortedStructIO) {
+    // TODO(tint:710): Tint has a known issue with sorting structs in HLSL.
+    DAWN_SKIP_TEST_IF(IsD3D12());
+
+    std::string vertexShader = R"(
+struct VertexIn {
+    [[location(0)]] position : vec3<f32>;
+    [[location(1)]] color : vec4<f32>;
+};
+
+struct VertexOut {
+    [[builtin(position)]] position : vec4<f32>;
+    [[location(0)]] color : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn main(input : VertexIn) -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4<f32>(input.position, 1.0);
+    output.color = input.color;
+    return output;
+})";
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vertexShader.c_str());
+
+    std::string fragmentShader = R"(
+struct FragmentIn {
+    [[location(0)]] color : vec4<f32>;
+    [[builtin(frag_coord)]] fragCoord : vec4<f32>;
+};
+
+[[stage(fragment)]]
+fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
+    return input.color * input.fragCoord;
+})";
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
+
+    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    rpDesc.vertex.module = vsModule;
+    rpDesc.cFragment.module = fsModule;
+    rpDesc.vertex.bufferCount = 1;
+    rpDesc.cBuffers[0].attributeCount = 2;
+    rpDesc.cBuffers[0].arrayStride = 28;
+    rpDesc.cAttributes[0].shaderLocation = 0;
+    rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x3;
+    rpDesc.cAttributes[1].shaderLocation = 1;
+    rpDesc.cAttributes[1].format = wgpu::VertexFormat::Float32x4;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+}
+
+// Tests that shaders I/O structs can be shared between vertex and fragment shaders.
+TEST_P(ShaderTests, WGSLSharedStructIO) {
+    // TODO(tint:714): Not yet implemeneted in tint yet, but intended to work.
+    DAWN_SKIP_TEST_IF(IsD3D12() || IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+
+    std::string shader = R"(
+struct VertexIn {
+    [[location(0)]] position : vec3<f32>;
+    [[location(1)]] color : vec4<f32>;
+};
+
+struct VertexOut {
+    [[location(0)]] color : vec4<f32>;
+    [[builtin(position)]] position : vec4<f32>;
+};
+
+[[stage(vertex)]]
+fn vertexMain(input : VertexIn) -> VertexOut {
+    var output : VertexOut;
+    output.position = vec4<f32>(input.position, 1.0);
+    output.color = input.color;
+    return output;
+}
+
+[[stage(fragment)]]
+fn fragmentMain(input : VertexOut) -> [[location(0)]] vec4<f32> {
+    return input.color;
+})";
+    wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
+
+    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    rpDesc.vertex.module = shaderModule;
+    rpDesc.vertex.entryPoint = "vertexMain";
+    rpDesc.cFragment.module = shaderModule;
+    rpDesc.cFragment.entryPoint = "fragmentMain";
+    rpDesc.vertex.bufferCount = 1;
+    rpDesc.cBuffers[0].attributeCount = 2;
+    rpDesc.cBuffers[0].arrayStride = 28;
+    rpDesc.cAttributes[0].shaderLocation = 0;
+    rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x3;
+    rpDesc.cAttributes[1].shaderLocation = 1;
+    rpDesc.cAttributes[1].format = wgpu::VertexFormat::Float32x4;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
 }
 
 DAWN_INSTANTIATE_TEST(ShaderTests,
