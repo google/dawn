@@ -15,6 +15,7 @@
 #include "gmock/gmock.h"
 #include "src/utils/command.h"
 #include "src/writer/hlsl/test_helper.h"
+#include "src/writer/msl/test_helper.h"
 
 namespace {
 
@@ -25,6 +26,8 @@ void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
 struct Flags {
   bool validate_hlsl = false;
   std::string dxc_path;
+  bool validate_msl = false;
+  std::string xcrun_path;
 
   bool parse(int argc, char** argv) {
     bool errored = false;
@@ -47,6 +50,9 @@ struct Flags {
 
       if (match("--validate-hlsl") || parse_value("--dxc-path", dxc_path)) {
         validate_hlsl = true;
+      } else if (match("--validate-msl") ||
+                 parse_value("--xcrun-path", xcrun_path)) {
+        validate_msl = true;
       } else {
         std::cout << "Unknown flag '" << argv[i] << "'" << std::endl;
         return false;
@@ -90,6 +96,31 @@ int main(int argc, char** argv) {
     std::cout << "HLSL validation with DXC is not enabled" << std::endl;
   }
 #endif  // TINT_BUILD_HLSL_WRITER
+
+#if TINT_BUILD_MSL_WRITER
+  // This must be kept alive for the duration of RUN_ALL_TESTS() as the c_str()
+  // is passed into tint::writer::msl::EnableMSLValidation(), which does not
+  // make a copy. This is to work around Chromium's strict rules on globals
+  // having no constructors / destructors.
+  std::string xcrun_path;
+  if (flags.validate_msl) {
+    auto xcrun = flags.xcrun_path.empty()
+                     ? tint::utils::Command::LookPath("xcrun")
+                     : tint::utils::Command(flags.xcrun_path);
+
+    if (!xcrun.Found()) {
+      std::cout << "xcrun executable not found" << std::endl;
+      return -1;
+    }
+
+    std::cout << "MSL validation with XCode SDK enabled" << std::endl;
+
+    xcrun_path = xcrun.Path();
+    tint::writer::msl::EnableMSLValidation(xcrun_path.c_str());
+  } else {
+    std::cout << "MSL validation with XCode SDK is not enabled" << std::endl;
+  }
+#endif  // TINT_BUILD_MSL_WRITER
 
   tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 

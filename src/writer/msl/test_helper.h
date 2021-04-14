@@ -16,6 +16,7 @@
 #define SRC_WRITER_MSL_TEST_HELPER_H_
 
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "gtest/gtest.h"
@@ -26,6 +27,28 @@
 namespace tint {
 namespace writer {
 namespace msl {
+
+/// Enables verification of MSL shaders by running the Metal compiler and
+/// checking no errors are reported.
+/// @param xcrun_path the path to the `xcrun` executable
+void EnableMSLValidation(const char* xcrun_path);
+
+/// The return structure of Compile()
+struct CompileResult {
+  /// Status is an enumerator of status codes from Compile()
+  enum class Status { kSuccess, kFailed, kVerificationNotEnabled };
+  /// The resulting status of the compilation
+  Status status;
+  /// Output of the Metal compiler
+  std::string output;
+  /// The MSL source that was compiled
+  std::string msl;
+};
+
+/// Compile attempts to compile the shader with xcrun if found on PATH.
+/// @param program the MSL program
+/// @return the result of the compile
+CompileResult Compile(Program* program);
 
 /// Helper class for testing
 template <typename BASE>
@@ -82,6 +105,20 @@ class TestHelperBase : public BASE, public ProgramBuilder {
     *program = std::move(result.program);
     gen_ = std::make_unique<GeneratorImpl>(program.get());
     return *gen_;
+  }
+
+  /// Validate generates MSL code for the current contents of `program` and
+  /// passes the output of the generator to the XCode SDK Metal compiler.
+  ///
+  /// If the Metal compiler finds problems, then any GTest test case that
+  /// invokes this function test will fail.
+  /// This function does nothing, if the Metal compiler path has not been
+  /// configured by calling `EnableMSLValidation()`.
+  void Validate() {
+    auto res = Compile(program.get());
+    if (res.status == CompileResult::Status::kFailed) {
+      FAIL() << "MSL Validation failed.\n\n" << res.msl << "\n\n" << res.output;
+    }
   }
 
   /// The program built with a call to Build()
