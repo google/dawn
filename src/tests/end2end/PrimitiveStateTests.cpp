@@ -50,10 +50,9 @@ class DepthClampingTest : public DawnTest {
                 depth : f32;
             };
             [[group(0), binding(0)]] var<uniform> ubo : UBO;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() {
-                Position = vec4<f32>(0.0, 0.0, ubo.depth, 1.0);
+            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                return vec4<f32>(0.0, 0.0, ubo.depth, 1.0);
             })");
 
         fsModule = utils::CreateShaderModule(device, R"(
@@ -63,10 +62,8 @@ class DepthClampingTest : public DawnTest {
             };
             [[group(0), binding(0)]] var<uniform> ubo : UBO;
 
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-                fragColor = vec4<f32>(ubo.color, 1.0);
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return vec4<f32>(ubo.color, 1.0);
             })");
     }
 

@@ -26,7 +26,7 @@ class ClipSpaceTest : public DawnTest {
         // 1. The depth value of the top-left one is >= 0.5
         // 2. The depth value of the bottom-right one is <= 0.5
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            const pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
+            let pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
                 vec3<f32>(-1.0,  1.0, 1.0),
                 vec3<f32>(-1.0, -1.0, 0.5),
                 vec3<f32>( 1.0,  1.0, 0.5),
@@ -34,19 +34,14 @@ class ClipSpaceTest : public DawnTest {
                 vec3<f32>(-1.0, -1.0, 0.5),
                 vec3<f32>( 1.0, -1.0, 0.0));
 
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-
-            [[stage(vertex)]] fn main() {
-                Position = vec4<f32>(pos[VertexIndex], 1.0);
-                return;
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                return vec4<f32>(pos[VertexIndex], 1.0);
             })");
 
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[location(0)]] var<out> fragColor : vec4<f32>;;
-            [[stage(fragment)]] fn main() {
-               fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-               return;
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+               return vec4<f32>(1.0, 0.0, 0.0, 1.0);
             })");
 
         wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil();

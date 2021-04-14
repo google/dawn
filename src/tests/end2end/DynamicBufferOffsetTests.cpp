@@ -94,14 +94,13 @@ class DynamicBufferOffsetTests : public DawnTest {
 
     wgpu::RenderPipeline CreateRenderPipeline(bool isInheritedPipeline = false) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0, 0.0),
                     vec2<f32>(-1.0, 1.0),
                     vec2<f32>( 0.0, 1.0));
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
         // Construct fragment shader source
@@ -141,14 +140,12 @@ class DynamicBufferOffsetTests : public DawnTest {
             )";
         }
 
-        fs << "[[location(0)]] var<out> fragColor : vec4<f32>;\n";
-
-        fs << "const multipleNumber : u32 = " << multipleNumber << "u;\n";
+        fs << "let multipleNumber : u32 = " << multipleNumber << "u;\n";
         fs << R"(
-            [[stage(fragment)]] fn main() {
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
                 sBufferNotDynamic.value = uBufferNotDynamic.value.xy;
                 sBuffer.value = vec2<u32>(multipleNumber, multipleNumber) * (uBuffer.value.xy + sBufferNotDynamic.value.xy);
-                fragColor = vec4<f32>(f32(uBuffer.value.x) / 255.0, f32(uBuffer.value.y) / 255.0,
+                return vec4<f32>(f32(uBuffer.value.x) / 255.0, f32(uBuffer.value.y) / 255.0,
                                       1.0, 1.0);
             }
         )";
@@ -210,7 +207,7 @@ class DynamicBufferOffsetTests : public DawnTest {
             )";
         }
 
-        cs << "const multipleNumber : u32 = " << multipleNumber << "u;\n";
+        cs << "let multipleNumber : u32 = " << multipleNumber << "u;\n";
         cs << R"(
             [[stage(compute)]] fn main() {
                 sBufferNotDynamic.value = uBufferNotDynamic.value.xy;

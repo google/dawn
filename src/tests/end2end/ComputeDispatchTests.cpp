@@ -39,11 +39,9 @@ class ComputeDispatchTests : public DawnTest {
             [[group(0), binding(0)]] var<uniform> input : InputBuf;
             [[group(0), binding(1)]] var<storage> output : [[access(read_write)]] OutputBuf;
 
-            [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
-
             [[stage(compute), workgroup_size(1, 1, 1)]]
-            fn main() {
-                const dispatch : vec3<u32> = input.expectedDispatch;
+            fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+                let dispatch : vec3<u32> = input.expectedDispatch;
 
                 if (dispatch.x == 0u || dispatch.y == 0u || dispatch.z == 0u) {
                     output.workGroups = vec3<u32>(0xFFFFFFFFu, 0xFFFFFFFFu, 0xFFFFFFFFu);

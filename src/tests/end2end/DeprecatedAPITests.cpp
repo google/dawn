@@ -497,20 +497,14 @@ class VertexFormatDeprecationTests : public DeprecationTests {
                                        : "vec4<f32>(f32(a), 0.0, 0.0, 1.0)";
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, (attribute + R"(
-                [[builtin(position)]] var<out> Position : vec4<f32>;
-
-                [[stage(vertex)]] fn main() {
-                    Position = )" + attribAccess + R"(;
-                    return;
+                [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                    return )" + attribAccess + R"(;
                 }
             )")
                                                                             .c_str());
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-                [[location(0)]] var<out> outColor : vec4<f32>;
-
-                [[stage(fragment)]] fn main() {
-                    outColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-                    return;
+                [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                    return vec4<f32>(1.0, 1.0, 1.0, 1.0);
                 }
             )");
 

@@ -121,7 +121,7 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
 
         [[group(0), binding(0)]] var<storage> idx_vals : [[access(read_write)]] IndexVals;
 
-        [[stage(fragment)]] fn main()  {
+        [[stage(fragment)]] fn main() {
         )";
 
     if ((checkIndex & CheckIndex::Vertex) != 0) {

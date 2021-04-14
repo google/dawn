@@ -212,10 +212,9 @@ TEST_P(DeviceLostTest, CreateShaderModuleFails) {
     SetCallbackAndLoseForTesting();
 
     ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
-        [[location(0)]] var<in> color : vec4<f32>;
-        [[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() {
-            fragColor = color;
+        [[stage(fragment)]]
+        fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
+            return color;
         })"));
 }
 

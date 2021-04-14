@@ -24,18 +24,12 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
     // TODO(crbug.com/dawn/658): Crashes on bots
     DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[builtin(position)]] var<out> Position : vec4<f32>;
-
-        [[stage(vertex)]] fn vertex_main() {
-            Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-            return;
+        [[stage(vertex)]] fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        [[location(0)]] var<out> outColor : vec4<f32>;
-
-        [[stage(fragment)]] fn fragment_main() {
-          outColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-          return;
+        [[stage(fragment)]] fn fragment_main() -> [[location(0)]] vec4<f32> {
+          return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
 

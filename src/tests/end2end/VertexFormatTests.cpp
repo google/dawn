@@ -232,19 +232,22 @@ class VertexFormatTest : public DawnTest {
         std::string expectedDataType = ShaderTypeGenerator(isFloat, isNormalized, isUnsigned, 1);
 
         std::ostringstream vs;
-        vs << "[[location(0)]] var<in> test : " << variableType << ";\n";
+        vs << "struct VertexIn {\n";
+        vs << "    [[location(0)]] test : " << variableType << ";\n";
+        vs << "    [[builtin(vertex_index)]] VertexIndex : u32;\n";
+        vs << "};\n";
+
         // Because x86 CPU using "extended
         // precision"(https://en.wikipedia.org/wiki/Extended_precision) during float
         // math(https://developer.nvidia.com/sites/default/files/akamai/cuda/files/NVIDIA-CUDA-Floating-Point.pdf),
         // move normalization and Float16ToFloat32 into shader to generate
         // expected value.
         vs << R"(
-            [[location(0)]] var<out> color : vec4<f32>;
             fn Float16ToFloat32(fp16 : u32) -> f32 {
-                const magic : u32 = (254u - 15u) << 23u;
-                const was_inf_nan : u32 = (127u + 16u) << 23u;
+                let magic : u32 = (254u - 15u) << 23u;
+                let was_inf_nan : u32 = (127u + 16u) << 23u;
                 var fp32u : u32 = (fp16 & 0x7FFFu) << 13u;
-                const fp32 : f32 = bitcast<f32>(fp32u) * bitcast<f32>(magic);
+                let fp32 : f32 = bitcast<f32>(fp32u) * bitcast<f32>(magic);
                 fp32u = bitcast<u32>(fp32);
                 if (fp32 >= bitcast<f32>(was_inf_nan)) {
                     fp32u = fp32u | (255u << 23u);
@@ -253,14 +256,19 @@ class VertexFormatTest : public DawnTest {
                 return bitcast<f32>(fp32u);
             }
 
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            struct VertexOut {
+                [[location(0)]] color : vec4<f32>;
+                [[builtin(position)]] position : vec4<f32>;
+            };
+
+            [[stage(vertex)]]
+            fn main(input : VertexIn) -> VertexOut {
+                let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>( 2.0,  0.0),
                     vec2<f32>( 0.0,  2.0));
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                var output : VertexOut;
+                output.position = vec4<f32>(pos[input.VertexIndex], 0.0, 1.0);
         )";
 
         // Declare expected values.
@@ -310,8 +318,8 @@ class VertexFormatTest : public DawnTest {
             std::string expectedVal = "expectedVal" + std::to_string(component);
             vs << "    var " << testVal << " : " << expectedDataType << ";\n";
             vs << "    var " << expectedVal << " : " << expectedDataType << ";\n";
-            vs << "    " << testVal << " = test" << suffix << ";\n";
-            vs << "    " << expectedVal << " = expected[VertexIndex]"
+            vs << "    " << testVal << " = input.test" << suffix << ";\n";
+            vs << "    " << expectedVal << " = expected[input.VertexIndex]"
                << "[" << component << "];\n";
             if (!isInputTypeFloat) {  // Integer / unsigned integer need to match exactly.
                 vs << "    success = success && (" << testVal << " == " << expectedVal << ");\n";
@@ -322,8 +330,8 @@ class VertexFormatTest : public DawnTest {
                 vs << "    if (isNan(" << expectedVal << ")) {\n";
                 vs << "       success = success && isNan(" << testVal << ");\n";
                 vs << "    } else {\n";
-                vs << "        const testValFloatToUint : u32 = bitcast<u32>(" << testVal << ");\n";
-                vs << "        const expectedValFloatToUint : u32 = bitcast<u32>(" << expectedVal
+                vs << "        let testValFloatToUint : u32 = bitcast<u32>(" << testVal << ");\n";
+                vs << "        let expectedValFloatToUint : u32 = bitcast<u32>(" << expectedVal
                    << ");\n";
                 vs << "        success = success && max(testValFloatToUint, "
                       "expectedValFloatToUint)";
@@ -333,18 +341,18 @@ class VertexFormatTest : public DawnTest {
         }
         vs << R"(
             if (success) {
-                color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
+                output.color = vec4<f32>(0.0, 1.0, 0.0, 1.0);
             } else {
-                color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
+                output.color = vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
+            return output;
         })";
 
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, vs.str().c_str());
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-                [[location(0)]] var<in> color : vec4<f32>;
-                [[location(0)]] var<out> FragColor : vec4<f32>;
-                [[stage(fragment)]] fn main() {
-                    FragColor = color;
+                [[stage(fragment)]]
+                fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
+                    return color;
                 })");
 
         uint32_t bytesPerComponents = BytesPerComponents(format);

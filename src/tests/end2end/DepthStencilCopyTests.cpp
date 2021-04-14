@@ -29,18 +29,16 @@ class DepthStencilCopyTests : public DawnTest {
 
         // Draw a square in the bottom left quarter of the screen.
         mVertexModule = utils::CreateShaderModule(device, R"(
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                let pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>( 0.0, -1.0),
                     vec2<f32>(-1.0,  0.0),
                     vec2<f32>(-1.0,  0.0),
                     vec2<f32>( 0.0, -1.0),
                     vec2<f32>( 0.0,  0.0));
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
     }
 
@@ -74,9 +72,8 @@ class DepthStencilCopyTests : public DawnTest {
         desc->vertex.module = mVertexModule;
 
         std::string fsSource = R"(
-        [[builtin(frag_depth)]] var<out> FragDepth : f32;
-        [[stage(fragment)]] fn main() {
-            FragDepth = )" + std::to_string(regionDepth) +
+        [[stage(fragment)]] fn main() -> [[builtin(frag_depth)]] f32 {
+            return )" + std::to_string(regionDepth) +
                                ";\n}";
 
         desc->cFragment.module = utils::CreateShaderModule(device, fsSource.c_str());
@@ -239,29 +236,31 @@ class DepthStencilCopyTests : public DawnTest {
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
 
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0, -1.0),
                     vec2<f32>( 3.0, -1.0),
                     vec2<f32>(-1.0,  3.0));
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
         // Sample the input texture and write out depth. |result| will only be set to 1 if we
         // pass the depth test.
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var texture0 : texture_2d<f32>;
-            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
 
-            [[location(0)]] var<out> result : u32;
-            [[builtin(frag_depth)]] var<out> FragDepth : f32;
+            struct FragmentOut {
+                [[location(0)]] result : u32;
+                [[builtin(frag_depth)]] fragDepth : f32;
+            };
 
-            [[stage(fragment)]] fn main() {
-                result = 1u;
-                FragDepth = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0)[0];
+            [[stage(fragment)]]
+            fn main([[builtin(frag_coord)]] FragCoord : vec4<f32>) -> FragmentOut {
+                var output : FragmentOut;
+                output.result = 1u;
+                output.fragDepth = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0)[0];
+                return output;
             })");
 
         // Pass the depth test only if the depth is equal.

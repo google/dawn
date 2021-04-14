@@ -38,7 +38,7 @@ TEST_P(ShaderTests, ComputeLog2) {
 [[group(0), binding(0)]] var<storage> buf : [[access(read_write)]] Buf;
 
 [[stage(compute)]] fn main() {
-    const factor : f32 = 1.0001;
+    let factor : f32 = 1.0001;
 
     buf.data[0] = u32(log2(1.0 * factor));
     buf.data[1] = u32(log2(2.0 * factor));

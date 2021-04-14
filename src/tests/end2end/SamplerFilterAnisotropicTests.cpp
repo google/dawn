@@ -42,31 +42,38 @@ class SamplerFilterAnisotropicTest : public DawnTest {
                 matrix : mat4x4<f32>;
             };
 
-            [[location(0)]] var<in> position : vec4<f32>;
-            [[location(1)]] var<in> uv : vec2<f32>;
+            struct VertexIn {
+                [[location(0)]] position : vec4<f32>;
+                [[location(1)]] uv : vec2<f32>;
+            };
 
             [[group(0), binding(2)]] var<uniform> uniforms : Uniforms;
 
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[location(0)]] var<out> fragUV : vec2<f32>;
+            struct VertexOut {
+                [[location(0)]] uv : vec2<f32>;
+                [[builtin(position)]] position : vec4<f32>;
+            };
 
-            [[stage(vertex)]] fn main() {
-                fragUV = uv;
-                Position = uniforms.matrix * position;
+            [[stage(vertex)]]
+            fn main(input : VertexIn) -> VertexOut {
+                var output : VertexOut;
+                output.uv = input.uv;
+                output.position = uniforms.matrix * input.position;
+                return output;
             }
         )");
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var sampler0 : sampler;
             [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
 
-            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
+            struct FragmentIn {
+                [[location(0)]] uv: vec2<f32>;
+                [[builtin(frag_coord)]] fragCoord : vec4<f32>;
+            };
 
-            [[location(0)]] var<in> fragUV: vec2<f32>;
-
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-                fragColor = textureSample(texture0, sampler0, fragUV);
+            [[stage(fragment)]]
+            fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
+                return textureSample(texture0, sampler0, input.uv);
             })");
 
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;

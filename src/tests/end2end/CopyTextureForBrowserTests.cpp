@@ -148,16 +148,16 @@ class CopyTextureForBrowserTests : public DawnTest {
             [[group(0), binding(1)]] var dst : texture_2d<f32>;
             [[group(0), binding(2)]] var<storage> output : [[access(read_write)]] OutputBuf;
             [[group(0), binding(3)]] var<uniform> uniforms : Uniforms;
-            [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
             fn aboutEqual(value : f32, expect : f32) -> bool {
                 // The value diff should be smaller than the hard coded tolerance.
                 return abs(value - expect) < 0.001;
             }
-            [[stage(compute), workgroup_size(1, 1, 1)]] fn main() {
-                var srcSize : vec2<i32> = textureDimensions(src);
-                var dstSize : vec2<i32> = textureDimensions(dst);
-                var dstTexCoord : vec2<u32> = vec2<u32>(GlobalInvocationID.xy);
-                var nonCoveredColor : vec4<f32> =
+            [[stage(compute), workgroup_size(1, 1, 1)]]
+            fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
+                let srcSize : vec2<i32> = textureDimensions(src);
+                let dstSize : vec2<i32> = textureDimensions(dst);
+                let dstTexCoord : vec2<u32> = vec2<u32>(GlobalInvocationID.xy);
+                let nonCoveredColor : vec4<f32> =
                     vec4<f32>(0.0, 1.0, 0.0, 1.0); // should be green
 
                 var success : bool = true;
@@ -179,8 +179,8 @@ class CopyTextureForBrowserTests : public DawnTest {
                         srcTexCoord.y = u32(srcSize.y) - srcTexCoord.y - 1u;
                     }
 
-                    var srcColor : vec4<f32> = textureLoad(src, vec2<i32>(srcTexCoord), 0);
-                    var dstColor : vec4<f32> = textureLoad(dst, vec2<i32>(dstTexCoord), 0);
+                    let srcColor : vec4<f32> = textureLoad(src, vec2<i32>(srcTexCoord), 0);
+                    let dstColor : vec4<f32> = textureLoad(dst, vec2<i32>(dstTexCoord), 0);
 
                     // Not use loop and variable index format to workaround
                     // crbug.com/tint/638.
@@ -196,7 +196,7 @@ class CopyTextureForBrowserTests : public DawnTest {
                                   aboutEqual(dstColor.a, srcColor.a);
                     }
                 }
-                var outputIndex : u32 = GlobalInvocationID.y * u32(dstSize.x) +
+                let outputIndex : u32 = GlobalInvocationID.y * u32(dstSize.x) +
                                         GlobalInvocationID.x;
                 if (success) {
                     output.result[outputIndex] = 1u;

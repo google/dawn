@@ -77,11 +77,9 @@ class RenderPassLoadOpTests : public DawnTest {
 
         // draws a blue quad on the right half of the screen
         const char* vsSource = R"(
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                let pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                     vec2<f32>( 0.0, -1.0),
                     vec2<f32>( 1.0, -1.0),
                     vec2<f32>( 0.0,  1.0),
@@ -89,13 +87,12 @@ class RenderPassLoadOpTests : public DawnTest {
                     vec2<f32>( 1.0, -1.0),
                     vec2<f32>( 1.0,  1.0));
 
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })";
 
         const char* fsSource = R"(
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() {
-                fragColor = vec4<f32>(0.0, 0.0, 1.0, 1.0);
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return vec4<f32>(0.0, 0.0, 1.0, 1.0);
             })";
         blueQuad = DrawQuad(device, vsSource, fsSource);
     }

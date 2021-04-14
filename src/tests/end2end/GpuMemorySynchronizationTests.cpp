@@ -58,9 +58,8 @@ class GpuMemorySyncTests : public DawnTest {
         const wgpu::Buffer& buffer,
         wgpu::TextureFormat colorFormat) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() {
-                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -68,10 +67,9 @@ class GpuMemorySyncTests : public DawnTest {
                 i : i32;
             };
             [[group(0), binding(0)]] var<storage> data : [[access(read_write)]] Data;
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() {
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
                 data.i = data.i + 1;
-                fragColor = vec4<f32>(f32(data.i) / 255.0, 0.0, 0.0, 1.0);
+                return vec4<f32>(f32(data.i) / 255.0, 0.0, 0.0, 1.0);
             })");
 
         utils::ComboRenderPipelineDescriptor2 rpDesc;
@@ -335,9 +333,8 @@ class StorageToUniformSyncTests : public DawnTest {
     std::tuple<wgpu::RenderPipeline, wgpu::BindGroup> CreatePipelineAndBindGroupForRender(
         wgpu::TextureFormat colorFormat) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[stage(vertex)]] fn main() {
-                Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                return vec4<f32>(0.0, 0.0, 0.0, 1.0);
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -346,9 +343,8 @@ class StorageToUniformSyncTests : public DawnTest {
             };
             [[group(0), binding(0)]] var<uniform> contents : Contents;
 
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-            [[stage(fragment)]] fn main() {
-                fragColor = vec4<f32>(contents.color, 0.0, 0.0, 1.0);
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return vec4<f32>(contents.color, 0.0, 0.0, 1.0);
             })");
 
         utils::ComboRenderPipelineDescriptor2 rpDesc;
@@ -538,7 +534,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
             vbContents.pos[1] = vec4<f32>(1.0, 1.0, 0.0, 1.0);
             vbContents.pos[2] = vec4<f32>(1.0, -1.0, 0.0, 1.0);
             vbContents.pos[3] = vec4<f32>(-1.0, -1.0, 0.0, 1.0);
-            const dummy : i32 = 0;
+            let dummy : i32 = 0;
             ibContents.indices[0] = vec4<i32>(0, 1, 2, 0);
             ibContents.indices[1] = vec4<i32>(2, 3, dummy, dummy);
             uniformContents.color = 1.0;
@@ -574,10 +570,9 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 
     // Create pipeline, bind group, and reuse buffers in render pass.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        [[location(0)]] var<in> pos : vec4<f32>;
-        [[builtin(position)]] var<out> Position: vec4<f32>;
-        [[stage(vertex)]] fn main() {
-            Position = pos;
+        [[stage(vertex)]]
+        fn main([[location(0)]] pos : vec4<f32>) -> [[builtin(position)]] vec4<f32> {
+            return pos;
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -588,9 +583,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
         [[group(0), binding(0)]] var<uniform> uniformBuffer : Buf;
         [[group(0), binding(1)]] var<storage> storageBuffer : [[access(read)]] Buf;
 
-        [[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() {
-            fragColor = vec4<f32>(uniformBuffer.color, storageBuffer.color, 0.0, 1.0);
+        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(uniformBuffer.color, storageBuffer.color, 0.0, 1.0);
         })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
@@ -655,7 +649,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
             contents.pos[1] = vec4<f32>(1.0, 1.0, 0.0, 1.0);
             contents.pos[2] = vec4<f32>(1.0, -1.0, 0.0, 1.0);
             contents.pos[3] = vec4<f32>(-1.0, -1.0, 0.0, 1.0);
-            const dummy : i32 = 0;
+            let dummy : i32 = 0;
             contents.indices[0] = vec4<i32>(0, 1, 2, 0);
             contents.indices[1] = vec4<i32>(2, 3, dummy, dummy);
             contents.color0 = 1.0;
@@ -692,10 +686,9 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
     // Create pipeline, bind group, and reuse the buffer in render pass.
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-        [[location(0)]] var<in> pos : vec4<f32>;
-        [[builtin(position)]] var<out> Position : vec4<f32>;
-        [[stage(vertex)]] fn main() {
-            Position = pos;
+        [[stage(vertex)]]
+        fn main([[location(0)]] pos : vec4<f32>) -> [[builtin(position)]] vec4<f32> {
+            return pos;
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -705,9 +698,8 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
         [[group(0), binding(0)]] var<uniform> uniformBuffer : Buf;
         [[group(0), binding(1)]] var<storage> storageBuffer : [[access(read)]] Buf;
 
-        [[location(0)]] var<out> fragColor : vec4<f32>;
-        [[stage(fragment)]] fn main() {
-            fragColor = vec4<f32>(uniformBuffer.color, storageBuffer.color, 0.0, 1.0);
+        [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+            return vec4<f32>(uniformBuffer.color, storageBuffer.color, 0.0, 1.0);
         })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);

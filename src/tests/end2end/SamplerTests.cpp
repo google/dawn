@@ -55,30 +55,25 @@ class SamplerTest : public DawnTest {
         mRenderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
         auto vsModule = utils::CreateShaderModule(device, R"(
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                let pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                     vec2<f32>(-2.0, -2.0),
                     vec2<f32>(-2.0,  2.0),
                     vec2<f32>( 2.0, -2.0),
                     vec2<f32>(-2.0,  2.0),
                     vec2<f32>( 2.0, -2.0),
                     vec2<f32>( 2.0,  2.0));
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             }
         )");
         auto fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var sampler0 : sampler;
             [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
 
-            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
-
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-                fragColor = textureSample(texture0, sampler0, FragCoord.xy / vec2<f32>(2.0, 2.0));
+            [[stage(fragment)]]
+            fn main([[builtin(frag_coord)]] FragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+                return textureSample(texture0, sampler0, FragCoord.xy / vec2<f32>(2.0, 2.0));
             })");
 
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;

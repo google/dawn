@@ -61,18 +61,17 @@ class DepthStencilStateTest : public DawnTest {
                 depth : f32;
             };
             [[group(0), binding(0)]] var<uniform> ubo : UBO;
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
 
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                let pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                         vec2<f32>(-1.0,  1.0),
                         vec2<f32>(-1.0, -1.0),
                         vec2<f32>( 1.0, -1.0), // front-facing
                         vec2<f32>(-1.0,  1.0),
                         vec2<f32>( 1.0,  1.0),
                         vec2<f32>( 1.0, -1.0)); // back-facing
-                Position = vec4<f32>(pos[VertexIndex], ubo.depth, 1.0);
+                return vec4<f32>(pos[VertexIndex], ubo.depth, 1.0);
             })");
 
         fsModule = utils::CreateShaderModule(device, R"(
@@ -82,10 +81,8 @@ class DepthStencilStateTest : public DawnTest {
             };
             [[group(0), binding(0)]] var<uniform> ubo : UBO;
 
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-                fragColor = vec4<f32>(ubo.color, 1.0);
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return vec4<f32>(ubo.color, 1.0);
             })");
     }
 

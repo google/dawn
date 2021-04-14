@@ -36,36 +36,32 @@ class DepthBiasTests : public DawnTest {
             case QuadAngle::Flat:
                 // Draw a square at z = 0.25
                 vertexSource = R"(
-    [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-    [[builtin(position)]] var<out> Position : vec4<f32>;
-    [[stage(vertex)]] fn main() {
-        const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+    [[stage(vertex)]]
+    fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+        let pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
             vec2<f32>(-1.0, -1.0),
             vec2<f32>( 1.0, -1.0),
             vec2<f32>(-1.0,  1.0),
             vec2<f32>(-1.0,  1.0),
             vec2<f32>( 1.0, -1.0),
             vec2<f32>( 1.0,  1.0));
-        Position = vec4<f32>(pos[VertexIndex], 0.25, 1.0);
-        return;
+        return vec4<f32>(pos[VertexIndex], 0.25, 1.0);
     })";
                 break;
 
             case QuadAngle::TiltedX:
                 // Draw a square ranging from 0 to 0.5, bottom to top
                 vertexSource = R"(
-    [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-    [[builtin(position)]] var<out> Position : vec4<f32>;
-    [[stage(vertex)]] fn main() {
-        const pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
+    [[stage(vertex)]]
+    fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+        let pos : array<vec3<f32>, 6> = array<vec3<f32>, 6>(
             vec3<f32>(-1.0, -1.0, 0.0),
             vec3<f32>( 1.0, -1.0, 0.0),
             vec3<f32>(-1.0,  1.0, 0.5),
             vec3<f32>(-1.0,  1.0, 0.5),
             vec3<f32>( 1.0, -1.0, 0.0),
             vec3<f32>( 1.0,  1.0, 0.5));
-        Position = vec4<f32>(pos[VertexIndex], 1.0);
-        return;
+        return vec4<f32>(pos[VertexIndex], 1.0);
     })";
                 break;
         }
@@ -73,10 +69,8 @@ class DepthBiasTests : public DawnTest {
         wgpu::ShaderModule vertexModule = utils::CreateShaderModule(device, vertexSource);
 
         wgpu::ShaderModule fragmentModule = utils::CreateShaderModule(device, R"(
-    [[location(0)]] var<out> fragColor : vec4<f32>;;
-    [[stage(fragment)]] fn main() {
-        fragColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-        return;
+    [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+        return vec4<f32>(1.0, 0.0, 0.0, 1.0);
     })");
 
         {

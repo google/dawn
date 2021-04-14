@@ -54,18 +54,22 @@ class MultisampledSamplingTest : public DawnTest {
             utils::ComboRenderPipelineDescriptor2 desc;
 
             desc.vertex.module = utils::CreateShaderModule(device, R"(
-                [[location(0)]] var<in> pos : vec2<f32>;
-                [[builtin(position)]] var<out> Position : vec4<f32>;
-                [[stage(vertex)]] fn main() {
-                    Position = vec4<f32>(pos, 0.0, 1.0);
+                [[stage(vertex)]]
+                fn main([[location(0)]] pos : vec2<f32>) -> [[builtin(position)]] vec4<f32> {
+                    return vec4<f32>(pos, 0.0, 1.0);
                 })");
 
             desc.cFragment.module = utils::CreateShaderModule(device, R"(
-                [[location(0)]] var<out> fragColor : f32;
-                [[builtin(frag_depth)]] var<out> FragDepth : f32;
-                [[stage(fragment)]] fn main() {
-                    fragColor = 1.0;
-                    FragDepth = 0.7;
+                struct FragmentOut {
+                    [[location(0)]] color : f32;
+                    [[builtin(frag_depth)]] depth : f32;
+                };
+
+                [[stage(fragment)]] fn main() -> FragmentOut {
+                    var output : FragmentOut;
+                    output.color = 1.0;
+                    output.depth = 0.7;
+                    return output;
                 })");
 
             desc.primitive.stripIndexFormat = wgpu::IndexFormat::Uint32;

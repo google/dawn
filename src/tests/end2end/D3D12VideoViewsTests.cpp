@@ -231,13 +231,14 @@ namespace {
         // Vertex shader used to render a sampled texture into a quad.
         wgpu::ShaderModule GetTestVertexShaderModule() const {
             return utils::CreateShaderModule(device, R"(
-                [[builtin(position)]] var<out> Position : vec4<f32>;
-                [[location(0)]] var<out> texCoord : vec2 <f32>;
+                struct VertexOut {
+                    [[location(0)]] texCoord : vec2 <f32>;
+                    [[builtin(position)]] position : vec4<f32>;
+                };
 
-                [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-
-                [[stage(vertex)]] fn main() {
-                    const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+                [[stage(vertex)]]
+                fn main([[builtin(vertex_index)]] VertexIndex : u32) -> VertexOut {
+                    let pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                         vec2<f32>(-1.0, 1.0),
                         vec2<f32>(-1.0, -1.0),
                         vec2<f32>(1.0, -1.0),
@@ -245,8 +246,10 @@ namespace {
                         vec2<f32>(1.0, -1.0),
                         vec2<f32>(1.0, 1.0)
                     );
-                    Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
-                    texCoord = vec2<f32>(Position.xy * 0.5) + vec2<f32>(0.5, 0.5);
+                    var output : VertexOut;
+                    output.position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                    output.texCoord = vec2<f32>(output.position.xy * 0.5) + vec2<f32>(0.5, 0.5);
+                    return output;
             })");
         }
 
@@ -297,12 +300,10 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
             [[set(0), binding(0)]] var sampler0 : sampler;
             [[set(0), binding(1)]] var texture : texture_2d<f32>;
 
-            [[location(0)]] var<in> texCoord : vec2<f32>;
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-               var y : f32 = textureSample(texture, sampler0, texCoord).r;
-               fragColor = vec4<f32>(y, 0.0, 0.0, 1.0);
+            [[stage(fragment)]]
+            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+               let y : f32 = textureSample(texture, sampler0, texCoord).r;
+               return vec4<f32>(y, 0.0, 0.0, 1.0);
             })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(
@@ -350,13 +351,11 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
             [[set(0), binding(0)]] var sampler0 : sampler;
             [[set(0), binding(1)]] var texture : texture_2d<f32>;
 
-            [[location(0)]] var<in> texCoord : vec2<f32>;
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-               var u : f32 = textureSample(texture, sampler0, texCoord).r;
-               var v : f32 = textureSample(texture, sampler0, texCoord).g;
-               fragColor = vec4<f32>(u, v, 0.0, 1.0);
+            [[stage(fragment)]]
+            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+               let u : f32 = textureSample(texture, sampler0, texCoord).r;
+               let v : f32 = textureSample(texture, sampler0, texCoord).g;
+               return vec4<f32>(u, v, 0.0, 1.0);
             })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(
@@ -413,14 +412,12 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
             [[set(0), binding(1)]] var lumaTexture : texture_2d<f32>;
             [[set(0), binding(2)]] var chromaTexture : texture_2d<f32>;
 
-            [[location(0)]] var<in> texCoord : vec2<f32>;
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-               var y : f32 = textureSample(lumaTexture, sampler0, texCoord).r;
-               var u : f32 = textureSample(chromaTexture, sampler0, texCoord).r;
-               var v : f32 = textureSample(chromaTexture, sampler0, texCoord).g;
-               fragColor = vec4<f32>(y, u, v, 1.0);
+            [[stage(fragment)]]
+            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+               let y : f32 = textureSample(lumaTexture, sampler0, texCoord).r;
+               let u : f32 = textureSample(chromaTexture, sampler0, texCoord).r;
+               let v : f32 = textureSample(chromaTexture, sampler0, texCoord).g;
+               return vec4<f32>(y, u, v, 1.0);
             })");
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(

@@ -101,18 +101,12 @@ TEST_P(D3D12CachingTests, SameShaderNoCache) {
     mPersistentCache.mIsDisabled = true;
 
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[builtin(position)]] var<out> Position : vec4<f32>;
-
-        [[stage(vertex)]] fn vertex_main() {
-            Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-            return;
+        [[stage(vertex)]] fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        [[location(0)]] var<out> outColor : vec4<f32>;
-
-        [[stage(fragment)]] fn fragment_main() {
-          outColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-          return;
+        [[stage(fragment)]] fn fragment_main() -> [[location(0)]] vec4<f32> {
+          return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
 
@@ -148,18 +142,12 @@ TEST_P(D3D12CachingTests, SameShaderNoCache) {
 // entrypoints)
 TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
-        [[builtin(position)]] var<out> Position : vec4<f32>;
-
-        [[stage(vertex)]] fn vertex_main() {
-            Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
-            return;
+        [[stage(vertex)]] fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
         }
 
-        [[location(0)]] var<out> outColor : vec4<f32>;
-
-        [[stage(fragment)]] fn fragment_main() {
-          outColor = vec4<f32>(1.0, 0.0, 0.0, 1.0);
-          return;
+        [[stage(fragment)]] fn fragment_main() -> [[location(0)]] vec4<f32> {
+          return vec4<f32>(1.0, 0.0, 0.0, 1.0);
         }
     )");
 
@@ -193,18 +181,12 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPointsPerStage) {
 
     // Modify the WGSL shader functions and make sure it doesn't hit.
     wgpu::ShaderModule newModule = utils::CreateShaderModule(device, R"(
-      [[builtin(position)]] var<out> Position : vec4<f32>;
-
-      [[stage(vertex)]] fn vertex_main() {
-          Position = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-          return;
+      [[stage(vertex)]] fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+          return vec4<f32>(1.0, 1.0, 1.0, 1.0);
       }
 
-      [[location(0)]] var<out> outColor : vec4<f32>;
-
-      [[stage(fragment)]] fn fragment_main() {
-        outColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-        return;
+      [[stage(fragment)]] fn fragment_main() -> [[location(0)]] vec4<f32> {
+        return vec4<f32>(1.0, 1.0, 1.0, 1.0);
       }
   )");
 
@@ -233,12 +215,10 @@ TEST_P(D3D12CachingTests, ReuseShaderWithMultipleEntryPoints) {
 
         [[stage(compute)]] fn write1() {
             data.data = 1u;
-            return;
         }
 
         [[stage(compute)]] fn write42() {
             data.data = 42u;
-            return;
         }
     )");
 

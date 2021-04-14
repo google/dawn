@@ -50,12 +50,17 @@ class MultisampledRenderingTest : public DawnTest {
                 depth : f32;
             };
             [[group(0), binding(0)]] var<uniform> uBuffer : U;
-            [[location(0)]] var<out> FragColor : vec4<f32>;
-            [[builtin(frag_depth)]] var<out> FragDepth : f32;
 
-            [[stage(fragment)]] fn main() {
-                FragColor = uBuffer.color;
-                FragDepth = uBuffer.depth;
+            struct FragmentOut {
+                [[location(0)]] color : vec4<f32>;
+                [[builtin(frag_depth)]] depth : f32;
+            };
+
+            [[stage(fragment)]] fn main() -> FragmentOut {
+                var output : FragmentOut;
+                output.color = uBuffer.color;
+                output.depth = uBuffer.depth;
+                return output;
             })";
 
         const char* kFsOneOutputWithoutDepth = R"(
@@ -63,10 +68,9 @@ class MultisampledRenderingTest : public DawnTest {
                 color : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> uBuffer : U;
-            [[location(0)]] var<out> FragColor : vec4<f32>;
 
-            [[stage(fragment)]] fn main() {
-                FragColor = uBuffer.color;
+            [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                return uBuffer.color;
             })";
 
         const char* fs = testDepth ? kFsOneOutputWithDepth : kFsOneOutputWithoutDepth;
@@ -84,12 +88,17 @@ class MultisampledRenderingTest : public DawnTest {
                 color1 : vec4<f32>;
             };
             [[group(0), binding(0)]] var<uniform> uBuffer : U;
-            [[location(0)]] var<out> FragColor0 : vec4<f32>;
-            [[location(1)]] var<out> FragColor1 : vec4<f32>;
 
-            [[stage(fragment)]] fn main() {
-                FragColor0 = uBuffer.color0;
-                FragColor1 = uBuffer.color1;
+            struct FragmentOut {
+                [[location(0)]] color0 : vec4<f32>;
+                [[location(1)]] color1 : vec4<f32>;
+            };
+
+            [[stage(fragment)]] fn main() -> FragmentOut {
+                var output : FragmentOut;
+                output.color0 = uBuffer.color0;
+                output.color1 = uBuffer.color1;
+                return output;
             })";
 
         return CreateRenderPipelineForTest(kFsTwoOutputs, 2, false, sampleMask,
@@ -214,30 +223,26 @@ class MultisampledRenderingTest : public DawnTest {
         // Draw a bottom-right triangle. In standard 4xMSAA pattern, for the pixels on diagonal,
         // only two of the samples will be touched.
         const char* vs = R"(
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
                     vec2<f32>( 1.0, -1.0)
                 );
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })";
 
         // Draw a bottom-left triangle.
         const char* vsFlipped = R"(
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-1.0,  1.0),
                     vec2<f32>( 1.0,  1.0),
                     vec2<f32>(-1.0, -1.0)
                 );
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })";
 
         if (flipTriangle) {
@@ -776,12 +781,17 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
             color : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uBuffer : U;
-        [[location(0)]] var<out> FragColor : vec4<f32>;
-        [[builtin(sample_mask_out)]] var<out> SampleMask : u32;
 
-        [[stage(fragment)]] fn main() {
-            FragColor = uBuffer.color;
-            SampleMask = 6u;
+        struct FragmentOut {
+            [[location(0)]] color : vec4<f32>;
+            [[builtin(sample_mask_out)]] sampleMask : u32;
+        };
+
+        [[stage(fragment)]] fn main() -> FragmentOut {
+            var output : FragmentOut;
+            output.color = uBuffer.color;
+            output.sampleMask = 6u;
+            return output;
         })";
 
     wgpu::RenderPipeline pipeline = CreateRenderPipelineForTest(fs, 1, false, kSampleMask);
@@ -833,14 +843,19 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
             color1 : vec4<f32>;
         };
         [[group(0), binding(0)]] var<uniform> uBuffer : U;
-        [[location(0)]] var<out> FragColor0 : vec4<f32>;
-        [[location(1)]] var<out> FragColor1 : vec4<f32>;
-        [[builtin(sample_mask_out)]] var<out> SampleMask : u32;
 
-        [[stage(fragment)]] fn main() {
-            FragColor0 = uBuffer.color0;
-            FragColor1 = uBuffer.color1;
-            SampleMask = 6u;
+        struct FragmentOut {
+            [[location(0)]] color0 : vec4<f32>;
+            [[location(1)]] color1 : vec4<f32>;
+            [[builtin(sample_mask_out)]] sampleMask : u32;
+        };
+
+        [[stage(fragment)]] fn main() -> FragmentOut {
+            var output : FragmentOut;
+            output.color0 = uBuffer.color0;
+            output.color1 = uBuffer.color1;
+            output.sampleMask = 6u;
+            return output;
         })";
 
     wgpu::RenderPipeline pipeline = CreateRenderPipelineForTest(fs, 2, false);

@@ -33,17 +33,13 @@ class VertexBufferRobustnessTest : public DawnTest {
     wgpu::ShaderModule CreateVertexModule(const std::string& attributes,
                                           const std::string& successExpression) {
         return utils::CreateShaderModule(device, (attributes + R"(
-                [[builtin(position)]] var<out> Position : vec4<f32>;
-
-                [[stage(vertex)]] fn main() {
+                [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
                     if ()" + successExpression + R"() {
                         // Success case, move the vertex out of the viewport
-                        Position = vec4<f32>(-10.0, 0.0, 0.0, 1.0);
-                    } else {
-                        // Failure case, move the vertex inside the viewport
-                        Position = vec4<f32>(0.0, 0.0, 0.0, 1.0);
+                        return vec4<f32>(-10.0, 0.0, 0.0, 1.0);
                     }
-                    return;
+                    // Failure case, move the vertex inside the viewport
+                    return vec4<f32>(0.0, 0.0, 0.0, 1.0);
                 }
             )")
                                                      .c_str());
@@ -58,11 +54,8 @@ class VertexBufferRobustnessTest : public DawnTest {
                 bool expectation) {
         wgpu::ShaderModule vsModule = CreateVertexModule(attributes, successExpression);
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-                [[location(0)]] var<out> outColor : vec4<f32>;
-
-                [[stage(fragment)]] fn main() {
-                    outColor = vec4<f32>(1.0, 1.0, 1.0, 1.0);
-                    return;
+                [[stage(fragment)]] fn main() -> [[location(0)]] vec4<f32> {
+                    return vec4<f32>(1.0, 1.0, 1.0, 1.0);
                 }
             )");
 

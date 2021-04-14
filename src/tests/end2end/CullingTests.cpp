@@ -26,7 +26,7 @@ class CullingTest : public DawnTest {
         // 1. The top-left one is counterclockwise (CCW)
         // 2. The bottom-right one is clockwise (CW)
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
-            const pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
+            let pos : array<vec2<f32>, 6> = array<vec2<f32>, 6>(
                 vec2<f32>(-1.0,  1.0),
                 vec2<f32>(-1.0,  0.0),
                 vec2<f32>( 0.0,  1.0),
@@ -34,26 +34,20 @@ class CullingTest : public DawnTest {
                 vec2<f32>( 1.0,  0.0),
                 vec2<f32>( 1.0, -1.0));
 
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-
-            [[stage(vertex)]] fn main() {
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
-                return;
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
+                return vec4<f32>(pos[VertexIndex], 0.0, 1.0);
             })");
 
         // FragCoord of pixel(x, y) in framebuffer coordinate is (x + 0.5, y + 0.5). And we use
         // RGBA8 format for the back buffer. So (FragCoord.xy - vec2(0.5)) / 255 in shader code
         // will make the pixel's R and G channels exactly equal to the pixel's x and y coordinates.
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
-            [[location(0)]] var<out> fragColor : vec4<f32>;;
-            [[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-                fragColor = vec4<f32>(
+            [[stage(fragment)]]
+            fn main([[builtin(frag_coord)]] FragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+                return vec4<f32>(
                     (FragCoord.xy - vec2<f32>(0.5, 0.5)) / vec2<f32>(255.0, 255.0),
                     0.0, 1.0);
-                return;
             })");
 
         // Set culling mode and front face according to the parameters

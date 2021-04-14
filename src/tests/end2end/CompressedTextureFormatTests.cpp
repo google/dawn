@@ -140,31 +140,30 @@ class CompressedTextureBCFormatTest : public DawnTest {
 
         utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[location(0)]] var<out> texCoord : vec2 <f32>;
+            struct VertexOut {
+                [[location(0)]] texCoord : vec2 <f32>;
+                [[builtin(position)]] position : vec4<f32>;
+            };
 
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-
-            [[stage(vertex)]] fn main() {
-                const pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            [[stage(vertex)]]
+            fn main([[builtin(vertex_index)]] VertexIndex : u32) -> VertexOut {
+                let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                     vec2<f32>(-3.0,  1.0),
                     vec2<f32>( 3.0,  1.0),
                     vec2<f32>( 0.0, -2.0)
                 );
-                Position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
-                texCoord = vec2<f32>(Position.x / 2.0, -Position.y / 2.0) + vec2<f32>(0.5, 0.5);
-                return;
+                var output : VertexOut;
+                output.position = vec4<f32>(pos[VertexIndex], 0.0, 1.0);
+                output.texCoord = vec2<f32>(output.position.x / 2.0, -output.position.y / 2.0) + vec2<f32>(0.5, 0.5);
+                return output;
             })");
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var sampler0 : sampler;
             [[group(0), binding(1)]] var texture0 : texture_2d<f32>;
 
-            [[location(0)]] var<in> texCoord : vec2<f32>;
-            [[location(0)]] var<out> fragColor : vec4<f32>;
-
-            [[stage(fragment)]] fn main() {
-                fragColor = textureSample(texture0, sampler0, texCoord);
-                return;
+            [[stage(fragment)]]
+            fn main([[location(0)]] texCoord : vec2<f32>) -> [[location(0)]] vec4<f32> {
+                return textureSample(texture0, sampler0, texCoord);
             })");
         renderPipelineDescriptor.vertex.module = vsModule;
         renderPipelineDescriptor.cFragment.module = fsModule;
