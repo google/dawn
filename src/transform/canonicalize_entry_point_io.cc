@@ -32,6 +32,10 @@ Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
   ProgramBuilder out;
   CloneContext ctx(&out, in);
 
+  // Start by cloning all the symbols. This ensures that the authored symbols
+  // won't get renamed if they collide with new symbols below.
+  ctx.CloneSymbols();
+
   // Strip entry point IO decorations from struct declarations.
   // TODO(jrprice): This code is duplicated with the SPIR-V transform.
   for (auto* ty : ctx.src->AST().ConstructedTypes()) {

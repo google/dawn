@@ -503,6 +503,29 @@ fn frag_main(tint_symbol : tint_symbol_1) -> tint_symbol_2 {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CanonicalizeEntryPointIOTest, DontRenameSymbols) {
+  auto* src = R"(
+[[stage(fragment)]]
+fn tint_symbol_1([[location(0)]] col : f32) {
+}
+)";
+
+  auto* expect = R"(
+struct tint_symbol_2 {
+  [[location(0)]]
+  col : f32;
+};
+
+[[stage(fragment)]]
+fn tint_symbol_1(tint_symbol : tint_symbol_2) {
+}
+)";
+
+  auto got = Run<CanonicalizeEntryPointIO>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint
