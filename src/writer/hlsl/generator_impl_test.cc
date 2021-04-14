@@ -75,7 +75,7 @@ INSTANTIATE_TEST_SUITE_P(
         HlslBuiltinData{ast::Builtin::kPosition, "SV_Position"},
         HlslBuiltinData{ast::Builtin::kVertexIndex, "SV_VertexID"},
         HlslBuiltinData{ast::Builtin::kInstanceIndex, "SV_InstanceID"},
-        HlslBuiltinData{ast::Builtin::kFrontFacing, "SV_IsFrontFacing"},
+        HlslBuiltinData{ast::Builtin::kFrontFacing, "SV_IsFrontFace"},
         HlslBuiltinData{ast::Builtin::kFragCoord, "SV_Position"},
         HlslBuiltinData{ast::Builtin::kFragDepth, "SV_Depth"},
         HlslBuiltinData{ast::Builtin::kLocalInvocationId, "SV_GroupThreadID"},

@@ -1941,7 +1941,7 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
     case ast::Builtin::kInstanceIndex:
       return "SV_InstanceID";
     case ast::Builtin::kFrontFacing:
-      return "SV_IsFrontFacing";
+      return "SV_IsFrontFace";
     case ast::Builtin::kFragCoord:
       return "SV_Position";
     case ast::Builtin::kFragDepth:
