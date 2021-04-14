@@ -540,7 +540,7 @@ struct S {
   a : f32;
   b : array<f32>;
 };
-var<in> s : S;
+var<storage> s : S;
 
 fn f() {
   var d : f32 = s.b[25];
@@ -554,7 +554,7 @@ struct S {
   b : array<f32>;
 };
 
-var<in> s : S;
+var<storage> s : S;
 
 fn f() {
   var d : f32 = s.b[min(u32(25), (arrayLength(s.b) - 1u))];
@@ -590,6 +590,49 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Scoped_Variable) {
   // -> var b : f32 = a[min(u32(i), 4)];
   //    var c : f32 = a[min(u32(i), 2)];
   FAIL();
+}
+
+// Check that existing use of min() and arrayLength() do not get renamed.
+TEST_F(BoundArrayAccessorsTest, DontRenameSymbols) {
+  auto* src = R"(
+[[block]]
+struct S {
+  a : f32;
+  b : array<f32>;
+};
+
+var<storage> s : S;
+
+let c : u32 = 1u;
+
+fn f() {
+  let b : f32 = s.b[c];
+  let x : i32 = min(1, 2);
+  let y : u32 = arrayLength(s.b);
+}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct S {
+  a : f32;
+  b : array<f32>;
+};
+
+var<storage> s : S;
+
+let c : u32 = 1u;
+
+fn f() {
+  let b : f32 = s.b[min(u32(c), (arrayLength(s.b) - 1u))];
+  let x : i32 = min(1, 2);
+  let y : u32 = arrayLength(s.b);
+}
+)";
+
+  auto got = Run<BoundArrayAccessors>(src);
+
+  EXPECT_EQ(expect, str(got));
 }
 
 }  // namespace
