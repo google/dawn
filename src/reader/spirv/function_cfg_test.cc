@@ -7222,7 +7222,7 @@ TEST_F(SpvParserTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge) {
 
 TEST_F(
     SpvParserTest,
-    FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeTrueHeader) {
+    FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeTrueHeader) {  // NOLINT - line length
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -7255,7 +7255,7 @@ TEST_F(
 
 TEST_F(
     SpvParserTest,
-    FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeFalseHeader) {
+    FindIfSelectionInternalHeaders_DomViolation_InteriorMerge_CantBeFalseHeader) {  // NOLINT - line length
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
