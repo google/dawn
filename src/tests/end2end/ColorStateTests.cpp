@@ -371,7 +371,7 @@ TEST_P(ColorStateTest, SrcBlendFactorOne) {
     CheckSrcBlendFactor(base, wgpu::BlendFactor::One, wgpu::BlendFactor::One, tests);
 }
 
-TEST_P(ColorStateTest, SrcBlendFactorSrcColor) {
+TEST_P(ColorStateTest, SrcBlendFactorSrc) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -381,10 +381,10 @@ TEST_P(ColorStateTest, SrcBlendFactorSrcColor) {
                        RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, fac);
                        return std::make_pair(TriangleSpec({{color}}), expected);
                    });
-    CheckSrcBlendFactor(base, wgpu::BlendFactor::SrcColor, wgpu::BlendFactor::Zero, tests);
+    CheckSrcBlendFactor(base, wgpu::BlendFactor::Src, wgpu::BlendFactor::Zero, tests);
 }
 
-TEST_P(ColorStateTest, SrcBlendFactorOneMinusSrcColor) {
+TEST_P(ColorStateTest, SrcBlendFactorOneMinusSrc) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -394,7 +394,7 @@ TEST_P(ColorStateTest, SrcBlendFactorOneMinusSrcColor) {
                        RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, fac);
                        return std::make_pair(TriangleSpec({{color}}), expected);
                    });
-    CheckSrcBlendFactor(base, wgpu::BlendFactor::OneMinusSrcColor, wgpu::BlendFactor::Zero, tests);
+    CheckSrcBlendFactor(base, wgpu::BlendFactor::OneMinusSrc, wgpu::BlendFactor::Zero, tests);
 }
 
 TEST_P(ColorStateTest, SrcBlendFactorSrcAlpha) {
@@ -422,7 +422,7 @@ TEST_P(ColorStateTest, SrcBlendFactorOneMinusSrcAlpha) {
                         wgpu::BlendFactor::OneMinusSrcAlpha, tests);
 }
 
-TEST_P(ColorStateTest, SrcBlendFactorDstColor) {
+TEST_P(ColorStateTest, SrcBlendFactorDst) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -432,10 +432,10 @@ TEST_P(ColorStateTest, SrcBlendFactorDstColor) {
                        RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, fac);
                        return std::make_pair(TriangleSpec({{color}}), expected);
                    });
-    CheckSrcBlendFactor(base, wgpu::BlendFactor::DstColor, wgpu::BlendFactor::Zero, tests);
+    CheckSrcBlendFactor(base, wgpu::BlendFactor::Dst, wgpu::BlendFactor::Zero, tests);
 }
 
-TEST_P(ColorStateTest, SrcBlendFactorOneMinusDstColor) {
+TEST_P(ColorStateTest, SrcBlendFactorOneMinusDst) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -445,7 +445,7 @@ TEST_P(ColorStateTest, SrcBlendFactorOneMinusDstColor) {
                        RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, fac);
                        return std::make_pair(TriangleSpec({{color}}), expected);
                    });
-    CheckSrcBlendFactor(base, wgpu::BlendFactor::OneMinusDstColor, wgpu::BlendFactor::Zero, tests);
+    CheckSrcBlendFactor(base, wgpu::BlendFactor::OneMinusDst, wgpu::BlendFactor::Zero, tests);
 }
 
 TEST_P(ColorStateTest, SrcBlendFactorDstAlpha) {
@@ -487,7 +487,7 @@ TEST_P(ColorStateTest, SrcBlendFactorSrcAlphaSaturated) {
                         wgpu::BlendFactor::SrcAlphaSaturated, tests);
 }
 
-TEST_P(ColorStateTest, SrcBlendFactorBlendColor) {
+TEST_P(ColorStateTest, SrcBlendFactorConstant) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(
@@ -496,10 +496,10 @@ TEST_P(ColorStateTest, SrcBlendFactorBlendColor) {
             RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, triangleSpec.blendFactor);
             return std::make_pair(triangleSpec, expected);
         });
-    CheckSrcBlendFactor(base, wgpu::BlendFactor::BlendColor, wgpu::BlendFactor::BlendColor, tests);
+    CheckSrcBlendFactor(base, wgpu::BlendFactor::Constant, wgpu::BlendFactor::Constant, tests);
 }
 
-TEST_P(ColorStateTest, SrcBlendFactorOneMinusBlendColor) {
+TEST_P(ColorStateTest, SrcBlendFactorOneMinusConstant) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -509,8 +509,8 @@ TEST_P(ColorStateTest, SrcBlendFactorOneMinusBlendColor) {
                        RGBA8 expected = base + mix(RGBA8(0, 0, 0, 0), color, f);
                        return std::make_pair(triangleSpec, expected);
                    });
-    CheckSrcBlendFactor(base, wgpu::BlendFactor::OneMinusBlendColor,
-                        wgpu::BlendFactor::OneMinusBlendColor, tests);
+    CheckSrcBlendFactor(base, wgpu::BlendFactor::OneMinusConstant,
+                        wgpu::BlendFactor::OneMinusConstant, tests);
 }
 
 // The following tests check that the Destination blend factor works
@@ -532,7 +532,7 @@ TEST_P(ColorStateTest, DstBlendFactorOne) {
     CheckDstBlendFactor(base, wgpu::BlendFactor::One, wgpu::BlendFactor::One, tests);
 }
 
-TEST_P(ColorStateTest, DstBlendFactorSrcColor) {
+TEST_P(ColorStateTest, DstBlendFactorSrc) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -542,10 +542,10 @@ TEST_P(ColorStateTest, DstBlendFactorSrcColor) {
                        RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, fac);
                        return std::make_pair(TriangleSpec({{color}}), expected);
                    });
-    CheckDstBlendFactor(base, wgpu::BlendFactor::SrcColor, wgpu::BlendFactor::Zero, tests);
+    CheckDstBlendFactor(base, wgpu::BlendFactor::Src, wgpu::BlendFactor::Zero, tests);
 }
 
-TEST_P(ColorStateTest, DstBlendFactorOneMinusSrcColor) {
+TEST_P(ColorStateTest, DstBlendFactorOneMinusSrc) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -555,7 +555,7 @@ TEST_P(ColorStateTest, DstBlendFactorOneMinusSrcColor) {
                        RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, fac);
                        return std::make_pair(TriangleSpec({{color}}), expected);
                    });
-    CheckDstBlendFactor(base, wgpu::BlendFactor::OneMinusSrcColor, wgpu::BlendFactor::Zero, tests);
+    CheckDstBlendFactor(base, wgpu::BlendFactor::OneMinusSrc, wgpu::BlendFactor::Zero, tests);
 }
 
 TEST_P(ColorStateTest, DstBlendFactorSrcAlpha) {
@@ -583,7 +583,7 @@ TEST_P(ColorStateTest, DstBlendFactorOneMinusSrcAlpha) {
                         wgpu::BlendFactor::OneMinusSrcAlpha, tests);
 }
 
-TEST_P(ColorStateTest, DstBlendFactorDstColor) {
+TEST_P(ColorStateTest, DstBlendFactorDst) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -593,10 +593,10 @@ TEST_P(ColorStateTest, DstBlendFactorDstColor) {
                        RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, fac);
                        return std::make_pair(TriangleSpec({{color}}), expected);
                    });
-    CheckDstBlendFactor(base, wgpu::BlendFactor::DstColor, wgpu::BlendFactor::Zero, tests);
+    CheckDstBlendFactor(base, wgpu::BlendFactor::Dst, wgpu::BlendFactor::Zero, tests);
 }
 
-TEST_P(ColorStateTest, DstBlendFactorOneMinusDstColor) {
+TEST_P(ColorStateTest, DstBlendFactorOneMinusDst) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -606,7 +606,7 @@ TEST_P(ColorStateTest, DstBlendFactorOneMinusDstColor) {
                        RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, fac);
                        return std::make_pair(TriangleSpec({{color}}), expected);
                    });
-    CheckDstBlendFactor(base, wgpu::BlendFactor::OneMinusDstColor, wgpu::BlendFactor::Zero, tests);
+    CheckDstBlendFactor(base, wgpu::BlendFactor::OneMinusDst, wgpu::BlendFactor::Zero, tests);
 }
 
 TEST_P(ColorStateTest, DstBlendFactorDstAlpha) {
@@ -648,7 +648,7 @@ TEST_P(ColorStateTest, DstBlendFactorSrcAlphaSaturated) {
                         wgpu::BlendFactor::SrcAlphaSaturated, tests);
 }
 
-TEST_P(ColorStateTest, DstBlendFactorBlendColor) {
+TEST_P(ColorStateTest, DstBlendFactorConstant) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(
@@ -657,10 +657,10 @@ TEST_P(ColorStateTest, DstBlendFactorBlendColor) {
             RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, triangleSpec.blendFactor);
             return std::make_pair(triangleSpec, expected);
         });
-    CheckDstBlendFactor(base, wgpu::BlendFactor::BlendColor, wgpu::BlendFactor::BlendColor, tests);
+    CheckDstBlendFactor(base, wgpu::BlendFactor::Constant, wgpu::BlendFactor::Constant, tests);
 }
 
-TEST_P(ColorStateTest, DstBlendFactorOneMinusBlendColor) {
+TEST_P(ColorStateTest, DstBlendFactorOneMinusConstant) {
     RGBA8 base(32, 64, 128, 192);
     std::vector<std::pair<TriangleSpec, RGBA8>> tests;
     std::transform(kColors.begin(), kColors.end(), std::back_inserter(tests),
@@ -670,8 +670,8 @@ TEST_P(ColorStateTest, DstBlendFactorOneMinusBlendColor) {
                        RGBA8 expected = color + mix(RGBA8(0, 0, 0, 0), base, f);
                        return std::make_pair(triangleSpec, expected);
                    });
-    CheckDstBlendFactor(base, wgpu::BlendFactor::OneMinusBlendColor,
-                        wgpu::BlendFactor::OneMinusBlendColor, tests);
+    CheckDstBlendFactor(base, wgpu::BlendFactor::OneMinusConstant,
+                        wgpu::BlendFactor::OneMinusConstant, tests);
 }
 
 // Check that the color write mask works
@@ -931,7 +931,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
 
     wgpu::BlendComponent blendComponent;
     blendComponent.operation = wgpu::BlendOperation::Add;
-    blendComponent.srcFactor = wgpu::BlendFactor::BlendColor;
+    blendComponent.srcFactor = wgpu::BlendFactor::Constant;
     blendComponent.dstFactor = wgpu::BlendFactor::One;
 
     wgpu::BlendState blend;

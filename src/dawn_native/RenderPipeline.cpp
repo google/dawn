@@ -211,7 +211,26 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateBlendState(const BlendState* descriptor) {
+        static constexpr wgpu::BlendFactor kFirstDeprecatedBlendFactor =
+            wgpu::BlendFactor::SrcColor;
+        static constexpr uint32_t kDeprecatedBlendFactorOffset = 100;
+
+        bool IsDeprecatedBlendFactor(wgpu::BlendFactor blendFactor) {
+            return blendFactor >= kFirstDeprecatedBlendFactor;
+        }
+
+        wgpu::BlendFactor NormalizeBlendFactor(wgpu::BlendFactor blendFactor) {
+            // If the specified format is from the deprecated range return the corresponding
+            // non-deprecated format.
+            if (blendFactor >= kFirstDeprecatedBlendFactor) {
+                uint32_t blendFactorValue = static_cast<uint32_t>(blendFactor);
+                return static_cast<wgpu::BlendFactor>(blendFactorValue -
+                                                      kDeprecatedBlendFactorOffset);
+            }
+            return blendFactor;
+        }
+
+        MaybeError ValidateBlendState(DeviceBase* device, const BlendState* descriptor) {
             DAWN_TRY(ValidateBlendOperation(descriptor->alpha.operation));
             DAWN_TRY(ValidateBlendFactor(descriptor->alpha.srcFactor));
             DAWN_TRY(ValidateBlendFactor(descriptor->alpha.dstFactor));
@@ -219,10 +238,18 @@ namespace dawn_native {
             DAWN_TRY(ValidateBlendFactor(descriptor->color.srcFactor));
             DAWN_TRY(ValidateBlendFactor(descriptor->color.dstFactor));
 
+            if (IsDeprecatedBlendFactor(descriptor->alpha.srcFactor) ||
+                IsDeprecatedBlendFactor(descriptor->alpha.dstFactor) ||
+                IsDeprecatedBlendFactor(descriptor->color.srcFactor) ||
+                IsDeprecatedBlendFactor(descriptor->color.dstFactor)) {
+                device->EmitDeprecationWarning(
+                    "Blend factor enums have changed and the old enums will be removed soon.");
+            }
+
             return {};
         }
 
-        MaybeError ValidateColorTargetState(const DeviceBase* device,
+        MaybeError ValidateColorTargetState(DeviceBase* device,
                                             const ColorTargetState* descriptor,
                                             bool fragmentWritten,
                                             wgpu::TextureComponentType fragmentOutputBaseType) {
@@ -231,7 +258,7 @@ namespace dawn_native {
             }
 
             if (descriptor->blend) {
-                DAWN_TRY(ValidateBlendState(descriptor->blend));
+                DAWN_TRY(ValidateBlendState(device, descriptor->blend));
             }
 
             DAWN_TRY(ValidateColorWriteMask(descriptor->writeMask));
@@ -440,6 +467,14 @@ namespace dawn_native {
             if (target->blend != nullptr) {
                 mTargetBlend[i] = *target->blend;
                 mTargets[i].blend = &mTargetBlend[i];
+                mTargetBlend[i].alpha.srcFactor =
+                    NormalizeBlendFactor(mTargetBlend[i].alpha.srcFactor);
+                mTargetBlend[i].alpha.dstFactor =
+                    NormalizeBlendFactor(mTargetBlend[i].alpha.dstFactor);
+                mTargetBlend[i].color.srcFactor =
+                    NormalizeBlendFactor(mTargetBlend[i].color.srcFactor);
+                mTargetBlend[i].color.dstFactor =
+                    NormalizeBlendFactor(mTargetBlend[i].color.dstFactor);
             }
         }
 

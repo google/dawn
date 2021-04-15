@@ -151,17 +151,17 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_BLEND_ZERO;
                 case wgpu::BlendFactor::One:
                     return D3D12_BLEND_ONE;
-                case wgpu::BlendFactor::SrcColor:
+                case wgpu::BlendFactor::Src:
                     return D3D12_BLEND_SRC_COLOR;
-                case wgpu::BlendFactor::OneMinusSrcColor:
+                case wgpu::BlendFactor::OneMinusSrc:
                     return D3D12_BLEND_INV_SRC_COLOR;
                 case wgpu::BlendFactor::SrcAlpha:
                     return D3D12_BLEND_SRC_ALPHA;
                 case wgpu::BlendFactor::OneMinusSrcAlpha:
                     return D3D12_BLEND_INV_SRC_ALPHA;
-                case wgpu::BlendFactor::DstColor:
+                case wgpu::BlendFactor::Dst:
                     return D3D12_BLEND_DEST_COLOR;
-                case wgpu::BlendFactor::OneMinusDstColor:
+                case wgpu::BlendFactor::OneMinusDst:
                     return D3D12_BLEND_INV_DEST_COLOR;
                 case wgpu::BlendFactor::DstAlpha:
                     return D3D12_BLEND_DEST_ALPHA;
@@ -169,10 +169,39 @@ namespace dawn_native { namespace d3d12 {
                     return D3D12_BLEND_INV_DEST_ALPHA;
                 case wgpu::BlendFactor::SrcAlphaSaturated:
                     return D3D12_BLEND_SRC_ALPHA_SAT;
-                case wgpu::BlendFactor::BlendColor:
+                case wgpu::BlendFactor::Constant:
                     return D3D12_BLEND_BLEND_FACTOR;
-                case wgpu::BlendFactor::OneMinusBlendColor:
+                case wgpu::BlendFactor::OneMinusConstant:
                     return D3D12_BLEND_INV_BLEND_FACTOR;
+
+                // Deprecated blend factors should be normalized prior to this call.
+                case wgpu::BlendFactor::SrcColor:
+                case wgpu::BlendFactor::OneMinusSrcColor:
+                case wgpu::BlendFactor::DstColor:
+                case wgpu::BlendFactor::OneMinusDstColor:
+                case wgpu::BlendFactor::BlendColor:
+                case wgpu::BlendFactor::OneMinusBlendColor:
+                    UNREACHABLE();
+            }
+        }
+
+        // When a blend factor is defined for the alpha channel, any of the factors that don't
+        // explicitly state that they apply to alpha should be treated as their explicitly-alpha
+        // equivalents. See: https://github.com/gpuweb/gpuweb/issues/65
+        D3D12_BLEND D3D12AlphaBlend(wgpu::BlendFactor factor) {
+            switch (factor) {
+                case wgpu::BlendFactor::Src:
+                    return D3D12_BLEND_SRC_ALPHA;
+                case wgpu::BlendFactor::OneMinusSrc:
+                    return D3D12_BLEND_INV_SRC_ALPHA;
+                case wgpu::BlendFactor::Dst:
+                    return D3D12_BLEND_DEST_ALPHA;
+                case wgpu::BlendFactor::OneMinusDst:
+                    return D3D12_BLEND_INV_DEST_ALPHA;
+
+                // Other blend factors translate to the same D3D12 enum as the color blend factors.
+                default:
+                    return D3D12Blend(factor);
             }
         }
 
@@ -214,8 +243,8 @@ namespace dawn_native { namespace d3d12 {
                 blendDesc.SrcBlend = D3D12Blend(state->blend->color.srcFactor);
                 blendDesc.DestBlend = D3D12Blend(state->blend->color.dstFactor);
                 blendDesc.BlendOp = D3D12BlendOperation(state->blend->color.operation);
-                blendDesc.SrcBlendAlpha = D3D12Blend(state->blend->alpha.srcFactor);
-                blendDesc.DestBlendAlpha = D3D12Blend(state->blend->alpha.dstFactor);
+                blendDesc.SrcBlendAlpha = D3D12AlphaBlend(state->blend->alpha.srcFactor);
+                blendDesc.DestBlendAlpha = D3D12AlphaBlend(state->blend->alpha.dstFactor);
                 blendDesc.BlendOpAlpha = D3D12BlendOperation(state->blend->alpha.operation);
             }
             blendDesc.RenderTargetWriteMask = D3D12RenderTargetWriteMask(state->writeMask);

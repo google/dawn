@@ -226,17 +226,24 @@
         "values": [
             {"value": 0, "name": "zero"},
             {"value": 1, "name": "one"},
-            {"value": 2, "name": "src color"},
-            {"value": 3, "name": "one minus src color"},
+            {"value": 2, "name": "src"},
+            {"value": 3, "name": "one minus src"},
             {"value": 4, "name": "src alpha"},
             {"value": 5, "name": "one minus src alpha"},
-            {"value": 6, "name": "dst color"},
-            {"value": 7, "name": "one minus dst color"},
+            {"value": 6, "name": "dst"},
+            {"value": 7, "name": "one minus dst"},
             {"value": 8, "name": "dst alpha"},
             {"value": 9, "name": "one minus dst alpha"},
             {"value": 10, "name": "src alpha saturated"},
-            {"value": 11, "name": "blend color"},
-            {"value": 12, "name": "one minus blend color"}
+            {"value": 11, "name": "constant"},
+            {"value": 12, "name": "one minus constant"},
+
+            {"value": 102, "name": "src color"},
+            {"value": 103, "name": "one minus src color"},
+            {"value": 106, "name": "dst color"},
+            {"value": 107, "name": "one minus dst color"},
+            {"value": 111, "name": "blend color"},
+            {"value": 112, "name": "one minus blend color"}
         ]
     },
     "blend operation": {

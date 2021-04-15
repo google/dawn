@@ -62,17 +62,17 @@ namespace dawn_native { namespace opengl {
                     return GL_ZERO;
                 case wgpu::BlendFactor::One:
                     return GL_ONE;
-                case wgpu::BlendFactor::SrcColor:
+                case wgpu::BlendFactor::Src:
                     return GL_SRC_COLOR;
-                case wgpu::BlendFactor::OneMinusSrcColor:
+                case wgpu::BlendFactor::OneMinusSrc:
                     return GL_ONE_MINUS_SRC_COLOR;
                 case wgpu::BlendFactor::SrcAlpha:
                     return GL_SRC_ALPHA;
                 case wgpu::BlendFactor::OneMinusSrcAlpha:
                     return GL_ONE_MINUS_SRC_ALPHA;
-                case wgpu::BlendFactor::DstColor:
+                case wgpu::BlendFactor::Dst:
                     return GL_DST_COLOR;
-                case wgpu::BlendFactor::OneMinusDstColor:
+                case wgpu::BlendFactor::OneMinusDst:
                     return GL_ONE_MINUS_DST_COLOR;
                 case wgpu::BlendFactor::DstAlpha:
                     return GL_DST_ALPHA;
@@ -80,10 +80,19 @@ namespace dawn_native { namespace opengl {
                     return GL_ONE_MINUS_DST_ALPHA;
                 case wgpu::BlendFactor::SrcAlphaSaturated:
                     return GL_SRC_ALPHA_SATURATE;
-                case wgpu::BlendFactor::BlendColor:
+                case wgpu::BlendFactor::Constant:
                     return alpha ? GL_CONSTANT_ALPHA : GL_CONSTANT_COLOR;
-                case wgpu::BlendFactor::OneMinusBlendColor:
+                case wgpu::BlendFactor::OneMinusConstant:
                     return alpha ? GL_ONE_MINUS_CONSTANT_ALPHA : GL_ONE_MINUS_CONSTANT_COLOR;
+
+                // Deprecated blend factors should be normalized prior to this call.
+                case wgpu::BlendFactor::SrcColor:
+                case wgpu::BlendFactor::OneMinusSrcColor:
+                case wgpu::BlendFactor::DstColor:
+                case wgpu::BlendFactor::OneMinusDstColor:
+                case wgpu::BlendFactor::BlendColor:
+                case wgpu::BlendFactor::OneMinusBlendColor:
+                    UNREACHABLE();
             }
         }
 

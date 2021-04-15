@@ -158,17 +158,17 @@ namespace dawn_native { namespace vulkan {
                     return VK_BLEND_FACTOR_ZERO;
                 case wgpu::BlendFactor::One:
                     return VK_BLEND_FACTOR_ONE;
-                case wgpu::BlendFactor::SrcColor:
+                case wgpu::BlendFactor::Src:
                     return VK_BLEND_FACTOR_SRC_COLOR;
-                case wgpu::BlendFactor::OneMinusSrcColor:
+                case wgpu::BlendFactor::OneMinusSrc:
                     return VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR;
                 case wgpu::BlendFactor::SrcAlpha:
                     return VK_BLEND_FACTOR_SRC_ALPHA;
                 case wgpu::BlendFactor::OneMinusSrcAlpha:
                     return VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
-                case wgpu::BlendFactor::DstColor:
+                case wgpu::BlendFactor::Dst:
                     return VK_BLEND_FACTOR_DST_COLOR;
-                case wgpu::BlendFactor::OneMinusDstColor:
+                case wgpu::BlendFactor::OneMinusDst:
                     return VK_BLEND_FACTOR_ONE_MINUS_DST_COLOR;
                 case wgpu::BlendFactor::DstAlpha:
                     return VK_BLEND_FACTOR_DST_ALPHA;
@@ -176,10 +176,19 @@ namespace dawn_native { namespace vulkan {
                     return VK_BLEND_FACTOR_ONE_MINUS_DST_ALPHA;
                 case wgpu::BlendFactor::SrcAlphaSaturated:
                     return VK_BLEND_FACTOR_SRC_ALPHA_SATURATE;
-                case wgpu::BlendFactor::BlendColor:
+                case wgpu::BlendFactor::Constant:
                     return VK_BLEND_FACTOR_CONSTANT_COLOR;
-                case wgpu::BlendFactor::OneMinusBlendColor:
+                case wgpu::BlendFactor::OneMinusConstant:
                     return VK_BLEND_FACTOR_ONE_MINUS_CONSTANT_COLOR;
+
+                // Deprecated blend factors should be normalized prior to this call.
+                case wgpu::BlendFactor::SrcColor:
+                case wgpu::BlendFactor::OneMinusSrcColor:
+                case wgpu::BlendFactor::DstColor:
+                case wgpu::BlendFactor::OneMinusDstColor:
+                case wgpu::BlendFactor::BlendColor:
+                case wgpu::BlendFactor::OneMinusBlendColor:
+                    UNREACHABLE();
             }
         }
 
