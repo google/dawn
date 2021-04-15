@@ -1715,6 +1715,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
             [[group(1), binding(0)]] var<storage> sReadonlyBufferDynamic : [[access(read)]] S;
 
             [[stage(fragment)]] fn main() {
+                var val : vec2<f32> = sBufferDynamic.value;
+                val = sReadonlyBufferDynamic.value;
             })",
                                       std::move(bindGroupLayouts));
     }
@@ -1748,6 +1750,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
             [[group(1), binding(0)]] var<storage> sReadonlyBufferDynamic : [[access(read)]] S;
 
             [[stage(compute), workgroup_size(4, 4, 1)]] fn main() {
+                var val : vec2<f32> = sBufferDynamic.value;
+                val = sReadonlyBufferDynamic.value;
             })",
                                      std::move(bindGroupLayouts));
     }
@@ -1772,8 +1776,6 @@ TEST_F(BindGroupLayoutCompatibilityTest, RWStorageInBGLWithROStorageInShader) {
 // Test that it is invalid to pass a readonly storage buffer in the pipeline layout when the shader
 // uses the binding as a writable storage buffer.
 TEST_F(BindGroupLayoutCompatibilityTest, ROStorageInBGLWithRWStorageInShader) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Set up the bind group layout.
     wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
@@ -1788,15 +1790,15 @@ TEST_F(BindGroupLayoutCompatibilityTest, ROStorageInBGLWithRWStorageInShader) {
 }
 
 TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     constexpr char kTexture2DShaderFS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[stage(fragment)]] fn main() {
+            textureDimensions(myTexture);
         })";
     constexpr char kTexture2DShaderCS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
         [[stage(compute)]] fn main() {
+           textureDimensions(myTexture);
         })";
 
     // Render: Test that 2D texture with 2D view dimension works
@@ -1830,10 +1832,12 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
     constexpr char kTexture2DArrayShaderFS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
         [[stage(fragment)]] fn main() {
+           textureDimensions(myTexture);
         })";
     constexpr char kTexture2DArrayShaderCS[] = R"(
         [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
         [[stage(compute)]] fn main() {
+           textureDimensions(myTexture);
         })";
 
     // Render: Test that 2D texture array with 2D array view dimension works
@@ -1933,8 +1937,6 @@ TEST_F(BindingsValidationTest, PipelineLayoutWithMoreBindingsThanPipeline) {
 // Test that it is invalid to set a pipeline layout that doesn't have all necessary bindings
 // required by the pipeline.
 TEST_F(BindingsValidationTest, PipelineLayoutWithLessBindingsThanPipeline) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Set up bind group layout.
     wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
@@ -2085,6 +2087,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
         CreateFragmentPipeline(&bindGroupLayout, R"(
             [[group(0), binding(0)]] var mySampler: sampler;
             [[stage(fragment)]] fn main() {
+                let s : sampler = mySampler;
             })");
     }
 
@@ -2096,6 +2099,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
         CreateFragmentPipeline(&bindGroupLayout, R"(
             [[group(0), binding(0)]] var mySampler: sampler_comparison;
             [[stage(fragment)]] fn main() {
+                let s : sampler_comparison = mySampler;
             })");
     }
 
@@ -2107,6 +2111,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
             [[group(0), binding(0)]] var mySampler: sampler_comparison;
             [[stage(fragment)]] fn main() {
+                let s : sampler_comparison = mySampler;
             })"));
     }
 
@@ -2118,6 +2123,7 @@ TEST_F(ComparisonSamplerBindingTest, DISABLED_ShaderAndBGLMatches) {
         ASSERT_DEVICE_ERROR(CreateFragmentPipeline(&bindGroupLayout, R"(
             [[group(0), binding(0)]] var mySampler: sampler;
             [[stage(fragment)]] fn main() {
+                let s : sampler = mySampler;
             })"));
     }
 }

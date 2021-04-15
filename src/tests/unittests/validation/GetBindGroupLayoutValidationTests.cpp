@@ -38,8 +38,6 @@ class GetBindGroupLayoutTests : public ValidationTest {
 // Test that GetBindGroupLayout returns the same object for the same index
 // and for matching layouts.
 TEST_F(GetBindGroupLayoutTests, SameObject) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -53,6 +51,8 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
         [[group(1), binding(0)]] var<uniform> uniform1 : S;
 
         [[stage(vertex)]] fn main() {
+            var pos : vec4<f32> = uniform0.pos;
+            pos = uniform1.pos;
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -67,6 +67,8 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
         [[group(3), binding(0)]] var<storage> storage3 : [[access(read_write)]] S3;
 
         [[stage(fragment)]] fn main() {
+            var pos_u : vec4<f32> = uniform2.pos;
+            var pos_s : mat4x4<f32> = storage3.pos;
         })");
 
     utils::ComboRenderPipelineDescriptor2 descriptor;
@@ -93,8 +95,6 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
 // - shader stage visibility is the stage that adds the binding.
 // - dynamic offsets is false
 TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -107,6 +107,7 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
         [[stage(fragment)]] fn main() {
+            var pos : vec4<f32> = uniforms.pos;
         })");
 
     wgpu::BindGroupLayoutEntry binding = {};
@@ -138,8 +139,6 @@ TEST_F(GetBindGroupLayoutTests, DefaultShaderStageAndDynamicOffsets) {
 
 // Test GetBindGroupLayout works with a compute pipeline
 TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -152,6 +151,7 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
         [[stage(compute)]] fn main() {
+            var pos : vec4<f32> = uniforms.pos;
         })");
 
     wgpu::ComputePipelineDescriptor descriptor;
@@ -177,8 +177,6 @@ TEST_F(GetBindGroupLayoutTests, ComputePipeline) {
 
 // Test that the binding type matches the shader.
 TEST_F(GetBindGroupLayoutTests, BindingType) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -205,6 +203,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] S;
 
             [[stage(fragment)]] fn main() {
+                var pos : vec4<f32> = ssbo.pos;
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -217,6 +216,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var<uniform> uniforms : S;
 
             [[stage(fragment)]] fn main() {
+                var pos : vec4<f32> = uniforms.pos;
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -230,6 +230,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var<storage> ssbo : [[access(read)]] S;
 
             [[stage(fragment)]] fn main() {
+                var pos : vec4<f32> = ssbo.pos;
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -242,6 +243,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -252,6 +254,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var myTexture : texture_multisampled_2d<f32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -263,6 +266,7 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
             [[group(0), binding(0)]] var mySampler: sampler;
 
             [[stage(fragment)]] fn main() {
+                let s : sampler = mySampler;
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -270,8 +274,6 @@ TEST_F(GetBindGroupLayoutTests, BindingType) {
 
 // Test that texture view dimension matches the shader.
 TEST_F(GetBindGroupLayoutTests, ViewDimension) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -292,6 +294,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_1d<f32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -302,6 +305,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -312,6 +316,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_2d_array<f32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -322,6 +327,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_3d<f32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -332,6 +338,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_cube<f32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -342,6 +349,7 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
             [[group(0), binding(0)]] var myTexture : texture_cube_array<f32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -349,8 +357,6 @@ TEST_F(GetBindGroupLayoutTests, ViewDimension) {
 
 // Test that texture component type matches the shader.
 TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -370,6 +376,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -380,6 +387,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<i32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -390,6 +398,7 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
             [[group(0), binding(0)]] var myTexture : texture_2d<u32>;
 
             [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -397,8 +406,6 @@ TEST_F(GetBindGroupLayoutTests, TextureComponentType) {
 
 // Test that binding= indices match.
 TEST_F(GetBindGroupLayoutTests, BindingIndices) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -423,6 +430,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
             [[group(0), binding(0)]] var<uniform> uniforms : S;
 
             [[stage(fragment)]] fn main() {
+                var pos : vec4<f32> = uniforms.pos;
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -436,6 +444,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
             [[group(0), binding(1)]] var<uniform> uniforms : S;
 
             [[stage(fragment)]] fn main() {
+                var pos : vec4<f32> = uniforms.pos;
             })");
         EXPECT_EQ(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -449,6 +458,7 @@ TEST_F(GetBindGroupLayoutTests, BindingIndices) {
             [[group(0), binding(1)]] var<uniform> uniforms : S;
 
             [[stage(fragment)]] fn main() {
+                var pos : vec4<f32> = uniforms.pos;
             })");
         EXPECT_NE(device.CreateBindGroupLayout(&desc).Get(), pipeline.GetBindGroupLayout(0).Get());
     }
@@ -464,6 +474,8 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
         [[group(1), binding(0)]] var<uniform> uniform1 : S;
 
         [[stage(vertex)]] fn main() {
+            var pos : vec4<f32> = uniform0.pos;
+            pos = uniform1.pos;
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -473,6 +485,7 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
         [[group(1), binding(0)]] var<uniform> uniforms : S;
 
         [[stage(fragment)]] fn main() {
+            var pos : vec4<f32> = uniforms.pos;
         })");
 
     utils::ComboRenderPipelineDescriptor2 descriptor;
@@ -485,8 +498,6 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
 
 // Test that minBufferSize is set on the BGL and that the max of the min buffer sizes is used.
 TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -499,6 +510,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
         [[stage(vertex)]] fn main() {
+            var pos : f32 = uniforms.pos;
         })");
 
     wgpu::ShaderModule vsModule64 = utils::CreateShaderModule(device, R"(
@@ -508,6 +520,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
         [[stage(vertex)]] fn main() {
+            var pos : mat4x4<f32> = uniforms.pos;
         })");
 
     wgpu::ShaderModule fsModule4 = utils::CreateShaderModule(device, R"(
@@ -517,6 +530,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
         [[stage(fragment)]] fn main() {
+            var pos : f32 = uniforms.pos;
         })");
 
     wgpu::ShaderModule fsModule64 = utils::CreateShaderModule(device, R"(
@@ -526,6 +540,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
         [[stage(fragment)]] fn main() {
+            var pos : mat4x4<f32> = uniforms.pos;
         })");
 
     // Create BGLs with minBufferBindingSize 4 and 64.
@@ -573,8 +588,6 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
 
 // Test that the visibility is correctly aggregated if two stages have the exact same binding.
 TEST_F(GetBindGroupLayoutTests, StageAggregation) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -587,6 +600,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     wgpu::ShaderModule vsModuleSampler = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var mySampler: sampler;
         [[stage(vertex)]] fn main() {
+            let s : sampler = mySampler;
         })");
 
     wgpu::ShaderModule fsModuleNoSampler = utils::CreateShaderModule(device, R"(
@@ -596,6 +610,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     wgpu::ShaderModule fsModuleSampler = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var mySampler: sampler;
         [[stage(fragment)]] fn main() {
+            let s : sampler = mySampler;
         })");
 
     // Create BGLs with minBufferBindingSize 4 and 64.
@@ -643,8 +658,6 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
 
 // Test it is invalid to have conflicting binding types in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[block]] struct S {
             pos : vec4<f32>;
@@ -652,6 +665,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
         [[group(0), binding(0)]] var<uniform> ubo : S;
 
         [[stage(vertex)]] fn main() {
+            var pos : vec4<f32> = ubo.pos;
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -661,6 +675,7 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
         [[group(0), binding(0)]] var<storage> ssbo : [[access(read_write)]] S;
 
         [[stage(fragment)]] fn main() {
+            var pos : vec4<f32> = ssbo.pos;
         })");
 
     utils::ComboRenderPipelineDescriptor2 descriptor;
@@ -673,18 +688,18 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
 
 // Test it is invalid to have conflicting binding texture multisampling in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() {
+            textureDimensions(myTexture);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_multisampled_2d<f32>;
 
         [[stage(fragment)]] fn main() {
+            textureDimensions(myTexture);
         })");
 
     utils::ComboRenderPipelineDescriptor2 descriptor;
@@ -697,18 +712,18 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
 
 // Test it is invalid to have conflicting binding texture dimension in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() {
+            textureDimensions(myTexture);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_3d<f32>;
 
         [[stage(fragment)]] fn main() {
+            textureDimensions(myTexture);
         })");
 
     utils::ComboRenderPipelineDescriptor2 descriptor;
@@ -721,18 +736,18 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
 
 // Test it is invalid to have conflicting binding texture component type in the shaders.
 TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
         [[stage(vertex)]] fn main() {
+            textureDimensions(myTexture);
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<i32>;
 
         [[stage(fragment)]] fn main() {
+            textureDimensions(myTexture);
         })");
 
     utils::ComboRenderPipelineDescriptor2 descriptor;
@@ -758,8 +773,6 @@ TEST_F(GetBindGroupLayoutTests, OutOfRangeIndex) {
 
 // Test that unused indices return the empty bind group layout.
 TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
     // Native.
@@ -773,6 +786,8 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
         [[group(2), binding(0)]] var<uniform> uniforms2 : S;
 
         [[stage(fragment)]] fn main() {
+            var pos : vec4<f32> = uniforms0.pos;
+            pos = uniforms2.pos;
         })");
 
     wgpu::BindGroupLayoutDescriptor desc = {};
@@ -819,6 +834,7 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
         [[stage(vertex)]] fn main() {
+            var pos : vec4<f32> = uniforms.pos;
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -850,24 +866,23 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
 
 // Test that fragment output validation is for the correct entryPoint
 // TODO(dawn:216): Re-enable when we correctly reflect which bindings are used for an entryPoint.
-TEST_F(GetBindGroupLayoutTests, DISABLED_FromCorrectEntryPoint) {
+TEST_F(GetBindGroupLayoutTests, FromCorrectEntryPoint) {
+    DAWN_SKIP_TEST_IF(!HasToggleEnabled("use_tint_generator"));
+
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         [[block]] struct Data {
             data : f32;
         };
-        [[binding 0, set 0]] var<storage> data0 : [[access(read_write)]] Data;
-        [[binding 1, set 0]] var<storage> data1 : [[access(read_write)]] Data;
+        [[group(0), binding(0)]] var<storage> data0 : [[access(read_write)]] Data;
+        [[group(0), binding(1)]] var<storage> data1 : [[access(read_write)]] Data;
 
-        fn compute0() {
+        [[stage(compute)]] fn compute0() {
             data0.data = 0.0;
-            return;
         }
-        fn compute1() {
+
+        [[stage(compute)]] fn compute1() {
             data1.data = 0.0;
-            return;
         }
-        entry_point compute = compute0;
-        entry_point compute = compute1;
     )");
 
     wgpu::ComputePipelineDescriptor pipelineDesc;

@@ -393,8 +393,6 @@ TEST_F(RenderPipelineValidationTest, AlphaToCoverageAndSampleCount) {
 
 // Tests that the texture component type in shader must match the bind group layout.
 TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     constexpr uint32_t kNumTextureComponentType = 3u;
     std::array<const char*, kNumTextureComponentType> kScalarTypes = {{"f32", "i32", "u32"}};
     std::array<wgpu::TextureSampleType, kNumTextureComponentType> kTextureComponentTypes = {{
@@ -414,6 +412,7 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
                    << kScalarTypes[i] << R"(>;
 
                 [[stage(fragment)]] fn main() {
+                    textureDimensions(myTexture);
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 
@@ -432,8 +431,6 @@ TEST_F(RenderPipelineValidationTest, TextureComponentTypeCompatibility) {
 
 // Tests that the texture view dimension in shader must match the bind group layout.
 TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     constexpr uint32_t kNumTextureViewDimensions = 6u;
     std::array<const char*, kNumTextureViewDimensions> kTextureKeywords = {{
         "texture_1d",
@@ -463,6 +460,7 @@ TEST_F(RenderPipelineValidationTest, TextureViewDimensionCompatibility) {
                 [[group(0), binding(0)]] var myTexture : )"
                    << kTextureKeywords[i] << R"(<f32>;
                 [[stage(fragment)]] fn main() {
+                    textureDimensions(myTexture);
                 })";
             descriptor.cFragment.module = utils::CreateShaderModule(device, stream.str().c_str());
 

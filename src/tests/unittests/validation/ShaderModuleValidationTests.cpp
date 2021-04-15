@@ -118,6 +118,7 @@ TEST_F(ShaderModuleValidationTest, CombinedTextureAndSampler) {
 // Test that it is not allowed to declare a multisampled-array interface texture.
 // TODO(enga): Also test multisampled cube, cube array, and 3D. These have no GLSL keywords.
 TEST_F(ShaderModuleValidationTest, MultisampledArrayTexture) {
+    // TODO(https://crbug.com/tint/717): Remove skip once this is fixed
     DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
 
     // SPIR-V ASM produced by glslang for the following fragment shader:
