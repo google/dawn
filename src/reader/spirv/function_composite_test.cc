@@ -129,7 +129,7 @@ VariableDeclStatement{
       }
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Matrix) {
@@ -169,8 +169,7 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Array) {
@@ -200,8 +199,7 @@ TEST_F(SpvParserTest_Composite_Construct, Array) {
         ScalarConstructor[not set]{5}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvParserTest_Composite_Construct, Struct) {
@@ -233,8 +231,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
         ScalarConstructor[not set]{30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 using SpvParserTest_CompositeExtract = SpvParserTest;
@@ -266,8 +263,7 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
         Identifier[not set]{y}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {
@@ -313,8 +309,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
         ScalarConstructor[not set]{2}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
@@ -367,8 +362,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
         Identifier[not set]{y}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Array) {
@@ -398,8 +392,7 @@ TEST_F(SpvParserTest_CompositeExtract, Array) {
         ScalarConstructor[not set]{3}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, RuntimeArray_IsError) {
@@ -450,8 +443,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
         Identifier[not set]{field2}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
@@ -568,8 +560,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
         Identifier[not set]{y}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 using SpvParserTest_CompositeInsert = SpvParserTest;
@@ -1066,7 +1057,7 @@ VariableDeclStatement{
       Identifier[not set]{x_1}
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTest_CopyObject, Pointer) {
@@ -1105,7 +1096,7 @@ VariableDeclStatement{
       Identifier[not set]{x_1}
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 using SpvParserTest_VectorShuffle = SpvParserTest;
@@ -1152,7 +1143,7 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
       }
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
@@ -1209,8 +1200,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
@@ -1241,8 +1231,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvParserTest_VectorShuffle, IndexTooBig_IsError) {

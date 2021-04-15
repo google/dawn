@@ -356,7 +356,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
     }
   }
 }
-)")) << ToString(p->builder(), fe.ast_body());
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
@@ -442,7 +442,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
     }
   }
 }
-)")) << ToString(p->builder(), fe.ast_body());
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias) {
@@ -512,7 +512,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
     }
   }
 }
-)")) << ToString(p->builder(), fe.ast_body());
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
@@ -547,7 +547,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
     }
   }
 }
-)")) << ToString(p->builder(), fe.ast_body());
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
@@ -587,7 +587,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
     }
   }
 }
-)")) << ToString(p->builder(), fe.ast_body());
+)"));
 }
 
 TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
@@ -627,7 +627,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
     }
   }
 }
-)")) << ToString(p->builder(), fe.ast_body());
+)"));
 }
 
 TEST_F(SpvParserTest,

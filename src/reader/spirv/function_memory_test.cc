@@ -345,7 +345,7 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_VectorSwizzle) {
     Identifier[not set]{z}
   }
   ScalarConstructor[not set]{42}
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTest, EmitStatement_AccessChain_VectorConstOutOfBounds) {
@@ -585,7 +585,7 @@ Assignment{
     Identifier[not set]{ancientness}
   }
   ScalarConstructor[not set]{420.000000}
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTest, EmitStatement_AccessChain_StructNonConstIndex) {
@@ -921,8 +921,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_Cascaded) {
     ScalarConstructor[not set]{1}
   }
   ScalarConstructor[not set]{0}
-})")) << ToString(p->builder(), fe.ast_body())
-      << p->error();
+})")) << p->error();
 }
 
 TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
@@ -965,8 +964,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
 Assignment{
   Identifier[not set]{x_2}
   ScalarConstructor[not set]{0}
-})")) << ToString(p->builder(), fe.ast_body())
-      << p->error();
+})")) << p->error();
 }
 
 TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
@@ -1036,8 +1034,7 @@ Assignment{
   ScalarConstructor[not set]{0}
 }
 Return{}
-)")) << ToString(p->builder(), fe.ast_body())
-     << p->error();
+)")) << p->error();
 }
 
 TEST_F(SpvParserTest, DISABLED_RemapStorageBuffer_ThroughFunctionCall) {

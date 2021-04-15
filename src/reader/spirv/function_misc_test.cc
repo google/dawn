@@ -104,7 +104,7 @@ VariableDeclStatement{
       ScalarConstructor[not set]{0.000000}
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Vector) {
@@ -184,7 +184,7 @@ VariableDeclStatement{
       }
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
@@ -247,7 +247,7 @@ VariableDeclStatement{
       ScalarConstructor[not set]{0.000000}
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
@@ -310,7 +310,7 @@ VariableDeclStatement{
       }
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
@@ -351,7 +351,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
       }
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
@@ -385,7 +385,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
       }
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
@@ -420,7 +420,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
       }
     }
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpNop) {
@@ -437,7 +437,7 @@ TEST_F(SpvParserTestMiscInstruction, OpNop) {
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), Eq(R"(Return{}
-)")) << ToString(p->builder(), fe.ast_body());
+)"));
 }
 
 // Test swizzle generation.

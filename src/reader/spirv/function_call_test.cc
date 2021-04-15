@@ -102,8 +102,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
     }
   }
 }
-Return{})"))
-        << ToString(p->builder(), fe.ast_body());
+Return{})"));
   }
 
   {
@@ -113,7 +112,7 @@ Return{})"))
   {
     ScalarConstructor[not set]{42}
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
   }
 }
 
@@ -174,8 +173,7 @@ Assignment{
   Identifier[not set]{x_10}
   Identifier[not set]{x_1}
 }
-Return{})"))
-        << ToString(p->builder(), fe.ast_body());
+Return{})"));
   }
   {
     FunctionEmitter fe(p.get(), *spirv_function(p.get(), 50));
@@ -184,7 +182,7 @@ Return{})"))
   {
     ScalarConstructor[not set]{42}
   }
-})")) << ToString(p->builder(), fe.ast_body());
+})"));
   }
 }
 

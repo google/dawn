@@ -88,8 +88,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
         ScalarConstructor[not set]{50.000000}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
@@ -118,8 +117,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_BadArg) {
@@ -244,8 +242,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
         Identifier[not set]{x_30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
@@ -273,8 +270,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
@@ -300,8 +296,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
         Identifier[not set]{x_30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
@@ -329,8 +324,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_BadArgType) {
@@ -391,8 +385,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
@@ -418,8 +411,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
         Identifier[not set]{x_30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
@@ -447,8 +439,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
@@ -474,8 +465,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
         Identifier[not set]{x_30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_BadArgType) {
@@ -535,8 +525,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
         Identifier[not set]{x_30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
@@ -564,8 +553,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
@@ -591,8 +579,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
         Identifier[not set]{x_30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
@@ -620,8 +607,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_BadArgType) {
@@ -683,8 +669,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
@@ -710,8 +695,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
         Identifier[not set]{x_30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned) {
@@ -739,8 +723,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
@@ -766,8 +749,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
         Identifier[not set]{x_30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 // TODO(dneto): OpSConvert // only if multiple widths

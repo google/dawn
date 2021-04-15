@@ -705,8 +705,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Int) {
         ScalarConstructor[not set]{30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryBitTest, Not_Int_Uint) {
@@ -734,8 +733,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Uint) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryBitTest, Not_Uint_Int) {
@@ -763,8 +761,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Int) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryBitTest, Not_Uint_Uint) {
@@ -790,8 +787,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Uint) {
         ScalarConstructor[not set]{10}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryBitTest, Not_SignedVec_SignedVec) {
@@ -821,8 +817,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_SignedVec) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryBitTest, Not_SignedVec_UnsignedVec) {
@@ -854,8 +849,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_UnsignedVec) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryBitTest, Not_UnsignedVec_SignedVec) {
@@ -887,8 +881,7 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_SignedVec) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 TEST_F(SpvUnaryBitTest, Not_UnsignedVec_UnsignedVec) {
   const auto assembly = CommonTypes() + R"(
@@ -917,8 +910,7 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_UnsignedVec) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 std::string BitTestPreamble() {

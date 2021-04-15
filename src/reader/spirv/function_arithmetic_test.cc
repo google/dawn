@@ -155,8 +155,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
         ScalarConstructor[not set]{30}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
@@ -184,8 +183,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
@@ -213,8 +211,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
@@ -244,8 +241,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
@@ -275,8 +271,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
@@ -308,8 +303,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
@@ -341,8 +335,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
@@ -376,8 +369,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
@@ -403,8 +395,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
         ScalarConstructor[not set]{50.000000}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Vector) {
@@ -434,8 +425,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 struct BinaryData {
@@ -1055,8 +1045,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1201,8 +1190,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
         }
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -1243,8 +1231,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
         Identifier[not set]{x_2}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
@@ -1272,8 +1259,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
         Identifier[not set]{x_2}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
@@ -1301,8 +1287,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
         Identifier[not set]{x_2}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
@@ -1330,8 +1315,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
         Identifier[not set]{x_2}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
@@ -1359,8 +1343,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
         Identifier[not set]{x_2}
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, Dot) {
@@ -1390,8 +1373,7 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
         )
       }
     }
-  })"))
-      << ToString(p->builder(), fe.ast_body());
+  })"));
 }
 
 TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
