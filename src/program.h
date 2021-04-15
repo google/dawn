@@ -165,7 +165,7 @@ class Program {
   SemNodeAllocator sem_nodes_;
   ast::Module* ast_ = nullptr;
   semantic::Info sem_;
-  SymbolTable symbols_;
+  SymbolTable symbols_{id_};
   diag::List diagnostics_;
   bool is_valid_ = false;  // Not valid until it is built
   bool moved_ = false;

@@ -23,7 +23,7 @@ class ScopeStackTest : public ProgramBuilder, public testing::Test {};
 
 TEST_F(ScopeStackTest, Global) {
   ScopeStack<uint32_t> s;
-  Symbol sym(1);
+  Symbol sym(1, ID());
   s.set_global(sym, 5);
 
   uint32_t val = 0;
@@ -43,7 +43,7 @@ TEST_F(ScopeStackTest, Global_SetWithPointer) {
 
 TEST_F(ScopeStackTest, Global_CanNotPop) {
   ScopeStack<uint32_t> s;
-  Symbol sym(1);
+  Symbol sym(1, ID());
   s.set_global(sym, 5);
   s.pop_scope();
 
@@ -54,7 +54,7 @@ TEST_F(ScopeStackTest, Global_CanNotPop) {
 
 TEST_F(ScopeStackTest, Scope) {
   ScopeStack<uint32_t> s;
-  Symbol sym(1);
+  Symbol sym(1, ID());
   s.push_scope();
   s.set(sym, 5);
 
@@ -65,7 +65,7 @@ TEST_F(ScopeStackTest, Scope) {
 
 TEST_F(ScopeStackTest, Get_MissingSymbol) {
   ScopeStack<uint32_t> s;
-  Symbol sym(1);
+  Symbol sym(1, ID());
   uint32_t ret = 0;
   EXPECT_FALSE(s.get(sym, &ret));
   EXPECT_EQ(ret, 0u);
@@ -73,8 +73,8 @@ TEST_F(ScopeStackTest, Get_MissingSymbol) {
 
 TEST_F(ScopeStackTest, Has) {
   ScopeStack<uint32_t> s;
-  Symbol sym(1);
-  Symbol sym2(2);
+  Symbol sym(1, ID());
+  Symbol sym2(2, ID());
   s.set_global(sym2, 3);
   s.push_scope();
   s.set(sym, 5);
@@ -85,7 +85,7 @@ TEST_F(ScopeStackTest, Has) {
 
 TEST_F(ScopeStackTest, ReturnsScopeBeforeGlobalFirst) {
   ScopeStack<uint32_t> s;
-  Symbol sym(1);
+  Symbol sym(1, ID());
   s.set_global(sym, 3);
   s.push_scope();
   s.set(sym, 5);

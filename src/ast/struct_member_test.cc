@@ -23,7 +23,7 @@ using StructMemberTest = TestHelper;
 
 TEST_F(StructMemberTest, Creation) {
   auto* st = Member("a", ty.i32(), {MemberSize(4)});
-  EXPECT_EQ(st->symbol(), Symbol(1));
+  EXPECT_EQ(st->symbol(), Symbol(1, ID()));
   EXPECT_EQ(st->type(), ty.i32());
   EXPECT_EQ(st->decorations().size(), 1u);
   EXPECT_TRUE(st->decorations()[0]->Is<StructMemberSizeDecoration>());
@@ -37,7 +37,7 @@ TEST_F(StructMemberTest, CreationWithSource) {
   auto* st = Member(
       Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
       "a", ty.i32());
-  EXPECT_EQ(st->symbol(), Symbol(1));
+  EXPECT_EQ(st->symbol(), Symbol(1, ID()));
   EXPECT_EQ(st->type(), ty.i32());
   EXPECT_EQ(st->decorations().size(), 0u);
   EXPECT_EQ(st->source().range.begin.line, 27u);
@@ -69,6 +69,16 @@ TEST_F(StructMemberTest, Assert_Null_Decoration) {
       {
         ProgramBuilder b;
         b.Member("a", b.ty.i32(), {b.MemberSize(4), nullptr});
+      },
+      "internal compiler error");
+}
+
+TEST_F(StructMemberTest, Assert_DifferentProgramID_Symbol) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.Member(b2.Sym("a"), b1.ty.i32(), {b1.MemberSize(4)});
       },
       "internal compiler error");
 }

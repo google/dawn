@@ -67,7 +67,7 @@ const char* str(Parameter::Usage usage) {
 }
 
 std::ostream& operator<<(std::ostream& out, Parameter parameter) {
-  out << "[type: " << parameter.type->FriendlyName(SymbolTable{})
+  out << "[type: " << parameter.type->FriendlyName(SymbolTable{ProgramID{}})
       << ", usage: " << str(parameter.usage) << "]";
   return out;
 }

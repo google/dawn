@@ -79,6 +79,16 @@ TEST_F(FunctionTest, Assert_Null_Param) {
       "internal compiler error");
 }
 
+TEST_F(FunctionTest, Assert_DifferentProgramID_Symbol) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.Func(b2.Sym("func"), VariableList{}, b1.ty.void_(), StatementList{});
+      },
+      "internal compiler error");
+}
+
 TEST_F(FunctionTest, Assert_DifferentProgramID_Param) {
   EXPECT_FATAL_FAILURE(
       {

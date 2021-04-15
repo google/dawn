@@ -23,12 +23,12 @@ using IdentifierExpressionTest = TestHelper;
 
 TEST_F(IdentifierExpressionTest, Creation) {
   auto* i = Expr("ident");
-  EXPECT_EQ(i->symbol(), Symbol(1));
+  EXPECT_EQ(i->symbol(), Symbol(1, ID()));
 }
 
 TEST_F(IdentifierExpressionTest, Creation_WithSource) {
   auto* i = Expr(Source{Source::Location{20, 2}}, "ident");
-  EXPECT_EQ(i->symbol(), Symbol(1));
+  EXPECT_EQ(i->symbol(), Symbol(1, ID()));
 
   auto src = i->source();
   EXPECT_EQ(src.range.begin.line, 20u);
@@ -45,6 +45,16 @@ TEST_F(IdentifierExpressionTest, Assert_InvalidSymbol) {
       {
         ProgramBuilder b;
         b.Expr("");
+      },
+      "internal compiler error");
+}
+
+TEST_F(IdentifierExpressionTest, Assert_DifferentProgramID_Symbol) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.Expr(b2.Sym(""));
       },
       "internal compiler error");
 }

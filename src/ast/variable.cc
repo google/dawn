@@ -39,6 +39,7 @@ Variable::Variable(ProgramID program_id,
       decorations_(std::move(decorations)),
       declared_storage_class_(declared_storage_class) {
   TINT_ASSERT(symbol_.IsValid());
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
   // no type means we must have a constructor to infer it
   TINT_ASSERT(declared_type_ || constructor);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(constructor, program_id);

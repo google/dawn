@@ -18,7 +18,8 @@ namespace tint {
 
 Symbol::Symbol() = default;
 
-Symbol::Symbol(uint32_t val) : val_(val) {}
+Symbol::Symbol(uint32_t val, tint::ProgramID program_id)
+    : val_(val), program_id_(program_id) {}
 
 Symbol::Symbol(const Symbol& o) = default;
 
@@ -31,6 +32,7 @@ Symbol& Symbol::operator=(const Symbol& o) = default;
 Symbol& Symbol::operator=(Symbol&& o) = default;
 
 bool Symbol::operator==(const Symbol& other) const {
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(program_id_, other.program_id_);
   return val_ == other.val_;
 }
 

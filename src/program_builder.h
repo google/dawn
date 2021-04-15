@@ -1435,7 +1435,7 @@ class ProgramBuilder {
   SemNodeAllocator sem_nodes_;
   ast::Module* ast_;
   semantic::Info sem_;
-  SymbolTable symbols_;
+  SymbolTable symbols_{id_};
   diag::List diagnostics_;
 
   /// The source to use when creating AST nodes without providing a Source as

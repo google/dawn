@@ -22,31 +22,36 @@ namespace {
 using SymbolTableTest = testing::Test;
 
 TEST_F(SymbolTableTest, GeneratesSymbolForName) {
-  SymbolTable s;
-  EXPECT_EQ(Symbol(1), s.Register("name"));
-  EXPECT_EQ(Symbol(2), s.Register("another_name"));
+  auto program_id = ProgramID::New();
+  SymbolTable s{program_id};
+  EXPECT_EQ(Symbol(1, program_id), s.Register("name"));
+  EXPECT_EQ(Symbol(2, program_id), s.Register("another_name"));
 }
 
 TEST_F(SymbolTableTest, DeduplicatesNames) {
-  SymbolTable s;
-  EXPECT_EQ(Symbol(1), s.Register("name"));
-  EXPECT_EQ(Symbol(2), s.Register("another_name"));
-  EXPECT_EQ(Symbol(1), s.Register("name"));
+  auto program_id = ProgramID::New();
+  SymbolTable s{program_id};
+  EXPECT_EQ(Symbol(1, program_id), s.Register("name"));
+  EXPECT_EQ(Symbol(2, program_id), s.Register("another_name"));
+  EXPECT_EQ(Symbol(1, program_id), s.Register("name"));
 }
 
 TEST_F(SymbolTableTest, ReturnsNameForSymbol) {
-  SymbolTable s;
+  auto program_id = ProgramID::New();
+  SymbolTable s{program_id};
   auto sym = s.Register("name");
   EXPECT_EQ("name", s.NameFor(sym));
 }
 
 TEST_F(SymbolTableTest, ReturnsBlankForMissingSymbol) {
-  SymbolTable s;
-  EXPECT_EQ("$2", s.NameFor(Symbol(2)));
+  auto program_id = ProgramID::New();
+  SymbolTable s{program_id};
+  EXPECT_EQ("$2", s.NameFor(Symbol(2, program_id)));
 }
 
 TEST_F(SymbolTableTest, ReturnsInvalidForBlankString) {
-  SymbolTable s;
+  auto program_id = ProgramID::New();
+  SymbolTable s{program_id};
   EXPECT_FALSE(s.Register("").IsValid());
 }
 

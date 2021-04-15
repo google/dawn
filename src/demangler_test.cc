@@ -23,7 +23,7 @@ namespace {
 using DemanglerTest = testing::Test;
 
 TEST_F(DemanglerTest, NoSymbols) {
-  SymbolTable t;
+  SymbolTable t{ProgramID::New()};
   t.Register("sym1");
 
   Demangler d;
@@ -31,7 +31,7 @@ TEST_F(DemanglerTest, NoSymbols) {
 }
 
 TEST_F(DemanglerTest, Symbol) {
-  SymbolTable t;
+  SymbolTable t{ProgramID::New()};
   t.Register("sym1");
 
   Demangler d;
@@ -39,7 +39,7 @@ TEST_F(DemanglerTest, Symbol) {
 }
 
 TEST_F(DemanglerTest, MultipleSymbols) {
-  SymbolTable t;
+  SymbolTable t{ProgramID::New()};
   t.Register("sym1");
   t.Register("sym2");
 

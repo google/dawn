@@ -32,6 +32,7 @@ StructMember::StructMember(ProgramID program_id,
       decorations_(std::move(decorations)) {
   TINT_ASSERT(type);
   TINT_ASSERT(symbol_.IsValid());
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
   for (auto* deco : decorations_) {
     TINT_ASSERT(deco);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(deco, program_id);

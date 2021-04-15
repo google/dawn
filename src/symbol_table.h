@@ -26,7 +26,9 @@ namespace tint {
 class SymbolTable {
  public:
   /// Constructor
-  SymbolTable();
+  /// @param program_id the identifier of the program that owns this symbol
+  /// table
+  explicit SymbolTable(tint::ProgramID program_id);
   /// Copy constructor
   SymbolTable(const SymbolTable&);
   /// Move Constructor
@@ -76,13 +78,23 @@ class SymbolTable {
     }
   }
 
+  /// @returns the identifier of the Program that owns this symbol table.
+  tint::ProgramID ProgramID() const { return program_id_; }
+
  private:
   // The value to be associated to the next registered symbol table entry.
   uint32_t next_symbol_ = 1;
 
   std::unordered_map<Symbol, std::string> symbol_to_name_;
   std::unordered_map<std::string, Symbol> name_to_symbol_;
+  tint::ProgramID program_id_;
 };
+
+/// @param symbol_table the SymbolTable
+/// @returns the ProgramID that owns the given SymbolTable
+inline ProgramID ProgramIDOf(const SymbolTable& symbol_table) {
+  return symbol_table.ProgramID();
+}
 
 }  // namespace tint
 

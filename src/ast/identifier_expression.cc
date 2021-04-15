@@ -25,6 +25,7 @@ IdentifierExpression::IdentifierExpression(ProgramID program_id,
                                            const Source& source,
                                            Symbol sym)
     : Base(program_id, source), sym_(sym) {
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(sym_, program_id);
   TINT_ASSERT(sym_.IsValid());
 }
 

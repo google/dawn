@@ -17,6 +17,8 @@
 
 #include <string>
 
+#include "src/program_id.h"
+
 namespace tint {
 
 /// A symbol representing a string in the system
@@ -27,7 +29,8 @@ class Symbol {
   Symbol();
   /// Constructor
   /// @param val the symbol value
-  explicit Symbol(uint32_t val);
+  /// @param program_id the identifier of the program that owns this Symbol
+  Symbol(uint32_t val, tint::ProgramID program_id);
   /// Copy constructor
   /// @param o the symbol to copy
   Symbol(const Symbol& o);
@@ -61,9 +64,19 @@ class Symbol {
   /// @return the string representation of the symbol
   std::string to_str() const;
 
+  /// @returns the identifier of the Program that owns this symbol.
+  tint::ProgramID ProgramID() const { return program_id_; }
+
  private:
   uint32_t val_ = static_cast<uint32_t>(-1);
+  tint::ProgramID program_id_;
 };
+
+/// @param sym the Symbol
+/// @returns the ProgramID that owns the given Symbol
+inline ProgramID ProgramIDOf(Symbol sym) {
+  return sym.IsValid() ? sym.ProgramID() : ProgramID();
+}
 
 }  // namespace tint
 

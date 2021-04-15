@@ -38,6 +38,7 @@ Function::Function(ProgramID program_id,
       body_(body),
       decorations_(std::move(decorations)),
       return_type_decorations_(std::move(return_type_decorations)) {
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(body, program_id);
   for (auto* param : params_) {
     TINT_ASSERT(param && param->is_const());

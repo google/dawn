@@ -24,7 +24,7 @@ using AliasTest = TestHelper;
 
 TEST_F(AliasTest, Create) {
   auto* a = ty.alias("a_type", ty.u32());
-  EXPECT_EQ(a->symbol(), Symbol(1));
+  EXPECT_EQ(a->symbol(), Symbol(1, ID()));
   EXPECT_EQ(a->type(), ty.u32());
 }
 
@@ -58,7 +58,7 @@ TEST_F(AliasTest, FriendlyName) {
 
 TEST_F(AliasTest, UnwrapIfNeeded_Alias) {
   auto* a = ty.alias("a_type", ty.u32());
-  EXPECT_EQ(a->symbol(), Symbol(1));
+  EXPECT_EQ(a->symbol(), Symbol(1, ID()));
   EXPECT_EQ(a->type(), ty.u32());
   EXPECT_EQ(a->UnwrapIfNeeded(), ty.u32());
   EXPECT_EQ(ty.u32()->UnwrapIfNeeded(), ty.u32());
@@ -74,7 +74,7 @@ TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel) {
   auto* a = ty.alias("a_type", ty.u32());
   auto* aa = ty.alias("aa_type", a);
 
-  EXPECT_EQ(aa->symbol(), Symbol(2));
+  EXPECT_EQ(aa->symbol(), Symbol(2, ID()));
   EXPECT_EQ(aa->type(), a);
   EXPECT_EQ(aa->UnwrapIfNeeded(), ty.u32());
 }
@@ -94,7 +94,7 @@ TEST_F(AliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
   auto* apaa = ty.alias("paa_type", &paa);
   auto* aapaa = ty.alias("aapaa_type", apaa);
 
-  EXPECT_EQ(aapaa->symbol(), Symbol(4));
+  EXPECT_EQ(aapaa->symbol(), Symbol(4, ID()));
   EXPECT_EQ(aapaa->type(), apaa);
   EXPECT_EQ(aapaa->UnwrapAll(), ty.u32());
 }

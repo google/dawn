@@ -14,9 +14,12 @@
 
 #include "src/symbol_table.h"
 
+#include "src/debug.h"
+
 namespace tint {
 
-SymbolTable::SymbolTable() = default;
+SymbolTable::SymbolTable(tint::ProgramID program_id)
+    : program_id_(program_id) {}
 
 SymbolTable::SymbolTable(const SymbolTable&) = default;
 
@@ -36,7 +39,7 @@ Symbol SymbolTable::Register(const std::string& name) {
   if (it != name_to_symbol_.end())
     return it->second;
 
-  Symbol sym(next_symbol_);
+  Symbol sym(next_symbol_, program_id_);
   ++next_symbol_;
 
   name_to_symbol_[name] = sym;
@@ -51,6 +54,7 @@ Symbol SymbolTable::Get(const std::string& name) const {
 }
 
 std::string SymbolTable::NameFor(const Symbol symbol) const {
+  TINT_ASSERT_PROGRAM_IDS_EQUAL(program_id_, symbol);
   auto it = symbol_to_name_.find(symbol);
   if (it == symbol_to_name_.end()) {
     return symbol.to_str();
