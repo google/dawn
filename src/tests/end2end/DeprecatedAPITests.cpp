@@ -51,6 +51,18 @@ TEST_P(DeprecationTests, SetIndexBufferWithFormat) {
     pass.EndPass();
 }
 
+// Test that SetBlendColor is deprecated.
+TEST_P(DeprecationTests, SetSetBlendColor) {
+    wgpu::Color blendColor{1.0, 0.0, 0.0, 1.0};
+
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    EXPECT_DEPRECATION_WARNING(pass.SetBlendColor(&blendColor));
+    pass.EndPass();
+}
+
 // Test that BindGroupLayoutEntry cannot have a type if buffer, sampler, texture, or storageTexture
 // are defined.
 TEST_P(DeprecationTests, BindGroupLayoutEntryTypeConflict) {

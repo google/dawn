@@ -59,7 +59,7 @@ namespace dawn_native {
         SetStencilReference,
         SetViewport,
         SetScissorRect,
-        SetBlendColor,
+        SetBlendConstant,
         SetBindGroup,
         SetIndexBuffer,
         SetVertexBuffer,
@@ -231,7 +231,7 @@ namespace dawn_native {
         uint32_t x, y, width, height;
     };
 
-    struct SetBlendColorCmd {
+    struct SetBlendConstantCmd {
         Color color;
     };
 

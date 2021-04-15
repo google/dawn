@@ -1547,6 +1547,12 @@
                 ]
             },
             {
+                "name": "set blend constant",
+                "args": [
+                    {"name": "color", "type": "color", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "set viewport",
                 "args": [
                     {"name": "x", "type": "float"},

@@ -1218,8 +1218,8 @@ namespace dawn_native { namespace opengl {
                     break;
                 }
 
-                case Command::SetBlendColor: {
-                    SetBlendColorCmd* cmd = mCommands.NextCommand<SetBlendColorCmd>();
+                case Command::SetBlendConstant: {
+                    SetBlendConstantCmd* cmd = mCommands.NextCommand<SetBlendConstantCmd>();
                     const std::array<float, 4> blendColor = ConvertToFloatColor(cmd->color);
                     gl.BlendColor(blendColor[0], blendColor[1], blendColor[2], blendColor[3]);
                     break;

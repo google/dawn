@@ -168,9 +168,9 @@ namespace dawn_native {
                     cmd->~SetScissorRectCmd();
                     break;
                 }
-                case Command::SetBlendColor: {
-                    SetBlendColorCmd* cmd = commands->NextCommand<SetBlendColorCmd>();
-                    cmd->~SetBlendColorCmd();
+                case Command::SetBlendConstant: {
+                    SetBlendConstantCmd* cmd = commands->NextCommand<SetBlendConstantCmd>();
+                    cmd->~SetBlendConstantCmd();
                     break;
                 }
                 case Command::SetBindGroup: {
@@ -315,8 +315,8 @@ namespace dawn_native {
                 commands->NextCommand<SetScissorRectCmd>();
                 break;
 
-            case Command::SetBlendColor:
-                commands->NextCommand<SetBlendColorCmd>();
+            case Command::SetBlendConstant:
+                commands->NextCommand<SetBlendConstantCmd>();
                 break;
 
             case Command::SetBindGroup: {

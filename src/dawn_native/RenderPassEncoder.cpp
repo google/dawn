@@ -115,13 +115,20 @@ namespace dawn_native {
         });
     }
 
-    void RenderPassEncoder::APISetBlendColor(const Color* color) {
+    void RenderPassEncoder::APISetBlendConstant(const Color* color) {
         mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            SetBlendColorCmd* cmd = allocator->Allocate<SetBlendColorCmd>(Command::SetBlendColor);
+            SetBlendConstantCmd* cmd =
+                allocator->Allocate<SetBlendConstantCmd>(Command::SetBlendConstant);
             cmd->color = *color;
 
             return {};
         });
+    }
+
+    void RenderPassEncoder::APISetBlendColor(const Color* color) {
+        GetDevice()->EmitDeprecationWarning(
+            "SetBlendColor has been deprecated in favor of SetBlendConstant.");
+        APISetBlendConstant(color);
     }
 
     void RenderPassEncoder::APISetViewport(float x,

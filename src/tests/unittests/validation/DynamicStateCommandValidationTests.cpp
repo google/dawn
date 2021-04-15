@@ -203,31 +203,31 @@ TEST_F(SetScissorTest, ScissorLargerThanFramebuffer) {
     TestScissorCall(false, 0, std::numeric_limits<uint32_t>::max(), kWidth, kHeight);
 }
 
-class SetBlendColorTest : public ValidationTest {};
+class SetBlendConstantTest : public ValidationTest {};
 
-// Test to check basic use of SetBlendColor
-TEST_F(SetBlendColorTest, Success) {
+// Test to check basic use of SetBlendConstantTest
+TEST_F(SetBlendConstantTest, Success) {
     DummyRenderPass renderPass(device);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         constexpr wgpu::Color kTransparentBlack{0.0f, 0.0f, 0.0f, 0.0f};
-        pass.SetBlendColor(&kTransparentBlack);
+        pass.SetBlendConstant(&kTransparentBlack);
         pass.EndPass();
     }
     encoder.Finish();
 }
 
-// Test that SetBlendColor allows any value, large, small or negative
-TEST_F(SetBlendColorTest, AnyValueAllowed) {
+// Test that SetBlendConstant allows any value, large, small or negative
+TEST_F(SetBlendConstantTest, AnyValueAllowed) {
     DummyRenderPass renderPass(device);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
         wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
         constexpr wgpu::Color kAnyColorValue{-1.0f, 42.0f, -0.0f, 0.0f};
-        pass.SetBlendColor(&kAnyColorValue);
+        pass.SetBlendConstant(&kAnyColorValue);
         pass.EndPass();
     }
     encoder.Finish();

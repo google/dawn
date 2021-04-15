@@ -106,8 +106,8 @@ class ColorStateTest : public DawnTest {
     // Test that after drawing a triangle with the base color, and then the given triangle spec, the
     // color is as expected
     void DoSingleSourceTest(RGBA8 base, const TriangleSpec& triangle, const RGBA8& expected) {
-        wgpu::Color blendColor{triangle.blendFactor[0], triangle.blendFactor[1],
-                               triangle.blendFactor[2], triangle.blendFactor[3]};
+        wgpu::Color blendConstant{triangle.blendFactor[0], triangle.blendFactor[1],
+                                  triangle.blendFactor[2], triangle.blendFactor[3]};
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
@@ -120,7 +120,7 @@ class ColorStateTest : public DawnTest {
             // Then use the test pipeline to draw the test triangle with blending
             pass.SetPipeline(testPipeline);
             pass.SetBindGroup(0, MakeBindGroupForColors(std::array<RGBA8, 1>({{triangle.color}})));
-            pass.SetBlendColor(&blendColor);
+            pass.SetBlendConstant(&blendConstant);
             pass.Draw(3);
             pass.EndPass();
         }
@@ -975,7 +975,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
                               MakeBindGroupForColors(std::array<RGBA8, 1>({{RGBA8(0, 0, 0, 0)}})));
             pass.Draw(3);
             pass.SetPipeline(testPipeline);
-            pass.SetBlendColor(&kWhite);
+            pass.SetBlendConstant(&kWhite);
             pass.SetBindGroup(
                 0, MakeBindGroupForColors(std::array<RGBA8, 1>({{RGBA8(255, 255, 255, 255)}})));
             pass.Draw(3);
@@ -999,7 +999,7 @@ TEST_P(ColorStateTest, DefaultBlendColor) {
                               MakeBindGroupForColors(std::array<RGBA8, 1>({{RGBA8(0, 0, 0, 0)}})));
             pass.Draw(3);
             pass.SetPipeline(testPipeline);
-            pass.SetBlendColor(&kWhite);
+            pass.SetBlendConstant(&kWhite);
             pass.SetBindGroup(
                 0, MakeBindGroupForColors(std::array<RGBA8, 1>({{RGBA8(255, 255, 255, 255)}})));
             pass.Draw(3);
