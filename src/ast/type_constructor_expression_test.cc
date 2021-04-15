@@ -50,7 +50,7 @@ TEST_F(TypeConstructorExpressionTest, IsTypeConstructor) {
   EXPECT_TRUE(t->Is<TypeConstructorExpression>());
 }
 
-TEST_F(TypeConstructorExpressionTest, Assert_NullType) {
+TEST_F(TypeConstructorExpressionTest, Assert_Null_Type) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -59,12 +59,23 @@ TEST_F(TypeConstructorExpressionTest, Assert_NullType) {
       "internal compiler error");
 }
 
-TEST_F(TypeConstructorExpressionTest, Assert_NullValue) {
+TEST_F(TypeConstructorExpressionTest, Assert_Null_Value) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<TypeConstructorExpression>(b.ty.i32(),
                                             ExpressionList{nullptr});
+      },
+      "internal compiler error");
+}
+
+TEST_F(TypeConstructorExpressionTest, Assert_DifferentProgramID_Value) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<TypeConstructorExpression>(b1.ty.i32(),
+                                             ExpressionList{b2.Expr(1)});
       },
       "internal compiler error");
 }

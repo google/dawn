@@ -90,11 +90,44 @@ TEST_F(CaseStatementTest, IsCase) {
   EXPECT_TRUE(c->Is<CaseStatement>());
 }
 
-TEST_F(CaseStatementTest, Assert_NullBody) {
+TEST_F(CaseStatementTest, Assert_Null_Body) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<CaseStatement>(CaseSelectorList{}, nullptr);
+      },
+      "internal compiler error");
+}
+
+TEST_F(CaseStatementTest, Assert_Null_Selector) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b;
+        b.create<CaseStatement>(CaseSelectorList{nullptr},
+                                b.create<BlockStatement>(StatementList{}));
+      },
+      "internal compiler error");
+}
+
+TEST_F(CaseStatementTest, Assert_DifferentProgramID_Call) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<CaseStatement>(CaseSelectorList{},
+                                 b2.create<BlockStatement>(StatementList{}));
+      },
+      "internal compiler error");
+}
+
+TEST_F(CaseStatementTest, Assert_DifferentProgramID_Selector) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<CaseStatement>(
+            CaseSelectorList{b2.create<SintLiteral>(b2.ty.i32(), 2)},
+            b1.create<BlockStatement>(StatementList{}));
       },
       "internal compiler error");
 }

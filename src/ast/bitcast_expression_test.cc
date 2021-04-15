@@ -48,7 +48,7 @@ TEST_F(BitcastExpressionTest, IsBitcast) {
   EXPECT_TRUE(exp->Is<BitcastExpression>());
 }
 
-TEST_F(BitcastExpressionTest, Assert_NullType) {
+TEST_F(BitcastExpressionTest, Assert_Null_Type) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -57,11 +57,21 @@ TEST_F(BitcastExpressionTest, Assert_NullType) {
       "internal compiler error");
 }
 
-TEST_F(BitcastExpressionTest, Assert_NullExpr) {
+TEST_F(BitcastExpressionTest, Assert_Null_Expr) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<BitcastExpression>(b.ty.f32(), nullptr);
+      },
+      "internal compiler error");
+}
+
+TEST_F(BitcastExpressionTest, Assert_DifferentProgramID_Expr) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<BitcastExpression>(b1.ty.f32(), b2.Expr("idx"));
       },
       "internal compiler error");
 }

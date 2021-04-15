@@ -26,12 +26,10 @@ namespace {
 using LoopStatementTest = TestHelper;
 
 TEST_F(LoopStatementTest, Creation) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* body = Block(create<DiscardStatement>());
   auto* b = body->last();
 
-  auto* continuing =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* continuing = Block(create<DiscardStatement>());
 
   auto* l = create<LoopStatement>(body, continuing);
   ASSERT_EQ(l->body()->size(), 1u);
@@ -41,11 +39,9 @@ TEST_F(LoopStatementTest, Creation) {
 }
 
 TEST_F(LoopStatementTest, Creation_WithSource) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* body = Block(create<DiscardStatement>());
 
-  auto* continuing =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* continuing = Block(create<DiscardStatement>());
 
   auto* l =
       create<LoopStatement>(Source{Source::Location{20, 2}}, body, continuing);
@@ -55,31 +51,27 @@ TEST_F(LoopStatementTest, Creation_WithSource) {
 }
 
 TEST_F(LoopStatementTest, IsLoop) {
-  auto* l = create<LoopStatement>(create<BlockStatement>(StatementList{}),
-                                  create<BlockStatement>(StatementList{}));
+  auto* l = create<LoopStatement>(Block(), Block());
   EXPECT_TRUE(l->Is<LoopStatement>());
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithoutContinuing) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* body = Block(create<DiscardStatement>());
 
   auto* l = create<LoopStatement>(body, nullptr);
   EXPECT_FALSE(l->has_continuing());
 }
 
 TEST_F(LoopStatementTest, HasContinuing_WithContinuing) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* body = Block(create<DiscardStatement>());
 
-  auto* continuing =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* continuing = Block(create<DiscardStatement>());
 
   auto* l = create<LoopStatement>(body, continuing);
   EXPECT_TRUE(l->has_continuing());
 }
 
-TEST_F(LoopStatementTest, Assert_NullBody) {
+TEST_F(LoopStatementTest, Assert_Null_Body) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -88,9 +80,28 @@ TEST_F(LoopStatementTest, Assert_NullBody) {
       "internal compiler error");
 }
 
+TEST_F(LoopStatementTest, Assert_DifferentProgramID_Body) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<LoopStatement>(b2.Block(), b1.Block());
+      },
+      "internal compiler error");
+}
+
+TEST_F(LoopStatementTest, Assert_DifferentProgramID_Continuing) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<LoopStatement>(b1.Block(), b2.Block());
+      },
+      "internal compiler error");
+}
+
 TEST_F(LoopStatementTest, ToStr) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* body = Block(create<DiscardStatement>());
 
   auto* l = create<LoopStatement>(body, nullptr);
   EXPECT_EQ(str(l), R"(Loop{
@@ -100,11 +111,9 @@ TEST_F(LoopStatementTest, ToStr) {
 }
 
 TEST_F(LoopStatementTest, ToStr_WithContinuing) {
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* body = Block(create<DiscardStatement>());
 
-  auto* continuing =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
+  auto* continuing = Block(create<DiscardStatement>());
 
   auto* l = create<LoopStatement>(body, continuing);
   EXPECT_EQ(str(l), R"(Loop{

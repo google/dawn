@@ -40,6 +40,17 @@ TEST_F(ScalarConstructorExpressionTest, ToStr) {
 )");
 }
 
+TEST_F(ScalarConstructorExpressionTest, Assert_DifferentProgramID_Literal) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<ScalarConstructorExpression>(
+            b2.create<BoolLiteral>(b2.ty.bool_(), true));
+      },
+      "internal compiler error");
+}
+
 }  // namespace
 }  // namespace ast
 }  // namespace tint

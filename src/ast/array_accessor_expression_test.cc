@@ -49,7 +49,7 @@ TEST_F(ArrayAccessorExpressionTest, IsArrayAccessor) {
   EXPECT_TRUE(exp->Is<ArrayAccessorExpression>());
 }
 
-TEST_F(ArrayAccessorExpressionTest, Assert_NullArray) {
+TEST_F(ArrayAccessorExpressionTest, Assert_Null_Array) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -58,11 +58,31 @@ TEST_F(ArrayAccessorExpressionTest, Assert_NullArray) {
       "internal compiler error");
 }
 
-TEST_F(ArrayAccessorExpressionTest, Assert_NullIndex) {
+TEST_F(ArrayAccessorExpressionTest, Assert_Null_Index) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<ArrayAccessorExpression>(b.Expr("arr"), nullptr);
+      },
+      "internal compiler error");
+}
+
+TEST_F(ArrayAccessorExpressionTest, Assert_DifferentProgramID_Array) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<ArrayAccessorExpression>(b2.Expr("arr"), b1.Expr("idx"));
+      },
+      "internal compiler error");
+}
+
+TEST_F(ArrayAccessorExpressionTest, Assert_DifferentProgramID_Index) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<ArrayAccessorExpression>(b1.Expr("arr"), b2.Expr("idx"));
       },
       "internal compiler error");
 }

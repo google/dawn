@@ -46,11 +46,21 @@ TEST_F(UnaryOpExpressionTest, IsUnaryOp) {
   EXPECT_TRUE(u->Is<UnaryOpExpression>());
 }
 
-TEST_F(UnaryOpExpressionTest, Assert_NullExpression) {
+TEST_F(UnaryOpExpressionTest, Assert_Null_Expression) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<UnaryOpExpression>(UnaryOp::kNot, nullptr);
+      },
+      "internal compiler error");
+}
+
+TEST_F(UnaryOpExpressionTest, Assert_DifferentProgramID_Expression) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<UnaryOpExpression>(UnaryOp::kNot, b2.Expr(true));
       },
       "internal compiler error");
 }

@@ -46,7 +46,7 @@ TEST_F(StructMemberTest, CreationWithSource) {
   EXPECT_EQ(st->source().range.end.column, 8u);
 }
 
-TEST_F(StructMemberTest, Assert_EmptySymbol) {
+TEST_F(StructMemberTest, Assert_Empty_Symbol) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -55,7 +55,7 @@ TEST_F(StructMemberTest, Assert_EmptySymbol) {
       "internal compiler error");
 }
 
-TEST_F(StructMemberTest, Assert_NullType) {
+TEST_F(StructMemberTest, Assert_Null_Type) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -64,11 +64,21 @@ TEST_F(StructMemberTest, Assert_NullType) {
       "internal compiler error");
 }
 
-TEST_F(StructMemberTest, Assert_NullDecoration) {
+TEST_F(StructMemberTest, Assert_Null_Decoration) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.Member("a", b.ty.i32(), {b.MemberSize(4), nullptr});
+      },
+      "internal compiler error");
+}
+
+TEST_F(StructMemberTest, Assert_DifferentProgramID_Decoration) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.Member("a", b1.ty.i32(), {b2.MemberSize(4)});
       },
       "internal compiler error");
 }

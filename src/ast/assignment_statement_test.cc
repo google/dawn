@@ -51,7 +51,7 @@ TEST_F(AssignmentStatementTest, IsAssign) {
   EXPECT_TRUE(stmt->Is<AssignmentStatement>());
 }
 
-TEST_F(AssignmentStatementTest, Assert_NullLHS) {
+TEST_F(AssignmentStatementTest, Assert_Null_LHS) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -60,11 +60,31 @@ TEST_F(AssignmentStatementTest, Assert_NullLHS) {
       "internal compiler error");
 }
 
-TEST_F(AssignmentStatementTest, Assert_NullRHS) {
+TEST_F(AssignmentStatementTest, Assert_Null_RHS) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<AssignmentStatement>(b.Expr(1), nullptr);
+      },
+      "internal compiler error");
+}
+
+TEST_F(AssignmentStatementTest, Assert_DifferentProgramID_LHS) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<AssignmentStatement>(b2.Expr("lhs"), b1.Expr("rhs"));
+      },
+      "internal compiler error");
+}
+
+TEST_F(AssignmentStatementTest, Assert_DifferentProgramID_RHS) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<AssignmentStatement>(b1.Expr("lhs"), b2.Expr("rhs"));
       },
       "internal compiler error");
 }

@@ -28,6 +28,7 @@ BitcastExpression::BitcastExpression(ProgramID program_id,
     : Base(program_id, source), type_(type), expr_(expr) {
   TINT_ASSERT(type_);
   TINT_ASSERT(expr_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(expr, program_id);
 }
 
 BitcastExpression::BitcastExpression(BitcastExpression&&) = default;

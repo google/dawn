@@ -44,7 +44,7 @@ TEST_F(MemberAccessorExpressionTest, IsMemberAccessor) {
   EXPECT_TRUE(stmt->Is<MemberAccessorExpression>());
 }
 
-TEST_F(MemberAccessorExpressionTest, Assert_NullStruct) {
+TEST_F(MemberAccessorExpressionTest, Assert_Null_Struct) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -53,11 +53,33 @@ TEST_F(MemberAccessorExpressionTest, Assert_NullStruct) {
       "internal compiler error");
 }
 
-TEST_F(MemberAccessorExpressionTest, Assert_NullMember) {
+TEST_F(MemberAccessorExpressionTest, Assert_Null_Member) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<MemberAccessorExpression>(b.Expr("struct"), nullptr);
+      },
+      "internal compiler error");
+}
+
+TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Struct) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<MemberAccessorExpression>(b2.Expr("structure"),
+                                            b1.Expr("member"));
+      },
+      "internal compiler error");
+}
+
+TEST_F(MemberAccessorExpressionTest, Assert_DifferentProgramID_Member) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<MemberAccessorExpression>(b1.Expr("structure"),
+                                            b2.Expr("member"));
       },
       "internal compiler error");
 }

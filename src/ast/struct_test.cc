@@ -83,6 +83,28 @@ TEST_F(StructTest, Assert_Null_Decoration) {
       "internal compiler error");
 }
 
+TEST_F(StructTest, Assert_DifferentProgramID_StructMember) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<Struct>(StructMemberList{b2.Member("a", b2.ty.i32())},
+                          DecorationList{});
+      },
+      "internal compiler error");
+}
+
+TEST_F(StructTest, Assert_DifferentProgramID_Decoration) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<Struct>(StructMemberList{b1.Member("a", b1.ty.i32())},
+                          DecorationList{b2.create<StructBlockDecoration>()});
+      },
+      "internal compiler error");
+}
+
 TEST_F(StructTest, ToStr) {
   DecorationList decos;
   decos.push_back(create<StructBlockDecoration>());

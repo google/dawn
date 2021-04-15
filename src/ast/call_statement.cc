@@ -26,6 +26,7 @@ CallStatement::CallStatement(ProgramID program_id,
                              CallExpression* call)
     : Base(program_id, source), call_(call) {
   TINT_ASSERT(call_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(call_, program_id);
 }
 
 CallStatement::CallStatement(CallStatement&&) = default;

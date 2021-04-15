@@ -35,11 +35,22 @@ TEST_F(CallStatementTest, IsCall) {
   EXPECT_TRUE(c->Is<CallStatement>());
 }
 
-TEST_F(CallStatementTest, Assert_NullCall) {
+TEST_F(CallStatementTest, Assert_Null_Call) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<CallStatement>(nullptr);
+      },
+      "internal compiler error");
+}
+
+TEST_F(CallStatementTest, Assert_DifferentProgramID_Call) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<CallStatement>(
+            b2.create<CallExpression>(b2.Expr("func"), ExpressionList{}));
       },
       "internal compiler error");
 }

@@ -46,11 +46,22 @@ TEST_F(BlockStatementTest, IsBlock) {
   EXPECT_TRUE(b->Is<BlockStatement>());
 }
 
-TEST_F(BlockStatementTest, Assert_NullStatement) {
+TEST_F(BlockStatementTest, Assert_Null_Statement) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<BlockStatement>(ast::StatementList{nullptr});
+      },
+      "internal compiler error");
+}
+
+TEST_F(BlockStatementTest, Assert_DifferentProgramID_Statement) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<BlockStatement>(
+            ast::StatementList{b2.create<DiscardStatement>()});
       },
       "internal compiler error");
 }

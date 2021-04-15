@@ -51,7 +51,7 @@ TEST_F(CallExpressionTest, IsCall) {
   EXPECT_TRUE(stmt->Is<CallExpression>());
 }
 
-TEST_F(CallExpressionTest, Assert_NullFunction) {
+TEST_F(CallExpressionTest, Assert_Null_Function) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -60,7 +60,7 @@ TEST_F(CallExpressionTest, Assert_NullFunction) {
       "internal compiler error");
 }
 
-TEST_F(CallExpressionTest, Assert_NullParam) {
+TEST_F(CallExpressionTest, Assert_Null_Param) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -69,6 +69,27 @@ TEST_F(CallExpressionTest, Assert_NullParam) {
         params.push_back(nullptr);
         params.push_back(b.Expr("param2"));
         b.create<CallExpression>(b.Expr("func"), params);
+      },
+      "internal compiler error");
+}
+
+TEST_F(CallExpressionTest, Assert_DifferentProgramID_Function) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<CallExpression>(b2.Expr("func"), ExpressionList{});
+      },
+      "internal compiler error");
+}
+
+TEST_F(CallExpressionTest, Assert_DifferentProgramID_Param) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<CallExpression>(b1.Expr("func"),
+                                  ExpressionList{b2.Expr("param1")});
       },
       "internal compiler error");
 }

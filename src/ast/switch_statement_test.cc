@@ -29,8 +29,7 @@ TEST_F(SwitchStatementTest, Creation) {
 
   auto* ident = Expr("ident");
   CaseStatementList body;
-  auto* case_stmt =
-      create<CaseStatement>(lit, create<BlockStatement>(StatementList{}));
+  auto* case_stmt = create<CaseStatement>(lit, Block());
   body.push_back(case_stmt);
 
   auto* stmt = create<SwitchStatement>(ident, body);
@@ -55,8 +54,7 @@ TEST_F(SwitchStatementTest, IsSwitch) {
 
   auto* ident = Expr("ident");
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
+  body.push_back(create<CaseStatement>(lit, Block()));
 
   auto* stmt = create<SwitchStatement>(ident, body);
   EXPECT_TRUE(stmt->Is<SwitchStatement>());
@@ -68,8 +66,7 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
         ProgramBuilder b;
         CaseStatementList cases;
         cases.push_back(
-            b.create<CaseStatement>(CaseSelectorList{b.Literal(1)},
-                                    b.create<BlockStatement>(StatementList{})));
+            b.create<CaseStatement>(CaseSelectorList{b.Literal(1)}, b.Block()));
         b.create<SwitchStatement>(nullptr, cases);
       },
       "internal compiler error");
@@ -80,6 +77,38 @@ TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
       {
         ProgramBuilder b;
         b.create<SwitchStatement>(b.Expr(true), CaseStatementList{nullptr});
+      },
+      "internal compiler error");
+}
+
+TEST_F(SwitchStatementTest, Assert_DifferentProgramID_Condition) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<SwitchStatement>(b2.Expr(true), CaseStatementList{
+                                                      b1.create<CaseStatement>(
+                                                          CaseSelectorList{
+                                                              b1.Literal(1),
+                                                          },
+                                                          b1.Block()),
+                                                  });
+      },
+      "internal compiler error");
+}
+
+TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<SwitchStatement>(b1.Expr(true), CaseStatementList{
+                                                      b2.create<CaseStatement>(
+                                                          CaseSelectorList{
+                                                              b2.Literal(1),
+                                                          },
+                                                          b2.Block()),
+                                                  });
       },
       "internal compiler error");
 }
@@ -102,8 +131,7 @@ TEST_F(SwitchStatementTest, ToStr) {
 
   auto* ident = Expr("ident");
   CaseStatementList body;
-  body.push_back(
-      create<CaseStatement>(lit, create<BlockStatement>(StatementList{})));
+  body.push_back(create<CaseStatement>(lit, Block()));
 
   auto* stmt = create<SwitchStatement>(ident, body);
   EXPECT_EQ(str(stmt), R"(Switch{

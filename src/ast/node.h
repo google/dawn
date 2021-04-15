@@ -78,6 +78,13 @@ class Node : public Castable<Node, Cloneable> {
 };
 
 }  // namespace ast
+
+/// @param node a pointer to an AST node
+/// @returns the ProgramID of the given AST node.
+inline ProgramID ProgramIDOf(ast::Node* node) {
+  return node ? node->program_id() : ProgramID();
+}
+
 }  // namespace tint
 
 #endif  // SRC_AST_NODE_H_

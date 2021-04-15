@@ -71,11 +71,21 @@ TEST_F(VariableTest, Assert_MissingSymbol) {
       "internal compiler error");
 }
 
-TEST_F(VariableTest, Assert_NullType) {
+TEST_F(VariableTest, Assert_Null_Type) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.Var("x", nullptr, StorageClass::kNone);
+      },
+      "internal compiler error");
+}
+
+TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.Var("x", b1.ty.f32(), StorageClass::kNone, b2.Expr(1.2f));
       },
       "internal compiler error");
 }

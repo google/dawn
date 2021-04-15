@@ -14,6 +14,7 @@
 
 #include "src/ast/return_statement.h"
 
+#include "gtest/gtest-spi.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -67,6 +68,16 @@ TEST_F(ReturnStatementTest, ToStr_WithoutValue) {
   auto* r = create<ReturnStatement>();
   EXPECT_EQ(str(r), R"(Return{}
 )");
+}
+
+TEST_F(ReturnStatementTest, Assert_DifferentProgramID_Expr) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<ReturnStatement>(b2.Expr(true));
+      },
+      "internal compiler error");
 }
 
 }  // namespace

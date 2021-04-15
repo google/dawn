@@ -27,6 +27,8 @@ LoopStatement::LoopStatement(ProgramID program_id,
                              BlockStatement* continuing)
     : Base(program_id, source), body_(body), continuing_(continuing) {
   TINT_ASSERT(body_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(body_, program_id);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(continuing_, program_id);
 }
 
 LoopStatement::LoopStatement(LoopStatement&&) = default;

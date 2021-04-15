@@ -47,11 +47,22 @@ TEST_F(VariableDeclStatementTest, IsVariableDecl) {
   EXPECT_TRUE(stmt->Is<VariableDeclStatement>());
 }
 
-TEST_F(VariableDeclStatementTest, Assert_NullVariable) {
+TEST_F(VariableDeclStatementTest, Assert_Null_Variable) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<VariableDeclStatement>(nullptr);
+      },
+      "internal compiler error");
+}
+
+TEST_F(VariableDeclStatementTest, Assert_DifferentProgramID_Variable) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<VariableDeclStatement>(
+            b2.Var("a", b2.ty.f32(), StorageClass::kNone));
       },
       "internal compiler error");
 }

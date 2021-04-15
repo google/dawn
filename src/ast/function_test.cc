@@ -57,7 +57,7 @@ TEST_F(FunctionTest, Assert_InvalidName) {
       "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_NullReturnType) {
+TEST_F(FunctionTest, Assert_Null_ReturnType) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -66,7 +66,7 @@ TEST_F(FunctionTest, Assert_NullReturnType) {
       "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_NullParam) {
+TEST_F(FunctionTest, Assert_Null_Param) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -75,6 +75,44 @@ TEST_F(FunctionTest, Assert_NullParam) {
         params.push_back(nullptr);
 
         b.Func("f", params, b.ty.void_(), StatementList{}, DecorationList{});
+      },
+      "internal compiler error");
+}
+
+TEST_F(FunctionTest, Assert_DifferentProgramID_Param) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.Func("func", VariableList{b2.Param("var", b2.ty.i32())},
+                b1.ty.void_(), StatementList{});
+      },
+      "internal compiler error");
+}
+
+TEST_F(FunctionTest, Assert_DifferentProgramID_Deco) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.Func("func", VariableList{}, b1.ty.void_(), StatementList{},
+                DecorationList{
+                    b2.create<WorkgroupDecoration>(2, 4, 6),
+                });
+      },
+      "internal compiler error");
+}
+
+TEST_F(FunctionTest, Assert_DifferentProgramID_ReturnDeco) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.Func("func", VariableList{}, b1.ty.void_(), StatementList{},
+                DecorationList{},
+                DecorationList{
+                    b2.create<WorkgroupDecoration>(2, 4, 6),
+                });
       },
       "internal compiler error");
 }

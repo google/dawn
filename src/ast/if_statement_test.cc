@@ -26,9 +26,8 @@ using IfStatementTest = TestHelper;
 
 TEST_F(IfStatementTest, Creation) {
   auto* cond = Expr("cond");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(Source{Source::Location{20, 2}}, cond, body,
+  auto* stmt = create<IfStatement>(Source{Source::Location{20, 2}}, cond,
+                                   Block(create<DiscardStatement>()),
                                    ElseStatementList{});
   auto src = stmt->source();
   EXPECT_EQ(src.range.begin.line, 20u);
@@ -36,22 +35,20 @@ TEST_F(IfStatementTest, Creation) {
 }
 
 TEST_F(IfStatementTest, IsIf) {
-  auto* stmt = create<IfStatement>(
-      Expr(true), create<BlockStatement>(StatementList{}), ElseStatementList{});
+  auto* stmt = create<IfStatement>(Expr(true), Block(), ElseStatementList{});
   EXPECT_TRUE(stmt->Is<IfStatement>());
 }
 
-TEST_F(IfStatementTest, Assert_NullCondition) {
+TEST_F(IfStatementTest, Assert_Null_Condition) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
-        auto* body = b.create<BlockStatement>(StatementList{});
-        b.create<IfStatement>(nullptr, body, ElseStatementList{});
+        b.create<IfStatement>(nullptr, b.Block(), ElseStatementList{});
       },
       "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_NullBody) {
+TEST_F(IfStatementTest, Assert_Null_Body) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -60,7 +57,7 @@ TEST_F(IfStatementTest, Assert_NullBody) {
       "internal compiler error");
 }
 
-TEST_F(IfStatementTest, Assert_NullElseStatement) {
+TEST_F(IfStatementTest, Assert_Null_ElseStatement) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -70,11 +67,44 @@ TEST_F(IfStatementTest, Assert_NullElseStatement) {
       "internal compiler error");
 }
 
+TEST_F(IfStatementTest, Assert_DifferentProgramID_Cond) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<IfStatement>(b2.Expr(true), b1.Block(), ElseStatementList{});
+      },
+      "internal compiler error");
+}
+
+TEST_F(IfStatementTest, Assert_DifferentProgramID_Body) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<IfStatement>(b1.Expr(true), b2.Block(), ElseStatementList{});
+      },
+      "internal compiler error");
+}
+
+TEST_F(IfStatementTest, Assert_DifferentProgramID_ElseStatement) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<IfStatement>(
+            b1.Expr(true), b1.Block(),
+            ElseStatementList{
+                b2.create<ElseStatement>(b2.Expr("ident"), b2.Block()),
+            });
+      },
+      "internal compiler error");
+}
+
 TEST_F(IfStatementTest, ToStr) {
   auto* cond = Expr("cond");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* stmt = create<IfStatement>(cond, body, ElseStatementList{});
+  auto* stmt = create<IfStatement>(cond, Block(create<DiscardStatement>()),
+                                   ElseStatementList{});
 
   EXPECT_EQ(str(stmt), R"(If{
   (
@@ -89,12 +119,10 @@ TEST_F(IfStatementTest, ToStr) {
 
 TEST_F(IfStatementTest, ToStr_WithElseStatements) {
   auto* cond = Expr("cond");
-  auto* body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* else_if_body =
-      create<BlockStatement>(StatementList{create<DiscardStatement>()});
-  auto* else_body = create<BlockStatement>(
-      StatementList{create<DiscardStatement>(), create<DiscardStatement>()});
+  auto* body = Block(create<DiscardStatement>());
+  auto* else_if_body = Block(create<DiscardStatement>());
+  auto* else_body =
+      Block(create<DiscardStatement>(), create<DiscardStatement>());
   auto* stmt = create<IfStatement>(
       cond, body,
       ElseStatementList{

@@ -73,6 +73,29 @@ TEST_F(ModuleTest, Assert_Null_ConstructedType) {
       "internal compiler error");
 }
 
+TEST_F(ModuleTest, Assert_DifferentProgramID_Function) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.AST().AddFunction(b2.create<ast::Function>(
+            b2.Symbols().Register("func"), VariableList{}, b2.ty.f32(),
+            b2.Block(), DecorationList{}, DecorationList{}));
+      },
+      "internal compiler error");
+}
+
+TEST_F(ModuleTest, Assert_DifferentProgramID_GlobalVariable) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.AST().AddGlobalVariable(
+            b2.Var("var", b2.ty.i32(), ast::StorageClass::kPrivate));
+      },
+      "internal compiler error");
+}
+
 TEST_F(ModuleTest, Assert_Null_Function) {
   EXPECT_FATAL_FAILURE(
       {

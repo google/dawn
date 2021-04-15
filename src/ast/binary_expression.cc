@@ -28,7 +28,9 @@ BinaryExpression::BinaryExpression(ProgramID program_id,
                                    Expression* rhs)
     : Base(program_id, source), op_(op), lhs_(lhs), rhs_(rhs) {
   TINT_ASSERT(lhs_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(lhs_, program_id);
   TINT_ASSERT(rhs_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(rhs_, program_id);
   TINT_ASSERT(op_ != BinaryOp::kNone);
 }
 

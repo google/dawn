@@ -50,7 +50,7 @@ TEST_F(BinaryExpressionTest, IsBinary) {
   EXPECT_TRUE(r->Is<BinaryExpression>());
 }
 
-TEST_F(BinaryExpressionTest, IsValid_Null_LHS) {
+TEST_F(BinaryExpressionTest, Assert_Null_LHS) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
@@ -59,11 +59,33 @@ TEST_F(BinaryExpressionTest, IsValid_Null_LHS) {
       "internal compiler error");
 }
 
-TEST_F(BinaryExpressionTest, IsValid_Null_RHS) {
+TEST_F(BinaryExpressionTest, Assert_Null_RHS) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder b;
         b.create<BinaryExpression>(BinaryOp::kEqual, b.Expr("lhs"), nullptr);
+      },
+      "internal compiler error");
+}
+
+TEST_F(BinaryExpressionTest, Assert_DifferentProgramID_LHS) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<BinaryExpression>(BinaryOp::kEqual, b2.Expr("lhs"),
+                                    b1.Expr("rhs"));
+      },
+      "internal compiler error");
+}
+
+TEST_F(BinaryExpressionTest, Assert_DifferentProgramID_RHS) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder b1;
+        ProgramBuilder b2;
+        b1.create<BinaryExpression>(BinaryOp::kEqual, b1.Expr("lhs"),
+                                    b2.Expr("rhs"));
       },
       "internal compiler error");
 }

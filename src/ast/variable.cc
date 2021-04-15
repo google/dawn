@@ -41,6 +41,7 @@ Variable::Variable(ProgramID program_id,
   TINT_ASSERT(symbol_.IsValid());
   // no type means we must have a constructor to infer it
   TINT_ASSERT(declared_type_ || constructor);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(constructor, program_id);
 }
 
 Variable::Variable(Variable&&) = default;

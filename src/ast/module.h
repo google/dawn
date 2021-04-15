@@ -53,6 +53,7 @@ class Module : public Castable<Module, Node> {
   /// @param var the variable to add
   void AddGlobalVariable(ast::Variable* var) {
     TINT_ASSERT(var);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(var, program_id());
     global_variables_.push_back(var);
     global_declarations_.push_back(var);
   }
@@ -81,6 +82,7 @@ class Module : public Castable<Module, Node> {
   /// @param func the function to add
   void AddFunction(ast::Function* func) {
     TINT_ASSERT(func);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(func, program_id());
     functions_.push_back(func);
     global_declarations_.push_back(func);
   }

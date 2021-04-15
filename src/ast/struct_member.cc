@@ -34,6 +34,7 @@ StructMember::StructMember(ProgramID program_id,
   TINT_ASSERT(symbol_.IsValid());
   for (auto* deco : decorations_) {
     TINT_ASSERT(deco);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(deco, program_id);
   }
 }
 

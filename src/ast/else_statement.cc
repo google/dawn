@@ -27,6 +27,8 @@ ElseStatement::ElseStatement(ProgramID program_id,
                              BlockStatement* body)
     : Base(program_id, source), condition_(condition), body_(body) {
   TINT_ASSERT(body_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(body_, program_id);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(condition_, program_id);
 }
 
 ElseStatement::ElseStatement(ElseStatement&&) = default;

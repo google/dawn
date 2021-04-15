@@ -27,6 +27,11 @@ CaseStatement::CaseStatement(ProgramID program_id,
                              BlockStatement* body)
     : Base(program_id, source), selectors_(selectors), body_(body) {
   TINT_ASSERT(body_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(body_, program_id);
+  for (auto* selector : selectors) {
+    TINT_ASSERT(selector);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(selector, program_id);
+  }
 }
 
 CaseStatement::CaseStatement(CaseStatement&&) = default;

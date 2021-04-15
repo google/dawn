@@ -27,7 +27,9 @@ ArrayAccessorExpression::ArrayAccessorExpression(ProgramID program_id,
                                                  Expression* idx_expr)
     : Base(program_id, source), array_(array), idx_expr_(idx_expr) {
   TINT_ASSERT(array_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(array_, program_id);
   TINT_ASSERT(idx_expr_);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(idx_expr_, program_id);
 }
 
 ArrayAccessorExpression::ArrayAccessorExpression(ArrayAccessorExpression&&) =
