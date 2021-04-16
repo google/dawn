@@ -73,6 +73,30 @@ TEST(CastableBase, Is) {
   ASSERT_TRUE(gecko->Is<Reptile>());
 }
 
+TEST(CastableBase, Is_kDontErrorOnImpossibleCast) {
+  // Unlike TEST(CastableBase, Is), we're dynamically querying [A -> B] without
+  // going via CastableBase.
+  auto frog = std::make_unique<Frog>();
+  auto bear = std::make_unique<Bear>();
+  auto gecko = std::make_unique<Gecko>();
+
+  ASSERT_TRUE((frog->Is<Animal, kDontErrorOnImpossibleCast>()));
+  ASSERT_TRUE((bear->Is<Animal, kDontErrorOnImpossibleCast>()));
+  ASSERT_TRUE((gecko->Is<Animal, kDontErrorOnImpossibleCast>()));
+
+  ASSERT_TRUE((frog->Is<Amphibian, kDontErrorOnImpossibleCast>()));
+  ASSERT_FALSE((bear->Is<Amphibian, kDontErrorOnImpossibleCast>()));
+  ASSERT_FALSE((gecko->Is<Amphibian, kDontErrorOnImpossibleCast>()));
+
+  ASSERT_FALSE((frog->Is<Mammal, kDontErrorOnImpossibleCast>()));
+  ASSERT_TRUE((bear->Is<Mammal, kDontErrorOnImpossibleCast>()));
+  ASSERT_FALSE((gecko->Is<Mammal, kDontErrorOnImpossibleCast>()));
+
+  ASSERT_FALSE((frog->Is<Reptile, kDontErrorOnImpossibleCast>()));
+  ASSERT_FALSE((bear->Is<Reptile, kDontErrorOnImpossibleCast>()));
+  ASSERT_TRUE((gecko->Is<Reptile, kDontErrorOnImpossibleCast>()));
+}
+
 TEST(CastableBase, IsWithPredicate) {
   std::unique_ptr<CastableBase> frog = std::make_unique<Frog>();
 
@@ -133,6 +157,36 @@ TEST(CastableBase, As) {
   ASSERT_EQ(frog->As<Reptile>(), nullptr);
   ASSERT_EQ(bear->As<Reptile>(), nullptr);
   ASSERT_EQ(gecko->As<Reptile>(), static_cast<Reptile*>(gecko.get()));
+}
+
+TEST(CastableBase, As_kDontErrorOnImpossibleCast) {
+  // Unlike TEST(CastableBase, As), we're dynamically casting [A -> B] without
+  // going via CastableBase.
+  auto frog = std::make_unique<Frog>();
+  auto bear = std::make_unique<Bear>();
+  auto gecko = std::make_unique<Gecko>();
+
+  ASSERT_EQ((frog->As<Animal, kDontErrorOnImpossibleCast>()),
+            static_cast<Animal*>(frog.get()));
+  ASSERT_EQ((bear->As<Animal, kDontErrorOnImpossibleCast>()),
+            static_cast<Animal*>(bear.get()));
+  ASSERT_EQ((gecko->As<Animal, kDontErrorOnImpossibleCast>()),
+            static_cast<Animal*>(gecko.get()));
+
+  ASSERT_EQ((frog->As<Amphibian, kDontErrorOnImpossibleCast>()),
+            static_cast<Amphibian*>(frog.get()));
+  ASSERT_EQ((bear->As<Amphibian, kDontErrorOnImpossibleCast>()), nullptr);
+  ASSERT_EQ((gecko->As<Amphibian, kDontErrorOnImpossibleCast>()), nullptr);
+
+  ASSERT_EQ((frog->As<Mammal, kDontErrorOnImpossibleCast>()), nullptr);
+  ASSERT_EQ((bear->As<Mammal, kDontErrorOnImpossibleCast>()),
+            static_cast<Mammal*>(bear.get()));
+  ASSERT_EQ((gecko->As<Mammal, kDontErrorOnImpossibleCast>()), nullptr);
+
+  ASSERT_EQ((frog->As<Reptile, kDontErrorOnImpossibleCast>()), nullptr);
+  ASSERT_EQ((bear->As<Reptile, kDontErrorOnImpossibleCast>()), nullptr);
+  ASSERT_EQ((gecko->As<Reptile, kDontErrorOnImpossibleCast>()),
+            static_cast<Reptile*>(gecko.get()));
 }
 
 TEST(Castable, Is) {

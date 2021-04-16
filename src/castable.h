@@ -44,6 +44,9 @@ template <typename T>
 struct TypeInfoOf;
 }  // namespace detail
 
+// Forward declaration
+class CastableBase;
+
 /// Helper macro to instantiate the TypeInfo<T> template for `CLASS`.
 #define TINT_INSTANTIATE_TYPEINFO(CLASS)                      \
   TINT_CASTABLE_PUSH_DISABLE_WARNINGS();                      \
@@ -88,17 +91,36 @@ struct TypeInfoOf {
 template <typename TO_FIRST, typename... TO_REST>
 struct IsAnyOf;
 
+/// A placeholder structure used for template parameters that need a default
+/// type, but can always be automatically inferred.
+struct Infer;
+
 }  // namespace detail
+
+/// Bit flags that can be passed to the template parameter `FLAGS` of Is() and
+/// As().
+enum CastFlags {
+  /// Disables the static_assert() inside Is(), that compile-time-verifies that
+  /// the cast is possible. This flag may be useful for highly-generic template
+  /// code that needs to compile for template permutations that generate
+  /// impossible casts.
+  kDontErrorOnImpossibleCast = 1,
+};
 
 /// @returns true if `obj` is a valid pointer, and is of, or derives from the
 /// class `TO`
 /// @param obj the object to test from
-template <typename TO, typename FROM>
+/// @see CastFlags
+template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
 inline bool Is(FROM* obj) {
   constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
   constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
   constexpr const bool nocast = std::is_same<FROM, TO>::value;
-  static_assert(upcast || downcast || nocast, "impossible cast");
+  constexpr const bool assert_is_castable =
+      (FLAGS & kDontErrorOnImpossibleCast) == 0;
+
+  static_assert(upcast || downcast || nocast || !assert_is_castable,
+                "impossible cast");
 
   if (obj == nullptr) {
     return false;
@@ -116,7 +138,11 @@ inline bool Is(FROM* obj) {
 /// @param obj the object to test from
 /// @param pred predicate function with signature `bool(const TO*)` called iff
 /// object is of, or derives from the class `TO`.
-template <typename TO, typename FROM, typename Pred>
+/// @see CastFlags
+template <typename TO,
+          int FLAGS = 0,
+          typename FROM = detail::Infer,
+          typename Pred = detail::Infer>
 inline bool Is(FROM* obj, Pred&& pred) {
   constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
   constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
@@ -144,9 +170,14 @@ inline bool IsAnyOf(FROM* obj) {
 /// @returns obj dynamically cast to the type `TO` or `nullptr` if
 /// this object does not derive from `TO`.
 /// @param obj the object to cast from
-template <typename TO, typename FROM>
+/// @see CastFlags
+template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
 inline TO* As(FROM* obj) {
-  return Is<TO>(obj) ? static_cast<TO*>(obj) : nullptr;
+  using castable =
+      typename std::conditional<std::is_const<FROM>::value, const CastableBase,
+                                CastableBase>::type;
+  auto* as_castable = static_cast<castable*>(obj);
+  return Is<TO, FLAGS>(obj) ? static_cast<TO*>(as_castable) : nullptr;
 }
 
 /// CastableBase is the base class for all Castable objects.
@@ -173,9 +204,9 @@ class CastableBase {
   /// pred(const TO*) returns true
   /// @param pred predicate function with signature `bool(const TO*)` called iff
   /// object is of, or derives from the class `TO`.
-  template <typename TO, typename Pred>
+  template <typename TO, int FLAGS = 0, typename Pred = detail::Infer>
   inline bool Is(Pred&& pred) const {
-    return tint::Is<TO>(this, std::forward<Pred>(pred));
+    return tint::Is<TO, FLAGS>(this, std::forward<Pred>(pred));
   }
 
   /// @returns true if this object is of, or derives from any of the `TO`
@@ -187,16 +218,18 @@ class CastableBase {
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
   /// this object does not derive from `TO`.
-  template <typename TO>
+  /// @see CastFlags
+  template <typename TO, int FLAGS = 0>
   inline TO* As() {
-    return tint::As<TO>(this);
+    return tint::As<TO, FLAGS>(this);
   }
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
   /// this object does not derive from `TO`.
-  template <typename TO>
+  /// @see CastFlags
+  template <typename TO, int FLAGS = 0>
   inline const TO* As() const {
-    return tint::As<const TO>(this);
+    return tint::As<const TO, FLAGS>(this);
   }
 
  protected:
@@ -242,19 +275,20 @@ class Castable : public BASE {
   }
 
   /// @returns true if this object is of, or derives from the class `TO`
-  template <typename TO>
+  /// @see CastFlags
+  template <typename TO, int FLAGS = 0>
   inline bool Is() const {
-    return tint::Is<TO>(static_cast<const CLASS*>(this));
+    return tint::Is<TO, FLAGS>(static_cast<const CLASS*>(this));
   }
 
   /// @returns true if this object is of, or derives from the class `TO` and
   /// pred(const TO*) returns true
   /// @param pred predicate function with signature `bool(const TO*)` called iff
   /// object is of, or derives from the class `TO`.
-  template <typename TO, typename Pred>
+  template <typename TO, int FLAGS = 0, typename Pred = detail::Infer>
   inline bool Is(Pred&& pred) const {
-    return tint::Is<TO>(static_cast<const CLASS*>(this),
-                        std::forward<Pred>(pred));
+    return tint::Is<TO, FLAGS>(static_cast<const CLASS*>(this),
+                               std::forward<Pred>(pred));
   }
 
   /// @returns true if this object is of, or derives from any of the `TO`
@@ -266,16 +300,18 @@ class Castable : public BASE {
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
   /// this object does not derive from `TO`.
-  template <typename TO>
+  /// @see CastFlags
+  template <typename TO, int FLAGS = 0>
   inline TO* As() {
-    return tint::As<TO>(this);
+    return tint::As<TO, FLAGS>(this);
   }
 
   /// @returns this object dynamically cast to the type `TO` or `nullptr` if
   /// this object does not derive from `TO`.
-  template <typename TO>
+  /// @see CastFlags
+  template <typename TO, int FLAGS = 0>
   inline const TO* As() const {
-    return tint::As<const TO>(this);
+    return tint::As<const TO, FLAGS>(this);
   }
 };
 
