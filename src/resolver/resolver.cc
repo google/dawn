@@ -1824,13 +1824,13 @@ const semantic::Array* Resolver::Array(type::Array* arr, const Source& source) {
     return nullptr;
   }
 
-  auto create_semantic = [&](uint32_t stride) -> semantic::Array* {
-    uint32_t el_align = 0;
-    uint32_t el_size = 0;
-    if (!DefaultAlignAndSize(arr->type(), el_align, el_size, source)) {
-      return nullptr;
-    }
+  uint32_t el_align = 0;
+  uint32_t el_size = 0;
+  if (!DefaultAlignAndSize(el_ty, el_align, el_size, source)) {
+    return nullptr;
+  }
 
+  auto create_semantic = [&](uint32_t stride) -> semantic::Array* {
     auto align = el_align;
     // WebGPU requires runtime arrays have at least one element, but the AST
     // records an element count of 0 for it.
@@ -1843,18 +1843,30 @@ const semantic::Array* Resolver::Array(type::Array* arr, const Source& source) {
   // Look for explicit stride via [[stride(n)]] decoration
   for (auto* deco : arr->decorations()) {
     if (auto* stride = deco->As<ast::StrideDecoration>()) {
-      return create_semantic(stride->stride());
+      auto explicit_stride = stride->stride();
+      bool is_valid_stride = (explicit_stride >= el_size) &&
+                             (explicit_stride >= el_align) &&
+                             (explicit_stride % el_align == 0);
+      if (!is_valid_stride) {
+        // https://gpuweb.github.io/gpuweb/wgsl/#array-layout-rules
+        // Arrays decorated with the stride attribute must have a stride that is
+        // at least the size of the element type, and be a multiple of the
+        // element type's alignment value.
+        diagnostics_.add_error(
+            "arrays decorated with the stride attribute must have a stride "
+            "that is at least the size of the element type, and be a multiple "
+            "of the element type's alignment value.",
+            source);
+        return nullptr;
+      }
+
+      return create_semantic(explicit_stride);
     }
   }
 
   // Calculate implicit stride
-  uint32_t el_align = 0;
-  uint32_t el_size = 0;
-  if (!DefaultAlignAndSize(el_ty, el_align, el_size, source)) {
-    return nullptr;
-  }
-
-  return create_semantic(utils::RoundUp(el_align, el_size));
+  auto implicit_stride = utils::RoundUp(el_align, el_size);
+  return create_semantic(implicit_stride);
 }
 
 bool Resolver::ValidateStructure(const type::Struct* st) {

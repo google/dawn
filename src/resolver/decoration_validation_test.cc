@@ -24,6 +24,9 @@
 #include "gmock/gmock.h"
 
 namespace tint {
+namespace resolver {
+
+namespace DecorationTests {
 namespace {
 
 enum class DecorationKind {
@@ -45,12 +48,11 @@ struct TestParams {
   DecorationKind kind;
   bool should_pass;
 };
-class TestWithParams : public resolver::TestHelper,
-                       public testing::TestWithParam<TestParams> {};
+struct TestWithParams : ResolverTestWithParam<TestParams> {};
 
-ast::Decoration* createDecoration(const Source& source,
-                                  ProgramBuilder& builder,
-                                  DecorationKind kind) {
+static ast::Decoration* createDecoration(const Source& source,
+                                         ProgramBuilder& builder,
+                                         DecorationKind kind) {
   switch (kind) {
     case DecorationKind::kAccess:
       return builder.create<ast::AccessDecoration>(
@@ -87,7 +89,7 @@ ast::Decoration* createDecoration(const Source& source,
 
 using FunctionReturnTypeDecorationTest = TestWithParams;
 TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
-  auto params = GetParam();
+  auto& params = GetParam();
 
   Func("main", ast::VariableList{}, ty.f32(),
        ast::StatementList{create<ast::ReturnStatement>(Expr(1.f))},
@@ -121,9 +123,8 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kWorkgroup, false}));
 
 using ArrayDecorationTest = TestWithParams;
-
 TEST_P(ArrayDecorationTest, IsValid) {
-  auto params = GetParam();
+  auto& params = GetParam();
 
   ast::StructMemberList members{Member(
       "a", create<type::Array>(ty.f32(), 0,
@@ -163,7 +164,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 using StructDecorationTest = TestWithParams;
 TEST_P(StructDecorationTest, IsValid) {
-  auto params = GetParam();
+  auto& params = GetParam();
 
   auto* s = create<ast::Struct>(ast::StructMemberList{},
                                 ast::DecorationList{createDecoration(
@@ -200,7 +201,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 using StructMemberDecorationTest = TestWithParams;
 TEST_P(StructMemberDecorationTest, IsValid) {
-  auto params = GetParam();
+  auto& params = GetParam();
 
   ast::StructMemberList members{
       Member("a", ty.i32(),
@@ -239,7 +240,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 using VariableDecorationTest = TestWithParams;
 TEST_P(VariableDecorationTest, IsValid) {
-  auto params = GetParam();
+  auto& params = GetParam();
 
   Global("a", ty.f32(), ast::StorageClass::kInput, nullptr,
          ast::DecorationList{
@@ -274,7 +275,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 using FunctionDecorationTest = TestWithParams;
 TEST_P(FunctionDecorationTest, IsValid) {
-  auto params = GetParam();
+  auto& params = GetParam();
 
   Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::DecorationList{
@@ -307,4 +308,121 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kWorkgroup, true}));
 
 }  // namespace
+}  // namespace DecorationTests
+
+namespace ArrayStrideTests {
+namespace {
+
+struct Params {
+  create_type_func_ptr create_el_type;
+  uint32_t stride;
+  bool should_pass;
+};
+
+struct TestWithParams : ResolverTestWithParam<Params> {};
+
+using ArrayStrideTest = TestWithParams;
+TEST_P(ArrayStrideTest, All) {
+  auto& params = GetParam();
+  auto* el_ty = params.create_el_type(ty);
+
+  std::stringstream ss;
+  ss << "el_ty: " << el_ty->FriendlyName(Symbols())
+     << ", stride: " << params.stride
+     << ", should_pass: " << params.should_pass;
+  SCOPED_TRACE(ss.str());
+
+  auto* arr =
+      create<type::Array>(el_ty, 4,
+                          ast::DecorationList{
+                              create<ast::StrideDecoration>(params.stride),
+                          });
+
+  Global(Source{{12, 34}}, "myarray", arr, ast::StorageClass::kInput);
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: arrays decorated with the stride attribute must "
+              "have a stride that is at least the size of the element type, "
+              "and be a multiple of the element type's alignment value.");
+  }
+}
+
+// Helpers and typedefs
+using i32 = ProgramBuilder::i32;
+using u32 = ProgramBuilder::u32;
+using f32 = ProgramBuilder::f32;
+
+struct SizeAndAlignment {
+  uint32_t size;
+  uint32_t align;
+};
+constexpr SizeAndAlignment default_u32 = {4, 4};
+constexpr SizeAndAlignment default_i32 = {4, 4};
+constexpr SizeAndAlignment default_f32 = {4, 4};
+constexpr SizeAndAlignment default_vec2 = {8, 8};
+constexpr SizeAndAlignment default_vec3 = {12, 16};
+constexpr SizeAndAlignment default_vec4 = {16, 16};
+constexpr SizeAndAlignment default_mat2x2 = {16, 8};
+constexpr SizeAndAlignment default_mat3x3 = {48, 16};
+constexpr SizeAndAlignment default_mat4x4 = {64, 16};
+
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    ArrayStrideTest,
+    testing::Values(
+        // Succeed because stride >= element size (while being multiple of
+        // element alignment)
+        Params{ty_u32, default_u32.size, true},
+        Params{ty_i32, default_i32.size, true},
+        Params{ty_f32, default_f32.size, true},
+        Params{ty_vec2<f32>, default_vec2.size, true},
+        // vec3's default size is not a multiple of its alignment
+        // Params{ty_vec3<f32>, default_vec3.size, true},
+        Params{ty_vec4<f32>, default_vec4.size, true},
+        Params{ty_mat2x2<f32>, default_mat2x2.size, true},
+        Params{ty_mat3x3<f32>, default_mat3x3.size, true},
+        Params{ty_mat4x4<f32>, default_mat4x4.size, true},
+
+        // Fail because stride is < element size
+        Params{ty_u32, default_u32.size - 1, false},
+        Params{ty_i32, default_i32.size - 1, false},
+        Params{ty_f32, default_f32.size - 1, false},
+        Params{ty_vec2<f32>, default_vec2.size - 1, false},
+        Params{ty_vec3<f32>, default_vec3.size - 1, false},
+        Params{ty_vec4<f32>, default_vec4.size - 1, false},
+        Params{ty_mat2x2<f32>, default_mat2x2.size - 1, false},
+        Params{ty_mat3x3<f32>, default_mat3x3.size - 1, false},
+        Params{ty_mat4x4<f32>, default_mat4x4.size - 1, false},
+
+        // Succeed because stride equals multiple of element alignment
+        Params{ty_u32, default_u32.align * 7, true},
+        Params{ty_i32, default_i32.align * 7, true},
+        Params{ty_f32, default_f32.align * 7, true},
+        Params{ty_vec2<f32>, default_vec2.align * 7, true},
+        Params{ty_vec3<f32>, default_vec3.align * 7, true},
+        Params{ty_vec4<f32>, default_vec4.align * 7, true},
+        Params{ty_mat2x2<f32>, default_mat2x2.align * 7, true},
+        Params{ty_mat3x3<f32>, default_mat3x3.align * 7, true},
+        Params{ty_mat4x4<f32>, default_mat4x4.align * 7, true},
+
+        // Fail because stride is not multiple of element alignment
+        Params{ty_u32, (default_u32.align - 1) * 7, false},
+        Params{ty_i32, (default_i32.align - 1) * 7, false},
+        Params{ty_f32, (default_f32.align - 1) * 7, false},
+        Params{ty_vec2<f32>, (default_vec2.align - 1) * 7, false},
+        Params{ty_vec3<f32>, (default_vec3.align - 1) * 7, false},
+        Params{ty_vec4<f32>, (default_vec4.align - 1) * 7, false},
+        Params{ty_mat2x2<f32>, (default_mat2x2.align - 1) * 7, false},
+        Params{ty_mat3x3<f32>, (default_mat3x3.align - 1) * 7, false},
+        Params{ty_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}
+
+        ));
+
+}  // namespace
+}  // namespace ArrayStrideTests
+}  // namespace resolver
 }  // namespace tint

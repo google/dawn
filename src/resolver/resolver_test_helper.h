@@ -123,6 +123,17 @@ using create_type_func_ptr =
     type::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
 
 template <typename T>
+type::Type* ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec2<T>();
+}
+
+template <create_type_func_ptr create_type>
+type::Type* ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
+  auto* type = create_type(ty);
+  return ty.vec2(type);
+}
+
+template <typename T>
 type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.vec3<T>();
 }
@@ -134,6 +145,28 @@ type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
 }
 
 template <typename T>
+type::Type* ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec4<T>();
+}
+
+template <create_type_func_ptr create_type>
+type::Type* ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
+  auto* type = create_type(ty);
+  return ty.vec4(type);
+}
+
+template <typename T>
+type::Type* ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat2x2<T>();
+}
+
+template <create_type_func_ptr create_type>
+type::Type* ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
+  auto* type = create_type(ty);
+  return ty.mat2x2(type);
+}
+
+template <typename T>
 type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat3x3<T>();
 }
@@ -142,6 +175,17 @@ template <create_type_func_ptr create_type>
 type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
   auto* type = create_type(ty);
   return ty.mat3x3(type);
+}
+
+template <typename T>
+type::Type* ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat4x4<T>();
+}
+
+template <create_type_func_ptr create_type>
+type::Type* ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
+  auto* type = create_type(ty);
+  return ty.mat4x4(type);
 }
 
 template <create_type_func_ptr create_type>
