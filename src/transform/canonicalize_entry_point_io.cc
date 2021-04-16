@@ -58,8 +58,7 @@ bool StructMemberComparator(const ast::StructMember* a,
 
 }  // namespace
 
-Transform::Output CanonicalizeEntryPointIO::Run(const Program* in,
-                                                const DataMap&) {
+Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
 

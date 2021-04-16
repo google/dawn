@@ -33,7 +33,7 @@ namespace transform {
 Hlsl::Hlsl() = default;
 Hlsl::~Hlsl() = default;
 
-Transform::Output Hlsl::Run(const Program* in, const DataMap& data) {
+Output Hlsl::Run(const Program* in, const DataMap& data) {
   Manager manager;
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<DecomposeStorageAccess>();

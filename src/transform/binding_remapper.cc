@@ -34,8 +34,7 @@ BindingRemapper::Remappings::~Remappings() = default;
 BindingRemapper::BindingRemapper() = default;
 BindingRemapper::~BindingRemapper() = default;
 
-Transform::Output BindingRemapper::Run(const Program* in,
-                                       const DataMap& datamap) {
+Output BindingRemapper::Run(const Program* in, const DataMap& datamap) {
   ProgramBuilder out;
   auto* remappings = datamap.Get<Remappings>();
   if (!remappings) {

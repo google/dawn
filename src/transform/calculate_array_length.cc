@@ -68,7 +68,7 @@ CalculateArrayLength::BufferSizeIntrinsic::Clone(CloneContext* ctx) const {
 CalculateArrayLength::CalculateArrayLength() = default;
 CalculateArrayLength::~CalculateArrayLength() = default;
 
-Transform::Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
+Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
 

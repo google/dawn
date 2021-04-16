@@ -609,8 +609,7 @@ DecomposeStorageAccess::Intrinsic* DecomposeStorageAccess::Intrinsic::Clone(
 DecomposeStorageAccess::DecomposeStorageAccess() = default;
 DecomposeStorageAccess::~DecomposeStorageAccess() = default;
 
-Transform::Output DecomposeStorageAccess::Run(const Program* in,
-                                              const DataMap&) {
+Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
 

@@ -20,7 +20,7 @@ namespace transform {
 Manager::Manager() = default;
 Manager::~Manager() = default;
 
-Transform::Output Manager::Run(const Program* program, const DataMap& data) {
+Output Manager::Run(const Program* program, const DataMap& data) {
   Output out;
   if (!transforms_.empty()) {
     for (auto& transform : transforms_) {

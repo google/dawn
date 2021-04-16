@@ -25,7 +25,7 @@ namespace transform {
 Msl::Msl() = default;
 Msl::~Msl() = default;
 
-Transform::Output Msl::Run(const Program* in, const DataMap& data) {
+Output Msl::Run(const Program* in, const DataMap& data) {
   Manager manager;
   manager.Add<CanonicalizeEntryPointIO>();
   auto out = manager.Run(in, data);

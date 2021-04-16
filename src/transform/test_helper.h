@@ -38,10 +38,9 @@ class TransformTestBase : public BASE {
   /// @param transforms the list of transforms to apply
   /// @param data the optional DataMap to pass to Transform::Run()
   /// @return the transformed output
-  Transform::Output Run(
-      std::string in,
-      std::vector<std::unique_ptr<transform::Transform>> transforms,
-      const DataMap& data = {}) {
+  Output Run(std::string in,
+             std::vector<std::unique_ptr<transform::Transform>> transforms,
+             const DataMap& data = {}) {
     auto file = std::make_unique<Source::File>("test", in);
     auto program = reader::wgsl::Parse(file.get());
 
@@ -49,7 +48,7 @@ class TransformTestBase : public BASE {
     files_.emplace_back(std::move(file));
 
     if (!program.IsValid()) {
-      return Transform::Output(std::move(program));
+      return Output(std::move(program));
     }
 
     Manager manager;
@@ -65,9 +64,9 @@ class TransformTestBase : public BASE {
   /// @param in the input WGSL source
   /// @param data the optional DataMap to pass to Transform::Run()
   /// @return the transformed output
-  Transform::Output Run(std::string in,
-                        std::unique_ptr<transform::Transform> transform,
-                        const DataMap& data = {}) {
+  Output Run(std::string in,
+             std::unique_ptr<transform::Transform> transform,
+             const DataMap& data = {}) {
     std::vector<std::unique_ptr<transform::Transform>> transforms;
     transforms.emplace_back(std::move(transform));
     return Run(std::move(in), std::move(transforms), data);
@@ -79,14 +78,14 @@ class TransformTestBase : public BASE {
   /// @param data the optional DataMap to pass to Transform::Run()
   /// @return the transformed output
   template <typename TRANSFORM>
-  Transform::Output Run(std::string in, const DataMap& data = {}) {
+  Output Run(std::string in, const DataMap& data = {}) {
     return Run(std::move(in), std::make_unique<TRANSFORM>(), data);
   }
 
   /// @param output the output of the transform
   /// @returns the output program as a WGSL string, or an error string if the
   /// program is not valid.
-  std::string str(const Transform::Output& output) {
+  std::string str(const Output& output) {
     diag::Formatter::Style style;
     style.print_newline_at_end = false;
 

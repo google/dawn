@@ -60,8 +60,7 @@ FirstIndexOffset::FirstIndexOffset(uint32_t binding, uint32_t group)
 
 FirstIndexOffset::~FirstIndexOffset() = default;
 
-Transform::Output FirstIndexOffset::Run(const Program* in,
-                                        const DataMap& data) {
+Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {
   // Get the uniform buffer binding point
   uint32_t ub_binding = binding_;
   uint32_t ub_group = group_;

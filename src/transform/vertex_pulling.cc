@@ -390,7 +390,7 @@ VertexPulling::VertexPulling(const Config& config) : cfg_(config) {}
 
 VertexPulling::~VertexPulling() = default;
 
-Transform::Output VertexPulling::Run(const Program* in, const DataMap& data) {
+Output VertexPulling::Run(const Program* in, const DataMap& data) {
   ProgramBuilder out;
 
   auto cfg = cfg_;

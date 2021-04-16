@@ -31,9 +31,10 @@ Data& Data::operator=(const Data&) = default;
 DataMap::DataMap() = default;
 DataMap::DataMap(DataMap&&) = default;
 DataMap::~DataMap() = default;
+DataMap& DataMap::operator=(DataMap&&) = default;
 
-Transform::Output::Output() = default;
-Transform::Output::Output(Program&& p) : program(std::move(p)) {}
+Output::Output() = default;
+Output::Output(Program&& p) : program(std::move(p)) {}
 Transform::Transform() = default;
 Transform::~Transform() = default;
 
