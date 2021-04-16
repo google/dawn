@@ -17,7 +17,7 @@
 namespace tint {
 namespace utils {
 
-TmpFile::TmpFile(std::string) = default;
+TmpFile::TmpFile(std::string) {}
 
 TmpFile::~TmpFile() = default;
 
