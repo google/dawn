@@ -156,7 +156,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
   });
   auto* c = create<CaseStatement>(CaseSelectorList{b}, body);
 
-  EXPECT_EQ(str(c), R"(Case 2{
+  EXPECT_EQ(str(c), R"(Case 2u{
   Discard{}
 }
 )");

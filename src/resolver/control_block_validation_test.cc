@@ -213,10 +213,9 @@ TEST_F(ResolverControlBlockValidationTest,
   WrapInFunction(block);
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      "12:34 error v-0027: a literal value must not appear more than once "
-      "in the case selectors for a switch statement: '2'");
+  EXPECT_EQ(r()->error(),
+            "12:34 error v-0027: a literal value must not appear more than "
+            "once in the case selectors for a switch statement: '2u'");
 }
 
 TEST_F(ResolverControlBlockValidationTest,

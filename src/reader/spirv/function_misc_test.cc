@@ -81,7 +81,7 @@ VariableDeclStatement{
     none
     __u32
     {
-      ScalarConstructor[not set]{0}
+      ScalarConstructor[not set]{0u}
     }
   }
 }
@@ -151,8 +151,8 @@ VariableDeclStatement{
     {
       TypeConstructor[not set]{
         __vec_2__u32
-        ScalarConstructor[not set]{0}
-        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0u}
+        ScalarConstructor[not set]{0u}
       }
     }
   }
@@ -224,7 +224,7 @@ VariableDeclStatement{
     none
     __u32
     {
-      ScalarConstructor[not set]{0}
+      ScalarConstructor[not set]{0u}
     }
   }
 }
@@ -277,8 +277,8 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
     {
       TypeConstructor[not set]{
         __vec_2__u32
-        ScalarConstructor[not set]{0}
-        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0u}
+        ScalarConstructor[not set]{0u}
       }
     }
   }
@@ -380,8 +380,8 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
     {
       TypeConstructor[not set]{
         __array__u32_2
-        ScalarConstructor[not set]{0}
-        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0u}
+        ScalarConstructor[not set]{0u}
       }
     }
   }
@@ -414,7 +414,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
       TypeConstructor[not set]{
         __struct_S
         ScalarConstructor[not set]{false}
-        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0u}
         ScalarConstructor[not set]{0}
         ScalarConstructor[not set]{0.000000}
       }

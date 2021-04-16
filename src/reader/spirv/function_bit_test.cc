@@ -61,15 +61,15 @@ std::string AstFor(std::string assembly) {
   if (assembly == "v2uint_10_20") {
     return R"(TypeConstructor[not set]{
           __vec_2__u32
-          ScalarConstructor[not set]{10}
-          ScalarConstructor[not set]{20}
+          ScalarConstructor[not set]{10u}
+          ScalarConstructor[not set]{20u}
         })";
   }
   if (assembly == "v2uint_20_10") {
     return R"(TypeConstructor[not set]{
           __vec_2__u32
-          ScalarConstructor[not set]{20}
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{20u}
+          ScalarConstructor[not set]{10u}
         })";
   }
   if (assembly == "v2int_30_40") {
@@ -90,8 +90,8 @@ std::string AstFor(std::string assembly) {
     return R"(Bitcast[not set]<__vec_2__i32>{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10}
-            ScalarConstructor[not set]{20}
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
         })";
   }
@@ -212,8 +212,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpShiftLeftLogical", "uint_20", "__u32",
-                   "ScalarConstructor[not set]{10}", "shift_left",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "shift_left",
+                   "ScalarConstructor[not set]{20u}"},
         // Both int
         BinaryData{"int", "int_30", "OpShiftLeftLogical", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "shift_left",
@@ -221,11 +221,11 @@ INSTANTIATE_TEST_SUITE_P(
         // Mixed, returning uint
         BinaryData{"uint", "int_30", "OpShiftLeftLogical", "uint_10", "__u32",
                    "ScalarConstructor[not set]{30}", "shift_left",
-                   "ScalarConstructor[not set]{10}"},
+                   "ScalarConstructor[not set]{10u}"},
         // Mixed, returning int
         BinaryData{"int", "int_30", "OpShiftLeftLogical", "uint_10", "__i32",
                    "ScalarConstructor[not set]{30}", "shift_left",
-                   "ScalarConstructor[not set]{10}"},
+                   "ScalarConstructor[not set]{10u}"},
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpShiftLeftLogical",
                    "v2uint_20_10", "__vec_2__u32", AstFor("v2uint_10_20"),
@@ -249,8 +249,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpShiftRightLogical", "uint_20", "__u32",
-                   "ScalarConstructor[not set]{10}", "shift_right",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "shift_right",
+                   "ScalarConstructor[not set]{20u}"},
         // Both int
         BinaryData{"int", "int_30", "OpShiftRightLogical", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "shift_right",
@@ -258,11 +258,11 @@ INSTANTIATE_TEST_SUITE_P(
         // Mixed, returning uint
         BinaryData{"uint", "int_30", "OpShiftRightLogical", "uint_10", "__u32",
                    "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{10}"},
+                   "ScalarConstructor[not set]{10u}"},
         // Mixed, returning int
         BinaryData{"int", "int_30", "OpShiftRightLogical", "uint_10", "__i32",
                    "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{10}"},
+                   "ScalarConstructor[not set]{10u}"},
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpShiftRightLogical",
                    "v2uint_20_10", "__vec_2__u32", AstFor("v2uint_10_20"),
@@ -286,8 +286,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpShiftRightArithmetic", "uint_20",
-                   "__u32", "ScalarConstructor[not set]{10}", "shift_right",
-                   "ScalarConstructor[not set]{20}"},
+                   "__u32", "ScalarConstructor[not set]{10u}", "shift_right",
+                   "ScalarConstructor[not set]{20u}"},
         // Both int
         BinaryData{"int", "int_30", "OpShiftRightArithmetic", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "shift_right",
@@ -295,11 +295,11 @@ INSTANTIATE_TEST_SUITE_P(
         // Mixed, returning uint
         BinaryData{"uint", "int_30", "OpShiftRightArithmetic", "uint_10",
                    "__u32", "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{10}"},
+                   "ScalarConstructor[not set]{10u}"},
         // Mixed, returning int
         BinaryData{"int", "int_30", "OpShiftRightArithmetic", "uint_10",
                    "__i32", "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{10}"},
+                   "ScalarConstructor[not set]{10u}"},
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpShiftRightArithmetic",
                    "v2uint_20_10", "__vec_2__u32", AstFor("v2uint_10_20"),
@@ -323,8 +323,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpBitwiseAnd", "uint_20", "__u32",
-                   "ScalarConstructor[not set]{10}", "and",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "and",
+                   "ScalarConstructor[not set]{20u}"},
         // Both int
         BinaryData{"int", "int_30", "OpBitwiseAnd", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "and",
@@ -351,7 +351,7 @@ INSTANTIATE_TEST_SUITE_P(
           ScalarConstructor[not set]{30}
           and
           Bitcast[not set]<__i32>{
-            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{10u}
           }
         }
       }
@@ -364,7 +364,7 @@ INSTANTIATE_TEST_SUITE_P(
         ScalarConstructor[not set]{30}
         and
         Bitcast[not set]<__i32>{
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         }
       }
     })"},
@@ -373,7 +373,7 @@ INSTANTIATE_TEST_SUITE_P(
                           R"(__u32
     {
       Binary[not set]{
-        ScalarConstructor[not set]{10}
+        ScalarConstructor[not set]{10u}
         and
         Bitcast[not set]<__u32>{
           ScalarConstructor[not set]{30}
@@ -386,9 +386,9 @@ INSTANTIATE_TEST_SUITE_P(
     {
       Bitcast[not set]<__i32>{
         Binary[not set]{
-          ScalarConstructor[not set]{20}
+          ScalarConstructor[not set]{20u}
           and
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         }
       }
     })"},
@@ -408,8 +408,8 @@ INSTANTIATE_TEST_SUITE_P(
           Bitcast[not set]<__vec_2__i32>{
             TypeConstructor[not set]{
               __vec_2__u32
-              ScalarConstructor[not set]{10}
-              ScalarConstructor[not set]{20}
+              ScalarConstructor[not set]{10u}
+              ScalarConstructor[not set]{20u}
             }
           }
         }
@@ -424,8 +424,8 @@ INSTANTIATE_TEST_SUITE_P(
         Binary[not set]{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10}
-            ScalarConstructor[not set]{20}
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
           and
           Bitcast[not set]<__vec_2__u32>{
@@ -445,8 +445,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpBitwiseOr", "uint_20", "__u32",
-                   "ScalarConstructor[not set]{10}", "or",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "or",
+                   "ScalarConstructor[not set]{20u}"},
         // Both int
         BinaryData{"int", "int_30", "OpBitwiseOr", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "or",
@@ -473,7 +473,7 @@ INSTANTIATE_TEST_SUITE_P(
           ScalarConstructor[not set]{30}
           or
           Bitcast[not set]<__i32>{
-            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{10u}
           }
         }
       }
@@ -486,7 +486,7 @@ INSTANTIATE_TEST_SUITE_P(
         ScalarConstructor[not set]{30}
         or
         Bitcast[not set]<__i32>{
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         }
       }
     })"},
@@ -495,7 +495,7 @@ INSTANTIATE_TEST_SUITE_P(
                           R"(__u32
     {
       Binary[not set]{
-        ScalarConstructor[not set]{10}
+        ScalarConstructor[not set]{10u}
         or
         Bitcast[not set]<__u32>{
           ScalarConstructor[not set]{30}
@@ -508,9 +508,9 @@ INSTANTIATE_TEST_SUITE_P(
     {
       Bitcast[not set]<__i32>{
         Binary[not set]{
-          ScalarConstructor[not set]{20}
+          ScalarConstructor[not set]{20u}
           or
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         }
       }
     })"},
@@ -530,8 +530,8 @@ INSTANTIATE_TEST_SUITE_P(
           Bitcast[not set]<__vec_2__i32>{
             TypeConstructor[not set]{
               __vec_2__u32
-              ScalarConstructor[not set]{10}
-              ScalarConstructor[not set]{20}
+              ScalarConstructor[not set]{10u}
+              ScalarConstructor[not set]{20u}
             }
           }
         }
@@ -545,8 +545,8 @@ INSTANTIATE_TEST_SUITE_P(
         Binary[not set]{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10}
-            ScalarConstructor[not set]{20}
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
           or
           Bitcast[not set]<__vec_2__u32>{
@@ -566,8 +566,8 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"uint", "uint_10", "OpBitwiseXor", "uint_20", "__u32",
-                   "ScalarConstructor[not set]{10}", "xor",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "xor",
+                   "ScalarConstructor[not set]{20u}"},
         // Both int
         BinaryData{"int", "int_30", "OpBitwiseXor", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "xor",
@@ -594,7 +594,7 @@ INSTANTIATE_TEST_SUITE_P(
           ScalarConstructor[not set]{30}
           xor
           Bitcast[not set]<__i32>{
-            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{10u}
           }
         }
       }
@@ -607,7 +607,7 @@ INSTANTIATE_TEST_SUITE_P(
         ScalarConstructor[not set]{30}
         xor
         Bitcast[not set]<__i32>{
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         }
       }
     })"},
@@ -616,7 +616,7 @@ INSTANTIATE_TEST_SUITE_P(
                           R"(__u32
     {
       Binary[not set]{
-        ScalarConstructor[not set]{10}
+        ScalarConstructor[not set]{10u}
         xor
         Bitcast[not set]<__u32>{
           ScalarConstructor[not set]{30}
@@ -629,9 +629,9 @@ INSTANTIATE_TEST_SUITE_P(
     {
       Bitcast[not set]<__i32>{
         Binary[not set]{
-          ScalarConstructor[not set]{20}
+          ScalarConstructor[not set]{20u}
           xor
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         }
       }
     })"},
@@ -651,8 +651,8 @@ INSTANTIATE_TEST_SUITE_P(
           Bitcast[not set]<__vec_2__i32>{
             TypeConstructor[not set]{
               __vec_2__u32
-              ScalarConstructor[not set]{10}
-              ScalarConstructor[not set]{20}
+              ScalarConstructor[not set]{10u}
+              ScalarConstructor[not set]{20u}
             }
           }
         }
@@ -667,8 +667,8 @@ INSTANTIATE_TEST_SUITE_P(
         Binary[not set]{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10}
-            ScalarConstructor[not set]{20}
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
           xor
           Bitcast[not set]<__vec_2__u32>{
@@ -729,7 +729,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Uint) {
       Bitcast[not set]<__i32>{
         UnaryOp[not set]{
           not
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         }
       }
     }
@@ -784,7 +784,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Uint) {
     {
       UnaryOp[not set]{
         not
-        ScalarConstructor[not set]{10}
+        ScalarConstructor[not set]{10u}
       }
     }
   })"));
@@ -843,8 +843,8 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_UnsignedVec) {
           not
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10}
-            ScalarConstructor[not set]{20}
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
         }
       }
@@ -905,8 +905,8 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_UnsignedVec) {
         not
         TypeConstructor[not set]{
           __vec_2__u32
-          ScalarConstructor[not set]{10}
-          ScalarConstructor[not set]{20}
+          ScalarConstructor[not set]{10u}
+          ScalarConstructor[not set]{20u}
         }
       }
     }

@@ -112,8 +112,8 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
       Bitcast[not set]<__vec_2__f32>{
         TypeConstructor[not set]{
           __vec_2__u32
-          ScalarConstructor[not set]{10}
-          ScalarConstructor[not set]{20}
+          ScalarConstructor[not set]{10u}
+          ScalarConstructor[not set]{20u}
         }
       }
     }

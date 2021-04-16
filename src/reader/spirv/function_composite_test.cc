@@ -96,8 +96,8 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
     {
       TypeConstructor[not set]{
         __vec_2__u32
-        ScalarConstructor[not set]{10}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{10u}
+        ScalarConstructor[not set]{20u}
       }
     }
   }
@@ -192,11 +192,11 @@ TEST_F(SpvParserTest_Composite_Construct, Array) {
     {
       TypeConstructor[not set]{
         __array__u32_5
-        ScalarConstructor[not set]{10}
-        ScalarConstructor[not set]{20}
-        ScalarConstructor[not set]{3}
-        ScalarConstructor[not set]{4}
-        ScalarConstructor[not set]{5}
+        ScalarConstructor[not set]{10u}
+        ScalarConstructor[not set]{20u}
+        ScalarConstructor[not set]{3u}
+        ScalarConstructor[not set]{4u}
+        ScalarConstructor[not set]{5u}
       }
     }
   })"));
@@ -227,7 +227,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
           ScalarConstructor[not set]{50.000000}
           ScalarConstructor[not set]{60.000000}
         }
-        ScalarConstructor[not set]{5}
+        ScalarConstructor[not set]{5u}
         ScalarConstructor[not set]{30}
       }
     }
@@ -306,7 +306,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
     {
       ArrayAccessor[not set]{
         Identifier[not set]{x_1}
-        ScalarConstructor[not set]{2}
+        ScalarConstructor[not set]{2u}
       }
     }
   })"));
@@ -357,7 +357,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
       MemberAccessor[not set]{
         ArrayAccessor[not set]{
           Identifier[not set]{x_1}
-          ScalarConstructor[not set]{2}
+          ScalarConstructor[not set]{2u}
         }
         Identifier[not set]{y}
       }
@@ -389,7 +389,7 @@ TEST_F(SpvParserTest_CompositeExtract, Array) {
     {
       ArrayAccessor[not set]{
         Identifier[not set]{x_1}
-        ScalarConstructor[not set]{3}
+        ScalarConstructor[not set]{3u}
       }
     }
   })"));
@@ -553,9 +553,9 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
               Identifier[not set]{x_1}
               Identifier[not set]{field1}
             }
-            ScalarConstructor[not set]{2}
+            ScalarConstructor[not set]{2u}
           }
-          ScalarConstructor[not set]{0}
+          ScalarConstructor[not set]{0u}
         }
         Identifier[not set]{y}
       }
@@ -657,7 +657,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix) {
 Assignment{
   ArrayAccessor[not set]{
     Identifier[not set]{x_2_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   TypeConstructor[not set]{
     __vec_2__f32
@@ -727,7 +727,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix_Vector) {
 Assignment{
   ArrayAccessor[not set]{
     Identifier[not set]{x_2_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   TypeConstructor[not set]{
     __vec_2__f32
@@ -777,9 +777,9 @@ TEST_F(SpvParserTest_CompositeInsert, Array) {
 Assignment{
   ArrayAccessor[not set]{
     Identifier[not set]{x_2_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
-  ScalarConstructor[not set]{20}
+  ScalarConstructor[not set]{20u}
 }
 VariableDeclStatement{
   VariableConst{
@@ -903,7 +903,7 @@ Assignment{
     Identifier[not set]{x_2_1}
     Identifier[not set]{algo}
   }
-  ScalarConstructor[not set]{10}
+  ScalarConstructor[not set]{10u}
 }
 VariableDeclStatement{
   VariableConst{
@@ -931,7 +931,7 @@ Assignment{
     Identifier[not set]{x_4_1}
     Identifier[not set]{rithm}
   }
-  ScalarConstructor[not set]{10}
+  ScalarConstructor[not set]{10u}
 }
 VariableDeclStatement{
   VariableConst{
@@ -1002,9 +1002,9 @@ Assignment{
           Identifier[not set]{x_2_1}
           Identifier[not set]{field1}
         }
-        ScalarConstructor[not set]{2}
+        ScalarConstructor[not set]{2u}
       }
-      ScalarConstructor[not set]{0}
+      ScalarConstructor[not set]{0u}
     }
     Identifier[not set]{y}
   }
@@ -1044,7 +1044,7 @@ TEST_F(SpvParserTest_CopyObject, Scalar) {
     none
     __u32
     {
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
@@ -1169,32 +1169,32 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
         MemberAccessor[not set]{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{4}
-            ScalarConstructor[not set]{3}
+            ScalarConstructor[not set]{4u}
+            ScalarConstructor[not set]{3u}
           }
           Identifier[not set]{y}
         }
         MemberAccessor[not set]{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{4}
-            ScalarConstructor[not set]{3}
+            ScalarConstructor[not set]{4u}
+            ScalarConstructor[not set]{3u}
           }
           Identifier[not set]{x}
         }
         MemberAccessor[not set]{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{3}
-            ScalarConstructor[not set]{4}
+            ScalarConstructor[not set]{3u}
+            ScalarConstructor[not set]{4u}
           }
           Identifier[not set]{y}
         }
         MemberAccessor[not set]{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{3}
-            ScalarConstructor[not set]{4}
+            ScalarConstructor[not set]{3u}
+            ScalarConstructor[not set]{4u}
           }
           Identifier[not set]{x}
         }
@@ -1224,7 +1224,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
     {
       TypeConstructor[not set]{
         __vec_2__u32
-        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0u}
         MemberAccessor[not set]{
           Identifier[not set]{x_1}
           Identifier[not set]{y}

@@ -30,7 +30,7 @@ UintLiteral::UintLiteral(ProgramID program_id,
 UintLiteral::~UintLiteral() = default;
 
 std::string UintLiteral::to_str(const semantic::Info&) const {
-  return std::to_string(value());
+  return std::to_string(value()) + "u";
 }
 
 std::string UintLiteral::name() const {

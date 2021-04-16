@@ -7563,7 +7563,7 @@ TEST_F(SpvParserTest, EmitBody_IfBreak_FromThen_ForwardWithinThen) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 VariableDeclStatement{
   Variable{
@@ -7582,7 +7582,7 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
     If{
       (
@@ -7602,7 +7602,7 @@ If{
       {
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{3}
+          ScalarConstructor[not set]{3u}
         }
         Assignment{
           Identifier[not set]{guard10}
@@ -7621,7 +7621,7 @@ Else{
       {
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4}
+          ScalarConstructor[not set]{4u}
         }
         Assignment{
           Identifier[not set]{guard10}
@@ -7633,7 +7633,7 @@ Else{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -7675,7 +7675,7 @@ TEST_F(SpvParserTest, EmitBody_IfBreak_FromElse_ForwardWithinElse) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 VariableDeclStatement{
   Variable{
@@ -7694,7 +7694,7 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
     Assignment{
       Identifier[not set]{guard10}
@@ -7711,7 +7711,7 @@ Else{
       {
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{3}
+          ScalarConstructor[not set]{3u}
         }
         If{
           (
@@ -7731,7 +7731,7 @@ Else{
           {
             Assignment{
               Identifier[not set]{var_1}
-              ScalarConstructor[not set]{4}
+              ScalarConstructor[not set]{4u}
             }
             Assignment{
               Identifier[not set]{guard10}
@@ -7745,7 +7745,7 @@ Else{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -7802,7 +7802,7 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 VariableDeclStatement{
   Variable{
@@ -7821,7 +7821,7 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
     If{
       (
@@ -7845,7 +7845,7 @@ If{
       {
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{3}
+          ScalarConstructor[not set]{3u}
         }
       }
     }
@@ -7860,7 +7860,7 @@ Else{
       {
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4}
+          ScalarConstructor[not set]{4u}
         }
         If{
           (
@@ -7880,7 +7880,7 @@ Else{
           {
             Assignment{
               Identifier[not set]{var_1}
-              ScalarConstructor[not set]{5}
+              ScalarConstructor[not set]{5u}
             }
           }
         }
@@ -7895,7 +7895,7 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{6}
+      ScalarConstructor[not set]{6u}
     }
     If{
       (
@@ -7919,7 +7919,7 @@ If{
       {
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{7}
+          ScalarConstructor[not set]{7u}
         }
         Assignment{
           Identifier[not set]{guard10}
@@ -7931,7 +7931,7 @@ If{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8}
+  ScalarConstructor[not set]{8u}
 }
 Return{}
 )";
@@ -8029,7 +8029,7 @@ TEST_F(SpvParserTest, EmitBody_If_Then_NoElse) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 If{
   (
@@ -8038,13 +8038,13 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8077,7 +8077,7 @@ TEST_F(SpvParserTest, EmitBody_If_NoThen_Else) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 If{
   (
@@ -8090,13 +8090,13 @@ Else{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8133,7 +8133,7 @@ TEST_F(SpvParserTest, EmitBody_If_Then_Else) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 If{
   (
@@ -8142,7 +8142,7 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
   }
 }
@@ -8150,13 +8150,13 @@ Else{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8200,7 +8200,7 @@ TEST_F(SpvParserTest, EmitBody_If_Then_Else_Premerge) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 If{
   (
@@ -8209,7 +8209,7 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
   }
 }
@@ -8217,7 +8217,7 @@ Else{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
@@ -8228,13 +8228,13 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8272,7 +8272,7 @@ TEST_F(SpvParserTest, EmitBody_If_Then_Premerge) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 If{
   (
@@ -8281,7 +8281,7 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
   }
 }
@@ -8292,13 +8292,13 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8336,7 +8336,7 @@ TEST_F(SpvParserTest, EmitBody_If_Else_Premerge) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 If{
   (
@@ -8349,7 +8349,7 @@ Else{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
   }
 }
@@ -8360,13 +8360,13 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8421,7 +8421,7 @@ TEST_F(SpvParserTest, EmitBody_If_Nest_If) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 If{
   (
@@ -8430,7 +8430,7 @@ If{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
     If{
       (
@@ -8439,13 +8439,13 @@ If{
       {
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{2}
+          ScalarConstructor[not set]{2u}
         }
       }
     }
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
@@ -8453,7 +8453,7 @@ Else{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
     If{
       (
@@ -8466,19 +8466,19 @@ Else{
       {
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{5}
+          ScalarConstructor[not set]{5u}
         }
       }
     }
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{6}
+      ScalarConstructor[not set]{6u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8511,12 +8511,12 @@ TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_TrueBackedge) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -8533,7 +8533,7 @@ Loop{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8566,12 +8566,12 @@ TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_FalseBackedge) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -8584,7 +8584,7 @@ Loop{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8617,17 +8617,17 @@ TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_BothBackedge) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8660,17 +8660,17 @@ TEST_F(SpvParserTest, EmitBody_Loop_SingleBlock_UnconditionalBackege) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8711,27 +8711,27 @@ TEST_F(SpvParserTest, EmitBody_Loop_Unconditional_Body_SingleBlockContinue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8776,31 +8776,31 @@ TEST_F(SpvParserTest, EmitBody_Loop_Unconditional_Body_MultiBlockContinue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8850,21 +8850,21 @@ TEST_F(SpvParserTest, EmitBody_Loop_Unconditional_Body_ContinueNestIf) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
     If{
       (
@@ -8873,19 +8873,19 @@ Loop{
       {
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4}
+          ScalarConstructor[not set]{4u}
         }
       }
     }
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{5}
+      ScalarConstructor[not set]{5u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{999}
+  ScalarConstructor[not set]{999u}
 }
 Return{}
 )";
@@ -8922,16 +8922,16 @@ TEST_F(SpvParserTest, EmitBody_Loop_MultiBlockContinueIsEntireLoop) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   If{
     (
@@ -8944,7 +8944,7 @@ Loop{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{3}
+  ScalarConstructor[not set]{3u}
 }
 Return{}
 )";
@@ -8981,19 +8981,19 @@ TEST_F(SpvParserTest, EmitBody_Loop_Never) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Break{}
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{3}
+  ScalarConstructor[not set]{3u}
 }
 Return{}
 )";
@@ -9041,7 +9041,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_TrueToBody_FalseBreaks) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -9057,18 +9057,18 @@ TEST_F(SpvParserTest, EmitBody_Loop_TrueToBody_FalseBreaks) {
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{4}
+  ScalarConstructor[not set]{4u}
 }
 Return{}
 )";
@@ -9108,7 +9108,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_FalseToBody_TrueBreaks) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -9124,18 +9124,18 @@ TEST_F(SpvParserTest, EmitBody_Loop_FalseToBody_TrueBreaks) {
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{4}
+  ScalarConstructor[not set]{4u}
 }
 Return{}
 )";
@@ -9187,19 +9187,19 @@ TEST_F(SpvParserTest, EmitBody_Loop_NestedIfContinue) {
     {
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{1}
+        ScalarConstructor[not set]{1u}
       }
       Continue{}
     }
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
@@ -9240,13 +9240,13 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyAlwaysBreaks) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Break{}
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
@@ -9289,7 +9289,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromTrue) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -9302,7 +9302,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromTrue) {
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
@@ -9345,7 +9345,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromFalse) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -9362,7 +9362,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromFalse) {
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
@@ -9407,7 +9407,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromTrue_Early) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -9419,12 +9419,12 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromTrue_Early) {
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
@@ -9469,7 +9469,7 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromFalse_Early) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -9485,12 +9485,12 @@ TEST_F(SpvParserTest, EmitBody_Loop_BodyConditionallyBreaks_FromFalse_Early) {
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
@@ -9521,10 +9521,10 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsMerge_NoCases) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
     Default{
     }
@@ -9532,7 +9532,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -9566,15 +9566,15 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsMerge_OneCase) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
     }
     Default{
@@ -9583,7 +9583,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -9620,21 +9620,21 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsMerge_TwoCases) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 30{
+    Case 30u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
     }
     Default{
@@ -9643,7 +9643,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -9680,21 +9680,21 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsMerge_CasesWithDup) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 30{
+    Case 30u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
-    Case 20, 40{
+    Case 20u, 40u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
     }
     Default{
@@ -9703,7 +9703,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -9746,34 +9746,34 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsCase_NoDupCases) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 40{
+    Case 40u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{40}
+        ScalarConstructor[not set]{40u}
       }
     }
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
     }
     Default{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -9817,37 +9817,37 @@ TEST_F(SpvParserTest, EmitBody_Switch_DefaultIsCase_WithDupCase) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 40{
+    Case 40u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{40}
+        ScalarConstructor[not set]{40u}
       }
     }
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
     }
     Default{
       Fallthrough{}
     }
-    Case 30{
+    Case 30u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -9889,7 +9889,7 @@ TEST_F(SpvParserTest, EmitBody_Switch_Case_SintValue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
   ScalarConstructor[not set]{42}
@@ -9897,19 +9897,19 @@ Switch{
     Case -294967296{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{40}
+        ScalarConstructor[not set]{40u}
       }
     }
     Case 2000000000{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
     Case 20{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
     }
     Default{
@@ -9918,7 +9918,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -9959,27 +9959,27 @@ TEST_F(SpvParserTest, EmitBody_Switch_Case_UintValue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 50{
+    Case 50u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{40}
+        ScalarConstructor[not set]{40u}
       }
     }
-    Case 2000000000{
+    Case 2000000000u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
     }
     Default{
@@ -9988,7 +9988,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -10107,7 +10107,7 @@ TEST_F(SpvParserTest, EmitBody_ReturnValue_TopLevel) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Return{
   {
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
 }
 )";
@@ -10151,14 +10151,14 @@ TEST_F(SpvParserTest, EmitBody_ReturnValue_InsideIf) {
   {
     Return{
       {
-        ScalarConstructor[not set]{2}
+        ScalarConstructor[not set]{2u}
       }
     }
   }
 }
 Return{
   {
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
 }
 )";
@@ -10204,13 +10204,13 @@ TEST_F(SpvParserTest, EmitBody_ReturnValue_Loop) {
   auto* expect = R"(Loop{
   Return{
     {
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
 Return{
   {
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
 }
 )";
@@ -10417,7 +10417,7 @@ TEST_F(SpvParserTest, EmitBody_Unreachable_InNonVoidFunction) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Return{
   {
-    ScalarConstructor[not set]{0}
+    ScalarConstructor[not set]{0u}
   }
 }
 )";
@@ -10453,7 +10453,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_BackEdge_MultiBlockLoop) {
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
   }
 }
@@ -10487,7 +10487,7 @@ TEST_F(SpvParserTest, EmitBody_Branch_BackEdge_SingleBlockLoop) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
 }
 Return{}
@@ -10523,15 +10523,15 @@ TEST_F(SpvParserTest, EmitBody_Branch_SwitchBreak_LastInCase) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
     }
     Default{
@@ -10540,7 +10540,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -10583,15 +10583,15 @@ TEST_F(SpvParserTest, EmitBody_Branch_SwitchBreak_NotLastInCase) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
       If{
         (
@@ -10600,14 +10600,14 @@ Switch{
         {
           Assignment{
             Identifier[not set]{var_1}
-            ScalarConstructor[not set]{40}
+            ScalarConstructor[not set]{40u}
           }
           Break{}
         }
       }
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{50}
+        ScalarConstructor[not set]{50u}
       }
     }
     Default{
@@ -10616,7 +10616,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -10655,13 +10655,13 @@ TEST_F(SpvParserTest, EmitBody_Branch_LoopBreak_MultiBlockLoop_FromBody) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Break{}
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
@@ -10738,7 +10738,7 @@ TEST_F(SpvParserTest,
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
     Break{}
   }
@@ -10779,12 +10779,12 @@ TEST_F(SpvParserTest, EmitBody_Branch_LoopContinue_LastInLoopConstruct) {
   auto* expect = R"(Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
   }
 }
@@ -10838,19 +10838,19 @@ TEST_F(SpvParserTest, EmitBody_Branch_LoopContinue_BeforeLast) {
     {
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{1}
+        ScalarConstructor[not set]{1u}
       }
       Continue{}
     }
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{3}
+      ScalarConstructor[not set]{3u}
     }
   }
 }
@@ -10901,24 +10901,24 @@ TEST_F(SpvParserTest, EmitBody_Branch_LoopContinue_FromSwitch) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   Switch{
-    ScalarConstructor[not set]{42}
+    ScalarConstructor[not set]{42u}
     {
-      Case 40{
+      Case 40u{
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4}
+          ScalarConstructor[not set]{4u}
         }
         Continue{}
       }
@@ -10928,18 +10928,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{5}
+    ScalarConstructor[not set]{5u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{6}
+      ScalarConstructor[not set]{6u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -10976,13 +10976,13 @@ TEST_F(SpvParserTest, EmitBody_Branch_IfBreak_FromThen) {
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{2}
+  ScalarConstructor[not set]{2u}
 }
 Return{}
 )";
@@ -11023,13 +11023,13 @@ Else{
   {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{1}
+      ScalarConstructor[not set]{1u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{2}
+  ScalarConstructor[not set]{2u}
 }
 Return{}
 )";
@@ -11066,22 +11066,22 @@ TEST_F(SpvParserTest, EmitBody_Branch_Fallthrough) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
       Fallthrough{}
     }
-    Case 30{
+    Case 30u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
     Default{
@@ -11090,7 +11090,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -11117,11 +11117,11 @@ TEST_F(SpvParserTest, EmitBody_Branch_Forward) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{2}
+  ScalarConstructor[not set]{2u}
 }
 Return{}
 )";
@@ -11221,17 +11221,17 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Back_SingleBlock_Back) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -11264,12 +11264,12 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -11282,7 +11282,7 @@ Loop{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -11315,12 +11315,12 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -11337,7 +11337,7 @@ Loop{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -11373,12 +11373,12 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   continuing {
     If{
@@ -11393,7 +11393,7 @@ Loop{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -11429,12 +11429,12 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   continuing {
     If{
@@ -11453,7 +11453,7 @@ Loop{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -11489,15 +11489,15 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
     }
     Default{
@@ -11506,7 +11506,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -11550,15 +11550,15 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
       If{
         (
@@ -11567,14 +11567,14 @@ Switch{
         {
           Assignment{
             Identifier[not set]{var_1}
-            ScalarConstructor[not set]{40}
+            ScalarConstructor[not set]{40u}
           }
           Break{}
         }
       }
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{50}
+        ScalarConstructor[not set]{50u}
       }
     }
     Default{
@@ -11583,7 +11583,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -11633,24 +11633,24 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_SwitchBreak_Continue_OnTrue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   Switch{
-    ScalarConstructor[not set]{42}
+    ScalarConstructor[not set]{42u}
     {
-      Case 40{
+      Case 40u{
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{40}
+          ScalarConstructor[not set]{40u}
         }
         If{
           (
@@ -11667,18 +11667,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{6}
+    ScalarConstructor[not set]{6u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{7}
+      ScalarConstructor[not set]{7u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8}
+  ScalarConstructor[not set]{8u}
 }
 Return{}
 )";
@@ -11728,24 +11728,24 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_SwitchBreak_Continue_OnFalse) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   Switch{
-    ScalarConstructor[not set]{42}
+    ScalarConstructor[not set]{42u}
     {
-      Case 40{
+      Case 40u{
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{40}
+          ScalarConstructor[not set]{40u}
         }
         If{
           (
@@ -11766,18 +11766,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{6}
+    ScalarConstructor[not set]{6u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{7}
+      ScalarConstructor[not set]{7u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8}
+  ScalarConstructor[not set]{8u}
 }
 Return{}
 )";
@@ -11813,15 +11813,15 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_SwitchBreak_Forward_OnTrue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
       If{
         (
@@ -11837,7 +11837,7 @@ Switch{
       }
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
     Default{
@@ -11846,7 +11846,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8}
+  ScalarConstructor[not set]{8u}
 }
 Return{}
 )";
@@ -11882,15 +11882,15 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_SwitchBreak_Forward_OnFalse) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
       If{
         (
@@ -11902,7 +11902,7 @@ Switch{
       }
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
     Default{
@@ -11911,7 +11911,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{8}
+  ScalarConstructor[not set]{8u}
 }
 Return{}
 )";
@@ -11949,15 +11949,15 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
       If{
         (
@@ -11973,10 +11973,10 @@ Switch{
       }
       Fallthrough{}
     }
-    Case 30{
+    Case 30u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
     Default{
@@ -11985,7 +11985,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -12023,15 +12023,15 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
       If{
         (
@@ -12043,10 +12043,10 @@ Switch{
       }
       Fallthrough{}
     }
-    Case 30{
+    Case 30u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
     Default{
@@ -12055,7 +12055,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -12092,24 +12092,24 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Break{}
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -12150,28 +12150,28 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   Break{}
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -12223,12 +12223,12 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopBreak_Continue_OnTrue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -12237,7 +12237,7 @@ Loop{
     {
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{2}
+        ScalarConstructor[not set]{2u}
       }
       If{
         (
@@ -12256,18 +12256,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -12319,12 +12319,12 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopBreak_Continue_OnFalse) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   If{
     (
@@ -12333,7 +12333,7 @@ Loop{
     {
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{2}
+        ScalarConstructor[not set]{2u}
       }
       If{
         (
@@ -12352,18 +12352,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -12458,16 +12458,16 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopBreak_Forward_OnTrue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   If{
     (
@@ -12483,18 +12483,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -12539,16 +12539,16 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopBreak_Forward_OnFalse) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   If{
     (
@@ -12560,18 +12560,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -12607,23 +12607,23 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Continue_FromHeader) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -12664,27 +12664,27 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -12736,16 +12736,16 @@ TEST_F(SpvParserTest,
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   If{
     (
@@ -12754,25 +12754,25 @@ Loop{
     {
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{3}
+        ScalarConstructor[not set]{3u}
       }
       Continue{}
     }
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{4}
+    ScalarConstructor[not set]{4u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{5}
+      ScalarConstructor[not set]{5u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{6}
+  ScalarConstructor[not set]{6u}
 }
 Return{}
 )";
@@ -12824,16 +12824,16 @@ TEST_F(
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   If{
     (
@@ -12842,19 +12842,19 @@ Loop{
     {
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{3}
+        ScalarConstructor[not set]{3u}
       }
       Continue{}
     }
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{4}
+    ScalarConstructor[not set]{4u}
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{6}
+  ScalarConstructor[not set]{6u}
 }
 Return{}
 )";
@@ -12903,24 +12903,24 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_LoopContinue_FromSwitch) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   Switch{
-    ScalarConstructor[not set]{42}
+    ScalarConstructor[not set]{42u}
     {
-      Case 40{
+      Case 40u{
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{4}
+          ScalarConstructor[not set]{4u}
         }
         Continue{}
       }
@@ -12930,18 +12930,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{5}
+    ScalarConstructor[not set]{5u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{6}
+      ScalarConstructor[not set]{6u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -12991,16 +12991,16 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_IfBreak_OnTrue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   If{
     (
@@ -13009,7 +13009,7 @@ Loop{
     {
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{3}
+        ScalarConstructor[not set]{3u}
       }
       If{
         (
@@ -13027,18 +13027,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{4}
+    ScalarConstructor[not set]{4u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{5}
+      ScalarConstructor[not set]{5u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{6}
+  ScalarConstructor[not set]{6u}
 }
 Return{}
 )";
@@ -13088,16 +13088,16 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_IfBreak_OnFalse) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   If{
     (
@@ -13106,7 +13106,7 @@ Loop{
     {
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{3}
+        ScalarConstructor[not set]{3u}
       }
       If{
         (
@@ -13120,18 +13120,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{4}
+    ScalarConstructor[not set]{4u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{5}
+      ScalarConstructor[not set]{5u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{6}
+  ScalarConstructor[not set]{6u}
 }
 Return{}
 )";
@@ -13184,24 +13184,24 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Fallthrough_OnTrue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   Switch{
-    ScalarConstructor[not set]{42}
+    ScalarConstructor[not set]{42u}
     {
-      Case 40{
+      Case 40u{
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{40}
+          ScalarConstructor[not set]{40u}
         }
         If{
           (
@@ -13217,10 +13217,10 @@ Loop{
         }
         Fallthrough{}
       }
-      Case 50{
+      Case 50u{
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{50}
+          ScalarConstructor[not set]{50u}
         }
       }
       Default{
@@ -13229,18 +13229,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -13293,24 +13293,24 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Fallthrough_OnFalse) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   Switch{
-    ScalarConstructor[not set]{42}
+    ScalarConstructor[not set]{42u}
     {
-      Case 40{
+      Case 40u{
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{40}
+          ScalarConstructor[not set]{40u}
         }
         If{
           (
@@ -13322,10 +13322,10 @@ Loop{
         }
         Fallthrough{}
       }
-      Case 50{
+      Case 50u{
         Assignment{
           Identifier[not set]{var_1}
-          ScalarConstructor[not set]{50}
+          ScalarConstructor[not set]{50u}
         }
       }
       Default{
@@ -13334,18 +13334,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -13390,16 +13390,16 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Forward_OnTrue) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   If{
     (
@@ -13415,18 +13415,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -13471,16 +13471,16 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Continue_Forward_OnFalse) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Loop{
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   If{
     (
@@ -13492,18 +13492,18 @@ Loop{
   }
   Assignment{
     Identifier[not set]{var_1}
-    ScalarConstructor[not set]{3}
+    ScalarConstructor[not set]{3u}
   }
   continuing {
     Assignment{
       Identifier[not set]{var_1}
-      ScalarConstructor[not set]{4}
+      ScalarConstructor[not set]{4u}
     }
   }
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -13535,7 +13535,7 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_IfBreak_IfBreak_Same) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 If{
   (
@@ -13546,7 +13546,7 @@ If{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{5}
+  ScalarConstructor[not set]{5u}
 }
 Return{}
 )";
@@ -13620,22 +13620,22 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Fallthrough_Fallthrough_Same) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Switch{
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
   {
-    Case 20{
+    Case 20u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{20}
+        ScalarConstructor[not set]{20u}
       }
       Fallthrough{}
     }
-    Case 30{
+    Case 30u{
       Assignment{
         Identifier[not set]{var_1}
-        ScalarConstructor[not set]{30}
+        ScalarConstructor[not set]{30u}
       }
     }
     Default{
@@ -13644,7 +13644,7 @@ Switch{
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{7}
+  ScalarConstructor[not set]{7u}
 }
 Return{}
 )";
@@ -13711,11 +13711,11 @@ TEST_F(SpvParserTest, EmitBody_BranchConditional_Forward_Forward_Same) {
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{1}
+  ScalarConstructor[not set]{1u}
 }
 Assignment{
   Identifier[not set]{var_1}
-  ScalarConstructor[not set]{2}
+  ScalarConstructor[not set]{2u}
 }
 Return{}
 )";
@@ -14081,9 +14081,9 @@ TEST_F(SpvParserTest, EmitBody_TrueBranch_SwitchBreak) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Switch{
-  ScalarConstructor[not set]{20}
+  ScalarConstructor[not set]{20u}
   {
-    Case 20{
+    Case 20u{
       If{
         (
           ScalarConstructor[not set]{false}
@@ -14234,9 +14234,9 @@ TEST_F(SpvParserTest, EmitBody_FalseBranch_SwitchBreak) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto got = ToString(p->builder(), fe.ast_body());
   auto* expect = R"(Switch{
-  ScalarConstructor[not set]{20}
+  ScalarConstructor[not set]{20u}
   {
-    Case 20{
+    Case 20u{
       If{
         (
           ScalarConstructor[not set]{false}

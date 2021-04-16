@@ -35,8 +35,8 @@ TEST_F(UintLiteralTest, Is) {
 }
 
 TEST_F(UintLiteralTest, ToStr) {
-  auto* u = create<UintLiteral>(ty.u32(), 42);
-  EXPECT_EQ(str(u), "42");
+  auto* u = create<UintLiteral>(ty.u32(), 42u);
+  EXPECT_EQ(str(u), "42u");
 }
 
 }  // namespace

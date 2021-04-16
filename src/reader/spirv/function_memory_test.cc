@@ -80,11 +80,11 @@ TEST_F(SpvParserTest, EmitStatement_StoreUintConst) {
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Assignment{
   Identifier[not set]{x_1}
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
 }
 Assignment{
   Identifier[not set]{x_1}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 })"));
 }
 
@@ -274,7 +274,7 @@ TEST_F(SpvParserTest, EmitStatement_StoreToModuleScopeVar) {
   EXPECT_TRUE(fe.EmitBody());
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Assignment{
   Identifier[not set]{x_1}
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
 })"));
 }
 
@@ -344,7 +344,7 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_VectorSwizzle) {
     Identifier[not set]{myvar}
     Identifier[not set]{z}
   }
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
 })"));
 }
 
@@ -407,7 +407,7 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_VectorNonConstIndex) {
     Identifier[not set]{myvar}
     Identifier[not set]{x_11}
   }
-  ScalarConstructor[not set]{42}
+  ScalarConstructor[not set]{42u}
 })"));
 }
 
@@ -442,7 +442,7 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Matrix) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Assignment{
   ArrayAccessor[not set]{
     Identifier[not set]{myvar}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   TypeConstructor[not set]{
     __vec_4__f32
@@ -485,7 +485,7 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Array) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Assignment{
   ArrayAccessor[not set]{
     Identifier[not set]{myvar}
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   TypeConstructor[not set]{
     __vec_4__f32
@@ -688,7 +688,7 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Struct_RuntimeArray) {
       Identifier[not set]{myvar}
       Identifier[not set]{age}
     }
-    ScalarConstructor[not set]{2}
+    ScalarConstructor[not set]{2u}
   }
   ScalarConstructor[not set]{42.000000}
 })"));
@@ -726,7 +726,7 @@ TEST_F(SpvParserTest, EmitStatement_AccessChain_Compound_Matrix_Vector) {
   MemberAccessor[not set]{
     ArrayAccessor[not set]{
       Identifier[not set]{myvar}
-      ScalarConstructor[not set]{2}
+      ScalarConstructor[not set]{2u}
     }
     Identifier[not set]{w}
   }
@@ -836,7 +836,7 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded) {
     Identifier[not set]{myvar}
     Identifier[not set]{field0}
   }
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Assignment{
   ArrayAccessor[not set]{
@@ -844,9 +844,9 @@ Assignment{
       Identifier[not set]{myvar}
       Identifier[not set]{field1}
     }
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 })"));
 }
 
@@ -878,7 +878,7 @@ TEST_F(SpvParserTest,
     Identifier[not set]{myvar}
     Identifier[not set]{field0}
   }
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Assignment{
   ArrayAccessor[not set]{
@@ -886,9 +886,9 @@ Assignment{
       Identifier[not set]{myvar}
       Identifier[not set]{field1}
     }
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 })")) << got
       << p->error();
 }
@@ -918,9 +918,9 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughAccessChain_Cascaded) {
       Identifier[not set]{myvar}
       Identifier[not set]{field1}
     }
-    ScalarConstructor[not set]{1}
+    ScalarConstructor[not set]{1u}
   }
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 })")) << p->error();
 }
 
@@ -956,14 +956,14 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
           Identifier[not set]{myvar}
           Identifier[not set]{field1}
         }
-        ScalarConstructor[not set]{1}
+        ScalarConstructor[not set]{1u}
       }
     }
   }
 }
 Assignment{
   Identifier[not set]{x_2}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 })")) << p->error();
 }
 
@@ -999,8 +999,8 @@ TEST_F(SpvParserTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
   ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
   FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
   EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
-              Eq(R"(VariableDeclStatement{
+  EXPECT_EQ(ToString(p->builder(), fe.ast_body()),
+            R"(VariableDeclStatement{
   Variable{
     x_2
     function
@@ -1019,7 +1019,7 @@ If{
           Identifier[not set]{myvar}
           Identifier[not set]{field1}
         }
-        ScalarConstructor[not set]{1}
+        ScalarConstructor[not set]{1u}
       }
     }
   }
@@ -1031,10 +1031,10 @@ Else{
 }
 Assignment{
   Identifier[not set]{x_2}
-  ScalarConstructor[not set]{0}
+  ScalarConstructor[not set]{0u}
 }
 Return{}
-)")) << p->error();
+)") << p->error();
 }
 
 TEST_F(SpvParserTest, DISABLED_RemapStorageBuffer_ThroughFunctionCall) {

@@ -209,7 +209,7 @@ TEST_F(SpvParserTest, EmitFunctions_CalleePrecedesCaller) {
   {
     Return{
       {
-        ScalarConstructor[not set]{0}
+        ScalarConstructor[not set]{0u}
       }
     }
   }

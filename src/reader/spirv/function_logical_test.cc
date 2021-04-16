@@ -83,42 +83,42 @@ std::string AstFor(std::string assembly) {
   if (assembly == "v2uint_10_20") {
     return R"(TypeConstructor[not set]{
           __vec_2__u32
-          ScalarConstructor[not set]{10}
-          ScalarConstructor[not set]{20}
+          ScalarConstructor[not set]{10u}
+          ScalarConstructor[not set]{20u}
         })";
   }
   if (assembly == "cast_uint_10") {
     return R"(Bitcast[not set]<__i32>{
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         })";
   }
   if (assembly == "cast_uint_20") {
     return R"(Bitcast[not set]<__i32>{
-          ScalarConstructor[not set]{20}
+          ScalarConstructor[not set]{20u}
         })";
   }
   if (assembly == "cast_v2uint_10_20") {
     return R"(Bitcast[not set]<__vec_2__i32>{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10}
-            ScalarConstructor[not set]{20}
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
         })";
   }
   if (assembly == "v2uint_20_10") {
     return R"(TypeConstructor[not set]{
           __vec_2__u32
-          ScalarConstructor[not set]{20}
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{20u}
+          ScalarConstructor[not set]{10u}
         })";
   }
   if (assembly == "cast_v2uint_20_10") {
     return R"(Bitcast[not set]<__vec_2__i32>{
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{20}
-            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{20u}
+            ScalarConstructor[not set]{10u}
           }
         })";
   }
@@ -300,15 +300,15 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // uint uint
         BinaryData{"bool", "uint_10", "OpIEqual", "uint_20", "__bool",
-                   "ScalarConstructor[not set]{10}", "equal",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "equal",
+                   "ScalarConstructor[not set]{20u}"},
         // int int
         BinaryData{"bool", "int_30", "OpIEqual", "int_40", "__bool",
                    "ScalarConstructor[not set]{30}", "equal",
                    "ScalarConstructor[not set]{40}"},
         // uint int
         BinaryData{"bool", "uint_10", "OpIEqual", "int_40", "__bool",
-                   "ScalarConstructor[not set]{10}", "equal",
+                   "ScalarConstructor[not set]{10u}", "equal",
                    R"(Bitcast[not set]<__u32>{
           ScalarConstructor[not set]{40}
         })"},
@@ -316,7 +316,7 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"bool", "int_40", "OpIEqual", "uint_10", "__bool",
                    "ScalarConstructor[not set]{40}", "equal",
                    R"(Bitcast[not set]<__i32>{
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         })"},
         // v2uint v2uint
         BinaryData{"v2bool", "v2uint_10_20", "OpIEqual", "v2uint_20_10",
@@ -344,15 +344,15 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both uint
         BinaryData{"bool", "uint_10", "OpINotEqual", "uint_20", "__bool",
-                   "ScalarConstructor[not set]{10}", "not_equal",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "not_equal",
+                   "ScalarConstructor[not set]{20u}"},
         // Both int
         BinaryData{"bool", "int_30", "OpINotEqual", "int_40", "__bool",
                    "ScalarConstructor[not set]{30}", "not_equal",
                    "ScalarConstructor[not set]{40}"},
         // uint int
         BinaryData{"bool", "uint_10", "OpINotEqual", "int_40", "__bool",
-                   "ScalarConstructor[not set]{10}", "not_equal",
+                   "ScalarConstructor[not set]{10u}", "not_equal",
                    R"(Bitcast[not set]<__u32>{
           ScalarConstructor[not set]{40}
         })"},
@@ -360,7 +360,7 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"bool", "int_40", "OpINotEqual", "uint_10", "__bool",
                    "ScalarConstructor[not set]{40}", "not_equal",
                    R"(Bitcast[not set]<__i32>{
-          ScalarConstructor[not set]{10}
+          ScalarConstructor[not set]{10u}
         })"},
         // Both v2uint
         BinaryData{"v2bool", "v2uint_10_20", "OpINotEqual", "v2uint_20_10",
@@ -480,15 +480,15 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both unsigned
         BinaryData{"bool", "uint_10", "OpUGreaterThan", "uint_20", "__bool",
-                   "ScalarConstructor[not set]{10}", "greater_than",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "greater_than",
+                   "ScalarConstructor[not set]{20u}"},
         // First arg signed
         BinaryData{"bool", "int_30", "OpUGreaterThan", "uint_20", "__bool",
                    AstFor("cast_int_30"), "greater_than",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{20u}"},
         // Second arg signed
         BinaryData{"bool", "uint_10", "OpUGreaterThan", "int_40", "__bool",
-                   "ScalarConstructor[not set]{10}", "greater_than",
+                   "ScalarConstructor[not set]{10u}", "greater_than",
                    AstFor("cast_int_40")},
         // Vector, both unsigned
         BinaryData{"v2bool", "v2uint_10_20", "OpUGreaterThan", "v2uint_20_10",
@@ -509,15 +509,15 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both unsigned
         BinaryData{"bool", "uint_10", "OpUGreaterThanEqual", "uint_20",
-                   "__bool", "ScalarConstructor[not set]{10}",
-                   "greater_than_equal", "ScalarConstructor[not set]{20}"},
+                   "__bool", "ScalarConstructor[not set]{10u}",
+                   "greater_than_equal", "ScalarConstructor[not set]{20u}"},
         // First arg signed
         BinaryData{"bool", "int_30", "OpUGreaterThanEqual", "uint_20", "__bool",
                    AstFor("cast_int_30"), "greater_than_equal",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{20u}"},
         // Second arg signed
         BinaryData{"bool", "uint_10", "OpUGreaterThanEqual", "int_40", "__bool",
-                   "ScalarConstructor[not set]{10}", "greater_than_equal",
+                   "ScalarConstructor[not set]{10u}", "greater_than_equal",
                    AstFor("cast_int_40")},
         // Vector, both unsigned
         BinaryData{"v2bool", "v2uint_10_20", "OpUGreaterThanEqual",
@@ -538,15 +538,15 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both unsigned
         BinaryData{"bool", "uint_10", "OpULessThan", "uint_20", "__bool",
-                   "ScalarConstructor[not set]{10}", "less_than",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "less_than",
+                   "ScalarConstructor[not set]{20u}"},
         // First arg signed
         BinaryData{"bool", "int_30", "OpULessThan", "uint_20", "__bool",
                    AstFor("cast_int_30"), "less_than",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{20u}"},
         // Second arg signed
         BinaryData{"bool", "uint_10", "OpULessThan", "int_40", "__bool",
-                   "ScalarConstructor[not set]{10}", "less_than",
+                   "ScalarConstructor[not set]{10u}", "less_than",
                    AstFor("cast_int_40")},
         // Vector, both unsigned
         BinaryData{"v2bool", "v2uint_10_20", "OpULessThan", "v2uint_20_10",
@@ -567,15 +567,15 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::Values(
         // Both unsigned
         BinaryData{"bool", "uint_10", "OpULessThanEqual", "uint_20", "__bool",
-                   "ScalarConstructor[not set]{10}", "less_than_equal",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{10u}", "less_than_equal",
+                   "ScalarConstructor[not set]{20u}"},
         // First arg signed
         BinaryData{"bool", "int_30", "OpULessThanEqual", "uint_20", "__bool",
                    AstFor("cast_int_30"), "less_than_equal",
-                   "ScalarConstructor[not set]{20}"},
+                   "ScalarConstructor[not set]{20u}"},
         // Second arg signed
         BinaryData{"bool", "uint_10", "OpULessThanEqual", "int_40", "__bool",
-                   "ScalarConstructor[not set]{10}", "less_than_equal",
+                   "ScalarConstructor[not set]{10u}", "less_than_equal",
                    AstFor("cast_int_40")},
         // Vector, both unsigned
         BinaryData{"v2bool", "v2uint_10_20", "OpULessThanEqual", "v2uint_20_10",
@@ -1170,8 +1170,8 @@ TEST_F(SpvFUnordTest, Select_BoolCond_IntScalarParams) {
       Call[not set]{
         Identifier[not set]{select}
         (
-          ScalarConstructor[not set]{10}
-          ScalarConstructor[not set]{20}
+          ScalarConstructor[not set]{10u}
+          ScalarConstructor[not set]{20u}
           ScalarConstructor[not set]{true}
         )
       }
@@ -1236,13 +1236,13 @@ TEST_F(SpvFUnordTest, Select_BoolCond_VectorParams) {
         (
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10}
-            ScalarConstructor[not set]{20}
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{20}
-            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{20u}
+            ScalarConstructor[not set]{10u}
           }
           ScalarConstructor[not set]{true}
         )
@@ -1276,13 +1276,13 @@ TEST_F(SpvFUnordTest, Select_VecBoolCond_VectorParams) {
         (
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{10}
-            ScalarConstructor[not set]{20}
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
           }
           TypeConstructor[not set]{
             __vec_2__u32
-            ScalarConstructor[not set]{20}
-            ScalarConstructor[not set]{10}
+            ScalarConstructor[not set]{20u}
+            ScalarConstructor[not set]{10u}
           }
           TypeConstructor[not set]{
             __vec_2__bool

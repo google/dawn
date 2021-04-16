@@ -110,7 +110,7 @@ Return{})"));
     EXPECT_TRUE(fe.EmitBody());
     EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Return{
   {
-    ScalarConstructor[not set]{42}
+    ScalarConstructor[not set]{42u}
   }
 })"));
   }
@@ -180,7 +180,7 @@ Return{})"));
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Return{
   {
-    ScalarConstructor[not set]{42}
+    ScalarConstructor[not set]{42u}
   }
 })"));
   }
@@ -249,8 +249,8 @@ TEST_F(SpvParserTest, EmitStatement_CallWithParams) {
           Call[not set]{
             Identifier[not set]{x_50}
             (
-              ScalarConstructor[not set]{42}
-              ScalarConstructor[not set]{84}
+              ScalarConstructor[not set]{42u}
+              ScalarConstructor[not set]{84u}
             )
           }
         }
