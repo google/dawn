@@ -25,6 +25,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"dawn.googlesource.com/tint/tools/fix-tests/substr"
 )
 
 func main() {
@@ -37,6 +39,12 @@ func main() {
 func showUsage() {
 	fmt.Println(`
 fix-tests is a tool to update tests with new expected output.
+
+fix-tests performs string matching and heuristics to fix up expected results of
+tests that use EXPECT_EQ(a, b) and EXPECT_THAT(a, HasSubstr(b))
+
+WARNING: Always thoroughly check the generated output for mistakes.
+This may produce incorrect output
 
 Usage:
   fix-tests <executable>
@@ -89,56 +97,119 @@ func run() error {
 	}
 
 	// For each failing test...
-	var errs []error
-	numFixes := 0
+	seen := map[string]bool{}
+	numFixed, numFailed := 0, 0
 	for _, group := range testResults.Groups {
 		for _, suite := range group.Testsuites {
 			for _, failure := range suite.Failures {
 				// .. attempt to fix the problem
-				test := group.Name + "." + suite.Name
+				test := testName(group, suite)
+				if seen[test] {
+					continue
+				}
+				seen[test] = true
+
 				if err := processFailure(test, wd, failure.Failure); err != nil {
-					errs = append(errs, fmt.Errorf("%v: %w", test, err))
+					fmt.Println(fmt.Errorf("%v: %w", test, err))
+					numFailed++
 				} else {
-					numFixes++
+					numFixed++
 				}
 			}
 		}
 	}
 
-	if numFixes > 0 {
-		fmt.Printf("%v tests fixed\n", numFixes)
+	fmt.Println()
+
+	if numFailed > 0 {
+		fmt.Println(numFailed, "tests could not be fixed")
 	}
-	if n := len(errs); n > 0 {
-		fmt.Printf("%v tests could not be fixed:\n", n)
-		for _, err := range errs {
-			fmt.Println(err)
-		}
+	if numFixed > 0 {
+		fmt.Println(numFixed, "tests fixed")
 	}
 	return nil
 }
 
+func testName(group TestsuiteGroup, suite Testsuite) string {
+	groupParts := strings.Split(group.Name, "/")
+	suiteParts := strings.Split(suite.Name, "/")
+	return groupParts[len(groupParts)-1] + "." + suiteParts[0]
+}
+
 var (
 	// Regular expression to match a test declaration
-	reTests = regexp.MustCompile(`TEST(?:_[FP])?\((\w+),[ \n]*(\w+)\)`)
-	// Regular expression to match a EXPECT_EQ failure for strings
-	reExpectEq = regexp.MustCompile(`^([./\\a-z_-]*):(\d+).*\nExpected equality of these values:\n(?:.|\n)*?(?:Which is: |  )"((?:.|\n)*?)[^\\]"\n(?:.|\n)*?(?:Which is: |  )"((?:.|\n)*?)[^\\]"`)
+	reTests = regexp.MustCompile(`TEST(?:_[FP])?\([ \n]*(\w+),[ \n]*(\w+)\)`)
+	// Regular expression to match a `EXPECT_EQ(a, b)` failure for strings
+	reExpectEq = regexp.MustCompile(`([./\\a-z_-]*):(\d+).*\nExpected equality of these values:\n(?:.|\n)*?(?:Which is: |  )"((?:.|\n)*?[^\\])"\n(?:.|\n)*?(?:Which is: |  )"((?:.|\n)*?[^\\])"`)
+	// Regular expression to match a `EXPECT_THAT(a, HasSubstr(b))` failure for strings
+	reExpectHasSubstr = regexp.MustCompile(`([./\\a-z_-]*):(\d+).*\nValue of: .*\nExpected: has substring "((?:.|\n)*?[^\\])"\n  Actual: "((?:.|\n)*?[^\\])"`)
 )
 
 func processFailure(test, wd, failure string) error {
 	// Start by un-escaping newlines in the failure message
 	failure = strings.ReplaceAll(failure, "\\n", "\n")
+	// Matched regex strings will also need to be un-escaped, but do this after
+	// the match, as unescaped quotes may upset the regex patterns
+	unescape := func(s string) string {
+		return strings.ReplaceAll(s, `\"`, `"`)
+	}
+	escape := func(s string) string {
+		s = strings.ReplaceAll(s, "\n", `\n`)
+		s = strings.ReplaceAll(s, "\"", `\"`)
+		return s
+	}
 
 	// Look for a EXPECT_EQ failure pattern
-	var file, a, b string
+	var file string
+	var fix func(testSource string) (string, error)
 	if parts := reExpectEq.FindStringSubmatch(failure); len(parts) == 5 {
-		file, a, b = parts[1], parts[3], parts[4]
+		// EXPECT_EQ(a, b)
+		a, b := unescape(parts[3]), unescape(parts[4])
+		file = parts[1]
+		fix = func(testSource string) (string, error) {
+			// We don't know if a or b is the expected, so just try flipping the string
+			// to the other form.
+			switch {
+			case strings.Contains(testSource, a):
+				testSource = strings.Replace(testSource, a, b, -1)
+			case strings.Contains(testSource, b):
+				testSource = strings.Replace(testSource, b, a, -1)
+			default:
+				// Try escaping for R"(...)" strings
+				a, b = escape(a), escape(b)
+				switch {
+				case strings.Contains(testSource, a):
+					testSource = strings.Replace(testSource, a, b, -1)
+				case strings.Contains(testSource, b):
+					testSource = strings.Replace(testSource, b, a, -1)
+				default:
+					return "", fmt.Errorf("Could not fix 'EXPECT_EQ' pattern in '%v'", file)
+				}
+			}
+			return testSource, nil
+		}
+	} else if parts := reExpectHasSubstr.FindStringSubmatch(failure); len(parts) == 5 {
+		// EXPECT_THAT(a, HasSubstr(b))
+		a, b := unescape(parts[4]), unescape(parts[3])
+		file = parts[1]
+		fix = func(testSource string) (string, error) {
+			if fix := substr.Fix(a, b); fix != "" {
+				if !strings.Contains(testSource, b) {
+					// Try escaping for R"(...)" strings
+					b, fix = escape(b), escape(fix)
+				}
+				if strings.Contains(testSource, b) {
+					testSource = strings.Replace(testSource, b, fix, -1)
+					return testSource, nil
+				}
+				return "", fmt.Errorf("Could apply fix for 'HasSubstr' pattern in '%v'", file)
+			}
+
+			return "", fmt.Errorf("Could find fix for 'HasSubstr' pattern in '%v'", file)
+		}
 	} else {
 		return fmt.Errorf("Cannot fix this type of failure")
 	}
-
-	// Now un-escape any quotes (the regex is sensitive to these)
-	a = strings.ReplaceAll(a, `\"`, `"`)
-	b = strings.ReplaceAll(b, `\"`, `"`)
 
 	// Get the path to the source file containing the test failure
 	sourcePath := filepath.Join(wd, file)
@@ -152,33 +223,14 @@ func processFailure(test, wd, failure string) error {
 	// Find the test
 	testIdx, ok := sourceFile.tests[test]
 	if !ok {
-		return fmt.Errorf("Test '%v' not found in '%v'", test, file)
+		return fmt.Errorf("Test not found in '%v'", file)
 	}
 
 	// Grab the source for the particular test
 	testSource := sourceFile.parts[testIdx]
 
-	// We don't know if a or b is the expected, so just try flipping the string
-	// to the other form.
-	switch {
-	case strings.Contains(testSource, a):
-		testSource = strings.Replace(testSource, a, b, -1)
-	case strings.Contains(testSource, b):
-		testSource = strings.Replace(testSource, b, a, -1)
-	default:
-		// Try escaping for R"(...)" strings
-		a = strings.ReplaceAll(a, "\n", `\n`)
-		b = strings.ReplaceAll(b, "\n", `\n`)
-		a = strings.ReplaceAll(a, "\"", `\"`)
-		b = strings.ReplaceAll(b, "\"", `\"`)
-		switch {
-		case strings.Contains(testSource, a):
-			testSource = strings.Replace(testSource, a, b, -1)
-		case strings.Contains(testSource, b):
-			testSource = strings.Replace(testSource, b, a, -1)
-		default:
-			return fmt.Errorf("Could not fix test '%v' in '%v'", test, file)
-		}
+	if testSource, err = fix(testSource); err != nil {
+		return err
 	}
 
 	// Replace the part of the source file
