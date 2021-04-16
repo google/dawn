@@ -41,7 +41,7 @@ WorkgroupDecoration::WorkgroupDecoration(ProgramID program_id,
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
 
-void WorkgroupDecoration::to_str(const semantic::Info&,
+void WorkgroupDecoration::to_str(const sem::Info&,
                                  std::ostream& out,
                                  size_t indent) const {
   make_indent(out, indent);

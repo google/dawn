@@ -31,7 +31,7 @@ void Node::make_indent(std::ostream& out, size_t indent) const {
     out << " ";
 }
 
-std::string Node::str(const semantic::Info& sem) const {
+std::string Node::str(const sem::Info& sem) const {
   std::ostringstream out;
   to_str(sem, out, 0);
   return out.str();

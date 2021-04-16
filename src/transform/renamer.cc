@@ -19,8 +19,8 @@
 #include <utility>
 
 #include "src/program_builder.h"
-#include "src/semantic/call.h"
-#include "src/semantic/member_accessor_expression.h"
+#include "src/sem/call.h"
+#include "src/sem/member_accessor_expression.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Renamer::Data);
 
@@ -861,7 +861,7 @@ Output Renamer::Run(const Program* in, const DataMap&) {
             << "MemberAccessorExpression has no semantic info";
         continue;
       }
-      if (sem->Is<semantic::Swizzle>()) {
+      if (sem->Is<sem::Swizzle>()) {
         preserve.emplace(member->member());
       }
     } else if (auto* call = node->As<ast::CallExpression>()) {
@@ -870,7 +870,7 @@ Output Renamer::Run(const Program* in, const DataMap&) {
         TINT_ICE(out.Diagnostics()) << "CallExpression has no semantic info";
         continue;
       }
-      if (sem->Target()->Is<semantic::Intrinsic>()) {
+      if (sem->Target()->Is<sem::Intrinsic>()) {
         preserve.emplace(call->func()->As<ast::IdentifierExpression>());
       }
     }

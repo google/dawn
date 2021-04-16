@@ -433,37 +433,37 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 }
 
 // Returns the WGSL standard library function intrinsic for the
-// given instruction, or semantic::IntrinsicType::kNone
-semantic::IntrinsicType GetIntrinsic(SpvOp opcode) {
+// given instruction, or sem::IntrinsicType::kNone
+sem::IntrinsicType GetIntrinsic(SpvOp opcode) {
   switch (opcode) {
     case SpvOpBitCount:
-      return semantic::IntrinsicType::kCountOneBits;
+      return sem::IntrinsicType::kCountOneBits;
     case SpvOpBitReverse:
-      return semantic::IntrinsicType::kReverseBits;
+      return sem::IntrinsicType::kReverseBits;
     case SpvOpDot:
-      return semantic::IntrinsicType::kDot;
+      return sem::IntrinsicType::kDot;
     case SpvOpDPdx:
-      return semantic::IntrinsicType::kDpdx;
+      return sem::IntrinsicType::kDpdx;
     case SpvOpDPdy:
-      return semantic::IntrinsicType::kDpdy;
+      return sem::IntrinsicType::kDpdy;
     case SpvOpFwidth:
-      return semantic::IntrinsicType::kFwidth;
+      return sem::IntrinsicType::kFwidth;
     case SpvOpDPdxFine:
-      return semantic::IntrinsicType::kDpdxFine;
+      return sem::IntrinsicType::kDpdxFine;
     case SpvOpDPdyFine:
-      return semantic::IntrinsicType::kDpdyFine;
+      return sem::IntrinsicType::kDpdyFine;
     case SpvOpFwidthFine:
-      return semantic::IntrinsicType::kFwidthFine;
+      return sem::IntrinsicType::kFwidthFine;
     case SpvOpDPdxCoarse:
-      return semantic::IntrinsicType::kDpdxCoarse;
+      return sem::IntrinsicType::kDpdxCoarse;
     case SpvOpDPdyCoarse:
-      return semantic::IntrinsicType::kDpdyCoarse;
+      return sem::IntrinsicType::kDpdyCoarse;
     case SpvOpFwidthCoarse:
-      return semantic::IntrinsicType::kFwidthCoarse;
+      return sem::IntrinsicType::kFwidthCoarse;
     default:
       break;
   }
-  return semantic::IntrinsicType::kNone;
+  return sem::IntrinsicType::kNone;
 }
 
 // @param opcode a SPIR-V opcode
@@ -705,7 +705,7 @@ DefInfo::~DefInfo() = default;
 ast::Node* StatementBuilder::Clone(CloneContext*) const {
   return nullptr;
 }
-void StatementBuilder::to_str(const semantic::Info&,
+void StatementBuilder::to_str(const sem::Info&,
                               std::ostream& out,
                               size_t indent) const {
   make_indent(out, indent);
@@ -3253,7 +3253,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   }
 
   const auto intrinsic = GetIntrinsic(opcode);
-  if (intrinsic != semantic::IntrinsicType::kNone) {
+  if (intrinsic != sem::IntrinsicType::kNone) {
     return MakeIntrinsicCall(inst);
   }
 

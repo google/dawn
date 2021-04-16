@@ -17,7 +17,7 @@
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/reader/spirv/spirv_tools_helpers_test.h"
-#include "src/semantic/call.h"
+#include "src/sem/call.h"
 
 namespace tint {
 namespace reader {
@@ -68,9 +68,9 @@ TEST_F(SpvParserTest, WorkgroupBarrier) {
   EXPECT_EQ(call->expr()->params().size(), 0u);
   auto* sem_call = program.Sem().Get(call->expr());
   ASSERT_NE(sem_call, nullptr);
-  auto* intrinsic = sem_call->Target()->As<semantic::Intrinsic>();
+  auto* intrinsic = sem_call->Target()->As<sem::Intrinsic>();
   ASSERT_NE(intrinsic, nullptr);
-  EXPECT_EQ(intrinsic->Type(), semantic::IntrinsicType::kWorkgroupBarrier);
+  EXPECT_EQ(intrinsic->Type(), sem::IntrinsicType::kWorkgroupBarrier);
 }
 
 TEST_F(SpvParserTest, StorageBarrier) {
@@ -96,9 +96,9 @@ TEST_F(SpvParserTest, StorageBarrier) {
   EXPECT_EQ(call->expr()->params().size(), 0u);
   auto* sem_call = program.Sem().Get(call->expr());
   ASSERT_NE(sem_call, nullptr);
-  auto* intrinsic = sem_call->Target()->As<semantic::Intrinsic>();
+  auto* intrinsic = sem_call->Target()->As<sem::Intrinsic>();
   ASSERT_NE(intrinsic, nullptr);
-  EXPECT_EQ(intrinsic->Type(), semantic::IntrinsicType::kStorageBarrier);
+  EXPECT_EQ(intrinsic->Type(), sem::IntrinsicType::kStorageBarrier);
 }
 
 TEST_F(SpvParserTest, ErrBarrierInvalidExecution) {

@@ -28,7 +28,7 @@ AccessDecoration::AccessDecoration(ProgramID program_id,
 
 AccessDecoration::~AccessDecoration() = default;
 
-void AccessDecoration::to_str(const semantic::Info&,
+void AccessDecoration::to_str(const sem::Info&,
                               std::ostream& out,
                               size_t indent) const {
   make_indent(out, indent);

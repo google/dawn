@@ -74,7 +74,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
   }
 }
 
-void Module::to_str(const semantic::Info& sem,
+void Module::to_str(const sem::Info& sem,
                     std::ostream& out,
                     size_t indent) const {
   make_indent(out, indent);
@@ -102,7 +102,7 @@ void Module::to_str(const semantic::Info& sem,
   out << "}" << std::endl;
 }
 
-std::string Module::to_str(const semantic::Info& sem) const {
+std::string Module::to_str(const sem::Info& sem) const {
   std::ostringstream out;
   to_str(sem, out, 0);
   return out.str();

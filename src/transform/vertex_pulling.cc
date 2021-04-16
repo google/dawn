@@ -21,7 +21,7 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
-#include "src/semantic/variable.h"
+#include "src/sem/variable.h"
 #include "src/utils/get_or_create.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling::Config);

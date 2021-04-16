@@ -105,13 +105,13 @@ class Module : public Castable<Module, Node> {
   /// @param sem the semantic info for the program
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
-  void to_str(const semantic::Info& sem,
+  void to_str(const sem::Info& sem,
               std::ostream& out,
               size_t indent) const override;
 
   /// @param sem the semantic info for the program
   /// @returns a string representation of the Builder
-  std::string to_str(const semantic::Info& sem) const;
+  std::string to_str(const sem::Info& sem) const;
 
  private:
   std::vector<Cloneable*> global_declarations_;

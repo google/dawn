@@ -29,11 +29,11 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/semantic/call.h"
-#include "src/semantic/function.h"
-#include "src/semantic/member_accessor_expression.h"
-#include "src/semantic/statement.h"
-#include "src/semantic/variable.h"
+#include "src/sem/call.h"
+#include "src/sem/function.h"
+#include "src/sem/member_accessor_expression.h"
+#include "src/sem/statement.h"
+#include "src/sem/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/sampled_texture_type.h"
 
@@ -44,7 +44,7 @@ namespace tint {
 namespace resolver {
 namespace {
 
-using IntrinsicType = semantic::IntrinsicType;
+using IntrinsicType = sem::IntrinsicType;
 
 using ResolverIntrinsicTest = ResolverTest;
 
@@ -1678,7 +1678,7 @@ INSTANTIATE_TEST_SUITE_P(
     testing::ValuesIn(ast::intrinsic::test::TextureOverloadCase::ValidCases()));
 
 std::string to_str(const std::string& function,
-                   const semantic::ParameterList& params) {
+                   const sem::ParameterList& params) {
   std::stringstream out;
   out << function << "(";
   bool first = true;
@@ -1686,7 +1686,7 @@ std::string to_str(const std::string& function,
     if (!first) {
       out << ", ";
     }
-    out << semantic::str(param.usage);
+    out << sem::str(param.usage);
     first = false;
   }
   out << ")";

@@ -16,7 +16,7 @@
 
 #include "src/ast/constant_id_decoration.h"
 #include "src/program_builder.h"
-#include "src/semantic/variable.h"
+#include "src/sem/variable.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Variable);
 
@@ -80,7 +80,7 @@ Variable* Variable::Clone(CloneContext* ctx) const {
                                     is_const_, ctor, decos);
 }
 
-void Variable::info_to_str(const semantic::Info& sem,
+void Variable::info_to_str(const sem::Info& sem,
                            std::ostream& out,
                            size_t indent) const {
   auto* var_sem = sem.Get(this);
@@ -95,7 +95,7 @@ void Variable::info_to_str(const semantic::Info& sem,
   }
 }
 
-void Variable::constructor_to_str(const semantic::Info& sem,
+void Variable::constructor_to_str(const sem::Info& sem,
                                   std::ostream& out,
                                   size_t indent) const {
   if (constructor_ == nullptr)
@@ -110,7 +110,7 @@ void Variable::constructor_to_str(const semantic::Info& sem,
   out << "}" << std::endl;
 }
 
-void Variable::to_str(const semantic::Info& sem,
+void Variable::to_str(const sem::Info& sem,
                       std::ostream& out,
                       size_t indent) const {
   make_indent(out, indent);

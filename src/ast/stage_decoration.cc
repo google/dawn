@@ -28,7 +28,7 @@ StageDecoration::StageDecoration(ProgramID program_id,
 
 StageDecoration::~StageDecoration() = default;
 
-void StageDecoration::to_str(const semantic::Info&,
+void StageDecoration::to_str(const sem::Info&,
                              std::ostream& out,
                              size_t indent) const {
   make_indent(out, indent);

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_STATEMENT_H_
-#define SRC_SEMANTIC_STATEMENT_H_
+#ifndef SRC_SEM_STATEMENT_H_
+#define SRC_SEM_STATEMENT_H_
 
-#include "src/semantic/node.h"
+#include "src/sem/node.h"
 
 namespace tint {
 
@@ -25,7 +25,7 @@ class BlockStatement;
 class Statement;
 }  // namespace ast
 
-namespace semantic {
+namespace sem {
 
 /// Statement holds the semantic information for a statement.
 class Statement : public Castable<Statement, Node> {
@@ -47,7 +47,7 @@ class Statement : public Castable<Statement, Node> {
   ast::BlockStatement const* const block_;
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_STATEMENT_H_
+#endif  // SRC_SEM_STATEMENT_H_

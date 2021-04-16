@@ -42,7 +42,7 @@ ScalarConstructorExpression* ScalarConstructorExpression::Clone(
   return ctx->dst->create<ScalarConstructorExpression>(src, lit);
 }
 
-void ScalarConstructorExpression::to_str(const semantic::Info& sem,
+void ScalarConstructorExpression::to_str(const sem::Info& sem,
                                          std::ostream& out,
                                          size_t indent) const {
   make_indent(out, indent);

@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/function.h"
+#include "src/sem/function.h"
 
 #include "src/ast/function.h"
-#include "src/semantic/variable.h"
+#include "src/sem/variable.h"
 #include "src/type/depth_texture_type.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
 #include "src/type/storage_texture_type.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::Function);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 namespace {
 
@@ -225,5 +225,5 @@ Function::VariableBindings Function::ReferencedSampledTextureVariablesImpl(
   return ret;
 }
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint

@@ -29,7 +29,7 @@ SintLiteral::SintLiteral(ProgramID program_id,
 
 SintLiteral::~SintLiteral() = default;
 
-std::string SintLiteral::to_str(const semantic::Info&) const {
+std::string SintLiteral::to_str(const sem::Info&) const {
   return std::to_string(value());
 }
 

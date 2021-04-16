@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_FUNCTION_H_
-#define SRC_SEMANTIC_FUNCTION_H_
+#ifndef SRC_SEM_FUNCTION_H_
+#define SRC_SEM_FUNCTION_H_
 
 #include <utility>
 #include <vector>
 
 #include "src/ast/variable.h"
-#include "src/semantic/call_target.h"
+#include "src/sem/call_target.h"
 
 namespace tint {
 
@@ -33,7 +33,7 @@ class LocationDecoration;
 class ReturnStatement;
 }  // namespace ast
 
-namespace semantic {
+namespace sem {
 
 class Variable;
 
@@ -154,7 +154,7 @@ class Function : public Castable<Function, CallTarget> {
   std::vector<Symbol> const ancestor_entry_points_;
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_FUNCTION_H_
+#endif  // SRC_SEM_FUNCTION_H_

@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/call_target.h"
+#include "src/sem/call_target.h"
 
 #include "src/symbol_table.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::CallTarget);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 CallTarget::CallTarget(type::Type* return_type, const ParameterList& parameters)
     : return_type_(return_type), parameters_(parameters) {}
@@ -72,5 +72,5 @@ std::ostream& operator<<(std::ostream& out, Parameter parameter) {
   return out;
 }
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint

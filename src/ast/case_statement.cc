@@ -46,7 +46,7 @@ CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<CaseStatement>(src, sel, b);
 }
 
-void CaseStatement::to_str(const semantic::Info& sem,
+void CaseStatement::to_str(const sem::Info& sem,
                            std::ostream& out,
                            size_t indent) const {
   make_indent(out, indent);

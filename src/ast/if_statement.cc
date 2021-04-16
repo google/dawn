@@ -53,7 +53,7 @@ IfStatement* IfStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<IfStatement>(src, cond, b, el);
 }
 
-void IfStatement::to_str(const semantic::Info& sem,
+void IfStatement::to_str(const sem::Info& sem,
                          std::ostream& out,
                          size_t indent) const {
   make_indent(out, indent);

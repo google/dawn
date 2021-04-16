@@ -12,22 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_NODE_H_
-#define SRC_SEMANTIC_NODE_H_
+#include "src/sem/expression.h"
 
-#include "src/castable.h"
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Expression);
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
-/// Node is the base class for all semantic nodes
-class Node : public Castable<Node> {
- public:
-  /// Destructor
-  ~Node() override;
-};
+Expression::Expression(ast::Expression* declaration,
+                       type::Type* type,
+                       Statement* statement)
+    : declaration_(declaration),
+      type_(type->UnwrapIfNeeded()),
+      statement_(statement) {}
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
-
-#endif  // SRC_SEMANTIC_NODE_H_

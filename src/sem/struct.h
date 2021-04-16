@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_STRUCT_H_
-#define SRC_SEMANTIC_STRUCT_H_
+#ifndef SRC_SEM_STRUCT_H_
+#define SRC_SEM_STRUCT_H_
 
 #include <stdint.h>
 
@@ -21,7 +21,7 @@
 #include <vector>
 
 #include "src/ast/storage_class.h"
-#include "src/semantic/node.h"
+#include "src/sem/node.h"
 
 namespace tint {
 
@@ -33,7 +33,7 @@ namespace type {
 class Struct;
 }  // namespace type
 
-namespace semantic {
+namespace sem {
 
 class StructMember;
 
@@ -171,7 +171,7 @@ class StructMember : public Castable<StructMember, Node> {
   uint32_t const size_;    // Byte size of the member
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_STRUCT_H_
+#endif  // SRC_SEM_STRUCT_H_

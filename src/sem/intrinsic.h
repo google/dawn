@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_INTRINSIC_H_
-#define SRC_SEMANTIC_INTRINSIC_H_
+#ifndef SRC_SEM_INTRINSIC_H_
+#define SRC_SEM_INTRINSIC_H_
 
 #include <string>
 
-#include "src/semantic/call_target.h"
+#include "src/sem/call_target.h"
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 enum class IntrinsicType {
   kNone = -1,
@@ -222,7 +222,7 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
 /// matches the name in the WGSL spec.
 std::ostream& operator<<(std::ostream& out, IntrinsicType i);
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_INTRINSIC_H_
+#endif  // SRC_SEM_INTRINSIC_H_

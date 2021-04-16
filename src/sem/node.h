@@ -12,14 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/node.h"
+#ifndef SRC_SEM_NODE_H_
+#define SRC_SEM_NODE_H_
 
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::Node);
+#include "src/castable.h"
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
-Node::~Node() = default;
+/// Node is the base class for all semantic nodes
+class Node : public Castable<Node> {
+ public:
+  /// Destructor
+  ~Node() override;
+};
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
+
+#endif  // SRC_SEM_NODE_H_

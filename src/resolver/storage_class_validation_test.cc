@@ -16,7 +16,7 @@
 
 #include "gmock/gmock.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/semantic/struct.h"
+#include "src/sem/struct.h"
 #include "src/type/access_control_type.h"
 
 namespace tint {

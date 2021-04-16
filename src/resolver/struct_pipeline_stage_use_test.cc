@@ -17,7 +17,7 @@
 #include "gmock/gmock.h"
 #include "src/ast/stage_decoration.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/semantic/struct.h"
+#include "src/sem/struct.h"
 
 using ::testing::UnorderedElementsAre;
 
@@ -76,7 +76,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_THAT(sem->PipelineStageUses(),
-              UnorderedElementsAre(semantic::PipelineStageUsage::kVertexInput));
+              UnorderedElementsAre(sem::PipelineStageUsage::kVertexInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
@@ -90,9 +90,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(
-      sem->PipelineStageUses(),
-      UnorderedElementsAre(semantic::PipelineStageUsage::kVertexOutput));
+  EXPECT_THAT(sem->PipelineStageUses(),
+              UnorderedElementsAre(sem::PipelineStageUsage::kVertexOutput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
@@ -106,9 +105,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(
-      sem->PipelineStageUses(),
-      UnorderedElementsAre(semantic::PipelineStageUsage::kFragmentInput));
+  EXPECT_THAT(sem->PipelineStageUses(),
+              UnorderedElementsAre(sem::PipelineStageUsage::kFragmentInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
@@ -122,9 +120,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(
-      sem->PipelineStageUses(),
-      UnorderedElementsAre(semantic::PipelineStageUsage::kFragmentOutput));
+  EXPECT_THAT(sem->PipelineStageUses(),
+              UnorderedElementsAre(sem::PipelineStageUsage::kFragmentOutput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
@@ -139,9 +136,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(
-      sem->PipelineStageUses(),
-      UnorderedElementsAre(semantic::PipelineStageUsage::kComputeInput));
+  EXPECT_THAT(sem->PipelineStageUses(),
+              UnorderedElementsAre(sem::PipelineStageUsage::kComputeInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
@@ -158,11 +154,10 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(
-      sem->PipelineStageUses(),
-      UnorderedElementsAre(semantic::PipelineStageUsage::kVertexInput,
-                           semantic::PipelineStageUsage::kVertexOutput,
-                           semantic::PipelineStageUsage::kFragmentInput));
+  EXPECT_THAT(sem->PipelineStageUses(),
+              UnorderedElementsAre(sem::PipelineStageUsage::kVertexInput,
+                                   sem::PipelineStageUsage::kVertexOutput,
+                                   sem::PipelineStageUsage::kFragmentInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
@@ -177,9 +172,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(
-      sem->PipelineStageUses(),
-      UnorderedElementsAre(semantic::PipelineStageUsage::kFragmentInput));
+  EXPECT_THAT(sem->PipelineStageUses(),
+              UnorderedElementsAre(sem::PipelineStageUsage::kFragmentInput));
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeViaAlias) {
@@ -194,9 +188,8 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeViaAlias) {
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
-  EXPECT_THAT(
-      sem->PipelineStageUses(),
-      UnorderedElementsAre(semantic::PipelineStageUsage::kFragmentOutput));
+  EXPECT_THAT(sem->PipelineStageUses(),
+              UnorderedElementsAre(sem::PipelineStageUsage::kFragmentOutput));
 }
 
 }  // namespace

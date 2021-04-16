@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/call.h"
+#include "src/sem/call.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {
@@ -44,7 +44,7 @@ TEST_P(MslImportData_SingleParamTest, FloatScalar) {
   ASSERT_NE(sem, nullptr);
   auto* target = sem->Target();
   ASSERT_NE(target, nullptr);
-  auto* intrinsic = target->As<semantic::Intrinsic>();
+  auto* intrinsic = target->As<sem::Intrinsic>();
   ASSERT_NE(intrinsic, nullptr);
 
   ASSERT_EQ(gen.generate_builtin_name(intrinsic), param.msl_name);

@@ -19,7 +19,7 @@
 
 #include "src/ast/function.h"
 #include "src/program_id.h"
-#include "src/semantic/info.h"
+#include "src/sem/info.h"
 #include "src/symbol_table.h"
 #include "src/type/type_manager.h"
 
@@ -40,8 +40,8 @@ class Program {
   /// ASTNodeAllocator is an alias to BlockAllocator<ast::Node>
   using ASTNodeAllocator = BlockAllocator<ast::Node>;
 
-  /// SemNodeAllocator is an alias to BlockAllocator<semantic::Node>
-  using SemNodeAllocator = BlockAllocator<semantic::Node>;
+  /// SemNodeAllocator is an alias to BlockAllocator<sem::Node>
+  using SemNodeAllocator = BlockAllocator<sem::Node>;
 
   /// Constructor
   Program();
@@ -90,7 +90,7 @@ class Program {
   }
 
   /// @returns a reference to the program's semantic info
-  const semantic::Info& Sem() const {
+  const sem::Info& Sem() const {
     AssertNotMoved();
     return sem_;
   }
@@ -164,7 +164,7 @@ class Program {
   ASTNodeAllocator ast_nodes_;
   SemNodeAllocator sem_nodes_;
   ast::Module* ast_ = nullptr;
-  semantic::Info sem_;
+  sem::Info sem_;
   SymbolTable symbols_{id_};
   diag::List diagnostics_;
   bool is_valid_ = false;  // Not valid until it is built

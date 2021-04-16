@@ -15,7 +15,7 @@
 #include "gmock/gmock.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/stage_decoration.h"
-#include "src/semantic/call.h"
+#include "src/sem/call.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
@@ -23,7 +23,7 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-using IntrinsicType = semantic::IntrinsicType;
+using IntrinsicType = sem::IntrinsicType;
 
 using ::testing::HasSubstr;
 
@@ -171,7 +171,7 @@ TEST_P(HlslIntrinsicTest, Emit) {
   ASSERT_NE(sem, nullptr);
   auto* target = sem->Target();
   ASSERT_NE(target, nullptr);
-  auto* intrinsic = target->As<semantic::Intrinsic>();
+  auto* intrinsic = target->As<sem::Intrinsic>();
   ASSERT_NE(intrinsic, nullptr);
 
   EXPECT_EQ(gen.generate_builtin_name(intrinsic), param.hlsl_name);

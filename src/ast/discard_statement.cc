@@ -34,7 +34,7 @@ DiscardStatement* DiscardStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<DiscardStatement>(src);
 }
 
-void DiscardStatement::to_str(const semantic::Info&,
+void DiscardStatement::to_str(const sem::Info&,
                               std::ostream& out,
                               size_t indent) const {
   make_indent(out, indent);

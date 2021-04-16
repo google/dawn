@@ -28,7 +28,7 @@ GroupDecoration::GroupDecoration(ProgramID program_id,
 
 GroupDecoration::~GroupDecoration() = default;
 
-void GroupDecoration::to_str(const semantic::Info&,
+void GroupDecoration::to_str(const sem::Info&,
                              std::ostream& out,
                              size_t indent) const {
   make_indent(out, indent);

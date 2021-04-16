@@ -40,7 +40,7 @@ class Expression : public Castable<Expression, Node> {
   /// @param sem the semantic info for the program
   /// @returns a string representation of the result type or 'not set' if no
   /// result type present
-  std::string result_type_str(const semantic::Info& sem) const;
+  std::string result_type_str(const sem::Info& sem) const;
 
  private:
   Expression(const Expression&) = delete;

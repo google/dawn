@@ -14,8 +14,8 @@
 
 #include "src/ast/expression.h"
 
-#include "src/semantic/expression.h"
-#include "src/semantic/info.h"
+#include "src/sem/expression.h"
+#include "src/sem/info.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Expression);
 
@@ -29,7 +29,7 @@ Expression::Expression(Expression&&) = default;
 
 Expression::~Expression() = default;
 
-std::string Expression::result_type_str(const semantic::Info& sem) const {
+std::string Expression::result_type_str(const sem::Info& sem) const {
   auto* sem_expr = sem.Get(this);
   return sem_expr ? sem_expr->Type()->type_name() : "not set";
 }

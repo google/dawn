@@ -31,11 +31,11 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/semantic/call.h"
-#include "src/semantic/function.h"
-#include "src/semantic/member_accessor_expression.h"
-#include "src/semantic/statement.h"
-#include "src/semantic/variable.h"
+#include "src/sem/call.h"
+#include "src/sem/function.h"
+#include "src/sem/member_accessor_expression.h"
+#include "src/sem/statement.h"
+#include "src/sem/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/sampled_texture_type.h"
 
@@ -902,10 +902,10 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 
   auto* ptr = TypeOf(mem)->As<type::Pointer>();
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
-  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::StructMemberAccess>());
+  ASSERT_TRUE(Sem().Get(mem)->Is<sem::StructMemberAccess>());
   EXPECT_EQ(Sem()
                 .Get(mem)
-                ->As<semantic::StructMemberAccess>()
+                ->As<sem::StructMemberAccess>()
                 ->Member()
                 ->Declaration()
                 ->symbol(),
@@ -932,7 +932,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
 
   auto* ptr = TypeOf(mem)->As<type::Pointer>();
   EXPECT_TRUE(ptr->type()->Is<type::F32>());
-  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::StructMemberAccess>());
+  ASSERT_TRUE(Sem().Get(mem)->Is<sem::StructMemberAccess>());
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
@@ -947,8 +947,8 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(mem)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(mem)->As<type::Vector>()->size(), 4u);
-  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::Swizzle>());
-  EXPECT_THAT(Sem().Get(mem)->As<semantic::Swizzle>()->Indices(),
+  ASSERT_TRUE(Sem().Get(mem)->Is<sem::Swizzle>());
+  EXPECT_THAT(Sem().Get(mem)->As<sem::Swizzle>()->Indices(),
               ElementsAre(0, 2, 1, 3));
 }
 
@@ -965,9 +965,8 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
 
   auto* ptr = TypeOf(mem)->As<type::Pointer>();
   ASSERT_TRUE(ptr->type()->Is<type::F32>());
-  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::Swizzle>());
-  EXPECT_THAT(Sem().Get(mem)->As<semantic::Swizzle>()->Indices(),
-              ElementsAre(2));
+  ASSERT_TRUE(Sem().Get(mem)->Is<sem::Swizzle>());
+  EXPECT_THAT(Sem().Get(mem)->As<sem::Swizzle>()->Indices(), ElementsAre(2));
 }
 
 TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
@@ -1019,7 +1018,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   ASSERT_TRUE(TypeOf(mem)->Is<type::Vector>());
   EXPECT_TRUE(TypeOf(mem)->As<type::Vector>()->type()->Is<type::F32>());
   EXPECT_EQ(TypeOf(mem)->As<type::Vector>()->size(), 2u);
-  ASSERT_TRUE(Sem().Get(mem)->Is<semantic::Swizzle>());
+  ASSERT_TRUE(Sem().Get(mem)->Is<sem::Swizzle>());
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {

@@ -29,11 +29,11 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/semantic/call.h"
-#include "src/semantic/function.h"
-#include "src/semantic/member_accessor_expression.h"
-#include "src/semantic/statement.h"
-#include "src/semantic/variable.h"
+#include "src/sem/call.h"
+#include "src/sem/function.h"
+#include "src/sem/member_accessor_expression.h"
+#include "src/sem/statement.h"
+#include "src/sem/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/sampled_texture_type.h"
 
@@ -51,7 +51,7 @@ class FakeStmt : public ast::Statement {
   FakeStmt(ProgramID program_id, Source source)
       : ast::Statement(program_id, source) {}
   FakeStmt* Clone(CloneContext*) const override { return nullptr; }
-  void to_str(const semantic::Info&, std::ostream& out, size_t) const override {
+  void to_str(const sem::Info&, std::ostream& out, size_t) const override {
     out << "Fake";
   }
 };
@@ -61,7 +61,7 @@ class FakeExpr : public ast::Expression {
   FakeExpr(ProgramID program_id, Source source)
       : ast::Expression(program_id, source) {}
   FakeExpr* Clone(CloneContext*) const override { return nullptr; }
-  void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
+  void to_str(const sem::Info&, std::ostream&, size_t) const override {}
 };
 
 TEST_F(ResolverValidationTest, Error_WithEmptySource) {

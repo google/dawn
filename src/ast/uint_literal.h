@@ -44,7 +44,7 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
 
   /// @param sem the semantic info for the program
   /// @returns the literal as a string
-  std::string to_str(const semantic::Info& sem) const override;
+  std::string to_str(const sem::Info& sem) const override;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`
   /// `ctx`.

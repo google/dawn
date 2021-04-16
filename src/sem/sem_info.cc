@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/info.h"
+#include "src/sem/info.h"
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 Info::Info() = default;
 
@@ -25,5 +25,5 @@ Info::~Info() = default;
 
 Info& Info::operator=(Info&&) = default;
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint

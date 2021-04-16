@@ -73,8 +73,8 @@ class ProgramBuilder {
   /// ASTNodeAllocator is an alias to BlockAllocator<ast::Node>
   using ASTNodeAllocator = BlockAllocator<ast::Node>;
 
-  /// SemNodeAllocator is an alias to BlockAllocator<semantic::Node>
-  using SemNodeAllocator = BlockAllocator<semantic::Node>;
+  /// SemNodeAllocator is an alias to BlockAllocator<sem::Node>
+  using SemNodeAllocator = BlockAllocator<sem::Node>;
 
   /// `i32` is a type alias to `int`.
   /// Useful for passing to template methods such as `vec2<i32>()` to imitate
@@ -172,13 +172,13 @@ class ProgramBuilder {
   }
 
   /// @returns a reference to the program's semantic info
-  semantic::Info& Sem() {
+  sem::Info& Sem() {
     AssertNotMoved();
     return sem_;
   }
 
   /// @returns a reference to the program's semantic info
-  const semantic::Info& Sem() const {
+  const sem::Info& Sem() const {
     AssertNotMoved();
     return sem_;
   }
@@ -276,13 +276,13 @@ class ProgramBuilder {
                                 std::forward<ARGS>(args)...);
   }
 
-  /// Creates a new semantic::Node owned by the ProgramBuilder.
-  /// When the ProgramBuilder is destructed, the semantic::Node will also be
+  /// Creates a new sem::Node owned by the ProgramBuilder.
+  /// When the ProgramBuilder is destructed, the sem::Node will also be
   /// destructed.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  traits::EnableIfIsType<T, semantic::Node>* create(ARGS&&... args) {
+  traits::EnableIfIsType<T, sem::Node>* create(ARGS&&... args) {
     AssertNotMoved();
     return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
   }
@@ -1445,7 +1445,7 @@ class ProgramBuilder {
   ASTNodeAllocator ast_nodes_;
   SemNodeAllocator sem_nodes_;
   ast::Module* ast_;
-  semantic::Info sem_;
+  sem::Info sem_;
   SymbolTable symbols_{id_};
   diag::List diagnostics_;
 

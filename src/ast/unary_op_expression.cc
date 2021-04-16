@@ -41,7 +41,7 @@ UnaryOpExpression* UnaryOpExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<UnaryOpExpression>(src, op_, e);
 }
 
-void UnaryOpExpression::to_str(const semantic::Info& sem,
+void UnaryOpExpression::to_str(const sem::Info& sem,
                                std::ostream& out,
                                size_t indent) const {
   make_indent(out, indent);

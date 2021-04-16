@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_MEMBER_ACCESSOR_EXPRESSION_H_
-#define SRC_SEMANTIC_MEMBER_ACCESSOR_EXPRESSION_H_
+#ifndef SRC_SEM_MEMBER_ACCESSOR_EXPRESSION_H_
+#define SRC_SEM_MEMBER_ACCESSOR_EXPRESSION_H_
 
 #include <vector>
 
-#include "src/semantic/expression.h"
+#include "src/sem/expression.h"
 
 namespace tint {
 
@@ -26,7 +26,7 @@ namespace ast {
 class MemberAccessorExpression;
 }  // namespace ast
 
-namespace semantic {
+namespace sem {
 
 /// Forward declarations
 class Struct;
@@ -99,7 +99,7 @@ class Swizzle : public Castable<Swizzle, MemberAccessorExpression> {
   std::vector<uint32_t> const indices_;
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_MEMBER_ACCESSOR_EXPRESSION_H_
+#endif  // SRC_SEM_MEMBER_ACCESSOR_EXPRESSION_H_

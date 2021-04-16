@@ -47,7 +47,7 @@ TypeConstructorExpression* TypeConstructorExpression::Clone(
   return ctx->dst->create<TypeConstructorExpression>(src, ty, vals);
 }
 
-void TypeConstructorExpression::to_str(const semantic::Info& sem,
+void TypeConstructorExpression::to_str(const sem::Info& sem,
                                        std::ostream& out,
                                        size_t indent) const {
   make_indent(out, indent);

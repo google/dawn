@@ -1,6 +1,6 @@
 // Copyright 2021 The Tint Authors.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
+// Licensed under the Apache License, Version 2.0(the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/array.h"
+#include "src/sem/call.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::Array);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Call);
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
-Array::Array(type::Array* type, uint32_t align, uint32_t size, uint32_t stride)
-    : type_(type), align_(align), size_(size), stride_(stride) {}
+Call::Call(ast::Expression* declaration,
+           const CallTarget* target,
+           Statement* statement)
+    : Base(declaration, target->ReturnType(), statement), target_(target) {}
 
-}  // namespace semantic
+Call::~Call() = default;
+
+}  // namespace sem
 }  // namespace tint

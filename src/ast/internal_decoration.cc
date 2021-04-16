@@ -24,7 +24,7 @@ InternalDecoration::InternalDecoration(ProgramID program_id)
 
 InternalDecoration::~InternalDecoration() = default;
 
-void InternalDecoration::to_str(const semantic::Info&,
+void InternalDecoration::to_str(const sem::Info&,
                                 std::ostream& out,
                                 size_t indent) const {
   make_indent(out, indent);

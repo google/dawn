@@ -29,7 +29,7 @@ StructMemberAlignDecoration::StructMemberAlignDecoration(ProgramID program_id,
 
 StructMemberAlignDecoration::~StructMemberAlignDecoration() = default;
 
-void StructMemberAlignDecoration::to_str(const semantic::Info&,
+void StructMemberAlignDecoration::to_str(const sem::Info&,
                                          std::ostream& out,
                                          size_t indent) const {
   make_indent(out, indent);

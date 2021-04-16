@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_CALL_TARGET_H_
-#define SRC_SEMANTIC_CALL_TARGET_H_
+#ifndef SRC_SEM_CALL_TARGET_H_
+#define SRC_SEM_CALL_TARGET_H_
 
 #include <vector>
 
-#include "src/semantic/node.h"
+#include "src/sem/node.h"
 #include "src/type/sampler_type.h"
 
 namespace tint {
@@ -27,7 +27,7 @@ namespace type {
 class Type;
 }  // namespace type
 
-namespace semantic {
+namespace sem {
 
 /// Parameter describes a single parameter of a call target
 struct Parameter {
@@ -96,7 +96,7 @@ class CallTarget : public Castable<CallTarget, Node> {
   ParameterList const parameters_;
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_CALL_TARGET_H_
+#endif  // SRC_SEM_CALL_TARGET_H_

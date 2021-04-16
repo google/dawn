@@ -64,7 +64,7 @@ StructMember* StructMember::Clone(CloneContext* ctx) const {
   return ctx->dst->create<StructMember>(src, sym, ty, decos);
 }
 
-void StructMember::to_str(const semantic::Info& sem,
+void StructMember::to_str(const sem::Info& sem,
                           std::ostream& out,
                           size_t indent) const {
   make_indent(out, indent);

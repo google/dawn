@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/intrinsic.h"
+#include "src/sem/intrinsic.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::Intrinsic);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Intrinsic);
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 std::ostream& operator<<(std::ostream& out, IntrinsicType i) {
   out << str(i);
@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream& out, IntrinsicType i) {
 }
 
 const char* Intrinsic::str() const {
-  return semantic::str(type_);
+  return sem::str(type_);
 }
 
 /// Name matches the spelling in the WGSL spec including case.
@@ -237,5 +237,5 @@ bool Intrinsic::IsBarrier() const {
   return IsBarrierIntrinsic(type_);
 }
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint

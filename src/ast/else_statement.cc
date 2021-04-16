@@ -43,7 +43,7 @@ ElseStatement* ElseStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ElseStatement>(src, cond, b);
 }
 
-void ElseStatement::to_str(const semantic::Info& sem,
+void ElseStatement::to_str(const sem::Info& sem,
                            std::ostream& out,
                            size_t indent) const {
   make_indent(out, indent);

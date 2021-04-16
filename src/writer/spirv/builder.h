@@ -42,9 +42,9 @@
 namespace tint {
 
 // Forward declarations
-namespace semantic {
+namespace sem {
 class Call;
-}  // namespace semantic
+}  // namespace sem
 
 namespace writer {
 namespace spirv {
@@ -349,7 +349,7 @@ class Builder {
   /// @param intrinsic the semantic information for the intrinsic
   /// @returns the expression ID on success or 0 otherwise
   uint32_t GenerateIntrinsic(ast::CallExpression* call,
-                             const semantic::Intrinsic* intrinsic);
+                             const sem::Intrinsic* intrinsic);
   /// Generates a texture intrinsic call. Emits an error and returns false if
   /// we're currently outside a function.
   /// @param call the call expression
@@ -359,14 +359,14 @@ class Builder {
   /// parameters
   /// @returns true on success
   bool GenerateTextureIntrinsic(ast::CallExpression* call,
-                                const semantic::Intrinsic* intrinsic,
+                                const sem::Intrinsic* intrinsic,
                                 spirv::Operand result_type,
                                 spirv::Operand result_id);
   /// Generates a control barrier statement.
   /// @param intrinsic the semantic information for the barrier intrinsic
   /// parameters
   /// @returns true on success
-  bool GenerateControlBarrierIntrinsic(const semantic::Intrinsic* intrinsic);
+  bool GenerateControlBarrierIntrinsic(const sem::Intrinsic* intrinsic);
   /// Generates a sampled image
   /// @param texture_type the texture type
   /// @param texture_operand the texture operand

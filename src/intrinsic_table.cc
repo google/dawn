@@ -638,7 +638,7 @@ class Impl : public IntrinsicTable {
   Impl();
 
   IntrinsicTable::Result Lookup(ProgramBuilder& builder,
-                                semantic::IntrinsicType type,
+                                sem::IntrinsicType type,
                                 const std::vector<type::Type*>& args,
                                 const Source& source) const override;
 
@@ -647,11 +647,10 @@ class Impl : public IntrinsicTable {
     Parameter(
         Builder* m)  // NOLINT - implicit constructor required for Register()
         : matcher(m) {}
-    Parameter(semantic::Parameter::Usage u, Builder* m)
-        : matcher(m), usage(u) {}
+    Parameter(sem::Parameter::Usage u, Builder* m) : matcher(m), usage(u) {}
 
     Builder* const matcher;
-    semantic::Parameter::Usage const usage = semantic::Parameter::Usage::kNone;
+    sem::Parameter::Usage const usage = sem::Parameter::Usage::kNone;
   };
 
   /// A single overload definition.
@@ -660,13 +659,13 @@ class Impl : public IntrinsicTable {
     /// types. If a match is made, the build intrinsic is returned, otherwise
     /// `match_score` is assigned a score of how closely the overload matched
     /// (positive representing a greater match), and nullptr is returned.
-    semantic::Intrinsic* Match(ProgramBuilder& builder,
-                               semantic::IntrinsicType type,
-                               const std::vector<type::Type*>& arg_types,
-                               diag::List& diagnostics,
-                               int& match_score) const;
+    sem::Intrinsic* Match(ProgramBuilder& builder,
+                          sem::IntrinsicType type,
+                          const std::vector<type::Type*>& arg_types,
+                          diag::List& diagnostics,
+                          int& match_score) const;
 
-    semantic::IntrinsicType type;
+    sem::IntrinsicType type;
     Builder* return_type;
     std::vector<Parameter> parameters;
     std::unordered_map<OpenType, Matcher*> open_type_matchers;
@@ -774,7 +773,7 @@ class Impl : public IntrinsicTable {
   /// Registers an overload with the given intrinsic type, return type Matcher /
   /// Builder, and parameter Matcher / Builders.
   /// This overload of Register does not constrain any OpenTypes.
-  void Register(semantic::IntrinsicType type,
+  void Register(sem::IntrinsicType type,
                 Builder* return_type,
                 std::vector<Parameter> parameters) {
     Overload overload{type, return_type, std::move(parameters), {}};
@@ -785,7 +784,7 @@ class Impl : public IntrinsicTable {
   /// Builder, and parameter Matcher / Builders.
   /// A single OpenType is contained with the given Matcher in
   /// open_type_matcher.
-  void Register(semantic::IntrinsicType type,
+  void Register(sem::IntrinsicType type,
                 Builder* return_type,
                 std::vector<Parameter> parameters,
                 std::pair<OpenType, Matcher*> open_type_matcher) {
@@ -796,7 +795,7 @@ class Impl : public IntrinsicTable {
 };
 
 Impl::Impl() {
-  using I = semantic::IntrinsicType;
+  using I = sem::IntrinsicType;
   using Dim = type::TextureDimension;
 
   auto* void_ = &matchers_.void_;      // void
@@ -835,8 +834,8 @@ Impl::Impl() {
   //
   //   Register(I::kIsInf, bool_, {f32});
   //
-  //   I     - is an alias to semantic::IntrinsicType.
-  //           I::kIsInf is shorthand for semantic::IntrinsicType::kIsInf.
+  //   I     - is an alias to sem::IntrinsicType.
+  //           I::kIsInf is shorthand for sem::IntrinsicType::kIsInf.
   //   bool_ - is a pointer to a pre-constructed BoolBuilder which matches and
   //           builds type::Bool types.
   //   {f32} - is the list of parameter Builders for the overload.
@@ -858,12 +857,12 @@ Impl::Impl() {
   //   (2) All the parameters have had their Matcher::Match() methods return
   //       true, there are no open-types (more about these later), so the
   //       overload has matched.
-  //   (3) The semantic::Intrinsic now needs to be built, so we begin by
+  //   (3) The sem::Intrinsic now needs to be built, so we begin by
   //       building the overload's parameter types (these may not exactly match
   //       the argument types). Build() is called for each parameter Builder,
   //       returning the parameter type.
   //   (4) Finally, Builder::Build() is called for the return_type, and the
-  //       semantic::Intrinsic is constructed and returned.
+  //       sem::Intrinsic is constructed and returned.
   //       Job done.
   //
   // Overload resolution also supports basic pattern matching through the use of
@@ -915,11 +914,11 @@ Impl::Impl() {
   //       The Matcher::Match() is called for each closed type. If any return
   //       false then the overload match fails.
   //   (4) Overload::Match() now needs to build and return the output
-  //       semantic::Intrinsic holding the matched overload signature.
+  //       sem::Intrinsic holding the matched overload signature.
   //   (5) The parameter types are built by calling OpenTypeBuilder::Build().
   //       This simply returns the closed type.
   //   (6) OpenTypeBuilder::Build() is called again for the return_type, and the
-  //       semantic::Intrinsic is constructed and returned.
+  //       sem::Intrinsic is constructed and returned.
   //       Job done.
   //
   // Open-numbers are very similar to open-types, except they match against
@@ -1118,18 +1117,18 @@ Impl::Impl() {
   auto* sampler = this->sampler(type::SamplerKind::kSampler);
   auto* sampler_comparison =
       this->sampler(type::SamplerKind::kComparisonSampler);
-  auto t = semantic::Parameter::Usage::kTexture;
-  auto s = semantic::Parameter::Usage::kSampler;
-  auto coords = semantic::Parameter::Usage::kCoords;
-  auto array_index = semantic::Parameter::Usage::kArrayIndex;
-  auto ddx = semantic::Parameter::Usage::kDdx;
-  auto ddy = semantic::Parameter::Usage::kDdy;
-  auto depth_ref = semantic::Parameter::Usage::kDepthRef;
-  auto bias = semantic::Parameter::Usage::kBias;
-  auto level = semantic::Parameter::Usage::kLevel;
-  auto offset = semantic::Parameter::Usage::kOffset;
-  auto value = semantic::Parameter::Usage::kValue;
-  auto sample_index = semantic::Parameter::Usage::kSampleIndex;
+  auto t = sem::Parameter::Usage::kTexture;
+  auto s = sem::Parameter::Usage::kSampler;
+  auto coords = sem::Parameter::Usage::kCoords;
+  auto array_index = sem::Parameter::Usage::kArrayIndex;
+  auto ddx = sem::Parameter::Usage::kDdx;
+  auto ddy = sem::Parameter::Usage::kDdy;
+  auto depth_ref = sem::Parameter::Usage::kDepthRef;
+  auto bias = sem::Parameter::Usage::kBias;
+  auto level = sem::Parameter::Usage::kLevel;
+  auto offset = sem::Parameter::Usage::kOffset;
+  auto value = sem::Parameter::Usage::kValue;
+  auto sample_index = sem::Parameter::Usage::kSampleIndex;
 
   // clang-format off
 
@@ -1271,8 +1270,8 @@ std::string str(const Impl::Overload& overload) {
         ss << ", ";
       }
       first = false;
-      if (param.usage != semantic::Parameter::Usage::kNone) {
-        ss << semantic::str(param.usage) << " : ";
+      if (param.usage != sem::Parameter::Usage::kNone) {
+        ss << sem::str(param.usage) << " : ";
       }
       ss << param.matcher->str();
     }
@@ -1300,10 +1299,10 @@ std::string str(const Impl::Overload& overload) {
 /// @return a string representing a call to an intrinsic with the given argument
 /// types.
 std::string CallSignature(ProgramBuilder& builder,
-                          semantic::IntrinsicType type,
+                          sem::IntrinsicType type,
                           const std::vector<type::Type*>& args) {
   std::stringstream ss;
-  ss << semantic::str(type) << "(";
+  ss << sem::str(type) << "(";
   {
     bool first = true;
     for (auto* arg : args) {
@@ -1320,7 +1319,7 @@ std::string CallSignature(ProgramBuilder& builder,
 }
 
 IntrinsicTable::Result Impl::Lookup(ProgramBuilder& builder,
-                                    semantic::IntrinsicType type,
+                                    sem::IntrinsicType type,
                                     const std::vector<type::Type*>& args,
                                     const Source& source) const {
   diag::List diagnostics;
@@ -1369,11 +1368,11 @@ IntrinsicTable::Result Impl::Lookup(ProgramBuilder& builder,
   return Result{nullptr, std::move(diagnostics)};
 }
 
-semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
-                                           semantic::IntrinsicType intrinsic,
-                                           const std::vector<type::Type*>& args,
-                                           diag::List& diagnostics,
-                                           int& match_score) const {
+sem::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
+                                      sem::IntrinsicType intrinsic,
+                                      const std::vector<type::Type*>& args,
+                                      diag::List& diagnostics,
+                                      int& match_score) const {
   if (type != intrinsic) {
     match_score = std::numeric_limits<int>::min();
     return nullptr;  // Incorrect function
@@ -1463,15 +1462,15 @@ semantic::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
   }
 
   // Build the semantic parameters
-  semantic::ParameterList params;
+  sem::ParameterList params;
   params.reserve(parameters.size());
   for (size_t i = 0; i < args.size(); i++) {
     auto& parameter = parameters[i];
     auto* ty = parameter.matcher->Build(builder_state);
-    params.emplace_back(semantic::Parameter{ty, parameter.usage});
+    params.emplace_back(sem::Parameter{ty, parameter.usage});
   }
 
-  return builder.create<semantic::Intrinsic>(intrinsic, ret, params);
+  return builder.create<sem::Intrinsic>(intrinsic, ret, params);
 }
 
 }  // namespace

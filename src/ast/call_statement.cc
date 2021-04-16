@@ -40,7 +40,7 @@ CallStatement* CallStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<CallStatement>(src, call);
 }
 
-void CallStatement::to_str(const semantic::Info& sem,
+void CallStatement::to_str(const sem::Info& sem,
                            std::ostream& out,
                            size_t indent) const {
   call_->to_str(sem, out, indent);

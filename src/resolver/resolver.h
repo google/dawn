@@ -24,7 +24,7 @@
 #include "src/intrinsic_table.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
-#include "src/semantic/struct.h"
+#include "src/sem/struct.h"
 #include "src/utils/unique_vector.h"
 
 namespace tint {
@@ -45,10 +45,10 @@ class SwitchStatement;
 class UnaryOpExpression;
 class Variable;
 }  // namespace ast
-namespace semantic {
+namespace sem {
 class Array;
 class Statement;
-}  // namespace semantic
+}  // namespace sem
 namespace type {
 class Struct;
 }  // namespace type
@@ -94,7 +94,7 @@ class Resolver {
 
  private:
   /// Structure holding semantic information about a variable.
-  /// Used to build the semantic::Variable nodes at the end of resolving.
+  /// Used to build the sem::Variable nodes at the end of resolving.
   struct VariableInfo {
     VariableInfo(ast::Variable* decl, type::Type* type);
     ~VariableInfo();
@@ -106,7 +106,7 @@ class Resolver {
   };
 
   /// Structure holding semantic information about a function.
-  /// Used to build the semantic::Function nodes at the end of resolving.
+  /// Used to build the sem::Function nodes at the end of resolving.
   struct FunctionInfo {
     explicit FunctionInfo(ast::Function* decl);
     ~FunctionInfo();
@@ -122,32 +122,32 @@ class Resolver {
   };
 
   /// Structure holding semantic information about an expression.
-  /// Used to build the semantic::Expression nodes at the end of resolving.
+  /// Used to build the sem::Expression nodes at the end of resolving.
   struct ExpressionInfo {
     type::Type* type;
-    semantic::Statement* statement;
+    sem::Statement* statement;
   };
 
   /// Structure holding semantic information about a call expression to an
   /// ast::Function.
-  /// Used to build the semantic::Call nodes at the end of resolving.
+  /// Used to build the sem::Call nodes at the end of resolving.
   struct FunctionCallInfo {
     FunctionInfo* function;
-    semantic::Statement* statement;
+    sem::Statement* statement;
   };
 
   /// Structure holding semantic information about a struct.
-  /// Used to build the semantic::Struct nodes at the end of resolving.
+  /// Used to build the sem::Struct nodes at the end of resolving.
   struct StructInfo {
     StructInfo();
     ~StructInfo();
 
-    std::vector<const semantic::StructMember*> members;
+    std::vector<const sem::StructMember*> members;
     uint32_t align = 0;
     uint32_t size = 0;
     uint32_t size_no_padding = 0;
     std::unordered_set<ast::StorageClass> storage_class_usage;
-    std::unordered_set<semantic::PipelineStageUsage> pipeline_stage_uses;
+    std::unordered_set<sem::PipelineStageUsage> pipeline_stage_uses;
   };
 
   /// Structure holding semantic information about a block (i.e. scope), such as
@@ -188,7 +188,7 @@ class Resolver {
   /// @returns true on success, false on error
   bool ResolveInternal();
 
-  /// Creates the nodes and adds them to the semantic::Info mappings of the
+  /// Creates the nodes and adds them to the sem::Info mappings of the
   /// ProgramBuilder.
   void CreateSemanticNodes() const;
 
@@ -225,7 +225,7 @@ class Resolver {
   bool Function(ast::Function*);
   bool Identifier(ast::IdentifierExpression*);
   bool IfStatement(ast::IfStatement*);
-  bool IntrinsicCall(ast::CallExpression*, semantic::IntrinsicType);
+  bool IntrinsicCall(ast::CallExpression*, sem::IntrinsicType);
   bool MemberAccessor(ast::MemberAccessorExpression*);
   bool Statement(ast::Statement*);
   bool Statements(const ast::StatementList&);
@@ -253,7 +253,7 @@ class Resolver {
   /// returned.
   /// @param arr the Array to get semantic information for
   /// @param source the Source of the ast node with this array as its type
-  const semantic::Array* Array(type::Array* arr, const Source& source);
+  const sem::Array* Array(type::Array* arr, const Source& source);
 
   /// @returns the StructInfo for the structure `str`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
@@ -291,7 +291,7 @@ class Resolver {
   /// @param expr the expression
   type::Type* TypeOf(ast::Expression* expr);
 
-  /// Creates a semantic::Expression node with the resolved type `type`, and
+  /// Creates a sem::Expression node with the resolved type `type`, and
   /// assigns this semantic node to the expression `expr`.
   /// @param expr the expression
   /// @param type the resolved type
@@ -325,7 +325,7 @@ class Resolver {
   std::unordered_map<type::Struct*, StructInfo*> struct_info_;
   std::unordered_map<type::Type*, type::Type*> type_to_canonical_;
   FunctionInfo* current_function_ = nullptr;
-  semantic::Statement* current_statement_ = nullptr;
+  sem::Statement* current_statement_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
   BlockAllocator<StructInfo> struct_infos_;

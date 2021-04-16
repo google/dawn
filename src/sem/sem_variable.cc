@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/variable.h"
+#include "src/sem/variable.h"
 
 #include "src/ast/identifier_expression.h"
 #include "src/ast/variable.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::Variable);
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::VariableUser);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Variable);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::VariableUser);
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 Variable::Variable(const ast::Variable* declaration,
                    type::Type* type,
@@ -37,8 +37,8 @@ type::Type* Variable::DeclaredType() const {
 VariableUser::VariableUser(ast::IdentifierExpression* declaration,
                            type::Type* type,
                            Statement* statement,
-                           semantic::Variable* variable)
+                           sem::Variable* variable)
     : Base(declaration, type, statement), variable_(variable) {}
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint

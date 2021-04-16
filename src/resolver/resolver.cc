@@ -34,13 +34,13 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
-#include "src/semantic/array.h"
-#include "src/semantic/call.h"
-#include "src/semantic/function.h"
-#include "src/semantic/member_accessor_expression.h"
-#include "src/semantic/statement.h"
-#include "src/semantic/struct.h"
-#include "src/semantic/variable.h"
+#include "src/sem/array.h"
+#include "src/sem/call.h"
+#include "src/sem/function.h"
+#include "src/sem/member_accessor_expression.h"
+#include "src/sem/statement.h"
+#include "src/sem/struct.h"
+#include "src/sem/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/math.h"
@@ -49,7 +49,7 @@ namespace tint {
 namespace resolver {
 namespace {
 
-using IntrinsicType = tint::semantic::IntrinsicType;
+using IntrinsicType = tint::sem::IntrinsicType;
 
 // Helper class that temporarily assigns a value to a reference for the scope of
 // the object. Once the ScopedAssignment is destructed, the original value is
@@ -394,7 +394,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func) {
   // Persistent state is used to track which builtins and locations have already
   // been seen, in order to catch conflicts.
   // TODO(jrprice): This state could be stored in FunctionInfo instead, and then
-  // passed to semantic::Function since it would be useful there too.
+  // passed to sem::Function since it would be useful there too.
   std::unordered_set<ast::Builtin> builtins;
   std::unordered_set<uint32_t> locations;
   enum class ParamOrRetType {
@@ -594,15 +594,15 @@ bool Resolver::Function(ast::Function* func) {
       switch (func->pipeline_stage()) {
         case ast::PipelineStage::kVertex:
           info->pipeline_stage_uses.emplace(
-              semantic::PipelineStageUsage::kVertexInput);
+              sem::PipelineStageUsage::kVertexInput);
           break;
         case ast::PipelineStage::kFragment:
           info->pipeline_stage_uses.emplace(
-              semantic::PipelineStageUsage::kFragmentInput);
+              sem::PipelineStageUsage::kFragmentInput);
           break;
         case ast::PipelineStage::kCompute:
           info->pipeline_stage_uses.emplace(
-              semantic::PipelineStageUsage::kComputeInput);
+              sem::PipelineStageUsage::kComputeInput);
           break;
         case ast::PipelineStage::kNone:
           break;
@@ -626,15 +626,15 @@ bool Resolver::Function(ast::Function* func) {
     switch (func->pipeline_stage()) {
       case ast::PipelineStage::kVertex:
         info->pipeline_stage_uses.emplace(
-            semantic::PipelineStageUsage::kVertexOutput);
+            sem::PipelineStageUsage::kVertexOutput);
         break;
       case ast::PipelineStage::kFragment:
         info->pipeline_stage_uses.emplace(
-            semantic::PipelineStageUsage::kFragmentOutput);
+            sem::PipelineStageUsage::kFragmentOutput);
         break;
       case ast::PipelineStage::kCompute:
         info->pipeline_stage_uses.emplace(
-            semantic::PipelineStageUsage::kComputeOutput);
+            sem::PipelineStageUsage::kComputeOutput);
         break;
       case ast::PipelineStage::kNone:
         break;
@@ -677,10 +677,10 @@ bool Resolver::Statements(const ast::StatementList& stmts) {
 
 bool Resolver::Statement(ast::Statement* stmt) {
   auto* sem_statement =
-      builder_->create<semantic::Statement>(stmt, current_block_->block);
+      builder_->create<sem::Statement>(stmt, current_block_->block);
   builder_->Sem().Add(stmt, sem_statement);
 
-  ScopedAssignment<semantic::Statement*> sa(current_statement_, sem_statement);
+  ScopedAssignment<sem::Statement*> sa(current_statement_, sem_statement);
 
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return Assignment(a);
@@ -790,10 +790,9 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
     // not a BlockStatement.
     constexpr ast::BlockStatement* no_block_statement = nullptr;
     auto* sem_else_stmt =
-        builder_->create<semantic::Statement>(else_stmt, no_block_statement);
+        builder_->create<sem::Statement>(else_stmt, no_block_statement);
     builder_->Sem().Add(else_stmt, sem_else_stmt);
-    ScopedAssignment<semantic::Statement*> sa(current_statement_,
-                                              sem_else_stmt);
+    ScopedAssignment<sem::Statement*> sa(current_statement_, sem_else_stmt);
     if (!Expression(else_stmt->condition())) {
       return false;
     }
@@ -916,7 +915,7 @@ bool Resolver::Call(ast::CallExpression* call) {
 
   auto name = builder_->Symbols().NameFor(ident->symbol());
 
-  auto intrinsic_type = semantic::ParseIntrinsicType(name);
+  auto intrinsic_type = sem::ParseIntrinsicType(name);
   if (intrinsic_type != IntrinsicType::kNone) {
     if (!IntrinsicCall(call, intrinsic_type)) {
       return false;
@@ -970,7 +969,7 @@ bool Resolver::Call(ast::CallExpression* call) {
 }
 
 bool Resolver::IntrinsicCall(ast::CallExpression* call,
-                             semantic::IntrinsicType intrinsic_type) {
+                             sem::IntrinsicType intrinsic_type) {
   std::vector<type::Type*> arg_tys;
   arg_tys.reserve(call->params().size());
   for (auto* expr : call->params()) {
@@ -985,8 +984,8 @@ bool Resolver::IntrinsicCall(ast::CallExpression* call,
     return false;
   }
 
-  builder_->Sem().Add(call, builder_->create<semantic::Call>(
-                                call, result.intrinsic, current_statement_));
+  builder_->Sem().Add(call, builder_->create<sem::Call>(call, result.intrinsic,
+                                                        current_statement_));
   SetType(call, result.intrinsic->ReturnType());
   return true;
 }
@@ -1186,7 +1185,7 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
   }
 
   std::string name = builder_->Symbols().NameFor(symbol);
-  if (semantic::ParseIntrinsicType(name) != IntrinsicType::kNone) {
+  if (sem::ParseIntrinsicType(name) != IntrinsicType::kNone) {
     diagnostics_.add_error("missing '(' for intrinsic call",
                            expr->source().End());
     return false;
@@ -1213,7 +1212,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     auto* str = Structure(ty);
     auto symbol = expr->member()->symbol();
 
-    const semantic::StructMember* member = nullptr;
+    const sem::StructMember* member = nullptr;
     for (auto* m : str->members) {
       if (m->Declaration()->symbol() == symbol) {
         ret = m->Declaration()->type();
@@ -1234,7 +1233,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
       ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
     }
 
-    builder_->Sem().Add(expr, builder_->create<semantic::StructMemberAccess>(
+    builder_->Sem().Add(expr, builder_->create<sem::StructMemberAccess>(
                                   expr, ret, current_statement_, member));
   } else if (auto* vec = data_type->As<type::Vector>()) {
     std::string str = builder_->Symbols().NameFor(expr->member()->symbol());
@@ -1302,8 +1301,8 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
                                            static_cast<uint32_t>(size));
     }
     builder_->Sem().Add(
-        expr, builder_->create<semantic::Swizzle>(expr, ret, current_statement_,
-                                                  std::move(swizzle)));
+        expr, builder_->create<sem::Swizzle>(expr, ret, current_statement_,
+                                             std::move(swizzle)));
   } else {
     diagnostics_.add_error(
         "invalid use of member accessor on a non-vector/non-struct " +
@@ -1682,9 +1681,9 @@ void Resolver::CreateSemanticNodes() const {
   for (auto it : variable_to_info_) {
     auto* var = it.first;
     auto* info = it.second;
-    auto* sem_var = builder_->create<semantic::Variable>(var, info->type,
-                                                         info->storage_class);
-    std::vector<const semantic::VariableUser*> users;
+    auto* sem_var =
+        builder_->create<sem::Variable>(var, info->type, info->storage_class);
+    std::vector<const sem::VariableUser*> users;
     for (auto* user : info->users) {
       // Create semantic node for the identifier expression if necessary
       auto* sem_expr = sem.Get(user);
@@ -1692,14 +1691,14 @@ void Resolver::CreateSemanticNodes() const {
         auto* type = expr_info_.at(user).type;
         auto* stmt = expr_info_.at(user).statement;
         auto* sem_user =
-            builder_->create<semantic::VariableUser>(user, type, stmt, sem_var);
+            builder_->create<sem::VariableUser>(user, type, stmt, sem_var);
         sem_var->AddUser(sem_user);
         sem.Add(user, sem_user);
       } else {
-        auto* sem_user = sem_expr->As<semantic::VariableUser>();
+        auto* sem_user = sem_expr->As<sem::VariableUser>();
         if (!sem_user) {
           TINT_ICE(builder_->Diagnostics())
-              << "expected semantic::VariableUser, got "
+              << "expected sem::VariableUser, got "
               << sem_expr->TypeInfo().name;
         }
         sem_var->AddUser(sem_user);
@@ -1709,7 +1708,7 @@ void Resolver::CreateSemanticNodes() const {
   }
 
   auto remap_vars = [&sem](const std::vector<VariableInfo*>& in) {
-    std::vector<const semantic::Variable*> out;
+    std::vector<const sem::Variable*> out;
     out.reserve(in.size());
     for (auto* info : in) {
       out.emplace_back(sem.Get(info->declaration));
@@ -1718,12 +1717,12 @@ void Resolver::CreateSemanticNodes() const {
   };
 
   // Create semantic nodes for all ast::Functions
-  std::unordered_map<FunctionInfo*, semantic::Function*> func_info_to_sem_func;
+  std::unordered_map<FunctionInfo*, sem::Function*> func_info_to_sem_func;
   for (auto it : function_to_info_) {
     auto* func = it.first;
     auto* info = it.second;
 
-    auto* sem_func = builder_->create<semantic::Function>(
+    auto* sem_func = builder_->create<sem::Function>(
         info->declaration, remap_vars(info->parameters),
         remap_vars(info->referenced_module_vars),
         remap_vars(info->local_referenced_module_vars), info->return_statements,
@@ -1737,8 +1736,7 @@ void Resolver::CreateSemanticNodes() const {
     auto* call = it.first;
     auto info = it.second;
     auto* sem_func = func_info_to_sem_func.at(info.function);
-    sem.Add(call,
-            builder_->create<semantic::Call>(call, sem_func, info.statement));
+    sem.Add(call, builder_->create<sem::Call>(call, sem_func, info.statement));
   }
 
   // Create semantic nodes for all remaining expression types
@@ -1749,8 +1747,8 @@ void Resolver::CreateSemanticNodes() const {
       // Expression has already been assigned a semantic node
       continue;
     }
-    sem.Add(expr, builder_->create<semantic::Expression>(expr, info.type,
-                                                         info.statement));
+    sem.Add(expr,
+            builder_->create<sem::Expression>(expr, info.type, info.statement));
   }
 
   // Create semantic nodes for all structs
@@ -1758,7 +1756,7 @@ void Resolver::CreateSemanticNodes() const {
     auto* str = it.first;
     auto* info = it.second;
     builder_->Sem().Add(
-        str, builder_->create<semantic::Struct>(
+        str, builder_->create<sem::Struct>(
                  str, std::move(info->members), info->align, info->size,
                  info->size_no_padding, info->storage_class_usage,
                  info->pipeline_stage_uses));
@@ -1829,7 +1827,7 @@ bool Resolver::DefaultAlignAndSize(type::Type* ty,
   return false;
 }
 
-const semantic::Array* Resolver::Array(type::Array* arr, const Source& source) {
+const sem::Array* Resolver::Array(type::Array* arr, const Source& source) {
   if (auto* sem = builder_->Sem().Get(arr)) {
     // Semantic info already constructed for this array type
     return sem;
@@ -1851,12 +1849,12 @@ const semantic::Array* Resolver::Array(type::Array* arr, const Source& source) {
     return nullptr;
   }
 
-  auto create_semantic = [&](uint32_t stride) -> semantic::Array* {
+  auto create_semantic = [&](uint32_t stride) -> sem::Array* {
     auto align = el_align;
     // WebGPU requires runtime arrays have at least one element, but the AST
     // records an element count of 0 for it.
     auto size = std::max<uint32_t>(arr->size(), 1) * stride;
-    auto* sem = builder_->create<semantic::Array>(arr, align, size, stride);
+    auto* sem = builder_->create<sem::Array>(arr, align, size, stride);
     builder_->Sem().Add(arr, sem);
     return sem;
   };
@@ -1956,7 +1954,7 @@ Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
     return nullptr;
   }
 
-  semantic::StructMemberList sem_members;
+  sem::StructMemberList sem_members;
   sem_members.reserve(str->impl()->members().size());
 
   // Calculate the effective size and alignment of each field, and the overall
@@ -2036,7 +2034,7 @@ Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
     offset = utils::RoundUp(align, offset);
 
     auto* sem_member =
-        builder_->create<semantic::StructMember>(member, offset, align, size);
+        builder_->create<sem::StructMember>(member, offset, align, size);
     builder_->Sem().Add(member, sem_member);
     sem_members.emplace_back(sem_member);
 

@@ -20,10 +20,10 @@
 
 #include "src/ast/struct_block_decoration.h"
 #include "src/program_builder.h"
-#include "src/semantic/function.h"
-#include "src/semantic/member_accessor_expression.h"
-#include "src/semantic/struct.h"
-#include "src/semantic/variable.h"
+#include "src/sem/function.h"
+#include "src/sem/member_accessor_expression.h"
+#include "src/sem/struct.h"
+#include "src/sem/variable.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::BindingPoint);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::FirstIndexOffset::Data);
@@ -73,9 +73,8 @@ Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {
   CloneContext ctx(&out, in);
 
   // Map of builtin usages
-  std::unordered_map<const semantic::Variable*, const char*> builtin_vars;
-  std::unordered_map<const semantic::StructMember*, const char*>
-      builtin_members;
+  std::unordered_map<const sem::Variable*, const char*> builtin_vars;
+  std::unordered_map<const sem::StructMember*, const char*> builtin_members;
 
   bool has_vertex_index = false;
   bool has_instance_index = false;
@@ -153,14 +152,14 @@ Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {
     // Fix up all references to the builtins with the offsets
     ctx.ReplaceAll([=, &ctx](ast::Expression* expr) -> ast::Expression* {
       auto* sem = ctx.src->Sem().Get(expr);
-      if (auto* user = sem->As<semantic::VariableUser>()) {
+      if (auto* user = sem->As<sem::VariableUser>()) {
         auto it = builtin_vars.find(user->Variable());
         if (it != builtin_vars.end()) {
           return ctx.dst->Add(ctx.CloneWithoutTransform(expr),
                               ctx.dst->MemberAccessor(buffer_name, it->second));
         }
       }
-      if (auto* access = sem->As<semantic::StructMemberAccess>()) {
+      if (auto* access = sem->As<sem::StructMemberAccess>()) {
         auto it = builtin_members.find(access->Member());
         if (it != builtin_members.end()) {
           return ctx.dst->Add(ctx.CloneWithoutTransform(expr),

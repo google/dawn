@@ -21,12 +21,12 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/fallthrough_statement.h"
-#include "src/semantic/array.h"
-#include "src/semantic/call.h"
-#include "src/semantic/function.h"
-#include "src/semantic/intrinsic.h"
-#include "src/semantic/struct.h"
-#include "src/semantic/variable.h"
+#include "src/sem/array.h"
+#include "src/sem/call.h"
+#include "src/sem/function.h"
+#include "src/sem/intrinsic.h"
+#include "src/sem/struct.h"
+#include "src/sem/variable.h"
 #include "src/type/depth_texture_type.h"
 #include "src/type/multisampled_texture_type.h"
 #include "src/type/sampled_texture_type.h"
@@ -37,7 +37,7 @@ namespace writer {
 namespace spirv {
 namespace {
 
-using IntrinsicType = semantic::IntrinsicType;
+using IntrinsicType = sem::IntrinsicType;
 
 const char kGLSLstd450[] = "GLSL.std.450";
 
@@ -118,7 +118,7 @@ type::Matrix* GetNestedMatrixType(type::Type* type) {
   return type->As<type::Matrix>();
 }
 
-uint32_t intrinsic_to_glsl_method(const semantic::Intrinsic* intrinsic) {
+uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
   switch (intrinsic->Type()) {
     case IntrinsicType::kAbs:
       if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
@@ -1879,7 +1879,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
 
   auto* call = builder_.Sem().Get(expr);
   auto* target = call->Target();
-  if (auto* intrinsic = target->As<semantic::Intrinsic>()) {
+  if (auto* intrinsic = target->As<sem::Intrinsic>()) {
     return GenerateIntrinsic(expr, intrinsic);
   }
 
@@ -1918,7 +1918,7 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
 }
 
 uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
-                                    const semantic::Intrinsic* intrinsic) {
+                                    const sem::Intrinsic* intrinsic) {
   auto result = result_op();
   auto result_id = result.to_i();
 
@@ -2091,10 +2091,10 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
 }
 
 bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
-                                       const semantic::Intrinsic* intrinsic,
+                                       const sem::Intrinsic* intrinsic,
                                        Operand result_type,
                                        Operand result_id) {
-  using Usage = semantic::Parameter::Usage;
+  using Usage = sem::Parameter::Usage;
 
   auto parameters = intrinsic->Parameters();
   auto arguments = call->params();
@@ -2112,7 +2112,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
 
   // Returns the argument with the given usage
   auto arg = [&](Usage usage) {
-    int idx = semantic::IndexOf(parameters, usage);
+    int idx = sem::IndexOf(parameters, usage);
     return (idx >= 0) ? arguments[idx] : nullptr;
   };
 
@@ -2491,8 +2491,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
   return post_emission();
 }
 
-bool Builder::GenerateControlBarrierIntrinsic(
-    const semantic::Intrinsic* intrinsic) {
+bool Builder::GenerateControlBarrierIntrinsic(const sem::Intrinsic* intrinsic) {
   auto const op = spv::Op::OpControlBarrier;
   uint32_t execution = 0;
   uint32_t memory = 0;
@@ -2500,13 +2499,13 @@ bool Builder::GenerateControlBarrierIntrinsic(
 
   // TODO(crbug.com/tint/661): Combine sequential barriers to a single
   // instruction.
-  if (intrinsic->Type() == semantic::IntrinsicType::kWorkgroupBarrier) {
+  if (intrinsic->Type() == sem::IntrinsicType::kWorkgroupBarrier) {
     execution = static_cast<uint32_t>(spv::Scope::Workgroup);
     memory = static_cast<uint32_t>(spv::Scope::Workgroup);
     semantics =
         static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease) |
         static_cast<uint32_t>(spv::MemorySemanticsMask::WorkgroupMemory);
-  } else if (intrinsic->Type() == semantic::IntrinsicType::kStorageBarrier) {
+  } else if (intrinsic->Type() == sem::IntrinsicType::kStorageBarrier) {
     execution = static_cast<uint32_t>(spv::Scope::Workgroup);
     memory = static_cast<uint32_t>(spv::Scope::Device);
     semantics =
@@ -2514,7 +2513,7 @@ bool Builder::GenerateControlBarrierIntrinsic(
         static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
   } else {
     error_ = "unexpected barrier intrinsic type ";
-    error_ += semantic::str(intrinsic->Type());
+    error_ += sem::str(intrinsic->Type());
     return false;
   }
 

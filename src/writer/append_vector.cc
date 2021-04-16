@@ -16,7 +16,7 @@
 
 #include <utility>
 
-#include "src/semantic/expression.h"
+#include "src/sem/expression.h"
 
 namespace tint {
 namespace writer {
@@ -64,7 +64,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   if (packed_el_ty != b->Sem().Get(scalar)->Type()->UnwrapPtrIfNeeded()) {
     // Cast scalar to the vector element type
     auto* scalar_cast = b->Construct(packed_el_ty, scalar);
-    b->Sem().Add(scalar_cast, b->create<semantic::Expression>(
+    b->Sem().Add(scalar_cast, b->create<sem::Expression>(
                                   scalar_cast, packed_el_ty, statement));
     packed.emplace_back(scalar_cast);
   } else {
@@ -72,8 +72,8 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   }
 
   auto* constructor = b->Construct(packed_ty, std::move(packed));
-  b->Sem().Add(constructor, b->create<semantic::Expression>(
-                                constructor, packed_ty, statement));
+  b->Sem().Add(constructor,
+               b->create<sem::Expression>(constructor, packed_ty, statement));
 
   return constructor;
 }

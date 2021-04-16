@@ -19,7 +19,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/debug.h"
 #include "src/demangler.h"
-#include "src/semantic/expression.h"
+#include "src/sem/expression.h"
 
 namespace tint {
 
@@ -59,7 +59,7 @@ ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
   builder.types_ = type::Manager::Wrap(program->Types());
   builder.ast_ = builder.create<ast::Module>(
       program->AST().source(), program->AST().GlobalDeclarations());
-  builder.sem_ = semantic::Info::Wrap(program->Sem());
+  builder.sem_ = sem::Info::Wrap(program->Sem());
   builder.symbols_ = program->Symbols();
   builder.diagnostics_ = program->Diagnostics();
   return builder;

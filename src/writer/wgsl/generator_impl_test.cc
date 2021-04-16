@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/variable.h"
+#include "src/sem/variable.h"
 #include "src/writer/wgsl/test_helper.h"
 
 namespace tint {

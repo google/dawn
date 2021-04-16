@@ -12,19 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/expression.h"
+#include <algorithm>
 
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::Expression);
+#include "src/ast/block_statement.h"
+#include "src/debug.h"
+#include "src/sem/statement.h"
+
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Statement);
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
-Expression::Expression(ast::Expression* declaration,
-                       type::Type* type,
-                       Statement* statement)
-    : declaration_(declaration),
-      type_(type->UnwrapIfNeeded()),
-      statement_(statement) {}
+Statement::Statement(const ast::Statement* declaration,
+                     const ast::BlockStatement* block)
+    : declaration_(declaration), block_(block) {
+#ifndef NDEBUG
+  if (block) {
+    auto& stmts = block->statements();
+    TINT_ASSERT(std::find(stmts.begin(), stmts.end(), declaration) !=
+                stmts.end());
+  }
+#endif  //  NDEBUG
+}
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint

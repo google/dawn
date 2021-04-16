@@ -28,7 +28,7 @@ BindingDecoration::BindingDecoration(ProgramID program_id,
 
 BindingDecoration::~BindingDecoration() = default;
 
-void BindingDecoration::to_str(const semantic::Info&,
+void BindingDecoration::to_str(const sem::Info&,
                                std::ostream& out,
                                size_t indent) const {
   make_indent(out, indent);

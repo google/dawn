@@ -42,7 +42,7 @@ BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BlockStatement>(src, stmts);
 }
 
-void BlockStatement::to_str(const semantic::Info& sem,
+void BlockStatement::to_str(const sem::Info& sem,
                             std::ostream& out,
                             size_t indent) const {
   make_indent(out, indent);

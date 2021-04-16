@@ -60,7 +60,7 @@ class LoopStatement : public Castable<LoopStatement, Statement> {
   /// @param sem the semantic info for the program
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
-  void to_str(const semantic::Info& sem,
+  void to_str(const sem::Info& sem,
               std::ostream& out,
               size_t indent) const override;
 

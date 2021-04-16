@@ -28,7 +28,7 @@ ConstantIdDecoration::ConstantIdDecoration(ProgramID program_id,
 
 ConstantIdDecoration::~ConstantIdDecoration() = default;
 
-void ConstantIdDecoration::to_str(const semantic::Info&,
+void ConstantIdDecoration::to_str(const sem::Info&,
                                   std::ostream& out,
                                   size_t indent) const {
   make_indent(out, indent);

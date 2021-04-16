@@ -188,26 +188,26 @@ set(TINT_LIB_SRCS
   resolver/resolver.cc
   resolver/resolver.h
   scope_stack.h
-  semantic/array.h
-  semantic/call.h
-  semantic/call_target.h
-  semantic/expression.h
-  semantic/info.h
-  semantic/intrinsic.h
-  semantic/node.h
-  semantic/sem_array.cc
-  semantic/sem_call.cc
-  semantic/sem_call_target.cc
-  semantic/sem_expression.cc
-  semantic/sem_member_accessor_expression.cc
-  semantic/sem_function.cc
-  semantic/sem_info.cc
-  semantic/sem_intrinsic.cc
-  semantic/sem_node.cc
-  semantic/sem_statement.cc
-  semantic/sem_struct.cc
-  semantic/sem_variable.cc
-  semantic/type_mappings.h
+  sem/array.h
+  sem/call.h
+  sem/call_target.h
+  sem/expression.h
+  sem/info.h
+  sem/intrinsic.h
+  sem/node.h
+  sem/sem_array.cc
+  sem/sem_call.cc
+  sem/sem_call_target.cc
+  sem/sem_expression.cc
+  sem/sem_member_accessor_expression.cc
+  sem/sem_function.cc
+  sem/sem_info.cc
+  sem/sem_intrinsic.cc
+  sem/sem_node.cc
+  sem/sem_statement.cc
+  sem/sem_struct.cc
+  sem/sem_variable.cc
+  sem/type_mappings.h
   source.cc
   source.h
   symbol.cc
@@ -496,7 +496,7 @@ if(${TINT_BUILD_TESTS})
     resolver/type_validation_test.cc
     resolver/validation_test.cc
     scope_stack_test.cc
-    semantic/sem_intrinsic_test.cc
+    sem/sem_intrinsic_test.cc
     symbol_table_test.cc
     symbol_test.cc
     traits_test.cc

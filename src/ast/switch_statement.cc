@@ -46,7 +46,7 @@ SwitchStatement* SwitchStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<SwitchStatement>(src, cond, b);
 }
 
-void SwitchStatement::to_str(const semantic::Info& sem,
+void SwitchStatement::to_str(const sem::Info& sem,
                              std::ostream& out,
                              size_t indent) const {
   make_indent(out, indent);

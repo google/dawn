@@ -29,7 +29,7 @@ BoolLiteral::BoolLiteral(ProgramID program_id,
 
 BoolLiteral::~BoolLiteral() = default;
 
-std::string BoolLiteral::to_str(const semantic::Info&) const {
+std::string BoolLiteral::to_str(const sem::Info&) const {
   return value_ ? "true" : "false";
 }
 

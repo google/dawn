@@ -46,7 +46,7 @@ BinaryExpression* BinaryExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BinaryExpression>(src, op_, l, r);
 }
 
-void BinaryExpression::to_str(const semantic::Info& sem,
+void BinaryExpression::to_str(const sem::Info& sem,
                               std::ostream& out,
                               size_t indent) const {
   make_indent(out, indent);

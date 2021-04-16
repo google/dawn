@@ -46,7 +46,7 @@ MemberAccessorExpression* MemberAccessorExpression::Clone(
   return ctx->dst->create<MemberAccessorExpression>(src, str, mem);
 }
 
-void MemberAccessorExpression::to_str(const semantic::Info& sem,
+void MemberAccessorExpression::to_str(const sem::Info& sem,
                                       std::ostream& out,
                                       size_t indent) const {
   make_indent(out, indent);

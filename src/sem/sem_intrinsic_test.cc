@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/semantic/intrinsic.h"
+#include "src/sem/intrinsic.h"
 
 #include "gtest/gtest.h"
 
 namespace tint {
-namespace semantic {
+namespace sem {
 namespace {
 
 struct IntrinsicData {
@@ -126,5 +126,5 @@ TEST_F(IntrinsicTypeTest, ParseNoMatch) {
 }
 
 }  // namespace
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint

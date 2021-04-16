@@ -39,7 +39,7 @@ struct Node : public Castable<Node, ast::Node> {
     return out;
   }
 
-  void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
+  void to_str(const sem::Info&, std::ostream&, size_t) const override {}
 };
 
 struct Replaceable : public Castable<Replaceable, Node> {
@@ -59,7 +59,7 @@ struct NotANode : public Castable<NotANode, ast::Node> {
     return ctx->dst->create<NotANode>();
   }
 
-  void to_str(const semantic::Info&, std::ostream&, size_t) const override {}
+  void to_str(const sem::Info&, std::ostream&, size_t) const override {}
 };
 
 TEST(CloneContext, Clone) {

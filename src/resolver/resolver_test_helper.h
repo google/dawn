@@ -21,9 +21,9 @@
 #include "gtest/gtest.h"
 #include "src/program_builder.h"
 #include "src/resolver/resolver.h"
-#include "src/semantic/expression.h"
-#include "src/semantic/statement.h"
-#include "src/semantic/variable.h"
+#include "src/sem/expression.h"
+#include "src/sem/statement.h"
+#include "src/sem/variable.h"
 
 namespace tint {
 namespace resolver {
@@ -69,12 +69,11 @@ class TestHelper : public ProgramBuilder {
 
   /// Returns the semantic variable for the given identifier expression.
   /// @param expr the identifier expression
-  /// @return the resolved semantic::Variable of the identifier, or nullptr if
+  /// @return the resolved sem::Variable of the identifier, or nullptr if
   /// the expression did not resolve to a variable.
-  const semantic::Variable* VarOf(ast::Expression* expr) {
+  const sem::Variable* VarOf(ast::Expression* expr) {
     auto* sem_ident = Sem().Get(expr);
-    auto* var_user =
-        sem_ident ? sem_ident->As<semantic::VariableUser>() : nullptr;
+    auto* var_user = sem_ident ? sem_ident->As<sem::VariableUser>() : nullptr;
     return var_user ? var_user->Variable() : nullptr;
   }
 

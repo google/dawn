@@ -13,13 +13,13 @@
 // limitations under the License.
 
 #include "src/ast/struct_member.h"
-#include "src/semantic/struct.h"
+#include "src/sem/struct.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::Struct);
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::StructMember);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 Struct::Struct(type::Struct* type,
                StructMemberList members,
@@ -55,5 +55,5 @@ StructMember::StructMember(ast::StructMember* declaration,
 
 StructMember::~StructMember() = default;
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint

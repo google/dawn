@@ -28,7 +28,7 @@ LocationDecoration::LocationDecoration(ProgramID program_id,
 
 LocationDecoration::~LocationDecoration() = default;
 
-void LocationDecoration::to_str(const semantic::Info&,
+void LocationDecoration::to_str(const sem::Info&,
                                 std::ostream& out,
                                 size_t indent) const {
   make_indent(out, indent);

@@ -41,10 +41,10 @@
 namespace tint {
 
 // Forward declarations
-namespace semantic {
+namespace sem {
 class Call;
 class Intrinsic;
-}  // namespace semantic
+}  // namespace sem
 
 namespace writer {
 namespace msl {
@@ -106,7 +106,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param intrinsic the semantic information for the texture intrinsic
   /// @returns true if the call expression is emitted
   bool EmitTextureCall(ast::CallExpression* expr,
-                       const semantic::Intrinsic* intrinsic);
+                       const sem::Intrinsic* intrinsic);
   /// Handles a case statement
   /// @param stmt the statement
   /// @returns true if the statement was emitted successfully
@@ -219,7 +219,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param var the variable to generate
   /// @param skip_constructor set true if the constructor should be skipped
   /// @returns true if the variable was emitted
-  bool EmitVariable(const semantic::Variable* var, bool skip_constructor);
+  bool EmitVariable(const sem::Variable* var, bool skip_constructor);
   /// Handles generating a program scope constant variable
   /// @param var the variable to emit
   /// @returns true if the variable was emitted
@@ -245,12 +245,12 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a builtin name
   /// @param intrinsic the semantic info for the intrinsic
   /// @returns the name or "" if not valid
-  std::string generate_builtin_name(const semantic::Intrinsic* intrinsic);
+  std::string generate_builtin_name(const sem::Intrinsic* intrinsic);
 
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check
   /// @returns true if the global is in an input or output struct
-  bool global_is_in_struct(const semantic::Variable* var) const;
+  bool global_is_in_struct(const sem::Variable* var) const;
 
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
@@ -283,7 +283,7 @@ class GeneratorImpl : public TextGenerator {
   /// type.
   SizeAndAlign MslPackedTypeSizeAndAlign(type::Type* ty);
 
-  ScopeStack<const semantic::Variable*> global_variables_;
+  ScopeStack<const sem::Variable*> global_variables_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   const Program* program_ = nullptr;

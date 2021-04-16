@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_ARRAY_H_
-#define SRC_SEMANTIC_ARRAY_H_
+#ifndef SRC_SEM_ARRAY_H_
+#define SRC_SEM_ARRAY_H_
 
 #include <stdint.h>
 
-#include "src/semantic/node.h"
+#include "src/sem/node.h"
 
 namespace tint {
 
@@ -26,7 +26,7 @@ namespace type {
 class Array;
 }  // namespace type
 
-namespace semantic {
+namespace sem {
 
 /// Array holds the semantic information for Array nodes.
 class Array : public Castable<Array, Node> {
@@ -63,7 +63,7 @@ class Array : public Castable<Array, Node> {
   uint32_t const stride_;
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_ARRAY_H_
+#endif  // SRC_SEM_ARRAY_H_

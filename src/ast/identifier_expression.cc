@@ -40,7 +40,7 @@ IdentifierExpression* IdentifierExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<IdentifierExpression>(src, sym);
 }
 
-void IdentifierExpression::to_str(const semantic::Info& sem,
+void IdentifierExpression::to_str(const sem::Info& sem,
                                   std::ostream& out,
                                   size_t indent) const {
   make_indent(out, indent);

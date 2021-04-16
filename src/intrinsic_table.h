@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "src/semantic/intrinsic.h"
+#include "src/sem/intrinsic.h"
 
 namespace tint {
 
@@ -38,7 +38,7 @@ class IntrinsicTable {
   /// Result is returned by Lookup
   struct Result {
     /// The intrinsic, if the lookup succeeded, otherwise nullptr
-    semantic::Intrinsic* intrinsic;
+    sem::Intrinsic* intrinsic;
     /// Diagnostic messages
     diag::List diagnostics;
   };
@@ -50,7 +50,7 @@ class IntrinsicTable {
   /// @param source the source of the intrinsic call
   /// @return the semantic intrinsic if found, otherwise nullptr
   virtual Result Lookup(ProgramBuilder& builder,
-                        semantic::IntrinsicType type,
+                        sem::IntrinsicType type,
                         const std::vector<type::Type*>& args,
                         const Source& source) const = 0;
 };

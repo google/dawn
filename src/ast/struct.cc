@@ -64,7 +64,7 @@ Struct* Struct::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Struct>(src, mem, decos);
 }
 
-void Struct::to_str(const semantic::Info& sem,
+void Struct::to_str(const sem::Info& sem,
                     std::ostream& out,
                     size_t indent) const {
   out << "Struct{" << std::endl;

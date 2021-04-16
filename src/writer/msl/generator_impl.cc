@@ -28,12 +28,12 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/semantic/array.h"
-#include "src/semantic/call.h"
-#include "src/semantic/function.h"
-#include "src/semantic/member_accessor_expression.h"
-#include "src/semantic/struct.h"
-#include "src/semantic/variable.h"
+#include "src/sem/array.h"
+#include "src/sem/call.h"
+#include "src/sem/function.h"
+#include "src/sem/member_accessor_expression.h"
+#include "src/sem/struct.h"
+#include "src/sem/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
@@ -321,14 +321,14 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
   }
 
   auto* call = program_->Sem().Get(expr);
-  if (auto* intrinsic = call->Target()->As<semantic::Intrinsic>()) {
+  if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
     if (intrinsic->IsTexture()) {
       return EmitTextureCall(expr, intrinsic);
     }
-    if (intrinsic->Type() == semantic::IntrinsicType::kPack2x16Float ||
-        intrinsic->Type() == semantic::IntrinsicType::kUnpack2x16Float) {
+    if (intrinsic->Type() == sem::IntrinsicType::kPack2x16Float ||
+        intrinsic->Type() == sem::IntrinsicType::kUnpack2x16Float) {
       make_indent();
-      if (intrinsic->Type() == semantic::IntrinsicType::kPack2x16Float) {
+      if (intrinsic->Type() == sem::IntrinsicType::kPack2x16Float) {
         out_ << "as_type<uint>(half2(";
       } else {
         out_ << "float2(as_type<half2>(";
@@ -341,12 +341,12 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     }
     // TODO(crbug.com/tint/661): Combine sequential barriers to a single
     // instruction.
-    if (intrinsic->Type() == semantic::IntrinsicType::kStorageBarrier) {
+    if (intrinsic->Type() == sem::IntrinsicType::kStorageBarrier) {
       make_indent();
       out_ << "threadgroup_barrier(mem_flags::mem_device)";
       return true;
     }
-    if (intrinsic->Type() == semantic::IntrinsicType::kWorkgroupBarrier) {
+    if (intrinsic->Type() == sem::IntrinsicType::kWorkgroupBarrier) {
       make_indent();
       out_ << "threadgroup_barrier(mem_flags::mem_threadgroup)";
       return true;
@@ -461,15 +461,15 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 }
 
 bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
-                                    const semantic::Intrinsic* intrinsic) {
-  using Usage = semantic::Parameter::Usage;
+                                    const sem::Intrinsic* intrinsic) {
+  using Usage = sem::Parameter::Usage;
 
   auto parameters = intrinsic->Parameters();
   auto arguments = expr->params();
 
   // Returns the argument with the given usage
   auto arg = [&](Usage usage) {
-    int idx = semantic::IndexOf(parameters, usage);
+    int idx = sem::IndexOf(parameters, usage);
     return (idx >= 0) ? arguments[idx] : nullptr;
   };
 
@@ -482,7 +482,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
   auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
 
   switch (intrinsic->Type()) {
-    case semantic::IntrinsicType::kTextureDimensions: {
+    case sem::IntrinsicType::kTextureDimensions: {
       std::vector<const char*> dims;
       switch (texture_type->dim()) {
         case type::TextureDimension::kNone:
@@ -537,7 +537,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       }
       return true;
     }
-    case semantic::IntrinsicType::kTextureNumLayers: {
+    case sem::IntrinsicType::kTextureNumLayers: {
       out_ << "int(";
       if (!EmitExpression(texture)) {
         return false;
@@ -545,7 +545,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       out_ << ".get_array_size())";
       return true;
     }
-    case semantic::IntrinsicType::kTextureNumLevels: {
+    case sem::IntrinsicType::kTextureNumLevels: {
       out_ << "int(";
       if (!EmitExpression(texture)) {
         return false;
@@ -553,7 +553,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
       out_ << ".get_num_mip_levels())";
       return true;
     }
-    case semantic::IntrinsicType::kTextureNumSamples: {
+    case sem::IntrinsicType::kTextureNumSamples: {
       out_ << "int(";
       if (!EmitExpression(texture)) {
         return false;
@@ -571,20 +571,20 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
   bool lod_param_is_named = true;
 
   switch (intrinsic->Type()) {
-    case semantic::IntrinsicType::kTextureSample:
-    case semantic::IntrinsicType::kTextureSampleBias:
-    case semantic::IntrinsicType::kTextureSampleLevel:
-    case semantic::IntrinsicType::kTextureSampleGrad:
+    case sem::IntrinsicType::kTextureSample:
+    case sem::IntrinsicType::kTextureSampleBias:
+    case sem::IntrinsicType::kTextureSampleLevel:
+    case sem::IntrinsicType::kTextureSampleGrad:
       out_ << ".sample(";
       break;
-    case semantic::IntrinsicType::kTextureSampleCompare:
+    case sem::IntrinsicType::kTextureSampleCompare:
       out_ << ".sample_compare(";
       break;
-    case semantic::IntrinsicType::kTextureLoad:
+    case sem::IntrinsicType::kTextureLoad:
       out_ << ".read(";
       lod_param_is_named = false;
       break;
-    case semantic::IntrinsicType::kTextureStore:
+    case sem::IntrinsicType::kTextureStore:
       out_ << ".write(";
       break;
     default:
@@ -678,135 +678,135 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
 }
 
 std::string GeneratorImpl::generate_builtin_name(
-    const semantic::Intrinsic* intrinsic) {
+    const sem::Intrinsic* intrinsic) {
   std::string out = "";
   switch (intrinsic->Type()) {
-    case semantic::IntrinsicType::kAcos:
-    case semantic::IntrinsicType::kAll:
-    case semantic::IntrinsicType::kAny:
-    case semantic::IntrinsicType::kAsin:
-    case semantic::IntrinsicType::kAtan:
-    case semantic::IntrinsicType::kAtan2:
-    case semantic::IntrinsicType::kCeil:
-    case semantic::IntrinsicType::kCos:
-    case semantic::IntrinsicType::kCosh:
-    case semantic::IntrinsicType::kCross:
-    case semantic::IntrinsicType::kDeterminant:
-    case semantic::IntrinsicType::kDistance:
-    case semantic::IntrinsicType::kDot:
-    case semantic::IntrinsicType::kExp:
-    case semantic::IntrinsicType::kExp2:
-    case semantic::IntrinsicType::kFloor:
-    case semantic::IntrinsicType::kFma:
-    case semantic::IntrinsicType::kFract:
-    case semantic::IntrinsicType::kLength:
-    case semantic::IntrinsicType::kLdexp:
-    case semantic::IntrinsicType::kLog:
-    case semantic::IntrinsicType::kLog2:
-    case semantic::IntrinsicType::kMix:
-    case semantic::IntrinsicType::kNormalize:
-    case semantic::IntrinsicType::kPow:
-    case semantic::IntrinsicType::kReflect:
-    case semantic::IntrinsicType::kSelect:
-    case semantic::IntrinsicType::kSin:
-    case semantic::IntrinsicType::kSinh:
-    case semantic::IntrinsicType::kSqrt:
-    case semantic::IntrinsicType::kStep:
-    case semantic::IntrinsicType::kTan:
-    case semantic::IntrinsicType::kTanh:
-    case semantic::IntrinsicType::kTrunc:
-    case semantic::IntrinsicType::kSign:
-    case semantic::IntrinsicType::kClamp:
+    case sem::IntrinsicType::kAcos:
+    case sem::IntrinsicType::kAll:
+    case sem::IntrinsicType::kAny:
+    case sem::IntrinsicType::kAsin:
+    case sem::IntrinsicType::kAtan:
+    case sem::IntrinsicType::kAtan2:
+    case sem::IntrinsicType::kCeil:
+    case sem::IntrinsicType::kCos:
+    case sem::IntrinsicType::kCosh:
+    case sem::IntrinsicType::kCross:
+    case sem::IntrinsicType::kDeterminant:
+    case sem::IntrinsicType::kDistance:
+    case sem::IntrinsicType::kDot:
+    case sem::IntrinsicType::kExp:
+    case sem::IntrinsicType::kExp2:
+    case sem::IntrinsicType::kFloor:
+    case sem::IntrinsicType::kFma:
+    case sem::IntrinsicType::kFract:
+    case sem::IntrinsicType::kLength:
+    case sem::IntrinsicType::kLdexp:
+    case sem::IntrinsicType::kLog:
+    case sem::IntrinsicType::kLog2:
+    case sem::IntrinsicType::kMix:
+    case sem::IntrinsicType::kNormalize:
+    case sem::IntrinsicType::kPow:
+    case sem::IntrinsicType::kReflect:
+    case sem::IntrinsicType::kSelect:
+    case sem::IntrinsicType::kSin:
+    case sem::IntrinsicType::kSinh:
+    case sem::IntrinsicType::kSqrt:
+    case sem::IntrinsicType::kStep:
+    case sem::IntrinsicType::kTan:
+    case sem::IntrinsicType::kTanh:
+    case sem::IntrinsicType::kTrunc:
+    case sem::IntrinsicType::kSign:
+    case sem::IntrinsicType::kClamp:
       out += intrinsic->str();
       break;
-    case semantic::IntrinsicType::kAbs:
+    case sem::IntrinsicType::kAbs:
       if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         out += "fabs";
       } else {
         out += "abs";
       }
       break;
-    case semantic::IntrinsicType::kCountOneBits:
+    case sem::IntrinsicType::kCountOneBits:
       out += "popcount";
       break;
-    case semantic::IntrinsicType::kDpdx:
-    case semantic::IntrinsicType::kDpdxCoarse:
-    case semantic::IntrinsicType::kDpdxFine:
+    case sem::IntrinsicType::kDpdx:
+    case sem::IntrinsicType::kDpdxCoarse:
+    case sem::IntrinsicType::kDpdxFine:
       out += "dfdx";
       break;
-    case semantic::IntrinsicType::kDpdy:
-    case semantic::IntrinsicType::kDpdyCoarse:
-    case semantic::IntrinsicType::kDpdyFine:
+    case sem::IntrinsicType::kDpdy:
+    case sem::IntrinsicType::kDpdyCoarse:
+    case sem::IntrinsicType::kDpdyFine:
       out += "dfdy";
       break;
-    case semantic::IntrinsicType::kFwidth:
-    case semantic::IntrinsicType::kFwidthCoarse:
-    case semantic::IntrinsicType::kFwidthFine:
+    case sem::IntrinsicType::kFwidth:
+    case sem::IntrinsicType::kFwidthCoarse:
+    case sem::IntrinsicType::kFwidthFine:
       out += "fwidth";
       break;
-    case semantic::IntrinsicType::kIsFinite:
+    case sem::IntrinsicType::kIsFinite:
       out += "isfinite";
       break;
-    case semantic::IntrinsicType::kIsInf:
+    case sem::IntrinsicType::kIsInf:
       out += "isinf";
       break;
-    case semantic::IntrinsicType::kIsNan:
+    case sem::IntrinsicType::kIsNan:
       out += "isnan";
       break;
-    case semantic::IntrinsicType::kIsNormal:
+    case sem::IntrinsicType::kIsNormal:
       out += "isnormal";
       break;
-    case semantic::IntrinsicType::kMax:
+    case sem::IntrinsicType::kMax:
       if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         out += "fmax";
       } else {
         out += "max";
       }
       break;
-    case semantic::IntrinsicType::kMin:
+    case sem::IntrinsicType::kMin:
       if (intrinsic->ReturnType()->is_float_scalar_or_vector()) {
         out += "fmin";
       } else {
         out += "min";
       }
       break;
-    case semantic::IntrinsicType::kFaceForward:
+    case sem::IntrinsicType::kFaceForward:
       out += "faceforward";
       break;
-    case semantic::IntrinsicType::kPack4x8Snorm:
+    case sem::IntrinsicType::kPack4x8Snorm:
       out += "pack_float_to_snorm4x8";
       break;
-    case semantic::IntrinsicType::kPack4x8Unorm:
+    case sem::IntrinsicType::kPack4x8Unorm:
       out += "pack_float_to_unorm4x8";
       break;
-    case semantic::IntrinsicType::kPack2x16Snorm:
+    case sem::IntrinsicType::kPack2x16Snorm:
       out += "pack_float_to_snorm2x16";
       break;
-    case semantic::IntrinsicType::kPack2x16Unorm:
+    case sem::IntrinsicType::kPack2x16Unorm:
       out += "pack_float_to_unorm2x16";
       break;
-    case semantic::IntrinsicType::kReverseBits:
+    case sem::IntrinsicType::kReverseBits:
       out += "reverse_bits";
       break;
-    case semantic::IntrinsicType::kRound:
+    case sem::IntrinsicType::kRound:
       out += "rint";
       break;
-    case semantic::IntrinsicType::kSmoothStep:
+    case sem::IntrinsicType::kSmoothStep:
       out += "smoothstep";
       break;
-    case semantic::IntrinsicType::kInverseSqrt:
+    case sem::IntrinsicType::kInverseSqrt:
       out += "rsqrt";
       break;
-    case semantic::IntrinsicType::kUnpack4x8Snorm:
+    case sem::IntrinsicType::kUnpack4x8Snorm:
       out += "unpack_snorm4x8_to_float";
       break;
-    case semantic::IntrinsicType::kUnpack4x8Unorm:
+    case sem::IntrinsicType::kUnpack4x8Unorm:
       out += "unpack_unorm4x8_to_float";
       break;
-    case semantic::IntrinsicType::kUnpack2x16Snorm:
+    case sem::IntrinsicType::kUnpack2x16Snorm:
       out += "unpack_snorm2x16_to_float";
       break;
-    case semantic::IntrinsicType::kUnpack2x16Unorm:
+    case sem::IntrinsicType::kUnpack2x16Unorm:
       out += "unpack_unorm2x16_to_float";
       break;
     default:
@@ -1563,7 +1563,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   return true;
 }
 
-bool GeneratorImpl::global_is_in_struct(const semantic::Variable* var) const {
+bool GeneratorImpl::global_is_in_struct(const sem::Variable* var) const {
   auto& decorations = var->Declaration()->decorations();
   bool in_or_out_struct_has_location =
       var != nullptr &&
@@ -1579,7 +1579,7 @@ bool GeneratorImpl::global_is_in_struct(const semantic::Variable* var) const {
 
 bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
   auto* ident = expr->As<ast::IdentifierExpression>();
-  const semantic::Variable* var = nullptr;
+  const sem::Variable* var = nullptr;
   if (global_variables_.get(ident->symbol(), &var)) {
     if (global_is_in_struct(var)) {
       auto var_type = var->StorageClass() == ast::StorageClass::kInput
@@ -1739,7 +1739,7 @@ bool GeneratorImpl::EmitMemberAccessor(ast::MemberAccessorExpression* expr) {
   out_ << ".";
 
   // Swizzles get written out directly
-  if (program_->Sem().Get(expr)->Is<semantic::Swizzle>()) {
+  if (program_->Sem().Get(expr)->Is<sem::Swizzle>()) {
     out_ << program_->Symbols().NameFor(expr->member()->symbol());
   } else if (!EmitExpression(expr->member())) {
     return false;
@@ -2127,17 +2127,16 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
           TINT_ICE(diagnostics_) << "invalid entry point IO struct uses";
         }
 
-        if (pipeline_stage_uses.count(
-                semantic::PipelineStageUsage::kVertexInput)) {
+        if (pipeline_stage_uses.count(sem::PipelineStageUsage::kVertexInput)) {
           out_ << " [[attribute(" + std::to_string(loc->value()) + ")]]";
         } else if (pipeline_stage_uses.count(
-                       semantic::PipelineStageUsage::kVertexOutput)) {
+                       sem::PipelineStageUsage::kVertexOutput)) {
           out_ << " [[user(locn" + std::to_string(loc->value()) + ")]]";
         } else if (pipeline_stage_uses.count(
-                       semantic::PipelineStageUsage::kFragmentInput)) {
+                       sem::PipelineStageUsage::kFragmentInput)) {
           out_ << " [[user(locn" + std::to_string(loc->value()) + ")]]";
         } else if (pipeline_stage_uses.count(
-                       semantic::PipelineStageUsage::kFragmentOutput)) {
+                       sem::PipelineStageUsage::kFragmentOutput)) {
           out_ << " [[color(" + std::to_string(loc->value()) + ")]]";
         } else {
           TINT_ICE(diagnostics_) << "invalid use of location decoration";
@@ -2193,7 +2192,7 @@ bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitVariable(const semantic::Variable* var,
+bool GeneratorImpl::EmitVariable(const sem::Variable* var,
                                  bool skip_constructor) {
   make_indent();
 

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_TYPE_MAPPINGS_H_
-#define SRC_SEMANTIC_TYPE_MAPPINGS_H_
+#ifndef SRC_SEM_TYPE_MAPPINGS_H_
+#define SRC_SEM_TYPE_MAPPINGS_H_
 
 #include <type_traits>
 
@@ -34,7 +34,7 @@ class Array;
 class Struct;
 }  // namespace type
 
-namespace semantic {
+namespace sem {
 
 // Forward declarations
 class Array;
@@ -47,10 +47,10 @@ class Struct;
 class StructMember;
 class Variable;
 
-/// TypeMappings is a struct that holds dummy `operator()` methods that's used
-/// by SemanticNodeTypeFor to map AST / type node types to their corresponding
-/// semantic node types. The standard operator overload resolving rules will be
-/// used to infer the return type based on the argument type.
+/// TypeMappings is a struct that holds undefined `operator()` methods that's
+/// used by SemanticNodeTypeFor to map AST / type node types to their
+/// corresponding semantic node types. The standard operator overload resolving
+/// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
   //! @cond Doxygen_Suppress
   Array* operator()(type::Array*);
@@ -65,13 +65,13 @@ struct TypeMappings {
   //! @endcond
 };
 
-/// SemanticNodeTypeFor resolves to the appropriate semantic::Node type for the
+/// SemanticNodeTypeFor resolves to the appropriate sem::Node type for the
 /// AST or type node `AST_OR_TYPE`.
 template <typename AST_OR_TYPE>
 using SemanticNodeTypeFor = typename std::remove_pointer<decltype(
     TypeMappings()(std::declval<AST_OR_TYPE*>()))>::type;
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_TYPE_MAPPINGS_H_
+#endif  // SRC_SEM_TYPE_MAPPINGS_H_

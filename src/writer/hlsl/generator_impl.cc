@@ -22,12 +22,12 @@
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/internal_decoration.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/semantic/array.h"
-#include "src/semantic/call.h"
-#include "src/semantic/function.h"
-#include "src/semantic/member_accessor_expression.h"
-#include "src/semantic/struct.h"
-#include "src/semantic/variable.h"
+#include "src/sem/array.h"
+#include "src/sem/call.h"
+#include "src/sem/function.h"
+#include "src/sem/member_accessor_expression.h"
+#include "src/sem/struct.h"
+#include "src/sem/variable.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/decompose_storage_access.h"
 #include "src/type/access_control_type.h"
@@ -486,7 +486,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
   auto* call = builder_.Sem().Get(expr);
   auto* target = call->Target();
 
-  if (auto* func = target->As<semantic::Function>()) {
+  if (auto* func = target->As<sem::Function>()) {
     if (ast::HasDecoration<
             transform::CalculateArrayLength::BufferSizeIntrinsic>(
             func->Declaration()->decorations())) {
@@ -602,14 +602,14 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
     }
   }
 
-  if (auto* intrinsic = call->Target()->As<semantic::Intrinsic>()) {
+  if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
     if (intrinsic->IsTexture()) {
       return EmitTextureCall(pre, out, expr, intrinsic);
     }
-    if (intrinsic->Type() == semantic::IntrinsicType::kSelect) {
+    if (intrinsic->Type() == sem::IntrinsicType::kSelect) {
       diagnostics_.add_error("select not supported in HLSL backend yet");
       return false;
-    } else if (intrinsic->Type() == semantic::IntrinsicType::kIsNormal) {
+    } else if (intrinsic->Type() == sem::IntrinsicType::kIsNormal) {
       diagnostics_.add_error("is_normal not supported in HLSL backend yet");
       return false;
     } else if (intrinsic->IsDataPacking()) {
@@ -700,7 +700,7 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
 bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
                                         std::ostream& out,
                                         ast::CallExpression* expr,
-                                        const semantic::Intrinsic* intrinsic) {
+                                        const sem::Intrinsic* intrinsic) {
   auto* param = expr->params()[0];
   auto tmp_name = generate_name(kTempNamePrefix);
   std::ostringstream expr_out;
@@ -710,21 +710,21 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
   uint32_t dims = 2;
   bool is_signed = false;
   uint32_t scale = 65535;
-  if (intrinsic->Type() == semantic::IntrinsicType::kPack4x8Snorm ||
-      intrinsic->Type() == semantic::IntrinsicType::kPack4x8Unorm) {
+  if (intrinsic->Type() == sem::IntrinsicType::kPack4x8Snorm ||
+      intrinsic->Type() == sem::IntrinsicType::kPack4x8Unorm) {
     dims = 4;
     scale = 255;
   }
-  if (intrinsic->Type() == semantic::IntrinsicType::kPack4x8Snorm ||
-      intrinsic->Type() == semantic::IntrinsicType::kPack2x16Snorm) {
+  if (intrinsic->Type() == sem::IntrinsicType::kPack4x8Snorm ||
+      intrinsic->Type() == sem::IntrinsicType::kPack2x16Snorm) {
     is_signed = true;
     scale = (scale - 1) / 2;
   }
   switch (intrinsic->Type()) {
-    case semantic::IntrinsicType::kPack4x8Snorm:
-    case semantic::IntrinsicType::kPack4x8Unorm:
-    case semantic::IntrinsicType::kPack2x16Snorm:
-    case semantic::IntrinsicType::kPack2x16Unorm:
+    case sem::IntrinsicType::kPack4x8Snorm:
+    case sem::IntrinsicType::kPack4x8Unorm:
+    case sem::IntrinsicType::kPack2x16Snorm:
+    case sem::IntrinsicType::kPack2x16Unorm:
       pre << (is_signed ? "" : "u") << "int" << dims << " " << tmp_name << " = "
           << (is_signed ? "" : "u") << "int" << dims << "(round(clamp("
           << expr_out.str() << ", " << (is_signed ? "-1.0" : "0.0")
@@ -743,7 +743,7 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
       }
       out << ")";
       break;
-    case semantic::IntrinsicType::kPack2x16Float:
+    case sem::IntrinsicType::kPack2x16Float:
       pre << "uint2 " << tmp_name << " = f32tof16(" << expr_out.str() << ");\n";
       out << "(" << tmp_name << ".x | " << tmp_name << ".y << 16)";
       break;
@@ -756,11 +756,10 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
   return true;
 }
 
-bool GeneratorImpl::EmitDataUnpackingCall(
-    std::ostream& pre,
-    std::ostream& out,
-    ast::CallExpression* expr,
-    const semantic::Intrinsic* intrinsic) {
+bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& pre,
+                                          std::ostream& out,
+                                          ast::CallExpression* expr,
+                                          const sem::Intrinsic* intrinsic) {
   auto* param = expr->params()[0];
   auto tmp_name = generate_name(kTempNamePrefix);
   std::ostringstream expr_out;
@@ -770,19 +769,19 @@ bool GeneratorImpl::EmitDataUnpackingCall(
   uint32_t dims = 2;
   bool is_signed = false;
   uint32_t scale = 65535;
-  if (intrinsic->Type() == semantic::IntrinsicType::kUnpack4x8Snorm ||
-      intrinsic->Type() == semantic::IntrinsicType::kUnpack4x8Unorm) {
+  if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8Snorm ||
+      intrinsic->Type() == sem::IntrinsicType::kUnpack4x8Unorm) {
     dims = 4;
     scale = 255;
   }
-  if (intrinsic->Type() == semantic::IntrinsicType::kUnpack4x8Snorm ||
-      intrinsic->Type() == semantic::IntrinsicType::kUnpack2x16Snorm) {
+  if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8Snorm ||
+      intrinsic->Type() == sem::IntrinsicType::kUnpack2x16Snorm) {
     is_signed = true;
     scale = (scale - 1) / 2;
   }
   switch (intrinsic->Type()) {
-    case semantic::IntrinsicType::kUnpack4x8Snorm:
-    case semantic::IntrinsicType::kUnpack2x16Snorm: {
+    case sem::IntrinsicType::kUnpack4x8Snorm:
+    case sem::IntrinsicType::kUnpack2x16Snorm: {
       auto tmp_name2 = generate_name(kTempNamePrefix);
       pre << "int " << tmp_name2 << " = int(" << expr_out.str() << ");\n";
       // Perform sign extension on the converted values.
@@ -798,8 +797,8 @@ bool GeneratorImpl::EmitDataUnpackingCall(
           << ".0, " << (is_signed ? "-1.0" : "0.0") << ", 1.0)";
       break;
     }
-    case semantic::IntrinsicType::kUnpack4x8Unorm:
-    case semantic::IntrinsicType::kUnpack2x16Unorm: {
+    case sem::IntrinsicType::kUnpack4x8Unorm:
+    case sem::IntrinsicType::kUnpack2x16Unorm: {
       auto tmp_name2 = generate_name(kTempNamePrefix);
       pre << "uint " << tmp_name2 << " = " << expr_out.str() << ";\n";
       pre << "uint" << dims << " " << tmp_name << " = uint" << dims << "(";
@@ -814,7 +813,7 @@ bool GeneratorImpl::EmitDataUnpackingCall(
       out << "float" << dims << "(" << tmp_name << ") / " << scale << ".0";
       break;
     }
-    case semantic::IntrinsicType::kUnpack2x16Float:
+    case sem::IntrinsicType::kUnpack2x16Float:
       pre << "uint " << tmp_name << " = " << expr_out.str() << ";\n";
       out << "f16tof32(uint2(" << tmp_name << " & 0xffff, " << tmp_name
           << " >> 16))";
@@ -830,16 +829,16 @@ bool GeneratorImpl::EmitDataUnpackingCall(
 
 bool GeneratorImpl::EmitBarrierCall(std::ostream&,
                                     std::ostream& out,
-                                    const semantic::Intrinsic* intrinsic) {
+                                    const sem::Intrinsic* intrinsic) {
   // TODO(crbug.com/tint/661): Combine sequential barriers to a single
   // instruction.
-  if (intrinsic->Type() == semantic::IntrinsicType::kWorkgroupBarrier) {
+  if (intrinsic->Type() == sem::IntrinsicType::kWorkgroupBarrier) {
     out << "GroupMemoryBarrierWithGroupSync()";
-  } else if (intrinsic->Type() == semantic::IntrinsicType::kStorageBarrier) {
+  } else if (intrinsic->Type() == sem::IntrinsicType::kStorageBarrier) {
     out << "DeviceMemoryBarrierWithGroupSync()";
   } else {
-    TINT_UNREACHABLE(diagnostics_) << "unexpected barrier intrinsic type "
-                                   << semantic::str(intrinsic->Type());
+    TINT_UNREACHABLE(diagnostics_)
+        << "unexpected barrier intrinsic type " << sem::str(intrinsic->Type());
     return false;
   }
   return true;
@@ -848,15 +847,15 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream&,
 bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
                                     std::ostream& out,
                                     ast::CallExpression* expr,
-                                    const semantic::Intrinsic* intrinsic) {
-  using Usage = semantic::Parameter::Usage;
+                                    const sem::Intrinsic* intrinsic) {
+  using Usage = sem::Parameter::Usage;
 
   auto parameters = intrinsic->Parameters();
   auto arguments = expr->params();
 
   // Returns the argument with the given usage
   auto arg = [&](Usage usage) {
-    int idx = semantic::IndexOf(parameters, usage);
+    int idx = sem::IndexOf(parameters, usage);
     return (idx >= 0) ? arguments[idx] : nullptr;
   };
 
@@ -869,17 +868,17 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
 
   switch (intrinsic->Type()) {
-    case semantic::IntrinsicType::kTextureDimensions:
-    case semantic::IntrinsicType::kTextureNumLayers:
-    case semantic::IntrinsicType::kTextureNumLevels:
-    case semantic::IntrinsicType::kTextureNumSamples: {
+    case sem::IntrinsicType::kTextureDimensions:
+    case sem::IntrinsicType::kTextureNumLayers:
+    case sem::IntrinsicType::kTextureNumLevels:
+    case sem::IntrinsicType::kTextureNumSamples: {
       // All of these intrinsics use the GetDimensions() method on the texture
       bool is_ms = texture_type->Is<type::MultisampledTexture>();
       int num_dimensions = 0;
       std::string swizzle;
 
       switch (intrinsic->Type()) {
-        case semantic::IntrinsicType::kTextureDimensions:
+        case sem::IntrinsicType::kTextureDimensions:
           switch (texture_type->dim()) {
             case type::TextureDimension::kNone:
               TINT_ICE(diagnostics_) << "texture dimension is kNone";
@@ -912,7 +911,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               break;
           }
           break;
-        case semantic::IntrinsicType::kTextureNumLayers:
+        case sem::IntrinsicType::kTextureNumLayers:
           switch (texture_type->dim()) {
             default:
               TINT_ICE(diagnostics_) << "texture dimension is not arrayed";
@@ -927,7 +926,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               break;
           }
           break;
-        case semantic::IntrinsicType::kTextureNumLevels:
+        case sem::IntrinsicType::kTextureNumLevels:
           switch (texture_type->dim()) {
             default:
               TINT_ICE(diagnostics_)
@@ -946,7 +945,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               break;
           }
           break;
-        case semantic::IntrinsicType::kTextureNumSamples:
+        case sem::IntrinsicType::kTextureNumSamples:
           switch (texture_type->dim()) {
             default:
               TINT_ICE(diagnostics_)
@@ -1013,8 +1012,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
           return false;
         }
         pre << ", ";
-      } else if (intrinsic->Type() ==
-                 semantic::IntrinsicType::kTextureNumLevels) {
+      } else if (intrinsic->Type() == sem::IntrinsicType::kTextureNumLevels) {
         pre << "0, ";
       }
 
@@ -1053,26 +1051,26 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
   bool pack_mip_in_coords = false;
 
   switch (intrinsic->Type()) {
-    case semantic::IntrinsicType::kTextureSample:
+    case sem::IntrinsicType::kTextureSample:
       out << ".Sample(";
       break;
-    case semantic::IntrinsicType::kTextureSampleBias:
+    case sem::IntrinsicType::kTextureSampleBias:
       out << ".SampleBias(";
       break;
-    case semantic::IntrinsicType::kTextureSampleLevel:
+    case sem::IntrinsicType::kTextureSampleLevel:
       out << ".SampleLevel(";
       break;
-    case semantic::IntrinsicType::kTextureSampleGrad:
+    case sem::IntrinsicType::kTextureSampleGrad:
       out << ".SampleGrad(";
       break;
-    case semantic::IntrinsicType::kTextureSampleCompare:
+    case sem::IntrinsicType::kTextureSampleCompare:
       out << ".SampleCmpLevelZero(";
       break;
-    case semantic::IntrinsicType::kTextureLoad:
+    case sem::IntrinsicType::kTextureLoad:
       out << ".Load(";
       pack_mip_in_coords = true;
       break;
-    case semantic::IntrinsicType::kTextureStore:
+    case sem::IntrinsicType::kTextureStore:
       out << "[";
       break;
     default:
@@ -1098,8 +1096,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     auto* i32 = builder_.create<type::I32>();
     auto* zero = builder_.Expr(0);
     auto* stmt = builder_.Sem().Get(vector)->Stmt();
-    builder_.Sem().Add(zero,
-                       builder_.create<semantic::Expression>(zero, i32, stmt));
+    builder_.Sem().Add(zero, builder_.create<sem::Expression>(zero, i32, stmt));
     auto* packed = AppendVector(&builder_, vector, zero);
     return EmitExpression(pre, out, packed);
   };
@@ -1134,7 +1131,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     }
   }
 
-  if (intrinsic->Type() == semantic::IntrinsicType::kTextureStore) {
+  if (intrinsic->Type() == sem::IntrinsicType::kTextureStore) {
     out << "] = ";
     if (!EmitExpression(pre, out, arg(Usage::kValue)))
       return false;
@@ -1146,97 +1143,97 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
 }  // namespace hlsl
 
 std::string GeneratorImpl::generate_builtin_name(
-    const semantic::Intrinsic* intrinsic) {
+    const sem::Intrinsic* intrinsic) {
   std::string out;
   switch (intrinsic->Type()) {
-    case semantic::IntrinsicType::kAcos:
-    case semantic::IntrinsicType::kAny:
-    case semantic::IntrinsicType::kAll:
-    case semantic::IntrinsicType::kAsin:
-    case semantic::IntrinsicType::kAtan:
-    case semantic::IntrinsicType::kAtan2:
-    case semantic::IntrinsicType::kCeil:
-    case semantic::IntrinsicType::kCos:
-    case semantic::IntrinsicType::kCosh:
-    case semantic::IntrinsicType::kCross:
-    case semantic::IntrinsicType::kDeterminant:
-    case semantic::IntrinsicType::kDistance:
-    case semantic::IntrinsicType::kDot:
-    case semantic::IntrinsicType::kExp:
-    case semantic::IntrinsicType::kExp2:
-    case semantic::IntrinsicType::kFloor:
-    case semantic::IntrinsicType::kFma:
-    case semantic::IntrinsicType::kLdexp:
-    case semantic::IntrinsicType::kLength:
-    case semantic::IntrinsicType::kLog:
-    case semantic::IntrinsicType::kLog2:
-    case semantic::IntrinsicType::kNormalize:
-    case semantic::IntrinsicType::kPow:
-    case semantic::IntrinsicType::kReflect:
-    case semantic::IntrinsicType::kRound:
-    case semantic::IntrinsicType::kSin:
-    case semantic::IntrinsicType::kSinh:
-    case semantic::IntrinsicType::kSqrt:
-    case semantic::IntrinsicType::kStep:
-    case semantic::IntrinsicType::kTan:
-    case semantic::IntrinsicType::kTanh:
-    case semantic::IntrinsicType::kTrunc:
-    case semantic::IntrinsicType::kMix:
-    case semantic::IntrinsicType::kSign:
-    case semantic::IntrinsicType::kAbs:
-    case semantic::IntrinsicType::kMax:
-    case semantic::IntrinsicType::kMin:
-    case semantic::IntrinsicType::kClamp:
+    case sem::IntrinsicType::kAcos:
+    case sem::IntrinsicType::kAny:
+    case sem::IntrinsicType::kAll:
+    case sem::IntrinsicType::kAsin:
+    case sem::IntrinsicType::kAtan:
+    case sem::IntrinsicType::kAtan2:
+    case sem::IntrinsicType::kCeil:
+    case sem::IntrinsicType::kCos:
+    case sem::IntrinsicType::kCosh:
+    case sem::IntrinsicType::kCross:
+    case sem::IntrinsicType::kDeterminant:
+    case sem::IntrinsicType::kDistance:
+    case sem::IntrinsicType::kDot:
+    case sem::IntrinsicType::kExp:
+    case sem::IntrinsicType::kExp2:
+    case sem::IntrinsicType::kFloor:
+    case sem::IntrinsicType::kFma:
+    case sem::IntrinsicType::kLdexp:
+    case sem::IntrinsicType::kLength:
+    case sem::IntrinsicType::kLog:
+    case sem::IntrinsicType::kLog2:
+    case sem::IntrinsicType::kNormalize:
+    case sem::IntrinsicType::kPow:
+    case sem::IntrinsicType::kReflect:
+    case sem::IntrinsicType::kRound:
+    case sem::IntrinsicType::kSin:
+    case sem::IntrinsicType::kSinh:
+    case sem::IntrinsicType::kSqrt:
+    case sem::IntrinsicType::kStep:
+    case sem::IntrinsicType::kTan:
+    case sem::IntrinsicType::kTanh:
+    case sem::IntrinsicType::kTrunc:
+    case sem::IntrinsicType::kMix:
+    case sem::IntrinsicType::kSign:
+    case sem::IntrinsicType::kAbs:
+    case sem::IntrinsicType::kMax:
+    case sem::IntrinsicType::kMin:
+    case sem::IntrinsicType::kClamp:
       out = intrinsic->str();
       break;
-    case semantic::IntrinsicType::kCountOneBits:
+    case sem::IntrinsicType::kCountOneBits:
       out = "countbits";
       break;
-    case semantic::IntrinsicType::kDpdx:
+    case sem::IntrinsicType::kDpdx:
       out = "ddx";
       break;
-    case semantic::IntrinsicType::kDpdxCoarse:
+    case sem::IntrinsicType::kDpdxCoarse:
       out = "ddx_coarse";
       break;
-    case semantic::IntrinsicType::kDpdxFine:
+    case sem::IntrinsicType::kDpdxFine:
       out = "ddx_fine";
       break;
-    case semantic::IntrinsicType::kDpdy:
+    case sem::IntrinsicType::kDpdy:
       out = "ddy";
       break;
-    case semantic::IntrinsicType::kDpdyCoarse:
+    case sem::IntrinsicType::kDpdyCoarse:
       out = "ddy_coarse";
       break;
-    case semantic::IntrinsicType::kDpdyFine:
+    case sem::IntrinsicType::kDpdyFine:
       out = "ddy_fine";
       break;
-    case semantic::IntrinsicType::kFaceForward:
+    case sem::IntrinsicType::kFaceForward:
       out = "faceforward";
       break;
-    case semantic::IntrinsicType::kFract:
+    case sem::IntrinsicType::kFract:
       out = "frac";
       break;
-    case semantic::IntrinsicType::kFwidth:
-    case semantic::IntrinsicType::kFwidthCoarse:
-    case semantic::IntrinsicType::kFwidthFine:
+    case sem::IntrinsicType::kFwidth:
+    case sem::IntrinsicType::kFwidthCoarse:
+    case sem::IntrinsicType::kFwidthFine:
       out = "fwidth";
       break;
-    case semantic::IntrinsicType::kInverseSqrt:
+    case sem::IntrinsicType::kInverseSqrt:
       out = "rsqrt";
       break;
-    case semantic::IntrinsicType::kIsFinite:
+    case sem::IntrinsicType::kIsFinite:
       out = "isfinite";
       break;
-    case semantic::IntrinsicType::kIsInf:
+    case sem::IntrinsicType::kIsInf:
       out = "isinf";
       break;
-    case semantic::IntrinsicType::kIsNan:
+    case sem::IntrinsicType::kIsNan:
       out = "isnan";
       break;
-    case semantic::IntrinsicType::kReverseBits:
+    case sem::IntrinsicType::kReverseBits:
       out = "reversebits";
       break;
-    case semantic::IntrinsicType::kSmoothStep:
+    case sem::IntrinsicType::kSmoothStep:
       out = "smoothstep";
       break;
     default:
@@ -1392,7 +1389,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& pre,
   return false;
 }
 
-bool GeneratorImpl::global_is_in_struct(const semantic::Variable* var) const {
+bool GeneratorImpl::global_is_in_struct(const sem::Variable* var) const {
   auto& decorations = var->Declaration()->decorations();
   if (ast::HasDecoration<ast::LocationDecoration>(decorations) ||
       ast::HasDecoration<ast::BuiltinDecoration>(decorations)) {
@@ -1406,7 +1403,7 @@ bool GeneratorImpl::EmitIdentifier(std::ostream&,
                                    std::ostream& out,
                                    ast::IdentifierExpression* expr) {
   auto* ident = expr->As<ast::IdentifierExpression>();
-  const semantic::Variable* var = nullptr;
+  const sem::Variable* var = nullptr;
   if (global_variables_.get(ident->symbol(), &var)) {
     if (global_is_in_struct(var)) {
       auto var_type = var->StorageClass() == ast::StorageClass::kInput
@@ -1482,7 +1479,7 @@ bool GeneratorImpl::EmitIf(std::ostream& out, ast::IfStatement* stmt) {
 }
 
 bool GeneratorImpl::has_referenced_in_var_needing_struct(
-    const semantic::Function* func) {
+    const sem::Function* func) {
   for (auto data : func->ReferencedLocationVariables()) {
     auto* var = data.first;
     if (var->StorageClass() == ast::StorageClass::kInput) {
@@ -1500,7 +1497,7 @@ bool GeneratorImpl::has_referenced_in_var_needing_struct(
 }
 
 bool GeneratorImpl::has_referenced_out_var_needing_struct(
-    const semantic::Function* func) {
+    const sem::Function* func) {
   for (auto data : func->ReferencedLocationVariables()) {
     auto* var = data.first;
     if (var->StorageClass() == ast::StorageClass::kOutput) {
@@ -1518,7 +1515,7 @@ bool GeneratorImpl::has_referenced_out_var_needing_struct(
 }
 
 bool GeneratorImpl::has_referenced_var_needing_struct(
-    const semantic::Function* func) {
+    const sem::Function* func) {
   for (auto data : func->ReferencedLocationVariables()) {
     auto* var = data.first;
     if (var->StorageClass() == ast::StorageClass::kOutput ||
@@ -2237,7 +2234,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& pre,
   out << ".";
 
   // Swizzles output the name directly
-  if (builder_.Sem().Get(expr)->Is<semantic::Swizzle>()) {
+  if (builder_.Sem().Get(expr)->Is<sem::Swizzle>()) {
     out << builder_.Symbols().NameFor(expr->member()->symbol());
   } else if (!EmitExpression(pre, out, expr->member())) {
     return false;
@@ -2556,17 +2553,16 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
           TINT_ICE(diagnostics_) << "invalid entry point IO struct uses";
         }
 
-        if (pipeline_stage_uses.count(
-                semantic::PipelineStageUsage::kVertexInput)) {
+        if (pipeline_stage_uses.count(sem::PipelineStageUsage::kVertexInput)) {
           out << " : TEXCOORD" + std::to_string(location->value());
         } else if (pipeline_stage_uses.count(
-                       semantic::PipelineStageUsage::kVertexOutput)) {
+                       sem::PipelineStageUsage::kVertexOutput)) {
           out << " : TEXCOORD" + std::to_string(location->value());
         } else if (pipeline_stage_uses.count(
-                       semantic::PipelineStageUsage::kFragmentInput)) {
+                       sem::PipelineStageUsage::kFragmentInput)) {
           out << " : TEXCOORD" + std::to_string(location->value());
         } else if (pipeline_stage_uses.count(
-                       semantic::PipelineStageUsage::kFragmentOutput)) {
+                       sem::PipelineStageUsage::kFragmentOutput)) {
           out << " : SV_Target" + std::to_string(location->value());
         } else {
           TINT_ICE(diagnostics_) << "invalid use of location decoration";

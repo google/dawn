@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_CALL_H_
-#define SRC_SEMANTIC_CALL_H_
+#ifndef SRC_SEM_CALL_H_
+#define SRC_SEM_CALL_H_
 
-#include "src/semantic/expression.h"
-#include "src/semantic/intrinsic.h"
+#include "src/sem/expression.h"
+#include "src/sem/intrinsic.h"
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 /// Call is the base class for semantic nodes that hold semantic information for
 /// ast::CallExpression nodes.
@@ -43,7 +43,7 @@ class Call : public Castable<Call, Expression> {
   CallTarget const* const target_;
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_CALL_H_
+#endif  // SRC_SEM_CALL_H_

@@ -24,11 +24,11 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/program_builder.h"
-#include "src/semantic/array.h"
-#include "src/semantic/call.h"
-#include "src/semantic/member_accessor_expression.h"
-#include "src/semantic/struct.h"
-#include "src/semantic/variable.h"
+#include "src/sem/array.h"
+#include "src/sem/call.h"
+#include "src/sem/member_accessor_expression.h"
+#include "src/sem/struct.h"
+#include "src/sem/variable.h"
 #include "src/type/access_control_type.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/hash.h"
@@ -356,7 +356,7 @@ type::Type* UnwrapPtrAndAlias(type::Type* ty) {
 
 /// StorageBufferAccess describes a single storage buffer access
 struct StorageBufferAccess {
-  semantic::Expression const* var = nullptr;  // Storage buffer variable
+  sem::Expression const* var = nullptr;       // Storage buffer variable
   std::unique_ptr<Offset> offset;             // The byte offset on var
   type::Type* type = nullptr;                 // The type of the access
   operator bool() const { return var; }       // Returns true if valid
@@ -628,7 +628,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     if (auto* ident = node->As<ast::IdentifierExpression>()) {
       // X
       auto* expr = sem.Get(ident);
-      if (auto* var = expr->As<semantic::VariableUser>()) {
+      if (auto* var = expr->As<sem::VariableUser>()) {
         if (var->Variable()->StorageClass() == ast::StorageClass::kStorage) {
           // Variable to a storage buffer
           state.AddAccesss(ident, {
@@ -644,7 +644,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     if (auto* accessor = node->As<ast::MemberAccessorExpression>()) {
       // X.Y
       auto* accessor_sem = sem.Get(accessor);
-      if (auto* swizzle = accessor_sem->As<semantic::Swizzle>()) {
+      if (auto* swizzle = accessor_sem->As<sem::Swizzle>()) {
         if (swizzle->Indices().size() == 1) {
           if (auto access = state.TakeAccess(accessor->structure())) {
             auto* vec_ty = access.type->As<type::Vector>();
@@ -724,8 +724,8 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
 
     if (auto* call_expr = node->As<ast::CallExpression>()) {
       auto* call = sem.Get(call_expr);
-      if (auto* intrinsic = call->Target()->As<semantic::Intrinsic>()) {
-        if (intrinsic->Type() == semantic::IntrinsicType::kArrayLength) {
+      if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
+        if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
           // arrayLength(X)
           // Don't convert X into a load, this actually requires the real
           // reference.

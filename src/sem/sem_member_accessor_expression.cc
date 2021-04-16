@@ -13,14 +13,14 @@
 // limitations under the License.
 
 #include "src/ast/member_accessor_expression.h"
-#include "src/semantic/member_accessor_expression.h"
+#include "src/sem/member_accessor_expression.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::MemberAccessorExpression);
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::StructMemberAccess);
-TINT_INSTANTIATE_TYPEINFO(tint::semantic::Swizzle);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::MemberAccessorExpression);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMemberAccess);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Swizzle);
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 MemberAccessorExpression::MemberAccessorExpression(
     ast::MemberAccessorExpression* declaration,
@@ -47,5 +47,5 @@ Swizzle::Swizzle(ast::MemberAccessorExpression* declaration,
 
 Swizzle::~Swizzle() = default;
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint

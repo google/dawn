@@ -18,7 +18,7 @@
 #include <utility>
 
 #include "src/program_builder.h"
-#include "src/semantic/expression.h"
+#include "src/sem/expression.h"
 
 namespace tint {
 namespace transform {

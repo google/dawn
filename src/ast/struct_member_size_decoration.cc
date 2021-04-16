@@ -29,7 +29,7 @@ StructMemberSizeDecoration::StructMemberSizeDecoration(ProgramID program_id,
 
 StructMemberSizeDecoration::~StructMemberSizeDecoration() = default;
 
-void StructMemberSizeDecoration::to_str(const semantic::Info&,
+void StructMemberSizeDecoration::to_str(const sem::Info&,
                                         std::ostream& out,
                                         size_t indent) const {
   make_indent(out, indent);

@@ -42,7 +42,7 @@ BitcastExpression* BitcastExpression::Clone(CloneContext* ctx) const {
   return ctx->dst->create<BitcastExpression>(src, ty, e);
 }
 
-void BitcastExpression::to_str(const semantic::Info& sem,
+void BitcastExpression::to_str(const sem::Info& sem,
                                std::ostream& out,
                                size_t indent) const {
   make_indent(out, indent);

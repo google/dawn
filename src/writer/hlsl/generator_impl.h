@@ -39,10 +39,10 @@ namespace tint {
 namespace type {
 class AccessControl;
 }  // namespace type
-namespace semantic {
+namespace sem {
 class Call;
 class Intrinsic;
-}  // namespace semantic
+}  // namespace sem
 
 namespace writer {
 namespace hlsl {
@@ -129,7 +129,7 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true if the call expression is emitted
   bool EmitBarrierCall(std::ostream& pre,
                        std::ostream& out,
-                       const semantic::Intrinsic* intrinsic);
+                       const sem::Intrinsic* intrinsic);
   /// Handles generating a call to a texture function (`textureSample`,
   /// `textureSampleGrad`, etc)
   /// @param pre the preamble for the expression stream
@@ -140,7 +140,7 @@ class GeneratorImpl : public TextGenerator {
   bool EmitTextureCall(std::ostream& pre,
                        std::ostream& out,
                        ast::CallExpression* expr,
-                       const semantic::Intrinsic* intrinsic);
+                       const sem::Intrinsic* intrinsic);
   /// Handles generating a call to data packing intrinsic
   /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
@@ -150,7 +150,7 @@ class GeneratorImpl : public TextGenerator {
   bool EmitDataPackingCall(std::ostream& pre,
                            std::ostream& out,
                            ast::CallExpression* expr,
-                           const semantic::Intrinsic* intrinsic);
+                           const sem::Intrinsic* intrinsic);
   /// Handles generating a call to data unpacking intrinsic
   /// @param pre the preamble of the expression stream
   /// @param out the output of the expression stream
@@ -160,7 +160,7 @@ class GeneratorImpl : public TextGenerator {
   bool EmitDataUnpackingCall(std::ostream& pre,
                              std::ostream& out,
                              ast::CallExpression* expr,
-                             const semantic::Intrinsic* intrinsic);
+                             const sem::Intrinsic* intrinsic);
   /// Handles a case statement
   /// @param out the output stream
   /// @param stmt the statement
@@ -334,11 +334,11 @@ class GeneratorImpl : public TextGenerator {
   /// Checks if the global variable is in an input or output struct
   /// @param var the variable to check
   /// @returns true if the global is in an input or output struct
-  bool global_is_in_struct(const semantic::Variable* var) const;
+  bool global_is_in_struct(const sem::Variable* var) const;
   /// Handles generating a builtin method name
   /// @param intrinsic the semantic info for the intrinsic
   /// @returns the name or "" if not valid
-  std::string generate_builtin_name(const semantic::Intrinsic* intrinsic);
+  std::string generate_builtin_name(const sem::Intrinsic* intrinsic);
   /// Converts a builtin to an attribute name
   /// @param builtin the builtin to convert
   /// @returns the string name of the builtin or blank on error
@@ -346,16 +346,16 @@ class GeneratorImpl : public TextGenerator {
   /// Determines if the function needs the input struct passed to it.
   /// @param func the function to check
   /// @returns true if there are input struct variables used in the function
-  bool has_referenced_in_var_needing_struct(const semantic::Function* func);
+  bool has_referenced_in_var_needing_struct(const sem::Function* func);
   /// Determines if the function needs the output struct passed to it.
   /// @param func the function to check
   /// @returns true if there are output struct variables used in the function
-  bool has_referenced_out_var_needing_struct(const semantic::Function* func);
+  bool has_referenced_out_var_needing_struct(const sem::Function* func);
   /// Determines if any used program variable requires an input or output
   /// struct.
   /// @param func the function to check
   /// @returns true if an input or output struct is required.
-  bool has_referenced_var_needing_struct(const semantic::Function* func);
+  bool has_referenced_var_needing_struct(const sem::Function* func);
 
   /// Generate a unique name
   /// @param prefix the name prefix
@@ -383,7 +383,7 @@ class GeneratorImpl : public TextGenerator {
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   uint32_t loop_emission_counter_ = 0;
-  ScopeStack<const semantic::Variable*> global_variables_;
+  ScopeStack<const sem::Variable*> global_variables_;
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_out_data_;
 

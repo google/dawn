@@ -46,7 +46,7 @@ ArrayAccessorExpression* ArrayAccessorExpression::Clone(
   return ctx->dst->create<ArrayAccessorExpression>(src, arr, idx);
 }
 
-void ArrayAccessorExpression::to_str(const semantic::Info& sem,
+void ArrayAccessorExpression::to_str(const sem::Info& sem,
                                      std::ostream& out,
                                      size_t indent) const {
   make_indent(out, indent);

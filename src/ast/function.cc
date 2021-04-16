@@ -88,7 +88,7 @@ Function* Function::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Function>(src, sym, p, ret, b, decos, ret_decos);
 }
 
-void Function::to_str(const semantic::Info& sem,
+void Function::to_str(const sem::Info& sem,
                       std::ostream& out,
                       size_t indent) const {
   make_indent(out, indent);
@@ -130,7 +130,7 @@ std::string Function::type_name() const {
 
   out << "__func" + return_type_->type_name();
   for (auto* param : params_) {
-    // No need for the semantic::Variable here, functions params must have a
+    // No need for the sem::Variable here, functions params must have a
     // type
     out << param->declared_type()->type_name();
   }

@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_EXPRESSION_H_
-#define SRC_SEMANTIC_EXPRESSION_H_
+#ifndef SRC_SEM_EXPRESSION_H_
+#define SRC_SEM_EXPRESSION_H_
 
 #include "src/ast/expression.h"
-#include "src/semantic/node.h"
+#include "src/sem/node.h"
 
 namespace tint {
 
 // Forward declarations
-namespace semantic {
+namespace sem {
 class Statement;
-}  // namespace semantic
+}  // namespace sem
 namespace type {
 class Type;
 }  // namespace type
 
-namespace semantic {
+namespace sem {
 
 /// Expression holds the semantic information for expression nodes.
 class Expression : public Castable<Expression, Node> {
@@ -56,7 +56,7 @@ class Expression : public Castable<Expression, Node> {
   Statement* const statement_;
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_EXPRESSION_H_
+#endif  // SRC_SEM_EXPRESSION_H_

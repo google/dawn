@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_VARIABLE_H_
-#define SRC_SEMANTIC_VARIABLE_H_
+#ifndef SRC_SEM_VARIABLE_H_
+#define SRC_SEM_VARIABLE_H_
 
 #include <vector>
 
 #include "src/ast/storage_class.h"
-#include "src/semantic/expression.h"
+#include "src/sem/expression.h"
 
 namespace tint {
 
@@ -31,7 +31,7 @@ namespace type {
 class Type;
 }  // namespace type
 
-namespace semantic {
+namespace sem {
 
 class VariableUser;
 
@@ -86,16 +86,16 @@ class VariableUser : public Castable<VariableUser, Expression> {
   VariableUser(ast::IdentifierExpression* declaration,
                type::Type* type,
                Statement* statement,
-               semantic::Variable* variable);
+               sem::Variable* variable);
 
   /// @returns the variable that this expression refers to
-  const semantic::Variable* Variable() const { return variable_; }
+  const sem::Variable* Variable() const { return variable_; }
 
  private:
-  semantic::Variable const* const variable_;
+  sem::Variable const* const variable_;
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_VARIABLE_H_
+#endif  // SRC_SEM_VARIABLE_H_

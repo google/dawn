@@ -43,7 +43,7 @@ LoopStatement* LoopStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<LoopStatement>(src, b, cont);
 }
 
-void LoopStatement::to_str(const semantic::Info& sem,
+void LoopStatement::to_str(const sem::Info& sem,
                            std::ostream& out,
                            size_t indent) const {
   make_indent(out, indent);

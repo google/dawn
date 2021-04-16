@@ -28,7 +28,7 @@ BuiltinDecoration::BuiltinDecoration(ProgramID program_id,
 
 BuiltinDecoration::~BuiltinDecoration() = default;
 
-void BuiltinDecoration::to_str(const semantic::Info&,
+void BuiltinDecoration::to_str(const sem::Info&,
                                std::ostream& out,
                                size_t indent) const {
   make_indent(out, indent);

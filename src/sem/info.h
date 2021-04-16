@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_SEMANTIC_INFO_H_
-#define SRC_SEMANTIC_INFO_H_
+#ifndef SRC_SEM_INFO_H_
+#define SRC_SEM_INFO_H_
 
 #include <unordered_map>
 
 #include "src/debug.h"
-#include "src/semantic/node.h"
-#include "src/semantic/type_mappings.h"
+#include "src/sem/node.h"
+#include "src/sem/type_mappings.h"
 
 namespace tint {
-namespace semantic {
+namespace sem {
 
 /// Info holds all the resolved semantic information for a Program.
 class Info {
@@ -80,10 +80,10 @@ class Info {
   }
 
  private:
-  std::unordered_map<const CastableBase*, const semantic::Node*> map;
+  std::unordered_map<const CastableBase*, const sem::Node*> map;
 };
 
-}  // namespace semantic
+}  // namespace sem
 }  // namespace tint
 
-#endif  // SRC_SEMANTIC_INFO_H_
+#endif  // SRC_SEM_INFO_H_

@@ -19,10 +19,10 @@
 
 #include "src/ast/call_statement.h"
 #include "src/program_builder.h"
-#include "src/semantic/call.h"
-#include "src/semantic/statement.h"
-#include "src/semantic/struct.h"
-#include "src/semantic/variable.h"
+#include "src/sem/call.h"
+#include "src/sem/statement.h"
+#include "src/sem/struct.h"
+#include "src/sem/variable.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/hash.h"
 
@@ -38,7 +38,7 @@ namespace {
 /// It is used as a key by the array_length_by_usage map.
 struct ArrayUsage {
   ast::BlockStatement const* const block;
-  semantic::Node const* const buffer;
+  sem::Node const* const buffer;
   bool operator==(const ArrayUsage& rhs) const {
     return block == rhs.block && buffer == rhs.buffer;
   }
@@ -110,8 +110,8 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* call_expr = node->As<ast::CallExpression>()) {
       auto* call = sem.Get(call_expr);
-      if (auto* intrinsic = call->Target()->As<semantic::Intrinsic>()) {
-        if (intrinsic->Type() == semantic::IntrinsicType::kArrayLength) {
+      if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
+        if (intrinsic->Type() == sem::IntrinsicType::kArrayLength) {
           // We're dealing with an arrayLength() call
 
           // https://gpuweb.github.io/gpuweb/wgsl.html#array-types states:
@@ -163,8 +163,8 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
           // true) then key the array_length from the variable. If not, key off
           // the expression semantic node, which will be unique per call to
           // arrayLength().
-          const semantic::Node* storage_buffer_usage = storage_buffer_sem;
-          if (auto* user = storage_buffer_sem->As<semantic::VariableUser>()) {
+          const sem::Node* storage_buffer_usage = storage_buffer_sem;
+          if (auto* user = storage_buffer_sem->As<sem::VariableUser>()) {
             storage_buffer_usage = user->Variable();
           }
 

@@ -31,7 +31,7 @@ FloatLiteral::FloatLiteral(ProgramID program_id,
 
 FloatLiteral::~FloatLiteral() = default;
 
-std::string FloatLiteral::to_str(const semantic::Info&) const {
+std::string FloatLiteral::to_str(const sem::Info&) const {
   return std::to_string(value_);
 }
 

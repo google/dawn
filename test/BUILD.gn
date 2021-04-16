@@ -190,7 +190,7 @@ source_set("tint_unittests_core_src") {
     "../src/resolver/type_validation_test.cc",
     "../src/resolver/validation_test.cc",
     "../src/scope_stack_test.cc",
-    "../src/semantic/sem_intrinsic_test.cc",
+    "../src/sem/sem_intrinsic_test.cc",
     "../src/symbol_table_test.cc",
     "../src/symbol_test.cc",
     "../src/traits_test.cc",

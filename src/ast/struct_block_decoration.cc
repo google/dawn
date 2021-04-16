@@ -27,7 +27,7 @@ StructBlockDecoration::StructBlockDecoration(ProgramID program_id,
 
 StructBlockDecoration::~StructBlockDecoration() = default;
 
-void StructBlockDecoration::to_str(const semantic::Info&,
+void StructBlockDecoration::to_str(const sem::Info&,
                                    std::ostream& out,
                                    size_t indent) const {
   make_indent(out, indent);

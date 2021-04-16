@@ -40,7 +40,7 @@ VariableDeclStatement* VariableDeclStatement::Clone(CloneContext* ctx) const {
   return ctx->dst->create<VariableDeclStatement>(src, var);
 }
 
-void VariableDeclStatement::to_str(const semantic::Info& sem,
+void VariableDeclStatement::to_str(const sem::Info& sem,
                                    std::ostream& out,
                                    size_t indent) const {
   make_indent(out, indent);

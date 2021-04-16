@@ -28,7 +28,7 @@ StructMemberOffsetDecoration::StructMemberOffsetDecoration(ProgramID program_id,
 
 StructMemberOffsetDecoration::~StructMemberOffsetDecoration() = default;
 
-void StructMemberOffsetDecoration::to_str(const semantic::Info&,
+void StructMemberOffsetDecoration::to_str(const sem::Info&,
                                           std::ostream& out,
                                           size_t indent) const {
   make_indent(out, indent);

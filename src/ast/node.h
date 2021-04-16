@@ -27,7 +27,7 @@ class CloneContext;
 namespace type {
 class Type;
 }
-namespace semantic {
+namespace sem {
 class Info;
 }
 
@@ -48,14 +48,14 @@ class Node : public Castable<Node, Cloneable> {
   /// @param sem the semantic info for the program
   /// @param out the stream to write to
   /// @param indent number of spaces to indent the node when writing
-  virtual void to_str(const semantic::Info& sem,
+  virtual void to_str(const sem::Info& sem,
                       std::ostream& out,
                       size_t indent) const = 0;
 
   /// Convenience wrapper around the to_str() method.
   /// @param sem the semantic info for the program
   /// @returns the node as a string
-  std::string str(const semantic::Info& sem) const;
+  std::string str(const sem::Info& sem) const;
 
  protected:
   /// Create a new node

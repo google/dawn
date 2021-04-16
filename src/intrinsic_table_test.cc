@@ -28,8 +28,8 @@ namespace {
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 
-using IntrinsicType = semantic::IntrinsicType;
-using Parameter = semantic::Parameter;
+using IntrinsicType = sem::IntrinsicType;
+using Parameter = sem::Parameter;
 
 class IntrinsicTableTest : public testing::Test, public ProgramBuilder {
  public:

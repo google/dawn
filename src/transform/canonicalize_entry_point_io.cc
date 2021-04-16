@@ -18,9 +18,9 @@
 #include <utility>
 
 #include "src/program_builder.h"
-#include "src/semantic/function.h"
-#include "src/semantic/statement.h"
-#include "src/semantic/variable.h"
+#include "src/sem/function.h"
+#include "src/sem/statement.h"
+#include "src/sem/variable.h"
 
 namespace tint {
 namespace transform {

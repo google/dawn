@@ -25,9 +25,9 @@
 namespace tint {
 
 // Forward declarations
-namespace semantic {
+namespace sem {
 class Call;
-}  // namespace semantic
+}  // namespace sem
 
 namespace writer {
 namespace spirv {

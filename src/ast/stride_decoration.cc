@@ -28,7 +28,7 @@ StrideDecoration::StrideDecoration(ProgramID program_id,
 
 StrideDecoration::~StrideDecoration() = default;
 
-void StrideDecoration::to_str(const semantic::Info&,
+void StrideDecoration::to_str(const sem::Info&,
                               std::ostream& out,
                               size_t indent) const {
   make_indent(out, indent);

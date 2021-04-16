@@ -17,7 +17,7 @@
 #include "gmock/gmock.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/semantic/struct.h"
+#include "src/sem/struct.h"
 
 namespace tint {
 namespace resolver {
