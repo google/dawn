@@ -217,6 +217,7 @@ INSTANTIATE_TEST_SUITE_P(
                     ast::Builtin::kLocalInvocationIndex},
         BuiltinCase{SpvBuiltInGlobalInvocationId, true,
                     ast::Builtin::kGlobalInvocationId},
+        BuiltinCase{SpvBuiltInWorkgroupId, true, ast::Builtin::kWorkgroupId},
         BuiltinCase{SpvBuiltInSampleId, true, ast::Builtin::kSampleIndex},
         BuiltinCase{SpvBuiltInSampleMask, true, ast::Builtin::kSampleMask}));
 

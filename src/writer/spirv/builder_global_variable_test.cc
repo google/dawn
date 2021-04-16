@@ -368,6 +368,8 @@ INSTANTIATE_TEST_SUITE_P(
                     ast::StorageClass::kInput, SpvBuiltInLocalInvocationIndex},
         BuiltinData{ast::Builtin::kGlobalInvocationId,
                     ast::StorageClass::kInput, SpvBuiltInGlobalInvocationId},
+        BuiltinData{ast::Builtin::kWorkgroupId, ast::StorageClass::kInput,
+                    SpvBuiltInWorkgroupId},
         BuiltinData{ast::Builtin::kSampleIndex, ast::StorageClass::kInput,
                     SpvBuiltInSampleId},
         BuiltinData{ast::Builtin::kSampleMask, ast::StorageClass::kInput,

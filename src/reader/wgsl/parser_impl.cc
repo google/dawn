@@ -85,6 +85,9 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "global_invocation_id") {
     return ast::Builtin::kGlobalInvocationId;
   }
+  if (str == "workgroup_id") {
+    return ast::Builtin::kWorkgroupId;
+  }
   if (str == "sample_index") {
     return ast::Builtin::kSampleIndex;
   }

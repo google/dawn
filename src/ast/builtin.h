@@ -32,6 +32,7 @@ enum class Builtin {
   kLocalInvocationId,
   kLocalInvocationIndex,
   kGlobalInvocationId,
+  kWorkgroupId,
   kSampleIndex,
   kSampleMask,
   kSampleMaskIn,   // TODO(crbug.com/tint/715): Remove this

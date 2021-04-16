@@ -1949,6 +1949,8 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "SV_GroupIndex";
     case ast::Builtin::kGlobalInvocationId:
       return "SV_DispatchThreadID";
+    case ast::Builtin::kWorkgroupId:
+      return "SV_GroupID";
     case ast::Builtin::kSampleIndex:
       return "SV_SampleIndex";
     case ast::Builtin::kSampleMask:

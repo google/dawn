@@ -74,6 +74,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "local_invocation_index"},
         WgslBuiltinData{ast::Builtin::kGlobalInvocationId,
                         "global_invocation_id"},
+        WgslBuiltinData{ast::Builtin::kWorkgroupId, "workgroup_id"},
         WgslBuiltinData{ast::Builtin::kSampleIndex, "sample_index"},
         WgslBuiltinData{ast::Builtin::kSampleMaskIn, "sample_mask_in"},
         WgslBuiltinData{ast::Builtin::kSampleMaskOut, "sample_mask_out"}));
