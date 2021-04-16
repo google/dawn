@@ -43,6 +43,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/program.h"
 #include "src/program_id.h"
+#include "src/type/access_control_type.h"
 #include "src/type/alias_type.h"
 #include "src/type/array_type.h"
 #include "src/type/bool_type.h"
@@ -517,6 +518,7 @@ class ProgramBuilder {
     type::Array* array(uint32_t stride) const {
       return array(Of<T>(), N, stride);
     }
+
     /// Creates an alias type
     /// @param name the alias name
     /// @param type the alias type
@@ -525,6 +527,15 @@ class ProgramBuilder {
     type::Alias* alias(NAME&& name, type::Type* type) const {
       return builder->create<type::Alias>(
           builder->Sym(std::forward<NAME>(name)), type);
+    }
+
+    /// Creates an access control qualifier type
+    /// @param access the access control
+    /// @param type the inner type
+    /// @returns the access control qualifier type
+    type::AccessControl* access(ast::AccessControl access,
+                                type::Type* type) const {
+      return builder->create<type::AccessControl>(access, type);
     }
 
     /// @return the tint AST pointer to `type` with the given ast::StorageClass

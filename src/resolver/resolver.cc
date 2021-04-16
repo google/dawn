@@ -2279,9 +2279,10 @@ std::string Resolver::VectorPretty(uint32_t size, type::Type* element_type) {
 }
 
 type::Type* Resolver::Canonical(type::Type* type) {
-  using Type = type::Type;
+  using AccessControl = type::AccessControl;
   using Alias = type::Alias;
   using Matrix = type::Matrix;
+  using Type = type::Type;
   using Vector = type::Vector;
 
   std::function<Type*(Type*)> make_canonical;
@@ -2298,6 +2299,10 @@ type::Type* Resolver::Canonical(type::Type* type) {
     if (auto* m = ct->As<Matrix>()) {
       return builder_->create<Matrix>(make_canonical(m->type()), m->rows(),
                                       m->columns());
+    }
+    if (auto* ac = ct->As<AccessControl>()) {
+      return builder_->create<AccessControl>(ac->access_control(),
+                                             make_canonical(ac->type()));
     }
     return ct;
   };

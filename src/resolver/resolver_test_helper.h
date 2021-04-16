@@ -194,6 +194,12 @@ type::Type* ty_alias(const ProgramBuilder::TypesBuilder& ty) {
   return ty.alias("alias_" + type->type_name(), type);
 }
 
+template <create_type_func_ptr create_type>
+type::Type* ty_access(const ProgramBuilder::TypesBuilder& ty) {
+  auto* type = create_type(ty);
+  return ty.access(ast::AccessControl::kReadOnly, type);
+}
+
 }  // namespace resolver
 }  // namespace tint
 

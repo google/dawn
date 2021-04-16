@@ -490,6 +490,12 @@ static constexpr Params cases[] = {
     Params{ty_alias<ty_alias<ty_mat3x3<ty_alias<ty_f32>>>>, ty_mat3x3<ty_f32>},
     Params{ty_alias<ty_alias<ty_mat3x3<ty_alias<ty_alias<ty_f32>>>>>,
            ty_mat3x3<ty_f32>},
+
+    Params{ty_alias<ty_access<ty_alias<ty_bool_>>>, ty_access<ty_bool_>},
+    Params{ty_alias<ty_access<ty_alias<ty_vec3<ty_access<ty_f32>>>>>,
+           ty_access<ty_vec3<ty_access<ty_f32>>>},
+    Params{ty_alias<ty_access<ty_alias<ty_mat3x3<ty_access<ty_f32>>>>>,
+           ty_access<ty_mat3x3<ty_access<ty_f32>>>},
 };
 
 using CanonicalTest = ResolverTestWithParam<Params>;
