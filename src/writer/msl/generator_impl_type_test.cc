@@ -525,7 +525,8 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
           Member("tint_pad_21", ty.f32()),
       });
 
-  Global("G", s, ast::StorageClass::kStorage);
+  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+         ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 

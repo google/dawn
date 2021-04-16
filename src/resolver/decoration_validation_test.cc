@@ -418,9 +418,7 @@ INSTANTIATE_TEST_SUITE_P(
         Params{ty_vec4<f32>, (default_vec4.align - 1) * 7, false},
         Params{ty_mat2x2<f32>, (default_mat2x2.align - 1) * 7, false},
         Params{ty_mat3x3<f32>, (default_mat3x3.align - 1) * 7, false},
-        Params{ty_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}
-
-        ));
+        Params{ty_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}));
 
 }  // namespace
 }  // namespace ArrayStrideTests

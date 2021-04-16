@@ -289,8 +289,8 @@ fn tint_unused_entry_point() {
   auto got = Run<Hlsl>(src);
 
   EXPECT_EQ(expect, str(got));
-
 }
+
 }  // namespace
 }  // namespace transform
 }  // namespace tint
