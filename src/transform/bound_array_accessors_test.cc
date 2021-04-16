@@ -540,8 +540,7 @@ struct S {
   a : f32;
   b : array<f32>;
 };
-var<storage> s : [[access(read)]]
-S;
+var<storage> s : [[access(read)]] S;
 
 fn f() {
   var d : f32 = s.b[25];
@@ -555,8 +554,7 @@ struct S {
   b : array<f32>;
 };
 
-var<storage> s : [[access(read)]]
-S;
+var<storage> s : [[access(read)]] S;
 
 fn f() {
   var d : f32 = s.b[min(u32(25), (arrayLength(s.b) - 1u))];
@@ -603,8 +601,7 @@ struct S {
   b : array<f32>;
 };
 
-var<storage> s : [[access(read)]]
-S;
+var<storage> s : [[access(read)]] S;
 
 let c : u32 = 1u;
 
@@ -622,8 +619,7 @@ struct S {
   b : array<f32>;
 };
 
-var<storage> s : [[access(read)]]
-S;
+var<storage> s : [[access(read)]] S;
 
 let c : u32 = 1u;
 

@@ -50,8 +50,7 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -108,117 +107,91 @@ struct SB {
 };
 
 [[internal(intrinsic_load_i32)]]
-fn tint_symbol(buffer : [[access(read_write)]]
-SB, offset : u32) -> i32
+fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> i32
 
 [[internal(intrinsic_load_u32)]]
-fn tint_symbol_1(buffer : [[access(read_write)]]
-SB, offset : u32) -> u32
+fn tint_symbol_1(buffer : [[access(read_write)]] SB, offset : u32) -> u32
 
 [[internal(intrinsic_load_f32)]]
-fn tint_symbol_2(buffer : [[access(read_write)]]
-SB, offset : u32) -> f32
+fn tint_symbol_2(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
 [[internal(intrinsic_load_vec2_i32)]]
-fn tint_symbol_3(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec2<i32>
+fn tint_symbol_3(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<i32>
 
 [[internal(intrinsic_load_vec2_u32)]]
-fn tint_symbol_4(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec2<u32>
+fn tint_symbol_4(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<u32>
 
 [[internal(intrinsic_load_vec2_f32)]]
-fn tint_symbol_5(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec2<f32>
+fn tint_symbol_5(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<f32>
 
 [[internal(intrinsic_load_vec3_i32)]]
-fn tint_symbol_6(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec3<i32>
+fn tint_symbol_6(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<i32>
 
 [[internal(intrinsic_load_vec3_u32)]]
-fn tint_symbol_7(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec3<u32>
+fn tint_symbol_7(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<u32>
 
 [[internal(intrinsic_load_vec3_f32)]]
-fn tint_symbol_8(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec3<f32>
+fn tint_symbol_8(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<f32>
 
 [[internal(intrinsic_load_vec4_i32)]]
-fn tint_symbol_9(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec4<i32>
+fn tint_symbol_9(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<i32>
 
 [[internal(intrinsic_load_vec4_u32)]]
-fn tint_symbol_10(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec4<u32>
+fn tint_symbol_10(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<u32>
 
 [[internal(intrinsic_load_vec4_f32)]]
-fn tint_symbol_11(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec4<f32>
+fn tint_symbol_11(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<f32>
 
 [[internal(intrinsic_load_vec2_f32)]]
-fn tint_symbol_12(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec2<f32>
+fn tint_symbol_12(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<f32>
 
-fn tint_symbol_13(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat2x2<f32> {
+fn tint_symbol_13(buffer : [[access(read_write)]] SB, offset : u32) -> mat2x2<f32> {
   return mat2x2<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 8u)));
 }
 
 [[internal(intrinsic_load_vec3_f32)]]
-fn tint_symbol_14(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec3<f32>
+fn tint_symbol_14(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<f32>
 
-fn tint_symbol_15(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat2x3<f32> {
+fn tint_symbol_15(buffer : [[access(read_write)]] SB, offset : u32) -> mat2x3<f32> {
   return mat2x3<f32>(tint_symbol_14(buffer, (offset + 0u)), tint_symbol_14(buffer, (offset + 16u)));
 }
 
 [[internal(intrinsic_load_vec4_f32)]]
-fn tint_symbol_16(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec4<f32>
+fn tint_symbol_16(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<f32>
 
-fn tint_symbol_17(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat2x4<f32> {
+fn tint_symbol_17(buffer : [[access(read_write)]] SB, offset : u32) -> mat2x4<f32> {
   return mat2x4<f32>(tint_symbol_16(buffer, (offset + 0u)), tint_symbol_16(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_18(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat3x2<f32> {
+fn tint_symbol_18(buffer : [[access(read_write)]] SB, offset : u32) -> mat3x2<f32> {
   return mat3x2<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 8u)), tint_symbol_12(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_19(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat3x3<f32> {
+fn tint_symbol_19(buffer : [[access(read_write)]] SB, offset : u32) -> mat3x3<f32> {
   return mat3x3<f32>(tint_symbol_14(buffer, (offset + 0u)), tint_symbol_14(buffer, (offset + 16u)), tint_symbol_14(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_20(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat3x4<f32> {
+fn tint_symbol_20(buffer : [[access(read_write)]] SB, offset : u32) -> mat3x4<f32> {
   return mat3x4<f32>(tint_symbol_16(buffer, (offset + 0u)), tint_symbol_16(buffer, (offset + 16u)), tint_symbol_16(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_21(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat4x2<f32> {
+fn tint_symbol_21(buffer : [[access(read_write)]] SB, offset : u32) -> mat4x2<f32> {
   return mat4x2<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 8u)), tint_symbol_12(buffer, (offset + 16u)), tint_symbol_12(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_22(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat4x3<f32> {
+fn tint_symbol_22(buffer : [[access(read_write)]] SB, offset : u32) -> mat4x3<f32> {
   return mat4x3<f32>(tint_symbol_14(buffer, (offset + 0u)), tint_symbol_14(buffer, (offset + 16u)), tint_symbol_14(buffer, (offset + 32u)), tint_symbol_14(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_23(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat4x4<f32> {
+fn tint_symbol_23(buffer : [[access(read_write)]] SB, offset : u32) -> mat4x4<f32> {
   return mat4x4<f32>(tint_symbol_16(buffer, (offset + 0u)), tint_symbol_16(buffer, (offset + 16u)), tint_symbol_16(buffer, (offset + 32u)), tint_symbol_16(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_24(buffer : [[access(read_write)]]
-SB, offset : u32) -> array<vec3<f32>, 2> {
+fn tint_symbol_24(buffer : [[access(read_write)]] SB, offset : u32) -> array<vec3<f32>, 2> {
   return array<vec3<f32>, 2>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -280,8 +253,7 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -338,136 +310,110 @@ struct SB {
 };
 
 [[internal(intrinsic_store_i32)]]
-fn tint_symbol(buffer : [[access(read_write)]]
-SB, offset : u32, value : i32)
+fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32, value : i32)
 
 [[internal(intrinsic_store_u32)]]
-fn tint_symbol_1(buffer : [[access(read_write)]]
-SB, offset : u32, value : u32)
+fn tint_symbol_1(buffer : [[access(read_write)]] SB, offset : u32, value : u32)
 
 [[internal(intrinsic_store_f32)]]
-fn tint_symbol_2(buffer : [[access(read_write)]]
-SB, offset : u32, value : f32)
+fn tint_symbol_2(buffer : [[access(read_write)]] SB, offset : u32, value : f32)
 
 [[internal(intrinsic_store_vec2_u32)]]
-fn tint_symbol_3(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec2<i32>)
+fn tint_symbol_3(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<i32>)
 
 [[internal(intrinsic_store_vec2_f32)]]
-fn tint_symbol_4(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec2<u32>)
+fn tint_symbol_4(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<u32>)
 
 [[internal(intrinsic_store_vec2_i32)]]
-fn tint_symbol_5(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec2<f32>)
+fn tint_symbol_5(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<f32>)
 
 [[internal(intrinsic_store_vec3_u32)]]
-fn tint_symbol_6(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec3<i32>)
+fn tint_symbol_6(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<i32>)
 
 [[internal(intrinsic_store_vec3_f32)]]
-fn tint_symbol_7(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec3<u32>)
+fn tint_symbol_7(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<u32>)
 
 [[internal(intrinsic_store_vec3_i32)]]
-fn tint_symbol_8(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec3<f32>)
+fn tint_symbol_8(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<f32>)
 
 [[internal(intrinsic_store_vec4_u32)]]
-fn tint_symbol_9(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec4<i32>)
+fn tint_symbol_9(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<i32>)
 
 [[internal(intrinsic_store_vec4_f32)]]
-fn tint_symbol_10(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec4<u32>)
+fn tint_symbol_10(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<u32>)
 
 [[internal(intrinsic_store_vec4_i32)]]
-fn tint_symbol_11(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec4<f32>)
+fn tint_symbol_11(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<f32>)
 
 [[internal(intrinsic_store_vec2_i32)]]
-fn tint_symbol_12(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec2<f32>)
+fn tint_symbol_12(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<f32>)
 
-fn tint_symbol_13(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat2x2<f32>) {
+fn tint_symbol_13(buffer : [[access(read_write)]] SB, offset : u32, value : mat2x2<f32>) {
   tint_symbol_12(buffer, (offset + 0u), value[0u]);
   tint_symbol_12(buffer, (offset + 8u), value[1u]);
 }
 
 [[internal(intrinsic_store_vec3_i32)]]
-fn tint_symbol_14(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec3<f32>)
+fn tint_symbol_14(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<f32>)
 
-fn tint_symbol_15(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat2x3<f32>) {
+fn tint_symbol_15(buffer : [[access(read_write)]] SB, offset : u32, value : mat2x3<f32>) {
   tint_symbol_14(buffer, (offset + 0u), value[0u]);
   tint_symbol_14(buffer, (offset + 16u), value[1u]);
 }
 
 [[internal(intrinsic_store_vec4_i32)]]
-fn tint_symbol_16(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec4<f32>)
+fn tint_symbol_16(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<f32>)
 
-fn tint_symbol_17(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat2x4<f32>) {
+fn tint_symbol_17(buffer : [[access(read_write)]] SB, offset : u32, value : mat2x4<f32>) {
   tint_symbol_16(buffer, (offset + 0u), value[0u]);
   tint_symbol_16(buffer, (offset + 16u), value[1u]);
 }
 
-fn tint_symbol_18(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat3x2<f32>) {
+fn tint_symbol_18(buffer : [[access(read_write)]] SB, offset : u32, value : mat3x2<f32>) {
   tint_symbol_12(buffer, (offset + 0u), value[0u]);
   tint_symbol_12(buffer, (offset + 8u), value[1u]);
   tint_symbol_12(buffer, (offset + 16u), value[2u]);
 }
 
-fn tint_symbol_19(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat3x3<f32>) {
+fn tint_symbol_19(buffer : [[access(read_write)]] SB, offset : u32, value : mat3x3<f32>) {
   tint_symbol_14(buffer, (offset + 0u), value[0u]);
   tint_symbol_14(buffer, (offset + 16u), value[1u]);
   tint_symbol_14(buffer, (offset + 32u), value[2u]);
 }
 
-fn tint_symbol_20(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat3x4<f32>) {
+fn tint_symbol_20(buffer : [[access(read_write)]] SB, offset : u32, value : mat3x4<f32>) {
   tint_symbol_16(buffer, (offset + 0u), value[0u]);
   tint_symbol_16(buffer, (offset + 16u), value[1u]);
   tint_symbol_16(buffer, (offset + 32u), value[2u]);
 }
 
-fn tint_symbol_21(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat4x2<f32>) {
+fn tint_symbol_21(buffer : [[access(read_write)]] SB, offset : u32, value : mat4x2<f32>) {
   tint_symbol_12(buffer, (offset + 0u), value[0u]);
   tint_symbol_12(buffer, (offset + 8u), value[1u]);
   tint_symbol_12(buffer, (offset + 16u), value[2u]);
   tint_symbol_12(buffer, (offset + 24u), value[3u]);
 }
 
-fn tint_symbol_22(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat4x3<f32>) {
+fn tint_symbol_22(buffer : [[access(read_write)]] SB, offset : u32, value : mat4x3<f32>) {
   tint_symbol_14(buffer, (offset + 0u), value[0u]);
   tint_symbol_14(buffer, (offset + 16u), value[1u]);
   tint_symbol_14(buffer, (offset + 32u), value[2u]);
   tint_symbol_14(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_23(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat4x4<f32>) {
+fn tint_symbol_23(buffer : [[access(read_write)]] SB, offset : u32, value : mat4x4<f32>) {
   tint_symbol_16(buffer, (offset + 0u), value[0u]);
   tint_symbol_16(buffer, (offset + 16u), value[1u]);
   tint_symbol_16(buffer, (offset + 32u), value[2u]);
   tint_symbol_16(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_24(buffer : [[access(read_write)]]
-SB, offset : u32, value : array<vec3<f32>, 2>) {
+fn tint_symbol_24(buffer : [[access(read_write)]] SB, offset : u32, value : array<vec3<f32>, 2>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
 }
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -529,8 +475,7 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -566,122 +511,95 @@ struct SB {
 };
 
 [[internal(intrinsic_load_i32)]]
-fn tint_symbol(buffer : [[access(read_write)]]
-SB, offset : u32) -> i32
+fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> i32
 
 [[internal(intrinsic_load_u32)]]
-fn tint_symbol_1(buffer : [[access(read_write)]]
-SB, offset : u32) -> u32
+fn tint_symbol_1(buffer : [[access(read_write)]] SB, offset : u32) -> u32
 
 [[internal(intrinsic_load_f32)]]
-fn tint_symbol_2(buffer : [[access(read_write)]]
-SB, offset : u32) -> f32
+fn tint_symbol_2(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
 [[internal(intrinsic_load_vec2_i32)]]
-fn tint_symbol_3(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec2<i32>
+fn tint_symbol_3(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<i32>
 
 [[internal(intrinsic_load_vec2_u32)]]
-fn tint_symbol_4(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec2<u32>
+fn tint_symbol_4(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<u32>
 
 [[internal(intrinsic_load_vec2_f32)]]
-fn tint_symbol_5(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec2<f32>
+fn tint_symbol_5(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<f32>
 
 [[internal(intrinsic_load_vec3_i32)]]
-fn tint_symbol_6(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec3<i32>
+fn tint_symbol_6(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<i32>
 
 [[internal(intrinsic_load_vec3_u32)]]
-fn tint_symbol_7(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec3<u32>
+fn tint_symbol_7(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<u32>
 
 [[internal(intrinsic_load_vec3_f32)]]
-fn tint_symbol_8(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec3<f32>
+fn tint_symbol_8(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<f32>
 
 [[internal(intrinsic_load_vec4_i32)]]
-fn tint_symbol_9(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec4<i32>
+fn tint_symbol_9(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<i32>
 
 [[internal(intrinsic_load_vec4_u32)]]
-fn tint_symbol_10(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec4<u32>
+fn tint_symbol_10(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<u32>
 
 [[internal(intrinsic_load_vec4_f32)]]
-fn tint_symbol_11(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec4<f32>
+fn tint_symbol_11(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<f32>
 
 [[internal(intrinsic_load_vec2_f32)]]
-fn tint_symbol_12(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec2<f32>
+fn tint_symbol_12(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<f32>
 
-fn tint_symbol_13(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat2x2<f32> {
+fn tint_symbol_13(buffer : [[access(read_write)]] SB, offset : u32) -> mat2x2<f32> {
   return mat2x2<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 8u)));
 }
 
 [[internal(intrinsic_load_vec3_f32)]]
-fn tint_symbol_14(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec3<f32>
+fn tint_symbol_14(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<f32>
 
-fn tint_symbol_15(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat2x3<f32> {
+fn tint_symbol_15(buffer : [[access(read_write)]] SB, offset : u32) -> mat2x3<f32> {
   return mat2x3<f32>(tint_symbol_14(buffer, (offset + 0u)), tint_symbol_14(buffer, (offset + 16u)));
 }
 
 [[internal(intrinsic_load_vec4_f32)]]
-fn tint_symbol_16(buffer : [[access(read_write)]]
-SB, offset : u32) -> vec4<f32>
+fn tint_symbol_16(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<f32>
 
-fn tint_symbol_17(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat2x4<f32> {
+fn tint_symbol_17(buffer : [[access(read_write)]] SB, offset : u32) -> mat2x4<f32> {
   return mat2x4<f32>(tint_symbol_16(buffer, (offset + 0u)), tint_symbol_16(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_18(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat3x2<f32> {
+fn tint_symbol_18(buffer : [[access(read_write)]] SB, offset : u32) -> mat3x2<f32> {
   return mat3x2<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 8u)), tint_symbol_12(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_19(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat3x3<f32> {
+fn tint_symbol_19(buffer : [[access(read_write)]] SB, offset : u32) -> mat3x3<f32> {
   return mat3x3<f32>(tint_symbol_14(buffer, (offset + 0u)), tint_symbol_14(buffer, (offset + 16u)), tint_symbol_14(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_20(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat3x4<f32> {
+fn tint_symbol_20(buffer : [[access(read_write)]] SB, offset : u32) -> mat3x4<f32> {
   return mat3x4<f32>(tint_symbol_16(buffer, (offset + 0u)), tint_symbol_16(buffer, (offset + 16u)), tint_symbol_16(buffer, (offset + 32u)));
 }
 
-fn tint_symbol_21(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat4x2<f32> {
+fn tint_symbol_21(buffer : [[access(read_write)]] SB, offset : u32) -> mat4x2<f32> {
   return mat4x2<f32>(tint_symbol_12(buffer, (offset + 0u)), tint_symbol_12(buffer, (offset + 8u)), tint_symbol_12(buffer, (offset + 16u)), tint_symbol_12(buffer, (offset + 24u)));
 }
 
-fn tint_symbol_22(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat4x3<f32> {
+fn tint_symbol_22(buffer : [[access(read_write)]] SB, offset : u32) -> mat4x3<f32> {
   return mat4x3<f32>(tint_symbol_14(buffer, (offset + 0u)), tint_symbol_14(buffer, (offset + 16u)), tint_symbol_14(buffer, (offset + 32u)), tint_symbol_14(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_23(buffer : [[access(read_write)]]
-SB, offset : u32) -> mat4x4<f32> {
+fn tint_symbol_23(buffer : [[access(read_write)]] SB, offset : u32) -> mat4x4<f32> {
   return mat4x4<f32>(tint_symbol_16(buffer, (offset + 0u)), tint_symbol_16(buffer, (offset + 16u)), tint_symbol_16(buffer, (offset + 32u)), tint_symbol_16(buffer, (offset + 48u)));
 }
 
-fn tint_symbol_24(buffer : [[access(read_write)]]
-SB, offset : u32) -> array<vec3<f32>, 2> {
+fn tint_symbol_24(buffer : [[access(read_write)]] SB, offset : u32) -> array<vec3<f32>, 2> {
   return array<vec3<f32>, 2>(tint_symbol_8(buffer, (offset + 0u)), tint_symbol_8(buffer, (offset + 16u)));
 }
 
-fn tint_symbol_25(buffer : [[access(read_write)]]
-SB, offset : u32) -> SB {
+fn tint_symbol_25(buffer : [[access(read_write)]] SB, offset : u32) -> SB {
   return SB(tint_symbol(buffer, (offset + 0u)), tint_symbol_1(buffer, (offset + 4u)), tint_symbol_2(buffer, (offset + 8u)), tint_symbol_3(buffer, (offset + 16u)), tint_symbol_4(buffer, (offset + 24u)), tint_symbol_5(buffer, (offset + 32u)), tint_symbol_6(buffer, (offset + 48u)), tint_symbol_7(buffer, (offset + 64u)), tint_symbol_8(buffer, (offset + 80u)), tint_symbol_9(buffer, (offset + 96u)), tint_symbol_10(buffer, (offset + 112u)), tint_symbol_11(buffer, (offset + 128u)), tint_symbol_13(buffer, (offset + 144u)), tint_symbol_15(buffer, (offset + 160u)), tint_symbol_17(buffer, (offset + 192u)), tint_symbol_18(buffer, (offset + 224u)), tint_symbol_19(buffer, (offset + 256u)), tint_symbol_20(buffer, (offset + 304u)), tint_symbol_21(buffer, (offset + 352u)), tint_symbol_22(buffer, (offset + 384u)), tint_symbol_23(buffer, (offset + 448u)), tint_symbol_24(buffer, (offset + 512u)));
 }
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -722,8 +640,7 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -759,136 +676,110 @@ struct SB {
 };
 
 [[internal(intrinsic_store_i32)]]
-fn tint_symbol(buffer : [[access(read_write)]]
-SB, offset : u32, value : i32)
+fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32, value : i32)
 
 [[internal(intrinsic_store_u32)]]
-fn tint_symbol_1(buffer : [[access(read_write)]]
-SB, offset : u32, value : u32)
+fn tint_symbol_1(buffer : [[access(read_write)]] SB, offset : u32, value : u32)
 
 [[internal(intrinsic_store_f32)]]
-fn tint_symbol_2(buffer : [[access(read_write)]]
-SB, offset : u32, value : f32)
+fn tint_symbol_2(buffer : [[access(read_write)]] SB, offset : u32, value : f32)
 
 [[internal(intrinsic_store_vec2_u32)]]
-fn tint_symbol_3(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec2<i32>)
+fn tint_symbol_3(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<i32>)
 
 [[internal(intrinsic_store_vec2_f32)]]
-fn tint_symbol_4(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec2<u32>)
+fn tint_symbol_4(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<u32>)
 
 [[internal(intrinsic_store_vec2_i32)]]
-fn tint_symbol_5(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec2<f32>)
+fn tint_symbol_5(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<f32>)
 
 [[internal(intrinsic_store_vec3_u32)]]
-fn tint_symbol_6(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec3<i32>)
+fn tint_symbol_6(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<i32>)
 
 [[internal(intrinsic_store_vec3_f32)]]
-fn tint_symbol_7(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec3<u32>)
+fn tint_symbol_7(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<u32>)
 
 [[internal(intrinsic_store_vec3_i32)]]
-fn tint_symbol_8(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec3<f32>)
+fn tint_symbol_8(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<f32>)
 
 [[internal(intrinsic_store_vec4_u32)]]
-fn tint_symbol_9(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec4<i32>)
+fn tint_symbol_9(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<i32>)
 
 [[internal(intrinsic_store_vec4_f32)]]
-fn tint_symbol_10(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec4<u32>)
+fn tint_symbol_10(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<u32>)
 
 [[internal(intrinsic_store_vec4_i32)]]
-fn tint_symbol_11(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec4<f32>)
+fn tint_symbol_11(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<f32>)
 
 [[internal(intrinsic_store_vec2_i32)]]
-fn tint_symbol_12(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec2<f32>)
+fn tint_symbol_12(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<f32>)
 
-fn tint_symbol_13(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat2x2<f32>) {
+fn tint_symbol_13(buffer : [[access(read_write)]] SB, offset : u32, value : mat2x2<f32>) {
   tint_symbol_12(buffer, (offset + 0u), value[0u]);
   tint_symbol_12(buffer, (offset + 8u), value[1u]);
 }
 
 [[internal(intrinsic_store_vec3_i32)]]
-fn tint_symbol_14(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec3<f32>)
+fn tint_symbol_14(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<f32>)
 
-fn tint_symbol_15(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat2x3<f32>) {
+fn tint_symbol_15(buffer : [[access(read_write)]] SB, offset : u32, value : mat2x3<f32>) {
   tint_symbol_14(buffer, (offset + 0u), value[0u]);
   tint_symbol_14(buffer, (offset + 16u), value[1u]);
 }
 
 [[internal(intrinsic_store_vec4_i32)]]
-fn tint_symbol_16(buffer : [[access(read_write)]]
-SB, offset : u32, value : vec4<f32>)
+fn tint_symbol_16(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<f32>)
 
-fn tint_symbol_17(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat2x4<f32>) {
+fn tint_symbol_17(buffer : [[access(read_write)]] SB, offset : u32, value : mat2x4<f32>) {
   tint_symbol_16(buffer, (offset + 0u), value[0u]);
   tint_symbol_16(buffer, (offset + 16u), value[1u]);
 }
 
-fn tint_symbol_18(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat3x2<f32>) {
+fn tint_symbol_18(buffer : [[access(read_write)]] SB, offset : u32, value : mat3x2<f32>) {
   tint_symbol_12(buffer, (offset + 0u), value[0u]);
   tint_symbol_12(buffer, (offset + 8u), value[1u]);
   tint_symbol_12(buffer, (offset + 16u), value[2u]);
 }
 
-fn tint_symbol_19(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat3x3<f32>) {
+fn tint_symbol_19(buffer : [[access(read_write)]] SB, offset : u32, value : mat3x3<f32>) {
   tint_symbol_14(buffer, (offset + 0u), value[0u]);
   tint_symbol_14(buffer, (offset + 16u), value[1u]);
   tint_symbol_14(buffer, (offset + 32u), value[2u]);
 }
 
-fn tint_symbol_20(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat3x4<f32>) {
+fn tint_symbol_20(buffer : [[access(read_write)]] SB, offset : u32, value : mat3x4<f32>) {
   tint_symbol_16(buffer, (offset + 0u), value[0u]);
   tint_symbol_16(buffer, (offset + 16u), value[1u]);
   tint_symbol_16(buffer, (offset + 32u), value[2u]);
 }
 
-fn tint_symbol_21(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat4x2<f32>) {
+fn tint_symbol_21(buffer : [[access(read_write)]] SB, offset : u32, value : mat4x2<f32>) {
   tint_symbol_12(buffer, (offset + 0u), value[0u]);
   tint_symbol_12(buffer, (offset + 8u), value[1u]);
   tint_symbol_12(buffer, (offset + 16u), value[2u]);
   tint_symbol_12(buffer, (offset + 24u), value[3u]);
 }
 
-fn tint_symbol_22(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat4x3<f32>) {
+fn tint_symbol_22(buffer : [[access(read_write)]] SB, offset : u32, value : mat4x3<f32>) {
   tint_symbol_14(buffer, (offset + 0u), value[0u]);
   tint_symbol_14(buffer, (offset + 16u), value[1u]);
   tint_symbol_14(buffer, (offset + 32u), value[2u]);
   tint_symbol_14(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_23(buffer : [[access(read_write)]]
-SB, offset : u32, value : mat4x4<f32>) {
+fn tint_symbol_23(buffer : [[access(read_write)]] SB, offset : u32, value : mat4x4<f32>) {
   tint_symbol_16(buffer, (offset + 0u), value[0u]);
   tint_symbol_16(buffer, (offset + 16u), value[1u]);
   tint_symbol_16(buffer, (offset + 32u), value[2u]);
   tint_symbol_16(buffer, (offset + 48u), value[3u]);
 }
 
-fn tint_symbol_24(buffer : [[access(read_write)]]
-SB, offset : u32, value : array<vec3<f32>, 2>) {
+fn tint_symbol_24(buffer : [[access(read_write)]] SB, offset : u32, value : array<vec3<f32>, 2>) {
   tint_symbol_8(buffer, (offset + 0u), value[0u]);
   tint_symbol_8(buffer, (offset + 16u), value[1u]);
 }
 
-fn tint_symbol_25(buffer : [[access(read_write)]]
-SB, offset : u32, value : SB) {
+fn tint_symbol_25(buffer : [[access(read_write)]] SB, offset : u32, value : SB) {
   tint_symbol(buffer, (offset + 0u), value.a);
   tint_symbol_1(buffer, (offset + 4u), value.b);
   tint_symbol_2(buffer, (offset + 8u), value.c);
@@ -913,8 +804,7 @@ SB, offset : u32, value : SB) {
   tint_symbol_24(buffer, (offset + 512u), value.v);
 }
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -948,8 +838,7 @@ struct SB {
   b : [[stride(256)]] array<S2>;
 };
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -985,11 +874,9 @@ struct SB {
 };
 
 [[internal(intrinsic_load_f32)]]
-fn tint_symbol(buffer : [[access(read_write)]]
-SB, offset : u32) -> f32
+fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -1023,8 +910,7 @@ struct SB {
   b : [[stride(256)]] array<S2>;
 };
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -1056,11 +942,9 @@ struct SB {
 };
 
 [[internal(intrinsic_load_f32)]]
-fn tint_symbol(buffer : [[access(read_write)]]
-SB, offset : u32) -> f32
+fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -1105,8 +989,7 @@ struct SB {
   b : A2_Array;
 };
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {
@@ -1146,11 +1029,9 @@ struct SB {
 };
 
 [[internal(intrinsic_load_f32)]]
-fn tint_symbol(buffer : [[access(read_write)]]
-SB, offset : u32) -> f32
+fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
-var<storage> sb : [[access(read_write)]]
-SB;
+var<storage> sb : [[access(read_write)]] SB;
 
 [[stage(compute)]]
 fn main() {

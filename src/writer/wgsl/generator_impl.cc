@@ -383,7 +383,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
       diagnostics_.add_error("invalid access control");
       return false;
     }
-    out_ << ")]]" << std::endl;
+    out_ << ")]] ";
     if (!EmitType(ac->type())) {
       return false;
     }

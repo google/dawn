@@ -256,8 +256,7 @@ struct Data {
   d : f32;
 };
 
-[[binding(0), group(0)]] var<storage> data : [[access(read_write)]]
-Data;
+[[binding(0), group(0)]] var<storage> data : [[access(read_write)]] Data;
 
 [[stage(compute)]]
 fn a() {

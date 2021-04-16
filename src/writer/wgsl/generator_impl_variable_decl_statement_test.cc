@@ -98,7 +98,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Texture) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var t : [[access(read)]]\ntexture_1d<f32>;\n");
+  EXPECT_EQ(gen.result(), "  var t : [[access(read)]] texture_1d<f32>;\n");
 }
 
 }  // namespace

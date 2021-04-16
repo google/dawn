@@ -118,8 +118,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]]
-TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
 
 var<private> var_a : f32;
 
@@ -161,8 +160,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]]
-TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
 
 var<private> var_a : f32;
 
@@ -204,8 +202,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(5)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]]
-TintVertexData;
+[[binding(0), group(5)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
 
 var<private> var_a : f32;
 
@@ -250,11 +247,9 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]]
-TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
 
-[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : [[access(read)]]
-TintVertexData;
+[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : [[access(read)]] TintVertexData;
 
 var<private> var_a : f32;
 
@@ -315,8 +310,7 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]]
-TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
 
 var<private> var_a : f32;
 
@@ -366,14 +360,11 @@ struct TintVertexData {
   tint_vertex_data : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]]
-TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0 : [[access(read)]] TintVertexData;
 
-[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : [[access(read)]]
-TintVertexData;
+[[binding(1), group(4)]] var<storage> tint_pulling_vertex_buffer_1 : [[access(read)]] TintVertexData;
 
-[[binding(2), group(4)]] var<storage> tint_pulling_vertex_buffer_2 : [[access(read)]]
-TintVertexData;
+[[binding(2), group(4)]] var<storage> tint_pulling_vertex_buffer_2 : [[access(read)]] TintVertexData;
 
 var<private> var_a : vec2<f32>;
 
@@ -432,8 +423,7 @@ struct TintVertexData {
   tint_vertex_data_1 : [[stride(4)]] array<u32>;
 };
 
-[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0_1 : [[access(read)]]
-TintVertexData;
+[[binding(0), group(4)]] var<storage> tint_pulling_vertex_buffer_0_1 : [[access(read)]] TintVertexData;
 
 var<private> var_a : f32;
 
