@@ -519,28 +519,19 @@ if(${TINT_BUILD_TESTS})
     type/type_manager_test.cc
     type/u32_type_test.cc
     type/vector_type_test.cc
+    utils/command_${TINT_OS_CC_SUFFIX}.cc
     utils/command_test.cc
     utils/command.h
     utils/get_or_create_test.cc
     utils/hash_test.cc
     utils/math_test.cc
+    utils/tmpfile_${TINT_OS_CC_SUFFIX}.cc
     utils/tmpfile_test.cc
     utils/tmpfile.h
     utils/unique_vector_test.cc
     writer/append_vector_test.cc
     writer/float_to_string_test.cc
   )
-
-  if(UNIX OR APPLE)
-    list(APPEND TINT_TEST_SRCS utils/tmpfile_posix.cc)
-    list(APPEND TINT_TEST_SRCS utils/command_posix.cc)
-  elseif(WIN32)
-    list(APPEND TINT_TEST_SRCS utils/command_windows.cc)
-    list(APPEND TINT_TEST_SRCS utils/tmpfile_windows.cc)
-  else()
-    list(APPEND TINT_TEST_SRCS utils/command_other.cc)
-    list(APPEND TINT_TEST_SRCS utils/tmpfile_other.cc)
-  endif()
 
   if(${TINT_BUILD_SPV_READER})
     list(APPEND TINT_TEST_SRCS

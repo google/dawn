@@ -95,6 +95,11 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
         ${SRC_DIR}/test/test-all.sh "${BUILD_DIR}/tint"
     hide_cmds
 
+    status "Checking _other.cc files also build"
+    show_cmds
+        cmake ${SRC_DIR} ${CMAKE_FLAGS} ${COMMON_CMAKE_FLAGS} -DTINT_BUILD_AS_OTHER_OS=1
+        make --jobs=$(nproc)
+    hide_cmds
 else
     status "Unsupported build system: $BUILD_SYSTEM"
     exit 1
