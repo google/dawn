@@ -19,7 +19,7 @@ namespace utils {
 
 Command::Command(const std::string&) {}
 
-Command Command::LookPath(const std::string& executable) {
+Command Command::LookPath(const std::string&) {
   return Command("");
 }
 
@@ -27,8 +27,7 @@ bool Command::Found() const {
   return false;
 }
 
-Command::Output Command::Exec(
-    std::initializer_list<std::string> arguments) const {
+Command::Output Command::Exec(std::initializer_list<std::string>) const {
   Output out;
   out.err = "Command not supported by this target";
   return out;

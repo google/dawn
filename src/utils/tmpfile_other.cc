@@ -21,7 +21,7 @@ TmpFile::TmpFile(std::string) {}
 
 TmpFile::~TmpFile() = default;
 
-bool TmpFile::Append(const void* data, size_t size) const {
+bool TmpFile::Append(const void*, size_t) const {
   return false;
 }
 
