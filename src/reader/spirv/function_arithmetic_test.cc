@@ -1478,6 +1478,79 @@ TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
       << got;
 }
 
+struct IntrinsicData {
+  const std::string spirv;
+  const std::string wgsl;
+};
+inline std::ostream& operator<<(std::ostream& out, IntrinsicData data) {
+  out << "OpData{" << data.spirv << "," << data.wgsl << "}";
+  return out;
+}
+struct ArgAndTypeData {
+  const std::string spirv_type;
+  const std::string spirv_arg;
+  const std::string ast_type;
+};
+inline std::ostream& operator<<(std::ostream& out, ArgAndTypeData data) {
+  out << "ArgAndTypeData{" << data.spirv_type << "," << data.spirv_arg << ","
+      << data.ast_type << "}";
+  return out;
+}
+
+using SpvBinaryDerivativeTest = SpvParserTestBase<
+    ::testing::TestWithParam<std::tuple<IntrinsicData, ArgAndTypeData>>>;
+
+TEST_P(SpvBinaryDerivativeTest, Derivatives) {
+  auto& intrinsic = std::get<0>(GetParam());
+  auto& arg = std::get<1>(GetParam());
+
+  const auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpCopyObject %)" +
+                        arg.spirv_type + " %" + arg.spirv_arg + R"(
+     %2 = )" + intrinsic.spirv +
+                        " %" + arg.spirv_type + R"( %1
+     OpReturn
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
+    x_2
+    none
+    )" + arg.ast_type + R"(
+    {
+      Call[not set]{
+        Identifier[not set]{)" + intrinsic.wgsl + R"(}
+        (
+          Identifier[not set]{x_1}
+        )
+      }
+    }
+  })"));
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvBinaryDerivativeTest,
+    SpvBinaryDerivativeTest,
+    testing::Combine(
+        ::testing::Values(IntrinsicData{"OpDPdx", "dpdx"},
+                          IntrinsicData{"OpDPdy", "dpdy"},
+                          IntrinsicData{"OpFwidth", "fwidth"},
+                          IntrinsicData{"OpDPdxFine", "dpdxFine"},
+                          IntrinsicData{"OpDPdyFine", "dpdyFine"},
+                          IntrinsicData{"OpFwidthFine", "fwidthFine"},
+                          IntrinsicData{"OpDPdxCoarse", "dpdxCoarse"},
+                          IntrinsicData{"OpDPdyCoarse", "dpdyCoarse"},
+                          IntrinsicData{"OpFwidthCoarse", "fwidthCoarse"}),
+        ::testing::Values(
+            ArgAndTypeData{"float", "float_50", "__f32"},
+            ArgAndTypeData{"v2float", "v2float_50_60", "__vec_2__f32"},
+            ArgAndTypeData{"v3float", "v3float_50_60_70", "__vec_3__f32"})));
+
 // TODO(dneto): OpSRem. Missing from WGSL
 // https://github.com/gpuweb/gpuweb/issues/702
 

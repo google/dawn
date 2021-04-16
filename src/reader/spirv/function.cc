@@ -442,6 +442,24 @@ semantic::IntrinsicType GetIntrinsic(SpvOp opcode) {
       return semantic::IntrinsicType::kReverseBits;
     case SpvOpDot:
       return semantic::IntrinsicType::kDot;
+    case SpvOpDPdx:
+      return semantic::IntrinsicType::kDpdx;
+    case SpvOpDPdy:
+      return semantic::IntrinsicType::kDpdy;
+    case SpvOpFwidth:
+      return semantic::IntrinsicType::kFwidth;
+    case SpvOpDPdxFine:
+      return semantic::IntrinsicType::kDpdxFine;
+    case SpvOpDPdyFine:
+      return semantic::IntrinsicType::kDpdyFine;
+    case SpvOpFwidthFine:
+      return semantic::IntrinsicType::kFwidthFine;
+    case SpvOpDPdxCoarse:
+      return semantic::IntrinsicType::kDpdxCoarse;
+    case SpvOpDPdyCoarse:
+      return semantic::IntrinsicType::kDpdyCoarse;
+    case SpvOpFwidthCoarse:
+      return semantic::IntrinsicType::kFwidthCoarse;
     default:
       break;
   }
