@@ -488,6 +488,7 @@ if(${TINT_BUILD_TESTS})
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h
     resolver/resolver_test.cc
+    resolver/storage_class_validation_test.cc
     resolver/struct_layout_test.cc
     resolver/struct_pipeline_stage_use_test.cc
     resolver/struct_storage_class_use_test.cc

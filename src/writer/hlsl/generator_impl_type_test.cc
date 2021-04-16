@@ -177,7 +177,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
                                Member("a", ty.i32()),
                                Member("b", ty.f32()),
                            });
-  Global("g", s, ast::StorageClass::kStorage);
+  Global("g", ty.access(ast::AccessControl::kReadWrite, s),
+         ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 

@@ -231,7 +231,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
                Member("z", ty.f32()),
            });
 
-  Global("G", s, ast::StorageClass::kStorage);
+  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+         ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 
@@ -333,7 +334,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                                Member("e", ty.f32()),
                            });
 
-  Global("G", s, ast::StorageClass::kStorage);
+  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+         ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 
@@ -422,7 +424,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                 },
                 ast::DecorationList{create<ast::StructBlockDecoration>()});
 
-  Global("G", s, ast::StorageClass::kStorage);
+  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+         ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 
@@ -500,7 +503,8 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("G", s, ast::StorageClass::kStorage);
+  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+         ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 

@@ -1379,7 +1379,8 @@ OpFunctionEnd
 TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
   auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))},
                       {create<ast::StructBlockDecoration>()});
-  Global("b", s, ast::StorageClass::kStorage, nullptr,
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
+  Global("b", ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
@@ -1428,8 +1429,8 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
                           Member(4, "a", ty.array<f32>(4)),
                       },
                       {create<ast::StructBlockDecoration>()});
-
-  Global("b", s, ast::StorageClass::kStorage, nullptr,
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
+  Global("b", ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),

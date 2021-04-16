@@ -56,15 +56,6 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableWithStorageClass_Pass) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverTypeValidationTest, GlobalVariableNoStorageClass_Fail) {
-  // var global_var: f32;
-  Global(Source{{12, 34}}, "global_var", ty.f32(), ast::StorageClass::kNone);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error v-0022: global variables must have a storage class");
-}
-
 TEST_F(ResolverTypeValidationTest, GlobalConstantWithStorageClass_Fail) {
   // const<in> global_var: f32;
   AST().AddGlobalVariable(

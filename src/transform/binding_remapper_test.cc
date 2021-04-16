@@ -30,9 +30,11 @@ TEST_F(BindingRemapperTest, NoRemappings) {
 struct S {
 };
 
-[[group(2), binding(1)]] var<storage> a : S;
+[[group(2), binding(1)]] var<storage> a : [[access(read)]]
+S;
 
-[[group(3), binding(2)]] var<storage> b : S;
+[[group(3), binding(2)]] var<storage> b : [[access(read)]]
+S;
 
 [[stage(compute)]]
 fn f() {
@@ -55,9 +57,11 @@ TEST_F(BindingRemapperTest, RemapBindingPoints) {
 struct S {
 };
 
-[[group(2), binding(1)]] var<storage> a : S;
+[[group(2), binding(1)]] var<storage> a : [[access(read)]]
+S;
 
-[[group(3), binding(2)]] var<storage> b : S;
+[[group(3), binding(2)]] var<storage> b : [[access(read)]]
+S;
 
 [[stage(compute)]]
 fn f() {
@@ -69,9 +73,11 @@ fn f() {
 struct S {
 };
 
-[[group(1), binding(2)]] var<storage> a : S;
+[[group(1), binding(2)]] var<storage> a : [[access(read)]]
+S;
 
-[[group(3), binding(2)]] var<storage> b : S;
+[[group(3), binding(2)]] var<storage> b : [[access(read)]]
+S;
 
 [[stage(compute)]]
 fn f() {
@@ -103,7 +109,8 @@ S;
 [[group(3), binding(2)]] var<storage> b : [[access(write)]]
 S;
 
-[[group(4), binding(3)]] var<storage> c : S;
+[[group(4), binding(3)]] var<storage> c : [[access(read)]]
+S;
 
 [[stage(compute)]]
 fn f() {
@@ -216,7 +223,8 @@ struct S {
 [[group(2), binding(1)]] var<storage> a : [[access(read)]]
 S;
 
-[[group(3), binding(2)]] var<storage> b : S;
+[[group(3), binding(2)]] var<storage> b : [[access(read)]]
+S;
 
 [[stage(compute)]]
 fn f() {
@@ -260,8 +268,10 @@ TEST_F(BindingRemapperTest, NoData) {
 struct S {
 };
 
-[[group(2), binding(1)]] var<storage> a : S;
-[[group(3), binding(2)]] var<storage> b : S;
+[[group(2), binding(1)]] var<storage> a : [[access(read)]]
+S;
+[[group(3), binding(2)]] var<storage> b : [[access(read)]]
+S;
 
 [[stage(compute)]]
 fn f() {}

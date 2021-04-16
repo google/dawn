@@ -25,32 +25,10 @@ namespace {
 
 using ResolverHostShareableValidationTest = ResolverTest;
 
-TEST_F(ResolverHostShareableValidationTest, Bool) {
-  Global(Source{{56, 78}}, "g", ty.bool_(), ast::StorageClass::kStorage);
-
-  ASSERT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(
-      r()->error(),
-      R"(56:78 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
-56:78 note: while instantiating variable g)");
-}
-
-TEST_F(ResolverHostShareableValidationTest, Pointer) {
-  Global(Source{{56, 78}}, "g", ty.pointer<i32>(ast::StorageClass::kInput),
-         ast::StorageClass::kStorage);
-
-  ASSERT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(
-      r()->error(),
-      R"(56:78 error: Type 'ptr<in, i32>' cannot be used in storage class 'storage' as it is non-host-shareable
-56:78 note: while instantiating variable g)");
-}
-
 TEST_F(ResolverHostShareableValidationTest, BoolMember) {
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.bool_())});
-  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage);
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
 
@@ -63,7 +41,8 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
 
 TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.vec3<bool>())});
-  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage);
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
 
@@ -77,22 +56,9 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
 TEST_F(ResolverHostShareableValidationTest, Aliases) {
   auto* a1 = ty.alias("a1", ty.bool_());
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", a1)});
-  auto* a2 = ty.alias("a2", s);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* a2 = ty.alias("a2", ac);
   Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage);
-
-  ASSERT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(
-      r()->error(),
-      R"(56:78 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
-12:34 note: while analysing structure member S.x
-56:78 note: while instantiating variable g)");
-}
-
-TEST_F(ResolverHostShareableValidationTest, AccessControl) {
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.bool_())});
-  auto* a = create<type::AccessControl>(ast::AccessControl::kReadOnly, s);
-  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
 
@@ -109,7 +75,8 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
   auto* i3 = Structure("I3", {Member(Source{{5, 6}}, "z", i2)});
 
   auto* s = Structure("S", {Member(Source{{7, 8}}, "m", i3)});
-  Global(Source{{9, 10}}, "g", s, ast::StorageClass::kStorage);
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  Global(Source{{9, 10}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
 
@@ -143,7 +110,8 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
                       });
 
   auto* s = Structure("S", {Member(Source{{7, 8}}, "m", i3)});
-  Global(Source{{9, 10}}, "g", s, ast::StorageClass::kStorage);
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  Global(Source{{9, 10}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }

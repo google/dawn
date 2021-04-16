@@ -253,6 +253,27 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     return false;
   }
 
+  if (info->storage_class == ast::StorageClass::kStorage) {
+    // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
+    // Variables in the storage storage class and variables with a storage
+    // texture type must have an access attribute applied to the store type.
+
+    // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
+    // A variable in the storage storage class is a storage buffer variable. Its
+    // store type must be a host-shareable structure type with block attribute,
+    // satisfying the storage class constraints.
+
+    auto* access = info->type->As<type::AccessControl>();
+    auto* str = access ? access->type()->As<type::Struct>() : nullptr;
+    if (!str) {
+      diagnostics_.add_error(
+          "variables declared in the <storage> storage class must be of an "
+          "[[access]] qualified structure type",
+          var->source());
+      return false;
+    }
+  }
+
   for (auto* deco : var->decorations()) {
     if (!(deco->Is<ast::BindingDecoration>() ||
           deco->Is<ast::BuiltinDecoration>() ||

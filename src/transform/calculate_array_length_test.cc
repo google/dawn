@@ -30,7 +30,8 @@ struct SB {
   arr : array<i32>;
 };
 
-var<storage> sb : SB;
+var<storage> sb : [[access(read)]]
+SB;
 
 [[stage(vertex)]]
 fn main() {
@@ -48,7 +49,8 @@ struct SB {
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
-var<storage> sb : SB;
+var<storage> sb : [[access(read)]]
+SB;
 
 [[stage(vertex)]]
 fn main() {
@@ -72,7 +74,8 @@ struct SB {
   arr : array<i32>;
 };
 
-var<storage> sb : SB;
+var<storage> sb : [[access(read)]]
+SB;
 
 [[stage(vertex)]]
 fn main() {
@@ -92,7 +95,8 @@ struct SB {
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
-var<storage> sb : SB;
+var<storage> sb : [[access(read)]]
+SB;
 
 [[stage(vertex)]]
 fn main() {
@@ -119,7 +123,8 @@ struct SB {
   arr : [[stride(64)]] array<i32>;
 };
 
-var<storage> sb : SB;
+var<storage> sb : [[access(read)]]
+SB;
 
 [[stage(vertex)]]
 fn main() {
@@ -138,7 +143,8 @@ struct SB {
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
-var<storage> sb : SB;
+var<storage> sb : [[access(read)]]
+SB;
 
 [[stage(vertex)]]
 fn main() {
@@ -162,7 +168,8 @@ struct SB {
   arr : array<i32>;
 };
 
-var<storage> sb : SB;
+var<storage> sb : [[access(read)]]
+SB;
 
 [[stage(vertex)]]
 fn main() {
@@ -186,7 +193,8 @@ struct SB {
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol(buffer : SB, result : ptr<function, u32>)
 
-var<storage> sb : SB;
+var<storage> sb : [[access(read)]]
+SB;
 
 [[stage(vertex)]]
 fn main() {
@@ -225,9 +233,11 @@ struct SB2 {
   arr2 : array<vec4<f32>>;
 };
 
-var<storage> sb1 : SB1;
+var<storage> sb1 : [[access(read)]]
+SB1;
 
-var<storage> sb2 : SB2;
+var<storage> sb2 : [[access(read)]]
+SB2;
 
 [[stage(vertex)]]
 fn main() {
@@ -256,9 +266,11 @@ struct SB2 {
 [[internal(intrinsic_buffer_size)]]
 fn tint_symbol_3(buffer : SB2, result : ptr<function, u32>)
 
-var<storage> sb1 : SB1;
+var<storage> sb1 : [[access(read)]]
+SB1;
 
-var<storage> sb2 : SB2;
+var<storage> sb2 : [[access(read)]]
+SB2;
 
 [[stage(vertex)]]
 fn main() {

@@ -209,12 +209,12 @@ struct State {
         {
             ctx.dst->create<ast::StructBlockDecoration>(),
         });
-
+    auto* access =
+        ctx.dst->ty.access(ast::AccessControl::kReadOnly, struct_type);
     for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
       // The decorated variable with struct type
       ctx.dst->Global(
-          GetVertexBufferName(i), struct_type, ast::StorageClass::kStorage,
-          nullptr,
+          GetVertexBufferName(i), access, ast::StorageClass::kStorage, nullptr,
           ast::DecorationList{
               ctx.dst->create<ast::BindingDecoration>(i),
               ctx.dst->create<ast::GroupDecoration>(cfg.pulling_group),

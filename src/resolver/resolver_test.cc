@@ -763,9 +763,12 @@ TEST_F(ResolverTest, Function_Parameters) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
+  auto* s = Structure("S", {Member("m", ty.u32())});
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
-  auto* sb_var = Global("sb_var", ty.f32(), ast::StorageClass::kStorage);
+  auto* sb_var = Global("sb_var", a, ast::StorageClass::kStorage);
   auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -795,9 +798,12 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
+  auto* s = Structure("S", {Member("m", ty.u32())});
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
-  auto* sb_var = Global("sb_var", ty.f32(), ast::StorageClass::kStorage);
+  auto* sb_var = Global("sb_var", a, ast::StorageClass::kStorage);
   auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
   auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 

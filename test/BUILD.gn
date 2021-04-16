@@ -182,6 +182,7 @@ source_set("tint_unittests_core_src") {
     "../src/resolver/resolver_test.cc",
     "../src/resolver/resolver_test_helper.cc",
     "../src/resolver/resolver_test_helper.h",
+    "../src/resolver/storage_class_validation_test.cc",
     "../src/resolver/struct_layout_test.cc",
     "../src/resolver/struct_pipeline_stage_use_test.cc",
     "../src/resolver/struct_storage_class_use_test.cc",

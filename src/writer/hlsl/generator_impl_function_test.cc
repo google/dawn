@@ -777,8 +777,9 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_Called_By_EntryPoint_With_StorageBuffer) {
-  type::AccessControl ac(ast::AccessControl::kReadWrite, ty.vec4<f32>());
-  Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
+  auto* s = Structure("S", {Member("x", ty.f32())});
+  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
+  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -806,7 +807,8 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(),
-            R"(RWByteAddressBuffer coord : register(u0, space1);
+            R"(
+RWByteAddressBuffer coord : register(u0, space1);
 
 float sub_func(float param) {
   return asfloat(coord.Load(0u));
