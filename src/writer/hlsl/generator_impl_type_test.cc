@@ -236,8 +236,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_THAT(result(), HasSubstr(R"(struct S {
-  int tint_double;
-  float tint_float;
+  int tint_symbol;
+  float tint_symbol_1;
 };
 )"));
 }

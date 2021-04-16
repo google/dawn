@@ -46,17 +46,20 @@ class Renamer : public Transform {
     Remappings const remappings;
   };
 
-  /// Method is an enumerator of renaming methods that can be used
-  enum class Method {
-    /// Every symbol will be replaced with an identifier containing a
-    /// monotonically incrementing integer.
-    kMonotonic,
+  /// Target is an enumerator of rename targets that can be used
+  enum class Target {
+    /// Rename every symbol.
+    kAll,
+    /// Only rename symbols that are reserved keywords in HLSL.
+    kHlslKeywords,
+    /// Only rename symbols that are reserved keywords in MSL.
+    kMslKeywords,
   };
 
   /// Configuration options for the transform
   struct Config {
-    /// The method used for renaming symbols
-    Method method = Method::kMonotonic;
+    /// The targets to rename
+    Target target = Target::kAll;
   };
 
   /// Constructor using a default configuration

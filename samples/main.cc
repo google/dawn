@@ -85,6 +85,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                 bound_array_accessors
                                 emit_vertex_point_size
                                 first_index_offset
+                                renamer
   --parse-only              -- Stop after parsing the input
   --dump-ast                -- Dump the generated AST to stdout
   --dawn-validation         -- SPIRV outputs are validated with the same flags
@@ -688,6 +689,8 @@ int main(int argc, const char** argv) {
     } else if (name == "first_index_offset") {
       transform_manager.append(
           std::make_unique<tint::transform::FirstIndexOffset>(0, 0));
+    } else if (name == "renamer") {
+      transform_manager.append(std::make_unique<tint::transform::Renamer>());
     } else {
       std::cerr << "Unknown transform name: " << name << std::endl;
       return 1;
@@ -702,14 +705,24 @@ int main(int argc, const char** argv) {
       break;
 #endif  // TINT_BUILD_SPV_WRITER
 #if TINT_BUILD_MSL_WRITER
-    case Format::kMsl:
+    case Format::kMsl: {
+      tint::transform::Renamer::Config renamer_config{
+          tint::transform::Renamer::Target::kMslKeywords};
+      transform_manager.append(
+          std::make_unique<tint::transform::Renamer>(renamer_config));
       transform_manager.append(std::make_unique<tint::transform::Msl>());
       break;
+    }
 #endif  // TINT_BUILD_MSL_WRITER
 #if TINT_BUILD_HLSL_WRITER
-    case Format::kHlsl:
+    case Format::kHlsl: {
+      tint::transform::Renamer::Config renamer_config{
+          tint::transform::Renamer::Target::kHlslKeywords};
+      transform_manager.append(
+          std::make_unique<tint::transform::Renamer>(renamer_config));
       transform_manager.append(std::make_unique<tint::transform::Hlsl>());
       break;
+    }
 #endif  // TINT_BUILD_HLSL_WRITER
     default:
       break;

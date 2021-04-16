@@ -165,25 +165,6 @@ class Transform {
       ast::Function* in,
       ast::StatementList statements);
 
-  /// Registers a symbol renamer on `ctx` for any symbol that is found in the
-  /// list of reserved identifiers.
-  /// @param ctx the clone context
-  /// @param names the lexicographically sorted list of reserved identifiers
-  /// @param count the number of identifiers in the array `names`
-  static void RenameReservedKeywords(CloneContext* ctx,
-                                     const char* names[],
-                                     size_t count);
-
-  /// Registers a symbol renamer on `ctx` for any symbol that is found in the
-  /// list of reserved identifiers.
-  /// @param ctx the clone context
-  /// @param names the lexicographically sorted list of reserved identifiers
-  template <size_t N>
-  static void RenameReservedKeywords(CloneContext* ctx,
-                                     const char* (&names)[N]) {
-    RenameReservedKeywords(ctx, names, N);
-  }
-
   /// Clones the decoration list `in`, removing decorations based on a filter.
   /// @param ctx the clone context
   /// @param in the decorations to clone

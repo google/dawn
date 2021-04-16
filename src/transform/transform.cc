@@ -57,18 +57,6 @@ ast::Function* Transform::CloneWithStatementsAtStart(
                                          body, decos, ret_decos);
 }
 
-void Transform::RenameReservedKeywords(CloneContext* ctx,
-                                       const char* names[],
-                                       size_t count) {
-  ctx->ReplaceAll([=](Symbol in) {
-    auto name_in = ctx->src->Symbols().NameFor(in);
-    if (std::binary_search(names, names + count, name_in)) {
-      return ctx->dst->Symbols().New("tint_" + name_in);
-    }
-    return ctx->dst->Symbols().New(name_in);
-  });
-}
-
 ast::DecorationList Transform::RemoveDecorations(
     CloneContext* ctx,
     const ast::DecorationList& in,

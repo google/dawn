@@ -60,7 +60,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Function_Name_Collision) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(  void tint_GeometryShader() {
+  EXPECT_THAT(result(), HasSubstr(R"(  void tint_symbol() {
     return;
   })"));
 }
@@ -877,7 +877,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_EQ(result(), R"(void tint_GeometryShader() {
+  EXPECT_EQ(result(), R"(void tint_symbol() {
   return;
 }
 
