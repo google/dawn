@@ -251,11 +251,20 @@ class Resolver {
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
   /// returned.
-  const semantic::Array* Array(type::Array*);
+  /// @param arr the Array to get semantic information for
+  /// @param source the Source of the ast node with this array as its type
+  const semantic::Array* Array(type::Array* arr, const Source& source);
 
   /// @returns the StructInfo for the structure `str`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
   StructInfo* Structure(type::Struct* str);
+
+  /// @returns the VariableInfo for the variable `var`, building it if it hasn't
+  /// been constructed already. If an error is raised, nullptr is returned.
+  /// @param var the variable to create or return the `VariableInfo` for
+  /// @param type optional type of `var` to use instead of
+  /// `var->declared_type()`. For type inference.
+  VariableInfo* Variable(ast::Variable* var, type::Type* type = nullptr);
 
   /// Records the storage class usage for the given type, and any transient
   /// dependencies of the type. Validates that the type can be used for the
@@ -267,14 +276,16 @@ class Resolver {
   /// @returns true on success, false on error
   bool ApplyStorageClassUsageToType(ast::StorageClass sc,
                                     type::Type* ty,
-                                    Source usage);
+                                    const Source& usage);
 
   /// @param align the output default alignment in bytes for the type `ty`
   /// @param size the output default size in bytes for the type `ty`
+  /// @param source the Source of the variable declaration of type `ty`
   /// @returns true on success, false on error
-  bool DefaultAlignAndSize(type::Type* ty, uint32_t& align, uint32_t& size);
-
-  VariableInfo* CreateVariableInfo(ast::Variable*);
+  bool DefaultAlignAndSize(type::Type* ty,
+                           uint32_t& align,
+                           uint32_t& size,
+                           const Source& source);
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression

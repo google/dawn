@@ -178,26 +178,12 @@ bool Resolver::IsValidAssignment(type::Type* lhs, type::Type* rhs) {
 }
 
 bool Resolver::ResolveInternal() {
-  // Process non-user-defined types (arrays). The rest will be processed in
-  // order of declaration below.
-  for (auto* ty : builder_->Types()) {
-    if (auto* arr = ty->As<type::Array>()) {
-      if (!Array(arr)) {
-        return false;
-      }
-    }
-  }
-
   // Process everything else in the order they appear in the module. This is
   // necessary for validation of use-before-declaration.
   for (auto* decl : builder_->AST().GlobalDeclarations()) {
     if (decl->Is<type::Type>()) {
       if (auto* str = decl->As<type::Struct>()) {
         if (!Structure(str)) {
-          return false;
-        }
-      } else if (auto* arr = decl->As<type::Array>()) {
-        if (!Array(arr)) {
           return false;
         }
       }
@@ -209,10 +195,35 @@ bool Resolver::ResolveInternal() {
       if (!GlobalVariable(var)) {
         return false;
       }
+    } else {
+      TINT_UNREACHABLE(diagnostics_)
+          << "unhandled global declaration: " << decl->TypeInfo().name;
+      return false;
     }
   }
 
   return true;
+}
+
+Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
+                                           type::Type* type /*=nullptr*/) {
+  auto it = variable_to_info_.find(var);
+  if (it != variable_to_info_.end()) {
+    return it->second;
+  }
+
+  auto* ctype = Canonical(type ? type : var->declared_type());
+  auto* info = variable_infos_.Create(var, ctype);
+  variable_to_info_.emplace(var, info);
+
+  // Resolve variable's type
+  if (auto* arr = info->type->As<type::Array>()) {
+    if (!Array(arr, var->source())) {
+      return nullptr;
+    }
+  }
+
+  return info;
 }
 
 bool Resolver::GlobalVariable(ast::Variable* var) {
@@ -224,7 +235,10 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     return false;
   }
 
-  auto* info = CreateVariableInfo(var);
+  auto* info = Variable(var);
+  if (!info) {
+    return false;
+  }
   variable_stack_.set_global(var->symbol(), info);
 
   if (!var->is_const() && info->storage_class == ast::StorageClass::kNone) {
@@ -535,7 +549,10 @@ bool Resolver::Function(ast::Function* func) {
 
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
-    auto* param_info = CreateVariableInfo(param);
+    auto* param_info = Variable(param);
+    if (!param_info) {
+      return false;
+    }
     variable_stack_.set(param->symbol(), param_info);
     func_info->parameters.emplace_back(param_info);
 
@@ -1565,7 +1582,12 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     }
   }
 
-  auto* info = CreateVariableInfo(var);
+  auto* info = Variable(var, type);
+  if (!info) {
+    return false;
+  }
+  // TODO(amaiorano): Remove this and fix tests. We're overriding the semantic
+  // type stored in info->type here with a possibly non-canonicalized type.
   info->type = type;
   variable_stack_.set(var->symbol(), info);
   current_block_->decls.push_back(var);
@@ -1595,12 +1617,6 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   }
 
   return true;
-}
-
-Resolver::VariableInfo* Resolver::CreateVariableInfo(ast::Variable* var) {
-  auto* info = variable_infos_.Create(var, Canonical(var->declared_type()));
-  variable_to_info_.emplace(var, info);
-  return info;
 }
 
 type::Type* Resolver::TypeOf(ast::Expression* expr) {
@@ -1730,7 +1746,8 @@ void Resolver::CreateSemanticNodes() const {
 
 bool Resolver::DefaultAlignAndSize(type::Type* ty,
                                    uint32_t& align,
-                                   uint32_t& size) {
+                                   uint32_t& size,
+                                   const Source& source) {
   static constexpr uint32_t vector_size[] = {
       /* padding */ 0,
       /* padding */ 0,
@@ -1779,7 +1796,8 @@ bool Resolver::DefaultAlignAndSize(type::Type* ty,
     }
     return false;
   } else if (cty->Is<type::Array>()) {
-    if (auto* sem = Array(ty->UnwrapAliasIfNeeded()->As<type::Array>())) {
+    if (auto* sem =
+            Array(ty->UnwrapAliasIfNeeded()->As<type::Array>(), source)) {
       align = sem->Align();
       size = sem->Size();
       return true;
@@ -1790,7 +1808,7 @@ bool Resolver::DefaultAlignAndSize(type::Type* ty,
   return false;
 }
 
-const semantic::Array* Resolver::Array(type::Array* arr) {
+const semantic::Array* Resolver::Array(type::Array* arr, const Source& source) {
   if (auto* sem = builder_->Sem().Get(arr)) {
     // Semantic info already constructed for this array type
     return sem;
@@ -1800,15 +1818,16 @@ const semantic::Array* Resolver::Array(type::Array* arr) {
   auto* el_ty = arr->type();
   if (!IsStorable(el_ty)) {
     builder_->Diagnostics().add_error(
-        std::string(el_ty->FriendlyName(builder_->Symbols())) +
-        " cannot be used as an element type of an array");
+        el_ty->FriendlyName(builder_->Symbols()) +
+            " cannot be used as an element type of an array",
+        source);
     return nullptr;
   }
 
   auto create_semantic = [&](uint32_t stride) -> semantic::Array* {
     uint32_t el_align = 0;
     uint32_t el_size = 0;
-    if (!DefaultAlignAndSize(arr->type(), el_align, el_size)) {
+    if (!DefaultAlignAndSize(arr->type(), el_align, el_size, source)) {
       return nullptr;
     }
 
@@ -1831,7 +1850,7 @@ const semantic::Array* Resolver::Array(type::Array* arr) {
   // Calculate implicit stride
   uint32_t el_align = 0;
   uint32_t el_size = 0;
-  if (!DefaultAlignAndSize(el_ty, el_align, el_size)) {
+  if (!DefaultAlignAndSize(el_ty, el_align, el_size, source)) {
     return nullptr;
   }
 
@@ -1933,7 +1952,7 @@ Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
     uint32_t offset = struct_size;
     uint32_t align = 0;
     uint32_t size = 0;
-    if (!DefaultAlignAndSize(member->type(), align, size)) {
+    if (!DefaultAlignAndSize(member->type(), align, size, member->source())) {
       return nullptr;
     }
 
@@ -2189,7 +2208,7 @@ bool Resolver::Assignment(ast::AssignmentStatement* a) {
 
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
                                             type::Type* ty,
-                                            Source usage) {
+                                            const Source& usage) {
   ty = ty->UnwrapIfNeeded();
 
   if (auto* str = ty->As<type::Struct>()) {
