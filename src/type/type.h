@@ -31,7 +31,7 @@ namespace type {
 enum class MemoryLayout { kUniformBuffer, kStorageBuffer };
 
 /// Base class for a type in the system
-class Type : public Castable<Type, Cloneable> {
+class Type : public Castable<Type, ShareableCloneable> {
  public:
   /// Move constructor
   Type(Type&&);

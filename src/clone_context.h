@@ -46,6 +46,11 @@ class Cloneable : public Castable<Cloneable> {
   virtual Cloneable* Clone(CloneContext* ctx) const = 0;
 };
 
+/// ShareableCloneable is the base class for Cloneable objects which will only
+/// be cloned once when CloneContext::Clone() is called with the same object
+/// pointer.
+class ShareableCloneable : public Castable<ShareableCloneable, Cloneable> {};
+
 /// CloneContext holds the state used while cloning AST nodes and types.
 class CloneContext {
   /// ParamTypeIsPtrOf<F, T>::value is true iff the first parameter of
@@ -90,18 +95,39 @@ class CloneContext {
       return nullptr;
     }
 
-    // See if we've already cloned this object - if we have return the
-    // previously cloned pointer.
-    // If we haven't cloned this before, try cloning using a replacer transform.
-    if (auto* c = LookupOrTransform(a)) {
-      return CheckedCast<T>(c);
+    // Have we cloned this object already, or was Replace() called for this
+    // object?
+    auto it = cloned_.find(a);
+    if (it != cloned_.end()) {
+      return CheckedCast<T>(it->second);
     }
 
-    // First time clone and no replacer transforms matched.
-    // Clone with T::Clone().
-    auto* c = a->Clone(this);
-    cloned_.emplace(a, c);
-    return CheckedCast<T>(c);
+    Cloneable* cloned = nullptr;
+
+    // Attempt to clone using the registered replacer functions.
+    auto& typeinfo = a->TypeInfo();
+    for (auto& transform : transforms_) {
+      if (!typeinfo.Is(*transform.typeinfo)) {
+        continue;
+      }
+      cloned = transform.function(a);
+      break;
+    }
+
+    if (!cloned) {
+      // No transform for this type, or the transform returned nullptr.
+      // Clone with T::Clone().
+      cloned = a->Clone(this);
+    }
+
+    // Does the type derive from ShareableCloneable?
+    if (Is<ShareableCloneable, kDontErrorOnImpossibleCast>(a)) {
+      // Yes. Record this src -> dst mapping so that future calls to Clone()
+      // return the same cloned object.
+      cloned_.emplace(a, cloned);
+    }
+
+    return CheckedCast<T>(cloned);
   }
 
   /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
@@ -385,43 +411,15 @@ class CloneContext {
   CloneContext(const CloneContext&) = delete;
   CloneContext& operator=(const CloneContext&) = delete;
 
-  /// LookupOrTransform is the template-independent logic of Clone().
-  /// This is outside of Clone() to reduce the amount of template-instantiated
-  /// code.
-  Cloneable* LookupOrTransform(Cloneable* a) {
-    // Have we seen this object before? If so, return the previously cloned
-    // version instead of making yet another copy.
-    auto it = cloned_.find(a);
-    if (it != cloned_.end()) {
-      return it->second;
-    }
-
-    // Attempt to clone using the registered replacer functions.
-    auto& typeinfo = a->TypeInfo();
-    for (auto& transform : transforms_) {
-      if (!typeinfo.Is(*transform.typeinfo)) {
-        continue;
-      }
-      if (Cloneable* c = transform.function(a)) {
-        cloned_.emplace(a, c);
-        return c;
-      }
-      break;
-    }
-
-    // No luck, Clone() will have to call T::Clone().
-    return nullptr;
-  }
-
   /// Cast `obj` from type `FROM` to type `TO`, returning the cast object.
   /// Reports an internal compiler error if the cast failed.
   template <typename TO, typename FROM>
   TO* CheckedCast(FROM* obj) {
-    TO* cast = obj->template As<TO>();
-    if (!cast) {
-      TINT_ICE(Diagnostics()) << "Cloned object was not of the expected type";
+    if (TO* cast = As<TO>(obj)) {
+      return cast;
     }
-    return cast;
+    TINT_ICE(Diagnostics()) << "Cloned object was not of the expected type";
+    return nullptr;
   }
 
   /// @returns the diagnostic list of #dst
