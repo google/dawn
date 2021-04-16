@@ -25,7 +25,7 @@ FILES="`find src -type f` `find samples -type f`"
 if command -v go &> /dev/null
 then
     # Go is installed. Run cpplint in parallel for speed wins
-    go run $SCRIPT_DIR/run-parallel/main.go       \
+    go run $SCRIPT_DIR/src/run-parallel/main.go   \
          --only-print-failures                    \
          ./third_party/cpplint/cpplint/cpplint.py \
          --root=$ROOT_DIR                         \
