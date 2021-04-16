@@ -242,44 +242,44 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
   // for each field of the structure s.
 #define ALL_FIELDS()                             \
   FIELD(0x0000, int, a, /*NO SUFFIX*/)           \
-  FIELD(0x0004, int8_t, _tint_pad_0, [124])      \
+  FIELD(0x0004, int8_t, tint_pad_0, [124])       \
   FIELD(0x0080, float, b, /*NO SUFFIX*/)         \
-  FIELD(0x0084, int8_t, _tint_pad_1, [124])      \
+  FIELD(0x0084, int8_t, tint_pad_1, [124])       \
   FIELD(0x0100, packed_float2, c, /*NO SUFFIX*/) \
   FIELD(0x0108, uint, d, /*NO SUFFIX*/)          \
-  FIELD(0x010c, int8_t, _tint_pad_2, [4])        \
+  FIELD(0x010c, int8_t, tint_pad_2, [4])         \
   FIELD(0x0110, packed_float3, e, /*NO SUFFIX*/) \
   FIELD(0x011c, uint, f, /*NO SUFFIX*/)          \
   FIELD(0x0120, packed_float4, g, /*NO SUFFIX*/) \
   FIELD(0x0130, uint, h, /*NO SUFFIX*/)          \
-  FIELD(0x0134, int8_t, _tint_pad_3, [4])        \
+  FIELD(0x0134, int8_t, tint_pad_3, [4])         \
   FIELD(0x0138, float2x2, i, /*NO SUFFIX*/)      \
   FIELD(0x0148, uint, j, /*NO SUFFIX*/)          \
-  FIELD(0x014c, int8_t, _tint_pad_4, [4])        \
+  FIELD(0x014c, int8_t, tint_pad_4, [4])         \
   FIELD(0x0150, float2x3, k, /*NO SUFFIX*/)      \
   FIELD(0x0170, uint, l, /*NO SUFFIX*/)          \
-  FIELD(0x0174, int8_t, _tint_pad_5, [12])       \
+  FIELD(0x0174, int8_t, tint_pad_5, [12])        \
   FIELD(0x0180, float2x4, m, /*NO SUFFIX*/)      \
   FIELD(0x01a0, uint, n, /*NO SUFFIX*/)          \
-  FIELD(0x01a4, int8_t, _tint_pad_6, [4])        \
+  FIELD(0x01a4, int8_t, tint_pad_6, [4])         \
   FIELD(0x01a8, float3x2, o, /*NO SUFFIX*/)      \
   FIELD(0x01c0, uint, p, /*NO SUFFIX*/)          \
-  FIELD(0x01c4, int8_t, _tint_pad_7, [12])       \
+  FIELD(0x01c4, int8_t, tint_pad_7, [12])        \
   FIELD(0x01d0, float3x3, q, /*NO SUFFIX*/)      \
   FIELD(0x0200, uint, r, /*NO SUFFIX*/)          \
-  FIELD(0x0204, int8_t, _tint_pad_8, [12])       \
+  FIELD(0x0204, int8_t, tint_pad_8, [12])        \
   FIELD(0x0210, float3x4, s, /*NO SUFFIX*/)      \
   FIELD(0x0240, uint, t, /*NO SUFFIX*/)          \
-  FIELD(0x0244, int8_t, _tint_pad_9, [4])        \
+  FIELD(0x0244, int8_t, tint_pad_9, [4])         \
   FIELD(0x0248, float4x2, u, /*NO SUFFIX*/)      \
   FIELD(0x0268, uint, v, /*NO SUFFIX*/)          \
-  FIELD(0x026c, int8_t, _tint_pad_10, [4])       \
+  FIELD(0x026c, int8_t, tint_pad_10, [4])        \
   FIELD(0x0270, float4x3, w, /*NO SUFFIX*/)      \
   FIELD(0x02b0, uint, x, /*NO SUFFIX*/)          \
-  FIELD(0x02b4, int8_t, _tint_pad_11, [12])      \
+  FIELD(0x02b4, int8_t, tint_pad_11, [12])       \
   FIELD(0x02c0, float4x4, y, /*NO SUFFIX*/)      \
   FIELD(0x0300, float, z, /*NO SUFFIX*/)         \
-  FIELD(0x0304, int8_t, _tint_pad_12, [124])
+  FIELD(0x0304, int8_t, tint_pad_12, [124])
 
   // Check that the generated string is as expected.
 #define FIELD(ADDR, TYPE, NAME, SUFFIX) \
@@ -343,14 +343,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
 
   // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, NAME, SUFFIX)
   // for each field of the structure s.
-#define ALL_FIELDS()                        \
-  FIELD(0x0000, int, a, /*NO SUFFIX*/)      \
-  FIELD(0x0004, int8_t, _tint_pad_0, [508]) \
-  FIELD(0x0200, inner_x, b, /*NO SUFFIX*/)  \
-  FIELD(0x0600, float, c, /*NO SUFFIX*/)    \
-  FIELD(0x0604, inner_y, d, /*NO SUFFIX*/)  \
-  FIELD(0x0808, float, e, /*NO SUFFIX*/)    \
-  FIELD(0x080c, int8_t, _tint_pad_1, [500])
+#define ALL_FIELDS()                       \
+  FIELD(0x0000, int, a, /*NO SUFFIX*/)     \
+  FIELD(0x0004, int8_t, tint_pad_0, [508]) \
+  FIELD(0x0200, inner_x, b, /*NO SUFFIX*/) \
+  FIELD(0x0600, float, c, /*NO SUFFIX*/)   \
+  FIELD(0x0604, inner_y, d, /*NO SUFFIX*/) \
+  FIELD(0x0808, float, e, /*NO SUFFIX*/)   \
+  FIELD(0x080c, int8_t, tint_pad_1, [500])
 
   // Check that the generated string is as expected.
 #define FIELD(ADDR, TYPE, NAME, SUFFIX) \
@@ -433,15 +433,15 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 
   // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, NAME, SUFFIX)
   // for each field of the structure s.
-#define ALL_FIELDS()                        \
-  FIELD(0x0000, int, a, /*NO SUFFIX*/)      \
-  FIELD(0x0004, float, b, [7])              \
-  FIELD(0x0020, float, c, /*NO SUFFIX*/)    \
-  FIELD(0x0024, int8_t, _tint_pad_0, [476]) \
-  FIELD(0x0200, inner, d, [4])              \
-  FIELD(0x1200, float, e, /*NO SUFFIX*/)    \
-  FIELD(0x1204, float, f, [1])              \
-  FIELD(0x1208, int8_t, _tint_pad_1, [504])
+#define ALL_FIELDS()                       \
+  FIELD(0x0000, int, a, /*NO SUFFIX*/)     \
+  FIELD(0x0004, float, b, [7])             \
+  FIELD(0x0020, float, c, /*NO SUFFIX*/)   \
+  FIELD(0x0024, int8_t, tint_pad_0, [476]) \
+  FIELD(0x0200, inner, d, [4])             \
+  FIELD(0x1200, float, e, /*NO SUFFIX*/)   \
+  FIELD(0x1204, float, f, [1])             \
+  FIELD(0x1208, int8_t, tint_pad_1, [504])
 
   // Check that the generated string is as expected.
 #define FIELD(ADDR, TYPE, NAME, SUFFIX) \
@@ -490,6 +490,88 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
   }
 
 #undef ALL_FIELDS
+}
+
+TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
+  auto* s = Structure(
+      "S",
+      {
+          // uses symbols tint_pad_[0..9] and tint_pad_[20..35]
+          Member("tint_pad_2", ty.i32(), {MemberSize(32)}),
+          Member("tint_pad_20", ty.f32(), {MemberAlign(128), MemberSize(128)}),
+          Member("tint_pad_33", ty.vec2<f32>()),
+          Member("tint_pad_1", ty.u32()),
+          Member("tint_pad_3", ty.vec3<f32>()),
+          Member("tint_pad_7", ty.u32()),
+          Member("tint_pad_25", ty.vec4<f32>()),
+          Member("tint_pad_5", ty.u32()),
+          Member("tint_pad_27", ty.mat2x2<f32>()),
+          Member("tint_pad_24", ty.u32()),
+          Member("tint_pad_23", ty.mat2x3<f32>()),
+          Member("tint_pad_0", ty.u32()),
+          Member("tint_pad_8", ty.mat2x4<f32>()),
+          Member("tint_pad_26", ty.u32()),
+          Member("tint_pad_29", ty.mat3x2<f32>()),
+          Member("tint_pad_6", ty.u32()),
+          Member("tint_pad_22", ty.mat3x3<f32>()),
+          Member("tint_pad_32", ty.u32()),
+          Member("tint_pad_34", ty.mat3x4<f32>()),
+          Member("tint_pad_35", ty.u32()),
+          Member("tint_pad_30", ty.mat4x2<f32>()),
+          Member("tint_pad_9", ty.u32()),
+          Member("tint_pad_31", ty.mat4x3<f32>()),
+          Member("tint_pad_28", ty.u32()),
+          Member("tint_pad_4", ty.mat4x4<f32>()),
+          Member("tint_pad_21", ty.f32()),
+      });
+
+  Global("G", s, ast::StorageClass::kStorage);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(struct S {
+  /* 0x0000 */ int tint_pad_2;
+  /* 0x0004 */ int8_t tint_pad_10[124];
+  /* 0x0080 */ float tint_pad_20;
+  /* 0x0084 */ int8_t tint_pad_11[124];
+  /* 0x0100 */ packed_float2 tint_pad_33;
+  /* 0x0108 */ uint tint_pad_1;
+  /* 0x010c */ int8_t tint_pad_12[4];
+  /* 0x0110 */ packed_float3 tint_pad_3;
+  /* 0x011c */ uint tint_pad_7;
+  /* 0x0120 */ packed_float4 tint_pad_25;
+  /* 0x0130 */ uint tint_pad_5;
+  /* 0x0134 */ int8_t tint_pad_13[4];
+  /* 0x0138 */ float2x2 tint_pad_27;
+  /* 0x0148 */ uint tint_pad_24;
+  /* 0x014c */ int8_t tint_pad_14[4];
+  /* 0x0150 */ float2x3 tint_pad_23;
+  /* 0x0170 */ uint tint_pad_0;
+  /* 0x0174 */ int8_t tint_pad_15[12];
+  /* 0x0180 */ float2x4 tint_pad_8;
+  /* 0x01a0 */ uint tint_pad_26;
+  /* 0x01a4 */ int8_t tint_pad_16[4];
+  /* 0x01a8 */ float3x2 tint_pad_29;
+  /* 0x01c0 */ uint tint_pad_6;
+  /* 0x01c4 */ int8_t tint_pad_17[12];
+  /* 0x01d0 */ float3x3 tint_pad_22;
+  /* 0x0200 */ uint tint_pad_32;
+  /* 0x0204 */ int8_t tint_pad_18[12];
+  /* 0x0210 */ float3x4 tint_pad_34;
+  /* 0x0240 */ uint tint_pad_35;
+  /* 0x0244 */ int8_t tint_pad_19[4];
+  /* 0x0248 */ float4x2 tint_pad_30;
+  /* 0x0268 */ uint tint_pad_9;
+  /* 0x026c */ int8_t tint_pad_36[4];
+  /* 0x0270 */ float4x3 tint_pad_31;
+  /* 0x02b0 */ uint tint_pad_28;
+  /* 0x02b4 */ int8_t tint_pad_37[12];
+  /* 0x02c0 */ float4x4 tint_pad_4;
+  /* 0x0300 */ float tint_pad_21;
+  /* 0x0304 */ int8_t tint_pad_38[124];
+};
+)");
 }
 
 // TODO(crbug.com/tint/649): Add tests for array with explicit stride.

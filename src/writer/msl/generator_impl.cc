@@ -2054,9 +2054,12 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
 
   uint32_t pad_count = 0;
   auto add_padding = [&](uint32_t size) {
-    out_ << "int8_t _tint_pad_" << pad_count << "[" << size << "];"
-         << std::endl;
-    pad_count++;
+    std::string name;
+    do {
+      name = "tint_pad_" + std::to_string(pad_count++);
+    } while (sem_str->FindMember(program_->Symbols().Get(name)));
+
+    out_ << "int8_t " << name << "[" << size << "];" << std::endl;
   };
 
   increment_indent();
