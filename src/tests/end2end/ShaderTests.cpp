@@ -215,9 +215,6 @@ fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
 
 // Tests that shaders I/O structs that us compatible locations but are not sorted by hand can link.
 TEST_P(ShaderTests, WGSLUnsortedStructIO) {
-    // TODO(tint:710): Tint has a known issue with sorting structs in HLSL.
-    DAWN_SKIP_TEST_IF(IsD3D12());
-
     std::string vertexShader = R"(
 struct VertexIn {
     [[location(0)]] position : vec3<f32>;
