@@ -414,10 +414,6 @@ Output VertexPulling::Run(const Program* in, const DataMap& data) {
 
   CloneContext ctx(&out, in);
 
-  // Start by cloning all the symbols. This ensures that the authored symbols
-  // won't get renamed if they collide with new symbols below.
-  ctx.CloneSymbols();
-
   State state{ctx, cfg};
   state.FindOrInsertVertexIndexIfUsed();
   state.FindOrInsertInstanceIndexIfUsed();

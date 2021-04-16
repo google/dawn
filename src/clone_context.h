@@ -63,7 +63,10 @@ class CloneContext {
   /// Constructor
   /// @param to the target ProgramBuilder to clone into
   /// @param from the source Program to clone from
-  CloneContext(ProgramBuilder* to, Program const* from);
+  /// @param auto_clone_symbols clone all symbols in `from` before returning
+  CloneContext(ProgramBuilder* to,
+               Program const* from,
+               bool auto_clone_symbols = true);
 
   /// Destructor
   ~CloneContext();
@@ -149,12 +152,6 @@ class CloneContext {
   /// @param s the Symbol to clone
   /// @return the cloned source
   Symbol Clone(Symbol s);
-
-  /// Clones all the Symbols in `src->Symbols()` into #dst.
-  /// This may be used to ensure that authored symbols are not suffixed with a
-  /// unique identifier if they collide with other symbols.
-  /// @returns this CloneContext so calls can be chained
-  CloneContext& CloneSymbols();
 
   /// Clones each of the elements of the vector `v` into the ProgramBuilder
   /// #dst.

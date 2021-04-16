@@ -26,8 +26,18 @@ namespace tint {
 CloneContext::ListTransforms::ListTransforms() = default;
 CloneContext::ListTransforms::~ListTransforms() = default;
 
-CloneContext::CloneContext(ProgramBuilder* to, Program const* from)
-    : dst(to), src(from) {}
+CloneContext::CloneContext(ProgramBuilder* to,
+                           Program const* from,
+                           bool auto_clone_symbols)
+    : dst(to), src(from) {
+  if (auto_clone_symbols) {
+    // Almost all transforms will want to clone all symbols before doing any
+    // work, to avoid any newly created symbols clashing with existing symbols
+    // in the source program and causing them to be renamed.
+    from->Symbols().Foreach([&](Symbol s, const std::string&) { Clone(s); });
+  }
+}
+
 CloneContext::~CloneContext() = default;
 
 Symbol CloneContext::Clone(Symbol s) {
@@ -37,11 +47,6 @@ Symbol CloneContext::Clone(Symbol s) {
     }
     return dst->Symbols().New(src->Symbols().NameFor(s));
   });
-}
-
-CloneContext& CloneContext::CloneSymbols() {
-  src->Symbols().Foreach([&](Symbol s, const std::string&) { Clone(s); });
-  return *this;
 }
 
 void CloneContext::Clone() {

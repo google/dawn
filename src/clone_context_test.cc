@@ -224,7 +224,7 @@ TEST(CloneContext, CloneWithReplaceAll_Symbols) {
   // N: Node
 
   ProgramBuilder cloned;
-  auto* cloned_root = CloneContext(&cloned, &original)
+  auto* cloned_root = CloneContext(&cloned, &original, false)
                           .ReplaceAll([&](Symbol sym) {
                             auto in = original.Symbols().NameFor(sym);
                             auto out = "transformed<" + in + ">";
@@ -435,7 +435,7 @@ TEST(CloneContext, CloneNewUnnamedSymbols) {
   Program original(std::move(builder));
 
   ProgramBuilder cloned;
-  CloneContext ctx(&cloned, &original);
+  CloneContext ctx(&cloned, &original, false);
   Symbol new_x = cloned.Symbols().New();
   Symbol new_a = ctx.Clone(old_a);
   Symbol new_y = cloned.Symbols().New();
@@ -463,7 +463,7 @@ TEST(CloneContext, CloneNewSymbols) {
   Program original(std::move(builder));
 
   ProgramBuilder cloned;
-  CloneContext ctx(&cloned, &original);
+  CloneContext ctx(&cloned, &original, false);
   Symbol new_x = cloned.Symbols().New("a");
   Symbol new_a = ctx.Clone(old_a);
   Symbol new_y = cloned.Symbols().New("b");
@@ -492,7 +492,6 @@ TEST(CloneContext, CloneNewSymbols_AfterCloneSymbols) {
 
   ProgramBuilder cloned;
   CloneContext ctx(&cloned, &original);
-  ctx.CloneSymbols();
   Symbol new_x = cloned.Symbols().New("a");
   Symbol new_a = ctx.Clone(old_a);
   Symbol new_y = cloned.Symbols().New("b");

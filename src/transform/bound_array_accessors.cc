@@ -29,11 +29,6 @@ BoundArrayAccessors::~BoundArrayAccessors() = default;
 Output BoundArrayAccessors::Run(const Program* in, const DataMap&) {
   ProgramBuilder out;
   CloneContext ctx(&out, in);
-
-  // Start by cloning all the symbols. This ensures that the authored symbols
-  // won't get renamed if they collide with new symbols below.
-  ctx.CloneSymbols();
-
   ctx.ReplaceAll([&](ast::ArrayAccessorExpression* expr) {
     return Transform(expr, &ctx);
   });

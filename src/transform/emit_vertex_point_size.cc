@@ -35,10 +35,6 @@ Output EmitVertexPointSize::Run(const Program* in, const DataMap&) {
 
   CloneContext ctx(&out, in);
 
-  // Start by cloning all the symbols. This ensures that the authored symbols
-  // won't get renamed if they collide with new symbols below.
-  ctx.CloneSymbols();
-
   Symbol pointsize = out.Symbols().New("tint_pointsize");
 
   // Declare the pointsize builtin output variable.
