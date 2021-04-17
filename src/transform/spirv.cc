@@ -271,18 +271,23 @@ Symbol Spirv::HoistToInputVariables(
   }
 
   // Recurse into struct members and build the initializer list.
-  ast::ExpressionList init_values;
+  std::vector<Symbol> init_value_names;
   auto* struct_ty = ty->As<type::Struct>();
   for (auto* member : struct_ty->impl()->members()) {
     auto member_var = HoistToInputVariables(
         ctx, func, member->type(), member->type(), member->decorations());
-    init_values.push_back(ctx.dst->Expr(member_var));
+    init_value_names.emplace_back(member_var);
   }
 
   auto func_var_symbol = ctx.dst->Symbols().New();
   if (func->body()->empty()) {
     // The return value should never get used.
     return func_var_symbol;
+  }
+
+  ast::ExpressionList init_values;
+  for (auto name : init_value_names) {
+    init_values.push_back(ctx.dst->Expr(name));
   }
 
   // Create a function-scope variable for the struct.

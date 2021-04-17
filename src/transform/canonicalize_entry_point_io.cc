@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <utility>
+#include <vector>
 
 #include "src/program_builder.h"
 #include "src/sem/function.h"
@@ -104,11 +105,11 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
         auto* param_ty = ctx.src->Sem().Get(param)->Type();
         auto* param_declared_ty = ctx.src->Sem().Get(param)->DeclaredType();
 
-        ast::Expression* func_const_initializer = nullptr;
+        std::function<ast::Expression*()> func_const_initializer;
 
         if (auto* struct_ty = param_ty->As<type::Struct>()) {
           // Pull out all struct members and build initializer list.
-          ast::ExpressionList init_values;
+          std::vector<Symbol> member_names;
           for (auto* member : struct_ty->impl()->members()) {
             if (member->type()->UnwrapAll()->Is<type::Struct>()) {
               TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
@@ -122,12 +123,19 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
             auto member_name = ctx.Clone(member->symbol());
             new_struct_members.push_back(ctx.dst->Member(
                 member_name, ctx.Clone(member->type()), new_decorations));
-            init_values.push_back(
-                ctx.dst->MemberAccessor(new_struct_param_symbol, member_name));
+            member_names.emplace_back(member_name);
           }
 
-          func_const_initializer =
-              ctx.dst->Construct(ctx.Clone(param_declared_ty), init_values);
+          func_const_initializer = [&ctx, new_struct_param_symbol,
+                                    param_declared_ty, member_names]() {
+            ast::ExpressionList init_values;
+            for (auto name : member_names) {
+              init_values.push_back(
+                  ctx.dst->MemberAccessor(new_struct_param_symbol, name));
+            }
+            return ctx.dst->Construct(ctx.Clone(param_declared_ty),
+                                      init_values);
+          };
         } else {
           ast::DecorationList new_decorations = RemoveDecorations(
               &ctx, param->decorations(), [](const ast::Decoration* deco) {
@@ -136,8 +144,10 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
               });
           new_struct_members.push_back(ctx.dst->Member(
               param_name, ctx.Clone(param_declared_ty), new_decorations));
-          func_const_initializer =
-              ctx.dst->MemberAccessor(new_struct_param_symbol, param_name);
+          func_const_initializer = [&ctx, new_struct_param_symbol,
+                                    param_name]() {
+            return ctx.dst->MemberAccessor(new_struct_param_symbol, param_name);
+          };
         }
 
         if (func->body()->empty()) {
@@ -148,7 +158,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
         // Create a function-scope const to replace the parameter.
         // Initialize it with the value extracted from the new struct parameter.
         auto* func_const = ctx.dst->Const(
-            param_name, ctx.Clone(param_declared_ty), func_const_initializer);
+            param_name, ctx.Clone(param_declared_ty), func_const_initializer());
         ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
                          ctx.dst->WrapInStatement(func_const));
 
