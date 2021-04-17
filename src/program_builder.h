@@ -1405,6 +1405,12 @@ class ProgramBuilder {
   /// expression has no resolved type.
   type::Type* TypeOf(ast::Expression* expr) const;
 
+  /// Wraps the ast::Literal in a statement. This is used by tests that
+  /// construct a partial AST and require the Resolver to reach these
+  /// nodes.
+  /// @param lit the ast::Literal to be wrapped by an ast::Statement
+  /// @return the ast::Statement that wraps the ast::Statement
+  ast::Statement* WrapInStatement(ast::Literal* lit);
   /// Wraps the ast::Expression in a statement. This is used by tests that
   /// construct a partial AST and require the Resolver to reach these
   /// nodes.

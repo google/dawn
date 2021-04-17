@@ -131,13 +131,17 @@ ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
 
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}
 
-ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(ast::Variable* v) {
-  return create<ast::VariableDeclStatement>(v);
+ast::Statement* ProgramBuilder::WrapInStatement(ast::Literal* lit) {
+  return WrapInStatement(create<ast::ScalarConstructorExpression>(lit));
 }
 
 ast::Statement* ProgramBuilder::WrapInStatement(ast::Expression* expr) {
   // Create a temporary variable of inferred type from expr.
   return Decl(Var(symbols_.New(), nullptr, ast::StorageClass::kFunction, expr));
+}
+
+ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(ast::Variable* v) {
+  return create<ast::VariableDeclStatement>(v);
 }
 
 ast::Statement* ProgramBuilder::WrapInStatement(ast::Statement* stmt) {
