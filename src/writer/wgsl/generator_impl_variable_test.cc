@@ -76,7 +76,6 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
   auto* v = Global("a", ty.f32(), ast::StorageClass::kInput, Expr(1.0f));
-  WrapInFunction(Decl(v));
 
   GeneratorImpl& gen = Build();
 

@@ -69,11 +69,7 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
 
   if (size == 0) {
     if (is_arr) {
-      // Call Cloneable::Clone() instead of CloneContext::Clone() to ensure the
-      // AST node is duplicated. CloneContext::Clone() will ensure that repeated
-      // calls with the same pointer return the *same* cloned node - in this
-      // case we actually want two copies.
-      auto* arr = static_cast<ast::Expression*>(expr->array()->Clone(ctx));
+      auto* arr = ctx->Clone(expr->array());
       auto* arr_len = b.Call("arrayLength", arr);
       auto* limit = b.Sub(arr_len, b.Expr(1u));
       new_idx = b.Call("min", b.Construct<u32>(ctx->Clone(old_idx)), limit);

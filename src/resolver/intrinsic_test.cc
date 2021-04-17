@@ -468,7 +468,7 @@ TEST_F(ResolverIntrinsicTest, Select_Error_NoParams) {
 }
 
 TEST_F(ResolverIntrinsicTest, Select_Error_SelectorInt) {
-  auto* expr = Call("select", Expr(1), Expr(1), Expr(1));
+  auto* expr = Call("select", 1, 1, 1);
   WrapInFunction(expr);
 
   EXPECT_FALSE(r()->Resolve());
@@ -483,8 +483,9 @@ TEST_F(ResolverIntrinsicTest, Select_Error_SelectorInt) {
 }
 
 TEST_F(ResolverIntrinsicTest, Select_Error_Matrix) {
-  auto* mat = mat2x2<float>(vec2<float>(1.0f, 1.0f), vec2<float>(1.0f, 1.0f));
-  auto* expr = Call("select", mat, mat, Expr(true));
+  auto* expr = Call(
+      "select", mat2x2<f32>(vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f)),
+      mat2x2<f32>(vec2<f32>(1.0f, 1.0f), vec2<f32>(1.0f, 1.0f)), Expr(true));
   WrapInFunction(expr);
 
   EXPECT_FALSE(r()->Resolve());
@@ -499,7 +500,7 @@ TEST_F(ResolverIntrinsicTest, Select_Error_Matrix) {
 }
 
 TEST_F(ResolverIntrinsicTest, Select_Error_MismatchTypes) {
-  auto* expr = Call("select", 1.0f, vec2<float>(2.0f, 3.0f), Expr(true));
+  auto* expr = Call("select", 1.0f, vec2<f32>(2.0f, 3.0f), Expr(true));
   WrapInFunction(expr);
 
   EXPECT_FALSE(r()->Resolve());
@@ -514,8 +515,8 @@ TEST_F(ResolverIntrinsicTest, Select_Error_MismatchTypes) {
 }
 
 TEST_F(ResolverIntrinsicTest, Select_Error_MismatchVectorSize) {
-  auto* expr = Call("select", vec2<float>(1.0f, 2.0f),
-                    vec3<float>(3.0f, 4.0f, 5.0f), Expr(true));
+  auto* expr = Call("select", vec2<f32>(1.0f, 2.0f),
+                    vec3<f32>(3.0f, 4.0f, 5.0f), Expr(true));
   WrapInFunction(expr);
 
   EXPECT_FALSE(r()->Resolve());
@@ -1007,15 +1008,7 @@ TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Sint_Scalar) {
 TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Sint_Vector) {
   auto param = GetParam();
 
-  ast::ExpressionList vals;
-  vals.push_back(Expr(1));
-  vals.push_back(Expr(1));
-  vals.push_back(Expr(3));
-
-  ast::ExpressionList params;
-  params.push_back(vec3<i32>(vals));
-
-  auto* call = Call(param.name, params);
+  auto* call = Call(param.name, vec3<i32>(1, 1, 3));
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1028,10 +1021,7 @@ TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Sint_Vector) {
 TEST_P(ResolverIntrinsicTest_SingleParam_FloatOrInt, Uint_Scalar) {
   auto param = GetParam();
 
-  ast::ExpressionList params;
-  params.push_back(Expr(1u));
-
-  auto* call = Call(param.name, params);
+  auto* call = Call(param.name, 1u);
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1087,10 +1077,7 @@ TEST_F(ResolverIntrinsicTest, Length_Scalar) {
 }
 
 TEST_F(ResolverIntrinsicTest, Length_FloatVector) {
-  ast::ExpressionList params;
-  params.push_back(vec3<f32>(1.0f, 1.0f, 3.0f));
-
-  auto* call = Call("length", params);
+  auto* call = Call("length", vec3<f32>(1.0f, 1.0f, 3.0f));
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

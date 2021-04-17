@@ -222,7 +222,10 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
       for (auto* ret : sem_func->ReturnStatements()) {
         auto* ret_sem = ctx.src->Sem().Get(ret);
         // Reconstruct the return value using the newly created struct.
-        auto* new_ret_value = ctx.Clone(ret->value());
+        std::function<ast::Expression*()> new_ret_value = [&ctx, ret] {
+          return ctx.Clone(ret->value());
+        };
+
         ast::ExpressionList ret_values;
         if (ret_type->Is<type::Struct>()) {
           if (!ret->value()->Is<ast::IdentifierExpression>()) {
@@ -230,17 +233,17 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
             // re-evaluating it multiple times.
             auto temp = ctx.dst->Symbols().New();
             auto* temp_var = ctx.dst->Decl(
-                ctx.dst->Const(temp, ctx.Clone(ret_type), new_ret_value));
+                ctx.dst->Const(temp, ctx.Clone(ret_type), new_ret_value()));
             ctx.InsertBefore(ret_sem->Block()->statements(), ret, temp_var);
-            new_ret_value = ctx.dst->Expr(temp);
+            new_ret_value = [&ctx, temp] { return ctx.dst->Expr(temp); };
           }
 
           for (auto* member : new_struct_members) {
             ret_values.push_back(
-                ctx.dst->MemberAccessor(new_ret_value, member->symbol()));
+                ctx.dst->MemberAccessor(new_ret_value(), member->symbol()));
           }
         } else {
-          ret_values.push_back(new_ret_value);
+          ret_values.push_back(new_ret_value());
         }
 
         auto* new_ret = ctx.dst->create<ast::ReturnStatement>(

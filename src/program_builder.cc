@@ -111,17 +111,18 @@ ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
         type, static_cast<ProgramBuilder::f32>(elem_value)));
   }
   if (auto* v = unwrapped_type->As<type::Vector>()) {
-    auto* elem_default_value = ConstructValueFilledWith(v->type(), elem_value);
     ast::ExpressionList el(v->size());
-    std::fill(el.begin(), el.end(), elem_default_value);
+    for (size_t i = 0; i < el.size(); i++) {
+      el[i] = ConstructValueFilledWith(v->type(), elem_value);
+    }
     return create<ast::TypeConstructorExpression>(type, std::move(el));
   }
   if (auto* m = unwrapped_type->As<type::Matrix>()) {
     auto* col_vec_type = create<type::Vector>(m->type(), m->rows());
-    auto* vec_default_value =
-        ConstructValueFilledWith(col_vec_type, elem_value);
-    ast::ExpressionList el(m->columns());
-    std::fill(el.begin(), el.end(), vec_default_value);
+    ast::ExpressionList el(col_vec_type->size());
+    for (size_t i = 0; i < el.size(); i++) {
+      el[i] = ConstructValueFilledWith(col_vec_type, elem_value);
+    }
     return create<ast::TypeConstructorExpression>(type, std::move(el));
   }
   TINT_ASSERT(false);

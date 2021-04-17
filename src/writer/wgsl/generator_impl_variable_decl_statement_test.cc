@@ -13,8 +13,6 @@
 // limitations under the License.
 
 #include "src/ast/variable_decl_statement.h"
-#include "src/type/access_control_type.h"
-#include "src/type/sampled_texture_type.h"
 #include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
@@ -25,7 +23,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kInput);
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kInput);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   WrapInFunction(stmt);
@@ -43,7 +41,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
   // storage class.  Rely on defaulting.
   // https://github.com/gpuweb/gpuweb/issues/654
 
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kFunction);
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kFunction);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   WrapInFunction(stmt);
@@ -57,7 +55,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kPrivate);
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
   WrapInFunction(stmt);
@@ -68,37 +66,6 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  var<private> a : f32;\n");
-}
-
-TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Sampler) {
-  auto* var = Global("s", create<type::Sampler>(type::SamplerKind::kSampler),
-                     ast::StorageClass::kUniformConstant);
-
-  auto* stmt = create<ast::VariableDeclStatement>(var);
-
-  GeneratorImpl& gen = Build();
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var s : sampler;\n");
-}
-
-TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Texture) {
-  auto* st =
-      create<type::SampledTexture>(type::TextureDimension::k1d, ty.f32());
-  auto* var = Global(
-      "t", create<type::AccessControl>(ast::AccessControl::kReadOnly, st),
-      ast::StorageClass::kUniformConstant);
-
-  auto* stmt = create<ast::VariableDeclStatement>(var);
-
-  GeneratorImpl& gen = Build();
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var t : [[access(read)]] texture_1d<f32>;\n");
 }
 
 }  // namespace

@@ -14,6 +14,8 @@
 
 #include "src/ast/stage_decoration.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/type/access_control_type.h"
+#include "src/type/sampled_texture_type.h"
 #include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
@@ -109,6 +111,32 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
     a1 = func();
   }
 )");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
+  Global("s", create<type::Sampler>(type::SamplerKind::kSampler),
+         ast::StorageClass::kUniformConstant);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  EXPECT_EQ(gen.result(), "  var s : sampler;\n");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
+  auto* st =
+      create<type::SampledTexture>(type::TextureDimension::k1d, ty.f32());
+  Global("t", ty.access(ast::AccessControl::kReadOnly, st),
+         ast::StorageClass::kUniformConstant);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  EXPECT_EQ(gen.result(), "  var t : [[access(read)]] texture_1d<f32>;\n");
 }
 
 }  // namespace

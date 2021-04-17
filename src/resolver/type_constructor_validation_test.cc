@@ -51,8 +51,7 @@ TEST_F(ResolverTypeConstructorValidationTest, InferTypeTest_Simple) {
   auto* a_ident = Expr("a");
   auto* b_ident = Expr("b");
 
-  WrapInFunction(Decl(a), Decl(b), Assign(a_ident, a_ident),
-                 Assign(b_ident, b_ident));
+  WrapInFunction(Decl(a), Decl(b), Assign(a_ident, "a"), Assign(b_ident, "b"));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_EQ(TypeOf(a_ident), ty.pointer(ty.i32(), sc));
@@ -75,7 +74,7 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
   // Self-assign 'a' to force the expression to be resolved so we can test its
   // type below
   auto* a_ident = Expr("a");
-  WrapInFunction(Decl(a), Assign(a_ident, a_ident));
+  WrapInFunction(Decl(a), Assign(a_ident, "a"));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_EQ(TypeOf(a_ident), ty.pointer(rhs_type, sc));
@@ -126,7 +125,7 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
   // Self-assign 'a' to force the expression to be resolved so we can test its
   // type below
   auto* a_ident = Expr("a");
-  WrapInFunction(Decl(a), Assign(a_ident, a_ident));
+  WrapInFunction(Decl(a), Assign(a_ident, "a"));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_EQ(TypeOf(a_ident), ty.pointer(rhs_type, sc));
@@ -171,7 +170,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
   // Self-assign 'a' to force the expression to be resolved so we can test its
   // type below
   auto* a_ident = Expr("a");
-  WrapInFunction(Decl(a), Assign(a_ident, a_ident));
+  WrapInFunction(Decl(a), Assign(a_ident, "a"));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   ASSERT_EQ(TypeOf(a_ident), ty.pointer(rhs_type, sc));
