@@ -1149,12 +1149,16 @@ class ProgramBuilder {
     return func;
   }
 
-  /// Creates an ast::ReturnStatement with the input args
-  /// @param args arguments to construct a return statement with
+  /// Creates an ast::ReturnStatement with no return value
   /// @returns the return statement pointer
-  template <typename... Args>
-  ast::ReturnStatement* Return(Args&&... args) {
-    return create<ast::ReturnStatement>(std::forward<Args>(args)...);
+  ast::ReturnStatement* Return() { return create<ast::ReturnStatement>(); }
+
+  /// Creates an ast::ReturnStatement with the given return value
+  /// @param val the return value
+  /// @returns the return statement pointer
+  template <typename EXPR>
+  ast::ReturnStatement* Return(EXPR&& val) {
+    return create<ast::ReturnStatement>(Expr(std::forward<EXPR>(val)));
   }
 
   /// Creates a ast::Struct and type::Struct, registering the type::Struct with
