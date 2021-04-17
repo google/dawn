@@ -104,14 +104,14 @@ namespace utils {
         uint32_t colorAttachmentIndex = 0;
         for (const wgpu::TextureView& colorAttachment : colorAttachmentInfo) {
             if (colorAttachment.Get() != nullptr) {
-                cColorAttachments[colorAttachmentIndex].attachment = colorAttachment;
+                cColorAttachments[colorAttachmentIndex].view = colorAttachment;
             }
             ++colorAttachmentIndex;
         }
         colorAttachments = cColorAttachments.data();
 
         if (depthStencil.Get() != nullptr) {
-            cDepthStencilAttachmentInfo.attachment = depthStencil;
+            cDepthStencilAttachmentInfo.view = depthStencil;
             depthStencilAttachment = &cDepthStencilAttachmentInfo;
         } else {
             depthStencilAttachment = nullptr;

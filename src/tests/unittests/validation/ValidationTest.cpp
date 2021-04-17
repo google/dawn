@@ -220,7 +220,7 @@ ValidationTest::DummyRenderPass::DummyRenderPass(const wgpu::Device& device)
     attachment = device.CreateTexture(&descriptor);
 
     wgpu::TextureView view = attachment.CreateView();
-    mColorAttachment.attachment = view;
+    mColorAttachment.view = view;
     mColorAttachment.resolveTarget = nullptr;
     mColorAttachment.clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
     mColorAttachment.loadOp = wgpu::LoadOp::Clear;

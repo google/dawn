@@ -172,7 +172,7 @@ class MultisampledRenderingTest : public DawnTest {
         renderPass.cDepthStencilAttachmentInfo.depthLoadOp = depthStencilLoadOp;
 
         if (hasDepthStencilAttachment) {
-            renderPass.cDepthStencilAttachmentInfo.attachment = mDepthStencilView;
+            renderPass.cDepthStencilAttachmentInfo.view = mDepthStencilView;
             renderPass.depthStencilAttachment = &renderPass.cDepthStencilAttachmentInfo;
         }
 

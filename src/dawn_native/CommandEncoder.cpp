@@ -155,7 +155,8 @@ namespace dawn_native {
             }
 
             const TextureViewBase* resolveTarget = colorAttachment.resolveTarget;
-            const TextureViewBase* attachment = colorAttachment.attachment;
+            const TextureViewBase* attachment =
+                colorAttachment.view != nullptr ? colorAttachment.view : colorAttachment.attachment;
             DAWN_TRY(device->ValidateObject(colorAttachment.resolveTarget));
             DAWN_TRY(ValidateCanUseAs(colorAttachment.resolveTarget->GetTexture(),
                                       wgpu::TextureUsage::RenderAttachment));
@@ -203,16 +204,33 @@ namespace dawn_native {
         }
 
         MaybeError ValidateRenderPassColorAttachment(
-            const DeviceBase* device,
+            DeviceBase* device,
             const RenderPassColorAttachmentDescriptor& colorAttachment,
             uint32_t* width,
             uint32_t* height,
             uint32_t* sampleCount) {
-            DAWN_TRY(device->ValidateObject(colorAttachment.attachment));
-            DAWN_TRY(ValidateCanUseAs(colorAttachment.attachment->GetTexture(),
-                                      wgpu::TextureUsage::RenderAttachment));
+            TextureViewBase* attachment;
+            if (colorAttachment.view != nullptr) {
+                if (colorAttachment.attachment != nullptr) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Cannot specify both a attachment and view. attachment is deprecated, "
+                        "favor view instead.");
+                }
+                attachment = colorAttachment.view;
+            } else if (colorAttachment.attachment != nullptr) {
+                device->EmitDeprecationWarning(
+                    "RenderPassColorAttachmentDescriptor.attachment has been deprecated. Use "
+                    "RenderPassColorAttachmentDescriptor.view instead.");
+                attachment = colorAttachment.attachment;
+            } else {
+                return DAWN_VALIDATION_ERROR(
+                    "Must specify a view for RenderPassColorAttachmentDescriptor");
+            }
 
-            const TextureViewBase* attachment = colorAttachment.attachment;
+            DAWN_TRY(device->ValidateObject(attachment));
+            DAWN_TRY(
+                ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment));
+
             if (!(attachment->GetAspects() & Aspect::Color) ||
                 !attachment->GetFormat().isRenderable) {
                 return DAWN_VALIDATION_ERROR(
@@ -243,18 +261,35 @@ namespace dawn_native {
         }
 
         MaybeError ValidateRenderPassDepthStencilAttachment(
-            const DeviceBase* device,
+            DeviceBase* device,
             const RenderPassDepthStencilAttachmentDescriptor* depthStencilAttachment,
             uint32_t* width,
             uint32_t* height,
             uint32_t* sampleCount) {
             DAWN_ASSERT(depthStencilAttachment != nullptr);
 
-            DAWN_TRY(device->ValidateObject(depthStencilAttachment->attachment));
-            DAWN_TRY(ValidateCanUseAs(depthStencilAttachment->attachment->GetTexture(),
-                                      wgpu::TextureUsage::RenderAttachment));
+            TextureViewBase* attachment;
+            if (depthStencilAttachment->view != nullptr) {
+                if (depthStencilAttachment->attachment != nullptr) {
+                    return DAWN_VALIDATION_ERROR(
+                        "Cannot specify both a attachment and view. attachment is deprecated, "
+                        "favor view instead.");
+                }
+                attachment = depthStencilAttachment->view;
+            } else if (depthStencilAttachment->attachment != nullptr) {
+                device->EmitDeprecationWarning(
+                    "RenderPassDepthStencilAttachmentDescriptor.attachment has been deprecated. "
+                    "Use RenderPassDepthStencilAttachmentDescriptor.view instead.");
+                attachment = depthStencilAttachment->attachment;
+            } else {
+                return DAWN_VALIDATION_ERROR(
+                    "Must specify a view for RenderPassDepthStencilAttachmentDescriptor");
+            }
 
-            const TextureViewBase* attachment = depthStencilAttachment->attachment;
+            DAWN_TRY(device->ValidateObject(attachment));
+            DAWN_TRY(
+                ValidateCanUseAs(attachment->GetTexture(), wgpu::TextureUsage::RenderAttachment));
+
             if ((attachment->GetAspects() & (Aspect::Depth | Aspect::Stencil)) == Aspect::None ||
                 !attachment->GetFormat().isRenderable) {
                 return DAWN_VALIDATION_ERROR(
@@ -313,7 +348,7 @@ namespace dawn_native {
             return {};
         }
 
-        MaybeError ValidateRenderPassDescriptor(const DeviceBase* device,
+        MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                                                 const RenderPassDescriptor* descriptor,
                                                 uint32_t* width,
                                                 uint32_t* height,
@@ -521,7 +556,10 @@ namespace dawn_native {
                 for (ColorAttachmentIndex index :
                      IterateBitSet(cmd->attachmentState->GetColorAttachmentsMask())) {
                     uint8_t i = static_cast<uint8_t>(index);
-                    TextureViewBase* view = descriptor->colorAttachments[i].attachment;
+                    TextureViewBase* view = descriptor->colorAttachments[i].view;
+                    if (view == nullptr) {
+                        view = descriptor->colorAttachments[i].attachment;
+                    }
                     TextureViewBase* resolveTarget = descriptor->colorAttachments[i].resolveTarget;
 
                     cmd->colorAttachments[index].view = view;
@@ -540,7 +578,10 @@ namespace dawn_native {
                 }
 
                 if (cmd->attachmentState->HasDepthStencilAttachment()) {
-                    TextureViewBase* view = descriptor->depthStencilAttachment->attachment;
+                    TextureViewBase* view = descriptor->depthStencilAttachment->view;
+                    if (view == nullptr) {
+                        view = descriptor->depthStencilAttachment->attachment;
+                    }
 
                     cmd->depthStencilAttachment.view = view;
                     cmd->depthStencilAttachment.clearDepth =

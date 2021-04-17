@@ -119,23 +119,23 @@ namespace {
             // We cannot use utils::ComboRenderPassDescriptor here because it only supports at most
             // kMaxColorAttachments(4) color attachments.
             std::array<wgpu::RenderPassColorAttachmentDescriptor, 5> colorAttachments;
-            colorAttachments[0].attachment = color0;
+            colorAttachments[0].view = color0;
             colorAttachments[0].resolveTarget = nullptr;
             colorAttachments[0].clearColor = {0.0f, 0.0f, 0.0f, 0.0f};
             colorAttachments[0].loadOp = wgpu::LoadOp::Clear;
             colorAttachments[0].storeOp = wgpu::StoreOp::Store;
 
             colorAttachments[1] = colorAttachments[0];
-            colorAttachments[1].attachment = color1;
+            colorAttachments[1].view = color1;
 
             colorAttachments[2] = colorAttachments[0];
-            colorAttachments[2].attachment = color2;
+            colorAttachments[2].view = color2;
 
             colorAttachments[3] = colorAttachments[0];
-            colorAttachments[3].attachment = color3;
+            colorAttachments[3].view = color3;
 
             colorAttachments[4] = colorAttachments[0];
-            colorAttachments[4].attachment =
+            colorAttachments[4].view =
                 Create2DAttachment(device, 1, 1, wgpu::TextureFormat::RGBA8Unorm);
 
             wgpu::RenderPassDescriptor renderPass;

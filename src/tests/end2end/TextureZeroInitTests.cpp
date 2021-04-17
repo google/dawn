@@ -203,7 +203,7 @@ TEST_P(TextureZeroInitTest, RenderingMipMapClearsToZero) {
     renderPass.renderPassInfo.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
     // Specify non-zero clear color. It should still be cleared to zero.
     renderPass.renderPassInfo.cColorAttachments[0].clearColor = {0.5f, 0.5f, 0.5f, 0.5f};
-    renderPass.renderPassInfo.cColorAttachments[0].attachment = view;
+    renderPass.renderPassInfo.cColorAttachments[0].view = view;
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {
@@ -248,7 +248,7 @@ TEST_P(TextureZeroInitTest, RenderingArrayLayerClearsToZero) {
     renderPass.renderPassInfo.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
     // Specify non-zero clear color. It should still be cleared to zero.
     renderPass.renderPassInfo.cColorAttachments[0].clearColor = {0.5f, 0.5f, 0.5f, 0.5f};
-    renderPass.renderPassInfo.cColorAttachments[0].attachment = view;
+    renderPass.renderPassInfo.cColorAttachments[0].view = view;
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     {

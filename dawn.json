@@ -1423,21 +1423,27 @@
         ]
     },
 
-    "render pass color attachment descriptor": {
+    "render pass color attachment": {
         "category": "structure",
         "members": [
-            {"name": "attachment", "type": "texture view"},
+            {"name": "view", "type": "texture view", "optional": true},
             {"name": "resolve target", "type": "texture view", "optional": true},
             {"name": "load op", "type": "load op"},
             {"name": "store op", "type": "store op"},
-            {"name": "clear color", "type": "color"}
+            {"name": "clear color", "type": "color"},
+            {"name": "attachment", "type": "texture view", "optional": true}
         ]
     },
 
-    "render pass depth stencil attachment descriptor": {
+    "render pass color attachment descriptor": {
+        "category": "typedef",
+        "type": "render pass color attachment"
+    },
+
+    "render pass depth stencil attachment": {
         "category": "structure",
         "members": [
-            {"name": "attachment", "type": "texture view"},
+            {"name": "view", "type": "texture view", "optional": true},
             {"name": "depth load op", "type": "load op"},
             {"name": "depth store op", "type": "store op"},
             {"name": "clear depth", "type": "float"},
@@ -1445,8 +1451,14 @@
             {"name": "stencil load op", "type": "load op"},
             {"name": "stencil store op", "type": "store op"},
             {"name": "clear stencil", "type": "uint32_t", "default": "0"},
-            {"name": "stencil read only", "type": "bool", "default": "false"}
+            {"name": "stencil read only", "type": "bool", "default": "false"},
+            {"name": "attachment", "type": "texture view", "optional": true}
         ]
+    },
+
+    "render pass depth stencil attachment descriptor": {
+        "category": "typedef",
+        "type": "render pass depth stencil attachment"
     },
 
     "render pass descriptor": {
@@ -1455,8 +1467,8 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "color attachment count", "type": "uint32_t"},
-            {"name": "color attachments", "type": "render pass color attachment descriptor", "annotation": "const*", "length": "color attachment count"},
-            {"name": "depth stencil attachment", "type": "render pass depth stencil attachment descriptor", "annotation": "const*", "optional": true},
+            {"name": "color attachments", "type": "render pass color attachment", "annotation": "const*", "length": "color attachment count"},
+            {"name": "depth stencil attachment", "type": "render pass depth stencil attachment", "annotation": "const*", "optional": true},
             {"name": "occlusion query set", "type": "query set", "optional": true}
         ]
     },
