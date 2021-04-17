@@ -4201,14 +4201,12 @@ bool FunctionEmitter::EmitControlBarrier(
     const spvtools::opt::Instruction& inst) {
   uint32_t operands[3];
   for (int i = 0; i < 3; i++) {
-    if (auto* op = MakeOperand(inst, i).expr) {
-      auto* lit = As<ast::ScalarConstructorExpression>(op)->literal();
-      if (auto* int_lit = lit->As<ast::IntLiteral>()) {
-        operands[i] = int_lit->value_as_u32();
-        continue;
-      }
+    auto id = inst.GetSingleWordInOperand(i);
+    if (auto* constant = constant_mgr_->FindDeclaredConstant(id)) {
+      operands[i] = constant->GetU32();
+    } else {
+      return Fail() << "invalid or missing operands for control barrier";
     }
-    return Fail() << "invalid or missing operands for control barrier";
   }
 
   uint32_t execution = operands[0];
