@@ -18,9 +18,9 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/workgroup_decoration.h"
-#include "src/type/depth_texture_type.h"
-#include "src/type/multisampled_texture_type.h"
-#include "src/type/sampled_texture_type.h"
+#include "src/sem/depth_texture_type.h"
+#include "src/sem/multisampled_texture_type.h"
+#include "src/sem/sampled_texture_type.h"
 #include "tint/tint.h"
 
 namespace tint {

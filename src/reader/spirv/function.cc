@@ -31,8 +31,8 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/type/depth_texture_type.h"
-#include "src/type/sampled_texture_type.h"
+#include "src/sem/depth_texture_type.h"
+#include "src/sem/sampled_texture_type.h"
 
 // Terms:
 //    CFG: the control flow graph of the function, where basic blocks are the

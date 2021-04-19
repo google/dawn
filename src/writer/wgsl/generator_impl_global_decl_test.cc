@@ -14,8 +14,8 @@
 
 #include "src/ast/stage_decoration.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/type/access_control_type.h"
-#include "src/type/sampled_texture_type.h"
+#include "src/sem/access_control_type.h"
+#include "src/sem/sampled_texture_type.h"
 #include "src/writer/wgsl/test_helper.h"
 
 namespace tint {

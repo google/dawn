@@ -19,7 +19,7 @@
 
 #include "src/ast/access_control.h"
 #include "src/program_builder.h"
-#include "src/type/storage_texture_type.h"
+#include "src/sem/storage_texture_type.h"
 
 namespace tint {
 namespace ast {

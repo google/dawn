@@ -16,8 +16,8 @@
 
 #include "gmock/gmock.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/type/access_control_type.h"
-#include "src/type/storage_texture_type.h"
+#include "src/sem/access_control_type.h"
+#include "src/sem/storage_texture_type.h"
 
 namespace tint {
 namespace resolver {

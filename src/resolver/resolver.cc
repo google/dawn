@@ -35,6 +35,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
+#include "src/sem/access_control_type.h"
 #include "src/sem/array.h"
 #include "src/sem/call.h"
 #include "src/sem/function.h"
@@ -42,7 +43,6 @@
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
-#include "src/type/access_control_type.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/math.h"
 

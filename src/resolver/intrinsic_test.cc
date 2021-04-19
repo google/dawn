@@ -30,13 +30,13 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/resolver/resolver_test_helper.h"
+#include "src/sem/access_control_type.h"
 #include "src/sem/call.h"
 #include "src/sem/function.h"
 #include "src/sem/member_accessor_expression.h"
+#include "src/sem/sampled_texture_type.h"
 #include "src/sem/statement.h"
 #include "src/sem/variable.h"
-#include "src/type/access_control_type.h"
-#include "src/type/sampled_texture_type.h"
 
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;

@@ -13,9 +13,9 @@
 // limitations under the License.
 
 #include "src/reader/wgsl/parser_impl_test_helper.h"
-#include "src/type/depth_texture_type.h"
-#include "src/type/multisampled_texture_type.h"
-#include "src/type/sampled_texture_type.h"
+#include "src/sem/depth_texture_type.h"
+#include "src/sem/multisampled_texture_type.h"
+#include "src/sem/sampled_texture_type.h"
 
 namespace tint {
 namespace reader {

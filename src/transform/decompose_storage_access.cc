@@ -24,12 +24,12 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/program_builder.h"
+#include "src/sem/access_control_type.h"
 #include "src/sem/array.h"
 #include "src/sem/call.h"
 #include "src/sem/member_accessor_expression.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
-#include "src/type/access_control_type.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/hash.h"
 

@@ -22,10 +22,10 @@
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/reader/spirv/function.h"
-#include "src/type/access_control_type.h"
-#include "src/type/depth_texture_type.h"
-#include "src/type/multisampled_texture_type.h"
-#include "src/type/sampled_texture_type.h"
+#include "src/sem/access_control_type.h"
+#include "src/sem/depth_texture_type.h"
+#include "src/sem/multisampled_texture_type.h"
+#include "src/sem/sampled_texture_type.h"
 
 namespace tint {
 namespace reader {

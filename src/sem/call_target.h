@@ -18,16 +18,13 @@
 #include <vector>
 
 #include "src/sem/node.h"
-#include "src/type/sampler_type.h"
+#include "src/sem/sampler_type.h"
 
 namespace tint {
 
+namespace sem {
 // Forward declarations
-namespace sem {
 class Type;
-}  // namespace sem
-
-namespace sem {
 
 /// Parameter describes a single parameter of a call target
 struct Parameter {

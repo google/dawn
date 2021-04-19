@@ -16,7 +16,7 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
-#include "src/type/access_control_type.h"
+#include "src/sem/access_control_type.h"
 #include "src/writer/wgsl/test_helper.h"
 
 namespace tint {

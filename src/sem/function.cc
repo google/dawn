@@ -15,11 +15,11 @@
 #include "src/sem/function.h"
 
 #include "src/ast/function.h"
+#include "src/sem/depth_texture_type.h"
+#include "src/sem/multisampled_texture_type.h"
+#include "src/sem/sampled_texture_type.h"
+#include "src/sem/storage_texture_type.h"
 #include "src/sem/variable.h"
-#include "src/type/depth_texture_type.h"
-#include "src/type/multisampled_texture_type.h"
-#include "src/type/sampled_texture_type.h"
-#include "src/type/storage_texture_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 

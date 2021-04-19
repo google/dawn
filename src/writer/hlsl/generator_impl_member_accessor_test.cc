@@ -15,7 +15,7 @@
 #include "gmock/gmock.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/type/access_control_type.h"
+#include "src/sem/access_control_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {

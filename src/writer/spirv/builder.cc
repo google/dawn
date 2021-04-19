@@ -23,13 +23,13 @@
 #include "src/ast/fallthrough_statement.h"
 #include "src/sem/array.h"
 #include "src/sem/call.h"
+#include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
 #include "src/sem/intrinsic.h"
+#include "src/sem/multisampled_texture_type.h"
+#include "src/sem/sampled_texture_type.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
-#include "src/type/depth_texture_type.h"
-#include "src/type/multisampled_texture_type.h"
-#include "src/type/sampled_texture_type.h"
 #include "src/writer/append_vector.h"
 
 namespace tint {

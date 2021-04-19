@@ -20,8 +20,8 @@
 #include "src/ast/function.h"
 #include "src/program_id.h"
 #include "src/sem/info.h"
+#include "src/sem/type_manager.h"
 #include "src/symbol_table.h"
-#include "src/type/type_manager.h"
 
 namespace tint {
 

@@ -17,8 +17,8 @@
 #include <utility>
 
 #include "src/program_builder.h"
+#include "src/sem/access_control_type.h"
 #include "src/sem/variable.h"
-#include "src/type/access_control_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::BindingRemapper::Remappings);
 

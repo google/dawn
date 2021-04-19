@@ -15,7 +15,7 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/type/depth_texture_type.h"
+#include "src/sem/depth_texture_type.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
 

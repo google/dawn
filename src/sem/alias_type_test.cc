@@ -1,0 +1,149 @@
+// Copyright 2020 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "src/sem/access_control_type.h"
+#include "src/sem/test_helper.h"
+#include "src/sem/texture_type.h"
+
+namespace tint {
+namespace sem {
+namespace {
+
+using AliasTest = TestHelper;
+
+TEST_F(AliasTest, Create) {
+  auto* a = ty.alias("a_type", ty.u32());
+  EXPECT_EQ(a->symbol(), Symbol(1, ID()));
+  EXPECT_EQ(a->type(), ty.u32());
+}
+
+TEST_F(AliasTest, Is) {
+  auto* at = ty.alias("a", ty.i32());
+  sem::Type* ty = at;
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_TRUE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<ArrayType>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<StructType>());
+  EXPECT_FALSE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
+}
+
+TEST_F(AliasTest, TypeName) {
+  auto* at = ty.alias("Particle", ty.i32());
+  EXPECT_EQ(at->type_name(), "__alias_$1__i32");
+}
+
+TEST_F(AliasTest, FriendlyName) {
+  auto* at = ty.alias("Particle", ty.i32());
+  EXPECT_EQ(at->FriendlyName(Symbols()), "Particle");
+}
+
+TEST_F(AliasTest, UnwrapIfNeeded_Alias) {
+  auto* a = ty.alias("a_type", ty.u32());
+  EXPECT_EQ(a->symbol(), Symbol(1, ID()));
+  EXPECT_EQ(a->type(), ty.u32());
+  EXPECT_EQ(a->UnwrapIfNeeded(), ty.u32());
+  EXPECT_EQ(ty.u32()->UnwrapIfNeeded(), ty.u32());
+}
+
+TEST_F(AliasTest, UnwrapIfNeeded_AccessControl) {
+  AccessControl a{ast::AccessControl::kReadOnly, ty.u32()};
+  EXPECT_EQ(a.type(), ty.u32());
+  EXPECT_EQ(a.UnwrapIfNeeded(), ty.u32());
+}
+
+TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel) {
+  auto* a = ty.alias("a_type", ty.u32());
+  auto* aa = ty.alias("aa_type", a);
+
+  EXPECT_EQ(aa->symbol(), Symbol(2, ID()));
+  EXPECT_EQ(aa->type(), a);
+  EXPECT_EQ(aa->UnwrapIfNeeded(), ty.u32());
+}
+
+TEST_F(AliasTest, UnwrapIfNeeded_MultiLevel_AliasAccessControl) {
+  auto* a = ty.alias("a_type", ty.u32());
+
+  AccessControl aa{ast::AccessControl::kReadWrite, a};
+  EXPECT_EQ(aa.type(), a);
+  EXPECT_EQ(aa.UnwrapIfNeeded(), ty.u32());
+}
+
+TEST_F(AliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
+  auto* a = ty.alias("a_type", ty.u32());
+  auto* aa = ty.alias("aa_type", a);
+  Pointer paa{aa, ast::StorageClass::kUniform};
+  auto* apaa = ty.alias("paa_type", &paa);
+  auto* aapaa = ty.alias("aapaa_type", apaa);
+
+  EXPECT_EQ(aapaa->symbol(), Symbol(4, ID()));
+  EXPECT_EQ(aapaa->type(), apaa);
+  EXPECT_EQ(aapaa->UnwrapAll(), ty.u32());
+}
+
+TEST_F(AliasTest, UnwrapAll_SecondConsecutivePointerBlocksUnrapping) {
+  auto* a = ty.alias("a_type", ty.u32());
+  auto* aa = ty.alias("aa_type", a);
+
+  Pointer paa{aa, ast::StorageClass::kUniform};
+  Pointer ppaa{&paa, ast::StorageClass::kUniform};
+  auto* appaa = ty.alias("appaa_type", &ppaa);
+  EXPECT_EQ(appaa->UnwrapAll(), &paa);
+}
+
+TEST_F(AliasTest, UnwrapAll_SecondNonConsecutivePointerBlocksUnrapping) {
+  auto* a = ty.alias("a_type", ty.u32());
+  auto* aa = ty.alias("aa_type", a);
+  Pointer paa{aa, ast::StorageClass::kUniform};
+
+  auto* apaa = ty.alias("apaa_type", &paa);
+  auto* aapaa = ty.alias("aapaa_type", apaa);
+  Pointer paapaa{aapaa, ast::StorageClass::kUniform};
+  auto* apaapaa = ty.alias("apaapaa_type", &paapaa);
+
+  EXPECT_EQ(apaapaa->UnwrapAll(), &paa);
+}
+
+TEST_F(AliasTest, UnwrapAll_AccessControlPointer) {
+  AccessControl a{ast::AccessControl::kReadOnly, ty.u32()};
+  Pointer pa{&a, ast::StorageClass::kUniform};
+  EXPECT_EQ(pa.type(), &a);
+  EXPECT_EQ(pa.UnwrapAll(), ty.u32());
+}
+
+TEST_F(AliasTest, UnwrapAll_PointerAccessControl) {
+  Pointer p{ty.u32(), ast::StorageClass::kUniform};
+  AccessControl a{ast::AccessControl::kReadOnly, &p};
+
+  EXPECT_EQ(a.type(), &p);
+  EXPECT_EQ(a.UnwrapAll(), ty.u32());
+}
+
+TEST_F(AliasTest, UnwrapAliasIfNeeded) {
+  auto* alias1 = ty.alias("alias1", ty.f32());
+  auto* alias2 = ty.alias("alias2", alias1);
+  auto* alias3 = ty.alias("alias3", alias2);
+  EXPECT_EQ(alias3->UnwrapAliasIfNeeded(), ty.f32());
+}
+
+}  // namespace
+}  // namespace sem
+}  // namespace tint

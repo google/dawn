@@ -35,7 +35,7 @@
 #include "src/program_builder.h"
 #include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
-#include "src/type/storage_texture_type.h"
+#include "src/sem/storage_texture_type.h"
 
 namespace tint {
 namespace reader {
