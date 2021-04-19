@@ -28,6 +28,7 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -764,7 +765,8 @@ TEST_F(ResolverTest, Function_Parameters) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
-  auto* s = Structure("S", {Member("m", ty.u32())});
+  auto* s = Structure("S", {Member("m", ty.u32())},
+                      {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kReadOnly, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
@@ -799,7 +801,8 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
-  auto* s = Structure("S", {Member("m", ty.u32())});
+  auto* s = Structure("S", {Member("m", ty.u32())},
+                      {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kReadOnly, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);

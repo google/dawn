@@ -15,6 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "gmock/gmock.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/struct.h"
 #include "src/type/access_control_type.h"
@@ -26,7 +27,8 @@ namespace {
 using ResolverHostShareableValidationTest = ResolverTest;
 
 TEST_F(ResolverHostShareableValidationTest, BoolMember) {
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.bool_())});
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.bool_())},
+                      {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
@@ -40,7 +42,8 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
 }
 
 TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.vec3<bool>())});
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.vec3<bool>())},
+                      {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
@@ -55,7 +58,8 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
 
 TEST_F(ResolverHostShareableValidationTest, Aliases) {
   auto* a1 = ty.alias("a1", ty.bool_());
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", a1)});
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", a1)},
+                      {create<ast::StructBlockDecoration>()});
   auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
   auto* a2 = ty.alias("a2", ac);
   Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage);
@@ -74,7 +78,8 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
   auto* i2 = Structure("I2", {Member(Source{{3, 4}}, "y", i1)});
   auto* i3 = Structure("I3", {Member(Source{{5, 6}}, "z", i2)});
 
-  auto* s = Structure("S", {Member(Source{{7, 8}}, "m", i3)});
+  auto* s = Structure("S", {Member(Source{{7, 8}}, "m", i3)},
+                      {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{9, 10}}, "g", a, ast::StorageClass::kStorage);
 
@@ -109,7 +114,8 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
                           Member(Source{{6, 1}}, "z3", ty.alias("a2", i2)),
                       });
 
-  auto* s = Structure("S", {Member(Source{{7, 8}}, "m", i3)});
+  auto* s = Structure("S", {Member(Source{{7, 8}}, "m", i3)},
+                      {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{9, 10}}, "g", a, ast::StorageClass::kStorage);
 

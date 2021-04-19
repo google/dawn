@@ -307,10 +307,12 @@ vertex tint_symbol_2 vert_main2() {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_With_RW_StorageBuffer) {
-  auto* s = Structure("Data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
+  auto* s = Structure("Data",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
@@ -351,10 +353,12 @@ fragment void frag_main(device Data& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_With_RO_StorageBuffer) {
-  auto* s = Structure("Data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
+  auto* s = Structure("Data",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
@@ -609,10 +613,12 @@ fragment void frag_main(constant float4& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_RW_StorageBuffer) {
-  auto* s = Structure("Data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
+  auto* s = Structure("Data",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
@@ -665,10 +671,12 @@ fragment void frag_main(device Data& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_RO_StorageBuffer) {
-  auto* s = Structure("Data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
+  auto* s = Structure("Data",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
 

@@ -14,6 +14,7 @@
 
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/writer/spirv/spv_dump.h"
 #include "src/writer/spirv/test_helper.h"
 
@@ -387,10 +388,12 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   // };
   // var b : [[access(read)]] A
 
-  auto* A = Structure("A", {
-                               Member("a", ty.i32()),
-                               Member("b", ty.i32()),
-                           });
+  auto* A = Structure("A",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.i32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
   auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, A);
 
   auto* var = Global("b", ac, ast::StorageClass::kStorage);
@@ -399,7 +402,8 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 Offset 0
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
+OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %3 0 NonWritable
 OpMemberDecorate %3 1 Offset 4
 OpMemberDecorate %3 1 NonWritable
@@ -423,7 +427,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   // type B = A;
   // var b : [[access(read)]] B
 
-  auto* A = Structure("A", {Member("a", ty.i32())});
+  auto* A = Structure("A", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
   auto* B = ty.alias("B", A);
   auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, B);
   auto* var = Global("b", ac, ast::StorageClass::kStorage);
@@ -432,7 +437,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 Offset 0
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
+OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %3 0 NonWritable
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
@@ -453,7 +459,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   // type B = [[access(read)]] A;
   // var b : B
 
-  auto* A = Structure("A", {Member("a", ty.i32())});
+  auto* A = Structure("A", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
   auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, A);
   auto* B = ty.alias("B", ac);
   auto* var = Global("b", B, ast::StorageClass::kStorage);
@@ -462,7 +469,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   EXPECT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
 
-  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpMemberDecorate %3 0 Offset 0
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
+OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %3 0 NonWritable
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
@@ -483,7 +491,8 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   // var b : [[access(read)]] A
   // var c : [[access(read_write)]] A
 
-  auto* A = Structure("A", {Member("a", ty.i32())});
+  auto* A = Structure("A", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
   type::AccessControl read{ast::AccessControl::kReadOnly, A};
   type::AccessControl rw{ast::AccessControl::kReadWrite, A};
 
@@ -496,8 +505,10 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   EXPECT_TRUE(b.GenerateGlobalVariable(var_c)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()),
-            R"(OpMemberDecorate %3 0 Offset 0
+            R"(OpDecorate %3 Block
+OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %3 0 NonWritable
+OpDecorate %7 Block
 OpMemberDecorate %7 0 Offset 0
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"

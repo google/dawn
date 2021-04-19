@@ -15,6 +15,7 @@
 #include "src/resolver/resolver.h"
 
 #include "gmock/gmock.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/struct.h"
 #include "src/type/access_control_type.h"
@@ -34,7 +35,7 @@ TEST_F(ResolverStorageClassValidationTest, GlobalVariableNoStorageClass_Fail) {
             "12:34 error v-0022: global variables must have a storage class");
 }
 
-TEST_F(ResolverStorageClassValidationTest, Bool) {
+TEST_F(ResolverStorageClassValidationTest, StorageBufferBool) {
   // var<storage> g : bool;
   Global(Source{{56, 78}}, "g", ty.bool_(), ast::StorageClass::kStorage);
 
@@ -45,7 +46,7 @@ TEST_F(ResolverStorageClassValidationTest, Bool) {
       R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
 }
 
-TEST_F(ResolverStorageClassValidationTest, Pointer) {
+TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
   // var<storage> g : ptr<i32, input>;
   Global(Source{{56, 78}}, "g", ty.pointer<i32>(ast::StorageClass::kInput),
          ast::StorageClass::kStorage);
@@ -57,7 +58,7 @@ TEST_F(ResolverStorageClassValidationTest, Pointer) {
       R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
 }
 
-TEST_F(ResolverStorageClassValidationTest, Array) {
+TEST_F(ResolverStorageClassValidationTest, StorageBufferArray) {
   // var<storage> g : [[access(read)]] array<S, 3>;
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* a = ty.array(s, 3);
@@ -71,7 +72,7 @@ TEST_F(ResolverStorageClassValidationTest, Array) {
       R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
 }
 
-TEST_F(ResolverStorageClassValidationTest, BoolAlias) {
+TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
   // type a = bool;
   // var<storage> g : [[access(read)]] a;
   auto* a = ty.alias("a", ty.bool_());
@@ -84,7 +85,7 @@ TEST_F(ResolverStorageClassValidationTest, BoolAlias) {
       R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
 }
 
-TEST_F(ResolverStorageClassValidationTest, NoAccessControl) {
+TEST_F(ResolverStorageClassValidationTest, StorageBufferNoAccessControl) {
   // var<storage> g : S;
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
   Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage);
@@ -96,20 +97,39 @@ TEST_F(ResolverStorageClassValidationTest, NoAccessControl) {
       R"(56:78 error: variables declared in the <storage> storage class must be of an [[access]] qualified structure type)");
 }
 
-TEST_F(ResolverStorageClassValidationTest, NoError_Basic) {
+TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {
+  // struct S { x : i32 };
   // var<storage> g : [[access(read)]] S;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
+  auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
+
+  ASSERT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: structure used as a storage buffer must be declared with the [[block]] decoration
+56:78 note: structure used as storage buffer here)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
+  // [[block]] struct S { x : i32 };
+  // var<storage> g : [[access(read)]] S;
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
   auto* a = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_TRUE(r()->Resolve());
 }
 
-TEST_F(ResolverStorageClassValidationTest, NoError_Aliases) {
+TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
+  // [[block]] struct S { x : i32 };
   // type a1 = S;
   // type a2 = [[access(read)]] a1;
   // var<storage> g : a2;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
   auto* a1 = ty.alias("a1", s);
   auto* ac = ty.access(ast::AccessControl::kReadOnly, a1);
   auto* a2 = ty.alias("a2", ac);

@@ -240,6 +240,7 @@ class Resolver {
   bool ValidateBinary(ast::BinaryExpression* expr);
   bool ValidateEntryPoint(const ast::Function* func);
   bool ValidateFunction(const ast::Function* func);
+  bool ValidateGlobalVariable(const VariableInfo* var);
   bool ValidateMatrixConstructor(const type::Matrix* matrix_type,
                                  const ast::ExpressionList& values);
   bool ValidateParameter(const ast::Variable* param);

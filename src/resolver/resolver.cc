@@ -284,27 +284,6 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     return false;
   }
 
-  if (info->storage_class == ast::StorageClass::kStorage) {
-    // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
-    // Variables in the storage storage class and variables with a storage
-    // texture type must have an access attribute applied to the store type.
-
-    // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
-    // A variable in the storage storage class is a storage buffer variable. Its
-    // store type must be a host-shareable structure type with block attribute,
-    // satisfying the storage class constraints.
-
-    auto* access = info->type->As<type::AccessControl>();
-    auto* str = access ? access->type()->As<type::Struct>() : nullptr;
-    if (!str) {
-      diagnostics_.add_error(
-          "variables declared in the <storage> storage class must be of an "
-          "[[access]] qualified structure type",
-          var->source());
-      return false;
-    }
-  }
-
   for (auto* deco : var->decorations()) {
     Mark(deco);
     if (!(deco->Is<ast::BindingDecoration>() ||
@@ -325,12 +304,53 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     }
   }
 
+  if (!ValidateGlobalVariable(info)) {
+    return false;
+  }
+
   if (!ApplyStorageClassUsageToType(var->declared_storage_class(), info->type,
                                     var->source())) {
     diagnostics_.add_note("while instantiating variable " +
                               builder_->Symbols().NameFor(var->symbol()),
                           var->source());
     return false;
+  }
+
+  return true;
+}
+
+bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
+  if (info->storage_class == ast::StorageClass::kStorage) {
+    // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
+    // Variables in the storage storage class and variables with a storage
+    // texture type must have an access attribute applied to the store type.
+
+    // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
+    // A variable in the storage storage class is a storage buffer variable. Its
+    // store type must be a host-shareable structure type with block attribute,
+    // satisfying the storage class constraints.
+
+    auto* access = info->type->As<type::AccessControl>();
+    auto* str = access ? access->type()->As<type::Struct>() : nullptr;
+    if (!str) {
+      diagnostics_.add_error(
+          "variables declared in the <storage> storage class must be of an "
+          "[[access]] qualified structure type",
+          info->declaration->source());
+      return false;
+    }
+
+    if (!str->IsBlockDecorated()) {
+      diagnostics_.add_error(
+          "structure used as a storage buffer must be declared with the "
+          "[[block]] decoration",
+          str->impl()->source());
+      if (info->declaration->source().range.begin.line) {
+        diagnostics_.add_note("structure used as storage buffer here",
+                              info->declaration->source());
+      }
+      return false;
+    }
   }
 
   return true;

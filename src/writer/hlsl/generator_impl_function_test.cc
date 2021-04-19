@@ -388,10 +388,12 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_RW_StorageBuffer_Read) {
-  auto* s = Structure("Data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
+  auto* s = Structure("Data",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
@@ -432,10 +434,12 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_RO_StorageBuffer_Read) {
-  auto* s = Structure("Data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
+  auto* s = Structure("Data",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   type::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
@@ -476,10 +480,12 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_WO_StorageBuffer_Store) {
-  auto* s = Structure("Data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
+  auto* s = Structure("Data",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   type::AccessControl ac(ast::AccessControl::kWriteOnly, s);
 
@@ -518,10 +524,12 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_StorageBuffer_Store) {
-  auto* s = Structure("Data", {
-                                  Member("a", ty.i32()),
-                                  Member("b", ty.f32()),
-                              });
+  auto* s = Structure("Data",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   type::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
@@ -777,7 +785,8 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_Called_By_EntryPoint_With_StorageBuffer) {
-  auto* s = Structure("S", {Member("x", ty.f32())});
+  auto* s = Structure("S", {Member("x", ty.f32())},
+                      {create<ast::StructBlockDecoration>()});
   auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{

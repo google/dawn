@@ -201,35 +201,37 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
-  auto* s = Structure(
-      "S", {
-               Member("a", ty.i32(), {MemberSize(32)}),
-               Member("b", ty.f32(), {MemberAlign(128), MemberSize(128)}),
-               Member("c", ty.vec2<f32>()),
-               Member("d", ty.u32()),
-               Member("e", ty.vec3<f32>()),
-               Member("f", ty.u32()),
-               Member("g", ty.vec4<f32>()),
-               Member("h", ty.u32()),
-               Member("i", ty.mat2x2<f32>()),
-               Member("j", ty.u32()),
-               Member("k", ty.mat2x3<f32>()),
-               Member("l", ty.u32()),
-               Member("m", ty.mat2x4<f32>()),
-               Member("n", ty.u32()),
-               Member("o", ty.mat3x2<f32>()),
-               Member("p", ty.u32()),
-               Member("q", ty.mat3x3<f32>()),
-               Member("r", ty.u32()),
-               Member("s", ty.mat3x4<f32>()),
-               Member("t", ty.u32()),
-               Member("u", ty.mat4x2<f32>()),
-               Member("v", ty.u32()),
-               Member("w", ty.mat4x3<f32>()),
-               Member("x", ty.u32()),
-               Member("y", ty.mat4x4<f32>()),
-               Member("z", ty.f32()),
-           });
+  auto* s =
+      Structure("S",
+                {
+                    Member("a", ty.i32(), {MemberSize(32)}),
+                    Member("b", ty.f32(), {MemberAlign(128), MemberSize(128)}),
+                    Member("c", ty.vec2<f32>()),
+                    Member("d", ty.u32()),
+                    Member("e", ty.vec3<f32>()),
+                    Member("f", ty.u32()),
+                    Member("g", ty.vec4<f32>()),
+                    Member("h", ty.u32()),
+                    Member("i", ty.mat2x2<f32>()),
+                    Member("j", ty.u32()),
+                    Member("k", ty.mat2x3<f32>()),
+                    Member("l", ty.u32()),
+                    Member("m", ty.mat2x4<f32>()),
+                    Member("n", ty.u32()),
+                    Member("o", ty.mat3x2<f32>()),
+                    Member("p", ty.u32()),
+                    Member("q", ty.mat3x3<f32>()),
+                    Member("r", ty.u32()),
+                    Member("s", ty.mat3x4<f32>()),
+                    Member("t", ty.u32()),
+                    Member("u", ty.mat4x2<f32>()),
+                    Member("v", ty.u32()),
+                    Member("w", ty.mat4x3<f32>()),
+                    Member("x", ty.u32()),
+                    Member("y", ty.mat4x4<f32>()),
+                    Member("z", ty.f32()),
+                },
+                {create<ast::StructBlockDecoration>()});
 
   Global("G", ty.access(ast::AccessControl::kReadOnly, s),
          ast::StorageClass::kStorage);
@@ -326,13 +328,15 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                                Member("b", ty.f32()),
                            });
 
-  auto* s = Structure("S", {
-                               Member("a", ty.i32()),
-                               Member("b", inner_x),
-                               Member("c", ty.f32()),
-                               Member("d", inner_y),
-                               Member("e", ty.f32()),
-                           });
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", inner_x),
+                          Member("c", ty.f32()),
+                          Member("d", inner_y),
+                          Member("e", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   Global("G", ty.access(ast::AccessControl::kReadOnly, s),
          ast::StorageClass::kStorage);
@@ -523,7 +527,8 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
           Member("tint_pad_28", ty.u32()),
           Member("tint_pad_4", ty.mat4x4<f32>()),
           Member("tint_pad_21", ty.f32()),
-      });
+      },
+      {create<ast::StructBlockDecoration>()});
 
   Global("G", ty.access(ast::AccessControl::kReadOnly, s),
          ast::StorageClass::kStorage);

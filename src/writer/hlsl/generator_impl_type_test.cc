@@ -173,10 +173,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
-  auto* s = Structure("S", {
-                               Member("a", ty.i32()),
-                               Member("b", ty.f32()),
-                           });
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
   Global("g", ty.access(ast::AccessControl::kReadWrite, s),
          ast::StorageClass::kStorage);
 
