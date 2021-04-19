@@ -96,11 +96,22 @@ bool GeneratorImpl::Generate() {
   }
 
   for (auto* var : program_->AST().GlobalVariables()) {
-    if (!var->is_const()) {
-      continue;
-    }
-    if (!EmitProgramConstVariable(var)) {
-      return false;
+    if (var->is_const()) {
+      if (!EmitProgramConstVariable(var)) {
+        return false;
+      }
+    } else {
+      auto* sem = program_->Sem().Get(var);
+      switch (sem->StorageClass()) {
+        case ast::StorageClass::kPrivate:
+        case ast::StorageClass::kWorkgroup:
+          TINT_UNIMPLEMENTED(diagnostics_)
+              << "crbug.com/tint/726: module-scope private and workgroup "
+                 "variables not yet implemented";
+          break;
+        default:
+          break;  // Handled by another code path
+      }
     }
   }
 
