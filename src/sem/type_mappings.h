@@ -30,7 +30,7 @@ class StructMember;
 class Variable;
 }  // namespace ast
 namespace type {
-class Array;
+class ArrayType;
 class Struct;
 }  // namespace type
 
@@ -53,7 +53,7 @@ class Variable;
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
   //! @cond Doxygen_Suppress
-  Array* operator()(type::Array*);
+  Array* operator()(type::ArrayType*);
   Call* operator()(ast::CallExpression*);
   Expression* operator()(ast::Expression*);
   Function* operator()(ast::Function*);

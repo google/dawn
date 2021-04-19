@@ -191,8 +191,8 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   EXPECT_FALSE(str->IsBlockDecorated());
 
   const auto* ty = str->impl()->members()[0]->type();
-  ASSERT_TRUE(ty->Is<type::Array>());
-  const auto* arr = ty->As<type::Array>();
+  ASSERT_TRUE(ty->Is<type::ArrayType>());
+  const auto* arr = ty->As<type::ArrayType>();
 
   ASSERT_EQ(arr->decorations().size(), 1u);
   auto* stride = arr->decorations()[0];

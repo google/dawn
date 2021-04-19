@@ -33,7 +33,7 @@ TEST_F(MultisampledTextureTest, Is) {
   Type* ty = &s;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
-  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->Is<Bool>());
   EXPECT_FALSE(ty->Is<F32>());
   EXPECT_FALSE(ty->Is<I32>());

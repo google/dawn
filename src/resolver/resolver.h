@@ -256,7 +256,7 @@ class Resolver {
   /// returned.
   /// @param arr the Array to get semantic information for
   /// @param source the Source of the ast node with this array as its type
-  const sem::Array* Array(type::Array* arr, const Source& source);
+  const sem::Array* Array(type::ArrayType* arr, const Source& source);
 
   /// @returns the StructInfo for the structure `str`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.

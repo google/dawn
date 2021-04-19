@@ -52,7 +52,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
-  type::Array ary(ty.f32(), 5, ast::DecorationList{});
+  type::ArrayType ary(ty.f32(), 5, ast::DecorationList{});
 
   auto* var = Var("a", &ary, ast::StorageClass::kNone);
   auto* stmt = create<ast::VariableDeclStatement>(var);

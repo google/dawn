@@ -390,7 +390,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
     return true;
   } else if (auto* alias = type->As<type::Alias>()) {
     out_ << program_->Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = type->As<type::Array>()) {
+  } else if (auto* ary = type->As<type::ArrayType>()) {
     for (auto* deco : ary->decorations()) {
       if (auto* stride = deco->As<ast::StrideDecoration>()) {
         out_ << "[[stride(" << stride->stride() << ")]] ";

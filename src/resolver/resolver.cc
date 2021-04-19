@@ -123,7 +123,7 @@ bool Resolver::IsStorable(type::Type* type) {
       type->Is<type::Matrix>()) {
     return true;
   }
-  if (type::Array* arr = type->As<type::Array>()) {
+  if (type::ArrayType* arr = type->As<type::ArrayType>()) {
     return IsStorable(arr->type());
   }
   if (type::Struct* str = type->As<type::Struct>()) {
@@ -149,7 +149,7 @@ bool Resolver::IsHostShareable(type::Type* type) {
   if (auto* mat = type->As<type::Matrix>()) {
     return IsHostShareable(mat->type());
   }
-  if (auto* arr = type->As<type::Array>()) {
+  if (auto* arr = type->As<type::ArrayType>()) {
     return IsHostShareable(arr->type());
   }
   if (auto* str = type->As<type::Struct>()) {
@@ -228,7 +228,7 @@ bool Resolver::Type(type::Type* ty) {
     if (!Structure(str)) {
       return false;
     }
-  } else if (auto* arr = ty->As<type::Array>()) {
+  } else if (auto* arr = ty->As<type::ArrayType>()) {
     if (!Array(arr, Source{})) {
       return false;
     }
@@ -248,7 +248,7 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
   variable_to_info_.emplace(var, info);
 
   // Resolve variable's type
-  if (auto* arr = info->type->As<type::Array>()) {
+  if (auto* arr = info->type->As<type::ArrayType>()) {
     if (!Array(arr, var->source())) {
       return nullptr;
     }
@@ -358,7 +358,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
 
 bool Resolver::ValidateVariable(const ast::Variable* var) {
   auto* type = variable_to_info_[var]->type;
-  if (auto* r = type->UnwrapAll()->As<type::Array>()) {
+  if (auto* r = type->UnwrapAll()->As<type::ArrayType>()) {
     if (r->IsRuntimeArray()) {
       diagnostics_.add_error(
           "v-0015",
@@ -568,7 +568,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func) {
                                     builder_->Symbols().NameFor(func->symbol()),
                                 func->source());
           return false;
-        } else if (auto* arr = member_ty->As<type::Array>()) {
+        } else if (auto* arr = member_ty->As<type::ArrayType>()) {
           if (arr->IsRuntimeArray()) {
             diagnostics_.add_error(
                 "entry point IO types cannot contain runtime sized arrays",
@@ -946,7 +946,7 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
   auto* res = TypeOf(expr->array());
   auto* parent_type = res->UnwrapAll();
   type::Type* ret = nullptr;
-  if (auto* arr = parent_type->As<type::Array>()) {
+  if (auto* arr = parent_type->As<type::ArrayType>()) {
     ret = arr->type();
   } else if (auto* vec = parent_type->As<type::Vector>()) {
     ret = vec->type();
@@ -962,7 +962,7 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
   // If we're extracting from a pointer, we return a pointer.
   if (auto* ptr = res->As<type::Pointer>()) {
     ret = builder_->create<type::Pointer>(ret, ptr->storage_class());
-  } else if (auto* arr = parent_type->As<type::Array>()) {
+  } else if (auto* arr = parent_type->As<type::ArrayType>()) {
     if (!arr->type()->is_scalar()) {
       // If we extract a non-scalar from an array then we also get a pointer. We
       // will generate a Function storage class variable to store this into.
@@ -1916,9 +1916,9 @@ bool Resolver::DefaultAlignAndSize(type::Type* ty,
       return true;
     }
     return false;
-  } else if (cty->Is<type::Array>()) {
+  } else if (cty->Is<type::ArrayType>()) {
     if (auto* sem =
-            Array(ty->UnwrapAliasIfNeeded()->As<type::Array>(), source)) {
+            Array(ty->UnwrapAliasIfNeeded()->As<type::ArrayType>(), source)) {
       align = sem->Align();
       size = sem->Size();
       return true;
@@ -1929,7 +1929,7 @@ bool Resolver::DefaultAlignAndSize(type::Type* ty,
   return false;
 }
 
-const sem::Array* Resolver::Array(type::Array* arr, const Source& source) {
+const sem::Array* Resolver::Array(type::ArrayType* arr, const Source& source) {
   if (auto* sem = builder_->Sem().Get(arr)) {
     // Semantic info already constructed for this array type
     return sem;
@@ -2000,7 +2000,7 @@ const sem::Array* Resolver::Array(type::Array* arr, const Source& source) {
 
 bool Resolver::ValidateStructure(const type::Struct* st) {
   for (auto* member : st->impl()->members()) {
-    if (auto* r = member->type()->UnwrapAll()->As<type::Array>()) {
+    if (auto* r = member->type()->UnwrapAll()->As<type::ArrayType>()) {
       if (r->IsRuntimeArray()) {
         if (member != st->impl()->members().back()) {
           diagnostics_.add_error(
@@ -2391,7 +2391,7 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
     return true;
   }
 
-  if (auto* arr = ty->As<type::Array>()) {
+  if (auto* arr = ty->As<type::ArrayType>()) {
     return ApplyStorageClassUsageToType(sc, arr->type(), usage);
   }
 

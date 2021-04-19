@@ -19,7 +19,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
 namespace tint {
 namespace sem {
 
-Array::Array(type::Array* type, uint32_t align, uint32_t size, uint32_t stride)
+Array::Array(type::ArrayType* type,
+             uint32_t align,
+             uint32_t size,
+             uint32_t stride)
     : type_(type), align_(align), size_(size), stride_(stride) {}
 
 }  // namespace sem

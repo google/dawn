@@ -447,7 +447,7 @@ struct State {
                                    member->Declaration()->type()->UnwrapAll());
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
-        } else if (auto* arr_ty = el_ty->As<type::Array>()) {
+        } else if (auto* arr_ty = el_ty->As<type::ArrayType>()) {
           auto& sem = ctx.src->Sem();
           auto* arr = sem.Get(arr_ty);
           for (uint32_t i = 0; i < arr_ty->size(); i++) {
@@ -518,7 +518,7 @@ struct State {
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
-        } else if (auto* arr_ty = el_ty->As<type::Array>()) {
+        } else if (auto* arr_ty = el_ty->As<type::ArrayType>()) {
           auto& sem = ctx.src->Sem();
           auto* arr = sem.Get(arr_ty);
           for (uint32_t i = 0; i < arr_ty->size(); i++) {
@@ -678,7 +678,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     if (auto* accessor = node->As<ast::ArrayAccessorExpression>()) {
       if (auto access = state.TakeAccess(accessor->array())) {
         // X[Y]
-        if (auto* arr_ty = access.type->As<type::Array>()) {
+        if (auto* arr_ty = access.type->As<type::ArrayType>()) {
           auto stride = sem.Get(arr_ty)->Stride();
           auto offset = Mul(stride, accessor->idx_expr());
           state.AddAccesss(accessor,

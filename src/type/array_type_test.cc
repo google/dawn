@@ -24,30 +24,30 @@ using ArrayTest = TestHelper;
 
 TEST_F(ArrayTest, CreateSizedArray) {
   U32 u32;
-  Array arr{&u32, 3, ast::DecorationList{}};
+  ArrayType arr{&u32, 3, ast::DecorationList{}};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 3u);
-  EXPECT_TRUE(arr.Is<Array>());
+  EXPECT_TRUE(arr.Is<ArrayType>());
   EXPECT_FALSE(arr.IsRuntimeArray());
 }
 
 TEST_F(ArrayTest, CreateRuntimeArray) {
   U32 u32;
-  Array arr{&u32, 0, ast::DecorationList{}};
+  ArrayType arr{&u32, 0, ast::DecorationList{}};
   EXPECT_EQ(arr.type(), &u32);
   EXPECT_EQ(arr.size(), 0u);
-  EXPECT_TRUE(arr.Is<Array>());
+  EXPECT_TRUE(arr.Is<ArrayType>());
   EXPECT_TRUE(arr.IsRuntimeArray());
 }
 
 TEST_F(ArrayTest, Is) {
   I32 i32;
 
-  Array arr{&i32, 3, ast::DecorationList{}};
+  ArrayType arr{&i32, 3, ast::DecorationList{}};
   Type* ty = &arr;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
-  EXPECT_TRUE(ty->Is<Array>());
+  EXPECT_TRUE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->Is<Bool>());
   EXPECT_FALSE(ty->Is<F32>());
   EXPECT_FALSE(ty->Is<I32>());
@@ -62,35 +62,36 @@ TEST_F(ArrayTest, Is) {
 
 TEST_F(ArrayTest, TypeName) {
   I32 i32;
-  Array arr{&i32, 0, ast::DecorationList{}};
+  ArrayType arr{&i32, 0, ast::DecorationList{}};
   EXPECT_EQ(arr.type_name(), "__array__i32");
 }
 
 TEST_F(ArrayTest, FriendlyNameRuntimeSized) {
-  Array arr{ty.i32(), 0, ast::DecorationList{}};
+  ArrayType arr{ty.i32(), 0, ast::DecorationList{}};
   EXPECT_EQ(arr.FriendlyName(Symbols()), "array<i32>");
 }
 
 TEST_F(ArrayTest, FriendlyNameStaticSized) {
-  Array arr{ty.i32(), 5, ast::DecorationList{}};
+  ArrayType arr{ty.i32(), 5, ast::DecorationList{}};
   EXPECT_EQ(arr.FriendlyName(Symbols()), "array<i32, 5>");
 }
 
 TEST_F(ArrayTest, FriendlyNameWithStride) {
-  Array arr{ty.i32(), 5,
-            ast::DecorationList{create<ast::StrideDecoration>(32)}};
+  ArrayType arr{ty.i32(), 5,
+                ast::DecorationList{create<ast::StrideDecoration>(32)}};
   EXPECT_EQ(arr.FriendlyName(Symbols()), "[[stride(32)]] array<i32, 5>");
 }
 
 TEST_F(ArrayTest, TypeName_RuntimeArray) {
   I32 i32;
-  Array arr{&i32, 3, ast::DecorationList{}};
+  ArrayType arr{&i32, 3, ast::DecorationList{}};
   EXPECT_EQ(arr.type_name(), "__array__i32_3");
 }
 
 TEST_F(ArrayTest, TypeName_WithStride) {
   I32 i32;
-  Array arr{&i32, 3, ast::DecorationList{create<ast::StrideDecoration>(16)}};
+  ArrayType arr{&i32, 3,
+                ast::DecorationList{create<ast::StrideDecoration>(16)}};
   EXPECT_EQ(arr.type_name(), "__array__i32_3_stride_16");
 }
 

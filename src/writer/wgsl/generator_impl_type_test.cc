@@ -73,10 +73,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
-  auto* a = create<type::Array>(ty.bool_(), 4,
-                                ast::DecorationList{
-                                    create<ast::StrideDecoration>(16u),
-                                });
+  auto* a = create<type::ArrayType>(ty.bool_(), 4,
+                                    ast::DecorationList{
+                                        create<ast::StrideDecoration>(16u),
+                                    });
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();
@@ -86,11 +86,11 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
-  auto* a = create<type::Array>(ty.bool_(), 4,
-                                ast::DecorationList{
-                                    create<ast::StrideDecoration>(16u),
-                                    create<ast::StrideDecoration>(32u),
-                                });
+  auto* a = create<type::ArrayType>(ty.bool_(), 4,
+                                    ast::DecorationList{
+                                        create<ast::StrideDecoration>(16u),
+                                        create<ast::StrideDecoration>(32u),
+                                    });
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();
@@ -100,7 +100,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
-  auto* a = create<type::Array>(ty.bool_(), 0, ast::DecorationList{});
+  auto* a = create<type::ArrayType>(ty.bool_(), 0, ast::DecorationList{});
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();

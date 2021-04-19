@@ -1315,8 +1315,9 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
     return EmitZeroValue(out, expr->type());
   }
 
-  bool brackets =
-      expr->type()->UnwrapAliasIfNeeded()->IsAnyOf<type::Array, type::Struct>();
+  bool brackets = expr->type()
+                      ->UnwrapAliasIfNeeded()
+                      ->IsAnyOf<type::ArrayType, type::Struct>();
 
   if (brackets) {
     out << "{";
@@ -1643,7 +1644,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
       return false;
     }
     // Array name is output as part of the type
-    if (!type->Is<type::Array>()) {
+    if (!type->Is<type::ArrayType>()) {
       out << " " << builder_.Symbols().NameFor(v->symbol());
     }
   }
@@ -1909,7 +1910,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (!EmitType(out, var->DeclaredType(), var->StorageClass(), name)) {
         return false;
       }
-      if (!var->DeclaredType()->UnwrapAliasIfNeeded()->Is<type::Array>()) {
+      if (!var->DeclaredType()->UnwrapAliasIfNeeded()->Is<type::ArrayType>()) {
         out << " " << name;
       }
 
@@ -2397,10 +2398,10 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
   if (auto* alias = type->As<type::Alias>()) {
     out << builder_.Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = type->As<type::Array>()) {
+  } else if (auto* ary = type->As<type::ArrayType>()) {
     type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (auto* arr = base_type->As<type::Array>()) {
+    while (auto* arr = base_type->As<type::ArrayType>()) {
       if (arr->IsRuntimeArray()) {
         TINT_ICE(diagnostics_)
             << "Runtime arrays may only exist in storage buffers, which should "
@@ -2564,7 +2565,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
       return false;
     }
     // Array member name will be output with the type
-    if (!mem->type()->Is<type::Array>()) {
+    if (!mem->type()->Is<type::ArrayType>()) {
       out << " " << builder_.Symbols().NameFor(mem->symbol());
     }
 
@@ -2663,7 +2664,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
                 builder_.Symbols().NameFor(var->symbol()))) {
     return false;
   }
-  if (!type->Is<type::Array>()) {
+  if (!type->Is<type::ArrayType>()) {
     out << " " << builder_.Symbols().NameFor(var->symbol());
   }
   out << constructor_out.str() << ";" << std::endl;
@@ -2725,7 +2726,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
                   builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
-    if (!type->Is<type::Array>()) {
+    if (!type->Is<type::ArrayType>()) {
       out << " " << builder_.Symbols().NameFor(var->symbol());
     }
 

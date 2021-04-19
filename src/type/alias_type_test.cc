@@ -33,7 +33,7 @@ TEST_F(AliasTest, Is) {
   type::Type* ty = at;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_TRUE(ty->Is<Alias>());
-  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<ArrayType>());
   EXPECT_FALSE(ty->Is<Bool>());
   EXPECT_FALSE(ty->Is<F32>());
   EXPECT_FALSE(ty->Is<I32>());

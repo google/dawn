@@ -82,7 +82,7 @@ ResourceBinding::SampledKind BaseTypeToSampledKind(type::Type* base_type) {
     return ResourceBinding::SampledKind::kUnknown;
   }
 
-  if (auto* at = base_type->As<type::Array>()) {
+  if (auto* at = base_type->As<type::ArrayType>()) {
     base_type = at->type();
   } else if (auto* mt = base_type->As<type::Matrix>()) {
     base_type = mt->type();

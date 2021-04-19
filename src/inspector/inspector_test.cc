@@ -645,13 +645,13 @@ class InspectorHelper : public ProgramBuilder {
     return *inspector_;
   }
 
-  type::Array* u32_array_type(uint32_t count) {
+  type::ArrayType* u32_array_type(uint32_t count) {
     if (array_type_memo_.find(count) == array_type_memo_.end()) {
       array_type_memo_[count] =
-          create<type::Array>(ty.u32(), count,
-                              ast::DecorationList{
-                                  create<ast::StrideDecoration>(4),
-                              });
+          create<type::ArrayType>(ty.u32(), count,
+                                  ast::DecorationList{
+                                      create<ast::StrideDecoration>(4),
+                                  });
     }
     return array_type_memo_[count];
   }
@@ -671,7 +671,7 @@ class InspectorHelper : public ProgramBuilder {
   std::unique_ptr<Inspector> inspector_;
   type::Sampler sampler_type_;
   type::Sampler comparison_sampler_type_;
-  std::map<uint32_t, type::Array*> array_type_memo_;
+  std::map<uint32_t, type::ArrayType*> array_type_memo_;
   std::map<std::tuple<type::Type*, uint32_t>, type::Vector*> vector_type_memo_;
 };
 

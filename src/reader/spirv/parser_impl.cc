@@ -762,7 +762,7 @@ type::Type* ParserImpl::ConvertType(
   if (!ParseArrayDecorations(rtarr_ty, &decorations)) {
     return nullptr;
   }
-  return create<type::Array>(ast_elem_ty, 0, std::move(decorations));
+  return create<type::ArrayType>(ast_elem_ty, 0, std::move(decorations));
 }
 
 type::Type* ParserImpl::ConvertType(
@@ -807,8 +807,8 @@ type::Type* ParserImpl::ConvertType(
   if (remap_buffer_block_type_.count(elem_type_id)) {
     remap_buffer_block_type_.insert(type_mgr_->GetId(arr_ty));
   }
-  return create<type::Array>(ast_elem_ty, static_cast<uint32_t>(num_elem),
-                             std::move(decorations));
+  return create<type::ArrayType>(ast_elem_ty, static_cast<uint32_t>(num_elem),
+                                 std::move(decorations));
 }
 
 bool ParserImpl::ParseArrayDecorations(
@@ -1493,7 +1493,7 @@ ast::Expression* ParserImpl::MakeNullValue(type::Type* type) {
     return create<ast::TypeConstructorExpression>(Source{}, type,
                                                   std::move(ast_components));
   }
-  if (auto* arr_ty = type->As<type::Array>()) {
+  if (auto* arr_ty = type->As<type::ArrayType>()) {
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < arr_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(arr_ty->type()));

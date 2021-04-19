@@ -404,7 +404,7 @@ class ArrayBuilder : public Builder {
       : element_builder_(element_builder) {}
 
   bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* arr = ty->As<type::Array>()) {
+    if (auto* arr = ty->As<type::ArrayType>()) {
       if (arr->size() == 0) {
         return element_builder_->Match(state, arr->type());
       }
@@ -414,7 +414,7 @@ class ArrayBuilder : public Builder {
 
   type::Type* Build(BuildState& state) const override {
     auto* el = element_builder_->Build(state);
-    return state.ty_mgr.Get<type::Array>(el, 0, ast::DecorationList{});
+    return state.ty_mgr.Get<type::ArrayType>(el, 0, ast::DecorationList{});
   }
 
   std::string str() const override {

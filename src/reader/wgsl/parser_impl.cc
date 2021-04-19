@@ -1052,7 +1052,7 @@ Expect<type::Type*> ParserImpl::expect_type_decl_array(
       size = val.value;
     }
 
-    return create<type::Array>(subtype.value, size, std::move(decos));
+    return create<type::ArrayType>(subtype.value, size, std::move(decos));
   });
 }
 

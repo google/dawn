@@ -23,7 +23,7 @@ namespace tint {
 
 // Forward declarations
 namespace type {
-class Array;
+class ArrayType;
 }  // namespace type
 
 namespace sem {
@@ -37,10 +37,10 @@ class Array : public Castable<Array, Node> {
   /// @param size the byte size of the structure
   /// @param stride the number of bytes from the start of one element of the
   /// array to the start of the next element
-  Array(type::Array* type, uint32_t align, uint32_t size, uint32_t stride);
+  Array(type::ArrayType* type, uint32_t align, uint32_t size, uint32_t stride);
 
   /// @return the resolved type of the Array
-  type::Array* Type() const { return type_; }
+  type::ArrayType* Type() const { return type_; }
 
   /// @returns the byte alignment of the array
   /// @note this may differ from the alignment of a structure member of this
@@ -57,7 +57,7 @@ class Array : public Castable<Array, Node> {
   uint32_t Stride() const { return stride_; }
 
  private:
-  type::Array* const type_;
+  type::ArrayType* const type_;
   uint32_t const align_;
   uint32_t const size_;
   uint32_t const stride_;

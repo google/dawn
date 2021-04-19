@@ -490,16 +490,19 @@ class ProgramBuilder {
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array.
     /// @return the tint AST type for a array of size `n` of type `T`
-    type::Array* array(type::Type* subtype, uint32_t n = 0) const {
-      return builder->create<type::Array>(subtype, n, ast::DecorationList{});
+    type::ArrayType* array(type::Type* subtype, uint32_t n = 0) const {
+      return builder->create<type::ArrayType>(subtype, n,
+                                              ast::DecorationList{});
     }
 
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array.
     /// @param stride the array stride.
     /// @return the tint AST type for a array of size `n` of type `T`
-    type::Array* array(type::Type* subtype, uint32_t n, uint32_t stride) const {
-      return builder->create<type::Array>(
+    type::ArrayType* array(type::Type* subtype,
+                           uint32_t n,
+                           uint32_t stride) const {
+      return builder->create<type::ArrayType>(
           subtype, n,
           ast::DecorationList{
               builder->create<ast::StrideDecoration>(stride),
@@ -508,14 +511,14 @@ class ProgramBuilder {
 
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
-    type::Array* array() const {
+    type::ArrayType* array() const {
       return array(Of<T>(), N);
     }
 
     /// @param stride the array stride
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
-    type::Array* array(uint32_t stride) const {
+    type::ArrayType* array(uint32_t stride) const {
       return array(Of<T>(), N, stride);
     }
 

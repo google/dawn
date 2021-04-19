@@ -24,17 +24,19 @@ namespace tint {
 namespace type {
 
 /// An array type. If size is zero then it is a runtime array.
-class Array : public Castable<Array, Type> {
+// TODO(amaiorano): https://crbug.com/tint/724 Fold into sem::Array once parsers
+// don't create this anymore.
+class ArrayType : public Castable<ArrayType, Type> {
  public:
   /// Constructor
   /// @param subtype the type of the array elements
   /// @param size the number of elements in the array. `0` represents a
   /// runtime-sized array.
   /// @param decorations the array decorations
-  Array(Type* subtype, uint32_t size, ast::DecorationList decorations);
+  ArrayType(Type* subtype, uint32_t size, ast::DecorationList decorations);
   /// Move constructor
-  Array(Array&&);
-  ~Array() override;
+  ArrayType(ArrayType&&);
+  ~ArrayType() override;
 
   /// @returns true if this is a runtime array.
   /// i.e. the size is determined at runtime
@@ -59,7 +61,7 @@ class Array : public Castable<Array, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Array* Clone(CloneContext* ctx) const override;
+  ArrayType* Clone(CloneContext* ctx) const override;
 
  private:
   Type* const subtype_;

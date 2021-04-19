@@ -18,19 +18,21 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Array);
+TINT_INSTANTIATE_TYPEINFO(tint::type::ArrayType);
 
 namespace tint {
 namespace type {
 
-Array::Array(Type* subtype, uint32_t size, ast::DecorationList decorations)
+ArrayType::ArrayType(Type* subtype,
+                     uint32_t size,
+                     ast::DecorationList decorations)
     : subtype_(subtype), size_(size), decos_(decorations) {}
 
-Array::Array(Array&&) = default;
+ArrayType::ArrayType(ArrayType&&) = default;
 
-Array::~Array() = default;
+ArrayType::~ArrayType() = default;
 
-std::string Array::type_name() const {
+std::string ArrayType::type_name() const {
   TINT_ASSERT(subtype_);
 
   std::string type_name = "__array" + subtype_->type_name();
@@ -46,7 +48,7 @@ std::string Array::type_name() const {
   return type_name;
 }
 
-std::string Array::FriendlyName(const SymbolTable& symbols) const {
+std::string ArrayType::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   for (auto* deco : decos_) {
     if (auto* stride = deco->As<ast::StrideDecoration>()) {
@@ -61,11 +63,11 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-Array* Array::Clone(CloneContext* ctx) const {
+ArrayType* ArrayType::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto* ty = ctx->Clone(type());
   auto decos = ctx->Clone(decorations());
-  return ctx->dst->create<Array>(ty, size_, decos);
+  return ctx->dst->create<ArrayType>(ty, size_, decos);
 }
 
 }  // namespace type

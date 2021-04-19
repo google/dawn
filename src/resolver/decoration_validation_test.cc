@@ -127,9 +127,10 @@ TEST_P(ArrayDecorationTest, IsValid) {
   auto& params = GetParam();
 
   ast::StructMemberList members{Member(
-      "a", create<type::Array>(ty.f32(), 0,
-                               ast::DecorationList{createDecoration(
-                                   Source{{12, 34}}, *this, params.kind)}))};
+      "a",
+      create<type::ArrayType>(ty.f32(), 0,
+                              ast::DecorationList{createDecoration(
+                                  Source{{12, 34}}, *this, params.kind)}))};
   auto* s = create<ast::Struct>(
       members, ast::DecorationList{create<ast::StructBlockDecoration>()});
   auto* s_ty = ty.struct_("mystruct", s);
@@ -333,10 +334,10 @@ TEST_P(ArrayStrideTest, All) {
   SCOPED_TRACE(ss.str());
 
   auto* arr =
-      create<type::Array>(el_ty, 4,
-                          ast::DecorationList{
-                              create<ast::StrideDecoration>(params.stride),
-                          });
+      create<type::ArrayType>(el_ty, 4,
+                              ast::DecorationList{
+                                  create<ast::StrideDecoration>(params.stride),
+                              });
 
   Global(Source{{12, 34}}, "myarray", arr, ast::StorageClass::kInput);
 
@@ -421,11 +422,11 @@ INSTANTIATE_TEST_SUITE_P(
         Params{ty_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}));
 
 TEST_F(ArrayStrideTest, MultipleDecorations) {
-  auto* arr = create<type::Array>(ty.i32(), 4,
-                                  ast::DecorationList{
-                                      create<ast::StrideDecoration>(4),
-                                      create<ast::StrideDecoration>(4),
-                                  });
+  auto* arr = create<type::ArrayType>(ty.i32(), 4,
+                                      ast::DecorationList{
+                                          create<ast::StrideDecoration>(4),
+                                          create<ast::StrideDecoration>(4),
+                                      });
 
   Global(Source{{12, 34}}, "myarray", arr, ast::StorageClass::kInput);
 

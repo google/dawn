@@ -886,7 +886,7 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
-  if (expr->type()->IsAnyOf<type::Array, type::Struct>()) {
+  if (expr->type()->IsAnyOf<type::ArrayType, type::Struct>()) {
     out_ << "{";
   } else {
     if (!EmitType(expr->type(), "")) {
@@ -915,7 +915,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  if (expr->type()->IsAnyOf<type::Array, type::Struct>()) {
+  if (expr->type()->IsAnyOf<type::ArrayType, type::Struct>()) {
     out_ << "}";
   } else {
     out_ << ")";
@@ -936,7 +936,7 @@ bool GeneratorImpl::EmitZeroValue(type::Type* type) {
     return EmitZeroValue(vec->type());
   } else if (auto* mat = type->As<type::Matrix>()) {
     return EmitZeroValue(mat->type());
-  } else if (auto* arr = type->As<type::Array>()) {
+  } else if (auto* arr = type->As<type::ArrayType>()) {
     out_ << "{";
     if (!EmitZeroValue(arr->type())) {
       return false;
@@ -1325,7 +1325,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
       return false;
     }
     // Array name is output as part of the type
-    if (!type->Is<type::Array>()) {
+    if (!type->Is<type::ArrayType>()) {
       out_ << " " << program_->Symbols().NameFor(v->symbol());
     }
   }
@@ -1908,10 +1908,10 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
 
   if (auto* alias = type->As<type::Alias>()) {
     out_ << program_->Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = type->As<type::Array>()) {
+  } else if (auto* ary = type->As<type::ArrayType>()) {
     type::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (auto* arr = base_type->As<type::Array>()) {
+    while (auto* arr = base_type->As<type::ArrayType>()) {
       if (arr->IsRuntimeArray()) {
         sizes.push_back(1);
       } else {
@@ -2120,7 +2120,7 @@ bool GeneratorImpl::EmitStructType(const type::Struct* str) {
     auto* ty = mem->type()->UnwrapAliasIfNeeded();
 
     // Array member name will be output with the type
-    if (!ty->Is<type::Array>()) {
+    if (!ty->Is<type::ArrayType>()) {
       out_ << " " << program_->Symbols().NameFor(mem->symbol());
     }
 
@@ -2222,7 +2222,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
   if (!EmitType(var->Type(), program_->Symbols().NameFor(decl->symbol()))) {
     return false;
   }
-  if (!var->Type()->Is<type::Array>()) {
+  if (!var->Type()->Is<type::ArrayType>()) {
     out_ << " " << program_->Symbols().NameFor(decl->symbol());
   }
 
@@ -2265,7 +2265,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   if (!EmitType(type, program_->Symbols().NameFor(var->symbol()))) {
     return false;
   }
-  if (!type->Is<type::Array>()) {
+  if (!type->Is<type::ArrayType>()) {
     out_ << " " << program_->Symbols().NameFor(var->symbol());
   }
 
@@ -2326,7 +2326,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     }
   }
 
-  if (auto* arr = ty->As<type::Array>()) {
+  if (auto* arr = ty->As<type::ArrayType>()) {
     auto* sem = program_->Sem().Get(arr);
     if (!sem) {
       TINT_ICE(diagnostics_) << "Array missing semantic info";
