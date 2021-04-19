@@ -22,13 +22,14 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Discard) {
-  auto* k = create<ast::DiscardStatement>();
+  auto* stmt = create<ast::DiscardStatement>();
+  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(k)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  discard;\n");
 }
 

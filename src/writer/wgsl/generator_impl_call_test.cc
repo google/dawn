@@ -23,8 +23,11 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
-  auto* id = Expr("my_func");
-  auto* call = create<ast::CallExpression>(id, ast::ExpressionList{});
+  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{});
+
+  auto* call = Call("my_func");
+  WrapInFunction(call);
 
   GeneratorImpl& gen = Build();
 
@@ -33,9 +36,13 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
-  auto* id = Expr("my_func");
-  auto* call = create<ast::CallExpression>(
-      id, ast::ExpressionList{Expr("param1"), Expr("param2")});
+  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{});
+  Global("param1", ty.f32(), ast::StorageClass::kPrivate);
+  Global("param2", ty.f32(), ast::StorageClass::kPrivate);
+
+  auto* call = Call("my_func", "param1", "param2");
+  WrapInFunction(call);
 
   GeneratorImpl& gen = Build();
 
@@ -44,15 +51,19 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
-  auto* id = Expr("my_func");
+  Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
+       ast::DecorationList{});
+  Global("param1", ty.f32(), ast::StorageClass::kPrivate);
+  Global("param2", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* call = create<ast::CallStatement>(create<ast::CallExpression>(
-      id, ast::ExpressionList{Expr("param1"), Expr("param2")}));
+  auto* call = Call("my_func", "param1", "param2");
+  auto* stmt = create<ast::CallStatement>(call);
+  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
-  ASSERT_TRUE(gen.EmitStatement(call)) << gen.error();
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  my_func(param1, param2);\n");
 }
 

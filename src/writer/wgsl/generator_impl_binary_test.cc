@@ -35,6 +35,7 @@ TEST_P(WgslBinaryTest, Emit) {
   auto* right = Expr("right");
 
   auto* expr = create<ast::BinaryExpression>(params.op, left, right);
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 

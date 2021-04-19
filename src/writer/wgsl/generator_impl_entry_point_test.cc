@@ -59,19 +59,15 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_UnusedFunction) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_UnusedVariable) {
-  auto* global_unused =
-      Global("global_unused", ty.f32(), ast::StorageClass::kInput);
-  create<ast::VariableDeclStatement>(global_unused);
+  Global("global_unused", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* global_used =
-      Global("global_used", ty.f32(), ast::StorageClass::kInput);
-  create<ast::VariableDeclStatement>(global_used);
+  Global("global_used", ty.f32(), ast::StorageClass::kPrivate);
 
-  Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
+  Func("main", {}, ty.void_(),
+       {
            create<ast::AssignmentStatement>(Expr("global_used"), Expr(1.f)),
        },
-       ast::DecorationList{
+       {
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 
@@ -82,7 +78,7 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_UnusedVariable) {
   ASSERT_TRUE(
       gen.GenerateEntryPoint(tint::ast::PipelineStage::kCompute, "main"))
       << gen.error();
-  EXPECT_EQ(gen.result(), R"(  var<in> global_used : f32;
+  EXPECT_EQ(gen.result(), R"(  var<private> global_used : f32;
 
   [[stage(compute)]]
   fn main() {
@@ -92,39 +88,26 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_UnusedVariable) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_GlobalsInterleaved) {
-  auto* global0 = Global("a0", ty.f32(), ast::StorageClass::kInput);
-  create<ast::VariableDeclStatement>(global0);
+  Global("a0", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* str0 = create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
-                                   ast::DecorationList{});
-  auto* s0 = ty.struct_("S0", str0);
-  AST().AddConstructedType(s0);
+  auto* s0 = Structure("S0", {Member("a", ty.i32())});
 
-  Func("func", ast::VariableList{}, ty.f32(),
-       ast::StatementList{
-           create<ast::ReturnStatement>(Expr("a0")),
+  Func("func", {}, ty.f32(),
+       {
+           Return("a0"),
+       });
+
+  Global("a1", ty.f32(), ast::StorageClass::kOutput);
+
+  auto* s1 = Structure("S1", {Member("a", ty.i32())});
+
+  Func("main", {}, ty.void_(),
+       {
+           Decl(Var("s0", s0, ast::StorageClass::kFunction)),
+           Decl(Var("s1", s1, ast::StorageClass::kFunction)),
+           create<ast::AssignmentStatement>(Expr("a1"), Call("func")),
        },
-       ast::DecorationList{});
-
-  auto* global1 = Global("a1", ty.f32(), ast::StorageClass::kOutput);
-  create<ast::VariableDeclStatement>(global1);
-
-  auto* str1 = create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
-                                   ast::DecorationList{});
-  auto* s1 = ty.struct_("S1", str1);
-  AST().AddConstructedType(s1);
-
-  auto* call_func = Call("func");
-
-  Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           create<ast::VariableDeclStatement>(
-               Var("s0", s0, ast::StorageClass::kFunction)),
-           create<ast::VariableDeclStatement>(
-               Var("s1", s1, ast::StorageClass::kFunction)),
-           create<ast::AssignmentStatement>(Expr("a1"), Expr(call_func)),
-       },
-       ast::DecorationList{
+       {
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 
@@ -135,7 +118,7 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_GlobalsInterleaved) {
   ASSERT_TRUE(
       gen.GenerateEntryPoint(tint::ast::PipelineStage::kCompute, "main"))
       << gen.error();
-  EXPECT_EQ(gen.result(), R"(  var<in> a0 : f32;
+  EXPECT_EQ(gen.result(), R"(  var<private> a0 : f32;
 
   struct S0 {
     a : i32;

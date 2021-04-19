@@ -22,11 +22,12 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_If) {
+  Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+
   auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(cond, body, ast::ElseStatementList{});
+  auto* body = Block(Return());
+  auto* i = If(cond, body);
+  WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
 
@@ -34,23 +35,24 @@ TEST_F(WgslGeneratorImplTest, Emit_If) {
 
   ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
-    discard;
+    return;
   }
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
+  Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(
-      Expr("cond"), body,
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(Expr("else_cond"), else_body)});
+  auto* else_cond = Expr("else_cond");
+  auto* else_body = Block(Return());
+
+  auto* cond = Expr("cond");
+  auto* body = Block(Return());
+  auto* i = If(
+      cond, body,
+      ast::ElseStatementList{create<ast::ElseStatement>(else_cond, else_body)});
+  WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
 
@@ -58,25 +60,24 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
 
   ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
-    discard;
+    return;
   } elseif (else_cond) {
-    discard;
+    return;
   }
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
+  Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+
+  auto* else_body = Block(Return());
 
   auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(
+  auto* body = Block(Return());
+  auto* i = If(
       cond, body,
       ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
+  WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
 
@@ -84,31 +85,31 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
 
   ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
-    discard;
+    return;
   } else {
-    discard;
+    return;
   }
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
+  Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
 
-  auto* else_body_2 = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
+  auto* else_cond = Expr("else_cond");
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(
-      Expr("cond"), body,
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(Expr("else_cond"), else_body),
-          create<ast::ElseStatement>(nullptr, else_body_2),
-      });
+  auto* else_body = Block(Return());
+
+  auto* else_body_2 = Block(Return());
+
+  auto* cond = Expr("cond");
+  auto* body = Block(Return());
+  auto* i = If(cond, body,
+               ast::ElseStatementList{
+                   create<ast::ElseStatement>(else_cond, else_body),
+                   create<ast::ElseStatement>(nullptr, else_body_2),
+               });
+  WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
 
@@ -116,11 +117,11 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
 
   ASSERT_TRUE(gen.EmitStatement(i)) << gen.error();
   EXPECT_EQ(gen.result(), R"(  if (cond) {
-    discard;
+    return;
   } elseif (else_cond) {
-    discard;
+    return;
   } else {
-    discard;
+    return;
   }
 )");
 }

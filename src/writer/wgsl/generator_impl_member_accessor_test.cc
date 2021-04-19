@@ -22,10 +22,11 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
-  auto* str = Expr("str");
-  auto* mem = Expr("mem");
+  auto* s = Structure("Data", {Member("mem", ty.f32())});
+  Global("str", s, ast::StorageClass::kPrivate);
 
-  auto* expr = create<ast::MemberAccessorExpression>(str, mem);
+  auto* expr = MemberAccessor("str", "mem");
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 

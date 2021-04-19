@@ -23,24 +23,6 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
-  auto* var = Var("a", ty.f32(), ast::StorageClass::kInput);
-
-  auto* stmt = create<ast::VariableDeclStatement>(var);
-  WrapInFunction(stmt);
-
-  GeneratorImpl& gen = Build();
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var<in> a : f32;\n");
-}
-
-TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
-  // Variable declarations with Function storage class don't mention their
-  // storage class.  Rely on defaulting.
-  // https://github.com/gpuweb/gpuweb/issues/654
-
   auto* var = Var("a", ty.f32(), ast::StorageClass::kFunction);
 
   auto* stmt = create<ast::VariableDeclStatement>(var);
@@ -52,20 +34,6 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Function) {
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
   EXPECT_EQ(gen.result(), "  var a : f32;\n");
-}
-
-TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-  auto* var = Var("a", ty.f32(), ast::StorageClass::kPrivate);
-
-  auto* stmt = create<ast::VariableDeclStatement>(var);
-  WrapInFunction(stmt);
-
-  GeneratorImpl& gen = Build();
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var<private> a : f32;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_InferredType) {

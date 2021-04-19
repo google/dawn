@@ -31,8 +31,13 @@ using WgslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(WgslUnaryOpTest, Emit) {
   auto params = GetParam();
 
-  auto* expr = Expr("expr");
-  auto* op = create<ast::UnaryOpExpression>(params.op, expr);
+  auto* type = (params.op == ast::UnaryOp::kNot)
+                   ? static_cast<type::Type*>(ty.bool_())
+                   : static_cast<type::Type*>(ty.i32());
+  Global("expr", type, ast::StorageClass::kPrivate);
+
+  auto* op = create<ast::UnaryOpExpression>(params.op, Expr("expr"));
+  WrapInFunction(op);
 
   GeneratorImpl& gen = Build();
 

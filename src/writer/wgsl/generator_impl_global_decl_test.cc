@@ -27,10 +27,9 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
   auto* func_var = Var("a", ty.f32(), ast::StorageClass::kFunction);
-  WrapInFunction(create<ast::VariableDeclStatement>(func_var));
+  WrapInFunction(func_var);
 
-  auto* global_var = Global("a", ty.f32(), ast::StorageClass::kInput);
-  create<ast::VariableDeclStatement>(global_var);
+  Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
@@ -42,18 +41,14 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
     var a : f32;
   }
 
-  var<in> a : f32;
+  var<private> a : f32;
 )");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
-  auto* global0 = Global("a0", ty.f32(), ast::StorageClass::kInput);
-  create<ast::VariableDeclStatement>(global0);
+  Global("a0", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* str0 = create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
-                                   ast::DecorationList{});
-  auto* s0 = ty.struct_("S0", str0);
-  AST().AddConstructedType(s0);
+  auto* s0 = Structure("S0", {Member("a", ty.i32())});
 
   Func("func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
@@ -61,23 +56,15 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
        },
        ast::DecorationList{});
 
-  auto* global1 = Global("a1", ty.f32(), ast::StorageClass::kOutput);
-  create<ast::VariableDeclStatement>(global1);
+  Global("a1", ty.f32(), ast::StorageClass::kOutput);
 
-  auto* str1 = create<ast::Struct>(ast::StructMemberList{Member("a", ty.i32())},
-                                   ast::DecorationList{});
-  auto* s1 = ty.struct_("S1", str1);
-  AST().AddConstructedType(s1);
-
-  auto* call_func = Call("func");
+  auto* s1 = Structure("S1", {Member("a", ty.i32())});
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(
-               Var("s0", s0, ast::StorageClass::kFunction)),
-           create<ast::VariableDeclStatement>(
-               Var("s1", s1, ast::StorageClass::kFunction)),
-           create<ast::AssignmentStatement>(Expr("a1"), Expr(call_func)),
+           Decl(Var("s0", s0, ast::StorageClass::kFunction)),
+           Decl(Var("s1", s1, ast::StorageClass::kFunction)),
+           create<ast::AssignmentStatement>(Expr("a1"), Call("func")),
        },
        ast::DecorationList{
            create<ast::StageDecoration>(ast::PipelineStage::kCompute),
@@ -88,7 +75,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(  var<in> a0 : f32;
+  EXPECT_EQ(gen.result(), R"(  var<private> a0 : f32;
 
   struct S0 {
     a : i32;

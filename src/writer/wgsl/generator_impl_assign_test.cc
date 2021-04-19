@@ -22,9 +22,10 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Assign) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
+  Global("lhs", ty.i32(), ast::StorageClass::kPrivate);
+  Global("rhs", ty.i32(), ast::StorageClass::kPrivate);
+  auto* assign = create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs"));
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 

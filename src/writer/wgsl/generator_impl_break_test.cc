@@ -23,6 +23,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Break) {
   auto* b = create<ast::BreakStatement>();
+  WrapInFunction(Loop(Block(b)));
 
   GeneratorImpl& gen = Build();
 

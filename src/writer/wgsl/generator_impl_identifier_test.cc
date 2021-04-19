@@ -23,6 +23,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitIdentifierExpression_Single) {
   auto* i = Expr("glsl");
+  WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
 

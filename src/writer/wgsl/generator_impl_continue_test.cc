@@ -23,6 +23,7 @@ using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Continue) {
   auto* c = create<ast::ContinueStatement>();
+  WrapInFunction(Loop(Block(c)));
 
   GeneratorImpl& gen = Build();
 

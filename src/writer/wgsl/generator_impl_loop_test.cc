@@ -22,10 +22,11 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* l = create<ast::LoopStatement>(body, nullptr);
+  auto* body = Block(create<ast::DiscardStatement>());
+  auto* continuing = Block();
+  auto* l = create<ast::LoopStatement>(body, continuing);
+
+  WrapInFunction(l);
 
   GeneratorImpl& gen = Build();
 
@@ -39,13 +40,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* continuing = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
+  auto* body = Block(create<ast::DiscardStatement>());
+  auto* continuing = Block(Return());
   auto* l = create<ast::LoopStatement>(body, continuing);
+
+  WrapInFunction(l);
 
   GeneratorImpl& gen = Build();
 
@@ -56,7 +55,7 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
     discard;
 
     continuing {
-      discard;
+      return;
     }
   }
 )");

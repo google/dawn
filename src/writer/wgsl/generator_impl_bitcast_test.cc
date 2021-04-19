@@ -22,13 +22,13 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Bitcast) {
-  auto* id = Expr("id");
-  auto* bitcast = create<ast::BitcastExpression>(ty.f32(), id);
+  auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1));
+  WrapInFunction(bitcast);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(bitcast)) << gen.error();
-  EXPECT_EQ(gen.result(), "bitcast<f32>(id)");
+  EXPECT_EQ(gen.result(), "bitcast<f32>(1)");
 }
 
 }  // namespace
