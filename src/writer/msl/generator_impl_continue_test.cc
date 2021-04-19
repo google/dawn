@@ -23,6 +23,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Continue) {
   auto* c = create<ast::ContinueStatement>();
+  WrapInFunction(Loop(Block(c)));
 
   GeneratorImpl& gen = Build();
 

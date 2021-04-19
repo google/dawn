@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {
@@ -19,163 +20,143 @@ namespace writer {
 namespace msl {
 namespace {
 
+using ::testing::HasSubstr;
+
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Bool) {
-  auto* expr = Expr(false);
+  WrapInFunction(Expr(false));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "false");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("false"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Int) {
-  auto* expr = Expr(-12345);
+  WrapInFunction(Expr(-12345));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "-12345");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("-12345"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_UInt) {
-  auto* expr = Expr(56779u);
+  WrapInFunction(Expr(56779u));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "56779u");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("56779u"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Float) {
   // Use a number close to 1<<30 but whose decimal representation ends in 0.
-  auto* expr = Expr(static_cast<float>((1 << 30) - 4));
+  WrapInFunction(Expr(static_cast<float>((1 << 30) - 4)));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "1073741824.0f");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("1073741824.0f"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Float) {
-  auto* expr = Construct<f32>(-1.2e-5f);
+  WrapInFunction(Construct<f32>(-1.2e-5f));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "float(-0.000012f)");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("float(-0.000012f)"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Bool) {
-  auto* expr = Construct<bool>(true);
+  WrapInFunction(Construct<bool>(true));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "bool(true)");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("bool(true)"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Int) {
-  auto* expr = Construct<i32>(-12345);
+  WrapInFunction(Construct<i32>(-12345));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "int(-12345)");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("int(-12345)"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Uint) {
-  auto* expr = Construct<u32>(12345u);
+  WrapInFunction(Construct<u32>(12345u));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "uint(12345u)");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("uint(12345u)"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec) {
-  auto* expr = vec3<f32>(1.f, 2.f, 3.f);
+  WrapInFunction(vec3<f32>(1.f, 2.f, 3.f));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "float3(1.0f, 2.0f, 3.0f)");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("float3(1.0f, 2.0f, 3.0f)"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
-  auto* expr = vec3<f32>();
+  WrapInFunction(vec3<f32>());
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "float3(0.0f)");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("float3(0.0f)"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
-  ast::ExpressionList mat_values;
-
-  for (size_t i = 0; i < 2; i++) {
-    mat_values.push_back(vec3<f32>(static_cast<float>(1 + (i * 2)),
-                                   static_cast<float>(2 + (i * 2)),
-                                   static_cast<float>(3 + (i * 2))));
-  }
-
-  auto* expr = Construct(ty.mat2x3<f32>(), mat_values);
+  WrapInFunction(Construct(ty.mat2x3<f32>(), vec3<f32>(1.0f, 2.0f, 3.0f),
+                           vec3<f32>(3.0f, 4.0f, 5.0f)));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
 
   // A matrix of type T with n columns and m rows can also be constructed from
   // n vectors of type T with m components.
-  EXPECT_EQ(gen.result(),
-            "float2x3(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f))");
+  EXPECT_THAT(
+      gen.result(),
+      HasSubstr(
+          "float2x3(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f))"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
-  type::Array ary(ty.vec3<f32>(), 3, ast::DecorationList{});
-
-  ast::ExpressionList ary_values;
-
-  for (size_t i = 0; i < 3; i++) {
-    ary_values.push_back(vec3<f32>(static_cast<float>(1 + (i * 3)),
-                                   static_cast<float>(2 + (i * 3)),
-                                   static_cast<float>(3 + (i * 3))));
-  }
-
-  auto* expr = Construct(&ary, ary_values);
+  WrapInFunction(
+      Construct(ty.array(ty.vec3<f32>(), 3), vec3<f32>(1.0f, 2.0f, 3.0f),
+                vec3<f32>(4.0f, 5.0f, 6.0f), vec3<f32>(7.0f, 8.0f, 9.0f)));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(),
-            "{float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), "
-            "float3(7.0f, 8.0f, 9.0f)}");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(),
+              HasSubstr("{float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f), "
+                        "float3(7.0f, 8.0f, 9.0f)}"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
-  auto* struct_ty = Structure("S",
-                              ast::StructMemberList{
-                                  Member("a", ty.f32()),
-                                  Member("b", ty.u32()),
-                                  Member("c", ty.vec4<f32>()),
-                              },
-                              ast::DecorationList{});
+  auto* str = Structure("S", {
+                                 Member("a", ty.i32()),
+                                 Member("b", ty.f32()),
+                                 Member("c", ty.vec3<i32>()),
+                             });
 
-  ast::ExpressionList struct_values;
-  struct_values.push_back(Expr(0.f));
-  struct_values.push_back(Expr(42u));
-  struct_values.push_back(Construct(
-      ty.vec4<f32>(),
-      ast::ExpressionList{Expr(1.f), Expr(2.f), Expr(3.f), Expr(4.f)}));
-
-  auto* expr = Construct(struct_ty, struct_values);
+  WrapInFunction(Construct(str, 1, 2.0f, vec3<i32>(3, 4, 5)));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitConstructor(expr)) << gen.error();
-  EXPECT_EQ(gen.result(), "{0.0f, 42u, float4(1.0f, 2.0f, 3.0f, 4.0f)}");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("{1, 2.0f, int3(3, 4, 5)}"));
 }
 
 }  // namespace

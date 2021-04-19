@@ -22,11 +22,9 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_If) {
-  auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(cond, body, ast::ElseStatementList{});
+  auto* cond = Var("cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* i = If(cond, Block(Return()));
+  WrapInFunction(cond, i);
 
   GeneratorImpl& gen = Build();
 
@@ -40,20 +38,10 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
-  auto* else_cond = Expr("else_cond");
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-
-  auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(
-      cond, body,
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(else_cond, else_body),
-      });
+  auto* cond = Var("cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* else_cond = Var("else_cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* i = If(cond, Block(Return()), Else(else_cond, Block(Return())));
+  WrapInFunction(cond, else_cond, i);
 
   GeneratorImpl& gen = Build();
 
@@ -69,19 +57,9 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-
-  auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(
-      cond, body,
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(nullptr, else_body),
-      });
+  auto* cond = Var("cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* i = If(cond, Block(Return()), Else(nullptr, Block(Return())));
+  WrapInFunction(cond, i);
 
   GeneratorImpl& gen = Build();
 
@@ -97,26 +75,11 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
-  auto* else_cond = Expr("else_cond");
-
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-
-  auto* else_body_2 = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-
-  auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(
-      cond, body,
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(else_cond, else_body),
-          create<ast::ElseStatement>(nullptr, else_body_2),
-      });
+  auto* cond = Var("cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* else_cond = Var("else_cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* i = If(cond, Block(Return()), Else(else_cond, Block(Return())),
+               Else(nullptr, Block(Return())));
+  WrapInFunction(cond, else_cond, i);
 
   GeneratorImpl& gen = Build();
 

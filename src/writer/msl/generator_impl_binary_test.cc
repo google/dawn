@@ -31,8 +31,17 @@ using MslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest, Emit) {
   auto params = GetParam();
 
+  auto* type = ((params.op == ast::BinaryOp::kLogicalAnd) ||
+                (params.op == ast::BinaryOp::kLogicalOr))
+                   ? static_cast<type::Type*>(ty.bool_())
+                   : static_cast<type::Type*>(ty.u32());
+
+  auto* left = Var("left", type, ast::StorageClass::kFunction);
+  auto* right = Var("right", type, ast::StorageClass::kFunction);
+
   auto* expr =
       create<ast::BinaryExpression>(params.op, Expr("left"), Expr("right"));
+  WrapInFunction(left, right, expr);
 
   GeneratorImpl& gen = Build();
 

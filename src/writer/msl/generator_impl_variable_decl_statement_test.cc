@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/msl/test_helper.h"
 
@@ -19,6 +20,8 @@ namespace tint {
 namespace writer {
 namespace msl {
 namespace {
+
+using ::testing::HasSubstr;
 
 using MslGeneratorImplTest = TestHelper;
 
@@ -109,29 +112,34 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
   EXPECT_EQ(gen.result(), "  float3x2 a = 0.0f;\n");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kPrivate);
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+// TODO(crbug.com/tint/726): module-scope private and workgroup variables not
+// yet implemented
+TEST_F(MslGeneratorImplTest, DISABLED_Emit_VariableDeclStatement_Private) {
+  Global("a", ty.f32(), ast::StorageClass::kPrivate);
+
+  WrapInFunction(Expr("a"));
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float a = 0.0f;\n");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("  float a = 0.0f;\n"));
 }
 
-TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
+// TODO(crbug.com/tint/726): module-scope private and workgroup variables not
+// yet implemented
+TEST_F(MslGeneratorImplTest,
+       DISABLED_Emit_VariableDeclStatement_Initializer_Private) {
   Global("initializer", ty.f32(), ast::StorageClass::kInput);
-  auto* var =
-      Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
+
+  WrapInFunction(Expr("a"));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(float a = initializer;
-)");
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("float a = initializer;\n"));
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {

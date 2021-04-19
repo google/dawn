@@ -22,12 +22,13 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_Bitcast) {
-  auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("id"));
+  auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr(1));
+  WrapInFunction(bitcast);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(bitcast)) << gen.error();
-  EXPECT_EQ(gen.result(), "as_type<float>(id)");
+  EXPECT_EQ(gen.result(), "as_type<float>(1)");
 }
 
 }  // namespace

@@ -22,7 +22,10 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Assign) {
+  auto* lhs = Var("lhs", ty.i32(), ast::StorageClass::kFunction);
+  auto* rhs = Var("rhs", ty.i32(), ast::StorageClass::kFunction);
   auto* assign = create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs"));
+  WrapInFunction(lhs, rhs, assign);
 
   GeneratorImpl& gen = Build();
 

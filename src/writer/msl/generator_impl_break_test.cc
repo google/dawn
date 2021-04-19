@@ -23,6 +23,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Break) {
   auto* b = create<ast::BreakStatement>();
+  WrapInFunction(Loop(Block(b)));
 
   GeneratorImpl& gen = Build();
 

@@ -22,12 +22,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
-  Global("str",
-         ty.struct_("my_str", create<ast::Struct>(
-                                  ast::StructMemberList{
-                                      Member("mem", ty.f32()),
-                                  },
-                                  ast::DecorationList{})),
+  Global("str", Structure("my_str", {Member("mem", ty.f32())}),
          ast::StorageClass::kPrivate);
   auto* expr = MemberAccessor("str", "mem");
   WrapInFunction(expr);

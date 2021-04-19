@@ -23,6 +23,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Discard) {
   auto* stmt = create<ast::DiscardStatement>();
+  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 

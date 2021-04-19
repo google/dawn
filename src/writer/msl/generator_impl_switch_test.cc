@@ -22,17 +22,15 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Switch) {
-  auto* def_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
+  auto* cond = Var("cond", ty.i32(), ast::StorageClass::kFunction);
+
+  auto* def_body = Block(create<ast::BreakStatement>());
   auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
 
   ast::CaseSelectorList case_val;
   case_val.push_back(Literal(5));
 
-  auto* case_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
+  auto* case_body = Block(create<ast::BreakStatement>());
 
   auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
 
@@ -40,8 +38,8 @@ TEST_F(MslGeneratorImplTest, Emit_Switch) {
   body.push_back(case_stmt);
   body.push_back(def);
 
-  auto* s = create<ast::SwitchStatement>(Expr("cond"), body);
-
+  auto* s = create<ast::SwitchStatement>(Expr(cond), body);
+  WrapInFunction(cond, s);
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();

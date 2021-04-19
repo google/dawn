@@ -22,7 +22,10 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitIdentifierExpression) {
+  auto* foo = Var("foo", ty.i32(), ast::StorageClass::kFunction);
+
   auto* i = Expr("foo");
+  WrapInFunction(foo, i);
 
   GeneratorImpl& gen = Build();
 

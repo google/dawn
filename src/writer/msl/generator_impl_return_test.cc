@@ -22,7 +22,8 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Return) {
-  auto* r = create<ast::ReturnStatement>();
+  auto* r = Return();
+  WrapInFunction(r);
 
   GeneratorImpl& gen = Build();
 
@@ -33,14 +34,15 @@ TEST_F(MslGeneratorImplTest, Emit_Return) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_ReturnWithValue) {
-  auto* r = create<ast::ReturnStatement>(Expr("expr"));
+  auto* r = Return(123);
+  Func("f", {}, ty.i32(), {r});
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(r)) << gen.error();
-  EXPECT_EQ(gen.result(), "  return expr;\n");
+  EXPECT_EQ(gen.result(), "  return 123;\n");
 }
 
 }  // namespace

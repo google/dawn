@@ -23,12 +23,11 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Case) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
+  auto* body = Block(create<ast::BreakStatement>());
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(ty.i32(), 5));
+  lit.push_back(Literal(5));
   auto* c = create<ast::CaseStatement>(lit, body);
+  WrapInFunction(c);
 
   GeneratorImpl& gen = Build();
 
@@ -43,9 +42,9 @@ TEST_F(MslGeneratorImplTest, Emit_Case) {
 
 TEST_F(MslGeneratorImplTest, Emit_Case_BreaksByDefault) {
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(ty.i32(), 5));
-  auto* c = create<ast::CaseStatement>(
-      lit, create<ast::BlockStatement>(ast::StatementList{}));
+  lit.push_back(Literal(5));
+  auto* c = create<ast::CaseStatement>(lit, Block());
+  WrapInFunction(c);
 
   GeneratorImpl& gen = Build();
 
@@ -59,12 +58,11 @@ TEST_F(MslGeneratorImplTest, Emit_Case_BreaksByDefault) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Case_WithFallthrough) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::FallthroughStatement>(),
-  });
+  auto* body = Block(create<ast::FallthroughStatement>());
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(ty.i32(), 5));
+  lit.push_back(Literal(5));
   auto* c = create<ast::CaseStatement>(lit, body);
+  WrapInFunction(c);
 
   GeneratorImpl& gen = Build();
 
@@ -78,13 +76,12 @@ TEST_F(MslGeneratorImplTest, Emit_Case_WithFallthrough) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Case_MultipleSelectors) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
+  auto* body = Block(create<ast::BreakStatement>());
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(ty.i32(), 5));
-  lit.push_back(create<ast::SintLiteral>(ty.i32(), 6));
+  lit.push_back(Literal(5));
+  lit.push_back(Literal(6));
   auto* c = create<ast::CaseStatement>(lit, body);
+  WrapInFunction(c);
 
   GeneratorImpl& gen = Build();
 
@@ -99,10 +96,9 @@ TEST_F(MslGeneratorImplTest, Emit_Case_MultipleSelectors) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Case_Default) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
+  auto* body = Block(create<ast::BreakStatement>());
   auto* c = create<ast::CaseStatement>(ast::CaseSelectorList{}, body);
+  WrapInFunction(c);
 
   GeneratorImpl& gen = Build();
 

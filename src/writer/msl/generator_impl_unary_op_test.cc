@@ -30,7 +30,10 @@ inline std::ostream& operator<<(std::ostream& out, UnaryOpData data) {
 using MslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(MslUnaryOpTest, Emit) {
   auto params = GetParam();
+  Global("expr", ty.i32(), ast::StorageClass::kPrivate);
+
   auto* op = create<ast::UnaryOpExpression>(params.op, Expr("expr"));
+  WrapInFunction(op);
 
   GeneratorImpl& gen = Build();
 

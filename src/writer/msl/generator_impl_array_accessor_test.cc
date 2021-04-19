@@ -21,23 +21,15 @@ namespace {
 
 using MslGeneratorImplTest = TestHelper;
 
-TEST_F(MslGeneratorImplTest, EmitExpression_ArrayAccessor) {
-  auto* expr = IndexAccessor(Expr("ary"), 5);
+TEST_F(MslGeneratorImplTest, ArrayAccessor) {
+  auto* ary = Var("ary", ty.array<i32, 10>(), ast::StorageClass::kFunction);
+  auto* expr = IndexAccessor("ary", 5);
+  WrapInFunction(ary, expr);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
   EXPECT_EQ(gen.result(), "ary[5]");
-}
-
-TEST_F(MslGeneratorImplTest, EmitArrayAccessor) {
-  auto* expr = IndexAccessor(Expr("ary"), Expr("idx"));
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitArrayAccessor(expr->As<ast::ArrayAccessorExpression>()))
-      << gen.error();
-  EXPECT_EQ(gen.result(), "ary[idx]");
 }
 
 }  // namespace

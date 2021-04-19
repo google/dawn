@@ -594,6 +594,10 @@ class ProgramBuilder {
     return expr;
   }
 
+  /// Passthrough for nullptr
+  /// @return nullptr
+  ast::IdentifierExpression* Expr(std::nullptr_t) { return nullptr; }
+
   /// @param name the identifier name
   /// @return an ast::IdentifierExpression with the given name
   ast::IdentifierExpression* Expr(const std::string& name) {
@@ -604,6 +608,12 @@ class ProgramBuilder {
   /// @return an ast::IdentifierExpression with the given symbol
   ast::IdentifierExpression* Expr(Symbol symbol) {
     return create<ast::IdentifierExpression>(symbol);
+  }
+
+  /// @param variable the AST variable
+  /// @return an ast::IdentifierExpression with the variable's symbol
+  ast::IdentifierExpression* Expr(ast::Variable* variable) {
+    return create<ast::IdentifierExpression>(variable->symbol());
   }
 
   /// @param source the source information
@@ -1252,9 +1262,10 @@ class ProgramBuilder {
   /// @param condition the else condition expression
   /// @param body the else body
   /// @returns the else statement pointer
-  ast::ElseStatement* Else(ast::Expression* condition,
-                           ast::BlockStatement* body) {
-    return create<ast::ElseStatement>(condition, body);
+  template <typename CONDITION>
+  ast::ElseStatement* Else(CONDITION&& condition, ast::BlockStatement* body) {
+    return create<ast::ElseStatement>(Expr(std::forward<CONDITION>(condition)),
+                                      body);
   }
 
   /// Creates a ast::IfStatement with input condition, body, and optional
@@ -1263,14 +1274,14 @@ class ProgramBuilder {
   /// @param body the if statement body
   /// @param elseStatements optional variadic else statements
   /// @returns the if statement pointer
-  template <typename... ElseStatements>
-  ast::IfStatement* If(ast::Expression* condition,
+  template <typename CONDITION, typename... ELSE_STATEMENTS>
+  ast::IfStatement* If(CONDITION&& condition,
                        ast::BlockStatement* body,
-                       ElseStatements&&... elseStatements) {
+                       ELSE_STATEMENTS&&... elseStatements) {
     return create<ast::IfStatement>(
-        condition, body,
+        Expr(std::forward<CONDITION>(condition)), body,
         ast::ElseStatementList{
-            std::forward<ElseStatements>(elseStatements)...});
+            std::forward<ELSE_STATEMENTS>(elseStatements)...});
   }
 
   /// Creates a ast::AssignmentStatement with input lhs and rhs expressions

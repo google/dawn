@@ -577,9 +577,6 @@ TEST_F(MslGeneratorImplTest,
 
   Func("sub_func", params, ty.f32(), body, ast::DecorationList{});
 
-  ast::ExpressionList expr;
-  expr.push_back(Expr(1.0f));
-
   auto* var =
       Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
 
@@ -686,9 +683,6 @@ TEST_F(MslGeneratorImplTest,
       create<ast::ReturnStatement>(MemberAccessor("coord", "b"))};
 
   Func("sub_func", params, ty.f32(), body, ast::DecorationList{});
-
-  ast::ExpressionList expr;
-  expr.push_back(Expr(1.0f));
 
   auto* var =
       Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
