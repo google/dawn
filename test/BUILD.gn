@@ -237,6 +237,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/type/array_type_test.cc",
     "../src/type/bool_type_test.cc",
     "../src/type/depth_texture_type_test.cc",
+    "../src/type/external_texture_type_test.cc",
     "../src/type/f32_type_test.cc",
     "../src/type/i32_type_test.cc",
     "../src/type/matrix_type_test.cc",

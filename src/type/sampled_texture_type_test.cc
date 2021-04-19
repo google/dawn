@@ -16,6 +16,7 @@
 
 #include "src/type/access_control_type.h"
 #include "src/type/depth_texture_type.h"
+#include "src/type/external_texture_type.h"
 #include "src/type/storage_texture_type.h"
 #include "src/type/test_helper.h"
 
@@ -49,6 +50,7 @@ TEST_F(SampledTextureTest, IsTexture) {
   SampledTexture s(TextureDimension::kCube, &f32);
   Texture* ty = &s;
   EXPECT_FALSE(ty->Is<DepthTexture>());
+  EXPECT_FALSE(ty->Is<ExternalTexture>());
   EXPECT_TRUE(ty->Is<SampledTexture>());
   EXPECT_FALSE(ty->Is<StorageTexture>());
 }

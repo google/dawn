@@ -248,6 +248,8 @@ set(TINT_LIB_SRCS
   type/bool_type.h
   type/depth_texture_type.cc
   type/depth_texture_type.h
+  type/external_texture_type.cc
+  type/external_texture_type.h
   type/f32_type.cc
   type/f32_type.h
   type/i32_type.cc
@@ -506,6 +508,7 @@ if(${TINT_BUILD_TESTS})
     type/array_type_test.cc
     type/bool_type_test.cc
     type/depth_texture_type_test.cc
+    type/external_texture_type_test.cc
     type/f32_type_test.cc
     type/i32_type_test.cc
     type/matrix_type_test.cc
