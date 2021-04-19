@@ -102,6 +102,13 @@ class Type : public Castable<Type, ShareableCloneable> {
   Type();
 };
 
+/// @returns the ProgramID of the given type.
+inline ProgramID ProgramIDOf(const Type*) {
+  /// TODO(crbug.com/tint/724): Actually implement this once we split the `type`
+  /// namespace into ast::Type and sem::Type.
+  return ProgramID();
+}
+
 }  // namespace type
 }  // namespace tint
 

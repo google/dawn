@@ -32,10 +32,13 @@ namespace tint {
 class CloneContext;
 class Program;
 class ProgramBuilder;
-
 namespace ast {
 class FunctionList;
+class Node;
 }  // namespace ast
+
+ProgramID ProgramIDOf(const Program*);
+ProgramID ProgramIDOf(const ast::Node*);
 
 /// Cloneable is the base class for all objects that can be cloned
 class Cloneable : public Castable<Cloneable> {
@@ -45,6 +48,11 @@ class Cloneable : public Castable<Cloneable> {
   /// @return the newly cloned object
   virtual Cloneable* Clone(CloneContext* ctx) const = 0;
 };
+
+/// @returns an invalid ProgramID
+inline ProgramID ProgramIDOf(const Cloneable*) {
+  return ProgramID();
+}
 
 /// ShareableCloneable is the base class for Cloneable objects which will only
 /// be cloned once when CloneContext::Clone() is called with the same object
@@ -95,6 +103,8 @@ class CloneContext {
       return nullptr;
     }
 
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a);
+
     // Have we cloned this object already, or was Replace() called for this
     // object?
     auto it = cloned_.find(a);
@@ -127,7 +137,11 @@ class CloneContext {
       cloned_.emplace(a, cloned);
     }
 
-    return CheckedCast<T>(cloned);
+    auto* out = CheckedCast<T>(cloned);
+
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, out);
+
+    return out;
   }
 
   /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
@@ -148,6 +162,8 @@ class CloneContext {
     if (a == nullptr) {
       return nullptr;
     }
+
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a);
 
     // Have we seen this object before? If so, return the previously cloned
     // version instead of making yet another copy.

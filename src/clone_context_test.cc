@@ -97,6 +97,23 @@ struct NotANode : public Castable<NotANode, Cloneable> {
   }
 };
 
+struct ProgramNode : public Castable<ProgramNode, Cloneable> {
+  ProgramNode(Allocator* alloc, ProgramID id, ProgramID cloned_id)
+      : allocator(alloc), program_id(id), cloned_program_id(cloned_id) {}
+
+  Allocator* const allocator;
+  ProgramID const program_id;
+  ProgramID const cloned_program_id;
+
+  ProgramNode* Clone(CloneContext*) const override {
+    return allocator->Create<ProgramNode>(cloned_program_id, cloned_program_id);
+  }
+};
+
+ProgramID ProgramIDOf(const ProgramNode* node) {
+  return node->program_id;
+}
+
 struct UniqueTypes {
   using Node = UniqueNode;
   using Replaceable = UniqueReplaceable;
@@ -642,6 +659,38 @@ TYPED_TEST(CloneContextTest, CloneNewSymbols_AfterCloneSymbols) {
   EXPECT_EQ(cloned.Symbols().NameFor(new_c), "c");
 }
 
+TYPED_TEST(CloneContextTest, ProgramIDs) {
+  ProgramBuilder dst;
+  Program src(ProgramBuilder{});
+  CloneContext ctx(&dst, &src);
+  Allocator allocator;
+  ctx.Clone(allocator.Create<ProgramNode>(src.ID(), dst.ID()));
+}
+
+TYPED_TEST(CloneContextTest, ProgramIDs_ObjectNotOwnedBySrc) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder dst;
+        Program src(ProgramBuilder{});
+        CloneContext ctx(&dst, &src);
+        Allocator allocator;
+        ctx.Clone(allocator.Create<ProgramNode>(ProgramID::New(), dst.ID()));
+      },
+      R"(internal compiler error: TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a))");
+}
+
+TYPED_TEST(CloneContextTest, ProgramIDs_ObjectNotOwnedByDst) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder dst;
+        Program src(ProgramBuilder{});
+        CloneContext ctx(&dst, &src);
+        Allocator allocator;
+        ctx.Clone(allocator.Create<ProgramNode>(src.ID(), ProgramID::New()));
+      },
+      R"(internal compiler error: TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, out))");
+}
+
 }  // namespace
 
 TINT_INSTANTIATE_TYPEINFO(UniqueNode);
@@ -651,5 +700,6 @@ TINT_INSTANTIATE_TYPEINFO(ShareableNode);
 TINT_INSTANTIATE_TYPEINFO(ShareableReplaceable);
 TINT_INSTANTIATE_TYPEINFO(ShareableReplacement);
 TINT_INSTANTIATE_TYPEINFO(NotANode);
+TINT_INSTANTIATE_TYPEINFO(ProgramNode);
 
 }  // namespace tint

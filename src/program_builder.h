@@ -1505,6 +1505,12 @@ struct ProgramBuilder::TypesBuilder::CToAST<void> {
 };
 //! @endcond
 
+/// @param builder the ProgramBuilder
+/// @returns the ProgramID of the ProgramBuilder
+inline ProgramID ProgramIDOf(const ProgramBuilder* builder) {
+  return builder->ID();
+}
+
 }  // namespace tint
 
 #endif  // SRC_PROGRAM_BUILDER_H_

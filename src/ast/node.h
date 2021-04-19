@@ -81,7 +81,7 @@ class Node : public Castable<Node, Cloneable> {
 
 /// @param node a pointer to an AST node
 /// @returns the ProgramID of the given AST node.
-inline ProgramID ProgramIDOf(ast::Node* node) {
+inline ProgramID ProgramIDOf(const ast::Node* node) {
   return node ? node->program_id() : ProgramID();
 }
 

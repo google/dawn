@@ -171,6 +171,12 @@ class Program {
   bool moved_ = false;
 };
 
+/// @param program the Program
+/// @returns the ProgramID of the Program
+inline ProgramID ProgramIDOf(const Program* program) {
+  return program->ID();
+}
+
 }  // namespace tint
 
 #endif  // SRC_PROGRAM_H_
