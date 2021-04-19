@@ -22,6 +22,7 @@
 
 #include "src/ast/storage_class.h"
 #include "src/sem/node.h"
+#include "src/symbol.h"
 
 namespace tint {
 

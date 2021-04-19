@@ -195,18 +195,18 @@ set(TINT_LIB_SRCS
   sem/info.h
   sem/intrinsic.h
   sem/node.h
-  sem/sem_array.cc
-  sem/sem_call.cc
-  sem/sem_call_target.cc
-  sem/sem_expression.cc
-  sem/sem_member_accessor_expression.cc
-  sem/sem_function.cc
-  sem/sem_info.cc
-  sem/sem_intrinsic.cc
-  sem/sem_node.cc
-  sem/sem_statement.cc
-  sem/sem_struct.cc
-  sem/sem_variable.cc
+  sem/array.cc
+  sem/call.cc
+  sem/call_target.cc
+  sem/expression.cc
+  sem/member_accessor_expression.cc
+  sem/function.cc
+  sem/info.cc
+  sem/intrinsic.cc
+  sem/node.cc
+  sem/statement.cc
+  sem/struct.cc
+  sem/variable.cc
   sem/type_mappings.h
   source.cc
   source.h
@@ -496,7 +496,7 @@ if(${TINT_BUILD_TESTS})
     resolver/type_validation_test.cc
     resolver/validation_test.cc
     scope_stack_test.cc
-    sem/sem_intrinsic_test.cc
+    sem/intrinsic_test.cc
     symbol_table_test.cc
     symbol_test.cc
     traits_test.cc

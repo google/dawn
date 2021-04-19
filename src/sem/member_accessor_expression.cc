@@ -15,6 +15,8 @@
 #include "src/ast/member_accessor_expression.h"
 #include "src/sem/member_accessor_expression.h"
 
+#include <utility>
+
 TINT_INSTANTIATE_TYPEINFO(tint::sem::MemberAccessorExpression);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMemberAccess);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Swizzle);

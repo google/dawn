@@ -221,7 +221,64 @@ tint_language_header("cldebuginfo100") {
 # use the build flags to control what is included, instead of trying to specify
 # the subsets that they want.
 
-source_set("libtint_core_src") {
+template("libtint_source_set") {
+  source_set(target_name) {
+    forward_variables_from(invoker, "*", [ "configs" ])
+
+    if (!defined(invoker.deps)) {
+      deps = []
+    }
+    deps += [
+      ":tint_core_enums_unified1",
+      ":tint_core_tables_unified1",
+      ":tint_language_header_cldebuginfo100",
+      ":tint_language_header_debuginfo",
+      "${tint_spirv_headers_dir}:spv_headers",
+      "${tint_spirv_tools_dir}:spvtools_headers",
+    ]
+
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+    configs += [ ":tint_common_config" ]
+    if (build_with_chromium) {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
+    }
+
+    if (!defined(invoker.public_configs)) {
+      public_configs = []
+    }
+    public_configs += [ ":tint_public_config" ]
+  }
+}
+
+libtint_source_set("libtint_sem_src") {
+  sources = [
+    "sem/array.cc",
+    "sem/array.h",
+    "sem/call.cc",
+    "sem/call.h",
+    "sem/call_target.cc",
+    "sem/call_target.h",
+    "sem/expression.cc",
+    "sem/expression.h",
+    "sem/function.cc",
+    "sem/info.cc",
+    "sem/info.h",
+    "sem/intrinsic.cc",
+    "sem/intrinsic.h",
+    "sem/member_accessor_expression.cc",
+    "sem/node.cc",
+    "sem/node.h",
+    "sem/statement.cc",
+    "sem/struct.cc",
+    "sem/type_mappings.h",
+    "sem/variable.cc",
+  ]
+}
+
+libtint_source_set("libtint_core_all_src") {
   sources = [
     "ast/access_control.cc",
     "ast/access_control.h",
@@ -373,26 +430,6 @@ source_set("libtint_core_src") {
     "resolver/resolver.cc",
     "resolver/resolver.h",
     "scope_stack.h",
-    "sem/array.h",
-    "sem/call.h",
-    "sem/call_target.h",
-    "sem/expression.h",
-    "sem/info.h",
-    "sem/intrinsic.h",
-    "sem/node.h",
-    "sem/sem_array.cc",
-    "sem/sem_call.cc",
-    "sem/sem_call_target.cc",
-    "sem/sem_expression.cc",
-    "sem/sem_function.cc",
-    "sem/sem_info.cc",
-    "sem/sem_intrinsic.cc",
-    "sem/sem_member_accessor_expression.cc",
-    "sem/sem_node.cc",
-    "sem/sem_statement.cc",
-    "sem/sem_struct.cc",
-    "sem/sem_variable.cc",
-    "sem/type_mappings.h",
     "source.cc",
     "source.h",
     "symbol.cc",
@@ -486,26 +523,16 @@ source_set("libtint_core_src") {
   } else {
     sources += [ "diagnostic/printer_other.cc" ]
   }
-
-  public_deps = [
-    ":tint_core_enums_unified1",
-    ":tint_core_tables_unified1",
-    ":tint_language_header_cldebuginfo100",
-    ":tint_language_header_debuginfo",
-    "${tint_spirv_headers_dir}:spv_headers",
-    "${tint_spirv_tools_dir}:spvtools_headers",
-  ]
-
-  configs += [ ":tint_common_config" ]
-  public_configs = [ ":tint_public_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
 }
 
-source_set("libtint_spv_reader_src") {
+libtint_source_set("libtint_core_src") {
+  deps = [
+    ":libtint_core_all_src",
+    ":libtint_sem_src",
+  ]
+}
+
+libtint_source_set("libtint_spv_reader_src") {
   sources = [
     "reader/spirv/construct.cc",
     "reader/spirv/construct.h",
@@ -525,28 +552,10 @@ source_set("libtint_spv_reader_src") {
     "reader/spirv/usage.h",
   ]
 
-  deps = [
-    ":tint_core_enums_unified1",
-    ":tint_core_tables_unified1",
-    ":tint_language_header_cldebuginfo100",
-    ":tint_language_header_debuginfo",
-    "${tint_spirv_tools_dir}/:spvtools",
-    "${tint_spirv_tools_dir}/:spvtools_opt",
-    "${tint_spirv_tools_dir}/:spvtools_val",
-  ]
-
-  configs += [ ":tint_common_config" ]
-  public_configs = [ ":tint_public_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
   public_deps = [ ":libtint_core_src" ]
 }
 
-source_set("libtint_spv_writer_src") {
+libtint_source_set("libtint_spv_writer_src") {
   sources = [
     "transform/spirv.cc",
     "transform/spirv.h",
@@ -565,18 +574,10 @@ source_set("libtint_spv_writer_src") {
     "writer/spirv/scalar_constant.h",
   ]
 
-  configs += [ ":tint_common_config" ]
-  public_configs = [ ":tint_public_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
   public_deps = [ ":libtint_core_src" ]
 }
 
-source_set("libtint_wgsl_reader_src") {
+libtint_source_set("libtint_wgsl_reader_src") {
   sources = [
     "reader/wgsl/lexer.cc",
     "reader/wgsl/lexer.h",
@@ -589,18 +590,10 @@ source_set("libtint_wgsl_reader_src") {
     "reader/wgsl/token.h",
   ]
 
-  configs += [ ":tint_common_config" ]
-  public_configs = [ ":tint_public_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
   public_deps = [ ":libtint_core_src" ]
 }
 
-source_set("libtint_wgsl_writer_src") {
+libtint_source_set("libtint_wgsl_writer_src") {
   sources = [
     "writer/wgsl/generator.cc",
     "writer/wgsl/generator.h",
@@ -608,18 +601,10 @@ source_set("libtint_wgsl_writer_src") {
     "writer/wgsl/generator_impl.h",
   ]
 
-  configs += [ ":tint_common_config" ]
-  public_configs = [ ":tint_public_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
   public_deps = [ ":libtint_core_src" ]
 }
 
-source_set("libtint_msl_writer_src") {
+libtint_source_set("libtint_msl_writer_src") {
   sources = [
     "transform/msl.cc",
     "transform/msl.h",
@@ -629,18 +614,10 @@ source_set("libtint_msl_writer_src") {
     "writer/msl/generator_impl.h",
   ]
 
-  configs += [ ":tint_common_config" ]
-  public_configs = [ ":tint_public_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
   public_deps = [ ":libtint_core_src" ]
 }
 
-source_set("libtint_hlsl_writer_src") {
+libtint_source_set("libtint_hlsl_writer_src") {
   sources = [
     "transform/hlsl.cc",
     "transform/hlsl.h",
@@ -649,14 +626,6 @@ source_set("libtint_hlsl_writer_src") {
     "writer/hlsl/generator_impl.cc",
     "writer/hlsl/generator_impl.h",
   ]
-
-  configs += [ ":tint_common_config" ]
-  public_configs = [ ":tint_public_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
 
   public_deps = [ ":libtint_core_src" ]
 }

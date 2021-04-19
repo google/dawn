@@ -107,7 +107,36 @@ config("tint_unittests_config") {
   ]
 }
 
-source_set("tint_unittests_core_src") {
+template("tint_unittests_source_set") {
+  source_set(target_name) {
+    forward_variables_from(invoker, "*", [ "configs" ])
+
+    if (defined(invoker.configs)) {
+      configs += invoker.configs
+    }
+    configs += [ ":tint_unittests_config" ]
+    if (build_with_chromium) {
+      configs -= [ "//build/config/compiler:chromium_code" ]
+      configs += [ "//build/config/compiler:no_chromium_code" ]
+    }
+
+    testonly = true
+
+    if (!defined(invoker.deps)) {
+      deps = []
+    }
+    deps += [
+      ":gmock_and_gtest",
+      "${tint_root_dir}/src:libtint_core_src",
+    ]
+  }
+}
+
+tint_unittests_source_set("tint_unittests_core_sem_src") {
+  sources = [ "../src/sem/intrinsic_test.cc" ]
+}
+
+tint_unittests_source_set("tint_unittests_core_src") {
   sources = [
     "../src/ast/access_decoration_test.cc",
     "../src/ast/array_accessor_expression_test.cc",
@@ -190,7 +219,6 @@ source_set("tint_unittests_core_src") {
     "../src/resolver/type_validation_test.cc",
     "../src/resolver/validation_test.cc",
     "../src/scope_stack_test.cc",
-    "../src/sem/sem_intrinsic_test.cc",
     "../src/symbol_table_test.cc",
     "../src/symbol_test.cc",
     "../src/traits_test.cc",
@@ -245,24 +273,14 @@ source_set("tint_unittests_core_src") {
     sources += [ "../src/utils/tmpfile_other.cc" ]
   }
 
-  configs += [ ":tint_unittests_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
-  testonly = true
-
   deps = [
-    ":gmock_and_gtest",
-    "${tint_root_dir}/src:libtint_core_src",
+    ":tint_unittests_core_sem_src",
     "${tint_root_dir}/src:libtint_wgsl_reader_src",
     "${tint_root_dir}/src:libtint_wgsl_writer_src",
   ]
 }
 
-source_set("tint_unittests_spv_reader_src") {
+tint_unittests_source_set("tint_unittests_spv_reader_src") {
   sources = [
     "../src/reader/spirv/enum_converter_test.cc",
     "../src/reader/spirv/fail_stream_test.cc",
@@ -296,23 +314,10 @@ source_set("tint_unittests_spv_reader_src") {
     "../src/reader/spirv/usage_test.cc",
   ]
 
-  configs += [ ":tint_unittests_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
-  testonly = true
-
-  deps = [
-    ":gmock_and_gtest",
-    ":tint_unittests_core_src",
-    "${tint_root_dir}/src:libtint_spv_reader_src",
-  ]
+  deps = [ "${tint_root_dir}/src:libtint_spv_reader_src" ]
 }
 
-source_set("tint_unittests_spv_writer_src") {
+tint_unittests_source_set("tint_unittests_spv_writer_src") {
   sources = [
     "../src/transform/spirv_test.cc",
     "../src/writer/spirv/binary_writer_test.cc",
@@ -349,23 +354,10 @@ source_set("tint_unittests_spv_writer_src") {
     "../src/writer/spirv/test_helper.h",
   ]
 
-  configs += [ ":tint_unittests_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
-  testonly = true
-
-  deps = [
-    ":gmock_and_gtest",
-    ":tint_unittests_core_src",
-    "${tint_root_dir}/src:libtint_spv_writer_src",
-  ]
+  deps = [ "${tint_root_dir}/src:libtint_spv_writer_src" ]
 }
 
-source_set("tint_unittests_wgsl_reader_src") {
+tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
   sources = [
     "../src/reader/wgsl/lexer_test.cc",
     "../src/reader/wgsl/parser_impl_additive_expression_test.cc",
@@ -443,23 +435,10 @@ source_set("tint_unittests_wgsl_reader_src") {
     "../src/reader/wgsl/token_test.cc",
   ]
 
-  configs += [ ":tint_unittests_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
-  testonly = true
-
-  deps = [
-    ":gmock_and_gtest",
-    ":tint_unittests_core_src",
-    "${tint_root_dir}/src:libtint_wgsl_reader_src",
-  ]
+  deps = [ "${tint_root_dir}/src:libtint_wgsl_reader_src" ]
 }
 
-source_set("tint_unittests_wgsl_writer_src") {
+tint_unittests_source_set("tint_unittests_wgsl_writer_src") {
   sources = [
     "../src/writer/wgsl/generator_impl_alias_type_test.cc",
     "../src/writer/wgsl/generator_impl_array_accessor_test.cc",
@@ -492,23 +471,10 @@ source_set("tint_unittests_wgsl_writer_src") {
     "../src/writer/wgsl/test_helper.h",
   ]
 
-  configs += [ ":tint_unittests_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
-  testonly = true
-
-  deps = [
-    ":gmock_and_gtest",
-    ":tint_unittests_core_src",
-    "${tint_root_dir}/src:libtint_wgsl_writer_src",
-  ]
+  deps = [ "${tint_root_dir}/src:libtint_wgsl_writer_src" ]
 }
 
-source_set("tint_unittests_msl_writer_src") {
+tint_unittests_source_set("tint_unittests_msl_writer_src") {
   sources = [
     "../src/transform/msl_test.cc",
     "../src/writer/msl/generator_impl_alias_type_test.cc",
@@ -544,23 +510,10 @@ source_set("tint_unittests_msl_writer_src") {
     "../src/writer/msl/test_helper.h",
   ]
 
-  configs += [ ":tint_unittests_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
-  testonly = true
-
-  deps = [
-    ":gmock_and_gtest",
-    ":tint_unittests_core_src",
-    "${tint_root_dir}/src:libtint_msl_writer_src",
-  ]
+  deps = [ "${tint_root_dir}/src:libtint_msl_writer_src" ]
 }
 
-source_set("tint_unittests_hlsl_writer_src") {
+tint_unittests_source_set("tint_unittests_hlsl_writer_src") {
   sources = [
     "../src/transform/hlsl_test.cc",
     "../src/writer/hlsl/generator_impl_alias_type_test.cc",
@@ -598,20 +551,7 @@ source_set("tint_unittests_hlsl_writer_src") {
     "../src/writer/hlsl/test_helper.h",
   ]
 
-  configs += [ ":tint_unittests_config" ]
-
-  if (build_with_chromium) {
-    configs -= [ "//build/config/compiler:chromium_code" ]
-    configs += [ "//build/config/compiler:no_chromium_code" ]
-  }
-
-  testonly = true
-
-  deps = [
-    ":gmock_and_gtest",
-    ":tint_unittests_core_src",
-    "${tint_root_dir}/src:libtint_hlsl_writer_src",
-  ]
+  deps = [ "${tint_root_dir}/src:libtint_hlsl_writer_src" ]
 }
 
 source_set("tint_unittests_src") {

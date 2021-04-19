@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/struct_member.h"
 #include "src/sem/struct.h"
+#include "src/ast/struct_member.h"
+
+#include <utility>
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
