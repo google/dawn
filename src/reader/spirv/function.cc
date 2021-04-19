@@ -3370,8 +3370,6 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   //    OpPtrCastToGeneric // Not in Vulkan
   //    OpGenericCastToPtr // Not in Vulkan
   //    OpGenericCastToPtrExplicit // Not in Vulkan
-  //
-  //    OpArrayLength
 
   return {};
 }
