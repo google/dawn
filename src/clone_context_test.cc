@@ -478,11 +478,11 @@ TYPED_TEST(CloneContextTest, CloneWithInsertAfter) {
 }
 
 TYPED_TEST(CloneContextTest, CloneWithReplaceAll_SameTypeTwice) {
-  using Node = typename TestFixture::Node;
-  std::string node_name = TypeInfo::Of<Node>().name;
+  std::string node_name = TypeInfo::Of<typename TestFixture::Node>().name;
 
   EXPECT_FATAL_FAILURE(
       {
+        using Node = typename TestFixture::Node;
         ProgramBuilder cloned;
         Program original;
         CloneContext ctx(&cloned, &original);
@@ -495,13 +495,15 @@ TYPED_TEST(CloneContextTest, CloneWithReplaceAll_SameTypeTwice) {
 }
 
 TYPED_TEST(CloneContextTest, CloneWithReplaceAll_BaseThenDerived) {
-  using Node = typename TestFixture::Node;
-  using Replaceable = typename TestFixture::Replaceable;
-  std::string node_name = TypeInfo::Of<Node>().name;
-  std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
+  std::string node_name = TypeInfo::Of<typename TestFixture::Node>().name;
+  std::string replaceable_name =
+      TypeInfo::Of<typename TestFixture::Replaceable>().name;
 
   EXPECT_FATAL_FAILURE(
       {
+        using Node = typename TestFixture::Node;
+        using Replaceable = typename TestFixture::Replaceable;
+
         ProgramBuilder cloned;
         Program original;
         CloneContext ctx(&cloned, &original);
@@ -514,13 +516,14 @@ TYPED_TEST(CloneContextTest, CloneWithReplaceAll_BaseThenDerived) {
 }
 
 TYPED_TEST(CloneContextTest, CloneWithReplaceAll_DerivedThenBase) {
-  using Node = typename TestFixture::Node;
-  using Replaceable = typename TestFixture::Replaceable;
-  std::string node_name = TypeInfo::Of<Node>().name;
-  std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
+  std::string node_name = TypeInfo::Of<typename TestFixture::Node>().name;
+  std::string replaceable_name =
+      TypeInfo::Of<typename TestFixture::Replaceable>().name;
 
   EXPECT_FATAL_FAILURE(
       {
+        using Node = typename TestFixture::Node;
+        using Replaceable = typename TestFixture::Replaceable;
         ProgramBuilder cloned;
         Program original;
         CloneContext ctx(&cloned, &original);
@@ -546,10 +549,9 @@ TYPED_TEST(CloneContextTest, CloneWithReplaceAll_SymbolsTwice) {
 }
 
 TYPED_TEST(CloneContextTest, CloneWithReplace_WithNotANode) {
-  using Node = typename TestFixture::Node;
-
   EXPECT_FATAL_FAILURE(
       {
+        using Node = typename TestFixture::Node;
         Allocator allocator;
         ProgramBuilder builder;
         auto* original_root =
