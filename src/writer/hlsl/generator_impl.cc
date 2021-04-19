@@ -1885,16 +1885,33 @@ bool GeneratorImpl::EmitEntryPointData(
         continue;  // Global already emitted
       }
 
-      if (var->StorageClass() == ast::StorageClass::kWorkgroup) {
-        out << "groupshared ";
-      } else if (!unwrapped_type->IsAnyOf<type::Texture, type::Sampler>()) {
-        continue;  // Not interested in this type
+      make_indent(out);
+
+      std::ostringstream constructor_out;
+      if (auto* constructor = decl->constructor()) {
+        if (!EmitExpression(out, constructor_out, constructor)) {
+          return false;
+        }
       }
 
-      if (!EmitType(out, var->DeclaredType(), var->StorageClass(), "")) {
+      switch (var->StorageClass()) {
+        case ast::StorageClass::kPrivate:
+        case ast::StorageClass::kUniformConstant:
+          break;
+        case ast::StorageClass::kWorkgroup:
+          out << "groupshared ";
+          break;
+        default:
+          continue;  // Not interested in this storage class
+      }
+
+      auto name = builder_.Symbols().NameFor(decl->symbol());
+      if (!EmitType(out, var->DeclaredType(), var->StorageClass(), name)) {
         return false;
       }
-      out << " " << builder_.Symbols().NameFor(decl->symbol());
+      if (!var->DeclaredType()->UnwrapAliasIfNeeded()->Is<type::Array>()) {
+        out << " " << name;
+      }
 
       const char* register_space = nullptr;
 
@@ -1915,6 +1932,10 @@ bool GeneratorImpl::EmitEntryPointData(
         auto bp = decl->binding_point();
         out << " : register(" << register_space << bp.binding->value()
             << ", space" << bp.group->value() << ")";
+      }
+
+      if (constructor_out.str().length()) {
+        out << " = " << constructor_out.str();
       }
 
       out << ";" << std::endl;

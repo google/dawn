@@ -139,6 +139,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   float mem;
 };
 
+Data str;
+
 [numthreads(1, 1, 1)]
 void test_function() {
   float tint_symbol = str.mem;

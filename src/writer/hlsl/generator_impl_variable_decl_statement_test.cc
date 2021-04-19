@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "gmock/gmock.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/writer/hlsl/test_helper.h"
 
@@ -20,12 +21,14 @@ namespace writer {
 namespace hlsl {
 namespace {
 
+using ::testing::HasSubstr;
+
 using HlslGeneratorImplTest_VariableDecl = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kInput);
-
+  auto* var = Var("a", ty.f32(), ast::StorageClass::kFunction);
   auto* stmt = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 
@@ -37,7 +40,6 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   auto* var = Const("a", ty.f32());
-
   auto* stmt = create<ast::VariableDeclStatement>(var);
   WrapInFunction(stmt);
 
@@ -50,58 +52,43 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
-  auto* var = Global("a", ty.array<f32, 5>(), ast::StorageClass::kInput);
+  auto* var = Var("a", ty.array<f32, 5>(), ast::StorageClass::kFunction);
 
-  auto* stmt = create<ast::VariableDeclStatement>(var);
-
-  GeneratorImpl& gen = Build();
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  float a[5];\n");
-}
-
-TEST_F(HlslGeneratorImplTest_VariableDecl,
-       Emit_VariableDeclStatement_Function) {
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kFunction);
-
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(var, Expr("a"));
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  float a;\n");
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("  float a[5];\n"));
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
-  auto* var = Global("a", ty.f32(), ast::StorageClass::kPrivate);
+  Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(Expr("a"));
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  float a;\n");
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr("  float a;\n"));
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_Private) {
   Global("initializer", ty.f32(), ast::StorageClass::kInput);
-  auto* var =
-      Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
+  Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
 
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(Expr("a"));
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), R"(float a = initializer;
-)");
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(R"(float a = initializer;
+)"));
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
