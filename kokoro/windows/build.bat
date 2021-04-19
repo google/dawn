@@ -60,6 +60,17 @@ if exist %TEMP_DIR% (
 )
 mkdir %TEMP_DIR% || goto :error
 
+call :status "Fetching DXC"
+@echo on
+curl -L https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.5.2010/dxc_2020_10-22.zip --output %TEMP_DIR%\dxc.zip || goto :error
+@echo off
+
+call :status "Unpacking DXC"
+@echo on
+powershell.exe -Command "Expand-Archive -LiteralPath '%TEMP_DIR%\dxc.zip' -DestinationPath '%TEMP_DIR%\dxc'" || goto :error
+set PATH=%TEMP_DIR%\dxc\bin\x64;%PATH%
+@echo off
+
 call :status "Installing depot_tools"
 @echo on
 pushd %TEMP_DIR%
@@ -107,7 +118,7 @@ cmake --build . --config %BUILD_TYPE% || goto :error
 
 call :status "Running tint_unittests"
 @echo on
-%BUILD_TYPE%\tint_unittests.exe || goto :error
+%BUILD_TYPE%\tint_unittests.exe --validate-hlsl || goto :error
 @echo off
 
 @rem TODO(amaiorano): test-all.sh for Windows
