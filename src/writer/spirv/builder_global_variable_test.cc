@@ -394,7 +394,7 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                           Member("b", ty.i32()),
                       },
                       {create<ast::StructBlockDecoration>()});
-  auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, A);
+  auto* ac = create<sem::AccessControl>(ast::AccessControl::kReadOnly, A);
 
   auto* var = Global("b", ac, ast::StorageClass::kStorage);
 
@@ -430,7 +430,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
   auto* B = ty.alias("B", A);
-  auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, B);
+  auto* ac = create<sem::AccessControl>(ast::AccessControl::kReadOnly, B);
   auto* var = Global("b", ac, ast::StorageClass::kStorage);
 
   spirv::Builder& b = Build();
@@ -461,7 +461,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, A);
+  auto* ac = create<sem::AccessControl>(ast::AccessControl::kReadOnly, A);
   auto* B = ty.alias("B", ac);
   auto* var = Global("b", B, ast::StorageClass::kStorage);
 
@@ -493,8 +493,8 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  type::AccessControl read{ast::AccessControl::kReadOnly, A};
-  type::AccessControl rw{ast::AccessControl::kReadWrite, A};
+  sem::AccessControl read{ast::AccessControl::kReadOnly, A};
+  sem::AccessControl rw{ast::AccessControl::kReadWrite, A};
 
   auto* var_b = Global("b", &read, ast::StorageClass::kStorage);
   auto* var_c = Global("c", &rw, ast::StorageClass::kStorage);
@@ -532,11 +532,11 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
   // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
 
   auto* subtype =
-      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, Types());
-  auto* type = create<type::StorageTexture>(
-      type::TextureDimension::k2d, type::ImageFormat::kR32Uint, subtype);
+      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Uint, Types());
+  auto* type = create<sem::StorageTexture>(sem::TextureDimension::k2d,
+                                           sem::ImageFormat::kR32Uint, subtype);
 
-  auto* ac = create<type::AccessControl>(ast::AccessControl::kReadOnly, type);
+  auto* ac = create<sem::AccessControl>(ast::AccessControl::kReadOnly, type);
 
   auto* var_a = Global("a", ac, ast::StorageClass::kUniformConstant);
 
@@ -557,12 +557,12 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   // var<uniform_constant> a : [[access(write)]] texture_storage_2d<r32uint>;
 
   auto* subtype =
-      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, Types());
-  auto* type = create<type::StorageTexture>(
-      type::TextureDimension::k2d, type::ImageFormat::kR32Uint, subtype);
+      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Uint, Types());
+  auto* type = create<sem::StorageTexture>(sem::TextureDimension::k2d,
+                                           sem::ImageFormat::kR32Uint, subtype);
   Global("test_var", type, ast::StorageClass::kInput);
 
-  auto* ac = create<type::AccessControl>(ast::AccessControl::kWriteOnly, type);
+  auto* ac = create<sem::AccessControl>(ast::AccessControl::kWriteOnly, type);
 
   auto* var_a = Global("a", ac, ast::StorageClass::kUniformConstant);
 
@@ -586,17 +586,16 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
   // var<uniform_constant> b : [[access(write)]] texture_storage_2d<r32uint>;
 
   auto* subtype =
-      type::StorageTexture::SubtypeFor(type::ImageFormat::kR32Uint, Types());
-  auto* st = create<type::StorageTexture>(type::TextureDimension::k2d,
-                                          type::ImageFormat::kR32Uint, subtype);
+      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Uint, Types());
+  auto* st = create<sem::StorageTexture>(sem::TextureDimension::k2d,
+                                         sem::ImageFormat::kR32Uint, subtype);
 
   Global("test_var", st, ast::StorageClass::kInput);
 
-  auto* type_a = create<type::AccessControl>(ast::AccessControl::kReadOnly, st);
+  auto* type_a = create<sem::AccessControl>(ast::AccessControl::kReadOnly, st);
   auto* var_a = Global("a", type_a, ast::StorageClass::kUniformConstant);
 
-  auto* type_b =
-      create<type::AccessControl>(ast::AccessControl::kWriteOnly, st);
+  auto* type_b = create<sem::AccessControl>(ast::AccessControl::kWriteOnly, st);
   auto* var_b = Global("b", type_b, ast::StorageClass::kUniformConstant);
 
   spirv::Builder& b = Build();

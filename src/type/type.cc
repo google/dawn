@@ -26,10 +26,10 @@
 #include "src/type/u32_type.h"
 #include "src/type/vector_type.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Type);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Type);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 Type::Type() = default;
 
@@ -38,7 +38,7 @@ Type::Type(Type&&) = default;
 Type::~Type() = default;
 
 Type* Type::UnwrapPtrIfNeeded() {
-  if (auto* ptr = As<type::Pointer>()) {
+  if (auto* ptr = As<sem::Pointer>()) {
     return ptr->type();
   }
   return this;
@@ -46,7 +46,7 @@ Type* Type::UnwrapPtrIfNeeded() {
 
 Type* Type::UnwrapAliasIfNeeded() {
   Type* unwrapped = this;
-  while (auto* ptr = unwrapped->As<type::Alias>()) {
+  while (auto* ptr = unwrapped->As<sem::Alias>()) {
     unwrapped = ptr->type();
   }
   return unwrapped;
@@ -55,9 +55,9 @@ Type* Type::UnwrapAliasIfNeeded() {
 Type* Type::UnwrapIfNeeded() {
   auto* where = this;
   while (true) {
-    if (auto* alias = where->As<type::Alias>()) {
+    if (auto* alias = where->As<sem::Alias>()) {
       where = alias->type();
-    } else if (auto* access = where->As<type::AccessControl>()) {
+    } else if (auto* access = where->As<sem::AccessControl>()) {
       where = access->type();
     } else {
       break;
@@ -132,5 +132,5 @@ bool Type::is_handle() const {
   return IsAnyOf<Sampler, Texture>();
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

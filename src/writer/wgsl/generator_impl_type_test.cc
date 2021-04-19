@@ -73,10 +73,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
-  auto* a = create<type::ArrayType>(ty.bool_(), 4,
-                                    ast::DecorationList{
-                                        create<ast::StrideDecoration>(16u),
-                                    });
+  auto* a = create<sem::ArrayType>(ty.bool_(), 4,
+                                   ast::DecorationList{
+                                       create<ast::StrideDecoration>(16u),
+                                   });
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();
@@ -86,11 +86,11 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
-  auto* a = create<type::ArrayType>(ty.bool_(), 4,
-                                    ast::DecorationList{
-                                        create<ast::StrideDecoration>(16u),
-                                        create<ast::StrideDecoration>(32u),
-                                    });
+  auto* a = create<sem::ArrayType>(ty.bool_(), 4,
+                                   ast::DecorationList{
+                                       create<ast::StrideDecoration>(16u),
+                                       create<ast::StrideDecoration>(32u),
+                                   });
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();
@@ -100,7 +100,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_MultipleDecorations) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
-  auto* a = create<type::ArrayType>(ty.bool_(), 0, ast::DecorationList{});
+  auto* a = create<sem::ArrayType>(ty.bool_(), 0, ast::DecorationList{});
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();
@@ -150,7 +150,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
-  auto* p = create<type::Pointer>(ty.f32(), ast::StorageClass::kWorkgroup);
+  auto* p = create<sem::Pointer>(ty.f32(), ast::StorageClass::kWorkgroup);
   AST().AddConstructedType(ty.alias("make_type_reachable", p));
 
   GeneratorImpl& gen = Build();
@@ -314,7 +314,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
 }
 
 struct TextureData {
-  type::TextureDimension dim;
+  sem::TextureDimension dim;
   const char* name;
 };
 inline std::ostream& operator<<(std::ostream& out, TextureData data) {
@@ -326,7 +326,7 @@ using WgslGenerator_DepthTextureTest = TestParamHelper<TextureData>;
 TEST_P(WgslGenerator_DepthTextureTest, EmitType_DepthTexture) {
   auto param = GetParam();
 
-  auto* d = create<type::DepthTexture>(param.dim);
+  auto* d = create<sem::DepthTexture>(param.dim);
   AST().AddConstructedType(ty.alias("make_type_reachable", d));
 
   GeneratorImpl& gen = Build();
@@ -338,17 +338,17 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_DepthTextureTest,
     testing::Values(
-        TextureData{type::TextureDimension::k2d, "texture_depth_2d"},
-        TextureData{type::TextureDimension::k2dArray, "texture_depth_2d_array"},
-        TextureData{type::TextureDimension::kCube, "texture_depth_cube"},
-        TextureData{type::TextureDimension::kCubeArray,
+        TextureData{sem::TextureDimension::k2d, "texture_depth_2d"},
+        TextureData{sem::TextureDimension::k2dArray, "texture_depth_2d_array"},
+        TextureData{sem::TextureDimension::kCube, "texture_depth_cube"},
+        TextureData{sem::TextureDimension::kCubeArray,
                     "texture_depth_cube_array"}));
 
 using WgslGenerator_SampledTextureTest = TestParamHelper<TextureData>;
 TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_F32) {
   auto param = GetParam();
 
-  auto* t = create<type::SampledTexture>(param.dim, ty.f32());
+  auto* t = create<sem::SampledTexture>(param.dim, ty.f32());
   AST().AddConstructedType(ty.alias("make_type_reachable", t));
 
   GeneratorImpl& gen = Build();
@@ -360,7 +360,7 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_F32) {
 TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_I32) {
   auto param = GetParam();
 
-  auto* t = create<type::SampledTexture>(param.dim, ty.i32());
+  auto* t = create<sem::SampledTexture>(param.dim, ty.i32());
   AST().AddConstructedType(ty.alias("make_type_reachable", t));
 
   GeneratorImpl& gen = Build();
@@ -372,7 +372,7 @@ TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_I32) {
 TEST_P(WgslGenerator_SampledTextureTest, EmitType_SampledTexture_U32) {
   auto param = GetParam();
 
-  auto* t = create<type::SampledTexture>(param.dim, ty.u32());
+  auto* t = create<sem::SampledTexture>(param.dim, ty.u32());
   AST().AddConstructedType(ty.alias("make_type_reachable", t));
 
   GeneratorImpl& gen = Build();
@@ -384,18 +384,18 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_SampledTextureTest,
     testing::Values(
-        TextureData{type::TextureDimension::k1d, "texture_1d"},
-        TextureData{type::TextureDimension::k2d, "texture_2d"},
-        TextureData{type::TextureDimension::k2dArray, "texture_2d_array"},
-        TextureData{type::TextureDimension::k3d, "texture_3d"},
-        TextureData{type::TextureDimension::kCube, "texture_cube"},
-        TextureData{type::TextureDimension::kCubeArray, "texture_cube_array"}));
+        TextureData{sem::TextureDimension::k1d, "texture_1d"},
+        TextureData{sem::TextureDimension::k2d, "texture_2d"},
+        TextureData{sem::TextureDimension::k2dArray, "texture_2d_array"},
+        TextureData{sem::TextureDimension::k3d, "texture_3d"},
+        TextureData{sem::TextureDimension::kCube, "texture_cube"},
+        TextureData{sem::TextureDimension::kCubeArray, "texture_cube_array"}));
 
 using WgslGenerator_MultiampledTextureTest = TestParamHelper<TextureData>;
 TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_F32) {
   auto param = GetParam();
 
-  auto* t = create<type::MultisampledTexture>(param.dim, ty.f32());
+  auto* t = create<sem::MultisampledTexture>(param.dim, ty.f32());
   AST().AddConstructedType(ty.alias("make_type_reachable", t));
 
   GeneratorImpl& gen = Build();
@@ -407,7 +407,7 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_F32) {
 TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_I32) {
   auto param = GetParam();
 
-  auto* t = create<type::MultisampledTexture>(param.dim, ty.i32());
+  auto* t = create<sem::MultisampledTexture>(param.dim, ty.i32());
   AST().AddConstructedType(ty.alias("make_type_reachable", t));
 
   GeneratorImpl& gen = Build();
@@ -419,7 +419,7 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_I32) {
 TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
   auto param = GetParam();
 
-  auto* t = create<type::MultisampledTexture>(param.dim, ty.u32());
+  auto* t = create<sem::MultisampledTexture>(param.dim, ty.u32());
   AST().AddConstructedType(ty.alias("make_type_reachable", t));
 
   GeneratorImpl& gen = Build();
@@ -430,12 +430,12 @@ TEST_P(WgslGenerator_MultiampledTextureTest, EmitType_MultisampledTexture_U32) {
 INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
                          WgslGenerator_MultiampledTextureTest,
                          testing::Values(TextureData{
-                             type::TextureDimension::k2d,
+                             sem::TextureDimension::k2d,
                              "texture_multisampled_2d"}));
 
 struct StorageTextureData {
-  type::ImageFormat fmt;
-  type::TextureDimension dim;
+  sem::ImageFormat fmt;
+  sem::TextureDimension dim;
   ast::AccessControl access;
   const char* name;
 };
@@ -447,8 +447,8 @@ using WgslGenerator_StorageTextureTest = TestParamHelper<StorageTextureData>;
 TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
   auto param = GetParam();
 
-  auto* subtype = type::StorageTexture::SubtypeFor(param.fmt, Types());
-  auto* t = create<type::StorageTexture>(param.dim, param.fmt, subtype);
+  auto* subtype = sem::StorageTexture::SubtypeFor(param.fmt, Types());
+  auto* t = create<sem::StorageTexture>(param.dim, param.fmt, subtype);
   auto* ac = ty.access(param.access, t);
 
   GeneratorImpl& gen = Build();
@@ -460,41 +460,41 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_StorageTextureTest,
     testing::Values(
-        StorageTextureData{type::ImageFormat::kR8Unorm,
-                           type::TextureDimension::k1d,
+        StorageTextureData{sem::ImageFormat::kR8Unorm,
+                           sem::TextureDimension::k1d,
                            ast::AccessControl::kReadOnly,
                            "[[access(read)]] texture_storage_1d<r8unorm>"},
-        StorageTextureData{type::ImageFormat::kR8Unorm,
-                           type::TextureDimension::k2d,
+        StorageTextureData{sem::ImageFormat::kR8Unorm,
+                           sem::TextureDimension::k2d,
                            ast::AccessControl::kReadOnly,
                            "[[access(read)]] texture_storage_2d<r8unorm>"},
         StorageTextureData{
-            type::ImageFormat::kR8Unorm, type::TextureDimension::k2dArray,
+            sem::ImageFormat::kR8Unorm, sem::TextureDimension::k2dArray,
             ast::AccessControl::kReadOnly,
             "[[access(read)]] texture_storage_2d_array<r8unorm>"},
-        StorageTextureData{type::ImageFormat::kR8Unorm,
-                           type::TextureDimension::k3d,
+        StorageTextureData{sem::ImageFormat::kR8Unorm,
+                           sem::TextureDimension::k3d,
                            ast::AccessControl::kReadOnly,
                            "[[access(read)]] texture_storage_3d<r8unorm>"},
-        StorageTextureData{type::ImageFormat::kR8Unorm,
-                           type::TextureDimension::k1d,
+        StorageTextureData{sem::ImageFormat::kR8Unorm,
+                           sem::TextureDimension::k1d,
                            ast::AccessControl::kWriteOnly,
                            "[[access(write)]] texture_storage_1d<r8unorm>"},
-        StorageTextureData{type::ImageFormat::kR8Unorm,
-                           type::TextureDimension::k2d,
+        StorageTextureData{sem::ImageFormat::kR8Unorm,
+                           sem::TextureDimension::k2d,
                            ast::AccessControl::kWriteOnly,
                            "[[access(write)]] texture_storage_2d<r8unorm>"},
         StorageTextureData{
-            type::ImageFormat::kR8Unorm, type::TextureDimension::k2dArray,
+            sem::ImageFormat::kR8Unorm, sem::TextureDimension::k2dArray,
             ast::AccessControl::kWriteOnly,
             "[[access(write)]] texture_storage_2d_array<r8unorm>"},
-        StorageTextureData{type::ImageFormat::kR8Unorm,
-                           type::TextureDimension::k3d,
+        StorageTextureData{sem::ImageFormat::kR8Unorm,
+                           sem::TextureDimension::k3d,
                            ast::AccessControl::kWriteOnly,
                            "[[access(write)]] texture_storage_3d<r8unorm>"}));
 
 struct ImageFormatData {
-  type::ImageFormat fmt;
+  sem::ImageFormat fmt;
   const char* name;
 };
 inline std::ostream& operator<<(std::ostream& out, ImageFormatData data) {
@@ -515,44 +515,44 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslGenerator_ImageFormatTest,
     testing::Values(
-        ImageFormatData{type::ImageFormat::kR8Unorm, "r8unorm"},
-        ImageFormatData{type::ImageFormat::kR8Snorm, "r8snorm"},
-        ImageFormatData{type::ImageFormat::kR8Uint, "r8uint"},
-        ImageFormatData{type::ImageFormat::kR8Sint, "r8sint"},
-        ImageFormatData{type::ImageFormat::kR16Uint, "r16uint"},
-        ImageFormatData{type::ImageFormat::kR16Sint, "r16sint"},
-        ImageFormatData{type::ImageFormat::kR16Float, "r16float"},
-        ImageFormatData{type::ImageFormat::kRg8Unorm, "rg8unorm"},
-        ImageFormatData{type::ImageFormat::kRg8Snorm, "rg8snorm"},
-        ImageFormatData{type::ImageFormat::kRg8Uint, "rg8uint"},
-        ImageFormatData{type::ImageFormat::kRg8Sint, "rg8sint"},
-        ImageFormatData{type::ImageFormat::kR32Uint, "r32uint"},
-        ImageFormatData{type::ImageFormat::kR32Sint, "r32sint"},
-        ImageFormatData{type::ImageFormat::kR32Float, "r32float"},
-        ImageFormatData{type::ImageFormat::kRg16Uint, "rg16uint"},
-        ImageFormatData{type::ImageFormat::kRg16Sint, "rg16sint"},
-        ImageFormatData{type::ImageFormat::kRg16Float, "rg16float"},
-        ImageFormatData{type::ImageFormat::kRgba8Unorm, "rgba8unorm"},
-        ImageFormatData{type::ImageFormat::kRgba8UnormSrgb, "rgba8unorm_srgb"},
-        ImageFormatData{type::ImageFormat::kRgba8Snorm, "rgba8snorm"},
-        ImageFormatData{type::ImageFormat::kRgba8Uint, "rgba8uint"},
-        ImageFormatData{type::ImageFormat::kRgba8Sint, "rgba8sint"},
-        ImageFormatData{type::ImageFormat::kBgra8Unorm, "bgra8unorm"},
-        ImageFormatData{type::ImageFormat::kBgra8UnormSrgb, "bgra8unorm_srgb"},
-        ImageFormatData{type::ImageFormat::kRgb10A2Unorm, "rgb10a2unorm"},
-        ImageFormatData{type::ImageFormat::kRg11B10Float, "rg11b10float"},
-        ImageFormatData{type::ImageFormat::kRg32Uint, "rg32uint"},
-        ImageFormatData{type::ImageFormat::kRg32Sint, "rg32sint"},
-        ImageFormatData{type::ImageFormat::kRg32Float, "rg32float"},
-        ImageFormatData{type::ImageFormat::kRgba16Uint, "rgba16uint"},
-        ImageFormatData{type::ImageFormat::kRgba16Sint, "rgba16sint"},
-        ImageFormatData{type::ImageFormat::kRgba16Float, "rgba16float"},
-        ImageFormatData{type::ImageFormat::kRgba32Uint, "rgba32uint"},
-        ImageFormatData{type::ImageFormat::kRgba32Sint, "rgba32sint"},
-        ImageFormatData{type::ImageFormat::kRgba32Float, "rgba32float"}));
+        ImageFormatData{sem::ImageFormat::kR8Unorm, "r8unorm"},
+        ImageFormatData{sem::ImageFormat::kR8Snorm, "r8snorm"},
+        ImageFormatData{sem::ImageFormat::kR8Uint, "r8uint"},
+        ImageFormatData{sem::ImageFormat::kR8Sint, "r8sint"},
+        ImageFormatData{sem::ImageFormat::kR16Uint, "r16uint"},
+        ImageFormatData{sem::ImageFormat::kR16Sint, "r16sint"},
+        ImageFormatData{sem::ImageFormat::kR16Float, "r16float"},
+        ImageFormatData{sem::ImageFormat::kRg8Unorm, "rg8unorm"},
+        ImageFormatData{sem::ImageFormat::kRg8Snorm, "rg8snorm"},
+        ImageFormatData{sem::ImageFormat::kRg8Uint, "rg8uint"},
+        ImageFormatData{sem::ImageFormat::kRg8Sint, "rg8sint"},
+        ImageFormatData{sem::ImageFormat::kR32Uint, "r32uint"},
+        ImageFormatData{sem::ImageFormat::kR32Sint, "r32sint"},
+        ImageFormatData{sem::ImageFormat::kR32Float, "r32float"},
+        ImageFormatData{sem::ImageFormat::kRg16Uint, "rg16uint"},
+        ImageFormatData{sem::ImageFormat::kRg16Sint, "rg16sint"},
+        ImageFormatData{sem::ImageFormat::kRg16Float, "rg16float"},
+        ImageFormatData{sem::ImageFormat::kRgba8Unorm, "rgba8unorm"},
+        ImageFormatData{sem::ImageFormat::kRgba8UnormSrgb, "rgba8unorm_srgb"},
+        ImageFormatData{sem::ImageFormat::kRgba8Snorm, "rgba8snorm"},
+        ImageFormatData{sem::ImageFormat::kRgba8Uint, "rgba8uint"},
+        ImageFormatData{sem::ImageFormat::kRgba8Sint, "rgba8sint"},
+        ImageFormatData{sem::ImageFormat::kBgra8Unorm, "bgra8unorm"},
+        ImageFormatData{sem::ImageFormat::kBgra8UnormSrgb, "bgra8unorm_srgb"},
+        ImageFormatData{sem::ImageFormat::kRgb10A2Unorm, "rgb10a2unorm"},
+        ImageFormatData{sem::ImageFormat::kRg11B10Float, "rg11b10float"},
+        ImageFormatData{sem::ImageFormat::kRg32Uint, "rg32uint"},
+        ImageFormatData{sem::ImageFormat::kRg32Sint, "rg32sint"},
+        ImageFormatData{sem::ImageFormat::kRg32Float, "rg32float"},
+        ImageFormatData{sem::ImageFormat::kRgba16Uint, "rgba16uint"},
+        ImageFormatData{sem::ImageFormat::kRgba16Sint, "rgba16sint"},
+        ImageFormatData{sem::ImageFormat::kRgba16Float, "rgba16float"},
+        ImageFormatData{sem::ImageFormat::kRgba32Uint, "rgba32uint"},
+        ImageFormatData{sem::ImageFormat::kRgba32Sint, "rgba32sint"},
+        ImageFormatData{sem::ImageFormat::kRgba32Float, "rgba32float"}));
 
 TEST_F(WgslGeneratorImplTest, EmitType_Sampler) {
-  auto* sampler = create<type::Sampler>(type::SamplerKind::kSampler);
+  auto* sampler = create<sem::Sampler>(sem::SamplerKind::kSampler);
   AST().AddConstructedType(ty.alias("make_type_reachable", sampler));
 
   GeneratorImpl& gen = Build();
@@ -562,7 +562,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Sampler) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_SamplerComparison) {
-  auto* sampler = create<type::Sampler>(type::SamplerKind::kComparisonSampler);
+  auto* sampler = create<sem::Sampler>(sem::SamplerKind::kComparisonSampler);
   AST().AddConstructedType(ty.alias("make_type_reachable", sampler));
 
   GeneratorImpl& gen = Build();

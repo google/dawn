@@ -15,12 +15,12 @@
 #include "src/type/type_manager.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 Manager::Manager() = default;
 Manager::Manager(Manager&&) = default;
 Manager& Manager::operator=(Manager&& rhs) = default;
 Manager::~Manager() = default;
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

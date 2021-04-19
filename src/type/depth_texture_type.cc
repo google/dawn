@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::DepthTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::DepthTexture);
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 bool IsValidDepthDimension(TextureDimension dim) {
@@ -53,5 +53,5 @@ DepthTexture* DepthTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<DepthTexture>(dim());
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

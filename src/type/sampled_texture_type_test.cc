@@ -21,7 +21,7 @@
 #include "src/type/test_helper.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using SampledTextureTest = TestHelper;
@@ -79,5 +79,5 @@ TEST_F(SampledTextureTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

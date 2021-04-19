@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::MultisampledTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::MultisampledTexture);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 MultisampledTexture::MultisampledTexture(TextureDimension dim, Type* type)
     : Base(dim), type_(type) {
@@ -50,5 +50,5 @@ MultisampledTexture* MultisampledTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<MultisampledTexture>(dim(), ty);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

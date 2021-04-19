@@ -18,10 +18,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::StructType);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::StructType);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 StructType::StructType(const Symbol& sym, ast::Struct* impl)
     : symbol_(sym), struct_(impl) {}
@@ -45,5 +45,5 @@ StructType* StructType::Clone(CloneContext* ctx) const {
   return ctx->dst->create<StructType>(sym, str);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

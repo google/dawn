@@ -18,7 +18,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// The dimensionality of the texture
 enum class TextureDimension {
@@ -69,7 +69,7 @@ class Texture : public Castable<Texture, Type> {
   TextureDimension const dim_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_TEXTURE_TYPE_H_

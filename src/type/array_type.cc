@@ -18,10 +18,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::ArrayType);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::ArrayType);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 ArrayType::ArrayType(Type* subtype,
                      uint32_t size,
@@ -70,5 +70,5 @@ ArrayType* ArrayType::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ArrayType>(ty, size_, decos);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

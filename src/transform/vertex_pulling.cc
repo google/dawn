@@ -367,7 +367,7 @@ struct State {
   /// @param count how many elements the vector has
   ast::Expression* AccessVec(uint32_t buffer,
                              uint32_t element_stride,
-                             type::Type* base_type,
+                             sem::Type* base_type,
                              VertexFormat base_format,
                              uint32_t count) {
     ast::ExpressionList expr_list;
@@ -379,7 +379,7 @@ struct State {
     }
 
     return ctx.dst->create<ast::TypeConstructorExpression>(
-        ctx.dst->create<type::Vector>(base_type, count), std::move(expr_list));
+        ctx.dst->create<sem::Vector>(base_type, count), std::move(expr_list));
   }
 };
 

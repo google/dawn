@@ -65,13 +65,13 @@ Output BindingRemapper::Run(const Program* in, const DataMap& datamap) {
       if (ac_it != remappings->access_controls.end()) {
         ast::AccessControl ac = ac_it->second;
         auto* ty = in->Sem().Get(var)->Type();
-        type::Type* inner_ty = nullptr;
-        if (auto* old_ac = ty->As<type::AccessControl>()) {
+        sem::Type* inner_ty = nullptr;
+        if (auto* old_ac = ty->As<sem::AccessControl>()) {
           inner_ty = ctx.Clone(old_ac->type());
         } else {
           inner_ty = ctx.Clone(ty);
         }
-        auto* new_ty = ctx.dst->create<type::AccessControl>(ac, inner_ty);
+        auto* new_ty = ctx.dst->create<sem::AccessControl>(ac, inner_ty);
         auto* new_var = ctx.dst->create<ast::Variable>(
             ctx.Clone(var->source()), ctx.Clone(var->symbol()),
             var->declared_storage_class(), new_ty, var->is_const(),

@@ -35,7 +35,7 @@ Module::Module(ProgramID program_id,
       continue;
     }
 
-    if (auto* ty = decl->As<type::Type>()) {
+    if (auto* ty = decl->As<sem::Type>()) {
       constructed_types_.push_back(ty);
     } else if (auto* func = decl->As<Function>()) {
       functions_.push_back(func);
@@ -62,7 +62,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
       TINT_ICE(ctx->dst->Diagnostics()) << "src global declaration was nullptr";
       continue;
     }
-    if (auto* ty = decl->As<type::Type>()) {
+    if (auto* ty = decl->As<sem::Type>()) {
       AddConstructedType(ty);
     } else if (auto* func = decl->As<Function>()) {
       AddFunction(func);
@@ -82,13 +82,13 @@ void Module::to_str(const sem::Info& sem,
   indent += 2;
   for (auto* const ty : constructed_types_) {
     make_indent(out, indent);
-    if (auto* alias = ty->As<type::Alias>()) {
+    if (auto* alias = ty->As<sem::Alias>()) {
       out << alias->symbol().to_str() << " -> " << alias->type()->type_name()
           << std::endl;
-      if (auto* str = alias->type()->As<type::StructType>()) {
+      if (auto* str = alias->type()->As<sem::StructType>()) {
         str->impl()->to_str(sem, out, indent);
       }
-    } else if (auto* str = ty->As<type::StructType>()) {
+    } else if (auto* str = ty->As<sem::StructType>()) {
       out << str->symbol().to_str() << " ";
       str->impl()->to_str(sem, out, indent);
     }

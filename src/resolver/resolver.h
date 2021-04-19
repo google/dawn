@@ -49,9 +49,9 @@ namespace sem {
 class Array;
 class Statement;
 }  // namespace sem
-namespace type {
-class Struct;
-}  // namespace type
+namespace sem {
+class StructType;
+}  // namespace sem
 
 namespace resolver {
 
@@ -73,34 +73,34 @@ class Resolver {
 
   /// @param type the given type
   /// @returns true if the given type is storable
-  static bool IsStorable(type::Type* type);
+  static bool IsStorable(sem::Type* type);
 
   /// @param type the given type
   /// @returns true if the given type is host-shareable
-  static bool IsHostShareable(type::Type* type);
+  static bool IsHostShareable(sem::Type* type);
 
   /// @param lhs the assignment store type (non-pointer)
   /// @param rhs the assignment source type (non-pointer or pointer with
   /// auto-deref)
   /// @returns true an expression of type `rhs` can be assigned to a variable,
   /// structure member or array element of type `lhs`
-  static bool IsValidAssignment(type::Type* lhs, type::Type* rhs);
+  static bool IsValidAssignment(sem::Type* lhs, sem::Type* rhs);
 
   /// @param type the input type
   /// @returns the canonical type for `type`; that is, a type with all aliases
   /// removed. For example, `Canonical(alias<alias<vec3<alias<f32>>>>)` is
   /// `vec3<f32>`.
-  type::Type* Canonical(type::Type* type);
+  sem::Type* Canonical(sem::Type* type);
 
  private:
   /// Structure holding semantic information about a variable.
   /// Used to build the sem::Variable nodes at the end of resolving.
   struct VariableInfo {
-    VariableInfo(ast::Variable* decl, type::Type* type);
+    VariableInfo(ast::Variable* decl, sem::Type* type);
     ~VariableInfo();
 
     ast::Variable* const declaration;
-    type::Type* type;
+    sem::Type* type;
     ast::StorageClass storage_class;
     std::vector<ast::IdentifierExpression*> users;
   };
@@ -124,7 +124,7 @@ class Resolver {
   /// Structure holding semantic information about an expression.
   /// Used to build the sem::Expression nodes at the end of resolving.
   struct ExpressionInfo {
-    type::Type* type;
+    sem::Type* type;
     sem::Statement* statement;
   };
 
@@ -199,11 +199,11 @@ class Resolver {
   /// @param params the parameters to the method call
   /// @param id out parameter for the external call ID. Must not be a nullptr.
   /// @returns the return type of `name` in `path` or nullptr on error.
-  type::Type* GetImportData(const Source& src,
-                            const std::string& path,
-                            const std::string& name,
-                            const ast::ExpressionList& params,
-                            uint32_t* id);
+  sem::Type* GetImportData(const Source& src,
+                           const std::string& path,
+                           const std::string& name,
+                           const ast::ExpressionList& params,
+                           uint32_t* id);
 
   void set_referenced_from_function_if_needed(VariableInfo* var, bool local);
 
@@ -230,7 +230,7 @@ class Resolver {
   bool Statement(ast::Statement*);
   bool Statements(const ast::StatementList&);
   bool Switch(ast::SwitchStatement* s);
-  bool Type(type::Type* ty);
+  bool Type(sem::Type* ty);
   bool UnaryOp(ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
 
@@ -241,14 +241,14 @@ class Resolver {
   bool ValidateEntryPoint(const ast::Function* func);
   bool ValidateFunction(const ast::Function* func);
   bool ValidateGlobalVariable(const VariableInfo* var);
-  bool ValidateMatrixConstructor(const type::Matrix* matrix_type,
+  bool ValidateMatrixConstructor(const sem::Matrix* matrix_type,
                                  const ast::ExpressionList& values);
   bool ValidateParameter(const ast::Variable* param);
   bool ValidateReturn(const ast::ReturnStatement* ret);
-  bool ValidateStructure(const type::StructType* st);
+  bool ValidateStructure(const sem::StructType* st);
   bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateVariable(const ast::Variable* param);
-  bool ValidateVectorConstructor(const type::Vector* vec_type,
+  bool ValidateVectorConstructor(const sem::Vector* vec_type,
                                  const ast::ExpressionList& values);
 
   /// @returns the semantic information for the array `arr`, building it if it
@@ -256,18 +256,18 @@ class Resolver {
   /// returned.
   /// @param arr the Array to get semantic information for
   /// @param source the Source of the ast node with this array as its type
-  const sem::Array* Array(type::ArrayType* arr, const Source& source);
+  const sem::Array* Array(sem::ArrayType* arr, const Source& source);
 
   /// @returns the StructInfo for the structure `str`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
-  StructInfo* Structure(type::StructType* str);
+  StructInfo* Structure(sem::StructType* str);
 
   /// @returns the VariableInfo for the variable `var`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
   /// @param var the variable to create or return the `VariableInfo` for
   /// @param type optional type of `var` to use instead of
   /// `var->declared_type()`. For type inference.
-  VariableInfo* Variable(ast::Variable* var, type::Type* type = nullptr);
+  VariableInfo* Variable(ast::Variable* var, sem::Type* type = nullptr);
 
   /// Records the storage class usage for the given type, and any transient
   /// dependencies of the type. Validates that the type can be used for the
@@ -278,27 +278,27 @@ class Resolver {
   /// given type and storage class. Used for generating sensible error messages.
   /// @returns true on success, false on error
   bool ApplyStorageClassUsageToType(ast::StorageClass sc,
-                                    type::Type* ty,
+                                    sem::Type* ty,
                                     const Source& usage);
 
   /// @param align the output default alignment in bytes for the type `ty`
   /// @param size the output default size in bytes for the type `ty`
   /// @param source the Source of the variable declaration of type `ty`
   /// @returns true on success, false on error
-  bool DefaultAlignAndSize(type::Type* ty,
+  bool DefaultAlignAndSize(sem::Type* ty,
                            uint32_t& align,
                            uint32_t& size,
                            const Source& source);
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  type::Type* TypeOf(ast::Expression* expr);
+  sem::Type* TypeOf(ast::Expression* expr);
 
   /// Creates a sem::Expression node with the resolved type `type`, and
   /// assigns this semantic node to the expression `expr`.
   /// @param expr the expression
   /// @param type the resolved type
-  void SetType(ast::Expression* expr, type::Type* type);
+  void SetType(ast::Expression* expr, sem::Type* type);
 
   /// Constructs a new BlockInfo with the given type and with #current_block_ as
   /// its parent, assigns this to #current_block_, and then calls `callback`.
@@ -313,7 +313,7 @@ class Resolver {
   /// @param size the vector dimension
   /// @param element_type scalar vector sub-element type
   /// @return pretty string representation
-  std::string VectorPretty(uint32_t size, type::Type* element_type);
+  std::string VectorPretty(uint32_t size, sem::Type* element_type);
 
   /// Mark records that the given AST node has been visited, and asserts that
   /// the given node has not already been seen. Diamonds in the AST are illegal.
@@ -330,8 +330,8 @@ class Resolver {
   std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
   std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;
-  std::unordered_map<type::StructType*, StructInfo*> struct_info_;
-  std::unordered_map<type::Type*, type::Type*> type_to_canonical_;
+  std::unordered_map<sem::StructType*, StructInfo*> struct_info_;
+  std::unordered_map<sem::Type*, sem::Type*> type_to_canonical_;
   std::unordered_set<ast::Node*> marked_;
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;

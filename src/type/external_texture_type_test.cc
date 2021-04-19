@@ -22,7 +22,7 @@
 #include "src/type/test_helper.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using ExternalTextureTest = TestHelper;
@@ -75,5 +75,5 @@ TEST_F(ExternalTextureTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

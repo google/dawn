@@ -17,7 +17,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using MatrixTest = TestHelper;
@@ -61,5 +61,5 @@ TEST_F(MatrixTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

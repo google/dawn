@@ -113,50 +113,50 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Scalar) {
   WrapInFunction(Decl(a), builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(builtin)->Is<sem::F32>());
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
   auto* a = Var("a", ty.vec2<int>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
-                  create<type::Pointer>(create<type::Vector>(ty.i32(), 2),
-                                        ast::StorageClass::kFunction),
+                  create<sem::Pointer>(create<sem::Vector>(ty.i32(), 2),
+                                       ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("frexp", vec2<float>(1.0f, 1.0f), Expr("b"));
   WrapInFunction(Decl(a), Decl(b), builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
   auto* a = Var("a", ty.vec3<int>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
-                  create<type::Pointer>(create<type::Vector>(ty.i32(), 3),
-                                        ast::StorageClass::kFunction),
+                  create<sem::Pointer>(create<sem::Vector>(ty.i32(), 3),
+                                       ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("frexp", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
   WrapInFunction(Decl(a), Decl(b), builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
   auto* a = Var("a", ty.vec4<int>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
-                  create<type::Pointer>(create<type::Vector>(ty.i32(), 4),
-                                        ast::StorageClass::kFunction),
+                  create<sem::Pointer>(create<sem::Vector>(ty.i32(), 4),
+                                       ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("frexp", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));
   WrapInFunction(Decl(a), Decl(b), builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
@@ -167,50 +167,50 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
   WrapInFunction(Decl(a), Decl(b), builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(builtin)->Is<sem::F32>());
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
   auto* a = Var("a", ty.vec2<float>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
-                  create<type::Pointer>(create<type::Vector>(ty.f32(), 2),
-                                        ast::StorageClass::kFunction),
+                  create<sem::Pointer>(create<sem::Vector>(ty.f32(), 2),
+                                       ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("modf", vec2<float>(1.0f, 1.0f), Expr("b"));
   WrapInFunction(Decl(a), Decl(b), builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
   auto* a = Var("a", ty.vec3<float>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
-                  create<type::Pointer>(create<type::Vector>(ty.f32(), 3),
-                                        ast::StorageClass::kFunction),
+                  create<sem::Pointer>(create<sem::Vector>(ty.f32(), 3),
+                                       ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("modf", vec3<float>(1.0f, 1.0f, 1.0f), Expr("b"));
   WrapInFunction(Decl(a), Decl(b), builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
   auto* a = Var("a", ty.vec4<float>(), ast::StorageClass::kFunction);
   auto* b = Const("b",
-                  create<type::Pointer>(create<type::Vector>(ty.f32(), 4),
-                                        ast::StorageClass::kFunction),
+                  create<sem::Pointer>(create<sem::Vector>(ty.f32(), 4),
+                                       ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("modf", vec4<float>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));
   WrapInFunction(Decl(a), Decl(b), builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
-  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<type::Pointer>());
+  EXPECT_TRUE(TypeOf(builtin->params()[1])->Is<sem::Pointer>());
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Cross_Float_Vec3) {
@@ -309,7 +309,7 @@ TEST_P(FloatAllMatching, Scalar) {
   WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::F32>());
+  EXPECT_TRUE(TypeOf(builtin)->Is<sem::F32>());
 }
 
 TEST_P(FloatAllMatching, Vec2) {
@@ -417,7 +417,7 @@ TEST_P(IntegerAllMatching, ScalarUnsigned) {
   WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::U32>());
+  EXPECT_TRUE(TypeOf(builtin)->Is<sem::U32>());
 }
 
 TEST_P(IntegerAllMatching, Vec2Unsigned) {
@@ -477,7 +477,7 @@ TEST_P(IntegerAllMatching, ScalarSigned) {
   WrapInFunction(builtin);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-  EXPECT_TRUE(TypeOf(builtin)->Is<type::I32>());
+  EXPECT_TRUE(TypeOf(builtin)->Is<sem::I32>());
 }
 
 TEST_P(IntegerAllMatching, Vec2Signed) {

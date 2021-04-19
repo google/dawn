@@ -26,63 +26,63 @@ namespace {
 using ::testing::HasSubstr;
 
 using create_type_func_ptr =
-    type::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
+    sem::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
 
-inline type::Type* ty_i32(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_i32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.i32();
 }
-inline type::Type* ty_u32(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_u32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.u32();
 }
-inline type::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.f32();
 }
 template <typename T>
-inline type::Type* ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
   return ty.vec2<T>();
 }
 template <typename T>
-inline type::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.vec3<T>();
 }
 template <typename T>
-inline type::Type* ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
   return ty.vec4<T>();
 }
 template <typename T>
-inline type::Type* ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat2x2<T>();
 }
 template <typename T>
-inline type::Type* ty_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat2x3<T>();
 }
 template <typename T>
-inline type::Type* ty_mat2x4(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_mat2x4(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat2x4<T>();
 }
 template <typename T>
-inline type::Type* ty_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat3x2<T>();
 }
 template <typename T>
-inline type::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat3x3<T>();
 }
 template <typename T>
-inline type::Type* ty_mat3x4(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_mat3x4(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat3x4<T>();
 }
 template <typename T>
-inline type::Type* ty_mat4x2(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_mat4x2(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat4x2<T>();
 }
 template <typename T>
-inline type::Type* ty_mat4x3(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_mat4x3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat4x3<T>();
 }
 template <typename T>
-inline type::Type* ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
+inline sem::Type* ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat4x4<T>();
 }
 
@@ -100,7 +100,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
         b.Structure("Data", members, {b.create<ast::StructBlockDecoration>()});
 
     auto* ac_ty =
-        b.create<type::AccessControl>(ast::AccessControl::kReadWrite, s);
+        b.create<sem::AccessControl>(ast::AccessControl::kReadWrite, s);
 
     b.Global("data", ac_ty, ast::StorageClass::kStorage, nullptr,
              ast::DecorationList{

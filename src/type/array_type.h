@@ -21,7 +21,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// An array type. If size is zero then it is a runtime array.
 // TODO(amaiorano): https://crbug.com/tint/724 Fold into sem::Array once parsers
@@ -69,7 +69,7 @@ class ArrayType : public Castable<ArrayType, Type> {
   ast::DecorationList const decos_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_ARRAY_TYPE_H_

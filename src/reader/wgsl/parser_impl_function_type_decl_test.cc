@@ -22,7 +22,7 @@ namespace {
 TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
   auto p = parser("void");
 
-  auto* v = p->builder().create<type::Void>();
+  auto* v = p->builder().create<sem::Void>();
 
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);
@@ -34,8 +34,8 @@ TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
 TEST_F(ParserImplTest, FunctionTypeDecl_Type) {
   auto p = parser("vec2<f32>");
 
-  auto* f32 = p->builder().create<type::F32>();
-  auto* vec2 = p->builder().create<type::Vector>(f32, 2);
+  auto* f32 = p->builder().create<sem::F32>();
+  auto* vec2 = p->builder().create<sem::Vector>(f32, 2);
 
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);

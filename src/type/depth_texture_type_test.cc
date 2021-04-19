@@ -22,7 +22,7 @@
 #include "src/type/storage_texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using DepthTextureTest = TestHelper;
@@ -70,5 +70,5 @@ TEST_F(DepthTextureTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

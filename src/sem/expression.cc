@@ -20,7 +20,7 @@ namespace tint {
 namespace sem {
 
 Expression::Expression(ast::Expression* declaration,
-                       type::Type* type,
+                       sem::Type* type,
                        Statement* statement)
     : declaration_(declaration),
       type_(type->UnwrapIfNeeded()),

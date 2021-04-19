@@ -27,7 +27,7 @@ Function::Function(ProgramID program_id,
                    const Source& source,
                    Symbol symbol,
                    VariableList params,
-                   type::Type* return_type,
+                   sem::Type* return_type,
                    BlockStatement* body,
                    DecorationList decorations,
                    DecorationList return_type_decorations)

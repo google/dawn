@@ -35,7 +35,7 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
                               create<ast::StructBlockDecoration>(),
                           });
   auto* ac_ty =
-      create<type::AccessControl>(ast::AccessControl::kReadOnly, sb_ty);
+      create<sem::AccessControl>(ast::AccessControl::kReadOnly, sb_ty);
 
   Global("sb", ac_ty, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{

@@ -237,7 +237,7 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
 TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   auto p = parser("f32(1)");
 
-  auto* f32 = p->builder().create<type::F32>();
+  auto* f32 = p->builder().create<sem::F32>();
 
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
@@ -258,7 +258,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   auto p = parser("bitcast<f32>(1)");
 
-  auto* f32 = p->builder().create<type::F32>();
+  auto* f32 = p->builder().create<sem::F32>();
 
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);

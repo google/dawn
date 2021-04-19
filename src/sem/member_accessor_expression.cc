@@ -26,7 +26,7 @@ namespace sem {
 
 MemberAccessorExpression::MemberAccessorExpression(
     ast::MemberAccessorExpression* declaration,
-    type::Type* type,
+    sem::Type* type,
     Statement* statement)
     : Base(declaration, type, statement) {}
 
@@ -34,7 +34,7 @@ MemberAccessorExpression::~MemberAccessorExpression() = default;
 
 StructMemberAccess::StructMemberAccess(
     ast::MemberAccessorExpression* declaration,
-    type::Type* type,
+    sem::Type* type,
     Statement* statement,
     const StructMember* member)
     : Base(declaration, type, statement), member_(member) {}
@@ -42,7 +42,7 @@ StructMemberAccess::StructMemberAccess(
 StructMemberAccess::~StructMemberAccess() = default;
 
 Swizzle::Swizzle(ast::MemberAccessorExpression* declaration,
-                 type::Type* type,
+                 sem::Type* type,
                  Statement* statement,
                  std::vector<uint32_t> indices)
     : Base(declaration, type, statement), indices_(std::move(indices)) {}

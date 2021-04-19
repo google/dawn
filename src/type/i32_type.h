@@ -20,7 +20,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A signed int 32 type.
 class I32 : public Castable<I32, Type> {
@@ -45,7 +45,7 @@ class I32 : public Castable<I32, Type> {
   I32* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_I32_TYPE_H_

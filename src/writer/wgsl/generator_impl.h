@@ -64,7 +64,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a constructed type
   /// @param ty the constructed to generate
   /// @returns true if the constructed was emitted
-  bool EmitConstructedType(const type::Type* ty);
+  bool EmitConstructedType(const sem::Type* ty);
   /// Handles an array accessor expression
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
@@ -172,15 +172,15 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating type
   /// @param type the type to generate
   /// @returns true if the type is emitted
-  bool EmitType(type::Type* type);
+  bool EmitType(sem::Type* type);
   /// Handles generating a struct declaration
   /// @param str the struct
   /// @returns true if the struct is emitted
-  bool EmitStructType(const type::StructType* str);
+  bool EmitStructType(const sem::StructType* str);
   /// Handles emitting an image format
   /// @param fmt the format to generate
   /// @returns true if the format is emitted
-  bool EmitImageFormat(const type::ImageFormat fmt);
+  bool EmitImageFormat(const sem::ImageFormat fmt);
   /// Handles emitting a type constructor
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted

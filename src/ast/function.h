@@ -48,7 +48,7 @@ class Function : public Castable<Function, Node> {
            const Source& source,
            Symbol symbol,
            VariableList params,
-           type::Type* return_type,
+           sem::Type* return_type,
            BlockStatement* body,
            DecorationList decorations,
            DecorationList return_type_decorations);
@@ -76,7 +76,7 @@ class Function : public Castable<Function, Node> {
   bool IsEntryPoint() const { return pipeline_stage() != PipelineStage::kNone; }
 
   /// @returns the function return type.
-  type::Type* return_type() const { return return_type_; }
+  sem::Type* return_type() const { return return_type_; }
 
   /// @returns the decorations attached to the function return type.
   const DecorationList& return_type_decorations() const {
@@ -114,7 +114,7 @@ class Function : public Castable<Function, Node> {
 
   Symbol const symbol_;
   VariableList const params_;
-  type::Type* const return_type_;
+  sem::Type* const return_type_;
   BlockStatement* const body_;
   DecorationList const decorations_;
   DecorationList const return_type_decorations_;

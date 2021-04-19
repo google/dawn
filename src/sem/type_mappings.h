@@ -29,21 +29,18 @@ class Statement;
 class StructMember;
 class Variable;
 }  // namespace ast
-namespace type {
-class ArrayType;
-class StructType;
-}  // namespace type
 
 namespace sem {
-
 // Forward declarations
 class Array;
+class ArrayType;
 class Call;
 class Expression;
 class Function;
 class MemberAccessorExpression;
 class Statement;
 class Struct;
+class StructType;
 class StructMember;
 class Variable;
 
@@ -53,13 +50,13 @@ class Variable;
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
   //! @cond Doxygen_Suppress
-  Array* operator()(type::ArrayType*);
+  Array* operator()(sem::ArrayType*);
   Call* operator()(ast::CallExpression*);
   Expression* operator()(ast::Expression*);
   Function* operator()(ast::Function*);
   MemberAccessorExpression* operator()(ast::MemberAccessorExpression*);
   Statement* operator()(ast::Statement*);
-  Struct* operator()(type::StructType*);
+  Struct* operator()(sem::StructType*);
   StructMember* operator()(ast::StructMember*);
   Variable* operator()(ast::Variable*);
   //! @endcond

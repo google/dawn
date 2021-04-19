@@ -17,7 +17,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using ArrayTest = TestHelper;
@@ -96,5 +96,5 @@ TEST_F(ArrayTest, TypeName_WithStride) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

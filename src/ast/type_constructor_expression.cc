@@ -23,7 +23,7 @@ namespace ast {
 
 TypeConstructorExpression::TypeConstructorExpression(ProgramID program_id,
                                                      const Source& source,
-                                                     type::Type* type,
+                                                     sem::Type* type,
                                                      ExpressionList values)
     : Base(program_id, source), type_(type), values_(std::move(values)) {
   TINT_ASSERT(type_);

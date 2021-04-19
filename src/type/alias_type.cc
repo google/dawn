@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Alias);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Alias);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 Alias::Alias(const Symbol& sym, Type* subtype)
     : symbol_(sym), subtype_(subtype) {
@@ -45,5 +45,5 @@ Alias* Alias::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Alias>(sym, ty);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

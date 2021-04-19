@@ -21,7 +21,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A pointer type.
 class Pointer : public Castable<Pointer, Type> {
@@ -57,7 +57,7 @@ class Pointer : public Castable<Pointer, Type> {
   ast::StorageClass const storage_class_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_POINTER_TYPE_H_

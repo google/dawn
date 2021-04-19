@@ -17,7 +17,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using U32Test = TestHelper;
@@ -51,5 +51,5 @@ TEST_F(U32Test, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

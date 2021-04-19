@@ -20,7 +20,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A unsigned int 32 type.
 class U32 : public Castable<U32, Type> {
@@ -45,7 +45,7 @@ class U32 : public Castable<U32, Type> {
   U32* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_U32_TYPE_H_

@@ -20,7 +20,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 class Manager;
 
@@ -72,7 +72,7 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// @param dim the dimensionality of the texture
   /// @param format the image format of the texture
   /// @param subtype the storage subtype. Use SubtypeFor() to calculate this.
-  StorageTexture(TextureDimension dim, ImageFormat format, type::Type* subtype);
+  StorageTexture(TextureDimension dim, ImageFormat format, sem::Type* subtype);
 
   /// Move constructor
   StorageTexture(StorageTexture&&);
@@ -98,17 +98,16 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   StorageTexture* Clone(CloneContext* ctx) const override;
 
   /// @param format the storage texture image format
-  /// @param type_mgr the type::Manager used to build the returned type
+  /// @param type_mgr the sem::Manager used to build the returned type
   /// @returns the storage texture subtype for the given ImageFormat
-  static type::Type* SubtypeFor(type::ImageFormat format,
-                                type::Manager& type_mgr);
+  static sem::Type* SubtypeFor(sem::ImageFormat format, sem::Manager& type_mgr);
 
  private:
   ImageFormat const image_format_;
   Type* const subtype_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_STORAGE_TEXTURE_TYPE_H_

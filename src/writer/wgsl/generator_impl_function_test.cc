@@ -210,7 +210,7 @@ TEST_F(WgslGeneratorImplTest,
   auto* s = Structure("Data", {Member("d", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("data", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{

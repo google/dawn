@@ -21,7 +21,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// An access control type. Holds an access setting and pointer to another type.
 class AccessControl : public Castable<AccessControl, Type> {
@@ -64,7 +64,7 @@ class AccessControl : public Castable<AccessControl, Type> {
   Type* const subtype_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_ACCESS_CONTROL_TYPE_H_

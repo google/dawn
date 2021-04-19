@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::U32);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::U32);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 U32::U32() = default;
 
@@ -39,5 +39,5 @@ U32* U32::Clone(CloneContext* ctx) const {
   return ctx->dst->create<U32>();
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

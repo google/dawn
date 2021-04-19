@@ -21,7 +21,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A structure type
 class StructType : public Castable<StructType, Type> {
@@ -63,7 +63,7 @@ class StructType : public Castable<StructType, Type> {
   uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_STRUCT_TYPE_H_

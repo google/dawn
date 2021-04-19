@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::SampledTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::SampledTexture);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 SampledTexture::SampledTexture(TextureDimension dim, Type* type)
     : Base(dim), type_(type) {
@@ -48,5 +48,5 @@ SampledTexture* SampledTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<SampledTexture>(dim(), ty);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

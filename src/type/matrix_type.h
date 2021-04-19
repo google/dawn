@@ -20,7 +20,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A matrix type
 class Matrix : public Castable<Matrix, Type> {
@@ -60,7 +60,7 @@ class Matrix : public Castable<Matrix, Type> {
   uint32_t const columns_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_MATRIX_TYPE_H_

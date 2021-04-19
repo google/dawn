@@ -25,7 +25,7 @@ namespace {
 
 ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
   if (auto* constructor = expr->As<ast::TypeConstructorExpression>()) {
-    if (constructor->type()->Is<type::Vector>()) {
+    if (constructor->type()->Is<sem::Vector>()) {
       return constructor;
     }
   }
@@ -38,10 +38,10 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
                                              ast::Expression* vector,
                                              ast::Expression* scalar) {
   uint32_t packed_size;
-  type::Type* packed_el_ty;  // Currently must be f32.
+  sem::Type* packed_el_ty;  // Currently must be f32.
   auto* vector_sem = b->Sem().Get(vector);
   auto* vector_ty = vector_sem->Type()->UnwrapPtrIfNeeded();
-  if (auto* vec = vector_ty->As<type::Vector>()) {
+  if (auto* vec = vector_ty->As<sem::Vector>()) {
     packed_size = vec->size() + 1;
     packed_el_ty = vec->type();
   } else {
@@ -51,7 +51,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
 
   auto* statement = vector_sem->Stmt();
 
-  auto* packed_ty = b->create<type::Vector>(packed_el_ty, packed_size);
+  auto* packed_ty = b->create<sem::Vector>(packed_el_ty, packed_size);
 
   // If the coordinates are already passed in a vector constructor, extract
   // the elements into the new vector instead of nesting a vector-in-vector.

@@ -73,12 +73,12 @@ TEST_F(ResolverIsStorableTest, AliasI32) {
 
 TEST_F(ResolverIsStorableTest, AccessControlVoid) {
   EXPECT_FALSE(r()->IsStorable(
-      create<type::AccessControl>(ast::AccessControl::kReadOnly, ty.void_())));
+      create<sem::AccessControl>(ast::AccessControl::kReadOnly, ty.void_())));
 }
 
 TEST_F(ResolverIsStorableTest, AccessControlI32) {
   EXPECT_TRUE(r()->IsStorable(
-      create<type::AccessControl>(ast::AccessControl::kReadOnly, ty.i32())));
+      create<sem::AccessControl>(ast::AccessControl::kReadOnly, ty.i32())));
 }
 
 TEST_F(ResolverIsStorableTest, ArraySizedOfStorable) {

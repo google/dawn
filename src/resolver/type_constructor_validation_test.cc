@@ -19,11 +19,11 @@ namespace resolver {
 namespace {
 
 /// @return the element type of `type` for vec and mat, otherwise `type` itself
-type::Type* ElementTypeOf(type::Type* type) {
-  if (auto* v = type->As<type::Vector>()) {
+sem::Type* ElementTypeOf(sem::Type* type) {
+  if (auto* v = type->As<sem::Vector>()) {
     return v->type();
   }
-  if (auto* m = type->As<type::Matrix>()) {
+  if (auto* m = type->As<sem::Matrix>()) {
     return m->type();
   }
   return type;

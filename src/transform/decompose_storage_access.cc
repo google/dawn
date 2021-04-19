@@ -57,7 +57,7 @@ struct OffsetExpr : Offset {
   ast::Expression* Build(CloneContext& ctx) override {
     auto* type = ctx.src->Sem().Get(expr)->Type()->UnwrapAll();
     auto* res = ctx.Clone(expr);
-    if (!type->Is<type::U32>()) {
+    if (!type->Is<sem::U32>()) {
       res = ctx.dst->Construct<ProgramBuilder::u32>(res);
     }
     return res;
@@ -174,8 +174,8 @@ std::unique_ptr<Offset> Mul(LHS&& lhs_, RHS&& rhs_) {
 
 /// TypePair is a pair of types that can be used as a unordered map or set key.
 struct TypePair {
-  type::Type* first;
-  type::Type* second;
+  sem::Type* first;
+  sem::Type* second;
   bool operator==(const TypePair& rhs) const {
     return first == rhs.first && second == rhs.second;
   }
@@ -187,67 +187,67 @@ struct TypePair {
 };
 
 /// @returns the size in bytes of a scalar
-uint32_t ScalarSize(type::Type*) {
+uint32_t ScalarSize(sem::Type*) {
   // TODO(bclayton): Assumes 32-bit elements
   return 4;
 }
 
 /// @returns the numer of bytes between columns of the given matrix
-uint32_t MatrixColumnStride(type::Matrix* mat) {
+uint32_t MatrixColumnStride(sem::Matrix* mat) {
   return ScalarSize(mat->type()) * ((mat->rows() == 2) ? 2 : 4);
 }
 
 /// @returns a DecomposeStorageAccess::Intrinsic decoration that can be applied
 /// to a stub function to load the type `ty`.
 DecomposeStorageAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
-                                                    type::Type* ty) {
+                                                    sem::Type* ty) {
   using Intrinsic = DecomposeStorageAccess::Intrinsic;
 
   auto intrinsic = [builder](Intrinsic::Type type) {
     return builder->ASTNodes().Create<Intrinsic>(builder->ID(), type);
   };
 
-  if (ty->Is<type::I32>()) {
+  if (ty->Is<sem::I32>()) {
     return intrinsic(Intrinsic::kLoadI32);
   }
-  if (ty->Is<type::U32>()) {
+  if (ty->Is<sem::U32>()) {
     return intrinsic(Intrinsic::kLoadU32);
   }
-  if (ty->Is<type::F32>()) {
+  if (ty->Is<sem::F32>()) {
     return intrinsic(Intrinsic::kLoadF32);
   }
-  if (auto* vec = ty->As<type::Vector>()) {
+  if (auto* vec = ty->As<sem::Vector>()) {
     switch (vec->size()) {
       case 2:
-        if (vec->type()->Is<type::I32>()) {
+        if (vec->type()->Is<sem::I32>()) {
           return intrinsic(Intrinsic::kLoadVec2I32);
         }
-        if (vec->type()->Is<type::U32>()) {
+        if (vec->type()->Is<sem::U32>()) {
           return intrinsic(Intrinsic::kLoadVec2U32);
         }
-        if (vec->type()->Is<type::F32>()) {
+        if (vec->type()->Is<sem::F32>()) {
           return intrinsic(Intrinsic::kLoadVec2F32);
         }
         break;
       case 3:
-        if (vec->type()->Is<type::I32>()) {
+        if (vec->type()->Is<sem::I32>()) {
           return intrinsic(Intrinsic::kLoadVec3I32);
         }
-        if (vec->type()->Is<type::U32>()) {
+        if (vec->type()->Is<sem::U32>()) {
           return intrinsic(Intrinsic::kLoadVec3U32);
         }
-        if (vec->type()->Is<type::F32>()) {
+        if (vec->type()->Is<sem::F32>()) {
           return intrinsic(Intrinsic::kLoadVec3F32);
         }
         break;
       case 4:
-        if (vec->type()->Is<type::I32>()) {
+        if (vec->type()->Is<sem::I32>()) {
           return intrinsic(Intrinsic::kLoadVec4I32);
         }
-        if (vec->type()->Is<type::U32>()) {
+        if (vec->type()->Is<sem::U32>()) {
           return intrinsic(Intrinsic::kLoadVec4U32);
         }
-        if (vec->type()->Is<type::F32>()) {
+        if (vec->type()->Is<sem::F32>()) {
           return intrinsic(Intrinsic::kLoadVec4F32);
         }
         break;
@@ -259,54 +259,54 @@ DecomposeStorageAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
 /// @returns a DecomposeStorageAccess::Intrinsic decoration that can be applied
 /// to a stub function to store the type `ty`.
 DecomposeStorageAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
-                                                     type::Type* ty) {
+                                                     sem::Type* ty) {
   using Intrinsic = DecomposeStorageAccess::Intrinsic;
 
   auto intrinsic = [builder](Intrinsic::Type type) {
     return builder->ASTNodes().Create<Intrinsic>(builder->ID(), type);
   };
 
-  if (ty->Is<type::I32>()) {
+  if (ty->Is<sem::I32>()) {
     return intrinsic(Intrinsic::kStoreI32);
   }
-  if (ty->Is<type::U32>()) {
+  if (ty->Is<sem::U32>()) {
     return intrinsic(Intrinsic::kStoreU32);
   }
-  if (ty->Is<type::F32>()) {
+  if (ty->Is<sem::F32>()) {
     return intrinsic(Intrinsic::kStoreF32);
   }
-  if (auto* vec = ty->As<type::Vector>()) {
+  if (auto* vec = ty->As<sem::Vector>()) {
     switch (vec->size()) {
       case 2:
-        if (vec->type()->Is<type::I32>()) {
+        if (vec->type()->Is<sem::I32>()) {
           return intrinsic(Intrinsic::kStoreVec2U32);
         }
-        if (vec->type()->Is<type::U32>()) {
+        if (vec->type()->Is<sem::U32>()) {
           return intrinsic(Intrinsic::kStoreVec2F32);
         }
-        if (vec->type()->Is<type::F32>()) {
+        if (vec->type()->Is<sem::F32>()) {
           return intrinsic(Intrinsic::kStoreVec2I32);
         }
         break;
       case 3:
-        if (vec->type()->Is<type::I32>()) {
+        if (vec->type()->Is<sem::I32>()) {
           return intrinsic(Intrinsic::kStoreVec3U32);
         }
-        if (vec->type()->Is<type::U32>()) {
+        if (vec->type()->Is<sem::U32>()) {
           return intrinsic(Intrinsic::kStoreVec3F32);
         }
-        if (vec->type()->Is<type::F32>()) {
+        if (vec->type()->Is<sem::F32>()) {
           return intrinsic(Intrinsic::kStoreVec3I32);
         }
         break;
       case 4:
-        if (vec->type()->Is<type::I32>()) {
+        if (vec->type()->Is<sem::I32>()) {
           return intrinsic(Intrinsic::kStoreVec4U32);
         }
-        if (vec->type()->Is<type::U32>()) {
+        if (vec->type()->Is<sem::U32>()) {
           return intrinsic(Intrinsic::kStoreVec4F32);
         }
-        if (vec->type()->Is<type::F32>()) {
+        if (vec->type()->Is<sem::F32>()) {
           return intrinsic(Intrinsic::kStoreVec4I32);
         }
         break;
@@ -328,20 +328,20 @@ void InsertGlobal(CloneContext& ctx, Cloneable* insert_after, Cloneable* node) {
 }
 
 /// @returns the unwrapped, user-declared constructed type of ty.
-type::Type* ConstructedTypeOf(type::Type* ty) {
+sem::Type* ConstructedTypeOf(sem::Type* ty) {
   while (true) {
-    if (auto* ptr = ty->As<type::Pointer>()) {
+    if (auto* ptr = ty->As<sem::Pointer>()) {
       ty = ptr->type();
       continue;
     }
-    if (auto* access = ty->As<type::AccessControl>()) {
+    if (auto* access = ty->As<sem::AccessControl>()) {
       ty = access->type();
       continue;
     }
-    if (auto* alias = ty->As<type::Alias>()) {
+    if (auto* alias = ty->As<sem::Alias>()) {
       return alias;
     }
-    if (auto* str = ty->As<type::StructType>()) {
+    if (auto* str = ty->As<sem::StructType>()) {
       return str;
     }
     // Not a constructed type
@@ -350,7 +350,7 @@ type::Type* ConstructedTypeOf(type::Type* ty) {
 }
 
 /// @returns the given type with all pointers and aliases removed.
-type::Type* UnwrapPtrAndAlias(type::Type* ty) {
+sem::Type* UnwrapPtrAndAlias(sem::Type* ty) {
   return ty->UnwrapPtrIfNeeded()->UnwrapAliasIfNeeded()->UnwrapPtrIfNeeded();
 }
 
@@ -358,7 +358,7 @@ type::Type* UnwrapPtrAndAlias(type::Type* ty) {
 struct StorageBufferAccess {
   sem::Expression const* var = nullptr;       // Storage buffer variable
   std::unique_ptr<Offset> offset;             // The byte offset on var
-  type::Type* type = nullptr;                 // The type of the access
+  sem::Type* type = nullptr;                  // The type of the access
   operator bool() const { return var; }       // Returns true if valid
 };
 
@@ -410,8 +410,8 @@ struct State {
   /// the signature: `fn load(buf : buf_ty, offset : u32) -> el_ty`
   Symbol LoadFunc(CloneContext& ctx,
                   Cloneable* insert_after,
-                  type::Type* buf_ty,
-                  type::Type* el_ty) {
+                  sem::Type* buf_ty,
+                  sem::Type* el_ty) {
     return utils::GetOrCreate(load_funcs, TypePair{buf_ty, el_ty}, [&] {
       ast::VariableList params = {
           // Note: The buffer parameter requires the kStorage StorageClass in
@@ -429,16 +429,16 @@ struct State {
             ast::DecorationList{intrinsic}, ast::DecorationList{});
       } else {
         ast::ExpressionList values;
-        if (auto* mat_ty = el_ty->As<type::Matrix>()) {
-          auto* vec_ty = ctx.dst->create<type::Vector>(
-              ctx.Clone(mat_ty->type()), mat_ty->rows());
+        if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
+          auto* vec_ty = ctx.dst->create<sem::Vector>(ctx.Clone(mat_ty->type()),
+                                                      mat_ty->rows());
           Symbol load = LoadFunc(ctx, insert_after, buf_ty, vec_ty);
           for (uint32_t i = 0; i < mat_ty->columns(); i++) {
             auto* offset =
                 ctx.dst->Add("offset", i * MatrixColumnStride(mat_ty));
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
-        } else if (auto* str_ty = el_ty->As<type::StructType>()) {
+        } else if (auto* str_ty = el_ty->As<sem::StructType>()) {
           auto& sem = ctx.src->Sem();
           auto* str = sem.Get(str_ty);
           for (auto* member : str->Members()) {
@@ -447,7 +447,7 @@ struct State {
                                    member->Declaration()->type()->UnwrapAll());
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
-        } else if (auto* arr_ty = el_ty->As<type::ArrayType>()) {
+        } else if (auto* arr_ty = el_ty->As<sem::ArrayType>()) {
           auto& sem = ctx.src->Sem();
           auto* arr = sem.Get(arr_ty);
           for (uint32_t i = 0; i < arr_ty->size(); i++) {
@@ -474,8 +474,8 @@ struct State {
   /// has the signature: `fn store(buf : buf_ty, offset : u32, value : el_ty)`
   Symbol StoreFunc(CloneContext& ctx,
                    Cloneable* insert_after,
-                   type::Type* buf_ty,
-                   type::Type* el_ty) {
+                   sem::Type* buf_ty,
+                   sem::Type* el_ty) {
     return utils::GetOrCreate(store_funcs, TypePair{buf_ty, el_ty}, [&] {
       ast::VariableList params{
           // Note: The buffer parameter requires the kStorage StorageClass in
@@ -494,9 +494,9 @@ struct State {
 
       } else {
         ast::StatementList body;
-        if (auto* mat_ty = el_ty->As<type::Matrix>()) {
-          auto* vec_ty = ctx.dst->create<type::Vector>(
-              ctx.Clone(mat_ty->type()), mat_ty->rows());
+        if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
+          auto* vec_ty = ctx.dst->create<sem::Vector>(ctx.Clone(mat_ty->type()),
+                                                      mat_ty->rows());
           Symbol store = StoreFunc(ctx, insert_after, buf_ty, vec_ty);
           for (uint32_t i = 0; i < mat_ty->columns(); i++) {
             auto* offset =
@@ -505,7 +505,7 @@ struct State {
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
-        } else if (auto* str_ty = el_ty->As<type::StructType>()) {
+        } else if (auto* str_ty = el_ty->As<sem::StructType>()) {
           auto& sem = ctx.src->Sem();
           auto* str = sem.Get(str_ty);
           for (auto* member : str->Members()) {
@@ -518,7 +518,7 @@ struct State {
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
-        } else if (auto* arr_ty = el_ty->As<type::ArrayType>()) {
+        } else if (auto* arr_ty = el_ty->As<sem::ArrayType>()) {
           auto& sem = ctx.src->Sem();
           auto* arr = sem.Get(arr_ty);
           for (uint32_t i = 0; i < arr_ty->size(); i++) {
@@ -647,7 +647,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
       if (auto* swizzle = accessor_sem->As<sem::Swizzle>()) {
         if (swizzle->Indices().size() == 1) {
           if (auto access = state.TakeAccess(accessor->structure())) {
-            auto* vec_ty = access.type->As<type::Vector>();
+            auto* vec_ty = access.type->As<sem::Vector>();
             auto offset =
                 Mul(ScalarSize(vec_ty->type()), swizzle->Indices()[0]);
             state.AddAccesss(
@@ -660,7 +660,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
         }
       } else {
         if (auto access = state.TakeAccess(accessor->structure())) {
-          auto* str_ty = access.type->As<type::StructType>();
+          auto* str_ty = access.type->As<sem::StructType>();
           auto* member =
               sem.Get(str_ty)->FindMember(accessor->member()->symbol());
           auto offset = member->Offset();
@@ -678,7 +678,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     if (auto* accessor = node->As<ast::ArrayAccessorExpression>()) {
       if (auto access = state.TakeAccess(accessor->array())) {
         // X[Y]
-        if (auto* arr_ty = access.type->As<type::ArrayType>()) {
+        if (auto* arr_ty = access.type->As<sem::ArrayType>()) {
           auto stride = sem.Get(arr_ty)->Stride();
           auto offset = Mul(stride, accessor->idx_expr());
           state.AddAccesss(accessor,
@@ -689,7 +689,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
                            });
           continue;
         }
-        if (auto* vec_ty = access.type->As<type::Vector>()) {
+        if (auto* vec_ty = access.type->As<sem::Vector>()) {
           auto offset = Mul(ScalarSize(vec_ty->type()), accessor->idx_expr());
           state.AddAccesss(accessor,
                            {
@@ -699,9 +699,9 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
                            });
           continue;
         }
-        if (auto* mat_ty = access.type->As<type::Matrix>()) {
+        if (auto* mat_ty = access.type->As<sem::Matrix>()) {
           auto offset = Mul(MatrixColumnStride(mat_ty), accessor->idx_expr());
-          auto* vec_ty = ctx.dst->create<type::Vector>(
+          auto* vec_ty = ctx.dst->create<sem::Vector>(
               ctx.Clone(mat_ty->type()->UnwrapAll()), mat_ty->rows());
           state.AddAccesss(accessor,
                            {

@@ -912,9 +912,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec2_Success_ZeroValue) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec2F32_Success_Scalar) {
@@ -924,9 +924,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec2F32_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec2U32_Success_Scalar) {
@@ -936,9 +936,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec2U32_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::U32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec2I32_Success_Scalar) {
@@ -948,9 +948,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec2I32_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::I32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec2Bool_Success_Scalar) {
@@ -960,9 +960,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec2Bool_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::Bool>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec2_Success_Identity) {
@@ -972,9 +972,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec2_Success_Identity) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
 }
 
 TEST_F(ResolverValidationTest,
@@ -985,9 +985,9 @@ TEST_F(ResolverValidationTest,
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 2u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 2u);
 }
 
 TEST_F(ResolverValidationTest,
@@ -1174,9 +1174,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_ZeroValue) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec3F32_Success_Scalar) {
@@ -1186,9 +1186,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec3F32_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec3U32_Success_Scalar) {
@@ -1198,9 +1198,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec3U32_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::U32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec3I32_Success_Scalar) {
@@ -1210,9 +1210,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec3I32_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::I32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec3Bool_Success_Scalar) {
@@ -1222,9 +1222,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec3Bool_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::Bool>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_Vec2AndScalar) {
@@ -1234,9 +1234,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_Vec2AndScalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_ScalarAndVec2) {
@@ -1246,9 +1246,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_ScalarAndVec2) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_Identity) {
@@ -1258,9 +1258,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec3_Success_Identity) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverValidationTest,
@@ -1271,9 +1271,9 @@ TEST_F(ResolverValidationTest,
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 3u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverValidationTest,
@@ -1528,9 +1528,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ZeroValue) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4F32_Success_Scalar) {
@@ -1540,9 +1540,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4F32_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4U32_Success_Scalar) {
@@ -1552,9 +1552,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4U32_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::U32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::U32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4I32_Success_Scalar) {
@@ -1564,9 +1564,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4I32_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::I32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::I32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4Bool_Success_Scalar) {
@@ -1576,9 +1576,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4Bool_Success_Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::Bool>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::Bool>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Vec2ScalarScalar) {
@@ -1588,9 +1588,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Vec2ScalarScalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ScalarVec2Scalar) {
@@ -1600,9 +1600,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ScalarVec2Scalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ScalarScalarVec2) {
@@ -1612,9 +1612,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ScalarScalarVec2) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Vec2AndVec2) {
@@ -1624,9 +1624,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Vec2AndVec2) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Vec3AndScalar) {
@@ -1636,9 +1636,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Vec3AndScalar) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ScalarAndVec3) {
@@ -1648,9 +1648,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_ScalarAndVec3) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Identity) {
@@ -1660,9 +1660,9 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vec4_Success_Identity) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest,
@@ -1673,9 +1673,9 @@ TEST_F(ResolverValidationTest,
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest,
@@ -1700,9 +1700,9 @@ TEST_F(ResolverValidationTest,
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
   ASSERT_NE(TypeOf(tc), nullptr);
-  ASSERT_TRUE(TypeOf(tc)->Is<type::Vector>());
-  EXPECT_TRUE(TypeOf(tc)->As<type::Vector>()->type()->Is<type::F32>());
-  EXPECT_EQ(TypeOf(tc)->As<type::Vector>()->size(), 4u);
+  ASSERT_TRUE(TypeOf(tc)->Is<sem::Vector>());
+  EXPECT_TRUE(TypeOf(tc)->As<sem::Vector>()->type()->Is<sem::F32>());
+  EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->size(), 4u);
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
@@ -1731,7 +1731,7 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_ElementTypeAlias_Error) {
   auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* vec_type = create<type::Vector>(f32_alias, 2);
+  auto* vec_type = create<sem::Vector>(f32_alias, 2);
 
   // vec2<Float32>(1.0f, 1u)
   auto* tc = create<ast::TypeConstructorExpression>(
@@ -1749,7 +1749,7 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_ElementTypeAlias_Error) {
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vector_ElementTypeAlias_Success) {
   auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* vec_type = create<type::Vector>(f32_alias, 2);
+  auto* vec_type = create<sem::Vector>(f32_alias, 2);
 
   // vec2<Float32>(1.0f, 1.0f)
   auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 34}}, vec_type,
@@ -1762,7 +1762,7 @@ TEST_F(ResolverValidationTest,
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vector_ArgumentElementTypeAlias_Error) {
   auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* vec_type = create<type::Vector>(f32_alias, 2);
+  auto* vec_type = create<sem::Vector>(f32_alias, 2);
 
   // vec3<u32>(vec<Float32>(), 1.0f)
   auto* tc = vec3<u32>(create<ast::TypeConstructorExpression>(
@@ -1779,7 +1779,7 @@ TEST_F(ResolverValidationTest,
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vector_ArgumentElementTypeAlias_Success) {
   auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* vec_type = create<type::Vector>(f32_alias, 2);
+  auto* vec_type = create<sem::Vector>(f32_alias, 2);
 
   // vec3<f32>(vec<Float32>(), 1.0f)
   auto* tc = vec3<f32>(create<ast::TypeConstructorExpression>(
@@ -1811,8 +1811,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooFewArguments) {
   // matNxM<f32>(vecM<f32>(), ...); with N - 1 arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* vec_type = create<type::Vector>(ty.f32(), param.rows);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns - 1; i++) {
@@ -1835,8 +1835,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooManyArguments) {
   // matNxM<f32>(vecM<f32>(), ...); with N + 1 arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* vec_type = create<type::Vector>(ty.f32(), param.rows);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns + 1; i++) {
@@ -1859,7 +1859,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_Error_InvalidArgumentType) {
   // matNxM<f32>(1.0, 1.0, ...); N arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -1888,9 +1888,9 @@ TEST_P(MatrixConstructorTest,
     return;
   }
 
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* valid_vec_type = create<type::Vector>(ty.f32(), param.rows);
-  auto* invalid_vec_type = create<type::Vector>(ty.f32(), param.rows - 1);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* valid_vec_type = create<sem::Vector>(ty.f32(), param.rows);
+  auto* invalid_vec_type = create<sem::Vector>(ty.f32(), param.rows - 1);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns - 1; i++) {
@@ -1924,9 +1924,9 @@ TEST_P(MatrixConstructorTest,
     return;
   }
 
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* valid_vec_type = create<type::Vector>(ty.f32(), param.rows);
-  auto* invalid_vec_type = create<type::Vector>(ty.f32(), param.rows + 1);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* valid_vec_type = create<sem::Vector>(ty.f32(), param.rows);
+  auto* invalid_vec_type = create<sem::Vector>(ty.f32(), param.rows + 1);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns - 1; i++) {
@@ -1954,8 +1954,8 @@ TEST_P(MatrixConstructorTest,
   // matNxM<f32>(vecM<u32>(), ...); with N arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* vec_type = create<type::Vector>(ty.u32(), param.rows);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* vec_type = create<sem::Vector>(ty.u32(), param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -1978,7 +1978,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ZeroValue_Success) {
   // matNxM<f32>();
 
   const auto param = GetParam();
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
   auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 40}},
                                                     matrix_type, ExprList());
   WrapInFunction(tc);
@@ -1990,8 +1990,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_WithArguments_Success) {
   // matNxM<f32>(vecM<f32>(), ...); with N arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* vec_type = create<type::Vector>(ty.f32(), param.rows);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2011,9 +2011,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
 
   const auto param = GetParam();
   auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* matrix_type =
-      create<type::Matrix>(f32_alias, param.rows, param.columns);
-  auto* vec_type = create<type::Vector>(ty.u32(), param.rows);
+  auto* matrix_type = create<sem::Matrix>(f32_alias, param.rows, param.columns);
+  auto* vec_type = create<sem::Vector>(ty.u32(), param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2037,9 +2036,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
 
   const auto param = GetParam();
   auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* matrix_type =
-      create<type::Matrix>(f32_alias, param.rows, param.columns);
-  auto* vec_type = create<type::Vector>(ty.f32(), param.rows);
+  auto* matrix_type = create<sem::Matrix>(f32_alias, param.rows, param.columns);
+  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2069,8 +2067,8 @@ TEST_F(ResolverValidationTest, Expr_MatrixConstructor_ArgumentTypeAlias_Error) {
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
   const auto param = GetParam();
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* vec_type = create<type::Vector>(ty.f32(), param.rows);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
   auto* vec_alias = ty.alias("VectorFloat2", vec_type);
 
   ast::ExpressionList args;
@@ -2088,9 +2086,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
   const auto param = GetParam();
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
   auto* f32_alias = ty.alias("UnsignedInt", ty.u32());
-  auto* vec_type = create<type::Vector>(f32_alias, param.rows);
+  auto* vec_type = create<sem::Vector>(f32_alias, param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2112,9 +2110,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
 TEST_P(MatrixConstructorTest,
        Expr_Constructor_ArgumentElementTypeAlias_Success) {
   const auto param = GetParam();
-  auto* matrix_type = create<type::Matrix>(ty.f32(), param.rows, param.columns);
+  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
   auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* vec_type = create<type::Vector>(f32_alias, param.rows);
+  auto* vec_type = create<sem::Vector>(f32_alias, param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {

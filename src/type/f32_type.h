@@ -20,7 +20,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A float 32 type
 class F32 : public Castable<F32, Type> {
@@ -45,7 +45,7 @@ class F32 : public Castable<F32, Type> {
   F32* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_F32_TYPE_H_

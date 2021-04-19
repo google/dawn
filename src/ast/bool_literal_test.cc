@@ -21,7 +21,7 @@ namespace {
 using BoolLiteralTest = TestHelper;
 
 TEST_F(BoolLiteralTest, True) {
-  type::Bool bool_type;
+  sem::Bool bool_type;
   auto* b = create<BoolLiteral>(&bool_type, true);
   ASSERT_TRUE(b->Is<BoolLiteral>());
   ASSERT_TRUE(b->IsTrue());
@@ -29,7 +29,7 @@ TEST_F(BoolLiteralTest, True) {
 }
 
 TEST_F(BoolLiteralTest, False) {
-  type::Bool bool_type;
+  sem::Bool bool_type;
   auto* b = create<BoolLiteral>(&bool_type, false);
   ASSERT_TRUE(b->Is<BoolLiteral>());
   ASSERT_FALSE(b->IsTrue());
@@ -37,7 +37,7 @@ TEST_F(BoolLiteralTest, False) {
 }
 
 TEST_F(BoolLiteralTest, Is) {
-  type::Bool bool_type;
+  sem::Bool bool_type;
   ast::Literal* l = create<BoolLiteral>(&bool_type, false);
   EXPECT_TRUE(l->Is<BoolLiteral>());
   EXPECT_FALSE(l->Is<SintLiteral>());
@@ -47,7 +47,7 @@ TEST_F(BoolLiteralTest, Is) {
 }
 
 TEST_F(BoolLiteralTest, ToStr) {
-  type::Bool bool_type;
+  sem::Bool bool_type;
   auto* t = create<BoolLiteral>(&bool_type, true);
   auto* f = create<BoolLiteral>(&bool_type, false);
 

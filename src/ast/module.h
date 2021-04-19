@@ -67,14 +67,14 @@ class Module : public Castable<Module, Node> {
   /// Adds a constructed type to the Builder.
   /// The type must be an alias or a struct.
   /// @param type the constructed type to add
-  void AddConstructedType(type::Type* type) {
+  void AddConstructedType(sem::Type* type) {
     TINT_ASSERT(type);
     constructed_types_.push_back(type);
     global_declarations_.push_back(type);
   }
 
   /// @returns the constructed types in the translation unit
-  const std::vector<type::Type*>& ConstructedTypes() const {
+  const std::vector<sem::Type*>& ConstructedTypes() const {
     return constructed_types_;
   }
 
@@ -115,7 +115,7 @@ class Module : public Castable<Module, Node> {
 
  private:
   std::vector<Cloneable*> global_declarations_;
-  std::vector<type::Type*> constructed_types_;
+  std::vector<sem::Type*> constructed_types_;
   FunctionList functions_;
   VariableList global_variables_;
 };

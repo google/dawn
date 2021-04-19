@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Pointer);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Pointer);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 Pointer::Pointer(Type* subtype, ast::StorageClass storage_class)
     : subtype_(subtype), storage_class_(storage_class) {}
@@ -50,5 +50,5 @@ Pointer* Pointer::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Pointer>(ty, storage_class_);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

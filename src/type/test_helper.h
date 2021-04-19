@@ -21,7 +21,7 @@
 #include "src/program_builder.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// Helper class for testing
 template <typename BASE>
@@ -43,7 +43,7 @@ using TestHelper = TestHelperBase<testing::Test>;
 template <typename T>
 using TestParamHelper = TestHelperBase<testing::TestWithParam<T>>;
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_TEST_HELPER_H_

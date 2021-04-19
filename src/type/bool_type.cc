@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Bool);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Bool);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 Bool::Bool() = default;
 
@@ -39,5 +39,5 @@ Bool* Bool::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Bool>();
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

@@ -25,7 +25,7 @@ namespace tint {
 class ProgramBuilder;
 class SymbolTable;
 
-namespace type {
+namespace sem {
 
 /// Supported memory layouts for calculating sizes
 enum class MemoryLayout { kUniformBuffer, kStorageBuffer };
@@ -109,7 +109,7 @@ inline ProgramID ProgramIDOf(const Type*) {
   return ProgramID();
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_TYPE_H_

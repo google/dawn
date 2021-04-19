@@ -20,7 +20,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A type alias type. Holds a name and pointer to another type.
 class Alias : public Castable<Alias, Type> {
@@ -57,7 +57,7 @@ class Alias : public Castable<Alias, Type> {
   Type* const subtype_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_ALIAS_TYPE_H_

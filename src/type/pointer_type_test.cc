@@ -17,7 +17,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using PointerTest = TestHelper;
@@ -65,5 +65,5 @@ TEST_F(PointerTest, FriendlyNameWithoutStorageClass) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

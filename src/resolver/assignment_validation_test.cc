@@ -255,12 +255,11 @@ TEST_F(ResolverAssignmentValidationTest, AssignFromPointer_Fail) {
   // var b : [[access(read)]] texture_storage_1d<rgba8unorm>;
   // a = b;
 
-  auto* tex_type = create<type::StorageTexture>(
-      type::TextureDimension::k1d, type::ImageFormat::kRgba8Unorm,
-      type::StorageTexture::SubtypeFor(type::ImageFormat::kRgba8Unorm,
-                                       Types()));
+  auto* tex_type = create<sem::StorageTexture>(
+      sem::TextureDimension::k1d, sem::ImageFormat::kRgba8Unorm,
+      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kRgba8Unorm, Types()));
   auto* tex_ac =
-      create<type::AccessControl>(ast::AccessControl::kReadOnly, tex_type);
+      create<sem::AccessControl>(ast::AccessControl::kReadOnly, tex_type);
 
   auto* var_a = Var("a", tex_ac, ast::StorageClass::kFunction);
   auto* var_b = Var("b", tex_ac, ast::StorageClass::kFunction);

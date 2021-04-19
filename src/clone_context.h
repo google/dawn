@@ -84,7 +84,7 @@ class CloneContext {
   /// Destructor
   ~CloneContext();
 
-  /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
+  /// Clones the Node or sem::Type `a` into the ProgramBuilder #dst if `a` is
   /// not null. If `a` is null, then Clone() returns null. If `a` has been
   /// cloned already by this CloneContext then the same cloned pointer is
   /// returned.
@@ -92,9 +92,9 @@ class CloneContext {
   /// Clone() may use a function registered with ReplaceAll() to create a
   /// transformed version of the object. See ReplaceAll() for more information.
   ///
-  /// The Node or type::Type `a` must be owned by the Program #src.
+  /// The Node or sem::Type `a` must be owned by the Program #src.
   ///
-  /// @param a the `Node` or `type::Type` to clone
+  /// @param a the `Node` or `sem::Type` to clone
   /// @return the cloned node
   template <typename T>
   T* Clone(T* a) {
@@ -144,7 +144,7 @@ class CloneContext {
     return out;
   }
 
-  /// Clones the Node or type::Type `a` into the ProgramBuilder #dst if `a` is
+  /// Clones the Node or sem::Type `a` into the ProgramBuilder #dst if `a` is
   /// not null. If `a` is null, then Clone() returns null. If `a` has been
   /// cloned already by this CloneContext then the same cloned pointer is
   /// returned.
@@ -152,9 +152,9 @@ class CloneContext {
   /// Unlike Clone(), this method does not invoke or use any transformations
   /// registered by ReplaceAll().
   ///
-  /// The Node or type::Type `a` must be owned by the Program #src.
+  /// The Node or sem::Type `a` must be owned by the Program #src.
   ///
-  /// @param a the `Node` or `type::Type` to clone
+  /// @param a the `Node` or `sem::Type` to clone
   /// @return the cloned node
   template <typename T>
   T* CloneWithoutTransform(T* a) {

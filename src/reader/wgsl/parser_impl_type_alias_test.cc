@@ -22,23 +22,23 @@ namespace {
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto p = parser("type a = i32");
 
-  auto* i32 = p->builder().create<type::I32>();
+  auto* i32 = p->builder().create<sem::I32>();
 
   auto t = p->type_alias();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<type::Alias>());
-  auto* alias = t->As<type::Alias>();
-  ASSERT_TRUE(alias->type()->Is<type::I32>());
+  ASSERT_TRUE(t->Is<sem::Alias>());
+  auto* alias = t->As<sem::Alias>();
+  ASSERT_TRUE(alias->type()->Is<sem::I32>());
   ASSERT_EQ(alias->type(), i32);
 }
 
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto p = parser("type a = B");
 
-  type::StructType str(p->builder().Symbols().Get("B"), {});
+  sem::StructType str(p->builder().Symbols().Get("B"), {});
   p->register_constructed("B", &str);
 
   auto t = p->type_alias();
@@ -46,12 +46,12 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<type::Alias>());
-  auto* alias = t->As<type::Alias>();
+  ASSERT_TRUE(t->Is<sem::Alias>());
+  auto* alias = t->As<sem::Alias>();
   EXPECT_EQ(p->builder().Symbols().NameFor(alias->symbol()), "a");
-  ASSERT_TRUE(alias->type()->Is<type::StructType>());
+  ASSERT_TRUE(alias->type()->Is<sem::StructType>());
 
-  auto* s = alias->type()->As<type::StructType>();
+  auto* s = alias->type()->As<sem::StructType>();
   EXPECT_EQ(s->symbol(), p->builder().Symbols().Get("B"));
   EXPECT_EQ(s->symbol(), p->builder().Symbols().Get("B"));
 }

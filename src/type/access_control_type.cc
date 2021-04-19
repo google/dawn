@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::AccessControl);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::AccessControl);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 AccessControl::AccessControl(ast::AccessControl access, Type* subtype)
     : access_(access), subtype_(subtype) {
@@ -71,5 +71,5 @@ AccessControl* AccessControl::Clone(CloneContext* ctx) const {
   return ctx->dst->create<AccessControl>(access_, ty);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

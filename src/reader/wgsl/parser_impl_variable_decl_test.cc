@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
   EXPECT_FALSE(v.errored);
   EXPECT_EQ(v->name, "my_var");
   EXPECT_NE(v->type, nullptr);
-  EXPECT_TRUE(v->type->Is<type::F32>());
+  EXPECT_TRUE(v->type->Is<sem::F32>());
 
   EXPECT_EQ(v->source.range.begin.line, 1u);
   EXPECT_EQ(v->source.range.begin.column, 5u);
@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
   EXPECT_FALSE(v.errored);
   EXPECT_FALSE(p->has_error());
   EXPECT_EQ(v->name, "my_var");
-  EXPECT_TRUE(v->type->Is<type::F32>());
+  EXPECT_TRUE(v->type->Is<sem::F32>());
   EXPECT_EQ(v->storage_class, ast::StorageClass::kPrivate);
 
   EXPECT_EQ(v->source.range.begin.line, 1u);

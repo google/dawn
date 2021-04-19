@@ -27,7 +27,7 @@ Variable::Variable(ProgramID program_id,
                    const Source& source,
                    const Symbol& sym,
                    StorageClass declared_storage_class,
-                   type::Type* declared_type,
+                   sem::Type* declared_type,
                    bool is_const,
                    Expression* constructor,
                    DecorationList decorations)

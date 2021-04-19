@@ -17,7 +17,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using SamplerTest = TestHelper;
@@ -72,5 +72,5 @@ TEST_F(SamplerTest, FriendlyNameComparisonSampler) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

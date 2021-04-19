@@ -32,8 +32,8 @@ TEST_P(WgslUnaryOpTest, Emit) {
   auto params = GetParam();
 
   auto* type = (params.op == ast::UnaryOp::kNot)
-                   ? static_cast<type::Type*>(ty.bool_())
-                   : static_cast<type::Type*>(ty.i32());
+                   ? static_cast<sem::Type*>(ty.bool_())
+                   : static_cast<sem::Type*>(ty.i32());
   Global("expr", type, ast::StorageClass::kPrivate);
 
   auto* op = create<ast::UnaryOpExpression>(params.op, Expr("expr"));

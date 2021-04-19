@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::ExternalTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::ExternalTexture);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 ExternalTexture::ExternalTexture() : Base(TextureDimension::k2d) {}
 
@@ -43,5 +43,5 @@ ExternalTexture* ExternalTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ExternalTexture>();
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

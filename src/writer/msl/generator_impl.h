@@ -63,7 +63,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a constructed
   /// @param ty the constructed type to generate
   /// @returns true if the constructed type was emitted
-  bool EmitConstructedType(const type::Type* ty);
+  bool EmitConstructedType(const sem::Type* ty);
   /// Handles an array accessor expression
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
@@ -195,18 +195,18 @@ class GeneratorImpl : public TextGenerator {
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitType(type::Type* type, const std::string& name);
+  bool EmitType(sem::Type* type, const std::string& name);
   /// Handles generating an MSL-packed storage type.
   /// If the type does not have a packed form, the standard non-packed form is
   /// emitted.
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitPackedType(type::Type* type, const std::string& name);
+  bool EmitPackedType(sem::Type* type, const std::string& name);
   /// Handles generating a struct declaration
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
-  bool EmitStructType(const type::StructType* str);
+  bool EmitStructType(const sem::StructType* str);
   /// Handles emitting a type constructor
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted
@@ -227,7 +227,7 @@ class GeneratorImpl : public TextGenerator {
   /// Emits the zero value for the given type
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
-  bool EmitZeroValue(type::Type* type);
+  bool EmitZeroValue(sem::Type* type);
 
   /// Determines if the function needs the input struct passed to it.
   /// @param func the function to check
@@ -269,7 +269,7 @@ class GeneratorImpl : public TextGenerator {
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  type::Type* TypeOf(ast::Expression* expr) const {
+  sem::Type* TypeOf(ast::Expression* expr) const {
     return program_->TypeOf(expr);
   }
 
@@ -281,7 +281,7 @@ class GeneratorImpl : public TextGenerator {
 
   /// @returns the MSL packed type size and alignment in bytes for the given
   /// type.
-  SizeAndAlign MslPackedTypeSizeAndAlign(type::Type* ty);
+  SizeAndAlign MslPackedTypeSizeAndAlign(sem::Type* ty);
 
   ScopeStack<const sem::Variable*> global_variables_;
   Symbol current_ep_sym_;

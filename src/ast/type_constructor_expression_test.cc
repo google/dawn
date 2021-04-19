@@ -81,7 +81,7 @@ TEST_F(TypeConstructorExpressionTest, Assert_DifferentProgramID_Value) {
 }
 
 TEST_F(TypeConstructorExpressionTest, ToStr) {
-  type::Vector vec(ty.f32(), 3);
+  sem::Vector vec(ty.f32(), 3);
   ExpressionList expr;
   expr.push_back(Expr("expr_1"));
   expr.push_back(Expr("expr_2"));

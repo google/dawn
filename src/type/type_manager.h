@@ -23,13 +23,13 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// The type manager holds all the pointers to the known types.
 class Manager {
  public:
   /// Iterator is the type returned by begin() and end()
-  using Iterator = BlockAllocator<type::Type>::ConstIterator;
+  using Iterator = BlockAllocator<sem::Type>::ConstIterator;
 
   /// Constructor
   Manager();
@@ -80,7 +80,7 @@ class Manager {
 
   /// Returns the type map
   /// @returns the mapping from name string to type.
-  const std::unordered_map<std::string, type::Type*>& types() const {
+  const std::unordered_map<std::string, sem::Type*>& types() const {
     return by_name_;
   }
 
@@ -90,11 +90,11 @@ class Manager {
   Iterator end() const { return types_.Objects().end(); }
 
  private:
-  std::unordered_map<std::string, type::Type*> by_name_;
-  BlockAllocator<type::Type> types_;
+  std::unordered_map<std::string, sem::Type*> by_name_;
+  BlockAllocator<sem::Type> types_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_TYPE_MANAGER_H_

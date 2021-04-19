@@ -19,7 +19,7 @@
 #include "src/type/u32_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 template <typename T>
@@ -79,5 +79,5 @@ TEST_F(TypeManagerTest, WrapDoesntAffectInner) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

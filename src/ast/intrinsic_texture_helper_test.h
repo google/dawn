@@ -182,8 +182,8 @@ struct TextureOverloadCase {
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
                       TextureKind,
-                      type::SamplerKind,
-                      type::TextureDimension,
+                      sem::SamplerKind,
+                      sem::TextureDimension,
                       TextureDataType,
                       const char*,
                       std::function<ExpressionList(ProgramBuilder*)>);
@@ -191,7 +191,7 @@ struct TextureOverloadCase {
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
                       TextureKind,
-                      type::TextureDimension,
+                      sem::TextureDimension,
                       TextureDataType,
                       const char*,
                       std::function<ExpressionList(ProgramBuilder*)>);
@@ -199,8 +199,8 @@ struct TextureOverloadCase {
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
                       AccessControl,
-                      type::ImageFormat,
-                      type::TextureDimension,
+                      sem::ImageFormat,
+                      sem::TextureDimension,
                       TextureDataType,
                       const char*,
                       std::function<ExpressionList(ProgramBuilder*)>);
@@ -215,7 +215,7 @@ struct TextureOverloadCase {
 
   /// @param builder the AST builder used for the test
   /// @returns the vector component type of the texture function return value
-  type::Type* resultVectorComponentType(ProgramBuilder* builder) const;
+  sem::Type* resultVectorComponentType(ProgramBuilder* builder) const;
   /// @param builder the AST builder used for the test
   /// @returns a variable holding the test texture, automatically registered as
   /// a global variable.
@@ -233,15 +233,15 @@ struct TextureOverloadCase {
   TextureKind const texture_kind;
   /// The sampler kind for the sampler parameter
   /// Used only when texture_kind is not kStorage
-  type::SamplerKind const sampler_kind = type::SamplerKind::kSampler;
+  sem::SamplerKind const sampler_kind = sem::SamplerKind::kSampler;
   /// The access control for the storage texture
   /// Used only when texture_kind is kStorage
   AccessControl const access_control = AccessControl::kReadWrite;
   /// The image format for the storage texture
   /// Used only when texture_kind is kStorage
-  type::ImageFormat const image_format = type::ImageFormat::kNone;
+  sem::ImageFormat const image_format = sem::ImageFormat::kNone;
   /// The dimensions of the texture parameter
-  type::TextureDimension const texture_dimension;
+  sem::TextureDimension const texture_dimension;
   /// The data type of the texture parameter
   TextureDataType const texture_data_type;
   /// Name of the function. e.g. `textureSample`, `textureSampleGrad`, etc

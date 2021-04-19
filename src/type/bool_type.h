@@ -26,7 +26,7 @@
 #endif
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A boolean type
 class Bool : public Castable<Bool, Type> {
@@ -51,7 +51,7 @@ class Bool : public Castable<Bool, Type> {
   Bool* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_BOOL_TYPE_H_

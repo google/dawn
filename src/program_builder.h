@@ -124,13 +124,13 @@ class ProgramBuilder {
   ProgramID ID() const { return id_; }
 
   /// @returns a reference to the program's types
-  type::Manager& Types() {
+  sem::Manager& Types() {
     AssertNotMoved();
     return types_;
   }
 
   /// @returns a reference to the program's types
-  const type::Manager& Types() const {
+  const sem::Manager& Types() const {
     AssertNotMoved();
     return types_;
   }
@@ -287,7 +287,7 @@ class ProgramBuilder {
     return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
   }
 
-  /// Creates a new type::Type owned by the ProgramBuilder.
+  /// Creates a new sem::Type owned by the ProgramBuilder.
   /// When the ProgramBuilder is destructed, owned ProgramBuilder and the
   /// returned`Type` will also be destructed.
   /// Types are unique (de-aliased), and so calling create() for the same `T`
@@ -300,9 +300,9 @@ class ProgramBuilder {
   /// @param args the arguments to pass to the type constructor
   /// @returns the de-aliased type pointer
   template <typename T, typename... ARGS>
-  traits::EnableIfIsType<T, type::Type>* create(ARGS&&... args) {
-    static_assert(std::is_base_of<type::Type, T>::value,
-                  "T does not derive from type::Type");
+  traits::EnableIfIsType<T, sem::Type>* create(ARGS&&... args) {
+    static_assert(std::is_base_of<sem::Type, T>::value,
+                  "T does not derive from sem::Type");
     AssertNotMoved();
     return types_.Get<T>(std::forward<ARGS>(args)...);
   }
@@ -324,185 +324,184 @@ class ProgramBuilder {
 
     /// @return the tint AST type for the C type `T`.
     template <typename T>
-    type::Type* Of() const {
+    sem::Type* Of() const {
       return CToAST<T>::get(this);
     }
 
     /// @returns a boolean type
-    type::Bool* bool_() const { return builder->create<type::Bool>(); }
+    sem::Bool* bool_() const { return builder->create<sem::Bool>(); }
 
     /// @returns a f32 type
-    type::F32* f32() const { return builder->create<type::F32>(); }
+    sem::F32* f32() const { return builder->create<sem::F32>(); }
 
     /// @returns a i32 type
-    type::I32* i32() const { return builder->create<type::I32>(); }
+    sem::I32* i32() const { return builder->create<sem::I32>(); }
 
     /// @returns a u32 type
-    type::U32* u32() const { return builder->create<type::U32>(); }
+    sem::U32* u32() const { return builder->create<sem::U32>(); }
 
     /// @returns a void type
-    type::Void* void_() const { return builder->create<type::Void>(); }
+    sem::Void* void_() const { return builder->create<sem::Void>(); }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 2-element vector of `type`.
-    type::Vector* vec2(type::Type* type) const {
-      return builder->create<type::Vector>(type, 2u);
+    sem::Vector* vec2(sem::Type* type) const {
+      return builder->create<sem::Vector>(type, 2u);
     }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 3-element vector of `type`.
-    type::Vector* vec3(type::Type* type) const {
-      return builder->create<type::Vector>(type, 3u);
+    sem::Vector* vec3(sem::Type* type) const {
+      return builder->create<sem::Vector>(type, 3u);
     }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 4-element vector of `type`.
-    type::Type* vec4(type::Type* type) const {
-      return builder->create<type::Vector>(type, 4u);
+    sem::Type* vec4(sem::Type* type) const {
+      return builder->create<sem::Vector>(type, 4u);
     }
 
     /// @return the tint AST type for a 2-element vector of the C type `T`.
     template <typename T>
-    type::Vector* vec2() const {
+    sem::Vector* vec2() const {
       return vec2(Of<T>());
     }
 
     /// @return the tint AST type for a 3-element vector of the C type `T`.
     template <typename T>
-    type::Vector* vec3() const {
+    sem::Vector* vec3() const {
       return vec3(Of<T>());
     }
 
     /// @return the tint AST type for a 4-element vector of the C type `T`.
     template <typename T>
-    type::Type* vec4() const {
+    sem::Type* vec4() const {
       return vec4(Of<T>());
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x3 matrix of `type`.
-    type::Matrix* mat2x2(type::Type* type) const {
-      return builder->create<type::Matrix>(type, 2u, 2u);
+    sem::Matrix* mat2x2(sem::Type* type) const {
+      return builder->create<sem::Matrix>(type, 2u, 2u);
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x3 matrix of `type`.
-    type::Matrix* mat2x3(type::Type* type) const {
-      return builder->create<type::Matrix>(type, 3u, 2u);
+    sem::Matrix* mat2x3(sem::Type* type) const {
+      return builder->create<sem::Matrix>(type, 3u, 2u);
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x4 matrix of `type`.
-    type::Matrix* mat2x4(type::Type* type) const {
-      return builder->create<type::Matrix>(type, 4u, 2u);
+    sem::Matrix* mat2x4(sem::Type* type) const {
+      return builder->create<sem::Matrix>(type, 4u, 2u);
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x2 matrix of `type`.
-    type::Matrix* mat3x2(type::Type* type) const {
-      return builder->create<type::Matrix>(type, 2u, 3u);
+    sem::Matrix* mat3x2(sem::Type* type) const {
+      return builder->create<sem::Matrix>(type, 2u, 3u);
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x3 matrix of `type`.
-    type::Matrix* mat3x3(type::Type* type) const {
-      return builder->create<type::Matrix>(type, 3u, 3u);
+    sem::Matrix* mat3x3(sem::Type* type) const {
+      return builder->create<sem::Matrix>(type, 3u, 3u);
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x4 matrix of `type`.
-    type::Matrix* mat3x4(type::Type* type) const {
-      return builder->create<type::Matrix>(type, 4u, 3u);
+    sem::Matrix* mat3x4(sem::Type* type) const {
+      return builder->create<sem::Matrix>(type, 4u, 3u);
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x2 matrix of `type`.
-    type::Matrix* mat4x2(type::Type* type) const {
-      return builder->create<type::Matrix>(type, 2u, 4u);
+    sem::Matrix* mat4x2(sem::Type* type) const {
+      return builder->create<sem::Matrix>(type, 2u, 4u);
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x3 matrix of `type`.
-    type::Matrix* mat4x3(type::Type* type) const {
-      return builder->create<type::Matrix>(type, 3u, 4u);
+    sem::Matrix* mat4x3(sem::Type* type) const {
+      return builder->create<sem::Matrix>(type, 3u, 4u);
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x4 matrix of `type`.
-    type::Matrix* mat4x4(type::Type* type) const {
-      return builder->create<type::Matrix>(type, 4u, 4u);
+    sem::Matrix* mat4x4(sem::Type* type) const {
+      return builder->create<sem::Matrix>(type, 4u, 4u);
     }
 
     /// @return the tint AST type for a 2x3 matrix of the C type `T`.
     template <typename T>
-    type::Matrix* mat2x2() const {
+    sem::Matrix* mat2x2() const {
       return mat2x2(Of<T>());
     }
 
     /// @return the tint AST type for a 2x3 matrix of the C type `T`.
     template <typename T>
-    type::Matrix* mat2x3() const {
+    sem::Matrix* mat2x3() const {
       return mat2x3(Of<T>());
     }
 
     /// @return the tint AST type for a 2x4 matrix of the C type `T`.
     template <typename T>
-    type::Matrix* mat2x4() const {
+    sem::Matrix* mat2x4() const {
       return mat2x4(Of<T>());
     }
 
     /// @return the tint AST type for a 3x2 matrix of the C type `T`.
     template <typename T>
-    type::Matrix* mat3x2() const {
+    sem::Matrix* mat3x2() const {
       return mat3x2(Of<T>());
     }
 
     /// @return the tint AST type for a 3x3 matrix of the C type `T`.
     template <typename T>
-    type::Matrix* mat3x3() const {
+    sem::Matrix* mat3x3() const {
       return mat3x3(Of<T>());
     }
 
     /// @return the tint AST type for a 3x4 matrix of the C type `T`.
     template <typename T>
-    type::Matrix* mat3x4() const {
+    sem::Matrix* mat3x4() const {
       return mat3x4(Of<T>());
     }
 
     /// @return the tint AST type for a 4x2 matrix of the C type `T`.
     template <typename T>
-    type::Matrix* mat4x2() const {
+    sem::Matrix* mat4x2() const {
       return mat4x2(Of<T>());
     }
 
     /// @return the tint AST type for a 4x3 matrix of the C type `T`.
     template <typename T>
-    type::Matrix* mat4x3() const {
+    sem::Matrix* mat4x3() const {
       return mat4x3(Of<T>());
     }
 
     /// @return the tint AST type for a 4x4 matrix of the C type `T`.
     template <typename T>
-    type::Matrix* mat4x4() const {
+    sem::Matrix* mat4x4() const {
       return mat4x4(Of<T>());
     }
 
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array.
     /// @return the tint AST type for a array of size `n` of type `T`
-    type::ArrayType* array(type::Type* subtype, uint32_t n = 0) const {
-      return builder->create<type::ArrayType>(subtype, n,
-                                              ast::DecorationList{});
+    sem::ArrayType* array(sem::Type* subtype, uint32_t n = 0) const {
+      return builder->create<sem::ArrayType>(subtype, n, ast::DecorationList{});
     }
 
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array.
     /// @param stride the array stride.
     /// @return the tint AST type for a array of size `n` of type `T`
-    type::ArrayType* array(type::Type* subtype,
-                           uint32_t n,
-                           uint32_t stride) const {
-      return builder->create<type::ArrayType>(
+    sem::ArrayType* array(sem::Type* subtype,
+                          uint32_t n,
+                          uint32_t stride) const {
+      return builder->create<sem::ArrayType>(
           subtype, n,
           ast::DecorationList{
               builder->create<ast::StrideDecoration>(stride),
@@ -511,14 +510,14 @@ class ProgramBuilder {
 
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
-    type::ArrayType* array() const {
+    sem::ArrayType* array() const {
       return array(Of<T>(), N);
     }
 
     /// @param stride the array stride
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
-    type::ArrayType* array(uint32_t stride) const {
+    sem::ArrayType* array(uint32_t stride) const {
       return array(Of<T>(), N, stride);
     }
 
@@ -527,33 +526,33 @@ class ProgramBuilder {
     /// @param type the alias type
     /// @returns the alias pointer
     template <typename NAME>
-    type::Alias* alias(NAME&& name, type::Type* type) const {
-      return builder->create<type::Alias>(
-          builder->Sym(std::forward<NAME>(name)), type);
+    sem::Alias* alias(NAME&& name, sem::Type* type) const {
+      return builder->create<sem::Alias>(builder->Sym(std::forward<NAME>(name)),
+                                         type);
     }
 
     /// Creates an access control qualifier type
     /// @param access the access control
     /// @param type the inner type
     /// @returns the access control qualifier type
-    type::AccessControl* access(ast::AccessControl access,
-                                type::Type* type) const {
-      return builder->create<type::AccessControl>(access, type);
+    sem::AccessControl* access(ast::AccessControl access,
+                               sem::Type* type) const {
+      return builder->create<sem::AccessControl>(access, type);
     }
 
     /// @return the tint AST pointer to `type` with the given ast::StorageClass
     /// @param type the type of the pointer
     /// @param storage_class the storage class of the pointer
-    type::Pointer* pointer(type::Type* type,
-                           ast::StorageClass storage_class) const {
-      return builder->create<type::Pointer>(type, storage_class);
+    sem::Pointer* pointer(sem::Type* type,
+                          ast::StorageClass storage_class) const {
+      return builder->create<sem::Pointer>(type, storage_class);
     }
 
     /// @return the tint AST pointer to type `T` with the given
     /// ast::StorageClass.
     /// @param storage_class the storage class of the pointer
     template <typename T>
-    type::Pointer* pointer(ast::StorageClass storage_class) const {
+    sem::Pointer* pointer(ast::StorageClass storage_class) const {
       return pointer(Of<T>(), storage_class);
     }
 
@@ -561,8 +560,8 @@ class ProgramBuilder {
     /// @param impl the struct implementation
     /// @returns a struct pointer
     template <typename NAME>
-    type::StructType* struct_(NAME&& name, ast::Struct* impl) const {
-      return builder->create<type::StructType>(
+    sem::StructType* struct_(NAME&& name, ast::Struct* impl) const {
+      return builder->create<sem::StructType>(
           builder->Sym(std::forward<NAME>(name)), impl);
     }
 
@@ -571,7 +570,7 @@ class ProgramBuilder {
     /// contains a single static `get()` method for obtaining the corresponding
     /// AST type for the C type `T`.
     /// `get()` has the signature:
-    ///    `static type::Type* get(Types* t)`
+    ///    `static sem::Type* get(Types* t)`
     template <typename T>
     struct CToAST {};
 
@@ -733,7 +732,7 @@ class ProgramBuilder {
   /// @return an `ast::TypeConstructorExpression` of `type` constructed with the
   /// values `args`.
   template <typename... ARGS>
-  ast::TypeConstructorExpression* Construct(type::Type* type, ARGS&&... args) {
+  ast::TypeConstructorExpression* Construct(sem::Type* type, ARGS&&... args) {
     return create<ast::TypeConstructorExpression>(
         type, ExprList(std::forward<ARGS>(args)...));
   }
@@ -746,7 +745,7 @@ class ProgramBuilder {
   /// @param elem_value the initial or element value (for vec and mat) to
   /// construct with
   /// @return the constructor expression
-  ast::ConstructorExpression* ConstructValueFilledWith(type::Type* type,
+  ast::ConstructorExpression* ConstructValueFilledWith(sem::Type* type,
                                                        int elem_value = 0);
 
   /// @param args the arguments for the vector constructor
@@ -872,7 +871,7 @@ class ProgramBuilder {
   /// @return an `ast::TypeConstructorExpression` of an array with element type
   /// `subtype`, constructed with the values `args`.
   template <typename... ARGS>
-  ast::TypeConstructorExpression* array(type::Type* subtype,
+  ast::TypeConstructorExpression* array(sem::Type* subtype,
                                         uint32_t n,
                                         ARGS&&... args) {
     return create<ast::TypeConstructorExpression>(
@@ -887,7 +886,7 @@ class ProgramBuilder {
   /// @returns a `ast::Variable` with the given name, storage and type
   template <typename NAME>
   ast::Variable* Var(NAME&& name,
-                     type::Type* type,
+                     sem::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
@@ -905,7 +904,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Var(const Source& source,
                      NAME&& name,
-                     type::Type* type,
+                     sem::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
@@ -920,7 +919,7 @@ class ProgramBuilder {
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Const(NAME&& name,
-                       type::Type* type,
+                       sem::Type* type,
                        ast::Expression* constructor = nullptr,
                        ast::DecorationList decorations = {}) {
     return create<ast::Variable>(Sym(std::forward<NAME>(name)),
@@ -937,7 +936,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Const(const Source& source,
                        NAME&& name,
-                       type::Type* type,
+                       sem::Type* type,
                        ast::Expression* constructor = nullptr,
                        ast::DecorationList decorations = {}) {
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
@@ -951,7 +950,7 @@ class ProgramBuilder {
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Param(NAME&& name,
-                       type::Type* type,
+                       sem::Type* type,
                        ast::DecorationList decorations = {}) {
     return create<ast::Variable>(Sym(std::forward<NAME>(name)),
                                  ast::StorageClass::kNone, type, true, nullptr,
@@ -966,7 +965,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Param(const Source& source,
                        NAME&& name,
-                       type::Type* type,
+                       sem::Type* type,
                        ast::DecorationList decorations = {}) {
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
                                  ast::StorageClass::kNone, type, true, nullptr,
@@ -1127,7 +1126,7 @@ class ProgramBuilder {
   ast::Function* Func(const Source& source,
                       NAME&& name,
                       ast::VariableList params,
-                      type::Type* type,
+                      sem::Type* type,
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
@@ -1151,7 +1150,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Function* Func(NAME&& name,
                       ast::VariableList params,
-                      type::Type* type,
+                      sem::Type* type,
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
@@ -1174,18 +1173,18 @@ class ProgramBuilder {
     return create<ast::ReturnStatement>(Expr(std::forward<EXPR>(val)));
   }
 
-  /// Creates a ast::Struct and type::StructType, registering the
-  /// type::StructType with the AST().ConstructedTypes().
+  /// Creates a ast::Struct and sem::StructType, registering the
+  /// sem::StructType with the AST().ConstructedTypes().
   /// @param source the source information
   /// @param name the struct name
   /// @param members the struct members
   /// @param decorations the optional struct decorations
   /// @returns the struct type
   template <typename NAME>
-  type::StructType* Structure(const Source& source,
-                              NAME&& name,
-                              ast::StructMemberList members,
-                              ast::DecorationList decorations = {}) {
+  sem::StructType* Structure(const Source& source,
+                             NAME&& name,
+                             ast::StructMemberList members,
+                             ast::DecorationList decorations = {}) {
     auto* impl =
         create<ast::Struct>(source, std::move(members), std::move(decorations));
     auto* type = ty.struct_(Sym(std::forward<NAME>(name)), impl);
@@ -1193,16 +1192,16 @@ class ProgramBuilder {
     return type;
   }
 
-  /// Creates a ast::Struct and type::StructType, registering the
-  /// type::StructType with the AST().ConstructedTypes().
+  /// Creates a ast::Struct and sem::StructType, registering the
+  /// sem::StructType with the AST().ConstructedTypes().
   /// @param name the struct name
   /// @param members the struct members
   /// @param decorations the optional struct decorations
   /// @returns the struct type
   template <typename NAME>
-  type::StructType* Structure(NAME&& name,
-                              ast::StructMemberList members,
-                              ast::DecorationList decorations = {}) {
+  sem::StructType* Structure(NAME&& name,
+                             ast::StructMemberList members,
+                             ast::DecorationList decorations = {}) {
     auto* impl =
         create<ast::Struct>(std::move(members), std::move(decorations));
     auto* type = ty.struct_(Sym(std::forward<NAME>(name)), impl);
@@ -1219,7 +1218,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::StructMember* Member(const Source& source,
                             NAME&& name,
-                            type::Type* type,
+                            sem::Type* type,
                             ast::DecorationList decorations = {}) {
     return create<ast::StructMember>(source, Sym(std::forward<NAME>(name)),
                                      type, std::move(decorations));
@@ -1232,7 +1231,7 @@ class ProgramBuilder {
   /// @returns the struct member pointer
   template <typename NAME>
   ast::StructMember* Member(NAME&& name,
-                            type::Type* type,
+                            sem::Type* type,
                             ast::DecorationList decorations = {}) {
     return create<ast::StructMember>(source_, Sym(std::forward<NAME>(name)),
                                      type, std::move(decorations));
@@ -1244,7 +1243,7 @@ class ProgramBuilder {
   /// @param type the struct member type
   /// @returns the struct member pointer
   template <typename NAME>
-  ast::StructMember* Member(uint32_t offset, NAME&& name, type::Type* type) {
+  ast::StructMember* Member(uint32_t offset, NAME&& name, sem::Type* type) {
     return create<ast::StructMember>(
         source_, Sym(std::forward<NAME>(name)), type,
         ast::DecorationList{
@@ -1417,7 +1416,7 @@ class ProgramBuilder {
   /// @param expr the AST expression
   /// @return the resolved semantic type for the expression, or nullptr if the
   /// expression has no resolved type.
-  type::Type* TypeOf(ast::Expression* expr) const;
+  sem::Type* TypeOf(ast::Expression* expr) const;
 
   /// Wraps the ast::Literal in a statement. This is used by tests that
   /// construct a partial AST and require the Resolver to reach these
@@ -1465,7 +1464,7 @@ class ProgramBuilder {
 
  private:
   ProgramID id_;
-  type::Manager types_;
+  sem::Manager types_;
   ASTNodeAllocator ast_nodes_;
   SemNodeAllocator sem_nodes_;
   ast::Module* ast_;
@@ -1489,31 +1488,31 @@ class ProgramBuilder {
 // Various template specializations for ProgramBuilder::TypesBuilder::CToAST.
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<ProgramBuilder::i32> {
-  static type::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
     return t->i32();
   }
 };
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<ProgramBuilder::u32> {
-  static type::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
     return t->u32();
   }
 };
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<ProgramBuilder::f32> {
-  static type::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
     return t->f32();
   }
 };
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<bool> {
-  static type::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
     return t->bool_();
   }
 };
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<void> {
-  static type::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
     return t->void_();
   }
 };

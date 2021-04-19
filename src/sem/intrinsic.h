@@ -174,7 +174,7 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   /// @param return_type the return type for the intrinsic call
   /// @param parameters the parameters for the intrinsic overload
   Intrinsic(IntrinsicType type,
-            type::Type* return_type,
+            sem::Type* return_type,
             const ParameterList& parameters);
 
   /// Destructor

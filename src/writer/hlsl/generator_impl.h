@@ -36,9 +36,9 @@
 namespace tint {
 
 // Forward declarations
-namespace type {
+namespace sem {
 class AccessControl;
-}  // namespace type
+}  // namespace sem
 namespace sem {
 class Call;
 class Intrinsic;
@@ -63,7 +63,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output stream
   /// @param ty the constructed type to generate
   /// @returns true if the constructed type was emitted
-  bool EmitConstructedType(std::ostream& out, const type::Type* ty);
+  bool EmitConstructedType(std::ostream& out, const sem::Type* ty);
   /// Handles an array accessor expression
   /// @param pre the preamble for the expression stream
   /// @param out the output of the expression stream
@@ -290,7 +290,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
   bool EmitType(std::ostream& out,
-                type::Type* type,
+                sem::Type* type,
                 ast::StorageClass storage_class,
                 const std::string& name);
   /// Handles generating a structure declaration
@@ -299,7 +299,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param name the struct name
   /// @returns true if the struct is emitted
   bool EmitStructType(std::ostream& out,
-                      const type::StructType* ty,
+                      const sem::StructType* ty,
                       const std::string& name);
   /// Handles a unary op expression
   /// @param pre the preamble for the expression stream
@@ -313,7 +313,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output stream
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
-  bool EmitZeroValue(std::ostream& out, type::Type* type);
+  bool EmitZeroValue(std::ostream& out, sem::Type* type);
   /// Handles generating a variable
   /// @param out the output stream
   /// @param var the variable to generate
@@ -375,7 +375,7 @@ class GeneratorImpl : public TextGenerator {
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  type::Type* TypeOf(ast::Expression* expr) const {
+  sem::Type* TypeOf(ast::Expression* expr) const {
     return builder_.TypeOf(expr);
   }
 

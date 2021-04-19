@@ -24,7 +24,7 @@ namespace ast {
 StructMember::StructMember(ProgramID program_id,
                            const Source& source,
                            const Symbol& sym,
-                           type::Type* type,
+                           sem::Type* type,
                            DecorationList decorations)
     : Base(program_id, source),
       symbol_(sym),

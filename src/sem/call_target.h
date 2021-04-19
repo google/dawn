@@ -23,9 +23,9 @@
 namespace tint {
 
 // Forward declarations
-namespace type {
+namespace sem {
 class Type;
-}  // namespace type
+}  // namespace sem
 
 namespace sem {
 
@@ -50,7 +50,7 @@ struct Parameter {
   };
 
   /// Parameter type
-  type::Type* const type;
+  sem::Type* const type;
   /// Parameter usage
   Usage const usage = Usage::kNone;
 };
@@ -80,10 +80,10 @@ class CallTarget : public Castable<CallTarget, Node> {
   /// Constructor
   /// @param return_type the return type of the call target
   /// @param parameters the parameters for the call target
-  CallTarget(type::Type* return_type, const ParameterList& parameters);
+  CallTarget(sem::Type* return_type, const ParameterList& parameters);
 
   /// @return the return type of the call target
-  type::Type* ReturnType() const { return return_type_; }
+  sem::Type* ReturnType() const { return return_type_; }
 
   /// Destructor
   ~CallTarget() override;
@@ -92,7 +92,7 @@ class CallTarget : public Castable<CallTarget, Node> {
   const ParameterList& Parameters() const { return parameters_; }
 
  private:
-  type::Type* const return_type_;
+  sem::Type* const return_type_;
   ParameterList const parameters_;
 };
 

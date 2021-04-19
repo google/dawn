@@ -20,7 +20,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A void type
 class Void : public Castable<Void, Type> {
@@ -45,7 +45,7 @@ class Void : public Castable<Void, Type> {
   Void* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_VOID_TYPE_H_

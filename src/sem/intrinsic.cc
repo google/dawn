@@ -195,7 +195,7 @@ bool IsBarrierIntrinsic(IntrinsicType i) {
 }
 
 Intrinsic::Intrinsic(IntrinsicType type,
-                     type::Type* return_type,
+                     sem::Type* return_type,
                      const ParameterList& parameters)
     : Base(return_type, parameters), type_(type) {}
 

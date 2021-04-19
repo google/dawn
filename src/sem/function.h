@@ -142,7 +142,7 @@ class Function : public Castable<Function, CallTarget> {
   bool HasAncestorEntryPoint(Symbol sym) const;
 
  private:
-  VariableBindings ReferencedSamplerVariablesImpl(type::SamplerKind kind) const;
+  VariableBindings ReferencedSamplerVariablesImpl(sem::SamplerKind kind) const;
   VariableBindings ReferencedSampledTextureVariablesImpl(
       bool multisampled) const;
 

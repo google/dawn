@@ -27,12 +27,11 @@ namespace ast {
 class IdentifierExpression;
 class Variable;
 }  // namespace ast
-namespace type {
-class Type;
-}  // namespace type
 
 namespace sem {
 
+// Forward declarations
+class Type;
 class VariableUser;
 
 /// Variable holds the semantic information for variables.
@@ -43,7 +42,7 @@ class Variable : public Castable<Variable, Node> {
   /// @param type the variable type
   /// @param storage_class the variable storage class
   Variable(const ast::Variable* declaration,
-           type::Type* type,
+           sem::Type* type,
            ast::StorageClass storage_class);
 
   /// Destructor
@@ -53,10 +52,10 @@ class Variable : public Castable<Variable, Node> {
   const ast::Variable* Declaration() const { return declaration_; }
 
   /// @returns the canonical type for the variable
-  type::Type* Type() const { return type_; }
+  sem::Type* Type() const { return type_; }
 
   /// @returns the AST node's type. May be nullptr.
-  type::Type* DeclaredType() const;
+  sem::Type* DeclaredType() const;
 
   /// @returns the storage class for the variable
   ast::StorageClass StorageClass() const { return storage_class_; }
@@ -69,7 +68,7 @@ class Variable : public Castable<Variable, Node> {
 
  private:
   const ast::Variable* const declaration_;
-  type::Type* const type_;
+  sem::Type* const type_;
   ast::StorageClass const storage_class_;
   std::vector<const VariableUser*> users_;
 };
@@ -84,7 +83,7 @@ class VariableUser : public Castable<VariableUser, Expression> {
   /// @param statement the statement that owns this expression
   /// @param variable the semantic variable
   VariableUser(ast::IdentifierExpression* declaration,
-               type::Type* type,
+               sem::Type* type,
                Statement* statement,
                sem::Variable* variable);
 

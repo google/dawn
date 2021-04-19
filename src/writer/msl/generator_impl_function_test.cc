@@ -314,7 +314,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),
@@ -360,7 +360,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadOnly, s);
+  sem::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),
@@ -620,7 +620,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),
@@ -678,7 +678,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadOnly, s);
+  sem::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),
@@ -818,7 +818,7 @@ TEST_F(MslGeneratorImplTest,
   auto* s = Structure("Data", {Member("d", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("data", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{create<ast::BindingDecoration>(0),

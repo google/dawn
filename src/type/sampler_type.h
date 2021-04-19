@@ -20,7 +20,7 @@
 #include "src/type/type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// The different kinds of samplers
 enum class SamplerKind {
@@ -64,7 +64,7 @@ class Sampler : public Castable<Sampler, Type> {
   SamplerKind const kind_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_SAMPLER_TYPE_H_

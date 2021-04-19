@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 namespace tint {
 namespace sem {
 
-CallTarget::CallTarget(type::Type* return_type, const ParameterList& parameters)
+CallTarget::CallTarget(sem::Type* return_type, const ParameterList& parameters)
     : return_type_(return_type), parameters_(parameters) {}
 
 CallTarget::~CallTarget() = default;

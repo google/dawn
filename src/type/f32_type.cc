@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::F32);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::F32);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 F32::F32() = default;
 
@@ -39,5 +39,5 @@ F32* F32::Clone(CloneContext* ctx) const {
   return ctx->dst->create<F32>();
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

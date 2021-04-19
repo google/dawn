@@ -33,14 +33,14 @@ class TypeConstructorExpression
   /// @param values the constructor values
   TypeConstructorExpression(ProgramID program_id,
                             const Source& source,
-                            type::Type* type,
+                            sem::Type* type,
                             ExpressionList values);
   /// Move constructor
   TypeConstructorExpression(TypeConstructorExpression&&);
   ~TypeConstructorExpression() override;
 
   /// @returns the type
-  type::Type* type() const { return type_; }
+  sem::Type* type() const { return type_; }
   /// @returns the values
   const ExpressionList& values() const { return values_; }
 
@@ -61,7 +61,7 @@ class TypeConstructorExpression
  private:
   TypeConstructorExpression(const TypeConstructorExpression&) = delete;
 
-  type::Type* const type_;
+  sem::Type* const type_;
   ExpressionList const values_;
 };
 

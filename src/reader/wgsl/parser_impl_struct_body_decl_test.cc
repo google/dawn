@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   auto p = parser("{a : i32;}");
 
   auto& builder = p->builder();
-  auto* i32 = builder.create<type::I32>();
+  auto* i32 = builder.create<sem::I32>();
 
   auto m = p->expect_struct_body_decl();
   ASSERT_FALSE(p->has_error());

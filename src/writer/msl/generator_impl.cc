@@ -145,17 +145,17 @@ bool GeneratorImpl::Generate() {
   return true;
 }
 
-bool GeneratorImpl::EmitConstructedType(const type::Type* ty) {
+bool GeneratorImpl::EmitConstructedType(const sem::Type* ty) {
   make_indent();
 
-  if (auto* alias = ty->As<type::Alias>()) {
+  if (auto* alias = ty->As<sem::Alias>()) {
     out_ << "typedef ";
     if (!EmitType(alias->type(), "")) {
       return false;
     }
     out_ << " " << program_->Symbols().NameFor(alias->symbol()) << ";"
          << std::endl;
-  } else if (auto* str = ty->As<type::StructType>()) {
+  } else if (auto* str = ty->As<sem::StructType>()) {
     if (!EmitStructType(str)) {
       return false;
     }
@@ -490,27 +490,27 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     return false;
   }
 
-  auto* texture_type = TypeOf(texture)->UnwrapAll()->As<type::Texture>();
+  auto* texture_type = TypeOf(texture)->UnwrapAll()->As<sem::Texture>();
 
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kTextureDimensions: {
       std::vector<const char*> dims;
       switch (texture_type->dim()) {
-        case type::TextureDimension::kNone:
+        case sem::TextureDimension::kNone:
           diagnostics_.add_error("texture dimension is kNone");
           return false;
-        case type::TextureDimension::k1d:
+        case sem::TextureDimension::k1d:
           dims = {"width"};
           break;
-        case type::TextureDimension::k2d:
-        case type::TextureDimension::k2dArray:
+        case sem::TextureDimension::k2d:
+        case sem::TextureDimension::k2dArray:
           dims = {"width", "height"};
           break;
-        case type::TextureDimension::k3d:
+        case sem::TextureDimension::k3d:
           dims = {"width", "height", "depth"};
           break;
-        case type::TextureDimension::kCube:
-        case type::TextureDimension::kCubeArray:
+        case sem::TextureDimension::kCube:
+        case sem::TextureDimension::kCubeArray:
           // width == height == depth for cubes
           // See https://github.com/gpuweb/gpuweb/issues/1345
           dims = {"width", "height", "height"};
@@ -645,17 +645,17 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
   if (auto* ddx = arg(Usage::kDdx)) {
     auto dim = texture_type->dim();
     switch (dim) {
-      case type::TextureDimension::k2d:
-      case type::TextureDimension::k2dArray:
+      case sem::TextureDimension::k2d:
+      case sem::TextureDimension::k2dArray:
         maybe_write_comma();
         out_ << "gradient2d(";
         break;
-      case type::TextureDimension::k3d:
+      case sem::TextureDimension::k3d:
         maybe_write_comma();
         out_ << "gradient3d(";
         break;
-      case type::TextureDimension::kCube:
-      case type::TextureDimension::kCubeArray:
+      case sem::TextureDimension::kCube:
+      case sem::TextureDimension::kCubeArray:
         maybe_write_comma();
         out_ << "gradientcube(";
         break;
@@ -886,7 +886,7 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
-  if (expr->type()->IsAnyOf<type::ArrayType, type::StructType>()) {
+  if (expr->type()->IsAnyOf<sem::ArrayType, sem::StructType>()) {
     out_ << "{";
   } else {
     if (!EmitType(expr->type(), "")) {
@@ -915,7 +915,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  if (expr->type()->IsAnyOf<type::ArrayType, type::StructType>()) {
+  if (expr->type()->IsAnyOf<sem::ArrayType, sem::StructType>()) {
     out_ << "}";
   } else {
     out_ << ")";
@@ -923,26 +923,26 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitZeroValue(type::Type* type) {
-  if (type->Is<type::Bool>()) {
+bool GeneratorImpl::EmitZeroValue(sem::Type* type) {
+  if (type->Is<sem::Bool>()) {
     out_ << "false";
-  } else if (type->Is<type::F32>()) {
+  } else if (type->Is<sem::F32>()) {
     out_ << "0.0f";
-  } else if (type->Is<type::I32>()) {
+  } else if (type->Is<sem::I32>()) {
     out_ << "0";
-  } else if (type->Is<type::U32>()) {
+  } else if (type->Is<sem::U32>()) {
     out_ << "0u";
-  } else if (auto* vec = type->As<type::Vector>()) {
+  } else if (auto* vec = type->As<sem::Vector>()) {
     return EmitZeroValue(vec->type());
-  } else if (auto* mat = type->As<type::Matrix>()) {
+  } else if (auto* mat = type->As<sem::Matrix>()) {
     return EmitZeroValue(mat->type());
-  } else if (auto* arr = type->As<type::ArrayType>()) {
+  } else if (auto* arr = type->As<sem::ArrayType>()) {
     out_ << "{";
     if (!EmitZeroValue(arr->type())) {
       return false;
     }
     out_ << "}";
-  } else if (type->As<type::StructType>()) {
+  } else if (type->As<sem::StructType>()) {
     out_ << "{}";
   } else {
     diagnostics_.add_error("Invalid type for zero emission: " +
@@ -1296,7 +1296,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
-    auto* ac = var->Type()->As<type::AccessControl>();
+    auto* ac = var->Type()->As<sem::AccessControl>();
     if (ac == nullptr) {
       diagnostics_.add_error(
           "invalid type for storage buffer, expected access control");
@@ -1325,7 +1325,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
       return false;
     }
     // Array name is output as part of the type
-    if (!type->Is<type::ArrayType>()) {
+    if (!type->Is<sem::ArrayType>()) {
       out_ << " " << program_->Symbols().NameFor(v->symbol());
     }
   }
@@ -1395,7 +1395,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   bool has_out_data = out_data != ep_sym_to_out_data_.end();
   if (has_out_data) {
     // TODO(crbug.com/tint/697): Remove this.
-    if (!func->return_type()->Is<type::Void>()) {
+    if (!func->return_type()->Is<sem::Void>()) {
       TINT_ICE(diagnostics_) << "Mixing module-scope variables and return "
                                 "types for shader outputs";
     }
@@ -1429,7 +1429,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
     out_ << " " << program_->Symbols().NameFor(var->symbol());
 
-    if (type->Is<type::StructType>()) {
+    if (type->Is<sem::StructType>()) {
       out_ << " [[stage_in]]";
     } else {
       auto& decos = var->decorations();
@@ -1524,7 +1524,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     // auto* set = data.second.set;
 
-    auto* ac = var->Type()->As<type::AccessControl>();
+    auto* ac = var->Type()->As<sem::AccessControl>();
     if (ac == nullptr) {
       diagnostics_.add_error(
           "invalid type for storage buffer, expected access control");
@@ -1891,9 +1891,9 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
+bool GeneratorImpl::EmitType(sem::Type* type, const std::string& name) {
   std::string access_str = "";
-  if (auto* ac = type->As<type::AccessControl>()) {
+  if (auto* ac = type->As<sem::AccessControl>()) {
     if (ac->access_control() == ast::AccessControl::kReadOnly) {
       access_str = "read";
     } else if (ac->access_control() == ast::AccessControl::kWriteOnly) {
@@ -1906,12 +1906,12 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
     type = ac->type();
   }
 
-  if (auto* alias = type->As<type::Alias>()) {
+  if (auto* alias = type->As<sem::Alias>()) {
     out_ << program_->Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = type->As<type::ArrayType>()) {
-    type::Type* base_type = ary;
+  } else if (auto* ary = type->As<sem::ArrayType>()) {
+    sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (auto* arr = base_type->As<type::ArrayType>()) {
+    while (auto* arr = base_type->As<sem::ArrayType>()) {
       if (arr->IsRuntimeArray()) {
         sizes.push_back(1);
       } else {
@@ -1928,76 +1928,76 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
     for (uint32_t size : sizes) {
       out_ << "[" << size << "]";
     }
-  } else if (type->Is<type::Bool>()) {
+  } else if (type->Is<sem::Bool>()) {
     out_ << "bool";
-  } else if (type->Is<type::F32>()) {
+  } else if (type->Is<sem::F32>()) {
     out_ << "float";
-  } else if (type->Is<type::I32>()) {
+  } else if (type->Is<sem::I32>()) {
     out_ << "int";
-  } else if (auto* mat = type->As<type::Matrix>()) {
+  } else if (auto* mat = type->As<sem::Matrix>()) {
     if (!EmitType(mat->type(), "")) {
       return false;
     }
     out_ << mat->columns() << "x" << mat->rows();
-  } else if (auto* ptr = type->As<type::Pointer>()) {
+  } else if (auto* ptr = type->As<sem::Pointer>()) {
     // TODO(dsinclair): Storage class?
     if (!EmitType(ptr->type(), "")) {
       return false;
     }
     out_ << "*";
-  } else if (type->Is<type::Sampler>()) {
+  } else if (type->Is<sem::Sampler>()) {
     out_ << "sampler";
-  } else if (auto* str = type->As<type::StructType>()) {
+  } else if (auto* str = type->As<sem::StructType>()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
     out_ << program_->Symbols().NameFor(str->symbol());
-  } else if (auto* tex = type->As<type::Texture>()) {
-    if (tex->Is<type::DepthTexture>()) {
+  } else if (auto* tex = type->As<sem::Texture>()) {
+    if (tex->Is<sem::DepthTexture>()) {
       out_ << "depth";
     } else {
       out_ << "texture";
     }
 
     switch (tex->dim()) {
-      case type::TextureDimension::k1d:
+      case sem::TextureDimension::k1d:
         out_ << "1d";
         break;
-      case type::TextureDimension::k2d:
+      case sem::TextureDimension::k2d:
         out_ << "2d";
         break;
-      case type::TextureDimension::k2dArray:
+      case sem::TextureDimension::k2dArray:
         out_ << "2d_array";
         break;
-      case type::TextureDimension::k3d:
+      case sem::TextureDimension::k3d:
         out_ << "3d";
         break;
-      case type::TextureDimension::kCube:
+      case sem::TextureDimension::kCube:
         out_ << "cube";
         break;
-      case type::TextureDimension::kCubeArray:
+      case sem::TextureDimension::kCubeArray:
         out_ << "cube_array";
         break;
       default:
         diagnostics_.add_error("Invalid texture dimensions");
         return false;
     }
-    if (tex->Is<type::MultisampledTexture>()) {
+    if (tex->Is<sem::MultisampledTexture>()) {
       out_ << "_ms";
     }
     out_ << "<";
-    if (tex->Is<type::DepthTexture>()) {
+    if (tex->Is<sem::DepthTexture>()) {
       out_ << "float, access::sample";
-    } else if (auto* storage = tex->As<type::StorageTexture>()) {
+    } else if (auto* storage = tex->As<sem::StorageTexture>()) {
       if (!EmitType(storage->type(), "")) {
         return false;
       }
       out_ << ", access::" << access_str;
-    } else if (auto* ms = tex->As<type::MultisampledTexture>()) {
+    } else if (auto* ms = tex->As<sem::MultisampledTexture>()) {
       if (!EmitType(ms->type(), "")) {
         return false;
       }
       out_ << ", access::sample";
-    } else if (auto* sampled = tex->As<type::SampledTexture>()) {
+    } else if (auto* sampled = tex->As<sem::SampledTexture>()) {
       if (!EmitType(sampled->type(), "")) {
         return false;
       }
@@ -2008,14 +2008,14 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
     }
     out_ << ">";
 
-  } else if (type->Is<type::U32>()) {
+  } else if (type->Is<sem::U32>()) {
     out_ << "uint";
-  } else if (auto* vec = type->As<type::Vector>()) {
+  } else if (auto* vec = type->As<sem::Vector>()) {
     if (!EmitType(vec->type(), "")) {
       return false;
     }
     out_ << vec->size();
-  } else if (type->Is<type::Void>()) {
+  } else if (type->Is<sem::Void>()) {
     out_ << "void";
   } else {
     diagnostics_.add_error("unknown type in EmitType: " + type->type_name());
@@ -2025,12 +2025,12 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
   return true;
 }
 
-bool GeneratorImpl::EmitPackedType(type::Type* type, const std::string& name) {
-  if (auto* alias = type->As<type::Alias>()) {
+bool GeneratorImpl::EmitPackedType(sem::Type* type, const std::string& name) {
+  if (auto* alias = type->As<sem::Alias>()) {
     return EmitPackedType(alias->type(), name);
   }
 
-  if (auto* vec = type->As<type::Vector>()) {
+  if (auto* vec = type->As<sem::Vector>()) {
     out_ << "packed_";
     if (!EmitType(vec->type(), "")) {
       return false;
@@ -2042,7 +2042,7 @@ bool GeneratorImpl::EmitPackedType(type::Type* type, const std::string& name) {
   return EmitType(type, name);
 }
 
-bool GeneratorImpl::EmitStructType(const type::StructType* str) {
+bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::Decoration::kNone) {
   // }
@@ -2120,7 +2120,7 @@ bool GeneratorImpl::EmitStructType(const type::StructType* str) {
     auto* ty = mem->type()->UnwrapAliasIfNeeded();
 
     // Array member name will be output with the type
-    if (!ty->Is<type::ArrayType>()) {
+    if (!ty->Is<sem::ArrayType>()) {
       out_ << " " << program_->Symbols().NameFor(mem->symbol());
     }
 
@@ -2222,7 +2222,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
   if (!EmitType(var->Type(), program_->Symbols().NameFor(decl->symbol()))) {
     return false;
   }
-  if (!var->Type()->Is<type::ArrayType>()) {
+  if (!var->Type()->Is<sem::ArrayType>()) {
     out_ << " " << program_->Symbols().NameFor(decl->symbol());
   }
 
@@ -2265,7 +2265,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   if (!EmitType(type, program_->Symbols().NameFor(var->symbol()))) {
     return false;
   }
-  if (!type->Is<type::ArrayType>()) {
+  if (!type->Is<sem::ArrayType>()) {
     out_ << " " << program_->Symbols().NameFor(var->symbol());
   }
 
@@ -2283,32 +2283,32 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
 }
 
 GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
-    type::Type* ty) {
+    sem::Type* ty) {
   ty = ty->UnwrapAliasIfNeeded();
 
-  if (ty->IsAnyOf<type::U32, type::I32, type::F32>()) {
+  if (ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
     // 2.1 Scalar Data Types
     return {4, 4};
   }
 
-  if (auto* vec = ty->As<type::Vector>()) {
+  if (auto* vec = ty->As<sem::Vector>()) {
     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
     // 2.2.3 Packed Vector Types
     auto num_els = vec->size();
     auto* el_ty = vec->type()->UnwrapAll();
-    if (el_ty->IsAnyOf<type::U32, type::I32, type::F32>()) {
+    if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
       return SizeAndAlign{num_els * 4, 4};
     }
   }
 
-  if (auto* mat = ty->As<type::Matrix>()) {
+  if (auto* mat = ty->As<sem::Matrix>()) {
     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
     // 2.3 Matrix Data Types
     auto cols = mat->columns();
     auto rows = mat->rows();
     auto* el_ty = mat->type()->UnwrapAll();
-    if (el_ty->IsAnyOf<type::U32, type::I32, type::F32>()) {
+    if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
       static constexpr SizeAndAlign table[] = {
           /* float2x2 */ {16, 8},
           /* float2x3 */ {32, 16},
@@ -2326,7 +2326,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     }
   }
 
-  if (auto* arr = ty->As<type::ArrayType>()) {
+  if (auto* arr = ty->As<sem::ArrayType>()) {
     auto* sem = program_->Sem().Get(arr);
     if (!sem) {
       TINT_ICE(diagnostics_) << "Array missing semantic info";
@@ -2345,7 +2345,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     return SizeAndAlign{el_size_align.size * num_els, el_size_align.align};
   }
 
-  if (auto* str = ty->As<type::StructType>()) {
+  if (auto* str = ty->As<sem::StructType>()) {
     // TODO(crbug.com/tint/650): There's an assumption here that MSL's default
     // structure size and alignment matches WGSL's. We need to confirm this.
     auto* sem = program_->Sem().Get(str);

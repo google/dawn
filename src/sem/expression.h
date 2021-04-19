@@ -19,16 +19,10 @@
 #include "src/sem/node.h"
 
 namespace tint {
-
+namespace sem {
 // Forward declarations
-namespace sem {
 class Statement;
-}  // namespace sem
-namespace type {
 class Type;
-}  // namespace type
-
-namespace sem {
 
 /// Expression holds the semantic information for expression nodes.
 class Expression : public Castable<Expression, Node> {
@@ -38,11 +32,11 @@ class Expression : public Castable<Expression, Node> {
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
   Expression(ast::Expression* declaration,
-             type::Type* type,
+             sem::Type* type,
              Statement* statement);
 
   /// @return the resolved type of the expression
-  type::Type* Type() const { return type_; }
+  sem::Type* Type() const { return type_; }
 
   /// @return the statement that owns this expression
   Statement* Stmt() const { return statement_; }
@@ -52,7 +46,7 @@ class Expression : public Castable<Expression, Node> {
 
  private:
   ast::Expression* declaration_;
-  type::Type* const type_;
+  sem::Type* const type_;
   Statement* const statement_;
 };
 

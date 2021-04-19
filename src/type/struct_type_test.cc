@@ -17,7 +17,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using StructTypeTest = TestHelper;
@@ -34,7 +34,7 @@ TEST_F(StructTypeTest, Is) {
   auto* impl =
       create<ast::Struct>(ast::StructMemberList{}, ast::DecorationList{});
   auto* s = ty.struct_("S", impl);
-  type::Type* ty = s;
+  sem::Type* ty = s;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
   EXPECT_FALSE(ty->Is<ArrayType>());
@@ -65,5 +65,5 @@ TEST_F(StructTypeTest, FriendlyName) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

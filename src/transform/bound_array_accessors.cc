@@ -42,8 +42,8 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
   auto& diags = ctx->dst->Diagnostics();
 
   auto* ret_type = ctx->src->Sem().Get(expr->array())->Type()->UnwrapAll();
-  if (!ret_type->Is<type::ArrayType>() && !ret_type->Is<type::Matrix>() &&
-      !ret_type->Is<type::Vector>()) {
+  if (!ret_type->Is<sem::ArrayType>() && !ret_type->Is<sem::Matrix>() &&
+      !ret_type->Is<sem::Vector>()) {
     return nullptr;
   }
 
@@ -51,15 +51,15 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
   using u32 = ProgramBuilder::u32;
 
   uint32_t size = 0;
-  bool is_vec = ret_type->Is<type::Vector>();
-  bool is_arr = ret_type->Is<type::ArrayType>();
+  bool is_vec = ret_type->Is<sem::Vector>();
+  bool is_arr = ret_type->Is<sem::ArrayType>();
   if (is_vec || is_arr) {
-    size = is_vec ? ret_type->As<type::Vector>()->size()
-                  : ret_type->As<type::ArrayType>()->size();
+    size = is_vec ? ret_type->As<sem::Vector>()->size()
+                  : ret_type->As<sem::ArrayType>()->size();
   } else {
     // The row accessor would have been an embedded array accessor and already
     // handled, so we just need to do columns here.
-    size = ret_type->As<type::Matrix>()->columns();
+    size = ret_type->As<sem::Matrix>()->columns();
   }
 
   auto* const old_idx = expr->idx_expr();

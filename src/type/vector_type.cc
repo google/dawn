@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Vector);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Vector);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 Vector::Vector(Type* subtype, uint32_t size) : subtype_(subtype), size_(size) {
   TINT_ASSERT(size_ > 1);
@@ -46,5 +46,5 @@ Vector* Vector::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Vector>(ty, size_);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

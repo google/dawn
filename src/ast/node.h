@@ -24,7 +24,7 @@ namespace tint {
 
 // Forward declarations
 class CloneContext;
-namespace type {
+namespace sem {
 class Type;
 }
 namespace sem {

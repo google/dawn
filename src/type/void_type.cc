@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Void);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Void);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 Void::Void() = default;
 
@@ -39,5 +39,5 @@ Void* Void::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Void>();
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

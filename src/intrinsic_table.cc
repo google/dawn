@@ -77,7 +77,7 @@ class Matcher {
     /// The map of open types. A new entry is assigned the first time an
     /// OpenType is encountered. If the OpenType is encountered again, a
     /// comparison is made to see if the type is consistent.
-    std::unordered_map<OpenType, type::Type*> open_types;
+    std::unordered_map<OpenType, sem::Type*> open_types;
     /// The map of open numbers. A new entry is assigned the first time an
     /// OpenNumber is encountered. If the OpenNumber is encountered again, a
     /// comparison is made to see if the number is consistent.
@@ -91,7 +91,7 @@ class Matcher {
   /// Aliases are automatically unwrapped before matching.
   /// Match may add to, or compare against the open types and numbers in state.
   /// @returns true if the argument type is as expected.
-  bool Match(MatchState& state, type::Type* argument_type) const {
+  bool Match(MatchState& state, sem::Type* argument_type) const {
     auto* unwrapped = argument_type->UnwrapAliasIfNeeded();
     return MatchUnwrapped(state, unwrapped);
   }
@@ -110,12 +110,12 @@ class Matcher {
   /// Match may add to, or compare against the open types and numbers in state.
   /// @returns true if the argument type is as expected.
   virtual bool MatchUnwrapped(MatchState& state,
-                              type::Type* argument_type) const = 0;
+                              sem::Type* argument_type) const = 0;
 
   /// Checks `state.open_type` to see if the OpenType `t` is equal to the type
   /// `ty`. If `state.open_type` does not contain an entry for `t`, then `ty`
   /// is added and returns true.
-  bool MatchOpenType(MatchState& state, OpenType t, type::Type* ty) const {
+  bool MatchOpenType(MatchState& state, OpenType t, sem::Type* ty) const {
     auto it = state.open_types.find(t);
     if (it != state.open_types.end()) {
       return it->second == ty;
@@ -145,9 +145,9 @@ class Builder : public Matcher {
   /// Final matched state passed to Build()
   struct BuildState {
     /// The type manager used to construct new types
-    type::Manager& ty_mgr;
+    sem::Manager& ty_mgr;
     /// The final resolved list of open types
-    std::unordered_map<OpenType, type::Type*> const open_types;
+    std::unordered_map<OpenType, sem::Type*> const open_types;
     /// The final resolved list of open numbers
     std::unordered_map<OpenNumber, uint32_t> const open_numbers;
   };
@@ -156,7 +156,7 @@ class Builder : public Matcher {
   ~Builder() override = default;
 
   /// Constructs and returns the expected type
-  virtual type::Type* Build(BuildState& state) const = 0;
+  virtual sem::Type* Build(BuildState& state) const = 0;
 };
 
 /// OpenTypeBuilder is a Matcher / Builder for an open type (T etc).
@@ -166,11 +166,11 @@ class OpenTypeBuilder : public Builder {
  public:
   explicit OpenTypeBuilder(OpenType open_type) : open_type_(open_type) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
     return MatchOpenType(state, open_type_, ty);
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     return state.open_types.at(open_type_);
   }
 
@@ -183,11 +183,11 @@ class OpenTypeBuilder : public Builder {
 /// VoidBuilder is a Matcher / Builder for void types.
 class VoidBuilder : public Builder {
  public:
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
-    return ty->Is<type::Void>();
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
+    return ty->Is<sem::Void>();
   }
-  type::Type* Build(BuildState& state) const override {
-    return state.ty_mgr.Get<type::Void>();
+  sem::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<sem::Void>();
   }
   std::string str() const override { return "void"; }
 };
@@ -195,11 +195,11 @@ class VoidBuilder : public Builder {
 /// BoolBuilder is a Matcher / Builder for boolean types.
 class BoolBuilder : public Builder {
  public:
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
-    return ty->Is<type::Bool>();
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
+    return ty->Is<sem::Bool>();
   }
-  type::Type* Build(BuildState& state) const override {
-    return state.ty_mgr.Get<type::Bool>();
+  sem::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<sem::Bool>();
   }
   std::string str() const override { return "bool"; }
 };
@@ -207,11 +207,11 @@ class BoolBuilder : public Builder {
 /// F32Builder is a Matcher / Builder for f32 types.
 class F32Builder : public Builder {
  public:
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
-    return ty->Is<type::F32>();
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
+    return ty->Is<sem::F32>();
   }
-  type::Type* Build(BuildState& state) const override {
-    return state.ty_mgr.Get<type::F32>();
+  sem::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<sem::F32>();
   }
   std::string str() const override { return "f32"; }
 };
@@ -219,11 +219,11 @@ class F32Builder : public Builder {
 /// U32Builder is a Matcher / Builder for u32 types.
 class U32Builder : public Builder {
  public:
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
-    return ty->Is<type::U32>();
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
+    return ty->Is<sem::U32>();
   }
-  type::Type* Build(BuildState& state) const override {
-    return state.ty_mgr.Get<type::U32>();
+  sem::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<sem::U32>();
   }
   std::string str() const override { return "u32"; }
 };
@@ -231,11 +231,11 @@ class U32Builder : public Builder {
 /// I32Builder is a Matcher / Builder for i32 types.
 class I32Builder : public Builder {
  public:
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
-    return ty->Is<type::I32>();
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
+    return ty->Is<sem::I32>();
   }
-  type::Type* Build(BuildState& state) const override {
-    return state.ty_mgr.Get<type::I32>();
+  sem::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<sem::I32>();
   }
   std::string str() const override { return "i32"; }
 };
@@ -243,8 +243,8 @@ class I32Builder : public Builder {
 /// IU32Matcher is a Matcher for i32 or u32 types.
 class IU32Matcher : public Matcher {
  public:
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
-    return ty->Is<type::I32>() || ty->Is<type::U32>();
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
+    return ty->Is<sem::I32>() || ty->Is<sem::U32>();
   }
   std::string str() const override { return "i32 or u32"; }
 };
@@ -252,8 +252,8 @@ class IU32Matcher : public Matcher {
 /// FIU32Matcher is a Matcher for f32, i32 or u32 types.
 class FIU32Matcher : public Matcher {
  public:
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
-    return ty->Is<type::F32>() || ty->Is<type::I32>() || ty->Is<type::U32>();
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
+    return ty->Is<sem::F32>() || ty->Is<sem::I32>() || ty->Is<sem::U32>();
   }
   std::string str() const override { return "f32, i32 or u32"; }
 };
@@ -261,7 +261,7 @@ class FIU32Matcher : public Matcher {
 /// ScalarMatcher is a Matcher for f32, i32, u32 or boolean types.
 class ScalarMatcher : public Matcher {
  public:
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
     return ty->is_scalar();
   }
   std::string str() const override { return "scalar"; }
@@ -274,8 +274,8 @@ class OpenSizeVecBuilder : public Builder {
   OpenSizeVecBuilder(OpenNumber size, Builder* element_builder)
       : size_(size), element_builder_(element_builder) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* vec = ty->As<type::Vector>()) {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
+    if (auto* vec = ty->As<sem::Vector>()) {
       if (!MatchOpenNumber(state, size_, vec->size())) {
         return false;
       }
@@ -284,10 +284,10 @@ class OpenSizeVecBuilder : public Builder {
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     auto* el = element_builder_->Build(state);
     auto n = state.open_numbers.at(size_);
-    return state.ty_mgr.Get<type::Vector>(el, n);
+    return state.ty_mgr.Get<sem::Vector>(el, n);
   }
 
   std::string str() const override {
@@ -306,8 +306,8 @@ class VecBuilder : public Builder {
   VecBuilder(uint32_t size, Builder* element_builder)
       : size_(size), element_builder_(element_builder) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* vec = ty->As<type::Vector>()) {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
+    if (auto* vec = ty->As<sem::Vector>()) {
       if (vec->size() == size_) {
         return element_builder_->Match(state, vec->type());
       }
@@ -315,9 +315,9 @@ class VecBuilder : public Builder {
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     auto* el = element_builder_->Build(state);
-    return state.ty_mgr.Get<type::Vector>(el, size_);
+    return state.ty_mgr.Get<sem::Vector>(el, size_);
   }
 
   std::string str() const override {
@@ -338,8 +338,8 @@ class OpenSizeMatBuilder : public Builder {
                      Builder* element_builder)
       : columns_(columns), rows_(rows), element_builder_(element_builder) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* mat = ty->As<type::Matrix>()) {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
+    if (auto* mat = ty->As<sem::Matrix>()) {
       if (!MatchOpenNumber(state, columns_, mat->columns())) {
         return false;
       }
@@ -351,11 +351,11 @@ class OpenSizeMatBuilder : public Builder {
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     auto* el = element_builder_->Build(state);
     auto columns = state.open_numbers.at(columns_);
     auto rows = state.open_numbers.at(rows_);
-    return state.ty_mgr.Get<type::Matrix>(el, rows, columns);
+    return state.ty_mgr.Get<sem::Matrix>(el, rows, columns);
   }
 
   std::string str() const override {
@@ -375,16 +375,16 @@ class PtrBuilder : public Builder {
   explicit PtrBuilder(Builder* element_builder)
       : element_builder_(element_builder) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* ptr = ty->As<type::Pointer>()) {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
+    if (auto* ptr = ty->As<sem::Pointer>()) {
       return element_builder_->Match(state, ptr->type());
     }
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     auto* el = element_builder_->Build(state);
-    return state.ty_mgr.Get<type::Pointer>(el, ast::StorageClass::kNone);
+    return state.ty_mgr.Get<sem::Pointer>(el, ast::StorageClass::kNone);
   }
 
   bool ExpectsPointer() const override { return true; }
@@ -403,8 +403,8 @@ class ArrayBuilder : public Builder {
   explicit ArrayBuilder(Builder* element_builder)
       : element_builder_(element_builder) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* arr = ty->As<type::ArrayType>()) {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
+    if (auto* arr = ty->As<sem::ArrayType>()) {
       if (arr->size() == 0) {
         return element_builder_->Match(state, arr->type());
       }
@@ -412,9 +412,9 @@ class ArrayBuilder : public Builder {
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     auto* el = element_builder_->Build(state);
-    return state.ty_mgr.Get<type::ArrayType>(el, 0, ast::DecorationList{});
+    return state.ty_mgr.Get<sem::ArrayType>(el, 0, ast::DecorationList{});
   }
 
   std::string str() const override {
@@ -428,12 +428,12 @@ class ArrayBuilder : public Builder {
 /// SampledTextureBuilder is a Matcher / Builder for sampled texture types.
 class SampledTextureBuilder : public Builder {
  public:
-  explicit SampledTextureBuilder(type::TextureDimension dimensions,
+  explicit SampledTextureBuilder(sem::TextureDimension dimensions,
                                  Builder* type_builder)
       : dimensions_(dimensions), type_builder_(type_builder) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* tex = ty->As<type::SampledTexture>()) {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
+    if (auto* tex = ty->As<sem::SampledTexture>()) {
       if (tex->dim() == dimensions_) {
         return type_builder_->Match(state, tex->type());
       }
@@ -441,9 +441,9 @@ class SampledTextureBuilder : public Builder {
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     auto* type = type_builder_->Build(state);
-    return state.ty_mgr.Get<type::SampledTexture>(dimensions_, type);
+    return state.ty_mgr.Get<sem::SampledTexture>(dimensions_, type);
   }
 
   std::string str() const override {
@@ -453,7 +453,7 @@ class SampledTextureBuilder : public Builder {
   }
 
  private:
-  type::TextureDimension const dimensions_;
+  sem::TextureDimension const dimensions_;
   Builder* const type_builder_;
 };
 
@@ -461,12 +461,12 @@ class SampledTextureBuilder : public Builder {
 /// types.
 class MultisampledTextureBuilder : public Builder {
  public:
-  explicit MultisampledTextureBuilder(type::TextureDimension dimensions,
+  explicit MultisampledTextureBuilder(sem::TextureDimension dimensions,
                                       Builder* type_builder)
       : dimensions_(dimensions), type_builder_(type_builder) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* tex = ty->As<type::MultisampledTexture>()) {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
+    if (auto* tex = ty->As<sem::MultisampledTexture>()) {
       if (tex->dim() == dimensions_) {
         return type_builder_->Match(state, tex->type());
       }
@@ -474,9 +474,9 @@ class MultisampledTextureBuilder : public Builder {
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     auto* type = type_builder_->Build(state);
-    return state.ty_mgr.Get<type::MultisampledTexture>(dimensions_, type);
+    return state.ty_mgr.Get<sem::MultisampledTexture>(dimensions_, type);
   }
 
   std::string str() const override {
@@ -487,25 +487,25 @@ class MultisampledTextureBuilder : public Builder {
   }
 
  private:
-  type::TextureDimension const dimensions_;
+  sem::TextureDimension const dimensions_;
   Builder* const type_builder_;
 };
 
 /// DepthTextureBuilder is a Matcher / Builder for depth texture types.
 class DepthTextureBuilder : public Builder {
  public:
-  explicit DepthTextureBuilder(type::TextureDimension dimensions)
+  explicit DepthTextureBuilder(sem::TextureDimension dimensions)
       : dimensions_(dimensions) {}
 
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
-    if (auto* tex = ty->As<type::DepthTexture>()) {
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
+    if (auto* tex = ty->As<sem::DepthTexture>()) {
       return tex->dim() == dimensions_;
     }
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
-    return state.ty_mgr.Get<type::DepthTexture>(dimensions_);
+  sem::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<sem::DepthTexture>(dimensions_);
   }
 
   std::string str() const override {
@@ -515,7 +515,7 @@ class DepthTextureBuilder : public Builder {
   }
 
  private:
-  type::TextureDimension const dimensions_;
+  sem::TextureDimension const dimensions_;
 };
 
 /// StorageTextureBuilder is a Matcher / Builder for storage texture types of
@@ -523,15 +523,15 @@ class DepthTextureBuilder : public Builder {
 class StorageTextureBuilder : public Builder {
  public:
   explicit StorageTextureBuilder(
-      type::TextureDimension dimensions,
+      sem::TextureDimension dimensions,
       OpenNumber texel_format,  // a.k.a "image format"
       OpenType channel_format)  // a.k.a "storage subtype"
       : dimensions_(dimensions),
         texel_format_(texel_format),
         channel_format_(channel_format) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* ac = ty->As<type::AccessControl>()) {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
+    if (auto* ac = ty->As<sem::AccessControl>()) {
       // If we have an storage texture argument that's got an access control
       // type wrapped around it, accept it. Signatures that don't include an
       // access control imply any access. Example:
@@ -539,7 +539,7 @@ class StorageTextureBuilder : public Builder {
       ty = ac->type();
     }
 
-    if (auto* tex = ty->As<type::StorageTexture>()) {
+    if (auto* tex = ty->As<sem::StorageTexture>()) {
       if (MatchOpenNumber(state, texel_format_,
                           static_cast<uint32_t>(tex->image_format()))) {
         if (MatchOpenType(state, channel_format_, tex->type())) {
@@ -550,12 +550,12 @@ class StorageTextureBuilder : public Builder {
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     auto texel_format =
-        static_cast<type::ImageFormat>(state.open_numbers.at(texel_format_));
+        static_cast<sem::ImageFormat>(state.open_numbers.at(texel_format_));
     auto* channel_format = state.open_types.at(channel_format_);
-    return state.ty_mgr.Get<type::StorageTexture>(dimensions_, texel_format,
-                                                  channel_format);
+    return state.ty_mgr.Get<sem::StorageTexture>(dimensions_, texel_format,
+                                                 channel_format);
   }
 
   std::string str() const override {
@@ -565,7 +565,7 @@ class StorageTextureBuilder : public Builder {
   }
 
  private:
-  type::TextureDimension const dimensions_;
+  sem::TextureDimension const dimensions_;
   OpenNumber const texel_format_;
   OpenType const channel_format_;
 };
@@ -573,31 +573,31 @@ class StorageTextureBuilder : public Builder {
 /// SamplerBuilder is a Matcher / Builder for sampler types of the given kind.
 class SamplerBuilder : public Builder {
  public:
-  explicit SamplerBuilder(type::SamplerKind kind) : kind_(kind) {}
+  explicit SamplerBuilder(sem::SamplerKind kind) : kind_(kind) {}
 
-  bool MatchUnwrapped(MatchState&, type::Type* ty) const override {
-    if (auto* sampler = ty->As<type::Sampler>()) {
+  bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
+    if (auto* sampler = ty->As<sem::Sampler>()) {
       return sampler->kind() == kind_;
     }
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
-    return state.ty_mgr.Get<type::Sampler>(kind_);
+  sem::Type* Build(BuildState& state) const override {
+    return state.ty_mgr.Get<sem::Sampler>(kind_);
   }
 
   std::string str() const override {
     switch (kind_) {
-      case type::SamplerKind::kSampler:
+      case sem::SamplerKind::kSampler:
         return "sampler";
-      case type::SamplerKind::kComparisonSampler:
+      case sem::SamplerKind::kComparisonSampler:
         return "sampler_comparison";
     }
     return "sampler";
   }
 
  private:
-  type::SamplerKind const kind_;
+  sem::SamplerKind const kind_;
 };
 
 /// AccessControlBuilder is a Matcher / Builder for AccessControl types
@@ -607,8 +607,8 @@ class AccessControlBuilder : public Builder {
                                 Builder* type)
       : access_control_(access_control), type_(type) {}
 
-  bool MatchUnwrapped(MatchState& state, type::Type* ty) const override {
-    if (auto* ac = ty->As<type::AccessControl>()) {
+  bool MatchUnwrapped(MatchState& state, sem::Type* ty) const override {
+    if (auto* ac = ty->As<sem::AccessControl>()) {
       if (ac->access_control() == access_control_) {
         return type_->Match(state, ty);
       }
@@ -616,9 +616,9 @@ class AccessControlBuilder : public Builder {
     return false;
   }
 
-  type::Type* Build(BuildState& state) const override {
+  sem::Type* Build(BuildState& state) const override {
     auto* ty = type_->Build(state);
-    return state.ty_mgr.Get<type::AccessControl>(access_control_, ty);
+    return state.ty_mgr.Get<sem::AccessControl>(access_control_, ty);
   }
 
   std::string str() const override {
@@ -639,7 +639,7 @@ class Impl : public IntrinsicTable {
 
   IntrinsicTable::Result Lookup(ProgramBuilder& builder,
                                 sem::IntrinsicType type,
-                                const std::vector<type::Type*>& args,
+                                const std::vector<sem::Type*>& args,
                                 const Source& source) const override;
 
   /// Holds the information about a single overload parameter used for matching
@@ -661,7 +661,7 @@ class Impl : public IntrinsicTable {
     /// (positive representing a greater match), and nullptr is returned.
     sem::Intrinsic* Match(ProgramBuilder& builder,
                           sem::IntrinsicType type,
-                          const std::vector<type::Type*>& arg_types,
+                          const std::vector<sem::Type*>& arg_types,
                           diag::List& diagnostics,
                           int& match_score) const;
 
@@ -732,13 +732,13 @@ class Impl : public IntrinsicTable {
 
   /// @returns a Matcher / Builder that matches a sampled texture with the given
   /// dimensions and type
-  Builder* sampled_texture(type::TextureDimension dimensions, Builder* type) {
+  Builder* sampled_texture(sem::TextureDimension dimensions, Builder* type) {
     return matcher_allocator_.Create<SampledTextureBuilder>(dimensions, type);
   }
 
   /// @returns a Matcher / Builder that matches a multisampled texture with the
   /// given dimensions and type
-  Builder* multisampled_texture(type::TextureDimension dimensions,
+  Builder* multisampled_texture(sem::TextureDimension dimensions,
                                 Builder* type) {
     return matcher_allocator_.Create<MultisampledTextureBuilder>(dimensions,
                                                                  type);
@@ -746,13 +746,13 @@ class Impl : public IntrinsicTable {
 
   /// @returns a Matcher / Builder that matches a depth texture with the
   /// given dimensions
-  Builder* depth_texture(type::TextureDimension dimensions) {
+  Builder* depth_texture(sem::TextureDimension dimensions) {
     return matcher_allocator_.Create<DepthTextureBuilder>(dimensions);
   }
 
   /// @returns a Matcher / Builder that matches a storage texture of the given
   /// format with the given dimensions
-  Builder* storage_texture(type::TextureDimension dimensions,
+  Builder* storage_texture(sem::TextureDimension dimensions,
                            OpenNumber texel_format,
                            OpenType channel_format) {
     return matcher_allocator_.Create<StorageTextureBuilder>(
@@ -760,7 +760,7 @@ class Impl : public IntrinsicTable {
   }
 
   /// @returns a Matcher / Builder that matches a sampler type
-  Builder* sampler(type::SamplerKind kind) {
+  Builder* sampler(sem::SamplerKind kind) {
     return matcher_allocator_.Create<SamplerBuilder>(kind);
   }
 
@@ -796,7 +796,7 @@ class Impl : public IntrinsicTable {
 
 Impl::Impl() {
   using I = sem::IntrinsicType;
-  using Dim = type::TextureDimension;
+  using Dim = sem::TextureDimension;
 
   auto* void_ = &matchers_.void_;      // void
   auto* bool_ = &matchers_.bool_;      // bool
@@ -837,12 +837,12 @@ Impl::Impl() {
   //   I     - is an alias to sem::IntrinsicType.
   //           I::kIsInf is shorthand for sem::IntrinsicType::kIsInf.
   //   bool_ - is a pointer to a pre-constructed BoolBuilder which matches and
-  //           builds type::Bool types.
+  //           builds sem::Bool types.
   //   {f32} - is the list of parameter Builders for the overload.
   //           Builders are a type of Matcher that can also build the the type.
   //           All Builders are Matchers, not all Matchers are Builders.
   //   f32     is a pointer to a pre-constructed F32Builder which matches and
-  //           builds type::F32 types.
+  //           builds sem::F32 types.
   //
   // This call registers the overload for the `isInf(f32) -> bool` intrinsic.
   //
@@ -851,8 +851,8 @@ Impl::Impl() {
   //
   //   (1) Overload::Match() begins by attempting to match the argument types
   //       from left to right.
-  //       F32Builder::Match() is called with the type::F32 argument type.
-  //       F32Builder (only) matches the type::F32 type, so F32Builder::Match()
+  //       F32Builder::Match() is called with the sem::F32 argument type.
+  //       F32Builder (only) matches the sem::F32 type, so F32Builder::Match()
   //       returns true.
   //   (2) All the parameters have had their Matcher::Match() methods return
   //       true, there are no open-types (more about these later), so the
@@ -1114,9 +1114,9 @@ Impl::Impl() {
       access_control(ast::AccessControl::kWriteOnly, tex_storage_2d_array_FT);
   auto* tex_storage_wo_3d_FT =
       access_control(ast::AccessControl::kWriteOnly, tex_storage_3d_FT);
-  auto* sampler = this->sampler(type::SamplerKind::kSampler);
+  auto* sampler = this->sampler(sem::SamplerKind::kSampler);
   auto* sampler_comparison =
-      this->sampler(type::SamplerKind::kComparisonSampler);
+      this->sampler(sem::SamplerKind::kComparisonSampler);
   auto t = sem::Parameter::Usage::kTexture;
   auto s = sem::Parameter::Usage::kSampler;
   auto coords = sem::Parameter::Usage::kCoords;
@@ -1300,7 +1300,7 @@ std::string str(const Impl::Overload& overload) {
 /// types.
 std::string CallSignature(ProgramBuilder& builder,
                           sem::IntrinsicType type,
-                          const std::vector<type::Type*>& args) {
+                          const std::vector<sem::Type*>& args) {
   std::stringstream ss;
   ss << sem::str(type) << "(";
   {
@@ -1320,7 +1320,7 @@ std::string CallSignature(ProgramBuilder& builder,
 
 IntrinsicTable::Result Impl::Lookup(ProgramBuilder& builder,
                                     sem::IntrinsicType type,
-                                    const std::vector<type::Type*>& args,
+                                    const std::vector<sem::Type*>& args,
                                     const Source& source) const {
   diag::List diagnostics;
   // Candidate holds information about a mismatched overload that could be what
@@ -1370,7 +1370,7 @@ IntrinsicTable::Result Impl::Lookup(ProgramBuilder& builder,
 
 sem::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
                                       sem::IntrinsicType intrinsic,
-                                      const std::vector<type::Type*>& args,
+                                      const std::vector<sem::Type*>& args,
                                       diag::List& diagnostics,
                                       int& match_score) const {
   if (type != intrinsic) {
@@ -1397,7 +1397,7 @@ sem::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
     }
 
     auto* arg_ty = args[i];
-    if (auto* ptr = arg_ty->As<type::Pointer>()) {
+    if (auto* ptr = arg_ty->As<sem::Pointer>()) {
       if (!parameters[i].matcher->ExpectsPointer()) {
         // Argument is a pointer, but the matcher isn't expecting one.
         // Perform an implicit dereference.

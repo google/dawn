@@ -20,7 +20,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A multisampled texture type.
 class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
@@ -53,7 +53,7 @@ class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
   Type* const type_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_MULTISAMPLED_TEXTURE_TYPE_H_

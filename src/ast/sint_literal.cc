@@ -23,7 +23,7 @@ namespace ast {
 
 SintLiteral::SintLiteral(ProgramID program_id,
                          const Source& source,
-                         type::Type* type,
+                         sem::Type* type,
                          int32_t value)
     : Base(program_id, source, type, static_cast<uint32_t>(value)) {}
 

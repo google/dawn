@@ -173,7 +173,7 @@ ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            std::string n,
                                            ast::VariableList p,
-                                           type::Type* ret_ty,
+                                           sem::Type* ret_ty,
                                            ast::DecorationList ret_decos)
     : source(src),
       name(n),
@@ -243,11 +243,11 @@ Token ParserImpl::peek() {
 }
 
 void ParserImpl::register_constructed(const std::string& name,
-                                      type::Type* type) {
+                                      sem::Type* type) {
   registered_constructs_[name] = type;
 }
 
-type::Type* ParserImpl::get_constructed(const std::string& name) {
+sem::Type* ParserImpl::get_constructed(const std::string& name) {
   if (registered_constructs_.find(name) == registered_constructs_.end()) {
     return nullptr;
   }
@@ -507,7 +507,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
 //  | sampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | storage_texture_type LESS_THAN image_storage_type GREATER_THAN
-Maybe<type::Type*> ParserImpl::texture_sampler_types() {
+Maybe<sem::Type*> ParserImpl::texture_sampler_types() {
   auto type = sampler_type();
   if (type.matched)
     return type;
@@ -524,7 +524,7 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return builder_.create<type::SampledTexture>(dim.value, subtype.value);
+    return builder_.create<sem::SampledTexture>(dim.value, subtype.value);
   }
 
   auto ms_dim = multisampled_texture_type();
@@ -535,8 +535,8 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return builder_.create<type::MultisampledTexture>(ms_dim.value,
-                                                      subtype.value);
+    return builder_.create<sem::MultisampledTexture>(ms_dim.value,
+                                                     subtype.value);
   }
 
   auto storage = storage_texture_type();
@@ -550,9 +550,9 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
       return Failure::kErrored;
 
     auto* subtype =
-        type::StorageTexture::SubtypeFor(format.value, builder_.Types());
-    return builder_.create<type::StorageTexture>(storage.value, format.value,
-                                                 subtype);
+        sem::StorageTexture::SubtypeFor(format.value, builder_.Types());
+    return builder_.create<sem::StorageTexture>(storage.value, format.value,
+                                                subtype);
   }
 
   return Failure::kNoMatch;
@@ -561,13 +561,12 @@ Maybe<type::Type*> ParserImpl::texture_sampler_types() {
 // sampler_type
 //  : SAMPLER
 //  | SAMPLER_COMPARISON
-Maybe<type::Type*> ParserImpl::sampler_type() {
+Maybe<sem::Type*> ParserImpl::sampler_type() {
   if (match(Token::Type::kSampler))
-    return builder_.create<type::Sampler>(type::SamplerKind::kSampler);
+    return builder_.create<sem::Sampler>(sem::SamplerKind::kSampler);
 
   if (match(Token::Type::kComparisonSampler))
-    return builder_.create<type::Sampler>(
-        type::SamplerKind::kComparisonSampler);
+    return builder_.create<sem::Sampler>(sem::SamplerKind::kComparisonSampler);
 
   return Failure::kNoMatch;
 }
@@ -579,33 +578,33 @@ Maybe<type::Type*> ParserImpl::sampler_type() {
 //  | TEXTURE_SAMPLED_3D
 //  | TEXTURE_SAMPLED_CUBE
 //  | TEXTURE_SAMPLED_CUBE_ARRAY
-Maybe<type::TextureDimension> ParserImpl::sampled_texture_type() {
+Maybe<sem::TextureDimension> ParserImpl::sampled_texture_type() {
   if (match(Token::Type::kTextureSampled1d))
-    return type::TextureDimension::k1d;
+    return sem::TextureDimension::k1d;
 
   if (match(Token::Type::kTextureSampled2d))
-    return type::TextureDimension::k2d;
+    return sem::TextureDimension::k2d;
 
   if (match(Token::Type::kTextureSampled2dArray))
-    return type::TextureDimension::k2dArray;
+    return sem::TextureDimension::k2dArray;
 
   if (match(Token::Type::kTextureSampled3d))
-    return type::TextureDimension::k3d;
+    return sem::TextureDimension::k3d;
 
   if (match(Token::Type::kTextureSampledCube))
-    return type::TextureDimension::kCube;
+    return sem::TextureDimension::kCube;
 
   if (match(Token::Type::kTextureSampledCubeArray))
-    return type::TextureDimension::kCubeArray;
+    return sem::TextureDimension::kCubeArray;
 
   return Failure::kNoMatch;
 }
 
 // multisampled_texture_type
 //  : TEXTURE_MULTISAMPLED_2D
-Maybe<type::TextureDimension> ParserImpl::multisampled_texture_type() {
+Maybe<sem::TextureDimension> ParserImpl::multisampled_texture_type() {
   if (match(Token::Type::kTextureMultisampled2d))
-    return type::TextureDimension::k2d;
+    return sem::TextureDimension::k2d;
 
   return Failure::kNoMatch;
 }
@@ -615,15 +614,15 @@ Maybe<type::TextureDimension> ParserImpl::multisampled_texture_type() {
 //  | TEXTURE_STORAGE_2D
 //  | TEXTURE_STORAGE_2D_ARRAY
 //  | TEXTURE_STORAGE_3D
-Maybe<type::TextureDimension> ParserImpl::storage_texture_type() {
+Maybe<sem::TextureDimension> ParserImpl::storage_texture_type() {
   if (match(Token::Type::kTextureStorage1d))
-    return type::TextureDimension::k1d;
+    return sem::TextureDimension::k1d;
   if (match(Token::Type::kTextureStorage2d))
-    return type::TextureDimension::k2d;
+    return sem::TextureDimension::k2d;
   if (match(Token::Type::kTextureStorage2dArray))
-    return type::TextureDimension::k2dArray;
+    return sem::TextureDimension::k2dArray;
   if (match(Token::Type::kTextureStorage3d))
-    return type::TextureDimension::k3d;
+    return sem::TextureDimension::k3d;
 
   return Failure::kNoMatch;
 }
@@ -633,20 +632,19 @@ Maybe<type::TextureDimension> ParserImpl::storage_texture_type() {
 //  | TEXTURE_DEPTH_2D_ARRAY
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
-Maybe<type::Type*> ParserImpl::depth_texture_type() {
+Maybe<sem::Type*> ParserImpl::depth_texture_type() {
   if (match(Token::Type::kTextureDepth2d))
-    return builder_.create<type::DepthTexture>(type::TextureDimension::k2d);
+    return builder_.create<sem::DepthTexture>(sem::TextureDimension::k2d);
 
   if (match(Token::Type::kTextureDepth2dArray))
-    return builder_.create<type::DepthTexture>(
-        type::TextureDimension::k2dArray);
+    return builder_.create<sem::DepthTexture>(sem::TextureDimension::k2dArray);
 
   if (match(Token::Type::kTextureDepthCube))
-    return builder_.create<type::DepthTexture>(type::TextureDimension::kCube);
+    return builder_.create<sem::DepthTexture>(sem::TextureDimension::kCube);
 
   if (match(Token::Type::kTextureDepthCubeArray))
-    return builder_.create<type::DepthTexture>(
-        type::TextureDimension::kCubeArray);
+    return builder_.create<sem::DepthTexture>(
+        sem::TextureDimension::kCubeArray);
 
   return Failure::kNoMatch;
 }
@@ -687,112 +685,112 @@ Maybe<type::Type*> ParserImpl::depth_texture_type() {
 //  | RGBA32UINT
 //  | RGBA32SINT
 //  | RGBA32FLOAT
-Expect<type::ImageFormat> ParserImpl::expect_image_storage_type(
+Expect<sem::ImageFormat> ParserImpl::expect_image_storage_type(
     const std::string& use) {
   if (match(Token::Type::kFormatR8Unorm))
-    return type::ImageFormat::kR8Unorm;
+    return sem::ImageFormat::kR8Unorm;
 
   if (match(Token::Type::kFormatR8Snorm))
-    return type::ImageFormat::kR8Snorm;
+    return sem::ImageFormat::kR8Snorm;
 
   if (match(Token::Type::kFormatR8Uint))
-    return type::ImageFormat::kR8Uint;
+    return sem::ImageFormat::kR8Uint;
 
   if (match(Token::Type::kFormatR8Sint))
-    return type::ImageFormat::kR8Sint;
+    return sem::ImageFormat::kR8Sint;
 
   if (match(Token::Type::kFormatR16Uint))
-    return type::ImageFormat::kR16Uint;
+    return sem::ImageFormat::kR16Uint;
 
   if (match(Token::Type::kFormatR16Sint))
-    return type::ImageFormat::kR16Sint;
+    return sem::ImageFormat::kR16Sint;
 
   if (match(Token::Type::kFormatR16Float))
-    return type::ImageFormat::kR16Float;
+    return sem::ImageFormat::kR16Float;
 
   if (match(Token::Type::kFormatRg8Unorm))
-    return type::ImageFormat::kRg8Unorm;
+    return sem::ImageFormat::kRg8Unorm;
 
   if (match(Token::Type::kFormatRg8Snorm))
-    return type::ImageFormat::kRg8Snorm;
+    return sem::ImageFormat::kRg8Snorm;
 
   if (match(Token::Type::kFormatRg8Uint))
-    return type::ImageFormat::kRg8Uint;
+    return sem::ImageFormat::kRg8Uint;
 
   if (match(Token::Type::kFormatRg8Sint))
-    return type::ImageFormat::kRg8Sint;
+    return sem::ImageFormat::kRg8Sint;
 
   if (match(Token::Type::kFormatR32Uint))
-    return type::ImageFormat::kR32Uint;
+    return sem::ImageFormat::kR32Uint;
 
   if (match(Token::Type::kFormatR32Sint))
-    return type::ImageFormat::kR32Sint;
+    return sem::ImageFormat::kR32Sint;
 
   if (match(Token::Type::kFormatR32Float))
-    return type::ImageFormat::kR32Float;
+    return sem::ImageFormat::kR32Float;
 
   if (match(Token::Type::kFormatRg16Uint))
-    return type::ImageFormat::kRg16Uint;
+    return sem::ImageFormat::kRg16Uint;
 
   if (match(Token::Type::kFormatRg16Sint))
-    return type::ImageFormat::kRg16Sint;
+    return sem::ImageFormat::kRg16Sint;
 
   if (match(Token::Type::kFormatRg16Float))
-    return type::ImageFormat::kRg16Float;
+    return sem::ImageFormat::kRg16Float;
 
   if (match(Token::Type::kFormatRgba8Unorm))
-    return type::ImageFormat::kRgba8Unorm;
+    return sem::ImageFormat::kRgba8Unorm;
 
   if (match(Token::Type::kFormatRgba8UnormSrgb))
-    return type::ImageFormat::kRgba8UnormSrgb;
+    return sem::ImageFormat::kRgba8UnormSrgb;
 
   if (match(Token::Type::kFormatRgba8Snorm))
-    return type::ImageFormat::kRgba8Snorm;
+    return sem::ImageFormat::kRgba8Snorm;
 
   if (match(Token::Type::kFormatRgba8Uint))
-    return type::ImageFormat::kRgba8Uint;
+    return sem::ImageFormat::kRgba8Uint;
 
   if (match(Token::Type::kFormatRgba8Sint))
-    return type::ImageFormat::kRgba8Sint;
+    return sem::ImageFormat::kRgba8Sint;
 
   if (match(Token::Type::kFormatBgra8Unorm))
-    return type::ImageFormat::kBgra8Unorm;
+    return sem::ImageFormat::kBgra8Unorm;
 
   if (match(Token::Type::kFormatBgra8UnormSrgb))
-    return type::ImageFormat::kBgra8UnormSrgb;
+    return sem::ImageFormat::kBgra8UnormSrgb;
 
   if (match(Token::Type::kFormatRgb10A2Unorm))
-    return type::ImageFormat::kRgb10A2Unorm;
+    return sem::ImageFormat::kRgb10A2Unorm;
 
   if (match(Token::Type::kFormatRg11B10Float))
-    return type::ImageFormat::kRg11B10Float;
+    return sem::ImageFormat::kRg11B10Float;
 
   if (match(Token::Type::kFormatRg32Uint))
-    return type::ImageFormat::kRg32Uint;
+    return sem::ImageFormat::kRg32Uint;
 
   if (match(Token::Type::kFormatRg32Sint))
-    return type::ImageFormat::kRg32Sint;
+    return sem::ImageFormat::kRg32Sint;
 
   if (match(Token::Type::kFormatRg32Float))
-    return type::ImageFormat::kRg32Float;
+    return sem::ImageFormat::kRg32Float;
 
   if (match(Token::Type::kFormatRgba16Uint))
-    return type::ImageFormat::kRgba16Uint;
+    return sem::ImageFormat::kRgba16Uint;
 
   if (match(Token::Type::kFormatRgba16Sint))
-    return type::ImageFormat::kRgba16Sint;
+    return sem::ImageFormat::kRgba16Sint;
 
   if (match(Token::Type::kFormatRgba16Float))
-    return type::ImageFormat::kRgba16Float;
+    return sem::ImageFormat::kRgba16Float;
 
   if (match(Token::Type::kFormatRgba32Uint))
-    return type::ImageFormat::kRgba32Uint;
+    return sem::ImageFormat::kRgba32Uint;
 
   if (match(Token::Type::kFormatRgba32Sint))
-    return type::ImageFormat::kRgba32Sint;
+    return sem::ImageFormat::kRgba32Sint;
 
   if (match(Token::Type::kFormatRgba32Float))
-    return type::ImageFormat::kRgba32Float;
+    return sem::ImageFormat::kRgba32Float;
 
   return add_error(peek().source(), "invalid format", use);
 }
@@ -831,7 +829,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   for (auto* deco : access_decos) {
     // If we have an access control decoration then we take it and wrap our
     // type up with that decoration
-    ty = builder_.create<type::AccessControl>(
+    ty = builder_.create<sem::AccessControl>(
         deco->As<ast::AccessDecoration>()->value(), ty);
   }
 
@@ -871,7 +869,7 @@ Maybe<ast::StorageClass> ParserImpl::variable_storage_decoration() {
 
 // type_alias
 //   : TYPE IDENT EQUAL type_decl
-Maybe<type::Type*> ParserImpl::type_alias() {
+Maybe<sem::Type*> ParserImpl::type_alias() {
   auto t = peek();
   if (!t.IsType())
     return Failure::kNoMatch;
@@ -893,7 +891,7 @@ Maybe<type::Type*> ParserImpl::type_alias() {
   if (!type.matched)
     return add_error(peek(), "invalid type alias");
 
-  auto* alias = builder_.create<type::Alias>(
+  auto* alias = builder_.create<sem::Alias>(
       builder_.Symbols().Register(name.value), type.value);
   register_constructed(name.value, alias);
 
@@ -924,7 +922,7 @@ Maybe<type::Type*> ParserImpl::type_alias() {
 //   | MAT4x3 LESS_THAN type_decl GREATER_THAN
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
 //   | texture_sampler_types
-Maybe<type::Type*> ParserImpl::type_decl() {
+Maybe<sem::Type*> ParserImpl::type_decl() {
   auto decos = decoration_list();
   if (decos.errored)
     return Failure::kErrored;
@@ -941,7 +939,7 @@ Maybe<type::Type*> ParserImpl::type_decl() {
   return type.value;
 }
 
-Maybe<type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
+Maybe<sem::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   auto t = peek();
   if (match(Token::Type::kIdentifier)) {
     auto* ty = get_constructed(t.to_str());
@@ -952,16 +950,16 @@ Maybe<type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   }
 
   if (match(Token::Type::kBool))
-    return builder_.create<type::Bool>();
+    return builder_.create<sem::Bool>();
 
   if (match(Token::Type::kF32))
-    return builder_.create<type::F32>();
+    return builder_.create<sem::F32>();
 
   if (match(Token::Type::kI32))
-    return builder_.create<type::I32>();
+    return builder_.create<sem::I32>();
 
   if (match(Token::Type::kU32))
-    return builder_.create<type::U32>();
+    return builder_.create<sem::U32>();
 
   if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
     next();  // Consume the peek
@@ -991,7 +989,7 @@ Maybe<type::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   return Failure::kNoMatch;
 }
 
-Expect<type::Type*> ParserImpl::expect_type(const std::string& use) {
+Expect<sem::Type*> ParserImpl::expect_type(const std::string& use) {
   auto type = type_decl();
   if (type.errored)
     return Failure::kErrored;
@@ -1000,10 +998,10 @@ Expect<type::Type*> ParserImpl::expect_type(const std::string& use) {
   return type.value;
 }
 
-Expect<type::Type*> ParserImpl::expect_type_decl_pointer() {
+Expect<sem::Type*> ParserImpl::expect_type_decl_pointer() {
   const char* use = "ptr declaration";
 
-  return expect_lt_gt_block(use, [&]() -> Expect<type::Type*> {
+  return expect_lt_gt_block(use, [&]() -> Expect<sem::Type*> {
     auto sc = expect_storage_class(use);
     if (sc.errored)
       return Failure::kErrored;
@@ -1015,11 +1013,11 @@ Expect<type::Type*> ParserImpl::expect_type_decl_pointer() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return builder_.create<type::Pointer>(subtype.value, sc.value);
+    return builder_.create<sem::Pointer>(subtype.value, sc.value);
   });
 }
 
-Expect<type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
+Expect<sem::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   uint32_t count = 2;
   if (t.IsVec3())
     count = 3;
@@ -1032,14 +1030,14 @@ Expect<type::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return builder_.create<type::Vector>(subtype.value, count);
+  return builder_.create<sem::Vector>(subtype.value, count);
 }
 
-Expect<type::Type*> ParserImpl::expect_type_decl_array(
+Expect<sem::Type*> ParserImpl::expect_type_decl_array(
     ast::DecorationList decos) {
   const char* use = "array declaration";
 
-  return expect_lt_gt_block(use, [&]() -> Expect<type::Type*> {
+  return expect_lt_gt_block(use, [&]() -> Expect<sem::Type*> {
     auto subtype = expect_type(use);
     if (subtype.errored)
       return Failure::kErrored;
@@ -1052,11 +1050,11 @@ Expect<type::Type*> ParserImpl::expect_type_decl_array(
       size = val.value;
     }
 
-    return create<type::ArrayType>(subtype.value, size, std::move(decos));
+    return create<sem::ArrayType>(subtype.value, size, std::move(decos));
   });
 }
 
-Expect<type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
+Expect<sem::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   uint32_t rows = 2;
   uint32_t columns = 2;
   if (t.IsMat3x2() || t.IsMat3x3() || t.IsMat3x4()) {
@@ -1076,7 +1074,7 @@ Expect<type::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return builder_.create<type::Matrix>(subtype.value, rows, columns);
+  return builder_.create<sem::Matrix>(subtype.value, rows, columns);
 }
 
 // storage_class
@@ -1121,7 +1119,7 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 
 // struct_decl
 //   : struct_decoration_decl* STRUCT IDENT struct_body_decl
-Maybe<type::StructType*> ParserImpl::struct_decl(ast::DecorationList& decos) {
+Maybe<sem::StructType*> ParserImpl::struct_decl(ast::DecorationList& decos) {
   auto t = peek();
   auto source = t.source();
 
@@ -1136,7 +1134,7 @@ Maybe<type::StructType*> ParserImpl::struct_decl(ast::DecorationList& decos) {
   if (body.errored)
     return Failure::kErrored;
 
-  return create<type::StructType>(
+  return create<sem::StructType>(
       builder_.Symbols().Register(name.value),
       create<ast::Struct>(source, std::move(body.value), std::move(decos)));
 }
@@ -1227,9 +1225,9 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
 // function_type_decl
 //   : type_decl
 //   | VOID
-Maybe<type::Type*> ParserImpl::function_type_decl() {
+Maybe<sem::Type*> ParserImpl::function_type_decl() {
   if (match(Token::Type::kVoid))
-    return builder_.create<type::Void>();
+    return builder_.create<sem::Void>();
 
   return type_decl();
 }
@@ -1261,7 +1259,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
     }
   }
 
-  type::Type* return_type = nullptr;
+  sem::Type* return_type = nullptr;
   ast::DecorationList return_decorations;
 
   if (match(Token::Type::kArrow)) {
@@ -1282,7 +1280,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
       return_type = type.value;
     }
 
-    if (return_type->Is<type::Void>()) {
+    if (return_type->Is<sem::Void>()) {
       // crbug.com/tint/677: void has been removed from the language
       deprecated(tok.source(),
                  "omit '-> void' for functions that do not return a value");
@@ -2726,19 +2724,19 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 Maybe<ast::Literal*> ParserImpl::const_literal() {
   auto t = peek();
   if (match(Token::Type::kTrue)) {
-    auto* type = builder_.create<type::Bool>();
+    auto* type = builder_.create<sem::Bool>();
     return create<ast::BoolLiteral>(Source{}, type, true);
   }
   if (match(Token::Type::kFalse)) {
-    auto* type = builder_.create<type::Bool>();
+    auto* type = builder_.create<sem::Bool>();
     return create<ast::BoolLiteral>(Source{}, type, false);
   }
   if (match(Token::Type::kSintLiteral)) {
-    auto* type = builder_.create<type::I32>();
+    auto* type = builder_.create<sem::I32>();
     return create<ast::SintLiteral>(Source{}, type, t.to_i32());
   }
   if (match(Token::Type::kUintLiteral)) {
-    auto* type = builder_.create<type::U32>();
+    auto* type = builder_.create<sem::U32>();
     return create<ast::UintLiteral>(Source{}, type, t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
@@ -2747,7 +2745,7 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
       next();  // Consume 'f'
       add_error(p.source(), "float literals must not be suffixed with 'f'");
     }
-    auto* type = builder_.create<type::F32>();
+    auto* type = builder_.create<sem::F32>();
     return create<ast::FloatLiteral>(Source{}, type, t.to_f32());
   }
   return Failure::kNoMatch;

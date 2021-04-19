@@ -32,7 +32,7 @@ class SintLiteral : public Castable<SintLiteral, IntLiteral> {
   /// @param value the signed int literals value
   SintLiteral(ProgramID program_id,
               const Source& source,
-              type::Type* type,
+              sem::Type* type,
               int32_t value);
   ~SintLiteral() override;
 

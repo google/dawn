@@ -17,7 +17,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using AliasTest = TestHelper;
@@ -30,7 +30,7 @@ TEST_F(AliasTest, Create) {
 
 TEST_F(AliasTest, Is) {
   auto* at = ty.alias("a", ty.i32());
-  type::Type* ty = at;
+  sem::Type* ty = at;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_TRUE(ty->Is<Alias>());
   EXPECT_FALSE(ty->Is<ArrayType>());
@@ -145,5 +145,5 @@ TEST_F(AliasTest, UnwrapAliasIfNeeded) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

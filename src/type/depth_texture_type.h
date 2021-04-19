@@ -20,7 +20,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A depth texture type.
 class DepthTexture : public Castable<DepthTexture, Texture> {
@@ -46,7 +46,7 @@ class DepthTexture : public Castable<DepthTexture, Texture> {
   DepthTexture* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_DEPTH_TEXTURE_TYPE_H_

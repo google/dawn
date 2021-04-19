@@ -223,7 +223,7 @@ class Inspector {
   /// @param decorations the variable decorations
   /// @param variables the list to add the variables to
   void AddEntryPointInOutVariables(std::string name,
-                                   type::Type* type,
+                                   sem::Type* type,
                                    const ast::DecorationList& decorations,
                                    std::vector<StageVariable>& variables) const;
 

@@ -24,18 +24,18 @@ namespace tint {
 namespace sem {
 
 Variable::Variable(const ast::Variable* declaration,
-                   type::Type* type,
+                   sem::Type* type,
                    ast::StorageClass storage_class)
     : declaration_(declaration), type_(type), storage_class_(storage_class) {}
 
 Variable::~Variable() = default;
 
-type::Type* Variable::DeclaredType() const {
+sem::Type* Variable::DeclaredType() const {
   return declaration_->declared_type();
 }
 
 VariableUser::VariableUser(ast::IdentifierExpression* declaration,
-                           type::Type* type,
+                           sem::Type* type,
                            Statement* statement,
                            sem::Variable* variable)
     : Base(declaration, type, statement), variable_(variable) {}

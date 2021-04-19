@@ -23,7 +23,7 @@ namespace ast {
 
 BitcastExpression::BitcastExpression(ProgramID program_id,
                                      const Source& source,
-                                     type::Type* type,
+                                     sem::Type* type,
                                      Expression* expr)
     : Base(program_id, source), type_(type), expr_(expr) {
   TINT_ASSERT(type_);

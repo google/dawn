@@ -128,7 +128,7 @@ let declaration_order_check_3 : i32 = 1;
   for (auto* src_node : src.ASTNodes().Objects()) {
     src_nodes.emplace(src_node);
   }
-  std::unordered_set<type::Type*> src_types;
+  std::unordered_set<sem::Type*> src_types;
   for (auto* src_type : src.Types()) {
     src_types.emplace(src_type);
   }

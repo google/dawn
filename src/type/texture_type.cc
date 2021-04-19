@@ -14,10 +14,10 @@
 
 #include "src/type/texture_type.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Texture);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Texture);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 std::ostream& operator<<(std::ostream& out, TextureDimension dim) {
   switch (dim) {
@@ -84,5 +84,5 @@ Texture::Texture(Texture&&) = default;
 
 Texture::~Texture() = default;
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

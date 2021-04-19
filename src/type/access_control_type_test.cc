@@ -18,7 +18,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using AccessControlTest = TestHelper;
@@ -96,5 +96,5 @@ TEST_F(AccessControlTest, FriendlyNameReadWrite) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

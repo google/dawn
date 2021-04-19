@@ -20,7 +20,7 @@
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 
 /// A sampled texture type.
 class SampledTexture : public Castable<SampledTexture, Texture> {
@@ -53,7 +53,7 @@ class SampledTexture : public Castable<SampledTexture, Texture> {
   Type* const type_;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 
 #endif  // SRC_TYPE_SAMPLED_TEXTURE_TYPE_H_

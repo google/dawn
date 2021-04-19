@@ -33,8 +33,8 @@ TEST_P(MslBinaryTest, Emit) {
 
   auto* type = ((params.op == ast::BinaryOp::kLogicalAnd) ||
                 (params.op == ast::BinaryOp::kLogicalOr))
-                   ? static_cast<type::Type*>(ty.bool_())
-                   : static_cast<type::Type*>(ty.u32());
+                   ? static_cast<sem::Type*>(ty.bool_())
+                   : static_cast<sem::Type*>(ty.u32());
 
   auto* left = Var("left", type, ast::StorageClass::kFunction);
   auto* right = Var("right", type, ast::StorageClass::kFunction);

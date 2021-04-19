@@ -21,7 +21,7 @@
 #include "src/type/test_helper.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using StorageTextureTest = TestHelper;
@@ -94,7 +94,7 @@ TEST_F(StorageTextureTest, FriendlyName) {
 
 TEST_F(StorageTextureTest, F32) {
   auto* subtype =
-      type::StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, Types());
+      sem::StorageTexture::SubtypeFor(ImageFormat::kRgba32Float, Types());
   Type* s = create<StorageTexture>(TextureDimension::k2dArray,
                                    ImageFormat::kRgba32Float, subtype);
 
@@ -108,7 +108,7 @@ TEST_F(StorageTextureTest, F32) {
 
 TEST_F(StorageTextureTest, U32) {
   auto* subtype =
-      type::StorageTexture::SubtypeFor(ImageFormat::kRg32Uint, Types());
+      sem::StorageTexture::SubtypeFor(ImageFormat::kRg32Uint, Types());
   Type* s = create<StorageTexture>(TextureDimension::k2dArray,
                                    ImageFormat::kRg32Uint, subtype);
 
@@ -122,7 +122,7 @@ TEST_F(StorageTextureTest, U32) {
 
 TEST_F(StorageTextureTest, I32) {
   auto* subtype =
-      type::StorageTexture::SubtypeFor(ImageFormat::kRgba32Sint, Types());
+      sem::StorageTexture::SubtypeFor(ImageFormat::kRgba32Sint, Types());
   Type* s = create<StorageTexture>(TextureDimension::k2dArray,
                                    ImageFormat::kRgba32Sint, subtype);
 
@@ -135,5 +135,5 @@ TEST_F(StorageTextureTest, I32) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

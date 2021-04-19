@@ -89,12 +89,12 @@ TEST_F(ResolverIsHostShareable, AliasI32) {
 
 TEST_F(ResolverIsHostShareable, AccessControlVoid) {
   EXPECT_FALSE(r()->IsHostShareable(
-      create<type::AccessControl>(ast::AccessControl::kReadOnly, ty.void_())));
+      create<sem::AccessControl>(ast::AccessControl::kReadOnly, ty.void_())));
 }
 
 TEST_F(ResolverIsHostShareable, AccessControlI32) {
   EXPECT_TRUE(r()->IsHostShareable(
-      create<type::AccessControl>(ast::AccessControl::kReadOnly, ty.i32())));
+      create<sem::AccessControl>(ast::AccessControl::kReadOnly, ty.i32())));
 }
 
 TEST_F(ResolverIsHostShareable, ArraySizedOfHostShareable) {

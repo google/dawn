@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   EXPECT_TRUE(e->is_const());
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   ASSERT_NE(e->declared_type(), nullptr);
-  EXPECT_TRUE(e->declared_type()->Is<type::F32>());
+  EXPECT_TRUE(e->declared_type()->Is<sem::F32>());
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
   EXPECT_EQ(e->source().range.begin.column, 5u);
@@ -115,7 +115,7 @@ TEST_F(ParserImplTest, GlobalConstantDec_ConstantId) {
   EXPECT_TRUE(e->is_const());
   EXPECT_EQ(e->symbol(), p->builder().Symbols().Get("a"));
   ASSERT_NE(e->declared_type(), nullptr);
-  EXPECT_TRUE(e->declared_type()->Is<type::F32>());
+  EXPECT_TRUE(e->declared_type()->Is<sem::F32>());
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
   EXPECT_EQ(e->source().range.begin.column, 24u);

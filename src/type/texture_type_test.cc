@@ -17,7 +17,7 @@
 #include "src/type/test_helper.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 namespace {
 
 using TextureTypeTest = TestHelper;
@@ -43,5 +43,5 @@ TEST_F(TextureTypeTest, NumCoordinateAxes) {
 }
 
 }  // namespace
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

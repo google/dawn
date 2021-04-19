@@ -15,10 +15,12 @@
 #ifndef SRC_TYPE_EXTERNAL_TEXTURE_TYPE_H_
 #define SRC_TYPE_EXTERNAL_TEXTURE_TYPE_H_
 
+#include <string>
+
 #include "src/type/texture_type.h"
 
 namespace tint {
-namespace type {
+namespace sem {
 class ExternalTexture : public Castable<ExternalTexture, Texture> {
  public:
   /// Constructor
@@ -42,6 +44,6 @@ class ExternalTexture : public Castable<ExternalTexture, Texture> {
   ExternalTexture* Clone(CloneContext* ctx) const override;
 };
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
 #endif  // SRC_TYPE_EXTERNAL_TEXTURE_TYPE_H_

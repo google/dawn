@@ -66,7 +66,7 @@ class Program {
   ProgramID ID() const { return id_; }
 
   /// @returns a reference to the program's types
-  const type::Manager& Types() const {
+  const sem::Manager& Types() const {
     AssertNotMoved();
     return types_;
   }
@@ -129,7 +129,7 @@ class Program {
   /// @param expr the AST expression
   /// @return the resolved semantic type for the expression, or nullptr if the
   /// expression has no resolved type.
-  type::Type* TypeOf(const ast::Expression* expr) const;
+  sem::Type* TypeOf(const ast::Expression* expr) const;
 
   /// @param demangle whether to automatically demangle the symbols in the
   /// returned string
@@ -160,7 +160,7 @@ class Program {
   void AssertNotMoved() const;
 
   ProgramID id_;
-  type::Manager types_;
+  sem::Manager types_;
   ASTNodeAllocator ast_nodes_;
   SemNodeAllocator sem_nodes_;
   ast::Module* ast_ = nullptr;

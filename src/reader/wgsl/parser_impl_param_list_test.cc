@@ -22,7 +22,7 @@ namespace {
 TEST_F(ParserImplTest, ParamList_Single) {
   auto p = parser("a : i32");
 
-  auto* i32 = p->builder().create<type::I32>();
+  auto* i32 = p->builder().create<sem::I32>();
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -42,9 +42,9 @@ TEST_F(ParserImplTest, ParamList_Single) {
 TEST_F(ParserImplTest, ParamList_Multiple) {
   auto p = parser("a : i32, b: f32, c: vec2<f32>");
 
-  auto* i32 = p->builder().create<type::I32>();
-  auto* f32 = p->builder().create<type::F32>();
-  auto* vec2 = p->builder().create<type::Vector>(f32, 2);
+  auto* i32 = p->builder().create<sem::I32>();
+  auto* f32 = p->builder().create<sem::F32>();
+  auto* vec2 = p->builder().create<sem::Vector>(f32, 2);
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -100,8 +100,8 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
       "[[builtin(position)]] coord : vec4<f32>, "
       "[[location(1)]] loc1 : f32");
 
-  auto* f32 = p->builder().create<type::F32>();
-  auto* vec4 = p->builder().create<type::Vector>(f32, 4);
+  auto* f32 = p->builder().create<sem::F32>();
+  auto* vec4 = p->builder().create<sem::Vector>(f32, 4);
 
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();

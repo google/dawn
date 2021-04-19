@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Sampler);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Sampler);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 std::ostream& operator<<(std::ostream& out, SamplerKind kind) {
   switch (kind) {
@@ -52,5 +52,5 @@ Sampler* Sampler::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Sampler>(kind_);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

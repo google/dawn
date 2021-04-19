@@ -56,7 +56,7 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
 ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
   ProgramBuilder builder;
   builder.id_ = program->ID();
-  builder.types_ = type::Manager::Wrap(program->Types());
+  builder.types_ = sem::Manager::Wrap(program->Types());
   builder.ast_ = builder.create<ast::Module>(
       program->AST().source(), program->AST().GlobalDeclarations());
   builder.sem_ = sem::Info::Wrap(program->Sem());
@@ -85,40 +85,40 @@ void ProgramBuilder::AssertNotMoved() const {
   }
 }
 
-type::Type* ProgramBuilder::TypeOf(ast::Expression* expr) const {
+sem::Type* ProgramBuilder::TypeOf(ast::Expression* expr) const {
   auto* sem = Sem().Get(expr);
   return sem ? sem->Type() : nullptr;
 }
 
 ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
-    type::Type* type,
+    sem::Type* type,
     int elem_value) {
   auto* unwrapped_type = type->UnwrapAliasIfNeeded();
-  if (unwrapped_type->Is<type::Bool>()) {
+  if (unwrapped_type->Is<sem::Bool>()) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::BoolLiteral>(type, elem_value == 0 ? false : true));
   }
-  if (unwrapped_type->Is<type::I32>()) {
+  if (unwrapped_type->Is<sem::I32>()) {
     return create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
         type, static_cast<ProgramBuilder::i32>(elem_value)));
   }
-  if (unwrapped_type->Is<type::U32>()) {
+  if (unwrapped_type->Is<sem::U32>()) {
     return create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
         type, static_cast<ProgramBuilder::u32>(elem_value)));
   }
-  if (unwrapped_type->Is<type::F32>()) {
+  if (unwrapped_type->Is<sem::F32>()) {
     return create<ast::ScalarConstructorExpression>(create<ast::FloatLiteral>(
         type, static_cast<ProgramBuilder::f32>(elem_value)));
   }
-  if (auto* v = unwrapped_type->As<type::Vector>()) {
+  if (auto* v = unwrapped_type->As<sem::Vector>()) {
     ast::ExpressionList el(v->size());
     for (size_t i = 0; i < el.size(); i++) {
       el[i] = ConstructValueFilledWith(v->type(), elem_value);
     }
     return create<ast::TypeConstructorExpression>(type, std::move(el));
   }
-  if (auto* m = unwrapped_type->As<type::Matrix>()) {
-    auto* col_vec_type = create<type::Vector>(m->type(), m->rows());
+  if (auto* m = unwrapped_type->As<sem::Matrix>()) {
+    auto* col_vec_type = create<sem::Vector>(m->type(), m->rows());
     ast::ExpressionList el(col_vec_type->size());
     for (size_t i = 0; i < el.size(); i++) {
       el[i] = ConstructValueFilledWith(col_vec_type, elem_value);

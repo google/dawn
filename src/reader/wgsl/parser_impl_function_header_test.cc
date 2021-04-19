@@ -30,7 +30,7 @@ TEST_F(ParserImplTest, FunctionHeader) {
   ASSERT_EQ(f->params.size(), 2u);
   EXPECT_EQ(f->params[0]->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_EQ(f->params[1]->symbol(), p->builder().Symbols().Get("b"));
-  EXPECT_TRUE(f->return_type->Is<type::Void>());
+  EXPECT_TRUE(f->return_type->Is<sem::Void>());
 }
 
 TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
 
   EXPECT_EQ(f->name, "main");
   EXPECT_EQ(f->params.size(), 0u);
-  EXPECT_TRUE(f->return_type->Is<type::F32>());
+  EXPECT_TRUE(f->return_type->Is<sem::F32>());
   ASSERT_EQ(f->return_type_decorations.size(), 1u);
   auto* loc = f->return_type_decorations[0]->As<ast::LocationDecoration>();
   ASSERT_TRUE(loc != nullptr);

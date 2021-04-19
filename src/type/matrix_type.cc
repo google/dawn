@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Matrix);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::Matrix);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 Matrix::Matrix(Type* subtype, uint32_t rows, uint32_t columns)
     : subtype_(subtype), rows_(rows), columns_(columns) {
@@ -51,5 +51,5 @@ Matrix* Matrix::Clone(CloneContext* ctx) const {
   return ctx->dst->create<Matrix>(ty, rows_, columns_);
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint

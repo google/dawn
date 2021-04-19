@@ -57,44 +57,44 @@ void AppendResourceBindings(std::vector<ResourceBinding>* dest,
 
 ResourceBinding::TextureDimension
 TypeTextureDimensionToResourceBindingTextureDimension(
-    const type::TextureDimension& type_dim) {
+    const sem::TextureDimension& type_dim) {
   switch (type_dim) {
-    case type::TextureDimension::k1d:
+    case sem::TextureDimension::k1d:
       return ResourceBinding::TextureDimension::k1d;
-    case type::TextureDimension::k2d:
+    case sem::TextureDimension::k2d:
       return ResourceBinding::TextureDimension::k2d;
-    case type::TextureDimension::k2dArray:
+    case sem::TextureDimension::k2dArray:
       return ResourceBinding::TextureDimension::k2dArray;
-    case type::TextureDimension::k3d:
+    case sem::TextureDimension::k3d:
       return ResourceBinding::TextureDimension::k3d;
-    case type::TextureDimension::kCube:
+    case sem::TextureDimension::kCube:
       return ResourceBinding::TextureDimension::kCube;
-    case type::TextureDimension::kCubeArray:
+    case sem::TextureDimension::kCubeArray:
       return ResourceBinding::TextureDimension::kCubeArray;
-    case type::TextureDimension::kNone:
+    case sem::TextureDimension::kNone:
       return ResourceBinding::TextureDimension::kNone;
   }
   return ResourceBinding::TextureDimension::kNone;
 }
 
-ResourceBinding::SampledKind BaseTypeToSampledKind(type::Type* base_type) {
+ResourceBinding::SampledKind BaseTypeToSampledKind(sem::Type* base_type) {
   if (!base_type) {
     return ResourceBinding::SampledKind::kUnknown;
   }
 
-  if (auto* at = base_type->As<type::ArrayType>()) {
+  if (auto* at = base_type->As<sem::ArrayType>()) {
     base_type = at->type();
-  } else if (auto* mt = base_type->As<type::Matrix>()) {
+  } else if (auto* mt = base_type->As<sem::Matrix>()) {
     base_type = mt->type();
-  } else if (auto* vt = base_type->As<type::Vector>()) {
+  } else if (auto* vt = base_type->As<sem::Vector>()) {
     base_type = vt->type();
   }
 
-  if (base_type->Is<type::F32>()) {
+  if (base_type->Is<sem::F32>()) {
     return ResourceBinding::SampledKind::kFloat;
-  } else if (base_type->Is<type::U32>()) {
+  } else if (base_type->Is<sem::U32>()) {
     return ResourceBinding::SampledKind::kUInt;
-  } else if (base_type->Is<type::I32>()) {
+  } else if (base_type->Is<sem::I32>()) {
     return ResourceBinding::SampledKind::kSInt;
   } else {
     return ResourceBinding::SampledKind::kUnknown;
@@ -102,79 +102,79 @@ ResourceBinding::SampledKind BaseTypeToSampledKind(type::Type* base_type) {
 }
 
 ResourceBinding::ImageFormat TypeImageFormatToResourceBindingImageFormat(
-    const type::ImageFormat& image_format) {
+    const sem::ImageFormat& image_format) {
   switch (image_format) {
-    case type::ImageFormat::kR8Unorm:
+    case sem::ImageFormat::kR8Unorm:
       return ResourceBinding::ImageFormat::kR8Unorm;
-    case type::ImageFormat::kR8Snorm:
+    case sem::ImageFormat::kR8Snorm:
       return ResourceBinding::ImageFormat::kR8Snorm;
-    case type::ImageFormat::kR8Uint:
+    case sem::ImageFormat::kR8Uint:
       return ResourceBinding::ImageFormat::kR8Uint;
-    case type::ImageFormat::kR8Sint:
+    case sem::ImageFormat::kR8Sint:
       return ResourceBinding::ImageFormat::kR8Sint;
-    case type::ImageFormat::kR16Uint:
+    case sem::ImageFormat::kR16Uint:
       return ResourceBinding::ImageFormat::kR16Uint;
-    case type::ImageFormat::kR16Sint:
+    case sem::ImageFormat::kR16Sint:
       return ResourceBinding::ImageFormat::kR16Sint;
-    case type::ImageFormat::kR16Float:
+    case sem::ImageFormat::kR16Float:
       return ResourceBinding::ImageFormat::kR16Float;
-    case type::ImageFormat::kRg8Unorm:
+    case sem::ImageFormat::kRg8Unorm:
       return ResourceBinding::ImageFormat::kRg8Unorm;
-    case type::ImageFormat::kRg8Snorm:
+    case sem::ImageFormat::kRg8Snorm:
       return ResourceBinding::ImageFormat::kRg8Snorm;
-    case type::ImageFormat::kRg8Uint:
+    case sem::ImageFormat::kRg8Uint:
       return ResourceBinding::ImageFormat::kRg8Uint;
-    case type::ImageFormat::kRg8Sint:
+    case sem::ImageFormat::kRg8Sint:
       return ResourceBinding::ImageFormat::kRg8Sint;
-    case type::ImageFormat::kR32Uint:
+    case sem::ImageFormat::kR32Uint:
       return ResourceBinding::ImageFormat::kR32Uint;
-    case type::ImageFormat::kR32Sint:
+    case sem::ImageFormat::kR32Sint:
       return ResourceBinding::ImageFormat::kR32Sint;
-    case type::ImageFormat::kR32Float:
+    case sem::ImageFormat::kR32Float:
       return ResourceBinding::ImageFormat::kR32Float;
-    case type::ImageFormat::kRg16Uint:
+    case sem::ImageFormat::kRg16Uint:
       return ResourceBinding::ImageFormat::kRg16Uint;
-    case type::ImageFormat::kRg16Sint:
+    case sem::ImageFormat::kRg16Sint:
       return ResourceBinding::ImageFormat::kRg16Sint;
-    case type::ImageFormat::kRg16Float:
+    case sem::ImageFormat::kRg16Float:
       return ResourceBinding::ImageFormat::kRg16Float;
-    case type::ImageFormat::kRgba8Unorm:
+    case sem::ImageFormat::kRgba8Unorm:
       return ResourceBinding::ImageFormat::kRgba8Unorm;
-    case type::ImageFormat::kRgba8UnormSrgb:
+    case sem::ImageFormat::kRgba8UnormSrgb:
       return ResourceBinding::ImageFormat::kRgba8UnormSrgb;
-    case type::ImageFormat::kRgba8Snorm:
+    case sem::ImageFormat::kRgba8Snorm:
       return ResourceBinding::ImageFormat::kRgba8Snorm;
-    case type::ImageFormat::kRgba8Uint:
+    case sem::ImageFormat::kRgba8Uint:
       return ResourceBinding::ImageFormat::kRgba8Uint;
-    case type::ImageFormat::kRgba8Sint:
+    case sem::ImageFormat::kRgba8Sint:
       return ResourceBinding::ImageFormat::kRgba8Sint;
-    case type::ImageFormat::kBgra8Unorm:
+    case sem::ImageFormat::kBgra8Unorm:
       return ResourceBinding::ImageFormat::kBgra8Unorm;
-    case type::ImageFormat::kBgra8UnormSrgb:
+    case sem::ImageFormat::kBgra8UnormSrgb:
       return ResourceBinding::ImageFormat::kBgra8UnormSrgb;
-    case type::ImageFormat::kRgb10A2Unorm:
+    case sem::ImageFormat::kRgb10A2Unorm:
       return ResourceBinding::ImageFormat::kRgb10A2Unorm;
-    case type::ImageFormat::kRg11B10Float:
+    case sem::ImageFormat::kRg11B10Float:
       return ResourceBinding::ImageFormat::kRg11B10Float;
-    case type::ImageFormat::kRg32Uint:
+    case sem::ImageFormat::kRg32Uint:
       return ResourceBinding::ImageFormat::kRg32Uint;
-    case type::ImageFormat::kRg32Sint:
+    case sem::ImageFormat::kRg32Sint:
       return ResourceBinding::ImageFormat::kRg32Sint;
-    case type::ImageFormat::kRg32Float:
+    case sem::ImageFormat::kRg32Float:
       return ResourceBinding::ImageFormat::kRg32Float;
-    case type::ImageFormat::kRgba16Uint:
+    case sem::ImageFormat::kRgba16Uint:
       return ResourceBinding::ImageFormat::kRgba16Uint;
-    case type::ImageFormat::kRgba16Sint:
+    case sem::ImageFormat::kRgba16Sint:
       return ResourceBinding::ImageFormat::kRgba16Sint;
-    case type::ImageFormat::kRgba16Float:
+    case sem::ImageFormat::kRgba16Float:
       return ResourceBinding::ImageFormat::kRgba16Float;
-    case type::ImageFormat::kRgba32Uint:
+    case sem::ImageFormat::kRgba32Uint:
       return ResourceBinding::ImageFormat::kRgba32Uint;
-    case type::ImageFormat::kRgba32Sint:
+    case sem::ImageFormat::kRgba32Sint:
       return ResourceBinding::ImageFormat::kRgba32Sint;
-    case type::ImageFormat::kRgba32Float:
+    case sem::ImageFormat::kRgba32Float:
       return ResourceBinding::ImageFormat::kRgba32Float;
-    case type::ImageFormat::kNone:
+    case sem::ImageFormat::kNone:
       return ResourceBinding::ImageFormat::kNone;
   }
   return ResourceBinding::ImageFormat::kNone;
@@ -207,7 +207,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
                                   entry_point.input_variables);
     }
 
-    if (!func->return_type()->Is<type::Void>()) {
+    if (!func->return_type()->Is<sem::Void>()) {
       AddEntryPointInOutVariables("<retval>", func->return_type(),
                                   func->return_type_decorations(),
                                   entry_point.output_variables);
@@ -386,7 +386,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     auto binding_info = ruv.second;
 
     auto* unwrapped_type = var->Type()->UnwrapIfNeeded();
-    auto* str = unwrapped_type->As<type::StructType>();
+    auto* str = unwrapped_type->As<sem::StructType>();
     if (str == nullptr) {
       continue;
     }
@@ -514,7 +514,7 @@ std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->Type()->UnwrapIfNeeded()->As<type::Texture>();
+    auto* texture_type = var->Type()->UnwrapIfNeeded()->As<sem::Texture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
@@ -541,7 +541,7 @@ ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
 
 void Inspector::AddEntryPointInOutVariables(
     std::string name,
-    type::Type* type,
+    sem::Type* type,
     const ast::DecorationList& decorations,
     std::vector<StageVariable>& variables) const {
   // Skip builtins.
@@ -551,7 +551,7 @@ void Inspector::AddEntryPointInOutVariables(
 
   auto* unwrapped_type = type->UnwrapAll();
 
-  if (auto* struct_ty = unwrapped_type->As<type::StructType>()) {
+  if (auto* struct_ty = unwrapped_type->As<sem::StructType>()) {
     // Recurse into members.
     for (auto* member : struct_ty->impl()->members()) {
       AddEntryPointInOutVariables(
@@ -597,7 +597,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     auto* var = rsv.first;
     auto binding_info = rsv.second;
 
-    auto* ac_type = var->Type()->As<type::AccessControl>();
+    auto* ac_type = var->Type()->As<sem::AccessControl>();
     if (ac_type == nullptr) {
       continue;
     }
@@ -606,7 +606,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    auto* str = var->Type()->UnwrapIfNeeded()->As<type::StructType>();
+    auto* str = var->Type()->UnwrapIfNeeded()->As<sem::StructType>();
     if (!str) {
       continue;
     }
@@ -657,18 +657,18 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->Type()->UnwrapIfNeeded()->As<type::Texture>();
+    auto* texture_type = var->Type()->UnwrapIfNeeded()->As<sem::Texture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
-    type::Type* base_type = nullptr;
+    sem::Type* base_type = nullptr;
     if (multisampled_only) {
-      base_type = texture_type->As<type::MultisampledTexture>()
+      base_type = texture_type->As<sem::MultisampledTexture>()
                       ->type()
                       ->UnwrapIfNeeded();
     } else {
       base_type =
-          texture_type->As<type::SampledTexture>()->type()->UnwrapIfNeeded();
+          texture_type->As<sem::SampledTexture>()->type()->UnwrapIfNeeded();
     }
     entry.sampled_kind = BaseTypeToSampledKind(base_type);
 
@@ -692,7 +692,7 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     auto* var = ref.first;
     auto binding_info = ref.second;
 
-    auto* ac_type = var->Type()->As<type::AccessControl>();
+    auto* ac_type = var->Type()->As<sem::AccessControl>();
     if (ac_type == nullptr) {
       continue;
     }
@@ -709,11 +709,11 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     entry.binding = binding_info.binding->value();
 
     auto* texture_type =
-        var->Type()->UnwrapIfNeeded()->As<type::StorageTexture>();
+        var->Type()->UnwrapIfNeeded()->As<sem::StorageTexture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
-    type::Type* base_type = texture_type->type()->UnwrapIfNeeded();
+    sem::Type* base_type = texture_type->type()->UnwrapIfNeeded();
     entry.sampled_kind = BaseTypeToSampledKind(base_type);
     entry.image_format = TypeImageFormatToResourceBindingImageFormat(
         texture_type->image_format());

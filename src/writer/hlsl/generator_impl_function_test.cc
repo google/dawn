@@ -395,7 +395,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
@@ -441,7 +441,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadOnly, s);
+  sem::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
@@ -487,7 +487,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kWriteOnly, s);
+  sem::AccessControl ac(ast::AccessControl::kWriteOnly, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
@@ -531,7 +531,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
@@ -983,7 +983,7 @@ TEST_F(HlslGeneratorImplTest_Function,
       Structure("Data", {Member("d", ty.f32())},
                 ast::DecorationList{create<ast::StructBlockDecoration>()});
 
-  type::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
   Global("data", &ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{

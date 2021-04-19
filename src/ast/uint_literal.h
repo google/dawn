@@ -32,7 +32,7 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
   /// @param value the uint literals value
   UintLiteral(ProgramID program_id,
               const Source& source,
-              type::Type* type,
+              sem::Type* type,
               uint32_t value);
   ~UintLiteral() override;
 

@@ -65,7 +65,7 @@ class Builder {
     uint32_t source_id;
     /// The type of the current chain source. This type matches the deduced
     /// result_type of the current source defined above.
-    type::Type* source_type;
+    sem::Type* source_type;
     /// A list of access chain indices to emit. Note, we _only_ have access
     /// chain indices if the source is pointer.
     std::vector<uint32_t> access_chain_indices;
@@ -263,7 +263,7 @@ class Builder {
   /// @param type the type to generate for
   /// @param struct_id the struct id
   /// @param member_idx the member index
-  void GenerateMemberAccessControlIfNeeded(type::Type* type,
+  void GenerateMemberAccessControlIfNeeded(sem::Type* type,
                                            uint32_t struct_id,
                                            uint32_t member_idx);
   /// Generates a function variable
@@ -372,7 +372,7 @@ class Builder {
   /// @param texture_operand the texture operand
   /// @param sampler_operand the sampler operand
   /// @returns the expression ID
-  uint32_t GenerateSampledImage(type::Type* texture_type,
+  uint32_t GenerateSampledImage(sem::Type* texture_type,
                                 Operand texture_operand,
                                 Operand sampler_operand);
   /// Generates a cast or object copy for the expression result,
@@ -381,7 +381,7 @@ class Builder {
   /// @param to_type the type we're casting too
   /// @param from_expr the expression to cast
   /// @returns the expression ID on success or 0 otherwise
-  uint32_t GenerateCastOrCopyOrPassthrough(type::Type* to_type,
+  uint32_t GenerateCastOrCopyOrPassthrough(sem::Type* to_type,
                                            ast::Expression* from_expr);
   /// Generates a loop statement
   /// @param stmt the statement to generate
@@ -413,7 +413,7 @@ class Builder {
   /// @param type the type to load
   /// @param id the variable id to load
   /// @returns the ID of the loaded value or `id` if type is not a pointer
-  uint32_t GenerateLoadIfNeeded(type::Type* type, uint32_t id);
+  uint32_t GenerateLoadIfNeeded(sem::Type* type, uint32_t id);
   /// Generates an OpStore. Emits an error and returns false if we're
   /// currently outside a function.
   /// @param to the ID to store too
@@ -423,33 +423,33 @@ class Builder {
   /// Generates a type if not already created
   /// @param type the type to create
   /// @returns the ID to use for the given type. Returns 0 on unknown type.
-  uint32_t GenerateTypeIfNeeded(type::Type* type);
+  uint32_t GenerateTypeIfNeeded(sem::Type* type);
   /// Generates a texture type declaration
   /// @param texture the texture to generate
   /// @param result the result operand
   /// @returns true if the texture was successfully generated
-  bool GenerateTextureType(type::Texture* texture, const Operand& result);
+  bool GenerateTextureType(sem::Texture* texture, const Operand& result);
   /// Generates an array type declaration
   /// @param ary the array to generate
   /// @param result the result operand
   /// @returns true if the array was successfully generated
-  bool GenerateArrayType(type::ArrayType* ary, const Operand& result);
+  bool GenerateArrayType(sem::ArrayType* ary, const Operand& result);
   /// Generates a matrix type declaration
   /// @param mat the matrix to generate
   /// @param result the result operand
   /// @returns true if the matrix was successfully generated
-  bool GenerateMatrixType(type::Matrix* mat, const Operand& result);
+  bool GenerateMatrixType(sem::Matrix* mat, const Operand& result);
   /// Generates a pointer type declaration
   /// @param ptr the pointer type to generate
   /// @param result the result operand
   /// @returns true if the pointer was successfully generated
-  bool GeneratePointerType(type::Pointer* ptr, const Operand& result);
+  bool GeneratePointerType(sem::Pointer* ptr, const Operand& result);
   /// Generates a vector type declaration
   /// @param struct_type the vector to generate
   /// @param access_control the access controls to assign to the struct
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
-  bool GenerateStructType(type::StructType* struct_type,
+  bool GenerateStructType(sem::StructType* struct_type,
                           ast::AccessControl access_control,
                           const Operand& result);
   /// Generates a struct member
@@ -468,12 +468,12 @@ class Builder {
   /// @param vec the vector to generate
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
-  bool GenerateVectorType(type::Vector* vec, const Operand& result);
+  bool GenerateVectorType(sem::Vector* vec, const Operand& result);
 
   /// Converts AST image format to SPIR-V and pushes an appropriate capability.
   /// @param format AST image format type
   /// @returns SPIR-V image format type
-  SpvImageFormat convert_image_format_to_spv(const type::ImageFormat format);
+  SpvImageFormat convert_image_format_to_spv(const sem::ImageFormat format);
 
   /// Determines if the given type constructor is created from constant values
   /// @param expr the expression to check
@@ -488,7 +488,7 @@ class Builder {
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  type::Type* TypeOf(ast::Expression* expr) const {
+  sem::Type* TypeOf(ast::Expression* expr) const {
     return builder_.TypeOf(expr);
   }
 
@@ -500,7 +500,7 @@ class Builder {
   /// Generates a constant-null of the given type, if needed
   /// @param type the type of the constant null to generate.
   /// @returns the ID on success or 0 on failure
-  uint32_t GenerateConstantNullIfNeeded(type::Type* type);
+  uint32_t GenerateConstantNullIfNeeded(sem::Type* type);
 
   ProgramBuilder builder_;
   std::string error_;

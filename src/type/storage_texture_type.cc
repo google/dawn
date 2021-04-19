@@ -16,10 +16,10 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::StorageTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::StorageTexture);
 
 namespace tint {
-namespace type {
+namespace sem {
 
 // Note, these names match the names in the WGSL spec. This behaviour is used
 // in the WGSL writer to emit the texture format names.
@@ -139,7 +139,7 @@ std::ostream& operator<<(std::ostream& out, ImageFormat format) {
 
 StorageTexture::StorageTexture(TextureDimension dim,
                                ImageFormat format,
-                               type::Type* subtype)
+                               sem::Type* subtype)
     : Base(dim), image_format_(format), subtype_(subtype) {}
 
 StorageTexture::StorageTexture(StorageTexture&&) = default;
@@ -164,59 +164,59 @@ StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<StorageTexture>(dim(), image_format_, ty);
 }
 
-type::Type* StorageTexture::SubtypeFor(type::ImageFormat format,
-                                       type::Manager& type_mgr) {
+sem::Type* StorageTexture::SubtypeFor(sem::ImageFormat format,
+                                      sem::Manager& type_mgr) {
   switch (format) {
-    case type::ImageFormat::kR8Uint:
-    case type::ImageFormat::kR16Uint:
-    case type::ImageFormat::kRg8Uint:
-    case type::ImageFormat::kR32Uint:
-    case type::ImageFormat::kRg16Uint:
-    case type::ImageFormat::kRgba8Uint:
-    case type::ImageFormat::kRg32Uint:
-    case type::ImageFormat::kRgba16Uint:
-    case type::ImageFormat::kRgba32Uint: {
-      return type_mgr.Get<type::U32>();
+    case sem::ImageFormat::kR8Uint:
+    case sem::ImageFormat::kR16Uint:
+    case sem::ImageFormat::kRg8Uint:
+    case sem::ImageFormat::kR32Uint:
+    case sem::ImageFormat::kRg16Uint:
+    case sem::ImageFormat::kRgba8Uint:
+    case sem::ImageFormat::kRg32Uint:
+    case sem::ImageFormat::kRgba16Uint:
+    case sem::ImageFormat::kRgba32Uint: {
+      return type_mgr.Get<sem::U32>();
     }
 
-    case type::ImageFormat::kR8Sint:
-    case type::ImageFormat::kR16Sint:
-    case type::ImageFormat::kRg8Sint:
-    case type::ImageFormat::kR32Sint:
-    case type::ImageFormat::kRg16Sint:
-    case type::ImageFormat::kRgba8Sint:
-    case type::ImageFormat::kRg32Sint:
-    case type::ImageFormat::kRgba16Sint:
-    case type::ImageFormat::kRgba32Sint: {
-      return type_mgr.Get<type::I32>();
+    case sem::ImageFormat::kR8Sint:
+    case sem::ImageFormat::kR16Sint:
+    case sem::ImageFormat::kRg8Sint:
+    case sem::ImageFormat::kR32Sint:
+    case sem::ImageFormat::kRg16Sint:
+    case sem::ImageFormat::kRgba8Sint:
+    case sem::ImageFormat::kRg32Sint:
+    case sem::ImageFormat::kRgba16Sint:
+    case sem::ImageFormat::kRgba32Sint: {
+      return type_mgr.Get<sem::I32>();
     }
 
-    case type::ImageFormat::kR8Unorm:
-    case type::ImageFormat::kRg8Unorm:
-    case type::ImageFormat::kRgba8Unorm:
-    case type::ImageFormat::kRgba8UnormSrgb:
-    case type::ImageFormat::kBgra8Unorm:
-    case type::ImageFormat::kBgra8UnormSrgb:
-    case type::ImageFormat::kRgb10A2Unorm:
-    case type::ImageFormat::kR8Snorm:
-    case type::ImageFormat::kRg8Snorm:
-    case type::ImageFormat::kRgba8Snorm:
-    case type::ImageFormat::kR16Float:
-    case type::ImageFormat::kR32Float:
-    case type::ImageFormat::kRg16Float:
-    case type::ImageFormat::kRg11B10Float:
-    case type::ImageFormat::kRg32Float:
-    case type::ImageFormat::kRgba16Float:
-    case type::ImageFormat::kRgba32Float: {
-      return type_mgr.Get<type::F32>();
+    case sem::ImageFormat::kR8Unorm:
+    case sem::ImageFormat::kRg8Unorm:
+    case sem::ImageFormat::kRgba8Unorm:
+    case sem::ImageFormat::kRgba8UnormSrgb:
+    case sem::ImageFormat::kBgra8Unorm:
+    case sem::ImageFormat::kBgra8UnormSrgb:
+    case sem::ImageFormat::kRgb10A2Unorm:
+    case sem::ImageFormat::kR8Snorm:
+    case sem::ImageFormat::kRg8Snorm:
+    case sem::ImageFormat::kRgba8Snorm:
+    case sem::ImageFormat::kR16Float:
+    case sem::ImageFormat::kR32Float:
+    case sem::ImageFormat::kRg16Float:
+    case sem::ImageFormat::kRg11B10Float:
+    case sem::ImageFormat::kRg32Float:
+    case sem::ImageFormat::kRgba16Float:
+    case sem::ImageFormat::kRgba32Float: {
+      return type_mgr.Get<sem::F32>();
     }
 
-    case type::ImageFormat::kNone:
+    case sem::ImageFormat::kNone:
       break;
   }
 
   return nullptr;
 }
 
-}  // namespace type
+}  // namespace sem
 }  // namespace tint
