@@ -24,6 +24,7 @@ using SpvBuilderConstructorTest = TestHelper;
 
 TEST_F(SpvBuilderConstructorTest, Const) {
   auto* c = Expr(42.2f);
+  WrapInFunction(c);
 
   spirv::Builder& b = Build();
 

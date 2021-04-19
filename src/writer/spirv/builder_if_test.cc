@@ -27,9 +27,8 @@ TEST_F(BuilderTest, If_Empty) {
   // }
   auto* cond = Expr(true);
 
-  auto* expr = create<ast::IfStatement>(
-      cond, create<ast::BlockStatement>(ast::StatementList{}),
-      ast::ElseStatementList{});
+  auto* expr =
+      create<ast::IfStatement>(cond, Block(), ast::ElseStatementList{});
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -56,7 +55,7 @@ TEST_F(BuilderTest, If_Empty_OutsideFunction_IsError) {
   auto* cond = Expr(true);
 
   ast::ElseStatementList elses;
-  auto* block = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block = Block();
   auto* expr = create<ast::IfStatement>(cond, block, elses);
   WrapInFunction(expr);
 
@@ -288,19 +287,14 @@ TEST_F(BuilderTest, If_WithBreak) {
   //   }
   // }
 
-  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
+  auto* if_body = Block(create<ast::BreakStatement>());
 
   auto* if_stmt =
       create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
 
-  auto* loop_body = create<ast::BlockStatement>(ast::StatementList{
-      if_stmt,
-  });
+  auto* loop_body = Block(if_stmt);
 
-  auto* expr = create<ast::LoopStatement>(
-      loop_body, create<ast::BlockStatement>(ast::StatementList{}));
+  auto* expr = create<ast::LoopStatement>(loop_body, Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -336,20 +330,15 @@ TEST_F(BuilderTest, If_WithElseBreak) {
   //     break;
   //   }
   // }
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
+  auto* else_body = Block(create<ast::BreakStatement>());
 
   auto* if_stmt = create<ast::IfStatement>(
-      Expr(true), create<ast::BlockStatement>(ast::StatementList{}),
+      Expr(true), Block(),
       ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
 
-  auto* loop_body = create<ast::BlockStatement>(ast::StatementList{
-      if_stmt,
-  });
+  auto* loop_body = Block(if_stmt);
 
-  auto* expr = create<ast::LoopStatement>(
-      loop_body, create<ast::BlockStatement>(ast::StatementList{}));
+  auto* expr = create<ast::LoopStatement>(loop_body, Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -386,19 +375,14 @@ TEST_F(BuilderTest, If_WithContinue) {
   //     continue;
   //   }
   // }
-  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ContinueStatement>(),
-  });
+  auto* if_body = Block(create<ast::ContinueStatement>());
 
   auto* if_stmt =
       create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
 
-  auto* loop_body = create<ast::BlockStatement>(ast::StatementList{
-      if_stmt,
-  });
+  auto* loop_body = Block(if_stmt);
 
-  auto* expr = create<ast::LoopStatement>(
-      loop_body, create<ast::BlockStatement>(ast::StatementList{}));
+  auto* expr = create<ast::LoopStatement>(loop_body, Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -434,20 +418,15 @@ TEST_F(BuilderTest, If_WithElseContinue) {
   //     continue;
   //   }
   // }
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ContinueStatement>(),
-  });
+  auto* else_body = Block(create<ast::ContinueStatement>());
 
   auto* if_stmt = create<ast::IfStatement>(
-      Expr(true), create<ast::BlockStatement>(ast::StatementList{}),
+      Expr(true), Block(),
       ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
 
-  auto* loop_body = create<ast::BlockStatement>(ast::StatementList{
-      if_stmt,
-  });
+  auto* loop_body = Block(if_stmt);
 
-  auto* expr = create<ast::LoopStatement>(
-      loop_body, create<ast::BlockStatement>(ast::StatementList{}));
+  auto* expr = create<ast::LoopStatement>(loop_body, Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -482,9 +461,7 @@ TEST_F(BuilderTest, If_WithReturn) {
   // if (true) {
   //   return;
   // }
-  auto* if_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
+  auto* if_body = Block(create<ast::ReturnStatement>());
 
   auto* expr =
       create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
@@ -540,9 +517,8 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
 
   auto* var = Global("a", ty.bool_(), ast::StorageClass::kFunction);
 
-  auto* expr = create<ast::IfStatement>(
-      Expr("a"), create<ast::BlockStatement>(ast::StatementList{}),
-      ast::ElseStatementList{});
+  auto* expr =
+      create<ast::IfStatement>(Expr("a"), Block(), ast::ElseStatementList{});
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();

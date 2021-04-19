@@ -23,6 +23,7 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Literal_Bool_True) {
   auto* b_true = create<ast::BoolLiteral>(ty.bool_(), true);
+  WrapInFunction(b_true);
 
   spirv::Builder& b = Build();
 
@@ -37,6 +38,7 @@ TEST_F(BuilderTest, Literal_Bool_True) {
 
 TEST_F(BuilderTest, Literal_Bool_False) {
   auto* b_false = create<ast::BoolLiteral>(ty.bool_(), false);
+  WrapInFunction(b_false);
 
   spirv::Builder& b = Build();
 
@@ -52,6 +54,7 @@ TEST_F(BuilderTest, Literal_Bool_False) {
 TEST_F(BuilderTest, Literal_Bool_Dedup) {
   auto* b_true = create<ast::BoolLiteral>(ty.bool_(), true);
   auto* b_false = create<ast::BoolLiteral>(ty.bool_(), false);
+  WrapInFunction(b_true, b_false);
 
   spirv::Builder& b = Build();
 
@@ -70,7 +73,7 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
 
 TEST_F(BuilderTest, Literal_I32) {
   auto* i = create<ast::SintLiteral>(ty.i32(), -23);
-
+  WrapInFunction(i);
   spirv::Builder& b = Build();
 
   auto id = b.GenerateLiteralIfNeeded(nullptr, i);
@@ -85,6 +88,7 @@ TEST_F(BuilderTest, Literal_I32) {
 TEST_F(BuilderTest, Literal_I32_Dedup) {
   auto* i1 = create<ast::SintLiteral>(ty.i32(), -23);
   auto* i2 = create<ast::SintLiteral>(ty.i32(), -23);
+  WrapInFunction(i1, i2);
 
   spirv::Builder& b = Build();
 
@@ -99,6 +103,7 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
 
 TEST_F(BuilderTest, Literal_U32) {
   auto* i = create<ast::UintLiteral>(ty.u32(), 23);
+  WrapInFunction(i);
 
   spirv::Builder& b = Build();
 
@@ -114,6 +119,7 @@ TEST_F(BuilderTest, Literal_U32) {
 TEST_F(BuilderTest, Literal_U32_Dedup) {
   auto* i1 = create<ast::UintLiteral>(ty.u32(), 23);
   auto* i2 = create<ast::UintLiteral>(ty.u32(), 23);
+  WrapInFunction(i1, i2);
 
   spirv::Builder& b = Build();
 
@@ -128,6 +134,7 @@ TEST_F(BuilderTest, Literal_U32_Dedup) {
 
 TEST_F(BuilderTest, Literal_F32) {
   auto* i = create<ast::FloatLiteral>(ty.f32(), 23.245f);
+  WrapInFunction(i);
 
   spirv::Builder& b = Build();
 
@@ -143,6 +150,7 @@ TEST_F(BuilderTest, Literal_F32) {
 TEST_F(BuilderTest, Literal_F32_Dedup) {
   auto* i1 = create<ast::FloatLiteral>(ty.f32(), 23.245f);
   auto* i2 = create<ast::FloatLiteral>(ty.f32(), 23.245f);
+  WrapInFunction(i1, i2);
 
   spirv::Builder& b = Build();
 

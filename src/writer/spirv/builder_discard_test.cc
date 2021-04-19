@@ -24,6 +24,7 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Discard) {
   auto* expr = create<ast::DiscardStatement>();
+  WrapInFunction(expr);
 
   spirv::Builder& b = Build();
 
