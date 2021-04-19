@@ -111,7 +111,7 @@ fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] ve
 
     std::string fragmentShader = R"(
 [[stage(fragment)]]
-fn main([[builtin(frag_coord)]] fragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+fn main([[builtin(position)]] fragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
     return vec4<f32>(fragCoord.xy, 0.0, 1.0);
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
@@ -191,7 +191,7 @@ fn main(input : VertexIn) -> VertexOut {
     std::string fragmentShader = R"(
 struct FragmentIn {
     [[location(0)]] color : vec4<f32>;
-    [[builtin(frag_coord)]] fragCoord : vec4<f32>;
+    [[builtin(position)]] fragCoord : vec4<f32>;
 };
 
 [[stage(fragment)]]
@@ -238,7 +238,7 @@ fn main(input : VertexIn) -> VertexOut {
     std::string fragmentShader = R"(
 struct FragmentIn {
     [[location(0)]] color : vec4<f32>;
-    [[builtin(frag_coord)]] fragCoord : vec4<f32>;
+    [[builtin(position)]] fragCoord : vec4<f32>;
 };
 
 [[stage(fragment)]]

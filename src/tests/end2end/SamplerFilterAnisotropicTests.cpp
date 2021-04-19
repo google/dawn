@@ -68,7 +68,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
 
             struct FragmentIn {
                 [[location(0)]] uv: vec2<f32>;
-                [[builtin(frag_coord)]] fragCoord : vec4<f32>;
+                [[builtin(position)]] fragCoord : vec4<f32>;
             };
 
             [[stage(fragment)]]

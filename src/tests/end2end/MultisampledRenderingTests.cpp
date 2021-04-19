@@ -784,7 +784,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
 
         struct FragmentOut {
             [[location(0)]] color : vec4<f32>;
-            [[builtin(sample_mask_out)]] sampleMask : u32;
+            [[builtin(sample_mask)]] sampleMask : u32;
         };
 
         [[stage(fragment)]] fn main() -> FragmentOut {
@@ -847,7 +847,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
         struct FragmentOut {
             [[location(0)]] color0 : vec4<f32>;
             [[location(1)]] color1 : vec4<f32>;
-            [[builtin(sample_mask_out)]] sampleMask : u32;
+            [[builtin(sample_mask)]] sampleMask : u32;
         };
 
         [[stage(fragment)]] fn main() -> FragmentOut {

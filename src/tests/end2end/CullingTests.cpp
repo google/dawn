@@ -44,7 +44,7 @@ class CullingTest : public DawnTest {
         // will make the pixel's R and G channels exactly equal to the pixel's x and y coordinates.
         pipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
             [[stage(fragment)]]
-            fn main([[builtin(frag_coord)]] FragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+            fn main([[builtin(position)]] FragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
                 return vec4<f32>(
                     (FragCoord.xy - vec2<f32>(0.5, 0.5)) / vec2<f32>(255.0, 255.0),
                     0.0, 1.0);

@@ -162,7 +162,7 @@ class TextureFormatTest : public DawnTest {
         fsSource << "   [[location(0)]] color : vec4<" << type << ">;\n";
         fsSource << R"(};
             [[stage(fragment)]]
-            fn main([[builtin(frag_coord)]] FragCoord : vec4<f32>) -> FragmentOut {
+            fn main([[builtin(position)]] FragCoord : vec4<f32>) -> FragmentOut {
                 var output : FragmentOut;
                 output.color = textureLoad(myTexture, vec2<i32>(FragCoord.xy), 0);
                 return output;

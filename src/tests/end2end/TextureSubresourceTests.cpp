@@ -105,7 +105,7 @@ class TextureSubresourceTest : public DawnTest {
             [[group(0), binding(1)]] var tex : texture_2d<f32>;
 
             [[stage(fragment)]]
-            fn main([[builtin(frag_coord)]] FragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+            fn main([[builtin(position)]] FragCoord : vec4<f32>) -> [[location(0)]] vec4<f32> {
                 return textureSample(tex, samp, FragCoord.xy / vec2<f32>(4.0, 4.0));
             })");
 

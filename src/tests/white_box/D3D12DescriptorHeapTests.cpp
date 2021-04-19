@@ -804,7 +804,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
             [[group(0), binding(3)]] var<uniform> buffer0 : U;
 
             [[stage(fragment)]] fn main(
-                [[builtin(frag_coord)]] FragCoord : vec4<f32>
+                [[builtin(position)]] FragCoord : vec4<f32>
             ) -> [[location(0)]] vec4<f32> {
                 return textureSample(texture0, sampler0, FragCoord.xy) + buffer0.color;
             })");

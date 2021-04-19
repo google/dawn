@@ -139,7 +139,7 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : [[access(read)]] texture_storage_2d<rgba8unorm>;
             [[stage(fragment)]] fn main(
-                [[builtin(frag_coord)]] FragCoord : vec4<f32>
+                [[builtin(position)]] FragCoord : vec4<f32>
             ) -> [[location(0)]] vec4<f32> {
                 return textureLoad(image0, vec2<i32>(FragCoord.xy));
             })");
@@ -170,8 +170,8 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
     {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[group(0), binding(0)]] var image0 : [[access(write)]] texture_storage_2d<rgba8unorm>;
-            [[stage(fragment)]] fn main([[builtin(frag_coord)]] frag_coord : vec4<f32>) {
-                textureStore(image0, vec2<i32>(frag_coord.xy), vec4<f32>(1.0, 0.0, 0.0, 1.0));
+            [[stage(fragment)]] fn main([[builtin(position)]] position : vec4<f32>) {
+                textureStore(image0, vec2<i32>(position.xy), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
 
         utils::ComboRenderPipelineDescriptor2 descriptor;

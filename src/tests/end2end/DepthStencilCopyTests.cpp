@@ -256,7 +256,7 @@ class DepthStencilCopyTests : public DawnTest {
             };
 
             [[stage(fragment)]]
-            fn main([[builtin(frag_coord)]] FragCoord : vec4<f32>) -> FragmentOut {
+            fn main([[builtin(position)]] FragCoord : vec4<f32>) -> FragmentOut {
                 var output : FragmentOut;
                 output.result = 1u;
                 output.fragDepth = textureLoad(texture0, vec2<i32>(FragCoord.xy), 0)[0];
