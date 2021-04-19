@@ -70,10 +70,13 @@ std::string CommonTypes() {
     %uint_6 = OpConstant %uint 6
     %uint_7 = OpConstant %uint 7
     %uint_8 = OpConstant %uint 8
+    %uint_10 = OpConstant %uint 10
     %uint_20 = OpConstant %uint 20
     %uint_30 = OpConstant %uint 30
     %uint_40 = OpConstant %uint 40
     %uint_50 = OpConstant %uint 50
+    %uint_90 = OpConstant %uint 90
+    %uint_99 = OpConstant %uint 99
 
     %ptr_Private_uint = OpTypePointer Private %uint
     %var = OpVariable %ptr_Private_uint Private
@@ -3669,6 +3672,55 @@ TEST_F(SpvParserTest, LabelControlFlowConstructs_Nest_If_MultiBlockLoop) {
   EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[2].get());
   EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[2].get());
   EXPECT_EQ(fe.GetBlockInfo(89)->construct, constructs[1].get());
+  EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+}
+
+TEST_F(SpvParserTest, LabelControlFlowConstructs_LoopInterallyDiverge) {
+  // In this case, insert a synthetic if-selection with the same blocks
+  // as the loop construct.
+  // crbug.com/tint/524
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %90 None
+     OpBranchConditional %cond %30 %40 ; divergence to distinct targets in the body
+
+       %30 = OpLabel
+       OpBranch %90
+
+       %40 = OpLabel
+       OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpBranch %20
+
+     %99 = OpLabel ; loop merge
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  ASSERT_TRUE(FlowLabelControlFlowConstructs(&fe)) << p->error();
+  const auto& constructs = fe.constructs();
+  EXPECT_EQ(constructs.size(), 4u);
+  ASSERT_THAT(ToString(constructs), Eq(R"(ConstructList{
+  Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
+  Construct{ Continue [4,5) begin_id:90 end_id:99 depth:1 parent:Function@10 in-c:Continue@90 }
+  Construct{ Loop [1,4) begin_id:20 end_id:90 depth:1 parent:Function@10 scope:[1,5) in-l:Loop@20 }
+  Construct{ IfSelection [1,4) begin_id:20 end_id:90 depth:2 parent:Loop@20 in-l:Loop@20 }
+})")) << constructs;
+  // The block records the nearest enclosing construct.
+  EXPECT_EQ(fe.GetBlockInfo(10)->construct, constructs[0].get());
+  EXPECT_EQ(fe.GetBlockInfo(20)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(30)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[3].get());
+  EXPECT_EQ(fe.GetBlockInfo(90)->construct, constructs[1].get());
   EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
 }
 
@@ -14257,6 +14309,87 @@ TEST_F(SpvParserTest, EmitBody_FalseBranch_SwitchBreak) {
 Return{}
 )";
   ASSERT_EQ(expect, got);
+}
+
+TEST_F(SpvParserTest, EmitBody_LoopInternallyDiverge_Simple) {
+  // crbug.com/tint/524
+  auto assembly = CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+     %10 = OpLabel
+     OpStore %var %uint_10
+     OpBranch %20
+
+     %20 = OpLabel
+     OpStore %var %uint_20
+     OpLoopMerge %99 %90 None
+     OpBranchConditional %cond %30 %40 ; divergence
+
+       %30 = OpLabel
+       OpStore %var %uint_30
+       OpBranch %90
+
+       %40 = OpLabel
+       OpStore %var %uint_40
+       OpBranch %90
+
+     %90 = OpLabel ; continue target
+     OpStore %var %uint_90
+     OpBranch %20
+
+     %99 = OpLabel ; loop merge
+     OpStore %var %uint_99
+     OpReturn
+
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(Assignment{
+  Identifier[not set]{var_1}
+  ScalarConstructor[not set]{10u}
+}
+Loop{
+  Assignment{
+    Identifier[not set]{var_1}
+    ScalarConstructor[not set]{20u}
+  }
+  If{
+    (
+      ScalarConstructor[not set]{false}
+    )
+    {
+      Assignment{
+        Identifier[not set]{var_1}
+        ScalarConstructor[not set]{30u}
+      }
+      Continue{}
+    }
+  }
+  Else{
+    {
+      Assignment{
+        Identifier[not set]{var_1}
+        ScalarConstructor[not set]{40u}
+      }
+    }
+  }
+  continuing {
+    Assignment{
+      Identifier[not set]{var_1}
+      ScalarConstructor[not set]{90u}
+    }
+  }
+}
+Assignment{
+  Identifier[not set]{var_1}
+  ScalarConstructor[not set]{99u}
+}
+Return{}
+)";
+  ASSERT_EQ(expect, got) << got;
 }
 
 }  // namespace

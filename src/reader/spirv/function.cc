@@ -1325,6 +1325,22 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
           // in the block order, starting at the header, until just
           // before the continue target.
           top = push_construct(depth, Construct::kLoop, header, ct);
+
+          // If the loop header branches to two different blocks inside the loop
+          // construct, then the loop body should be modeled as an if-selection
+          // construct
+          std::vector<uint32_t> targets;
+          header_info->basic_block->ForEachSuccessorLabel(
+              [&targets](const uint32_t target) { targets.push_back(target); });
+          if ((targets.size() == 2u) && targets[0] != targets[1]) {
+            const auto target0_pos = GetBlockInfo(targets[0])->pos;
+            const auto target1_pos = GetBlockInfo(targets[1])->pos;
+            if (top->ContainsPos(target0_pos) &&
+                top->ContainsPos(target1_pos)) {
+              // Insert a synthetic if-selection
+              top = push_construct(depth+1, Construct::kIfSelection, header, ct);
+            }
+          }
         }
       } else {
         // From the interval rule, the selection construct consists of blocks
@@ -1705,7 +1721,7 @@ bool FunctionEmitter::ClassifyCFGEdges() {
         if ((edge_kind == EdgeKind::kForward) ||
             (edge_kind == EdgeKind::kCaseFallThrough)) {
           // Check for an invalid forward exit out of this construct.
-          if (dest_info->pos >= src_construct.end_pos) {
+          if (dest_info->pos > src_construct.end_pos) {
             // In most cases we're bypassing the merge block for the source
             // construct.
             auto end_block = src_construct.end_id;
@@ -2151,10 +2167,12 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   // What constructs can we have entered?
   // - It can't be kFunction, because there is only one of those, and it was
   //   already on the stack at the outermost level.
-  // - We have at most one of kIfSelection, kSwitchSelection, or kLoop because
-  //   each of those is headed by a block with a merge instruction (OpLoopMerge
-  //   for kLoop, and OpSelectionMerge for the others), and the kIfSelection and
-  //   kSwitchSelection header blocks end in different branch instructions.
+  // - We have at most one of kSwitchSelection, or kLoop because each of those
+  //   is headed by a block with a merge instruction (OpLoopMerge for kLoop,
+  //   and OpSelectionMerge for kSwitchSelection).
+  // - When there is a kIfSelection, it can't contain another construct,
+  //   because both would have to have their own distinct merge instructions
+  //   and distinct terminators.
   // - A kContinue can contain a kContinue
   //   This is possible in Vulkan SPIR-V, but Tint disallows this by the rule
   //   that a block can be continue target for at most one header block. See
@@ -2162,8 +2180,14 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   //   then by a dominance argument, the inner loop continue target can only be
   //   a single-block loop.
   // TODO(dneto): Handle this case.
-  // - All that's left is a kContinue and one of kIfSelection, kSwitchSelection,
-  //   kLoop.
+  // - If a kLoop is on the outside, its terminator is either:
+  //   - an OpBranch, in which case there is no other construct.
+  //   - an OpBranchConditional, in which case there is either an kIfSelection
+  //     (when both branch targets are different and are inside the loop),
+  //     or no other construct (because the branch targets are the same,
+  //     or one of them is a break or continue).
+  // - All that's left is a kContinue on the outside, and one of
+  //   kIfSelection, kSwitchSelection, kLoop on the inside.
   //
   //   The kContinue can be the parent of the other.  For example, a selection
   //   starting at the first block of a continue construct.
@@ -2189,19 +2213,20 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
   //
   // So we fall into one of the following cases:
   //  - We are entering 0 or 1 constructs, or
-  //  - We are entering 2 constructs, with the outer one being a kContinue, the
-  //    inner one is not a continue.
+  //  - We are entering 2 constructs, with the outer one being a kContinue or
+  //    kLoop, the inner one is not a continue.
   if (entering_constructs.size() > 2) {
     return Fail() << "internal error: bad construct nesting found";
   }
   if (entering_constructs.size() == 2) {
     auto inner_kind = entering_constructs[0]->kind;
     auto outer_kind = entering_constructs[1]->kind;
-    if (outer_kind != Construct::kContinue) {
-      return Fail() << "internal error: bad construct nesting. Only Continue "
-                       "construct can be outer construct on same block.  Got "
-                       "outer kind "
-                    << int(outer_kind) << " inner kind " << int(inner_kind);
+    if (outer_kind != Construct::kContinue && outer_kind != Construct::kLoop) {
+      return Fail()
+             << "internal error: bad construct nesting. Only a Continue "
+                "or a Loop construct can be outer construct on same block.  "
+                "Got outer kind "
+             << int(outer_kind) << " inner kind " << int(inner_kind);
     }
     if (inner_kind == Construct::kContinue) {
       return Fail() << "internal error: unsupported construct nesting: "
