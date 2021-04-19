@@ -68,6 +68,20 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   EXPECT_EQ(gen.result(), "  var<private> a : f32;\n");
 }
 
+TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_InferredType) {
+  auto* var = Var("a", nullptr, ast::StorageClass::kFunction, Expr(123));
+
+  auto* stmt = create<ast::VariableDeclStatement>(var);
+  WrapInFunction(stmt);
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+  EXPECT_EQ(gen.result(), "  var a = 123;\n");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace writer

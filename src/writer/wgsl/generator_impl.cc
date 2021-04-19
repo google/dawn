@@ -598,9 +598,13 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
     }
   }
 
-  out_ << " " << program_->Symbols().NameFor(var->symbol()) << " : ";
-  if (!EmitType(sem->DeclaredType())) {
-    return false;
+  out_ << " " << program_->Symbols().NameFor(var->symbol());
+
+  if (var->declared_type()) {
+    out_ << " : ";
+    if (!EmitType(var->declared_type())) {
+      return false;
+    }
   }
 
   if (var->constructor() != nullptr) {
