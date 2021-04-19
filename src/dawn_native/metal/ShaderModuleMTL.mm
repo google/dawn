@@ -70,10 +70,12 @@ namespace dawn_native { namespace metal {
         errorStream << "Tint MSL failure:" << std::endl;
 
         tint::transform::Manager transformManager;
+        tint::transform::DataMap transformInputs;
+
         if (stage == SingleShaderStage::Vertex &&
             GetDevice()->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
-            transformManager.append(
-                MakeVertexPullingTransform(*vertexState, entryPointName, kPullingBufferBindingSet));
+            AddVertexPullingTransformConfig(*vertexState, entryPointName, kPullingBufferBindingSet,
+                                            &transformInputs);
 
             for (VertexBufferSlot slot :
                  IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
@@ -83,20 +85,16 @@ namespace dawn_native { namespace metal {
                 // this MSL buffer index.
             }
         }
-        transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
-        transformManager.append(std::make_unique<tint::transform::Renamer>());
-        transformManager.append(std::make_unique<tint::transform::Msl>());
+        transformManager.Add<tint::transform::BoundArrayAccessors>();
+        transformManager.Add<tint::transform::Renamer>();
+        transformManager.Add<tint::transform::Msl>();
 
-        tint::transform::Transform::Output output = transformManager.Run(GetTintProgram());
+        tint::Program program;
+        tint::transform::DataMap transformOutputs;
+        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(), transformInputs,
+                                               &transformOutputs, nullptr));
 
-        tint::Program& program = output.program;
-        if (!program.IsValid()) {
-            errorStream << "Tint program transform error: " << program.Diagnostics().str()
-                        << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
-
-        if (auto* data = output.data.Get<tint::transform::Renamer::Data>()) {
+        if (auto* data = transformOutputs.Get<tint::transform::Renamer::Data>()) {
             auto it = data->remappings.find(entryPointName);
             if (it == data->remappings.end()) {
                 return DAWN_VALIDATION_ERROR("Could not find remapped name for entry point.");

@@ -87,9 +87,12 @@ namespace dawn_native { namespace opengl {
             tint::transform::Manager transformManager;
             transformManager.append(std::make_unique<tint::transform::Spirv>());
 
+            tint::transform::DataMap transformInputs;
+
             tint::Program program;
-            DAWN_TRY_ASSIGN(
-                program, RunTransforms(&transformManager, GetTintProgram(), CompilationMessages()));
+            DAWN_TRY_ASSIGN(program,
+                            RunTransforms(&transformManager, GetTintProgram(), transformInputs,
+                                          nullptr, GetCompilationMessages()));
 
             tint::writer::spirv::Generator generator(&program);
             if (!generator.Generate()) {

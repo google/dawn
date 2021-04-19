@@ -55,14 +55,16 @@ namespace dawn_native { namespace vulkan {
             errorStream << "Tint SPIR-V writer failure:" << std::endl;
 
             tint::transform::Manager transformManager;
-            transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
-            transformManager.append(std::make_unique<tint::transform::EmitVertexPointSize>());
-            transformManager.append(std::make_unique<tint::transform::Spirv>());
+            transformManager.Add<tint::transform::BoundArrayAccessors>();
+            transformManager.Add<tint::transform::EmitVertexPointSize>();
+            transformManager.Add<tint::transform::Spirv>();
+
+            tint::transform::DataMap transformInputs;
 
             tint::Program program;
             DAWN_TRY_ASSIGN(program,
                             RunTransforms(&transformManager, parseResult->tintProgram.get(),
-                                          CompilationMessages()));
+                                          transformInputs, nullptr, GetCompilationMessages()));
 
             tint::writer::spirv::Generator generator(&program);
             if (!generator.Generate()) {
@@ -166,15 +168,10 @@ namespace dawn_native { namespace vulkan {
         tint::transform::DataMap transformInputs;
         transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
                                                          std::move(accessControls));
-        tint::transform::Transform::Output output =
-            transformManager.Run(GetTintProgram(), transformInputs);
 
-        const tint::Program& program = output.program;
-        if (!program.IsValid()) {
-            errorStream << "Tint program transform error: " << program.Diagnostics().str()
-                        << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
+        tint::Program program;
+        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(), transformInputs,
+                                               nullptr, nullptr));
 
         tint::writer::spirv::Generator generator(&program);
         if (!generator.Generate()) {

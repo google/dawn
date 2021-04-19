@@ -194,7 +194,7 @@ namespace dawn_native { namespace d3d12 {
         SingleShaderStage stage,
         PipelineLayout* layout,
         std::string* remappedEntryPointName,
-        FirstOffsetInfo* firstOffsetInfo) const {
+        FirstOffsetInfo* firstOffsetInfo) {
         ASSERT(!IsError());
 
         ScopedTintICEHandler scopedICEHandler(GetDevice());
@@ -245,30 +245,28 @@ namespace dawn_native { namespace d3d12 {
         errorStream << "Tint HLSL failure:" << std::endl;
 
         tint::transform::Manager transformManager;
-        transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
-        if (stage == SingleShaderStage::Vertex) {
-            transformManager.append(std::make_unique<tint::transform::FirstIndexOffset>(
-                layout->GetFirstIndexOffsetShaderRegister(),
-                layout->GetFirstIndexOffsetRegisterSpace()));
-        }
-        transformManager.append(std::make_unique<tint::transform::BindingRemapper>());
-        transformManager.append(std::make_unique<tint::transform::Renamer>());
-        transformManager.append(std::make_unique<tint::transform::Hlsl>());
-
         tint::transform::DataMap transformInputs;
+
+        transformManager.Add<tint::transform::BoundArrayAccessors>();
+        if (stage == SingleShaderStage::Vertex) {
+            transformManager.Add<tint::transform::FirstIndexOffset>();
+            transformInputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(
+                layout->GetFirstIndexOffsetShaderRegister(),
+                layout->GetFirstIndexOffsetRegisterSpace());
+        }
+        transformManager.Add<tint::transform::BindingRemapper>();
+        transformManager.Add<tint::transform::Renamer>();
+        transformManager.Add<tint::transform::Hlsl>();
+
         transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
                                                          std::move(accessControls));
-        tint::transform::Transform::Output output =
-            transformManager.Run(GetTintProgram(), transformInputs);
 
-        const tint::Program& program = output.program;
-        if (!program.IsValid()) {
-            errorStream << "Tint program transform error: " << program.Diagnostics().str()
-                        << std::endl;
-            return DAWN_VALIDATION_ERROR(errorStream.str().c_str());
-        }
+        tint::Program program;
+        tint::transform::DataMap transformOutputs;
+        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(), transformInputs,
+                                               &transformOutputs, nullptr));
 
-        if (auto* data = output.data.Get<tint::transform::FirstIndexOffset::Data>()) {
+        if (auto* data = transformOutputs.Get<tint::transform::FirstIndexOffset::Data>()) {
             firstOffsetInfo->usesVertexIndex = data->has_vertex_index;
             if (firstOffsetInfo->usesVertexIndex) {
                 firstOffsetInfo->vertexIndexOffset = data->first_vertex_offset;
@@ -279,7 +277,7 @@ namespace dawn_native { namespace d3d12 {
             }
         }
 
-        if (auto* data = output.data.Get<tint::transform::Renamer::Data>()) {
+        if (auto* data = transformOutputs.Get<tint::transform::Renamer::Data>()) {
             auto it = data->remappings.find(entryPointName);
             if (it == data->remappings.end()) {
                 return DAWN_VALIDATION_ERROR("Could not find remapped name for entry point.");

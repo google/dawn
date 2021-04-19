@@ -1110,11 +1110,13 @@ namespace dawn_native {
                     parseResult->tintSource = std::move(tintSource);
                 } else {
                     tint::transform::Manager transformManager;
-                    transformManager.append(
-                        std::make_unique<tint::transform::EmitVertexPointSize>());
-                    transformManager.append(std::make_unique<tint::transform::Spirv>());
-                    DAWN_TRY_ASSIGN(program,
-                                    RunTransforms(&transformManager, &program, outMessages));
+                    transformManager.Add<tint::transform::EmitVertexPointSize>();
+                    transformManager.Add<tint::transform::Spirv>();
+
+                    tint::transform::DataMap transformInputs;
+
+                    DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program,
+                                                           transformInputs, nullptr, outMessages));
 
                     std::vector<uint32_t> spirv;
                     DAWN_TRY_ASSIGN(spirv, ModuleToSPIRV(&program));
@@ -1144,8 +1146,10 @@ namespace dawn_native {
 
     ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
                                                const tint::Program* program,
+                                               const tint::transform::DataMap& inputs,
+                                               tint::transform::DataMap* outputs,
                                                OwnedCompilationMessages* outMessages) {
-        tint::transform::Transform::Output output = transform->Run(program);
+        tint::transform::Output output = transform->Run(program, inputs);
         if (outMessages != nullptr) {
             outMessages->AddMessages(output.program.Diagnostics());
         }
@@ -1153,13 +1157,16 @@ namespace dawn_native {
             std::string err = "Tint program failure: " + output.program.Diagnostics().str();
             return DAWN_VALIDATION_ERROR(err.c_str());
         }
+        if (outputs != nullptr) {
+            *outputs = std::move(output.data);
+        }
         return std::move(output.program);
     }
 
-    std::unique_ptr<tint::transform::VertexPulling> MakeVertexPullingTransform(
-        const VertexState& vertexState,
-        const std::string& entryPoint,
-        BindGroupIndex pullingBufferBindingSet) {
+    void AddVertexPullingTransformConfig(const VertexState& vertexState,
+                                         const std::string& entryPoint,
+                                         BindGroupIndex pullingBufferBindingSet,
+                                         tint::transform::DataMap* transformInputs) {
         tint::transform::VertexPulling::Config cfg;
         cfg.entry_point_name = entryPoint;
         cfg.pulling_group = static_cast<uint32_t>(pullingBufferBindingSet);
@@ -1181,7 +1188,7 @@ namespace dawn_native {
 
             cfg.vertex_state.push_back(std::move(layout));
         }
-        return std::make_unique<tint::transform::VertexPulling>(cfg);
+        transformInputs->Add<tint::transform::VertexPulling::Config>(cfg);
     }
 
     MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
@@ -1314,19 +1321,23 @@ namespace dawn_native {
         errorStream << "Tint vertex pulling failure:" << std::endl;
 
         tint::transform::Manager transformManager;
-        transformManager.append(
-            MakeVertexPullingTransform(vertexState, entryPoint, pullingBufferBindingSet));
-        transformManager.append(std::make_unique<tint::transform::EmitVertexPointSize>());
-        transformManager.append(std::make_unique<tint::transform::Spirv>());
+        transformManager.Add<tint::transform::VertexPulling>();
+        transformManager.Add<tint::transform::EmitVertexPointSize>();
+        transformManager.Add<tint::transform::Spirv>();
         if (GetDevice()->IsRobustnessEnabled()) {
-            transformManager.append(std::make_unique<tint::transform::BoundArrayAccessors>());
+            transformManager.Add<tint::transform::BoundArrayAccessors>();
         }
 
+        tint::transform::DataMap transformInputs;
+        AddVertexPullingTransformConfig(vertexState, entryPoint, pullingBufferBindingSet,
+                                        &transformInputs);
+
         // A nullptr is passed in for the CompilationMessages here since this method is called
-        // during RenderPipeline creation, by which point the shader module's CompilationInfo may
-        // have already been queried.
+        // during RenderPipeline creation, by which point the shader module's CompilationInfo
+        // may have already been queried.
         tint::Program program;
-        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, programIn, nullptr));
+        DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, programIn, transformInputs,
+                                               nullptr, nullptr));
 
         tint::writer::spirv::Generator generator(&program);
         if (!generator.Generate()) {

@@ -37,6 +37,7 @@ namespace tint {
     class Program;
 
     namespace transform {
+        class DataMap;
         class Transform;
         class VertexPulling;
     }  // namespace transform
@@ -88,12 +89,15 @@ namespace dawn_native {
                                                             const PipelineLayoutBase* layout);
     ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform,
                                                const tint::Program* program,
+                                               const tint::transform::DataMap& inputs,
+                                               tint::transform::DataMap* outputs,
                                                OwnedCompilationMessages* messages);
 
-    std::unique_ptr<tint::transform::VertexPulling> MakeVertexPullingTransform(
-        const VertexState& vertexState,
-        const std::string& entryPoint,
-        BindGroupIndex pullingBufferBindingSet);
+    /// Creates and adds the tint::transform::VertexPulling::Config to transformInputs.
+    void AddVertexPullingTransformConfig(const VertexState& vertexState,
+                                         const std::string& entryPoint,
+                                         BindGroupIndex pullingBufferBindingSet,
+                                         tint::transform::DataMap* transformInputs);
 
     // Contains all the reflection data for a valid (ShaderModule, entryPoint, stage). They are
     // stored in the ShaderModuleBase and destroyed only when the shader program is destroyed so
@@ -173,7 +177,7 @@ namespace dawn_native {
             const std::string& entryPoint,
             BindGroupIndex pullingBufferBindingSet) const;
 
-        OwnedCompilationMessages* CompilationMessages() {
+        OwnedCompilationMessages* GetCompilationMessages() {
             return mCompilationMessages.get();
         }
 

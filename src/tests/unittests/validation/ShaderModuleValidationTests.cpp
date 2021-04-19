@@ -160,7 +160,7 @@ TEST_F(ShaderModuleValidationTest, MultisampledArrayTexture) {
 }
 
 // Tests that shader module compilation messages can be queried.
-TEST_F(ShaderModuleValidationTest, CompilationMessages) {
+TEST_F(ShaderModuleValidationTest, GetCompilationMessages) {
     // This test works assuming ShaderModule is backed by a dawn_native::ShaderModuleBase, which
     // is not the case on the wire.
     DAWN_SKIP_TEST_IF(UsesWire());
@@ -172,12 +172,11 @@ TEST_F(ShaderModuleValidationTest, CompilationMessages) {
 
     dawn_native::ShaderModuleBase* shaderModuleBase =
         reinterpret_cast<dawn_native::ShaderModuleBase*>(shaderModule.Get());
-    shaderModuleBase->CompilationMessages()->ClearMessages();
-    shaderModuleBase->CompilationMessages()->AddMessage("Info Message");
-    shaderModuleBase->CompilationMessages()->AddMessage("Warning Message",
-                                                        wgpu::CompilationMessageType::Warning);
-    shaderModuleBase->CompilationMessages()->AddMessage("Error Message",
-                                                        wgpu::CompilationMessageType::Error, 3, 4);
+    dawn_native::OwnedCompilationMessages* messages = shaderModuleBase->GetCompilationMessages();
+    messages->ClearMessages();
+    messages->AddMessage("Info Message");
+    messages->AddMessage("Warning Message", wgpu::CompilationMessageType::Warning);
+    messages->AddMessage("Error Message", wgpu::CompilationMessageType::Error, 3, 4);
 
     auto callback = [](WGPUCompilationInfoRequestStatus status, const WGPUCompilationInfo* info,
                        void* userdata) {

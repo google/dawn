@@ -63,7 +63,7 @@ namespace dawn_native { namespace d3d12 {
                                                            SingleShaderStage stage,
                                                            PipelineLayout* layout,
                                                            std::string* remappedEntryPointName,
-                                                           FirstOffsetInfo* firstOffsetInfo) const;
+                                                           FirstOffsetInfo* firstOffsetInfo);
 
         ResultOrError<std::string> TranslateToHLSLWithSPIRVCross(const char* entryPointName,
                                                                  SingleShaderStage stage,
