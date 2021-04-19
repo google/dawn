@@ -420,6 +420,20 @@ INSTANTIATE_TEST_SUITE_P(
         Params{ty_mat3x3<f32>, (default_mat3x3.align - 1) * 7, false},
         Params{ty_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}));
 
+TEST_F(ArrayStrideTest, MultipleDecorations) {
+  auto* arr = create<type::Array>(ty.i32(), 4,
+                                  ast::DecorationList{
+                                      create<ast::StrideDecoration>(4),
+                                      create<ast::StrideDecoration>(4),
+                                  });
+
+  Global(Source{{12, 34}}, "myarray", arr, ast::StorageClass::kInput);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: array must have at most one [[stride]] decoration");
+}
+
 }  // namespace
 }  // namespace ArrayStrideTests
 }  // namespace resolver

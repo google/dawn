@@ -147,6 +147,12 @@ class Source {
   const FileContent* file_content = nullptr;
 };
 
+/// Writes the Source to the std::ostream.
+/// @param out the std::ostream to write to
+/// @param source the source to write
+/// @returns out so calls can be chained
+std::ostream& operator<<(std::ostream& out, const Source& source);
+
 /// Writes the Source::FileContent to the std::ostream.
 /// @param out the std::ostream to write to
 /// @param content the file content to write

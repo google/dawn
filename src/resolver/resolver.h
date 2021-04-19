@@ -210,43 +210,45 @@ class Resolver {
   // AST and Type traversal methods
   // Each return true on success, false on failure.
   bool ArrayAccessor(ast::ArrayAccessorExpression*);
+  bool Assignment(ast::AssignmentStatement* a);
   bool Binary(ast::BinaryExpression*);
   bool Bitcast(ast::BitcastExpression*);
   bool BlockStatement(const ast::BlockStatement*);
   bool Call(ast::CallExpression*);
   bool CaseStatement(ast::CaseStatement*);
   bool Constructor(ast::ConstructorExpression*);
-  bool VectorConstructor(const type::Vector* vec_type,
-                         const ast::ExpressionList& values);
-  bool MatrixConstructor(const type::Matrix* matrix_type,
-                         const ast::ExpressionList& values);
   bool Expression(ast::Expression*);
   bool Expressions(const ast::ExpressionList&);
   bool Function(ast::Function*);
+  bool GlobalVariable(ast::Variable* var);
   bool Identifier(ast::IdentifierExpression*);
   bool IfStatement(ast::IfStatement*);
   bool IntrinsicCall(ast::CallExpression*, sem::IntrinsicType);
   bool MemberAccessor(ast::MemberAccessorExpression*);
+  bool Parameter(ast::Variable* param);
+  bool Return(ast::ReturnStatement* ret);
   bool Statement(ast::Statement*);
   bool Statements(const ast::StatementList&);
+  bool Switch(ast::SwitchStatement* s);
+  bool Type(type::Type* ty);
   bool UnaryOp(ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
-  bool Return(ast::ReturnStatement* ret);
-  bool Switch(ast::SwitchStatement* s);
-  bool Assignment(ast::AssignmentStatement* a);
-  bool GlobalVariable(ast::Variable* var);
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
-  bool ValidateBinary(ast::BinaryExpression* expr);
-  bool ValidateVariable(const ast::Variable* param);
-  bool ValidateParameter(const ast::Variable* param);
-  bool ValidateFunction(const ast::Function* func);
-  bool ValidateEntryPoint(const ast::Function* func);
-  bool ValidateStructure(const type::Struct* st);
-  bool ValidateReturn(const ast::ReturnStatement* ret);
-  bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateAssignment(const ast::AssignmentStatement* a);
+  bool ValidateBinary(ast::BinaryExpression* expr);
+  bool ValidateEntryPoint(const ast::Function* func);
+  bool ValidateFunction(const ast::Function* func);
+  bool ValidateMatrixConstructor(const type::Matrix* matrix_type,
+                                 const ast::ExpressionList& values);
+  bool ValidateParameter(const ast::Variable* param);
+  bool ValidateReturn(const ast::ReturnStatement* ret);
+  bool ValidateStructure(const type::Struct* st);
+  bool ValidateSwitch(const ast::SwitchStatement* s);
+  bool ValidateVariable(const ast::Variable* param);
+  bool ValidateVectorConstructor(const type::Vector* vec_type,
+                                 const ast::ExpressionList& values);
 
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
@@ -312,6 +314,11 @@ class Resolver {
   /// @return pretty string representation
   std::string VectorPretty(uint32_t size, type::Type* element_type);
 
+  /// Mark records that the given AST node has been visited, and asserts that
+  /// the given node has not already been seen. Diamonds in the AST are illegal.
+  /// @param node the AST node.
+  void Mark(ast::Node* node);
+
   ProgramBuilder* const builder_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
   diag::List diagnostics_;
@@ -324,6 +331,7 @@ class Resolver {
   std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;
   std::unordered_map<type::Struct*, StructInfo*> struct_info_;
   std::unordered_map<type::Type*, type::Type*> type_to_canonical_;
+  std::unordered_set<ast::Node*> marked_;
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;

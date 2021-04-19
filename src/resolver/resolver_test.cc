@@ -17,6 +17,7 @@
 #include <tuple>
 
 #include "gmock/gmock.h"
+#include "gtest/gtest-spi.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
@@ -1617,6 +1618,31 @@ TEST_F(ResolverTest, Function_EntryPoints_LinearTime) {
        });
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTest, ASTNodeNotReached) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder builder;
+        builder.Expr("1");
+        Resolver(&builder).Resolve();
+      },
+      "internal compiler error: AST node 'tint::ast::IdentifierExpression' was "
+      "not reached by the resolver");
+}
+
+TEST_F(ResolverTest, ASTNodeReachedTwice) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder builder;
+        auto* expr = builder.Expr("1");
+        auto* usesExprTwice = builder.Add(expr, expr);
+        builder.Global("g", builder.ty.i32(), ast::StorageClass::kPrivate,
+                       usesExprTwice);
+        Resolver(&builder).Resolve();
+      },
+      "internal compiler error: AST node 'tint::ast::IdentifierExpression' was "
+      "encountered twice in the same AST of a Program");
 }
 
 }  // namespace
