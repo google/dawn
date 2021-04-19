@@ -22,9 +22,10 @@ namespace {
 using HlslGeneratorImplTest_Assign = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
-  auto* lhs = Expr("lhs");
-  auto* rhs = Expr("rhs");
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
+  Global("lhs", ty.i32(), ast::StorageClass::kPrivate);
+  Global("rhs", ty.i32(), ast::StorageClass::kPrivate);
+  auto* assign = create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs"));
+  WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();
 

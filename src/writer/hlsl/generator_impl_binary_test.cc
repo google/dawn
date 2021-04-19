@@ -157,7 +157,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
-  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
   auto* lhs = Expr("mat");
   auto* rhs = Expr(1.f);
 
@@ -172,7 +172,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
-  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
   auto* lhs = Expr(1.f);
   auto* rhs = Expr("mat");
 
@@ -187,7 +187,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
-  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
   auto* lhs = Expr("mat");
   auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
 
@@ -202,7 +202,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
-  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
   auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
   auto* rhs = Expr("mat");
 
@@ -217,49 +217,52 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
-  Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
-  auto* lhs = Expr("mat");
-  auto* rhs = Expr("mat");
+  Global("lhs", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+  Global("rhs", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
 
-  auto* expr =
-      create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
+                                             Expr("lhs"), Expr("rhs"));
   WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
   EXPECT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
-  EXPECT_EQ(result(), "mul(mat, mat)");
+  EXPECT_EQ(result(), "mul(rhs, lhs)");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
-  auto* left = Expr("left");
-  auto* right = Expr("right");
+  Global("a", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
 
-  auto* expr =
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, left, right);
+  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
+                                             Expr("a"), Expr("b"));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool tint_tmp = left;
+  EXPECT_EQ(pre_result(), R"(bool tint_tmp = a;
 if (tint_tmp) {
-  tint_tmp = right;
+  tint_tmp = b;
 }
 )");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
   // (a && b) || (c || d)
-  auto* a = Expr("a");
-  auto* b = Expr("b");
-  auto* c = Expr("c");
-  auto* d = Expr("d");
+  Global("a", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("c", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("d", ty.bool_(), ast::StorageClass::kPrivate);
 
   auto* expr = create<ast::BinaryExpression>(
       ast::BinaryOp::kLogicalOr,
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b),
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, c, d));
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"),
+                                    Expr("b")),
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("c"),
+                                    Expr("d")));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -281,19 +284,20 @@ if (!tint_tmp_1) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
-  auto* left = Expr("left");
-  auto* right = Expr("right");
+  Global("a", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
 
-  auto* expr =
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, left, right);
+  auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
+                                             Expr("a"), Expr("b"));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, expr)) << gen.error();
   EXPECT_EQ(result(), "(tint_tmp)");
-  EXPECT_EQ(pre_result(), R"(bool tint_tmp = left;
+  EXPECT_EQ(pre_result(), R"(bool tint_tmp = a;
 if (!tint_tmp) {
-  tint_tmp = right;
+  tint_tmp = b;
 }
 )");
 }
@@ -307,13 +311,17 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   //   return 3;
   // }
 
+  Global("a", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("c", ty.bool_(), ast::StorageClass::kPrivate);
+
   auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(Expr(3)),
+      Return(Expr(3)),
   });
   auto* else_stmt = create<ast::ElseStatement>(nullptr, body);
 
   body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(Expr(2)),
+      Return(Expr(2)),
   });
   auto* else_if_stmt = create<ast::ElseStatement>(
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"),
@@ -321,7 +329,7 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
       body);
 
   body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(Expr(1)),
+      Return(Expr(1)),
   });
 
   auto* expr = create<ast::IfStatement>(
@@ -332,6 +340,7 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
           else_if_stmt,
           else_stmt,
       });
+  Func("func", {}, ty.i32(), {WrapInStatement(expr), Return(0)});
 
   GeneratorImpl& gen = Build();
 
@@ -358,13 +367,17 @@ if ((tint_tmp)) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
   // return (a && b) || c;
-  auto* a = Expr("a");
-  auto* b = Expr("b");
-  auto* c = Expr("c");
 
-  auto* expr = create<ast::ReturnStatement>(create<ast::BinaryExpression>(
+  Global("a", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("c", ty.bool_(), ast::StorageClass::kPrivate);
+
+  auto* expr = Return(create<ast::BinaryExpression>(
       ast::BinaryOp::kLogicalOr,
-      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, a, b), c));
+      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"),
+                                    Expr("b")),
+      Expr("c")));
+  Func("func", {}, ty.bool_(), {WrapInStatement(expr)});
 
   GeneratorImpl& gen = Build();
 
@@ -383,16 +396,19 @@ return (tint_tmp_1);
 
 TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
   // a = (b || c) && d;
-  auto* a = Expr("a");
-  auto* b = Expr("b");
-  auto* c = Expr("c");
-  auto* d = Expr("d");
+
+  Global("a", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("c", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("d", ty.bool_(), ast::StorageClass::kPrivate);
 
   auto* expr = create<ast::AssignmentStatement>(
-      a,
-      create<ast::BinaryExpression>(
-          ast::BinaryOp::kLogicalAnd,
-          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c), d));
+      Expr("a"), create<ast::BinaryExpression>(
+                     ast::BinaryOp::kLogicalAnd,
+                     create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
+                                                   Expr("b"), Expr("c")),
+                     Expr("d")));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -412,22 +428,19 @@ a = (tint_tmp_1);
 TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   // var a : bool = (b && c) || d;
 
-  auto* b_decl = Decl(Var("b", ty.bool_(), ast::StorageClass::kFunction));
-  auto* c_decl = Decl(Var("c", ty.bool_(), ast::StorageClass::kFunction));
-  auto* d_decl = Decl(Var("d", ty.bool_(), ast::StorageClass::kFunction));
+  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("c", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("d", ty.bool_(), ast::StorageClass::kPrivate);
 
-  auto* b = Expr("b");
-  auto* c = Expr("c");
-  auto* d = Expr("d");
-
-  auto* var = Var(
-      "a", ty.bool_(), ast::StorageClass::kFunction,
-      create<ast::BinaryExpression>(
-          ast::BinaryOp::kLogicalOr,
-          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, b, c), d));
+  auto* var = Var("a", ty.bool_(), ast::StorageClass::kFunction,
+                  create<ast::BinaryExpression>(
+                      ast::BinaryOp::kLogicalOr,
+                      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
+                                                    Expr("b"), Expr("c")),
+                      Expr("d")));
 
   auto* decl = Decl(var);
-  WrapInFunction(b_decl, c_decl, d_decl, Decl(var));
+  WrapInFunction(decl);
 
   GeneratorImpl& gen = Build();
 
@@ -447,15 +460,16 @@ bool a = (tint_tmp_1);
 TEST_F(HlslGeneratorImplTest_Binary, Bitcast_WithLogical) {
   // as<i32>(a && (b || c))
 
-  auto* a = Expr("a");
-  auto* b = Expr("b");
-  auto* c = Expr("c");
+  Global("a", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("c", ty.bool_(), ast::StorageClass::kPrivate);
 
   auto* expr = create<ast::BitcastExpression>(
-      ty.i32(),
-      create<ast::BinaryExpression>(
-          ast::BinaryOp::kLogicalAnd, a,
-          create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, b, c)));
+      ty.i32(), create<ast::BinaryExpression>(
+                    ast::BinaryOp::kLogicalAnd, Expr("a"),
+                    create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
+                                                  Expr("b"), Expr("c"))));
+  WrapInFunction(expr);
 
   GeneratorImpl& gen = Build();
 
@@ -477,10 +491,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
 
   Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::DecorationList{});
-  Global("a", ty.bool_(), ast::StorageClass::kInput);
-  Global("b", ty.bool_(), ast::StorageClass::kInput);
-  Global("c", ty.bool_(), ast::StorageClass::kInput);
-  Global("d", ty.bool_(), ast::StorageClass::kInput);
+  Global("a", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("b", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("c", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("d", ty.bool_(), ast::StorageClass::kPrivate);
 
   ast::ExpressionList params;
   params.push_back(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,

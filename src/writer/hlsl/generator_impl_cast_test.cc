@@ -22,21 +22,23 @@ namespace {
 using HlslGeneratorImplTest_Cast = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Scalar) {
-  auto* cast = Construct<f32>("id");
+  auto* cast = Construct<f32>(1);
+  WrapInFunction(cast);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, cast)) << gen.error();
-  EXPECT_EQ(result(), "float(id)");
+  EXPECT_EQ(result(), "float(1)");
 }
 
 TEST_F(HlslGeneratorImplTest_Cast, EmitExpression_Cast_Vector) {
-  auto* cast = vec3<f32>("id");
+  auto* cast = vec3<f32>(vec3<i32>(1, 2, 3));
+  WrapInFunction(cast);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, cast)) << gen.error();
-  EXPECT_EQ(result(), "float3(id)");
+  EXPECT_EQ(result(), "float3(int3(1, 2, 3))");
 }
 
 }  // namespace

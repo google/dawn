@@ -22,11 +22,12 @@ namespace {
 using HlslGeneratorImplTest_If = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_If, Emit_If) {
+  Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+
   auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(cond, body, ast::ElseStatementList{});
+  auto* body = Block(Return());
+  auto* i = If(cond, body);
+  WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
 
@@ -39,18 +40,18 @@ TEST_F(HlslGeneratorImplTest_If, Emit_If) {
 }
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
+  Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
+
   auto* else_cond = Expr("else_cond");
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
+  auto* else_body = Block(Return());
 
   auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(
+  auto* body = Block(Return());
+  auto* i = If(
       cond, body,
       ast::ElseStatementList{create<ast::ElseStatement>(else_cond, else_body)});
+  WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
 
@@ -68,17 +69,16 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
 }
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
+  Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+
+  auto* else_body = Block(Return());
 
   auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(
+  auto* body = Block(Return());
+  auto* i = If(
       cond, body,
       ast::ElseStatementList{create<ast::ElseStatement>(nullptr, else_body)});
+  WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
 
@@ -94,26 +94,23 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
 }
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
+  Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+  Global("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
+
   auto* else_cond = Expr("else_cond");
 
-  auto* else_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
+  auto* else_body = Block(Return());
 
-  auto* else_body_2 = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
+  auto* else_body_2 = Block(Return());
 
   auto* cond = Expr("cond");
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* i = create<ast::IfStatement>(
-      cond, body,
-      ast::ElseStatementList{
-          create<ast::ElseStatement>(else_cond, else_body),
-          create<ast::ElseStatement>(nullptr, else_body_2),
-      });
+  auto* body = Block(Return());
+  auto* i = If(cond, body,
+               ast::ElseStatementList{
+                   create<ast::ElseStatement>(else_cond, else_body),
+                   create<ast::ElseStatement>(nullptr, else_body_2),
+               });
+  WrapInFunction(i);
 
   GeneratorImpl& gen = Build();
 

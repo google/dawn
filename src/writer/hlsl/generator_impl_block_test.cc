@@ -22,9 +22,8 @@ namespace {
 using HlslGeneratorImplTest_Block = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
-  auto* b = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
+  auto* b = Block(create<ast::DiscardStatement>());
+  WrapInFunction(b);
 
   GeneratorImpl& gen = Build();
 
@@ -38,9 +37,8 @@ TEST_F(HlslGeneratorImplTest_Block, Emit_Block) {
 }
 
 TEST_F(HlslGeneratorImplTest_Block, Emit_Block_WithoutNewline) {
-  auto* b = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
+  auto* b = Block(create<ast::DiscardStatement>());
+  WrapInFunction(b);
 
   GeneratorImpl& gen = Build();
 

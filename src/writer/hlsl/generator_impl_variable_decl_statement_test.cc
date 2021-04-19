@@ -79,7 +79,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_Private) {
-  Global("initializer", ty.f32(), ast::StorageClass::kInput);
+  Global("initializer", ty.f32(), ast::StorageClass::kPrivate);
   Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
 
   WrapInFunction(Expr("a"));

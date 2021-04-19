@@ -31,8 +31,10 @@ using HlslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(HlslUnaryOpTest, Emit) {
   auto params = GetParam();
 
-  auto* expr = Expr("expr");
-  auto* op = create<ast::UnaryOpExpression>(params.op, expr);
+  Global("expr", ty.i32(), ast::StorageClass::kPrivate);
+
+  auto* op = create<ast::UnaryOpExpression>(params.op, Expr("expr"));
+  WrapInFunction(op);
 
   GeneratorImpl& gen = Build();
 

@@ -23,10 +23,8 @@ namespace {
 using HlslGeneratorImplTest_Loop = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* continuing = create<ast::BlockStatement>(ast::StatementList{});
+  auto* body = Block(create<ast::DiscardStatement>());
+  auto* continuing = Block();
   auto* l = create<ast::LoopStatement>(body, continuing);
 
   WrapInFunction(l);
@@ -43,12 +41,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* continuing = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
+  auto* body = Block(create<ast::DiscardStatement>());
+  auto* continuing = Block(Return());
   auto* l = create<ast::LoopStatement>(body, continuing);
 
   WrapInFunction(l);
@@ -73,27 +67,19 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
 }
 
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
-  Global("lhs", ty.f32(), ast::StorageClass::kInput);
-  Global("rhs", ty.f32(), ast::StorageClass::kInput);
+  Global("lhs", ty.f32(), ast::StorageClass::kPrivate);
+  Global("rhs", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* continuing = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
+  auto* body = Block(create<ast::DiscardStatement>());
+  auto* continuing = Block(Return());
   auto* inner = create<ast::LoopStatement>(body, continuing);
 
-  body = create<ast::BlockStatement>(ast::StatementList{
-      inner,
-  });
+  body = Block(inner);
 
   auto* lhs = Expr("lhs");
   auto* rhs = Expr("rhs");
 
-  continuing = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
-  });
+  continuing = Block(create<ast::AssignmentStatement>(lhs, rhs));
 
   auto* outer = create<ast::LoopStatement>(body, continuing);
   WrapInFunction(outer);
@@ -149,22 +135,18 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
   //   }
   // }
 
-  Global("rhs", ty.f32(), ast::StorageClass::kInput);
+  Global("rhs", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* var = Var("lhs", ty.f32(), ast::StorageClass::kFunction, Expr(2.4f));
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::VariableDeclStatement>(
-          Var("other", ty.f32(), ast::StorageClass::kFunction)),
-  });
+  auto* body = Block(create<ast::VariableDeclStatement>(var),
+                     create<ast::VariableDeclStatement>(
+                         Var("other", ty.f32(), ast::StorageClass::kFunction)));
 
   auto* lhs = Expr("lhs");
   auto* rhs = Expr("rhs");
 
-  auto* continuing = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
-  });
+  auto* continuing = Block(create<ast::AssignmentStatement>(lhs, rhs));
   auto* outer = create<ast::LoopStatement>(body, continuing);
   WrapInFunction(outer);
 

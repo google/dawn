@@ -23,6 +23,7 @@ using HlslGeneratorImplTest_Discard = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Discard, Emit_Discard) {
   auto* stmt = create<ast::DiscardStatement>();
+  WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
 

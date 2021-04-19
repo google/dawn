@@ -23,6 +23,7 @@ using HlslGeneratorImplTest_Continue = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Continue, Emit_Continue) {
   auto* c = create<ast::ContinueStatement>();
+  WrapInFunction(Loop(Block(c)));
 
   GeneratorImpl& gen = Build();
 

@@ -22,17 +22,15 @@ namespace {
 using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
-  auto* def_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
+  Global("cond", ty.i32(), ast::StorageClass::kPrivate);
+
+  auto* def_body = Block(create<ast::BreakStatement>());
   auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
 
   ast::CaseSelectorList case_val;
   case_val.push_back(Literal(5));
 
-  auto* case_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
+  auto* case_body = Block(create<ast::BreakStatement>());
 
   auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
 
@@ -42,6 +40,7 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
 
   auto* cond = Expr("cond");
   auto* s = create<ast::SwitchStatement>(cond, body);
+  WrapInFunction(s);
 
   GeneratorImpl& gen = Build();
 

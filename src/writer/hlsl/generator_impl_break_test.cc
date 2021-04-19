@@ -23,6 +23,7 @@ using HlslGeneratorImplTest_Break = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Break, Emit_Break) {
   auto* b = create<ast::BreakStatement>();
+  WrapInFunction(Loop(Block(b)));
 
   GeneratorImpl& gen = Build();
 
