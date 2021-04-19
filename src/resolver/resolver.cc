@@ -353,7 +353,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
     }
   }
 
-  return true;
+  return ValidateVariable(info->declaration);
 }
 
 bool Resolver::ValidateVariable(const ast::Variable* var) {

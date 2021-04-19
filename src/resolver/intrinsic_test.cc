@@ -25,6 +25,7 @@
 #include "src/ast/loop_statement.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
@@ -758,8 +759,13 @@ INSTANTIATE_TEST_SUITE_P(
 using ResolverIntrinsicDataTest = ResolverTest;
 
 TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
-  Global("arr", ty.array<int>(), ast::StorageClass::kInput);
-  auto* call = Call("arrayLength", "arr");
+  auto* ary = ty.array<i32>();
+  auto* str = Structure("S", {Member("x", ary)},
+                        {create<ast::StructBlockDecoration>()});
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, str);
+  Global("a", ac, ast::StorageClass::kStorage);
+
+  auto* call = Call("arrayLength", MemberAccessor("a", "x"));
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

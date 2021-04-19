@@ -59,7 +59,10 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   auto* ary = ty.array(ty.i32(), 0);
-  Global("a", ary, ast::StorageClass::kInput);
+  auto* str = Structure("S", {Member("x", ary)},
+                        {create<ast::StructBlockDecoration>()});
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, str);
+  Global("a", ac, ast::StorageClass::kStorage);
 
   spirv::Builder& b = Build();
 
@@ -74,7 +77,10 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
   auto* ary = ty.array(ty.i32(), 0);
-  Global("a", ary, ast::StorageClass::kInput);
+  auto* str = Structure("S", {Member("x", ary)},
+                        {create<ast::StructBlockDecoration>()});
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, str);
+  Global("a", ac, ast::StorageClass::kStorage);
 
   spirv::Builder& b = Build();
 
