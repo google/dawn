@@ -66,7 +66,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
   // Strip entry point IO decorations from struct declarations.
   // TODO(jrprice): This code is duplicated with the SPIR-V transform.
   for (auto* ty : ctx.src->AST().ConstructedTypes()) {
-    if (auto* struct_ty = ty->As<type::Struct>()) {
+    if (auto* struct_ty = ty->As<type::StructType>()) {
       // Build new list of struct members without entry point IO decorations.
       ast::StructMemberList new_struct_members;
       for (auto* member : struct_ty->impl()->members()) {
@@ -81,7 +81,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
       }
 
       // Redeclare the struct.
-      auto* new_struct = ctx.dst->create<type::Struct>(
+      auto* new_struct = ctx.dst->create<type::StructType>(
           ctx.Clone(struct_ty->symbol()),
           ctx.dst->create<ast::Struct>(
               new_struct_members, ctx.Clone(struct_ty->impl()->decorations())));
@@ -107,11 +107,11 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
 
         std::function<ast::Expression*()> func_const_initializer;
 
-        if (auto* struct_ty = param_ty->As<type::Struct>()) {
+        if (auto* struct_ty = param_ty->As<type::StructType>()) {
           // Pull out all struct members and build initializer list.
           std::vector<Symbol> member_names;
           for (auto* member : struct_ty->impl()->members()) {
-            if (member->type()->UnwrapAll()->Is<type::Struct>()) {
+            if (member->type()->UnwrapAll()->Is<type::StructType>()) {
               TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
             }
 
@@ -174,7 +174,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
                 StructMemberComparator);
 
       // Create the new struct type.
-      auto* in_struct = ctx.dst->create<type::Struct>(
+      auto* in_struct = ctx.dst->create<type::StructType>(
           ctx.dst->Symbols().New(),
           ctx.dst->create<ast::Struct>(new_struct_members,
                                        ast::DecorationList{}));
@@ -193,10 +193,10 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
     } else {
       ast::StructMemberList new_struct_members;
 
-      if (auto* struct_ty = ret_type->As<type::Struct>()) {
+      if (auto* struct_ty = ret_type->As<type::StructType>()) {
         // Rebuild struct with only the entry point IO attributes.
         for (auto* member : struct_ty->impl()->members()) {
-          if (member->type()->UnwrapAll()->Is<type::Struct>()) {
+          if (member->type()->UnwrapAll()->Is<type::StructType>()) {
             TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
           }
 
@@ -220,7 +220,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
                 StructMemberComparator);
 
       // Create the new struct type.
-      auto* out_struct = ctx.dst->create<type::Struct>(
+      auto* out_struct = ctx.dst->create<type::StructType>(
           ctx.dst->Symbols().New(),
           ctx.dst->create<ast::Struct>(new_struct_members,
                                        ast::DecorationList{}));
@@ -237,7 +237,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
         };
 
         ast::ExpressionList ret_values;
-        if (ret_type->Is<type::Struct>()) {
+        if (ret_type->Is<type::StructType>()) {
           if (!ret->value()->Is<ast::IdentifierExpression>()) {
             // Create a const to hold the return value expression to avoid
             // re-evaluating it multiple times.

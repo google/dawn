@@ -85,10 +85,10 @@ void Module::to_str(const sem::Info& sem,
     if (auto* alias = ty->As<type::Alias>()) {
       out << alias->symbol().to_str() << " -> " << alias->type()->type_name()
           << std::endl;
-      if (auto* str = alias->type()->As<type::Struct>()) {
+      if (auto* str = alias->type()->As<type::StructType>()) {
         str->impl()->to_str(sem, out, indent);
       }
-    } else if (auto* str = ty->As<type::Struct>()) {
+    } else if (auto* str = ty->As<type::StructType>()) {
       out << str->symbol().to_str() << " ";
       str->impl()->to_str(sem, out, indent);
     }

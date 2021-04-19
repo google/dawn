@@ -31,7 +31,7 @@ namespace ast {
 class StructMember;
 }  // namespace ast
 namespace type {
-class Struct;
+class StructType;
 }  // namespace type
 
 namespace sem {
@@ -63,7 +63,7 @@ class Struct : public Castable<Struct, Node> {
   /// alignment padding
   /// @param storage_class_usage a set of all the storage class usages
   /// @param pipeline_stage_uses a set of all the pipeline stage uses
-  Struct(type::Struct* type,
+  Struct(type::StructType* type,
          StructMemberList members,
          uint32_t align,
          uint32_t size,
@@ -75,7 +75,7 @@ class Struct : public Castable<Struct, Node> {
   ~Struct() override;
 
   /// @returns the structure type
-  type::Struct* Type() const { return type_; }
+  type::StructType* Type() const { return type_; }
 
   /// @returns the members of the structure
   const StructMemberList& Members() const { return members_; }
@@ -128,7 +128,7 @@ class Struct : public Castable<Struct, Node> {
   }
 
  private:
-  type::Struct* const type_;
+  type::StructType* const type_;
   StructMemberList const members_;
   uint32_t const align_;
   uint32_t const size_;

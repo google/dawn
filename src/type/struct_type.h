@@ -24,15 +24,15 @@ namespace tint {
 namespace type {
 
 /// A structure type
-class Struct : public Castable<Struct, Type> {
+class StructType : public Castable<StructType, Type> {
  public:
   /// Constructor
   /// @param sym the symbol representing the struct
   /// @param impl the struct data
-  Struct(const Symbol& sym, ast::Struct* impl);
+  StructType(const Symbol& sym, ast::Struct* impl);
   /// Move constructor
-  Struct(Struct&&);
-  ~Struct() override;
+  StructType(StructType&&);
+  ~StructType() override;
 
   /// @returns the struct symbol
   const Symbol& symbol() const { return symbol_; }
@@ -54,7 +54,7 @@ class Struct : public Castable<Struct, Type> {
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned type
-  Struct* Clone(CloneContext* ctx) const override;
+  StructType* Clone(CloneContext* ctx) const override;
 
  private:
   Symbol const symbol_;

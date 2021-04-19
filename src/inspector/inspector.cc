@@ -386,7 +386,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     auto binding_info = ruv.second;
 
     auto* unwrapped_type = var->Type()->UnwrapIfNeeded();
-    auto* str = unwrapped_type->As<type::Struct>();
+    auto* str = unwrapped_type->As<type::StructType>();
     if (str == nullptr) {
       continue;
     }
@@ -551,7 +551,7 @@ void Inspector::AddEntryPointInOutVariables(
 
   auto* unwrapped_type = type->UnwrapAll();
 
-  if (auto* struct_ty = unwrapped_type->As<type::Struct>()) {
+  if (auto* struct_ty = unwrapped_type->As<type::StructType>()) {
     // Recurse into members.
     for (auto* member : struct_ty->impl()->members()) {
       AddEntryPointInOutVariables(
@@ -606,7 +606,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    auto* str = var->Type()->UnwrapIfNeeded()->As<type::Struct>();
+    auto* str = var->Type()->UnwrapIfNeeded()->As<type::StructType>();
     if (!str) {
       continue;
     }

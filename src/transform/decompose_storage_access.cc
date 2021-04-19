@@ -341,7 +341,7 @@ type::Type* ConstructedTypeOf(type::Type* ty) {
     if (auto* alias = ty->As<type::Alias>()) {
       return alias;
     }
-    if (auto* str = ty->As<type::Struct>()) {
+    if (auto* str = ty->As<type::StructType>()) {
       return str;
     }
     // Not a constructed type
@@ -438,7 +438,7 @@ struct State {
                 ctx.dst->Add("offset", i * MatrixColumnStride(mat_ty));
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
-        } else if (auto* str_ty = el_ty->As<type::Struct>()) {
+        } else if (auto* str_ty = el_ty->As<type::StructType>()) {
           auto& sem = ctx.src->Sem();
           auto* str = sem.Get(str_ty);
           for (auto* member : str->Members()) {
@@ -505,7 +505,7 @@ struct State {
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
-        } else if (auto* str_ty = el_ty->As<type::Struct>()) {
+        } else if (auto* str_ty = el_ty->As<type::StructType>()) {
           auto& sem = ctx.src->Sem();
           auto* str = sem.Get(str_ty);
           for (auto* member : str->Members()) {
@@ -660,7 +660,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
         }
       } else {
         if (auto access = state.TakeAccess(accessor->structure())) {
-          auto* str_ty = access.type->As<type::Struct>();
+          auto* str_ty = access.type->As<type::StructType>();
           auto* member =
               sem.Get(str_ty)->FindMember(accessor->member()->symbol());
           auto offset = member->Offset();

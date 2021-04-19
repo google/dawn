@@ -62,7 +62,7 @@ class InspectorHelper : public ProgramBuilder {
   /// Generates a struct that contains user-defined IO members
   /// @param name the name of the generated struct
   /// @param inout_vars tuples of {name, loc} that will be the struct members
-  type::Struct* MakeInOutStruct(
+  type::StructType* MakeInOutStruct(
       std::string name,
       std::vector<std::tuple<std::string, uint32_t>> inout_vars) {
     ast::StructMemberList members;
@@ -212,9 +212,9 @@ class InspectorHelper : public ProgramBuilder {
   /// @param member_types a vector of member types
   /// @param is_block whether or not to decorate as a Block
   /// @returns a struct type
-  type::Struct* MakeStructType(const std::string& name,
-                               std::vector<type::Type*> member_types,
-                               bool is_block) {
+  type::StructType* MakeStructType(const std::string& name,
+                                   std::vector<type::Type*> member_types,
+                                   bool is_block) {
     ast::StructMemberList members;
     for (auto* type : member_types) {
       members.push_back(Member(StructMemberName(members.size(), type), type));
@@ -235,8 +235,9 @@ class InspectorHelper : public ProgramBuilder {
   /// @param name name for the type
   /// @param member_types a vector of member types
   /// @returns a struct type that has the layout for an uniform buffer.
-  type::Struct* MakeUniformBufferType(const std::string& name,
-                                      std::vector<type::Type*> member_types) {
+  type::StructType* MakeUniformBufferType(
+      const std::string& name,
+      std::vector<type::Type*> member_types) {
     auto* struct_type = MakeStructType(name, member_types, true);
     return struct_type;
   }
@@ -247,7 +248,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @returns a tuple {struct type, access control type}, where the struct has
   ///          the layout for a storage buffer, and the control type wraps the
   ///          struct.
-  std::tuple<type::Struct*, type::AccessControl*> MakeStorageBufferTypes(
+  std::tuple<type::StructType*, type::AccessControl*> MakeStorageBufferTypes(
       const std::string& name,
       std::vector<type::Type*> member_types) {
     auto* struct_type = MakeStructType(name, member_types, true);
@@ -262,7 +263,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @returns a tuple {struct type, access control type}, where the struct has
   ///          the layout for a read-only storage buffer, and the control type
   ///          wraps the struct.
-  std::tuple<type::Struct*, type::AccessControl*>
+  std::tuple<type::StructType*, type::AccessControl*>
   MakeReadOnlyStorageBufferTypes(const std::string& name,
                                  std::vector<type::Type*> member_types) {
     auto* struct_type = MakeStructType(name, member_types, true);
@@ -1680,18 +1681,19 @@ TEST_F(InspectorGetResourceBindingsTest, Empty) {
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Simple) {
-  type::Struct* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32()});
+  type::StructType* ub_struct_type =
+      MakeUniformBufferType("ub_type", {ty.i32()});
   AddUniformBuffer("ub_var", ub_struct_type, 0, 0);
   MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
 
-  type::Struct* sb_struct_type;
+  type::StructType* sb_struct_type;
   type::AccessControl* sb_control_type;
   std::tie(sb_struct_type, sb_control_type) =
       MakeStorageBufferTypes("sb_type", {ty.i32()});
   AddStorageBuffer("sb_var", sb_control_type, 1, 0);
   MakeStructVariableReferenceBodyFunction("sb_func", "sb_var", {{0, ty.i32()}});
 
-  type::Struct* rosb_struct_type;
+  type::StructType* rosb_struct_type;
   type::AccessControl* rosb_control_type;
   std::tie(rosb_struct_type, rosb_control_type) =
       MakeReadOnlyStorageBufferTypes("rosb_type", {ty.i32()});
@@ -1801,7 +1803,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
-  type::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  type::StructType* foo_struct_type =
+      MakeUniformBufferType("foo_type", {ty.i32()});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
@@ -1844,7 +1847,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
-  type::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  type::StructType* foo_struct_type =
+      MakeUniformBufferType("foo_type", {ty.i32()});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
@@ -1870,7 +1874,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
-  type::Struct* foo_struct_type =
+  type::StructType* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.i32(), ty.u32(), ty.f32()});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
@@ -1898,7 +1902,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
-  type::Struct* foo_struct_type =
+  type::StructType* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.vec3<f32>()});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
@@ -1926,7 +1930,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
-  type::Struct* ub_struct_type =
+  type::StructType* ub_struct_type =
       MakeUniformBufferType("ub_type", {ty.i32(), ty.u32(), ty.f32()});
   AddUniformBuffer("ub_foo", ub_struct_type, 0, 0);
   AddUniformBuffer("ub_bar", ub_struct_type, 0, 1);
@@ -1985,7 +1989,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   // TODO(bclayton) - This is not a legal structure layout for uniform buffer
   // usage. Once crbug.com/tint/628 is implemented, this will fail validation
   // and will need to be fixed.
-  type::Struct* foo_struct_type =
+  type::StructType* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.i32(), u32_array_type(4)});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
@@ -2012,7 +2016,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {ty.i32()});
@@ -2041,7 +2045,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {ty.i32(), ty.u32(), ty.f32()});
@@ -2071,7 +2075,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
-  type::Struct* sb_struct_type;
+  type::StructType* sb_struct_type;
   type::AccessControl* sb_control_type;
   std::tie(sb_struct_type, sb_control_type) =
       MakeStorageBufferTypes("sb_type", {ty.i32(), ty.u32(), ty.f32()});
@@ -2132,7 +2136,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {ty.i32(), u32_array_type(4)});
@@ -2161,7 +2165,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {ty.i32(), u32_array_type(0)});
@@ -2190,7 +2194,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {ty.vec3<f32>()});
@@ -2220,7 +2224,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32()});
@@ -2242,7 +2246,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32()});
@@ -2272,7 +2276,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        MultipleStorageBuffers) {
-  type::Struct* sb_struct_type;
+  type::StructType* sb_struct_type;
   type::AccessControl* sb_control_type;
   std::tie(sb_struct_type, sb_control_type) =
       MakeReadOnlyStorageBufferTypes("sb_type", {ty.i32(), ty.u32(), ty.f32()});
@@ -2333,7 +2337,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32(), u32_array_type(4)});
@@ -2363,7 +2367,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        ContainingRuntimeArray) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32(), u32_array_type(0)});
@@ -2392,7 +2396,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
-  type::Struct* foo_struct_type;
+  type::StructType* foo_struct_type;
   type::AccessControl* foo_control_type;
   std::tie(foo_struct_type, foo_control_type) =
       MakeStorageBufferTypes("foo_type", {ty.i32()});

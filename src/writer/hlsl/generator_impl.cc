@@ -207,7 +207,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
   if (auto* alias = ty->As<type::Alias>()) {
     // HLSL typedef is for intrinsic types only. For an alias'd struct,
     // generate a secondary struct with the new name.
-    if (auto* str = alias->type()->As<type::Struct>()) {
+    if (auto* str = alias->type()->As<type::StructType>()) {
       if (!EmitStructType(out, str,
                           builder_.Symbols().NameFor(alias->symbol()))) {
         return false;
@@ -220,7 +220,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     }
     out << " " << builder_.Symbols().NameFor(alias->symbol()) << ";"
         << std::endl;
-  } else if (auto* str = ty->As<type::Struct>()) {
+  } else if (auto* str = ty->As<type::StructType>()) {
     if (!EmitStructType(out, str, builder_.Symbols().NameFor(str->symbol()))) {
       return false;
     }
@@ -1317,7 +1317,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
 
   bool brackets = expr->type()
                       ->UnwrapAliasIfNeeded()
-                      ->IsAnyOf<type::ArrayType, type::Struct>();
+                      ->IsAnyOf<type::ArrayType, type::StructType>();
 
   if (brackets) {
     out << "{";
@@ -1708,7 +1708,7 @@ bool GeneratorImpl::EmitEntryPointData(
     }
 
     auto* type = var->Type()->UnwrapIfNeeded();
-    if (auto* strct = type->As<type::Struct>()) {
+    if (auto* strct = type->As<type::StructType>()) {
       out << "ConstantBuffer<" << builder_.Symbols().NameFor(strct->symbol())
           << "> " << builder_.Symbols().NameFor(decl->symbol())
           << RegisterAndSpace('b', binding_point) << ";" << std::endl;
@@ -2030,7 +2030,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   for (auto* var : func->params()) {
     auto* sem = builder_.Sem().Get(var);
     auto* type = sem->Type();
-    if (!type->Is<type::Struct>()) {
+    if (!type->Is<type::StructType>()) {
       TINT_ICE(diagnostics_) << "Unsupported non-struct entry point parameter";
     }
 
@@ -2132,7 +2132,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, type::Type* type) {
         return false;
       }
     }
-  } else if (auto* str = type->As<type::Struct>()) {
+  } else if (auto* str = type->As<type::StructType>()) {
     out << "{";
     bool first = true;
     for (auto* member : str->impl()->members()) {
@@ -2449,7 +2449,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       out << "Comparison";
     }
     out << "State";
-  } else if (auto* str = type->As<type::Struct>()) {
+  } else if (auto* str = type->As<type::StructType>()) {
     out << builder_.Symbols().NameFor(str->symbol());
   } else if (auto* tex = type->As<type::Texture>()) {
     auto* storage = tex->As<type::StorageTexture>();
@@ -2539,7 +2539,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitStructType(std::ostream& out,
-                                   const type::Struct* str,
+                                   const type::StructType* str,
                                    const std::string& name) {
   auto* sem_str = builder_.Sem().Get(str);
 

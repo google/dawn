@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto p = parser("type a = B");
 
-  type::Struct str(p->builder().Symbols().Get("B"), {});
+  type::StructType str(p->builder().Symbols().Get("B"), {});
   p->register_constructed("B", &str);
 
   auto t = p->type_alias();
@@ -49,9 +49,9 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   ASSERT_TRUE(t->Is<type::Alias>());
   auto* alias = t->As<type::Alias>();
   EXPECT_EQ(p->builder().Symbols().NameFor(alias->symbol()), "a");
-  ASSERT_TRUE(alias->type()->Is<type::Struct>());
+  ASSERT_TRUE(alias->type()->Is<type::StructType>());
 
-  auto* s = alias->type()->As<type::Struct>();
+  auto* s = alias->type()->As<type::StructType>();
   EXPECT_EQ(s->symbol(), p->builder().Symbols().Get("B"));
   EXPECT_EQ(s->symbol(), p->builder().Symbols().Get("B"));
 }

@@ -245,7 +245,7 @@ class Resolver {
                                  const ast::ExpressionList& values);
   bool ValidateParameter(const ast::Variable* param);
   bool ValidateReturn(const ast::ReturnStatement* ret);
-  bool ValidateStructure(const type::Struct* st);
+  bool ValidateStructure(const type::StructType* st);
   bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateVariable(const ast::Variable* param);
   bool ValidateVectorConstructor(const type::Vector* vec_type,
@@ -260,7 +260,7 @@ class Resolver {
 
   /// @returns the StructInfo for the structure `str`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
-  StructInfo* Structure(type::Struct* str);
+  StructInfo* Structure(type::StructType* str);
 
   /// @returns the VariableInfo for the variable `var`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
@@ -330,7 +330,7 @@ class Resolver {
   std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
   std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;
-  std::unordered_map<type::Struct*, StructInfo*> struct_info_;
+  std::unordered_map<type::StructType*, StructInfo*> struct_info_;
   std::unordered_map<type::Type*, type::Type*> type_to_canonical_;
   std::unordered_set<ast::Node*> marked_;
   FunctionInfo* current_function_ = nullptr;

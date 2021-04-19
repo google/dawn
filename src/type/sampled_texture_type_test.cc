@@ -39,7 +39,7 @@ TEST_F(SampledTextureTest, Is) {
   EXPECT_FALSE(ty->Is<Matrix>());
   EXPECT_FALSE(ty->Is<Pointer>());
   EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_FALSE(ty->Is<StructType>());
   EXPECT_TRUE(ty->Is<Texture>());
   EXPECT_FALSE(ty->Is<U32>());
   EXPECT_FALSE(ty->Is<Vector>());

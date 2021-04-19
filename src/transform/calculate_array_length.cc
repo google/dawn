@@ -77,8 +77,8 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
   // get_buffer_size_intrinsic() emits the function decorated with
   // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to
   // [RW]ByteAddressBuffer.GetDimensions().
-  std::unordered_map<type::Struct*, Symbol> buffer_size_intrinsics;
-  auto get_buffer_size_intrinsic = [&](type::Struct* buffer_type) {
+  std::unordered_map<type::StructType*, Symbol> buffer_size_intrinsics;
+  auto get_buffer_size_intrinsic = [&](type::StructType* buffer_type) {
     return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
       auto name = ctx.dst->Symbols().New();
       auto* func = ctx.dst->create<ast::Function>(
@@ -138,7 +138,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
           auto* storage_buffer_expr = accessor->structure();
           auto* storage_buffer_sem = sem.Get(storage_buffer_expr);
           auto* storage_buffer_type =
-              storage_buffer_sem->Type()->UnwrapAll()->As<type::Struct>();
+              storage_buffer_sem->Type()->UnwrapAll()->As<type::StructType>();
 
           // Generate BufferSizeIntrinsic for this storage type if we haven't
           // already
@@ -146,7 +146,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
 
           if (!storage_buffer_type) {
             TINT_ICE(ctx.dst->Diagnostics())
-                << "arrayLength(X.Y) expected X to be type::Struct, got "
+                << "arrayLength(X.Y) expected X to be type::StructType, got "
                 << storage_buffer_type->FriendlyName(ctx.src->Symbols());
             break;
           }

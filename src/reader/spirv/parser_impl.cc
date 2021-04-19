@@ -947,7 +947,7 @@ type::Type* ParserImpl::ConvertType(
   namer_.SuggestSanitizedName(type_id, "S");
 
   auto name = namer_.GetName(type_id);
-  auto* result = builder_.create<type::Struct>(
+  auto* result = builder_.create<type::StructType>(
       builder_.Symbols().Register(name), ast_struct);
   id_to_type_[type_id] = result;
   if (num_non_writable_members == members.size()) {
@@ -1501,7 +1501,7 @@ ast::Expression* ParserImpl::MakeNullValue(type::Type* type) {
     return create<ast::TypeConstructorExpression>(Source{}, original_type,
                                                   std::move(ast_components));
   }
-  if (auto* struct_ty = type->As<type::Struct>()) {
+  if (auto* struct_ty = type->As<type::StructType>()) {
     ast::ExpressionList ast_components;
     for (auto* member : struct_ty->impl()->members()) {
       ast_components.emplace_back(MakeNullValue(member->type()));

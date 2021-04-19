@@ -126,7 +126,7 @@ bool Resolver::IsStorable(type::Type* type) {
   if (type::ArrayType* arr = type->As<type::ArrayType>()) {
     return IsStorable(arr->type());
   }
-  if (type::Struct* str = type->As<type::Struct>()) {
+  if (type::StructType* str = type->As<type::StructType>()) {
     for (const auto* member : str->impl()->members()) {
       if (!IsStorable(member->type())) {
         return false;
@@ -152,7 +152,7 @@ bool Resolver::IsHostShareable(type::Type* type) {
   if (auto* arr = type->As<type::ArrayType>()) {
     return IsHostShareable(arr->type());
   }
-  if (auto* str = type->As<type::Struct>()) {
+  if (auto* str = type->As<type::StructType>()) {
     for (auto* member : str->impl()->members()) {
       if (!IsHostShareable(member->type())) {
         return false;
@@ -224,7 +224,7 @@ bool Resolver::ResolveInternal() {
 
 bool Resolver::Type(type::Type* ty) {
   ty = ty->UnwrapAliasIfNeeded();
-  if (auto* str = ty->As<type::Struct>()) {
+  if (auto* str = ty->As<type::StructType>()) {
     if (!Structure(str)) {
       return false;
     }
@@ -331,7 +331,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
     // satisfying the storage class constraints.
 
     auto* access = info->type->As<type::AccessControl>();
-    auto* str = access ? access->type()->As<type::Struct>() : nullptr;
+    auto* str = access ? access->type()->As<type::StructType>() : nullptr;
     if (!str) {
       diagnostics_.add_error(
           "variables declared in the <storage> storage class must be of an "
@@ -519,7 +519,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func) {
         }
 
         // Check that we saw a pipeline IO attribute iff we need one.
-        if (Canonical(ty)->Is<type::Struct>()) {
+        if (Canonical(ty)->Is<type::StructType>()) {
           if (pipeline_io_attribute) {
             diagnostics_.add_error(
                 "entry point IO attributes must not be used on structure " +
@@ -555,12 +555,12 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func) {
       return false;
     }
 
-    if (auto* struct_ty = Canonical(ty)->As<type::Struct>()) {
+    if (auto* struct_ty = Canonical(ty)->As<type::StructType>()) {
       // Validate the decorations for each struct members, and also check for
       // invalid member types.
       for (auto* member : struct_ty->impl()->members()) {
         auto* member_ty = Canonical(member->type());
-        if (member_ty->Is<type::Struct>()) {
+        if (member_ty->Is<type::StructType>()) {
           diagnostics_.add_error(
               "entry point IO types cannot contain nested structures",
               member->source());
@@ -646,7 +646,7 @@ bool Resolver::Function(ast::Function* func) {
       return false;
     }
 
-    if (auto* str = param_info->type->As<type::Struct>()) {
+    if (auto* str = param_info->type->As<type::StructType>()) {
       auto* info = Structure(str);
       if (!info) {
         return false;
@@ -670,7 +670,7 @@ bool Resolver::Function(ast::Function* func) {
     }
   }
 
-  if (auto* str = Canonical(func->return_type())->As<type::Struct>()) {
+  if (auto* str = Canonical(func->return_type())->As<type::StructType>()) {
     if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, str,
                                       func->source())) {
       diagnostics_.add_note("while instantiating return type for " +
@@ -1296,7 +1296,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
   type::Type* ret = nullptr;
   std::vector<uint32_t> swizzle;
 
-  if (auto* ty = data_type->As<type::Struct>()) {
+  if (auto* ty = data_type->As<type::StructType>()) {
     Mark(expr->member());
     auto symbol = expr->member()->symbol();
     auto* str = Structure(ty);
@@ -1909,7 +1909,7 @@ bool Resolver::DefaultAlignAndSize(type::Type* ty,
     align = vector_align[mat->rows()];
     size = vector_align[mat->rows()] * mat->columns();
     return true;
-  } else if (auto* s = cty->As<type::Struct>()) {
+  } else if (auto* s = cty->As<type::StructType>()) {
     if (auto* si = Structure(s)) {
       align = si->align;
       size = si->size;
@@ -1998,7 +1998,7 @@ const sem::Array* Resolver::Array(type::ArrayType* arr, const Source& source) {
   return create_semantic(implicit_stride);
 }
 
-bool Resolver::ValidateStructure(const type::Struct* st) {
+bool Resolver::ValidateStructure(const type::StructType* st) {
   for (auto* member : st->impl()->members()) {
     if (auto* r = member->type()->UnwrapAll()->As<type::ArrayType>()) {
       if (r->IsRuntimeArray()) {
@@ -2053,7 +2053,7 @@ bool Resolver::ValidateStructure(const type::Struct* st) {
   return true;
 }
 
-Resolver::StructInfo* Resolver::Structure(type::Struct* str) {
+Resolver::StructInfo* Resolver::Structure(type::StructType* str) {
   auto info_it = struct_info_.find(str);
   if (info_it != struct_info_.end()) {
     // StructInfo already resolved for this structure type
@@ -2369,7 +2369,7 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
                                             const Source& usage) {
   ty = ty->UnwrapIfNeeded();
 
-  if (auto* str = ty->As<type::Struct>()) {
+  if (auto* str = ty->As<type::StructType>()) {
     auto* info = Structure(str);
     if (!info) {
       return false;

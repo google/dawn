@@ -123,7 +123,7 @@ bool GeneratorImpl::EmitConstructedType(const type::Type* ty) {
       return false;
     }
     out_ << ";" << std::endl;
-  } else if (auto* str = ty->As<type::Struct>()) {
+  } else if (auto* str = ty->As<type::StructType>()) {
     if (!EmitStructType(str)) {
       return false;
     }
@@ -430,7 +430,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
     if (sampler->IsComparison()) {
       out_ << "_comparison";
     }
-  } else if (auto* str = type->As<type::Struct>()) {
+  } else if (auto* str = type->As<type::StructType>()) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
     out_ << program_->Symbols().NameFor(str->symbol());
@@ -511,7 +511,7 @@ bool GeneratorImpl::EmitType(type::Type* type) {
   return true;
 }
 
-bool GeneratorImpl::EmitStructType(const type::Struct* str) {
+bool GeneratorImpl::EmitStructType(const type::StructType* str) {
   auto* impl = str->impl();
   for (auto* deco : impl->decorations()) {
     out_ << "[[";

@@ -111,7 +111,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
 
   // Strip entry point IO decorations from struct declarations.
   for (auto* ty : ctx.src->AST().ConstructedTypes()) {
-    if (auto* struct_ty = ty->As<type::Struct>()) {
+    if (auto* struct_ty = ty->As<type::StructType>()) {
       // Build new list of struct members without entry point IO decorations.
       ast::StructMemberList new_struct_members;
       for (auto* member : struct_ty->impl()->members()) {
@@ -126,7 +126,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       }
 
       // Redeclare the struct.
-      auto* new_struct = ctx.dst->create<type::Struct>(
+      auto* new_struct = ctx.dst->create<type::StructType>(
           ctx.Clone(struct_ty->symbol()),
           ctx.dst->create<ast::Struct>(
               new_struct_members, ctx.Clone(struct_ty->impl()->decorations())));
@@ -255,7 +255,7 @@ Symbol Spirv::HoistToInputVariables(
     type::Type* ty,
     type::Type* declared_ty,
     const ast::DecorationList& decorations) const {
-  if (!ty->Is<type::Struct>()) {
+  if (!ty->Is<type::StructType>()) {
     // Base case: create a global variable and return.
     ast::DecorationList new_decorations =
         RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
@@ -272,7 +272,7 @@ Symbol Spirv::HoistToInputVariables(
 
   // Recurse into struct members and build the initializer list.
   std::vector<Symbol> init_value_names;
-  auto* struct_ty = ty->As<type::Struct>();
+  auto* struct_ty = ty->As<type::StructType>();
   for (auto* member : struct_ty->impl()->members()) {
     auto member_var = HoistToInputVariables(
         ctx, func, member->type(), member->type(), member->decorations());
@@ -308,7 +308,7 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
                                    Symbol store_value,
                                    ast::StatementList& stores) const {
   // Base case.
-  if (!ty->Is<type::Struct>()) {
+  if (!ty->Is<type::StructType>()) {
     // Create a global variable.
     ast::DecorationList new_decorations =
         RemoveDecorations(&ctx, decorations, [](const ast::Decoration* deco) {
@@ -332,7 +332,7 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
   }
 
   // Recurse into struct members.
-  auto* struct_ty = ty->As<type::Struct>();
+  auto* struct_ty = ty->As<type::StructType>();
   for (auto* member : struct_ty->impl()->members()) {
     member_accesses.push_back(ctx.Clone(member->symbol()));
     HoistToOutputVariables(ctx, func, member->type(), member->type(),

@@ -23,7 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
 namespace tint {
 namespace sem {
 
-Struct::Struct(type::Struct* type,
+Struct::Struct(type::StructType* type,
                StructMemberList members,
                uint32_t align,
                uint32_t size,

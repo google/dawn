@@ -1121,7 +1121,7 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 
 // struct_decl
 //   : struct_decoration_decl* STRUCT IDENT struct_body_decl
-Maybe<type::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
+Maybe<type::StructType*> ParserImpl::struct_decl(ast::DecorationList& decos) {
   auto t = peek();
   auto source = t.source();
 
@@ -1136,7 +1136,7 @@ Maybe<type::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
   if (body.errored)
     return Failure::kErrored;
 
-  return create<type::Struct>(
+  return create<type::StructType>(
       builder_.Symbols().Register(name.value),
       create<ast::Struct>(source, std::move(body.value), std::move(decos)));
 }

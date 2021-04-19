@@ -176,7 +176,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a struct declaration
   /// @param str the struct
   /// @returns true if the struct is emitted
-  bool EmitStructType(const type::Struct* str);
+  bool EmitStructType(const type::StructType* str);
   /// Handles emitting an image format
   /// @param fmt the format to generate
   /// @returns true if the format is emitted

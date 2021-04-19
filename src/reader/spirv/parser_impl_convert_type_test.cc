@@ -550,10 +550,10 @@ TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
 
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->Is<type::Struct>());
+  EXPECT_TRUE(type->Is<type::StructType>());
 
   Program program = p->program();
-  EXPECT_THAT(program.str(type->As<type::Struct>()->impl()), Eq(R"(Struct{
+  EXPECT_THAT(program.str(type->As<type::StructType>()->impl()), Eq(R"(Struct{
   StructMember{field0: __u32}
   StructMember{field1: __f32}
 }
@@ -571,10 +571,10 @@ TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
 
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->Is<type::Struct>());
+  EXPECT_TRUE(type->Is<type::StructType>());
 
   Program program = p->program();
-  EXPECT_THAT(program.str(type->As<type::Struct>()->impl()), Eq(R"(Struct{
+  EXPECT_THAT(program.str(type->As<type::StructType>()->impl()), Eq(R"(Struct{
   [[block]]
   StructMember{field0: __u32}
 }
@@ -596,10 +596,10 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
 
   auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type->Is<type::Struct>());
+  EXPECT_TRUE(type->Is<type::StructType>());
 
   Program program = p->program();
-  EXPECT_THAT(program.str(type->As<type::Struct>()->impl()), Eq(R"(Struct{
+  EXPECT_THAT(program.str(type->As<type::StructType>()->impl()), Eq(R"(Struct{
   StructMember{[[ offset 0 ]] field0: __f32}
   StructMember{[[ offset 8 ]] field1: __vec_2__f32}
   StructMember{[[ offset 16 ]] field2: __mat_2_2__f32}

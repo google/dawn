@@ -299,7 +299,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param name the struct name
   /// @returns true if the struct is emitted
   bool EmitStructType(std::ostream& out,
-                      const type::Struct* ty,
+                      const type::StructType* ty,
                       const std::string& name);
   /// Handles a unary op expression
   /// @param pre the preamble for the expression stream

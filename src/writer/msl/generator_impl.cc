@@ -155,7 +155,7 @@ bool GeneratorImpl::EmitConstructedType(const type::Type* ty) {
     }
     out_ << " " << program_->Symbols().NameFor(alias->symbol()) << ";"
          << std::endl;
-  } else if (auto* str = ty->As<type::Struct>()) {
+  } else if (auto* str = ty->As<type::StructType>()) {
     if (!EmitStructType(str)) {
       return false;
     }
@@ -886,7 +886,7 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
-  if (expr->type()->IsAnyOf<type::ArrayType, type::Struct>()) {
+  if (expr->type()->IsAnyOf<type::ArrayType, type::StructType>()) {
     out_ << "{";
   } else {
     if (!EmitType(expr->type(), "")) {
@@ -915,7 +915,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  if (expr->type()->IsAnyOf<type::ArrayType, type::Struct>()) {
+  if (expr->type()->IsAnyOf<type::ArrayType, type::StructType>()) {
     out_ << "}";
   } else {
     out_ << ")";
@@ -942,7 +942,7 @@ bool GeneratorImpl::EmitZeroValue(type::Type* type) {
       return false;
     }
     out_ << "}";
-  } else if (type->As<type::Struct>()) {
+  } else if (type->As<type::StructType>()) {
     out_ << "{}";
   } else {
     diagnostics_.add_error("Invalid type for zero emission: " +
@@ -1429,7 +1429,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
     out_ << " " << program_->Symbols().NameFor(var->symbol());
 
-    if (type->Is<type::Struct>()) {
+    if (type->Is<type::StructType>()) {
       out_ << " [[stage_in]]";
     } else {
       auto& decos = var->decorations();
@@ -1947,7 +1947,7 @@ bool GeneratorImpl::EmitType(type::Type* type, const std::string& name) {
     out_ << "*";
   } else if (type->Is<type::Sampler>()) {
     out_ << "sampler";
-  } else if (auto* str = type->As<type::Struct>()) {
+  } else if (auto* str = type->As<type::StructType>()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
     out_ << program_->Symbols().NameFor(str->symbol());
@@ -2042,7 +2042,7 @@ bool GeneratorImpl::EmitPackedType(type::Type* type, const std::string& name) {
   return EmitType(type, name);
 }
 
-bool GeneratorImpl::EmitStructType(const type::Struct* str) {
+bool GeneratorImpl::EmitStructType(const type::StructType* str) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::Decoration::kNone) {
   // }
@@ -2345,7 +2345,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     return SizeAndAlign{el_size_align.size * num_els, el_size_align.align};
   }
 
-  if (auto* str = ty->As<type::Struct>()) {
+  if (auto* str = ty->As<type::StructType>()) {
     // TODO(crbug.com/tint/650): There's an assumption here that MSL's default
     // structure size and alignment matches WGSL's. We need to confirm this.
     auto* sem = program_->Sem().Get(str);

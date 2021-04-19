@@ -18,31 +18,31 @@
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::type::Struct);
+TINT_INSTANTIATE_TYPEINFO(tint::type::StructType);
 
 namespace tint {
 namespace type {
 
-Struct::Struct(const Symbol& sym, ast::Struct* impl)
+StructType::StructType(const Symbol& sym, ast::Struct* impl)
     : symbol_(sym), struct_(impl) {}
 
-Struct::Struct(Struct&&) = default;
+StructType::StructType(StructType&&) = default;
 
-Struct::~Struct() = default;
+StructType::~StructType() = default;
 
-std::string Struct::type_name() const {
+std::string StructType::type_name() const {
   return "__struct_" + symbol_.to_str();
 }
 
-std::string Struct::FriendlyName(const SymbolTable& symbols) const {
+std::string StructType::FriendlyName(const SymbolTable& symbols) const {
   return symbols.NameFor(symbol_);
 }
 
-Struct* Struct::Clone(CloneContext* ctx) const {
+StructType* StructType::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto sym = ctx->Clone(symbol());
   auto* str = ctx->Clone(impl());
-  return ctx->dst->create<Struct>(sym, str);
+  return ctx->dst->create<StructType>(sym, str);
 }
 
 }  // namespace type

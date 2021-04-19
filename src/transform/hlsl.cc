@@ -96,7 +96,7 @@ void Hlsl::PromoteInitializersToConstVar(CloneContext& ctx) const {
       }
 
       auto* src_ty = src_sem_expr->Type();
-      if (src_ty->IsAnyOf<type::ArrayType, type::Struct>()) {
+      if (src_ty->IsAnyOf<type::ArrayType, type::StructType>()) {
         // Create a new symbol for the constant
         auto dst_symbol = ctx.dst->Symbols().New();
         // Clone the type

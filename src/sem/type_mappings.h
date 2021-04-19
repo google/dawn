@@ -31,7 +31,7 @@ class Variable;
 }  // namespace ast
 namespace type {
 class ArrayType;
-class Struct;
+class StructType;
 }  // namespace type
 
 namespace sem {
@@ -59,7 +59,7 @@ struct TypeMappings {
   Function* operator()(ast::Function*);
   MemberAccessorExpression* operator()(ast::MemberAccessorExpression*);
   Statement* operator()(ast::Statement*);
-  Struct* operator()(type::Struct*);
+  Struct* operator()(type::StructType*);
   StructMember* operator()(ast::StructMember*);
   Variable* operator()(ast::Variable*);
   //! @endcond

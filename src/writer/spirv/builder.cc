@@ -864,8 +864,8 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
 
   // If the data_type is a structure we're accessing a member, if it's a
   // vector we're accessing a swizzle.
-  if (data_type->Is<type::Struct>()) {
-    auto* strct = data_type->As<type::Struct>()->impl();
+  if (data_type->Is<type::StructType>()) {
+    auto* strct = data_type->As<type::StructType>()->impl();
     auto symbol = expr->member()->symbol();
 
     uint32_t idx = 0;
@@ -1252,7 +1252,7 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
       subtype = mat->type()->UnwrapAll();
     } else if (auto* arr = subtype->As<type::ArrayType>()) {
       subtype = arr->type()->UnwrapAll();
-    } else if (auto* str = subtype->As<type::Struct>()) {
+    } else if (auto* str = subtype->As<type::StructType>()) {
       subtype = str->impl()->members()[i]->type()->UnwrapAll();
     }
     if (subtype != TypeOf(sc)->UnwrapAll()) {
@@ -1329,7 +1329,8 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
     if (result_type == value_type || result_type->Is<type::Matrix>() ||
-        result_type->Is<type::ArrayType>() || result_type->Is<type::Struct>()) {
+        result_type->Is<type::ArrayType>() ||
+        result_type->Is<type::StructType>()) {
       out << "_" << id;
 
       ops.push_back(Operand::Int(id));
@@ -1980,14 +1981,14 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       params.push_back(Operand::Int(struct_id));
 
       auto* type = TypeOf(accessor->structure())->UnwrapAll();
-      if (!type->Is<type::Struct>()) {
+      if (!type->Is<type::StructType>()) {
         error_ =
             "invalid type (" + type->type_name() + ") for runtime array length";
         return 0;
       }
       // Runtime array must be the last member in the structure
-      params.push_back(Operand::Int(
-          uint32_t(type->As<type::Struct>()->impl()->members().size() - 1)));
+      params.push_back(Operand::Int(uint32_t(
+          type->As<type::StructType>()->impl()->members().size() - 1)));
 
       if (!push_function_inst(spv::Op::OpArrayLength, params)) {
         return 0;
@@ -2934,7 +2935,7 @@ uint32_t Builder::GenerateTypeIfNeeded(type::Type* type) {
     return GenerateTypeIfNeeded(alias->type());
   }
   if (auto* ac = type->As<type::AccessControl>()) {
-    if (!ac->type()->UnwrapIfNeeded()->Is<type::Struct>()) {
+    if (!ac->type()->UnwrapIfNeeded()->Is<type::StructType>()) {
       return GenerateTypeIfNeeded(ac->type());
     }
   }
@@ -2949,8 +2950,8 @@ uint32_t Builder::GenerateTypeIfNeeded(type::Type* type) {
   if (auto* ac = type->As<type::AccessControl>()) {
     // The non-struct case was handled above.
     auto* subtype = ac->type()->UnwrapIfNeeded();
-    if (!GenerateStructType(subtype->As<type::Struct>(), ac->access_control(),
-                            result)) {
+    if (!GenerateStructType(subtype->As<type::StructType>(),
+                            ac->access_control(), result)) {
       return 0;
     }
   } else if (auto* arr = type->As<type::ArrayType>()) {
@@ -2971,7 +2972,7 @@ uint32_t Builder::GenerateTypeIfNeeded(type::Type* type) {
     if (!GeneratePointerType(ptr, result)) {
       return 0;
     }
-  } else if (auto* str = type->As<type::Struct>()) {
+  } else if (auto* str = type->As<type::StructType>()) {
     if (!GenerateStructType(str, ast::AccessControl::kReadWrite, result)) {
       return 0;
     }
@@ -3144,7 +3145,7 @@ bool Builder::GeneratePointerType(type::Pointer* ptr, const Operand& result) {
   return true;
 }
 
-bool Builder::GenerateStructType(type::Struct* struct_type,
+bool Builder::GenerateStructType(type::StructType* struct_type,
                                  ast::AccessControl access_control,
                                  const Operand& result) {
   auto struct_id = result.to_i();
