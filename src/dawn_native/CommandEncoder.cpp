@@ -451,9 +451,9 @@ namespace dawn_native {
             BufferDescriptor availabilityDesc = {};
             availabilityDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopyDst;
             availabilityDesc.size = querySet->GetQueryCount() * sizeof(uint32_t);
-            // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-            Ref<BufferBase> availabilityBuffer =
-                AcquireRef(device->APICreateBuffer(&availabilityDesc));
+            Ref<BufferBase> availabilityBuffer;
+            DAWN_TRY_ASSIGN(availabilityBuffer, device->CreateBuffer(&availabilityDesc));
+
             DAWN_TRY(device->GetQueue()->WriteBuffer(availabilityBuffer.Get(), 0,
                                                      availability.data(),
                                                      availability.size() * sizeof(uint32_t)));
@@ -461,17 +461,18 @@ namespace dawn_native {
             // Timestamp params uniform buffer
             TimestampParams params = {queryCount, static_cast<uint32_t>(destinationOffset),
                                       device->GetTimestampPeriodInNS()};
+
             BufferDescriptor parmsDesc = {};
             parmsDesc.usage = wgpu::BufferUsage::Uniform | wgpu::BufferUsage::CopyDst;
             parmsDesc.size = sizeof(params);
-            // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-            Ref<BufferBase> paramsBuffer = AcquireRef(device->APICreateBuffer(&parmsDesc));
+            Ref<BufferBase> paramsBuffer;
+            DAWN_TRY_ASSIGN(paramsBuffer, device->CreateBuffer(&parmsDesc));
+
             DAWN_TRY(
                 device->GetQueue()->WriteBuffer(paramsBuffer.Get(), 0, &params, sizeof(params)));
 
-            EncodeConvertTimestampsToNanoseconds(encoder, destination, availabilityBuffer.Get(),
-                                                 paramsBuffer.Get());
-            return {};
+            return EncodeConvertTimestampsToNanoseconds(
+                encoder, destination, availabilityBuffer.Get(), paramsBuffer.Get());
         }
 
     }  // namespace

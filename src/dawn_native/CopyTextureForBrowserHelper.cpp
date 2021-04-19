@@ -139,7 +139,7 @@ namespace dawn_native {
             return nullptr;
         }
 
-        RenderPipelineBase* GetOrCreateCopyTextureForBrowserPipeline(
+        ResultOrError<RenderPipelineBase*> GetOrCreateCopyTextureForBrowserPipeline(
             DeviceBase* device,
             wgpu::TextureFormat dstFormat) {
             InternalPipelineStore* store = device->GetInternalPipelineStore();
@@ -152,9 +152,8 @@ namespace dawn_native {
                     wgslDesc.source = sCopyTextureForBrowserVertex;
                     descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
 
-                    // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-                    store->copyTextureForBrowserVS =
-                        AcquireRef(device->APICreateShaderModule(&descriptor));
+                    DAWN_TRY_ASSIGN(store->copyTextureForBrowserVS,
+                                    device->CreateShaderModule(&descriptor));
                 }
 
                 ShaderModuleBase* vertexModule = store->copyTextureForBrowserVS.Get();
@@ -165,9 +164,8 @@ namespace dawn_native {
                     ShaderModuleWGSLDescriptor wgslDesc;
                     wgslDesc.source = sCopyTextureForBrowserFragment;
                     descriptor.nextInChain = reinterpret_cast<ChainedStruct*>(&wgslDesc);
-                    // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-                    store->copyTextureForBrowserFS =
-                        AcquireRef(device->APICreateShaderModule(&descriptor));
+                    DAWN_TRY_ASSIGN(store->copyTextureForBrowserFS,
+                                    device->CreateShaderModule(&descriptor));
                 }
 
                 ShaderModuleBase* fragmentModule = store->copyTextureForBrowserFS.Get();
@@ -200,9 +198,9 @@ namespace dawn_native {
                 fragment.targetCount = 1;
                 fragment.targets = &target;
 
-                // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-                store->copyTextureForBrowserPipelines.insert(
-                    {dstFormat, AcquireRef(device->APICreateRenderPipeline2(&renderPipelineDesc))});
+                Ref<RenderPipelineBase> pipeline;
+                DAWN_TRY_ASSIGN(pipeline, device->CreateRenderPipeline(&renderPipelineDesc));
+                store->copyTextureForBrowserPipelines.insert({dstFormat, std::move(pipeline)});
             }
 
             return GetCachedPipeline(store, dstFormat);
@@ -245,12 +243,13 @@ namespace dawn_native {
         // TODO(shaobo.yan@intel.com): In D3D12 and Vulkan, compatible texture format can directly
         // copy to each other. This can be a potential fast path.
 
-        RenderPipelineBase* pipeline = GetOrCreateCopyTextureForBrowserPipeline(
-            device, destination->texture->GetFormat().format);
+        RenderPipelineBase* pipeline;
+        DAWN_TRY_ASSIGN(pipeline, GetOrCreateCopyTextureForBrowserPipeline(
+                                      device, destination->texture->GetFormat().format));
 
         // Prepare bind group layout.
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<BindGroupLayoutBase> layout = AcquireRef(pipeline->APIGetBindGroupLayout(0));
+        Ref<BindGroupLayoutBase> layout;
+        DAWN_TRY_ASSIGN(layout, pipeline->GetBindGroupLayout(0));
 
         // Prepare bind group descriptor
         BindGroupEntry bindGroupEntries[3] = {};
@@ -280,8 +279,8 @@ namespace dawn_native {
         BufferDescriptor uniformDesc = {};
         uniformDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Uniform;
         uniformDesc.size = sizeof(uniformData);
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<BufferBase> uniformBuffer = AcquireRef(device->APICreateBuffer(&uniformDesc));
+        Ref<BufferBase> uniformBuffer;
+        DAWN_TRY_ASSIGN(uniformBuffer, device->CreateBuffer(&uniformDesc));
 
         DAWN_TRY(device->GetQueue()->WriteBuffer(uniformBuffer.Get(), 0, uniformData,
                                                  sizeof(uniformData)));
@@ -289,16 +288,16 @@ namespace dawn_native {
         // Prepare binding 1 resource: sampler
         // Use default configuration, filterMode set to Nearest for min and mag.
         SamplerDescriptor samplerDesc = {};
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<SamplerBase> sampler = AcquireRef(device->APICreateSampler(&samplerDesc));
+        Ref<SamplerBase> sampler;
+        DAWN_TRY_ASSIGN(sampler, device->CreateSampler(&samplerDesc));
 
         // Prepare binding 2 resource: sampled texture
         TextureViewDescriptor srcTextureViewDesc = {};
         srcTextureViewDesc.baseMipLevel = source->mipLevel;
         srcTextureViewDesc.mipLevelCount = 1;
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<TextureViewBase> srcTextureView =
-            AcquireRef(source->texture->APICreateView(&srcTextureViewDesc));
+        Ref<TextureViewBase> srcTextureView;
+        DAWN_TRY_ASSIGN(srcTextureView,
+                        device->CreateTextureView(source->texture, &srcTextureViewDesc));
 
         // Set bind group entries.
         bindGroupEntries[0].binding = 0;
@@ -310,8 +309,8 @@ namespace dawn_native {
         bindGroupEntries[2].textureView = srcTextureView.Get();
 
         // Create bind group after all binding entries are set.
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<BindGroupBase> bindGroup = AcquireRef(device->APICreateBindGroup(&bgDesc));
+        Ref<BindGroupBase> bindGroup;
+        DAWN_TRY_ASSIGN(bindGroup, device->CreateBindGroup(&bgDesc));
 
         // Create command encoder.
         CommandEncoderDescriptor encoderDesc = {};
@@ -322,9 +321,9 @@ namespace dawn_native {
         TextureViewDescriptor dstTextureViewDesc;
         dstTextureViewDesc.baseMipLevel = destination->mipLevel;
         dstTextureViewDesc.mipLevelCount = 1;
-        // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-        Ref<TextureViewBase> dstView =
-            AcquireRef(destination->texture->APICreateView(&dstTextureViewDesc));
+        Ref<TextureViewBase> dstView;
+        DAWN_TRY_ASSIGN(dstView,
+                        device->CreateTextureView(destination->texture, &dstTextureViewDesc));
 
         // Prepare render pass color attachment descriptor.
         RenderPassColorAttachmentDescriptor colorAttachmentDesc;

@@ -50,11 +50,14 @@ namespace dawn_native {
         const ProgrammableStage& GetStage(SingleShaderStage stage) const;
         const PerStage<ProgrammableStage>& GetAllStages() const;
 
-        BindGroupLayoutBase* APIGetBindGroupLayout(uint32_t groupIndex);
+        ResultOrError<Ref<BindGroupLayoutBase>> GetBindGroupLayout(uint32_t groupIndex);
 
         // Helper functions for std::unordered_map-based pipeline caches.
         size_t ComputeContentHash() override;
         static bool EqualForCache(const PipelineBase* a, const PipelineBase* b);
+
+        // Implementation of the API entrypoint. Do not use in a reentrant manner.
+        BindGroupLayoutBase* APIGetBindGroupLayout(uint32_t groupIndex);
 
       protected:
         PipelineBase(DeviceBase* device,

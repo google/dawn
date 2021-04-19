@@ -626,7 +626,13 @@ namespace dawn_native {
     }
 
     TextureViewBase* TextureBase::APICreateView(const TextureViewDescriptor* descriptor) {
-        return GetDevice()->CreateTextureView(this, descriptor);
+        DeviceBase* device = GetDevice();
+
+        Ref<TextureViewBase> result;
+        if (device->ConsumedError(device->CreateTextureView(this, descriptor), &result)) {
+            return TextureViewBase::MakeError(device);
+        }
+        return result.Detach();
     }
 
     void TextureBase::APIDestroy() {

@@ -127,6 +127,12 @@ namespace dawn_native {
     }
 
     template <typename BackendTraits, typename T>
+    Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>&& ToBackendBase(Ref<T>&& common) {
+        return reinterpret_cast<Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>&&>(
+            common);
+    }
+
+    template <typename BackendTraits, typename T>
     const Ref<typename ToBackendTraits<T, BackendTraits>::BackendType>& ToBackendBase(
         const Ref<T>& common) {
         return reinterpret_cast<

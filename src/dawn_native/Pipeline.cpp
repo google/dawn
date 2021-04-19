@@ -125,21 +125,24 @@ namespace dawn_native {
         return {};
     }
 
-    BindGroupLayoutBase* PipelineBase::APIGetBindGroupLayout(uint32_t groupIndexIn) {
-        if (GetDevice()->ConsumedError(ValidateGetBindGroupLayout(groupIndexIn))) {
-            return BindGroupLayoutBase::MakeError(GetDevice());
-        }
+    ResultOrError<Ref<BindGroupLayoutBase>> PipelineBase::GetBindGroupLayout(
+        uint32_t groupIndexIn) {
+        DAWN_TRY(ValidateGetBindGroupLayout(groupIndexIn));
 
         BindGroupIndex groupIndex(groupIndexIn);
-
-        BindGroupLayoutBase* bgl = nullptr;
         if (!mLayout->GetBindGroupLayoutsMask()[groupIndex]) {
-            bgl = GetDevice()->GetEmptyBindGroupLayout();
+            return Ref<BindGroupLayoutBase>(GetDevice()->GetEmptyBindGroupLayout());
         } else {
-            bgl = mLayout->GetBindGroupLayout(groupIndex);
+            return Ref<BindGroupLayoutBase>(mLayout->GetBindGroupLayout(groupIndex));
         }
-        bgl->Reference();
-        return bgl;
+    }
+
+    BindGroupLayoutBase* PipelineBase::APIGetBindGroupLayout(uint32_t groupIndexIn) {
+        Ref<BindGroupLayoutBase> result;
+        if (GetDevice()->ConsumedError(GetBindGroupLayout(groupIndexIn), &result)) {
+            return BindGroupLayoutBase::MakeError(GetDevice());
+        }
+        return result.Detach();
     }
 
     size_t PipelineBase::ComputeContentHash() {

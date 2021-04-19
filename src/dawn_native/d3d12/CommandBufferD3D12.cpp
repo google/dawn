@@ -139,10 +139,10 @@ namespace dawn_native { namespace d3d12 {
             return false;
         }
 
-        void RecordCopyTextureWithTemporaryBuffer(CommandRecordingContext* recordingContext,
-                                                  const TextureCopy& srcCopy,
-                                                  const TextureCopy& dstCopy,
-                                                  const Extent3D& copySize) {
+        MaybeError RecordCopyTextureWithTemporaryBuffer(CommandRecordingContext* recordingContext,
+                                                        const TextureCopy& srcCopy,
+                                                        const TextureCopy& dstCopy,
+                                                        const Extent3D& copySize) {
             ASSERT(srcCopy.texture->GetFormat().format == dstCopy.texture->GetFormat().format);
             ASSERT(srcCopy.aspect == dstCopy.aspect);
             dawn_native::Format format = srcCopy.texture->GetFormat();
@@ -166,9 +166,9 @@ namespace dawn_native { namespace d3d12 {
             tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
             tempBufferDescriptor.size = tempBufferSize.AcquireSuccess();
             Device* device = ToBackend(srcCopy.texture->GetDevice());
-            // TODO(dawn:723): change to not use AcquireRef for reentrant object creation.
-            Ref<Buffer> tempBuffer =
-                AcquireRef(ToBackend(device->APICreateBuffer(&tempBufferDescriptor)));
+            Ref<BufferBase> tempBufferBase;
+            DAWN_TRY_ASSIGN(tempBufferBase, device->CreateBuffer(&tempBufferDescriptor));
+            Ref<Buffer> tempBuffer = ToBackend(std::move(tempBufferBase));
 
             // Copy from source texture into tempBuffer
             Texture* srcTexture = ToBackend(srcCopy.texture).Get();
@@ -190,6 +190,8 @@ namespace dawn_native { namespace d3d12 {
 
             // Save tempBuffer into recordingContext
             recordingContext->AddToTempBuffers(std::move(tempBuffer));
+
+            return {};
         }
     }  // anonymous namespace
 
@@ -824,8 +826,8 @@ namespace dawn_native { namespace d3d12 {
                     ASSERT(srcRange.aspects == dstRange.aspects);
                     if (ShouldCopyUsingTemporaryBuffer(GetDevice(), copy->source,
                                                        copy->destination)) {
-                        RecordCopyTextureWithTemporaryBuffer(commandContext, copy->source,
-                                                             copy->destination, copy->copySize);
+                        DAWN_TRY(RecordCopyTextureWithTemporaryBuffer(
+                            commandContext, copy->source, copy->destination, copy->copySize));
                         break;
                     }
 

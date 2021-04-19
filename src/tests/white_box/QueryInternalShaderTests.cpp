@@ -25,11 +25,11 @@ namespace {
                                               wgpu::Buffer timestamps,
                                               wgpu::Buffer availability,
                                               wgpu::Buffer params) {
-        dawn_native::EncodeConvertTimestampsToNanoseconds(
+        ASSERT_TRUE(dawn_native::EncodeConvertTimestampsToNanoseconds(
             reinterpret_cast<dawn_native::CommandEncoder*>(encoder.Get()),
             reinterpret_cast<dawn_native::BufferBase*>(timestamps.Get()),
             reinterpret_cast<dawn_native::BufferBase*>(availability.Get()),
-            reinterpret_cast<dawn_native::BufferBase*>(params.Get()));
+            reinterpret_cast<dawn_native::BufferBase*>(params.Get())).IsSuccess());
     }
 
     class InternalShaderExpectation : public detail::Expectation {

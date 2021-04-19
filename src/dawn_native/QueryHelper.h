@@ -15,6 +15,7 @@
 #ifndef DAWNNATIVE_QUERYHELPER_H_
 #define DAWNNATIVE_QUERYHELPER_H_
 
+#include "dawn_native/Error.h"
 #include "dawn_native/ObjectBase.h"
 
 namespace dawn_native {
@@ -28,10 +29,10 @@ namespace dawn_native {
         float period;
     };
 
-    void EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
-                                              BufferBase* timestamps,
-                                              BufferBase* availability,
-                                              BufferBase* params);
+    MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
+                                                    BufferBase* timestamps,
+                                                    BufferBase* availability,
+                                                    BufferBase* params);
 
 }  // namespace dawn_native
 
