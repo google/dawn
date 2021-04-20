@@ -38,8 +38,8 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto p = parser("type a = B");
 
-  sem::StructType str(p->builder().Symbols().Get("B"), {});
-  p->register_constructed("B", &str);
+  auto* str = Structure(p->builder().Symbols().Register("B"), {});
+  p->register_constructed("B", str);
 
   auto t = p->type_alias();
   EXPECT_FALSE(p->has_error());
@@ -52,8 +52,8 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   ASSERT_TRUE(alias->type()->Is<sem::StructType>());
 
   auto* s = alias->type()->As<sem::StructType>();
-  EXPECT_EQ(s->symbol(), p->builder().Symbols().Get("B"));
-  EXPECT_EQ(s->symbol(), p->builder().Symbols().Get("B"));
+  EXPECT_EQ(s->impl()->name(), p->builder().Symbols().Get("B"));
+  EXPECT_EQ(s->impl()->name(), p->builder().Symbols().Get("B"));
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {

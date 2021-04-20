@@ -339,8 +339,8 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("struct declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      register_constructed(builder_.Symbols().NameFor(str.value->symbol()),
-                           str.value);
+      register_constructed(
+          builder_.Symbols().NameFor(str.value->impl()->name()), str.value);
       builder_.AST().AddConstructedType(str.value);
       return true;
     }
@@ -1135,9 +1135,8 @@ Maybe<sem::StructType*> ParserImpl::struct_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   auto sym = builder_.Symbols().Register(name.value);
-  return create<sem::StructType>(
-      sym, create<ast::Struct>(source, sym, std::move(body.value),
-                               std::move(decos)));
+  return create<sem::StructType>(create<ast::Struct>(
+      source, sym, std::move(body.value), std::move(decos)));
 }
 
 // struct_body_decl

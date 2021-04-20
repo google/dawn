@@ -104,7 +104,7 @@ type B = A;)");
   ASSERT_EQ(program.AST().ConstructedTypes().size(), 2u);
   ASSERT_TRUE(program.AST().ConstructedTypes()[0]->Is<sem::StructType>());
   auto* str = program.AST().ConstructedTypes()[0]->As<sem::StructType>();
-  EXPECT_EQ(str->symbol(), program.Symbols().Get("A"));
+  EXPECT_EQ(str->impl()->name(), program.Symbols().Get("A"));
 
   ASSERT_TRUE(program.AST().ConstructedTypes()[1]->Is<sem::Alias>());
   auto* alias = program.AST().ConstructedTypes()[1]->As<sem::Alias>();
@@ -168,7 +168,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   ASSERT_TRUE(t->Is<sem::StructType>());
 
   auto* str = t->As<sem::StructType>();
-  EXPECT_EQ(str->symbol(), program.Symbols().Get("A"));
+  EXPECT_EQ(str->impl()->name(), program.Symbols().Get("A"));
   EXPECT_EQ(str->impl()->members().size(), 2u);
 }
 
@@ -186,7 +186,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   ASSERT_TRUE(t->Is<sem::StructType>());
 
   auto* str = t->As<sem::StructType>();
-  EXPECT_EQ(str->symbol(), program.Symbols().Get("A"));
+  EXPECT_EQ(str->impl()->name(), program.Symbols().Get("A"));
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_FALSE(str->IsBlockDecorated());
 
@@ -213,7 +213,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   ASSERT_TRUE(t->Is<sem::StructType>());
 
   auto* str = t->As<sem::StructType>();
-  EXPECT_EQ(str->symbol(), program.Symbols().Get("A"));
+  EXPECT_EQ(str->impl()->name(), program.Symbols().Get("A"));
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_TRUE(str->IsBlockDecorated());
 }

@@ -27,15 +27,11 @@ namespace sem {
 class StructType : public Castable<StructType, Type> {
  public:
   /// Constructor
-  /// @param sym the symbol representing the struct
   /// @param impl the struct data
-  StructType(const Symbol& sym, ast::Struct* impl);
+  explicit StructType(ast::Struct* impl);
   /// Move constructor
   StructType(StructType&&);
   ~StructType() override;
-
-  /// @returns the struct symbol
-  const Symbol& symbol() const { return symbol_; }
 
   /// @returns true if the struct has a block decoration
   bool IsBlockDecorated() const { return struct_->IsBlockDecorated(); }
@@ -57,7 +53,6 @@ class StructType : public Castable<StructType, Type> {
   StructType* Clone(CloneContext* ctx) const override;
 
  private:
-  Symbol const symbol_;
   ast::Struct* const struct_;
 
   uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;

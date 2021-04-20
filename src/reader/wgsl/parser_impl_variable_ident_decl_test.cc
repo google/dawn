@@ -116,7 +116,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(Sym("S"), members, decos);
-  auto* s = ty.struct_("S", str);
+  auto* s = ty.struct_(str);
 
   p->register_constructed("S", s);
 
@@ -141,7 +141,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(Sym("S"), members, decos);
-  auto* s = ty.struct_("S", str);
+  auto* s = ty.struct_(str);
 
   p->register_constructed("S", s);
 
@@ -166,7 +166,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(Sym("S"), members, decos);
-  auto* s = ty.struct_("S", str);
+  auto* s = ty.struct_(str);
 
   p->register_constructed("S", s);
 
@@ -188,7 +188,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDeco_MultiBlock_Fail) {
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(Sym("S"), members, decos);
-  auto* s = ty.struct_("S", str);
+  auto* s = ty.struct_(str);
 
   p->register_constructed("S", s);
 
@@ -226,7 +226,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_NonAccessDecoFail) {
   decos.push_back(block_deco);
 
   auto* str = create<ast::Struct>(Sym("S"), members, decos);
-  auto* s = ty.struct_("S", str);
+  auto* s = ty.struct_(str);
 
   p->register_constructed("S", s);
 

@@ -320,7 +320,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
                                                 Member("rt", ty.array<f32>())},
                           decos);
 
-  auto* struct_type = ty.struct_("Foo", st);
+  auto* struct_type = ty.struct_(st);
   AST().AddConstructedType(struct_type);
 
   WrapInFunction();
@@ -341,7 +341,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLastNoBlock_Fail) {
                             Member(Source{{12, 34}}, "rt", ty.array<f32>())},
       decos);
 
-  auto* struct_type = ty.struct_("Foo", st);
+  auto* struct_type = ty.struct_(st);
   AST().AddConstructedType(struct_type);
 
   WrapInFunction();
@@ -366,7 +366,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
   auto* st = create<ast::Struct>(
       Sym("Foo"), ast::StructMemberList{rt, Member("vf", ty.f32())}, decos);
 
-  auto* struct_type = ty.struct_("Foo", st);
+  auto* struct_type = ty.struct_(st);
 
   AST().AddConstructedType(struct_type);
 
@@ -445,7 +445,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
                             Member("a", ty.u32())},
       decos);
 
-  auto* struct_type = ty.struct_("s", st);
+  auto* struct_type = ty.struct_(st);
   AST().AddConstructedType(struct_type);
 
   WrapInFunction();
@@ -473,7 +473,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
       Sym("s"),
       ast::StructMemberList{Member("a", ty.u32()), Member("b", alias)}, decos);
 
-  auto* struct_type = ty.struct_("s", st);
+  auto* struct_type = ty.struct_(st);
   AST().AddConstructedType(struct_type);
 
   WrapInFunction();

@@ -227,7 +227,7 @@ class InspectorHelper : public ProgramBuilder {
 
     auto sym = Sym(name);
     auto* str = create<ast::Struct>(sym, members, decos);
-    auto* str_ty = ty.struct_(sym, str);
+    auto* str_ty = ty.struct_(str);
     AST().AddConstructedType(str_ty);
     return str_ty;
   }
@@ -1829,7 +1829,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
       ast::StructMemberList{Member(StructMemberName(0, ty.i32()), ty.i32())},
       decos);
 
-  auto* foo_type = ty.struct_("foo_type", str);
+  auto* foo_type = ty.struct_(str);
   AddUniformBuffer("foo_ub", foo_type, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});

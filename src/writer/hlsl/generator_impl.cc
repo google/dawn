@@ -221,7 +221,8 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     out << " " << builder_.Symbols().NameFor(alias->symbol()) << ";"
         << std::endl;
   } else if (auto* str = ty->As<sem::StructType>()) {
-    if (!EmitStructType(out, str, builder_.Symbols().NameFor(str->symbol()))) {
+    if (!EmitStructType(out, str,
+                        builder_.Symbols().NameFor(str->impl()->name()))) {
       return false;
     }
   } else {
@@ -1709,8 +1710,9 @@ bool GeneratorImpl::EmitEntryPointData(
 
     auto* type = var->Type()->UnwrapIfNeeded();
     if (auto* strct = type->As<sem::StructType>()) {
-      out << "ConstantBuffer<" << builder_.Symbols().NameFor(strct->symbol())
-          << "> " << builder_.Symbols().NameFor(decl->symbol())
+      out << "ConstantBuffer<"
+          << builder_.Symbols().NameFor(strct->impl()->name()) << "> "
+          << builder_.Symbols().NameFor(decl->symbol())
           << RegisterAndSpace('b', binding_point) << ";" << std::endl;
     } else {
       // TODO(dsinclair): There is outstanding spec work to require all uniform
@@ -2450,7 +2452,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     }
     out << "State";
   } else if (auto* str = type->As<sem::StructType>()) {
-    out << builder_.Symbols().NameFor(str->symbol());
+    out << builder_.Symbols().NameFor(str->impl()->name());
   } else if (auto* tex = type->As<sem::Texture>()) {
     auto* storage = tex->As<sem::StorageTexture>();
     auto* multism = tex->As<sem::MultisampledTexture>();

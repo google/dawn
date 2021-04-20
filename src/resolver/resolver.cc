@@ -2009,12 +2009,12 @@ bool Resolver::ValidateStructure(const sem::StructType* st) {
           return false;
         }
         if (!st->IsBlockDecorated()) {
-          diagnostics_.add_error("v-0015",
-                                 "a struct containing a runtime-sized array "
-                                 "requires the [[block]] attribute: '" +
-                                     builder_->Symbols().NameFor(st->symbol()) +
-                                     "'",
-                                 member->source());
+          diagnostics_.add_error(
+              "v-0015",
+              "a struct containing a runtime-sized array "
+              "requires the [[block]] attribute: '" +
+                  builder_->Symbols().NameFor(st->impl()->name()) + "'",
+              member->source());
           return false;
         }
 

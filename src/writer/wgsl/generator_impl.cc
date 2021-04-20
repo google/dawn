@@ -433,7 +433,7 @@ bool GeneratorImpl::EmitType(sem::Type* type) {
   } else if (auto* str = type->As<sem::StructType>()) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
-    out_ << program_->Symbols().NameFor(str->symbol());
+    out_ << program_->Symbols().NameFor(str->impl()->name());
   } else if (auto* texture = type->As<sem::Texture>()) {
     out_ << "texture_";
     if (texture->Is<sem::DepthTexture>()) {
@@ -518,7 +518,7 @@ bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
     program_->to_str(deco, out_, 0);
     out_ << "]]" << std::endl;
   }
-  out_ << "struct " << program_->Symbols().NameFor(str->symbol()) << " {"
+  out_ << "struct " << program_->Symbols().NameFor(str->impl()->name()) << " {"
        << std::endl;
 
   auto add_padding = [&](uint32_t size) {

@@ -126,11 +126,11 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       }
 
       // Redeclare the struct.
-      auto new_struct_name = ctx.Clone(struct_ty->symbol());
-      auto* new_struct = ctx.dst->create<sem::StructType>(
-          new_struct_name, ctx.dst->create<ast::Struct>(
-                               new_struct_name, new_struct_members,
-                               ctx.Clone(struct_ty->impl()->decorations())));
+      auto new_struct_name = ctx.Clone(struct_ty->impl()->name());
+      auto* new_struct =
+          ctx.dst->create<sem::StructType>(ctx.dst->create<ast::Struct>(
+              new_struct_name, new_struct_members,
+              ctx.Clone(struct_ty->impl()->decorations())));
       ctx.Replace(struct_ty, new_struct);
     }
   }

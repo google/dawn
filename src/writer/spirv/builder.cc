@@ -3150,11 +3150,10 @@ bool Builder::GenerateStructType(sem::StructType* struct_type,
   auto struct_id = result.to_i();
   auto* impl = struct_type->impl();
 
-  if (struct_type->symbol().IsValid()) {
-    push_debug(
-        spv::Op::OpName,
-        {Operand::Int(struct_id),
-         Operand::String(builder_.Symbols().NameFor(struct_type->symbol()))});
+  if (struct_type->impl()->name().IsValid()) {
+    push_debug(spv::Op::OpName, {Operand::Int(struct_id),
+                                 Operand::String(builder_.Symbols().NameFor(
+                                     struct_type->impl()->name()))});
   }
 
   OperandList ops;

@@ -23,26 +23,24 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::StructType);
 namespace tint {
 namespace sem {
 
-StructType::StructType(const Symbol& sym, ast::Struct* impl)
-    : symbol_(sym), struct_(impl) {}
+StructType::StructType(ast::Struct* impl) : struct_(impl) {}
 
 StructType::StructType(StructType&&) = default;
 
 StructType::~StructType() = default;
 
 std::string StructType::type_name() const {
-  return "__struct_" + symbol_.to_str();
+  return impl()->type_name();
 }
 
 std::string StructType::FriendlyName(const SymbolTable& symbols) const {
-  return symbols.NameFor(symbol_);
+  return impl()->FriendlyName(symbols);
 }
 
 StructType* StructType::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto sym = ctx->Clone(symbol());
   auto* str = ctx->Clone(impl());
-  return ctx->dst->create<StructType>(sym, str);
+  return ctx->dst->create<StructType>(str);
 }
 
 }  // namespace sem

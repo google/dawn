@@ -398,7 +398,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     auto* sem = program_->Sem().Get(str);
     if (!sem) {
       error_ = "Missing semantic information for structure " +
-               program_->Symbols().NameFor(str->symbol());
+               program_->Symbols().NameFor(str->impl()->name());
       continue;
     }
 
@@ -614,7 +614,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     auto* sem = program_->Sem().Get(str);
     if (!sem) {
       error_ = "Missing semantic information for structure " +
-               program_->Symbols().NameFor(str->symbol());
+               program_->Symbols().NameFor(str->impl()->name());
       continue;
     }
 

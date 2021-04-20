@@ -27,7 +27,7 @@ TEST_F(StructTypeTest, Creation) {
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
   auto* ptr = impl;
-  auto* s = ty.struct_(name, impl);
+  auto* s = ty.struct_(impl);
   EXPECT_EQ(s->impl(), ptr);
 }
 
@@ -35,7 +35,7 @@ TEST_F(StructTypeTest, Is) {
   auto name = Sym("S");
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
-  auto* s = ty.struct_(name, impl);
+  auto* s = ty.struct_(impl);
   sem::Type* ty = s;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -56,7 +56,7 @@ TEST_F(StructTypeTest, TypeName) {
   auto name = Sym("my_struct");
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
-  auto* s = ty.struct_(name, impl);
+  auto* s = ty.struct_(impl);
   EXPECT_EQ(s->type_name(), "__struct_$1");
 }
 
@@ -64,7 +64,7 @@ TEST_F(StructTypeTest, FriendlyName) {
   auto name = Sym("my_struct");
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
-  auto* s = ty.struct_(name, impl);
+  auto* s = ty.struct_(impl);
   EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
 }
 

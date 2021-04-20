@@ -556,13 +556,10 @@ class ProgramBuilder {
       return pointer(Of<T>(), storage_class);
     }
 
-    /// @param name the struct name
     /// @param impl the struct implementation
     /// @returns a struct pointer
-    template <typename NAME>
-    sem::StructType* struct_(NAME&& name, ast::Struct* impl) const {
-      return builder->create<sem::StructType>(
-          builder->Sym(std::forward<NAME>(name)), impl);
+    sem::StructType* struct_(ast::Struct* impl) const {
+      return builder->create<sem::StructType>(impl);
     }
 
    private:
@@ -1188,7 +1185,7 @@ class ProgramBuilder {
     auto sym = Sym(std::forward<NAME>(name));
     auto* impl = create<ast::Struct>(source, sym, std::move(members),
                                      std::move(decorations));
-    auto* type = ty.struct_(sym, impl);
+    auto* type = ty.struct_(impl);
     AST().AddConstructedType(type);
     return type;
   }
@@ -1206,7 +1203,7 @@ class ProgramBuilder {
     auto sym = Sym(std::forward<NAME>(name));
     auto* impl =
         create<ast::Struct>(sym, std::move(members), std::move(decorations));
-    auto* type = ty.struct_(sym, impl);
+    auto* type = ty.struct_(impl);
     AST().AddConstructedType(type);
     return type;
   }

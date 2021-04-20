@@ -1950,7 +1950,7 @@ bool GeneratorImpl::EmitType(sem::Type* type, const std::string& name) {
   } else if (auto* str = type->As<sem::StructType>()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
-    out_ << program_->Symbols().NameFor(str->symbol());
+    out_ << program_->Symbols().NameFor(str->impl()->name());
   } else if (auto* tex = type->As<sem::Texture>()) {
     if (tex->Is<sem::DepthTexture>()) {
       out_ << "depth";
@@ -2046,7 +2046,7 @@ bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::Decoration::kNone) {
   // }
-  out_ << "struct " << program_->Symbols().NameFor(str->symbol()) << " {"
+  out_ << "struct " << program_->Symbols().NameFor(str->impl()->name()) << " {"
        << std::endl;
 
   auto* sem_str = program_->Sem().Get(str);

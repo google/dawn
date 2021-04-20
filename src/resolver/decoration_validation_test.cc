@@ -133,7 +133,7 @@ TEST_P(ArrayDecorationTest, IsValid) {
   auto* s = create<ast::Struct>(
       Sym("mystruct"), members,
       ast::DecorationList{create<ast::StructBlockDecoration>()});
-  auto* s_ty = ty.struct_("mystruct", s);
+  auto* s_ty = ty.struct_(s);
   AST().AddConstructedType(s_ty);
 
   WrapInFunction();
@@ -170,7 +170,7 @@ TEST_P(StructDecorationTest, IsValid) {
   auto* s = create<ast::Struct>(Sym("mystruct"), ast::StructMemberList{},
                                 ast::DecorationList{createDecoration(
                                     Source{{12, 34}}, *this, params.kind)});
-  auto* s_ty = ty.struct_("mystruct", s);
+  auto* s_ty = ty.struct_(s);
   AST().AddConstructedType(s_ty);
 
   WrapInFunction();
@@ -210,7 +210,7 @@ TEST_P(StructMemberDecorationTest, IsValid) {
                  createDecoration(Source{{12, 34}}, *this, params.kind)})};
   auto* s =
       create<ast::Struct>(Sym("mystruct"), members, ast::DecorationList{});
-  auto* s_ty = ty.struct_("mystruct", s);
+  auto* s_ty = ty.struct_(s);
   AST().AddConstructedType(s_ty);
 
   WrapInFunction();
