@@ -194,7 +194,7 @@ namespace dawn_native { namespace d3d12 {
         SingleShaderStage stage,
         PipelineLayout* layout,
         std::string* remappedEntryPointName,
-        FirstOffsetInfo* firstOffsetInfo) {
+        FirstOffsetInfo* firstOffsetInfo) const {
         ASSERT(!IsError());
 
         ScopedTintICEHandler scopedICEHandler(GetDevice());
