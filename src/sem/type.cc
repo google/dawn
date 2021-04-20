@@ -74,6 +74,10 @@ bool Type::is_scalar() const {
   return IsAnyOf<F32, U32, I32, Bool>();
 }
 
+bool Type::is_numeric_scalar() const {
+  return IsAnyOf<F32, U32, I32>();
+}
+
 bool Type::is_float_scalar() const {
   return Is<F32>();
 }

@@ -17,6 +17,7 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
+#include "src/sem/multisampled_texture_type.h"
 
 #include "gmock/gmock.h"
 
@@ -531,6 +532,86 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          testing::ValuesIn(cases));
 
 }  // namespace GetCanonicalTests
+
+namespace MultisampledTextureTests {
+struct DimensionParams {
+  sem::TextureDimension dim;
+  bool is_valid;
+};
+
+static constexpr DimensionParams dimension_cases[] = {
+    DimensionParams{sem::TextureDimension::k1d, false},
+    DimensionParams{sem::TextureDimension::k2d, true},
+    DimensionParams{sem::TextureDimension::k2dArray, false},
+    DimensionParams{sem::TextureDimension::k3d, false},
+    DimensionParams{sem::TextureDimension::kCube, false},
+    DimensionParams{sem::TextureDimension::kCubeArray, false}};
+
+using MultisampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
+TEST_P(MultisampledTextureDimensionTest, All) {
+  auto& params = GetParam();
+  Global("a", create<sem::MultisampledTexture>(params.dim, ty.i32()),
+         ast::StorageClass::kUniformConstant, nullptr,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  if (params.is_valid) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+  }
+}
+INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
+                         MultisampledTextureDimensionTest,
+                         testing::ValuesIn(dimension_cases));
+
+struct TypeParams {
+  create_type_func_ptr type_func;
+  bool is_valid;
+};
+
+static constexpr TypeParams type_cases[] = {
+    TypeParams{ty_bool_, false},
+    TypeParams{ty_i32, true},
+    TypeParams{ty_u32, true},
+    TypeParams{ty_f32, true},
+
+    TypeParams{ty_alias<ty_bool_>, false},
+    TypeParams{ty_alias<ty_i32>, true},
+    TypeParams{ty_alias<ty_u32>, true},
+    TypeParams{ty_alias<ty_f32>, true},
+
+    TypeParams{ty_vec3<ty_f32>, false},
+    TypeParams{ty_mat3x3<ty_f32>, false},
+
+    TypeParams{ty_alias<ty_vec3<ty_f32>>, false},
+    TypeParams{ty_alias<ty_mat3x3<ty_f32>>, false}};
+
+using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
+TEST_P(MultisampledTextureTypeTest, All) {
+  auto& params = GetParam();
+  Global("a",
+         create<sem::MultisampledTexture>(sem::TextureDimension::k2d,
+                                          params.type_func(ty)),
+         ast::StorageClass::kUniformConstant, nullptr,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  if (params.is_valid) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+  }
+}
+INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
+                         MultisampledTextureTypeTest,
+                         testing::ValuesIn(type_cases));
+
+}  // namespace MultisampledTextureTests
 
 }  // namespace
 }  // namespace resolver

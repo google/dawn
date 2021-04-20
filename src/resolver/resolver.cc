@@ -40,6 +40,7 @@
 #include "src/sem/call.h"
 #include "src/sem/function.h"
 #include "src/sem/member_accessor_expression.h"
+#include "src/sem/multisampled_texture_type.h"
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
@@ -366,6 +367,23 @@ bool Resolver::ValidateVariable(const ast::Variable* var) {
       return false;
     }
   }
+
+  if (auto* mst = type->UnwrapAll()->As<sem::MultisampledTexture>()) {
+    if (mst->dim() != sem::TextureDimension::k2d) {
+      diagnostics_.add_error("Only 2d multisampled textures are supported",
+                             var->source());
+      return false;
+    }
+
+    auto* data_type = mst->type()->UnwrapAll();
+    if (!data_type->is_numeric_scalar()) {
+      diagnostics_.add_error(
+          "texture_multisampled_2d<type>: type must be f32, i32 or u32",
+          var->source());
+      return false;
+    }
+  }
+
   return true;
 }
 

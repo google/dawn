@@ -69,6 +69,8 @@ class Type : public Castable<Type, ShareableCloneable> {
 
   /// @returns true if this type is a scalar
   bool is_scalar() const;
+  /// @returns true if this type is a numeric scalar
+  bool is_numeric_scalar() const;
   /// @returns true if this type is a float scalar
   bool is_float_scalar() const;
   /// @returns true if this type is a float matrix
