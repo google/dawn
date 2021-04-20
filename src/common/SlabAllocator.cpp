@@ -30,12 +30,8 @@ SlabAllocatorImpl::IndexLinkNode::IndexLinkNode(Index index, Index nextIndex)
 
 // Slab
 
-SlabAllocatorImpl::Slab::Slab(std::unique_ptr<char[]> allocation, IndexLinkNode* head)
-    : allocation(std::move(allocation)),
-      freeList(head),
-      prev(nullptr),
-      next(nullptr),
-      blocksInUse(0) {
+SlabAllocatorImpl::Slab::Slab(char allocation[], IndexLinkNode* head)
+    : allocation(allocation), freeList(head), prev(nullptr), next(nullptr), blocksInUse(0) {
 }
 
 SlabAllocatorImpl::Slab::Slab(Slab&& rhs) = default;
@@ -50,7 +46,8 @@ SlabAllocatorImpl::SentinelSlab::~SentinelSlab() {
     while (slab != nullptr) {
         Slab* next = slab->next;
         ASSERT(slab->blocksInUse == 0);
-        slab->~Slab();
+        // Delete the slab's allocation. The slab is allocated inside slab->allocation.
+        delete[] slab->allocation;
         slab = next;
     }
 }
@@ -232,8 +229,8 @@ void SlabAllocatorImpl::GetNewSlab() {
     }
 
     // TODO(enga): Use aligned_alloc with C++17.
-    auto allocation = std::unique_ptr<char[]>(new char[mTotalAllocationSize]);
-    char* alignedPtr = AlignPtr(allocation.get(), mAllocationAlignment);
+    char* allocation = new char[mTotalAllocationSize];
+    char* alignedPtr = AlignPtr(allocation, mAllocationAlignment);
 
     char* dataStart = alignedPtr + mSlabBlocksOffset;
 
@@ -245,5 +242,5 @@ void SlabAllocatorImpl::GetNewSlab() {
     IndexLinkNode* lastNode = OffsetFrom(node, mBlocksPerSlab - 1);
     lastNode->nextIndex = kInvalidIndex;
 
-    mAvailableSlabs.Prepend(new (alignedPtr) Slab(std::move(allocation), node));
+    mAvailableSlabs.Prepend(new (alignedPtr) Slab(allocation, node));
 }

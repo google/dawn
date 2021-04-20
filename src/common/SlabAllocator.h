@@ -18,7 +18,6 @@
 #include "common/PlacementAllocated.h"
 
 #include <cstdint>
-#include <memory>
 #include <type_traits>
 
 // The SlabAllocator allocates objects out of one or more fixed-size contiguous "slabs" of memory.
@@ -77,12 +76,12 @@ class SlabAllocatorImpl {
         // Ownership of the allocation is transferred to the slab on creation.
         // | ---------- allocation --------- |
         // | pad | Slab | data ------------> |
-        Slab(std::unique_ptr<char[]> allocation, IndexLinkNode* head);
+        Slab(char allocation[], IndexLinkNode* head);
         Slab(Slab&& rhs);
 
         void Splice();
 
-        std::unique_ptr<char[]> allocation;
+        char* allocation;
         IndexLinkNode* freeList;
         Slab* prev;
         Slab* next;
