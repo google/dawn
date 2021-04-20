@@ -42,6 +42,7 @@
 #include "src/sem/member_accessor_expression.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/statement.h"
+#include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/utils/get_or_create.h"
@@ -75,6 +76,42 @@ class ScopedAssignment {
 Source CombineSourceRange(const Source& start, const Source& end) {
   return Source(Source::Range(start.range.begin, end.range.end),
                 start.file_path, start.file_content);
+}
+
+bool IsValidStorageTextureDimension(sem::TextureDimension dim) {
+  switch (dim) {
+    case sem::TextureDimension::k1d:
+    case sem::TextureDimension::k2d:
+    case sem::TextureDimension::k2dArray:
+    case sem::TextureDimension::k3d:
+      return true;
+    default:
+      return false;
+  }
+}
+
+bool IsValidStorageTextureImageFormat(sem::ImageFormat format) {
+  switch (format) {
+    case sem::ImageFormat::kR32Uint:
+    case sem::ImageFormat::kR32Sint:
+    case sem::ImageFormat::kR32Float:
+    case sem::ImageFormat::kRg32Uint:
+    case sem::ImageFormat::kRg32Sint:
+    case sem::ImageFormat::kRg32Float:
+    case sem::ImageFormat::kRgba8Unorm:
+    case sem::ImageFormat::kRgba8Snorm:
+    case sem::ImageFormat::kRgba8Uint:
+    case sem::ImageFormat::kRgba8Sint:
+    case sem::ImageFormat::kRgba16Uint:
+    case sem::ImageFormat::kRgba16Sint:
+    case sem::ImageFormat::kRgba16Float:
+    case sem::ImageFormat::kRgba32Uint:
+    case sem::ImageFormat::kRgba32Sint:
+    case sem::ImageFormat::kRgba32Float:
+      return true;
+    default:
+      return false;
+  }
 }
 
 }  // namespace
@@ -175,6 +212,7 @@ bool Resolver::IsValidAssignment(sem::Type* lhs, sem::Type* rhs) {
       return false;
     }
   }
+
   return true;
 }
 
@@ -372,17 +410,35 @@ bool Resolver::ValidateVariable(const ast::Variable* var) {
     }
   }
 
-  if (auto* mst = type->UnwrapAll()->As<sem::MultisampledTexture>()) {
-    if (mst->dim() != sem::TextureDimension::k2d) {
+  if (auto* r = type->UnwrapAll()->As<sem::MultisampledTexture>()) {
+    if (r->dim() != sem::TextureDimension::k2d) {
       diagnostics_.add_error("Only 2d multisampled textures are supported",
                              var->source());
       return false;
     }
 
-    auto* data_type = mst->type()->UnwrapAll();
+    auto* data_type = r->type()->UnwrapAll();
     if (!data_type->is_numeric_scalar()) {
       diagnostics_.add_error(
           "texture_multisampled_2d<type>: type must be f32, i32 or u32",
+          var->source());
+      return false;
+    }
+  }
+
+  if (auto* r = type->UnwrapAll()->As<sem::StorageTexture>()) {
+    if (!IsValidStorageTextureDimension(r->dim())) {
+      diagnostics_.add_error(
+          "Cube dimensions for storage textures are not "
+          "supported.",
+          var->source());
+      return false;
+    }
+
+    if (!IsValidStorageTextureImageFormat(r->image_format())) {
+      diagnostics_.add_error(
+          "image format must be one of the texel formats specified for storage "
+          "textues in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
           var->source());
       return false;
     }

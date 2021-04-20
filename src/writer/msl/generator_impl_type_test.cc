@@ -739,8 +739,8 @@ TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR16Float, Types());
-  auto* s = create<sem::StorageTexture>(params.dim, sem::ImageFormat::kR16Float,
+      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
+  auto* s = create<sem::StorageTexture>(params.dim, sem::ImageFormat::kR32Float,
                                         subtype);
   auto* ac =
       create<sem::AccessControl>(params.ro ? ast::AccessControl::kReadOnly

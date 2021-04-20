@@ -836,11 +836,11 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
 )");
 }
 
-TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R16Float) {
+TEST_F(BuilderTest_Type, StorageTexture_Generate_1d) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR16Float, Types());
+      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
   auto* s = create<sem::StorageTexture>(sem::TextureDimension::k1d,
-                                        sem::ImageFormat::kR16Float, subtype);
+                                        sem::ImageFormat::kR32Float, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -849,98 +849,15 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R16Float) {
   EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 1D 0 0 0 2 R16f
-)");
-
-  EXPECT_EQ(DumpInstructions(b.capabilities()),
-            R"(OpCapability Image1D
-OpCapability StorageImageExtendedFormats
-)");
-}
-
-TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8SNorm) {
-  auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR8Snorm, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k1d,
-                                        sem::ImageFormat::kR8Snorm, subtype);
-
-  Global("test_var", s, ast::StorageClass::kInput);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 1D 0 0 0 2 R8Snorm
-)");
-
-  EXPECT_EQ(DumpInstructions(b.capabilities()),
-            R"(OpCapability Image1D
-OpCapability StorageImageExtendedFormats
-)");
-}
-
-TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8UNorm) {
-  auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR8Unorm, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k1d,
-                                        sem::ImageFormat::kR8Unorm, subtype);
-
-  Global("test_var", s, ast::StorageClass::kInput);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 1D 0 0 0 2 R8
-)");
-
-  EXPECT_EQ(DumpInstructions(b.capabilities()),
-            R"(OpCapability Image1D
-OpCapability StorageImageExtendedFormats
-)");
-}
-
-TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Uint) {
-  auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR8Uint, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k1d,
-                                        sem::ImageFormat::kR8Uint, subtype);
-
-  Global("test_var", s, ast::StorageClass::kInput);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 0
-%1 = OpTypeImage %2 1D 0 0 0 2 R8ui
-)");
-}
-
-TEST_F(BuilderTest_Type, StorageTexture_Generate_1d_R8Sint) {
-  auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR8Sint, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k1d,
-                                        sem::ImageFormat::kR8Sint, subtype);
-
-  Global("test_var", s, ast::StorageClass::kInput);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeInt 32 1
-%1 = OpTypeImage %2 1D 0 0 0 2 R8i
+%1 = OpTypeImage %2 1D 0 0 0 2 R32f
 )");
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR16Float, Types());
+      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
   auto* s = create<sem::StorageTexture>(sem::TextureDimension::k2d,
-                                        sem::ImageFormat::kR16Float, subtype);
+                                        sem::ImageFormat::kR32Float, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -949,15 +866,15 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
   EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 2D 0 0 0 2 R16f
+%1 = OpTypeImage %2 2D 0 0 0 2 R32f
 )");
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR16Float, Types());
+      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
   auto* s = create<sem::StorageTexture>(sem::TextureDimension::k2dArray,
-                                        sem::ImageFormat::kR16Float, subtype);
+                                        sem::ImageFormat::kR32Float, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -966,15 +883,15 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
   EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 2D 0 1 0 2 R16f
+%1 = OpTypeImage %2 2D 0 1 0 2 R32f
 )");
 }
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR16Float, Types());
+      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
   auto* s = create<sem::StorageTexture>(sem::TextureDimension::k3d,
-                                        sem::ImageFormat::kR16Float, subtype);
+                                        sem::ImageFormat::kR32Float, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -983,7 +900,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
   EXPECT_EQ(b.GenerateTypeIfNeeded(s), 1u);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeImage %2 3D 0 0 0 2 R16f
+%1 = OpTypeImage %2 3D 0 0 0 2 R32f
 )");
 }
 
