@@ -31,7 +31,6 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kDimensions2d:
     case ValidTextureOverload::kDimensions2dArray:
     case ValidTextureOverload::kDimensionsMultisampled2d:
-    case ValidTextureOverload::kDimensionsMultisampled2dArray:
     case ValidTextureOverload::kDimensionsDepth2d:
     case ValidTextureOverload::kDimensionsDepth2dArray:
     case ValidTextureOverload::kDimensionsStorageRO2d:
@@ -62,7 +61,6 @@ std::string expected_texture_overload(
       return R"(int3(texture.get_width(1), texture.get_height(1), texture.get_height(1)))";
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
-    case ValidTextureOverload::kNumLayersMultisampled2dArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
     case ValidTextureOverload::kNumLayersDepthCubeArray:
     case ValidTextureOverload::kNumLayersStorageWO2dArray:
@@ -78,7 +76,6 @@ std::string expected_texture_overload(
     case ValidTextureOverload::kNumLevelsDepthCubeArray:
       return R"(int(texture.get_num_mip_levels()))";
     case ValidTextureOverload::kNumSamplesMultisampled2d:
-    case ValidTextureOverload::kNumSamplesMultisampled2dArray:
       return R"(int(texture.get_num_samples()))";
     case ValidTextureOverload::kSample1dF32:
       return R"(texture.sample(sampler, 1.0f))";
@@ -212,12 +209,6 @@ std::string expected_texture_overload(
       return R"(texture.read(int2(1, 2), 3))";
     case ValidTextureOverload::kLoadMultisampled2dI32:
       return R"(texture.read(int2(1, 2), 3))";
-    case ValidTextureOverload::kLoadMultisampled2dArrayF32:
-      return R"(texture.read(int2(1, 2), 3, 4))";
-    case ValidTextureOverload::kLoadMultisampled2dArrayU32:
-      return R"(texture.read(int2(1, 2), 3, 4))";
-    case ValidTextureOverload::kLoadMultisampled2dArrayI32:
-      return R"(texture.read(int2(1, 2), 3, 4))";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
       return R"(texture.read(int2(1, 2), 3))";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:

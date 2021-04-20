@@ -74,13 +74,6 @@ ExpectedResult expected_texture_overload(
 )",
           "tint_tmp.xy",
       };
-    case ValidTextureOverload::kDimensionsMultisampled2dArray:
-      return {
-          R"(int4 tint_tmp;
-  tint_symbol.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
-)",
-          "tint_tmp.xy",
-      };
     case ValidTextureOverload::kDimensions3d:
     case ValidTextureOverload::kDimensionsStorageRO3d:
     case ValidTextureOverload::kDimensionsStorageWO3d:
@@ -156,14 +149,6 @@ ExpectedResult expected_texture_overload(
 )",
           "tint_tmp.z",
       };
-    case ValidTextureOverload::kNumLayersMultisampled2dArray:
-      return {
-          R"(int4 tint_tmp;
-  tint_symbol.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
-)",
-          "tint_tmp.z",
-      };
-
     case ValidTextureOverload::kNumLevels2d:
     case ValidTextureOverload::kNumLevelsCube:
     case ValidTextureOverload::kNumLevelsDepth2d:
@@ -191,13 +176,6 @@ ExpectedResult expected_texture_overload(
   tint_symbol.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
 )",
           "tint_tmp.z",
-      };
-    case ValidTextureOverload::kNumSamplesMultisampled2dArray:
-      return {
-          R"(int4 tint_tmp;
-  tint_symbol.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z, tint_tmp.w);
-)",
-          "tint_tmp.w",
       };
     case ValidTextureOverload::kSample1dF32:
       return R"(tint_symbol.Sample(tint_symbol_1, 1.0f))";
@@ -331,12 +309,6 @@ ExpectedResult expected_texture_overload(
       return R"(tint_symbol.Load(int3(1, 2, 0), 3))";
     case ValidTextureOverload::kLoadMultisampled2dI32:
       return R"(tint_symbol.Load(int3(1, 2, 0), 3))";
-    case ValidTextureOverload::kLoadMultisampled2dArrayF32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4))";
-    case ValidTextureOverload::kLoadMultisampled2dArrayU32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4))";
-    case ValidTextureOverload::kLoadMultisampled2dArrayI32:
-      return R"(tint_symbol.Load(int4(1, 2, 3, 0), 4))";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
       return R"(tint_symbol.Load(int3(1, 2, 0), 3))";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:

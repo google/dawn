@@ -325,17 +325,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           [](ProgramBuilder* b) { return b->ExprList("texture"); },
       },
       {
-          ValidTextureOverload::kDimensionsMultisampled2dArray,
-          "textureDimensions(t : texture_multisampled_2d_array<f32>)-> "
-          "vec2<i32>",
-          TextureKind::kMultisampled,
-          sem::SamplerKind::kSampler,
-          sem::TextureDimension::k2dArray,
-          TextureDataType::kF32,
-          "textureDimensions",
-          [](ProgramBuilder* b) { return b->ExprList("texture"); },
-      },
-      {
           ValidTextureOverload::kDimensionsDepth2d,
           "textureDimensions(t : texture_depth_2d) -> vec2<i32>",
           TextureKind::kDepth,
@@ -526,16 +515,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           [](ProgramBuilder* b) { return b->ExprList("texture"); },
       },
       {
-          ValidTextureOverload::kNumLayersMultisampled2dArray,
-          "textureNumLayers(t : texture_multisampled_2d_array<f32>) -> i32",
-          TextureKind::kMultisampled,
-          sem::SamplerKind::kSampler,
-          sem::TextureDimension::k2dArray,
-          TextureDataType::kF32,
-          "textureNumLayers",
-          [](ProgramBuilder* b) { return b->ExprList("texture"); },
-      },
-      {
           ValidTextureOverload::kNumLayersDepth2dArray,
           "textureNumLayers(t : texture_depth_2d_array) -> i32",
           TextureKind::kDepth,
@@ -661,16 +640,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
           TextureKind::kMultisampled,
           sem::SamplerKind::kSampler,
           sem::TextureDimension::k2d,
-          TextureDataType::kF32,
-          "textureNumSamples",
-          [](ProgramBuilder* b) { return b->ExprList("texture"); },
-      },
-      {
-          ValidTextureOverload::kNumSamplesMultisampled2dArray,
-          "textureNumSamples(t : texture_multisampled_2d_array<f32>) -> i32",
-          TextureKind::kMultisampled,
-          sem::SamplerKind::kSampler,
-          sem::TextureDimension::k2dArray,
           TextureDataType::kF32,
           "textureNumSamples",
           [](ProgramBuilder* b) { return b->ExprList("texture"); },
@@ -1886,57 +1855,6 @@ std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {
             return b->ExprList("texture",           // t
                                b->vec2<i32>(1, 2),  // coords
                                3);                  // sample_index
-          },
-      },
-      {
-          ValidTextureOverload::kLoadMultisampled2dArrayF32,
-          "textureLoad(t            : texture_multisampled_2d_array<f32>,\n"
-          "            coords       : vec2<i32>,\n"
-          "            array_index  : i32,\n"
-          "            sample_index : i32) -> vec4<f32>",
-          TextureKind::kMultisampled,
-          sem::TextureDimension::k2dArray,
-          TextureDataType::kF32,
-          "textureLoad",
-          [](ProgramBuilder* b) {
-            return b->ExprList("texture",           // t
-                               b->vec2<i32>(1, 2),  // coords
-                               3,                   // array_index
-                               4);                  // sample_index
-          },
-      },
-      {
-          ValidTextureOverload::kLoadMultisampled2dArrayU32,
-          "textureLoad(t            : texture_multisampled_2d_array<u32>,\n"
-          "            coords       : vec2<i32>,\n"
-          "            array_index  : i32,\n"
-          "            sample_index : i32) -> vec4<u32>",
-          TextureKind::kMultisampled,
-          sem::TextureDimension::k2dArray,
-          TextureDataType::kU32,
-          "textureLoad",
-          [](ProgramBuilder* b) {
-            return b->ExprList("texture",           // t
-                               b->vec2<i32>(1, 2),  // coords
-                               3,                   // array_index
-                               4);                  // sample_index
-          },
-      },
-      {
-          ValidTextureOverload::kLoadMultisampled2dArrayI32,
-          "textureLoad(t            : texture_multisampled_2d_array<i32>,\n"
-          "            coords       : vec2<i32>,\n"
-          "            array_index  : i32,\n"
-          "            sample_index : i32) -> vec4<i32>",
-          TextureKind::kMultisampled,
-          sem::TextureDimension::k2dArray,
-          TextureDataType::kI32,
-          "textureLoad",
-          [](ProgramBuilder* b) {
-            return b->ExprList("texture",           // t
-                               b->vec2<i32>(1, 2),  // coords
-                               3,                   // array_index
-                               4);                  // sample_index
           },
       },
       {

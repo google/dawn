@@ -1697,7 +1697,6 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kDimensionsCube:
     case ValidTextureOverload::kDimensionsCubeArray:
     case ValidTextureOverload::kDimensionsMultisampled2d:
-    case ValidTextureOverload::kDimensionsMultisampled2dArray:
     case ValidTextureOverload::kDimensionsDepth2d:
     case ValidTextureOverload::kDimensionsDepth2dArray:
     case ValidTextureOverload::kDimensionsDepthCube:
@@ -1713,7 +1712,6 @@ const char* expected_texture_overload(
       return R"(textureDimensions(texture))";
     case ValidTextureOverload::kNumLayers2dArray:
     case ValidTextureOverload::kNumLayersCubeArray:
-    case ValidTextureOverload::kNumLayersMultisampled2dArray:
     case ValidTextureOverload::kNumLayersDepth2dArray:
     case ValidTextureOverload::kNumLayersDepthCubeArray:
     case ValidTextureOverload::kNumLayersStorageWO2dArray:
@@ -1729,7 +1727,6 @@ const char* expected_texture_overload(
     case ValidTextureOverload::kNumLevelsDepthCubeArray:
       return R"(textureNumLevels(texture))";
     case ValidTextureOverload::kNumSamplesMultisampled2d:
-    case ValidTextureOverload::kNumSamplesMultisampled2dArray:
       return R"(textureNumSamples(texture))";
     case ValidTextureOverload::kDimensions2dLevel:
     case ValidTextureOverload::kDimensions2dArrayLevel:
@@ -1873,12 +1870,6 @@ const char* expected_texture_overload(
       return R"(textureLoad(texture, coords, sample_index))";
     case ValidTextureOverload::kLoadMultisampled2dI32:
       return R"(textureLoad(texture, coords, sample_index))";
-    case ValidTextureOverload::kLoadMultisampled2dArrayF32:
-      return R"(textureLoad(texture, coords, array_index, sample_index))";
-    case ValidTextureOverload::kLoadMultisampled2dArrayU32:
-      return R"(textureLoad(texture, coords, array_index, sample_index))";
-    case ValidTextureOverload::kLoadMultisampled2dArrayI32:
-      return R"(textureLoad(texture, coords, array_index, sample_index))";
     case ValidTextureOverload::kLoadDepth2dLevelF32:
       return R"(textureLoad(texture, coords, level))";
     case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
