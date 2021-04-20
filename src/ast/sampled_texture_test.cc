@@ -1,0 +1,92 @@
+// Copyright 2020 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "src/ast/sampled_texture.h"
+
+#include "src/ast/access_control.h"
+#include "src/ast/alias.h"
+#include "src/ast/array.h"
+#include "src/ast/bool.h"
+#include "src/ast/depth_texture.h"
+#include "src/ast/f32.h"
+#include "src/ast/i32.h"
+#include "src/ast/matrix.h"
+#include "src/ast/pointer.h"
+#include "src/ast/sampler.h"
+#include "src/ast/storage_texture.h"
+#include "src/ast/struct.h"
+#include "src/ast/test_helper.h"
+#include "src/ast/texture.h"
+#include "src/ast/u32.h"
+#include "src/ast/vector.h"
+
+namespace tint {
+namespace ast {
+namespace {
+
+using AstSampledTextureTest = TestHelper;
+
+TEST_F(AstSampledTextureTest, Is) {
+  auto* f32 = create<F32>();
+  Type* ty = create<SampledTexture>(TextureDimension::kCube, f32);
+  EXPECT_FALSE(ty->Is<AccessControl>());
+  EXPECT_FALSE(ty->Is<Alias>());
+  EXPECT_FALSE(ty->Is<Array>());
+  EXPECT_FALSE(ty->Is<Bool>());
+  EXPECT_FALSE(ty->Is<F32>());
+  EXPECT_FALSE(ty->Is<I32>());
+  EXPECT_FALSE(ty->Is<Matrix>());
+  EXPECT_FALSE(ty->Is<Pointer>());
+  EXPECT_FALSE(ty->Is<Sampler>());
+  EXPECT_FALSE(ty->Is<Struct>());
+  EXPECT_TRUE(ty->Is<Texture>());
+  EXPECT_FALSE(ty->Is<U32>());
+  EXPECT_FALSE(ty->Is<Vector>());
+}
+
+TEST_F(AstSampledTextureTest, IsTexture) {
+  auto* f32 = create<F32>();
+  Texture* ty = create<SampledTexture>(TextureDimension::kCube, f32);
+  EXPECT_FALSE(ty->Is<DepthTexture>());
+  EXPECT_TRUE(ty->Is<SampledTexture>());
+  EXPECT_FALSE(ty->Is<StorageTexture>());
+}
+
+TEST_F(AstSampledTextureTest, Dim) {
+  auto* f32 = create<F32>();
+  auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
+  EXPECT_EQ(s->dim(), TextureDimension::k3d);
+}
+
+TEST_F(AstSampledTextureTest, Type) {
+  auto* f32 = create<F32>();
+  auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
+  EXPECT_EQ(s->type(), f32);
+}
+
+TEST_F(AstSampledTextureTest, TypeName) {
+  auto* f32 = create<F32>();
+  auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
+  EXPECT_EQ(s->type_name(), "__sampled_texture_3d__f32");
+}
+
+TEST_F(AstSampledTextureTest, FriendlyName) {
+  auto* f32 = create<F32>();
+  auto* s = create<SampledTexture>(TextureDimension::k3d, f32);
+  EXPECT_EQ(s->FriendlyName(Symbols()), "texture_3d<f32>");
+}
+
+}  // namespace
+}  // namespace ast
+}  // namespace tint

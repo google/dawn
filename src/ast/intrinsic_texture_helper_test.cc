@@ -63,7 +63,7 @@ TextureOverloadCase::TextureOverloadCase(
 TextureOverloadCase::TextureOverloadCase(
     ValidTextureOverload o,
     const char* d,
-    AccessControl access,
+    AccessControl::Access access,
     sem::ImageFormat i,
     sem::TextureDimension dims,
     TextureDataType datatype,

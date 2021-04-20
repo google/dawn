@@ -30,11 +30,11 @@ class AccessDecoration : public Castable<AccessDecoration, Decoration> {
   /// @param value the access value
   AccessDecoration(ProgramID program_id,
                    const Source& source,
-                   AccessControl value);
+                   AccessControl::Access value);
   ~AccessDecoration() override;
 
   /// @returns the access control value
-  AccessControl value() const { return value_; }
+  AccessControl::Access value() const { return value_; }
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program
@@ -51,7 +51,7 @@ class AccessDecoration : public Castable<AccessDecoration, Decoration> {
   AccessDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  AccessControl const value_;
+  AccessControl::Access const value_;
 };
 
 }  // namespace ast

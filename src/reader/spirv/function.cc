@@ -1338,7 +1338,8 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
             if (top->ContainsPos(target0_pos) &&
                 top->ContainsPos(target1_pos)) {
               // Insert a synthetic if-selection
-              top = push_construct(depth+1, Construct::kIfSelection, header, ct);
+              top = push_construct(depth + 1, Construct::kIfSelection, header,
+                                   ct);
             }
           }
         }

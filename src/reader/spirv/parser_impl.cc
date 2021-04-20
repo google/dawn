@@ -551,7 +551,7 @@ Source ParserImpl::GetSourceForInst(
   if (where == inst_source_.end()) {
     return {};
   }
-  return Source{where->second };
+  return Source{where->second};
 }
 
 bool ParserImpl::ParseInternalModuleExceptFunctions() {
@@ -940,15 +940,16 @@ sem::Type* ParserImpl::ConvertType(
     return nullptr;
   }
 
-  // Now make the struct.
-  auto* ast_struct = create<ast::Struct>(Source{}, std::move(ast_members),
-                                         std::move(ast_struct_decorations));
-
   namer_.SuggestSanitizedName(type_id, "S");
 
   auto name = namer_.GetName(type_id);
-  auto* result = builder_.create<sem::StructType>(
-      builder_.Symbols().Register(name), ast_struct);
+
+  // Now make the struct.
+  auto sym = builder_.Symbols().Register(name);
+  auto* ast_struct = create<ast::Struct>(Source{}, sym, std::move(ast_members),
+                                         std::move(ast_struct_decorations));
+
+  auto* result = builder_.create<sem::StructType>(sym, ast_struct);
   id_to_type_[type_id] = result;
   if (num_non_writable_members == members.size()) {
     read_only_struct_types_.insert(result);

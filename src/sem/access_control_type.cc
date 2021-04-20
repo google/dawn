@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::AccessControl);
 namespace tint {
 namespace sem {
 
-AccessControl::AccessControl(ast::AccessControl access, Type* subtype)
+AccessControl::AccessControl(ast::AccessControl::Access access, Type* subtype)
     : access_(access), subtype_(subtype) {
   TINT_ASSERT(subtype_);
   TINT_ASSERT(!subtype_->Is<AccessControl>());

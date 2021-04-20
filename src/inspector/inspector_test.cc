@@ -225,8 +225,9 @@ class InspectorHelper : public ProgramBuilder {
       decos.push_back(create<ast::StructBlockDecoration>());
     }
 
-    auto* str = create<ast::Struct>(members, decos);
-    auto* str_ty = ty.struct_(name, str);
+    auto sym = Sym(name);
+    auto* str = create<ast::Struct>(sym, members, decos);
+    auto* str_ty = ty.struct_(sym, str);
     AST().AddConstructedType(str_ty);
     return str_ty;
   }
@@ -1824,6 +1825,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
   ast::DecorationList decos;
   auto* str = create<ast::Struct>(
+      Sym("foo_type"),
       ast::StructMemberList{Member(StructMemberName(0, ty.i32()), ty.i32())},
       decos);
 

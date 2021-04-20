@@ -315,7 +315,8 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
   ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st =
-      create<ast::Struct>(ast::StructMemberList{Member("vf", ty.f32()),
+      create<ast::Struct>(Sym("Foo"),
+                          ast::StructMemberList{Member("vf", ty.f32()),
                                                 Member("rt", ty.array<f32>())},
                           decos);
 
@@ -335,6 +336,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLastNoBlock_Fail) {
 
   ast::DecorationList decos;
   auto* st = create<ast::Struct>(
+      Sym("Foo"),
       ast::StructMemberList{Member("vf", ty.f32()),
                             Member(Source{{12, 34}}, "rt", ty.array<f32>())},
       decos);
@@ -362,7 +364,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
 
   auto* rt = Member(Source{{12, 34}}, "rt", ty.array<f32>());
   auto* st = create<ast::Struct>(
-      ast::StructMemberList{rt, Member("vf", ty.f32())}, decos);
+      Sym("Foo"), ast::StructMemberList{rt, Member("vf", ty.f32())}, decos);
 
   auto* struct_type = ty.struct_("Foo", st);
 
@@ -438,6 +440,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
   ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st = create<ast::Struct>(
+      Sym("s"),
       ast::StructMemberList{Member(Source{{12, 34}}, "b", alias),
                             Member("a", ty.u32())},
       decos);
@@ -467,6 +470,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
   ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
   auto* st = create<ast::Struct>(
+      Sym("s"),
       ast::StructMemberList{Member("a", ty.u32()), Member("b", alias)}, decos);
 
   auto* struct_type = ty.struct_("s", st);

@@ -21,6 +21,8 @@
 
 namespace tint {
 namespace sem {
+
+/// An external texture type
 class ExternalTexture : public Castable<ExternalTexture, Texture> {
  public:
   /// Constructor
@@ -46,4 +48,5 @@ class ExternalTexture : public Castable<ExternalTexture, Texture> {
 
 }  // namespace sem
 }  // namespace tint
+
 #endif  // SRC_SEM_EXTERNAL_TEXTURE_TYPE_H_

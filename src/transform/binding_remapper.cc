@@ -63,7 +63,7 @@ Output BindingRemapper::Run(const Program* in, const DataMap& datamap) {
       // Replace any access controls.
       auto ac_it = remappings->access_controls.find(from);
       if (ac_it != remappings->access_controls.end()) {
-        ast::AccessControl ac = ac_it->second;
+        ast::AccessControl::Access ac = ac_it->second;
         auto* ty = in->Sem().Get(var)->Type();
         sem::Type* inner_ty = nullptr;
         if (auto* old_ac = ty->As<sem::AccessControl>()) {

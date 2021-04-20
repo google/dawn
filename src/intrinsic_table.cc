@@ -603,7 +603,7 @@ class SamplerBuilder : public Builder {
 /// AccessControlBuilder is a Matcher / Builder for AccessControl types
 class AccessControlBuilder : public Builder {
  public:
-  explicit AccessControlBuilder(ast::AccessControl access_control,
+  explicit AccessControlBuilder(ast::AccessControl::Access access_control,
                                 Builder* type)
       : access_control_(access_control), type_(type) {}
 
@@ -628,7 +628,7 @@ class AccessControlBuilder : public Builder {
   }
 
  private:
-  ast::AccessControl const access_control_;
+  ast::AccessControl::Access const access_control_;
   Builder* const type_;
 };
 
@@ -765,7 +765,8 @@ class Impl : public IntrinsicTable {
   }
 
   /// @returns a Matcher / Builder that matches an access control type
-  Builder* access_control(ast::AccessControl access_control, Builder* type) {
+  Builder* access_control(ast::AccessControl::Access access_control,
+                          Builder* type) {
     return matcher_allocator_.Create<AccessControlBuilder>(access_control,
                                                            type);
   }

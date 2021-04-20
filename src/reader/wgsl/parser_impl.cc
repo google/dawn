@@ -836,7 +836,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   return TypedIdentifier{ty, ident.value, ident.source};
 }
 
-Expect<ast::AccessControl> ParserImpl::expect_access_type() {
+Expect<ast::AccessControl::Access> ParserImpl::expect_access_type() {
   auto ident = expect_ident("access_type");
   if (ident.errored)
     return Failure::kErrored;
@@ -1134,9 +1134,10 @@ Maybe<sem::StructType*> ParserImpl::struct_decl(ast::DecorationList& decos) {
   if (body.errored)
     return Failure::kErrored;
 
+  auto sym = builder_.Symbols().Register(name.value);
   return create<sem::StructType>(
-      builder_.Symbols().Register(name.value),
-      create<ast::Struct>(source, std::move(body.value), std::move(decos)));
+      sym, create<ast::Struct>(source, sym, std::move(body.value),
+                               std::move(decos)));
 }
 
 // struct_body_decl

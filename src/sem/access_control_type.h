@@ -29,7 +29,7 @@ class AccessControl : public Castable<AccessControl, Type> {
   /// Constructor
   /// @param access the access control setting
   /// @param subtype the access controlled type
-  AccessControl(ast::AccessControl access, Type* subtype);
+  AccessControl(ast::AccessControl::Access access, Type* subtype);
   /// Move constructor
   AccessControl(AccessControl&&);
   ~AccessControl() override;
@@ -42,7 +42,7 @@ class AccessControl : public Castable<AccessControl, Type> {
   bool IsReadWrite() const { return access_ == ast::AccessControl::kReadWrite; }
 
   /// @returns the access control value
-  ast::AccessControl access_control() const { return access_; }
+  ast::AccessControl::Access access_control() const { return access_; }
   /// @returns the subtype type
   Type* type() const { return subtype_; }
 
@@ -60,7 +60,7 @@ class AccessControl : public Castable<AccessControl, Type> {
   AccessControl* Clone(CloneContext* ctx) const override;
 
  private:
-  ast::AccessControl const access_;
+  ast::AccessControl::Access const access_;
   Type* const subtype_;
 };
 

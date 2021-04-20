@@ -14,6 +14,8 @@
 
 #include "src/ast/struct.h"
 
+#include <string>
+
 #include "src/ast/struct_block_decoration.h"
 #include "src/program_builder.h"
 
@@ -24,9 +26,11 @@ namespace ast {
 
 Struct::Struct(ProgramID program_id,
                const Source& source,
+               Symbol name,
                StructMemberList members,
                DecorationList decorations)
     : Base(program_id, source),
+      name_(name),
       members_(std::move(members)),
       decorations_(std::move(decorations)) {
   for (auto* mem : members_) {
@@ -59,15 +63,16 @@ bool Struct::IsBlockDecorated() const {
 Struct* Struct::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
+  auto n = ctx->Clone(name());
   auto mem = ctx->Clone(members());
   auto decos = ctx->Clone(decorations());
-  return ctx->dst->create<Struct>(src, mem, decos);
+  return ctx->dst->create<Struct>(src, n, mem, decos);
 }
 
 void Struct::to_str(const sem::Info& sem,
                     std::ostream& out,
                     size_t indent) const {
-  out << "Struct{" << std::endl;
+  out << "Struct " << name().to_str() << " {" << std::endl;
   for (auto* deco : decorations_) {
     make_indent(out, indent + 2);
     out << "[[";
@@ -79,6 +84,14 @@ void Struct::to_str(const sem::Info& sem,
   }
   make_indent(out, indent);
   out << "}" << std::endl;
+}
+
+std::string Struct::type_name() const {
+  return "__struct_" + name().to_str();
+}
+
+std::string Struct::FriendlyName(const SymbolTable& symbols) const {
+  return symbols.NameFor(name());
 }
 
 }  // namespace ast

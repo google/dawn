@@ -437,7 +437,7 @@ class ParserImpl {
   /// Parses an access type identifier, erroring if the next token does not
   /// match a valid access type name.
   /// @returns the parsed access control.
-  Expect<ast::AccessControl> expect_access_type();
+  Expect<ast::AccessControl::Access> expect_access_type();
   /// Parses a builtin identifier, erroring if the next token does not match a
   /// valid builtin name.
   /// @returns the parsed builtin.

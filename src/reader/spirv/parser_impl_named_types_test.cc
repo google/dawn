@@ -29,7 +29,7 @@ TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
     %s = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->program().to_str(), HasSubstr("S Struct"));
+  EXPECT_THAT(p->program().to_str(), HasSubstr("Struct S"));
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
@@ -39,7 +39,7 @@ TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
     %s = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(p->program().to_str(), HasSubstr("mystruct Struct"));
+  EXPECT_THAT(p->program().to_str(), HasSubstr("Struct mystruct"));
 }
 
 TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
@@ -49,11 +49,11 @@ TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
     %s2 = OpTypeStruct %uint %uint
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
-  EXPECT_THAT(p->program().to_str(), HasSubstr(R"(S Struct{
+  EXPECT_THAT(p->program().to_str(), HasSubstr(R"(Struct S {
     StructMember{field0: __u32}
     StructMember{field1: __u32}
   }
-  S_1 Struct{
+  Struct S_1 {
     StructMember{field0: __u32}
     StructMember{field1: __u32}
   })"));

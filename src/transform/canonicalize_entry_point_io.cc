@@ -81,10 +81,11 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
       }
 
       // Redeclare the struct.
+      auto new_struct_name = ctx.Clone(struct_ty->symbol());
       auto* new_struct = ctx.dst->create<sem::StructType>(
-          ctx.Clone(struct_ty->symbol()),
-          ctx.dst->create<ast::Struct>(
-              new_struct_members, ctx.Clone(struct_ty->impl()->decorations())));
+          new_struct_name, ctx.dst->create<ast::Struct>(
+                               new_struct_name, new_struct_members,
+                               ctx.Clone(struct_ty->impl()->decorations())));
       ctx.Replace(struct_ty, new_struct);
     }
   }
@@ -174,9 +175,10 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
                 StructMemberComparator);
 
       // Create the new struct type.
+      auto in_struct_name = ctx.dst->Symbols().New();
       auto* in_struct = ctx.dst->create<sem::StructType>(
-          ctx.dst->Symbols().New(),
-          ctx.dst->create<ast::Struct>(new_struct_members,
+          in_struct_name,
+          ctx.dst->create<ast::Struct>(in_struct_name, new_struct_members,
                                        ast::DecorationList{}));
       ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, in_struct);
 
@@ -220,9 +222,10 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
                 StructMemberComparator);
 
       // Create the new struct type.
+      auto out_struct_name = ctx.dst->Symbols().New();
       auto* out_struct = ctx.dst->create<sem::StructType>(
-          ctx.dst->Symbols().New(),
-          ctx.dst->create<ast::Struct>(new_struct_members,
+          out_struct_name,
+          ctx.dst->create<ast::Struct>(out_struct_name, new_struct_members,
                                        ast::DecorationList{}));
       ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, out_struct);
       new_ret_type = out_struct;

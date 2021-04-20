@@ -553,7 +553,7 @@ TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
   EXPECT_TRUE(type->Is<sem::StructType>());
 
   Program program = p->program();
-  EXPECT_THAT(program.str(type->As<sem::StructType>()->impl()), Eq(R"(Struct{
+  EXPECT_THAT(program.str(type->As<sem::StructType>()->impl()), Eq(R"(Struct S {
   StructMember{field0: __u32}
   StructMember{field1: __f32}
 }
@@ -574,7 +574,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
   EXPECT_TRUE(type->Is<sem::StructType>());
 
   Program program = p->program();
-  EXPECT_THAT(program.str(type->As<sem::StructType>()->impl()), Eq(R"(Struct{
+  EXPECT_THAT(program.str(type->As<sem::StructType>()->impl()), Eq(R"(Struct S {
   [[block]]
   StructMember{field0: __u32}
 }
@@ -599,7 +599,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
   EXPECT_TRUE(type->Is<sem::StructType>());
 
   Program program = p->program();
-  EXPECT_THAT(program.str(type->As<sem::StructType>()->impl()), Eq(R"(Struct{
+  EXPECT_THAT(program.str(type->As<sem::StructType>()->impl()), Eq(R"(Struct S {
   StructMember{[[ offset 0 ]] field0: __f32}
   StructMember{[[ offset 8 ]] field1: __vec_2__f32}
   StructMember{[[ offset 16 ]] field2: __mat_2_2__f32}

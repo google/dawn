@@ -1654,7 +1654,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S Struct{
+  Struct S {
     [[block]]
     StructMember{field0: __u32}
     StructMember{field1: __f32}
@@ -1685,7 +1685,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S Struct{
+  Struct S {
     [[block]]
     StructMember{field0: __mat_2_3__f32}
   }
@@ -1714,7 +1714,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S Struct{
+  Struct S {
     [[block]]
     StructMember{field0: __mat_2_3__f32}
   }
@@ -1763,7 +1763,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S Struct{
+  Struct S {
     [[block]]
     StructMember{field0: __f32}
     StructMember{field1: __f32}
@@ -1792,7 +1792,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S Struct{
+  Struct S {
     [[block]]
     StructMember{field0: __f32}
     StructMember{field1: __f32}
@@ -1824,7 +1824,7 @@ TEST_F(
   EXPECT_TRUE(p->error().empty());
   const auto module_str = p->program().to_str();
   EXPECT_THAT(module_str, HasSubstr(R"(
-  S Struct{
+  Struct S {
     [[block]]
     StructMember{field0: __f32}
     StructMember{field1: __f32}

@@ -889,6 +889,7 @@ TEST_F(ResolverTest, Function_ReturnStatements) {
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
   auto* strct = create<ast::Struct>(
+      Sym("S"),
       ast::StructMemberList{Member("first_member", ty.i32()),
                             Member("second_member", ty.f32())},
       ast::DecorationList{});
@@ -918,6 +919,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
   auto* strct = create<ast::Struct>(
+      Sym("alias"),
       ast::StructMemberList{Member("first_member", ty.i32()),
                             Member("second_member", ty.f32())},
       ast::DecorationList{});
@@ -999,14 +1001,15 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   // }
   //
 
-  auto* strctB =
-      create<ast::Struct>(ast::StructMemberList{Member("foo", ty.vec4<f32>())},
-                          ast::DecorationList{});
+  auto* strctB = create<ast::Struct>(
+      Sym("B"), ast::StructMemberList{Member("foo", ty.vec4<f32>())},
+      ast::DecorationList{});
   auto* stB = ty.struct_("B", strctB);
 
   sem::Vector vecB(stB, 3);
-  auto* strctA = create<ast::Struct>(
-      ast::StructMemberList{Member("mem", &vecB)}, ast::DecorationList{});
+  auto* strctA =
+      create<ast::Struct>(Sym("A"), ast::StructMemberList{Member("mem", &vecB)},
+                          ast::DecorationList{});
 
   auto* stA = ty.struct_("A", strctA);
   Global("c", stA, ast::StorageClass::kInput);
@@ -1027,6 +1030,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
   auto* strct = create<ast::Struct>(
+      Sym("S"),
       ast::StructMemberList{Member("first_member", ty.f32()),
                             Member("second_member", ty.f32())},
       ast::DecorationList{});

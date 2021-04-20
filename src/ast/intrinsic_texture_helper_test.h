@@ -198,7 +198,7 @@ struct TextureOverloadCase {
   /// Constructor for textureLoad() with storage textures
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
-                      AccessControl,
+                      AccessControl::Access,
                       sem::ImageFormat,
                       sem::TextureDimension,
                       TextureDataType,
@@ -236,7 +236,7 @@ struct TextureOverloadCase {
   sem::SamplerKind const sampler_kind = sem::SamplerKind::kSampler;
   /// The access control for the storage texture
   /// Used only when texture_kind is kStorage
-  AccessControl const access_control = AccessControl::kReadWrite;
+  AccessControl::Access const access_control = AccessControl::kReadWrite;
   /// The image format for the storage texture
   /// Used only when texture_kind is kStorage
   sem::ImageFormat const image_format = sem::ImageFormat::kNone;

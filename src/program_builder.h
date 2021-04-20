@@ -535,7 +535,7 @@ class ProgramBuilder {
     /// @param access the access control
     /// @param type the inner type
     /// @returns the access control qualifier type
-    sem::AccessControl* access(ast::AccessControl access,
+    sem::AccessControl* access(ast::AccessControl::Access access,
                                sem::Type* type) const {
       return builder->create<sem::AccessControl>(access, type);
     }
@@ -1185,9 +1185,10 @@ class ProgramBuilder {
                              NAME&& name,
                              ast::StructMemberList members,
                              ast::DecorationList decorations = {}) {
-    auto* impl =
-        create<ast::Struct>(source, std::move(members), std::move(decorations));
-    auto* type = ty.struct_(Sym(std::forward<NAME>(name)), impl);
+    auto sym = Sym(std::forward<NAME>(name));
+    auto* impl = create<ast::Struct>(source, sym, std::move(members),
+                                     std::move(decorations));
+    auto* type = ty.struct_(sym, impl);
     AST().AddConstructedType(type);
     return type;
   }
@@ -1202,9 +1203,10 @@ class ProgramBuilder {
   sem::StructType* Structure(NAME&& name,
                              ast::StructMemberList members,
                              ast::DecorationList decorations = {}) {
+    auto sym = Sym(std::forward<NAME>(name));
     auto* impl =
-        create<ast::Struct>(std::move(members), std::move(decorations));
-    auto* type = ty.struct_(Sym(std::forward<NAME>(name)), impl);
+        create<ast::Struct>(sym, std::move(members), std::move(decorations));
+    auto* type = ty.struct_(sym, impl);
     AST().AddConstructedType(type);
     return type;
   }

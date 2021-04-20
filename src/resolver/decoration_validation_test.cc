@@ -131,7 +131,8 @@ TEST_P(ArrayDecorationTest, IsValid) {
                                   ast::DecorationList{createDecoration(
                                       Source{{12, 34}}, *this, params.kind)}))};
   auto* s = create<ast::Struct>(
-      members, ast::DecorationList{create<ast::StructBlockDecoration>()});
+      Sym("mystruct"), members,
+      ast::DecorationList{create<ast::StructBlockDecoration>()});
   auto* s_ty = ty.struct_("mystruct", s);
   AST().AddConstructedType(s_ty);
 
@@ -166,7 +167,7 @@ using StructDecorationTest = TestWithParams;
 TEST_P(StructDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  auto* s = create<ast::Struct>(ast::StructMemberList{},
+  auto* s = create<ast::Struct>(Sym("mystruct"), ast::StructMemberList{},
                                 ast::DecorationList{createDecoration(
                                     Source{{12, 34}}, *this, params.kind)});
   auto* s_ty = ty.struct_("mystruct", s);
@@ -207,7 +208,8 @@ TEST_P(StructMemberDecorationTest, IsValid) {
       Member("a", ty.i32(),
              ast::DecorationList{
                  createDecoration(Source{{12, 34}}, *this, params.kind)})};
-  auto* s = create<ast::Struct>(members, ast::DecorationList{});
+  auto* s =
+      create<ast::Struct>(Sym("mystruct"), members, ast::DecorationList{});
   auto* s_ty = ty.struct_("mystruct", s);
   AST().AddConstructedType(s_ty);
 

@@ -77,7 +77,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   for (auto* src_node : src.ASTNodes().Objects()) {
     src_nodes.emplace(src_node);
   }
-  std::unordered_set<tint::type::Type*> src_types;
+  std::unordered_set<tint::sem::Type*> src_types;
   for (auto* src_type : src.Types()) {
     src_types.emplace(src_type);
   }

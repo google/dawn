@@ -436,7 +436,7 @@ INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
 struct StorageTextureData {
   sem::ImageFormat fmt;
   sem::TextureDimension dim;
-  ast::AccessControl access;
+  ast::AccessControl::Access access;
   const char* name;
 };
 inline std::ostream& operator<<(std::ostream& out, StorageTextureData data) {

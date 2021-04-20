@@ -15,30 +15,37 @@
 #ifndef SRC_AST_STRUCT_H_
 #define SRC_AST_STRUCT_H_
 
+#include <string>
 #include <utility>
 
 #include "src/ast/decoration.h"
 #include "src/ast/struct_member.h"
+#include "src/ast/type.h"
 
 namespace tint {
 namespace ast {
 
 /// A struct statement.
-class Struct : public Castable<Struct, Node> {
+class Struct : public Castable<Struct, Type> {
  public:
   /// Create a new struct statement
   /// @param program_id the identifier of the program that owns this node
   /// @param source The input source for the import statement
+  /// @param name The name of the structure
   /// @param members The struct members
   /// @param decorations The struct decorations
   Struct(ProgramID program_id,
          const Source& source,
+         Symbol name,
          StructMemberList members,
          DecorationList decorations);
   /// Move constructor
   Struct(Struct&&);
 
   ~Struct() override;
+
+  /// @returns the name of the structure
+  Symbol name() const { return name_; }
 
   /// @returns the struct decorations
   const DecorationList& decorations() const { return decorations_; }
@@ -68,9 +75,18 @@ class Struct : public Castable<Struct, Node> {
               std::ostream& out,
               size_t indent) const override;
 
+  /// @returns the name for the type
+  std::string type_name() const override;
+
+  /// @param symbols the program's symbol table
+  /// @returns the name for this type that closely resembles how it would be
+  /// declared in WGSL.
+  std::string FriendlyName(const SymbolTable& symbols) const override;
+
  private:
   Struct(const Struct&) = delete;
 
+  Symbol const name_;
   StructMemberList const members_;
   DecorationList const decorations_;
 };

@@ -450,7 +450,7 @@ class Builder {
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
   bool GenerateStructType(sem::StructType* struct_type,
-                          ast::AccessControl access_control,
+                          ast::AccessControl::Access access_control,
                           const Operand& result);
   /// Generates a struct member
   /// @param struct_id the id of the parent structure

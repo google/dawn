@@ -89,7 +89,6 @@ void Module::to_str(const sem::Info& sem,
         str->impl()->to_str(sem, out, indent);
       }
     } else if (auto* str = ty->As<sem::StructType>()) {
-      out << str->symbol().to_str() << " ";
       str->impl()->to_str(sem, out, indent);
     }
   }

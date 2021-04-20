@@ -3145,7 +3145,7 @@ bool Builder::GeneratePointerType(sem::Pointer* ptr, const Operand& result) {
 }
 
 bool Builder::GenerateStructType(sem::StructType* struct_type,
-                                 ast::AccessControl access_control,
+                                 ast::AccessControl::Access access_control,
                                  const Operand& result) {
   auto struct_id = result.to_i();
   auto* impl = struct_type->impl();

@@ -42,8 +42,12 @@ set(TINT_LIB_SRCS
   ast/access_control.h
   ast/access_decoration.cc
   ast/access_decoration.h
+  ast/alias.cc
+  ast/alias.h
   ast/array_accessor_expression.cc
   ast/array_accessor_expression.h
+  ast/array.cc
+  ast/array.h
   ast/assignment_statement.cc
   ast/assignment_statement.h
   ast/binary_expression.cc
@@ -56,6 +60,8 @@ set(TINT_LIB_SRCS
   ast/block_statement.h
   ast/bool_literal.cc
   ast/bool_literal.h
+  ast/bool.cc
+  ast/bool.h
   ast/break_statement.cc
   ast/break_statement.h
   ast/builtin_decoration.cc
@@ -76,12 +82,16 @@ set(TINT_LIB_SRCS
   ast/continue_statement.h
   ast/decoration.cc
   ast/decoration.h
+  ast/depth_texture.cc
+  ast/depth_texture.h
   ast/discard_statement.cc
   ast/discard_statement.h
   ast/else_statement.cc
   ast/else_statement.h
   ast/expression.cc
   ast/expression.h
+  ast/f32.cc
+  ast/f32.h
   ast/fallthrough_statement.cc
   ast/fallthrough_statement.h
   ast/float_literal.cc
@@ -90,6 +100,8 @@ set(TINT_LIB_SRCS
   ast/function.h
   ast/group_decoration.cc
   ast/group_decoration.h
+  ast/i32.cc
+  ast/i32.h
   ast/identifier_expression.cc
   ast/identifier_expression.h
   ast/if_statement.cc
@@ -104,16 +116,26 @@ set(TINT_LIB_SRCS
   ast/location_decoration.h
   ast/loop_statement.cc
   ast/loop_statement.h
+  ast/matrix.cc
+  ast/matrix.h
   ast/member_accessor_expression.cc
   ast/member_accessor_expression.h
   ast/module.cc
   ast/module.h
+  ast/multisampled_texture.cc
+  ast/multisampled_texture.h
   ast/node.cc
   ast/node.h
   ast/pipeline_stage.cc
   ast/pipeline_stage.h
+  ast/pointer.cc
+  ast/pointer.h
   ast/return_statement.cc
   ast/return_statement.h
+  ast/sampled_texture.cc
+  ast/sampled_texture.h
+  ast/sampler.cc
+  ast/sampler.h
   ast/scalar_constructor_expression.cc
   ast/scalar_constructor_expression.h
   ast/sint_literal.cc
@@ -124,34 +146,46 @@ set(TINT_LIB_SRCS
   ast/statement.h
   ast/storage_class.cc
   ast/storage_class.h
+  ast/storage_texture.cc
+  ast/storage_texture.h
   ast/stride_decoration.cc
   ast/stride_decoration.h
-  ast/struct.cc
-  ast/struct.h
   ast/struct_block_decoration.cc
   ast/struct_block_decoration.h
-  ast/struct_member.cc
-  ast/struct_member.h
   ast/struct_member_align_decoration.cc
   ast/struct_member_align_decoration.h
   ast/struct_member_offset_decoration.cc
   ast/struct_member_offset_decoration.h
   ast/struct_member_size_decoration.cc
   ast/struct_member_size_decoration.h
+  ast/struct_member.cc
+  ast/struct_member.h
+  ast/struct.cc
+  ast/struct.h
   ast/switch_statement.cc
   ast/switch_statement.h
+  ast/texture.cc
+  ast/texture.h
   ast/type_constructor_expression.cc
   ast/type_constructor_expression.h
+  ast/ast_type.cc  # TODO(bclayton) - rename to type.cc
+  ast/type.h
+  ast/u32.cc
+  ast/u32.h
   ast/uint_literal.cc
   ast/uint_literal.h
-  ast/unary_op.cc
-  ast/unary_op.h
   ast/unary_op_expression.cc
   ast/unary_op_expression.h
-  ast/variable.cc
-  ast/variable.h
+  ast/unary_op.cc
+  ast/unary_op.h
   ast/variable_decl_statement.cc
   ast/variable_decl_statement.h
+  ast/variable.cc
+  ast/variable.h
+  ast/vector.cc
+  ast/vector.h
+  ast/void.cc
+  ast/void.h
   ast/workgroup_decoration.cc
   ast/workgroup_decoration.h
   block_allocator.h
@@ -163,8 +197,6 @@ set(TINT_LIB_SRCS
   debug.h
   demangler.cc
   demangler.h
-  intrinsic_table.cc
-  intrinsic_table.h
   diagnostic/diagnostic.cc
   diagnostic/diagnostic.h
   diagnostic/formatter.cc
@@ -177,6 +209,8 @@ set(TINT_LIB_SRCS
   inspector/inspector.h
   inspector/scalar.cc
   inspector/scalar.h
+  intrinsic_table.cc
+  intrinsic_table.h
   program_builder.cc
   program_builder.h
   program_id.cc
@@ -188,32 +222,32 @@ set(TINT_LIB_SRCS
   resolver/resolver.cc
   resolver/resolver.h
   scope_stack.h
-  sem/array.h
-  sem/call.h
-  sem/call_target.h
-  sem/expression.h
-  sem/info.h
-  sem/intrinsic.h
-  sem/node.h
   sem/array.cc
-  sem/call.cc
+  sem/array.h
   sem/call_target.cc
+  sem/call_target.h
+  sem/call.cc
+  sem/call.h
   sem/expression.cc
-  sem/member_accessor_expression.cc
+  sem/expression.h
   sem/function.cc
   sem/info.cc
+  sem/info.h
   sem/intrinsic.cc
+  sem/intrinsic.h
+  sem/member_accessor_expression.cc
   sem/node.cc
+  sem/node.h
   sem/statement.cc
   sem/struct.cc
-  sem/variable.cc
   sem/type_mappings.h
+  sem/variable.cc
   source.cc
   source.h
-  symbol.cc
-  symbol.h
   symbol_table.cc
   symbol_table.h
+  symbol.cc
+  symbol.h
   traits.h
   transform/binding_point.h
   transform/binding_remapper.cc
@@ -288,10 +322,10 @@ set(TINT_LIB_SRCS
   writer/append_vector.h
   writer/float_to_string.cc
   writer/float_to_string.h
-  writer/text.cc
-  writer/text.h
   writer/text_generator.cc
   writer/text_generator.h
+  writer/text.cc
+  writer/text.h
   writer/writer.cc
   writer/writer.h
 )
@@ -418,14 +452,18 @@ endif()
 
 if(${TINT_BUILD_TESTS})
   set(TINT_TEST_SRCS
+    ast/access_control_test.cc
     ast/access_decoration_test.cc
+    ast/alias_test.cc
     ast/array_accessor_expression_test.cc
+    ast/array_test.cc
     ast/assignment_statement_test.cc
     ast/binary_expression_test.cc
     ast/binding_decoration_test.cc
     ast/bitcast_expression_test.cc
     ast/block_statement_test.cc
     ast/bool_literal_test.cc
+    ast/bool_test.cc
     ast/break_statement_test.cc
     ast/builtin_decoration_test.cc
     ast/call_expression_test.cc
@@ -433,12 +471,15 @@ if(${TINT_BUILD_TESTS})
     ast/case_statement_test.cc
     ast/constant_id_decoration_test.cc
     ast/continue_statement_test.cc
+    ast/depth_texture_test.cc
     ast/discard_statement_test.cc
     ast/else_statement_test.cc
+    ast/f32_test.cc
     ast/fallthrough_statement_test.cc
     ast/float_literal_test.cc
     ast/function_test.cc
     ast/group_decoration_test.cc
+    ast/i32_test.cc
     ast/identifier_expression_test.cc
     ast/if_statement_test.cc
     ast/int_literal_test.cc
@@ -446,13 +487,19 @@ if(${TINT_BUILD_TESTS})
     ast/intrinsic_texture_helper_test.h
     ast/location_decoration_test.cc
     ast/loop_statement_test.cc
+    ast/matrix_test.cc
     ast/member_accessor_expression_test.cc
     ast/module_clone_test.cc
     ast/module_test.cc
+    ast/multisampled_texture_test.cc
+    ast/pointer_test.cc
     ast/return_statement_test.cc
+    ast/sampled_texture_test.cc
+    ast/sampler_test.cc
     ast/scalar_constructor_expression_test.cc
     ast/sint_literal_test.cc
     ast/stage_decoration_test.cc
+    ast/storage_texture_test.cc
     ast/stride_decoration_test.cc
     ast/struct_member_align_decoration_test.cc
     ast/struct_member_offset_decoration_test.cc
@@ -461,11 +508,14 @@ if(${TINT_BUILD_TESTS})
     ast/struct_test.cc
     ast/switch_statement_test.cc
     ast/test_helper.h
+    ast/texture_test.cc
     ast/type_constructor_expression_test.cc
+    ast/u32_test.cc
     ast/uint_literal_test.cc
     ast/unary_op_expression_test.cc
     ast/variable_decl_statement_test.cc
     ast/variable_test.cc
+    ast/vector_test.cc
     ast/workgroup_decoration_test.cc
     block_allocator_test.cc
     castable_test.cc
@@ -501,7 +551,6 @@ if(${TINT_BUILD_TESTS})
     sem/intrinsic_test.cc
     symbol_table_test.cc
     symbol_test.cc
-    traits_test.cc
     test_main.cc
     sem/access_control_type_test.cc
     sem/alias_type_test.cc
