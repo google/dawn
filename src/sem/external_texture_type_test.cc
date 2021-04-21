@@ -60,7 +60,7 @@ TEST_F(ExternalTextureTest, IsTexture) {
 TEST_F(ExternalTextureTest, Dim) {
   F32 f32;
   ExternalTexture s;
-  EXPECT_EQ(s.dim(), TextureDimension::k2d);
+  EXPECT_EQ(s.dim(), ast::TextureDimension::k2d);
 }
 
 TEST_F(ExternalTextureTest, TypeName) {

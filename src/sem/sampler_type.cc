@@ -21,19 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Sampler);
 namespace tint {
 namespace sem {
 
-std::ostream& operator<<(std::ostream& out, SamplerKind kind) {
-  switch (kind) {
-    case SamplerKind::kSampler:
-      out << "sampler";
-      break;
-    case SamplerKind::kComparisonSampler:
-      out << "comparison_sampler";
-      break;
-  }
-  return out;
-}
-
-Sampler::Sampler(SamplerKind kind) : kind_(kind) {}
+Sampler::Sampler(ast::SamplerKind kind) : kind_(kind) {}
 
 Sampler::Sampler(Sampler&&) = default;
 
@@ -41,11 +29,11 @@ Sampler::~Sampler() = default;
 
 std::string Sampler::type_name() const {
   return std::string("__sampler_") +
-         (kind_ == SamplerKind::kSampler ? "sampler" : "comparison");
+         (kind_ == ast::SamplerKind::kSampler ? "sampler" : "comparison");
 }
 
 std::string Sampler::FriendlyName(const SymbolTable&) const {
-  return kind_ == SamplerKind::kSampler ? "sampler" : "sampler_comparison";
+  return kind_ == ast::SamplerKind::kSampler ? "sampler" : "sampler_comparison";
 }
 
 Sampler* Sampler::Clone(CloneContext* ctx) const {

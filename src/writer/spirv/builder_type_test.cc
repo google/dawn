@@ -617,7 +617,7 @@ INSTANTIATE_TEST_SUITE_P(
         PtrData{ast::StorageClass::kFunction, SpvStorageClassFunction}));
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_2d) {
-  sem::DepthTexture two_d(sem::TextureDimension::k2d);
+  sem::DepthTexture two_d(ast::TextureDimension::k2d);
 
   spirv::Builder& b = Build();
 
@@ -631,7 +631,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_2d) {
 }
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_2dArray) {
-  sem::DepthTexture two_d_array(sem::TextureDimension::k2dArray);
+  sem::DepthTexture two_d_array(ast::TextureDimension::k2dArray);
 
   spirv::Builder& b = Build();
 
@@ -645,7 +645,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_2dArray) {
 }
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_Cube) {
-  sem::DepthTexture cube(sem::TextureDimension::kCube);
+  sem::DepthTexture cube(ast::TextureDimension::kCube);
 
   spirv::Builder& b = Build();
 
@@ -660,7 +660,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_Cube) {
 }
 
 TEST_F(BuilderTest_Type, DepthTexture_Generate_CubeArray) {
-  sem::DepthTexture cube_array(sem::TextureDimension::kCubeArray);
+  sem::DepthTexture cube_array(ast::TextureDimension::kCubeArray);
 
   spirv::Builder& b = Build();
 
@@ -677,7 +677,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_CubeArray) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_i32) {
-  sem::MultisampledTexture ms(sem::TextureDimension::k2d, ty.i32());
+  sem::MultisampledTexture ms(ast::TextureDimension::k2d, ty.i32());
 
   spirv::Builder& b = Build();
 
@@ -689,7 +689,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_i32) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_u32) {
-  sem::MultisampledTexture ms(sem::TextureDimension::k2d, ty.u32());
+  sem::MultisampledTexture ms(ast::TextureDimension::k2d, ty.u32());
 
   spirv::Builder& b = Build();
 
@@ -702,7 +702,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_u32) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_f32) {
-  sem::MultisampledTexture ms(sem::TextureDimension::k2d, ty.f32());
+  sem::MultisampledTexture ms(ast::TextureDimension::k2d, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -715,7 +715,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_f32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_i32) {
-  auto* s = create<sem::SampledTexture>(sem::TextureDimension::k1d, ty.i32());
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k1d, ty.i32());
 
   spirv::Builder& b = Build();
 
@@ -732,7 +732,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_i32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_u32) {
-  auto* s = create<sem::SampledTexture>(sem::TextureDimension::k1d, ty.u32());
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k1d, ty.u32());
 
   spirv::Builder& b = Build();
 
@@ -749,7 +749,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_u32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
-  auto* s = create<sem::SampledTexture>(sem::TextureDimension::k1d, ty.f32());
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k1d, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -766,7 +766,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_2d) {
-  auto* s = create<sem::SampledTexture>(sem::TextureDimension::k2d, ty.f32());
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k2d, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -780,7 +780,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_2d) {
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_2d_array) {
   auto* s =
-      create<sem::SampledTexture>(sem::TextureDimension::k2dArray, ty.f32());
+      create<sem::SampledTexture>(ast::TextureDimension::k2dArray, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -793,7 +793,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_2d_array) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_3d) {
-  auto* s = create<sem::SampledTexture>(sem::TextureDimension::k3d, ty.f32());
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k3d, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -806,7 +806,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_3d) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_Cube) {
-  auto* s = create<sem::SampledTexture>(sem::TextureDimension::kCube, ty.f32());
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::kCube, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -821,7 +821,7 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_Cube) {
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
   auto* s =
-      create<sem::SampledTexture>(sem::TextureDimension::kCubeArray, ty.f32());
+      create<sem::SampledTexture>(ast::TextureDimension::kCubeArray, ty.f32());
 
   spirv::Builder& b = Build();
 
@@ -838,9 +838,9 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_1d) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k1d,
-                                        sem::ImageFormat::kR32Float, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Float, Types());
+  auto* s = create<sem::StorageTexture>(ast::TextureDimension::k1d,
+                                        ast::ImageFormat::kR32Float, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -855,9 +855,9 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d) {
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k2d,
-                                        sem::ImageFormat::kR32Float, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Float, Types());
+  auto* s = create<sem::StorageTexture>(ast::TextureDimension::k2d,
+                                        ast::ImageFormat::kR32Float, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -872,9 +872,9 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k2dArray,
-                                        sem::ImageFormat::kR32Float, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Float, Types());
+  auto* s = create<sem::StorageTexture>(ast::TextureDimension::k2dArray,
+                                        ast::ImageFormat::kR32Float, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -889,9 +889,9 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
 
 TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k3d,
-                                        sem::ImageFormat::kR32Float, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Float, Types());
+  auto* s = create<sem::StorageTexture>(ast::TextureDimension::k3d,
+                                        ast::ImageFormat::kR32Float, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -907,9 +907,9 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
 TEST_F(BuilderTest_Type,
        StorageTexture_Generate_SampledTypeFloat_Format_r32float) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Float, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k2d,
-                                        sem::ImageFormat::kR32Float, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Float, Types());
+  auto* s = create<sem::StorageTexture>(ast::TextureDimension::k2d,
+                                        ast::ImageFormat::kR32Float, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -925,9 +925,9 @@ TEST_F(BuilderTest_Type,
 TEST_F(BuilderTest_Type,
        StorageTexture_Generate_SampledTypeSint_Format_r32sint) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Sint, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k2d,
-                                        sem::ImageFormat::kR32Sint, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Sint, Types());
+  auto* s = create<sem::StorageTexture>(ast::TextureDimension::k2d,
+                                        ast::ImageFormat::kR32Sint, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -943,9 +943,9 @@ TEST_F(BuilderTest_Type,
 TEST_F(BuilderTest_Type,
        StorageTexture_Generate_SampledTypeUint_Format_r32uint) {
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Uint, Types());
-  auto* s = create<sem::StorageTexture>(sem::TextureDimension::k2d,
-                                        sem::ImageFormat::kR32Uint, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Uint, Types());
+  auto* s = create<sem::StorageTexture>(ast::TextureDimension::k2d,
+                                        ast::ImageFormat::kR32Uint, subtype);
 
   Global("test_var", s, ast::StorageClass::kInput);
 
@@ -959,7 +959,7 @@ TEST_F(BuilderTest_Type,
 }
 
 TEST_F(BuilderTest_Type, Sampler) {
-  sem::Sampler sampler(sem::SamplerKind::kSampler);
+  sem::Sampler sampler(ast::SamplerKind::kSampler);
 
   spirv::Builder& b = Build();
 
@@ -969,7 +969,7 @@ TEST_F(BuilderTest_Type, Sampler) {
 }
 
 TEST_F(BuilderTest_Type, ComparisonSampler) {
-  sem::Sampler sampler(sem::SamplerKind::kComparisonSampler);
+  sem::Sampler sampler(ast::SamplerKind::kComparisonSampler);
 
   spirv::Builder& b = Build();
 
@@ -979,8 +979,8 @@ TEST_F(BuilderTest_Type, ComparisonSampler) {
 }
 
 TEST_F(BuilderTest_Type, Dedup_Sampler_And_ComparisonSampler) {
-  sem::Sampler comp_sampler(sem::SamplerKind::kComparisonSampler);
-  sem::Sampler sampler(sem::SamplerKind::kSampler);
+  sem::Sampler comp_sampler(ast::SamplerKind::kComparisonSampler);
+  sem::Sampler sampler(ast::SamplerKind::kSampler);
 
   spirv::Builder& b = Build();
 

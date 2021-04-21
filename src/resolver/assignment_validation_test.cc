@@ -256,8 +256,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignFromPointer_Fail) {
   // a = b;
 
   auto* tex_type = create<sem::StorageTexture>(
-      sem::TextureDimension::k1d, sem::ImageFormat::kRgba8Unorm,
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kRgba8Unorm, Types()));
+      ast::TextureDimension::k1d, ast::ImageFormat::kRgba8Unorm,
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kRgba8Unorm, Types()));
   auto* tex_ac =
       create<sem::AccessControl>(ast::AccessControl::kReadOnly, tex_type);
 

@@ -27,7 +27,7 @@ class DepthTexture : public Castable<DepthTexture, Texture> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture
-  explicit DepthTexture(TextureDimension dim);
+  explicit DepthTexture(ast::TextureDimension dim);
   /// Move constructor
   DepthTexture(DepthTexture&&);
   ~DepthTexture() override;

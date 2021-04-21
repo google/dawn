@@ -29,7 +29,7 @@ using MultisampledTextureTest = TestHelper;
 
 TEST_F(MultisampledTextureTest, Is) {
   F32 f32;
-  MultisampledTexture s(TextureDimension::kCube, &f32);
+  MultisampledTexture s(ast::TextureDimension::kCube, &f32);
   Type* ty = &s;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -48,7 +48,7 @@ TEST_F(MultisampledTextureTest, Is) {
 
 TEST_F(MultisampledTextureTest, IsTexture) {
   F32 f32;
-  MultisampledTexture s(TextureDimension::kCube, &f32);
+  MultisampledTexture s(ast::TextureDimension::kCube, &f32);
   Texture* ty = &s;
   EXPECT_FALSE(ty->Is<DepthTexture>());
   EXPECT_FALSE(ty->Is<ExternalTexture>());
@@ -59,24 +59,24 @@ TEST_F(MultisampledTextureTest, IsTexture) {
 
 TEST_F(MultisampledTextureTest, Dim) {
   F32 f32;
-  MultisampledTexture s(TextureDimension::k3d, &f32);
-  EXPECT_EQ(s.dim(), TextureDimension::k3d);
+  MultisampledTexture s(ast::TextureDimension::k3d, &f32);
+  EXPECT_EQ(s.dim(), ast::TextureDimension::k3d);
 }
 
 TEST_F(MultisampledTextureTest, Type) {
   F32 f32;
-  MultisampledTexture s(TextureDimension::k3d, &f32);
+  MultisampledTexture s(ast::TextureDimension::k3d, &f32);
   EXPECT_EQ(s.type(), &f32);
 }
 
 TEST_F(MultisampledTextureTest, TypeName) {
   F32 f32;
-  MultisampledTexture s(TextureDimension::k3d, &f32);
+  MultisampledTexture s(ast::TextureDimension::k3d, &f32);
   EXPECT_EQ(s.type_name(), "__multisampled_texture_3d__f32");
 }
 
 TEST_F(MultisampledTextureTest, FriendlyName) {
-  MultisampledTexture s(TextureDimension::k3d, ty.f32());
+  MultisampledTexture s(ast::TextureDimension::k3d, ty.f32());
   EXPECT_EQ(s.FriendlyName(Symbols()), "texture_multisampled_3d<f32>");
 }
 

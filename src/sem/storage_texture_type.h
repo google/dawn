@@ -17,53 +17,13 @@
 
 #include <string>
 
+#include "src/ast/storage_texture.h"
 #include "src/sem/texture_type.h"
 
 namespace tint {
 namespace sem {
 
 class Manager;
-
-/// The image format in the storage texture
-enum class ImageFormat {
-  kNone = -1,
-  kR8Unorm,
-  kR8Snorm,
-  kR8Uint,
-  kR8Sint,
-  kR16Uint,
-  kR16Sint,
-  kR16Float,
-  kRg8Unorm,
-  kRg8Snorm,
-  kRg8Uint,
-  kRg8Sint,
-  kR32Uint,
-  kR32Sint,
-  kR32Float,
-  kRg16Uint,
-  kRg16Sint,
-  kRg16Float,
-  kRgba8Unorm,
-  kRgba8UnormSrgb,
-  kRgba8Snorm,
-  kRgba8Uint,
-  kRgba8Sint,
-  kBgra8Unorm,
-  kBgra8UnormSrgb,
-  kRgb10A2Unorm,
-  kRg11B10Float,
-  kRg32Uint,
-  kRg32Sint,
-  kRg32Float,
-  kRgba16Uint,
-  kRgba16Sint,
-  kRgba16Float,
-  kRgba32Uint,
-  kRgba32Sint,
-  kRgba32Float,
-};
-std::ostream& operator<<(std::ostream& out, ImageFormat dim);
 
 /// A storage texture type.
 class StorageTexture : public Castable<StorageTexture, Texture> {
@@ -72,7 +32,9 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// @param dim the dimensionality of the texture
   /// @param format the image format of the texture
   /// @param subtype the storage subtype. Use SubtypeFor() to calculate this.
-  StorageTexture(TextureDimension dim, ImageFormat format, sem::Type* subtype);
+  StorageTexture(ast::TextureDimension dim,
+                 ast::ImageFormat format,
+                 sem::Type* subtype);
 
   /// Move constructor
   StorageTexture(StorageTexture&&);
@@ -82,7 +44,7 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   Type* type() const { return subtype_; }
 
   /// @returns the image format
-  ImageFormat image_format() const { return image_format_; }
+  ast::ImageFormat image_format() const { return image_format_; }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -100,10 +62,10 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// @param format the storage texture image format
   /// @param type_mgr the sem::Manager used to build the returned type
   /// @returns the storage texture subtype for the given ImageFormat
-  static sem::Type* SubtypeFor(sem::ImageFormat format, sem::Manager& type_mgr);
+  static sem::Type* SubtypeFor(ast::ImageFormat format, sem::Manager& type_mgr);
 
  private:
-  ImageFormat const image_format_;
+  ast::ImageFormat const image_format_;
   Type* const subtype_;
 };
 

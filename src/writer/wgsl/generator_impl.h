@@ -180,7 +180,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles emitting an image format
   /// @param fmt the format to generate
   /// @returns true if the format is emitted
-  bool EmitImageFormat(const sem::ImageFormat fmt);
+  bool EmitImageFormat(const ast::ImageFormat fmt);
   /// Handles emitting a type constructor
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted

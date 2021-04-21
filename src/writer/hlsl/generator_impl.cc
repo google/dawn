@@ -58,26 +58,26 @@ bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
          stmts->last()->Is<ast::FallthroughStatement>();
 }
 
-const char* image_format_to_rwtexture_type(sem::ImageFormat image_format) {
+const char* image_format_to_rwtexture_type(ast::ImageFormat image_format) {
   switch (image_format) {
-    case sem::ImageFormat::kRgba8Unorm:
-    case sem::ImageFormat::kRgba8Snorm:
-    case sem::ImageFormat::kRgba16Float:
-    case sem::ImageFormat::kR32Float:
-    case sem::ImageFormat::kRg32Float:
-    case sem::ImageFormat::kRgba32Float:
+    case ast::ImageFormat::kRgba8Unorm:
+    case ast::ImageFormat::kRgba8Snorm:
+    case ast::ImageFormat::kRgba16Float:
+    case ast::ImageFormat::kR32Float:
+    case ast::ImageFormat::kRg32Float:
+    case ast::ImageFormat::kRgba32Float:
       return "float4";
-    case sem::ImageFormat::kRgba8Uint:
-    case sem::ImageFormat::kRgba16Uint:
-    case sem::ImageFormat::kR32Uint:
-    case sem::ImageFormat::kRg32Uint:
-    case sem::ImageFormat::kRgba32Uint:
+    case ast::ImageFormat::kRgba8Uint:
+    case ast::ImageFormat::kRgba16Uint:
+    case ast::ImageFormat::kR32Uint:
+    case ast::ImageFormat::kRg32Uint:
+    case ast::ImageFormat::kRgba32Uint:
       return "uint4";
-    case sem::ImageFormat::kRgba8Sint:
-    case sem::ImageFormat::kRgba16Sint:
-    case sem::ImageFormat::kR32Sint:
-    case sem::ImageFormat::kRg32Sint:
-    case sem::ImageFormat::kRgba32Sint:
+    case ast::ImageFormat::kRgba8Sint:
+    case ast::ImageFormat::kRgba16Sint:
+    case ast::ImageFormat::kR32Sint:
+    case ast::ImageFormat::kRg32Sint:
+    case ast::ImageFormat::kRgba32Sint:
       return "int4";
     default:
       return nullptr;
@@ -881,30 +881,30 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
       switch (intrinsic->Type()) {
         case sem::IntrinsicType::kTextureDimensions:
           switch (texture_type->dim()) {
-            case sem::TextureDimension::kNone:
+            case ast::TextureDimension::kNone:
               TINT_ICE(diagnostics_) << "texture dimension is kNone";
               return false;
-            case sem::TextureDimension::k1d:
+            case ast::TextureDimension::k1d:
               num_dimensions = 1;
               break;
-            case sem::TextureDimension::k2d:
+            case ast::TextureDimension::k2d:
               num_dimensions = is_ms ? 3 : 2;
               swizzle = is_ms ? ".xy" : "";
               break;
-            case sem::TextureDimension::k2dArray:
+            case ast::TextureDimension::k2dArray:
               num_dimensions = is_ms ? 4 : 3;
               swizzle = ".xy";
               break;
-            case sem::TextureDimension::k3d:
+            case ast::TextureDimension::k3d:
               num_dimensions = 3;
               break;
-            case sem::TextureDimension::kCube:
+            case ast::TextureDimension::kCube:
               // width == height == depth for cubes
               // See https://github.com/gpuweb/gpuweb/issues/1345
               num_dimensions = 2;
               swizzle = ".xyy";  // [width, height, height]
               break;
-            case sem::TextureDimension::kCubeArray:
+            case ast::TextureDimension::kCubeArray:
               // width == height == depth for cubes
               // See https://github.com/gpuweb/gpuweb/issues/1345
               num_dimensions = 3;
@@ -917,11 +917,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
             default:
               TINT_ICE(diagnostics_) << "texture dimension is not arrayed";
               return false;
-            case sem::TextureDimension::k2dArray:
+            case ast::TextureDimension::k2dArray:
               num_dimensions = is_ms ? 4 : 3;
               swizzle = ".z";
               break;
-            case sem::TextureDimension::kCubeArray:
+            case ast::TextureDimension::kCubeArray:
               num_dimensions = 3;
               swizzle = ".z";
               break;
@@ -933,14 +933,14 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               TINT_ICE(diagnostics_)
                   << "texture dimension does not support mips";
               return false;
-            case sem::TextureDimension::k2d:
-            case sem::TextureDimension::kCube:
+            case ast::TextureDimension::k2d:
+            case ast::TextureDimension::kCube:
               num_dimensions = 3;
               swizzle = ".z";
               break;
-            case sem::TextureDimension::k2dArray:
-            case sem::TextureDimension::k3d:
-            case sem::TextureDimension::kCubeArray:
+            case ast::TextureDimension::k2dArray:
+            case ast::TextureDimension::k3d:
+            case ast::TextureDimension::kCubeArray:
               num_dimensions = 4;
               swizzle = ".w";
               break;
@@ -952,11 +952,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
               TINT_ICE(diagnostics_)
                   << "texture dimension does not support multisampling";
               return false;
-            case sem::TextureDimension::k2d:
+            case ast::TextureDimension::k2d:
               num_dimensions = 3;
               swizzle = ".z";
               break;
-            case sem::TextureDimension::k2dArray:
+            case ast::TextureDimension::k2dArray:
               num_dimensions = 4;
               swizzle = ".w";
               break;
@@ -2466,22 +2466,22 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     out << "Texture";
 
     switch (tex->dim()) {
-      case sem::TextureDimension::k1d:
+      case ast::TextureDimension::k1d:
         out << "1D";
         break;
-      case sem::TextureDimension::k2d:
+      case ast::TextureDimension::k2d:
         out << (multism ? "2DMS" : "2D");
         break;
-      case sem::TextureDimension::k2dArray:
+      case ast::TextureDimension::k2dArray:
         out << (multism ? "2DMSArray" : "2DArray");
         break;
-      case sem::TextureDimension::k3d:
+      case ast::TextureDimension::k3d:
         out << "3D";
         break;
-      case sem::TextureDimension::kCube:
+      case ast::TextureDimension::kCube:
         out << "Cube";
         break;
-      case sem::TextureDimension::kCubeArray:
+      case ast::TextureDimension::kCubeArray:
         out << "CubeArray";
         break;
       default:

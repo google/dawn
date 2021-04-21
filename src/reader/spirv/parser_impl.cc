@@ -1898,8 +1898,8 @@ sem::Pointer* ParserImpl::GetTypeForHandleVar(
   sem::Type* ast_store_type = nullptr;
   if (usage.IsSampler()) {
     ast_store_type = builder_.create<sem::Sampler>(
-        usage.IsComparisonSampler() ? sem::SamplerKind::kComparisonSampler
-                                    : sem::SamplerKind::kSampler);
+        usage.IsComparisonSampler() ? ast::SamplerKind::kComparisonSampler
+                                    : ast::SamplerKind::kSampler);
   } else if (usage.IsTexture()) {
     const spvtools::opt::analysis::Image* image_type =
         type_mgr_->GetType(raw_handle_type->result_id())->AsImage();
@@ -1909,9 +1909,9 @@ sem::Pointer* ParserImpl::GetTypeForHandleVar(
       return nullptr;
     }
 
-    const sem::TextureDimension dim =
+    const ast::TextureDimension dim =
         enum_converter_.ToDim(image_type->dim(), image_type->is_arrayed());
-    if (dim == sem::TextureDimension::kNone) {
+    if (dim == ast::TextureDimension::kNone) {
       return nullptr;
     }
 
@@ -1942,7 +1942,7 @@ sem::Pointer* ParserImpl::GetTypeForHandleVar(
                               ? ast::AccessControl::kReadOnly
                               : ast::AccessControl::kWriteOnly;
       const auto format = enum_converter_.ToImageFormat(image_type->format());
-      if (format == sem::ImageFormat::kNone) {
+      if (format == ast::ImageFormat::kNone) {
         return nullptr;
       }
       auto* subtype = sem::StorageTexture::SubtypeFor(format, builder_.Types());
@@ -1964,47 +1964,47 @@ sem::Pointer* ParserImpl::GetTypeForHandleVar(
   return result;
 }
 
-sem::Type* ParserImpl::GetComponentTypeForFormat(sem::ImageFormat format) {
+sem::Type* ParserImpl::GetComponentTypeForFormat(ast::ImageFormat format) {
   switch (format) {
-    case sem::ImageFormat::kR8Uint:
-    case sem::ImageFormat::kR16Uint:
-    case sem::ImageFormat::kRg8Uint:
-    case sem::ImageFormat::kR32Uint:
-    case sem::ImageFormat::kRg16Uint:
-    case sem::ImageFormat::kRgba8Uint:
-    case sem::ImageFormat::kRg32Uint:
-    case sem::ImageFormat::kRgba16Uint:
-    case sem::ImageFormat::kRgba32Uint:
+    case ast::ImageFormat::kR8Uint:
+    case ast::ImageFormat::kR16Uint:
+    case ast::ImageFormat::kRg8Uint:
+    case ast::ImageFormat::kR32Uint:
+    case ast::ImageFormat::kRg16Uint:
+    case ast::ImageFormat::kRgba8Uint:
+    case ast::ImageFormat::kRg32Uint:
+    case ast::ImageFormat::kRgba16Uint:
+    case ast::ImageFormat::kRgba32Uint:
       return builder_.create<sem::U32>();
 
-    case sem::ImageFormat::kR8Sint:
-    case sem::ImageFormat::kR16Sint:
-    case sem::ImageFormat::kRg8Sint:
-    case sem::ImageFormat::kR32Sint:
-    case sem::ImageFormat::kRg16Sint:
-    case sem::ImageFormat::kRgba8Sint:
-    case sem::ImageFormat::kRg32Sint:
-    case sem::ImageFormat::kRgba16Sint:
-    case sem::ImageFormat::kRgba32Sint:
+    case ast::ImageFormat::kR8Sint:
+    case ast::ImageFormat::kR16Sint:
+    case ast::ImageFormat::kRg8Sint:
+    case ast::ImageFormat::kR32Sint:
+    case ast::ImageFormat::kRg16Sint:
+    case ast::ImageFormat::kRgba8Sint:
+    case ast::ImageFormat::kRg32Sint:
+    case ast::ImageFormat::kRgba16Sint:
+    case ast::ImageFormat::kRgba32Sint:
       return builder_.create<sem::I32>();
 
-    case sem::ImageFormat::kR8Unorm:
-    case sem::ImageFormat::kRg8Unorm:
-    case sem::ImageFormat::kRgba8Unorm:
-    case sem::ImageFormat::kRgba8UnormSrgb:
-    case sem::ImageFormat::kBgra8Unorm:
-    case sem::ImageFormat::kBgra8UnormSrgb:
-    case sem::ImageFormat::kRgb10A2Unorm:
-    case sem::ImageFormat::kR8Snorm:
-    case sem::ImageFormat::kRg8Snorm:
-    case sem::ImageFormat::kRgba8Snorm:
-    case sem::ImageFormat::kR16Float:
-    case sem::ImageFormat::kR32Float:
-    case sem::ImageFormat::kRg16Float:
-    case sem::ImageFormat::kRg11B10Float:
-    case sem::ImageFormat::kRg32Float:
-    case sem::ImageFormat::kRgba16Float:
-    case sem::ImageFormat::kRgba32Float:
+    case ast::ImageFormat::kR8Unorm:
+    case ast::ImageFormat::kRg8Unorm:
+    case ast::ImageFormat::kRgba8Unorm:
+    case ast::ImageFormat::kRgba8UnormSrgb:
+    case ast::ImageFormat::kBgra8Unorm:
+    case ast::ImageFormat::kBgra8UnormSrgb:
+    case ast::ImageFormat::kRgb10A2Unorm:
+    case ast::ImageFormat::kR8Snorm:
+    case ast::ImageFormat::kRg8Snorm:
+    case ast::ImageFormat::kRgba8Snorm:
+    case ast::ImageFormat::kR16Float:
+    case ast::ImageFormat::kR32Float:
+    case ast::ImageFormat::kRg16Float:
+    case ast::ImageFormat::kRg11B10Float:
+    case ast::ImageFormat::kRg32Float:
+    case ast::ImageFormat::kRgba16Float:
+    case ast::ImageFormat::kRgba32Float:
       return builder_.create<sem::F32>();
     default:
       break;
@@ -2013,54 +2013,54 @@ sem::Type* ParserImpl::GetComponentTypeForFormat(sem::ImageFormat format) {
   return nullptr;
 }
 
-sem::Type* ParserImpl::GetTexelTypeForFormat(sem::ImageFormat format) {
+sem::Type* ParserImpl::GetTexelTypeForFormat(ast::ImageFormat format) {
   auto* component_type = GetComponentTypeForFormat(format);
   if (!component_type) {
     return nullptr;
   }
 
   switch (format) {
-    case sem::ImageFormat::kR16Float:
-    case sem::ImageFormat::kR16Sint:
-    case sem::ImageFormat::kR16Uint:
-    case sem::ImageFormat::kR32Float:
-    case sem::ImageFormat::kR32Sint:
-    case sem::ImageFormat::kR32Uint:
-    case sem::ImageFormat::kR8Sint:
-    case sem::ImageFormat::kR8Snorm:
-    case sem::ImageFormat::kR8Uint:
-    case sem::ImageFormat::kR8Unorm:
+    case ast::ImageFormat::kR16Float:
+    case ast::ImageFormat::kR16Sint:
+    case ast::ImageFormat::kR16Uint:
+    case ast::ImageFormat::kR32Float:
+    case ast::ImageFormat::kR32Sint:
+    case ast::ImageFormat::kR32Uint:
+    case ast::ImageFormat::kR8Sint:
+    case ast::ImageFormat::kR8Snorm:
+    case ast::ImageFormat::kR8Uint:
+    case ast::ImageFormat::kR8Unorm:
       // One channel
       return component_type;
 
-    case sem::ImageFormat::kRg11B10Float:
-    case sem::ImageFormat::kRg16Float:
-    case sem::ImageFormat::kRg16Sint:
-    case sem::ImageFormat::kRg16Uint:
-    case sem::ImageFormat::kRg32Float:
-    case sem::ImageFormat::kRg32Sint:
-    case sem::ImageFormat::kRg32Uint:
-    case sem::ImageFormat::kRg8Sint:
-    case sem::ImageFormat::kRg8Snorm:
-    case sem::ImageFormat::kRg8Uint:
-    case sem::ImageFormat::kRg8Unorm:
+    case ast::ImageFormat::kRg11B10Float:
+    case ast::ImageFormat::kRg16Float:
+    case ast::ImageFormat::kRg16Sint:
+    case ast::ImageFormat::kRg16Uint:
+    case ast::ImageFormat::kRg32Float:
+    case ast::ImageFormat::kRg32Sint:
+    case ast::ImageFormat::kRg32Uint:
+    case ast::ImageFormat::kRg8Sint:
+    case ast::ImageFormat::kRg8Snorm:
+    case ast::ImageFormat::kRg8Uint:
+    case ast::ImageFormat::kRg8Unorm:
       // Two channels
       return builder_.create<sem::Vector>(component_type, 2);
 
-    case sem::ImageFormat::kBgra8Unorm:
-    case sem::ImageFormat::kBgra8UnormSrgb:
-    case sem::ImageFormat::kRgb10A2Unorm:
-    case sem::ImageFormat::kRgba16Float:
-    case sem::ImageFormat::kRgba16Sint:
-    case sem::ImageFormat::kRgba16Uint:
-    case sem::ImageFormat::kRgba32Float:
-    case sem::ImageFormat::kRgba32Sint:
-    case sem::ImageFormat::kRgba32Uint:
-    case sem::ImageFormat::kRgba8Sint:
-    case sem::ImageFormat::kRgba8Snorm:
-    case sem::ImageFormat::kRgba8Uint:
-    case sem::ImageFormat::kRgba8Unorm:
-    case sem::ImageFormat::kRgba8UnormSrgb:
+    case ast::ImageFormat::kBgra8Unorm:
+    case ast::ImageFormat::kBgra8UnormSrgb:
+    case ast::ImageFormat::kRgb10A2Unorm:
+    case ast::ImageFormat::kRgba16Float:
+    case ast::ImageFormat::kRgba16Sint:
+    case ast::ImageFormat::kRgba16Uint:
+    case ast::ImageFormat::kRgba32Float:
+    case ast::ImageFormat::kRgba32Sint:
+    case ast::ImageFormat::kRgba32Uint:
+    case ast::ImageFormat::kRgba8Sint:
+    case ast::ImageFormat::kRgba8Snorm:
+    case ast::ImageFormat::kRgba8Uint:
+    case ast::ImageFormat::kRgba8Unorm:
+    case ast::ImageFormat::kRgba8UnormSrgb:
       // Four channels
       return builder_.create<sem::Vector>(component_type, 4);
 

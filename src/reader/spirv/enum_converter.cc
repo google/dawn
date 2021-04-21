@@ -100,83 +100,83 @@ ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {
   return ast::Builtin::kNone;
 }
 
-sem::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
+ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
   if (arrayed) {
     switch (dim) {
       case SpvDim2D:
-        return sem::TextureDimension::k2dArray;
+        return ast::TextureDimension::k2dArray;
       case SpvDimCube:
-        return sem::TextureDimension::kCubeArray;
+        return ast::TextureDimension::kCubeArray;
       default:
         break;
     }
     Fail() << "arrayed dimension must be 1D, 2D, or Cube. Got " << int(dim);
-    return sem::TextureDimension::kNone;
+    return ast::TextureDimension::kNone;
   }
   // Assume non-arrayed
   switch (dim) {
     case SpvDim1D:
-      return sem::TextureDimension::k1d;
+      return ast::TextureDimension::k1d;
     case SpvDim2D:
-      return sem::TextureDimension::k2d;
+      return ast::TextureDimension::k2d;
     case SpvDim3D:
-      return sem::TextureDimension::k3d;
+      return ast::TextureDimension::k3d;
     case SpvDimCube:
-      return sem::TextureDimension::kCube;
+      return ast::TextureDimension::kCube;
     default:
       break;
   }
   Fail() << "invalid dimension: " << int(dim);
-  return sem::TextureDimension::kNone;
+  return ast::TextureDimension::kNone;
 }
 
-sem::ImageFormat EnumConverter::ToImageFormat(SpvImageFormat fmt) {
+ast::ImageFormat EnumConverter::ToImageFormat(SpvImageFormat fmt) {
   switch (fmt) {
     case SpvImageFormatUnknown:
-      return sem::ImageFormat::kNone;
+      return ast::ImageFormat::kNone;
 
     // 8 bit channels
     case SpvImageFormatRgba8:
-      return sem::ImageFormat::kRgba8Unorm;
+      return ast::ImageFormat::kRgba8Unorm;
     case SpvImageFormatRgba8Snorm:
-      return sem::ImageFormat::kRgba8Snorm;
+      return ast::ImageFormat::kRgba8Snorm;
     case SpvImageFormatRgba8ui:
-      return sem::ImageFormat::kRgba8Uint;
+      return ast::ImageFormat::kRgba8Uint;
     case SpvImageFormatRgba8i:
-      return sem::ImageFormat::kRgba8Sint;
+      return ast::ImageFormat::kRgba8Sint;
 
     // 16 bit channels
     case SpvImageFormatRgba16ui:
-      return sem::ImageFormat::kRgba16Uint;
+      return ast::ImageFormat::kRgba16Uint;
     case SpvImageFormatRgba16i:
-      return sem::ImageFormat::kRgba16Sint;
+      return ast::ImageFormat::kRgba16Sint;
     case SpvImageFormatRgba16f:
-      return sem::ImageFormat::kRgba16Float;
+      return ast::ImageFormat::kRgba16Float;
 
     // 32 bit channels
     case SpvImageFormatR32ui:
-      return sem::ImageFormat::kR32Uint;
+      return ast::ImageFormat::kR32Uint;
     case SpvImageFormatR32i:
-      return sem::ImageFormat::kR32Sint;
+      return ast::ImageFormat::kR32Sint;
     case SpvImageFormatR32f:
-      return sem::ImageFormat::kR32Float;
+      return ast::ImageFormat::kR32Float;
     case SpvImageFormatRg32ui:
-      return sem::ImageFormat::kRg32Uint;
+      return ast::ImageFormat::kRg32Uint;
     case SpvImageFormatRg32i:
-      return sem::ImageFormat::kRg32Sint;
+      return ast::ImageFormat::kRg32Sint;
     case SpvImageFormatRg32f:
-      return sem::ImageFormat::kRg32Float;
+      return ast::ImageFormat::kRg32Float;
     case SpvImageFormatRgba32ui:
-      return sem::ImageFormat::kRgba32Uint;
+      return ast::ImageFormat::kRgba32Uint;
     case SpvImageFormatRgba32i:
-      return sem::ImageFormat::kRgba32Sint;
+      return ast::ImageFormat::kRgba32Sint;
     case SpvImageFormatRgba32f:
-      return sem::ImageFormat::kRgba32Float;
+      return ast::ImageFormat::kRgba32Float;
     default:
       break;
   }
   Fail() << "invalid image format: " << int(fmt);
-  return sem::ImageFormat::kNone;
+  return ast::ImageFormat::kNone;
 }
 
 }  // namespace spirv

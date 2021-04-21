@@ -28,7 +28,7 @@ class SampledTexture : public Castable<SampledTexture, Texture> {
   /// Constructor
   /// @param dim the dimensionality of the texture
   /// @param type the data type of the sampled texture
-  SampledTexture(TextureDimension dim, Type* type);
+  SampledTexture(ast::TextureDimension dim, Type* type);
   /// Move constructor
   SampledTexture(SampledTexture&&);
   ~SampledTexture() override;

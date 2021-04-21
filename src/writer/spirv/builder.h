@@ -473,7 +473,7 @@ class Builder {
   /// Converts AST image format to SPIR-V and pushes an appropriate capability.
   /// @param format AST image format type
   /// @returns SPIR-V image format type
-  SpvImageFormat convert_image_format_to_spv(const sem::ImageFormat format);
+  SpvImageFormat convert_image_format_to_spv(const ast::ImageFormat format);
 
   /// Determines if the given type constructor is created from constant values
   /// @param expr the expression to check

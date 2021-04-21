@@ -536,17 +536,17 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 
 namespace MultisampledTextureTests {
 struct DimensionParams {
-  sem::TextureDimension dim;
+  ast::TextureDimension dim;
   bool is_valid;
 };
 
 static constexpr DimensionParams dimension_cases[] = {
-    DimensionParams{sem::TextureDimension::k1d, false},
-    DimensionParams{sem::TextureDimension::k2d, true},
-    DimensionParams{sem::TextureDimension::k2dArray, false},
-    DimensionParams{sem::TextureDimension::k3d, false},
-    DimensionParams{sem::TextureDimension::kCube, false},
-    DimensionParams{sem::TextureDimension::kCubeArray, false}};
+    DimensionParams{ast::TextureDimension::k1d, false},
+    DimensionParams{ast::TextureDimension::k2d, true},
+    DimensionParams{ast::TextureDimension::k2dArray, false},
+    DimensionParams{ast::TextureDimension::k3d, false},
+    DimensionParams{ast::TextureDimension::kCube, false},
+    DimensionParams{ast::TextureDimension::kCubeArray, false}};
 
 using MultisampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(MultisampledTextureDimensionTest, All) {
@@ -594,7 +594,7 @@ using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {
   auto& params = GetParam();
   Global("a",
-         create<sem::MultisampledTexture>(sem::TextureDimension::k2d,
+         create<sem::MultisampledTexture>(ast::TextureDimension::k2d,
                                           params.type_func(ty)),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
@@ -616,25 +616,25 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 
 namespace StorageTextureTests {
 struct DimensionParams {
-  sem::TextureDimension dim;
+  ast::TextureDimension dim;
   bool is_valid;
 };
 
 static constexpr DimensionParams Dimension_cases[] = {
-    DimensionParams{sem::TextureDimension::k1d, true},
-    DimensionParams{sem::TextureDimension::k2d, true},
-    DimensionParams{sem::TextureDimension::k2dArray, true},
-    DimensionParams{sem::TextureDimension::k3d, true},
-    DimensionParams{sem::TextureDimension::kCube, false},
-    DimensionParams{sem::TextureDimension::kCubeArray, false}};
+    DimensionParams{ast::TextureDimension::k1d, true},
+    DimensionParams{ast::TextureDimension::k2d, true},
+    DimensionParams{ast::TextureDimension::k2dArray, true},
+    DimensionParams{ast::TextureDimension::k3d, true},
+    DimensionParams{ast::TextureDimension::kCube, false},
+    DimensionParams{ast::TextureDimension::kCubeArray, false}};
 
 using StorageTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(StorageTextureDimensionTest, All) {
   auto& params = GetParam();
   Global("a",
-         create<sem::StorageTexture>(params.dim, sem::ImageFormat::kR32Uint,
+         create<sem::StorageTexture>(params.dim, ast::ImageFormat::kR32Uint,
                                      sem::StorageTexture::SubtypeFor(
-                                         sem::ImageFormat::kR32Uint, Types())),
+                                         ast::ImageFormat::kR32Uint, Types())),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -652,46 +652,46 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          testing::ValuesIn(Dimension_cases));
 
 struct FormatParams {
-  sem::ImageFormat format;
+  ast::ImageFormat format;
   bool is_valid;
 };
 
 static constexpr FormatParams format_cases[] = {
-    FormatParams{sem::ImageFormat::kBgra8Unorm, false},
-    FormatParams{sem::ImageFormat::kBgra8UnormSrgb, false},
-    FormatParams{sem::ImageFormat::kR16Float, false},
-    FormatParams{sem::ImageFormat::kR16Sint, false},
-    FormatParams{sem::ImageFormat::kR16Uint, false},
-    FormatParams{sem::ImageFormat::kR32Float, true},
-    FormatParams{sem::ImageFormat::kR32Sint, true},
-    FormatParams{sem::ImageFormat::kR32Uint, true},
-    FormatParams{sem::ImageFormat::kR8Sint, false},
-    FormatParams{sem::ImageFormat::kR8Snorm, false},
-    FormatParams{sem::ImageFormat::kR8Uint, false},
-    FormatParams{sem::ImageFormat::kR8Unorm, false},
-    FormatParams{sem::ImageFormat::kRg11B10Float, false},
-    FormatParams{sem::ImageFormat::kRg16Float, false},
-    FormatParams{sem::ImageFormat::kRg16Sint, false},
-    FormatParams{sem::ImageFormat::kRg16Uint, false},
-    FormatParams{sem::ImageFormat::kRg32Float, true},
-    FormatParams{sem::ImageFormat::kRg32Sint, true},
-    FormatParams{sem::ImageFormat::kRg32Uint, true},
-    FormatParams{sem::ImageFormat::kRg8Sint, false},
-    FormatParams{sem::ImageFormat::kRg8Snorm, false},
-    FormatParams{sem::ImageFormat::kRg8Uint, false},
-    FormatParams{sem::ImageFormat::kRg8Unorm, false},
-    FormatParams{sem::ImageFormat::kRgb10A2Unorm, false},
-    FormatParams{sem::ImageFormat::kRgba16Float, true},
-    FormatParams{sem::ImageFormat::kRgba16Sint, true},
-    FormatParams{sem::ImageFormat::kRgba16Uint, true},
-    FormatParams{sem::ImageFormat::kRgba32Float, true},
-    FormatParams{sem::ImageFormat::kRgba32Sint, true},
-    FormatParams{sem::ImageFormat::kRgba32Uint, true},
-    FormatParams{sem::ImageFormat::kRgba8Sint, true},
-    FormatParams{sem::ImageFormat::kRgba8Snorm, true},
-    FormatParams{sem::ImageFormat::kRgba8Uint, true},
-    FormatParams{sem::ImageFormat::kRgba8Unorm, true},
-    FormatParams{sem::ImageFormat::kRgba8UnormSrgb, false}};
+    FormatParams{ast::ImageFormat::kBgra8Unorm, false},
+    FormatParams{ast::ImageFormat::kBgra8UnormSrgb, false},
+    FormatParams{ast::ImageFormat::kR16Float, false},
+    FormatParams{ast::ImageFormat::kR16Sint, false},
+    FormatParams{ast::ImageFormat::kR16Uint, false},
+    FormatParams{ast::ImageFormat::kR32Float, true},
+    FormatParams{ast::ImageFormat::kR32Sint, true},
+    FormatParams{ast::ImageFormat::kR32Uint, true},
+    FormatParams{ast::ImageFormat::kR8Sint, false},
+    FormatParams{ast::ImageFormat::kR8Snorm, false},
+    FormatParams{ast::ImageFormat::kR8Uint, false},
+    FormatParams{ast::ImageFormat::kR8Unorm, false},
+    FormatParams{ast::ImageFormat::kRg11B10Float, false},
+    FormatParams{ast::ImageFormat::kRg16Float, false},
+    FormatParams{ast::ImageFormat::kRg16Sint, false},
+    FormatParams{ast::ImageFormat::kRg16Uint, false},
+    FormatParams{ast::ImageFormat::kRg32Float, true},
+    FormatParams{ast::ImageFormat::kRg32Sint, true},
+    FormatParams{ast::ImageFormat::kRg32Uint, true},
+    FormatParams{ast::ImageFormat::kRg8Sint, false},
+    FormatParams{ast::ImageFormat::kRg8Snorm, false},
+    FormatParams{ast::ImageFormat::kRg8Uint, false},
+    FormatParams{ast::ImageFormat::kRg8Unorm, false},
+    FormatParams{ast::ImageFormat::kRgb10A2Unorm, false},
+    FormatParams{ast::ImageFormat::kRgba16Float, true},
+    FormatParams{ast::ImageFormat::kRgba16Sint, true},
+    FormatParams{ast::ImageFormat::kRgba16Uint, true},
+    FormatParams{ast::ImageFormat::kRgba32Float, true},
+    FormatParams{ast::ImageFormat::kRgba32Sint, true},
+    FormatParams{ast::ImageFormat::kRgba32Uint, true},
+    FormatParams{ast::ImageFormat::kRgba8Sint, true},
+    FormatParams{ast::ImageFormat::kRgba8Snorm, true},
+    FormatParams{ast::ImageFormat::kRgba8Uint, true},
+    FormatParams{ast::ImageFormat::kRgba8Unorm, true},
+    FormatParams{ast::ImageFormat::kRgba8UnormSrgb, false}};
 
 using StorageTextureFormatTest = ResolverTestWithParam<FormatParams>;
 TEST_P(StorageTextureFormatTest, All) {
@@ -705,7 +705,7 @@ TEST_P(StorageTextureFormatTest, All) {
 
   Global("a",
          create<sem::StorageTexture>(
-             sem::TextureDimension::k1d, params.format,
+             ast::TextureDimension::k1d, params.format,
              sem::StorageTexture::SubtypeFor(params.format, Types())),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
@@ -715,7 +715,7 @@ TEST_P(StorageTextureFormatTest, All) {
 
   Global("b",
          create<sem::StorageTexture>(
-             sem::TextureDimension::k2d, params.format,
+             ast::TextureDimension::k2d, params.format,
              sem::StorageTexture::SubtypeFor(params.format, Types())),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
@@ -725,7 +725,7 @@ TEST_P(StorageTextureFormatTest, All) {
 
   Global("c",
          create<sem::StorageTexture>(
-             sem::TextureDimension::k2dArray, params.format,
+             ast::TextureDimension::k2dArray, params.format,
              sem::StorageTexture::SubtypeFor(params.format, Types())),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
@@ -735,7 +735,7 @@ TEST_P(StorageTextureFormatTest, All) {
 
   Global("d",
          create<sem::StorageTexture>(
-             sem::TextureDimension::k3d, params.format,
+             ast::TextureDimension::k3d, params.format,
              sem::StorageTexture::SubtypeFor(params.format, Types())),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{

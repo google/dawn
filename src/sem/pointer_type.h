@@ -29,7 +29,7 @@ class Pointer : public Castable<Pointer, Type> {
   /// Construtor
   /// @param subtype the pointee type
   /// @param storage_class the storage class of the pointer
-  explicit Pointer(Type* subtype, ast::StorageClass storage_class);
+  Pointer(Type* subtype, ast::StorageClass storage_class);
   /// Move constructor
   Pointer(Pointer&&);
   ~Pointer() override;

@@ -532,9 +532,9 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
   // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
 
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Uint, Types());
-  auto* type = create<sem::StorageTexture>(sem::TextureDimension::k2d,
-                                           sem::ImageFormat::kR32Uint, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Uint, Types());
+  auto* type = create<sem::StorageTexture>(ast::TextureDimension::k2d,
+                                           ast::ImageFormat::kR32Uint, subtype);
 
   auto* ac = create<sem::AccessControl>(ast::AccessControl::kReadOnly, type);
 
@@ -557,9 +557,9 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   // var<uniform_constant> a : [[access(write)]] texture_storage_2d<r32uint>;
 
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Uint, Types());
-  auto* type = create<sem::StorageTexture>(sem::TextureDimension::k2d,
-                                           sem::ImageFormat::kR32Uint, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Uint, Types());
+  auto* type = create<sem::StorageTexture>(ast::TextureDimension::k2d,
+                                           ast::ImageFormat::kR32Uint, subtype);
   Global("test_var", type, ast::StorageClass::kInput);
 
   auto* ac = create<sem::AccessControl>(ast::AccessControl::kWriteOnly, type);
@@ -586,9 +586,9 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
   // var<uniform_constant> b : [[access(write)]] texture_storage_2d<r32uint>;
 
   auto* subtype =
-      sem::StorageTexture::SubtypeFor(sem::ImageFormat::kR32Uint, Types());
-  auto* st = create<sem::StorageTexture>(sem::TextureDimension::k2d,
-                                         sem::ImageFormat::kR32Uint, subtype);
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR32Uint, Types());
+  auto* st = create<sem::StorageTexture>(ast::TextureDimension::k2d,
+                                         ast::ImageFormat::kR32Uint, subtype);
 
   Global("test_var", st, ast::StorageClass::kInput);
 

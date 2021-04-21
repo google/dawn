@@ -403,21 +403,21 @@ class ParserImpl {
   /// Parses a `multisampled_texture_type` grammar element
   /// @returns returns the multisample texture dimension or kNone if none
   /// matched.
-  Maybe<sem::TextureDimension> multisampled_texture_type();
+  Maybe<ast::TextureDimension> multisampled_texture_type();
   /// Parses a `sampled_texture_type` grammar element
   /// @returns returns the sample texture dimension or kNone if none matched.
-  Maybe<sem::TextureDimension> sampled_texture_type();
+  Maybe<ast::TextureDimension> sampled_texture_type();
   /// Parses a `storage_texture_type` grammar element
   /// @returns returns the storage texture dimension.
   /// Returns kNone if none matched.
-  Maybe<sem::TextureDimension> storage_texture_type();
+  Maybe<ast::TextureDimension> storage_texture_type();
   /// Parses a `depth_texture_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<sem::Type*> depth_texture_type();
   /// Parses a `image_storage_type` grammar element
   /// @param use a description of what was being parsed if an error was raised
   /// @returns returns the image format or kNone if none matched.
-  Expect<sem::ImageFormat> expect_image_storage_type(const std::string& use);
+  Expect<ast::ImageFormat> expect_image_storage_type(const std::string& use);
   /// Parses a `function_type_decl` grammar element
   /// @returns the parsed type or nullptr otherwise
   Maybe<sem::Type*> function_type_decl();

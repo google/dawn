@@ -23,18 +23,18 @@ namespace {
 using SamplerTest = TestHelper;
 
 TEST_F(SamplerTest, Creation) {
-  Sampler s{SamplerKind::kSampler};
-  EXPECT_EQ(s.kind(), SamplerKind::kSampler);
+  Sampler s{ast::SamplerKind::kSampler};
+  EXPECT_EQ(s.kind(), ast::SamplerKind::kSampler);
 }
 
 TEST_F(SamplerTest, Creation_ComparisonSampler) {
-  Sampler s{SamplerKind::kComparisonSampler};
-  EXPECT_EQ(s.kind(), SamplerKind::kComparisonSampler);
+  Sampler s{ast::SamplerKind::kComparisonSampler};
+  EXPECT_EQ(s.kind(), ast::SamplerKind::kComparisonSampler);
   EXPECT_TRUE(s.IsComparison());
 }
 
 TEST_F(SamplerTest, Is) {
-  Sampler s{SamplerKind::kSampler};
+  Sampler s{ast::SamplerKind::kSampler};
   Type* ty = &s;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -52,22 +52,22 @@ TEST_F(SamplerTest, Is) {
 }
 
 TEST_F(SamplerTest, TypeName_Sampler) {
-  Sampler s{SamplerKind::kSampler};
+  Sampler s{ast::SamplerKind::kSampler};
   EXPECT_EQ(s.type_name(), "__sampler_sampler");
 }
 
 TEST_F(SamplerTest, TypeName_Comparison) {
-  Sampler s{SamplerKind::kComparisonSampler};
+  Sampler s{ast::SamplerKind::kComparisonSampler};
   EXPECT_EQ(s.type_name(), "__sampler_comparison");
 }
 
 TEST_F(SamplerTest, FriendlyNameSampler) {
-  Sampler s{SamplerKind::kSampler};
+  Sampler s{ast::SamplerKind::kSampler};
   EXPECT_EQ(s.FriendlyName(Symbols()), "sampler");
 }
 
 TEST_F(SamplerTest, FriendlyNameComparisonSampler) {
-  Sampler s{SamplerKind::kComparisonSampler};
+  Sampler s{ast::SamplerKind::kComparisonSampler};
   EXPECT_EQ(s.FriendlyName(Symbols()), "sampler_comparison");
 }
 

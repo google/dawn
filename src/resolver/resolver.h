@@ -251,6 +251,12 @@ class Resolver {
   bool ValidateVectorConstructor(const sem::Vector* vec_type,
                                  const ast::ExpressionList& values);
 
+  /// @returns the sem::Type for the ast::Type `ty`, building it if it
+  /// hasn't been constructed already. If an error is raised, nullptr is
+  /// returned.
+  /// @param ty the ast::Type
+  sem::Type* Type(ast::Type* ty);
+
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
   /// returned.

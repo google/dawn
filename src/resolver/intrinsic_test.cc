@@ -206,9 +206,9 @@ inline std::ostream& operator<<(std::ostream& out, Texture data) {
 }
 
 struct TextureTestParams {
-  sem::TextureDimension dim;
+  ast::TextureDimension dim;
   Texture type = Texture::kF32;
-  sem::ImageFormat format = sem::ImageFormat::kR16Float;
+  ast::ImageFormat format = ast::ImageFormat::kR16Float;
 };
 inline std::ostream& operator<<(std::ostream& out, TextureTestParams data) {
   out << data.dim << "_" << data.type;
@@ -223,16 +223,16 @@ class ResolverIntrinsicTest_TextureOperation
   /// @param dim dimensionality of the texture being sampled
   /// @param scalar the scalar type
   /// @returns a pointer to a type appropriate for the coord param
-  sem::Type* GetCoordsType(sem::TextureDimension dim, sem::Type* scalar) {
+  sem::Type* GetCoordsType(ast::TextureDimension dim, sem::Type* scalar) {
     switch (dim) {
-      case sem::TextureDimension::k1d:
+      case ast::TextureDimension::k1d:
         return scalar;
-      case sem::TextureDimension::k2d:
-      case sem::TextureDimension::k2dArray:
+      case ast::TextureDimension::k2d:
+      case ast::TextureDimension::k2dArray:
         return create<sem::Vector>(scalar, 2);
-      case sem::TextureDimension::k3d:
-      case sem::TextureDimension::kCube:
-      case sem::TextureDimension::kCubeArray:
+      case ast::TextureDimension::k3d:
+      case ast::TextureDimension::kCube:
+      case ast::TextureDimension::kCubeArray:
         return create<sem::Vector>(scalar, 3);
       default:
         [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
@@ -276,7 +276,7 @@ TEST_P(ResolverIntrinsicTest_StorageTextureOperation, TextureLoadRo) {
   add_call_param("texture", ro_texture_type, &call_params);
   add_call_param("coords", coords_type, &call_params);
 
-  if (sem::IsTextureArray(dim)) {
+  if (ast::IsTextureArray(dim)) {
     add_call_param("array_index", ty.i32(), &call_params);
   }
 
@@ -301,30 +301,30 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverIntrinsicTest_StorageTextureOperation,
     testing::Values(
-        TextureTestParams{sem::TextureDimension::k1d, Texture::kF32,
-                          sem::ImageFormat::kR32Float},
-        TextureTestParams{sem::TextureDimension::k1d, Texture::kI32,
-                          sem::ImageFormat::kR32Sint},
-        TextureTestParams{sem::TextureDimension::k1d, Texture::kF32,
-                          sem::ImageFormat::kRgba8Unorm},
-        TextureTestParams{sem::TextureDimension::k2d, Texture::kF32,
-                          sem::ImageFormat::kR32Float},
-        TextureTestParams{sem::TextureDimension::k2d, Texture::kI32,
-                          sem::ImageFormat::kR32Sint},
-        TextureTestParams{sem::TextureDimension::k2d, Texture::kF32,
-                          sem::ImageFormat::kRgba8Unorm},
-        TextureTestParams{sem::TextureDimension::k2dArray, Texture::kF32,
-                          sem::ImageFormat::kR32Float},
-        TextureTestParams{sem::TextureDimension::k2dArray, Texture::kI32,
-                          sem::ImageFormat::kR32Sint},
-        TextureTestParams{sem::TextureDimension::k2dArray, Texture::kF32,
-                          sem::ImageFormat::kRgba8Unorm},
-        TextureTestParams{sem::TextureDimension::k3d, Texture::kF32,
-                          sem::ImageFormat::kR32Float},
-        TextureTestParams{sem::TextureDimension::k3d, Texture::kI32,
-                          sem::ImageFormat::kR32Sint},
-        TextureTestParams{sem::TextureDimension::k3d, Texture::kF32,
-                          sem::ImageFormat::kRgba8Unorm}));
+        TextureTestParams{ast::TextureDimension::k1d, Texture::kF32,
+                          ast::ImageFormat::kR32Float},
+        TextureTestParams{ast::TextureDimension::k1d, Texture::kI32,
+                          ast::ImageFormat::kR32Sint},
+        TextureTestParams{ast::TextureDimension::k1d, Texture::kF32,
+                          ast::ImageFormat::kRgba8Unorm},
+        TextureTestParams{ast::TextureDimension::k2d, Texture::kF32,
+                          ast::ImageFormat::kR32Float},
+        TextureTestParams{ast::TextureDimension::k2d, Texture::kI32,
+                          ast::ImageFormat::kR32Sint},
+        TextureTestParams{ast::TextureDimension::k2d, Texture::kF32,
+                          ast::ImageFormat::kRgba8Unorm},
+        TextureTestParams{ast::TextureDimension::k2dArray, Texture::kF32,
+                          ast::ImageFormat::kR32Float},
+        TextureTestParams{ast::TextureDimension::k2dArray, Texture::kI32,
+                          ast::ImageFormat::kR32Sint},
+        TextureTestParams{ast::TextureDimension::k2dArray, Texture::kF32,
+                          ast::ImageFormat::kRgba8Unorm},
+        TextureTestParams{ast::TextureDimension::k3d, Texture::kF32,
+                          ast::ImageFormat::kR32Float},
+        TextureTestParams{ast::TextureDimension::k3d, Texture::kI32,
+                          ast::ImageFormat::kR32Sint},
+        TextureTestParams{ast::TextureDimension::k3d, Texture::kF32,
+                          ast::ImageFormat::kRgba8Unorm}));
 
 using ResolverIntrinsicTest_SampledTextureOperation =
     ResolverIntrinsicTest_TextureOperation;
@@ -340,7 +340,7 @@ TEST_P(ResolverIntrinsicTest_SampledTextureOperation, TextureLoadSampled) {
 
   add_call_param("texture", texture_type, &call_params);
   add_call_param("coords", coords_type, &call_params);
-  if (dim == sem::TextureDimension::k2dArray) {
+  if (dim == ast::TextureDimension::k2dArray) {
     add_call_param("array_index", ty.i32(), &call_params);
   }
   add_call_param("level", ty.i32(), &call_params);
@@ -365,10 +365,10 @@ TEST_P(ResolverIntrinsicTest_SampledTextureOperation, TextureLoadSampled) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverIntrinsicTest_SampledTextureOperation,
-    testing::Values(TextureTestParams{sem::TextureDimension::k1d},
-                    TextureTestParams{sem::TextureDimension::k2d},
-                    TextureTestParams{sem::TextureDimension::k2dArray},
-                    TextureTestParams{sem::TextureDimension::k3d}));
+    testing::Values(TextureTestParams{ast::TextureDimension::k1d},
+                    TextureTestParams{ast::TextureDimension::k2d},
+                    TextureTestParams{ast::TextureDimension::k2dArray},
+                    TextureTestParams{ast::TextureDimension::k3d}));
 
 TEST_F(ResolverIntrinsicTest, Dot_Vec2) {
   Global("my_var", ty.vec2<f32>(), ast::StorageClass::kInput);
@@ -1924,16 +1924,16 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
     switch (param.texture_dimension) {
       default:
         FAIL() << "invalid texture dimensions: " << param.texture_dimension;
-      case sem::TextureDimension::k1d:
+      case ast::TextureDimension::k1d:
         EXPECT_EQ(TypeOf(call)->type_name(), ty.i32()->type_name());
         break;
-      case sem::TextureDimension::k2d:
-      case sem::TextureDimension::k2dArray:
+      case ast::TextureDimension::k2d:
+      case ast::TextureDimension::k2dArray:
         EXPECT_EQ(TypeOf(call)->type_name(), ty.vec2<i32>()->type_name());
         break;
-      case sem::TextureDimension::k3d:
-      case sem::TextureDimension::kCube:
-      case sem::TextureDimension::kCubeArray:
+      case ast::TextureDimension::k3d:
+      case ast::TextureDimension::kCube:
+      case ast::TextureDimension::kCubeArray:
         EXPECT_EQ(TypeOf(call)->type_name(), ty.vec3<i32>()->type_name());
         break;
     }

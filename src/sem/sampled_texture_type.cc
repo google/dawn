@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::SampledTexture);
 namespace tint {
 namespace sem {
 
-SampledTexture::SampledTexture(TextureDimension dim, Type* type)
+SampledTexture::SampledTexture(ast::TextureDimension dim, Type* type)
     : Base(dim), type_(type) {
   TINT_ASSERT(type_);
 }

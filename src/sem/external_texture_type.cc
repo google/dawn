@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::ExternalTexture);
 namespace tint {
 namespace sem {
 
-ExternalTexture::ExternalTexture() : Base(TextureDimension::k2d) {}
+ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
 
 ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
 

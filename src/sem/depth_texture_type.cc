@@ -22,14 +22,16 @@ namespace tint {
 namespace sem {
 namespace {
 
-bool IsValidDepthDimension(TextureDimension dim) {
-  return dim == TextureDimension::k2d || dim == TextureDimension::k2dArray ||
-         dim == TextureDimension::kCube || dim == TextureDimension::kCubeArray;
+bool IsValidDepthDimension(ast::TextureDimension dim) {
+  return dim == ast::TextureDimension::k2d ||
+         dim == ast::TextureDimension::k2dArray ||
+         dim == ast::TextureDimension::kCube ||
+         dim == ast::TextureDimension::kCubeArray;
 }
 
 }  // namespace
 
-DepthTexture::DepthTexture(TextureDimension dim) : Base(dim) {
+DepthTexture::DepthTexture(ast::TextureDimension dim) : Base(dim) {
   TINT_ASSERT(IsValidDepthDimension(dim));
 }
 

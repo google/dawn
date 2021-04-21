@@ -28,7 +28,7 @@ class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
   /// Constructor
   /// @param dim the dimensionality of the texture
   /// @param type the data type of the multisampled texture
-  MultisampledTexture(TextureDimension dim, Type* type);
+  MultisampledTexture(ast::TextureDimension dim, Type* type);
   /// Move constructor
   MultisampledTexture(MultisampledTexture&&);
   ~MultisampledTexture() override;

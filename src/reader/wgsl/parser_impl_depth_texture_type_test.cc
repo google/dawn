@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, DepthTextureType_2d) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<sem::Texture>());
   ASSERT_TRUE(t->Is<sem::DepthTexture>());
-  EXPECT_EQ(t->As<sem::Texture>()->dim(), sem::TextureDimension::k2d);
+  EXPECT_EQ(t->As<sem::Texture>()->dim(), ast::TextureDimension::k2d);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -48,7 +48,7 @@ TEST_F(ParserImplTest, DepthTextureType_2dArray) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<sem::Texture>());
   ASSERT_TRUE(t->Is<sem::DepthTexture>());
-  EXPECT_EQ(t->As<sem::Texture>()->dim(), sem::TextureDimension::k2dArray);
+  EXPECT_EQ(t->As<sem::Texture>()->dim(), ast::TextureDimension::k2dArray);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -60,7 +60,7 @@ TEST_F(ParserImplTest, DepthTextureType_Cube) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<sem::Texture>());
   ASSERT_TRUE(t->Is<sem::DepthTexture>());
-  EXPECT_EQ(t->As<sem::Texture>()->dim(), sem::TextureDimension::kCube);
+  EXPECT_EQ(t->As<sem::Texture>()->dim(), ast::TextureDimension::kCube);
   EXPECT_FALSE(p->has_error());
 }
 
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, DepthTextureType_CubeArray) {
   ASSERT_NE(t.value, nullptr);
   ASSERT_TRUE(t->Is<sem::Texture>());
   ASSERT_TRUE(t->Is<sem::DepthTexture>());
-  EXPECT_EQ(t->As<sem::Texture>()->dim(), sem::TextureDimension::kCubeArray);
+  EXPECT_EQ(t->As<sem::Texture>()->dim(), ast::TextureDimension::kCubeArray);
   EXPECT_FALSE(p->has_error());
 }
 

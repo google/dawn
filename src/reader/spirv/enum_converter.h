@@ -58,13 +58,13 @@ class EnumConverter {
   /// @param dim the SPIR-V Dim value
   /// @param arrayed true if the texture is arrayed
   /// @returns a Tint AST texture dimension
-  sem::TextureDimension ToDim(SpvDim dim, bool arrayed);
+  ast::TextureDimension ToDim(SpvDim dim, bool arrayed);
 
   /// Converts a SPIR-V Image Format to a Tint ImageFormat
   /// On failure, logs an error and returns kNone
   /// @param fmt the SPIR-V format
   /// @returns a Tint AST format
-  sem::ImageFormat ToImageFormat(SpvImageFormat fmt);
+  ast::ImageFormat ToImageFormat(SpvImageFormat fmt);
 
  private:
   /// Registers a failure and returns a stream for log diagnostics.

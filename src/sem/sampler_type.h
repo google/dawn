@@ -17,35 +17,29 @@
 
 #include <string>
 
+#include "src/ast/sampler.h"
 #include "src/sem/type.h"
 
 namespace tint {
 namespace sem {
-
-/// The different kinds of samplers
-enum class SamplerKind {
-  /// A regular sampler
-  kSampler,
-  /// A comparison sampler
-  kComparisonSampler
-};
-std::ostream& operator<<(std::ostream& out, SamplerKind kind);
 
 /// A sampler type.
 class Sampler : public Castable<Sampler, Type> {
  public:
   /// Constructor
   /// @param kind the kind of sampler
-  explicit Sampler(SamplerKind kind);
+  explicit Sampler(ast::SamplerKind kind);
   /// Move constructor
   Sampler(Sampler&&);
   ~Sampler() override;
 
   /// @returns the sampler type
-  SamplerKind kind() const { return kind_; }
+  ast::SamplerKind kind() const { return kind_; }
 
   /// @returns true if this is a comparison sampler
-  bool IsComparison() const { return kind_ == SamplerKind::kComparisonSampler; }
+  bool IsComparison() const {
+    return kind_ == ast::SamplerKind::kComparisonSampler;
+  }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -61,7 +55,7 @@ class Sampler : public Castable<Sampler, Type> {
   Sampler* Clone(CloneContext* ctx) const override;
 
  private:
-  SamplerKind const kind_;
+  ast::SamplerKind const kind_;
 };
 
 }  // namespace sem

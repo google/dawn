@@ -358,9 +358,9 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
   return true;
 }
 
-bool GeneratorImpl::EmitImageFormat(const sem::ImageFormat fmt) {
+bool GeneratorImpl::EmitImageFormat(const ast::ImageFormat fmt) {
   switch (fmt) {
-    case sem::ImageFormat::kNone:
+    case ast::ImageFormat::kNone:
       diagnostics_.add_error("unknown image format");
       return false;
     default:
@@ -450,22 +450,22 @@ bool GeneratorImpl::EmitType(sem::Type* type) {
     }
 
     switch (texture->dim()) {
-      case sem::TextureDimension::k1d:
+      case ast::TextureDimension::k1d:
         out_ << "1d";
         break;
-      case sem::TextureDimension::k2d:
+      case ast::TextureDimension::k2d:
         out_ << "2d";
         break;
-      case sem::TextureDimension::k2dArray:
+      case ast::TextureDimension::k2dArray:
         out_ << "2d_array";
         break;
-      case sem::TextureDimension::k3d:
+      case ast::TextureDimension::k3d:
         out_ << "3d";
         break;
-      case sem::TextureDimension::kCube:
+      case ast::TextureDimension::kCube:
         out_ << "cube";
         break;
-      case sem::TextureDimension::kCubeArray:
+      case ast::TextureDimension::kCubeArray:
         out_ << "cube_array";
         break;
       default:

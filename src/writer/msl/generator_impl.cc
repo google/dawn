@@ -496,21 +496,21 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     case sem::IntrinsicType::kTextureDimensions: {
       std::vector<const char*> dims;
       switch (texture_type->dim()) {
-        case sem::TextureDimension::kNone:
+        case ast::TextureDimension::kNone:
           diagnostics_.add_error("texture dimension is kNone");
           return false;
-        case sem::TextureDimension::k1d:
+        case ast::TextureDimension::k1d:
           dims = {"width"};
           break;
-        case sem::TextureDimension::k2d:
-        case sem::TextureDimension::k2dArray:
+        case ast::TextureDimension::k2d:
+        case ast::TextureDimension::k2dArray:
           dims = {"width", "height"};
           break;
-        case sem::TextureDimension::k3d:
+        case ast::TextureDimension::k3d:
           dims = {"width", "height", "depth"};
           break;
-        case sem::TextureDimension::kCube:
-        case sem::TextureDimension::kCubeArray:
+        case ast::TextureDimension::kCube:
+        case ast::TextureDimension::kCubeArray:
           // width == height == depth for cubes
           // See https://github.com/gpuweb/gpuweb/issues/1345
           dims = {"width", "height", "height"};
@@ -645,17 +645,17 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
   if (auto* ddx = arg(Usage::kDdx)) {
     auto dim = texture_type->dim();
     switch (dim) {
-      case sem::TextureDimension::k2d:
-      case sem::TextureDimension::k2dArray:
+      case ast::TextureDimension::k2d:
+      case ast::TextureDimension::k2dArray:
         maybe_write_comma();
         out_ << "gradient2d(";
         break;
-      case sem::TextureDimension::k3d:
+      case ast::TextureDimension::k3d:
         maybe_write_comma();
         out_ << "gradient3d(";
         break;
-      case sem::TextureDimension::kCube:
-      case sem::TextureDimension::kCubeArray:
+      case ast::TextureDimension::kCube:
+      case ast::TextureDimension::kCubeArray:
         maybe_write_comma();
         out_ << "gradientcube(";
         break;
@@ -1959,22 +1959,22 @@ bool GeneratorImpl::EmitType(sem::Type* type, const std::string& name) {
     }
 
     switch (tex->dim()) {
-      case sem::TextureDimension::k1d:
+      case ast::TextureDimension::k1d:
         out_ << "1d";
         break;
-      case sem::TextureDimension::k2d:
+      case ast::TextureDimension::k2d:
         out_ << "2d";
         break;
-      case sem::TextureDimension::k2dArray:
+      case ast::TextureDimension::k2dArray:
         out_ << "2d_array";
         break;
-      case sem::TextureDimension::k3d:
+      case ast::TextureDimension::k3d:
         out_ << "3d";
         break;
-      case sem::TextureDimension::kCube:
+      case ast::TextureDimension::kCube:
         out_ << "cube";
         break;
-      case sem::TextureDimension::kCubeArray:
+      case ast::TextureDimension::kCubeArray:
         out_ << "cube_array";
         break;
       default:

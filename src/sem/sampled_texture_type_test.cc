@@ -28,7 +28,7 @@ using SampledTextureTest = TestHelper;
 
 TEST_F(SampledTextureTest, Is) {
   F32 f32;
-  SampledTexture s(TextureDimension::kCube, &f32);
+  SampledTexture s(ast::TextureDimension::kCube, &f32);
   Type* ty = &s;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -47,7 +47,7 @@ TEST_F(SampledTextureTest, Is) {
 
 TEST_F(SampledTextureTest, IsTexture) {
   F32 f32;
-  SampledTexture s(TextureDimension::kCube, &f32);
+  SampledTexture s(ast::TextureDimension::kCube, &f32);
   Texture* ty = &s;
   EXPECT_FALSE(ty->Is<DepthTexture>());
   EXPECT_FALSE(ty->Is<ExternalTexture>());
@@ -57,24 +57,24 @@ TEST_F(SampledTextureTest, IsTexture) {
 
 TEST_F(SampledTextureTest, Dim) {
   F32 f32;
-  SampledTexture s(TextureDimension::k3d, &f32);
-  EXPECT_EQ(s.dim(), TextureDimension::k3d);
+  SampledTexture s(ast::TextureDimension::k3d, &f32);
+  EXPECT_EQ(s.dim(), ast::TextureDimension::k3d);
 }
 
 TEST_F(SampledTextureTest, Type) {
   F32 f32;
-  SampledTexture s(TextureDimension::k3d, &f32);
+  SampledTexture s(ast::TextureDimension::k3d, &f32);
   EXPECT_EQ(s.type(), &f32);
 }
 
 TEST_F(SampledTextureTest, TypeName) {
   F32 f32;
-  SampledTexture s(TextureDimension::k3d, &f32);
+  SampledTexture s(ast::TextureDimension::k3d, &f32);
   EXPECT_EQ(s.type_name(), "__sampled_texture_3d__f32");
 }
 
 TEST_F(SampledTextureTest, FriendlyName) {
-  SampledTexture s(TextureDimension::k3d, ty.f32());
+  SampledTexture s(ast::TextureDimension::k3d, ty.f32());
   EXPECT_EQ(s.FriendlyName(Symbols()), "texture_3d<f32>");
 }
 

@@ -18,29 +18,42 @@
 #include <utility>
 
 #include "src/ast/access_decoration.h"
+#include "src/ast/alias.h"
+#include "src/ast/array.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/continue_statement.h"
+#include "src/ast/depth_texture.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/internal_decoration.h"
 #include "src/ast/loop_statement.h"
+#include "src/ast/matrix.h"
+#include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/sampled_texture.h"
+#include "src/ast/sampler.h"
+#include "src/ast/storage_texture.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/vector.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/sem/access_control_type.h"
 #include "src/sem/array.h"
 #include "src/sem/call.h"
+#include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
 #include "src/sem/member_accessor_expression.h"
 #include "src/sem/multisampled_texture_type.h"
+#include "src/sem/pointer_type.h"
+#include "src/sem/sampled_texture_type.h"
+#include "src/sem/sampler_type.h"
 #include "src/sem/statement.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
@@ -78,36 +91,36 @@ Source CombineSourceRange(const Source& start, const Source& end) {
                 start.file_path, start.file_content);
 }
 
-bool IsValidStorageTextureDimension(sem::TextureDimension dim) {
+bool IsValidStorageTextureDimension(ast::TextureDimension dim) {
   switch (dim) {
-    case sem::TextureDimension::k1d:
-    case sem::TextureDimension::k2d:
-    case sem::TextureDimension::k2dArray:
-    case sem::TextureDimension::k3d:
+    case ast::TextureDimension::k1d:
+    case ast::TextureDimension::k2d:
+    case ast::TextureDimension::k2dArray:
+    case ast::TextureDimension::k3d:
       return true;
     default:
       return false;
   }
 }
 
-bool IsValidStorageTextureImageFormat(sem::ImageFormat format) {
+bool IsValidStorageTextureImageFormat(ast::ImageFormat format) {
   switch (format) {
-    case sem::ImageFormat::kR32Uint:
-    case sem::ImageFormat::kR32Sint:
-    case sem::ImageFormat::kR32Float:
-    case sem::ImageFormat::kRg32Uint:
-    case sem::ImageFormat::kRg32Sint:
-    case sem::ImageFormat::kRg32Float:
-    case sem::ImageFormat::kRgba8Unorm:
-    case sem::ImageFormat::kRgba8Snorm:
-    case sem::ImageFormat::kRgba8Uint:
-    case sem::ImageFormat::kRgba8Sint:
-    case sem::ImageFormat::kRgba16Uint:
-    case sem::ImageFormat::kRgba16Sint:
-    case sem::ImageFormat::kRgba16Float:
-    case sem::ImageFormat::kRgba32Uint:
-    case sem::ImageFormat::kRgba32Sint:
-    case sem::ImageFormat::kRgba32Float:
+    case ast::ImageFormat::kR32Uint:
+    case ast::ImageFormat::kR32Sint:
+    case ast::ImageFormat::kR32Float:
+    case ast::ImageFormat::kRg32Uint:
+    case ast::ImageFormat::kRg32Sint:
+    case ast::ImageFormat::kRg32Float:
+    case ast::ImageFormat::kRgba8Unorm:
+    case ast::ImageFormat::kRgba8Snorm:
+    case ast::ImageFormat::kRgba8Uint:
+    case ast::ImageFormat::kRgba8Sint:
+    case ast::ImageFormat::kRgba16Uint:
+    case ast::ImageFormat::kRgba16Sint:
+    case ast::ImageFormat::kRgba16Float:
+    case ast::ImageFormat::kRgba32Uint:
+    case ast::ImageFormat::kRgba32Sint:
+    case ast::ImageFormat::kRgba32Float:
       return true;
     default:
       return false;
@@ -266,6 +279,61 @@ bool Resolver::ResolveInternal() {
   return true;
 }
 
+sem::Type* Resolver::Type(ast::Type* ty) {
+  Mark(ty);
+  sem::Type* s = nullptr;
+  if (ty->Is<ast::Void>()) {
+    s = builder_->create<sem::Void>();
+  } else if (ty->Is<ast::Bool>()) {
+    s = builder_->create<sem::Bool>();
+  } else if (ty->Is<ast::I32>()) {
+    s = builder_->create<sem::I32>();
+  } else if (ty->Is<ast::U32>()) {
+    s = builder_->create<sem::U32>();
+  } else if (ty->Is<ast::F32>()) {
+    s = builder_->create<sem::F32>();
+  } else if (auto* alias = ty->As<ast::Alias>()) {
+    auto* el = Type(alias->type());
+    s = builder_->create<sem::Alias>(alias->symbol(), el);
+  } else if (auto* access = ty->As<ast::AccessControl>()) {
+    auto* el = Type(access->type());
+    s = builder_->create<sem::AccessControl>(access->access_control(), el);
+  } else if (auto* vec = ty->As<ast::Vector>()) {
+    auto* el = Type(vec->type());
+    s = builder_->create<sem::Vector>(el, vec->size());
+  } else if (auto* mat = ty->As<ast::Matrix>()) {
+    auto* el = Type(mat->type());
+    s = builder_->create<sem::Matrix>(el, mat->rows(), mat->columns());
+  } else if (auto* arr = ty->As<ast::Array>()) {
+    auto* el = Type(arr->type());
+    s = builder_->create<sem::ArrayType>(el, arr->size(), arr->decorations());
+  } else if (auto* ptr = ty->As<ast::Pointer>()) {
+    auto* el = Type(ptr->type());
+    s = builder_->create<sem::Pointer>(el, ptr->storage_class());
+  } else if (auto* str = ty->As<ast::Struct>()) {
+    s = builder_->create<sem::StructType>(str);
+  } else if (auto* sampler = ty->As<ast::Sampler>()) {
+    s = builder_->create<sem::Sampler>(sampler->kind());
+  } else if (auto* sampled_tex = ty->As<ast::SampledTexture>()) {
+    auto* el = Type(sampled_tex->type());
+    s = builder_->create<sem::SampledTexture>(sampled_tex->dim(), el);
+  } else if (auto* depth_tex = ty->As<ast::DepthTexture>()) {
+    s = builder_->create<sem::DepthTexture>(depth_tex->dim());
+  } else if (auto* storage_tex = ty->As<ast::StorageTexture>()) {
+    auto* el = Type(storage_tex->type());
+    s = builder_->create<sem::StorageTexture>(storage_tex->dim(),
+                                              storage_tex->image_format(), el);
+  }
+  if (s == nullptr) {
+    return nullptr;
+  }
+  if (!Type(s)) {
+    return nullptr;
+  }
+  return s;
+}
+
+// TODO(crbug.com/tint/724): This method should be replaced by Type(ast::Type*)
 bool Resolver::Type(sem::Type* ty) {
   ty = ty->UnwrapAliasIfNeeded();
   if (auto* str = ty->As<sem::StructType>()) {
@@ -413,7 +481,7 @@ bool Resolver::ValidateVariable(const ast::Variable* var) {
   }
 
   if (auto* r = type->UnwrapAll()->As<sem::MultisampledTexture>()) {
-    if (r->dim() != sem::TextureDimension::k2d) {
+    if (r->dim() != ast::TextureDimension::k2d) {
       diagnostics_.add_error("Only 2d multisampled textures are supported",
                              var->source());
       return false;

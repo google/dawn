@@ -563,10 +563,10 @@ Maybe<sem::Type*> ParserImpl::texture_sampler_types() {
 //  | SAMPLER_COMPARISON
 Maybe<sem::Type*> ParserImpl::sampler_type() {
   if (match(Token::Type::kSampler))
-    return builder_.create<sem::Sampler>(sem::SamplerKind::kSampler);
+    return builder_.create<sem::Sampler>(ast::SamplerKind::kSampler);
 
   if (match(Token::Type::kComparisonSampler))
-    return builder_.create<sem::Sampler>(sem::SamplerKind::kComparisonSampler);
+    return builder_.create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
 
   return Failure::kNoMatch;
 }
@@ -578,33 +578,33 @@ Maybe<sem::Type*> ParserImpl::sampler_type() {
 //  | TEXTURE_SAMPLED_3D
 //  | TEXTURE_SAMPLED_CUBE
 //  | TEXTURE_SAMPLED_CUBE_ARRAY
-Maybe<sem::TextureDimension> ParserImpl::sampled_texture_type() {
+Maybe<ast::TextureDimension> ParserImpl::sampled_texture_type() {
   if (match(Token::Type::kTextureSampled1d))
-    return sem::TextureDimension::k1d;
+    return ast::TextureDimension::k1d;
 
   if (match(Token::Type::kTextureSampled2d))
-    return sem::TextureDimension::k2d;
+    return ast::TextureDimension::k2d;
 
   if (match(Token::Type::kTextureSampled2dArray))
-    return sem::TextureDimension::k2dArray;
+    return ast::TextureDimension::k2dArray;
 
   if (match(Token::Type::kTextureSampled3d))
-    return sem::TextureDimension::k3d;
+    return ast::TextureDimension::k3d;
 
   if (match(Token::Type::kTextureSampledCube))
-    return sem::TextureDimension::kCube;
+    return ast::TextureDimension::kCube;
 
   if (match(Token::Type::kTextureSampledCubeArray))
-    return sem::TextureDimension::kCubeArray;
+    return ast::TextureDimension::kCubeArray;
 
   return Failure::kNoMatch;
 }
 
 // multisampled_texture_type
 //  : TEXTURE_MULTISAMPLED_2D
-Maybe<sem::TextureDimension> ParserImpl::multisampled_texture_type() {
+Maybe<ast::TextureDimension> ParserImpl::multisampled_texture_type() {
   if (match(Token::Type::kTextureMultisampled2d))
-    return sem::TextureDimension::k2d;
+    return ast::TextureDimension::k2d;
 
   return Failure::kNoMatch;
 }
@@ -614,15 +614,15 @@ Maybe<sem::TextureDimension> ParserImpl::multisampled_texture_type() {
 //  | TEXTURE_STORAGE_2D
 //  | TEXTURE_STORAGE_2D_ARRAY
 //  | TEXTURE_STORAGE_3D
-Maybe<sem::TextureDimension> ParserImpl::storage_texture_type() {
+Maybe<ast::TextureDimension> ParserImpl::storage_texture_type() {
   if (match(Token::Type::kTextureStorage1d))
-    return sem::TextureDimension::k1d;
+    return ast::TextureDimension::k1d;
   if (match(Token::Type::kTextureStorage2d))
-    return sem::TextureDimension::k2d;
+    return ast::TextureDimension::k2d;
   if (match(Token::Type::kTextureStorage2dArray))
-    return sem::TextureDimension::k2dArray;
+    return ast::TextureDimension::k2dArray;
   if (match(Token::Type::kTextureStorage3d))
-    return sem::TextureDimension::k3d;
+    return ast::TextureDimension::k3d;
 
   return Failure::kNoMatch;
 }
@@ -634,17 +634,17 @@ Maybe<sem::TextureDimension> ParserImpl::storage_texture_type() {
 //  | TEXTURE_DEPTH_CUBE_ARRAY
 Maybe<sem::Type*> ParserImpl::depth_texture_type() {
   if (match(Token::Type::kTextureDepth2d))
-    return builder_.create<sem::DepthTexture>(sem::TextureDimension::k2d);
+    return builder_.create<sem::DepthTexture>(ast::TextureDimension::k2d);
 
   if (match(Token::Type::kTextureDepth2dArray))
-    return builder_.create<sem::DepthTexture>(sem::TextureDimension::k2dArray);
+    return builder_.create<sem::DepthTexture>(ast::TextureDimension::k2dArray);
 
   if (match(Token::Type::kTextureDepthCube))
-    return builder_.create<sem::DepthTexture>(sem::TextureDimension::kCube);
+    return builder_.create<sem::DepthTexture>(ast::TextureDimension::kCube);
 
   if (match(Token::Type::kTextureDepthCubeArray))
     return builder_.create<sem::DepthTexture>(
-        sem::TextureDimension::kCubeArray);
+        ast::TextureDimension::kCubeArray);
 
   return Failure::kNoMatch;
 }
@@ -685,112 +685,112 @@ Maybe<sem::Type*> ParserImpl::depth_texture_type() {
 //  | RGBA32UINT
 //  | RGBA32SINT
 //  | RGBA32FLOAT
-Expect<sem::ImageFormat> ParserImpl::expect_image_storage_type(
+Expect<ast::ImageFormat> ParserImpl::expect_image_storage_type(
     const std::string& use) {
   if (match(Token::Type::kFormatR8Unorm))
-    return sem::ImageFormat::kR8Unorm;
+    return ast::ImageFormat::kR8Unorm;
 
   if (match(Token::Type::kFormatR8Snorm))
-    return sem::ImageFormat::kR8Snorm;
+    return ast::ImageFormat::kR8Snorm;
 
   if (match(Token::Type::kFormatR8Uint))
-    return sem::ImageFormat::kR8Uint;
+    return ast::ImageFormat::kR8Uint;
 
   if (match(Token::Type::kFormatR8Sint))
-    return sem::ImageFormat::kR8Sint;
+    return ast::ImageFormat::kR8Sint;
 
   if (match(Token::Type::kFormatR16Uint))
-    return sem::ImageFormat::kR16Uint;
+    return ast::ImageFormat::kR16Uint;
 
   if (match(Token::Type::kFormatR16Sint))
-    return sem::ImageFormat::kR16Sint;
+    return ast::ImageFormat::kR16Sint;
 
   if (match(Token::Type::kFormatR16Float))
-    return sem::ImageFormat::kR16Float;
+    return ast::ImageFormat::kR16Float;
 
   if (match(Token::Type::kFormatRg8Unorm))
-    return sem::ImageFormat::kRg8Unorm;
+    return ast::ImageFormat::kRg8Unorm;
 
   if (match(Token::Type::kFormatRg8Snorm))
-    return sem::ImageFormat::kRg8Snorm;
+    return ast::ImageFormat::kRg8Snorm;
 
   if (match(Token::Type::kFormatRg8Uint))
-    return sem::ImageFormat::kRg8Uint;
+    return ast::ImageFormat::kRg8Uint;
 
   if (match(Token::Type::kFormatRg8Sint))
-    return sem::ImageFormat::kRg8Sint;
+    return ast::ImageFormat::kRg8Sint;
 
   if (match(Token::Type::kFormatR32Uint))
-    return sem::ImageFormat::kR32Uint;
+    return ast::ImageFormat::kR32Uint;
 
   if (match(Token::Type::kFormatR32Sint))
-    return sem::ImageFormat::kR32Sint;
+    return ast::ImageFormat::kR32Sint;
 
   if (match(Token::Type::kFormatR32Float))
-    return sem::ImageFormat::kR32Float;
+    return ast::ImageFormat::kR32Float;
 
   if (match(Token::Type::kFormatRg16Uint))
-    return sem::ImageFormat::kRg16Uint;
+    return ast::ImageFormat::kRg16Uint;
 
   if (match(Token::Type::kFormatRg16Sint))
-    return sem::ImageFormat::kRg16Sint;
+    return ast::ImageFormat::kRg16Sint;
 
   if (match(Token::Type::kFormatRg16Float))
-    return sem::ImageFormat::kRg16Float;
+    return ast::ImageFormat::kRg16Float;
 
   if (match(Token::Type::kFormatRgba8Unorm))
-    return sem::ImageFormat::kRgba8Unorm;
+    return ast::ImageFormat::kRgba8Unorm;
 
   if (match(Token::Type::kFormatRgba8UnormSrgb))
-    return sem::ImageFormat::kRgba8UnormSrgb;
+    return ast::ImageFormat::kRgba8UnormSrgb;
 
   if (match(Token::Type::kFormatRgba8Snorm))
-    return sem::ImageFormat::kRgba8Snorm;
+    return ast::ImageFormat::kRgba8Snorm;
 
   if (match(Token::Type::kFormatRgba8Uint))
-    return sem::ImageFormat::kRgba8Uint;
+    return ast::ImageFormat::kRgba8Uint;
 
   if (match(Token::Type::kFormatRgba8Sint))
-    return sem::ImageFormat::kRgba8Sint;
+    return ast::ImageFormat::kRgba8Sint;
 
   if (match(Token::Type::kFormatBgra8Unorm))
-    return sem::ImageFormat::kBgra8Unorm;
+    return ast::ImageFormat::kBgra8Unorm;
 
   if (match(Token::Type::kFormatBgra8UnormSrgb))
-    return sem::ImageFormat::kBgra8UnormSrgb;
+    return ast::ImageFormat::kBgra8UnormSrgb;
 
   if (match(Token::Type::kFormatRgb10A2Unorm))
-    return sem::ImageFormat::kRgb10A2Unorm;
+    return ast::ImageFormat::kRgb10A2Unorm;
 
   if (match(Token::Type::kFormatRg11B10Float))
-    return sem::ImageFormat::kRg11B10Float;
+    return ast::ImageFormat::kRg11B10Float;
 
   if (match(Token::Type::kFormatRg32Uint))
-    return sem::ImageFormat::kRg32Uint;
+    return ast::ImageFormat::kRg32Uint;
 
   if (match(Token::Type::kFormatRg32Sint))
-    return sem::ImageFormat::kRg32Sint;
+    return ast::ImageFormat::kRg32Sint;
 
   if (match(Token::Type::kFormatRg32Float))
-    return sem::ImageFormat::kRg32Float;
+    return ast::ImageFormat::kRg32Float;
 
   if (match(Token::Type::kFormatRgba16Uint))
-    return sem::ImageFormat::kRgba16Uint;
+    return ast::ImageFormat::kRgba16Uint;
 
   if (match(Token::Type::kFormatRgba16Sint))
-    return sem::ImageFormat::kRgba16Sint;
+    return ast::ImageFormat::kRgba16Sint;
 
   if (match(Token::Type::kFormatRgba16Float))
-    return sem::ImageFormat::kRgba16Float;
+    return ast::ImageFormat::kRgba16Float;
 
   if (match(Token::Type::kFormatRgba32Uint))
-    return sem::ImageFormat::kRgba32Uint;
+    return ast::ImageFormat::kRgba32Uint;
 
   if (match(Token::Type::kFormatRgba32Sint))
-    return sem::ImageFormat::kRgba32Sint;
+    return ast::ImageFormat::kRgba32Sint;
 
   if (match(Token::Type::kFormatRgba32Float))
-    return sem::ImageFormat::kRgba32Float;
+    return ast::ImageFormat::kRgba32Float;
 
   return add_error(peek().source(), "invalid format", use);
 }

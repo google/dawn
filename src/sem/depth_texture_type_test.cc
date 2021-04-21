@@ -28,7 +28,7 @@ namespace {
 using DepthTextureTest = TestHelper;
 
 TEST_F(DepthTextureTest, Is) {
-  DepthTexture d(TextureDimension::kCube);
+  DepthTexture d(ast::TextureDimension::kCube);
   Type* ty = &d;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -46,7 +46,7 @@ TEST_F(DepthTextureTest, Is) {
 }
 
 TEST_F(DepthTextureTest, IsTexture) {
-  DepthTexture d(TextureDimension::kCube);
+  DepthTexture d(ast::TextureDimension::kCube);
   Texture* ty = &d;
   EXPECT_TRUE(ty->Is<DepthTexture>());
   EXPECT_FALSE(ty->Is<ExternalTexture>());
@@ -55,17 +55,17 @@ TEST_F(DepthTextureTest, IsTexture) {
 }
 
 TEST_F(DepthTextureTest, Dim) {
-  DepthTexture d(TextureDimension::kCube);
-  EXPECT_EQ(d.dim(), TextureDimension::kCube);
+  DepthTexture d(ast::TextureDimension::kCube);
+  EXPECT_EQ(d.dim(), ast::TextureDimension::kCube);
 }
 
 TEST_F(DepthTextureTest, TypeName) {
-  DepthTexture d(TextureDimension::kCube);
+  DepthTexture d(ast::TextureDimension::kCube);
   EXPECT_EQ(d.type_name(), "__depth_texture_cube");
 }
 
 TEST_F(DepthTextureTest, FriendlyName) {
-  DepthTexture d(TextureDimension::kCube);
+  DepthTexture d(ast::TextureDimension::kCube);
   EXPECT_EQ(d.FriendlyName(Symbols()), "texture_depth_cube");
 }
 

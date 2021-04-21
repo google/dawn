@@ -2271,22 +2271,22 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
       std::vector<uint32_t> swizzle;
       uint32_t spirv_dims = 0;
       switch (texture_type->dim()) {
-        case sem::TextureDimension::kNone:
+        case ast::TextureDimension::kNone:
           error_ = "texture dimension is kNone";
           return false;
-        case sem::TextureDimension::k1d:
-        case sem::TextureDimension::k2d:
-        case sem::TextureDimension::k3d:
+        case ast::TextureDimension::k1d:
+        case ast::TextureDimension::k2d:
+        case ast::TextureDimension::k3d:
           break;  // No swizzle needed
-        case sem::TextureDimension::kCube:
+        case ast::TextureDimension::kCube:
           swizzle = {0, 1, 1};  // Duplicate height for depth
           spirv_dims = 2;       // [width, height]
           break;
-        case sem::TextureDimension::k2dArray:
+        case ast::TextureDimension::k2dArray:
           swizzle = {0, 1};  // Strip array index
           spirv_dims = 3;    // [width, height, array_count]
           break;
-        case sem::TextureDimension::kCubeArray:
+        case ast::TextureDimension::kCubeArray:
           swizzle = {0, 1, 1};  // Strip array index, duplicate height for depth
           spirv_dims = 3;       // [width, height, array_count]
           break;
@@ -2319,8 +2319,8 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
         default:
           error_ = "texture is not arrayed";
           return false;
-        case sem::TextureDimension::k2dArray:
-        case sem::TextureDimension::kCubeArray:
+        case ast::TextureDimension::k2dArray:
+        case ast::TextureDimension::kCubeArray:
           spirv_dims = 3;
           break;
       }
@@ -3010,13 +3010,13 @@ bool Builder::GenerateTextureType(sem::Texture* texture,
                                   const Operand& result) {
   uint32_t array_literal = 0u;
   const auto dim = texture->dim();
-  if (dim == sem::TextureDimension::k2dArray ||
-      dim == sem::TextureDimension::kCubeArray) {
+  if (dim == ast::TextureDimension::k2dArray ||
+      dim == ast::TextureDimension::kCubeArray) {
     array_literal = 1u;
   }
 
   uint32_t dim_literal = SpvDim2D;
-  if (dim == sem::TextureDimension::k1d) {
+  if (dim == ast::TextureDimension::k1d) {
     dim_literal = SpvDim1D;
     if (texture->Is<sem::SampledTexture>()) {
       push_capability(SpvCapabilitySampled1D);
@@ -3024,11 +3024,11 @@ bool Builder::GenerateTextureType(sem::Texture* texture,
       push_capability(SpvCapabilityImage1D);
     }
   }
-  if (dim == sem::TextureDimension::k3d) {
+  if (dim == ast::TextureDimension::k3d) {
     dim_literal = SpvDim3D;
   }
-  if (dim == sem::TextureDimension::kCube ||
-      dim == sem::TextureDimension::kCubeArray) {
+  if (dim == ast::TextureDimension::kCube ||
+      dim == ast::TextureDimension::kCubeArray) {
     dim_literal = SpvDimCube;
   }
 
@@ -3048,7 +3048,7 @@ bool Builder::GenerateTextureType(sem::Texture* texture,
     sampled_literal = 1u;
   }
 
-  if (dim == sem::TextureDimension::kCubeArray) {
+  if (dim == ast::TextureDimension::kCubeArray) {
     if (texture->Is<sem::SampledTexture>() ||
         texture->Is<sem::DepthTexture>()) {
       push_capability(SpvCapabilitySampledCubeArray);
@@ -3321,98 +3321,98 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin,
 }
 
 SpvImageFormat Builder::convert_image_format_to_spv(
-    const sem::ImageFormat format) {
+    const ast::ImageFormat format) {
   switch (format) {
-    case sem::ImageFormat::kR8Unorm:
+    case ast::ImageFormat::kR8Unorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR8;
-    case sem::ImageFormat::kR8Snorm:
+    case ast::ImageFormat::kR8Snorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR8Snorm;
-    case sem::ImageFormat::kR8Uint:
+    case ast::ImageFormat::kR8Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR8ui;
-    case sem::ImageFormat::kR8Sint:
+    case ast::ImageFormat::kR8Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR8i;
-    case sem::ImageFormat::kR16Uint:
+    case ast::ImageFormat::kR16Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR16ui;
-    case sem::ImageFormat::kR16Sint:
+    case ast::ImageFormat::kR16Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR16i;
-    case sem::ImageFormat::kR16Float:
+    case ast::ImageFormat::kR16Float:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR16f;
-    case sem::ImageFormat::kRg8Unorm:
+    case ast::ImageFormat::kRg8Unorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg8;
-    case sem::ImageFormat::kRg8Snorm:
+    case ast::ImageFormat::kRg8Snorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg8Snorm;
-    case sem::ImageFormat::kRg8Uint:
+    case ast::ImageFormat::kRg8Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg8ui;
-    case sem::ImageFormat::kRg8Sint:
+    case ast::ImageFormat::kRg8Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg8i;
-    case sem::ImageFormat::kR32Uint:
+    case ast::ImageFormat::kR32Uint:
       return SpvImageFormatR32ui;
-    case sem::ImageFormat::kR32Sint:
+    case ast::ImageFormat::kR32Sint:
       return SpvImageFormatR32i;
-    case sem::ImageFormat::kR32Float:
+    case ast::ImageFormat::kR32Float:
       return SpvImageFormatR32f;
-    case sem::ImageFormat::kRg16Uint:
+    case ast::ImageFormat::kRg16Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg16ui;
-    case sem::ImageFormat::kRg16Sint:
+    case ast::ImageFormat::kRg16Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg16i;
-    case sem::ImageFormat::kRg16Float:
+    case ast::ImageFormat::kRg16Float:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg16f;
-    case sem::ImageFormat::kRgba8Unorm:
+    case ast::ImageFormat::kRgba8Unorm:
       return SpvImageFormatRgba8;
-    case sem::ImageFormat::kRgba8UnormSrgb:
+    case ast::ImageFormat::kRgba8UnormSrgb:
       return SpvImageFormatUnknown;
-    case sem::ImageFormat::kRgba8Snorm:
+    case ast::ImageFormat::kRgba8Snorm:
       return SpvImageFormatRgba8Snorm;
-    case sem::ImageFormat::kRgba8Uint:
+    case ast::ImageFormat::kRgba8Uint:
       return SpvImageFormatRgba8ui;
-    case sem::ImageFormat::kRgba8Sint:
+    case ast::ImageFormat::kRgba8Sint:
       return SpvImageFormatRgba8i;
-    case sem::ImageFormat::kBgra8Unorm:
+    case ast::ImageFormat::kBgra8Unorm:
       return SpvImageFormatUnknown;
-    case sem::ImageFormat::kBgra8UnormSrgb:
+    case ast::ImageFormat::kBgra8UnormSrgb:
       return SpvImageFormatUnknown;
-    case sem::ImageFormat::kRgb10A2Unorm:
+    case ast::ImageFormat::kRgb10A2Unorm:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRgb10A2;
-    case sem::ImageFormat::kRg11B10Float:
+    case ast::ImageFormat::kRg11B10Float:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatR11fG11fB10f;
-    case sem::ImageFormat::kRg32Uint:
+    case ast::ImageFormat::kRg32Uint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg32ui;
-    case sem::ImageFormat::kRg32Sint:
+    case ast::ImageFormat::kRg32Sint:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg32i;
-    case sem::ImageFormat::kRg32Float:
+    case ast::ImageFormat::kRg32Float:
       push_capability(SpvCapabilityStorageImageExtendedFormats);
       return SpvImageFormatRg32f;
-    case sem::ImageFormat::kRgba16Uint:
+    case ast::ImageFormat::kRgba16Uint:
       return SpvImageFormatRgba16ui;
-    case sem::ImageFormat::kRgba16Sint:
+    case ast::ImageFormat::kRgba16Sint:
       return SpvImageFormatRgba16i;
-    case sem::ImageFormat::kRgba16Float:
+    case ast::ImageFormat::kRgba16Float:
       return SpvImageFormatRgba16f;
-    case sem::ImageFormat::kRgba32Uint:
+    case ast::ImageFormat::kRgba32Uint:
       return SpvImageFormatRgba32ui;
-    case sem::ImageFormat::kRgba32Sint:
+    case ast::ImageFormat::kRgba32Sint:
       return SpvImageFormatRgba32i;
-    case sem::ImageFormat::kRgba32Float:
+    case ast::ImageFormat::kRgba32Float:
       return SpvImageFormatRgba32f;
-    case sem::ImageFormat::kNone:
+    case ast::ImageFormat::kNone:
       return SpvImageFormatUnknown;
   }
   return SpvImageFormatUnknown;

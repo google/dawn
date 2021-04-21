@@ -176,8 +176,8 @@ struct TextureOverloadCase {
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
                       TextureKind,
-                      sem::SamplerKind,
-                      sem::TextureDimension,
+                      ast::SamplerKind,
+                      ast::TextureDimension,
                       TextureDataType,
                       const char*,
                       std::function<ExpressionList(ProgramBuilder*)>);
@@ -185,7 +185,7 @@ struct TextureOverloadCase {
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
                       TextureKind,
-                      sem::TextureDimension,
+                      ast::TextureDimension,
                       TextureDataType,
                       const char*,
                       std::function<ExpressionList(ProgramBuilder*)>);
@@ -193,8 +193,8 @@ struct TextureOverloadCase {
   TextureOverloadCase(ValidTextureOverload,
                       const char*,
                       AccessControl::Access,
-                      sem::ImageFormat,
-                      sem::TextureDimension,
+                      ast::ImageFormat,
+                      ast::TextureDimension,
                       TextureDataType,
                       const char*,
                       std::function<ExpressionList(ProgramBuilder*)>);
@@ -227,15 +227,15 @@ struct TextureOverloadCase {
   TextureKind const texture_kind;
   /// The sampler kind for the sampler parameter
   /// Used only when texture_kind is not kStorage
-  sem::SamplerKind const sampler_kind = sem::SamplerKind::kSampler;
+  ast::SamplerKind const sampler_kind = ast::SamplerKind::kSampler;
   /// The access control for the storage texture
   /// Used only when texture_kind is kStorage
   AccessControl::Access const access_control = AccessControl::kReadWrite;
   /// The image format for the storage texture
   /// Used only when texture_kind is kStorage
-  sem::ImageFormat const image_format = sem::ImageFormat::kNone;
+  ast::ImageFormat const image_format = ast::ImageFormat::kNone;
   /// The dimensions of the texture parameter
-  sem::TextureDimension const texture_dimension;
+  ast::TextureDimension const texture_dimension;
   /// The data type of the texture parameter
   TextureDataType const texture_data_type;
   /// Name of the function. e.g. `textureSample`, `textureSampleGrad`, etc

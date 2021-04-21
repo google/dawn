@@ -117,12 +117,12 @@ Function::ReferencedBuiltinVariables() const {
 }
 
 Function::VariableBindings Function::ReferencedSamplerVariables() const {
-  return ReferencedSamplerVariablesImpl(sem::SamplerKind::kSampler);
+  return ReferencedSamplerVariablesImpl(ast::SamplerKind::kSampler);
 }
 
 Function::VariableBindings Function::ReferencedComparisonSamplerVariables()
     const {
-  return ReferencedSamplerVariablesImpl(sem::SamplerKind::kComparisonSampler);
+  return ReferencedSamplerVariablesImpl(ast::SamplerKind::kComparisonSampler);
 }
 
 Function::VariableBindings Function::ReferencedSampledTextureVariables() const {
@@ -180,7 +180,7 @@ bool Function::HasAncestorEntryPoint(Symbol symbol) const {
 }
 
 Function::VariableBindings Function::ReferencedSamplerVariablesImpl(
-    sem::SamplerKind kind) const {
+    ast::SamplerKind kind) const {
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {

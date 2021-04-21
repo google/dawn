@@ -15,58 +15,27 @@
 #ifndef SRC_SEM_TEXTURE_TYPE_H_
 #define SRC_SEM_TEXTURE_TYPE_H_
 
+#include "src/ast/texture.h"
 #include "src/sem/type.h"
 
 namespace tint {
 namespace sem {
-
-/// The dimensionality of the texture
-enum class TextureDimension {
-  /// Invalid texture
-  kNone = -1,
-  /// 1 dimensional texture
-  k1d,
-  /// 2 dimensional texture
-  k2d,
-  /// 2 dimensional array texture
-  k2dArray,
-  /// 3 dimensional texture
-  k3d,
-  /// cube texture
-  kCube,
-  /// cube array texture
-  kCubeArray,
-};
-std::ostream& operator<<(std::ostream& out, TextureDimension dim);
-
-/// @param dim the TextureDimension to query
-/// @return true if the given TextureDimension is an array texture
-bool IsTextureArray(TextureDimension dim);
-
-/// Returns the number of axes in the coordinate for a dimensionality.
-///  None -> 0
-///  1D -> 1
-///  2D, 2DArray -> 2
-///  3D, Cube, CubeArray -> 3
-/// @param dim the TextureDimension to query
-/// @return number of dimensions in a coordinate for the dimensionality
-int NumCoordinateAxes(TextureDimension dim);
 
 /// A texture type.
 class Texture : public Castable<Texture, Type> {
  public:
   /// Constructor
   /// @param dim the dimensionality of the texture
-  explicit Texture(TextureDimension dim);
+  explicit Texture(ast::TextureDimension dim);
   /// Move constructor
   Texture(Texture&&);
   ~Texture() override;
 
   /// @returns the texture dimension
-  TextureDimension dim() const { return dim_; }
+  ast::TextureDimension dim() const { return dim_; }
 
  private:
-  TextureDimension const dim_;
+  ast::TextureDimension const dim_;
 };
 
 }  // namespace sem

@@ -428,7 +428,7 @@ class ArrayBuilder : public Builder {
 /// SampledTextureBuilder is a Matcher / Builder for sampled texture types.
 class SampledTextureBuilder : public Builder {
  public:
-  explicit SampledTextureBuilder(sem::TextureDimension dimensions,
+  explicit SampledTextureBuilder(ast::TextureDimension dimensions,
                                  Builder* type_builder)
       : dimensions_(dimensions), type_builder_(type_builder) {}
 
@@ -453,7 +453,7 @@ class SampledTextureBuilder : public Builder {
   }
 
  private:
-  sem::TextureDimension const dimensions_;
+  ast::TextureDimension const dimensions_;
   Builder* const type_builder_;
 };
 
@@ -461,7 +461,7 @@ class SampledTextureBuilder : public Builder {
 /// types.
 class MultisampledTextureBuilder : public Builder {
  public:
-  explicit MultisampledTextureBuilder(sem::TextureDimension dimensions,
+  explicit MultisampledTextureBuilder(ast::TextureDimension dimensions,
                                       Builder* type_builder)
       : dimensions_(dimensions), type_builder_(type_builder) {}
 
@@ -487,14 +487,14 @@ class MultisampledTextureBuilder : public Builder {
   }
 
  private:
-  sem::TextureDimension const dimensions_;
+  ast::TextureDimension const dimensions_;
   Builder* const type_builder_;
 };
 
 /// DepthTextureBuilder is a Matcher / Builder for depth texture types.
 class DepthTextureBuilder : public Builder {
  public:
-  explicit DepthTextureBuilder(sem::TextureDimension dimensions)
+  explicit DepthTextureBuilder(ast::TextureDimension dimensions)
       : dimensions_(dimensions) {}
 
   bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
@@ -515,7 +515,7 @@ class DepthTextureBuilder : public Builder {
   }
 
  private:
-  sem::TextureDimension const dimensions_;
+  ast::TextureDimension const dimensions_;
 };
 
 /// StorageTextureBuilder is a Matcher / Builder for storage texture types of
@@ -523,7 +523,7 @@ class DepthTextureBuilder : public Builder {
 class StorageTextureBuilder : public Builder {
  public:
   explicit StorageTextureBuilder(
-      sem::TextureDimension dimensions,
+      ast::TextureDimension dimensions,
       OpenNumber texel_format,  // a.k.a "image format"
       OpenType channel_format)  // a.k.a "storage subtype"
       : dimensions_(dimensions),
@@ -552,7 +552,7 @@ class StorageTextureBuilder : public Builder {
 
   sem::Type* Build(BuildState& state) const override {
     auto texel_format =
-        static_cast<sem::ImageFormat>(state.open_numbers.at(texel_format_));
+        static_cast<ast::ImageFormat>(state.open_numbers.at(texel_format_));
     auto* channel_format = state.open_types.at(channel_format_);
     return state.ty_mgr.Get<sem::StorageTexture>(dimensions_, texel_format,
                                                  channel_format);
@@ -565,7 +565,7 @@ class StorageTextureBuilder : public Builder {
   }
 
  private:
-  sem::TextureDimension const dimensions_;
+  ast::TextureDimension const dimensions_;
   OpenNumber const texel_format_;
   OpenType const channel_format_;
 };
@@ -573,7 +573,7 @@ class StorageTextureBuilder : public Builder {
 /// SamplerBuilder is a Matcher / Builder for sampler types of the given kind.
 class SamplerBuilder : public Builder {
  public:
-  explicit SamplerBuilder(sem::SamplerKind kind) : kind_(kind) {}
+  explicit SamplerBuilder(ast::SamplerKind kind) : kind_(kind) {}
 
   bool MatchUnwrapped(MatchState&, sem::Type* ty) const override {
     if (auto* sampler = ty->As<sem::Sampler>()) {
@@ -588,16 +588,16 @@ class SamplerBuilder : public Builder {
 
   std::string str() const override {
     switch (kind_) {
-      case sem::SamplerKind::kSampler:
+      case ast::SamplerKind::kSampler:
         return "sampler";
-      case sem::SamplerKind::kComparisonSampler:
+      case ast::SamplerKind::kComparisonSampler:
         return "sampler_comparison";
     }
     return "sampler";
   }
 
  private:
-  sem::SamplerKind const kind_;
+  ast::SamplerKind const kind_;
 };
 
 /// AccessControlBuilder is a Matcher / Builder for AccessControl types
@@ -732,13 +732,13 @@ class Impl : public IntrinsicTable {
 
   /// @returns a Matcher / Builder that matches a sampled texture with the given
   /// dimensions and type
-  Builder* sampled_texture(sem::TextureDimension dimensions, Builder* type) {
+  Builder* sampled_texture(ast::TextureDimension dimensions, Builder* type) {
     return matcher_allocator_.Create<SampledTextureBuilder>(dimensions, type);
   }
 
   /// @returns a Matcher / Builder that matches a multisampled texture with the
   /// given dimensions and type
-  Builder* multisampled_texture(sem::TextureDimension dimensions,
+  Builder* multisampled_texture(ast::TextureDimension dimensions,
                                 Builder* type) {
     return matcher_allocator_.Create<MultisampledTextureBuilder>(dimensions,
                                                                  type);
@@ -746,13 +746,13 @@ class Impl : public IntrinsicTable {
 
   /// @returns a Matcher / Builder that matches a depth texture with the
   /// given dimensions
-  Builder* depth_texture(sem::TextureDimension dimensions) {
+  Builder* depth_texture(ast::TextureDimension dimensions) {
     return matcher_allocator_.Create<DepthTextureBuilder>(dimensions);
   }
 
   /// @returns a Matcher / Builder that matches a storage texture of the given
   /// format with the given dimensions
-  Builder* storage_texture(sem::TextureDimension dimensions,
+  Builder* storage_texture(ast::TextureDimension dimensions,
                            OpenNumber texel_format,
                            OpenType channel_format) {
     return matcher_allocator_.Create<StorageTextureBuilder>(
@@ -760,7 +760,7 @@ class Impl : public IntrinsicTable {
   }
 
   /// @returns a Matcher / Builder that matches a sampler type
-  Builder* sampler(sem::SamplerKind kind) {
+  Builder* sampler(ast::SamplerKind kind) {
     return matcher_allocator_.Create<SamplerBuilder>(kind);
   }
 
@@ -797,7 +797,7 @@ class Impl : public IntrinsicTable {
 
 Impl::Impl() {
   using I = sem::IntrinsicType;
-  using Dim = sem::TextureDimension;
+  using Dim = ast::TextureDimension;
 
   auto* void_ = &matchers_.void_;      // void
   auto* bool_ = &matchers_.bool_;      // bool
@@ -1115,9 +1115,9 @@ Impl::Impl() {
       access_control(ast::AccessControl::kWriteOnly, tex_storage_2d_array_FT);
   auto* tex_storage_wo_3d_FT =
       access_control(ast::AccessControl::kWriteOnly, tex_storage_3d_FT);
-  auto* sampler = this->sampler(sem::SamplerKind::kSampler);
+  auto* sampler = this->sampler(ast::SamplerKind::kSampler);
   auto* sampler_comparison =
-      this->sampler(sem::SamplerKind::kComparisonSampler);
+      this->sampler(ast::SamplerKind::kComparisonSampler);
   auto t = sem::Parameter::Usage::kTexture;
   auto s = sem::Parameter::Usage::kSampler;
   auto coords = sem::Parameter::Usage::kCoords;

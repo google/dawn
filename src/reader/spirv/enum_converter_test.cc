@@ -243,7 +243,7 @@ struct DimCase {
   SpvDim dim;
   bool arrayed;
   bool expect_success;
-  sem::TextureDimension expected;
+  ast::TextureDimension expected;
 };
 inline std::ostream& operator<<(std::ostream& out, DimCase dc) {
   out << "DimCase{ SpvDim:" << int(dc.dim) << " arrayed?:" << int(dc.arrayed)
@@ -287,37 +287,37 @@ INSTANTIATE_TEST_SUITE_P(
     SpvDimTest,
     testing::Values(
         // Non-arrayed
-        DimCase{SpvDim1D, false, true, sem::TextureDimension::k1d},
-        DimCase{SpvDim2D, false, true, sem::TextureDimension::k2d},
-        DimCase{SpvDim3D, false, true, sem::TextureDimension::k3d},
-        DimCase{SpvDimCube, false, true, sem::TextureDimension::kCube},
+        DimCase{SpvDim1D, false, true, ast::TextureDimension::k1d},
+        DimCase{SpvDim2D, false, true, ast::TextureDimension::k2d},
+        DimCase{SpvDim3D, false, true, ast::TextureDimension::k3d},
+        DimCase{SpvDimCube, false, true, ast::TextureDimension::kCube},
         // Arrayed
-        DimCase{SpvDim2D, true, true, sem::TextureDimension::k2dArray},
-        DimCase{SpvDimCube, true, true, sem::TextureDimension::kCubeArray}));
+        DimCase{SpvDim2D, true, true, ast::TextureDimension::k2dArray},
+        DimCase{SpvDimCube, true, true, ast::TextureDimension::kCubeArray}));
 
 INSTANTIATE_TEST_SUITE_P(
     EnumConverterBad,
     SpvDimTest,
     testing::Values(
         // Invalid SPIR-V dimensionality.
-        DimCase{SpvDimMax, false, false, sem::TextureDimension::kNone},
-        DimCase{SpvDimMax, true, false, sem::TextureDimension::kNone},
+        DimCase{SpvDimMax, false, false, ast::TextureDimension::kNone},
+        DimCase{SpvDimMax, true, false, ast::TextureDimension::kNone},
         // Vulkan non-arrayed dimensionalities not supported by WGSL.
-        DimCase{SpvDimRect, false, false, sem::TextureDimension::kNone},
-        DimCase{SpvDimBuffer, false, false, sem::TextureDimension::kNone},
-        DimCase{SpvDimSubpassData, false, false, sem::TextureDimension::kNone},
+        DimCase{SpvDimRect, false, false, ast::TextureDimension::kNone},
+        DimCase{SpvDimBuffer, false, false, ast::TextureDimension::kNone},
+        DimCase{SpvDimSubpassData, false, false, ast::TextureDimension::kNone},
         // Arrayed dimensionalities not supported by WGSL
-        DimCase{SpvDim3D, true, false, sem::TextureDimension::kNone},
-        DimCase{SpvDimRect, true, false, sem::TextureDimension::kNone},
-        DimCase{SpvDimBuffer, true, false, sem::TextureDimension::kNone},
-        DimCase{SpvDimSubpassData, true, false, sem::TextureDimension::kNone}));
+        DimCase{SpvDim3D, true, false, ast::TextureDimension::kNone},
+        DimCase{SpvDimRect, true, false, ast::TextureDimension::kNone},
+        DimCase{SpvDimBuffer, true, false, ast::TextureDimension::kNone},
+        DimCase{SpvDimSubpassData, true, false, ast::TextureDimension::kNone}));
 
 // ImageFormat
 
 struct ImageFormatCase {
   SpvImageFormat format;
   bool expect_success;
-  sem::ImageFormat expected;
+  ast::ImageFormat expected;
 };
 inline std::ostream& operator<<(std::ostream& out, ImageFormatCase ifc) {
   out << "ImageFormatCase{ SpvImageFormat:" << int(ifc.format)
@@ -361,68 +361,68 @@ INSTANTIATE_TEST_SUITE_P(
     SpvImageFormatTest,
     testing::Values(
         // Unknown.  This is used for sampled images.
-        ImageFormatCase{SpvImageFormatUnknown, true, sem::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatUnknown, true, ast::ImageFormat::kNone},
         // 8 bit channels
         ImageFormatCase{SpvImageFormatRgba8, true,
-                        sem::ImageFormat::kRgba8Unorm},
+                        ast::ImageFormat::kRgba8Unorm},
         ImageFormatCase{SpvImageFormatRgba8Snorm, true,
-                        sem::ImageFormat::kRgba8Snorm},
+                        ast::ImageFormat::kRgba8Snorm},
         ImageFormatCase{SpvImageFormatRgba8ui, true,
-                        sem::ImageFormat::kRgba8Uint},
+                        ast::ImageFormat::kRgba8Uint},
         ImageFormatCase{SpvImageFormatRgba8i, true,
-                        sem::ImageFormat::kRgba8Sint},
+                        ast::ImageFormat::kRgba8Sint},
         // 16 bit channels
         ImageFormatCase{SpvImageFormatRgba16ui, true,
-                        sem::ImageFormat::kRgba16Uint},
+                        ast::ImageFormat::kRgba16Uint},
         ImageFormatCase{SpvImageFormatRgba16i, true,
-                        sem::ImageFormat::kRgba16Sint},
+                        ast::ImageFormat::kRgba16Sint},
         ImageFormatCase{SpvImageFormatRgba16f, true,
-                        sem::ImageFormat::kRgba16Float},
+                        ast::ImageFormat::kRgba16Float},
         // 32 bit channels
         // ... 1 channel
-        ImageFormatCase{SpvImageFormatR32ui, true, sem::ImageFormat::kR32Uint},
-        ImageFormatCase{SpvImageFormatR32i, true, sem::ImageFormat::kR32Sint},
-        ImageFormatCase{SpvImageFormatR32f, true, sem::ImageFormat::kR32Float},
+        ImageFormatCase{SpvImageFormatR32ui, true, ast::ImageFormat::kR32Uint},
+        ImageFormatCase{SpvImageFormatR32i, true, ast::ImageFormat::kR32Sint},
+        ImageFormatCase{SpvImageFormatR32f, true, ast::ImageFormat::kR32Float},
         // ... 2 channels
         ImageFormatCase{SpvImageFormatRg32ui, true,
-                        sem::ImageFormat::kRg32Uint},
-        ImageFormatCase{SpvImageFormatRg32i, true, sem::ImageFormat::kRg32Sint},
+                        ast::ImageFormat::kRg32Uint},
+        ImageFormatCase{SpvImageFormatRg32i, true, ast::ImageFormat::kRg32Sint},
         ImageFormatCase{SpvImageFormatRg32f, true,
-                        sem::ImageFormat::kRg32Float},
+                        ast::ImageFormat::kRg32Float},
         // ... 4 channels
         ImageFormatCase{SpvImageFormatRgba32ui, true,
-                        sem::ImageFormat::kRgba32Uint},
+                        ast::ImageFormat::kRgba32Uint},
         ImageFormatCase{SpvImageFormatRgba32i, true,
-                        sem::ImageFormat::kRgba32Sint},
+                        ast::ImageFormat::kRgba32Sint},
         ImageFormatCase{SpvImageFormatRgba32f, true,
-                        sem::ImageFormat::kRgba32Float}));
+                        ast::ImageFormat::kRgba32Float}));
 
 INSTANTIATE_TEST_SUITE_P(
     EnumConverterBad,
     SpvImageFormatTest,
     testing::Values(
         // Scanning in order from the SPIR-V spec.
-        ImageFormatCase{SpvImageFormatRg16f, false, sem::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatRg16f, false, ast::ImageFormat::kNone},
         ImageFormatCase{SpvImageFormatR11fG11fB10f, false,
-                        sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatR16f, false, sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatRgb10A2, false, sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatRg16, false, sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatRg8, false, sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatR16, false, sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatR8, false, sem::ImageFormat::kNone},
+                        ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatR16f, false, ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatRgb10A2, false, ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatRg16, false, ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatRg8, false, ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatR16, false, ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatR8, false, ast::ImageFormat::kNone},
         ImageFormatCase{SpvImageFormatRgba16Snorm, false,
-                        sem::ImageFormat::kNone},
+                        ast::ImageFormat::kNone},
         ImageFormatCase{SpvImageFormatRg16Snorm, false,
-                        sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatRg8Snorm, false, sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatRg16i, false, sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatRg8i, false, sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatR8i, false, sem::ImageFormat::kNone},
+                        ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatRg8Snorm, false, ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatRg16i, false, ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatRg8i, false, ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatR8i, false, ast::ImageFormat::kNone},
         ImageFormatCase{SpvImageFormatRgb10a2ui, false,
-                        sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatRg16ui, false, sem::ImageFormat::kNone},
-        ImageFormatCase{SpvImageFormatRg8ui, false, sem::ImageFormat::kNone}));
+                        ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatRg16ui, false, ast::ImageFormat::kNone},
+        ImageFormatCase{SpvImageFormatRg8ui, false, ast::ImageFormat::kNone}));
 
 }  // namespace
 }  // namespace spirv

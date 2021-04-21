@@ -746,7 +746,7 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   auto p = parser("sampler");
 
   auto& builder = p->builder();
-  auto* type = builder.create<sem::Sampler>(sem::SamplerKind::kSampler);
+  auto* type = builder.create<sem::Sampler>(ast::SamplerKind::kSampler);
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
@@ -761,7 +761,7 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
   auto p = parser("texture_cube<f32>");
 
   auto& builder = p->builder();
-  auto* type = builder.create<sem::SampledTexture>(sem::TextureDimension::kCube,
+  auto* type = builder.create<sem::SampledTexture>(ast::TextureDimension::kCube,
                                                    ty.f32());
 
   auto t = p->type_decl();

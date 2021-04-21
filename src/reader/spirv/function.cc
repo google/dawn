@@ -4549,9 +4549,9 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
                     << inst.PrettyPrint();
     }
     switch (texture_type->dim()) {
-      case sem::TextureDimension::k2d:
-      case sem::TextureDimension::k2dArray:
-      case sem::TextureDimension::k3d:
+      case ast::TextureDimension::k2d:
+      case ast::TextureDimension::k2dArray:
+      case ast::TextureDimension::k3d:
         break;
       default:
         return Fail() << "ConstOffset is only permitted for 2D, 2D Arrayed, "
@@ -4674,7 +4674,7 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       }
       exprs.push_back(
           create<ast::CallExpression>(Source{}, dims_ident, dims_args));
-      if (sem::IsTextureArray(texture_type->dim())) {
+      if (ast::IsTextureArray(texture_type->dim())) {
         auto* layers_ident = create<ast::IdentifierExpression>(
             Source{}, builder_.Symbols().Register("textureNumLayers"));
         exprs.push_back(create<ast::CallExpression>(
@@ -4753,10 +4753,10 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   if (!texture_type) {
     return {};
   }
-  sem::TextureDimension dim = texture_type->dim();
+  ast::TextureDimension dim = texture_type->dim();
   // Number of regular coordinates.
-  uint32_t num_axes = sem::NumCoordinateAxes(dim);
-  bool is_arrayed = sem::IsTextureArray(dim);
+  uint32_t num_axes = ast::NumCoordinateAxes(dim);
+  bool is_arrayed = ast::IsTextureArray(dim);
   if ((num_axes == 0) || (num_axes > 3)) {
     Fail() << "unsupported image dimensionality for "
            << texture_type->type_name() << " prompted by "

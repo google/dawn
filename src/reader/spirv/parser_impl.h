@@ -475,12 +475,12 @@ class ParserImpl : Reader {
   /// format.
   /// @param format image texel format
   /// @returns the component type, one of f32, i32, u32
-  sem::Type* GetComponentTypeForFormat(sem::ImageFormat format);
+  sem::Type* GetComponentTypeForFormat(ast::ImageFormat format);
 
   /// Returns texel type corresponding to the given image format.
   /// @param format image texel format
   /// @returns the texel format
-  sem::Type* GetTexelTypeForFormat(sem::ImageFormat format);
+  sem::Type* GetTexelTypeForFormat(ast::ImageFormat format);
 
   /// Returns the SPIR-V instruction with the given ID, or nullptr.
   /// @param id the SPIR-V result ID
