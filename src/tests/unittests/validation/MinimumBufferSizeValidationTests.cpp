@@ -573,15 +573,16 @@ TEST_F(MinBufferSizeDefaultLayoutTests, NonDefaultLayout) {
 
 // Minimum size should be the max requirement of both vertex and fragment stages.
 TEST_F(MinBufferSizeDefaultLayoutTests, RenderPassConsidersBothStages) {
-    // TODO(https://crbug.com/tint/716): Remove skip once this is resolved.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     std::string vertexShader = CreateVertexShaderWithBindings(
-        {{0, 0, "a : f32;", "f32", "a", 4, wgpu::BufferBindingType::Uniform},
-         {0, 1, "b : vec4<f32>;", "vec4<f32>", "b", 16, wgpu::BufferBindingType::Uniform}});
+        {{0, 0, "a : f32; b : f32;", "f32", "a", 8, wgpu::BufferBindingType::Uniform,
+          wgpu::ShaderStage::Vertex},
+         {0, 1, "c : vec4<f32>;", "vec4<f32>", "c", 16, wgpu::BufferBindingType::Uniform,
+          wgpu::ShaderStage::Vertex}});
     std::string fragShader = CreateFragmentShaderWithBindings(
-        {{0, 0, "a : f32; b : f32;", "f32", "a", 8, wgpu::BufferBindingType::Uniform},
-         {0, 1, "c : f32; d : f32;", "f32", "c", 8, wgpu::BufferBindingType::Uniform}});
+        {{0, 0, "a : f32;", "f32", "a", 4, wgpu::BufferBindingType::Uniform,
+          wgpu::ShaderStage::Fragment},
+         {0, 1, "b : f32; c : f32;", "f32", "b", 8, wgpu::BufferBindingType::Uniform,
+          wgpu::ShaderStage::Fragment}});
 
     wgpu::BindGroupLayout renderLayout = GetBGLFromRenderShaders(vertexShader, fragShader, 0);
 
