@@ -32,3 +32,20 @@ TEST(WindowsUtilsTests, WCharToUTF8) {
     // Test three-byte utf8 codepoint
     ASSERT_EQ("\xe1\x81\x90", WCharToUTF8(L"\x1050"));
 }
+
+TEST(WindowsUtilsTests, UTF8ToWStr) {
+    // Test the empty string
+    ASSERT_EQ(L"", UTF8ToWStr(""));
+
+    // Test ASCII characters
+    ASSERT_EQ(L"abc", UTF8ToWStr("abc"));
+
+    // Test ASCII characters
+    ASSERT_EQ(L"abc", UTF8ToWStr("abc"));
+
+    // Test two-byte utf8 character
+    ASSERT_EQ(L"\x450", UTF8ToWStr("\xd1\x90"));
+
+    // Test three-byte utf8 codepoint
+    ASSERT_EQ(L"\x1050", UTF8ToWStr("\xe1\x81\x90"));
+}

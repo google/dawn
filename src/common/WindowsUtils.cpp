@@ -30,3 +30,16 @@ std::string WCharToUTF8(const wchar_t* input) {
     // This will allocate the returned std::string and then destroy result.
     return std::string(result.get(), result.get() + (requiredSize - 1));
 }
+
+std::wstring UTF8ToWStr(const char* input) {
+    // The -1 argument asks MultiByteToWideChar to use the null terminator to know the size of
+    // input. It will return a size that includes the null terminator.
+    int requiredSize = MultiByteToWideChar(CP_UTF8, 0, input, -1, nullptr, 0);
+
+    // When we can use C++17 this can be changed to use string.data() instead.
+    std::unique_ptr<wchar_t[]> result = std::make_unique<wchar_t[]>(requiredSize);
+    MultiByteToWideChar(CP_UTF8, 0, input, -1, result.get(), requiredSize);
+
+    // This will allocate the returned std::string and then destroy result.
+    return std::wstring(result.get(), result.get() + (requiredSize - 1));
+}

@@ -19,4 +19,6 @@
 
 std::string WCharToUTF8(const wchar_t* input);
 
+std::wstring UTF8ToWStr(const char* input);
+
 #endif  // COMMON_WINDOWSUTILS_H_
