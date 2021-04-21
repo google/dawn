@@ -73,6 +73,7 @@ class DepthStencilSamplingTest : public DawnTest {
         utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
 
         std::ostringstream shaderSource;
+        std::ostringstream shaderOutputStruct;
         std::ostringstream shaderBody;
 
         uint32_t index = 0;
@@ -82,10 +83,10 @@ class DepthStencilSamplingTest : public DawnTest {
                     shaderSource << "[[group(0), binding(" << index << ")]] var tex" << index
                                  << " : texture_2d<f32>;\n";
 
-                    shaderSource << "[[location(" << index << ")]] var<out> result" << index
-                                 << " : f32;\n";
+                    shaderOutputStruct << "  [[location(" << index << ")]] result" << index
+                                       << " : f32;\n";
 
-                    shaderBody << "\nresult" << index << " = textureLoad(tex" << index
+                    shaderBody << "\n  output.result" << index << " = textureLoad(tex" << index
                                << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];\n";
                     pipelineDescriptor.cTargets[index].format = wgpu::TextureFormat::R32Float;
                     break;
@@ -93,10 +94,10 @@ class DepthStencilSamplingTest : public DawnTest {
                     shaderSource << "[[group(0), binding(" << index << ")]] var tex" << index
                                  << " : texture_2d<u32>;\n";
 
-                    shaderSource << "[[location(" << index << ")]] var<out> result" << index
-                                 << " : u32;\n";
+                    shaderOutputStruct << "  [[location(" << index << ")]] result" << index
+                                       << " : u32;\n";
 
-                    shaderBody << "\nresult" << index << " = textureLoad(tex" << index
+                    shaderBody << "\n  output.result" << index << " = textureLoad(tex" << index
                                << ", vec2<i32>(0, 0), 0)[" << componentIndex << "];\n";
                     pipelineDescriptor.cTargets[index].format = wgpu::TextureFormat::R8Uint;
                     break;
@@ -105,7 +106,10 @@ class DepthStencilSamplingTest : public DawnTest {
             index++;
         }
 
-        shaderSource << "[[stage(fragment)]] fn main() { " << shaderBody.str() << "\n}";
+        shaderSource << "struct FragOutputs {\n" << shaderOutputStruct.str() << "};\n";
+        shaderSource << "[[stage(fragment)]] fn main() -> FragOutputs {\n";
+        shaderSource << "  var output : FragOutputs;\n"
+                     << shaderBody.str() << "  return output;\n}";
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
         pipelineDescriptor.vertex.module = vsModule;

@@ -58,12 +58,11 @@ namespace dawn_native {
                 var<storage> availability : [[access(read)]] AvailabilityArr;
             [[group(0), binding(2)]] var<uniform> params : TimestampParams;
 
-            [[builtin(global_invocation_id)]] var<in> GlobalInvocationID : vec3<u32>;
 
             const sizeofTimestamp : u32 = 8u;
 
             [[stage(compute), workgroup_size(8, 1, 1)]]
-            fn main() {
+            fn main([[builtin(global_invocation_id)]] GlobalInvocationID : vec3<u32>) {
                 if (GlobalInvocationID.x >= params.count) { return; }
 
                 var index : u32 = GlobalInvocationID.x + params.offset / sizeofTimestamp;

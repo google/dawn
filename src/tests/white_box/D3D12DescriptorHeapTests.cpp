@@ -448,10 +448,9 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBO) {
             heapSize : f32;
         };
         [[group(0), binding(0)]] var<uniform> buffer0 : U;
-        [[location(0)]] var<out> FragColor : f32;
 
-        [[stage(fragment)]] fn main() {
-            FragColor = buffer0.heapSize;
+        [[stage(fragment)]] fn main() -> [[location(0)]] f32 {
+            return buffer0.heapSize;
         })");
 
     wgpu::BlendState blend;

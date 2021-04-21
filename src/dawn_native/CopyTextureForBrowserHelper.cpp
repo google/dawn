@@ -38,16 +38,23 @@ namespace dawn_native {
                 u_scale : vec2<f32>;
                 u_offset : vec2<f32>;
             };
+            [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
+
             const texcoord : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                 vec2<f32>(-0.5, 0.0),
                 vec2<f32>( 1.5, 0.0),
                 vec2<f32>( 0.5, 2.0));
-            [[location(0)]] var<out> v_texcoord: vec2<f32>;
-            [[builtin(position)]] var<out> Position : vec4<f32>;
-            [[builtin(vertex_index)]] var<in> VertexIndex : u32;
-            [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
-            [[stage(vertex)]] fn main() {
-                Position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
+
+            struct VertexOutputs {
+                [[location(0)]] texcoords : vec2<f32>;
+                [[builtin(position)]] position : vec4<f32>;
+            };
+
+            [[stage(vertex)]] fn main(
+                [[builtin(vertex_index)]] VertexIndex : u32
+            ) -> VertexOutputs {
+                var output : VertexOutputs;
+                output.position = vec4<f32>((texcoord[VertexIndex] * 2.0 - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
 
                 // Y component of scale is calculated by the copySizeHeight / textureHeight. Only
                 // flipY case can get negative number.
@@ -59,33 +66,38 @@ namespace dawn_native {
                     // We need to get the mirror positions(mirrored based on y = 0.5) on flip cases.
                     // Adopt transform to src texture and then mapping it to triangle coord which
                     // do a +1 shift on Y dimension will help us got that mirror position perfectly.
-                    v_texcoord = (texcoord[VertexIndex] * uniforms.u_scale + uniforms.u_offset) *
-                                  vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0);
+                    output.texcoords = (texcoord[VertexIndex] * uniforms.u_scale + uniforms.u_offset) *
+                        vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0);
                 } else {
                     // For the normal case, we need to get the exact position.
                     // So mapping texture to triangle firstly then adopt the transform.
-                    v_texcoord = (texcoord[VertexIndex] *
-                                  vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0)) *
-                                  uniforms.u_scale + uniforms.u_offset;
+                    output.texcoords = (texcoord[VertexIndex] *
+                        vec2<f32>(1.0, -1.0) + vec2<f32>(0.0, 1.0)) *
+                        uniforms.u_scale + uniforms.u_offset;
                 }
+
+                return output;
             }
         )";
 
         static const char sCopyTextureForBrowserFragment[] = R"(
             [[binding(1), group(0)]] var mySampler: sampler;
             [[binding(2), group(0)]] var myTexture: texture_2d<f32>;
-            [[location(0)]] var<in> v_texcoord : vec2<f32>;
-            [[location(0)]] var<out> outputColor : vec4<f32>;
-            [[stage(fragment)]] fn main() {
+
+            [[stage(fragment)]] fn main(
+                [[location(0)]] texcoord : vec2<f32>
+            ) -> [[location(0)]] vec4<f32> {
                 // Clamp the texcoord and discard the out-of-bound pixels.
                 var clampedTexcoord : vec2<f32> =
-                    clamp(v_texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));
-                if (all(clampedTexcoord == v_texcoord)) {
-                    var srcColor : vec4<f32> = textureSample(myTexture, mySampler, v_texcoord);
-                    // Swizzling of texture formats when sampling / rendering is handled by the
-                    // hardware so we don't need special logic in this shader. This is covered by tests.
-                    outputColor = srcColor;
+                    clamp(texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));
+                if (!all(clampedTexcoord == texcoord)) {
+                    discard;
                 }
+
+                var srcColor : vec4<f32> = textureSample(myTexture, mySampler, texcoord);
+                // Swizzling of texture formats when sampling / rendering is handled by the
+                // hardware so we don't need special logic in this shader. This is covered by tests.
+                return srcColor;
             }
         )";
 

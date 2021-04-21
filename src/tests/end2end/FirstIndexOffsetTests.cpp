@@ -86,77 +86,68 @@ void FirstIndexOffsetTests::TestImpl(DrawMode mode,
                                      uint32_t firstVertex,
                                      uint32_t firstInstance) {
     using wgpu::operator&;
-    std::stringstream vertexShader;
-    std::stringstream fragmentShader;
+
+    std::stringstream vertexInputs;
+    std::stringstream vertexOutputs;
+    std::stringstream vertexBody;
+    std::stringstream fragmentInputs;
+    std::stringstream fragmentBody;
+
+    vertexInputs << "  [[location(0)]] position : vec4<f32>;\n";
+    vertexOutputs << "  [[builtin(position)]] position : vec4<f32>;\n";
 
     if ((checkIndex & CheckIndex::Vertex) != 0) {
-        vertexShader << R"(
-        [[builtin(vertex_index)]] var<in> vertex_index : u32;
-        [[location(1)]] var<out> out_vertex_index : u32;
-        )";
-        fragmentShader << R"(
-        [[location(1)]] var<in> in_vertex_index : u32;
-    )";
+        vertexInputs << "  [[builtin(vertex_index)]] vertex_index : u32;\n";
+        vertexOutputs << "  [[location(1)]] vertex_index : u32;\n";
+        vertexBody << "  output.vertex_index = input.vertex_index;\n";
+
+        fragmentInputs << "  [[location(1)]] vertex_index : u32;\n";
+        fragmentBody << "  idx_vals.vertex_index = input.vertex_index;\n";
     }
     if ((checkIndex & CheckIndex::Instance) != 0) {
-        vertexShader << R"(
-            [[builtin(instance_index)]] var<in> instance_index : u32;
-            [[location(2)]] var<out> out_instance_index : u32;
-            )";
-        fragmentShader << R"(
-            [[location(2)]] var<in> in_instance_index : u32;
-        )";
+        vertexInputs << "  [[builtin(instance_index)]] instance_index : u32;\n";
+        vertexOutputs << "  [[location(2)]] instance_index : u32;\n";
+        vertexBody << "  output.instance_index = input.instance_index;\n";
+
+        fragmentInputs << "  [[location(2)]] instance_index : u32;\n";
+        fragmentBody << "  idx_vals.instance_index = input.instance_index;\n";
     }
 
-    vertexShader << R"(
-        [[builtin(position)]] var<out> position : vec4<f32>;
-        [[location(0)]] var<in> pos : vec4<f32>;
+    std::string vertexShader = R"(
+struct VertexInputs {
+)" + vertexInputs.str() + R"(
+};
+struct VertexOutputs {
+)" + vertexOutputs.str() + R"(
+};
+[[stage(vertex)]] fn main(input : VertexInputs) -> VertexOutputs {
+  var output : VertexOutputs;
+)" + vertexBody.str() + R"(
+  output.position = input.position;
+  return output;
+})";
 
-        [[stage(vertex)]] fn main() {)";
-    fragmentShader << R"(
-         [[block]] struct IndexVals {
-             vertex_index : u32;
-             instance_index : u32;
-         };
+    std::string fragmentShader = R"(
+[[block]] struct IndexVals {
+  vertex_index : u32;
+  instance_index : u32;
+};
+[[group(0), binding(0)]] var<storage> idx_vals : [[access(read_write)]] IndexVals;
 
-        [[group(0), binding(0)]] var<storage> idx_vals : [[access(read_write)]] IndexVals;
-
-        [[stage(fragment)]] fn main() {
-        )";
-
-    if ((checkIndex & CheckIndex::Vertex) != 0) {
-        vertexShader << R"(
-            out_vertex_index = vertex_index;
-            )";
-        fragmentShader << R"(
-            idx_vals.vertex_index = in_vertex_index;
-            )";
-    }
-    if ((checkIndex & CheckIndex::Instance) != 0) {
-        vertexShader << R"(
-            out_instance_index = instance_index;
-            )";
-        fragmentShader << R"(
-            idx_vals.instance_index = in_instance_index;
-            )";
-    }
-
-    vertexShader << R"(
-            position = pos;
-            return;
-        })";
-
-    fragmentShader << R"(
-            return;
-        })";
+struct FragInputs {
+)" + fragmentInputs.str() + R"(
+};
+[[stage(fragment)]] fn main(input : FragInputs) {
+)" + fragmentBody.str() + R"(
+})";
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
     constexpr uint32_t kComponentsPerVertex = 4;
 
     utils::ComboRenderPipelineDescriptor2 pipelineDesc;
-    pipelineDesc.vertex.module = utils::CreateShaderModule(device, vertexShader.str().c_str());
-    pipelineDesc.cFragment.module = utils::CreateShaderModule(device, fragmentShader.str().c_str());
+    pipelineDesc.vertex.module = utils::CreateShaderModule(device, vertexShader.c_str());
+    pipelineDesc.cFragment.module = utils::CreateShaderModule(device, fragmentShader.c_str());
     pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
     pipelineDesc.vertex.bufferCount = 1;
     pipelineDesc.cBuffers[0].arrayStride = kComponentsPerVertex * sizeof(float);

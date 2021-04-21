@@ -538,16 +538,15 @@ class VertexFormatDeprecationTests : public DeprecationTests {
   protected:
     // Runs the test
     void DoTest(const wgpu::VertexFormat vertexFormat, bool deprecated) {
-        std::string attribute = "[[location(0)]] var<in> a : ";
+        std::string attribute = "[[location(0)]] a : ";
         attribute += dawn::GetWGSLVertexFormatType(vertexFormat);
-        attribute += ";";
 
         std::string attribAccess = dawn::VertexFormatNumComponents(vertexFormat) > 1
                                        ? "vec4<f32>(f32(a.x), 0.0, 0.0, 1.0)"
                                        : "vec4<f32>(f32(a), 0.0, 0.0, 1.0)";
 
-        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, (attribute + R"(
-                [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+        wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, (R"(
+                [[stage(vertex)]] fn main()" + attribute + R"() -> [[builtin(position)]] vec4<f32> {
                     return )" + attribAccess + R"(;
                 }
             )")
