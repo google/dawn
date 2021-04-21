@@ -438,5 +438,25 @@ TEST_F(ArrayStrideTest, MultipleDecorations) {
 
 }  // namespace
 }  // namespace ArrayStrideTests
+
+namespace StructBlockTests {
+namespace {
+
+using StructBlockTest = ResolverTest;
+TEST_F(StructBlockTest, StructUsedAsArrayElement) {
+  auto* s = Structure("S", {Member("x", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  auto* a = ty.array(s, 4);
+  Global("G", a, ast::StorageClass::kPrivate);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "error: A structure type with a [[block]] decoration cannot be "
+            "used as an element of an array");
+}
+
+}  // namespace
+}  // namespace StructBlockTests
+
 }  // namespace resolver
 }  // namespace tint

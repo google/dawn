@@ -236,6 +236,11 @@ class Resolver {
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
+  bool ValidateArray(const sem::ArrayType* arr, const Source& source);
+  bool ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
+                                     uint32_t el_size,
+                                     uint32_t el_align,
+                                     const Source& source);
   bool ValidateAssignment(const ast::AssignmentStatement* a);
   bool ValidateBinary(ast::BinaryExpression* expr);
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);

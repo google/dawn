@@ -34,7 +34,7 @@ fn frag_main() -> [[location(0)]] vec4<f32> {
 }
 
 // compute shader
-[[block]] struct Particle {
+struct Particle {
   pos : vec2<f32>;
   vel : vec2<f32>;
 };

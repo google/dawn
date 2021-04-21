@@ -2110,15 +2110,11 @@ const sem::Array* Resolver::Array(sem::ArrayType* arr, const Source& source) {
     return sem;
   }
 
-  // First check the element type is legal
-  auto* el_ty = arr->type();
-  if (!IsStorable(el_ty)) {
-    builder_->Diagnostics().add_error(
-        el_ty->FriendlyName(builder_->Symbols()) +
-            " cannot be used as an element type of an array",
-        source);
+  if (!ValidateArray(arr, source)) {
     return nullptr;
   }
+
+  auto* el_ty = arr->type();
 
   uint32_t el_align = 0;
   uint32_t el_size = 0;
@@ -2147,19 +2143,7 @@ const sem::Array* Resolver::Array(sem::ArrayType* arr, const Source& source) {
         return nullptr;
       }
       explicit_stride = stride->stride();
-      bool is_valid_stride = (explicit_stride >= el_size) &&
-                             (explicit_stride >= el_align) &&
-                             (explicit_stride % el_align == 0);
-      if (!is_valid_stride) {
-        // https://gpuweb.github.io/gpuweb/wgsl/#array-layout-rules
-        // Arrays decorated with the stride attribute must have a stride that is
-        // at least the size of the element type, and be a multiple of the
-        // element type's alignment value.
-        diagnostics_.add_error(
-            "arrays decorated with the stride attribute must have a stride "
-            "that is at least the size of the element type, and be a multiple "
-            "of the element type's alignment value.",
-            source);
+      if (!ValidateArrayStrideDecoration(stride, el_size, el_align, source)) {
         return nullptr;
       }
     }
@@ -2171,6 +2155,55 @@ const sem::Array* Resolver::Array(sem::ArrayType* arr, const Source& source) {
   // Calculate implicit stride
   auto implicit_stride = utils::RoundUp(el_align, el_size);
   return create_semantic(implicit_stride);
+}
+
+bool Resolver::ValidateArray(const sem::ArrayType* arr, const Source& source) {
+  auto* el_ty = arr->type();
+
+  if (!IsStorable(el_ty)) {
+    builder_->Diagnostics().add_error(
+        el_ty->FriendlyName(builder_->Symbols()) +
+            " cannot be used as an element type of an array",
+        source);
+    return false;
+  }
+
+  if (auto* el_str = el_ty->As<sem::StructType>()) {
+    if (el_str->impl()->IsBlockDecorated()) {
+      // https://gpuweb.github.io/gpuweb/wgsl/#attributes
+      // A structure type with the block attribute must not be:
+      // * the element type of an array type
+      // * the member type in another structure
+      diagnostics_.add_error(
+          "A structure type with a [[block]] decoration cannot be used as an "
+          "element of an array",
+          source);
+      return false;
+    }
+  }
+  return true;
+}
+
+bool Resolver::ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
+                                             uint32_t el_size,
+                                             uint32_t el_align,
+                                             const Source& source) {
+  auto stride = deco->stride();
+  bool is_valid_stride =
+      (stride >= el_size) && (stride >= el_align) && (stride % el_align == 0);
+  if (!is_valid_stride) {
+    // https://gpuweb.github.io/gpuweb/wgsl/#array-layout-rules
+    // Arrays decorated with the stride attribute must have a stride that is
+    // at least the size of the element type, and be a multiple of the
+    // element type's alignment value.
+    diagnostics_.add_error(
+        "arrays decorated with the stride attribute must have a stride "
+        "that is at least the size of the element type, and be a multiple "
+        "of the element type's alignment value.",
+        source);
+    return false;
+  }
+  return true;
 }
 
 bool Resolver::ValidateStructure(const sem::StructType* st) {
