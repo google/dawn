@@ -160,7 +160,7 @@ namespace dawn_native { namespace d3d12 {
 
         // The environment can only use DXC when it's available. Override the decision if it is not
         // applicable.
-        ApplyUseDxcToggle();
+        DAWN_TRY(ApplyUseDxcToggle());
         return {};
     }
 
@@ -196,25 +196,33 @@ namespace dawn_native { namespace d3d12 {
         return ToBackend(GetAdapter())->GetBackend()->GetFactory();
     }
 
-    void Device::ApplyUseDxcToggle() {
+    MaybeError Device::ApplyUseDxcToggle() {
         if (!ToBackend(GetAdapter())->GetBackend()->GetFunctions()->IsDXCAvailable()) {
             ForceSetToggle(Toggle::UseDXC, false);
         } else if (IsExtensionEnabled(Extension::ShaderFloat16)) {
             // Currently we can only use DXC to compile HLSL shaders using float16.
             ForceSetToggle(Toggle::UseDXC, true);
         }
+
+        if (IsToggleEnabled(Toggle::UseDXC)) {
+            DAWN_TRY(ToBackend(GetAdapter())->GetBackend()->EnsureDxcCompiler());
+            DAWN_TRY(ToBackend(GetAdapter())->GetBackend()->EnsureDxcLibrary());
+            DAWN_TRY(ToBackend(GetAdapter())->GetBackend()->EnsureDxcValidator());
+        }
+
+        return {};
     }
 
-    ResultOrError<IDxcLibrary*> Device::GetOrCreateDxcLibrary() const {
-        return ToBackend(GetAdapter())->GetBackend()->GetOrCreateDxcLibrary();
+    ComPtr<IDxcLibrary> Device::GetDxcLibrary() const {
+        return ToBackend(GetAdapter())->GetBackend()->GetDxcLibrary();
     }
 
-    ResultOrError<IDxcCompiler*> Device::GetOrCreateDxcCompiler() const {
-        return ToBackend(GetAdapter())->GetBackend()->GetOrCreateDxcCompiler();
+    ComPtr<IDxcCompiler> Device::GetDxcCompiler() const {
+        return ToBackend(GetAdapter())->GetBackend()->GetDxcCompiler();
     }
 
-    ResultOrError<IDxcValidator*> Device::GetOrCreateDxcValidator() const {
-        return ToBackend(GetAdapter())->GetBackend()->GetOrCreateDxcValidator();
+    ComPtr<IDxcValidator> Device::GetDxcValidator() const {
+        return ToBackend(GetAdapter())->GetBackend()->GetDxcValidator();
     }
 
     const PlatformFunctions* Device::GetFunctions() const {

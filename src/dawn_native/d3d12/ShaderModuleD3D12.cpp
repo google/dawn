@@ -97,16 +97,14 @@ namespace dawn_native { namespace d3d12 {
                                                      const std::string& hlslSource,
                                                      const char* entryPoint,
                                                      uint32_t compileFlags) {
-        IDxcLibrary* dxcLibrary;
-        DAWN_TRY_ASSIGN(dxcLibrary, device->GetOrCreateDxcLibrary());
+        ComPtr<IDxcLibrary> dxcLibrary = device->GetDxcLibrary();
 
         ComPtr<IDxcBlobEncoding> sourceBlob;
         DAWN_TRY(CheckHRESULT(dxcLibrary->CreateBlobWithEncodingOnHeapCopy(
                                   hlslSource.c_str(), hlslSource.length(), CP_UTF8, &sourceBlob),
                               "DXC create blob"));
 
-        IDxcCompiler* dxcCompiler;
-        DAWN_TRY_ASSIGN(dxcCompiler, device->GetOrCreateDxcCompiler());
+        ComPtr<IDxcCompiler> dxcCompiler = device->GetDxcCompiler();
 
         std::wstring entryPointW;
         DAWN_TRY_ASSIGN(entryPointW, ConvertStringToWstring(entryPoint));
@@ -478,8 +476,7 @@ namespace dawn_native { namespace d3d12 {
     }
 
     ResultOrError<uint64_t> ShaderModule::GetDXCompilerVersion() const {
-        ComPtr<IDxcValidator> dxcValidator;
-        DAWN_TRY_ASSIGN(dxcValidator, ToBackend(GetDevice())->GetOrCreateDxcValidator());
+        ComPtr<IDxcValidator> dxcValidator = ToBackend(GetDevice())->GetDxcValidator();
 
         ComPtr<IDxcVersionInfo> versionInfo;
         DAWN_TRY(CheckHRESULT(dxcValidator.As(&versionInfo),

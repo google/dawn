@@ -102,34 +102,49 @@ namespace dawn_native { namespace d3d12 {
         return mFactory;
     }
 
-    ResultOrError<IDxcLibrary*> Backend::GetOrCreateDxcLibrary() {
+    MaybeError Backend::EnsureDxcLibrary() {
         if (mDxcLibrary == nullptr) {
             DAWN_TRY(CheckHRESULT(
                 mFunctions->dxcCreateInstance(CLSID_DxcLibrary, IID_PPV_ARGS(&mDxcLibrary)),
                 "DXC create library"));
             ASSERT(mDxcLibrary != nullptr);
         }
-        return mDxcLibrary.Get();
+        return {};
     }
 
-    ResultOrError<IDxcCompiler*> Backend::GetOrCreateDxcCompiler() {
+    MaybeError Backend::EnsureDxcCompiler() {
         if (mDxcCompiler == nullptr) {
             DAWN_TRY(CheckHRESULT(
                 mFunctions->dxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&mDxcCompiler)),
                 "DXC create compiler"));
             ASSERT(mDxcCompiler != nullptr);
         }
-        return mDxcCompiler.Get();
+        return {};
     }
 
-    ResultOrError<IDxcValidator*> Backend::GetOrCreateDxcValidator() {
+    MaybeError Backend::EnsureDxcValidator() {
         if (mDxcValidator == nullptr) {
             DAWN_TRY(CheckHRESULT(
                 mFunctions->dxcCreateInstance(CLSID_DxcValidator, IID_PPV_ARGS(&mDxcValidator)),
                 "DXC create validator"));
             ASSERT(mDxcValidator != nullptr);
         }
-        return mDxcValidator.Get();
+        return {};
+    }
+
+    ComPtr<IDxcLibrary> Backend::GetDxcLibrary() const {
+        ASSERT(mDxcLibrary != nullptr);
+        return mDxcLibrary;
+    }
+
+    ComPtr<IDxcCompiler> Backend::GetDxcCompiler() const {
+        ASSERT(mDxcCompiler != nullptr);
+        return mDxcCompiler;
+    }
+
+    ComPtr<IDxcValidator> Backend::GetDxcValidator() const {
+        ASSERT(mDxcValidator != nullptr);
+        return mDxcValidator;
     }
 
     const PlatformFunctions* Backend::GetFunctions() const {
