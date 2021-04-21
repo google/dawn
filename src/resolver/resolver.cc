@@ -811,7 +811,8 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         }
       }
     }
-    if (!found) {
+    // TODO(bclayton): Reenable after CTS is updated
+    if (((false)) && !found) {
       diagnostics_.add_error(
           "a vertex shader must include the 'position' builtin in its return "
           "type",

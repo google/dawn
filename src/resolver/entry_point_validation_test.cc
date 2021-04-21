@@ -500,7 +500,9 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateLocation) {
 12:34 note: while analysing entry point main)");
 }
 
-TEST_F(ResolverEntryPointValidationTest, VertexShaderMustReturnPosition) {
+// TODO(bclayton): Reenable after CTS is updated
+TEST_F(ResolverEntryPointValidationTest,
+       DISABLED_VertexShaderMustReturnPosition) {
   // [[stage(vertex)]]
   // fn main() {}
   Func(Source{{12, 34}}, "main", {}, ty.void_(), {},
