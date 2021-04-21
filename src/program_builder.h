@@ -985,13 +985,42 @@ class ProgramBuilder {
                                  decorations);
   }
 
-  /// @param args the arguments to pass to Var()
-  /// @returns a `ast::Variable` constructed by calling Var() with the arguments
-  /// of `args`, which is automatically registered as a global variable with the
-  /// ast::Module.
-  template <typename... ARGS>
-  ast::Variable* Global(ARGS&&... args) {
-    auto* var = Var(std::forward<ARGS>(args)...);
+  /// @param name the variable name
+  /// @param type the variable type
+  /// @param storage the variable storage class
+  /// @param constructor constructor expression
+  /// @param decorations variable decorations
+  /// @returns a new `ast::Variable`, which is automatically registered as a
+  /// global variable with the ast::Module.
+  template <typename NAME>
+  ast::Variable* Global(NAME&& name,
+                        sem::Type* type,
+                        ast::StorageClass storage,
+                        ast::Expression* constructor = nullptr,
+                        ast::DecorationList decorations = {}) {
+    auto* var =
+        Var(std::forward<NAME>(name), type, storage, constructor, decorations);
+    AST().AddGlobalVariable(var);
+    return var;
+  }
+
+  /// @param source the variable source
+  /// @param name the variable name
+  /// @param type the variable type
+  /// @param storage the variable storage class
+  /// @param constructor constructor expression
+  /// @param decorations variable decorations
+  /// @returns a new `ast::Variable`, which is automatically registered as a
+  /// global variable with the ast::Module.
+  template <typename NAME>
+  ast::Variable* Global(const Source& source,
+                        NAME&& name,
+                        sem::Type* type,
+                        ast::StorageClass storage,
+                        ast::Expression* constructor = nullptr,
+                        ast::DecorationList decorations = {}) {
+    auto* var = Var(source, std::forward<NAME>(name), type, storage,
+                    constructor, decorations);
     AST().AddGlobalVariable(var);
     return var;
   }

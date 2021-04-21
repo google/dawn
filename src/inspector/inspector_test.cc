@@ -1822,31 +1822,6 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
   EXPECT_TRUE(error.find("not an entry point") != std::string::npos);
 }
 
-TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingBlockDeco) {
-  ast::DecorationList decos;
-  auto* str = create<ast::Struct>(
-      Sym("foo_type"),
-      ast::StructMemberList{Member(StructMemberName(0, ty.i32()), ty.i32())},
-      decos);
-
-  auto* foo_type = ty.struct_(str);
-  AddUniformBuffer("foo_ub", foo_type, 0, 0);
-
-  MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
-
-  MakeCallerBodyFunction(
-      "ep_func", {"ub_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
-
-  Inspector& inspector = Build();
-
-  auto result = inspector.GetUniformBufferResourceBindings("ep_func");
-  ASSERT_FALSE(inspector.has_error()) << inspector.error();
-  EXPECT_EQ(0u, result.size());
-}
-
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
   sem::StructType* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.i32()});

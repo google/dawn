@@ -432,37 +432,69 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 }
 
 bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
-  if (info->storage_class == ast::StorageClass::kStorage) {
-    // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
-    // Variables in the storage storage class and variables with a storage
-    // texture type must have an access attribute applied to the store type.
+  switch (info->storage_class) {
+    case ast::StorageClass::kStorage: {
+      // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
+      // Variables in the storage storage class and variables with a storage
+      // texture type must have an access attribute applied to the store type.
 
-    // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
-    // A variable in the storage storage class is a storage buffer variable. Its
-    // store type must be a host-shareable structure type with block attribute,
-    // satisfying the storage class constraints.
+      // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
+      // A variable in the storage storage class is a storage buffer variable.
+      // Its store type must be a host-shareable structure type with block
+      // attribute, satisfying the storage class constraints.
 
-    auto* access = info->type->As<sem::AccessControl>();
-    auto* str = access ? access->type()->As<sem::StructType>() : nullptr;
-    if (!str) {
-      diagnostics_.add_error(
-          "variables declared in the <storage> storage class must be of an "
-          "[[access]] qualified structure type",
-          info->declaration->source());
-      return false;
-    }
-
-    if (!str->IsBlockDecorated()) {
-      diagnostics_.add_error(
-          "structure used as a storage buffer must be declared with the "
-          "[[block]] decoration",
-          str->impl()->source());
-      if (info->declaration->source().range.begin.line) {
-        diagnostics_.add_note("structure used as storage buffer here",
-                              info->declaration->source());
+      auto* access = info->type->As<sem::AccessControl>();
+      auto* str = access ? access->type()->As<sem::StructType>() : nullptr;
+      if (!str) {
+        diagnostics_.add_error(
+            "variables declared in the <storage> storage class must be of an "
+            "[[access]] qualified structure type",
+            info->declaration->source());
+        return false;
       }
-      return false;
+
+      if (!str->IsBlockDecorated()) {
+        diagnostics_.add_error(
+            "structure used as a storage buffer must be declared with the "
+            "[[block]] decoration",
+            str->impl()->source());
+        if (info->declaration->source().range.begin.line) {
+          diagnostics_.add_note("structure used as storage buffer here",
+                                info->declaration->source());
+        }
+        return false;
+      }
+      break;
     }
+    case ast::StorageClass::kUniform: {
+      // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
+      // A variable in the uniform storage class is a uniform buffer variable.
+      // Its store type must be a host-shareable structure type with block
+      // attribute, satisfying the storage class constraints.
+      auto* str = info->type->As<sem::StructType>();
+      if (!str) {
+        diagnostics_.add_error(
+            "variables declared in the <uniform> storage class must be of a "
+            "structure type",
+            info->declaration->source());
+        return false;
+      }
+
+      if (!str->IsBlockDecorated()) {
+        diagnostics_.add_error(
+            "structure used as a uniform buffer must be declared with the "
+            "[[block]] decoration",
+            str->impl()->source());
+        if (info->declaration->source().range.begin.line) {
+          diagnostics_.add_note("structure used as uniform buffer here",
+                                info->declaration->source());
+        }
+        return false;
+      }
+      break;
+    }
+    default:
+      break;
   }
 
   return ValidateVariable(info->declaration);

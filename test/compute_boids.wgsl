@@ -53,7 +53,7 @@ struct Particle {
   particles : array<Particle, 5>;
 };
 
-[[binding(0), group(0)]] var<uniform> params : [[access(read)]] SimParams;
+[[binding(0), group(0)]] var<uniform> params : SimParams;
 [[binding(1), group(0)]] var<storage> particlesA : [[access(read_write)]] Particles;
 [[binding(2), group(0)]] var<storage> particlesB : [[access(read_write)]] Particles;
 

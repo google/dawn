@@ -138,6 +138,94 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
   ASSERT_TRUE(r()->Resolve());
 }
 
+///
+
+TEST_F(ResolverStorageClassValidationTest, UniformBufferBool) {
+  // var<uniform> g : bool;
+  Global(Source{{56, 78}}, "g", ty.bool_(), ast::StorageClass::kUniform);
+
+  ASSERT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(
+      r()->error(),
+      R"(56:78 error: variables declared in the <uniform> storage class must be of a structure type)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
+  // var<uniform> g : ptr<i32, input>;
+  Global(Source{{56, 78}}, "g", ty.pointer<i32>(ast::StorageClass::kInput),
+         ast::StorageClass::kUniform);
+
+  ASSERT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(
+      r()->error(),
+      R"(56:78 error: variables declared in the <uniform> storage class must be of a structure type)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
+  // var<uniform> g : [[access(read)]] array<S, 3>;
+  auto* s = Structure("S", {Member("a", ty.f32())});
+  auto* a = ty.array(s, 3);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, a);
+  Global(Source{{56, 78}}, "g", ac, ast::StorageClass::kUniform);
+
+  ASSERT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(
+      r()->error(),
+      R"(56:78 error: variables declared in the <uniform> storage class must be of a structure type)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
+  // type a = bool;
+  // var<uniform> g : [[access(read)]] a;
+  auto* a = ty.alias("a", ty.bool_());
+  Global(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform);
+
+  ASSERT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(
+      r()->error(),
+      R"(56:78 error: variables declared in the <uniform> storage class must be of a structure type)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, UniformBufferNoBlockDecoration) {
+  // struct S { x : i32 };
+  // var<uniform> g : S;
+  auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
+  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kUniform);
+
+  ASSERT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: structure used as a uniform buffer must be declared with the [[block]] decoration
+56:78 note: structure used as uniform buffer here)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Basic) {
+  // [[block]] struct S { x : i32 };
+  // var<uniform> g :  S;
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  Global(Source{{56, 78}}, "g", s, ast::StorageClass::kUniform);
+
+  ASSERT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Aliases) {
+  // [[block]] struct S { x : i32 };
+  // type a1 = S;
+  // var<uniform> g : a1;
+  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  auto* a1 = ty.alias("a1", s);
+  Global(Source{{56, 78}}, "g", a1, ast::StorageClass::kUniform);
+
+  ASSERT_TRUE(r()->Resolve());
+}
+
 }  // namespace
 }  // namespace resolver
 }  // namespace tint

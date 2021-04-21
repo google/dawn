@@ -66,53 +66,53 @@ TEST_F(ResolverStorageClassUseTest, StructReachableFromReturnType) {
 TEST_F(ResolverStorageClassUseTest, StructReachableFromGlobal) {
   auto* s = Structure("S", {Member("a", ty.f32())});
 
-  Global("g", s, ast::StorageClass::kUniform);
+  Global("g", s, ast::StorageClass::kPrivate);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kUniform));
+              UnorderedElementsAre(ast::StorageClass::kPrivate));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalAlias) {
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* a = ty.alias("A", s);
-  Global("g", a, ast::StorageClass::kUniform);
+  Global("g", a, ast::StorageClass::kPrivate);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kUniform));
+              UnorderedElementsAre(ast::StorageClass::kPrivate));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalStruct) {
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* o = Structure("O", {Member("a", s)});
-  Global("g", o, ast::StorageClass::kUniform);
+  Global("g", o, ast::StorageClass::kPrivate);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kUniform));
+              UnorderedElementsAre(ast::StorageClass::kPrivate));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalArray) {
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* a = ty.array(s, 3);
-  Global("g", a, ast::StorageClass::kUniform);
+  Global("g", a, ast::StorageClass::kPrivate);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
   auto* sem = Sem().Get(s);
   ASSERT_NE(sem, nullptr);
   EXPECT_THAT(sem->StorageClassUsage(),
-              UnorderedElementsAre(ast::StorageClass::kUniform));
+              UnorderedElementsAre(ast::StorageClass::kPrivate));
 }
 
 TEST_F(ResolverStorageClassUseTest, StructReachableFromLocal) {

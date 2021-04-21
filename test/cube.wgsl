@@ -17,7 +17,7 @@
   modelViewProjectionMatrix : mat4x4<f32>;
 };
 
-[[binding(0), group(0)]] var<uniform> uniforms : [[access(read)]] Uniforms;
+[[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
 
 struct VertexInput {
   [[location(0)]] cur_position : vec4<f32>;
