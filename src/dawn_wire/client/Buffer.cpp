@@ -119,6 +119,8 @@ namespace dawn_wire { namespace client {
             }
         }
         mRequests.clear();
+
+        FreeMappedData(true);
     }
 
     void Buffer::CancelCallbacksForDisconnect() {
@@ -360,15 +362,9 @@ namespace dawn_wire { namespace client {
                     mWriteHandle->SerializeFlush(writeHandleBuffer);
                     return WireResult::Success;
                 });
-            mWriteHandle = nullptr;
-
-        } else if (mReadHandle) {
-            mReadHandle = nullptr;
         }
 
-        mMappedData = nullptr;
-        mMapOffset = 0;
-        mMapSize = 0;
+        FreeMappedData(false);
 
         // Tag all mapping requests still in flight as unmapped before callback.
         for (auto& it : mRequests) {
@@ -384,9 +380,7 @@ namespace dawn_wire { namespace client {
 
     void Buffer::Destroy() {
         // Remove the current mapping.
-        mWriteHandle = nullptr;
-        mReadHandle = nullptr;
-        mMappedData = nullptr;
+        FreeMappedData(true);
 
         // Tag all mapping requests still in flight as destroyed before callback.
         for (auto& it : mRequests) {
@@ -420,4 +414,22 @@ namespace dawn_wire { namespace client {
         size_t offsetInMappedRange = offset - mMapOffset;
         return offsetInMappedRange <= mMapSize - size;
     }
+
+    void Buffer::FreeMappedData(bool destruction) {
+#if defined(DAWN_ENABLE_ASSERTS)
+        // When in "debug" mode, 0xCA-out the mapped data when we free it so that in we can detect
+        // use-after-free of the mapped data. This is particularly useful for WebGPU test about the
+        // interaction of mapping and GC.
+        if (mMappedData && destruction) {
+            memset(mMappedData, 0xCA, mMapSize);
+        }
+#endif  // defined(DAWN_ENABLE_ASSERTS)
+
+        mMapOffset = 0;
+        mMapSize = 0;
+        mWriteHandle = nullptr;
+        mReadHandle = nullptr;
+        mMappedData = nullptr;
+    }
+
 }}  // namespace dawn_wire::client

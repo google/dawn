@@ -57,6 +57,8 @@ namespace dawn_wire { namespace client {
         bool IsMappedForWriting() const;
         bool CheckGetMappedRangeOffsetSize(size_t offset, size_t size) const;
 
+        void FreeMappedData(bool destruction);
+
         Device* mDevice;
 
         // We want to defer all the validation to the server, which means we could have multiple
