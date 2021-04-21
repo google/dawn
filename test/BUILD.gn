@@ -88,7 +88,12 @@ source_set("tint_unittests_main") {
     sources = [ "//gpu/tint_unittests_main.cc" ]
   } else {
     sources = [ "../src/test_main.cc" ]
-    deps += [ "${tint_root_dir}/src:libtint" ]
+    deps += [
+      ":tint_test_helpers",
+      ":tint_unittests_hlsl_writer_src",
+      ":tint_unittests_msl_writer_src",
+      "${tint_root_dir}/src:libtint",
+    ]
   }
 }
 

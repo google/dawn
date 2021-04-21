@@ -14,4 +14,4 @@
 
 buildconfig = "//build/config/BUILDCONFIG.gn"
 
-check_targets = [ "//:*" ]
+check_targets = [ "//*" ]
