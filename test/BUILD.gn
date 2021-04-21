@@ -107,6 +107,27 @@ config("tint_unittests_config") {
   ]
 }
 
+source_set("tint_test_helpers") {
+  sources = [
+    "../src/ast/intrinsic_texture_helper_test.cc",
+    "../src/ast/intrinsic_texture_helper_test.h",
+    "../src/transform/test_helper.h",
+    "../src/utils/command.h",
+    "../src/utils/tmpfile.h",
+  ]
+
+  if (is_linux || is_mac) {
+    sources += [ "../src/utils/command_posix.cc" ]
+    sources += [ "../src/utils/tmpfile_posix.cc" ]
+  } else if (is_win) {
+    sources += [ "../src/utils/command_windows.cc" ]
+    sources += [ "../src/utils/tmpfile_windows.cc" ]
+  } else {
+    sources += [ "../src/utils/command_other.cc" ]
+    sources += [ "../src/utils/tmpfile_other.cc" ]
+  }
+}
+
 template("tint_unittests_source_set") {
   source_set(target_name) {
     forward_variables_from(invoker, "*", [ "configs" ])
@@ -127,6 +148,7 @@ template("tint_unittests_source_set") {
     }
     deps += [
       ":gmock_and_gtest",
+      ":tint_test_helpers",
       "${tint_root_dir}/src:libtint_core_src",
     ]
   }
@@ -169,8 +191,6 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/identifier_expression_test.cc",
     "../src/ast/if_statement_test.cc",
     "../src/ast/int_literal_test.cc",
-    "../src/ast/intrinsic_texture_helper_test.cc",
-    "../src/ast/intrinsic_texture_helper_test.h",
     "../src/ast/location_decoration_test.cc",
     "../src/ast/loop_statement_test.cc",
     "../src/ast/matrix_test.cc",
@@ -224,9 +244,9 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/resolver/intrinsic_test.cc",
     "../src/resolver/is_host_shareable_test.cc",
     "../src/resolver/is_storeable_test.cc",
+    "../src/resolver/resolver_test.cc",
     "../src/resolver/resolver_test_helper.cc",
     "../src/resolver/resolver_test_helper.h",
-    "../src/resolver/resolver_test.cc",
     "../src/resolver/storage_class_validation_test.cc",
     "../src/resolver/struct_layout_test.cc",
     "../src/resolver/struct_pipeline_stage_use_test.cc",
@@ -265,31 +285,16 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/transform/emit_vertex_point_size_test.cc",
     "../src/transform/first_index_offset_test.cc",
     "../src/transform/renamer_test.cc",
-    "../src/transform/test_helper.h",
     "../src/transform/vertex_pulling_test.cc",
-    "../src/utils/command.h",
     "../src/utils/command_test.cc",
-    "../src/utils/command.h",
     "../src/utils/get_or_create_test.cc",
     "../src/utils/hash_test.cc",
     "../src/utils/math_test.cc",
     "../src/utils/tmpfile_test.cc",
-    "../src/utils/tmpfile.h",
     "../src/utils/unique_vector_test.cc",
     "../src/writer/append_vector_test.cc",
     "../src/writer/float_to_string_test.cc",
   ]
-
-  if (is_linux || is_mac) {
-    sources += [ "../src/utils/command_posix.cc" ]
-    sources += [ "../src/utils/tmpfile_posix.cc" ]
-  } else if (is_win) {
-    sources += [ "../src/utils/command_windows.cc" ]
-    sources += [ "../src/utils/tmpfile_windows.cc" ]
-  } else {
-    sources += [ "../src/utils/command_other.cc" ]
-    sources += [ "../src/utils/tmpfile_other.cc" ]
-  }
 
   deps = [
     ":tint_unittests_core_sem_src",
@@ -372,7 +377,10 @@ tint_unittests_source_set("tint_unittests_spv_writer_src") {
     "../src/writer/spirv/test_helper.h",
   ]
 
-  deps = [ "${tint_root_dir}/src:libtint_spv_writer_src" ]
+  deps = [
+    "${tint_root_dir}/src:libtint_spv_writer_src",
+    "${tint_spirv_tools_dir}/:spvtools",
+  ]
 }
 
 tint_unittests_source_set("tint_unittests_wgsl_reader_src") {
