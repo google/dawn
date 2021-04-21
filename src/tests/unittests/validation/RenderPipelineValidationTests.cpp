@@ -486,8 +486,9 @@ TEST_F(RenderPipelineValidationTest, StorageBufferInVertexShaderNoLayout) {
             data : array<u32, 100>;
         };
         [[group(0), binding(0)]] var<storage> dst : [[access(read_write)]] Dst;
-        [[stage(vertex)]] fn main([[builtin(vertex_index)]] VertexIndex : u32) {
+        [[stage(vertex)]] fn main([[builtin(vertex_index)]] VertexIndex : u32) -> [[builtin(position)]] vec4<f32> {
             dst.data[VertexIndex] = 0x1234u;
+            return vec4<f32>();
         })");
 
     utils::ComboRenderPipelineDescriptor2 descriptor;

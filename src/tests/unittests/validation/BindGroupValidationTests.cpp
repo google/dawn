@@ -1084,7 +1084,8 @@ class SetBindGroupValidationTest : public ValidationTest {
 
     wgpu::RenderPipeline CreateRenderPipeline() {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]] fn main() {
+                [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                    return vec4<f32>();
                 })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -1487,7 +1488,8 @@ class SetBindGroupPersistenceValidationTest : public ValidationTest {
         ValidationTest::SetUp();
 
         mVsModule = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]] fn main() {
+                [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                    return vec4<f32>();
                 })");
     }
 
@@ -1689,7 +1691,8 @@ class BindGroupLayoutCompatibilityTest : public ValidationTest {
         const char* fsShader,
         std::vector<wgpu::BindGroupLayout> bindGroupLayout) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]] fn main() {
+                [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                    return vec4<f32>();
                 })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fsShader);
@@ -2061,7 +2064,8 @@ class ComparisonSamplerBindingTest : public ValidationTest {
     wgpu::RenderPipeline CreateFragmentPipeline(wgpu::BindGroupLayout* bindGroupLayout,
                                                 const char* fragmentSource) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-            [[stage(vertex)]] fn main() {
+            [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                return vec4<f32>();
             })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentSource);

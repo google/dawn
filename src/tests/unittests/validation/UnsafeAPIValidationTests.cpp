@@ -65,7 +65,11 @@ TEST_F(UnsafeAPIValidationTest, DrawIndexedIndirectDisallowed) {
     bundleDesc.cColorFormats[0] = renderPass.attachmentFormat;
 
     utils::ComboRenderPipelineDescriptor2 desc;
-    desc.vertex.module = utils::CreateShaderModule(device, "[[stage(vertex)]] fn main() {}");
+    desc.vertex.module = utils::CreateShaderModule(
+        device,
+        R"([[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>();
+        })");
     desc.cFragment.module = utils::CreateShaderModule(device, "[[stage(fragment)]] fn main() {}");
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
 

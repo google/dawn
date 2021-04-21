@@ -123,8 +123,10 @@ namespace {
 
     // Creates a vertex shader with given bindings
     std::string CreateVertexShaderWithBindings(const std::vector<BindingDescriptor>& bindings) {
-        return kStructs + GenerateBindingString(bindings) + "[[stage(vertex)]] fn main() {\n" +
-               GenerateReferenceString(bindings, wgpu::ShaderStage::Vertex) + "}";
+        return kStructs + GenerateBindingString(bindings) +
+               "[[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {\n" +
+               GenerateReferenceString(bindings, wgpu::ShaderStage::Vertex) +
+               "\n   return vec4<f32>(); " + "}";
     }
 
     // Creates a fragment shader with given bindings

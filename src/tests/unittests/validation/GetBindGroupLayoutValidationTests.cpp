@@ -21,7 +21,8 @@ class GetBindGroupLayoutTests : public ValidationTest {
   protected:
     wgpu::RenderPipeline RenderPipelineFromFragmentShader(const char* shader) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
-                [[stage(vertex)]] fn main() {
+                [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+                    return vec4<f32>();
                 })");
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, shader);
@@ -50,9 +51,10 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
         [[group(0), binding(0)]] var<uniform> uniform0 : S;
         [[group(1), binding(0)]] var<uniform> uniform1 : S;
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             var pos : vec4<f32> = uniform0.pos;
             pos = uniform1.pos;
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -473,9 +475,10 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
         [[group(0), binding(0)]] var<uniform> uniform0 : S;
         [[group(1), binding(0)]] var<uniform> uniform1 : S;
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             var pos : vec4<f32> = uniform0.pos;
             pos = uniform1.pos;
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -509,8 +512,9 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             var pos : f32 = uniforms.pos;
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule vsModule64 = utils::CreateShaderModule(device, R"(
@@ -519,8 +523,9 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             var pos : mat4x4<f32> = uniforms.pos;
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModule4 = utils::CreateShaderModule(device, R"(
@@ -594,13 +599,15 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     DAWN_SKIP_TEST_IF(UsesWire());
 
     wgpu::ShaderModule vsModuleNoSampler = utils::CreateShaderModule(device, R"(
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule vsModuleSampler = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var mySampler: sampler;
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             let s : sampler = mySampler;
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModuleNoSampler = utils::CreateShaderModule(device, R"(
@@ -664,8 +671,9 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
         };
         [[group(0), binding(0)]] var<uniform> ubo : S;
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             var pos : vec4<f32> = ubo.pos;
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -691,8 +699,9 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             textureDimensions(myTexture);
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -715,8 +724,9 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             textureDimensions(myTexture);
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -739,8 +749,9 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         [[group(0), binding(0)]] var myTexture : texture_2d<f32>;
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             textureDimensions(myTexture);
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
@@ -833,8 +844,9 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
         };
         [[group(0), binding(0)]] var<uniform> uniforms : S;
 
-        [[stage(vertex)]] fn main() {
+        [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
             var pos : vec4<f32> = uniforms.pos;
+            return vec4<f32>();
         })");
 
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
