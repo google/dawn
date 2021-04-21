@@ -42,7 +42,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
   //              [[location(1)]] loc1 : f32) {
   //   var col : f32 = (coord.x * loc1);
   // }
-  auto* f32 = ty.f32();
+  auto f32 = ty.f32();
   auto* vec4 = ty.vec4<float>();
   auto* coord = Param(
       "coord", vec4, {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
@@ -106,8 +106,8 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
   //   }
   //   return 1.0;
   // }
-  auto* f32 = ty.f32();
-  auto* u32 = ty.u32();
+  auto f32 = ty.f32();
+  auto u32 = ty.u32();
   auto* loc_in = Param("loc_in", u32, {create<ast::LocationDecoration>(0)});
   auto* cond = create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan,
                                              Expr("loc_in"), Expr(10u));

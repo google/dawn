@@ -127,7 +127,7 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
-  auto* bool_ = ty.bool_();
+  auto bool_ = ty.bool_();
 
   GeneratorImpl& gen = Build();
 
@@ -136,7 +136,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Bool) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_F32) {
-  auto* f32 = ty.f32();
+  auto f32 = ty.f32();
 
   GeneratorImpl& gen = Build();
 
@@ -145,7 +145,7 @@ TEST_F(MslGeneratorImplTest, EmitType_F32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_I32) {
-  auto* i32 = ty.i32();
+  auto i32 = ty.i32();
 
   GeneratorImpl& gen = Build();
 
@@ -604,7 +604,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_U32) {
-  auto* u32 = ty.u32();
+  auto u32 = ty.u32();
 
   GeneratorImpl& gen = Build();
 
@@ -622,7 +622,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Vector) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Void) {
-  auto* void_ = ty.void_();
+  auto void_ = ty.void_();
 
   GeneratorImpl& gen = Build();
 

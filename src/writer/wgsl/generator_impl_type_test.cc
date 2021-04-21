@@ -110,7 +110,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Bool) {
-  auto* bool_ = ty.bool_();
+  auto bool_ = ty.bool_();
   AST().AddConstructedType(ty.alias("make_type_reachable", bool_));
 
   GeneratorImpl& gen = Build();
@@ -120,7 +120,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Bool) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_F32) {
-  auto* f32 = ty.f32();
+  auto f32 = ty.f32();
   AST().AddConstructedType(ty.alias("make_type_reachable", f32));
 
   GeneratorImpl& gen = Build();
@@ -130,7 +130,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_F32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_I32) {
-  auto* i32 = ty.i32();
+  auto i32 = ty.i32();
   AST().AddConstructedType(ty.alias("make_type_reachable", i32));
 
   GeneratorImpl& gen = Build();
@@ -294,7 +294,7 @@ struct S {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_U32) {
-  auto* u32 = ty.u32();
+  auto u32 = ty.u32();
   AST().AddConstructedType(ty.alias("make_type_reachable", u32));
 
   GeneratorImpl& gen = Build();

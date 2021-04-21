@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, StructMember_Parses) {
   auto p = parser("a : i32;");
 
   auto& builder = p->builder();
-  auto* i32 = builder.ty.i32();
+  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithOffsetDecoration_DEPRECATED) {
   auto p = parser("[[offset(2)]] a : i32;");
 
   auto& builder = p->builder();
-  auto* i32 = builder.ty.i32();
+  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -79,7 +79,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithAlignDecoration) {
   auto p = parser("[[align(2)]] a : i32;");
 
   auto& builder = p->builder();
-  auto* i32 = builder.ty.i32();
+  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -108,7 +108,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithSizeDecoration) {
   auto p = parser("[[size(2)]] a : i32;");
 
   auto& builder = p->builder();
-  auto* i32 = builder.ty.i32();
+  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -137,7 +137,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   auto p = parser("[[size(2)]] a : i32;");
 
   auto& builder = p->builder();
-  auto* i32 = builder.ty.i32();
+  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -167,7 +167,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
 [[align(4)]] a : i32;)");
 
   auto& builder = p->builder();
-  auto* i32 = builder.ty.i32();
+  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);

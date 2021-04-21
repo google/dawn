@@ -41,8 +41,8 @@ TEST_F(BuilderTest_Type, GenerateAlias) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
-  auto* i32 = ty.i32();
-  auto* f32 = ty.f32();
+  auto i32 = ty.i32();
+  auto f32 = ty.f32();
   auto* alias_type = ty.alias("my_type", f32);
 
   spirv::Builder& b = Build();
@@ -148,7 +148,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateBool) {
-  auto* bool_ = ty.bool_();
+  auto bool_ = ty.bool_();
 
   spirv::Builder& b = Build();
 
@@ -162,8 +162,8 @@ TEST_F(BuilderTest_Type, GenerateBool) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
-  auto* bool_ = ty.bool_();
-  auto* i32 = ty.i32();
+  auto bool_ = ty.bool_();
+  auto i32 = ty.i32();
 
   spirv::Builder& b = Build();
 
@@ -176,7 +176,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
 }
 
 TEST_F(BuilderTest_Type, GenerateF32) {
-  auto* f32 = ty.f32();
+  auto f32 = ty.f32();
 
   spirv::Builder& b = Build();
 
@@ -190,8 +190,8 @@ TEST_F(BuilderTest_Type, GenerateF32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
-  auto* f32 = ty.f32();
-  auto* i32 = ty.i32();
+  auto f32 = ty.f32();
+  auto i32 = ty.i32();
 
   spirv::Builder& b = Build();
 
@@ -204,7 +204,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
 }
 
 TEST_F(BuilderTest_Type, GenerateI32) {
-  auto* i32 = ty.i32();
+  auto i32 = ty.i32();
 
   spirv::Builder& b = Build();
 
@@ -218,8 +218,8 @@ TEST_F(BuilderTest_Type, GenerateI32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
-  auto* f32 = ty.f32();
-  auto* i32 = ty.i32();
+  auto f32 = ty.f32();
+  auto i32 = ty.i32();
 
   spirv::Builder& b = Build();
 
@@ -249,7 +249,7 @@ TEST_F(BuilderTest_Type, GenerateMatrix) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
   auto* mat = ty.mat4x3<i32>();
-  auto* i32 = ty.i32();
+  auto i32 = ty.i32();
 
   spirv::Builder& b = Build();
 
@@ -500,7 +500,7 @@ OpDecorate %11 ArrayStride 64
 }
 
 TEST_F(BuilderTest_Type, GenerateU32) {
-  auto* u32 = ty.u32();
+  auto u32 = ty.u32();
 
   spirv::Builder& b = Build();
 
@@ -514,8 +514,8 @@ TEST_F(BuilderTest_Type, GenerateU32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedU32) {
-  auto* u32 = ty.u32();
-  auto* f32 = ty.f32();
+  auto u32 = ty.u32();
+  auto f32 = ty.f32();
 
   spirv::Builder& b = Build();
 
@@ -544,7 +544,7 @@ TEST_F(BuilderTest_Type, GenerateVector) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
   auto* vec = ty.vec3<i32>();
-  auto* i32 = ty.i32();
+  auto i32 = ty.i32();
 
   spirv::Builder& b = Build();
 
@@ -557,7 +557,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
 }
 
 TEST_F(BuilderTest_Type, GenerateVoid) {
-  auto* void_ = ty.void_();
+  auto void_ = ty.void_();
 
   spirv::Builder& b = Build();
 
@@ -571,8 +571,8 @@ TEST_F(BuilderTest_Type, GenerateVoid) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVoid) {
-  auto* void_ = ty.void_();
-  auto* i32 = ty.i32();
+  auto void_ = ty.void_();
+  auto i32 = ty.i32();
 
   spirv::Builder& b = Build();
 

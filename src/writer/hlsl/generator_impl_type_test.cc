@@ -105,7 +105,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
-  auto* bool_ = ty.bool_();
+  auto bool_ = ty.bool_();
 
   GeneratorImpl& gen = Build();
 
@@ -115,7 +115,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
-  auto* f32 = ty.f32();
+  auto f32 = ty.f32();
 
   GeneratorImpl& gen = Build();
 
@@ -125,7 +125,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
-  auto* i32 = ty.i32();
+  auto i32 = ty.i32();
 
   GeneratorImpl& gen = Build();
 
@@ -265,7 +265,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
-  auto* u32 = ty.u32();
+  auto u32 = ty.u32();
 
   GeneratorImpl& gen = Build();
 
@@ -285,7 +285,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
-  auto* void_ = ty.void_();
+  auto void_ = ty.void_();
 
   GeneratorImpl& gen = Build();
 

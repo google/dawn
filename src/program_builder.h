@@ -21,10 +21,13 @@
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
+#include "src/ast/bool.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/f32.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/i32.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/member_accessor_expression.h"
@@ -39,8 +42,10 @@
 #include "src/ast/struct_member_size_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/u32.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/void.h"
 #include "src/program.h"
 #include "src/program_id.h"
 #include "src/sem/access_control_type.h"
@@ -55,6 +60,7 @@
 #include "src/sem/u32_type.h"
 #include "src/sem/vector_type.h"
 #include "src/sem/void_type.h"
+#include "src/typepair.h"
 
 namespace tint {
 
@@ -329,19 +335,29 @@ class ProgramBuilder {
     }
 
     /// @returns a boolean type
-    sem::Bool* bool_() const { return builder->create<sem::Bool>(); }
+    typ::Bool bool_() const {
+      return {builder->create<ast::Bool>(), builder->create<sem::Bool>()};
+    }
 
     /// @returns a f32 type
-    sem::F32* f32() const { return builder->create<sem::F32>(); }
+    typ::F32 f32() const {
+      return {builder->create<ast::F32>(), builder->create<sem::F32>()};
+    }
 
     /// @returns a i32 type
-    sem::I32* i32() const { return builder->create<sem::I32>(); }
+    typ::I32 i32() const {
+      return {builder->create<ast::I32>(), builder->create<sem::I32>()};
+    }
 
     /// @returns a u32 type
-    sem::U32* u32() const { return builder->create<sem::U32>(); }
+    typ::U32 u32() const {
+      return {builder->create<ast::U32>(), builder->create<sem::U32>()};
+    }
 
     /// @returns a void type
-    sem::Void* void_() const { return builder->create<sem::Void>(); }
+    typ::Void void_() const {
+      return {builder->create<ast::Void>(), builder->create<sem::Void>()};
+    }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 2-element vector of `type`.
