@@ -30,7 +30,10 @@ if (build_with_chromium) {
       "${tint_root_dir}/src:tint_common_config",
     ]
 
-    public_deps = [ "${tint_root_dir}/src:libtint" ]
+    public_deps = [
+      "${tint_root_dir}/src:libtint",
+      "${tint_spirv_tools_dir}/:spvtools_val",
+    ]
 
     sources = [
       "tint_common_fuzzer.cc",

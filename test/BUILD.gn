@@ -126,6 +126,8 @@ source_set("tint_test_helpers") {
     sources += [ "../src/utils/command_other.cc" ]
     sources += [ "../src/utils/tmpfile_other.cc" ]
   }
+
+  configs += [ ":tint_unittests_config" ]
 }
 
 template("tint_unittests_source_set") {
