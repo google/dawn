@@ -52,8 +52,9 @@ fn test(vert_idx : u32) -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry([[builtin(vertex_index)]] vert_idx : u32) {
+fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
   test(vert_idx);
+  return vec4<f32>();
 }
 )";
 
@@ -70,8 +71,9 @@ fn test(vert_idx : u32) -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry([[builtin(vertex_index)]] vert_idx : u32) {
+fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
   test((vert_idx + tint_symbol_1.first_vertex_index));
+  return vec4<f32>();
 }
 )";
 
@@ -97,8 +99,9 @@ fn test(inst_idx : u32) -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry([[builtin(instance_index)]] inst_idx : u32) {
+fn entry([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
   test(inst_idx);
+  return vec4<f32>();
 }
 )";
 
@@ -115,8 +118,9 @@ fn test(inst_idx : u32) -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry([[builtin(instance_index)]] inst_idx : u32) {
+fn entry([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
   test((inst_idx + tint_symbol_1.first_instance_index));
+  return vec4<f32>();
 }
 )";
 
@@ -147,8 +151,9 @@ struct Inputs {
 };
 
 [[stage(vertex)]]
-fn entry(inputs : Inputs) {
+fn entry(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
   test(inputs.instance_idx, inputs.vert_idx);
+  return vec4<f32>();
 }
 )";
 
@@ -173,8 +178,9 @@ struct Inputs {
 };
 
 [[stage(vertex)]]
-fn entry(inputs : Inputs) {
+fn entry(inputs : Inputs) -> [[builtin(position)]] vec4<f32> {
   test((inputs.instance_idx + tint_symbol_1.first_instance_index), (inputs.vert_idx + tint_symbol_1.first_vertex_index));
+  return vec4<f32>();
 }
 )";
 
@@ -204,8 +210,9 @@ fn func2(vert_idx : u32) -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry([[builtin(vertex_index)]] vert_idx : u32) {
+fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
   func2(vert_idx);
+  return vec4<f32>();
 }
 )";
 
@@ -226,8 +233,9 @@ fn func2(vert_idx : u32) -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry([[builtin(vertex_index)]] vert_idx : u32) {
+fn entry([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
   func2((vert_idx + tint_symbol_1.first_vertex_index));
+  return vec4<f32>();
 }
 )";
 
@@ -253,18 +261,21 @@ fn func(i : u32) -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry_a([[builtin(vertex_index)]] vert_idx : u32) {
+fn entry_a([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
   func(vert_idx);
+  return vec4<f32>();
 }
 
 [[stage(vertex)]]
-fn entry_b([[builtin(vertex_index)]] vert_idx : u32, [[builtin(instance_index)]] inst_idx : u32) {
+fn entry_b([[builtin(vertex_index)]] vert_idx : u32, [[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
   func(vert_idx + inst_idx);
+  return vec4<f32>();
 }
 
 [[stage(vertex)]]
-fn entry_c([[builtin(instance_index)]] inst_idx : u32) {
+fn entry_c([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
   func(inst_idx);
+  return vec4<f32>();
 }
 )";
 
@@ -282,18 +293,21 @@ fn func(i : u32) -> u32 {
 }
 
 [[stage(vertex)]]
-fn entry_a([[builtin(vertex_index)]] vert_idx : u32) {
+fn entry_a([[builtin(vertex_index)]] vert_idx : u32) -> [[builtin(position)]] vec4<f32> {
   func((vert_idx + tint_symbol_1.first_vertex_index));
+  return vec4<f32>();
 }
 
 [[stage(vertex)]]
-fn entry_b([[builtin(vertex_index)]] vert_idx : u32, [[builtin(instance_index)]] inst_idx : u32) {
+fn entry_b([[builtin(vertex_index)]] vert_idx : u32, [[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
   func(((vert_idx + tint_symbol_1.first_vertex_index) + (inst_idx + tint_symbol_1.first_instance_index)));
+  return vec4<f32>();
 }
 
 [[stage(vertex)]]
-fn entry_c([[builtin(instance_index)]] inst_idx : u32) {
+fn entry_c([[builtin(instance_index)]] inst_idx : u32) -> [[builtin(position)]] vec4<f32> {
   func((inst_idx + tint_symbol_1.first_instance_index));
+  return vec4<f32>();
 }
 )";
 
@@ -316,6 +330,8 @@ TEST_F(FirstIndexOffsetTest, OLD_BasicModuleVertexIndex) {
   auto* src = R"(
 [[builtin(vertex_index)]] var<in> vert_idx : u32;
 
+[[builtin(position)]] var<out> pos : vec4<f32>;
+
 fn test() -> u32 {
   return vert_idx;
 }
@@ -323,6 +339,7 @@ fn test() -> u32 {
 [[stage(vertex)]]
 fn entry() {
   test();
+  pos = vec4<f32>();
 }
 )";
 
@@ -336,6 +353,8 @@ struct tint_symbol {
 
 [[builtin(vertex_index)]] var<in> vert_idx : u32;
 
+[[builtin(position)]] var<out> pos : vec4<f32>;
+
 fn test() -> u32 {
   return (vert_idx + tint_symbol_1.first_vertex_index);
 }
@@ -343,6 +362,7 @@ fn test() -> u32 {
 [[stage(vertex)]]
 fn entry() {
   test();
+  pos = vec4<f32>();
 }
 )";
 
@@ -363,6 +383,8 @@ TEST_F(FirstIndexOffsetTest, OLD_BasicModuleInstanceIndex) {
   auto* src = R"(
 [[builtin(instance_index)]] var<in> inst_idx : u32;
 
+[[builtin(position)]] var<out> pos : vec4<f32>;
+
 fn test() -> u32 {
   return inst_idx;
 }
@@ -370,6 +392,7 @@ fn test() -> u32 {
 [[stage(vertex)]]
 fn entry() {
   test();
+  pos = vec4<f32>();
 }
 )";
 
@@ -383,6 +406,8 @@ struct tint_symbol {
 
 [[builtin(instance_index)]] var<in> inst_idx : u32;
 
+[[builtin(position)]] var<out> pos : vec4<f32>;
+
 fn test() -> u32 {
   return (inst_idx + tint_symbol_1.first_instance_index);
 }
@@ -390,6 +415,7 @@ fn test() -> u32 {
 [[stage(vertex)]]
 fn entry() {
   test();
+  pos = vec4<f32>();
 }
 )";
 
@@ -410,6 +436,7 @@ TEST_F(FirstIndexOffsetTest, OLD_BasicModuleBothIndex) {
   auto* src = R"(
 [[builtin(instance_index)]] var<in> instance_idx : u32;
 [[builtin(vertex_index)]] var<in> vert_idx : u32;
+[[builtin(position)]] var<out> pos : vec4<f32>;
 
 fn test() -> u32 {
   return instance_idx + vert_idx;
@@ -418,6 +445,7 @@ fn test() -> u32 {
 [[stage(vertex)]]
 fn entry() {
   test();
+  pos = vec4<f32>();
 }
 )";
 
@@ -434,6 +462,8 @@ struct tint_symbol {
 
 [[builtin(vertex_index)]] var<in> vert_idx : u32;
 
+[[builtin(position)]] var<out> pos : vec4<f32>;
+
 fn test() -> u32 {
   return ((instance_idx + tint_symbol_1.first_instance_index) + (vert_idx + tint_symbol_1.first_vertex_index));
 }
@@ -441,6 +471,7 @@ fn test() -> u32 {
 [[stage(vertex)]]
 fn entry() {
   test();
+  pos = vec4<f32>();
 }
 )";
 
@@ -460,6 +491,7 @@ fn entry() {
 TEST_F(FirstIndexOffsetTest, OLD_NestedCalls) {
   auto* src = R"(
 [[builtin(vertex_index)]] var<in> vert_idx : u32;
+[[builtin(position)]] var<out> pos : vec4<f32>;
 
 fn func1() -> u32 {
   return vert_idx;
@@ -472,6 +504,7 @@ fn func2() -> u32 {
 [[stage(vertex)]]
 fn entry() {
   func2();
+  pos = vec4<f32>();
 }
 )";
 
@@ -485,6 +518,8 @@ struct tint_symbol {
 
 [[builtin(vertex_index)]] var<in> vert_idx : u32;
 
+[[builtin(position)]] var<out> pos : vec4<f32>;
+
 fn func1() -> u32 {
   return (vert_idx + tint_symbol_1.first_vertex_index);
 }
@@ -496,6 +531,7 @@ fn func2() -> u32 {
 [[stage(vertex)]]
 fn entry() {
   func2();
+  pos = vec4<f32>();
 }
 )";
 

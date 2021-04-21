@@ -112,9 +112,7 @@ TEST_F(ResolverTypeValidationTest,
 
   auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
 
-  Func("my_func", ast::VariableList{}, ty.void_(), {Decl(var)},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+  Func("my_func", ast::VariableList{}, ty.void_(), {Decl(var)});
 
   Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
 
@@ -277,9 +275,6 @@ TEST_F(ResolverTypeValidationTest,
        ast::StatementList{
            create<ast::VariableDeclStatement>(Source{{13, 34}}, var1),
            create<ast::ReturnStatement>(),
-       },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

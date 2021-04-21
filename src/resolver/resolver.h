@@ -238,8 +238,8 @@ class Resolver {
   // Each return true on success, false on failure.
   bool ValidateAssignment(const ast::AssignmentStatement* a);
   bool ValidateBinary(ast::BinaryExpression* expr);
-  bool ValidateEntryPoint(const ast::Function* func);
-  bool ValidateFunction(const ast::Function* func);
+  bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
+  bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);
   bool ValidateGlobalVariable(const VariableInfo* var);
   bool ValidateMatrixConstructor(const sem::Matrix* matrix_type,
                                  const ast::ExpressionList& values);

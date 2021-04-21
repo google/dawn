@@ -307,8 +307,8 @@ struct Interface {
   [[location(1)]] value : f32;
 };
 
-[[stage(vertex)]]
-fn vert_main(inputs : Interface) -> Interface {
+[[stage(fragment)]]
+fn frag_main(inputs : Interface) -> Interface {
   return inputs;
 }
 )";
@@ -326,8 +326,8 @@ fn tint_symbol_4(tint_symbol_2 : Interface) {
   tint_symbol_3 = tint_symbol_2.value;
 }
 
-[[stage(vertex)]]
-fn vert_main() {
+[[stage(fragment)]]
+fn frag_main() {
   let tint_symbol_1 : Interface = Interface(tint_symbol);
   tint_symbol_4(tint_symbol_1);
   return;
@@ -342,12 +342,13 @@ fn vert_main() {
 TEST_F(SpirvTest, HandleEntryPointIOTypes_SharedStruct_DifferentShaders) {
   auto* src = R"(
 struct Interface {
+  [[builtin(position)]] pos : vec4<f32>;
   [[location(1)]] value : f32;
 };
 
 [[stage(vertex)]]
 fn vert_main() -> Interface {
-  return Interface(42.0);
+  return Interface(vec4<f32>(), 42.0);
 }
 
 [[stage(fragment)]]
@@ -358,27 +359,33 @@ fn frag_main(inputs : Interface) {
 
   auto* expect = R"(
 struct Interface {
+  pos : vec4<f32>;
   value : f32;
 };
 
-[[location(1)]] var<out> tint_symbol_1 : f32;
+[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
 
-fn tint_symbol_2(tint_symbol : Interface) {
-  tint_symbol_1 = tint_symbol.value;
+[[location(1)]] var<out> tint_symbol_2 : f32;
+
+fn tint_symbol_3(tint_symbol : Interface) {
+  tint_symbol_1 = tint_symbol.pos;
+  tint_symbol_2 = tint_symbol.value;
 }
 
 [[stage(vertex)]]
 fn vert_main() {
-  tint_symbol_2(Interface(42.0));
+  tint_symbol_3(Interface(vec4<f32>(), 42.0));
   return;
 }
 
-[[location(1)]] var<in> tint_symbol_3 : f32;
+[[builtin(position)]] var<in> tint_symbol_4 : vec4<f32>;
+
+[[location(1)]] var<in> tint_symbol_5 : f32;
 
 [[stage(fragment)]]
 fn frag_main() {
-  let tint_symbol_4 : Interface = Interface(tint_symbol_3);
-  var x : f32 = tint_symbol_4.value;
+  let tint_symbol_6 : Interface = Interface(tint_symbol_4, tint_symbol_5);
+  var x : f32 = tint_symbol_6.value;
 }
 )";
 

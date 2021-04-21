@@ -36,7 +36,7 @@ TEST_F(ParserTest, Parses) {
   Source::File file("test.wgsl", R"(
 [[location(0)]] var<out> gl_FragColor : vec4<f32>;
 
-[[stage(vertex)]]
+[[stage(fragment)]]
 fn main() {
   gl_FragColor = vec4<f32>(.4, .2, .3, 1.);
 }

@@ -47,7 +47,6 @@ TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
 
 TEST_F(ResolverFunctionValidationTest,
        VoidFunctionEndWithoutReturnStatement_Pass) {
-  // [[stage(vertex)]]
   // fn func { var a:i32 = 2; }
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
@@ -55,9 +54,6 @@ TEST_F(ResolverFunctionValidationTest,
        ty.void_(),
        ast::StatementList{
            create<ast::VariableDeclStatement>(var),
-       },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -82,14 +78,10 @@ TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
 
 TEST_F(ResolverFunctionValidationTest,
        VoidFunctionEndWithoutReturnStatementEmptyBody_Pass) {
-  // [[stage(vertex)]]
   // fn func {}
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
-       ty.void_(), ast::StatementList{},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
+       ty.void_(), ast::StatementList{});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -109,15 +101,11 @@ TEST_F(ResolverFunctionValidationTest,
 
 TEST_F(ResolverFunctionValidationTest,
        FunctionTypeMustMatchReturnStatementType_Pass) {
-  // [[stage(vertex)]]
   // fn func { return; }
 
   Func("func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
            create<ast::ReturnStatement>(),
-       },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -148,10 +136,6 @@ TEST_F(ResolverFunctionValidationTest,
                                         Expr(2.f)),
        },
        ast::DecorationList{});
-  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -183,10 +167,6 @@ TEST_F(ResolverFunctionValidationTest,
                                         Expr(2.f)),
        },
        ast::DecorationList{});
-  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -202,10 +182,6 @@ TEST_F(ResolverFunctionValidationTest,
                                         Expr(2u)),
        },
        ast::DecorationList{});
-  Func("main", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),

@@ -42,14 +42,14 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
              create<ast::LocationDecoration>(1),
          });
 
-  Func("vtx_main", ast::VariableList{}, ty.void_(),
+  Func("vtx_main", ast::VariableList{}, ty.vec4<f32>(),
        ast::StatementList{
-           create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-           create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+           Assign(Expr("foo"), Expr("foo")),
+           Assign(Expr("bar"), Expr("bar")),
+           Return(Construct(ty.vec4<f32>())),
        },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
+       {Stage(ast::PipelineStage::kVertex)},
+       {Builtin(ast::Builtin::kPosition)});
 
   std::unordered_set<Symbol> globals;
 
@@ -85,14 +85,14 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
              create<ast::LocationDecoration>(1),
          });
 
-  Func("vtx_main", ast::VariableList{}, ty.void_(),
+  Func("vtx_main", ast::VariableList{}, ty.vec4<f32>(),
        ast::StatementList{
-           create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-           create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+           Assign(Expr("foo"), Expr("foo")),
+           Assign(Expr("bar"), Expr("bar")),
+           Return(Construct(ty.vec4<f32>())),
        },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
+       {Stage(ast::PipelineStage::kVertex)},
+       {Builtin(ast::Builtin::kPosition)});
 
   std::unordered_set<Symbol> globals;
 
@@ -134,7 +134,7 @@ TEST_F(HlslGeneratorImplTest_EntryPoint,
            create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
   std::unordered_set<Symbol> globals;

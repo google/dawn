@@ -28,8 +28,9 @@ fn non_entry_a() {
 }
 
 [[stage(vertex)]]
-fn entry() {
+fn entry() -> [[builtin(position)]] vec4<f32> {
   var builtin_assignments_should_happen_before_this : f32;
+  return vec4<f32>();
 }
 
 fn non_entry_b() {
@@ -43,42 +44,10 @@ fn non_entry_a() {
 }
 
 [[stage(vertex)]]
-fn entry() {
+fn entry() -> [[builtin(position)]] vec4<f32> {
   tint_pointsize = 1.0;
   var builtin_assignments_should_happen_before_this : f32;
-}
-
-fn non_entry_b() {
-}
-)";
-
-  auto got = Run<EmitVertexPointSize>(src);
-
-  EXPECT_EQ(expect, str(got));
-}
-
-TEST_F(EmitVertexPointSizeTest, VertexStageEmpty) {
-  auto* src = R"(
-fn non_entry_a() {
-}
-
-[[stage(vertex)]]
-fn entry() {
-}
-
-fn non_entry_b() {
-}
-)";
-
-  auto* expect = R"(
-[[builtin(pointsize)]] var<out> tint_pointsize : f32;
-
-fn non_entry_a() {
-}
-
-[[stage(vertex)]]
-fn entry() {
-  tint_pointsize = 1.0;
+  return vec4<f32>();
 }
 
 fn non_entry_b() {
@@ -119,8 +88,9 @@ fn compute_entry() {
 TEST_F(EmitVertexPointSizeTest, AttemptSymbolCollision) {
   auto* src = R"(
 [[stage(vertex)]]
-fn entry() {
+fn entry() -> [[builtin(position)]] vec4<f32> {
   var tint_pointsize : f32;
+  return vec4<f32>();
 }
 )";
 
@@ -128,9 +98,10 @@ fn entry() {
 [[builtin(pointsize)]] var<out> tint_pointsize_1 : f32;
 
 [[stage(vertex)]]
-fn entry() {
+fn entry() -> [[builtin(position)]] vec4<f32> {
   tint_pointsize_1 = 1.0;
   var tint_pointsize : f32;
+  return vec4<f32>();
 }
 )";
 

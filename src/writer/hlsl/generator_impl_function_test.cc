@@ -174,32 +174,39 @@ tint_symbol_2 frag_main(tint_symbol_1 tint_symbol) {
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_SharedStruct_DifferentStages) {
   // struct Interface {
+  //   [[builtin(position)]] pos : vec4<f32>;
   //   [[location(1)]] col1 : f32;
   //   [[location(2)]] col2 : f32;
   // };
   // fn vert_main() -> Interface {
-  //   return Interface(0.4, 0.6);
+  //   return Interface(vec4<f32>(), 0.4, 0.6);
   // }
-  // fn frag_main(colors : Interface) {
-  //   const r = colors.col1;
-  //   const g = colors.col2;
+  // fn frag_main(inputs : Interface) {
+  //   const r = inputs.col1;
+  //   const g = inputs.col2;
+  //   const p = inputs.pos;
   // }
   auto* interface_struct = Structure(
       "Interface",
-      {Member("col1", ty.f32(), {create<ast::LocationDecoration>(1)}),
-       Member("col2", ty.f32(), {create<ast::LocationDecoration>(2)})});
+      {
+          Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
+          Member("col1", ty.f32(), {Location(1)}),
+          Member("col2", ty.f32(), {Location(2)}),
+      });
 
   Func("vert_main", {}, interface_struct,
-       {create<ast::ReturnStatement>(
-           Construct(interface_struct, Expr(0.5f), Expr(0.25f)))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+       {Return(Construct(interface_struct, Construct(ty.vec4<f32>()),
+                         Expr(0.5f), Expr(0.25f)))},
+       {Stage(ast::PipelineStage::kVertex)});
 
-  Func("frag_main", {Param("colors", interface_struct)}, ty.void_(),
+  Func("frag_main", {Param("inputs", interface_struct)}, ty.void_(),
        {
            WrapInStatement(
-               Const("r", ty.f32(), MemberAccessor(Expr("colors"), "col1"))),
+               Const("r", ty.f32(), MemberAccessor(Expr("inputs"), "col1"))),
            WrapInStatement(
-               Const("g", ty.f32(), MemberAccessor(Expr("colors"), "col2"))),
+               Const("g", ty.f32(), MemberAccessor(Expr("inputs"), "col2"))),
+           WrapInStatement(Const("p", ty.vec4<f32>(),
+                                 MemberAccessor(Expr("inputs"), "pos"))),
        },
        {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
@@ -207,28 +214,32 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"(struct Interface {
+  float4 pos;
   float col1;
   float col2;
 };
 struct tint_symbol {
   float col1 : TEXCOORD1;
   float col2 : TEXCOORD2;
+  float4 pos : SV_Position;
 };
 struct tint_symbol_3 {
   float col1 : TEXCOORD1;
   float col2 : TEXCOORD2;
+  float4 pos : SV_Position;
 };
 
 tint_symbol vert_main() {
-  const Interface tint_symbol_1 = {0.5f, 0.25f};
-  const tint_symbol tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2};
+  const Interface tint_symbol_1 = {float4(0.0f, 0.0f, 0.0f, 0.0f), 0.5f, 0.25f};
+  const tint_symbol tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
   return tint_symbol_4;
 }
 
 void frag_main(tint_symbol_3 tint_symbol_2) {
-  const Interface colors = {tint_symbol_2.col1, tint_symbol_2.col2};
-  const float r = colors.col1;
-  const float g = colors.col2;
+  const Interface inputs = {tint_symbol_2.pos, tint_symbol_2.col1, tint_symbol_2.col2};
+  const float r = inputs.col1;
+  const float g = inputs.col2;
+  const float4 p = inputs.pos;
   return;
 }
 

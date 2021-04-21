@@ -32,7 +32,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Location) {
   // [[stage(vertex)]]
   // fn main() -> [[location(0)]] f32 { return 1.0; }
   Func(Source{{12, 34}}, "main", {}, ty.f32(), {Return(Expr(1.0f))},
-       {Stage(ast::PipelineStage::kVertex)}, {Location(0)});
+       {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -498,6 +498,18 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateLocation) {
       r()->error(),
       R"(12:34 error: location(1) attribute appears multiple times as pipeline input
 12:34 note: while analysing entry point main)");
+}
+
+TEST_F(ResolverEntryPointValidationTest, VertexShaderMustReturnPosition) {
+  // [[stage(vertex)]]
+  // fn main() {}
+  Func(Source{{12, 34}}, "main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kVertex)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: a vertex shader must include the 'position' builtin "
+            "in its return type");
 }
 
 }  // namespace

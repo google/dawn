@@ -521,7 +521,8 @@ bool Resolver::ValidateParameter(const ast::Variable* param) {
   return ValidateVariable(param);
 }
 
-bool Resolver::ValidateFunction(const ast::Function* func) {
+bool Resolver::ValidateFunction(const ast::Function* func,
+                                const FunctionInfo* info) {
   if (symbol_to_function_.find(func->symbol()) != symbol_to_function_.end()) {
     diagnostics_.add_error("v-0016",
                            "function names must be unique '" +
@@ -564,7 +565,7 @@ bool Resolver::ValidateFunction(const ast::Function* func) {
   }
 
   if (func->IsEntryPoint()) {
-    if (!ValidateEntryPoint(func)) {
+    if (!ValidateEntryPoint(func, info)) {
       return false;
     }
   }
@@ -572,7 +573,8 @@ bool Resolver::ValidateFunction(const ast::Function* func) {
   return true;
 }
 
-bool Resolver::ValidateEntryPoint(const ast::Function* func) {
+bool Resolver::ValidateEntryPoint(const ast::Function* func,
+                                  const FunctionInfo* info) {
   auto stage_deco_count = 0;
   for (auto* deco : func->decorations()) {
     if (deco->Is<ast::StageDecoration>()) {
@@ -750,12 +752,38 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func) {
     }
   }
 
+  // Clear IO sets after parameter validation. Builtin and location attributes
+  // in return types should be validated independently from those used in
+  // parameters.
+  builtins.clear();
+  locations.clear();
+
   if (!func->return_type()->Is<sem::Void>()) {
-    builtins.clear();
-    locations.clear();
     if (!validate_entry_point_decorations(func->return_type_decorations(),
                                           func->return_type(), func->source(),
                                           ParamOrRetType::kReturnType)) {
+      return false;
+    }
+  }
+
+  if (func->pipeline_stage() == ast::PipelineStage::kVertex &&
+      builtins.count(ast::Builtin::kPosition) == 0) {
+    // Check module-scope variables, as the SPIR-V sanitizer generates these.
+    bool found = false;
+    for (auto* var : info->referenced_module_vars) {
+      if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
+              var->declaration->decorations())) {
+        if (builtin->value() == ast::Builtin::kPosition) {
+          found = true;
+          break;
+        }
+      }
+    }
+    if (!found) {
+      diagnostics_.add_error(
+          "a vertex shader must include the 'position' builtin in its return "
+          "type",
+          func->source());
       return false;
     }
   }
@@ -863,7 +891,7 @@ bool Resolver::Function(ast::Function* func) {
     Mark(deco);
   }
 
-  if (!ValidateFunction(func)) {
+  if (!ValidateFunction(func, func_info)) {
     return false;
   }
 

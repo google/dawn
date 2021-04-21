@@ -94,7 +94,7 @@ TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
   Func("main", ast::VariableList{}, ty.f32(),
        ast::StatementList{create<ast::ReturnStatement>(Expr(1.f))},
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex)},
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute)},
        ast::DecorationList{createDecoration({}, *this, params.kind)});
 
   if (params.should_pass) {

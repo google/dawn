@@ -1261,7 +1261,7 @@ TEST_F(IntrinsicBuilderTest, Call_Modf) {
            create<ast::CallStatement>(expr),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = Build();
@@ -1271,7 +1271,8 @@ TEST_F(IntrinsicBuilderTest, Call_Modf) {
   auto* expect = R"(OpCapability Shader
 %11 = OpExtInstImport "GLSL.std.450"
 OpMemoryModel Logical GLSL450
-OpEntryPoint Vertex %3 "a_func"
+OpEntryPoint Fragment %3 "a_func"
+OpExecutionMode %3 OriginUpperLeft
 OpName %3 "a_func"
 OpName %5 "out"
 %2 = OpTypeVoid
@@ -1304,7 +1305,7 @@ TEST_F(IntrinsicBuilderTest, Call_Frexp) {
            create<ast::CallStatement>(expr),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = Build();
@@ -1314,7 +1315,8 @@ TEST_F(IntrinsicBuilderTest, Call_Frexp) {
   auto* expect = R"(OpCapability Shader
 %13 = OpExtInstImport "GLSL.std.450"
 OpMemoryModel Logical GLSL450
-OpEntryPoint Vertex %3 "a_func"
+OpEntryPoint Fragment %3 "a_func"
+OpExecutionMode %3 OriginUpperLeft
 OpName %3 "a_func"
 OpName %5 "out"
 %2 = OpTypeVoid
@@ -1393,7 +1395,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
            create<ast::CallStatement>(expr),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = Build();
@@ -1443,7 +1445,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
            create<ast::CallStatement>(expr),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = Build();

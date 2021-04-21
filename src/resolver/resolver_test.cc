@@ -1532,7 +1532,7 @@ TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
                create<ast::AssignmentStatement>(Expr("call_b"), Call("b")),
            },
            ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
   auto* ep_2 =
@@ -1541,7 +1541,7 @@ TEST_F(ResolverTest, Function_EntryPoints_StageDecoration) {
                create<ast::AssignmentStatement>(Expr("call_c"), Call("c")),
            },
            ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
            });
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1620,7 +1620,7 @@ TEST_F(ResolverTest, Function_EntryPoints_LinearTime) {
            create<ast::CallStatement>(Call(fn_b(0))),
        },
        {
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
        });
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();

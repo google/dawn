@@ -39,7 +39,9 @@ TEST_F(VertexPullingTest, Error_NoEntryPoint) {
 TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
   auto* src = R"(
 [[stage(vertex)]]
-fn main() {}
+fn main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
 )";
 
   auto* expect = "error: Vertex stage entry point not found";
@@ -75,7 +77,9 @@ fn main() {}
 TEST_F(VertexPullingTest, BasicModule) {
   auto* src = R"(
 [[stage(vertex)]]
-fn main() {}
+fn main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
 )";
 
   auto* expect = R"(
@@ -85,10 +89,11 @@ struct TintVertexData {
 };
 
 [[stage(vertex)]]
-fn main() {
+fn main() -> [[builtin(position)]] vec4<f32> {
   {
     var tint_pulling_pos : u32;
   }
+  return vec4<f32>();
 }
 )";
 
@@ -107,7 +112,9 @@ TEST_F(VertexPullingTest, OneAttribute) {
 [[location(0)]] var<in> var_a : f32;
 
 [[stage(vertex)]]
-fn main() {}
+fn main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
 )";
 
   auto* expect = R"(
@@ -123,12 +130,13 @@ struct TintVertexData {
 var<private> var_a : f32;
 
 [[stage(vertex)]]
-fn main() {
+fn main() -> [[builtin(position)]] vec4<f32> {
   {
     var tint_pulling_pos : u32;
     tint_pulling_pos = ((tint_pulling_vertex_index * 4u) + 0u);
     var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(tint_pulling_pos / 4u)]);
   }
+  return vec4<f32>();
 }
 )";
 
@@ -149,7 +157,9 @@ TEST_F(VertexPullingTest, OneInstancedAttribute) {
 [[location(0)]] var<in> var_a : f32;
 
 [[stage(vertex)]]
-fn main() {}
+fn main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
 )";
 
   auto* expect = R"(
@@ -165,12 +175,13 @@ struct TintVertexData {
 var<private> var_a : f32;
 
 [[stage(vertex)]]
-fn main() {
+fn main() -> [[builtin(position)]] vec4<f32> {
   {
     var tint_pulling_pos : u32;
     tint_pulling_pos = ((tint_pulling_instance_index * 4u) + 0u);
     var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(tint_pulling_pos / 4u)]);
   }
+  return vec4<f32>();
 }
 )";
 
@@ -191,7 +202,9 @@ TEST_F(VertexPullingTest, OneAttributeDifferentOutputSet) {
 [[location(0)]] var<in> var_a : f32;
 
 [[stage(vertex)]]
-fn main() {}
+fn main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
 )";
 
   auto* expect = R"(
@@ -207,12 +220,13 @@ struct TintVertexData {
 var<private> var_a : f32;
 
 [[stage(vertex)]]
-fn main() {
+fn main() -> [[builtin(position)]] vec4<f32> {
   {
     var tint_pulling_pos : u32;
     tint_pulling_pos = ((tint_pulling_vertex_index * 4u) + 0u);
     var_a = bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[(tint_pulling_pos / 4u)]);
   }
+  return vec4<f32>();
 }
 )";
 
@@ -238,7 +252,9 @@ TEST_F(VertexPullingTest, ExistingVertexIndexAndInstanceIndex) {
 [[builtin(instance_index)]] var<in> custom_instance_index : u32;
 
 [[stage(vertex)]]
-fn main() {}
+fn main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
 )";
 
   auto* expect = R"(
@@ -260,7 +276,7 @@ var<private> var_b : f32;
 [[builtin(instance_index)]] var<in> custom_instance_index : u32;
 
 [[stage(vertex)]]
-fn main() {
+fn main() -> [[builtin(position)]] vec4<f32> {
   {
     var tint_pulling_pos : u32;
     tint_pulling_pos = ((custom_vertex_index * 4u) + 0u);
@@ -268,6 +284,7 @@ fn main() {
     tint_pulling_pos = ((custom_instance_index * 4u) + 0u);
     var_b = bitcast<f32>(tint_pulling_vertex_buffer_1.tint_vertex_data[(tint_pulling_pos / 4u)]);
   }
+  return vec4<f32>();
 }
 )";
 
@@ -299,7 +316,9 @@ TEST_F(VertexPullingTest, TwoAttributesSameBuffer) {
 [[location(1)]] var<in> var_b : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() {}
+fn main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
 )";
 
   auto* expect = R"(
@@ -317,7 +336,7 @@ var<private> var_a : f32;
 var<private> var_b : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() {
+fn main() -> [[builtin(position)]] vec4<f32> {
   {
     var tint_pulling_pos : u32;
     tint_pulling_pos = ((tint_pulling_vertex_index * 16u) + 0u);
@@ -325,6 +344,7 @@ fn main() {
     tint_pulling_pos = ((tint_pulling_vertex_index * 16u) + 0u);
     var_b = vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 8u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_0.tint_vertex_data[((tint_pulling_pos + 12u) / 4u)]));
   }
+  return vec4<f32>();
 }
 )";
 
@@ -349,7 +369,9 @@ TEST_F(VertexPullingTest, FloatVectorAttributes) {
 [[location(2)]] var<in> var_c : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() {}
+fn main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
 )";
 
   auto* expect = R"(
@@ -373,7 +395,7 @@ var<private> var_b : vec3<f32>;
 var<private> var_c : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() {
+fn main() -> [[builtin(position)]] vec4<f32> {
   {
     var tint_pulling_pos : u32;
     tint_pulling_pos = ((tint_pulling_vertex_index * 8u) + 0u);
@@ -383,6 +405,7 @@ fn main() {
     tint_pulling_pos = ((tint_pulling_vertex_index * 16u) + 0u);
     var_c = vec4<f32>(bitcast<f32>(tint_pulling_vertex_buffer_2.tint_vertex_data[((tint_pulling_pos + 0u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_2.tint_vertex_data[((tint_pulling_pos + 4u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_2.tint_vertex_data[((tint_pulling_pos + 8u) / 4u)]), bitcast<f32>(tint_pulling_vertex_buffer_2.tint_vertex_data[((tint_pulling_pos + 12u) / 4u)]));
   }
+  return vec4<f32>();
 }
 )";
 
@@ -407,11 +430,12 @@ TEST_F(VertexPullingTest, AttemptSymbolCollision) {
 [[location(1)]] var<in> var_b : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() {
+fn main() -> [[builtin(position)]] vec4<f32> {
   var tint_pulling_vertex_index : i32;
   var tint_pulling_vertex_buffer_0 : i32;
   var tint_vertex_data : i32;
   var tint_pulling_pos : i32;
+  return vec4<f32>();
 }
 )";
 
@@ -430,7 +454,7 @@ var<private> var_a : f32;
 var<private> var_b : vec4<f32>;
 
 [[stage(vertex)]]
-fn main() {
+fn main() -> [[builtin(position)]] vec4<f32> {
   {
     var tint_pulling_pos_1 : u32;
     tint_pulling_pos_1 = ((tint_pulling_vertex_index_1 * 16u) + 0u);
@@ -442,6 +466,7 @@ fn main() {
   var tint_pulling_vertex_buffer_0 : i32;
   var tint_vertex_data : i32;
   var tint_pulling_pos : i32;
+  return vec4<f32>();
 }
 )";
 

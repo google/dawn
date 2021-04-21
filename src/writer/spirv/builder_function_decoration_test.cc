@@ -28,14 +28,14 @@ TEST_F(BuilderTest, Decoration_Stage) {
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{},
            ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
   spirv::Builder& b = Build();
 
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
   EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Vertex %3 "main"
+            R"(OpEntryPoint Fragment %3 "main"
 )");
 }
 
@@ -51,13 +51,24 @@ using Decoration_StageTest = TestParamHelper<FunctionStageData>;
 TEST_P(Decoration_StageTest, Emit) {
   auto params = GetParam();
 
-  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
+  ast::Variable* var = nullptr;
+  ast::StatementList body;
+  if (params.stage == ast::PipelineStage::kVertex) {
+    var = Global("pos", ty.vec4<f32>(), ast::StorageClass::kOutput, nullptr,
+                 ast::DecorationList{Builtin(ast::Builtin::kPosition)});
+    body.push_back(Assign("pos", Construct(ty.vec4<f32>())));
+  }
+
+  auto* func = Func("main", {}, ty.void_(), body,
                     ast::DecorationList{
                         create<ast::StageDecoration>(params.stage),
                     });
 
   spirv::Builder& b = Build();
 
+  if (var) {
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  }
   ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
   auto preamble = b.entry_points();
@@ -82,7 +93,7 @@ TEST_F(BuilderTest, Decoration_Stage_WithUnusedInterfaceIds) {
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{},
            ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
   auto* v_in = Global("my_in", ty.f32(), ast::StorageClass::kInput);
@@ -113,7 +124,7 @@ OpName %11 "main"
 %9 = OpTypeFunction %10
 )");
   EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Vertex %11 "main"
+            R"(OpEntryPoint Fragment %11 "main"
 )");
 }
 
@@ -131,7 +142,7 @@ TEST_F(BuilderTest, Decoration_Stage_WithUsedInterfaceIds) {
                // output multiple times.
                create<ast::AssignmentStatement>(Expr("my_out"), Expr("my_in"))},
            ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
 
   spirv::Builder& b = Build();
@@ -158,7 +169,7 @@ OpName %11 "main"
 %9 = OpTypeFunction %10
 )");
   EXPECT_EQ(DumpInstructions(b.entry_points()),
-            R"(OpEntryPoint Vertex %11 "main" %4 %1
+            R"(OpEntryPoint Fragment %11 "main" %4 %1
 )");
 }
 

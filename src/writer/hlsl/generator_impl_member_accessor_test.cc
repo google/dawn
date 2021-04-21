@@ -113,7 +113,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
     ProgramBuilder& b = *this;
     b.Func("main", ast::VariableList{}, b.ty.void_(), statements,
            ast::DecorationList{
-               b.create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+               b.create<ast::StageDecoration>(ast::PipelineStage::kFragment),
            });
   }
 };

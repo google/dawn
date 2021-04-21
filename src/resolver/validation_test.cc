@@ -280,9 +280,6 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
            create<ast::AssignmentStatement>(Source{Source::Location{12, 34}},
                                             Expr("global_var"), Expr(3.14f)),
            create<ast::ReturnStatement>(),
-       },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

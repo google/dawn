@@ -130,7 +130,7 @@ void Hlsl::AddEmptyEntryPoint(CloneContext& ctx) const {
   ctx.dst->Func(
       ctx.dst->Symbols().New("tint_unused_entry_point"), {},
       ctx.dst->ty.void_(), {},
-      {ctx.dst->create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+      {ctx.dst->create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
 }
 
 }  // namespace transform

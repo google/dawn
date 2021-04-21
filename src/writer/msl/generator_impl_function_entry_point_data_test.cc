@@ -38,14 +38,14 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
          ast::DecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+      Assign(Expr("foo"), Expr("foo")),
+      Assign(Expr("bar"), Expr("bar")),
+      Return(Construct(ty.vec4<f32>())),
   };
 
-  Func("vtx_main", ast::VariableList{}, ty.void_(), body,
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
+  Func("vtx_main", ast::VariableList{}, ty.vec4<f32>(), body,
+       {Stage(ast::PipelineStage::kVertex)},
+       {Builtin(ast::Builtin::kPosition)});
 
   GeneratorImpl& gen = Build();
 
@@ -75,14 +75,14 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
          ast::DecorationList{create<ast::LocationDecoration>(1)});
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+      Assign(Expr("foo"), Expr("foo")),
+      Assign(Expr("bar"), Expr("bar")),
+      Return(Construct(ty.vec4<f32>())),
   };
 
-  Func("vtx_main", ast::VariableList{}, ty.void_(), body,
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-       });
+  Func("vtx_main", ast::VariableList{}, ty.vec4<f32>(), body,
+       {Stage(ast::PipelineStage::kVertex)},
+       {Builtin(ast::Builtin::kPosition)});
 
   GeneratorImpl& gen = Build();
 

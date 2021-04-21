@@ -65,11 +65,12 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointReturnType) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
-  auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+  auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
 
-  Func("main", {Param("param", s)}, ty.void_(), {},
-       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+  Func("main", {Param("param", s)}, ty.vec4<f32>(),
+       {Return(Construct(ty.vec4<f32>()))},
+       {Stage(ast::PipelineStage::kVertex)},
+       {Builtin(ast::Builtin::kPosition)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -81,10 +82,10 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
   auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+      "S", {Member("a", ty.f32(), {Builtin(ast::Builtin::kPosition)})});
 
   Func("main", {}, s, {Return(Construct(s, Expr(0.f)))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+       {Stage(ast::PipelineStage::kVertex)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -142,13 +143,13 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
   auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+      "S", {Member("a", ty.f32(), {Builtin(ast::Builtin::kPosition)})});
 
   Func("vert_main", {Param("param", s)}, s, {Return(Construct(s, Expr(0.f)))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+       {Stage(ast::PipelineStage::kVertex)});
 
   Func("frag_main", {Param("param", s)}, ty.void_(), {},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {Stage(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
