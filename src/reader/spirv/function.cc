@@ -175,6 +175,8 @@ const char* GetUnaryBuiltInFunctionName(SpvOp opcode) {
       return "isNan";
     case SpvOpIsInf:
       return "isInf";
+    case SpvOpTranspose:
+      return "transpose";
     default:
       break;
   }
