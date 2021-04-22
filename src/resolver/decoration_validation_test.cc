@@ -62,21 +62,19 @@ static ast::Decoration* createDecoration(const Source& source,
     case DecorationKind::kBinding:
       return builder.create<ast::BindingDecoration>(source, 1);
     case DecorationKind::kBuiltin:
-      return builder.create<ast::BuiltinDecoration>(source,
-                                                    ast::Builtin::kPosition);
+      return builder.Builtin(source, ast::Builtin::kPosition);
     case DecorationKind::kConstantId:
       return builder.create<ast::ConstantIdDecoration>(source, 0u);
     case DecorationKind::kGroup:
       return builder.create<ast::GroupDecoration>(source, 1u);
     case DecorationKind::kLocation:
-      return builder.create<ast::LocationDecoration>(source, 1);
+      return builder.Location(source, 1);
     case DecorationKind::kOffset:
       return builder.create<ast::StructMemberOffsetDecoration>(source, 4u);
     case DecorationKind::kSize:
       return builder.create<ast::StructMemberSizeDecoration>(source, 4u);
     case DecorationKind::kStage:
-      return builder.create<ast::StageDecoration>(source,
-                                                  ast::PipelineStage::kCompute);
+      return builder.Stage(source, ast::PipelineStage::kCompute);
     case DecorationKind::kStride:
       return builder.create<ast::StrideDecoration>(source, 4u);
     case DecorationKind::kStructBlock:
@@ -91,10 +89,8 @@ using FunctionReturnTypeDecorationTest = TestWithParams;
 TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  Func("main", ast::VariableList{}, ty.f32(),
-       ast::StatementList{create<ast::ReturnStatement>(Expr(1.f))},
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute)},
+  Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
+       ast::DecorationList{Stage(ast::PipelineStage::kCompute)},
        ast::DecorationList{createDecoration({}, *this, params.kind)});
 
   if (params.should_pass) {
@@ -126,15 +122,16 @@ using ArrayDecorationTest = TestWithParams;
 TEST_P(ArrayDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  ast::StructMemberList members{Member(
-      "a", create<sem::ArrayType>(ty.f32(), 0,
-                                  ast::DecorationList{createDecoration(
-                                      Source{{12, 34}}, *this, params.kind)}))};
-  auto* s = create<ast::Struct>(
-      Sym("mystruct"), members,
-      ast::DecorationList{create<ast::StructBlockDecoration>()});
-  auto* s_ty = ty.struct_(s);
-  AST().AddConstructedType(s_ty);
+  auto* arr = create<sem::ArrayType>(
+      ty.f32(), 0,
+      ast::DecorationList{
+          createDecoration(Source{{12, 34}}, *this, params.kind),
+      });
+  Structure("mystruct",
+            {
+                Member("a", arr),
+            },
+            {create<ast::StructBlockDecoration>()});
 
   WrapInFunction();
 
@@ -167,11 +164,8 @@ using StructDecorationTest = TestWithParams;
 TEST_P(StructDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  auto* s = create<ast::Struct>(Sym("mystruct"), ast::StructMemberList{},
-                                ast::DecorationList{createDecoration(
-                                    Source{{12, 34}}, *this, params.kind)});
-  auto* s_ty = ty.struct_(s);
-  AST().AddConstructedType(s_ty);
+  Structure("mystruct", {},
+            {createDecoration(Source{{12, 34}}, *this, params.kind)});
 
   WrapInFunction();
 
@@ -208,10 +202,8 @@ TEST_P(StructMemberDecorationTest, IsValid) {
       Member("a", ty.i32(),
              ast::DecorationList{
                  createDecoration(Source{{12, 34}}, *this, params.kind)})};
-  auto* s =
-      create<ast::Struct>(Sym("mystruct"), members, ast::DecorationList{});
-  auto* s_ty = ty.struct_(s);
-  AST().AddConstructedType(s_ty);
+
+  Structure("mystruct", members);
 
   WrapInFunction();
 
@@ -281,7 +273,7 @@ TEST_P(FunctionDecorationTest, IsValid) {
 
   Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
            createDecoration(Source{{12, 34}}, *this, params.kind)});
 
   if (params.should_pass) {

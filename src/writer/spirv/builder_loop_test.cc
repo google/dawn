@@ -26,9 +26,7 @@ TEST_F(BuilderTest, Loop_Empty) {
   // loop {
   // }
 
-  auto* loop = create<ast::LoopStatement>(
-      create<ast::BlockStatement>(ast::StatementList{}),
-      create<ast::BlockStatement>(ast::StatementList{}));
+  auto* loop = Loop(Block(), Block());
   WrapInFunction(loop);
 
   spirv::Builder& b = Build();
@@ -55,11 +53,9 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
   // }
 
   auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
+  auto* body = Block(Assign("v", 2));
 
-  auto* loop = create<ast::LoopStatement>(
-      body, create<ast::BlockStatement>(ast::StatementList{}));
+  auto* loop = Loop(body, Block());
   WrapInFunction(loop);
 
   spirv::Builder& b = Build();
@@ -97,12 +93,10 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
   // }
 
   auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
-  auto* continuing = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
+  auto* body = Block(Assign("v", 2));
+  auto* continuing = Block(Assign("v", 3));
 
-  auto* loop = create<ast::LoopStatement>(body, continuing);
+  auto* loop = Loop(body, continuing);
   WrapInFunction(loop);
 
   spirv::Builder& b = Build();
@@ -143,11 +137,10 @@ TEST_F(BuilderTest, Loop_WithBodyVariableAccessInContinuing) {
 
   auto* var = Var("a", ty.i32(), ast::StorageClass::kFunction);
   auto* var_decl = WrapInStatement(var);
-  auto* body = create<ast::BlockStatement>(ast::StatementList{var_decl});
-  auto* continuing = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("a"), Expr(3))});
+  auto* body = Block(var_decl);
+  auto* continuing = Block(Assign("a", 3));
 
-  auto* loop = create<ast::LoopStatement>(body, continuing);
+  auto* loop = Loop(body, continuing);
   WrapInFunction(loop);
 
   spirv::Builder& b = Build();
@@ -178,11 +171,8 @@ TEST_F(BuilderTest, Loop_WithContinue) {
   // loop {
   //   continue;
   // }
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ContinueStatement>(),
-  });
-  auto* loop = create<ast::LoopStatement>(
-      body, create<ast::BlockStatement>(ast::StatementList{}));
+  auto* body = Block(create<ast::ContinueStatement>());
+  auto* loop = Loop(body, Block());
   WrapInFunction(loop);
 
   spirv::Builder& b = Build();
@@ -207,11 +197,8 @@ TEST_F(BuilderTest, Loop_WithBreak) {
   // loop {
   //   break;
   // }
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::BreakStatement>(),
-  });
-  auto* loop = create<ast::LoopStatement>(
-      body, create<ast::BlockStatement>(ast::StatementList{}));
+  auto* body = Block(create<ast::BreakStatement>());
+  auto* loop = Loop(body, Block());
   WrapInFunction(loop);
 
   spirv::Builder& b = Build();

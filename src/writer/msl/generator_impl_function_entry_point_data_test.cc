@@ -32,14 +32,14 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Input) {
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{Location(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{Location(1)});
 
   auto body = ast::StatementList{
-      Assign(Expr("foo"), Expr("foo")),
-      Assign(Expr("bar"), Expr("bar")),
+      Assign("foo", "foo"),
+      Assign("bar", "bar"),
       Return(Construct(ty.vec4<f32>())),
   };
 
@@ -69,14 +69,14 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Vertex_Output) {
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{Location(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{Location(1)});
 
   auto body = ast::StatementList{
-      Assign(Expr("foo"), Expr("foo")),
-      Assign(Expr("bar"), Expr("bar")),
+      Assign("foo", "foo"),
+      Assign("bar", "bar"),
       Return(Construct(ty.vec4<f32>())),
   };
 
@@ -106,19 +106,19 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Input) {
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{Location(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{Location(1)});
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+      Assign("foo", "foo"),
+      Assign("bar", "bar"),
   };
 
   Func("main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   GeneratorImpl& gen = Build();
@@ -143,19 +143,19 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Fragment_Output) {
   // };
 
   Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{Location(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{Location(1)});
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+      Assign("foo", "foo"),
+      Assign("bar", "bar"),
   };
 
   Func("main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   GeneratorImpl& gen = Build();
@@ -177,19 +177,19 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Input) {
   // -> Error, not allowed
 
   Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{Location(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{Location(1)});
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+      Assign("foo", "foo"),
+      Assign("bar", "bar"),
   };
 
   Func("main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   GeneratorImpl& gen = Build();
@@ -207,19 +207,19 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Compute_Output) {
   // -> Error not allowed
 
   Global("foo", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{Location(0)});
 
   Global("bar", ty.i32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(1)});
+         ast::DecorationList{Location(1)});
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("foo"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("bar")),
+      Assign("foo", "foo"),
+      Assign("bar", "bar"),
   };
 
   Func("main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   GeneratorImpl& gen = Build();
@@ -242,19 +242,16 @@ TEST_F(MslGeneratorImplTest, Emit_Function_EntryPointData_Builtins) {
   // };
 
   Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
+         ast::DecorationList{Builtin(ast::Builtin::kPosition)});
 
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
+         ast::DecorationList{Builtin(ast::Builtin::kFragDepth)});
 
-  auto body = ast::StatementList{create<ast::AssignmentStatement>(
-      Expr("depth"), MemberAccessor("coord", "x"))};
+  auto body = ast::StatementList{Assign("depth", MemberAccessor("coord", "x"))};
 
   Func("main", ast::VariableList{}, ty.void_(), body,
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   GeneratorImpl& gen = Build();

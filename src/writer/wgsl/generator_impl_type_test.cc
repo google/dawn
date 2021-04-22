@@ -275,9 +275,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithEntryPointDecorations) {
   auto* s = Structure(
       "S",
       ast::StructMemberList{
-          Member("a", ty.u32(),
-                 {create<ast::BuiltinDecoration>(ast::Builtin::kVertexIndex)}),
-          Member("b", ty.f32(), {create<ast::LocationDecoration>(2u)})},
+          Member("a", ty.u32(), {Builtin(ast::Builtin::kVertexIndex)}),
+          Member("b", ty.f32(), {Location(2u)})},
       decos);
 
   GeneratorImpl& gen = Build();

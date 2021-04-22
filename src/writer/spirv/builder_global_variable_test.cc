@@ -144,7 +144,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_ConstructorWithExtract) {
 TEST_F(BuilderTest, GlobalVar_WithLocation) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, nullptr,
                    ast::DecorationList{
-                       create<ast::LocationDecoration>(5),
+                       Location(5),
                    });
 
   spirv::Builder& b = Build();
@@ -186,7 +186,7 @@ OpDecorate %1 DescriptorSet 3
 TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, nullptr,
                    ast::DecorationList{
-                       create<ast::BuiltinDecoration>(ast::Builtin::kPosition),
+                       Builtin(ast::Builtin::kPosition),
                    });
 
   spirv::Builder& b = Build();
@@ -621,7 +621,7 @@ TEST_F(BuilderTest, SampleIndex) {
   auto* var =
       Global("sample_index", ty.u32(), ast::StorageClass::kInput, nullptr,
              ast::DecorationList{
-                 create<ast::BuiltinDecoration>(ast::Builtin::kSampleIndex),
+                 Builtin(ast::Builtin::kSampleIndex),
              });
 
   spirv::Builder& b = Build();
@@ -655,18 +655,18 @@ TEST_F(BuilderTest, SampleMask) {
 
   Global("mask_in", ty.u32(), ast::StorageClass::kInput, nullptr,
          ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kSampleMask),
+             Builtin(ast::Builtin::kSampleMask),
          });
   Global("mask_out", ty.u32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kSampleMask),
+             Builtin(ast::Builtin::kSampleMask),
          });
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::AssignmentStatement>(Expr("mask_out"), Expr("mask_in")),
+           Assign("mask_out", "mask_in"),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   spirv::Builder& b = SanitizeAndBuild();

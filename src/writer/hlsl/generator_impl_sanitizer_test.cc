@@ -45,12 +45,11 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(
-               Var("len", ty.u32(), ast::StorageClass::kFunction,
-                   Call("arrayLength", MemberAccessor("sb", "arr")))),
+           Decl(Var("len", ty.u32(), ast::StorageClass::kFunction,
+                    Call("arrayLength", MemberAccessor("sb", "arr")))),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -80,10 +79,10 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(pos),
+           Decl(pos),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -114,10 +113,10 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(pos),
+           Decl(pos),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   GeneratorImpl& gen = SanitizeAndBuild();

@@ -31,8 +31,7 @@ TEST_F(BuilderTest, Expression_Call) {
 
   auto* a_func =
       Func("a_func", func_params, ty.f32(),
-           ast::StatementList{create<ast::ReturnStatement>(Add("a", "b"))},
-           ast::DecorationList{});
+           ast::StatementList{Return(Add("a", "b"))}, ast::DecorationList{});
 
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{}, ast::DecorationList{});
@@ -78,8 +77,7 @@ TEST_F(BuilderTest, Statement_Call) {
 
   auto* a_func =
       Func("a_func", func_params, ty.f32(),
-           ast::StatementList{create<ast::ReturnStatement>(Add("a", "b"))},
-           ast::DecorationList{});
+           ast::StatementList{Return(Add("a", "b"))}, ast::DecorationList{});
 
   auto* func =
       Func("main", {}, ty.void_(), ast::StatementList{}, ast::DecorationList{});

@@ -30,13 +30,13 @@ TEST_F(ResolverFunctionValidationTest, FunctionNamesMustBeUnique_fail) {
   // fn func -> i32 { return 2; }
   Func("func", ast::VariableList{}, ty.i32(),
        ast::StatementList{
-           create<ast::ReturnStatement>(Expr(2)),
+           Return(2),
        },
        ast::DecorationList{});
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
        ast::StatementList{
-           create<ast::ReturnStatement>(Expr(2)),
+           Return(2),
        },
        ast::DecorationList{});
 
@@ -53,7 +53,7 @@ TEST_F(ResolverFunctionValidationTest,
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{},
        ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
+           Decl(var),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -66,7 +66,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {
 
   Func(Source{Source::Location{12, 34}}, "func", ast::VariableList{}, ty.i32(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
+           Decl(var),
        },
        ast::DecorationList{});
 
@@ -105,7 +105,7 @@ TEST_F(ResolverFunctionValidationTest,
 
   Func("func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::ReturnStatement>(),
+           Return(),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -116,8 +116,7 @@ TEST_F(ResolverFunctionValidationTest,
   // fn func { return 2; }
   Func("func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
-                                        Expr(2)),
+           Return(Source{Source::Location{12, 34}}, Expr(2)),
        },
        ast::DecorationList{});
 
@@ -132,8 +131,7 @@ TEST_F(ResolverFunctionValidationTest,
   // fn func -> f32 { return 2.0; }
   Func("func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
-           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
-                                        Expr(2.f)),
+           Return(Source{Source::Location{12, 34}}, Expr(2.f)),
        },
        ast::DecorationList{});
 
@@ -145,8 +143,7 @@ TEST_F(ResolverFunctionValidationTest,
   // fn func -> f32 { return 2; }
   Func("func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
-           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
-                                        Expr(2)),
+           Return(Source{Source::Location{12, 34}}, Expr(2)),
        },
        ast::DecorationList{});
 
@@ -163,8 +160,7 @@ TEST_F(ResolverFunctionValidationTest,
   auto* myf32 = ty.alias("myf32", ty.f32());
   Func("func", ast::VariableList{}, myf32,
        ast::StatementList{
-           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
-                                        Expr(2.f)),
+           Return(Source{Source::Location{12, 34}}, Expr(2.f)),
        },
        ast::DecorationList{});
 
@@ -178,8 +174,7 @@ TEST_F(ResolverFunctionValidationTest,
   auto* myf32 = ty.alias("myf32", ty.f32());
   Func("func", ast::VariableList{}, myf32,
        ast::StatementList{
-           create<ast::ReturnStatement>(Source{Source::Location{12, 34}},
-                                        Expr(2u)),
+           Return(Source{Source::Location{12, 34}}, Expr(2u)),
        },
        ast::DecorationList{});
 
@@ -196,11 +191,11 @@ TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
   Func(Source{Source::Location{12, 34}}, "main", ast::VariableList{},
        ty.void_(),
        ast::StatementList{
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kVertex),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   EXPECT_FALSE(r()->Resolve());
@@ -212,7 +207,7 @@ TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {
 TEST_F(ResolverFunctionValidationTest, NoPipelineEntryPoints) {
   Func("vtx_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{});
 

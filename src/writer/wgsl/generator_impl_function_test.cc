@@ -30,7 +30,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
   auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{
                         create<ast::DiscardStatement>(),
-                        create<ast::ReturnStatement>(),
+                        Return(),
                     },
                     ast::DecorationList{});
 
@@ -52,7 +52,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
       ty.void_(),
       ast::StatementList{
           create<ast::DiscardStatement>(),
-          create<ast::ReturnStatement>(),
+          Return(),
       },
       ast::DecorationList{});
 
@@ -72,7 +72,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
                     ast::StatementList{
                         create<ast::DiscardStatement>(),
-                        create<ast::ReturnStatement>(),
+                        Return(),
                     },
                     ast::DecorationList{
                         create<ast::WorkgroupDecoration>(2u, 4u, 6u),
@@ -92,15 +92,14 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
-  auto* func =
-      Func("my_func", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::DiscardStatement>(),
-               create<ast::ReturnStatement>(),
-           },
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{
+                        create<ast::DiscardStatement>(),
+                        Return(),
+                    },
+                    ast::DecorationList{
+                        Stage(ast::PipelineStage::kFragment),
+                    });
 
   GeneratorImpl& gen = Build();
 
@@ -116,16 +115,15 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
-  auto* func =
-      Func("my_func", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::DiscardStatement>(),
-               create<ast::ReturnStatement>(),
-           },
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-               create<ast::WorkgroupDecoration>(2u, 4u, 6u),
-           });
+  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{
+                        create<ast::DiscardStatement>(),
+                        Return(),
+                    },
+                    ast::DecorationList{
+                        Stage(ast::PipelineStage::kFragment),
+                        create<ast::WorkgroupDecoration>(2u, 4u, 6u),
+                    });
 
   GeneratorImpl& gen = Build();
 
@@ -143,15 +141,13 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
   auto* vec4 = ty.vec4<f32>();
-  auto* coord = Param(
-      "coord", vec4, {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
-  auto* loc1 = Param("loc1", ty.f32(), {create<ast::LocationDecoration>(1u)});
-  auto* func =
-      Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
-           ast::StatementList{},
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
+  auto* coord = Param("coord", vec4, {Builtin(ast::Builtin::kPosition)});
+  auto* loc1 = Param("loc1", ty.f32(), {Location(1u)});
+  auto* func = Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
+                    ast::StatementList{},
+                    ast::DecorationList{
+                        Stage(ast::PipelineStage::kFragment),
+                    });
 
   GeneratorImpl& gen = Build();
 
@@ -165,17 +161,16 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_ReturnValue) {
-  auto* func =
-      Func("frag_main", ast::VariableList{}, ty.f32(),
-           ast::StatementList{
-               create<ast::ReturnStatement>(Expr(1.f)),
-           },
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           },
-           ast::DecorationList{
-               create<ast::LocationDecoration>(1u),
-           });
+  auto* func = Func("frag_main", ast::VariableList{}, ty.f32(),
+                    ast::StatementList{
+                        Return(1.f),
+                    },
+                    ast::DecorationList{
+                        Stage(ast::PipelineStage::kFragment),
+                    },
+                    ast::DecorationList{
+                        Location(1u),
+                    });
 
   GeneratorImpl& gen = Build();
 
@@ -219,32 +214,30 @@ TEST_F(WgslGeneratorImplTest,
          });
 
   {
-    auto* var =
-        Var("v", ty.f32(), ast::StorageClass::kFunction,
-            create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")));
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
+                    MemberAccessor("data", "d"));
 
     Func("a", ast::VariableList{}, ty.void_(),
          ast::StatementList{
-             create<ast::VariableDeclStatement>(var),
-             create<ast::ReturnStatement>(),
+             Decl(var),
+             Return(),
          },
          ast::DecorationList{
-             create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+             Stage(ast::PipelineStage::kCompute),
          });
   }
 
   {
-    auto* var =
-        Var("v", ty.f32(), ast::StorageClass::kFunction,
-            create<ast::MemberAccessorExpression>(Expr("data"), Expr("d")));
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
+                    MemberAccessor("data", "d"));
 
     Func("b", ast::VariableList{}, ty.void_(),
          ast::StatementList{
-             create<ast::VariableDeclStatement>(var),
-             create<ast::ReturnStatement>(),
+             Decl(var),
+             Return(),
          },
          ast::DecorationList{
-             create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+             Stage(ast::PipelineStage::kCompute),
          });
   }
 

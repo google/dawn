@@ -35,7 +35,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignIncompatibleTypes) {
   auto* lhs = Expr("a");
   auto* rhs = Expr(2.3f);
 
-  auto* assign = create<ast::AssignmentStatement>(Source{{12, 34}}, lhs, rhs);
+  auto* assign = Assign(Source{{12, 34}}, lhs, rhs);
   WrapInFunction(var, assign);
 
   ASSERT_FALSE(r()->Resolve());
@@ -57,7 +57,7 @@ TEST_F(ResolverAssignmentValidationTest,
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
-  auto* assign = create<ast::AssignmentStatement>(Source{{12, 34}}, lhs, rhs);
+  auto* assign = Assign(Source{{12, 34}}, lhs, rhs);
   WrapInFunction(var_a, var_b, assign);
 
   ASSERT_FALSE(r()->Resolve());
@@ -77,10 +77,7 @@ TEST_F(ResolverAssignmentValidationTest,
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::AssignmentStatement>(Source{{12, 34}}, lhs, rhs),
-  });
+  auto* body = Block(Decl(var), Assign(Source{{12, 34}}, lhs, rhs));
   WrapInFunction(body);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -97,10 +94,7 @@ TEST_F(ResolverAssignmentValidationTest,
   auto* lhs = Expr("a");
   auto* rhs = Expr(2.3f);
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::AssignmentStatement>(Source{{12, 34}}, lhs, rhs),
-  });
+  auto* block = Block(Decl(var), Assign(Source{{12, 34}}, lhs, rhs));
   WrapInFunction(block);
 
   ASSERT_FALSE(r()->Resolve());
@@ -123,14 +117,9 @@ TEST_F(ResolverAssignmentValidationTest,
   auto* lhs = Expr("a");
   auto* rhs = Expr(2.3f);
 
-  auto* inner_block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::AssignmentStatement>(Source{{12, 34}}, lhs, rhs),
-  });
+  auto* inner_block = Block(Decl(var), Assign(Source{{12, 34}}, lhs, rhs));
 
-  auto* outer_block = create<ast::BlockStatement>(ast::StatementList{
-      inner_block,
-  });
+  auto* outer_block = Block(inner_block);
 
   WrapInFunction(outer_block);
 
@@ -149,7 +138,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignToScalar_Fail) {
   auto* lhs = Expr(1);
   auto* rhs = Expr("my_var");
 
-  auto* assign = create<ast::AssignmentStatement>(Source{{12, 34}}, lhs, rhs);
+  auto* assign = Assign(Source{{12, 34}}, lhs, rhs);
   WrapInFunction(Decl(var), assign);
 
   EXPECT_FALSE(r()->Resolve());
@@ -166,8 +155,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignCompatibleTypes_Pass) {
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
-  auto* assign = create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs);
+  auto* assign = Assign(Source{Source::Location{12, 34}}, lhs, rhs);
   WrapInFunction(Decl(var), assign);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -184,8 +172,7 @@ TEST_F(ResolverAssignmentValidationTest,
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
-  auto* assign = create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs);
+  auto* assign = Assign(Source{Source::Location{12, 34}}, lhs, rhs);
   WrapInFunction(Decl(var), assign);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -202,8 +189,7 @@ TEST_F(ResolverAssignmentValidationTest,
   auto* lhs = Expr("a");
   auto* rhs = Expr("b");
 
-  auto* assign = create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs);
+  auto* assign = Assign(Source{Source::Location{12, 34}}, lhs, rhs);
   WrapInFunction(Decl(var_a), Decl(var_b), assign);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -220,8 +206,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignThroughPointer_Pass) {
   auto* lhs = Expr("b");
   auto* rhs = Expr(2);
 
-  auto* assign = create<ast::AssignmentStatement>(
-      Source{Source::Location{12, 34}}, lhs, rhs);
+  auto* assign = Assign(Source{Source::Location{12, 34}}, lhs, rhs);
   WrapInFunction(Decl(var_a), Decl(var_b), assign);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -237,11 +222,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
-                                       rhs),
-  });
+  auto* body =
+      Block(Decl(var), Assign(Source{Source::Location{12, 34}}, lhs, rhs));
 
   WrapInFunction(body);
 
@@ -267,7 +249,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignFromPointer_Fail) {
   auto* lhs = Expr("a");
   auto* rhs = Expr("b");
 
-  auto* assign = create<ast::AssignmentStatement>(Source{{12, 34}}, lhs, rhs);
+  auto* assign = Assign(Source{{12, 34}}, lhs, rhs);
   WrapInFunction(Decl(var_a), Decl(var_b), assign);
 
   EXPECT_FALSE(r()->Resolve());

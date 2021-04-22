@@ -442,8 +442,8 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
-  auto* expr = create<ast::AssignmentStatement>(
-      MemberAccessor(MemberAccessor("ident", "inner"), "a"), Expr(2.0f));
+  auto* expr =
+      Assign(MemberAccessor(MemberAccessor("ident", "inner"), "a"), Expr(2.0f));
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -494,7 +494,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   auto* store = Global("store", ty.f32(), ast::StorageClass::kFunction);
 
   auto* rhs = MemberAccessor(MemberAccessor("ident", "inner"), "a");
-  auto* expr = create<ast::AssignmentStatement>(Expr("store"), rhs);
+  auto* expr = Assign("store", rhs);
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();

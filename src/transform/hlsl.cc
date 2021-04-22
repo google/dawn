@@ -106,8 +106,7 @@ void Hlsl::PromoteInitializersToConstVar(CloneContext& ctx) const {
         // Construct the constant that holds the hoisted initializer
         auto* dst_var = ctx.dst->Const(dst_symbol, dst_ty, dst_init);
         // Construct the variable declaration statement
-        auto* dst_var_decl =
-            ctx.dst->create<ast::VariableDeclStatement>(dst_var);
+        auto* dst_var_decl = ctx.dst->Decl(dst_var);
         // Construct the identifier for referencing the constant
         auto* dst_ident = ctx.dst->Expr(dst_symbol);
 
@@ -127,10 +126,9 @@ void Hlsl::AddEmptyEntryPoint(CloneContext& ctx) const {
       return;
     }
   }
-  ctx.dst->Func(
-      ctx.dst->Symbols().New("tint_unused_entry_point"), {},
-      ctx.dst->ty.void_(), {},
-      {ctx.dst->create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
+  ctx.dst->Func(ctx.dst->Symbols().New("tint_unused_entry_point"), {},
+                ctx.dst->ty.void_(), {},
+                {ctx.dst->Stage(ast::PipelineStage::kCompute)});
 }
 
 }  // namespace transform

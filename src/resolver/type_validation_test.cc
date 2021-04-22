@@ -38,11 +38,8 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
   auto* lhs = Expr("a");
   auto* rhs = Expr(2);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::AssignmentStatement>(Source{Source::Location{12, 34}}, lhs,
-                                       rhs),
-  });
+  auto* body =
+      Block(Decl(var), Assign(Source{Source::Location{12, 34}}, lhs, rhs));
 
   WrapInFunction(body);
 
@@ -133,7 +130,7 @@ TEST_F(ResolverTypeValidationTest,
 
   Func("my_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(Source{{12, 34}}, var),
+           Decl(Source{{12, 34}}, var),
        },
        ast::DecorationList{});
 
@@ -152,8 +149,8 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifier_Fail) {
 
   Func("my_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
-           create<ast::VariableDeclStatement>(Source{{12, 34}}, var_a_float),
+           Decl(var),
+           Decl(Source{{12, 34}}, var_a_float),
        },
        ast::DecorationList{});
 
@@ -169,16 +166,13 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScope_Pass) {
   auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
 
   auto* cond = Expr(true);
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-  });
+  auto* body = Block(Decl(var));
 
   auto* var_a_float = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.1f));
 
-  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
-      create<ast::VariableDeclStatement>(Source{{12, 34}}, var_a_float),
-  });
+  auto* outer_body =
+      Block(create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
+            Decl(Source{{12, 34}}, var_a_float));
 
   WrapInFunction(outer_body);
 
@@ -198,14 +192,11 @@ TEST_F(ResolverTypeValidationTest,
   auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
 
   auto* cond = Expr(true);
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{{12, 34}}, var),
-  });
+  auto* body = Block(Decl(Source{{12, 34}}, var));
 
-  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var_a_float),
-      create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
-  });
+  auto* outer_body =
+      Block(Decl(var_a_float),
+            create<ast::IfStatement>(cond, body, ast::ElseStatementList{}));
 
   WrapInFunction(outer_body);
 
@@ -219,15 +210,10 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Pass) {
   //  var a : f32;
   // }
   auto* var_inner = Var("a", ty.f32(), ast::StorageClass::kNone);
-  auto* inner = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{{12, 34}}, var_inner),
-  });
+  auto* inner = Block(Decl(Source{{12, 34}}, var_inner));
 
   auto* var_outer = Var("a", ty.f32(), ast::StorageClass::kNone);
-  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
-      inner,
-      create<ast::VariableDeclStatement>(var_outer),
-  });
+  auto* outer_body = Block(inner, Decl(var_outer));
 
   WrapInFunction(outer_body);
 
@@ -240,15 +226,10 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Fail) {
   //  { var a : f32; }
   // }
   auto* var_inner = Var("a", ty.f32(), ast::StorageClass::kNone);
-  auto* inner = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(Source{{12, 34}}, var_inner),
-  });
+  auto* inner = Block(Decl(Source{{12, 34}}, var_inner));
 
   auto* var_outer = Var("a", ty.f32(), ast::StorageClass::kNone);
-  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var_outer),
-      inner,
-  });
+  auto* outer_body = Block(Decl(var_outer), inner);
 
   WrapInFunction(outer_body);
 
@@ -266,15 +247,15 @@ TEST_F(ResolverTypeValidationTest,
 
   Func("func0", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(Source{{12, 34}}, var0),
-           create<ast::ReturnStatement>(),
+           Decl(Source{{12, 34}}, var0),
+           Return(),
        },
        ast::DecorationList{});
 
   Func("func1", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(Source{{13, 34}}, var1),
-           create<ast::ReturnStatement>(),
+           Decl(Source{{13, 34}}, var1),
+           Return(),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -289,10 +270,10 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
 
   Func("func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
+           Decl(var),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           Stage(ast::PipelineStage::kVertex),
        });
 
   EXPECT_FALSE(r()->Resolve());
@@ -309,16 +290,12 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
   //   rt: array<f32>;
   // };
 
-  ast::DecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>());
-  auto* st =
-      create<ast::Struct>(Sym("Foo"),
-                          ast::StructMemberList{Member("vf", ty.f32()),
-                                                Member("rt", ty.array<f32>())},
-                          decos);
-
-  auto* struct_type = ty.struct_(st);
-  AST().AddConstructedType(struct_type);
+  Structure("Foo",
+            {
+                Member("vf", ty.f32()),
+                Member("rt", ty.array<f32>()),
+            },
+            {create<ast::StructBlockDecoration>()});
 
   WrapInFunction();
 
@@ -331,15 +308,10 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLastNoBlock_Fail) {
   //   rt: array<f32>;
   // };
 
-  ast::DecorationList decos;
-  auto* st = create<ast::Struct>(
-      Sym("Foo"),
-      ast::StructMemberList{Member("vf", ty.f32()),
-                            Member(Source{{12, 34}}, "rt", ty.array<f32>())},
-      decos);
-
-  auto* struct_type = ty.struct_(st);
-  AST().AddConstructedType(struct_type);
+  Structure("Foo", {
+                       Member("vf", ty.f32()),
+                       Member(Source{{12, 34}}, "rt", ty.array<f32>()),
+                   });
 
   WrapInFunction();
 
@@ -356,16 +328,12 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
   //   vf: f32;
   // };
 
-  ast::DecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>());
-
-  auto* rt = Member(Source{{12, 34}}, "rt", ty.array<f32>());
-  auto* st = create<ast::Struct>(
-      Sym("Foo"), ast::StructMemberList{rt, Member("vf", ty.f32())}, decos);
-
-  auto* struct_type = ty.struct_(st);
-
-  AST().AddConstructedType(struct_type);
+  Structure("Foo",
+            {
+                Member(Source{{12, 34}}, "rt", ty.array<f32>()),
+                Member("vf", ty.f32()),
+            },
+            {create<ast::StructBlockDecoration>()});
 
   WrapInFunction();
 
@@ -405,16 +373,16 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
 
   Func("func", ast::VariableList{param}, ty.void_(),
        ast::StatementList{
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{});
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           Stage(ast::PipelineStage::kVertex),
        });
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
@@ -434,16 +402,12 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
 
   auto* alias = ty.alias("RTArr", ty.array<u32>());
 
-  ast::DecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>());
-  auto* st = create<ast::Struct>(
-      Sym("s"),
-      ast::StructMemberList{Member(Source{{12, 34}}, "b", alias),
-                            Member("a", ty.u32())},
-      decos);
-
-  auto* struct_type = ty.struct_(st);
-  AST().AddConstructedType(struct_type);
+  Structure("s",
+            {
+                Member(Source{{12, 34}}, "b", alias),
+                Member("a", ty.u32()),
+            },
+            {create<ast::StructBlockDecoration>()});
 
   WrapInFunction();
 
@@ -464,14 +428,12 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
 
   auto* alias = ty.alias("RTArr", ty.array<u32>());
 
-  ast::DecorationList decos;
-  decos.push_back(create<ast::StructBlockDecoration>());
-  auto* st = create<ast::Struct>(
-      Sym("s"),
-      ast::StructMemberList{Member("a", ty.u32()), Member("b", alias)}, decos);
-
-  auto* struct_type = ty.struct_(st);
-  AST().AddConstructedType(struct_type);
+  Structure("s",
+            {
+                Member("a", ty.u32()),
+                Member("b", alias),
+            },
+            {create<ast::StructBlockDecoration>()});
 
   WrapInFunction();
 

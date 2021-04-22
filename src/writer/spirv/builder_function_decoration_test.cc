@@ -25,11 +25,10 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Decoration_Stage) {
-  auto* func =
-      Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{
+                        Stage(ast::PipelineStage::kFragment),
+                    });
 
   spirv::Builder& b = Build();
 
@@ -61,7 +60,7 @@ TEST_P(Decoration_StageTest, Emit) {
 
   auto* func = Func("main", {}, ty.void_(), body,
                     ast::DecorationList{
-                        create<ast::StageDecoration>(params.stage),
+                        Stage(params.stage),
                     });
 
   spirv::Builder& b = Build();
@@ -90,11 +89,10 @@ INSTANTIATE_TEST_SUITE_P(
                                       SpvExecutionModelGLCompute}));
 
 TEST_F(BuilderTest, Decoration_Stage_WithUnusedInterfaceIds) {
-  auto* func =
-      Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{
+                        Stage(ast::PipelineStage::kFragment),
+                    });
 
   auto* v_in = Global("my_in", ty.f32(), ast::StorageClass::kInput);
   auto* v_out = Global("my_out", ty.f32(), ast::StorageClass::kOutput);
@@ -133,17 +131,15 @@ TEST_F(BuilderTest, Decoration_Stage_WithUsedInterfaceIds) {
   auto* v_out = Global("my_out", ty.f32(), ast::StorageClass::kOutput);
   auto* v_wg = Global("my_wg", ty.f32(), ast::StorageClass::kWorkgroup);
 
-  auto* func =
-      Func("main", {}, ty.void_(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("my_out"), Expr("my_in")),
-               create<ast::AssignmentStatement>(Expr("my_wg"), Expr("my_wg")),
-               // Add duplicate usages so we show they don't get
-               // output multiple times.
-               create<ast::AssignmentStatement>(Expr("my_out"), Expr("my_in"))},
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
+  auto* func = Func(
+      "main", {}, ty.void_(),
+      ast::StatementList{Assign("my_out", "my_in"), Assign("my_wg", "my_wg"),
+                         // Add duplicate usages so we show they
+                         // don't get output multiple times.
+                         Assign("my_out", "my_in")},
+      ast::DecorationList{
+          Stage(ast::PipelineStage::kFragment),
+      });
 
   spirv::Builder& b = Build();
 
@@ -174,11 +170,10 @@ OpName %11 "main"
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
-  auto* func =
-      Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{
+                        Stage(ast::PipelineStage::kFragment),
+                    });
 
   spirv::Builder& b = Build();
 
@@ -189,11 +184,10 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
-  auto* func =
-      Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-           });
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{
+                        Stage(ast::PipelineStage::kCompute),
+                    });
 
   spirv::Builder& b = Build();
 
@@ -204,12 +198,11 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize) {
-  auto* func =
-      Func("main", {}, ty.void_(), ast::StatementList{},
-           ast::DecorationList{
-               create<ast::WorkgroupDecoration>(2u, 4u, 6u),
-               create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-           });
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{
+                        create<ast::WorkgroupDecoration>(2u, 4u, 6u),
+                        Stage(ast::PipelineStage::kCompute),
+                    });
 
   spirv::Builder& b = Build();
 
@@ -220,17 +213,15 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_MultipleFragment) {
-  auto* func1 =
-      Func("main1", {}, ty.void_(), ast::StatementList{},
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
+  auto* func1 = Func("main1", {}, ty.void_(), ast::StatementList{},
+                     ast::DecorationList{
+                         Stage(ast::PipelineStage::kFragment),
+                     });
 
-  auto* func2 =
-      Func("main2", {}, ty.void_(), ast::StatementList{},
-           ast::DecorationList{
-               create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-           });
+  auto* func2 = Func("main2", {}, ty.void_(), ast::StatementList{},
+                     ast::DecorationList{
+                         Stage(ast::PipelineStage::kFragment),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -259,15 +250,14 @@ OpFunctionEnd
 TEST_F(BuilderTest, Decoration_ExecutionMode_FragDepth) {
   Global("fragdepth", ty.f32(), ast::StorageClass::kOutput, nullptr,
          ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth),
+             Builtin(ast::Builtin::kFragDepth),
          });
 
-  auto* func =
-      Func("main", ast::VariableList{}, ty.void_(),
-           ast::StatementList{
-               create<ast::AssignmentStatement>(Expr("fragdepth"), Expr(1.f)),
-           },
-           ast::DecorationList{});
+  auto* func = Func("main", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{
+                        Assign("fragdepth", Expr(1.f)),
+                    },
+                    ast::DecorationList{});
 
   spirv::Builder& b = Build();
 

@@ -44,15 +44,14 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
   // }
   auto f32 = ty.f32();
   auto* vec4 = ty.vec4<float>();
-  auto* coord = Param(
-      "coord", vec4, {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
-  auto* loc1 = Param("loc1", f32, {create<ast::LocationDecoration>(1u)});
+  auto* coord = Param("coord", vec4, {Builtin(ast::Builtin::kPosition)});
+  auto* loc1 = Param("loc1", f32, {Location(1u)});
   auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
   auto* col = Var("col", f32, ast::StorageClass::kFunction, mul, {});
   Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
        ast::StatementList{WrapInStatement(col)},
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = SanitizeAndBuild();
@@ -108,18 +107,18 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
   // }
   auto f32 = ty.f32();
   auto u32 = ty.u32();
-  auto* loc_in = Param("loc_in", u32, {create<ast::LocationDecoration>(0)});
+  auto* loc_in = Param("loc_in", u32, {Location(0)});
   auto* cond = create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan,
                                              Expr("loc_in"), Expr(10u));
   Func("frag_main", ast::VariableList{loc_in}, f32,
        ast::StatementList{
-           If(cond, Block(create<ast::ReturnStatement>(Expr(0.5f)))),
-           create<ast::ReturnStatement>(Expr(1.0f)),
+           If(cond, Block(Return(0.5f))),
+           Return(1.0f),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        },
-       ast::DecorationList{create<ast::LocationDecoration>(0)});
+       ast::DecorationList{Location(0)});
 
   spirv::Builder& b = SanitizeAndBuild();
 
@@ -201,15 +200,14 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
       });
 
   auto* vert_retval = Construct(interface, 42.f, Construct(ty.vec4<f32>()));
-  Func("vert_main", ast::VariableList{}, interface,
-       {create<ast::ReturnStatement>(vert_retval)},
-       {create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+  Func("vert_main", ast::VariableList{}, interface, {Return(vert_retval)},
+       {Stage(ast::PipelineStage::kVertex)});
 
   auto* frag_inputs = Param("inputs", interface);
   Func("frag_main", ast::VariableList{frag_inputs}, ty.f32(),
-       {create<ast::ReturnStatement>(MemberAccessor(Expr("inputs"), "value"))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)},
-       {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
+       {Return(MemberAccessor(Expr("inputs"), "value"))},
+       {Stage(ast::PipelineStage::kFragment)},
+       {Builtin(ast::Builtin::kFragDepth)});
 
   spirv::Builder& b = SanitizeAndBuild();
 

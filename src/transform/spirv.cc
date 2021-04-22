@@ -176,7 +176,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
         auto* call = ctx.dst->Call(return_func_symbol, ctx.Clone(ret->value()));
         ctx.InsertBefore(ret_sem->Block()->statements(), ret,
                          ctx.dst->create<ast::CallStatement>(call));
-        ctx.Replace(ret, ctx.dst->create<ast::ReturnStatement>());
+        ctx.Replace(ret, ctx.dst->Return());
       }
     }
 
@@ -245,9 +245,8 @@ void Spirv::AddEmptyEntryPoint(CloneContext& ctx) const {
       return;
     }
   }
-  ctx.dst->Func(
-      "_tint_unused_entry_point", {}, ctx.dst->ty.void_(), {},
-      {ctx.dst->create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
+  ctx.dst->Func("_tint_unused_entry_point", {}, ctx.dst->ty.void_(), {},
+                {ctx.dst->Stage(ast::PipelineStage::kCompute)});
 }
 
 Symbol Spirv::HoistToInputVariables(

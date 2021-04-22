@@ -336,7 +336,7 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
   Func("main", {}, ty.void_(),
        {create<ast::CallStatement>(Call("textureDimensions", "tex"))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {Stage(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 
@@ -395,7 +395,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
 
   Func("main", {}, ty.void_(),
        {create<ast::CallStatement>(Call("textureDimensions", "tex"))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {Stage(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 
@@ -539,7 +539,7 @@ TEST_P(HlslStorageTexturesTest, Emit) {
 
   Func("main", {}, ty.void_(),
        {create<ast::CallStatement>(Call("textureDimensions", "tex"))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {Stage(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 

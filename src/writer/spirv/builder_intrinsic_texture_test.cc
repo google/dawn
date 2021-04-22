@@ -3494,7 +3494,7 @@ TEST_P(IntrinsicTextureTest, ValidateSPIRV) {
            create<ast::CallStatement>(call),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = Build();

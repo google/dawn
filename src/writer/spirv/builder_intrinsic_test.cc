@@ -1257,11 +1257,11 @@ TEST_F(IntrinsicBuilderTest, Call_Modf) {
   auto* expr = Call("modf", vec2<f32>(1.0f, 2.0f), "out");
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(out),
+           Decl(out),
            create<ast::CallStatement>(expr),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = Build();
@@ -1301,11 +1301,11 @@ TEST_F(IntrinsicBuilderTest, Call_Frexp) {
   auto* expr = Call("frexp", vec2<f32>(1.0f, 2.0f), "out");
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(out),
+           Decl(out),
            create<ast::CallStatement>(expr),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = Build();
@@ -1395,7 +1395,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength) {
            create<ast::CallStatement>(expr),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = Build();
@@ -1445,7 +1445,7 @@ TEST_F(IntrinsicBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
            create<ast::CallStatement>(expr),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   spirv::Builder& b = Build();
@@ -1605,7 +1605,7 @@ TEST_F(IntrinsicBuilderTest, Call_WorkgroupBarrier) {
            create<ast::CallStatement>(Call("workgroupBarrier")),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   spirv::Builder& b = Build();
@@ -1637,7 +1637,7 @@ TEST_F(IntrinsicBuilderTest, Call_StorageBarrier) {
            create<ast::CallStatement>(Call("storageBarrier")),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   spirv::Builder& b = Build();

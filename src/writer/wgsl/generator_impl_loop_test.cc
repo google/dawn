@@ -24,7 +24,7 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
   auto* body = Block(create<ast::DiscardStatement>());
   auto* continuing = Block();
-  auto* l = create<ast::LoopStatement>(body, continuing);
+  auto* l = Loop(body, continuing);
 
   WrapInFunction(l);
 
@@ -42,7 +42,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
   auto* body = Block(create<ast::DiscardStatement>());
   auto* continuing = Block(Return());
-  auto* l = create<ast::LoopStatement>(body, continuing);
+  auto* l = Loop(body, continuing);
 
   WrapInFunction(l);
 

@@ -117,12 +117,11 @@ struct State {
     static const char kDefaultVertexIndexName[] = "tint_pulling_vertex_index";
     vertex_index_name = ctx.dst->Symbols().New(kDefaultVertexIndexName);
 
-    ctx.dst->Global(
-        vertex_index_name, ctx.dst->ty.u32(), ast::StorageClass::kInput,
-        nullptr,
-        ast::DecorationList{
-            ctx.dst->create<ast::BuiltinDecoration>(ast::Builtin::kVertexIndex),
-        });
+    ctx.dst->Global(vertex_index_name, ctx.dst->ty.u32(),
+                    ast::StorageClass::kInput, nullptr,
+                    ast::DecorationList{
+                        ctx.dst->Builtin(ast::Builtin::kVertexIndex),
+                    });
   }
 
   /// Inserts instance_index binding, or finds the existing one
@@ -163,8 +162,7 @@ struct State {
     ctx.dst->Global(instance_index_name, ctx.dst->ty.u32(),
                     ast::StorageClass::kInput, nullptr,
                     ast::DecorationList{
-                        ctx.dst->create<ast::BuiltinDecoration>(
-                            ast::Builtin::kInstanceIndex),
+                        ctx.dst->Builtin(ast::Builtin::kInstanceIndex),
                     });
   }
 
@@ -230,9 +228,9 @@ struct State {
     ast::StatementList stmts;
 
     // Declare the pulling position variable in the shader
-    stmts.emplace_back(ctx.dst->create<ast::VariableDeclStatement>(
-        ctx.dst->Var(GetPullingPositionName(), ctx.dst->ty.u32(),
-                     ast::StorageClass::kFunction)));
+    stmts.emplace_back(
+        ctx.dst->Decl(ctx.dst->Var(GetPullingPositionName(), ctx.dst->ty.u32(),
+                                   ast::StorageClass::kFunction)));
 
     for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
       const VertexBufferLayoutDescriptor& buffer_layout = cfg.vertex_state[i];

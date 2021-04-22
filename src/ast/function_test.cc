@@ -268,11 +268,11 @@ TEST_F(FunctionListTest, FindSymbolMissing) {
 TEST_F(FunctionListTest, FindSymbolStage) {
   auto* fs = Func("main", VariableList{}, ty.f32(), StatementList{},
                   ast::DecorationList{
-                      create<ast::StageDecoration>(PipelineStage::kFragment),
+                      Stage(PipelineStage::kFragment),
                   });
   auto* vs = Func("main", VariableList{}, ty.f32(), StatementList{},
                   ast::DecorationList{
-                      create<ast::StageDecoration>(PipelineStage::kVertex),
+                      Stage(PipelineStage::kVertex),
                   });
   FunctionList list;
   list.Add(fs);
@@ -286,7 +286,7 @@ TEST_F(FunctionListTest, FindSymbolStageMissing) {
   FunctionList list;
   list.Add(Func("main", VariableList{}, ty.f32(), StatementList{},
                 ast::DecorationList{
-                    create<ast::StageDecoration>(PipelineStage::kFragment),
+                    Stage(PipelineStage::kFragment),
                 }));
   EXPECT_EQ(nullptr,
             list.Find(Symbols().Register("main"), PipelineStage::kVertex));
@@ -296,7 +296,7 @@ TEST_F(FunctionListTest, HasStage) {
   FunctionList list;
   list.Add(Func("main", VariableList{}, ty.f32(), StatementList{},
                 ast::DecorationList{
-                    create<ast::StageDecoration>(PipelineStage::kFragment),
+                    Stage(PipelineStage::kFragment),
                 }));
   EXPECT_TRUE(list.HasStage(PipelineStage::kFragment));
   EXPECT_FALSE(list.HasStage(PipelineStage::kVertex));

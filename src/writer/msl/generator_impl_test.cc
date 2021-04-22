@@ -25,7 +25,7 @@ using MslGeneratorImplTest = TestHelper;
 TEST_F(MslGeneratorImplTest, Generate) {
   Func("my_func", ast::VariableList{}, ty.void_(), ast::StatementList{},
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   GeneratorImpl& gen = Build();

@@ -27,7 +27,7 @@ using HlslGeneratorImplTest_VariableDecl = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
   auto* var = Var("a", ty.f32(), ast::StorageClass::kFunction);
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -40,7 +40,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   auto* var = Const("a", ty.f32());
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -96,7 +96,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   auto* var =
       Var("a", ty.vec3<f32>(), ast::StorageClass::kFunction, vec3<f32>());
 
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -111,7 +111,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
   auto* var =
       Var("a", ty.mat2x3<f32>(), ast::StorageClass::kFunction, mat2x3<f32>());
 
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();

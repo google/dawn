@@ -25,7 +25,7 @@ using HlslGeneratorImplTest_Loop = TestHelper;
 TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
   auto* body = Block(create<ast::DiscardStatement>());
   auto* continuing = Block();
-  auto* l = create<ast::LoopStatement>(body, continuing);
+  auto* l = Loop(body, continuing);
 
   WrapInFunction(l);
 
@@ -43,7 +43,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
 TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
   auto* body = Block(create<ast::DiscardStatement>());
   auto* continuing = Block(Return());
-  auto* l = create<ast::LoopStatement>(body, continuing);
+  auto* l = Loop(body, continuing);
 
   WrapInFunction(l);
 
@@ -72,16 +72,16 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
 
   auto* body = Block(create<ast::DiscardStatement>());
   auto* continuing = Block(Return());
-  auto* inner = create<ast::LoopStatement>(body, continuing);
+  auto* inner = Loop(body, continuing);
 
   body = Block(inner);
 
   auto* lhs = Expr("lhs");
   auto* rhs = Expr("rhs");
 
-  continuing = Block(create<ast::AssignmentStatement>(lhs, rhs));
+  continuing = Block(Assign(lhs, rhs));
 
-  auto* outer = create<ast::LoopStatement>(body, continuing);
+  auto* outer = Loop(body, continuing);
   WrapInFunction(outer);
 
   GeneratorImpl& gen = Build();
@@ -139,15 +139,14 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
 
   auto* var = Var("lhs", ty.f32(), ast::StorageClass::kFunction, Expr(2.4f));
 
-  auto* body = Block(create<ast::VariableDeclStatement>(var),
-                     create<ast::VariableDeclStatement>(
-                         Var("other", ty.f32(), ast::StorageClass::kFunction)));
+  auto* body = Block(
+      Decl(var), Decl(Var("other", ty.f32(), ast::StorageClass::kFunction)));
 
   auto* lhs = Expr("lhs");
   auto* rhs = Expr("rhs");
 
-  auto* continuing = Block(create<ast::AssignmentStatement>(lhs, rhs));
-  auto* outer = create<ast::LoopStatement>(body, continuing);
+  auto* continuing = Block(Assign(lhs, rhs));
+  auto* outer = Loop(body, continuing);
   WrapInFunction(outer);
 
   GeneratorImpl& gen = Build();

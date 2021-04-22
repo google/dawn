@@ -257,8 +257,8 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
           ret_values.push_back(new_ret_value());
         }
 
-        auto* new_ret = ctx.dst->create<ast::ReturnStatement>(
-            ctx.dst->Construct(new_ret_type, ret_values));
+        auto* new_ret =
+            ctx.dst->Return(ctx.dst->Construct(new_ret_type, ret_values));
         ctx.Replace(ret, new_ret);
       }
     }

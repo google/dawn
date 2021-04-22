@@ -24,7 +24,7 @@ using HlslGeneratorImplTest_Assign = TestHelper;
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
   Global("lhs", ty.i32(), ast::StorageClass::kPrivate);
   Global("rhs", ty.i32(), ast::StorageClass::kPrivate);
-  auto* assign = create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs"));
+  auto* assign = Assign("lhs", "rhs");
   WrapInFunction(assign);
 
   GeneratorImpl& gen = Build();

@@ -113,7 +113,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
     ProgramBuilder& b = *this;
     b.Func("main", ast::VariableList{}, b.ty.void_(), statements,
            ast::DecorationList{
-               b.create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+               b.Stage(ast::PipelineStage::kFragment),
            });
   }
 };
@@ -179,9 +179,8 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad, Test) {
   });
 
   SetupFunction({
-      create<ast::VariableDeclStatement>(Var("x", nullptr,
-                                             ast::StorageClass::kFunction,
-                                             MemberAccessor("data", "b"))),
+      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+               MemberAccessor("data", "b"))),
   });
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -256,8 +255,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
   });
 
   SetupFunction({
-      create<ast::VariableDeclStatement>(
-          Var("value", type, ast::StorageClass::kFunction, Construct(type))),
+      Decl(Var("value", type, ast::StorageClass::kFunction, Construct(type))),
       Assign(MemberAccessor("data", "b"), Expr("value")),
   });
 
@@ -386,7 +384,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      create<ast::VariableDeclStatement>(
+      Decl(
           Var("x", nullptr, ast::StorageClass::kFunction,
               IndexAccessor(IndexAccessor(MemberAccessor("data", "a"), 2), 1))),
   });
@@ -423,9 +421,8 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      create<ast::VariableDeclStatement>(
-          Var("x", nullptr, ast::StorageClass::kFunction,
-              IndexAccessor(MemberAccessor("data", "a"), 2))),
+      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+               IndexAccessor(MemberAccessor("data", "a"), 2))),
   });
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -458,10 +455,9 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      create<ast::VariableDeclStatement>(
-          Var("x", nullptr, ast::StorageClass::kFunction,
-              IndexAccessor(MemberAccessor("data", "a"),
-                            Sub(Add(2, Expr(4)), Expr(3))))),
+      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+               IndexAccessor(MemberAccessor("data", "a"),
+                             Sub(Add(2, Expr(4)), Expr(3))))),
   });
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -534,7 +530,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
   });
 
   SetupFunction({
-      create<ast::VariableDeclStatement>(Var(
+      Decl(Var(
           "x", nullptr, ast::StorageClass::kFunction,
           MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2), "b"))),
   });
@@ -580,12 +576,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      create<ast::VariableDeclStatement>(
-          Var("x", nullptr, ast::StorageClass::kFunction,
-              MemberAccessor(
-                  MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2),
-                                 "b"),
-                  "xy"))),
+      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+               MemberAccessor(
+                   MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2),
+                                  "b"),
+                   "xy"))),
   });
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -629,12 +624,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      create<ast::VariableDeclStatement>(
-          Var("x", nullptr, ast::StorageClass::kFunction,
-              MemberAccessor(
-                  MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2),
-                                 "b"),
-                  "g"))),
+      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+               MemberAccessor(
+                   MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2),
+                                  "b"),
+                   "g"))),
   });
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -678,7 +672,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      create<ast::VariableDeclStatement>(Var(
+      Decl(Var(
           "x", nullptr, ast::StorageClass::kFunction,
           IndexAccessor(MemberAccessor(
                             IndexAccessor(MemberAccessor("data", "c"), 2), "b"),

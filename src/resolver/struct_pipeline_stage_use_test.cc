@@ -28,8 +28,7 @@ namespace {
 using ResolverPipelineStageUseTest = ResolverTest;
 
 TEST_F(ResolverPipelineStageUseTest, UnusedStruct) {
-  auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+  auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -39,8 +38,7 @@ TEST_F(ResolverPipelineStageUseTest, UnusedStruct) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointParam) {
-  auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+  auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
 
   Func("foo", {Param("param", s)}, ty.void_(), {}, {});
 
@@ -52,8 +50,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointParam) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointReturnType) {
-  auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+  auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
 
   Func("foo", {}, s, {Return(Construct(s, Expr(0.f)))}, {});
 
@@ -96,11 +93,10 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
-  auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+  auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
 
   Func("main", {Param("param", s)}, ty.void_(), {},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {Stage(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -111,11 +107,10 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
-  auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+  auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
 
   Func("main", {}, s, {Return(Construct(s, Expr(0.f)))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {Stage(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -126,12 +121,12 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsComputeShaderParam) {
-  auto* s = Structure("S", {Member("a", ty.u32(),
-                                   {create<ast::BuiltinDecoration>(
-                                       ast::Builtin::kLocalInvocationIndex)})});
+  auto* s = Structure(
+      "S",
+      {Member("a", ty.u32(), {Builtin(ast::Builtin::kLocalInvocationIndex)})});
 
   Func("main", {Param("param", s)}, ty.void_(), {},
-       {create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
+       {Stage(ast::PipelineStage::kCompute)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -162,12 +157,11 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
-  auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+  auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
   auto* s_alias = ty.alias("S_alias", s);
 
   Func("main", {Param("param", s_alias)}, ty.void_(), {},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {Stage(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -178,12 +172,11 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeViaAlias) {
-  auto* s = Structure(
-      "S", {Member("a", ty.f32(), {create<ast::LocationDecoration>(0)})});
+  auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
   auto* s_alias = ty.alias("S_alias", s);
 
   Func("main", {}, s_alias, {Return(Construct(s_alias, Expr(0.f)))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+       {Stage(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 

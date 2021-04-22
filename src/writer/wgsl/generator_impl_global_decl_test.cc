@@ -52,7 +52,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
   Func("func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
-           create<ast::ReturnStatement>(Expr("a0")),
+           Return("a0"),
        },
        ast::DecorationList{});
 
@@ -64,10 +64,10 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
        ast::StatementList{
            Decl(Var("s0", s0, ast::StorageClass::kFunction)),
            Decl(Var("s1", s1, ast::StorageClass::kFunction)),
-           create<ast::AssignmentStatement>(Expr("a1"), Call("func")),
+           Assign("a1", Call("func")),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   GeneratorImpl& gen = Build();

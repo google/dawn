@@ -27,7 +27,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
   auto* var = Var("a", ty.f32(), ast::StorageClass::kNone);
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -40,7 +40,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement) {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
   auto* var = Const("a", ty.f32());
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -55,7 +55,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
   sem::ArrayType ary(ty.f32(), 5, ast::DecorationList{});
 
   auto* var = Var("a", &ary, ast::StorageClass::kNone);
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -73,7 +73,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
                            });
 
   auto* var = Var("a", s, ast::StorageClass::kNone);
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -87,7 +87,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
   auto* var = Var("a", ty.vec2<f32>(), ast::StorageClass::kFunction);
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -101,7 +101,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
   auto* var = Var("a", ty.mat3x2<f32>(), ast::StorageClass::kFunction);
 
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -146,7 +146,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   auto* zero_vec = vec3<f32>();
 
   auto* var = Var("a", ty.vec3<f32>(), ast::StorageClass::kFunction, zero_vec);
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();

@@ -38,8 +38,8 @@ class InspectorHelper : public ProgramBuilder {
   /// @param decorations the function decorations
   void MakeEmptyBodyFunction(std::string name,
                              ast::DecorationList decorations) {
-    Func(name, ast::VariableList(), ty.void_(),
-         ast::StatementList{create<ast::ReturnStatement>()}, decorations);
+    Func(name, ast::VariableList(), ty.void_(), ast::StatementList{Return()},
+         decorations);
   }
 
   /// Generates a function that calls other functions
@@ -54,7 +54,7 @@ class InspectorHelper : public ProgramBuilder {
     for (auto callee : callees) {
       body.push_back(create<ast::CallStatement>(Call(callee)));
     }
-    body.push_back(create<ast::ReturnStatement>());
+    body.push_back(Return());
 
     Func(caller, ast::VariableList(), ty.void_(), body, decorations);
   }
@@ -87,9 +87,9 @@ class InspectorHelper : public ProgramBuilder {
       std::tie(in, out) = inout;
 
       Global(in, ty.u32(), ast::StorageClass::kInput, nullptr,
-             ast::DecorationList{create<ast::LocationDecoration>(location++)});
+             ast::DecorationList{Location(location++)});
       Global(out, ty.u32(), ast::StorageClass::kOutput, nullptr,
-             ast::DecorationList{create<ast::LocationDecoration>(location++)});
+             ast::DecorationList{Location(location++)});
     }
   }
 
@@ -107,9 +107,9 @@ class InspectorHelper : public ProgramBuilder {
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
-      stmts.emplace_back(create<ast::AssignmentStatement>(Expr(out), Expr(in)));
+      stmts.emplace_back(Assign(out, in));
     }
-    stmts.emplace_back(create<ast::ReturnStatement>());
+    stmts.emplace_back(Return());
     Func(name, ast::VariableList(), ty.void_(), stmts, decorations);
   }
 
@@ -131,10 +131,10 @@ class InspectorHelper : public ProgramBuilder {
     for (auto inout : inout_vars) {
       std::string in, out;
       std::tie(in, out) = inout;
-      stmts.emplace_back(create<ast::AssignmentStatement>(Expr(out), Expr(in)));
+      stmts.emplace_back(Assign(out, in));
     }
     stmts.emplace_back(create<ast::CallStatement>(Call(callee)));
-    stmts.emplace_back(create<ast::ReturnStatement>());
+    stmts.emplace_back(Return());
 
     return Func(caller, ast::VariableList(), ty.void_(), stmts, decorations);
   }
@@ -225,11 +225,7 @@ class InspectorHelper : public ProgramBuilder {
       decos.push_back(create<ast::StructBlockDecoration>());
     }
 
-    auto sym = Sym(name);
-    auto* str = create<ast::Struct>(sym, members, decos);
-    auto* str_ty = ty.struct_(str);
-    AST().AddConstructedType(str_ty);
-    return str_ty;
+    return Structure(name, members, decos);
   }
 
   /// Generates types appropriate for using in an uniform buffer
@@ -329,7 +325,7 @@ class InspectorHelper : public ProgramBuilder {
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
 
-      stmts.emplace_back(create<ast::VariableDeclStatement>(
+      stmts.emplace_back(Decl(
           Var("local" + member_name, member_type, ast::StorageClass::kNone)));
     }
 
@@ -339,12 +335,11 @@ class InspectorHelper : public ProgramBuilder {
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
 
-      stmts.emplace_back(create<ast::AssignmentStatement>(
-          Expr("local" + member_name),
-          MemberAccessor(struct_name, member_name)));
+      stmts.emplace_back(Assign("local" + member_name,
+                                MemberAccessor(struct_name, member_name)));
     }
 
-    stmts.emplace_back(create<ast::ReturnStatement>());
+    stmts.emplace_back(Return());
 
     Func(func_name, ast::VariableList(), ty.void_(), stmts,
          ast::DecorationList{});
@@ -454,14 +449,13 @@ class InspectorHelper : public ProgramBuilder {
     std::string result_name = "sampler_result";
 
     ast::StatementList stmts;
-    stmts.emplace_back(create<ast::VariableDeclStatement>(
-        Var("sampler_result", vec_type(base_type, 4),
-            ast::StorageClass::kFunction)));
+    stmts.emplace_back(Decl(Var("sampler_result", vec_type(base_type, 4),
+                                ast::StorageClass::kFunction)));
 
-    stmts.emplace_back(create<ast::AssignmentStatement>(
-        Expr("sampler_result"),
-        Call("textureSample", texture_name, sampler_name, coords_name)));
-    stmts.emplace_back(create<ast::ReturnStatement>());
+    stmts.emplace_back(
+        Assign("sampler_result",
+               Call("textureSample", texture_name, sampler_name, coords_name)));
+    stmts.emplace_back(Return());
 
     return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
   }
@@ -487,14 +481,13 @@ class InspectorHelper : public ProgramBuilder {
 
     ast::StatementList stmts;
 
-    stmts.emplace_back(create<ast::VariableDeclStatement>(
-        Var("sampler_result", vec_type(base_type, 4),
-            ast::StorageClass::kFunction)));
+    stmts.emplace_back(Decl(Var("sampler_result", vec_type(base_type, 4),
+                                ast::StorageClass::kFunction)));
 
-    stmts.emplace_back(create<ast::AssignmentStatement>(
-        Expr("sampler_result"), Call("textureSample", texture_name,
-                                     sampler_name, coords_name, array_index)));
-    stmts.emplace_back(create<ast::ReturnStatement>());
+    stmts.emplace_back(
+        Assign("sampler_result", Call("textureSample", texture_name,
+                                      sampler_name, coords_name, array_index)));
+    stmts.emplace_back(Return());
 
     return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
   }
@@ -521,12 +514,12 @@ class InspectorHelper : public ProgramBuilder {
 
     ast::StatementList stmts;
 
-    stmts.emplace_back(create<ast::VariableDeclStatement>(
-        Var("sampler_result", base_type, ast::StorageClass::kFunction)));
-    stmts.emplace_back(create<ast::AssignmentStatement>(
-        Expr("sampler_result"), Call("textureSampleCompare", texture_name,
-                                     sampler_name, coords_name, depth_name)));
-    stmts.emplace_back(create<ast::ReturnStatement>());
+    stmts.emplace_back(
+        Decl(Var("sampler_result", base_type, ast::StorageClass::kFunction)));
+    stmts.emplace_back(
+        Assign("sampler_result", Call("textureSampleCompare", texture_name,
+                                      sampler_name, coords_name, depth_name)));
+    stmts.emplace_back(Return());
 
     return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
   }
@@ -624,11 +617,10 @@ class InspectorHelper : public ProgramBuilder {
       ast::DecorationList decorations) {
     ast::StatementList stmts;
 
-    stmts.emplace_back(create<ast::VariableDeclStatement>(
-        Var("dim", dim_type, ast::StorageClass::kFunction)));
-    stmts.emplace_back(create<ast::AssignmentStatement>(
-        Expr("dim"), Call("textureDimensions", st_name)));
-    stmts.emplace_back(create<ast::ReturnStatement>());
+    stmts.emplace_back(
+        Decl(Var("dim", dim_type, ast::StorageClass::kFunction)));
+    stmts.emplace_back(Assign("dim", Call("textureDimensions", st_name)));
+    stmts.emplace_back(Return());
 
     return Func(func_name, ast::VariableList(), ty.void_(), stmts, decorations);
   }
@@ -769,10 +761,9 @@ TEST_F(InspectorGetEntryPointTest, NoEntryPoints) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
-  MakeEmptyBodyFunction(
-      "foo", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-             });
+  MakeEmptyBodyFunction("foo", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kFragment),
+                               });
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -788,15 +779,13 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
-  MakeEmptyBodyFunction(
-      "foo", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-             });
+  MakeEmptyBodyFunction("foo", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kFragment),
+                               });
 
-  MakeEmptyBodyFunction(
-      "bar", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-             });
+  MakeEmptyBodyFunction("bar", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kCompute),
+                               });
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -817,17 +806,15 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
 TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
   MakeEmptyBodyFunction("func", {});
 
-  MakeCallerBodyFunction(
-      "foo", {"func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-      });
+  MakeCallerBodyFunction("foo", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kCompute),
+                         });
 
-  MakeCallerBodyFunction(
-      "bar", {"func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("bar", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -846,10 +833,9 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
 }
 
 TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
-  MakeEmptyBodyFunction(
-      "foo", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-             });
+  MakeEmptyBodyFunction("foo", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kCompute),
+                               });
 
   Inspector& inspector = Build();
 
@@ -865,11 +851,10 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
-  MakeEmptyBodyFunction(
-      "foo", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-                 create<ast::WorkgroupDecoration>(8u, 2u, 1u),
-             });
+  MakeEmptyBodyFunction("foo", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kCompute),
+                                   create<ast::WorkgroupDecoration>(8u, 2u, 1u),
+                               });
 
   Inspector& inspector = Build();
 
@@ -887,11 +872,10 @@ TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
 TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
   MakeEmptyBodyFunction("func", {});
 
-  MakeCallerBodyFunction(
-      "foo", {"func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("foo", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -921,7 +905,7 @@ TEST_P(InspectorGetEntryPointTestWithComponentTypeParam, InOutVariables) {
   }
 
   auto* in_var = Param("in_var", tint_type, {Location(0u)});
-  Func("foo", {in_var}, tint_type, {Return(Expr("in_var"))},
+  Func("foo", {in_var}, tint_type, {Return("in_var")},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
   Inspector& inspector = Build();
 
@@ -952,7 +936,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
   auto* in_var0 = Param("in_var0", ty.u32(), {Location(0u)});
   auto* in_var1 = Param("in_var1", ty.u32(), {Location(1u)});
   auto* in_var4 = Param("in_var4", ty.u32(), {Location(4u)});
-  Func("foo", {in_var0, in_var1, in_var4}, ty.u32(), {Return(Expr("in_var0"))},
+  Func("foo", {in_var0, in_var1, in_var4}, ty.u32(), {Return("in_var0")},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
   Inspector& inspector = Build();
 
@@ -984,11 +968,11 @@ TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
   auto* in_var_foo = Param("in_var_foo", ty.u32(), {Location(0u)});
-  Func("foo", {in_var_foo}, ty.u32(), {Return(Expr("in_var_foo"))},
+  Func("foo", {in_var_foo}, ty.u32(), {Return("in_var_foo")},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
 
   auto* in_var_bar = Param("in_var_bar", ty.u32(), {Location(0u)});
-  Func("bar", {in_var_bar}, ty.u32(), {Return(Expr("in_var_bar"))},
+  Func("bar", {in_var_bar}, ty.u32(), {Return("in_var_bar")},
        {Stage(ast::PipelineStage::kFragment)}, {Location(1u)});
 
   Inspector& inspector = Build();
@@ -1027,7 +1011,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
   auto* in_var0 =
       Param("in_var0", ty.u32(), {Builtin(ast::Builtin::kInstanceIndex)});
   auto* in_var1 = Param("in_var1", ty.u32(), {Location(0u)});
-  Func("foo", {in_var0, in_var1}, ty.u32(), {Return(Expr("in_var1"))},
+  Func("foo", {in_var0, in_var1}, ty.u32(), {Return("in_var1")},
        {Stage(ast::PipelineStage::kFragment)},
        {Builtin(ast::Builtin::kSampleMask)});
   Inspector& inspector = Build();
@@ -1048,7 +1032,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
 
 TEST_F(InspectorGetEntryPointTest, InOutStruct) {
   auto* interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
-  Func("foo", {Param("param", interface)}, interface, {Return(Expr("param"))},
+  Func("foo", {Param("param", interface)}, interface, {Return("param")},
        {Stage(ast::PipelineStage::kFragment)});
   Inspector& inspector = Build();
 
@@ -1123,8 +1107,7 @@ TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
        {Param("param_a", struct_a), Param("param_b", struct_b),
         Param("param_c", ty.f32(), {Location(3u)}),
         Param("param_d", ty.f32(), {Location(4u)})},
-       struct_a, {Return(Expr("param_a"))},
-       {Stage(ast::PipelineStage::kFragment)});
+       struct_a, {Return("param_a")}, {Stage(ast::PipelineStage::kFragment)});
   Inspector& inspector = Build();
 
   auto result = inspector.GetEntryPoints();
@@ -1169,11 +1152,10 @@ TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
 TEST_F(InspectorGetEntryPointTest, EntryPointInOutVariables_Legacy) {
   AddInOutVariables({{"in_var", "out_var"}});
 
-  MakeInOutVariableBodyFunction(
-      "foo", {{"in_var", "out_var"}},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeInOutVariableBodyFunction("foo", {{"in_var", "out_var"}},
+                                ast::DecorationList{
+                                    Stage(ast::PipelineStage::kFragment),
+                                });
 
   Inspector& inspector = Build();
 
@@ -1201,11 +1183,10 @@ TEST_F(InspectorGetEntryPointTest, FunctionInOutVariables_Legacy) {
 
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
 
-  MakeCallerBodyFunction(
-      "foo", {"func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("foo", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -1233,11 +1214,10 @@ TEST_F(InspectorGetEntryPointTest, RepeatedInOutVariables_Legacy) {
 
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
 
-  MakeInOutVariableCallerBodyFunction(
-      "foo", "func", {{"in_var", "out_var"}},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeInOutVariableCallerBodyFunction("foo", "func", {{"in_var", "out_var"}},
+                                      ast::DecorationList{
+                                          Stage(ast::PipelineStage::kFragment),
+                                      });
 
   Inspector& inspector = Build();
 
@@ -1266,7 +1246,7 @@ TEST_F(InspectorGetEntryPointTest, EntryPointMultipleInOutVariables_Legacy) {
   MakeInOutVariableBodyFunction(
       "foo", {{"in_var", "out_var"}, {"in2_var", "out2_var"}},
       ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+          Stage(ast::PipelineStage::kFragment),
       });
 
   Inspector& inspector = Build();
@@ -1304,11 +1284,10 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables_Legacy) {
   MakeInOutVariableBodyFunction(
       "func", {{"in_var", "out_var"}, {"in2_var", "out2_var"}}, {});
 
-  MakeCallerBodyFunction(
-      "foo", {"func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("foo", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -1342,17 +1321,15 @@ TEST_F(InspectorGetEntryPointTest, FunctionMultipleInOutVariables_Legacy) {
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables_Legacy) {
   AddInOutVariables({{"in_var", "out_var"}, {"in2_var", "out2_var"}});
 
-  MakeInOutVariableBodyFunction(
-      "foo", {{"in_var", "out2_var"}},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeInOutVariableBodyFunction("foo", {{"in_var", "out2_var"}},
+                                ast::DecorationList{
+                                    Stage(ast::PipelineStage::kFragment),
+                                });
 
-  MakeInOutVariableBodyFunction(
-      "bar", {{"in2_var", "out_var"}},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-      });
+  MakeInOutVariableBodyFunction("bar", {{"in2_var", "out_var"}},
+                                ast::DecorationList{
+                                    Stage(ast::PipelineStage::kCompute),
+                                });
 
   // TODO(dsinclair): Update to run the namer transform when
   // available.
@@ -1402,17 +1379,15 @@ TEST_F(InspectorGetEntryPointTest,
 
   MakeInOutVariableBodyFunction("func", {{"in2_var", "out2_var"}}, {});
 
-  MakeInOutVariableCallerBodyFunction(
-      "foo", "func", {{"in_var", "out_var"}},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeInOutVariableCallerBodyFunction("foo", "func", {{"in_var", "out_var"}},
+                                      ast::DecorationList{
+                                          Stage(ast::PipelineStage::kFragment),
+                                      });
 
-  MakeCallerBodyFunction(
-      "bar", {"func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-      });
+  MakeCallerBodyFunction("bar", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kCompute),
+                         });
 
   // TODO(dsinclair): Update to run the namer transform when
   // available.
@@ -1466,18 +1441,16 @@ TEST_F(InspectorGetEntryPointTest,
 // TODO(crbug.com/tint/697): Remove this.
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables_Legacy) {
   Global("in_var", ty.u32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{
-             create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
+         ast::DecorationList{Builtin(ast::Builtin::kPosition)});
   Global("out_var", ty.u32(), ast::StorageClass::kOutput, nullptr,
-         ast::DecorationList{create<ast::LocationDecoration>(0)});
+         ast::DecorationList{Location(0)});
 
   MakeInOutVariableBodyFunction("func", {{"in_var", "out_var"}}, {});
 
-  MakeCallerBodyFunction(
-      "foo", {"func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("foo", {"func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   // TODO(dsinclair): Update to run the namer transform when available.
 
@@ -1523,10 +1496,9 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_NoEntryPoints) {
 // TODO(rharrison): Reenable once GetRemappedNameForEntryPoint isn't a pass
 // through
 TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_OneEntryPoint) {
-  MakeEmptyBodyFunction(
-      "foo", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-             });
+  MakeEmptyBodyFunction("foo", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kVertex),
+                               });
 
   // TODO(dsinclair): Update to run the namer transform when
   // available.
@@ -1543,18 +1515,16 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest, DISABLED_OneEntryPoint) {
 // through
 TEST_F(InspectorGetRemappedNameForEntryPointTest,
        DISABLED_MultipleEntryPoints) {
-  MakeEmptyBodyFunction(
-      "foo", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kVertex),
-             });
+  MakeEmptyBodyFunction("foo", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kVertex),
+                               });
 
   // TODO(dsinclair): Update to run the namer transform when
   // available.
 
-  MakeEmptyBodyFunction(
-      "bar", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kCompute),
-             });
+  MakeEmptyBodyFunction("bar", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kCompute),
+                               });
 
   Inspector& inspector = Build();
 
@@ -1667,11 +1637,10 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Empty) {
-  MakeCallerBodyFunction(
-      "ep_func", {},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -1734,13 +1703,12 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   AddStorageTexture("rost_var", rost_ac, 4, 1);
   MakeStorageTextureBodyFunction("rost_func", "rost_var", ty.vec2<i32>(), {});
 
-  MakeCallerBodyFunction(
-      "ep_func",
-      {"ub_func", "sb_func", "rosb_func", "s_func", "cs_func", "st_func",
-       "rost_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func",
+                         {"ub_func", "sb_func", "rosb_func", "s_func",
+                          "cs_func", "st_func", "rost_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -1809,11 +1777,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"ub_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"ub_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -1829,11 +1796,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"ub_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"ub_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -1857,11 +1823,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
   MakeStructVariableReferenceBodyFunction(
       "ub_func", "foo_ub", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"ub_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"ub_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -1885,11 +1850,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
                                           {{0, ty.vec3<f32>()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"ub_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"ub_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -1927,10 +1891,9 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
 
   Func("ep_func", ast::VariableList(), ty.void_(),
        ast::StatementList{FuncCall("ub_foo_func"), FuncCall("ub_bar_func"),
-                          FuncCall("ub_baz_func"),
-                          create<ast::ReturnStatement>()},
+                          FuncCall("ub_baz_func"), Return()},
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   Inspector& inspector = Build();
@@ -1971,11 +1934,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"ub_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"ub_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2000,11 +1962,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2030,11 +1991,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
   MakeStructVariableReferenceBodyFunction(
       "sb_func", "foo_sb", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2077,10 +2037,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
            FuncCall("sb_foo_func"),
            FuncCall("sb_bar_func"),
            FuncCall("sb_baz_func"),
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   Inspector& inspector = Build();
@@ -2120,11 +2080,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2149,11 +2108,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2179,11 +2137,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                           {{0, ty.vec3<f32>()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2208,11 +2165,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2230,11 +2186,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2278,10 +2233,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
            FuncCall("sb_foo_func"),
            FuncCall("sb_bar_func"),
            FuncCall("sb_baz_func"),
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   Inspector& inspector = Build();
@@ -2321,11 +2276,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2351,11 +2305,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2380,11 +2333,10 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"sb_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"sb_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2400,11 +2352,11 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
   AddSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32());
 
-  MakeSamplerReferenceBodyFunction(
-      "ep", "foo_texture", "foo_sampler", "foo_coords", ty.f32(),
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler",
+                                   "foo_coords", ty.f32(),
+                                   ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
 
   Inspector& inspector = Build();
 
@@ -2418,11 +2370,9 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
-  MakeEmptyBodyFunction(
-      "ep_func",
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeEmptyBodyFunction("ep_func", ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
 
   Inspector& inspector = Build();
 
@@ -2442,11 +2392,10 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
   MakeSamplerReferenceBodyFunction("foo_func", "foo_texture", "foo_sampler",
                                    "foo_coords", ty.f32(), {});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"foo_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"foo_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2466,11 +2415,11 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
   AddSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32());
 
-  MakeSamplerReferenceBodyFunction(
-      "ep", "foo_texture", "foo_sampler", "foo_coords", ty.f32(),
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler",
+                                   "foo_coords", ty.f32(),
+                                   ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
 
   Inspector& inspector = Build();
 
@@ -2488,7 +2437,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
   MakeComparisonSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_depth", ty.f32(),
       ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+          Stage(ast::PipelineStage::kFragment),
       });
 
   Inspector& inspector = Build();
@@ -2509,7 +2458,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
   MakeComparisonSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_depth", ty.f32(),
       ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+          Stage(ast::PipelineStage::kFragment),
       });
 
   Inspector& inspector = Build();
@@ -2525,11 +2474,9 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
-  MakeEmptyBodyFunction(
-      "ep_func",
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeEmptyBodyFunction("ep_func", ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
 
   Inspector& inspector = Build();
 
@@ -2550,11 +2497,10 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
                                              "foo_sampler", "foo_coords",
                                              "foo_depth", ty.f32(), {});
 
-  MakeCallerBodyFunction(
-      "ep_func", {"foo_func"},
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeCallerBodyFunction("ep_func", {"foo_func"},
+                         ast::DecorationList{
+                             Stage(ast::PipelineStage::kFragment),
+                         });
 
   Inspector& inspector = Build();
 
@@ -2578,7 +2524,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
   MakeComparisonSamplerReferenceBodyFunction(
       "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_depth", ty.f32(),
       ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+          Stage(ast::PipelineStage::kFragment),
       });
 
   Inspector& inspector = Build();
@@ -2594,11 +2540,11 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
   AddSampler("foo_sampler", 0, 1);
   AddGlobalVariable("foo_coords", ty.f32());
 
-  MakeSamplerReferenceBodyFunction(
-      "ep", "foo_texture", "foo_sampler", "foo_coords", ty.f32(),
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler",
+                                   "foo_coords", ty.f32(),
+                                   ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
 
   Inspector& inspector = Build();
 
@@ -2609,10 +2555,9 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
 }
 
 TEST_F(InspectorGetSampledTextureResourceBindingsTest, Empty) {
-  MakeEmptyBodyFunction(
-      "foo", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-             });
+  MakeEmptyBodyFunction("foo", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kFragment),
+                               });
 
   Inspector& inspector = Build();
 
@@ -2630,12 +2575,12 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
   auto* coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
   AddGlobalVariable("foo_coords", coord_type);
 
-  MakeSamplerReferenceBodyFunction(
-      "ep", "foo_texture", "foo_sampler", "foo_coords",
-      GetBaseType(GetParam().sampled_kind),
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler",
+                                   "foo_coords",
+                                   GetBaseType(GetParam().sampled_kind),
+                                   ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
 
   Inspector& inspector = Build();
 
@@ -2689,12 +2634,12 @@ TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
   AddGlobalVariable("foo_coords", coord_type);
   AddGlobalVariable("foo_array_index", ty.i32());
 
-  MakeSamplerReferenceBodyFunction(
-      "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_array_index",
-      GetBaseType(GetParam().sampled_kind),
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler",
+                                   "foo_coords", "foo_array_index",
+                                   GetBaseType(GetParam().sampled_kind),
+                                   ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
 
   Inspector& inspector = Build();
 
@@ -2738,7 +2683,7 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
                                            "foo_coords", "foo_sample_index")),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   Inspector& inspector = Build();
@@ -2780,10 +2725,9 @@ INSTANTIATE_TEST_SUITE_P(
             inspector::ResourceBinding::SampledKind::kUInt}));
 
 TEST_F(InspectorGetMultisampledArrayTextureResourceBindingsTest, Empty) {
-  MakeEmptyBodyFunction(
-      "foo", ast::DecorationList{
-                 create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-             });
+  MakeEmptyBodyFunction("foo", ast::DecorationList{
+                                   Stage(ast::PipelineStage::kFragment),
+                               });
 
   Inspector& inspector = Build();
 
@@ -2803,12 +2747,12 @@ TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
   AddGlobalVariable("foo_coords", coord_type);
   AddGlobalVariable("foo_array_index", ty.i32());
 
-  MakeSamplerReferenceBodyFunction(
-      "ep", "foo_texture", "foo_sampler", "foo_coords", "foo_array_index",
-      GetBaseType(GetParam().sampled_kind),
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-      });
+  MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler",
+                                   "foo_coords", "foo_array_index",
+                                   GetBaseType(GetParam().sampled_kind),
+                                   ast::DecorationList{
+                                       Stage(ast::PipelineStage::kFragment),
+                                   });
 
   Inspector& inspector = Build();
 
@@ -2842,10 +2786,9 @@ INSTANTIATE_TEST_SUITE_P(
             inspector::ResourceBinding::SampledKind::kUInt}));
 
 TEST_F(InspectorGetStorageTextureResourceBindingsTest, Empty) {
-  MakeEmptyBodyFunction(
-      "ep", ast::DecorationList{
-                create<ast::StageDecoration>(ast::PipelineStage::kFragment),
-            });
+  MakeEmptyBodyFunction("ep", ast::DecorationList{
+                                  Stage(ast::PipelineStage::kFragment),
+                              });
 
   Inspector& inspector = Build();
 
@@ -2900,8 +2843,7 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
 
   MakeStorageTextureBodyFunction(
       "ep", "st_var", dim_type,
-      ast::DecorationList{
-          create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
+      ast::DecorationList{Stage(ast::PipelineStage::kFragment)});
 
   Inspector& inspector = Build();
 
@@ -3003,7 +2945,7 @@ TEST_P(InspectorGetDepthTextureResourceBindingsTestWithParam,
                Call("textureDimensions", "dt", "dt_level")),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   Inspector& inspector = Build();

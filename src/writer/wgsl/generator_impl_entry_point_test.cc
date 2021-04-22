@@ -38,7 +38,7 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_UnusedFunction) {
            create<ast::CallStatement>(call_func),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   GeneratorImpl& gen = Build();
@@ -65,10 +65,10 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_UnusedVariable) {
 
   Func("main", {}, ty.void_(),
        {
-           create<ast::AssignmentStatement>(Expr("global_used"), Expr(1.f)),
+           Assign("global_used", 1.f),
        },
        {
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   GeneratorImpl& gen = Build();
@@ -105,10 +105,10 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_GlobalsInterleaved) {
        {
            Decl(Var("s0", s0, ast::StorageClass::kFunction)),
            Decl(Var("s1", s1, ast::StorageClass::kFunction)),
-           create<ast::AssignmentStatement>(Expr("a1"), Call("func")),
+           Assign("a1", Call("func")),
        },
        {
-           create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+           Stage(ast::PipelineStage::kCompute),
        });
 
   GeneratorImpl& gen = Build();

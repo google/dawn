@@ -356,10 +356,10 @@ sem::Type* UnwrapPtrAndAlias(sem::Type* ty) {
 
 /// StorageBufferAccess describes a single storage buffer access
 struct StorageBufferAccess {
-  sem::Expression const* var = nullptr;       // Storage buffer variable
-  std::unique_ptr<Offset> offset;             // The byte offset on var
-  sem::Type* type = nullptr;                  // The type of the access
-  operator bool() const { return var; }       // Returns true if valid
+  sem::Expression const* var = nullptr;  // Storage buffer variable
+  std::unique_ptr<Offset> offset;        // The byte offset on var
+  sem::Type* type = nullptr;             // The type of the access
+  operator bool() const { return var; }  // Returns true if valid
 };
 
 /// Store describes a single storage buffer write
@@ -459,8 +459,8 @@ struct State {
         }
         func = ctx.dst->create<ast::Function>(
             ctx.dst->Symbols().New(), params, ctx.Clone(el_ty),
-            ctx.dst->Block(ctx.dst->create<ast::ReturnStatement>(
-                ctx.dst->create<ast::TypeConstructorExpression>(
+            ctx.dst->Block(
+                ctx.dst->Return(ctx.dst->create<ast::TypeConstructorExpression>(
                     ctx.Clone(el_ty), values))),
             ast::DecorationList{}, ast::DecorationList{});
       }

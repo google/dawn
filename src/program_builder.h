@@ -1204,8 +1204,24 @@ class ProgramBuilder {
   }
 
   /// Creates an ast::ReturnStatement with no return value
+  /// @param source the source information
+  /// @returns the return statement pointer
+  ast::ReturnStatement* Return(const Source& source) {
+    return create<ast::ReturnStatement>(source);
+  }
+
+  /// Creates an ast::ReturnStatement with no return value
   /// @returns the return statement pointer
   ast::ReturnStatement* Return() { return create<ast::ReturnStatement>(); }
+
+  /// Creates an ast::ReturnStatement with the given return value
+  /// @param source the source information
+  /// @param val the return value
+  /// @returns the return statement pointer
+  template <typename EXPR>
+  ast::ReturnStatement* Return(const Source& source, EXPR&& val) {
+    return create<ast::ReturnStatement>(source, Expr(std::forward<EXPR>(val)));
+  }
 
   /// Creates an ast::ReturnStatement with the given return value
   /// @param val the return value
@@ -1331,6 +1347,20 @@ class ProgramBuilder {
   }
 
   /// Creates a ast::AssignmentStatement with input lhs and rhs expressions
+  /// @param source the source information
+  /// @param lhs the left hand side expression initializer
+  /// @param rhs the right hand side expression initializer
+  /// @returns the assignment statement pointer
+  template <typename LhsExpressionInit, typename RhsExpressionInit>
+  ast::AssignmentStatement* Assign(const Source& source,
+                                   LhsExpressionInit&& lhs,
+                                   RhsExpressionInit&& rhs) {
+    return create<ast::AssignmentStatement>(
+        source, Expr(std::forward<LhsExpressionInit>(lhs)),
+        Expr(std::forward<RhsExpressionInit>(rhs)));
+  }
+
+  /// Creates a ast::AssignmentStatement with input lhs and rhs expressions
   /// @param lhs the left hand side expression initializer
   /// @param rhs the right hand side expression initializer
   /// @returns the assignment statement pointer
@@ -1349,6 +1379,14 @@ class ProgramBuilder {
   ast::LoopStatement* Loop(ast::BlockStatement* body,
                            ast::BlockStatement* continuing = nullptr) {
     return create<ast::LoopStatement>(body, continuing);
+  }
+
+  /// Creates a ast::VariableDeclStatement for the input variable
+  /// @param source the source information
+  /// @param var the variable to wrap in a decl statement
+  /// @returns the variable decl statement pointer
+  ast::VariableDeclStatement* Decl(const Source& source, ast::Variable* var) {
+    return create<ast::VariableDeclStatement>(source, var);
   }
 
   /// Creates a ast::VariableDeclStatement for the input variable

@@ -31,7 +31,7 @@ class ResolverEntryPointValidationTest : public resolver::TestHelper,
 TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Location) {
   // [[stage(vertex)]]
   // fn main() -> [[location(0)]] f32 { return 1.0; }
-  Func(Source{{12, 34}}, "main", {}, ty.f32(), {Return(Expr(1.0f))},
+  Func(Source{{12, 34}}, "main", {}, ty.f32(), {Return(1.0f)},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();

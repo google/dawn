@@ -28,9 +28,8 @@ using HlslGeneratorImplTest_WorkgroupVar = TestHelper;
 TEST_F(HlslGeneratorImplTest_WorkgroupVar, Basic) {
   Global("wg", ty.f32(), ast::StorageClass::kWorkgroup);
 
-  Func("main", {}, ty.void_(),
-       {create<ast::AssignmentStatement>(Expr("wg"), Expr(1.2f))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
+  Func("main", {}, ty.void_(), {Assign("wg", 1.2f)},
+       {Stage(ast::PipelineStage::kCompute)});
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
@@ -45,9 +44,8 @@ TEST_F(HlslGeneratorImplTest_WorkgroupVar, Aliased) {
 
   Global("wg", alias, ast::StorageClass::kWorkgroup);
 
-  Func("main", {}, ty.void_(),
-       {create<ast::AssignmentStatement>(Expr("wg"), Expr(1.2f))},
-       {create<ast::StageDecoration>(ast::PipelineStage::kCompute)});
+  Func("main", {}, ty.void_(), {Assign("wg", 1.2f)},
+       {Stage(ast::PipelineStage::kCompute)});
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();

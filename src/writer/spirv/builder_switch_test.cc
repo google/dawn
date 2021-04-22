@@ -178,8 +178,7 @@ TEST_F(BuilderTest, Switch_WithDefault) {
   auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
-  auto* default_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
+  auto* default_body = Block(Assign("v", 1));
 
   ast::CaseStatementList cases;
   cases.push_back(
@@ -238,14 +237,11 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
   auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
-  auto* case_1_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1))});
+  auto* case_1_body = Block(Assign("v", Expr(1)));
 
-  auto* case_2_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
+  auto* case_2_body = Block(Assign("v", Expr(2)));
 
-  auto* default_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
+  auto* default_body = Block(Assign("v", Expr(3)));
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(Literal(1));
@@ -322,15 +318,12 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
   auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
   auto* a = Global("a", ty.i32(), ast::StorageClass::kPrivate);
 
-  auto* case_1_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(1)),
-                         create<ast::FallthroughStatement>()});
+  auto* case_1_body =
+      Block(Assign("v", Expr(1)), create<ast::FallthroughStatement>());
 
-  auto* case_2_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
+  auto* case_2_body = Block(Assign("v", Expr(2)));
 
-  auto* default_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
+  auto* default_body = Block(Assign("v", Expr(3)));
 
   ast::CaseSelectorList selector_1;
   selector_1.push_back(Literal(1));

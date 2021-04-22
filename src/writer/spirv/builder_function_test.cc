@@ -44,7 +44,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_Return) {
   Func("a_func", {}, ty.void_(),
        ast::StatementList{
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{});
 
@@ -65,8 +65,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
-  Func("a_func", {}, ty.f32(),
-       ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
+  Func("a_func", {}, ty.f32(), ast::StatementList{Return("a")},
        ast::DecorationList{});
 
   spirv::Builder& b = Build();
@@ -115,8 +114,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_WithParams) {
   ast::VariableList params = {Param("a", ty.f32()), Param("b", ty.i32())};
 
-  Func("a_func", params, ty.f32(),
-       ast::StatementList{create<ast::ReturnStatement>(Expr("a"))},
+  Func("a_func", params, ty.f32(), ast::StatementList{Return("a")},
        ast::DecorationList{});
 
   spirv::Builder& b = Build();
@@ -141,7 +139,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_WithBody) {
   Func("a_func", {}, ty.void_(),
        ast::StatementList{
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{});
 
@@ -220,11 +218,11 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
     Func("a", ast::VariableList{}, ty.void_(),
          ast::StatementList{
-             create<ast::VariableDeclStatement>(var),
-             create<ast::ReturnStatement>(),
+             Decl(var),
+             Return(),
          },
          ast::DecorationList{
-             create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+             Stage(ast::PipelineStage::kCompute),
          });
   }
 
@@ -234,11 +232,11 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
     Func("b", ast::VariableList{}, ty.void_(),
          ast::StatementList{
-             create<ast::VariableDeclStatement>(var),
-             create<ast::ReturnStatement>(),
+             Decl(var),
+             Return(),
          },
          ast::DecorationList{
-             create<ast::StageDecoration>(ast::PipelineStage::kCompute),
+             Stage(ast::PipelineStage::kCompute),
          });
   }
 

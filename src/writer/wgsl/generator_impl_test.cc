@@ -48,7 +48,7 @@ TEST_P(WgslBuiltinConversionTest, Emit) {
 
   auto* var = Global("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
                      ast::DecorationList{
-                         create<ast::BuiltinDecoration>(params.builtin),
+                         Builtin(params.builtin),
                      });
 
   GeneratorImpl& gen = Build();

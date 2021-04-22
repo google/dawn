@@ -95,13 +95,13 @@ TEST_F(ResolverValidationTest, Stmt_Call_undeclared) {
   Func("main", params0, ty.f32(),
        ast::StatementList{
            create<ast::CallStatement>(call_expr),
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{});
 
   Func("func", params0, ty.f32(),
        ast::StatementList{
-           create<ast::ReturnStatement>(),
+           Return(),
        },
        ast::DecorationList{});
 
@@ -123,7 +123,7 @@ TEST_F(ResolverValidationTest, Stmt_Call_recursive) {
            create<ast::CallStatement>(call_expr),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex),
+           Stage(ast::PipelineStage::kVertex),
        });
 
   EXPECT_FALSE(r()->Resolve());
@@ -153,8 +153,7 @@ TEST_F(ResolverValidationTest,
   auto* var =
       Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(unsigned_value));
 
-  auto* decl =
-      create<ast::VariableDeclStatement>(Source{{{3, 3}, {3, 22}}}, var);
+  auto* decl = Decl(Source{{{3, 3}, {3, 22}}}, var);
   WrapInFunction(decl);
 
   EXPECT_FALSE(r()->Resolve());
@@ -170,8 +169,7 @@ TEST_F(ResolverValidationTest,
   auto* var =
       Var("my_var", my_int, ast::StorageClass::kNone, Expr(unsigned_value));
 
-  auto* decl =
-      create<ast::VariableDeclStatement>(Source{{{3, 3}, {3, 22}}}, var);
+  auto* decl = Decl(Source{{{3, 3}, {3, 22}}}, var);
   WrapInFunction(decl);
 
   EXPECT_FALSE(r()->Resolve());
@@ -216,7 +214,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariable_Fail) {
 
   auto* lhs = Expr(Source{{12, 34}}, "b");
   auto* rhs = Expr(2);
-  auto* assign = create<ast::AssignmentStatement>(lhs, rhs);
+  auto* assign = Assign(lhs, rhs);
   WrapInFunction(assign);
 
   EXPECT_FALSE(r()->Resolve());
@@ -232,9 +230,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInBlockStatement_Fail) {
   auto* lhs = Expr(Source{{12, 34}}, "b");
   auto* rhs = Expr(2);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
-  });
+  auto* body = Block(Assign(lhs, rhs));
   WrapInFunction(body);
 
   EXPECT_FALSE(r()->Resolve());
@@ -253,10 +249,9 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariableAfter_Fail) {
 
   Func("my_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::AssignmentStatement>(lhs, rhs),
+           Assign(lhs, rhs),
        },
-       ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kVertex)});
+       ast::DecorationList{Stage(ast::PipelineStage::kVertex)});
 
   Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
 
@@ -277,9 +272,8 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
 
   Func("my_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::AssignmentStatement>(Source{Source::Location{12, 34}},
-                                            Expr("global_var"), Expr(3.14f)),
-           create<ast::ReturnStatement>(),
+           Assign(Expr(Source{Source::Location{12, 34}}, "global_var"), 3.14f),
+           Return(),
        });
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -293,18 +287,15 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableInnerScope_Fail) {
   auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
 
   auto* cond = Expr(true);
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-  });
+  auto* body = Block(Decl(var));
 
   SetSource(Source{Source::Location{12, 34}});
   auto* lhs = Expr(Source{{12, 34}}, "a");
   auto* rhs = Expr(3.14f);
 
-  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
-      create<ast::AssignmentStatement>(lhs, rhs),
-  });
+  auto* outer_body =
+      Block(create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
+            Assign(lhs, rhs));
 
   WrapInFunction(outer_body);
 
@@ -324,14 +315,11 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableOuterScope_Pass) {
   auto* rhs = Expr(3.14f);
 
   auto* cond = Expr(true);
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
-  });
+  auto* body = Block(Assign(lhs, rhs));
 
-  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::IfStatement>(cond, body, ast::ElseStatementList{}),
-  });
+  auto* outer_body =
+      Block(Decl(var),
+            create<ast::IfStatement>(cond, body, ast::ElseStatementList{}));
 
   WrapInFunction(outer_body);
 
@@ -344,20 +332,13 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
   //  { a = 3.14; }
   // }
   auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
-  auto* first_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-  });
+  auto* first_body = Block(Decl(var));
 
   auto* lhs = Expr(Source{{12, 34}}, "a");
   auto* rhs = Expr(3.14f);
-  auto* second_body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(lhs, rhs),
-  });
+  auto* second_body = Block(Assign(lhs, rhs));
 
-  auto* outer_body = create<ast::BlockStatement>(ast::StatementList{
-      first_body,
-      second_body,
-  });
+  auto* outer_body = Block(first_body, second_body);
 
   WrapInFunction(outer_body);
 
@@ -369,7 +350,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableDifferentScope_Fail) {
 TEST_F(ResolverValidationTest, StorageClass_NonFunctionClassError) {
   auto* var = Var("var", ty.i32(), ast::StorageClass::kWorkgroup);
 
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   Func("func", ast::VariableList{}, ty.void_(), ast::StatementList{stmt},
        ast::DecorationList{});
 
@@ -436,7 +417,7 @@ TEST_F(ResolverValidationTest,
   auto error_loc = Source{Source::Location{12, 34}};
   auto* body = Block(create<ast::ContinueStatement>(),
                      Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
-  auto* continuing = Block(Assign(Expr(error_loc, "z"), Expr(2)));
+  auto* continuing = Block(Assign(Expr(error_loc, "z"), 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
@@ -462,7 +443,7 @@ TEST_F(ResolverValidationTest,
   auto* body = Block(create<ast::ContinueStatement>(),
                      Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
                      create<ast::ContinueStatement>());
-  auto* continuing = Block(Assign(Expr(error_loc, "z"), Expr(2)));
+  auto* continuing = Block(Assign(Expr(error_loc, "z"), 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
@@ -487,7 +468,7 @@ TEST_F(ResolverValidationTest,
   auto error_loc = Source{Source::Location{12, 34}};
   auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
                      Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
-  auto* continuing = Block(Assign(Expr(error_loc, "z"), Expr(2)));
+  auto* continuing = Block(Assign(Expr(error_loc, "z"), 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
@@ -517,7 +498,7 @@ TEST_F(
                      Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
 
   auto* continuing =
-      Block(If(Expr(true), Block(Assign(Expr(error_loc, "z"), Expr(2)))));
+      Block(If(Expr(true), Block(Assign(Expr(error_loc, "z"), 2))));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
@@ -545,7 +526,7 @@ TEST_F(ResolverValidationTest,
   auto* body = Block(If(Expr(true), Block(create<ast::ContinueStatement>())),
                      Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
 
-  auto* continuing = Block(Loop(Block(Assign(Expr(error_loc, "z"), Expr(2)))));
+  auto* continuing = Block(Loop(Block(Assign(Expr(error_loc, "z"), 2))));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
@@ -571,7 +552,7 @@ TEST_F(ResolverValidationTest,
   auto* inner_loop = Loop(Block(create<ast::ContinueStatement>()));
   auto* body =
       Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
-  auto* continuing = Block(Assign(Expr("z"), Expr(2)));
+  auto* continuing = Block(Assign("z", 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
@@ -596,7 +577,7 @@ TEST_F(ResolverValidationTest,
   auto* inner_loop = Loop(Block(create<ast::ContinueStatement>()));
   auto* body =
       Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
-  auto* continuing = Block(If(Expr(true), Block(Assign(Expr("z"), Expr(2)))));
+  auto* continuing = Block(If(Expr(true), Block(Assign("z", 2))));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
@@ -621,7 +602,7 @@ TEST_F(ResolverValidationTest,
   auto* inner_loop = Loop(Block(create<ast::ContinueStatement>()));
   auto* body =
       Block(inner_loop, Decl(Var("z", ty.i32(), ast::StorageClass::kNone)));
-  auto* continuing = Block(Loop(Block(Assign(Expr("z"), Expr(2)))));
+  auto* continuing = Block(Loop(Block(Assign("z", 2))));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 
@@ -641,7 +622,7 @@ TEST_F(ResolverTest, Stmt_Loop_ContinueInLoopBodyAfterDecl_UsageInContinuing) {
   auto error_loc = Source{Source::Location{12, 34}};
   auto* body = Block(Decl(Var("z", ty.i32(), ast::StorageClass::kNone)),
                      create<ast::ContinueStatement>());
-  auto* continuing = Block(Assign(Expr(error_loc, "z"), Expr(2)));
+  auto* continuing = Block(Assign(Expr(error_loc, "z"), 2));
   auto* loop_stmt = Loop(body, continuing);
   WrapInFunction(loop_stmt);
 

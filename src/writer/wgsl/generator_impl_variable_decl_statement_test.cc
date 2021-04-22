@@ -25,7 +25,7 @@ using WgslGeneratorImplTest = TestHelper;
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
   auto* var = Var("a", ty.f32(), ast::StorageClass::kFunction);
 
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();
@@ -39,7 +39,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_InferredType) {
   auto* var = Var("a", nullptr, ast::StorageClass::kFunction, Expr(123));
 
-  auto* stmt = create<ast::VariableDeclStatement>(var);
+  auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
   GeneratorImpl& gen = Build();

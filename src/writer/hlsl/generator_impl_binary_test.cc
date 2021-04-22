@@ -315,22 +315,16 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
   Global("b", ty.bool_(), ast::StorageClass::kPrivate);
   Global("c", ty.bool_(), ast::StorageClass::kPrivate);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      Return(Expr(3)),
-  });
+  auto* body = Block(Return(3));
   auto* else_stmt = create<ast::ElseStatement>(nullptr, body);
 
-  body = create<ast::BlockStatement>(ast::StatementList{
-      Return(Expr(2)),
-  });
+  body = Block(Return(2));
   auto* else_if_stmt = create<ast::ElseStatement>(
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"),
                                     Expr("c")),
       body);
 
-  body = create<ast::BlockStatement>(ast::StatementList{
-      Return(Expr(1)),
-  });
+  body = Block(Return(1));
 
   auto* expr = create<ast::IfStatement>(
       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"),
@@ -402,7 +396,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
   Global("c", ty.bool_(), ast::StorageClass::kPrivate);
   Global("d", ty.bool_(), ast::StorageClass::kPrivate);
 
-  auto* expr = create<ast::AssignmentStatement>(
+  auto* expr = Assign(
       Expr("a"), create<ast::BinaryExpression>(
                      ast::BinaryOp::kLogicalAnd,
                      create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,

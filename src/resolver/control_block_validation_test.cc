@@ -31,15 +31,13 @@ TEST_F(ResolverControlBlockValidationTest,
   auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.14f));
 
   ast::CaseStatementList body;
-  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_default = Block();
   body.push_back(
       create<ast::CaseStatement>(ast::CaseSelectorList{}, block_default));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Expr(Source{Source::Location{12, 34}}, "a"),
-                                   body),
-  });
+  auto* block =
+      Block(Decl(var), create<ast::SwitchStatement>(
+                           Expr(Source{Source::Location{12, 34}}, "a"), body));
 
   WrapInFunction(block);
 
@@ -60,14 +58,11 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithoutDefault_Fail) {
   csl.push_back(Literal(1));
 
   ast::CaseStatementList body;
-  body.push_back(create<ast::CaseStatement>(
-      csl, create<ast::BlockStatement>(ast::StatementList{})));
+  body.push_back(create<ast::CaseStatement>(csl, Block()));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Source{Source::Location{12, 34}}, Expr("a"),
-                                   body),
-  });
+  auto* block =
+      Block(Decl(var), create<ast::SwitchStatement>(
+                           Source{Source::Location{12, 34}}, Expr("a"), body));
 
   WrapInFunction(block);
 
@@ -87,24 +82,22 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
 
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList default_csl_1;
-  auto* block_default_1 = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_default_1 = Block();
   switch_body.push_back(
       create<ast::CaseStatement>(default_csl_1, block_default_1));
 
   ast::CaseSelectorList csl_case_1;
   csl_case_1.push_back(Literal(1));
-  auto* block_case_1 = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_case_1 = Block();
   switch_body.push_back(create<ast::CaseStatement>(csl_case_1, block_case_1));
 
   ast::CaseSelectorList default_csl_2;
-  auto* block_default_2 = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_default_2 = Block();
   switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, default_csl_2, block_default_2));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Expr("a"), switch_body),
-  });
+  auto* block =
+      Block(Decl(var), create<ast::SwitchStatement>(Expr("a"), switch_body));
 
   WrapInFunction(block);
 
@@ -128,17 +121,14 @@ TEST_F(ResolverControlBlockValidationTest,
   ast::CaseSelectorList csl;
   csl.push_back(create<ast::UintLiteral>(ty.u32(), 1));
   switch_body.push_back(create<ast::CaseStatement>(
-      Source{Source::Location{12, 34}}, csl,
-      create<ast::BlockStatement>(ast::StatementList{})));
+      Source{Source::Location{12, 34}}, csl, Block()));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_default = Block();
   switch_body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Expr("a"), switch_body),
-  });
+  auto* block =
+      Block(Decl(var), create<ast::SwitchStatement>(Expr("a"), switch_body));
   WrapInFunction(block);
 
   EXPECT_FALSE(r()->Resolve());
@@ -160,17 +150,14 @@ TEST_F(ResolverControlBlockValidationTest,
   ast::CaseSelectorList csl;
   csl.push_back(Literal(-1));
   switch_body.push_back(create<ast::CaseStatement>(
-      Source{Source::Location{12, 34}}, csl,
-      create<ast::BlockStatement>(ast::StatementList{})));
+      Source{Source::Location{12, 34}}, csl, Block()));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_default = Block();
   switch_body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Expr("a"), switch_body),
-  });
+  auto* block =
+      Block(Decl(var), create<ast::SwitchStatement>(Expr("a"), switch_body));
   WrapInFunction(block);
 
   EXPECT_FALSE(r()->Resolve());
@@ -192,24 +179,20 @@ TEST_F(ResolverControlBlockValidationTest,
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList csl_1;
   csl_1.push_back(create<ast::UintLiteral>(ty.u32(), 0));
-  switch_body.push_back(create<ast::CaseStatement>(
-      csl_1, create<ast::BlockStatement>(ast::StatementList{})));
+  switch_body.push_back(create<ast::CaseStatement>(csl_1, Block()));
 
   ast::CaseSelectorList csl_2;
   csl_2.push_back(create<ast::UintLiteral>(ty.u32(), 2));
   csl_2.push_back(create<ast::UintLiteral>(ty.u32(), 2));
   switch_body.push_back(create<ast::CaseStatement>(
-      Source{Source::Location{12, 34}}, csl_2,
-      create<ast::BlockStatement>(ast::StatementList{})));
+      Source{Source::Location{12, 34}}, csl_2, Block()));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_default = Block();
   switch_body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Expr("a"), switch_body),
-  });
+  auto* block =
+      Block(Decl(var), create<ast::SwitchStatement>(Expr("a"), switch_body));
   WrapInFunction(block);
 
   EXPECT_FALSE(r()->Resolve());
@@ -231,8 +214,7 @@ TEST_F(ResolverControlBlockValidationTest,
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList csl_1;
   csl_1.push_back(Literal(10));
-  switch_body.push_back(create<ast::CaseStatement>(
-      csl_1, create<ast::BlockStatement>(ast::StatementList{})));
+  switch_body.push_back(create<ast::CaseStatement>(csl_1, Block()));
 
   ast::CaseSelectorList csl_2;
   csl_2.push_back(Literal(0));
@@ -240,17 +222,14 @@ TEST_F(ResolverControlBlockValidationTest,
   csl_2.push_back(Literal(2));
   csl_2.push_back(Literal(10));
   switch_body.push_back(create<ast::CaseStatement>(
-      Source{Source::Location{12, 34}}, csl_2,
-      create<ast::BlockStatement>(ast::StatementList{})));
+      Source{Source::Location{12, 34}}, csl_2, Block()));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_default = Block();
   switch_body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Expr("a"), switch_body),
-  });
+  auto* block =
+      Block(Decl(var), create<ast::SwitchStatement>(Expr("a"), switch_body));
   WrapInFunction(block);
 
   EXPECT_FALSE(r()->Resolve());
@@ -269,18 +248,12 @@ TEST_F(ResolverControlBlockValidationTest,
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default = create<ast::BlockStatement>(
-
-      ast::StatementList{
-          create<ast::FallthroughStatement>(Source{Source::Location{12, 34}}),
-      });
+  auto* block_default = Block(
+      create<ast::FallthroughStatement>(Source{Source::Location{12, 34}}));
   ast::CaseStatementList body;
   body.push_back(create<ast::CaseStatement>(default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Expr("a"), body),
-  });
+  auto* block = Block(Decl(var), create<ast::SwitchStatement>(Expr("a"), body));
   WrapInFunction(block);
 
   EXPECT_FALSE(r()->Resolve());
@@ -299,19 +272,16 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCase_Pass) {
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_default = Block();
   ast::CaseStatementList body;
   body.push_back(create<ast::CaseStatement>(Source{Source::Location{12, 34}},
                                             default_csl, block_default));
   ast::CaseSelectorList case_csl;
   case_csl.push_back(Literal(5));
-  auto* block_case = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_case = Block();
   body.push_back(create<ast::CaseStatement>(case_csl, block_case));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Expr("a"), body),
-  });
+  auto* block = Block(Decl(var), create<ast::SwitchStatement>(Expr("a"), body));
   WrapInFunction(block);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -328,15 +298,12 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCaseAlias_Pass) {
   auto* var = Var("a", my_int, ast::StorageClass::kNone, Expr(2u));
 
   ast::CaseSelectorList default_csl;
-  auto* block_default = create<ast::BlockStatement>(ast::StatementList{});
+  auto* block_default = Block();
   ast::CaseStatementList body;
   body.push_back(create<ast::CaseStatement>(Source{Source::Location{12, 34}},
                                             default_csl, block_default));
 
-  auto* block = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::SwitchStatement>(Expr("a"), body),
-  });
+  auto* block = Block(Decl(var), create<ast::SwitchStatement>(Expr("a"), body));
   AST().AddConstructedType(my_int);
 
   WrapInFunction(block);

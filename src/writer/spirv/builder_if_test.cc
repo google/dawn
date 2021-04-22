@@ -74,8 +74,7 @@ TEST_F(BuilderTest, If_WithStatements) {
   // }
 
   auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
+  auto* body = Block(Assign("v", 2));
   auto* expr =
       create<ast::IfStatement>(Expr(true), body, ast::ElseStatementList{});
   WrapInFunction(expr);
@@ -112,10 +111,8 @@ TEST_F(BuilderTest, If_WithElse) {
   // }
 
   auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
-  auto* else_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
+  auto* body = Block(Assign("v", 2));
+  auto* else_body = Block(Assign("v", 3));
 
   auto* expr = create<ast::IfStatement>(
       Expr(true), body,
@@ -158,10 +155,8 @@ TEST_F(BuilderTest, If_WithElseIf) {
   // }
 
   auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
-  auto* else_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
+  auto* body = Block(Assign("v", 2));
+  auto* else_body = Block(Assign("v", 3));
 
   auto* expr = create<ast::IfStatement>(
       Expr(true), body,
@@ -215,14 +210,10 @@ TEST_F(BuilderTest, If_WithMultiple) {
   // }
 
   auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
-  auto* body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(2))});
-  auto* elseif_1_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(3))});
-  auto* elseif_2_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(4))});
-  auto* else_body = create<ast::BlockStatement>(
-      ast::StatementList{create<ast::AssignmentStatement>(Expr("v"), Expr(5))});
+  auto* body = Block(Assign("v", 2));
+  auto* elseif_1_body = Block(Assign("v", 3));
+  auto* elseif_2_body = Block(Assign("v", 4));
+  auto* else_body = Block(Assign("v", 5));
 
   auto* expr = create<ast::IfStatement>(
       Expr(true), body,
@@ -294,7 +285,7 @@ TEST_F(BuilderTest, If_WithBreak) {
 
   auto* loop_body = Block(if_stmt);
 
-  auto* expr = create<ast::LoopStatement>(loop_body, Block());
+  auto* expr = Loop(loop_body, Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -338,7 +329,7 @@ TEST_F(BuilderTest, If_WithElseBreak) {
 
   auto* loop_body = Block(if_stmt);
 
-  auto* expr = create<ast::LoopStatement>(loop_body, Block());
+  auto* expr = Loop(loop_body, Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -382,7 +373,7 @@ TEST_F(BuilderTest, If_WithContinue) {
 
   auto* loop_body = Block(if_stmt);
 
-  auto* expr = create<ast::LoopStatement>(loop_body, Block());
+  auto* expr = Loop(loop_body, Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -426,7 +417,7 @@ TEST_F(BuilderTest, If_WithElseContinue) {
 
   auto* loop_body = Block(if_stmt);
 
-  auto* expr = create<ast::LoopStatement>(loop_body, Block());
+  auto* expr = Loop(loop_body, Block());
   WrapInFunction(expr);
 
   spirv::Builder& b = Build();
@@ -461,7 +452,7 @@ TEST_F(BuilderTest, If_WithReturn) {
   // if (true) {
   //   return;
   // }
-  auto* if_body = Block(create<ast::ReturnStatement>());
+  auto* if_body = Block(Return());
 
   auto* expr =
       create<ast::IfStatement>(Expr(true), if_body, ast::ElseStatementList{});
@@ -489,9 +480,9 @@ TEST_F(BuilderTest, If_WithReturnValue) {
   //   return false;
   // }
   // return true;
-  auto* if_body = Block(Return(Expr(false)));
+  auto* if_body = Block(Return(false));
   auto* expr = If(Expr(true), if_body);
-  Func("test", {}, ty.bool_(), {expr, Return(Expr(true))}, {});
+  Func("test", {}, ty.bool_(), {expr, Return(true)}, {});
   spirv::Builder& b = Build();
 
   b.push_function(Function{});

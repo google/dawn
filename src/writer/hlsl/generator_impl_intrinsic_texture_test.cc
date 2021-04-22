@@ -364,7 +364,7 @@ TEST_P(HlslGeneratorIntrinsicTextureTest, Call) {
            create<ast::CallStatement>(call),
        },
        ast::DecorationList{
-           create<ast::StageDecoration>(ast::PipelineStage::kFragment),
+           Stage(ast::PipelineStage::kFragment),
        });
 
   GeneratorImpl& gen = SanitizeAndBuild();

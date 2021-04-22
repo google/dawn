@@ -23,11 +23,9 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Loop) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* continuing = create<ast::BlockStatement>(ast::StatementList{});
-  auto* l = create<ast::LoopStatement>(body, continuing);
+  auto* body = Block(create<ast::DiscardStatement>());
+  auto* continuing = Block();
+  auto* l = Loop(body, continuing);
   WrapInFunction(l);
 
   GeneratorImpl& gen = Build();
@@ -42,13 +40,9 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* continuing = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* l = create<ast::LoopStatement>(body, continuing);
+  auto* body = Block(create<ast::DiscardStatement>());
+  auto* continuing = Block(Return());
+  auto* l = Loop(body, continuing);
   WrapInFunction(l);
 
   GeneratorImpl& gen = Build();
@@ -74,23 +68,15 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
   Global("lhs", ty.f32(), ast::StorageClass::kInput);
   Global("rhs", ty.f32(), ast::StorageClass::kInput);
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::DiscardStatement>(),
-  });
-  auto* continuing = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::ReturnStatement>(),
-  });
-  auto* inner = create<ast::LoopStatement>(body, continuing);
+  auto* body = Block(create<ast::DiscardStatement>());
+  auto* continuing = Block(Return());
+  auto* inner = Loop(body, continuing);
 
-  body = create<ast::BlockStatement>(ast::StatementList{
-      inner,
-  });
+  body = Block(inner);
 
-  continuing = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs")),
-  });
+  continuing = Block(Assign("lhs", "rhs"));
 
-  auto* outer = create<ast::LoopStatement>(body, continuing);
+  auto* outer = Loop(body, continuing);
   WrapInFunction(outer);
 
   GeneratorImpl& gen = Build();
@@ -148,16 +134,12 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
 
   auto* var = Var("lhs", ty.f32(), ast::StorageClass::kFunction, Expr(2.4f));
 
-  auto* body = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(var),
-      create<ast::VariableDeclStatement>(
-          Var("other", ty.f32(), ast::StorageClass::kFunction))});
+  auto* body = Block(
+      Decl(var), Decl(Var("other", ty.f32(), ast::StorageClass::kFunction)));
 
-  auto* continuing = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("lhs"), Expr("rhs")),
-  });
+  auto* continuing = Block(Assign("lhs", "rhs"));
 
-  auto* outer = create<ast::LoopStatement>(body, continuing);
+  auto* outer = Loop(body, continuing);
   WrapInFunction(outer);
 
   GeneratorImpl& gen = Build();

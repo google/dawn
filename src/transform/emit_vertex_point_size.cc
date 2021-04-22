@@ -40,7 +40,7 @@ Output EmitVertexPointSize::Run(const Program* in, const DataMap&) {
   // Declare the pointsize builtin output variable.
   out.Global(pointsize, out.ty.f32(), ast::StorageClass::kOutput, nullptr,
              ast::DecorationList{
-                 out.create<ast::BuiltinDecoration>(ast::Builtin::kPointSize),
+                 out.Builtin(ast::Builtin::kPointSize),
              });
 
   // Add the pointsize assignment statement to the front of all vertex stages.

@@ -27,15 +27,10 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, DISABLED_Block) {
   // Note, this test uses shadow variables which aren't allowed in WGSL but
   // serves to prove the block code is pushing new scopes as needed.
-  auto* inner = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(
-          Var("var", ty.f32(), ast::StorageClass::kFunction)),
-      create<ast::AssignmentStatement>(Expr("var"), Expr(2.f))});
-  auto* outer = create<ast::BlockStatement>(ast::StatementList{
-      create<ast::VariableDeclStatement>(
-          Var("var", ty.f32(), ast::StorageClass::kFunction)),
-      create<ast::AssignmentStatement>(Expr("var"), Expr(1.f)), inner,
-      create<ast::AssignmentStatement>(Expr("var"), Expr(3.f))});
+  auto* inner = Block(Decl(Var("var", ty.f32(), ast::StorageClass::kFunction)),
+                      Assign("var", 2.f));
+  auto* outer = Block(Decl(Var("var", ty.f32(), ast::StorageClass::kFunction)),
+                      Assign("var", 1.f), inner, Assign("var", 3.f));
 
   WrapInFunction(outer);
 

@@ -95,10 +95,9 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOutVars) {
   // fn frag_main([[location(0)]] foo : f32) -> [[location(1)]] f32 {
   //   return foo;
   // }
-  auto* foo_in = Param("foo", ty.f32(), {create<ast::LocationDecoration>(0)});
-  Func("frag_main", ast::VariableList{foo_in}, ty.f32(), {Return(Expr("foo"))},
-       {Stage(ast::PipelineStage::kFragment)},
-       {create<ast::LocationDecoration>(1)});
+  auto* foo_in = Param("foo", ty.f32(), {Location(0)});
+  Func("frag_main", ast::VariableList{foo_in}, ty.f32(), {Return("foo")},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(1)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -128,12 +127,11 @@ TEST_F(MslGeneratorImplTest, Emit_Decoration_EntryPoint_WithInOut_Builtins) {
   //   return coord.x;
   // }
   auto* coord_in =
-      Param("coord", ty.vec4<f32>(),
-            {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
+      Param("coord", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
   Func("frag_main", ast::VariableList{coord_in}, ty.f32(),
        {Return(MemberAccessor("coord", "x"))},
        {Stage(ast::PipelineStage::kFragment)},
-       {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
+       {Builtin(ast::Builtin::kFragDepth)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -188,9 +186,9 @@ TEST_F(MslGeneratorImplTest,
   Func("frag_main", {Param("colors", interface_struct)}, ty.void_(),
        {
            WrapInStatement(
-               Const("r", ty.f32(), MemberAccessor(Expr("colors"), "col1"))),
+               Const("r", ty.f32(), MemberAccessor("colors", "col1"))),
            WrapInStatement(
-               Const("g", ty.f32(), MemberAccessor(Expr("colors"), "col2"))),
+               Const("g", ty.f32(), MemberAccessor("colors", "col2"))),
        },
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -249,13 +247,11 @@ TEST_F(MslGeneratorImplTest,
   // }
   auto* vertex_output_struct = Structure(
       "VertexOutput",
-      {Member("pos", ty.vec4<f32>(),
-              {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)})});
+      {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
 
   Func("foo", {Param("x", ty.f32())}, vertex_output_struct,
        {Return(Construct(vertex_output_struct,
-                         Construct(ty.vec4<f32>(), Expr("x"), Expr("x"),
-                                   Expr("x"), Expr(1.f))))},
+                         Construct(ty.vec4<f32>(), "x", "x", "x", Expr(1.f))))},
        {});
 
   Func("vert_main1", {}, vertex_output_struct,
@@ -321,7 +317,7 @@ TEST_F(MslGeneratorImplTest,
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
+           Decl(var),
            Return(),
        },
        {
@@ -366,7 +362,7 @@ TEST_F(MslGeneratorImplTest,
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
+           Decl(var),
            Return(),
        },
        {
@@ -396,27 +392,22 @@ fragment void frag_main(const device Data& coord [[buffer(0)]]) {
 TEST_F(
     MslGeneratorImplTest,
     Emit_Decoration_Called_By_EntryPoints_WithLocationGlobals_And_Params) {  // NOLINT
-  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr,
-         {create<ast::LocationDecoration>(0)});
+  Global("foo", ty.f32(), ast::StorageClass::kInput, nullptr, {Location(0)});
 
-  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {create<ast::LocationDecoration>(1)});
+  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr, {Location(1)});
 
-  Global("val", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {create<ast::LocationDecoration>(0)});
+  Global("val", ty.f32(), ast::StorageClass::kOutput, nullptr, {Location(0)});
 
   ast::VariableList params;
   params.push_back(Param("param", ty.f32()));
 
-  auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("bar"), Expr("foo")),
-      create<ast::AssignmentStatement>(Expr("val"), Expr("param")),
-      Return(Expr("foo"))};
+  auto body = ast::StatementList{Assign("bar", "foo"), Assign("val", "param"),
+                                 Return("foo")};
 
   Func("sub_func", params, ty.f32(), body, {});
 
   body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("bar"), Call("sub_func", 1.0f)),
+      Assign("bar", Call("sub_func", 1.0f)),
       Return(),
   };
 
@@ -459,19 +450,19 @@ fragment ep_1_out ep_1(ep_1_in _tint_in [[stage_in]]) {
 TEST_F(MslGeneratorImplTest,
        Emit_Decoration_Called_By_EntryPoints_NoUsedGlobals) {
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
+         {Builtin(ast::Builtin::kFragDepth)});
 
   ast::VariableList params;
   params.push_back(Param("param", ty.f32()));
 
   Func("sub_func", params, ty.f32(),
        ast::StatementList{
-           Return(Expr("param")),
+           Return("param"),
        },
        {});
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("depth"), Call("sub_func", 1.0f)),
+      Assign("depth", Call("sub_func", 1.0f)),
       Return(),
   };
 
@@ -508,24 +499,23 @@ TEST_F(
     MslGeneratorImplTest,
     Emit_Decoration_Called_By_EntryPoints_WithBuiltinGlobals_And_Params) {  // NOLINT
   Global("coord", ty.vec4<f32>(), ast::StorageClass::kInput, nullptr,
-         {create<ast::BuiltinDecoration>(ast::Builtin::kPosition)});
+         {Builtin(ast::Builtin::kPosition)});
 
   Global("depth", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {create<ast::BuiltinDecoration>(ast::Builtin::kFragDepth)});
+         {Builtin(ast::Builtin::kFragDepth)});
 
   ast::VariableList params;
   params.push_back(Param("param", ty.f32()));
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("depth"),
-                                       MemberAccessor("coord", "x")),
-      Return(Expr("param")),
+      Assign("depth", MemberAccessor("coord", "x")),
+      Return("param"),
   };
 
   Func("sub_func", params, ty.f32(), body, {});
 
   body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("depth"), Call("sub_func", 1.0f)),
+      Assign("depth", Call("sub_func", 1.0f)),
       Return(),
   };
 
@@ -635,7 +625,7 @@ TEST_F(MslGeneratorImplTest,
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
+           Decl(var),
            Return(),
        },
        {
@@ -691,7 +681,7 @@ TEST_F(MslGeneratorImplTest,
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           create<ast::VariableDeclStatement>(var),
+           Decl(var),
            Return(),
        },
        {
@@ -724,15 +714,12 @@ fragment void frag_main(const device Data& coord [[buffer(0)]]) {
 // TODO(crbug.com/tint/697): Remove this test
 TEST_F(MslGeneratorImplTest,
        Emit_Decoration_EntryPoints_WithGlobal_Nested_Return) {
-  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr,
-         {create<ast::LocationDecoration>(1)});
+  Global("bar", ty.f32(), ast::StorageClass::kOutput, nullptr, {Location(1)});
 
-  auto* list = create<ast::BlockStatement>(ast::StatementList{
-      Return(),
-  });
+  auto* list = Block(Return());
 
   auto body = ast::StatementList{
-      create<ast::AssignmentStatement>(Expr("bar"), Expr(1.f)),
+      Assign("bar", Expr(1.f)),
       create<ast::IfStatement>(create<ast::BinaryExpression>(
                                    ast::BinaryOp::kEqual, Expr(1), Expr(1)),
                                list, ast::ElseStatementList{}),
@@ -823,7 +810,7 @@ TEST_F(MslGeneratorImplTest,
 
     Func("a", ast::VariableList{}, ty.void_(),
          ast::StatementList{
-             create<ast::VariableDeclStatement>(var),
+             Decl(var),
              Return(),
          },
          {
@@ -836,7 +823,7 @@ TEST_F(MslGeneratorImplTest,
                     MemberAccessor("data", "d"));
 
     Func("b", ast::VariableList{}, ty.void_(),
-         ast::StatementList{create<ast::VariableDeclStatement>(var), Return()},
+         ast::StatementList{Decl(var), Return()},
          {Stage(ast::PipelineStage::kCompute)});
   }
 
