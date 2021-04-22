@@ -26,6 +26,7 @@
 #include "src/reader/wgsl/lexer.h"
 #include "src/sem/access_control_type.h"
 #include "src/sem/depth_texture_type.h"
+#include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
 
@@ -516,6 +517,10 @@ Maybe<sem::Type*> ParserImpl::texture_sampler_types() {
   if (type.matched)
     return type.value;
 
+  type = external_texture_type();
+  if (type.matched)
+    return type.value;
+
   auto dim = sampled_texture_type();
   if (dim.matched) {
     const char* use = "sampled texture type";
@@ -596,6 +601,16 @@ Maybe<ast::TextureDimension> ParserImpl::sampled_texture_type() {
 
   if (match(Token::Type::kTextureSampledCubeArray))
     return ast::TextureDimension::kCubeArray;
+
+  return Failure::kNoMatch;
+}
+
+// external_texture_type
+//  : TEXTURE_EXTERNAL
+Maybe<sem::Type*> ParserImpl::external_texture_type() {
+  if (match(Token::Type::kTextureExternal)) {
+    return builder_.create<sem::ExternalTexture>();
+  }
 
   return Failure::kNoMatch;
 }

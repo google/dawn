@@ -650,6 +650,9 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kTextureDepthCubeArray, source,
             "texture_depth_cube_array"};
   }
+  if (str == "texture_external") {
+    return {Token::Type::kTextureExternal, source, "texture_external"};
+  }
   if (str == "texture_multisampled_2d") {
     return {Token::Type::kTextureMultisampled2d, source,
             "texture_multisampled_2d"};

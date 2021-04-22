@@ -414,6 +414,9 @@ class ParserImpl {
   /// Parses a `depth_texture_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<sem::Type*> depth_texture_type();
+  /// Parses a 'texture_external_type' grammar element
+  /// @returns the parsed Type or nullptr if none matched
+  Maybe<sem::Type*> external_texture_type();
   /// Parses a `image_storage_type` grammar element
   /// @param use a description of what was being parsed if an error was raised
   /// @returns returns the image format or kNone if none matched.

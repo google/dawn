@@ -639,6 +639,7 @@ if(${TINT_BUILD_TESTS})
       reader/wgsl/parser_impl_continue_stmt_test.cc
       reader/wgsl/parser_impl_continuing_stmt_test.cc
       reader/wgsl/parser_impl_depth_texture_type_test.cc
+      reader/wgsl/parser_impl_external_texture_type_test.cc
       reader/wgsl/parser_impl_else_stmt_test.cc
       reader/wgsl/parser_impl_elseif_stmt_test.cc
       reader/wgsl/parser_impl_equality_expression_test.cc
