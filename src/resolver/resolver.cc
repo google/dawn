@@ -529,6 +529,21 @@ bool Resolver::ValidateVariable(const ast::Variable* var) {
   }
 
   if (auto* r = type->UnwrapAll()->As<sem::StorageTexture>()) {
+    auto* ac = type->As<sem::AccessControl>();
+    if (!ac) {
+      diagnostics_.add_error("Storage Textures must have access control.",
+                             var->source());
+      return false;
+    }
+
+    if (ac->IsReadWrite()) {
+      diagnostics_.add_error(
+          "Storage Textures only support Read-Only and Write-Only access "
+          "control.",
+          var->source());
+      return false;
+    }
+
     if (!IsValidStorageTextureDimension(r->dim())) {
       diagnostics_.add_error(
           "Cube dimensions for storage textures are not "

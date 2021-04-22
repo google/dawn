@@ -556,7 +556,6 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
 
   auto type = ty.storage_texture(ast::TextureDimension::k2d,
                                  ast::ImageFormat::kR32Uint);
-  Global("test_var", type, ast::StorageClass::kInput);
 
   auto ac = ty.access(ast::AccessControl::kWriteOnly, type);
 
@@ -583,8 +582,6 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
 
   auto st = ty.storage_texture(ast::TextureDimension::k2d,
                                ast::ImageFormat::kR32Uint);
-
-  Global("test_var", st, ast::StorageClass::kInput);
 
   auto type_a = ty.access(ast::AccessControl::kReadOnly, st);
   auto* var_a = Global("a", type_a, ast::StorageClass::kUniformConstant);

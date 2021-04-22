@@ -17,6 +17,7 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver.h"
 #include "src/resolver/resolver_test_helper.h"
+#include "src/sem/access_control_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
 
@@ -587,9 +588,14 @@ static constexpr DimensionParams Dimension_cases[] = {
 
 using StorageTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(StorageTextureDimensionTest, All) {
+  // [[group(0), binding(0)]]
+  // var a : [[access(read)]] texture_storage_*<ru32int>;
   auto& params = GetParam();
-  Global("a", ty.storage_texture(params.dim, ast::ImageFormat::kR32Uint),
-         ast::StorageClass::kUniformConstant, nullptr,
+
+  auto st = ty.storage_texture(params.dim, ast::ImageFormat::kR32Uint);
+  auto ac = ty.access(ast::AccessControl::kReadOnly, st);
+
+  Global("a", ac, ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -650,40 +656,46 @@ static constexpr FormatParams format_cases[] = {
 using StorageTextureFormatTest = ResolverTestWithParam<FormatParams>;
 TEST_P(StorageTextureFormatTest, All) {
   auto& params = GetParam();
-  // {
-  // var a : texture_storage_1d<*>;
-  // var b : texture_storage_2d<*>;
-  // var c : texture_storage_2d_array<*>;
-  // var d : texture_storage_3<*>;
-  // }
+  // [[group(0), binding(0)]]
+  // var a : [[access(read)]] texture_storage_1d<*>;
+  // [[group(0), binding(1)]]
+  // var b : [[access(read)]] texture_storage_2d<*>;
+  // [[group(0), binding(2)]]
+  // var c : [[access(read)]] texture_storage_2d_array<*>;
+  // [[group(0), binding(3)]]
+  // var d : [[access(read)]] texture_storage_3d<*>;
 
-  Global("a", ty.storage_texture(ast::TextureDimension::k1d, params.format),
-         ast::StorageClass::kUniformConstant, nullptr,
+  auto st_a = ty.storage_texture(ast::TextureDimension::k1d, params.format);
+  auto ac_a = ty.access(ast::AccessControl::kReadOnly, st_a);
+  Global("a", ac_a, ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
 
-  Global("b", ty.storage_texture(ast::TextureDimension::k2d, params.format),
-         ast::StorageClass::kUniformConstant, nullptr,
+  auto st_b = ty.storage_texture(ast::TextureDimension::k2d, params.format);
+  auto ac_b = ty.access(ast::AccessControl::kReadOnly, st_b);
+  Global("b", ac_b, ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
-             create<ast::BindingDecoration>(1),
-             create<ast::GroupDecoration>(0),
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(1),
          });
 
-  Global("c",
-         ty.storage_texture(ast::TextureDimension::k2dArray, params.format),
-         ast::StorageClass::kUniformConstant, nullptr,
+  auto st_c =
+      ty.storage_texture(ast::TextureDimension::k2dArray, params.format);
+  auto ac_c = ty.access(ast::AccessControl::kReadOnly, st_c);
+  Global("c", ac_c, ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
-             create<ast::BindingDecoration>(2),
-             create<ast::GroupDecoration>(0),
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(2),
          });
 
-  Global("d", ty.storage_texture(ast::TextureDimension::k3d, params.format),
-         ast::StorageClass::kUniformConstant, nullptr,
+  auto st_d = ty.storage_texture(ast::TextureDimension::k3d, params.format);
+  auto ac_d = ty.access(ast::AccessControl::kReadOnly, st_d);
+  Global("d", ac_d, ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
-             create<ast::BindingDecoration>(3),
-             create<ast::GroupDecoration>(0),
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(3),
          });
 
   if (params.is_valid) {
@@ -695,6 +707,76 @@ TEST_P(StorageTextureFormatTest, All) {
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          StorageTextureFormatTest,
                          testing::ValuesIn(format_cases));
+
+using StorageTextureAccessControlTest = ResolverTest;
+
+TEST_F(StorageTextureAccessControlTest, MissingAccessControl_Fail) {
+  // [[group(0), binding(0)]]
+  // var a : texture_storage_1d<ru32int>;
+
+  auto st = ty.storage_texture(ast::TextureDimension::k1d,
+                               ast::ImageFormat::kR32Uint);
+
+  Global("a", st, ast::StorageClass::kUniformConstant, nullptr,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  EXPECT_FALSE(r()->Resolve());
+}
+
+TEST_F(StorageTextureAccessControlTest, RWAccessControl_Fail) {
+  // [[group(0), binding(0)]]
+  // var a : [[access(readwrite)]] texture_storage_1d<ru32int>;
+
+  auto st = ty.storage_texture(ast::TextureDimension::k1d,
+                               ast::ImageFormat::kR32Uint);
+  auto ac = ty.access(ast::AccessControl::kReadWrite, st);
+
+  Global("a", ac, ast::StorageClass::kUniformConstant, nullptr,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  EXPECT_FALSE(r()->Resolve());
+}
+
+TEST_F(StorageTextureAccessControlTest, ReadOnlyAccessControl_Pass) {
+  // [[group(0), binding(0)]]
+  // var a : [[access(read)]] texture_storage_1d<ru32int>;
+
+  auto st = ty.storage_texture(ast::TextureDimension::k1d,
+                               ast::ImageFormat::kR32Uint);
+  auto ac = ty.access(ast::AccessControl::kReadOnly, st);
+
+  Global("a", ac, ast::StorageClass::kUniformConstant, nullptr,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StorageTextureAccessControlTest, WriteOnlyAccessControl_Pass) {
+  // [[group(0), binding(0)]]
+  // var a : [[access(write)]] texture_storage_1d<ru32int>;
+
+  auto st = ty.storage_texture(ast::TextureDimension::k1d,
+                               ast::ImageFormat::kR32Uint);
+  auto ac = ty.access(ast::AccessControl::kWriteOnly, st);
+
+  Global("a", ac, ast::StorageClass::kUniformConstant, nullptr,
+         ast::DecorationList{
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 }  // namespace StorageTextureTests
 
 }  // namespace
