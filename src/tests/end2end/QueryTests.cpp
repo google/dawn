@@ -302,9 +302,10 @@ TEST_P(OcclusionQueryTests, Rewrite) {
 // Test resolving occlusion query correctly if the queries are written sparsely, which also tests
 // the query resetting at the start of render passes on Vulkan backend.
 TEST_P(OcclusionQueryTests, ResolveSparseQueries) {
-    // TODO(hao.x.li@intel.com): Clear the resolve region of the buffer to 0 if there is at least
-    // one query not written and the resolve buffer has been initialized or fully used.
-    DAWN_SKIP_TEST_IF(IsVulkan());
+    // TODO(hao.x.li@intel.com): Fails on Intel Windows Vulkan due to a driver issue that
+    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it util
+    // the issue is fixed.
+    DAWN_SKIP_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
     // TODO(hao.x.li@intel.com): Investigate why it's failed on D3D12 on Nvidia when running with
     // the previous occlusion tests. Expect resolve to 0 for these unwritten queries but the
@@ -366,10 +367,6 @@ TEST_P(OcclusionQueryTests, ResolveSparseQueries) {
 
 // Test resolving occlusion query to 0 if all queries are not written
 TEST_P(OcclusionQueryTests, ResolveWithoutWritten) {
-    // TODO(hao.x.li@intel.com): Clear the resolve region of the buffer to 0 if there is at least
-    // one query not written and the resolve buffer has been initialized or fully used.
-    DAWN_SKIP_TEST_IF(IsVulkan());
-
     // TODO(hao.x.li@intel.com): Investigate why it's failed on D3D12 on Nvidia when running with
     // the previous occlusion tests. Expect resolve to 0 but the occlusion result of the previous
     // tests is got.
@@ -707,6 +704,11 @@ TEST_P(TimestampQueryTests, ResolveFromAnotherEncoder) {
 
 // Test resolving timestamp query correctly if the queries are written sparsely
 TEST_P(TimestampQueryTests, ResolveSparseQueries) {
+    // TODO(hao.x.li@intel.com): Fails on Intel Windows Vulkan due to a driver issue that
+    // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it util
+    // the issue is fixed.
+    DAWN_SKIP_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
+
     constexpr uint32_t kQueryCount = 4;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);

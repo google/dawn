@@ -800,13 +800,29 @@ namespace dawn_native { namespace vulkan {
                     QuerySet* querySet = ToBackend(cmd->querySet.Get());
                     Buffer* destination = ToBackend(cmd->destination.Get());
 
-                    // TODO(hao.x.li@intel.com): Clear the resolve region of the buffer to 0 if at
-                    // least one query is unavailable for the resolving and the resolve buffer has
-                    // been initialized or fully used.
+                    // vkCmdCopyQueryPoolResults only can retrieve available queries because
+                    // VK_QUERY_RESULT_WAIT_BIT is set, for these unavailable queries, we need to
+                    // clear the resolving region of the buffer to 0s if the buffer has been
+                    // initialized or fully used.
+                    auto startIt = querySet->GetQueryAvailability().begin() + cmd->firstQuery;
+                    auto endIt = querySet->GetQueryAvailability().begin() + cmd->firstQuery +
+                                 cmd->queryCount;
+                    bool hasUnavailableQueries = std::find(startIt, endIt, false) != endIt;
+                    if (hasUnavailableQueries &&
+                        (destination->IsDataInitialized() ||
+                         destination->IsFullBufferRange(cmd->destinationOffset,
+                                                        cmd->queryCount * sizeof(uint64_t)))) {
+                        destination->TransitionUsageNow(recordingContext,
+                                                        wgpu::BufferUsage::CopyDst);
+                        device->fn.CmdFillBuffer(commands, destination->GetHandle(),
+                                                 cmd->destinationOffset,
+                                                 cmd->queryCount * sizeof(uint64_t), 0u);
+                    } else {
+                        destination->EnsureDataInitializedAsDestination(
+                            recordingContext, cmd->destinationOffset,
+                            cmd->queryCount * sizeof(uint64_t));
+                    }
 
-                    destination->EnsureDataInitializedAsDestination(
-                        recordingContext, cmd->destinationOffset,
-                        cmd->queryCount * sizeof(uint64_t));
                     destination->TransitionUsageNow(recordingContext,
                                                     wgpu::BufferUsage::QueryResolve);
 

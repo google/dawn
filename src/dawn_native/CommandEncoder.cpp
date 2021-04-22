@@ -370,14 +370,6 @@ namespace dawn_native {
             if (descriptor->occlusionQuerySet != nullptr) {
                 DAWN_TRY(device->ValidateObject(descriptor->occlusionQuerySet));
 
-                // Occlusion query has not been implemented completely. Disallow it as unsafe until
-                // the implementaion is completed.
-                if (device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-                    return DAWN_VALIDATION_ERROR(
-                        "Occlusion query is disallowed because it has not been implemented "
-                        "completely.");
-                }
-
                 if (descriptor->occlusionQuerySet->GetQueryType() != wgpu::QueryType::Occlusion) {
                     return DAWN_VALIDATION_ERROR("The type of query set must be Occlusion");
                 }
