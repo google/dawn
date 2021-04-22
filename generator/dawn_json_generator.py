@@ -765,6 +765,14 @@ class MultiGeneratorFromDawnJSON(Generator):
             renders.append(
                 FileRender('dawn_native/ProcTable.cpp',
                            'src/dawn_native/ProcTable.cpp', frontend_params))
+            renders.append(
+                FileRender('dawn_native/ChainUtils.h',
+                           'src/dawn_native/ChainUtils_autogen.h',
+                           frontend_params))
+            renders.append(
+                FileRender('dawn_native/ChainUtils.cpp',
+                           'src/dawn_native/ChainUtils_autogen.cpp',
+                           frontend_params))
 
         if 'dawn_wire' in targets:
             additional_params = compute_wire_params(api_params, wire_json)

@@ -17,6 +17,7 @@
 #include "common/HashUtils.h"
 #include "common/VertexFormatUtils.h"
 #include "dawn_native/BindGroupLayout.h"
+#include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/CompilationMessages.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"
@@ -1069,65 +1070,56 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Shader module descriptor missing chained descriptor");
         }
         // For now only a single SPIRV or WGSL subdescriptor is allowed.
-        if (chainedDescriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR(
-                "Shader module descriptor chained nextInChain must be nullptr");
-        }
+        DAWN_TRY(ValidateSingleSType(chainedDescriptor,
+            wgpu::SType::ShaderModuleSPIRVDescriptor,
+            wgpu::SType::ShaderModuleWGSLDescriptor));
 
         OwnedCompilationMessages* outMessages = parseResult->compilationMessages.get();
 
         ScopedTintICEHandler scopedICEHandler(device);
 
-        switch (chainedDescriptor->sType) {
-            case wgpu::SType::ShaderModuleSPIRVDescriptor: {
-                const auto* spirvDesc =
-                    static_cast<const ShaderModuleSPIRVDescriptor*>(chainedDescriptor);
-                std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
-                if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
-                    tint::Program program;
-                    DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, outMessages));
-                    parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
-                } else {
-                    if (device->IsValidationEnabled()) {
-                        DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
-                    }
-                    parseResult->spirv = std::move(spirv);
-                }
-                break;
-            }
+        const ShaderModuleSPIRVDescriptor* spirvDesc = nullptr;
+        FindInChain(chainedDescriptor, &spirvDesc);
+        const ShaderModuleWGSLDescriptor* wgslDesc = nullptr;
+        FindInChain(chainedDescriptor, &wgslDesc);
 
-            case wgpu::SType::ShaderModuleWGSLDescriptor: {
-                const auto* wgslDesc =
-                    static_cast<const ShaderModuleWGSLDescriptor*>(chainedDescriptor);
-
-                auto tintSource = std::make_unique<TintSource>("", wgslDesc->source);
-
+        if (spirvDesc) {
+            std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
+            if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
                 tint::Program program;
-                DAWN_TRY_ASSIGN(program, ParseWGSL(&tintSource->file, outMessages));
-
-                if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
-                    parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
-                    parseResult->tintSource = std::move(tintSource);
-                } else {
-                    tint::transform::Manager transformManager;
-                    transformManager.Add<tint::transform::EmitVertexPointSize>();
-                    transformManager.Add<tint::transform::Spirv>();
-
-                    tint::transform::DataMap transformInputs;
-
-                    DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program,
-                                                           transformInputs, nullptr, outMessages));
-
-                    std::vector<uint32_t> spirv;
-                    DAWN_TRY_ASSIGN(spirv, ModuleToSPIRV(&program));
+                DAWN_TRY_ASSIGN(program, ParseSPIRV(spirv, outMessages));
+                parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
+            } else {
+                if (device->IsValidationEnabled()) {
                     DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
-
-                    parseResult->spirv = std::move(spirv);
                 }
-                break;
+                parseResult->spirv = std::move(spirv);
             }
-            default:
-                return DAWN_VALIDATION_ERROR("Unsupported sType");
+        } else if (wgslDesc) {
+            auto tintSource = std::make_unique<TintSource>("", wgslDesc->source);
+
+            tint::Program program;
+            DAWN_TRY_ASSIGN(program, ParseWGSL(&tintSource->file, outMessages));
+
+            if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
+                parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
+                parseResult->tintSource = std::move(tintSource);
+            } else {
+                tint::transform::Manager transformManager;
+                transformManager.Add<tint::transform::EmitVertexPointSize>();
+                transformManager.Add<tint::transform::Spirv>();
+
+                tint::transform::DataMap transformInputs;
+
+                DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program,
+                                                       transformInputs, nullptr, outMessages));
+
+                std::vector<uint32_t> spirv;
+                DAWN_TRY_ASSIGN(spirv, ModuleToSPIRV(&program));
+                DAWN_TRY(ValidateSpirv(spirv.data(), spirv.size()));
+
+                parseResult->spirv = std::move(spirv);
+            }
         }
 
         return {};
@@ -1216,23 +1208,18 @@ namespace dawn_native {
     ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
         : CachedObject(device), mType(Type::Undefined) {
         ASSERT(descriptor->nextInChain != nullptr);
-        switch (descriptor->nextInChain->sType) {
-            case wgpu::SType::ShaderModuleSPIRVDescriptor: {
-                mType = Type::Spirv;
-                const auto* spirvDesc =
-                    static_cast<const ShaderModuleSPIRVDescriptor*>(descriptor->nextInChain);
-                mOriginalSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
-                break;
-            }
-            case wgpu::SType::ShaderModuleWGSLDescriptor: {
-                mType = Type::Wgsl;
-                const auto* wgslDesc =
-                    static_cast<const ShaderModuleWGSLDescriptor*>(descriptor->nextInChain);
-                mWgsl = std::string(wgslDesc->source);
-                break;
-            }
-            default:
-                UNREACHABLE();
+        const ShaderModuleSPIRVDescriptor* spirvDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &spirvDesc);
+        const ShaderModuleWGSLDescriptor* wgslDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &wgslDesc);
+        ASSERT(spirvDesc || wgslDesc);
+
+        if (spirvDesc) {
+            mType = Type::Spirv;
+            mOriginalSpirv.assign(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
+        } else if (wgslDesc) {
+            mType = Type::Wgsl;
+            mWgsl = std::string(wgslDesc->source);
         }
     }
 

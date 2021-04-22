@@ -15,6 +15,7 @@
 #include "dawn_native/Surface.h"
 
 #include "common/Platform.h"
+#include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/SwapChain.h"
 
@@ -34,75 +35,60 @@ namespace dawn_native {
 
     MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
                                          const SurfaceDescriptor* descriptor) {
-        // TODO(cwallez@chromium.org): Have some type of helper to iterate over all the chained
-        // structures.
         if (descriptor->nextInChain == nullptr) {
             return DAWN_VALIDATION_ERROR("Surface cannot be created with just the base descriptor");
         }
 
-        const ChainedStruct* chainedDescriptor = descriptor->nextInChain;
-        if (chainedDescriptor->nextInChain != nullptr) {
-            return DAWN_VALIDATION_ERROR("Cannot specify two windows for a single surface");
-        }
+        DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
+            wgpu::SType::SurfaceDescriptorFromMetalLayer,
+            wgpu::SType::SurfaceDescriptorFromWindowsHWND,
+            wgpu::SType::SurfaceDescriptorFromXlib));
 
-        switch (chainedDescriptor->sType) {
 #if defined(DAWN_ENABLE_BACKEND_METAL)
-            case wgpu::SType::SurfaceDescriptorFromMetalLayer: {
-                const SurfaceDescriptorFromMetalLayer* metalDesc =
-                    static_cast<const SurfaceDescriptorFromMetalLayer*>(chainedDescriptor);
-
-                // Check that the layer is a CAMetalLayer (or a derived class).
-                if (!InheritsFromCAMetalLayer(metalDesc->layer)) {
-                    return DAWN_VALIDATION_ERROR("layer must be a CAMetalLayer");
-                }
-                break;
-            }
+        const SurfaceDescriptorFromMetalLayer* metalDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &metalDesc);
+        if (!metalDesc) {
+            return DAWN_VALIDATION_ERROR("Unsupported sType");
+        }
+        // Check that the layer is a CAMetalLayer (or a derived class).
+        if (!InheritsFromCAMetalLayer(metalDesc->layer)) {
+            return DAWN_VALIDATION_ERROR("layer must be a CAMetalLayer");
+        }
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
 #if defined(DAWN_PLATFORM_WINDOWS)
-            case wgpu::SType::SurfaceDescriptorFromWindowsHWND: {
-                const SurfaceDescriptorFromWindowsHWND* hwndDesc =
-                    static_cast<const SurfaceDescriptorFromWindowsHWND*>(chainedDescriptor);
-
-                // It is not possible to validate an HINSTANCE.
-
-                // Validate the hwnd using the windows.h IsWindow function.
-                if (IsWindow(static_cast<HWND>(hwndDesc->hwnd)) == 0) {
-                    return DAWN_VALIDATION_ERROR("Invalid HWND");
-                }
-                break;
-            }
+        const SurfaceDescriptorFromWindowsHWND* hwndDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &hwndDesc);
+        if (!hwndDesc) {
+            return DAWN_VALIDATION_ERROR("Unsupported sType");
+        }
+        // Validate the hwnd using the windows.h IsWindow function.
+        if (IsWindow(static_cast<HWND>(hwndDesc->hwnd)) == 0) {
+            return DAWN_VALIDATION_ERROR("Invalid HWND");
+        }
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
 #if defined(DAWN_USE_X11)
-            case wgpu::SType::SurfaceDescriptorFromXlib: {
-                const SurfaceDescriptorFromXlib* xDesc =
-                    static_cast<const SurfaceDescriptorFromXlib*>(chainedDescriptor);
-
-                // It is not possible to validate an X Display.
-
-                // Check the validity of the window by calling a getter function on the window that
-                // returns a status code. If the window is bad the call return a status of zero. We
-                // need to set a temporary X11 error handler while doing this because the default
-                // X11 error handler exits the program on any error.
-                XErrorHandler oldErrorHandler =
-                    XSetErrorHandler([](Display*, XErrorEvent*) { return 0; });
-                XWindowAttributes attributes;
-                int status = XGetWindowAttributes(reinterpret_cast<Display*>(xDesc->display),
-                                                  xDesc->window, &attributes);
-                XSetErrorHandler(oldErrorHandler);
-
-                if (status == 0) {
-                    return DAWN_VALIDATION_ERROR("Invalid X Window");
-                }
-                break;
-            }
-#endif  // defined(DAWN_USE_X11)
-
-            case wgpu::SType::SurfaceDescriptorFromCanvasHTMLSelector:
-            default:
-                return DAWN_VALIDATION_ERROR("Unsupported sType");
+        const SurfaceDescriptorFromXlib* xDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &xDesc);
+        if (!xDesc) {
+            return DAWN_VALIDATION_ERROR("Unsupported sType");
         }
+        // Check the validity of the window by calling a getter function on the window that
+        // returns a status code. If the window is bad the call return a status of zero. We
+        // need to set a temporary X11 error handler while doing this because the default
+        // X11 error handler exits the program on any error.
+        XErrorHandler oldErrorHandler =
+            XSetErrorHandler([](Display*, XErrorEvent*) { return 0; });
+        XWindowAttributes attributes;
+        int status = XGetWindowAttributes(reinterpret_cast<Display*>(xDesc->display),
+                                          xDesc->window, &attributes);
+        XSetErrorHandler(oldErrorHandler);
+
+        if (status == 0) {
+            return DAWN_VALIDATION_ERROR("Invalid X Window");
+        }
+#endif  // defined(DAWN_USE_X11)
 
         return {};
     }
@@ -110,37 +96,24 @@ namespace dawn_native {
     Surface::Surface(InstanceBase* instance, const SurfaceDescriptor* descriptor)
         : mInstance(instance) {
         ASSERT(descriptor->nextInChain != nullptr);
-        const ChainedStruct* chainedDescriptor = descriptor->nextInChain;
-
-        switch (chainedDescriptor->sType) {
-            case wgpu::SType::SurfaceDescriptorFromMetalLayer: {
-                const SurfaceDescriptorFromMetalLayer* metalDesc =
-                    static_cast<const SurfaceDescriptorFromMetalLayer*>(chainedDescriptor);
-                mType = Type::MetalLayer;
-                mMetalLayer = metalDesc->layer;
-                break;
-            }
-
-            case wgpu::SType::SurfaceDescriptorFromWindowsHWND: {
-                const SurfaceDescriptorFromWindowsHWND* hwndDesc =
-                    static_cast<const SurfaceDescriptorFromWindowsHWND*>(chainedDescriptor);
-                mType = Type::WindowsHWND;
-                mHInstance = hwndDesc->hinstance;
-                mHWND = hwndDesc->hwnd;
-                break;
-            }
-
-            case wgpu::SType::SurfaceDescriptorFromXlib: {
-                const SurfaceDescriptorFromXlib* xDesc =
-                    static_cast<const SurfaceDescriptorFromXlib*>(chainedDescriptor);
-                mType = Type::Xlib;
-                mXDisplay = xDesc->display;
-                mXWindow = xDesc->window;
-                break;
-            }
-
-            default:
-                UNREACHABLE();
+        const SurfaceDescriptorFromMetalLayer* metalDesc = nullptr;
+        const SurfaceDescriptorFromWindowsHWND* hwndDesc = nullptr;
+        const SurfaceDescriptorFromXlib* xDesc = nullptr;
+        FindInChain(descriptor->nextInChain, &metalDesc);
+        FindInChain(descriptor->nextInChain, &hwndDesc);
+        FindInChain(descriptor->nextInChain, &xDesc);
+        ASSERT(metalDesc || hwndDesc || xDesc);
+        if (metalDesc) {
+            mType = Type::MetalLayer;
+            mMetalLayer = metalDesc->layer;
+        } else if (hwndDesc) {
+            mType = Type::WindowsHWND;
+            mHInstance = hwndDesc->hinstance;
+            mHWND = hwndDesc->hwnd;
+        } else if (xDesc) {
+            mType = Type::Xlib;
+            mXDisplay = xDesc->display;
+            mXWindow = xDesc->window;
         }
     }
 

@@ -91,6 +91,8 @@ config("dawn_native_vulkan_rpath") {
 dawn_json_generator("dawn_native_utils_gen") {
   target = "dawn_native_utils"
   outputs = [
+    "src/dawn_native/ChainUtils_autogen.h",
+    "src/dawn_native/ChainUtils_autogen.cpp",
     "src/dawn_native/ProcTable.cpp",
     "src/dawn_native/wgpu_structs_autogen.h",
     "src/dawn_native/wgpu_structs_autogen.cpp",

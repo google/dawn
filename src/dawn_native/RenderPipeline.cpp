@@ -16,6 +16,7 @@
 
 #include "common/BitSetIterator.h"
 #include "common/VertexFormatUtils.h"
+#include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Commands.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"
@@ -133,16 +134,13 @@ namespace dawn_native {
 
         MaybeError ValidatePrimitiveState(const DeviceBase* device,
                                           const PrimitiveState* descriptor) {
-            const ChainedStruct* chained = descriptor->nextInChain;
-            if (chained != nullptr) {
-                if (chained->sType != wgpu::SType::PrimitiveDepthClampingState) {
-                    return DAWN_VALIDATION_ERROR("Unsupported sType");
-                }
-                if (!device->IsExtensionEnabled(Extension::DepthClamping)) {
-                    return DAWN_VALIDATION_ERROR("The depth clamping feature is not supported");
-                }
+            DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
+                wgpu::SType::PrimitiveDepthClampingState));
+            const PrimitiveDepthClampingState* clampInfo = nullptr;
+            FindInChain(descriptor->nextInChain, &clampInfo);
+            if (clampInfo && !device->IsExtensionEnabled(Extension::DepthClamping)) {
+                return DAWN_VALIDATION_ERROR("The depth clamping feature is not supported");
             }
-
             DAWN_TRY(ValidatePrimitiveTopology(descriptor->topology));
             DAWN_TRY(ValidateIndexFormat(descriptor->stripIndexFormat));
             DAWN_TRY(ValidateFrontFace(descriptor->frontFace));
@@ -426,11 +424,10 @@ namespace dawn_native {
         }
 
         mPrimitive = descriptor->primitive;
-        const ChainedStruct* chained = mPrimitive.nextInChain;
-        if (chained != nullptr) {
-            ASSERT(chained->sType == wgpu::SType::PrimitiveDepthClampingState);
-            const auto* clampState = static_cast<const PrimitiveDepthClampingState*>(chained);
-            mClampDepth = clampState->clampDepth;
+        const PrimitiveDepthClampingState* clampInfo = nullptr;
+        FindInChain(mPrimitive.nextInChain, &clampInfo);
+        if (clampInfo) {
+            mClampDepth = clampInfo->clampDepth;
         }
         mMultisample = descriptor->multisample;
 

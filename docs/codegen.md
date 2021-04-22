@@ -18,6 +18,7 @@ At this time it is used to generate:
  - validation helper functions for dawn_native
  - the definition of dawn_native's proc table
  - dawn_native's internal version of the webgpu.h types
+ - utilities for working with dawn_native's chained structs
  - a lot of dawn_wire parts, see below
 
 Internally `dawn.json` is a dictionary from the "canonical name" of things to their definition. The "canonical name" is a space-separated (mostly) lower-case version of the name that's parsed into a `Name` Python object. Then that name can be turned into various casings with `.CamelCase()` `.SNAKE_CASE()`, etc. When `dawn.json` things reference each other, it is always via these "canonical names".
