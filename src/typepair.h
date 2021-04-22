@@ -22,6 +22,7 @@
 namespace tint {
 
 namespace ast {
+class Array;
 class Bool;
 class F32;
 class I32;
@@ -32,6 +33,7 @@ class Void;
 }  // namespace ast
 
 namespace sem {
+class ArrayType;
 class Bool;
 class F32;
 class I32;
@@ -63,8 +65,15 @@ struct TypePair {
 
   /// Constructor
   TypePair() = default;
+  /// Copy constructor
+  /// @param other the TypePair to copy
+  template <typename OTHER_AST, typename OTHER_SEM>
+  TypePair(const TypePair<OTHER_AST, OTHER_SEM>& other)
+      : ast(static_cast<const AST*>(other.ast)),
+        sem(static_cast<const SEM*>(other.sem)) {}
   /// Constructor
   /// @param a the ast::Type pointer
+  template <typename U>
   TypePair(const AST* a) : ast(a) {}  // NOLINT: explicit
   /// Constructor
   /// @param s the sem::Type pointer
@@ -84,6 +93,7 @@ struct TypePair {
 
 using Type = TypePair<ast::Type, sem::Type>;
 
+using Array = TypePair<ast::Array, sem::ArrayType>;
 using Bool = TypePair<ast::Bool, sem::Bool>;
 using F32 = TypePair<ast::F32, sem::F32>;
 using I32 = TypePair<ast::I32, sem::I32>;

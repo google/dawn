@@ -220,7 +220,7 @@ void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
         // Use the same name as the old variable.
         auto var_name = ctx.Clone(var->symbol());
         // Use `array<u32, 1>` for the new variable.
-        auto* type = ctx.dst->ty.array(ctx.dst->ty.u32(), 1u);
+        auto type = ctx.dst->ty.array(ctx.dst->ty.u32(), 1u);
         // Create the new variable.
         auto* var_arr = ctx.dst->Var(var->source(), var_name, type,
                                      var->declared_storage_class(), nullptr,

@@ -58,7 +58,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
 }
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
-  auto* ary = ty.array(ty.i32(), 0);
+  auto ary = ty.array(ty.i32(), 0);
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
   auto* ac = ty.access(ast::AccessControl::kReadOnly, str);
@@ -76,7 +76,7 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
-  auto* ary = ty.array(ty.i32(), 0);
+  auto ary = ty.array(ty.i32(), 0);
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
   auto* ac = ty.access(ast::AccessControl::kReadOnly, str);
@@ -94,7 +94,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray) {
-  auto* ary = ty.array(ty.i32(), 4);
+  auto ary = ty.array(ty.i32(), 4);
   Global("a", ary, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
@@ -111,7 +111,7 @@ TEST_F(BuilderTest_Type, GenerateArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
-  auto* ary = ty.array(ty.i32(), 4, 16u);
+  auto ary = ty.array(ty.i32(), 4, 16u);
   Global("a", ary, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
@@ -131,7 +131,7 @@ TEST_F(BuilderTest_Type, GenerateArray_WithStride) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
-  auto* ary = ty.array(ty.i32(), 4);
+  auto ary = ty.array(ty.i32(), 4);
   Global("a", ary, ast::StorageClass::kInput);
 
   spirv::Builder& b = Build();
@@ -445,9 +445,9 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   // We have to infer layout for matrix when it also has an offset.
   // The decoration goes on the struct member, even if the matrix is buried
   // in levels of arrays.
-  auto* arr_mat2x2 = ty.array(ty.mat2x2<f32>(), 1);      // Singly nested array
-  auto* arr_arr_mat2x3 = ty.array(ty.mat2x3<f32>(), 1);  // Doubly nested array
-  auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>(), 0);    // Runtime array
+  auto arr_mat2x2 = ty.array(ty.mat2x2<f32>(), 1);      // Singly nested array
+  auto arr_arr_mat2x3 = ty.array(ty.mat2x3<f32>(), 1);  // Doubly nested array
+  auto rtarr_mat4x4 = ty.array(ty.mat4x4<f32>(), 0);    // Runtime array
 
   auto* s =
       Structure("S",

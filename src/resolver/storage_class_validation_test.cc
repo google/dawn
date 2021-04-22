@@ -61,7 +61,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
 TEST_F(ResolverStorageClassValidationTest, StorageBufferArray) {
   // var<storage> g : [[access(read)]] array<S, 3>;
   auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* a = ty.array(s, 3);
+  auto a = ty.array(s, 3);
   auto* ac = ty.access(ast::AccessControl::kReadOnly, a);
   Global(Source{{56, 78}}, "g", ac, ast::StorageClass::kStorage);
 
@@ -166,7 +166,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
 TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
   // var<uniform> g : [[access(read)]] array<S, 3>;
   auto* s = Structure("S", {Member("a", ty.f32())});
-  auto* a = ty.array(s, 3);
+  auto a = ty.array(s, 3);
   auto* ac = ty.access(ast::AccessControl::kReadOnly, a);
   Global(Source{{56, 78}}, "g", ac, ast::StorageClass::kUniform);
 

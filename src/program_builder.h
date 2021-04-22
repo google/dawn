@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "src/ast/array.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
 #include "src/ast/binary_expression.h"
@@ -520,34 +521,39 @@ class ProgramBuilder {
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array.
     /// @return the tint AST type for a array of size `n` of type `T`
-    sem::ArrayType* array(sem::Type* subtype, uint32_t n = 0) const {
-      return builder->create<sem::ArrayType>(subtype, n, ast::DecorationList{});
+    typ::Array array(typ::Type subtype, uint32_t n = 0) const {
+      return {
+          builder->create<ast::Array>(subtype, n, ast::DecorationList{}),
+          builder->create<sem::ArrayType>(subtype, n, ast::DecorationList{})};
     }
 
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array.
     /// @param stride the array stride.
     /// @return the tint AST type for a array of size `n` of type `T`
-    sem::ArrayType* array(sem::Type* subtype,
-                          uint32_t n,
-                          uint32_t stride) const {
-      return builder->create<sem::ArrayType>(
-          subtype, n,
-          ast::DecorationList{
-              builder->create<ast::StrideDecoration>(stride),
-          });
+    typ::Array array(typ::Type subtype, uint32_t n, uint32_t stride) const {
+      return {builder->create<ast::Array>(
+                  subtype, n,
+                  ast::DecorationList{
+                      builder->create<ast::StrideDecoration>(stride),
+                  }),
+              builder->create<sem::ArrayType>(
+                  subtype, n,
+                  ast::DecorationList{
+                      builder->create<ast::StrideDecoration>(stride),
+                  })};
     }
 
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
-    sem::ArrayType* array() const {
+    typ::Array array() const {
       return array(Of<T>(), N);
     }
 
     /// @param stride the array stride
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
-    sem::ArrayType* array(uint32_t stride) const {
+    typ::Array array(uint32_t stride) const {
       return array(Of<T>(), N, stride);
     }
 

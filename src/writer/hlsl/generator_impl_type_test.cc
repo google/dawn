@@ -43,7 +43,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
-  auto* arr = ty.array<bool, 4>();
+  auto arr = ty.array<bool, 4>();
 
   GeneratorImpl& gen = Build();
 
@@ -53,7 +53,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
-  auto* arr = ty.array(ty.array<bool, 4>(), 5);
+  auto arr = ty.array(ty.array<bool, 4>(), 5);
 
   GeneratorImpl& gen = Build();
 
@@ -65,7 +65,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
 // TODO(dsinclair): Is this possible? What order should it output in?
 TEST_F(HlslGeneratorImplTest_Type,
        DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
-  auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 0);
+  auto arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 0);
 
   GeneratorImpl& gen = Build();
 
@@ -75,7 +75,7 @@ TEST_F(HlslGeneratorImplTest_Type,
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
-  auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 6);
+  auto arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 6);
 
   GeneratorImpl& gen = Build();
 
@@ -85,7 +85,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
-  auto* arr = ty.array<bool, 4>();
+  auto arr = ty.array<bool, 4>();
 
   GeneratorImpl& gen = Build();
 
@@ -95,7 +95,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
-  auto* arr = ty.array<bool>();
+  auto arr = ty.array<bool>();
 
   GeneratorImpl& gen = Build();
 

@@ -37,7 +37,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array) {
-  auto* arr = ty.array<bool, 4>();
+  auto arr = ty.array<bool, 4>();
   AST().AddConstructedType(ty.alias("make_type_reachable", arr));
 
   GeneratorImpl& gen = Build();

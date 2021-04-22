@@ -759,7 +759,7 @@ INSTANTIATE_TEST_SUITE_P(
 using ResolverIntrinsicDataTest = ResolverTest;
 
 TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
-  auto* ary = ty.array<i32>();
+  auto ary = ty.array<i32>();
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
   auto* ac = ty.access(ast::AccessControl::kReadOnly, str);

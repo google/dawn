@@ -67,7 +67,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
-  auto* arr = ty.array<bool, 4>();
+  auto arr = ty.array<bool, 4>();
 
   GeneratorImpl& gen = Build();
 
@@ -76,8 +76,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Array) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
-  auto* a = ty.array<bool, 4>();
-  auto* b = ty.array(a, 5);
+  auto a = ty.array<bool, 4>();
+  auto b = ty.array(a, 5);
 
   GeneratorImpl& gen = Build();
 
@@ -87,9 +87,9 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
 
 // TODO(dsinclair): Is this possible? What order should it output in?
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
-  auto* a = ty.array<bool, 4>();
-  auto* b = ty.array(a, 5);
-  auto* c = ty.array(b, 0);
+  auto a = ty.array<bool, 4>();
+  auto b = ty.array(a, 5);
+  auto c = ty.array(b, 0);
 
   GeneratorImpl& gen = Build();
 
@@ -98,9 +98,9 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
-  auto* a = ty.array<bool, 4>();
-  auto* b = ty.array(a, 5);
-  auto* c = ty.array(b, 6);
+  auto a = ty.array<bool, 4>();
+  auto b = ty.array(a, 5);
+  auto c = ty.array(b, 6);
 
   GeneratorImpl& gen = Build();
 
@@ -109,7 +109,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
-  auto* arr = ty.array<bool, 4>();
+  auto arr = ty.array<bool, 4>();
 
   GeneratorImpl& gen = Build();
 
@@ -118,7 +118,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
-  auto* arr = ty.array<bool, 1>();
+  auto arr = ty.array<bool, 1>();
 
   GeneratorImpl& gen = Build();
 
@@ -408,13 +408,13 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                          });
 
   // array_x: size(28), align(4)
-  auto* array_x = ty.array<f32, 7>();
+  auto array_x = ty.array<f32, 7>();
 
   // array_y: size(4096), align(512)
-  auto* array_y = ty.array(inner, 4);
+  auto array_y = ty.array(inner, 4);
 
   // array_z: size(4), align(4)
-  auto* array_z = ty.array<f32>();
+  auto array_z = ty.array<f32>();
 
   auto* s =
       Structure("S",
