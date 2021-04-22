@@ -260,7 +260,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl) {
 }
 
 TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
-  auto* my_int = ty.alias("MyInt", ty.i32());
+  auto my_int = ty.alias("MyInt", ty.i32());
   auto* var = Var("my_var", my_int, ast::StorageClass::kNone, Expr(2));
   auto* init = var->constructor();
 
@@ -407,7 +407,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Array) {
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Alias_Array) {
-  auto* aary = ty.alias("myarrty", ty.array<f32, 3>());
+  auto aary = ty.alias("myarrty", ty.array<f32, 3>());
 
   Global("my_var", aary, ast::StorageClass::kFunction);
 
@@ -761,9 +761,9 @@ TEST_F(ResolverTest, Function_Parameters) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
-  auto* s = Structure("S", {Member("m", ty.u32())},
-                      {create<ast::StructBlockDecoration>()});
-  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  auto s = Structure("S", {Member("m", ty.u32())},
+                     {create<ast::StructBlockDecoration>()});
+  auto a = ty.access(ast::AccessControl::kReadOnly, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
@@ -796,9 +796,9 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
-  auto* s = Structure("S", {Member("m", ty.u32())},
-                      {create<ast::StructBlockDecoration>()});
-  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  auto s = Structure("S", {Member("m", ty.u32())},
+                     {create<ast::StructBlockDecoration>()});
+  auto a = ty.access(ast::AccessControl::kReadOnly, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
@@ -878,8 +878,8 @@ TEST_F(ResolverTest, Function_ReturnStatements) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
-  auto* st = Structure("S", {Member("first_member", ty.i32()),
-                             Member("second_member", ty.f32())});
+  auto st = Structure("S", {Member("first_member", ty.i32()),
+                            Member("second_member", ty.f32())});
   Global("my_struct", st, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
@@ -903,9 +903,9 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
-  auto* st = Structure("alias", {Member("first_member", ty.i32()),
-                                 Member("second_member", ty.f32())});
-  auto* alias = ty.alias("alias", st);
+  auto st = Structure("alias", {Member("first_member", ty.i32()),
+                                Member("second_member", ty.f32())});
+  auto alias = ty.alias("alias", st);
   Global("my_struct", alias, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
@@ -981,11 +981,11 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   // }
   //
 
-  auto* stB = Structure("B", {Member("foo", ty.vec4<f32>())});
+  auto stB = Structure("B", {Member("foo", ty.vec4<f32>())});
 
   sem::Vector vecB(stB, 3);
 
-  auto* stA = Structure("A", {Member("mem", &vecB)});
+  auto stA = Structure("A", {Member("mem", &vecB)});
   Global("c", stA, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor(
@@ -1003,8 +1003,8 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
-  auto* st = Structure("S", {Member("first_member", ty.f32()),
-                             Member("second_member", ty.f32())});
+  auto st = Structure("S", {Member("first_member", ty.f32()),
+                            Member("second_member", ty.f32())});
   Global("my_struct", st, ast::StorageClass::kInput);
 
   auto* expr = Add(MemberAccessor("my_struct", "first_member"),
@@ -1181,9 +1181,9 @@ using Expr_Binary_Test_Valid = ResolverTestWithParam<Params>;
 TEST_P(Expr_Binary_Test_Valid, All) {
   auto& params = GetParam();
 
-  auto* lhs_type = params.create_lhs_type(ty);
-  auto* rhs_type = params.create_rhs_type(ty);
-  auto* result_type = params.create_result_type(ty);
+  auto lhs_type = params.create_lhs_type(ty);
+  auto rhs_type = params.create_rhs_type(ty);
+  auto result_type = params.create_result_type(ty);
 
   std::stringstream ss;
   ss << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
@@ -1212,8 +1212,8 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
   const Params& params = std::get<0>(GetParam());
   BinaryExprSide side = std::get<1>(GetParam());
 
-  auto* lhs_type = params.create_lhs_type(ty);
-  auto* rhs_type = params.create_rhs_type(ty);
+  auto lhs_type = params.create_lhs_type(ty);
+  auto rhs_type = params.create_rhs_type(ty);
 
   std::stringstream ss;
   ss << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
@@ -1287,8 +1287,8 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
     return;
   }
 
-  auto* lhs_type = params.create_lhs_type(ty);
-  auto* rhs_type = create_type_func(ty);
+  auto lhs_type = params.create_lhs_type(ty);
+  auto rhs_type = create_type_func(ty);
 
   // Skip exceptions: multiplication of f32, vecN<f32>, and matNxN<f32>
   if (params.op == Op::kMultiply &&
@@ -1331,20 +1331,20 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
   uint32_t mat_rows = std::get<2>(GetParam());
   uint32_t mat_cols = std::get<3>(GetParam());
 
-  sem::Type* lhs_type;
-  sem::Type* rhs_type;
-  sem::Type* result_type;
+  typ::Type lhs_type;
+  typ::Type rhs_type;
+  typ::Type result_type;
   bool is_valid_expr;
 
   if (vec_by_mat) {
-    lhs_type = create<sem::Vector>(ty.f32(), vec_size);
-    rhs_type = create<sem::Matrix>(ty.f32(), mat_rows, mat_cols);
-    result_type = create<sem::Vector>(ty.f32(), mat_cols);
+    lhs_type = ty.vec<f32>(vec_size);
+    rhs_type = ty.mat<f32>(mat_cols, mat_rows);
+    result_type = ty.vec<f32>(mat_cols);
     is_valid_expr = vec_size == mat_rows;
   } else {
-    lhs_type = create<sem::Matrix>(ty.f32(), mat_rows, mat_cols);
-    rhs_type = create<sem::Vector>(ty.f32(), vec_size);
-    result_type = create<sem::Vector>(ty.f32(), mat_rows);
+    lhs_type = ty.mat<f32>(mat_cols, mat_rows);
+    rhs_type = ty.vec<f32>(vec_size);
+    result_type = ty.vec<f32>(mat_rows);
     is_valid_expr = vec_size == mat_cols;
   }
 
@@ -1383,9 +1383,9 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
   uint32_t rhs_mat_rows = std::get<2>(GetParam());
   uint32_t rhs_mat_cols = std::get<3>(GetParam());
 
-  auto* lhs_type = create<sem::Matrix>(ty.f32(), lhs_mat_rows, lhs_mat_cols);
-  auto* rhs_type = create<sem::Matrix>(ty.f32(), rhs_mat_rows, rhs_mat_cols);
-  auto* result_type = create<sem::Matrix>(ty.f32(), lhs_mat_rows, rhs_mat_cols);
+  auto lhs_type = ty.mat<f32>(lhs_mat_cols, lhs_mat_rows);
+  auto rhs_type = ty.mat<f32>(rhs_mat_cols, rhs_mat_rows);
+  auto result_type = ty.mat<f32>(rhs_mat_cols, lhs_mat_rows);
 
   Global("lhs", lhs_type, ast::StorageClass::kInput);
   Global("rhs", rhs_type, ast::StorageClass::kInput);

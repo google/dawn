@@ -66,7 +66,7 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
   // }
   auto& params = GetParam();
 
-  auto* rhs_type = params.create_rhs_type(ty);
+  auto rhs_type = params.create_rhs_type(ty);
   auto* constructor_expr = ConstructValueFilledWith(rhs_type, 0);
 
   auto sc = ast::StorageClass::kFunction;
@@ -114,7 +114,7 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
   // }
   auto& params = GetParam();
 
-  auto* rhs_type = params.create_rhs_type(ty);
+  auto rhs_type = params.create_rhs_type(ty);
 
   auto* arith_lhs_expr = ConstructValueFilledWith(rhs_type, 2);
   auto* arith_rhs_expr = ConstructValueFilledWith(ElementTypeOf(rhs_type), 3);
@@ -159,7 +159,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
   // }
   auto& params = GetParam();
 
-  auto* rhs_type = params.create_rhs_type(ty);
+  auto rhs_type = params.create_rhs_type(ty);
 
   Func("foo", {}, rhs_type, {Return(ConstructValueFilledWith(rhs_type, 0))},
        {});

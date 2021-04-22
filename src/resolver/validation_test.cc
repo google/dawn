@@ -164,7 +164,7 @@ TEST_F(ResolverValidationTest,
 
 TEST_F(ResolverValidationTest,
        Stmt_VariableDecl_MismatchedTypeScalarConstructor_Alias) {
-  auto* my_int = ty.alias("MyInt", ty.i32());
+  auto my_int = ty.alias("MyInt", ty.i32());
   u32 unsigned_value = 2u;  // Type does not match variable type
   auto* var =
       Var("my_var", my_int, ast::StorageClass::kNone, Expr(unsigned_value));
@@ -1684,7 +1684,7 @@ TEST_F(ResolverValidationTest,
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
-  auto* alias = ty.alias("UnsignedInt", ty.u32());
+  auto alias = ty.alias("UnsignedInt", ty.u32());
   Global("uint_var", alias, ast::StorageClass::kInput);
 
   auto* tc = vec2<f32>(Expr(Source{{12, 34}}, "uint_var"));
@@ -1697,8 +1697,8 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* vec2_alias = ty.alias("VectorFloat2", ty.vec2<f32>());
+  auto f32_alias = ty.alias("Float32", ty.f32());
+  auto vec2_alias = ty.alias("VectorFloat2", ty.vec2<f32>());
   Global("my_f32", f32_alias, ast::StorageClass::kInput);
   Global("my_vec2", vec2_alias, ast::StorageClass::kInput);
 
@@ -1708,7 +1708,7 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_ElementTypeAlias_Error) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto f32_alias = ty.alias("Float32", ty.f32());
   auto* vec_type = create<sem::Vector>(f32_alias, 2);
 
   // vec2<Float32>(1.0f, 1u)
@@ -1726,7 +1726,7 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_ElementTypeAlias_Error) {
 
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vector_ElementTypeAlias_Success) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto f32_alias = ty.alias("Float32", ty.f32());
   auto* vec_type = create<sem::Vector>(f32_alias, 2);
 
   // vec2<Float32>(1.0f, 1.0f)
@@ -1739,7 +1739,7 @@ TEST_F(ResolverValidationTest,
 
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vector_ArgumentElementTypeAlias_Error) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto f32_alias = ty.alias("Float32", ty.f32());
   auto* vec_type = create<sem::Vector>(f32_alias, 2);
 
   // vec3<u32>(vec<Float32>(), 1.0f)
@@ -1756,7 +1756,7 @@ TEST_F(ResolverValidationTest,
 
 TEST_F(ResolverValidationTest,
        Expr_Constructor_Vector_ArgumentElementTypeAlias_Success) {
-  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto f32_alias = ty.alias("Float32", ty.f32());
   auto* vec_type = create<sem::Vector>(f32_alias, 2);
 
   // vec3<f32>(vec<Float32>(), 1.0f)
@@ -1789,8 +1789,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooFewArguments) {
   // matNxM<f32>(vecM<f32>(), ...); with N - 1 arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto vec_type = ty.vec<f32>(param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns - 1; i++) {
@@ -1813,8 +1813,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_Error_TooManyArguments) {
   // matNxM<f32>(vecM<f32>(), ...); with N + 1 arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto vec_type = ty.vec<f32>(param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns + 1; i++) {
@@ -1837,7 +1837,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_Error_InvalidArgumentType) {
   // matNxM<f32>(1.0, 1.0, ...); N arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -1866,9 +1866,9 @@ TEST_P(MatrixConstructorTest,
     return;
   }
 
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* valid_vec_type = create<sem::Vector>(ty.f32(), param.rows);
-  auto* invalid_vec_type = create<sem::Vector>(ty.f32(), param.rows - 1);
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto valid_vec_type = ty.vec<f32>(param.rows);
+  auto invalid_vec_type = ty.vec<f32>(param.rows - 1);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns - 1; i++) {
@@ -1902,9 +1902,9 @@ TEST_P(MatrixConstructorTest,
     return;
   }
 
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* valid_vec_type = create<sem::Vector>(ty.f32(), param.rows);
-  auto* invalid_vec_type = create<sem::Vector>(ty.f32(), param.rows + 1);
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto valid_vec_type = ty.vec<f32>(param.rows);
+  auto invalid_vec_type = ty.vec<f32>(param.rows + 1);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns - 1; i++) {
@@ -1932,7 +1932,7 @@ TEST_P(MatrixConstructorTest,
   // matNxM<f32>(vecM<u32>(), ...); with N arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
   auto* vec_type = create<sem::Vector>(ty.u32(), param.rows);
 
   ast::ExpressionList args;
@@ -1956,7 +1956,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ZeroValue_Success) {
   // matNxM<f32>();
 
   const auto param = GetParam();
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
   auto* tc = create<ast::TypeConstructorExpression>(Source{{12, 40}},
                                                     matrix_type, ExprList());
   WrapInFunction(tc);
@@ -1968,8 +1968,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_WithArguments_Success) {
   // matNxM<f32>(vecM<f32>(), ...); with N arguments
 
   const auto param = GetParam();
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto vec_type = ty.vec<f32>(param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -1988,8 +1988,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Error) {
   // matNxM<Float32>(vecM<u32>(), ...); with N arguments
 
   const auto param = GetParam();
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* matrix_type = create<sem::Matrix>(f32_alias, param.rows, param.columns);
+  auto f32_alias = ty.alias("Float32", ty.f32());
+  auto matrix_type = ty.mat(f32_alias, param.columns, param.rows);
   auto* vec_type = create<sem::Vector>(ty.u32(), param.rows);
 
   ast::ExpressionList args;
@@ -2013,9 +2013,9 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
   // matNxM<Float32>(vecM<f32>(), ...); with N arguments
 
   const auto param = GetParam();
-  auto* f32_alias = ty.alias("Float32", ty.f32());
-  auto* matrix_type = create<sem::Matrix>(f32_alias, param.rows, param.columns);
-  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
+  auto f32_alias = ty.alias("Float32", ty.f32());
+  auto matrix_type = ty.mat(f32_alias, param.columns, param.rows);
+  auto vec_type = ty.vec<f32>(param.rows);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2031,7 +2031,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MatrixConstructor_ArgumentTypeAlias_Error) {
-  auto* vec2_alias = ty.alias("VectorUnsigned2", ty.vec2<u32>());
+  auto vec2_alias = ty.alias("VectorUnsigned2", ty.vec2<u32>());
   auto* tc = mat2x2<f32>(create<ast::TypeConstructorExpression>(
                              Source{{12, 34}}, vec2_alias, ExprList()),
                          vec2<f32>());
@@ -2045,9 +2045,9 @@ TEST_F(ResolverValidationTest, Expr_MatrixConstructor_ArgumentTypeAlias_Error) {
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
   const auto param = GetParam();
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* vec_type = create<sem::Vector>(ty.f32(), param.rows);
-  auto* vec_alias = ty.alias("VectorFloat2", vec_type);
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto vec_type = ty.vec<f32>(param.rows);
+  auto vec_alias = ty.alias("VectorFloat2", vec_type);
 
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
@@ -2064,8 +2064,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
   const auto param = GetParam();
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* f32_alias = ty.alias("UnsignedInt", ty.u32());
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto f32_alias = ty.alias("UnsignedInt", ty.u32());
   auto* vec_type = create<sem::Vector>(f32_alias, param.rows);
 
   ast::ExpressionList args;
@@ -2088,8 +2088,8 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentElementTypeAlias_Error) {
 TEST_P(MatrixConstructorTest,
        Expr_Constructor_ArgumentElementTypeAlias_Success) {
   const auto param = GetParam();
-  auto* matrix_type = create<sem::Matrix>(ty.f32(), param.rows, param.columns);
-  auto* f32_alias = ty.alias("Float32", ty.f32());
+  auto matrix_type = ty.mat<f32>(param.columns, param.rows);
+  auto f32_alias = ty.alias("Float32", ty.f32());
   auto* vec_type = create<sem::Vector>(f32_alias, param.rows);
 
   ast::ExpressionList args;

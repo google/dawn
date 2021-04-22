@@ -93,7 +93,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // type Int = i32
   // cast<Int>(2.3f)
 
-  auto* alias = ty.alias("Int", ty.i32());
+  auto alias = ty.alias("Int", ty.i32());
   auto* cast = Construct(alias, 2.3f);
   WrapInFunction(cast);
 
@@ -975,10 +975,10 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Struct) {
-  auto* s = Structure("my_struct", {
-                                       Member("a", ty.f32()),
-                                       Member("b", ty.vec3<f32>()),
-                                   });
+  auto s = Structure("my_struct", {
+                                      Member("a", ty.f32()),
+                                      Member("b", ty.vec3<f32>()),
+                                  });
 
   auto* t = Construct(s, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
   WrapInFunction(t);
@@ -1125,7 +1125,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
-  auto* s = Structure("my_struct", {Member("a", ty.f32())});
+  auto s = Structure("my_struct", {Member("a", ty.f32())});
   auto* t = Construct(s);
   WrapInFunction(t);
 
@@ -1545,10 +1545,10 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
 }
 
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
-  auto* s = Structure("my_struct", {
-                                       Member("a", ty.f32()),
-                                       Member("b", ty.vec3<f32>()),
-                                   });
+  auto s = Structure("my_struct", {
+                                      Member("a", ty.f32()),
+                                      Member("b", ty.vec3<f32>()),
+                                  });
 
   auto* t = Construct(s, 2.f, vec3<f32>(2.f, 2.f, 2.f));
   WrapInFunction(t);
@@ -1561,10 +1561,10 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
 
 TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_Struct_WithIdentSubExpression) {
-  auto* s = Structure("my_struct", {
-                                       Member("a", ty.f32()),
-                                       Member("b", ty.vec3<f32>()),
-                                   });
+  auto s = Structure("my_struct", {
+                                      Member("a", ty.f32()),
+                                      Member("b", ty.vec3<f32>()),
+                                  });
 
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
   Global("b", ty.f32(), ast::StorageClass::kPrivate);

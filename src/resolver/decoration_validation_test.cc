@@ -122,11 +122,11 @@ using ArrayDecorationTest = TestWithParams;
 TEST_P(ArrayDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  auto* arr = create<sem::ArrayType>(
-      ty.f32(), 0,
-      ast::DecorationList{
-          createDecoration(Source{{12, 34}}, *this, params.kind),
-      });
+  auto arr =
+      ty.array(ty.f32(), 0,
+               {
+                   createDecoration(Source{{12, 34}}, *this, params.kind),
+               });
   Structure("mystruct",
             {
                 Member("a", arr),
@@ -318,7 +318,7 @@ struct TestWithParams : ResolverTestWithParam<Params> {};
 using ArrayStrideTest = TestWithParams;
 TEST_P(ArrayStrideTest, All) {
   auto& params = GetParam();
-  auto* el_ty = params.create_el_type(ty);
+  auto el_ty = params.create_el_type(ty);
 
   std::stringstream ss;
   ss << "el_ty: " << el_ty->FriendlyName(Symbols())
@@ -326,11 +326,7 @@ TEST_P(ArrayStrideTest, All) {
      << ", should_pass: " << params.should_pass;
   SCOPED_TRACE(ss.str());
 
-  auto* arr =
-      create<sem::ArrayType>(el_ty, 4,
-                             ast::DecorationList{
-                                 create<ast::StrideDecoration>(params.stride),
-                             });
+  auto arr = ty.array(el_ty, 4, params.stride);
 
   Global(Source{{12, 34}}, "myarray", arr, ast::StorageClass::kInput);
 
@@ -415,11 +411,11 @@ INSTANTIATE_TEST_SUITE_P(
         Params{ty_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}));
 
 TEST_F(ArrayStrideTest, MultipleDecorations) {
-  auto* arr = create<sem::ArrayType>(ty.i32(), 4,
-                                     ast::DecorationList{
-                                         create<ast::StrideDecoration>(4),
-                                         create<ast::StrideDecoration>(4),
-                                     });
+  auto arr = ty.array(ty.i32(), 4,
+                      {
+                          create<ast::StrideDecoration>(4),
+                          create<ast::StrideDecoration>(4),
+                      });
 
   Global(Source{{12, 34}}, "myarray", arr, ast::StorageClass::kInput);
 
@@ -436,8 +432,8 @@ namespace {
 
 using StructBlockTest = ResolverTest;
 TEST_F(StructBlockTest, StructUsedAsArrayElement) {
-  auto* s = Structure("S", {Member("x", ty.i32())},
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("S", {Member("x", ty.i32())},
+                     {create<ast::StructBlockDecoration>()});
   auto a = ty.array(s, 4);
   Global("G", a, ast::StorageClass::kPrivate);
 

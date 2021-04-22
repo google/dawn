@@ -179,7 +179,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   //   const g = inputs.col2;
   //   const p = inputs.pos;
   // }
-  auto* interface_struct = Structure(
+  auto interface_struct = Structure(
       "Interface",
       {
           Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
@@ -252,7 +252,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   // fn vert_main2() -> VertexOutput {
   //   return foo(0.25);
   // }
-  auto* vertex_output_struct = Structure(
+  auto vertex_output_struct = Structure(
       "VertexOutput",
       {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
 
@@ -307,8 +307,8 @@ tint_symbol_2 vert_main2() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_Uniform) {
-  auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())},
-                           {create<ast::StructBlockDecoration>()});
+  auto ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())},
+                          {create<ast::StructBlockDecoration>()});
   auto* ubo = Global(
       "ubo", ubo_ty, ast::StorageClass::kUniform, nullptr,
       {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(1)});
@@ -359,8 +359,8 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_UniformStruct) {
-  auto* s = Structure("Uniforms", {Member("coord", ty.vec4<f32>())},
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Uniforms", {Member("coord", ty.vec4<f32>())},
+                     {create<ast::StructBlockDecoration>()});
 
   Global("uniforms", s, ast::StorageClass::kUniform, nullptr,
          {
@@ -401,12 +401,12 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_RW_StorageBuffer_Read) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
@@ -447,12 +447,12 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_RO_StorageBuffer_Read) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
@@ -493,12 +493,12 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_WO_StorageBuffer_Store) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kWriteOnly, s);
 
@@ -536,12 +536,12 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_With_StorageBuffer_Store) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
@@ -742,8 +742,8 @@ ep_1_out ep_1(ep_1_in tint_in) {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_Called_By_EntryPoint_With_Uniform) {
-  auto* s = Structure("S", {Member("x", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("S", {Member("x", ty.f32())},
+                     {create<ast::StructBlockDecoration>()});
   Global("coord", s, ast::StorageClass::kUniform, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -792,9 +792,9 @@ void frag_main() {
 
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_Called_By_EntryPoint_With_StorageBuffer) {
-  auto* s = Structure("S", {Member("x", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
-  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
+  auto s = Structure("S", {Member("x", ty.f32())},
+                     {create<ast::StructBlockDecoration>()});
+  auto ac = ty.access(ast::AccessControl::kReadWrite, s);
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -981,8 +981,8 @@ TEST_F(HlslGeneratorImplTest_Function,
   //   return;
   // }
 
-  auto* s = Structure("Data", {Member("d", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data", {Member("d", ty.f32())},
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 

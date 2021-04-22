@@ -22,7 +22,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
-  auto* alias = ty.alias("a", ty.f32());
+  auto alias = ty.alias("a", ty.f32());
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitConstructedType(alias)) << gen.error();
@@ -31,12 +31,12 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructedType_Struct) {
-  auto* s = Structure("A", {
-                               Member("a", ty.f32()),
-                               Member("b", ty.i32()),
-                           });
+  auto s = Structure("A", {
+                              Member("a", ty.f32()),
+                              Member("b", ty.i32()),
+                          });
 
-  auto* alias = ty.alias("B", s);
+  auto alias = ty.alias("B", s);
 
   GeneratorImpl& gen = Build();
 
@@ -51,12 +51,12 @@ type B = A;
 }
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
-  auto* s = Structure("A", {
-                               Member("a", ty.f32()),
-                               Member("b", ty.i32()),
-                           });
+  auto s = Structure("A", {
+                              Member("a", ty.f32()),
+                              Member("b", ty.i32()),
+                          });
 
-  auto* alias = ty.alias("B", s);
+  auto alias = ty.alias("B", s);
 
   GeneratorImpl& gen = Build();
 

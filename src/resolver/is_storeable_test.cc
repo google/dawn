@@ -97,7 +97,7 @@ TEST_F(ResolverIsStorableTest, Struct_AllMembersStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_SomeMembersNonStorable) {
-  auto* ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
+  auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
   EXPECT_FALSE(r()->IsStorable(Structure("S", {
                                                   Member("a", ty.i32()),
                                                   Member("b", ptr_ty),
@@ -105,10 +105,10 @@ TEST_F(ResolverIsStorableTest, Struct_SomeMembersNonStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_NestedStorable) {
-  auto* storable = Structure("S", {
-                                      Member("a", ty.i32()),
-                                      Member("b", ty.f32()),
-                                  });
+  auto storable = Structure("S", {
+                                     Member("a", ty.i32()),
+                                     Member("b", ty.f32()),
+                                 });
   EXPECT_TRUE(r()->IsStorable(Structure("S", {
                                                  Member("a", ty.i32()),
                                                  Member("b", storable),
@@ -116,11 +116,11 @@ TEST_F(ResolverIsStorableTest, Struct_NestedStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_NestedNonStorable) {
-  auto* ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
-  auto* non_storable = Structure("nonstorable", {
-                                                    Member("a", ty.i32()),
-                                                    Member("b", ptr_ty),
-                                                });
+  auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
+  auto non_storable = Structure("nonstorable", {
+                                                   Member("a", ty.i32()),
+                                                   Member("b", ptr_ty),
+                                               });
   EXPECT_FALSE(r()->IsStorable(Structure("S", {
                                                   Member("a", ty.i32()),
                                                   Member("b", non_storable),

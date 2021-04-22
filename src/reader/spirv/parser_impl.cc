@@ -1897,7 +1897,7 @@ sem::Pointer* ParserImpl::GetTypeForHandleVar(
   // Construct the Tint handle type.
   sem::Type* ast_store_type = nullptr;
   if (usage.IsSampler()) {
-    ast_store_type = builder_.create<sem::Sampler>(
+    ast_store_type = builder_.ty.sampler(
         usage.IsComparisonSampler() ? ast::SamplerKind::kComparisonSampler
                                     : ast::SamplerKind::kSampler);
   } else if (usage.IsTexture()) {

@@ -746,7 +746,7 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   auto p = parser("sampler");
 
   auto& builder = p->builder();
-  auto* type = builder.create<sem::Sampler>(ast::SamplerKind::kSampler);
+  auto type = builder.ty.sampler(ast::SamplerKind::kSampler);
 
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);

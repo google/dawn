@@ -198,7 +198,7 @@ struct State {
 
     // Creating the struct type
     static const char kStructName[] = "TintVertexData";
-    auto* struct_type = ctx.dst->Structure(
+    auto struct_type = ctx.dst->Structure(
         ctx.dst->Symbols().New(kStructName),
         {
             ctx.dst->Member(GetStructBufferName(),
@@ -207,7 +207,7 @@ struct State {
         {
             ctx.dst->create<ast::StructBlockDecoration>(),
         });
-    auto* access =
+    auto access =
         ctx.dst->ty.access(ast::AccessControl::kReadOnly, struct_type);
     for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
       // The decorated variable with struct type

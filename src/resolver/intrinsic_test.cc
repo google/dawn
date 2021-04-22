@@ -223,17 +223,17 @@ class ResolverIntrinsicTest_TextureOperation
   /// @param dim dimensionality of the texture being sampled
   /// @param scalar the scalar type
   /// @returns a pointer to a type appropriate for the coord param
-  sem::Type* GetCoordsType(ast::TextureDimension dim, sem::Type* scalar) {
+  typ::Type GetCoordsType(ast::TextureDimension dim, typ::Type scalar) {
     switch (dim) {
       case ast::TextureDimension::k1d:
         return scalar;
       case ast::TextureDimension::k2d:
       case ast::TextureDimension::k2dArray:
-        return create<sem::Vector>(scalar, 2);
+        return ty.vec(scalar, 2);
       case ast::TextureDimension::k3d:
       case ast::TextureDimension::kCube:
       case ast::TextureDimension::kCubeArray:
-        return create<sem::Vector>(scalar, 3);
+        return ty.vec(scalar, 3);
       default:
         [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
     }
@@ -241,19 +241,19 @@ class ResolverIntrinsicTest_TextureOperation
   }
 
   void add_call_param(std::string name,
-                      sem::Type* type,
+                      typ::Type type,
                       ast::ExpressionList* call_params) {
     Global(name, type, ast::StorageClass::kInput);
     call_params->push_back(Expr(name));
   }
-  sem::Type* subtype(Texture type) {
+  typ::Type subtype(Texture type) {
     if (type == Texture::kF32) {
-      return create<sem::F32>();
+      return ty.f32();
     }
     if (type == Texture::kI32) {
-      return create<sem::I32>();
+      return ty.i32();
     }
-    return create<sem::U32>();
+    return ty.u32();
   }
 };
 
@@ -264,12 +264,9 @@ TEST_P(ResolverIntrinsicTest_StorageTextureOperation, TextureLoadRo) {
   auto type = GetParam().type;
   auto format = GetParam().format;
 
-  auto* coords_type = GetCoordsType(dim, ty.i32());
-
-  auto* subtype = sem::StorageTexture::SubtypeFor(format, Types());
-  auto* texture_type = create<sem::StorageTexture>(dim, format, subtype);
-  auto* ro_texture_type =
-      create<sem::AccessControl>(ast::AccessControl::kReadOnly, texture_type);
+  auto coords_type = GetCoordsType(dim, ty.i32());
+  auto texture_type = ty.storage_texture(dim, format);
+  auto ro_texture_type = ty.access(ast::AccessControl::kReadOnly, texture_type);
 
   ast::ExpressionList call_params;
 
@@ -332,9 +329,9 @@ TEST_P(ResolverIntrinsicTest_SampledTextureOperation, TextureLoadSampled) {
   auto dim = GetParam().dim;
   auto type = GetParam().type;
 
-  sem::Type* s = subtype(type);
-  auto* coords_type = GetCoordsType(dim, ty.i32());
-  auto* texture_type = create<sem::SampledTexture>(dim, s);
+  auto s = subtype(type);
+  auto coords_type = GetCoordsType(dim, ty.i32());
+  auto texture_type = ty.sampled_texture(dim, s);
 
   ast::ExpressionList call_params;
 
@@ -760,9 +757,9 @@ using ResolverIntrinsicDataTest = ResolverTest;
 
 TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
   auto ary = ty.array<i32>();
-  auto* str = Structure("S", {Member("x", ary)},
-                        {create<ast::StructBlockDecoration>()});
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, str);
+  auto str = Structure("S", {Member("x", ary)},
+                       {create<ast::StructBlockDecoration>()});
+  auto ac = ty.access(ast::AccessControl::kReadOnly, str);
   Global("a", ac, ast::StorageClass::kStorage);
 
   auto* call = Call("arrayLength", MemberAccessor("a", "x"));
@@ -1950,7 +1947,7 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
       case ast::intrinsic::test::TextureKind::kRegular:
       case ast::intrinsic::test::TextureKind::kMultisampled:
       case ast::intrinsic::test::TextureKind::kStorage: {
-        auto* datatype = param.resultVectorComponentType(this);
+        auto datatype = param.resultVectorComponentType(this);
         ASSERT_TRUE(TypeOf(call)->Is<sem::Vector>());
         EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->type(), datatype);
         break;

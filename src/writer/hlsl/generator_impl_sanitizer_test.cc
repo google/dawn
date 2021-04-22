@@ -26,16 +26,15 @@ namespace {
 using HlslSanitizerTest = TestHelper;
 
 TEST_F(HlslSanitizerTest, ArrayLength) {
-  auto* sb_ty = Structure("SB",
-                          {
-                              Member("x", ty.f32()),
-                              Member("arr", ty.array(ty.vec4<f32>())),
-                          },
-                          {
-                              create<ast::StructBlockDecoration>(),
-                          });
-  auto* ac_ty =
-      create<sem::AccessControl>(ast::AccessControl::kReadOnly, sb_ty);
+  auto sb_ty = Structure("SB",
+                         {
+                             Member("x", ty.f32()),
+                             Member("arr", ty.array(ty.vec4<f32>())),
+                         },
+                         {
+                             create<ast::StructBlockDecoration>(),
+                         });
+  auto ac_ty = ty.access(ast::AccessControl::kReadOnly, sb_ty);
 
   Global("sb", ac_ty, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
@@ -101,11 +100,11 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 }
 
 TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
-  auto* str = Structure("S", {
-                                 Member("a", ty.i32()),
-                                 Member("b", ty.vec3<f32>()),
-                                 Member("c", ty.i32()),
-                             });
+  auto str = Structure("S", {
+                                Member("a", ty.i32()),
+                                Member("b", ty.vec3<f32>()),
+                                Member("c", ty.i32()),
+                            });
   auto* struct_init = Construct(str, 1, vec3<f32>(2.f, 3.f, 4.f), 4);
   auto* struct_access = MemberAccessor(struct_init, "b");
   auto* pos =

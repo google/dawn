@@ -60,9 +60,9 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferArray) {
   // var<storage> g : [[access(read)]] array<S, 3>;
-  auto* s = Structure("S", {Member("a", ty.f32())});
+  auto s = Structure("S", {Member("a", ty.f32())});
   auto a = ty.array(s, 3);
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, a);
+  auto ac = ty.access(ast::AccessControl::kReadOnly, a);
   Global(Source{{56, 78}}, "g", ac, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
@@ -75,7 +75,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferArray) {
 TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
   // type a = bool;
   // var<storage> g : [[access(read)]] a;
-  auto* a = ty.alias("a", ty.bool_());
+  auto a = ty.alias("a", ty.bool_());
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
@@ -87,7 +87,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoAccessControl) {
   // var<storage> g : S;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
+  auto s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
   Global(Source{{56, 78}}, "g", s, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
@@ -100,8 +100,8 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoAccessControl) {
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {
   // struct S { x : i32 };
   // var<storage> g : [[access(read)]] S;
-  auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
-  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  auto s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
+  auto a = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
@@ -115,9 +115,9 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
   // [[block]] struct S { x : i32 };
   // var<storage> g : [[access(read)]] S;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
-                      {create<ast::StructBlockDecoration>()});
-  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  auto s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
+                     {create<ast::StructBlockDecoration>()});
+  auto a = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_TRUE(r()->Resolve());
@@ -128,11 +128,11 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
   // type a1 = S;
   // type a2 = [[access(read)]] a1;
   // var<storage> g : a2;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
-                      {create<ast::StructBlockDecoration>()});
-  auto* a1 = ty.alias("a1", s);
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, a1);
-  auto* a2 = ty.alias("a2", ac);
+  auto s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
+                     {create<ast::StructBlockDecoration>()});
+  auto a1 = ty.alias("a1", s);
+  auto ac = ty.access(ast::AccessControl::kReadOnly, a1);
+  auto a2 = ty.alias("a2", ac);
   Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage);
 
   ASSERT_TRUE(r()->Resolve());
@@ -165,9 +165,9 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
   // var<uniform> g : [[access(read)]] array<S, 3>;
-  auto* s = Structure("S", {Member("a", ty.f32())});
+  auto s = Structure("S", {Member("a", ty.f32())});
   auto a = ty.array(s, 3);
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, a);
+  auto ac = ty.access(ast::AccessControl::kReadOnly, a);
   Global(Source{{56, 78}}, "g", ac, ast::StorageClass::kUniform);
 
   ASSERT_FALSE(r()->Resolve());
@@ -180,7 +180,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
 TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
   // type a = bool;
   // var<uniform> g : [[access(read)]] a;
-  auto* a = ty.alias("a", ty.bool_());
+  auto a = ty.alias("a", ty.bool_());
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform);
 
   ASSERT_FALSE(r()->Resolve());
@@ -193,7 +193,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
 TEST_F(ResolverStorageClassValidationTest, UniformBufferNoBlockDecoration) {
   // struct S { x : i32 };
   // var<uniform> g : S;
-  auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
+  auto s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
   Global(Source{{56, 78}}, "g", s, ast::StorageClass::kUniform);
 
   ASSERT_FALSE(r()->Resolve());
@@ -207,8 +207,8 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferNoBlockDecoration) {
 TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Basic) {
   // [[block]] struct S { x : i32 };
   // var<uniform> g :  S;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
+                     {create<ast::StructBlockDecoration>()});
   Global(Source{{56, 78}}, "g", s, ast::StorageClass::kUniform);
 
   ASSERT_TRUE(r()->Resolve());
@@ -218,9 +218,9 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Aliases) {
   // [[block]] struct S { x : i32 };
   // type a1 = S;
   // var<uniform> g : a1;
-  auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
-                      {create<ast::StructBlockDecoration>()});
-  auto* a1 = ty.alias("a1", s);
+  auto s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
+                     {create<ast::StructBlockDecoration>()});
+  auto a1 = ty.alias("a1", s);
   Global(Source{{56, 78}}, "g", a1, ast::StorageClass::kUniform);
 
   ASSERT_TRUE(r()->Resolve());

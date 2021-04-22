@@ -18,6 +18,7 @@
 #include <string>
 #include <utility>
 
+#include "src/ast/alias.h"
 #include "src/ast/array.h"
 #include "src/ast/array_accessor_expression.h"
 #include "src/ast/assignment_statement.h"
@@ -26,6 +27,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
+#include "src/ast/depth_texture.h"
 #include "src/ast/f32.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/i32.h"
@@ -34,10 +36,14 @@
 #include "src/ast/matrix.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
+#include "src/ast/multisampled_texture.h"
+#include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
+#include "src/ast/sampled_texture.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/storage_texture.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
@@ -55,10 +61,14 @@
 #include "src/sem/alias_type.h"
 #include "src/sem/array_type.h"
 #include "src/sem/bool_type.h"
+#include "src/sem/depth_texture_type.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/i32_type.h"
 #include "src/sem/matrix_type.h"
+#include "src/sem/multisampled_texture_type.h"
 #include "src/sem/pointer_type.h"
+#include "src/sem/sampled_texture_type.h"
+#include "src/sem/storage_texture_type.h"
 #include "src/sem/struct_type.h"
 #include "src/sem/u32_type.h"
 #include "src/sem/vector_type.h"
@@ -363,24 +373,30 @@ class ProgramBuilder {
     }
 
     /// @param type vector subtype
-    /// @return the tint AST type for a 2-element vector of `type`.
-    typ::Vector vec2(typ::Type type) const {
-      return {builder->create<ast::Vector>(type, 2u),
-              builder->create<sem::Vector>(type, 2u)};
+    /// @param n vector width in elements
+    /// @return the tint AST type for a `n`-element vector of `type`.
+    typ::Vector vec(typ::Type type, uint32_t n) const {
+      return {builder->create<ast::Vector>(type, n),
+              builder->create<sem::Vector>(type, n)};
     }
+
+    /// @param type vector subtype
+    /// @return the tint AST type for a 2-element vector of `type`.
+    typ::Vector vec2(typ::Type type) const { return vec(type, 2u); }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 3-element vector of `type`.
-    typ::Vector vec3(typ::Type type) const {
-      return {builder->create<ast::Vector>(type, 3u),
-              builder->create<sem::Vector>(type, 3u)};
-    }
+    typ::Vector vec3(typ::Type type) const { return vec(type, 3u); }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 4-element vector of `type`.
-    typ::Vector vec4(typ::Type type) const {
-      return {builder->create<ast::Vector>(type, 4u),
-              builder->create<sem::Vector>(type, 4u)};
+    typ::Vector vec4(typ::Type type) const { return vec(type, 4u); }
+
+    /// @param n vector width in elements
+    /// @return the tint AST type for a `n`-element vector of `type`.
+    template <typename T>
+    typ::Vector vec(uint32_t n) const {
+      return vec(Of<T>(), n);
     }
 
     /// @return the tint AST type for a 2-element vector of the C type `T`.
@@ -399,6 +415,15 @@ class ProgramBuilder {
     template <typename T>
     typ::Vector vec4() const {
       return vec4(Of<T>());
+    }
+
+    /// @param type matrix subtype
+    /// @param columns number of columns for the matrix
+    /// @param rows number of rows for the matrix
+    /// @return the tint AST type for a matrix of `type`
+    typ::Matrix mat(typ::Type type, uint32_t columns, uint32_t rows) const {
+      return {builder->create<ast::Matrix>(type, rows, columns),
+              builder->create<sem::Matrix>(type, rows, columns)};
     }
 
     /// @param type matrix subtype
@@ -464,6 +489,14 @@ class ProgramBuilder {
               builder->create<sem::Matrix>(type, 4u, 4u)};
     }
 
+    /// @param columns number of columns for the matrix
+    /// @param rows number of rows for the matrix
+    /// @return the tint AST type for a matrix of `type`
+    template <typename T>
+    typ::Matrix mat(uint32_t columns, uint32_t rows) const {
+      return mat(Of<T>(), columns, rows);
+    }
+
     /// @return the tint AST type for a 2x3 matrix of the C type `T`.
     template <typename T>
     typ::Matrix mat2x2() const {
@@ -519,29 +552,23 @@ class ProgramBuilder {
     }
 
     /// @param subtype the array element type
-    /// @param n the array size. 0 represents a runtime-array.
+    /// @param n the array size. 0 represents a runtime-array
+    /// @param decos the optional decorations for the array
     /// @return the tint AST type for a array of size `n` of type `T`
-    typ::Array array(typ::Type subtype, uint32_t n = 0) const {
-      return {
-          builder->create<ast::Array>(subtype, n, ast::DecorationList{}),
-          builder->create<sem::ArrayType>(subtype, n, ast::DecorationList{})};
+    typ::Array array(typ::Type subtype,
+                     uint32_t n = 0,
+                     ast::DecorationList decos = {}) const {
+      return {builder->create<ast::Array>(subtype, n, decos),
+              builder->create<sem::ArrayType>(subtype, n, decos)};
     }
 
     /// @param subtype the array element type
-    /// @param n the array size. 0 represents a runtime-array.
-    /// @param stride the array stride.
+    /// @param n the array size. 0 represents a runtime-array
+    /// @param stride the array stride
     /// @return the tint AST type for a array of size `n` of type `T`
     typ::Array array(typ::Type subtype, uint32_t n, uint32_t stride) const {
-      return {builder->create<ast::Array>(
-                  subtype, n,
-                  ast::DecorationList{
-                      builder->create<ast::StrideDecoration>(stride),
-                  }),
-              builder->create<sem::ArrayType>(
-                  subtype, n,
-                  ast::DecorationList{
-                      builder->create<ast::StrideDecoration>(stride),
-                  })};
+      return array(subtype, n,
+                   {builder->create<ast::StrideDecoration>(stride)});
     }
 
     /// @return the tint AST type for an array of size `N` of type `T`
@@ -562,40 +589,88 @@ class ProgramBuilder {
     /// @param type the alias type
     /// @returns the alias pointer
     template <typename NAME>
-    sem::Alias* alias(NAME&& name, sem::Type* type) const {
-      return builder->create<sem::Alias>(builder->Sym(std::forward<NAME>(name)),
-                                         type);
+    typ::Alias alias(NAME&& name, typ::Type type) const {
+      auto sym = builder->Sym(std::forward<NAME>(name));
+      return {
+          builder->create<ast::Alias>(sym, type),
+          builder->create<sem::Alias>(sym, type),
+      };
     }
 
     /// Creates an access control qualifier type
     /// @param access the access control
     /// @param type the inner type
     /// @returns the access control qualifier type
-    sem::AccessControl* access(ast::AccessControl::Access access,
-                               sem::Type* type) const {
-      return builder->create<sem::AccessControl>(access, type);
+    typ::AccessControl access(ast::AccessControl::Access access,
+                              typ::Type type) const {
+      return {builder->create<ast::AccessControl>(access, type),
+              builder->create<sem::AccessControl>(access, type)};
     }
 
-    /// @return the tint AST pointer to `type` with the given ast::StorageClass
     /// @param type the type of the pointer
     /// @param storage_class the storage class of the pointer
-    sem::Pointer* pointer(sem::Type* type,
-                          ast::StorageClass storage_class) const {
-      return builder->create<sem::Pointer>(type, storage_class);
+    /// @return the pointer to `type` with the given ast::StorageClass
+    typ::Pointer pointer(typ::Type type,
+                         ast::StorageClass storage_class) const {
+      return {builder->create<ast::Pointer>(type, storage_class),
+              builder->create<sem::Pointer>(type, storage_class)};
     }
 
-    /// @return the tint AST pointer to type `T` with the given
-    /// ast::StorageClass.
     /// @param storage_class the storage class of the pointer
+    /// @return the pointer to type `T` with the given ast::StorageClass.
     template <typename T>
-    sem::Pointer* pointer(ast::StorageClass storage_class) const {
+    typ::Pointer pointer(ast::StorageClass storage_class) const {
       return pointer(Of<T>(), storage_class);
     }
 
     /// @param impl the struct implementation
     /// @returns a struct pointer
-    sem::StructType* struct_(ast::Struct* impl) const {
-      return builder->create<sem::StructType>(impl);
+    typ::Struct struct_(ast::Struct* impl) const {
+      return {impl, builder->create<sem::StructType>(impl)};
+    }
+
+    /// @param kind the kind of sampler
+    /// @returns the sampler
+    typ::Sampler sampler(ast::SamplerKind kind) const {
+      return {builder->create<ast::Sampler>(kind),
+              builder->create<sem::Sampler>(kind)};
+    }
+
+    /// @param dims the dimensionality of the texture
+    /// @returns the depth texture
+    typ::DepthTexture depth_texture(ast::TextureDimension dims) const {
+      return {builder->create<ast::DepthTexture>(dims),
+              builder->create<sem::DepthTexture>(dims)};
+    }
+
+    /// @param dims the dimensionality of the texture
+    /// @param subtype the texture subtype.
+    /// @returns the sampled texture
+    typ::SampledTexture sampled_texture(ast::TextureDimension dims,
+                                        typ::Type subtype) const {
+      return {builder->create<ast::SampledTexture>(dims, subtype),
+              builder->create<sem::SampledTexture>(dims, subtype)};
+    }
+
+    /// @param dims the dimensionality of the texture
+    /// @param subtype the texture subtype.
+    /// @returns the multisampled texture
+    typ::MultisampledTexture multisampled_texture(ast::TextureDimension dims,
+                                                  typ::Type subtype) const {
+      return {builder->create<ast::MultisampledTexture>(dims, subtype),
+              builder->create<sem::MultisampledTexture>(dims, subtype)};
+    }
+
+    /// @param dims the dimensionality of the texture
+    /// @param format the image format of the texture
+    /// @returns the storage texture
+    typ::StorageTexture storage_texture(ast::TextureDimension dims,
+                                        ast::ImageFormat format) const {
+      auto* ast_subtype = ast::StorageTexture::SubtypeFor(format, *builder);
+      auto* sem_subtype =
+          sem::StorageTexture::SubtypeFor(format, builder->Types());
+      return {builder->create<ast::StorageTexture>(dims, format, ast_subtype),
+              builder->create<sem::StorageTexture>(dims, format, sem_subtype)};
     }
 
    private:
@@ -904,7 +979,7 @@ class ProgramBuilder {
   /// @return an `ast::TypeConstructorExpression` of an array with element type
   /// `subtype`, constructed with the values `args`.
   template <typename... ARGS>
-  ast::TypeConstructorExpression* array(sem::Type* subtype,
+  ast::TypeConstructorExpression* array(typ::Type subtype,
                                         uint32_t n,
                                         ARGS&&... args) {
     return create<ast::TypeConstructorExpression>(
@@ -1259,14 +1334,14 @@ class ProgramBuilder {
   /// @param decorations the optional struct decorations
   /// @returns the struct type
   template <typename NAME>
-  sem::StructType* Structure(const Source& source,
-                             NAME&& name,
-                             ast::StructMemberList members,
-                             ast::DecorationList decorations = {}) {
+  typ::Struct Structure(const Source& source,
+                        NAME&& name,
+                        ast::StructMemberList members,
+                        ast::DecorationList decorations = {}) {
     auto sym = Sym(std::forward<NAME>(name));
     auto* impl = create<ast::Struct>(source, sym, std::move(members),
                                      std::move(decorations));
-    auto* type = ty.struct_(impl);
+    auto type = ty.struct_(impl);
     AST().AddConstructedType(type);
     return type;
   }
@@ -1278,13 +1353,13 @@ class ProgramBuilder {
   /// @param decorations the optional struct decorations
   /// @returns the struct type
   template <typename NAME>
-  sem::StructType* Structure(NAME&& name,
-                             ast::StructMemberList members,
-                             ast::DecorationList decorations = {}) {
+  typ::Struct Structure(NAME&& name,
+                        ast::StructMemberList members,
+                        ast::DecorationList decorations = {}) {
     auto sym = Sym(std::forward<NAME>(name));
     auto* impl =
         create<ast::Struct>(sym, std::move(members), std::move(decorations));
-    auto* type = ty.struct_(impl);
+    auto type = ty.struct_(impl);
     AST().AddConstructedType(type);
     return type;
   }

@@ -176,10 +176,10 @@ TEST_F(BuilderTest, Assign_StructMember) {
   // var ident : my_struct
   // ident.b = 4.0;
 
-  auto* s = Structure("my_struct", {
-                                       Member("a", ty.f32()),
-                                       Member("b", ty.f32()),
-                                   });
+  auto s = Structure("my_struct", {
+                                      Member("a", ty.f32()),
+                                      Member("b", ty.f32()),
+                                  });
 
   auto* v = Global("ident", s, ast::StorageClass::kFunction);
 

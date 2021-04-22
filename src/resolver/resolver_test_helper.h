@@ -105,97 +105,91 @@ template <typename T>
 class ResolverTestWithParam : public TestHelper,
                               public testing::TestWithParam<T> {};
 
-inline sem::Type* ty_bool_(const ProgramBuilder::TypesBuilder& ty) {
+inline typ::Type ty_bool_(const ProgramBuilder::TypesBuilder& ty) {
   return ty.bool_();
 }
-inline sem::Type* ty_i32(const ProgramBuilder::TypesBuilder& ty) {
+inline typ::Type ty_i32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.i32();
 }
-inline sem::Type* ty_u32(const ProgramBuilder::TypesBuilder& ty) {
+inline typ::Type ty_u32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.u32();
 }
-inline sem::Type* ty_f32(const ProgramBuilder::TypesBuilder& ty) {
+inline typ::Type ty_f32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.f32();
 }
 
 using create_type_func_ptr =
-    sem::Type* (*)(const ProgramBuilder::TypesBuilder& ty);
+    typ::Type (*)(const ProgramBuilder::TypesBuilder& ty);
 
 template <typename T>
-sem::Type* ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
+typ::Type ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
   return ty.vec2<T>();
 }
 
 template <create_type_func_ptr create_type>
-sem::Type* ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
-  return ty.vec2(type);
+typ::Type ty_vec2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec2(create_type(ty));
 }
 
 template <typename T>
-sem::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
+typ::Type ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.vec3<T>();
 }
 
 template <create_type_func_ptr create_type>
-sem::Type* ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
-  return ty.vec3(type);
+typ::Type ty_vec3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec3(create_type(ty));
 }
 
 template <typename T>
-sem::Type* ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
+typ::Type ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
   return ty.vec4<T>();
 }
 
 template <create_type_func_ptr create_type>
-sem::Type* ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
-  return ty.vec4(type);
+typ::Type ty_vec4(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.vec4(create_type(ty));
 }
 
 template <typename T>
-sem::Type* ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
+typ::Type ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat2x2<T>();
 }
 
 template <create_type_func_ptr create_type>
-sem::Type* ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
-  return ty.mat2x2(type);
+typ::Type ty_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat2x2(create_type(ty));
 }
 
 template <typename T>
-sem::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
+typ::Type ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat3x3<T>();
 }
 
 template <create_type_func_ptr create_type>
-sem::Type* ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
-  return ty.mat3x3(type);
+typ::Type ty_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat3x3(create_type(ty));
 }
 
 template <typename T>
-sem::Type* ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
+typ::Type ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat4x4<T>();
 }
 
 template <create_type_func_ptr create_type>
-sem::Type* ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
-  return ty.mat4x4(type);
+typ::Type ty_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat4x4(create_type(ty));
 }
 
 template <create_type_func_ptr create_type>
-sem::Type* ty_alias(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
+typ::Type ty_alias(const ProgramBuilder::TypesBuilder& ty) {
+  auto type = create_type(ty);
   return ty.alias("alias_" + type->type_name(), type);
 }
 
 template <create_type_func_ptr create_type>
-sem::Type* ty_access(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
+typ::Type ty_access(const ProgramBuilder::TypesBuilder& ty) {
+  auto type = create_type(ty);
   return ty.access(ast::AccessControl::kReadOnly, type);
 }
 

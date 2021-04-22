@@ -69,7 +69,7 @@ TEST_F(IntrinsicTableTest, MismatchU32) {
 }
 
 TEST_F(IntrinsicTableTest, MatchI32) {
-  auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k1d, ty.f32());
+  auto tex = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
                               {tex, ty.i32(), ty.i32()}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
@@ -83,7 +83,7 @@ TEST_F(IntrinsicTableTest, MatchI32) {
 }
 
 TEST_F(IntrinsicTableTest, MismatchI32) {
-  auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k1d, ty.f32());
+  auto tex = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
                               {tex, ty.f32()}, Source{});
   ASSERT_EQ(result.intrinsic, nullptr);
@@ -219,8 +219,8 @@ TEST_F(IntrinsicTableTest, MismatchArray) {
 }
 
 TEST_F(IntrinsicTableTest, MatchSampler) {
-  auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k2d, ty.f32());
-  auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
+  auto tex = ty.sampled_texture(ast::TextureDimension::k2d, ty.f32());
+  auto sampler = ty.sampler(ast::SamplerKind::kSampler);
   auto result = table->Lookup(*this, IntrinsicType::kTextureSample,
                               {tex, sampler, ty.vec2<f32>()}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
@@ -235,7 +235,7 @@ TEST_F(IntrinsicTableTest, MatchSampler) {
 }
 
 TEST_F(IntrinsicTableTest, MismatchSampler) {
-  auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k2d, ty.f32());
+  auto tex = ty.sampled_texture(ast::TextureDimension::k2d, ty.f32());
   auto result = table->Lookup(*this, IntrinsicType::kTextureSample,
                               {tex, ty.f32(), ty.vec2<f32>()}, Source{});
   ASSERT_EQ(result.intrinsic, nullptr);
@@ -243,7 +243,7 @@ TEST_F(IntrinsicTableTest, MismatchSampler) {
 }
 
 TEST_F(IntrinsicTableTest, MatchSampledTexture) {
-  auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k2d, ty.f32());
+  auto tex = ty.sampled_texture(ast::TextureDimension::k2d, ty.f32());
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
                               {tex, ty.vec2<i32>(), ty.i32()}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
@@ -272,7 +272,7 @@ TEST_F(IntrinsicTableTest, MatchMultisampledTexture) {
 }
 
 TEST_F(IntrinsicTableTest, MatchDepthTexture) {
-  auto* tex = create<sem::DepthTexture>(ast::TextureDimension::k2d);
+  auto tex = ty.depth_texture(ast::TextureDimension::k2d);
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
                               {tex, ty.vec2<i32>(), ty.i32()}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
@@ -286,10 +286,9 @@ TEST_F(IntrinsicTableTest, MatchDepthTexture) {
 }
 
 TEST_F(IntrinsicTableTest, MatchROStorageTexture) {
-  auto* tex = create<sem::StorageTexture>(
-      ast::TextureDimension::k2d, ast::ImageFormat::kR16Float,
-      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR16Float, Types()));
-  auto* tex_ac = create<sem::AccessControl>(ast::AccessControl::kReadOnly, tex);
+  auto tex = ty.storage_texture(ast::TextureDimension::k2d,
+                                ast::ImageFormat::kR16Float);
+  auto tex_ac = ty.access(ast::AccessControl::kReadOnly, tex);
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
                               {tex_ac, ty.vec2<i32>()}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
@@ -303,11 +302,9 @@ TEST_F(IntrinsicTableTest, MatchROStorageTexture) {
 }
 
 TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
-  auto* tex = create<sem::StorageTexture>(
-      ast::TextureDimension::k2d, ast::ImageFormat::kR16Float,
-      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR16Float, Types()));
-  auto* tex_ac =
-      create<sem::AccessControl>(ast::AccessControl::kWriteOnly, tex);
+  auto tex = ty.storage_texture(ast::TextureDimension::k2d,
+                                ast::ImageFormat::kR16Float);
+  auto tex_ac = ty.access(ast::AccessControl::kWriteOnly, tex);
   auto result =
       table->Lookup(*this, IntrinsicType::kTextureStore,
                     {tex_ac, ty.vec2<i32>(), ty.vec4<f32>()}, Source{});
@@ -340,9 +337,9 @@ TEST_F(IntrinsicTableTest, MatchAutoPointerDereference) {
 }
 
 TEST_F(IntrinsicTableTest, MatchWithAliasUnwrapping) {
-  auto* alias_a = ty.alias("alias_a", ty.f32());
-  auto* alias_b = ty.alias("alias_b", alias_a);
-  auto* alias_c = ty.alias("alias_c", alias_b);
+  auto alias_a = ty.alias("alias_a", ty.f32());
+  auto alias_b = ty.alias("alias_b", alias_a);
+  auto alias_c = ty.alias("alias_c", alias_b);
   auto result = table->Lookup(*this, IntrinsicType::kCos, {alias_c}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
@@ -352,12 +349,12 @@ TEST_F(IntrinsicTableTest, MatchWithAliasUnwrapping) {
 }
 
 TEST_F(IntrinsicTableTest, MatchWithNestedAliasUnwrapping) {
-  auto* alias_a = ty.alias("alias_a", ty.bool_());
-  auto* alias_b = ty.alias("alias_b", alias_a);
-  auto* alias_c = ty.alias("alias_c", alias_b);
+  auto alias_a = ty.alias("alias_a", ty.bool_());
+  auto alias_b = ty.alias("alias_b", alias_a);
+  auto alias_c = ty.alias("alias_c", alias_b);
   auto vec4_of_c = ty.vec4(alias_c);
-  auto* alias_d = ty.alias("alias_d", vec4_of_c);
-  auto* alias_e = ty.alias("alias_e", alias_d);
+  auto alias_d = ty.alias("alias_d", vec4_of_c);
+  auto alias_e = ty.alias("alias_e", alias_d);
 
   auto result = table->Lookup(*this, IntrinsicType::kAll, {alias_e}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
@@ -464,7 +461,7 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
 }
 
 TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
-  auto* tex = create<sem::DepthTexture>(ast::TextureDimension::k2d);
+  auto tex = ty.depth_texture(ast::TextureDimension::k2d);
   auto result = table->Lookup(*this, IntrinsicType::kTextureDimensions,
                               {tex, ty.bool_()}, Source{});
   ASSERT_EQ(

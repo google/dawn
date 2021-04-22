@@ -22,7 +22,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
-  auto* alias = ty.alias("a", ty.f32());
+  auto alias = ty.alias("a", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -32,10 +32,10 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_F32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
-  auto* s = Structure("a", {
-                               Member("a", ty.f32()),
-                               Member("b", ty.i32()),
-                           });
+  auto s = Structure("a", {
+                              Member("a", ty.f32()),
+                              Member("b", ty.i32()),
+                          });
 
   GeneratorImpl& gen = Build();
 
@@ -48,12 +48,12 @@ TEST_F(MslGeneratorImplTest, EmitConstructedType_Struct) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructedType_AliasStructIdent) {
-  auto* s = Structure("b", {
-                               Member("a", ty.f32()),
-                               Member("b", ty.i32()),
-                           });
+  auto s = Structure("b", {
+                              Member("a", ty.f32()),
+                              Member("b", ty.i32()),
+                          });
 
-  auto* alias = ty.alias("a", s);
+  auto alias = ty.alias("a", s);
 
   GeneratorImpl& gen = Build();
 

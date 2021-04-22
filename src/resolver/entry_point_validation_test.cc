@@ -85,7 +85,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Struct) {
   // fn main() -> [[location(0)]] Output {
   //   return Output();
   // }
-  auto* output = Structure("Output", {});
+  auto output = Structure("Output", {});
   Func(Source{{12, 34}}, "main", {}, output, {Return(Construct(output))},
        {Stage(ast::PipelineStage::kVertex)}, {Location(Source{{13, 43}}, 0)});
 
@@ -105,7 +105,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_Valid) {
   // fn main() -> Output {
   //   return Output();
   // }
-  auto* output = Structure(
+  auto output = Structure(
       "Output", {Member("a", ty.f32(), {Location(0)}),
                  Member("b", ty.f32(), {Builtin(ast::Builtin::kFragDepth)})});
   Func(Source{{12, 34}}, "main", {}, output, {Return(Construct(output))},
@@ -123,7 +123,7 @@ TEST_F(ResolverEntryPointValidationTest,
   // fn main() -> Output {
   //   return Output();
   // }
-  auto* output = Structure(
+  auto output = Structure(
       "Output",
       {Member("a", ty.f32(),
               {Location(Source{{13, 43}}, 0),
@@ -147,7 +147,7 @@ TEST_F(ResolverEntryPointValidationTest,
   // fn main() -> Output {
   //   return Output();
   // }
-  auto* output = Structure(
+  auto output = Structure(
       "Output", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)}),
                  Member(Source{{14, 52}}, "b", ty.f32(), {})});
   Func(Source{{12, 34}}, "main", {}, output, {Return(Construct(output))},
@@ -170,9 +170,9 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_NestedStruct) {
   // fn main() -> Output {
   //   return Output();
   // }
-  auto* inner = Structure(
+  auto inner = Structure(
       "Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
-  auto* output = Structure(
+  auto output = Structure(
       "Output", {Member(Source{{14, 52}}, "a", inner, {Location(0)})});
   Func(Source{{12, 34}}, "main", {}, output, {Return(Construct(output))},
        {Stage(ast::PipelineStage::kFragment)});
@@ -193,7 +193,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_RuntimeArray) {
   // fn main() -> Output {
   //   return Output();
   // }
-  auto* output = Structure(
+  auto output = Structure(
       "Output",
       {Member(Source{{13, 43}}, "a", ty.array<float>(), {Location(0)})},
       {create<ast::StructBlockDecoration>()});
@@ -216,7 +216,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
   // fn main() -> Output {
   //   return Output();
   // }
-  auto* output = Structure(
+  auto output = Structure(
       "Output", {Member("a", ty.f32(), {Builtin(ast::Builtin::kFragDepth)}),
                  Member("b", ty.f32(), {Builtin(ast::Builtin::kFragDepth)})});
   Func(Source{{12, 34}}, "main", {}, output, {Return(Construct(output))},
@@ -238,8 +238,8 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateLocation) {
   // fn main() -> Output {
   //   return Output();
   // }
-  auto* output = Structure("Output", {Member("a", ty.f32(), {Location(1)}),
-                                      Member("b", ty.f32(), {Location(1)})});
+  auto output = Structure("Output", {Member("a", ty.f32(), {Location(1)}),
+                                     Member("b", ty.f32(), {Location(1)})});
   Func(Source{{12, 34}}, "main", {}, output, {Return(Construct(output))},
        {Stage(ast::PipelineStage::kFragment)});
 
@@ -302,7 +302,7 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Struct) {
   // };
   // [[stage(fragment)]]
   // fn main([[location(0)]] param : Input) {}
-  auto* input = Structure("Input", {});
+  auto input = Structure("Input", {});
   auto* param = Param("param", input, {Location(Source{{13, 43}}, 0)});
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
        {Stage(ast::PipelineStage::kFragment)});
@@ -321,7 +321,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_Valid) {
   // };
   // [[stage(fragment)]]
   // fn main(param : Input) {}
-  auto* input = Structure(
+  auto input = Structure(
       "Input", {Member("a", ty.f32(), {Location(0)}),
                 Member("b", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
   auto* param = Param("param", input);
@@ -338,7 +338,7 @@ TEST_F(ResolverEntryPointValidationTest,
   // };
   // [[stage(fragment)]]
   // fn main(param : Input) {}
-  auto* input = Structure(
+  auto input = Structure(
       "Input",
       {Member("a", ty.f32(),
               {Location(Source{{13, 43}}, 0),
@@ -361,7 +361,7 @@ TEST_F(ResolverEntryPointValidationTest,
   // };
   // [[stage(fragment)]]
   // fn main(param : Input) {}
-  auto* input = Structure(
+  auto input = Structure(
       "Input", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)}),
                 Member(Source{{14, 52}}, "b", ty.f32(), {})});
   auto* param = Param("param", input);
@@ -382,9 +382,9 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_NestedStruct) {
   // };
   // [[stage(fragment)]]
   // fn main(param : Input) {}
-  auto* inner = Structure(
+  auto inner = Structure(
       "Inner", {Member(Source{{13, 43}}, "a", ty.f32(), {Location(0)})});
-  auto* input =
+  auto input =
       Structure("Input", {Member(Source{{14, 52}}, "a", inner, {Location(0)})});
   auto* param = Param("param", input);
   Func(Source{{12, 34}}, "main", {param}, ty.void_(), {},
@@ -404,7 +404,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_RuntimeArray) {
   // };
   // [[stage(fragment)]]
   // fn main(param : Input) {}
-  auto* input = Structure(
+  auto input = Structure(
       "Input",
       {Member(Source{{13, 43}}, "a", ty.array<float>(), {Location(0)})},
       {create<ast::StructBlockDecoration>()});
@@ -446,9 +446,9 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
   // };
   // [[stage(fragment)]]
   // fn main(param_a : InputA, param_b : InputB) {}
-  auto* input_a = Structure(
+  auto input_a = Structure(
       "InputA", {Member("a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
-  auto* input_b = Structure(
+  auto input_b = Structure(
       "InputB", {Member("a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
   auto* param_a = Param("param_a", input_a);
   auto* param_b = Param("param_b", input_b);
@@ -486,8 +486,8 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateLocation) {
   // };
   // [[stage(fragment)]]
   // fn main(param_a : InputA, param_b : InputB) {}
-  auto* input_a = Structure("InputA", {Member("a", ty.f32(), {Location(1)})});
-  auto* input_b = Structure("InputB", {Member("a", ty.f32(), {Location(1)})});
+  auto input_a = Structure("InputA", {Member("a", ty.f32(), {Location(1)})});
+  auto input_b = Structure("InputB", {Member("a", ty.f32(), {Location(1)})});
   auto* param_a = Param("param_a", input_a);
   auto* param_b = Param("param_b", input_b);
   Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},

@@ -89,12 +89,12 @@ TEST_F(ResolverIsHostShareable, AliasI32) {
 
 TEST_F(ResolverIsHostShareable, AccessControlVoid) {
   EXPECT_FALSE(r()->IsHostShareable(
-      create<sem::AccessControl>(ast::AccessControl::kReadOnly, ty.void_())));
+      ty.access(ast::AccessControl::kReadOnly, ty.void_())));
 }
 
 TEST_F(ResolverIsHostShareable, AccessControlI32) {
-  EXPECT_TRUE(r()->IsHostShareable(
-      create<sem::AccessControl>(ast::AccessControl::kReadOnly, ty.i32())));
+  EXPECT_TRUE(
+      r()->IsHostShareable(ty.access(ast::AccessControl::kReadOnly, ty.i32())));
 }
 
 TEST_F(ResolverIsHostShareable, ArraySizedOfHostShareable) {
@@ -113,7 +113,7 @@ TEST_F(ResolverIsHostShareable, Struct_AllMembersHostShareable) {
 }
 
 TEST_F(ResolverIsHostShareable, Struct_SomeMembersNonHostShareable) {
-  auto* ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
+  auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
   EXPECT_FALSE(r()->IsHostShareable(Structure("S", {
                                                        Member("a", ty.i32()),
                                                        Member("b", ptr_ty),
@@ -121,10 +121,10 @@ TEST_F(ResolverIsHostShareable, Struct_SomeMembersNonHostShareable) {
 }
 
 TEST_F(ResolverIsHostShareable, Struct_NestedHostShareable) {
-  auto* host_shareable = Structure("S", {
-                                            Member("a", ty.i32()),
-                                            Member("b", ty.f32()),
-                                        });
+  auto host_shareable = Structure("S", {
+                                           Member("a", ty.i32()),
+                                           Member("b", ty.f32()),
+                                       });
   EXPECT_TRUE(
       r()->IsHostShareable(Structure("S", {
                                               Member("a", ty.i32()),
@@ -133,8 +133,8 @@ TEST_F(ResolverIsHostShareable, Struct_NestedHostShareable) {
 }
 
 TEST_F(ResolverIsHostShareable, Struct_NestedNonHostShareable) {
-  auto* ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
-  auto* non_host_shareable =
+  auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
+  auto non_host_shareable =
       Structure("non_host_shareable", {
                                           Member("a", ty.i32()),
                                           Member("b", ptr_ty),

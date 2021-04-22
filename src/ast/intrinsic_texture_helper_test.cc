@@ -132,7 +132,7 @@ std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data) {
   return out;
 }
 
-sem::Type* TextureOverloadCase::resultVectorComponentType(
+typ::Type TextureOverloadCase::resultVectorComponentType(
     ProgramBuilder* b) const {
   switch (texture_data_type) {
     case ast::intrinsic::test::TextureDataType::kF32:
@@ -144,12 +144,12 @@ sem::Type* TextureOverloadCase::resultVectorComponentType(
   }
 
   TINT_UNREACHABLE(b->Diagnostics());
-  return nullptr;
+  return {};
 }
 
 ast::Variable* TextureOverloadCase::buildTextureVariable(
     ProgramBuilder* b) const {
-  auto* datatype = resultVectorComponentType(b);
+  auto datatype = resultVectorComponentType(b);
 
   DecorationList decos = {
       b->create<ast::GroupDecoration>(0),
@@ -157,27 +157,23 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
   };
   switch (texture_kind) {
     case ast::intrinsic::test::TextureKind::kRegular:
-      return b->Global(
-          "texture",
-          b->create<sem::SampledTexture>(texture_dimension, datatype),
-          ast::StorageClass::kUniformConstant, nullptr, decos);
+      return b->Global("texture",
+                       b->ty.sampled_texture(texture_dimension, datatype),
+                       ast::StorageClass::kUniformConstant, nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kDepth:
-      return b->Global("texture",
-                       b->create<sem::DepthTexture>(texture_dimension),
+      return b->Global("texture", b->ty.depth_texture(texture_dimension),
                        ast::StorageClass::kUniformConstant, nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kMultisampled:
       return b->Global(
           "texture",
-          b->create<sem::MultisampledTexture>(texture_dimension, datatype),
+          b->ty.multisampled_texture(texture_dimension, datatype),
           ast::StorageClass::kUniformConstant, nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kStorage: {
-      auto* st = b->create<sem::StorageTexture>(texture_dimension, image_format,
-                                                datatype);
-
-      auto* ac = b->create<sem::AccessControl>(access_control, st);
+      auto st = b->ty.storage_texture(texture_dimension, image_format);
+      auto ac = b->ty.access(access_control, st);
       return b->Global("texture", ac, ast::StorageClass::kUniformConstant,
                        nullptr, decos);
     }
@@ -193,7 +189,7 @@ ast::Variable* TextureOverloadCase::buildSamplerVariable(
       b->create<ast::GroupDecoration>(0),
       b->create<ast::BindingDecoration>(1),
   };
-  return b->Global("sampler", b->create<sem::Sampler>(sampler_kind),
+  return b->Global("sampler", b->ty.sampler(sampler_kind),
                    ast::StorageClass::kUniformConstant, nullptr, decos);
 }
 

@@ -136,7 +136,7 @@ Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {
       instance_index_offset = offset;
       offset += 4;
     }
-    auto* struct_type =
+    auto struct_type =
         ctx.dst->Structure(ctx.dst->Symbols().New(), std::move(members),
                            {ctx.dst->create<ast::StructBlockDecoration>()});
 

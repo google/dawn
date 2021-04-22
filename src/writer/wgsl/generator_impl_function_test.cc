@@ -202,8 +202,8 @@ TEST_F(WgslGeneratorImplTest,
   //   return;
   // }
 
-  auto* s = Structure("Data", {Member("d", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data", {Member("d", ty.f32())},
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 

@@ -67,10 +67,10 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
-  auto* s = Structure("S", {
-                               Member("a", ty.f32()),
-                               Member("b", ty.f32()),
-                           });
+  auto s = Structure("S", {
+                              Member("a", ty.f32()),
+                              Member("b", ty.f32()),
+                          });
 
   auto* var = Var("a", s, ast::StorageClass::kNone);
   auto* stmt = Decl(var);

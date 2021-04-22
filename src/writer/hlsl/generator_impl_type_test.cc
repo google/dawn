@@ -33,7 +33,7 @@ using ::testing::HasSubstr;
 using HlslGeneratorImplTest_Type = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
-  auto* alias = ty.alias("alias", ty.f32());
+  auto alias = ty.alias("alias", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -156,10 +156,10 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
-  auto* s = Structure("S", {
-                               Member("a", ty.i32()),
-                               Member("b", ty.f32()),
-                           });
+  auto s = Structure("S", {
+                              Member("a", ty.i32()),
+                              Member("b", ty.f32()),
+                          });
   Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
@@ -173,12 +173,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("S",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
   Global("g", ty.access(ast::AccessControl::kReadWrite, s),
          ast::StorageClass::kStorage);
 
@@ -189,10 +189,10 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
-  auto* s = Structure("S", {
-                               Member("a", ty.i32()),
-                               Member("b", ty.f32()),
-                           });
+  auto s = Structure("S", {
+                              Member("a", ty.i32()),
+                              Member("b", ty.f32()),
+                          });
   Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
@@ -205,7 +205,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
 /// TODO(bclayton): Enable this, fix it, add tests for vector, matrix, array and
 /// nested structures.
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
-  auto* s = Structure(
+  auto s = Structure(
       "S", {
                Member("a", ty.i32(), {MemberSize(32)}),
                Member("b", ty.f32()),
@@ -229,10 +229,10 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
-  auto* s = Structure("S", {
-                               Member("double", ty.i32()),
-                               Member("float", ty.f32()),
-                           });
+  auto s = Structure("S", {
+                              Member("double", ty.i32()),
+                              Member("float", ty.f32()),
+                          });
   Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -247,12 +247,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
-  auto* s = Structure("S",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("S",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
   Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
@@ -326,7 +326,7 @@ using HlslDepthTexturesTest = TestParamHelper<HlslDepthTextureData>;
 TEST_P(HlslDepthTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto* t = create<sem::DepthTexture>(params.dim);
+  auto t = ty.depth_texture(params.dim);
 
   Global("tex", t, ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
@@ -373,7 +373,7 @@ using HlslSampledTexturesTest = TestParamHelper<HlslSampledTextureData>;
 TEST_P(HlslSampledTexturesTest, Emit) {
   auto params = GetParam();
 
-  sem::Type* datatype = nullptr;
+  typ::Type datatype;
   switch (params.datatype) {
     case TextureDataType::F32:
       datatype = ty.f32();
@@ -385,7 +385,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
       datatype = ty.i32();
       break;
   }
-  auto* t = create<sem::SampledTexture>(params.dim, datatype);
+  auto t = ty.sampled_texture(params.dim, datatype);
 
   Global("tex", t, ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
@@ -524,12 +524,10 @@ using HlslStorageTexturesTest = TestParamHelper<HlslStorageTextureData>;
 TEST_P(HlslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto* subtype = sem::StorageTexture::SubtypeFor(params.imgfmt, Types());
-  auto* t = create<sem::StorageTexture>(params.dim, params.imgfmt, subtype);
-  auto* ac =
-      create<sem::AccessControl>(params.ro ? ast::AccessControl::kReadOnly
-                                           : ast::AccessControl::kWriteOnly,
-                                 t);
+  auto t = ty.storage_texture(params.dim, params.imgfmt);
+  auto ac = ty.access(params.ro ? ast::AccessControl::kReadOnly
+                                : ast::AccessControl::kWriteOnly,
+                      t);
 
   Global("tex", ac, ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{

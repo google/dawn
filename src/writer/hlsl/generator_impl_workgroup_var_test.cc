@@ -39,7 +39,7 @@ TEST_F(HlslGeneratorImplTest_WorkgroupVar, Basic) {
 }
 
 TEST_F(HlslGeneratorImplTest_WorkgroupVar, Aliased) {
-  auto* alias = ty.alias("F32", ty.f32());
+  auto alias = ty.alias("F32", ty.f32());
   AST().AddConstructedType(alias);
 
   Global("wg", alias, ast::StorageClass::kWorkgroup);

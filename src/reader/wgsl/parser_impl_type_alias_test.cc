@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto p = parser("type a = B");
 
-  auto* str = Structure(p->builder().Symbols().Register("B"), {});
+  auto str = Structure(p->builder().Symbols().Register("B"), {});
   p->register_constructed("B", str);
 
   auto t = p->type_alias();

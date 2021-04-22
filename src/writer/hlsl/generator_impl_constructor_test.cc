@@ -195,11 +195,11 @@ TEST_F(HlslGeneratorImplTest_Constructor,
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {
-  auto* str = Structure("S", {
-                                 Member("a", ty.i32()),
-                                 Member("b", ty.f32()),
-                                 Member("c", ty.vec3<i32>()),
-                             });
+  auto str = Structure("S", {
+                                Member("a", ty.i32()),
+                                Member("b", ty.f32()),
+                                Member("c", ty.vec3<i32>()),
+                            });
 
   WrapInFunction(Construct(str, 1, 2.0f, vec3<i32>(3, 4, 5)));
 
@@ -212,11 +212,11 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {
 }
 
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct_Empty) {
-  auto* str = Structure("S", {
-                                 Member("a", ty.i32()),
-                                 Member("b", ty.f32()),
-                                 Member("c", ty.vec3<i32>()),
-                             });
+  auto str = Structure("S", {
+                                Member("a", ty.i32()),
+                                Member("b", ty.f32()),
+                                Member("c", ty.vec3<i32>()),
+                            });
 
   WrapInFunction(Construct(str));
 

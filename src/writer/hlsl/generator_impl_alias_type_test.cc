@@ -25,7 +25,7 @@ using ::testing::HasSubstr;
 using HlslGeneratorImplTest_Alias = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
-  auto* alias = ty.alias("a", ty.f32());
+  auto alias = ty.alias("a", ty.f32());
 
   GeneratorImpl& gen = Build();
 
@@ -45,11 +45,11 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
 }
 
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
-  auto* s = Structure("A", {
-                               Member("a", ty.f32()),
-                               Member("b", ty.i32()),
-                           });
-  auto* alias = ty.alias("B", s);
+  auto s = Structure("A", {
+                              Member("a", ty.f32()),
+                              Member("b", ty.i32()),
+                          });
+  auto alias = ty.alias("B", s);
   AST().AddConstructedType(alias);
   Global("g", alias, ast::StorageClass::kPrivate);
 

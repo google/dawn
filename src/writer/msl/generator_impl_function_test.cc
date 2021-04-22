@@ -170,7 +170,7 @@ TEST_F(MslGeneratorImplTest,
   //   const r = colors.col1;
   //   const g = colors.col2;
   // }
-  auto* interface_struct = Structure(
+  auto interface_struct = Structure(
       "Interface",
       {
           Member("col1", ty.f32(), {Location(1)}),
@@ -245,7 +245,7 @@ TEST_F(MslGeneratorImplTest,
   // fn vert_main2() -> VertexOutput {
   //   return foo(0.25);
   // }
-  auto* vertex_output_struct = Structure(
+  auto vertex_output_struct = Structure(
       "VertexOutput",
       {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
 
@@ -300,12 +300,12 @@ vertex tint_symbol_2 vert_main2() {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_With_RW_StorageBuffer) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
@@ -345,12 +345,12 @@ fragment void frag_main(device Data& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_EntryPoint_With_RO_StorageBuffer) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
@@ -550,8 +550,8 @@ fragment ep_1_out ep_1(float4 coord [[position]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_Decoration_Called_By_EntryPoint_With_Uniform) {
-  auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())},
-                           {create<ast::StructBlockDecoration>()});
+  auto ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())},
+                          {create<ast::StructBlockDecoration>()});
   auto* ubo = Global(
       "ubo", ubo_ty, ast::StorageClass::kUniform, nullptr,
       {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(1)});
@@ -601,12 +601,12 @@ fragment void frag_main(constant UBO& ubo [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_RW_StorageBuffer) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 
@@ -657,12 +657,12 @@ fragment void frag_main(device Data& coord [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest,
        Emit_FunctionDecoration_Called_By_EntryPoint_With_RO_StorageBuffer) {
-  auto* s = Structure("Data",
-                      {
-                          Member("a", ty.i32()),
-                          Member("b", ty.f32()),
-                      },
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data",
+                     {
+                         Member("a", ty.i32()),
+                         Member("b", ty.f32()),
+                     },
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadOnly, s);
 
@@ -796,8 +796,8 @@ TEST_F(MslGeneratorImplTest,
   //   return;
   // }
 
-  auto* s = Structure("Data", {Member("d", ty.f32())},
-                      {create<ast::StructBlockDecoration>()});
+  auto s = Structure("Data", {Member("d", ty.f32())},
+                     {create<ast::StructBlockDecoration>()});
 
   sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
 

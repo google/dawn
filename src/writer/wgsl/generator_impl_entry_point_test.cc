@@ -90,7 +90,7 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_UnusedVariable) {
 TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_GlobalsInterleaved) {
   Global("a0", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* s0 = Structure("S0", {Member("a", ty.i32())});
+  auto s0 = Structure("S0", {Member("a", ty.i32())});
 
   Func("func", {}, ty.f32(),
        {
@@ -99,7 +99,7 @@ TEST_F(WgslGeneratorImplTest, Emit_EntryPoint_GlobalsInterleaved) {
 
   Global("a1", ty.f32(), ast::StorageClass::kOutput);
 
-  auto* s1 = Structure("S1", {Member("a", ty.i32())});
+  auto s1 = Structure("S1", {Member("a", ty.i32())});
 
   Func("main", {}, ty.void_(),
        {

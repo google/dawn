@@ -166,7 +166,7 @@ TEST_F(ResolverAssignmentValidationTest,
   // alias myint = i32;
   // var a :myint = 2;
   // a = 2
-  auto* myint = ty.alias("myint", ty.i32());
+  auto myint = ty.alias("myint", ty.i32());
   auto* var = Var("a", myint, ast::StorageClass::kNone, Expr(2));
 
   auto* lhs = Expr("a");
@@ -237,11 +237,9 @@ TEST_F(ResolverAssignmentValidationTest, AssignFromPointer_Fail) {
   // var b : [[access(read)]] texture_storage_1d<rgba8unorm>;
   // a = b;
 
-  auto* tex_type = create<sem::StorageTexture>(
-      ast::TextureDimension::k1d, ast::ImageFormat::kRgba8Unorm,
-      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kRgba8Unorm, Types()));
-  auto* tex_ac =
-      create<sem::AccessControl>(ast::AccessControl::kReadOnly, tex_type);
+  auto tex_type = ty.storage_texture(ast::TextureDimension::k1d,
+                                     ast::ImageFormat::kRgba8Unorm);
+  auto tex_ac = ty.access(ast::AccessControl::kReadOnly, tex_type);
 
   auto* var_a = Var("a", tex_ac, ast::StorageClass::kFunction);
   auto* var_b = Var("b", tex_ac, ast::StorageClass::kFunction);

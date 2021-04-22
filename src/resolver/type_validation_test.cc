@@ -400,7 +400,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
   //  a: u32;
   //}
 
-  auto* alias = ty.alias("RTArr", ty.array<u32>());
+  auto alias = ty.alias("RTArr", ty.array<u32>());
 
   Structure("s",
             {
@@ -426,7 +426,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
   //  b: RTArr;
   //}
 
-  auto* alias = ty.alias("RTArr", ty.array<u32>());
+  auto alias = ty.alias("RTArr", ty.array<u32>());
 
   Structure("s",
             {
@@ -478,8 +478,8 @@ using CanonicalTest = ResolverTestWithParam<Params>;
 TEST_P(CanonicalTest, All) {
   auto& params = GetParam();
 
-  auto* type = params.create_type(ty);
-  auto* expected_canonical_type = params.create_canonical_type(ty);
+  auto type = params.create_type(ty);
+  auto expected_canonical_type = params.create_canonical_type(ty);
 
   auto* canonical_type = r()->Canonical(type);
 
@@ -508,7 +508,7 @@ static constexpr DimensionParams dimension_cases[] = {
 using MultisampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(MultisampledTextureDimensionTest, All) {
   auto& params = GetParam();
-  Global("a", create<sem::MultisampledTexture>(params.dim, ty.i32()),
+  Global("a", ty.multisampled_texture(params.dim, ty.i32()),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -550,14 +550,14 @@ static constexpr TypeParams type_cases[] = {
 using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {
   auto& params = GetParam();
-  Global("a",
-         create<sem::MultisampledTexture>(ast::TextureDimension::k2d,
-                                          params.type_func(ty)),
-         ast::StorageClass::kUniformConstant, nullptr,
-         ast::DecorationList{
-             create<ast::BindingDecoration>(0),
-             create<ast::GroupDecoration>(0),
-         });
+  Global(
+      "a",
+      ty.multisampled_texture(ast::TextureDimension::k2d, params.type_func(ty)),
+      ast::StorageClass::kUniformConstant, nullptr,
+      ast::DecorationList{
+          create<ast::BindingDecoration>(0),
+          create<ast::GroupDecoration>(0),
+      });
 
   if (params.is_valid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -588,10 +588,7 @@ static constexpr DimensionParams Dimension_cases[] = {
 using StorageTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(StorageTextureDimensionTest, All) {
   auto& params = GetParam();
-  Global("a",
-         create<sem::StorageTexture>(params.dim, ast::ImageFormat::kR32Uint,
-                                     sem::StorageTexture::SubtypeFor(
-                                         ast::ImageFormat::kR32Uint, Types())),
+  Global("a", ty.storage_texture(params.dim, ast::ImageFormat::kR32Uint),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -660,20 +657,14 @@ TEST_P(StorageTextureFormatTest, All) {
   // var d : texture_storage_3<*>;
   // }
 
-  Global("a",
-         create<sem::StorageTexture>(
-             ast::TextureDimension::k1d, params.format,
-             sem::StorageTexture::SubtypeFor(params.format, Types())),
+  Global("a", ty.storage_texture(ast::TextureDimension::k1d, params.format),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
 
-  Global("b",
-         create<sem::StorageTexture>(
-             ast::TextureDimension::k2d, params.format,
-             sem::StorageTexture::SubtypeFor(params.format, Types())),
+  Global("b", ty.storage_texture(ast::TextureDimension::k2d, params.format),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
@@ -681,19 +672,14 @@ TEST_P(StorageTextureFormatTest, All) {
          });
 
   Global("c",
-         create<sem::StorageTexture>(
-             ast::TextureDimension::k2dArray, params.format,
-             sem::StorageTexture::SubtypeFor(params.format, Types())),
+         ty.storage_texture(ast::TextureDimension::k2dArray, params.format),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(2),
              create<ast::GroupDecoration>(0),
          });
 
-  Global("d",
-         create<sem::StorageTexture>(
-             ast::TextureDimension::k3d, params.format,
-             sem::StorageTexture::SubtypeFor(params.format, Types())),
+  Global("d", ty.storage_texture(ast::TextureDimension::k3d, params.format),
          ast::StorageClass::kUniformConstant, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(3),
