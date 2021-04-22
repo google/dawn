@@ -24,7 +24,7 @@ namespace tint {
 namespace sem {
 
 Variable::Variable(const ast::Variable* declaration,
-                   sem::Type* type,
+                   const sem::Type* type,
                    ast::StorageClass storage_class)
     : declaration_(declaration), type_(type), storage_class_(storage_class) {}
 
@@ -35,7 +35,7 @@ sem::Type* Variable::DeclaredType() const {
 }
 
 VariableUser::VariableUser(ast::IdentifierExpression* declaration,
-                           sem::Type* type,
+                           const sem::Type* type,
                            Statement* statement,
                            sem::Variable* variable)
     : Base(declaration, type, statement), variable_(variable) {}

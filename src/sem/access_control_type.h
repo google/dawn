@@ -29,7 +29,7 @@ class AccessControl : public Castable<AccessControl, Type> {
   /// Constructor
   /// @param access the access control setting
   /// @param subtype the access controlled type
-  AccessControl(ast::AccessControl::Access access, Type* subtype);
+  AccessControl(ast::AccessControl::Access access, const Type* subtype);
   /// Move constructor
   AccessControl(AccessControl&&);
   ~AccessControl() override;
@@ -44,7 +44,7 @@ class AccessControl : public Castable<AccessControl, Type> {
   /// @returns the access control value
   ast::AccessControl::Access access_control() const { return access_; }
   /// @returns the subtype type
-  Type* type() const { return subtype_; }
+  Type* type() const { return const_cast<Type*>(subtype_); }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -61,7 +61,7 @@ class AccessControl : public Castable<AccessControl, Type> {
 
  private:
   ast::AccessControl::Access const access_;
-  Type* const subtype_;
+  const Type* const subtype_;
 };
 
 }  // namespace sem

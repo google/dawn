@@ -36,7 +36,7 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
   /// @param value value of the literal
   IntLiteral(ProgramID program_id,
              const Source& source,
-             sem::Type* type,
+             const sem::Type* type,
              uint32_t value);
 
  private:

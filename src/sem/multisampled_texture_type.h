@@ -28,13 +28,13 @@ class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
   /// Constructor
   /// @param dim the dimensionality of the texture
   /// @param type the data type of the multisampled texture
-  MultisampledTexture(ast::TextureDimension dim, Type* type);
+  MultisampledTexture(ast::TextureDimension dim, const Type* type);
   /// Move constructor
   MultisampledTexture(MultisampledTexture&&);
   ~MultisampledTexture() override;
 
   /// @returns the subtype of the sampled texture
-  Type* type() const { return type_; }
+  Type* type() const { return const_cast<Type*>(type_); }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -50,7 +50,7 @@ class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
   MultisampledTexture* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* const type_;
+  const Type* const type_;
 };
 
 }  // namespace sem

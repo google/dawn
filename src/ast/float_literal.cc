@@ -25,7 +25,7 @@ namespace ast {
 
 FloatLiteral::FloatLiteral(ProgramID program_id,
                            const Source& source,
-                           sem::Type* type,
+                           const sem::Type* type,
                            float value)
     : Base(program_id, source, type), value_(value) {}
 

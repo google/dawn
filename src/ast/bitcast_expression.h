@@ -30,14 +30,14 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
   /// @param expr the expr
   BitcastExpression(ProgramID program_id,
                     const Source& source,
-                    sem::Type* type,
+                    const sem::Type* type,
                     Expression* expr);
   /// Move constructor
   BitcastExpression(BitcastExpression&&);
   ~BitcastExpression() override;
 
   /// @returns the left side expression
-  sem::Type* type() const { return type_; }
+  sem::Type* type() const { return const_cast<sem::Type*>(type_); }
   /// @returns the expression
   Expression* expr() const { return expr_; }
 
@@ -58,7 +58,7 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
  private:
   BitcastExpression(const BitcastExpression&) = delete;
 
-  sem::Type* const type_;
+  const sem::Type* const type_;
   Expression* const expr_;
 };
 

@@ -42,7 +42,7 @@ class MemberAccessorExpression
   /// @param type the resolved type of the expression
   /// @param statement the statement that owns this expression
   MemberAccessorExpression(ast::MemberAccessorExpression* declaration,
-                           sem::Type* type,
+                           const sem::Type* type,
                            Statement* statement);
 
   /// Destructor
@@ -61,7 +61,7 @@ class StructMemberAccess
   /// @param statement the statement that owns this expression
   /// @param member the structure member
   StructMemberAccess(ast::MemberAccessorExpression* declaration,
-                     sem::Type* type,
+                     const sem::Type* type,
                      Statement* statement,
                      const StructMember* member);
 
@@ -85,7 +85,7 @@ class Swizzle : public Castable<Swizzle, MemberAccessorExpression> {
   /// @param statement the statement that
   /// @param indices the swizzle indices
   Swizzle(ast::MemberAccessorExpression* declaration,
-          sem::Type* type,
+          const sem::Type* type,
           Statement* statement,
           std::vector<uint32_t> indices);
 

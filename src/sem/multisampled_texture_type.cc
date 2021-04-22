@@ -21,7 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::MultisampledTexture);
 namespace tint {
 namespace sem {
 
-MultisampledTexture::MultisampledTexture(ast::TextureDimension dim, Type* type)
+MultisampledTexture::MultisampledTexture(ast::TextureDimension dim,
+                                         const Type* type)
     : Base(dim), type_(type) {
   TINT_ASSERT(type_);
 }

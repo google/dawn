@@ -32,7 +32,7 @@ class BoolLiteral : public Castable<BoolLiteral, Literal> {
   /// @param value the bool literals value
   BoolLiteral(ProgramID program_id,
               const Source& source,
-              sem::Type* type,
+              const sem::Type* type,
               bool value);
   ~BoolLiteral() override;
 

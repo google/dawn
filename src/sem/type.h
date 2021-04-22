@@ -48,9 +48,20 @@ class Type : public Castable<Type, ShareableCloneable> {
   /// @returns the pointee type if this is a pointer, `this` otherwise
   Type* UnwrapPtrIfNeeded();
 
+  /// @returns the pointee type if this is a pointer, `this` otherwise
+  const Type* UnwrapPtrIfNeeded() const {
+    return const_cast<Type*>(this)->UnwrapPtrIfNeeded();
+  }
+
   /// @returns the most deeply nested aliased type if this is an alias, `this`
   /// otherwise
   Type* UnwrapAliasIfNeeded();
+
+  /// @returns the most deeply nested aliased type if this is an alias, `this`
+  /// otherwise
+  const Type* UnwrapAliasIfNeeded() const {
+    return const_cast<Type*>(this)->UnwrapAliasIfNeeded();
+  }
 
   /// Removes all levels of aliasing and access control.
   /// This is just enough to assist with WGSL translation
@@ -60,12 +71,29 @@ class Type : public Castable<Type, ShareableCloneable> {
   /// @returns the completely unaliased type.
   Type* UnwrapIfNeeded();
 
+  /// Removes all levels of aliasing and access control.
+  /// This is just enough to assist with WGSL translation
+  /// in that you want see through one level of pointer to get from an
+  /// identifier-like expression as an l-value to its corresponding r-value,
+  /// plus see through the wrappers on either side.
+  /// @returns the completely unaliased type.
+  const Type* UnwrapIfNeeded() const {
+    return const_cast<Type*>(this)->UnwrapIfNeeded();
+  }
+
   /// Returns the type found after:
   /// - removing all layers of aliasing and access control if they exist, then
   /// - removing the pointer, if it exists, then
   /// - removing all further layers of aliasing or access control, if they exist
   /// @returns the unwrapped type
   Type* UnwrapAll();
+
+  /// Returns the type found after:
+  /// - removing all layers of aliasing and access control if they exist, then
+  /// - removing the pointer, if it exists, then
+  /// - removing all further layers of aliasing or access control, if they exist
+  /// @returns the unwrapped type
+  const Type* UnwrapAll() const { return const_cast<Type*>(this)->UnwrapAll(); }
 
   /// @returns true if this type is a scalar
   bool is_scalar() const;

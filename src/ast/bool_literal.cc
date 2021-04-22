@@ -23,7 +23,7 @@ namespace ast {
 
 BoolLiteral::BoolLiteral(ProgramID program_id,
                          const Source& source,
-                         sem::Type* type,
+                         const sem::Type* type,
                          bool value)
     : Base(program_id, source, type), value_(value) {}
 

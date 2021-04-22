@@ -42,7 +42,7 @@ class Variable : public Castable<Variable, Node> {
   /// @param type the variable type
   /// @param storage_class the variable storage class
   Variable(const ast::Variable* declaration,
-           sem::Type* type,
+           const sem::Type* type,
            ast::StorageClass storage_class);
 
   /// Destructor
@@ -52,7 +52,7 @@ class Variable : public Castable<Variable, Node> {
   const ast::Variable* Declaration() const { return declaration_; }
 
   /// @returns the canonical type for the variable
-  sem::Type* Type() const { return type_; }
+  sem::Type* Type() const { return const_cast<sem::Type*>(type_); }
 
   /// @returns the AST node's type. May be nullptr.
   sem::Type* DeclaredType() const;
@@ -68,7 +68,7 @@ class Variable : public Castable<Variable, Node> {
 
  private:
   const ast::Variable* const declaration_;
-  sem::Type* const type_;
+  const sem::Type* const type_;
   ast::StorageClass const storage_class_;
   std::vector<const VariableUser*> users_;
 };
@@ -83,7 +83,7 @@ class VariableUser : public Castable<VariableUser, Expression> {
   /// @param statement the statement that owns this expression
   /// @param variable the semantic variable
   VariableUser(ast::IdentifierExpression* declaration,
-               sem::Type* type,
+               const sem::Type* type,
                Statement* statement,
                sem::Variable* variable);
 

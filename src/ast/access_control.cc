@@ -24,7 +24,7 @@ namespace ast {
 AccessControl::AccessControl(ProgramID program_id,
                              const Source& source,
                              Access access,
-                             Type* subtype)
+                             const Type* subtype)
     : Base(program_id, source), access_(access), subtype_(subtype) {
   TINT_ASSERT(subtype_);
   TINT_ASSERT(!subtype_->Is<AccessControl>());

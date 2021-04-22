@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Alias);
 namespace tint {
 namespace sem {
 
-Alias::Alias(const Symbol& sym, Type* subtype)
+Alias::Alias(const Symbol& sym, const Type* subtype)
     : symbol_(sym), subtype_(subtype) {
   TINT_ASSERT(subtype_);
 }

@@ -23,7 +23,7 @@ namespace ast {
 
 UintLiteral::UintLiteral(ProgramID program_id,
                          const Source& source,
-                         sem::Type* type,
+                         const sem::Type* type,
                          uint32_t value)
     : Base(program_id, source, type, value) {}
 

@@ -28,7 +28,7 @@ class Alias : public Castable<Alias, Type> {
   /// Constructor
   /// @param sym the symbol for the alias
   /// @param subtype the alias'd type
-  Alias(const Symbol& sym, Type* subtype);
+  Alias(const Symbol& sym, const Type* subtype);
   /// Move constructor
   Alias(Alias&&);
   /// Destructor
@@ -37,7 +37,7 @@ class Alias : public Castable<Alias, Type> {
   /// @returns the alias symbol
   Symbol symbol() const { return symbol_; }
   /// @returns the alias type
-  Type* type() const { return subtype_; }
+  Type* type() const { return const_cast<Type*>(subtype_); }
 
   /// @returns the type_name for this type
   std::string type_name() const override;
@@ -54,7 +54,7 @@ class Alias : public Castable<Alias, Type> {
 
  private:
   Symbol const symbol_;
-  Type* const subtype_;
+  const Type* const subtype_;
 };
 
 }  // namespace sem

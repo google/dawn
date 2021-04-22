@@ -103,7 +103,7 @@ class Variable : public Castable<Variable, Node> {
            const Source& source,
            const Symbol& sym,
            StorageClass declared_storage_class,
-           sem::Type* declared_type,
+           const sem::Type* declared_type,
            bool is_const,
            Expression* constructor,
            DecorationList decorations);
@@ -116,7 +116,9 @@ class Variable : public Castable<Variable, Node> {
   const Symbol& symbol() const { return symbol_; }
 
   /// @returns the declared type
-  sem::Type* declared_type() const { return declared_type_; }
+  sem::Type* declared_type() const {
+    return const_cast<sem::Type*>(declared_type_);
+  }
 
   /// @returns the declared storage class
   StorageClass declared_storage_class() const {
@@ -175,7 +177,7 @@ class Variable : public Castable<Variable, Node> {
 
   Symbol const symbol_;
   // The value type if a const or formal paramter, and the store type if a var
-  sem::Type* const declared_type_;
+  const sem::Type* const declared_type_;
   bool const is_const_;
   Expression* const constructor_;
   DecorationList const decorations_;
