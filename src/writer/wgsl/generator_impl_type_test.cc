@@ -140,7 +140,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_I32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
-  auto* mat2x3 = ty.mat2x3<f32>();
+  auto mat2x3 = ty.mat2x3<f32>();
   AST().AddConstructedType(ty.alias("make_type_reachable", mat2x3));
 
   GeneratorImpl& gen = Build();

@@ -30,6 +30,7 @@
 #include "src/ast/i32.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
+#include "src/ast/matrix.h"
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/return_statement.h"
@@ -401,109 +402,118 @@ class ProgramBuilder {
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x3 matrix of `type`.
-    sem::Matrix* mat2x2(sem::Type* type) const {
-      return builder->create<sem::Matrix>(type, 2u, 2u);
+    typ::Matrix mat2x2(typ::Type type) const {
+      return {builder->create<ast::Matrix>(type, 2u, 2u),
+              builder->create<sem::Matrix>(type, 2u, 2u)};
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x3 matrix of `type`.
-    sem::Matrix* mat2x3(sem::Type* type) const {
-      return builder->create<sem::Matrix>(type, 3u, 2u);
+    typ::Matrix mat2x3(typ::Type type) const {
+      return {builder->create<ast::Matrix>(type, 3u, 2u),
+              builder->create<sem::Matrix>(type, 3u, 2u)};
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x4 matrix of `type`.
-    sem::Matrix* mat2x4(sem::Type* type) const {
-      return builder->create<sem::Matrix>(type, 4u, 2u);
+    typ::Matrix mat2x4(typ::Type type) const {
+      return {builder->create<ast::Matrix>(type, 4u, 2u),
+              builder->create<sem::Matrix>(type, 4u, 2u)};
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x2 matrix of `type`.
-    sem::Matrix* mat3x2(sem::Type* type) const {
-      return builder->create<sem::Matrix>(type, 2u, 3u);
+    typ::Matrix mat3x2(typ::Type type) const {
+      return {builder->create<ast::Matrix>(type, 2u, 3u),
+              builder->create<sem::Matrix>(type, 2u, 3u)};
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x3 matrix of `type`.
-    sem::Matrix* mat3x3(sem::Type* type) const {
-      return builder->create<sem::Matrix>(type, 3u, 3u);
+    typ::Matrix mat3x3(typ::Type type) const {
+      return {builder->create<ast::Matrix>(type, 3u, 3u),
+              builder->create<sem::Matrix>(type, 3u, 3u)};
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x4 matrix of `type`.
-    sem::Matrix* mat3x4(sem::Type* type) const {
-      return builder->create<sem::Matrix>(type, 4u, 3u);
+    typ::Matrix mat3x4(typ::Type type) const {
+      return {builder->create<ast::Matrix>(type, 4u, 3u),
+              builder->create<sem::Matrix>(type, 4u, 3u)};
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x2 matrix of `type`.
-    sem::Matrix* mat4x2(sem::Type* type) const {
-      return builder->create<sem::Matrix>(type, 2u, 4u);
+    typ::Matrix mat4x2(typ::Type type) const {
+      return {builder->create<ast::Matrix>(type, 2u, 4u),
+              builder->create<sem::Matrix>(type, 2u, 4u)};
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x3 matrix of `type`.
-    sem::Matrix* mat4x3(sem::Type* type) const {
-      return builder->create<sem::Matrix>(type, 3u, 4u);
+    typ::Matrix mat4x3(typ::Type type) const {
+      return {builder->create<ast::Matrix>(type, 3u, 4u),
+              builder->create<sem::Matrix>(type, 3u, 4u)};
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x4 matrix of `type`.
-    sem::Matrix* mat4x4(sem::Type* type) const {
-      return builder->create<sem::Matrix>(type, 4u, 4u);
+    typ::Matrix mat4x4(typ::Type type) const {
+      return {builder->create<ast::Matrix>(type, 4u, 4u),
+              builder->create<sem::Matrix>(type, 4u, 4u)};
     }
 
     /// @return the tint AST type for a 2x3 matrix of the C type `T`.
     template <typename T>
-    sem::Matrix* mat2x2() const {
+    typ::Matrix mat2x2() const {
       return mat2x2(Of<T>());
     }
 
     /// @return the tint AST type for a 2x3 matrix of the C type `T`.
     template <typename T>
-    sem::Matrix* mat2x3() const {
+    typ::Matrix mat2x3() const {
       return mat2x3(Of<T>());
     }
 
     /// @return the tint AST type for a 2x4 matrix of the C type `T`.
     template <typename T>
-    sem::Matrix* mat2x4() const {
+    typ::Matrix mat2x4() const {
       return mat2x4(Of<T>());
     }
 
     /// @return the tint AST type for a 3x2 matrix of the C type `T`.
     template <typename T>
-    sem::Matrix* mat3x2() const {
+    typ::Matrix mat3x2() const {
       return mat3x2(Of<T>());
     }
 
     /// @return the tint AST type for a 3x3 matrix of the C type `T`.
     template <typename T>
-    sem::Matrix* mat3x3() const {
+    typ::Matrix mat3x3() const {
       return mat3x3(Of<T>());
     }
 
     /// @return the tint AST type for a 3x4 matrix of the C type `T`.
     template <typename T>
-    sem::Matrix* mat3x4() const {
+    typ::Matrix mat3x4() const {
       return mat3x4(Of<T>());
     }
 
     /// @return the tint AST type for a 4x2 matrix of the C type `T`.
     template <typename T>
-    sem::Matrix* mat4x2() const {
+    typ::Matrix mat4x2() const {
       return mat4x2(Of<T>());
     }
 
     /// @return the tint AST type for a 4x3 matrix of the C type `T`.
     template <typename T>
-    sem::Matrix* mat4x3() const {
+    typ::Matrix mat4x3() const {
       return mat4x3(Of<T>());
     }
 
     /// @return the tint AST type for a 4x4 matrix of the C type `T`.
     template <typename T>
-    sem::Matrix* mat4x4() const {
+    typ::Matrix mat4x4() const {
       return mat4x4(Of<T>());
     }
 

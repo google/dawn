@@ -232,7 +232,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
 }
 
 TEST_F(BuilderTest_Type, GenerateMatrix) {
-  auto* mat2x3 = ty.mat2x3<f32>();
+  auto mat2x3 = ty.mat2x3<f32>();
 
   spirv::Builder& b = Build();
 
@@ -248,7 +248,7 @@ TEST_F(BuilderTest_Type, GenerateMatrix) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
-  auto* mat = ty.mat4x3<i32>();
+  auto mat = ty.mat4x3<i32>();
   auto i32 = ty.i32();
 
   spirv::Builder& b = Build();

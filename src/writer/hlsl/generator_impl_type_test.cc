@@ -135,7 +135,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
-  auto* mat2x3 = ty.mat2x3<f32>();
+  auto mat2x3 = ty.mat2x3<f32>();
 
   GeneratorImpl& gen = Build();
 

@@ -25,6 +25,7 @@ namespace ast {
 class Bool;
 class F32;
 class I32;
+class Matrix;
 class U32;
 class Vector;
 class Void;
@@ -34,6 +35,7 @@ namespace sem {
 class Bool;
 class F32;
 class I32;
+class Matrix;
 class U32;
 class Vector;
 class Void;
@@ -85,6 +87,7 @@ using Type = TypePair<ast::Type, sem::Type>;
 using Bool = TypePair<ast::Bool, sem::Bool>;
 using F32 = TypePair<ast::F32, sem::F32>;
 using I32 = TypePair<ast::I32, sem::I32>;
+using Matrix = TypePair<ast::Matrix, sem::Matrix>;
 using U32 = TypePair<ast::U32, sem::U32>;
 using Vector = TypePair<ast::Vector, sem::Vector>;
 using Void = TypePair<ast::Void, sem::Void>;
