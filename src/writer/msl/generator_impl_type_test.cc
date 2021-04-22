@@ -613,7 +613,7 @@ TEST_F(MslGeneratorImplTest, EmitType_U32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Vector) {
-  auto* vec3 = ty.vec3<f32>();
+  auto vec3 = ty.vec3<f32>();
 
   GeneratorImpl& gen = Build();
 

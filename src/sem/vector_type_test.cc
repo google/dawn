@@ -49,13 +49,14 @@ TEST_F(VectorTest, Is) {
 }
 
 TEST_F(VectorTest, TypeName) {
-  I32 i32;
-  Vector v{&i32, 3};
-  EXPECT_EQ(v.type_name(), "__vec_3__i32");
+  auto* i32 = create<I32>();
+  auto* v = create<Vector>(i32, 3);
+  EXPECT_EQ(v->type_name(), "__vec_3__i32");
 }
 
 TEST_F(VectorTest, FriendlyName) {
-  auto* v = ty.vec3<f32>();
+  auto* f32 = create<F32>();
+  auto* v = create<Vector>(f32, 3);
   EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
 }
 

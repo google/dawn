@@ -303,7 +303,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_U32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
-  auto* vec3 = ty.vec3<f32>();
+  auto vec3 = ty.vec3<f32>();
   AST().AddConstructedType(ty.alias("make_type_reachable", vec3));
 
   GeneratorImpl& gen = Build();

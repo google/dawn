@@ -43,7 +43,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
   //   var col : f32 = (coord.x * loc1);
   // }
   auto f32 = ty.f32();
-  auto* vec4 = ty.vec4<float>();
+  auto vec4 = ty.vec4<float>();
   auto* coord = Param("coord", vec4, {Builtin(ast::Builtin::kPosition)});
   auto* loc1 = Param("loc1", f32, {Location(1u)});
   auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));

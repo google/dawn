@@ -528,7 +528,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedU32) {
 }
 
 TEST_F(BuilderTest_Type, GenerateVector) {
-  auto* vec = ty.vec3<f32>();
+  auto vec = ty.vec3<f32>();
 
   spirv::Builder& b = Build();
 
@@ -543,7 +543,7 @@ TEST_F(BuilderTest_Type, GenerateVector) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
-  auto* vec = ty.vec3<i32>();
+  auto vec = ty.vec3<i32>();
   auto i32 = ty.i32();
 
   spirv::Builder& b = Build();

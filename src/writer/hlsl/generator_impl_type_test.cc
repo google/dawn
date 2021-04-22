@@ -275,7 +275,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
-  auto* vec3 = ty.vec3<f32>();
+  auto vec3 = ty.vec3<f32>();
 
   GeneratorImpl& gen = Build();
 

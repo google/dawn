@@ -26,6 +26,7 @@ class Bool;
 class F32;
 class I32;
 class U32;
+class Vector;
 class Void;
 }  // namespace ast
 
@@ -34,12 +35,13 @@ class Bool;
 class F32;
 class I32;
 class U32;
+class Vector;
 class Void;
 }  // namespace sem
 
 namespace typ {  //  type-pair
 
-/// Type is a pair of ast::Type and sem::Type pointers used to simplify
+/// TypePair is a pair of ast::Type and sem::Type pointers used to simplify
 /// migration to the new ast::Type nodes.
 ///
 /// Type attempts to behave as either an ast::Type or sem::Type:
@@ -51,24 +53,24 @@ namespace typ {  //  type-pair
 /// * operator->() returns the sem::Type pointer. Later in the migration this
 ///   will switch to returning the ast::Type pointer.
 template <typename AST, typename SEM>
-struct Type {
+struct TypePair {
   /// The ast::Type pointer
   AST const* const ast = nullptr;
   /// The sem::Type pointer
   SEM const* const sem = nullptr;
 
   /// Constructor
-  Type() = default;
+  TypePair() = default;
   /// Constructor
   /// @param a the ast::Type pointer
-  Type(const AST* a) : ast(a) {}  // NOLINT: explicit
+  TypePair(const AST* a) : ast(a) {}  // NOLINT: explicit
   /// Constructor
   /// @param s the sem::Type pointer
-  Type(const SEM* s) : sem(s) {}  // NOLINT: explicit
+  TypePair(const SEM* s) : sem(s) {}  // NOLINT: explicit
   /// Constructor
   /// @param a the ast::Type pointer
   /// @param s the sem::Type pointer
-  Type(const AST* a, const SEM* s) : ast(a), sem(s) {}
+  TypePair(const AST* a, const SEM* s) : ast(a), sem(s) {}
 
   /// @returns the ast::Type pointer
   operator AST*() const { return const_cast<AST*>(ast); }
@@ -78,11 +80,14 @@ struct Type {
   SEM* operator->() const { return const_cast<SEM*>(sem); }
 };
 
-using Bool = Type<ast::Bool, sem::Bool>;
-using F32 = Type<ast::F32, sem::F32>;
-using I32 = Type<ast::I32, sem::I32>;
-using U32 = Type<ast::U32, sem::U32>;
-using Void = Type<ast::Void, sem::Void>;
+using Type = TypePair<ast::Type, sem::Type>;
+
+using Bool = TypePair<ast::Bool, sem::Bool>;
+using F32 = TypePair<ast::F32, sem::F32>;
+using I32 = TypePair<ast::I32, sem::I32>;
+using U32 = TypePair<ast::U32, sem::U32>;
+using Vector = TypePair<ast::Vector, sem::Vector>;
+using Void = TypePair<ast::Void, sem::Void>;
 
 }  // namespace typ
 

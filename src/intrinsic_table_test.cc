@@ -355,7 +355,7 @@ TEST_F(IntrinsicTableTest, MatchWithNestedAliasUnwrapping) {
   auto* alias_a = ty.alias("alias_a", ty.bool_());
   auto* alias_b = ty.alias("alias_b", alias_a);
   auto* alias_c = ty.alias("alias_c", alias_b);
-  auto* vec4_of_c = ty.vec4(alias_c);
+  auto vec4_of_c = ty.vec4(alias_c);
   auto* alias_d = ty.alias("alias_d", vec4_of_c);
   auto* alias_e = ty.alias("alias_e", alias_d);
 

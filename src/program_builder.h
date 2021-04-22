@@ -45,6 +45,7 @@
 #include "src/ast/u32.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/vector.h"
 #include "src/ast/void.h"
 #include "src/program.h"
 #include "src/program_id.h"
@@ -361,37 +362,40 @@ class ProgramBuilder {
 
     /// @param type vector subtype
     /// @return the tint AST type for a 2-element vector of `type`.
-    sem::Vector* vec2(sem::Type* type) const {
-      return builder->create<sem::Vector>(type, 2u);
+    typ::Vector vec2(typ::Type type) const {
+      return {builder->create<ast::Vector>(type, 2u),
+              builder->create<sem::Vector>(type, 2u)};
     }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 3-element vector of `type`.
-    sem::Vector* vec3(sem::Type* type) const {
-      return builder->create<sem::Vector>(type, 3u);
+    typ::Vector vec3(typ::Type type) const {
+      return {builder->create<ast::Vector>(type, 3u),
+              builder->create<sem::Vector>(type, 3u)};
     }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 4-element vector of `type`.
-    sem::Type* vec4(sem::Type* type) const {
-      return builder->create<sem::Vector>(type, 4u);
+    typ::Vector vec4(typ::Type type) const {
+      return {builder->create<ast::Vector>(type, 4u),
+              builder->create<sem::Vector>(type, 4u)};
     }
 
     /// @return the tint AST type for a 2-element vector of the C type `T`.
     template <typename T>
-    sem::Vector* vec2() const {
+    typ::Vector vec2() const {
       return vec2(Of<T>());
     }
 
     /// @return the tint AST type for a 3-element vector of the C type `T`.
     template <typename T>
-    sem::Vector* vec3() const {
+    typ::Vector vec3() const {
       return vec3(Of<T>());
     }
 
     /// @return the tint AST type for a 4-element vector of the C type `T`.
     template <typename T>
-    sem::Type* vec4() const {
+    typ::Vector vec4() const {
       return vec4(Of<T>());
     }
 

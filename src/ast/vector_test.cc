@@ -65,7 +65,8 @@ TEST_F(AstVectorTest, TypeName) {
 }
 
 TEST_F(AstVectorTest, FriendlyName) {
-  auto* v = ty.vec3<f32>();
+  auto* f32 = create<F32>();
+  auto* v = create<Vector>(f32, 3);
   EXPECT_EQ(v->FriendlyName(Symbols()), "vec3<f32>");
 }
 
