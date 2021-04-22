@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <type_traits>
+#include <utility>
 
 // The SlabAllocator allocates objects out of one or more fixed-size contiguous "slabs" of memory.
 // This makes it very quick to allocate and deallocate fixed-size objects because the allocator only
