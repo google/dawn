@@ -19,6 +19,12 @@
 #ifndef SRC_TYPEPAIR_H_
 #define SRC_TYPEPAIR_H_
 
+// X11 likes to #define Bool leading to confusing error messages.
+// If its defined, undefine it.
+#ifdef Bool
+#undef Bool
+#endif
+
 namespace tint {
 
 namespace ast {
