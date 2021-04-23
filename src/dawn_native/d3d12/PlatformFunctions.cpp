@@ -114,6 +114,15 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError PlatformFunctions::LoadD3D12() {
+#if DAWN_PLATFORM_WINUWP
+        d3d12CreateDevice = &D3D12CreateDevice;
+        d3d12GetDebugInterface = &D3D12GetDebugInterface;
+        d3d12SerializeRootSignature = &D3D12SerializeRootSignature;
+        d3d12CreateRootSignatureDeserializer = &D3D12CreateRootSignatureDeserializer;
+        d3d12SerializeVersionedRootSignature = &D3D12SerializeVersionedRootSignature;
+        d3d12CreateVersionedRootSignatureDeserializer =
+            &D3D12CreateVersionedRootSignatureDeserializer;
+#else
         std::string error;
         if (!mD3D12Lib.Open("d3d12.dll", &error) ||
             !mD3D12Lib.GetProc(&d3d12CreateDevice, "D3D12CreateDevice", &error) ||
@@ -128,32 +137,48 @@ namespace dawn_native { namespace d3d12 {
                                "D3D12CreateVersionedRootSignatureDeserializer", &error)) {
             return DAWN_INTERNAL_ERROR(error.c_str());
         }
+#endif
 
         return {};
     }
 
     MaybeError PlatformFunctions::LoadD3D11() {
+#if DAWN_PLATFORM_WINUWP
+        d3d11on12CreateDevice = &D3D11On12CreateDevice;
+#else
         std::string error;
         if (!mD3D11Lib.Open("d3d11.dll", &error) ||
             !mD3D11Lib.GetProc(&d3d11on12CreateDevice, "D3D11On12CreateDevice", &error)) {
             return DAWN_INTERNAL_ERROR(error.c_str());
         }
+#endif
 
         return {};
     }
 
     MaybeError PlatformFunctions::LoadDXGI() {
+#if DAWN_PLATFORM_WINUWP
+        dxgiGetDebugInterface1 = &DXGIGetDebugInterface1;
+        createDxgiFactory2 = &CreateDXGIFactory2;
+#else
         std::string error;
         if (!mDXGILib.Open("dxgi.dll", &error) ||
             !mDXGILib.GetProc(&dxgiGetDebugInterface1, "DXGIGetDebugInterface1", &error) ||
             !mDXGILib.GetProc(&createDxgiFactory2, "CreateDXGIFactory2", &error)) {
             return DAWN_INTERNAL_ERROR(error.c_str());
         }
+#endif
 
         return {};
     }
 
     void PlatformFunctions::LoadDXCLibraries() {
+        // TODO(dawn:766)
+        // Statically linked with dxcompiler.lib in UWP
+        // currently linked with dxcompiler.lib making CoreApp unable to activate
+        // LoadDXIL and LoadDXCompiler will fail in UWP, but LoadFunctions() can still be
+        // successfully executed.
+
         const std::string& windowsSDKBasePath = GetWindowsSDKBasePath();
 
         LoadDXIL(windowsSDKBasePath);
@@ -199,12 +224,15 @@ namespace dawn_native { namespace d3d12 {
     }
 
     MaybeError PlatformFunctions::LoadFXCompiler() {
+#if DAWN_PLATFORM_WINUWP
+        d3dCompile = &D3DCompile;
+#else
         std::string error;
         if (!mFXCompilerLib.Open("d3dcompiler_47.dll", &error) ||
             !mFXCompilerLib.GetProc(&d3dCompile, "D3DCompile", &error)) {
             return DAWN_INTERNAL_ERROR(error.c_str());
         }
-
+#endif
         return {};
     }
 
@@ -217,6 +245,11 @@ namespace dawn_native { namespace d3d12 {
     }
 
     void PlatformFunctions::LoadPIXRuntime() {
+        // TODO(dawn:766):
+        // In UWP PIX should be statically linked WinPixEventRuntime_UAP.lib
+        // So maybe we should put WinPixEventRuntime as a third party package
+        // Currently PIX is not going to be loaded in UWP since the following
+        // mPIXEventRuntimeLib.Open will fail.
         if (!mPIXEventRuntimeLib.Open("WinPixEventRuntime.dll") ||
             !mPIXEventRuntimeLib.GetProc(&pixBeginEventOnCommandList,
                                          "PIXBeginEventOnCommandList") ||

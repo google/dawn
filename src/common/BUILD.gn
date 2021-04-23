@@ -129,6 +129,16 @@ config("dawn_internal") {
     # Dawn extends wgpu enums with internal enums.
     # MSVC considers these invalid switch values. crbug.com/dawn/397.
     cflags += [ "/wd4063" ]
+    if (dawn_is_winuwp) {
+      # /ZW makes sure we don't add calls that are forbidden in UWP.
+      # and /EHsc is required to be used in combination with it,
+      # even if it is already added by the windows GN defaults,
+      # we still add it to make every /ZW paired with a /EHsc
+      cflags_cc = [
+        "/ZW:nostdlib",
+        "/EHsc",
+      ]
+    }
   }
 }
 

@@ -26,6 +26,9 @@ if (build_with_chromium) {
   }
 }
 
+# Enable the compilation for UWP
+dawn_is_winuwp = is_win && target_os == "winuwp"
+
 declare_args() {
   dawn_use_angle = true
 
@@ -62,8 +65,9 @@ declare_args() {
   dawn_enable_opengl = is_linux && !is_chromeos
 
   # Enables the compilation of Dawn's Vulkan backend
-  dawn_enable_vulkan = is_linux || is_chromeos || is_win || is_fuchsia ||
-                       is_android || dawn_use_swiftshader
+  # Disables vulkan when compiling for UWP, since UWP only supports d3d
+  dawn_enable_vulkan = is_linux || is_chromeos || (is_win && !dawn_is_winuwp) ||
+                       is_fuchsia || is_android || dawn_use_swiftshader
 
   # Enable use of reflection compiler in spirv-cross. This is needed
   # if performing reflection on systems that the platform language
@@ -90,5 +94,6 @@ declare_args() {
   dawn_enable_vulkan_loader = dawn_enable_vulkan && is_mac
 }
 
+# UWP only supports CoreWindow for windowing
 dawn_supports_glfw_for_windowing =
-    is_win || (is_linux && !is_chromeos) || is_mac
+    (is_win && !dawn_is_winuwp) || (is_linux && !is_chromeos) || is_mac

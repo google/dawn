@@ -32,6 +32,11 @@ class PlacementAllocated {
     void operator delete(void* ptr) {
         // Object is placement-allocated. Don't free the memory.
     }
+
+    void operator delete(void*, void*) {
+        // This is added to match new(size_t size, void* ptr)
+        // Otherwise it triggers C4291 warning in MSVC
+    }
 };
 
 #endif  // COMMON_PLACEMENTALLOCATED_H_

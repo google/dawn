@@ -311,6 +311,20 @@ source_set("dawn_native_sources") {
 
   if (is_win) {
     libs += [ "user32.lib" ]
+    if (dawn_is_winuwp) {
+      # UWP has a limited DLL search space.
+      # So we have to link with stub libs provided by Windows SDK
+      # to load DLLs correctly.
+      libs += [
+        "dxgi.lib",
+        "d3d12.lib",
+        "d3d11.lib",
+
+        # TODO(dawn:766):
+        # Somehow use dxcompiler.lib makes CoreApp unable to activate
+        # WinPIX should be added as third party tools and linked statically
+      ]
+    }
   }
 
   if (dawn_enable_d3d12) {

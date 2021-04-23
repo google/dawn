@@ -95,7 +95,7 @@ static_library("dawn_utils") {
   libs = []
   frameworks = []
 
-  if (is_win) {
+  if (is_win && !dawn_is_winuwp) {
     sources += [ "WindowsDebugLogger.cpp" ]
   } else {
     sources += [ "EmptyDebugLogger.cpp" ]

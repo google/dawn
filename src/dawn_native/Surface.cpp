@@ -56,7 +56,7 @@ namespace dawn_native {
         }
 #endif  // defined(DAWN_ENABLE_BACKEND_METAL)
 
-#if defined(DAWN_PLATFORM_WINDOWS)
+#if defined(DAWN_PLATFORM_WIN32)
         const SurfaceDescriptorFromWindowsHWND* hwndDesc = nullptr;
         FindInChain(descriptor->nextInChain, &hwndDesc);
         if (!hwndDesc) {
@@ -66,7 +66,7 @@ namespace dawn_native {
         if (IsWindow(static_cast<HWND>(hwndDesc->hwnd)) == 0) {
             return DAWN_VALIDATION_ERROR("Invalid HWND");
         }
-#endif  // defined(DAWN_PLATFORM_WINDOWS)
+#endif  // defined(DAWN_PLATFORM_WIN32)
 
 #if defined(DAWN_USE_X11)
         const SurfaceDescriptorFromXlib* xDesc = nullptr;

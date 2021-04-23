@@ -18,6 +18,9 @@
 
 #if DAWN_PLATFORM_WINDOWS
 #    include "common/windows_with_undefs.h"
+#    if DAWN_PLATFORM_WINUWP
+#        include "common/WindowsUtils.h"
+#    endif
 #elif DAWN_PLATFORM_POSIX
 #    include <dlfcn.h>
 #else
@@ -43,8 +46,11 @@ bool DynamicLib::Valid() const {
 
 bool DynamicLib::Open(const std::string& filename, std::string* error) {
 #if DAWN_PLATFORM_WINDOWS
+#    if DAWN_PLATFORM_WINUWP
+    mHandle = LoadPackagedLibrary(UTF8ToWStr(filename.c_str()).c_str(), 0);
+#    else
     mHandle = LoadLibraryA(filename.c_str());
-
+#    endif
     if (mHandle == nullptr && error != nullptr) {
         *error = "Windows Error: " + std::to_string(GetLastError());
     }
