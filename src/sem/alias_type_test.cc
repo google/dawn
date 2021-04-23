@@ -46,6 +46,19 @@ TEST_F(AliasTest, Is) {
   EXPECT_FALSE(ty->Is<Vector>());
 }
 
+// Check for linear-time evaluation of Alias::type_name().
+// If type_name() is non-linear, this test should noticeably stall.
+// See: crbug.com/1200936
+TEST_F(AliasTest, TypeName_LinearTime) {
+  Type* type = ty.i32();
+  for (int i = 0; i < 1024; i++) {
+    type = create<Alias>(Symbols().New(), type);
+  }
+  for (int i = 0; i < 16384; i++) {
+    type->type_name();
+  }
+}
+
 TEST_F(AliasTest, TypeName) {
   auto* at = create<Alias>(Sym("Particle"), ty.i32());
   EXPECT_EQ(at->type_name(), "__alias_$1__i32");

@@ -54,7 +54,8 @@ class Alias : public Castable<Alias, Type> {
 
  private:
   Symbol const symbol_;
-  const Type* const subtype_;
+  Type const* const subtype_;
+  std::string const type_name_;
 };
 
 }  // namespace sem

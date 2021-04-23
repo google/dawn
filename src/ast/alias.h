@@ -60,6 +60,7 @@ class Alias : public Castable<Alias, Type> {
  private:
   Symbol const symbol_;
   Type* const subtype_;
+  std::string const type_name_;
 };
 
 }  // namespace ast

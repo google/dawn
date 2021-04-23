@@ -22,7 +22,9 @@ namespace tint {
 namespace sem {
 
 Alias::Alias(const Symbol& sym, const Type* subtype)
-    : symbol_(sym), subtype_(subtype) {
+    : symbol_(sym),
+      subtype_(subtype),
+      type_name_("__alias_" + sym.to_str() + subtype->type_name()) {
   TINT_ASSERT(subtype_);
 }
 
@@ -31,7 +33,7 @@ Alias::Alias(Alias&&) = default;
 Alias::~Alias() = default;
 
 std::string Alias::type_name() const {
-  return "__alias_" + symbol_.to_str() + subtype_->type_name();
+  return type_name_;
 }
 
 std::string Alias::FriendlyName(const SymbolTable& symbols) const {

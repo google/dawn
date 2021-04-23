@@ -25,7 +25,10 @@ Alias::Alias(ProgramID program_id,
              const Source& source,
              const Symbol& sym,
              Type* subtype)
-    : Base(program_id, source), symbol_(sym), subtype_(subtype) {
+    : Base(program_id, source),
+      symbol_(sym),
+      subtype_(subtype),
+      type_name_("__alias_" + sym.to_str() + subtype->type_name()) {
   TINT_ASSERT(subtype_);
 }
 
@@ -34,7 +37,7 @@ Alias::Alias(Alias&&) = default;
 Alias::~Alias() = default;
 
 std::string Alias::type_name() const {
-  return "__alias_" + symbol_.to_str() + subtype_->type_name();
+  return type_name_;
 }
 
 std::string Alias::FriendlyName(const SymbolTable& symbols) const {
