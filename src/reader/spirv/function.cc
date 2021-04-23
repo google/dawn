@@ -3450,16 +3450,11 @@ TypedExpression FunctionEmitter::MakeAccessChain(
     return {};
   }
 
-  // A SPIR-V access chain is a single instruction with multiple indices
-  // walking down into composites.  The Tint AST represents this as
-  // ever-deeper nested indexing expressions. Start off with an expression
-  // for the base, and then bury that inside nested indexing expressions.
-  TypedExpression current_expr(MakeOperand(inst, 0));
-  const auto constants = constant_mgr_->GetOperandConstants(&inst);
-
   auto ptr_ty_id = def_use_mgr_->GetDef(base_id)->type_id();
   uint32_t first_index = 1;
   const auto num_in_operands = inst.NumInOperands();
+
+  TypedExpression current_expr;
 
   // If the variable was originally gl_PerVertex, then in the AST we
   // have instead emitted a gl_Position variable.
@@ -3525,6 +3520,15 @@ TypedExpression FunctionEmitter::MakeAccessChain(
       current_expr.type = parser_impl_.ConvertType(ptr_ty_id);
     }
   }
+
+  // A SPIR-V access chain is a single instruction with multiple indices
+  // walking down into composites.  The Tint AST represents this as
+  // ever-deeper nested indexing expressions. Start off with an expression
+  // for the base, and then bury that inside nested indexing expressions.
+  if (!current_expr.expr) {
+    current_expr = MakeOperand(inst, 0);
+  }
+  const auto constants = constant_mgr_->GetOperandConstants(&inst);
 
   const auto* ptr_type_inst = def_use_mgr_->GetDef(ptr_ty_id);
   if (!ptr_type_inst || (ptr_type_inst->opcode() != SpvOpTypePointer)) {

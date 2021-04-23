@@ -272,7 +272,8 @@ bool Resolver::ResolveInternal() {
       }
       TINT_ICE(diagnostics_) << "AST node '" << node->TypeInfo().name
                              << "' was not reached by the resolver\n"
-                             << "At: " << node->source();
+                             << "At: " << node->source() << "\n"
+                             << "Content: " << builder_->str(node);
     }
   }
 

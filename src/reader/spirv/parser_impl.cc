@@ -845,15 +845,13 @@ sem::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Struct* struct_ty) {
   // Compute the struct decoration.
   auto struct_decorations = this->GetDecorationsFor(type_id);
-  ast::DecorationList ast_struct_decorations;
+  bool is_block_decorated = false;
   if (struct_decorations.size() == 1) {
     const auto decoration = struct_decorations[0][0];
     if (decoration == SpvDecorationBlock) {
-      ast_struct_decorations.push_back(
-          create<ast::StructBlockDecoration>(Source{}));
+      is_block_decorated = true;
     } else if (decoration == SpvDecorationBufferBlock) {
-      ast_struct_decorations.push_back(
-          create<ast::StructBlockDecoration>(Source{}));
+      is_block_decorated = true;
       remap_buffer_block_type_.insert(type_id);
     } else {
       Fail() << "struct with ID " << type_id
@@ -869,7 +867,6 @@ sem::Type* ParserImpl::ConvertType(
   ast::StructMemberList ast_members;
   const auto members = struct_ty->element_types();
   unsigned num_non_writable_members = 0;
-  bool is_per_vertex_struct = false;
   for (uint32_t member_index = 0; member_index < members.size();
        ++member_index) {
     const auto member_type_id = type_mgr_->GetId(members[member_index]);
@@ -878,8 +875,10 @@ sem::Type* ParserImpl::ConvertType(
       // Already emitted diagnostics.
       return nullptr;
     }
-    ast::DecorationList ast_member_decorations;
-    bool is_non_writable = false;
+
+    // Scan member for built-in decorations. Some vertex built-ins are handled
+    // specially, and should not generate a structure member.
+    bool create_ast_member = true;
     for (auto& decoration : GetDecorationsForMember(type_id, member_index)) {
       if (decoration.empty()) {
         Fail() << "malformed SPIR-V decoration: it's empty";
@@ -892,23 +891,31 @@ sem::Type* ParserImpl::ConvertType(
             builtin_position_.struct_type_id = type_id;
             builtin_position_.position_member_index = member_index;
             builtin_position_.position_member_type_id = member_type_id;
-            // Don't map the struct type.  But this is not an error either.
-            is_per_vertex_struct = true;
+            create_ast_member = false;  // Not part of the WGSL structure.
             break;
           case SpvBuiltInPointSize:  // not supported in WGSL, but ignore
             builtin_position_.pointsize_member_index = member_index;
-            is_per_vertex_struct = true;
+            create_ast_member = false;  // Not part of the WGSL structure.
             break;
           case SpvBuiltInClipDistance:  // not supported in WGSL
           case SpvBuiltInCullDistance:  // not supported in WGSL
-            // Silently ignore, so we can detect Position and PointSize
-            is_per_vertex_struct = true;
+            create_ast_member = false;  // Not part of the WGSL structure.
             break;
           default:
             Fail() << "unrecognized builtin " << decoration[1];
             return nullptr;
         }
-      } else if (decoration[0] == SpvDecorationNonWritable) {
+      }
+    }
+    if (!create_ast_member) {
+      // This member is decorated as a built-in, and is handled specially.
+      continue;
+    }
+
+    bool is_non_writable = false;
+    ast::DecorationList ast_member_decorations;
+    for (auto& decoration : GetDecorationsForMember(type_id, member_index)) {
+      if (decoration[0] == SpvDecorationNonWritable) {
         // WGSL doesn't represent individual members as non-writable. Instead,
         // apply the ReadOnly access control to the containing struct if all
         // the members are non-writable.
@@ -924,6 +931,7 @@ sem::Type* ParserImpl::ConvertType(
         }
       }
     }
+
     if (is_non_writable) {
       // Count a member as non-writable only once, no matter how many
       // NonWritable decorations are applied to it.
@@ -935,8 +943,9 @@ sem::Type* ParserImpl::ConvertType(
         std::move(ast_member_decorations));
     ast_members.push_back(ast_struct_member);
   }
-  if (is_per_vertex_struct) {
-    // We're replacing it by the Position builtin alone.
+
+  if (ast_members.empty()) {
+    // All members were likely built-ins. Don't generate an empty AST structure.
     return nullptr;
   }
 
@@ -946,6 +955,11 @@ sem::Type* ParserImpl::ConvertType(
 
   // Now make the struct.
   auto sym = builder_.Symbols().Register(name);
+  ast::DecorationList ast_struct_decorations;
+  if (is_block_decorated) {
+    ast_struct_decorations.emplace_back(
+        create<ast::StructBlockDecoration>(Source{}));
+  }
   auto* ast_struct = create<ast::Struct>(Source{}, sym, std::move(ast_members),
                                          std::move(ast_struct_decorations));
   auto* result = builder_.create<sem::StructType>(ast_struct);
