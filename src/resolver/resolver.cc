@@ -502,7 +502,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
 
 bool Resolver::ValidateVariable(const ast::Variable* var) {
   auto* type = variable_to_info_[var]->type;
-  if (auto* r = type->UnwrapAll()->As<sem::ArrayType>()) {
+  if (auto* r = type->As<sem::ArrayType>()) {
     if (r->IsRuntimeArray()) {
       diagnostics_.add_error(
           "v-0015",
@@ -512,7 +512,7 @@ bool Resolver::ValidateVariable(const ast::Variable* var) {
     }
   }
 
-  if (auto* r = type->UnwrapAll()->As<sem::MultisampledTexture>()) {
+  if (auto* r = type->As<sem::MultisampledTexture>()) {
     if (r->dim() != ast::TextureDimension::k2d) {
       diagnostics_.add_error("Only 2d multisampled textures are supported",
                              var->source());
@@ -528,36 +528,38 @@ bool Resolver::ValidateVariable(const ast::Variable* var) {
     }
   }
 
-  if (auto* r = type->UnwrapAll()->As<sem::StorageTexture>()) {
-    auto* ac = type->As<sem::AccessControl>();
-    if (!ac) {
-      diagnostics_.add_error("Storage Textures must have access control.",
-                             var->source());
-      return false;
-    }
+  if (type->As<sem::StorageTexture>()) {
+    diagnostics_.add_error("Storage Textures must have access control.",
+                           var->source());
+    return false;
+  }
 
-    if (ac->IsReadWrite()) {
-      diagnostics_.add_error(
-          "Storage Textures only support Read-Only and Write-Only access "
-          "control.",
-          var->source());
-      return false;
-    }
+  if (auto* ac = type->As<sem::AccessControl>()) {
+    if (auto* r = ac->type()->As<sem::StorageTexture>()) {
+      if (ac->IsReadWrite()) {
+        diagnostics_.add_error(
+            "Storage Textures only support Read-Only and Write-Only access "
+            "control.",
+            var->source());
+        return false;
+      }
 
-    if (!IsValidStorageTextureDimension(r->dim())) {
-      diagnostics_.add_error(
-          "Cube dimensions for storage textures are not "
-          "supported.",
-          var->source());
-      return false;
-    }
+      if (!IsValidStorageTextureDimension(r->dim())) {
+        diagnostics_.add_error(
+            "Cube dimensions for storage textures are not "
+            "supported.",
+            var->source());
+        return false;
+      }
 
-    if (!IsValidStorageTextureImageFormat(r->image_format())) {
-      diagnostics_.add_error(
-          "image format must be one of the texel formats specified for storage "
-          "textues in https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
-          var->source());
-      return false;
+      if (!IsValidStorageTextureImageFormat(r->image_format())) {
+        diagnostics_.add_error(
+            "image format must be one of the texel formats specified for "
+            "storage textues in "
+            "https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
+            var->source());
+        return false;
+      }
     }
   }
 
