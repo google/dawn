@@ -24,13 +24,13 @@ namespace ast {
 StructMember::StructMember(ProgramID program_id,
                            const Source& source,
                            const Symbol& sym,
-                           sem::Type* type,
+                           typ::Type type,
                            DecorationList decorations)
     : Base(program_id, source),
       symbol_(sym),
       type_(type),
       decorations_(std::move(decorations)) {
-  TINT_ASSERT(type);
+  TINT_ASSERT(type.sem);
   TINT_ASSERT(symbol_.IsValid());
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
   for (auto* deco : decorations_) {
@@ -59,7 +59,7 @@ StructMember* StructMember::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
   auto sym = ctx->Clone(symbol_);
-  auto* ty = ctx->Clone(type_);
+  auto ty = ctx->Clone(type_);
   auto decos = ctx->Clone(decorations_);
   return ctx->dst->create<StructMember>(src, sym, ty, decos);
 }

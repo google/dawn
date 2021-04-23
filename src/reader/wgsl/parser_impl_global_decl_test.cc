@@ -190,7 +190,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   EXPECT_EQ(str->impl()->members().size(), 1u);
   EXPECT_FALSE(str->IsBlockDecorated());
 
-  const auto* ty = str->impl()->members()[0]->type();
+  const auto ty = str->impl()->members()[0]->type();
   ASSERT_TRUE(ty->Is<sem::ArrayType>());
   const auto* arr = ty->As<sem::ArrayType>();
 

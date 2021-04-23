@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "src/ast/decoration.h"
+#include "src/typepair.h"
 
 namespace tint {
 namespace ast {
@@ -35,7 +36,7 @@ class StructMember : public Castable<StructMember, Node> {
   StructMember(ProgramID program_id,
                const Source& source,
                const Symbol& sym,
-               sem::Type* type,
+               typ::Type type,
                DecorationList decorations);
   /// Move constructor
   StructMember(StructMember&&);
@@ -44,8 +45,9 @@ class StructMember : public Castable<StructMember, Node> {
 
   /// @returns the symbol
   const Symbol& symbol() const { return symbol_; }
+
   /// @returns the type
-  sem::Type* type() const { return type_; }
+  typ::Type type() const { return type_; }
 
   /// @returns the decorations
   const DecorationList& decorations() const { return decorations_; }
@@ -73,7 +75,7 @@ class StructMember : public Castable<StructMember, Node> {
   StructMember(const StructMember&) = delete;
 
   Symbol const symbol_;
-  sem::Type* const type_;
+  typ::Type const type_;
   DecorationList const decorations_;
 };
 
