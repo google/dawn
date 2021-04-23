@@ -36,6 +36,7 @@
 #include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
 #include "src/sem/storage_texture_type.h"
+#include "src/typepair.h"
 
 namespace tint {
 namespace reader {
@@ -198,8 +199,21 @@ class ParserImpl {
   /// TypedIdentifier holds a parsed identifier and type. Returned by
   /// variable_ident_decl().
   struct TypedIdentifier {
+    /// Constructor
+    TypedIdentifier();
+    /// Copy constructor
+    /// @param other the FunctionHeader to copy
+    TypedIdentifier(const TypedIdentifier& other);
+    /// Constructor
+    /// @param type_in parsed type
+    /// @param name_in parsed identifier
+    /// @param source_in source to the identifier
+    TypedIdentifier(typ::Type type_in, std::string name_in, Source source_in);
+    /// Destructor
+    ~TypedIdentifier();
+
     /// Parsed type.
-    sem::Type* type = nullptr;
+    typ::Type type;
     /// Parsed identifier.
     std::string name;
     /// Source to the identifier.
@@ -365,12 +379,18 @@ class ParserImpl {
   Maybe<sem::Type*> type_alias();
   /// Parses a `type_decl` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<sem::Type*> type_decl();
+  Maybe<typ::Type> type_decl();
+  /// TODO(crbug.com/tint/724): Temporary until type_decl() returns
+  /// Maybe<ast::Type*>
+  /// @returns the parsed Type or nullptr if none matched.
+  Maybe<sem::Type*> type_decl_DEPRECATED() {
+    return to_deprecated(type_decl());
+  }
   /// Parses a `type_decl` grammar element with the given pre-parsed
   /// decorations.
   /// @param decos the list of decorations for the type.
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<sem::Type*> type_decl(ast::DecorationList& decos);
+  Maybe<typ::Type> type_decl(ast::DecorationList& decos);
   /// Parses a `storage_class` grammar element, erroring on parse failure.
   /// @param use a description of what was being parsed if an error was raised.
   /// @returns the storage class or StorageClass::kNone if none matched
@@ -635,6 +655,30 @@ class ParserImpl {
   Expect<ast::Decoration*> expect_decoration();
 
  private:
+  // TODO(crbug.com/tint/724): Helper to convert Maybe<typ::Type> to
+  // Maybe<sem::Type*> while we convert code
+  Maybe<sem::Type*> to_deprecated(const Maybe<typ::Type>& tp) {
+    if (tp.errored) {
+      return Failure::kErrored;
+    }
+    if (!tp.matched) {
+      return Failure::kNoMatch;
+    }
+    return tp.value;
+  }
+
+  //// TODO(crbug.com/tint/724): Helper to convert Maybe<sem::Type*> to
+  /// Maybe<typ::Type> while we / convert code
+  Maybe<typ::Type> from_deprecated(const Maybe<sem::Type*>& tp) {
+    if (tp.errored) {
+      return Failure::kErrored;
+    }
+    if (!tp.matched) {
+      return Failure::kNoMatch;
+    }
+    return typ::Type{nullptr, tp.value};
+  }
+
   /// ReturnType resolves to the return type for the function or lambda F.
   template <typename F>
   using ReturnType = typename std::result_of<F()>::type;

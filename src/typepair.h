@@ -36,6 +36,7 @@ class Sampler;
 class SampledTexture;
 class StorageTexture;
 class Struct;
+class Type;
 class U32;
 class Vector;
 class Void;
@@ -56,6 +57,7 @@ class Sampler;
 class SampledTexture;
 class StorageTexture;
 class StructType;
+class Type;
 class U32;
 class Vector;
 class Void;
@@ -111,6 +113,10 @@ struct TypePair {
   /// @param ty the semantic type to compare against
   /// @returns true if the semantic type is equal to `ty`
   bool operator==(sem::Type* ty) const { return sem == ty; }
+
+  /// @param ty the semantic type to compare against
+  /// @returns true if the semantic type is not equal to `ty`
+  bool operator!=(sem::Type* ty) const { return !((*this) == ty); }
 
   /// @param other the TypePair to compare against
   /// @returns true if this TypePair is less than `other`

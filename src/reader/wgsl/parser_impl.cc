@@ -167,6 +167,17 @@ struct BlockCounters {
 
 }  // namespace
 
+ParserImpl::TypedIdentifier::TypedIdentifier() = default;
+
+ParserImpl::TypedIdentifier::TypedIdentifier(const TypedIdentifier&) = default;
+
+ParserImpl::TypedIdentifier::TypedIdentifier(typ::Type type_in,
+                                             std::string name_in,
+                                             Source source_in)
+    : type(type_in), name(std::move(name_in)), source(std::move(source_in)) {}
+
+ParserImpl::TypedIdentifier::~TypedIdentifier() = default;
+
 ParserImpl::FunctionHeader::FunctionHeader() = default;
 
 ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
@@ -840,15 +851,26 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (access_decos.size() > 1)
     return add_error(ident.source, "multiple access decorations not allowed");
 
-  auto* ty = type.value;
+  // TODO(crbug.com/tint/724): Remove
+  auto* sem_ty = type.value.sem;
   for (auto* deco : access_decos) {
     // If we have an access control decoration then we take it and wrap our
     // type up with that decoration
-    ty = builder_.create<sem::AccessControl>(
-        deco->As<ast::AccessDecoration>()->value(), ty);
+    sem_ty = builder_.create<sem::AccessControl>(
+        deco->As<ast::AccessDecoration>()->value(), sem_ty);
   }
 
-  return TypedIdentifier{ty, ident.value, ident.source};
+  auto* ty = type.value.ast;
+  // TODO(crbug.com/tint/724): Remove 'if'
+  if (ty) {
+    for (auto* deco : access_decos) {
+      // If we have an access control decoration then we take it and wrap our
+      // type up with that decoration
+      ty = builder_.create<ast::AccessControl>(
+          deco->As<ast::AccessDecoration>()->value(), ty);
+    }
+  }
+  return TypedIdentifier{typ::Type{ty, sem_ty}, ident.value, ident.source};
 }
 
 Expect<ast::AccessControl::Access> ParserImpl::expect_access_type() {
@@ -937,7 +959,7 @@ Maybe<sem::Type*> ParserImpl::type_alias() {
 //   | MAT4x3 LESS_THAN type_decl GREATER_THAN
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
 //   | texture_sampler_types
-Maybe<sem::Type*> ParserImpl::type_decl() {
+Maybe<typ::Type> ParserImpl::type_decl() {
   auto decos = decoration_list();
   if (decos.errored)
     return Failure::kErrored;
@@ -951,55 +973,56 @@ Maybe<sem::Type*> ParserImpl::type_decl() {
   if (!expect_decorations_consumed(decos.value))
     return Failure::kErrored;
 
-  return type.value;
+  return type;
 }
 
-Maybe<sem::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
+Maybe<typ::Type> ParserImpl::type_decl(ast::DecorationList& decos) {
   auto t = peek();
   if (match(Token::Type::kIdentifier)) {
     auto* ty = get_constructed(t.to_str());
     if (ty == nullptr)
       return add_error(t, "unknown constructed type '" + t.to_str() + "'");
 
-    return ty;
+    // TODO(crbug.com/tint/724): builder_.create<ast::TypeName>(t.to_str())
+    return typ::Type{nullptr, ty};
   }
 
   if (match(Token::Type::kBool))
-    return builder_.create<sem::Bool>();
+    return typ::Type{nullptr, builder_.create<sem::Bool>()};
 
   if (match(Token::Type::kF32))
-    return builder_.create<sem::F32>();
+    return typ::Type{nullptr, builder_.create<sem::F32>()};
 
   if (match(Token::Type::kI32))
-    return builder_.create<sem::I32>();
+    return typ::Type{nullptr, builder_.create<sem::I32>()};
 
   if (match(Token::Type::kU32))
-    return builder_.create<sem::U32>();
+    return typ::Type{nullptr, builder_.create<sem::U32>()};
 
   if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
     next();  // Consume the peek
-    return expect_type_decl_vector(t);
+    return from_deprecated(expect_type_decl_vector(t));
   }
 
   if (match(Token::Type::kPtr))
-    return expect_type_decl_pointer();
+    return from_deprecated(expect_type_decl_pointer());
 
   if (match(Token::Type::kArray)) {
-    return expect_type_decl_array(std::move(decos));
+    return from_deprecated(expect_type_decl_array(std::move(decos)));
   }
 
   if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
       t.IsMat3x3() || t.IsMat3x4() || t.IsMat4x2() || t.IsMat4x3() ||
       t.IsMat4x4()) {
     next();  // Consume the peek
-    return expect_type_decl_matrix(t);
+    return from_deprecated(expect_type_decl_matrix(t));
   }
 
   auto texture_or_sampler = texture_sampler_types();
   if (texture_or_sampler.errored)
     return Failure::kErrored;
   if (texture_or_sampler.matched)
-    return texture_or_sampler.value;
+    return typ::Type{nullptr, texture_or_sampler.value};
 
   return Failure::kNoMatch;
 }
@@ -1244,7 +1267,7 @@ Maybe<sem::Type*> ParserImpl::function_type_decl() {
   if (match(Token::Type::kVoid))
     return builder_.create<sem::Void>();
 
-  return type_decl();
+  return to_deprecated(type_decl());
 }
 
 // function_header
