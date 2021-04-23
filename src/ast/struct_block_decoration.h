@@ -47,9 +47,6 @@ class StructBlockDecoration
   StructBlockDecoration* Clone(CloneContext* ctx) const override;
 };
 
-/// List of struct decorations
-using DecorationList = std::vector<Decoration*>;
-
 }  // namespace ast
 }  // namespace tint
 
