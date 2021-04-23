@@ -168,6 +168,8 @@ set(TINT_LIB_SRCS
   ast/texture.h
   ast/type_constructor_expression.cc
   ast/type_constructor_expression.h
+  ast/type_name.cc
+  ast/type_name.h
   ast/ast_type.cc  # TODO(bclayton) - rename to type.cc
   ast/type.h
   ast/u32.cc

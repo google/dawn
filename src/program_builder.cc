@@ -16,6 +16,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/call_statement.h"
+#include "src/ast/type_name.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/debug.h"
 #include "src/demangler.h"
@@ -91,7 +92,7 @@ sem::Type* ProgramBuilder::TypeOf(ast::Expression* expr) const {
 }
 
 ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
-    sem::Type* type,
+    typ::Type type,
     int elem_value) {
   auto* unwrapped_type = type->UnwrapAliasIfNeeded();
   if (unwrapped_type->Is<sem::Bool>()) {
@@ -127,6 +128,17 @@ ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
   }
   TINT_ASSERT(false);
   return nullptr;
+}
+
+typ::Type ProgramBuilder::TypesBuilder::MaybeCreateTypename(
+    typ::Type type) const {
+  if (auto* alias = type.ast->As<ast::Alias>()) {
+    return {builder->create<ast::TypeName>(alias->symbol()), type.sem};
+  }
+  if (auto* str = type.ast->As<ast::Struct>()) {
+    return {builder->create<ast::TypeName>(str->name()), type.sem};
+  }
+  return type;
 }
 
 ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}

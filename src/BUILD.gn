@@ -387,6 +387,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/type.h",
     "ast/type_constructor_expression.cc",
     "ast/type_constructor_expression.h",
+    "ast/type_name.cc",
+    "ast/type_name.h",
     "ast/u32.cc",
     "ast/u32.h",
     "ast/uint_literal.cc",

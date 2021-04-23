@@ -343,7 +343,7 @@ class ProgramBuilder {
 
     /// @return the tint AST type for the C type `T`.
     template <typename T>
-    sem::Type* Of() const {
+    typ::Type Of() const {
       return CToAST<T>::get(this);
     }
 
@@ -558,6 +558,7 @@ class ProgramBuilder {
     typ::Array array(typ::Type subtype,
                      uint32_t n = 0,
                      ast::DecorationList decos = {}) const {
+      subtype = MaybeCreateTypename(subtype);
       return {builder->create<ast::Array>(subtype, n, decos),
               builder->create<sem::ArrayType>(subtype, n, decos)};
     }
@@ -567,6 +568,7 @@ class ProgramBuilder {
     /// @param stride the array stride
     /// @return the tint AST type for a array of size `n` of type `T`
     typ::Array array(typ::Type subtype, uint32_t n, uint32_t stride) const {
+      subtype = MaybeCreateTypename(subtype);
       return array(subtype, n,
                    {builder->create<ast::StrideDecoration>(stride)});
     }
@@ -590,6 +592,7 @@ class ProgramBuilder {
     /// @returns the alias pointer
     template <typename NAME>
     typ::Alias alias(NAME&& name, typ::Type type) const {
+      type = MaybeCreateTypename(type);
       auto sym = builder->Sym(std::forward<NAME>(name));
       return {
           builder->create<ast::Alias>(sym, type),
@@ -603,6 +606,7 @@ class ProgramBuilder {
     /// @returns the access control qualifier type
     typ::AccessControl access(ast::AccessControl::Access access,
                               typ::Type type) const {
+      type = MaybeCreateTypename(type);
       return {builder->create<ast::AccessControl>(access, type),
               builder->create<sem::AccessControl>(access, type)};
     }
@@ -612,6 +616,7 @@ class ProgramBuilder {
     /// @return the pointer to `type` with the given ast::StorageClass
     typ::Pointer pointer(typ::Type type,
                          ast::StorageClass storage_class) const {
+      type = MaybeCreateTypename(type);
       return {builder->create<ast::Pointer>(type, storage_class),
               builder->create<sem::Pointer>(type, storage_class)};
     }
@@ -673,12 +678,18 @@ class ProgramBuilder {
               builder->create<sem::StorageTexture>(dims, format, sem_subtype)};
     }
 
+    /// If ty is a ast::Struct or ast::Alias, the returned type is an
+    /// ast::TypeName of the given type's name, otherwise  type is returned.
+    /// @param type the type
+    /// @return either type or a pointer to a new ast::TypeName
+    typ::Type MaybeCreateTypename(typ::Type type) const;
+
    private:
     /// CToAST<T> is specialized for various `T` types and each specialization
     /// contains a single static `get()` method for obtaining the corresponding
     /// AST type for the C type `T`.
     /// `get()` has the signature:
-    ///    `static sem::Type* get(Types* t)`
+    ///    `static typ::Type get(Types* t)`
     template <typename T>
     struct CToAST {};
 
@@ -840,7 +851,7 @@ class ProgramBuilder {
   /// @return an `ast::TypeConstructorExpression` of `type` constructed with the
   /// values `args`.
   template <typename... ARGS>
-  ast::TypeConstructorExpression* Construct(sem::Type* type, ARGS&&... args) {
+  ast::TypeConstructorExpression* Construct(typ::Type type, ARGS&&... args) {
     return create<ast::TypeConstructorExpression>(
         type, ExprList(std::forward<ARGS>(args)...));
   }
@@ -853,7 +864,7 @@ class ProgramBuilder {
   /// @param elem_value the initial or element value (for vec and mat) to
   /// construct with
   /// @return the constructor expression
-  ast::ConstructorExpression* ConstructValueFilledWith(sem::Type* type,
+  ast::ConstructorExpression* ConstructValueFilledWith(typ::Type type,
                                                        int elem_value = 0);
 
   /// @param args the arguments for the vector constructor
@@ -994,10 +1005,11 @@ class ProgramBuilder {
   /// @returns a `ast::Variable` with the given name, storage and type
   template <typename NAME>
   ast::Variable* Var(NAME&& name,
-                     sem::Type* type,
+                     typ::Type type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(Sym(std::forward<NAME>(name)), storage, type,
                                  false, constructor, decorations);
   }
@@ -1012,10 +1024,11 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Var(const Source& source,
                      NAME&& name,
-                     sem::Type* type,
+                     typ::Type type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)), storage,
                                  type, false, constructor, decorations);
   }
@@ -1027,9 +1040,10 @@ class ProgramBuilder {
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Const(NAME&& name,
-                       sem::Type* type,
+                       typ::Type type,
                        ast::Expression* constructor = nullptr,
                        ast::DecorationList decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(Sym(std::forward<NAME>(name)),
                                  ast::StorageClass::kNone, type, true,
                                  constructor, decorations);
@@ -1044,9 +1058,10 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Const(const Source& source,
                        NAME&& name,
-                       sem::Type* type,
+                       typ::Type type,
                        ast::Expression* constructor = nullptr,
                        ast::DecorationList decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
                                  ast::StorageClass::kNone, type, true,
                                  constructor, decorations);
@@ -1058,8 +1073,9 @@ class ProgramBuilder {
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Param(NAME&& name,
-                       sem::Type* type,
+                       typ::Type type,
                        ast::DecorationList decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(Sym(std::forward<NAME>(name)),
                                  ast::StorageClass::kNone, type, true, nullptr,
                                  decorations);
@@ -1073,8 +1089,9 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Param(const Source& source,
                        NAME&& name,
-                       sem::Type* type,
+                       typ::Type type,
                        ast::DecorationList decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
                                  ast::StorageClass::kNone, type, true, nullptr,
                                  decorations);
@@ -1089,7 +1106,7 @@ class ProgramBuilder {
   /// global variable with the ast::Module.
   template <typename NAME>
   ast::Variable* Global(NAME&& name,
-                        sem::Type* type,
+                        typ::Type type,
                         ast::StorageClass storage,
                         ast::Expression* constructor = nullptr,
                         ast::DecorationList decorations = {}) {
@@ -1110,7 +1127,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Global(const Source& source,
                         NAME&& name,
-                        sem::Type* type,
+                        typ::Type type,
                         ast::StorageClass storage,
                         ast::Expression* constructor = nullptr,
                         ast::DecorationList decorations = {}) {
@@ -1263,10 +1280,11 @@ class ProgramBuilder {
   ast::Function* Func(const Source& source,
                       NAME&& name,
                       ast::VariableList params,
-                      sem::Type* type,
+                      typ::Type type,
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     auto* func =
         create<ast::Function>(source, Sym(std::forward<NAME>(name)), params,
                               type, create<ast::BlockStatement>(body),
@@ -1287,10 +1305,11 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Function* Func(NAME&& name,
                       ast::VariableList params,
-                      sem::Type* type,
+                      typ::Type type,
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     auto* func = create<ast::Function>(Sym(std::forward<NAME>(name)), params,
                                        type, create<ast::BlockStatement>(body),
                                        decorations, return_type_decorations);
@@ -1373,8 +1392,9 @@ class ProgramBuilder {
   template <typename NAME>
   ast::StructMember* Member(const Source& source,
                             NAME&& name,
-                            sem::Type* type,
+                            typ::Type type,
                             ast::DecorationList decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::StructMember>(source, Sym(std::forward<NAME>(name)),
                                      type, std::move(decorations));
   }
@@ -1386,8 +1406,9 @@ class ProgramBuilder {
   /// @returns the struct member pointer
   template <typename NAME>
   ast::StructMember* Member(NAME&& name,
-                            sem::Type* type,
+                            typ::Type type,
                             ast::DecorationList decorations = {}) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::StructMember>(source_, Sym(std::forward<NAME>(name)),
                                      type, std::move(decorations));
   }
@@ -1398,7 +1419,8 @@ class ProgramBuilder {
   /// @param type the struct member type
   /// @returns the struct member pointer
   template <typename NAME>
-  ast::StructMember* Member(uint32_t offset, NAME&& name, sem::Type* type) {
+  ast::StructMember* Member(uint32_t offset, NAME&& name, typ::Type type) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::StructMember>(
         source_, Sym(std::forward<NAME>(name)), type,
         ast::DecorationList{
@@ -1665,31 +1687,31 @@ class ProgramBuilder {
 // Various template specializations for ProgramBuilder::TypesBuilder::CToAST.
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<ProgramBuilder::i32> {
-  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static typ::Type get(const ProgramBuilder::TypesBuilder* t) {
     return t->i32();
   }
 };
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<ProgramBuilder::u32> {
-  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static typ::Type get(const ProgramBuilder::TypesBuilder* t) {
     return t->u32();
   }
 };
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<ProgramBuilder::f32> {
-  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static typ::Type get(const ProgramBuilder::TypesBuilder* t) {
     return t->f32();
   }
 };
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<bool> {
-  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static typ::Type get(const ProgramBuilder::TypesBuilder* t) {
     return t->bool_();
   }
 };
 template <>
 struct ProgramBuilder::TypesBuilder::CToAST<void> {
-  static sem::Type* get(const ProgramBuilder::TypesBuilder* t) {
+  static typ::Type get(const ProgramBuilder::TypesBuilder* t) {
     return t->void_();
   }
 };
