@@ -227,9 +227,6 @@ TEST_F(StorageTextureValidationTests, ComputePipeline) {
 
 // Validate read-write storage textures are not currently supported.
 TEST_F(StorageTextureValidationTests, ReadWriteStorageTexture) {
-    // TODO(https://crbug.com/tint/692): Remove skip once this is fixed.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Read-write storage textures cannot be declared in a vertex shader by default.
     {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
@@ -293,9 +290,6 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutWithStorageTextureBindingTy
 // Validate it is an error to declare a read-only or write-only storage texture in shaders with any
 // format that doesn't support TextureUsage::Storage texture usages.
 TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
-    // TODO(https://crbug.com/tint/718): Remove skip once this is fixed.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     // Not include RGBA8UnormSrgb, BGRA8Unorm, BGRA8UnormSrgb because they are not related to any
     // SPIR-V Image Formats.
     constexpr std::array<wgpu::TextureFormat, 32> kWGPUTextureFormatSupportedAsSPIRVImageFormats = {
@@ -332,9 +326,6 @@ TEST_F(StorageTextureValidationTests, StorageTextureFormatInShaders) {
 // Verify that declaring a storage texture format that is not supported in WebGPU causes validation
 // error.
 TEST_F(StorageTextureValidationTests, UnsupportedWGSLStorageTextureFormat) {
-    // TODO(https://crbug.com/tint/718): Remove skip once this is fixed.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator"));
-
     constexpr std::array<wgpu::TextureFormat, 16> kUnsupportedTextureFormats = {
         wgpu::TextureFormat::R8Unorm,      wgpu::TextureFormat::R8Snorm,
         wgpu::TextureFormat::R8Uint,       wgpu::TextureFormat::R8Sint,
