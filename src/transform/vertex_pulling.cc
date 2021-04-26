@@ -567,8 +567,6 @@ struct State {
 }  // namespace
 
 VertexPulling::VertexPulling() = default;
-VertexPulling::VertexPulling(const Config& config) : cfg_(config) {}
-
 VertexPulling::~VertexPulling() = default;
 
 Output VertexPulling::Run(const Program* in, const DataMap& data) {

@@ -109,11 +109,7 @@ class FirstIndexOffset : public Transform {
 
   /// Constructor
   FirstIndexOffset();
-  /// Constructor
-  /// [DEPRECATED] - pass BindingPoint as part of the `data` to Run()
-  /// @param binding the binding() for firstVertex/Instance uniform
-  /// @param group the group() for firstVertex/Instance uniform
-  FirstIndexOffset(uint32_t binding, uint32_t group);
+  /// Destructor
   ~FirstIndexOffset() override;
 
   /// Runs the transform on `program`, returning the transformation result.

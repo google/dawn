@@ -160,11 +160,6 @@ class VertexPulling : public Transform {
   /// Constructor
   VertexPulling();
 
-  /// Constructor
-  /// [DEPRECATED] - pass Config as part of the `data` to Run()
-  /// @param config the configuration options for the transform
-  explicit VertexPulling(const Config& config);
-
   /// Destructor
   ~VertexPulling() override;
 

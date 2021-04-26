@@ -147,7 +147,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   }
 
   if (transform_manager_) {
-    auto out = transform_manager_->Run(&program);
+    auto out = transform_manager_->Run(&program, transform_inputs_);
     if (!out.program.IsValid()) {
       return 0;
     }

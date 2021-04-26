@@ -366,7 +366,9 @@ fn entry() {
 }
 )";
 
-  auto got = Run(src, std::make_unique<FirstIndexOffset>(1, 2));
+  DataMap config;
+  config.Add<FirstIndexOffset::BindingPoint>(1, 2);
+  auto got = Run<FirstIndexOffset>(src, std::move(config));
 
   EXPECT_EQ(expect, str(got));
 
@@ -419,7 +421,9 @@ fn entry() {
 }
 )";
 
-  auto got = Run(src, std::make_unique<FirstIndexOffset>(1, 7));
+  DataMap config;
+  config.Add<FirstIndexOffset::BindingPoint>(1, 7);
+  auto got = Run<FirstIndexOffset>(src, std::move(config));
 
   EXPECT_EQ(expect, str(got));
 
@@ -475,7 +479,9 @@ fn entry() {
 }
 )";
 
-  auto got = Run(src, std::make_unique<FirstIndexOffset>(1, 2));
+  DataMap config;
+  config.Add<FirstIndexOffset::BindingPoint>(1, 2);
+  auto got = Run<FirstIndexOffset>(src, std::move(config));
 
   EXPECT_EQ(expect, str(got));
 
@@ -535,7 +541,9 @@ fn entry() {
 }
 )";
 
-  auto got = Run(src, std::make_unique<FirstIndexOffset>(1, 2));
+  DataMap config;
+  config.Add<FirstIndexOffset::BindingPoint>(1, 2);
+  auto got = Run<FirstIndexOffset>(src, std::move(config));
 
   EXPECT_EQ(expect, str(got));
 

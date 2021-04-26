@@ -15,6 +15,8 @@
 #ifndef FUZZERS_TINT_COMMON_FUZZER_H_
 #define FUZZERS_TINT_COMMON_FUZZER_H_
 
+#include <utility>
+
 #include "include/tint/tint.h"
 
 namespace tint {
@@ -29,7 +31,10 @@ class CommonFuzzer {
   explicit CommonFuzzer(InputFormat input, OutputFormat output);
   ~CommonFuzzer();
 
-  void SetTransformManager(transform::Manager* tm) { transform_manager_ = tm; }
+  void SetTransformManager(transform::Manager* tm, transform::DataMap inputs) {
+    transform_manager_ = tm;
+    transform_inputs_ = std::move(inputs);
+  }
   void EnableInspector() { inspector_enabled_ = true; }
 
   int Run(const uint8_t* data, size_t size);
@@ -38,6 +43,7 @@ class CommonFuzzer {
   InputFormat input_;
   OutputFormat output_;
   transform::Manager* transform_manager_;
+  transform::DataMap transform_inputs_;
   bool inspector_enabled_;
 };
 

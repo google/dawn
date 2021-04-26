@@ -675,22 +675,22 @@ int main(int argc, const char** argv) {
   }
 
   tint::transform::Manager transform_manager;
+  tint::transform::DataMap transform_inputs;
   for (const auto& name : options.transforms) {
     // TODO(dsinclair): The vertex pulling transform requires setup code to
     // be run that needs user input. Should we find a way to support that here
     // maybe through a provided file?
 
     if (name == "bound_array_accessors") {
-      transform_manager.append(
-          std::make_unique<tint::transform::BoundArrayAccessors>());
+      transform_manager.Add<tint::transform::BoundArrayAccessors>();
     } else if (name == "emit_vertex_point_size") {
-      transform_manager.append(
-          std::make_unique<tint::transform::EmitVertexPointSize>());
+      transform_manager.Add<tint::transform::EmitVertexPointSize>();
     } else if (name == "first_index_offset") {
-      transform_manager.append(
-          std::make_unique<tint::transform::FirstIndexOffset>(0, 0));
+      transform_inputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(0,
+                                                                            0);
+      transform_manager.Add<tint::transform::FirstIndexOffset>();
     } else if (name == "renamer") {
-      transform_manager.append(std::make_unique<tint::transform::Renamer>());
+      transform_manager.Add<tint::transform::Renamer>();
     } else {
       std::cerr << "Unknown transform name: " << name << std::endl;
       return 1;
@@ -701,7 +701,7 @@ int main(int argc, const char** argv) {
 #if TINT_BUILD_SPV_WRITER
     case Format::kSpirv:
     case Format::kSpvAsm:
-      transform_manager.append(std::make_unique<tint::transform::Spirv>());
+      transform_manager.Add<tint::transform::Spirv>();
       break;
 #endif  // TINT_BUILD_SPV_WRITER
 #if TINT_BUILD_MSL_WRITER
@@ -710,7 +710,7 @@ int main(int argc, const char** argv) {
           tint::transform::Renamer::Target::kMslKeywords};
       transform_manager.append(
           std::make_unique<tint::transform::Renamer>(renamer_config));
-      transform_manager.append(std::make_unique<tint::transform::Msl>());
+      transform_manager.Add<tint::transform::Msl>();
       break;
     }
 #endif  // TINT_BUILD_MSL_WRITER
@@ -720,7 +720,7 @@ int main(int argc, const char** argv) {
           tint::transform::Renamer::Target::kHlslKeywords};
       transform_manager.append(
           std::make_unique<tint::transform::Renamer>(renamer_config));
-      transform_manager.append(std::make_unique<tint::transform::Hlsl>());
+      transform_manager.Add<tint::transform::Hlsl>();
       break;
     }
 #endif  // TINT_BUILD_HLSL_WRITER
@@ -728,7 +728,7 @@ int main(int argc, const char** argv) {
       break;
   }
 
-  auto out = transform_manager.Run(program.get());
+  auto out = transform_manager.Run(program.get(), std::move(transform_inputs));
   if (!out.program.IsValid()) {
     diag_formatter.format(out.program.Diagnostics(), diag_printer.get());
     return 1;

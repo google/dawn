@@ -55,9 +55,6 @@ FirstIndexOffset::Data::Data(const Data&) = default;
 FirstIndexOffset::Data::~Data() = default;
 
 FirstIndexOffset::FirstIndexOffset() = default;
-FirstIndexOffset::FirstIndexOffset(uint32_t binding, uint32_t group)
-    : binding_(binding), group_(group) {}
-
 FirstIndexOffset::~FirstIndexOffset() = default;
 
 Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {

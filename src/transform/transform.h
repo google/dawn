@@ -147,9 +147,6 @@ class Output {
 /// Interface for Program transforms
 class Transform {
  public:
-  /// [DEPRECATED]: Use transform::Output
-  using Output = transform::Output;
-
   /// Constructor
   Transform();
   /// Destructor
