@@ -192,6 +192,7 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/ast/depth_texture_test.cc",
     "../src/ast/discard_statement_test.cc",
     "../src/ast/else_statement_test.cc",
+    "../src/ast/external_texture_test.cc",
     "../src/ast/f32_test.cc",
     "../src/ast/fallthrough_statement_test.cc",
     "../src/ast/float_literal_test.cc",

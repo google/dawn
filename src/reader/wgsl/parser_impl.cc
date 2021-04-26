@@ -23,6 +23,7 @@
 #include "src/ast/constant_id_decoration.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
+#include "src/ast/external_texture.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
@@ -657,8 +658,8 @@ Maybe<ast::TextureDimension> ParserImpl::sampled_texture_type() {
 //  : TEXTURE_EXTERNAL
 Maybe<typ::Type> ParserImpl::external_texture_type() {
   if (match(Token::Type::kTextureExternal)) {
-    // TODO(crbug.com/tint/724): builder_.create<ast::ExternalTexture>()
-    return typ::Type{nullptr, builder_.create<sem::ExternalTexture>()};
+    return typ::Type{builder_.create<ast::ExternalTexture>(),
+                     builder_.create<sem::ExternalTexture>()};
   }
 
   return Failure::kNoMatch;

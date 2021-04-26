@@ -90,6 +90,8 @@ set(TINT_LIB_SRCS
   ast/else_statement.h
   ast/expression.cc
   ast/expression.h
+  ast/external_texture.cc
+  ast/external_texture.h
   ast/f32.cc
   ast/f32.h
   ast/fallthrough_statement.cc
@@ -479,6 +481,7 @@ if(${TINT_BUILD_TESTS})
     ast/depth_texture_test.cc
     ast/discard_statement_test.cc
     ast/else_statement_test.cc
+    ast/external_texture_test.cc
     ast/f32_test.cc
     ast/fallthrough_statement_test.cc
     ast/float_literal_test.cc

@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/sem/external_texture_type.h"
+#include "src/ast/external_texture.h"
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::ExternalTexture);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::ExternalTexture);
 
 namespace tint {
-namespace sem {
+namespace ast {
 
-ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
+// ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
+ExternalTexture::ExternalTexture(ProgramID program_id, const Source& source)
+    : Base(program_id, source, ast::TextureDimension::k2d) {}
 
 ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
 
@@ -39,5 +41,5 @@ ExternalTexture* ExternalTexture::Clone(CloneContext* ctx) const {
   return ctx->dst->create<ExternalTexture>();
 }
 
-}  // namespace sem
+}  // namespace ast
 }  // namespace tint
