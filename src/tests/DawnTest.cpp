@@ -255,7 +255,7 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                     UNREACHABLE();
                 }
             } else {
-                mBackendValidationLevel = dawn_native::BackendValidationLevel::Full;
+                mBackendValidationLevel = dawn_native::BackendValidationLevel::Partial;
             }
             continue;
         }
@@ -353,9 +353,9 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    "  -w, --use-wire: Run the tests through the wire (defaults to no wire)\n"
                    "  -c, --begin-capture-on-startup: Begin debug capture on startup "
                    "(defaults to no capture)\n"
-                   "  --enable-backend-validation: Enables backend validation. Defaults to 'full'\n"
-                   "    to enable all available backend validation. Set to 'partial' to\n"
-                   "    enable a subset of backend validation with less performance overhead.\n"
+                   "  --enable-backend-validation: Enables backend validation. Defaults to \n"
+                   "    'partial' to enable only minimum backend validation. Set to 'full' to\n"
+                   "    enable all available backend validation with less performance overhead.\n"
                    "    Set to 'disabled' to run with no validation (same as no flag).\n"
                    "  --enable-toggles: Comma-delimited list of Dawn toggles to enable.\n"
                    "    ex.) skip_validation,use_tint_generator,disable_robustness,turn_off_vsync\n"

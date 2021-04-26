@@ -39,10 +39,8 @@ namespace dawn_native { namespace d3d12 {
                             functions->d3d12GetDebugInterface(IID_PPV_ARGS(&debugController)))) {
                         ASSERT(debugController != nullptr);
                         debugController->EnableDebugLayer();
-                        debugController->SetEnableGPUBasedValidation(true);
-                        if (validationLevel == BackendValidationLevel::Partial) {
-                            debugController->SetGPUBasedValidationFlags(
-                                D3D12_GPU_BASED_VALIDATION_FLAGS_DISABLE_STATE_TRACKING);
+                        if (validationLevel == BackendValidationLevel::Full) {
+                            debugController->SetEnableGPUBasedValidation(true);
                         }
 
                         // Enable additional debug layers.
