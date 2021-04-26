@@ -57,6 +57,12 @@ class Namer {
     return id_to_name_.find(id) != id_to_name_.end();
   }
 
+  /// @param name a string
+  /// @returns true if the string has been registered as a name.
+  bool IsRegistered(const std::string& name) const {
+    return name_to_id_.find(name) != name_to_id_.end();
+  }
+
   /// @param id the SPIR-V ID
   /// @returns the name for the ID. It must have been registered.
   const std::string& GetName(uint32_t id) const {

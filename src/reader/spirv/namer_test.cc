@@ -100,6 +100,24 @@ TEST_F(SpvNamerTest, FindUnusedDerivedName_HasMultipleConflicts) {
   EXPECT_THAT(namer.FindUnusedDerivedName("rigby"), Eq("rigby_2"));
 }
 
+TEST_F(SpvNamerTest, IsRegistered_NoRecordedName) {
+  Namer namer(fail_stream_);
+  EXPECT_FALSE(namer.IsRegistered("abbey"));
+}
+
+TEST_F(SpvNamerTest, IsRegistered_RegisteredById) {
+  Namer namer(fail_stream_);
+  namer.SaveName(1, "abbey");
+  EXPECT_TRUE(namer.IsRegistered("abbey"));
+}
+
+TEST_F(SpvNamerTest, IsRegistered_RegisteredByDerivation) {
+  Namer namer(fail_stream_);
+  const auto got = namer.MakeDerivedName("abbey");
+  EXPECT_TRUE(namer.IsRegistered("abbey"));
+  EXPECT_EQ(got, "abbey");
+}
+
 TEST_F(SpvNamerTest, MakeDerivedName_NoRecordedName) {
   Namer namer(fail_stream_);
   EXPECT_THAT(namer.MakeDerivedName("eleanor"), Eq("eleanor"));

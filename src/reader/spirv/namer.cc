@@ -105,17 +105,16 @@ std::string Namer::GetMemberName(uint32_t struct_id,
 std::string Namer::FindUnusedDerivedName(const std::string& base_name) const {
   // Ensure uniqueness among names.
   std::string derived_name;
-  for (int i = 0;; i++) {
+  int i = 0;
+  do {
     std::stringstream new_name_stream;
     new_name_stream << base_name;
     if (i > 0) {
       new_name_stream << "_" << i;
     }
+    i++;
     derived_name = new_name_stream.str();
-    if (name_to_id_.count(derived_name) == 0) {
-      break;
-    }
-  }
+  } while (IsRegistered(derived_name));
   return derived_name;
 }
 
