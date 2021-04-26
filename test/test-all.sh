@@ -35,13 +35,13 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
 NUM_PASS=0
 NUM_FAIL=0
 
-# check(WGSL_FILE, FORMAT)
+# check(TEST_FILE, FORMAT)
 function check() {
-    WGSL_FILE=$1
+    TEST_FILE=$1
     FORMAT=$2
     printf "%7s: " "${FORMAT}"
     set +e
-    ${TINT} ${WGSL_FILE} --format ${FORMAT} -o /dev/null
+    ${TINT} ${TEST_FILE} --format ${FORMAT} -o /dev/null
     if [ $? -eq 0 ]; then
         echo -e "${TEXT_GREEN}PASS${TEXT_DEFAULT}"
         NUM_PASS=$((${NUM_PASS}+1))
@@ -52,14 +52,14 @@ function check() {
     set -e
 }
 
-for WGSL_FILE in ${SCRIPT_DIR}/*.wgsl
+for TEST_FILE in ${SCRIPT_DIR}/*.spvasm ${SCRIPT_DIR}/*.wgsl
 do
     echo
-    echo "Testing $WGSL_FILE..."
-    check "${WGSL_FILE}" wgsl
-    check "${WGSL_FILE}" spirv
-    check "${WGSL_FILE}" msl
-    check "${WGSL_FILE}" hlsl
+    echo "Testing $TEST_FILE..."
+    check "${TEST_FILE}" wgsl
+    check "${TEST_FILE}" spirv
+    check "${TEST_FILE}" msl
+    check "${TEST_FILE}" hlsl
 done
 
 if [ ${NUM_FAIL} -ne 0 ]; then
