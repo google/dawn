@@ -89,12 +89,17 @@ config("dawn_internal") {
 
   cflags = []
 
-  # Enable more warnings that were found when using Dawn in other projects
-  if (is_clang) {
+  # Enable more warnings that were found when using Dawn in other projects.
+  # Add them only when building in standalone because we control which clang
+  # version we use. Otherwise we risk breaking projects depending on Dawn when
+  # the use a different clang version.
+  if (dawn_standalone && is_clang) {
     cflags += [
       "-Wconditional-uninitialized",
       "-Wcstring-format-directive",
       "-Wc++11-narrowing",
+      "-Wdeprecated-copy",
+      "-Wdeprecated-copy-dtor",
       "-Wduplicate-enum",
       "-Wextra-semi-stmt",
       "-Wimplicit-fallthrough",
