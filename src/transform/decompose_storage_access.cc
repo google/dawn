@@ -425,7 +425,7 @@ struct State {
       ast::Function* func = nullptr;
       if (auto* intrinsic = IntrinsicLoadFor(ctx.dst, el_ty)) {
         func = ctx.dst->create<ast::Function>(
-            ctx.dst->Symbols().New(), params, ctx.Clone(el_ty), nullptr,
+            ctx.dst->Sym(), params, ctx.Clone(el_ty), nullptr,
             ast::DecorationList{intrinsic}, ast::DecorationList{});
       } else {
         ast::ExpressionList values;
@@ -458,7 +458,7 @@ struct State {
           }
         }
         func = ctx.dst->create<ast::Function>(
-            ctx.dst->Symbols().New(), params, ctx.Clone(el_ty),
+            ctx.dst->Sym(), params, ctx.Clone(el_ty),
             ctx.dst->Block(
                 ctx.dst->Return(ctx.dst->create<ast::TypeConstructorExpression>(
                     ctx.Clone(el_ty), values))),
@@ -489,7 +489,7 @@ struct State {
       ast::Function* func = nullptr;
       if (auto* intrinsic = IntrinsicStoreFor(ctx.dst, el_ty)) {
         func = ctx.dst->create<ast::Function>(
-            ctx.dst->Symbols().New(), params, ctx.dst->ty.void_(), nullptr,
+            ctx.dst->Sym(), params, ctx.dst->ty.void_(), nullptr,
             ast::DecorationList{intrinsic}, ast::DecorationList{});
 
       } else {
@@ -531,8 +531,8 @@ struct State {
           }
         }
         func = ctx.dst->create<ast::Function>(
-            ctx.dst->Symbols().New(), params, ctx.dst->ty.void_(),
-            ctx.dst->Block(body), ast::DecorationList{}, ast::DecorationList{});
+            ctx.dst->Sym(), params, ctx.dst->ty.void_(), ctx.dst->Block(body),
+            ast::DecorationList{}, ast::DecorationList{});
       }
 
       InsertGlobal(ctx, insert_after, func);

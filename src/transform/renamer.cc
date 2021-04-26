@@ -906,7 +906,7 @@ Output Renamer::Run(const Program* in, const DataMap&) {
         break;
     }
 
-    auto sym_out = ctx.dst->Symbols().New();
+    auto sym_out = ctx.dst->Sym();
     remappings.emplace(name_in, ctx.dst->Symbols().NameFor(sym_out));
     return sym_out;
   });
