@@ -95,8 +95,6 @@ config("dawn_internal") {
       "-Wconditional-uninitialized",
       "-Wcstring-format-directive",
       "-Wc++11-narrowing",
-      "-Wdeprecated-copy",
-      "-Wdeprecated-copy-dtor",
       "-Wduplicate-enum",
       "-Wextra-semi-stmt",
       "-Wimplicit-fallthrough",
