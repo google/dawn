@@ -47,12 +47,14 @@ struct State {
 
   CloneContext& ctx;
   VertexPulling::Config const cfg;
-  std::unordered_map<uint32_t, ast::Variable*> location_to_var;
-  Symbol vertex_index_name;
-  Symbol instance_index_name;
+  std::unordered_map<uint32_t, std::function<ast::Expression*()>>
+      location_to_expr;
+  std::function<ast::Expression*()> vertex_index_expr = nullptr;
+  std::function<ast::Expression*()> instance_index_expr = nullptr;
   Symbol pulling_position_name;
   Symbol struct_buffer_name;
   std::unordered_map<uint32_t, Symbol> vertex_buffer_names;
+  ast::VariableList new_function_parameters;
 
   /// Generate the vertex buffer binding name
   /// @param index index to append to buffer name
@@ -106,7 +108,9 @@ struct State {
       for (auto* d : v->decorations()) {
         if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
           if (builtin->value() == ast::Builtin::kVertexIndex) {
-            vertex_index_name = ctx.Clone(v->symbol());
+            vertex_index_expr = [this, v]() {
+              return ctx.dst->Expr(ctx.Clone(v->symbol()));
+            };
             return;
           }
         }
@@ -114,11 +118,10 @@ struct State {
     }
 
     // We didn't find a vertex index builtin, so create one
-    static const char kDefaultVertexIndexName[] = "tint_pulling_vertex_index";
-    vertex_index_name = ctx.dst->Symbols().New(kDefaultVertexIndexName);
+    auto name = ctx.dst->Symbols().New("tint_pulling_vertex_index");
+    vertex_index_expr = [this, name]() { return ctx.dst->Expr(name); };
 
-    ctx.dst->Global(vertex_index_name, ctx.dst->ty.u32(),
-                    ast::StorageClass::kInput, nullptr,
+    ctx.dst->Global(name, ctx.dst->ty.u32(), ast::StorageClass::kInput, nullptr,
                     ast::DecorationList{
                         ctx.dst->Builtin(ast::Builtin::kVertexIndex),
                     });
@@ -147,7 +150,9 @@ struct State {
       for (auto* d : v->decorations()) {
         if (auto* builtin = d->As<ast::BuiltinDecoration>()) {
           if (builtin->value() == ast::Builtin::kInstanceIndex) {
-            instance_index_name = ctx.Clone(v->symbol());
+            instance_index_expr = [this, v]() {
+              return ctx.dst->Expr(ctx.Clone(v->symbol()));
+            };
             return;
           }
         }
@@ -155,12 +160,10 @@ struct State {
     }
 
     // We didn't find an instance index builtin, so create one
-    static const char kDefaultInstanceIndexName[] =
-        "tint_pulling_instance_index";
-    instance_index_name = ctx.dst->Symbols().New(kDefaultInstanceIndexName);
+    auto name = ctx.dst->Symbols().New("tint_pulling_instance_index");
+    instance_index_expr = [this, name]() { return ctx.dst->Expr(name); };
 
-    ctx.dst->Global(instance_index_name, ctx.dst->ty.u32(),
-                    ast::StorageClass::kInput, nullptr,
+    ctx.dst->Global(name, ctx.dst->ty.u32(), ast::StorageClass::kInput, nullptr,
                     ast::DecorationList{
                         ctx.dst->Builtin(ast::Builtin::kInstanceIndex),
                     });
@@ -180,10 +183,12 @@ struct State {
           // This is where the replacement is created. Expressions use
           // identifier strings instead of pointers, so we don't need to update
           // any other place in the AST.
-          auto* replacement = ctx.dst->Var(ctx.Clone(v->symbol()),
-                                           ctx.Clone(v->declared_type()),
+          auto name = ctx.Clone(v->symbol());
+          auto* replacement = ctx.dst->Var(name, ctx.Clone(v->declared_type()),
                                            ast::StorageClass::kPrivate);
-          location_to_var[location] = replacement;
+          location_to_expr[location] = [this, name]() {
+            return ctx.dst->Expr(name);
+          };
           ctx.Replace(v, replacement);
           break;
         }
@@ -237,30 +242,29 @@ struct State {
 
       for (const VertexAttributeDescriptor& attribute_desc :
            buffer_layout.attributes) {
-        auto it = location_to_var.find(attribute_desc.shader_location);
-        if (it == location_to_var.end()) {
+        auto it = location_to_expr.find(attribute_desc.shader_location);
+        if (it == location_to_expr.end()) {
           continue;
         }
-        auto* v = it->second;
+        auto* ident = it->second();
 
-        auto name = buffer_layout.step_mode == InputStepMode::kVertex
-                        ? vertex_index_name
-                        : instance_index_name;
+        auto* index_expr = buffer_layout.step_mode == InputStepMode::kVertex
+                               ? vertex_index_expr()
+                               : instance_index_expr();
 
         // An expression for the start of the read in the buffer in bytes
         auto* pos_value = ctx.dst->Add(
-            ctx.dst->Mul(name,
+            ctx.dst->Mul(index_expr,
                          static_cast<uint32_t>(buffer_layout.array_stride)),
             static_cast<uint32_t>(attribute_desc.offset));
 
         // Update position of the read
-        auto* set_pos_expr = ctx.dst->create<ast::AssignmentStatement>(
-            ctx.dst->Expr(GetPullingPositionName()), pos_value);
+        auto* set_pos_expr =
+            ctx.dst->Assign(ctx.dst->Expr(GetPullingPositionName()), pos_value);
         stmts.emplace_back(set_pos_expr);
 
-        stmts.emplace_back(ctx.dst->create<ast::AssignmentStatement>(
-            ctx.dst->create<ast::IdentifierExpression>(v->symbol()),
-            AccessByFormat(i, attribute_desc.format)));
+        stmts.emplace_back(
+            ctx.dst->Assign(ident, AccessByFormat(i, attribute_desc.format)));
       }
     }
 
@@ -379,6 +383,186 @@ struct State {
     return ctx.dst->create<ast::TypeConstructorExpression>(
         ctx.dst->create<sem::Vector>(base_type, count), std::move(expr_list));
   }
+
+  /// Process a non-struct entry point parameter.
+  /// Generate function-scope variables for location parameters, and record
+  /// vertex_index and instance_index builtins if present.
+  /// @param func the entry point function
+  /// @param param the parameter to process
+  void ProcessNonStructParameter(ast::Function* func, ast::Variable* param) {
+    if (auto* location =
+            ast::GetDecoration<ast::LocationDecoration>(param->decorations())) {
+      // Create a function-scope variable to replace the parameter.
+      auto func_var_sym = ctx.Clone(param->symbol());
+      auto* func_var_type = ctx.Clone(param->declared_type());
+      auto* func_var = ctx.dst->Var(func_var_sym, func_var_type,
+                                    ast::StorageClass::kFunction);
+      ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
+                       ctx.dst->Decl(func_var));
+      // Capture mapping from location to the new variable.
+      location_to_expr[location->value()] = [this, func_var]() {
+        return ctx.dst->Expr(func_var);
+      };
+    } else if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
+                   param->decorations())) {
+      // Check for existing vertex_index and instance_index builtins.
+      if (builtin->value() == ast::Builtin::kVertexIndex) {
+        vertex_index_expr = [this, param]() {
+          return ctx.dst->Expr(ctx.Clone(param->symbol()));
+        };
+      } else if (builtin->value() == ast::Builtin::kInstanceIndex) {
+        instance_index_expr = [this, param]() {
+          return ctx.dst->Expr(ctx.Clone(param->symbol()));
+        };
+      }
+      new_function_parameters.push_back(ctx.Clone(param));
+    } else {
+      TINT_ICE(ctx.dst->Diagnostics()) << "Invalid entry point parameter";
+    }
+  }
+
+  /// Process a struct entry point parameter.
+  /// If the struct has members with location attributes, push the parameter to
+  /// a function-scope variable and create a new struct parameter without those
+  /// attributes. Record expressions for members that are vertex_index and
+  /// instance_index builtins.
+  /// @param func the entry point function
+  /// @param param the parameter to process
+  void ProcessStructParameter(ast::Function* func, ast::Variable* param) {
+    auto* struct_ty = param->declared_type()->As<sem::StructType>();
+    if (!struct_ty) {
+      TINT_ICE(ctx.dst->Diagnostics()) << "Invalid struct parameter";
+    }
+
+    auto param_sym = ctx.Clone(param->symbol());
+
+    // Process the struct members.
+    bool has_locations = false;
+    ast::StructMemberList members_to_clone;
+    for (auto* member : struct_ty->impl()->members()) {
+      auto member_sym = ctx.Clone(member->symbol());
+      std::function<ast::Expression*()> member_expr = [this, param_sym,
+                                                       member_sym]() {
+        return ctx.dst->MemberAccessor(param_sym, member_sym);
+      };
+
+      if (auto* location = ast::GetDecoration<ast::LocationDecoration>(
+              member->decorations())) {
+        // Capture mapping from location to struct member.
+        location_to_expr[location->value()] = member_expr;
+        has_locations = true;
+      } else if (auto* builtin = ast::GetDecoration<ast::BuiltinDecoration>(
+                     member->decorations())) {
+        // Check for existing vertex_index and instance_index builtins.
+        if (builtin->value() == ast::Builtin::kVertexIndex) {
+          vertex_index_expr = member_expr;
+        } else if (builtin->value() == ast::Builtin::kInstanceIndex) {
+          instance_index_expr = member_expr;
+        }
+        members_to_clone.push_back(member);
+      } else {
+        TINT_ICE(ctx.dst->Diagnostics()) << "Invalid entry point parameter";
+      }
+    }
+
+    if (!has_locations) {
+      // Nothing to do.
+      new_function_parameters.push_back(ctx.Clone(param));
+      return;
+    }
+
+    // Create a function-scope variable to replace the parameter.
+    auto* func_var = ctx.dst->Var(param_sym, ctx.Clone(param->declared_type()),
+                                  ast::StorageClass::kFunction);
+    ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
+                     ctx.dst->Decl(func_var));
+
+    if (!members_to_clone.empty()) {
+      // Create a new struct without the location attributes.
+      ast::StructMemberList new_members;
+      for (auto* member : members_to_clone) {
+        auto member_sym = ctx.Clone(member->symbol());
+        auto member_type = ctx.Clone(member->type());
+        auto member_decos = ctx.Clone(member->decorations());
+        new_members.push_back(
+            ctx.dst->Member(member_sym, member_type, std::move(member_decos)));
+      }
+      auto new_struct =
+          ctx.dst->Structure(ctx.dst->Symbols().New(), new_members);
+
+      // Create a new function parameter with this struct.
+      auto* new_param = ctx.dst->Param(ctx.dst->Symbols().New(), new_struct);
+      new_function_parameters.push_back(new_param);
+
+      // Copy values from the new parameter to the function-scope variable.
+      for (auto* member : members_to_clone) {
+        auto member_name = ctx.Clone(member->symbol());
+        ctx.InsertBefore(
+            func->body()->statements(), *func->body()->begin(),
+            ctx.dst->Assign(ctx.dst->MemberAccessor(func_var, member_name),
+                            ctx.dst->MemberAccessor(new_param, member_name)));
+      }
+    }
+  }
+
+  /// Process an entry point function.
+  /// @param func the entry point function
+  void Process(ast::Function* func) {
+    if (func->body()->empty()) {
+      return;
+    }
+
+    // Process entry point parameters.
+    for (auto* param : func->params()) {
+      auto* sem = ctx.src->Sem().Get(param);
+      if (sem->Type()->Is<sem::StructType>()) {
+        ProcessStructParameter(func, param);
+      } else {
+        ProcessNonStructParameter(func, param);
+      }
+    }
+
+    // Insert new parameters for vertex_index and instance_index if needed.
+    if (!vertex_index_expr) {
+      for (const VertexBufferLayoutDescriptor& layout : cfg.vertex_state) {
+        if (layout.step_mode == InputStepMode::kVertex) {
+          auto name = ctx.dst->Symbols().New("tint_pulling_vertex_index");
+          new_function_parameters.push_back(
+              ctx.dst->Param(name, ctx.dst->ty.u32(),
+                             {ctx.dst->Builtin(ast::Builtin::kVertexIndex)}));
+          vertex_index_expr = [this, name]() { return ctx.dst->Expr(name); };
+          break;
+        }
+      }
+    }
+    if (!instance_index_expr) {
+      for (const VertexBufferLayoutDescriptor& layout : cfg.vertex_state) {
+        if (layout.step_mode == InputStepMode::kInstance) {
+          auto name = ctx.dst->Symbols().New("tint_pulling_instance_index");
+          new_function_parameters.push_back(
+              ctx.dst->Param(name, ctx.dst->ty.u32(),
+                             {ctx.dst->Builtin(ast::Builtin::kInstanceIndex)}));
+          instance_index_expr = [this, name]() { return ctx.dst->Expr(name); };
+          break;
+        }
+      }
+    }
+
+    // Generate vertex pulling preamble.
+    ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
+                     CreateVertexPullingPreamble());
+
+    // Rewrite the function header with the new parameters.
+    auto func_sym = ctx.Clone(func->symbol());
+    auto ret_type = ctx.Clone(func->return_type());
+    auto* body = ctx.Clone(func->body());
+    auto decos = ctx.Clone(func->decorations());
+    auto ret_decos = ctx.Clone(func->return_type_decorations());
+    auto* new_func = ctx.dst->create<ast::Function>(
+        func->source(), func_sym, new_function_parameters, ret_type, body,
+        std::move(decos), std::move(ret_decos));
+    ctx.Replace(func, new_func);
+  }
 };
 
 }  // namespace
@@ -413,18 +597,26 @@ Output VertexPulling::Run(const Program* in, const DataMap& data) {
   CloneContext ctx(&out, in);
 
   State state{ctx, cfg};
-  state.FindOrInsertVertexIndexIfUsed();
-  state.FindOrInsertInstanceIndexIfUsed();
-  state.ConvertVertexInputVariablesToPrivate();
-  state.AddVertexStorageBuffers();
 
-  ctx.ReplaceAll([&](ast::Function* f) -> ast::Function* {
-    if (f == func) {
-      return CloneWithStatementsAtStart(&ctx, f,
-                                        {state.CreateVertexPullingPreamble()});
-    }
-    return nullptr;  // Just clone func
-  });
+  if (func->params().empty()) {
+    // TODO(crbug.com/tint/697): Remove this path for the old shader IO syntax.
+    state.FindOrInsertVertexIndexIfUsed();
+    state.FindOrInsertInstanceIndexIfUsed();
+    state.ConvertVertexInputVariablesToPrivate();
+    state.AddVertexStorageBuffers();
+
+    ctx.ReplaceAll([&](ast::Function* f) -> ast::Function* {
+      if (f == func) {
+        return CloneWithStatementsAtStart(
+            &ctx, f, {state.CreateVertexPullingPreamble()});
+      }
+      return nullptr;  // Just clone func
+    });
+  } else {
+    state.AddVertexStorageBuffers();
+    state.Process(func);
+  }
+
   ctx.Clone();
 
   return Output(Program(std::move(out)));
