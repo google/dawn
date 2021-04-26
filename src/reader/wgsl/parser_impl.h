@@ -23,15 +23,6 @@
 #include <vector>
 
 #include "src/ast/access_control.h"
-#include "src/ast/assignment_statement.h"
-#include "src/ast/break_statement.h"
-#include "src/ast/call_statement.h"
-#include "src/ast/continue_statement.h"
-#include "src/ast/if_statement.h"
-#include "src/ast/loop_statement.h"
-#include "src/ast/return_statement.h"
-#include "src/ast/switch_statement.h"
-#include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
@@ -39,6 +30,18 @@
 #include "src/typepair.h"
 
 namespace tint {
+namespace ast {
+class AssignmentStatement;
+class BreakStatement;
+class CallStatement;
+class ContinueStatement;
+class IfStatement;
+class LoopStatement;
+class ReturnStatement;
+class SwitchStatement;
+class VariableDeclStatement;
+}  // namespace ast
+
 namespace reader {
 namespace wgsl {
 
@@ -236,7 +239,7 @@ class ParserImpl {
     FunctionHeader(Source src,
                    std::string n,
                    ast::VariableList p,
-                   sem::Type* ret_ty,
+                   typ::Type ret_ty,
                    ast::DecorationList ret_decos);
     /// Destructor
     ~FunctionHeader();
@@ -252,13 +255,30 @@ class ParserImpl {
     /// Function parameters
     ast::VariableList params;
     /// Function return type
-    sem::Type* return_type;
+    typ::Type return_type;
     /// Function return type decorations
     ast::DecorationList return_type_decorations;
   };
 
   /// VarDeclInfo contains the parsed information for variable declaration.
   struct VarDeclInfo {
+    /// Constructor
+    VarDeclInfo();
+    /// Copy constructor
+    /// @param other the VarDeclInfo to copy
+    VarDeclInfo(const VarDeclInfo& other);
+    /// Constructor
+    /// @param source_in variable declaration source
+    /// @param name_in variable name
+    /// @param storage_class_in variable storage class
+    /// @param type_in variable type
+    VarDeclInfo(Source source_in,
+                std::string name_in,
+                ast::StorageClass storage_class_in,
+                typ::Type type_in);
+    /// Destructor
+    ~VarDeclInfo();
+
     /// Variable declaration source
     Source source;
     /// Variable name
@@ -266,7 +286,7 @@ class ParserImpl {
     /// Variable storage class
     ast::StorageClass storage_class;
     /// Variable type
-    sem::Type* type;
+    typ::Type type;
   };
 
   /// Creates a new parser using the given file
@@ -376,16 +396,10 @@ class ParserImpl {
   Maybe<ast::StorageClass> variable_storage_decoration();
   /// Parses a `type_alias` grammar element
   /// @returns the type alias or nullptr on error
-  Maybe<sem::Type*> type_alias();
+  Maybe<typ::Type> type_alias();
   /// Parses a `type_decl` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<typ::Type> type_decl();
-  /// TODO(crbug.com/tint/724): Temporary until type_decl() returns
-  /// Maybe<ast::Type*>
-  /// @returns the parsed Type or nullptr if none matched.
-  Maybe<sem::Type*> type_decl_DEPRECATED() {
-    return to_deprecated(type_decl());
-  }
   /// Parses a `type_decl` grammar element with the given pre-parsed
   /// decorations.
   /// @param decos the list of decorations for the type.
@@ -416,10 +430,10 @@ class ParserImpl {
   Maybe<ast::Function*> function_decl(ast::DecorationList& decos);
   /// Parses a `texture_sampler_types` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<sem::Type*> texture_sampler_types();
+  Maybe<typ::Type> texture_sampler_types();
   /// Parses a `sampler_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<sem::Type*> sampler_type();
+  Maybe<typ::Type> sampler_type();
   /// Parses a `multisampled_texture_type` grammar element
   /// @returns returns the multisample texture dimension or kNone if none
   /// matched.
@@ -433,17 +447,17 @@ class ParserImpl {
   Maybe<ast::TextureDimension> storage_texture_type();
   /// Parses a `depth_texture_type` grammar element
   /// @returns the parsed Type or nullptr if none matched.
-  Maybe<sem::Type*> depth_texture_type();
+  Maybe<typ::Type> depth_texture_type();
   /// Parses a 'texture_external_type' grammar element
   /// @returns the parsed Type or nullptr if none matched
-  Maybe<sem::Type*> external_texture_type();
+  Maybe<typ::Type> external_texture_type();
   /// Parses a `image_storage_type` grammar element
   /// @param use a description of what was being parsed if an error was raised
   /// @returns returns the image format or kNone if none matched.
   Expect<ast::ImageFormat> expect_image_storage_type(const std::string& use);
   /// Parses a `function_type_decl` grammar element
   /// @returns the parsed type or nullptr otherwise
-  Maybe<sem::Type*> function_type_decl();
+  Maybe<typ::Type> function_type_decl();
   /// Parses a `function_header` grammar element
   /// @returns the parsed function header
   Maybe<FunctionHeader> function_header();
@@ -655,30 +669,6 @@ class ParserImpl {
   Expect<ast::Decoration*> expect_decoration();
 
  private:
-  // TODO(crbug.com/tint/724): Helper to convert Maybe<typ::Type> to
-  // Maybe<sem::Type*> while we convert code
-  Maybe<sem::Type*> to_deprecated(const Maybe<typ::Type>& tp) {
-    if (tp.errored) {
-      return Failure::kErrored;
-    }
-    if (!tp.matched) {
-      return Failure::kNoMatch;
-    }
-    return tp.value;
-  }
-
-  //// TODO(crbug.com/tint/724): Helper to convert Maybe<sem::Type*> to
-  /// Maybe<typ::Type> while we / convert code
-  Maybe<typ::Type> from_deprecated(const Maybe<sem::Type*>& tp) {
-    if (tp.errored) {
-      return Failure::kErrored;
-    }
-    if (!tp.matched) {
-      return Failure::kNoMatch;
-    }
-    return typ::Type{nullptr, tp.value};
-  }
-
   /// ReturnType resolves to the return type for the function or lambda F.
   template <typename F>
   using ReturnType = typename std::result_of<F()>::type;
@@ -831,12 +821,12 @@ class ParserImpl {
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
 
-  Expect<sem::Type*> expect_type_decl_pointer();
-  Expect<sem::Type*> expect_type_decl_vector(Token t);
-  Expect<sem::Type*> expect_type_decl_array(ast::DecorationList decos);
-  Expect<sem::Type*> expect_type_decl_matrix(Token t);
+  Expect<typ::Type> expect_type_decl_pointer();
+  Expect<typ::Type> expect_type_decl_vector(Token t);
+  Expect<typ::Type> expect_type_decl_array(ast::DecorationList decos);
+  Expect<typ::Type> expect_type_decl_matrix(Token t);
 
-  Expect<sem::Type*> expect_type(const std::string& use);
+  Expect<typ::Type> expect_type(const std::string& use);
 
   Maybe<ast::Statement*> non_block_statement();
   Maybe<ast::Statement*> for_header_initializer();

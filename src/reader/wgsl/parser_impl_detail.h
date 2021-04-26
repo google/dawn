@@ -16,6 +16,7 @@
 #define SRC_READER_WGSL_PARSER_IMPL_DETAIL_H_
 
 #include <memory>
+#include "src/typepair.h"
 
 namespace tint {
 namespace reader {
@@ -60,6 +61,17 @@ struct OperatorArrow<T*> {
   /// `ParserImpl::Maybe<T>`.
   /// @return `val`.
   static inline T* ptr(T* val) { return val; }
+};
+
+/// OperatorArrow template specialization for TypePair<T, U>.
+template <typename T, typename U>
+struct OperatorArrow<typ::TypePair<T, U>> {
+  /// type resolves to the same as input type to allow for operator-> chaining
+  using type = typ::TypePair<T, U>;
+  /// @param val the value held by `ParserImpl::Expect<T>` or
+  /// `ParserImpl::Maybe<T>`.
+  /// @return `val`.
+  static inline type& ptr(type& val) { return val; }
 };
 
 }  // namespace detail

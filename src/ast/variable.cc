@@ -27,13 +27,13 @@ Variable::Variable(ProgramID program_id,
                    const Source& source,
                    const Symbol& sym,
                    StorageClass declared_storage_class,
-                   const sem::Type* declared_type,
+                   const typ::Type type,
                    bool is_const,
                    Expression* constructor,
                    DecorationList decorations)
     : Base(program_id, source),
       symbol_(sym),
-      declared_type_(declared_type),
+      type_(type),
       is_const_(is_const),
       constructor_(constructor),
       decorations_(std::move(decorations)),
@@ -41,7 +41,7 @@ Variable::Variable(ProgramID program_id,
   TINT_ASSERT(symbol_.IsValid());
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
   // no type means we must have a constructor to infer it
-  TINT_ASSERT(declared_type_ || constructor);
+  TINT_ASSERT(type_.sem || constructor);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(constructor, program_id);
 }
 
@@ -73,7 +73,7 @@ uint32_t Variable::constant_id() const {
 Variable* Variable::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto sym = ctx->Clone(symbol());
-  auto* ty = ctx->Clone(declared_type());
+  auto ty = ctx->Clone(type());
   auto* ctor = ctx->Clone(constructor());
   auto decos = ctx->Clone(decorations());
   return ctx->dst->create<Variable>(src, sym, declared_storage_class(), ty,
@@ -90,8 +90,8 @@ void Variable::info_to_str(const sem::Info& sem,
   out << (var_sem ? var_sem->StorageClass() : declared_storage_class())
       << std::endl;
   make_indent(out, indent);
-  if (declared_type_) {
-    out << declared_type_->type_name() << std::endl;
+  if (type_.sem) {
+    out << type_->type_name() << std::endl;
   }
 }
 

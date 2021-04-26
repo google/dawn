@@ -27,7 +27,7 @@ Function::Function(ProgramID program_id,
                    const Source& source,
                    Symbol symbol,
                    VariableList params,
-                   sem::Type* return_type,
+                   typ::Type return_type,
                    BlockStatement* body,
                    DecorationList decorations,
                    DecorationList return_type_decorations)
@@ -45,7 +45,7 @@ Function::Function(ProgramID program_id,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(param, program_id);
   }
   TINT_ASSERT(symbol_.IsValid());
-  TINT_ASSERT(return_type_);
+  TINT_ASSERT(return_type_.sem);
   for (auto* deco : decorations_) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(deco, program_id);
   }
@@ -81,7 +81,7 @@ Function* Function::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto sym = ctx->Clone(symbol());
   auto p = ctx->Clone(params_);
-  auto* ret = ctx->Clone(return_type_);
+  auto ret = ctx->Clone(return_type_);
   auto* b = ctx->Clone(body_);
   auto decos = ctx->Clone(decorations_);
   auto ret_decos = ctx->Clone(return_type_decorations_);

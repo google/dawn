@@ -22,7 +22,7 @@ namespace {
 
 TEST_F(ParserImplTest, TypeDecl_Invalid) {
   auto p = parser("1234");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_EQ(t.errored, false);
   EXPECT_EQ(t.matched, false);
   EXPECT_EQ(t.value, nullptr);
@@ -40,7 +40,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
 
   p->register_constructed("A", alias_type);
 
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
 TEST_F(ParserImplTest, TypeDecl_Identifier_NotFound) {
   auto p = parser("B");
 
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
   auto& builder = p->builder();
   auto* bool_type = builder.create<sem::Bool>();
 
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
   auto& builder = p->builder();
   auto* float_type = builder.create<sem::F32>();
 
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -97,7 +97,7 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
   auto& builder = p->builder();
   auto* int_type = builder.create<sem::I32>();
 
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -111,7 +111,7 @@ TEST_F(ParserImplTest, TypeDecl_U32) {
   auto& builder = p->builder();
   auto* uint_type = builder.create<sem::U32>();
 
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -133,7 +133,7 @@ class VecTest : public ParserImplTestWithParam<VecData> {};
 TEST_P(VecTest, Parse) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -152,7 +152,7 @@ class VecMissingGreaterThanTest : public ParserImplTestWithParam<VecData> {};
 TEST_P(VecMissingGreaterThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -170,7 +170,7 @@ class VecMissingLessThanTest : public ParserImplTestWithParam<VecData> {};
 TEST_P(VecMissingLessThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -188,7 +188,7 @@ class VecBadType : public ParserImplTestWithParam<VecData> {};
 TEST_P(VecBadType, Handles_Unknown_Type) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -206,7 +206,7 @@ class VecMissingType : public ParserImplTestWithParam<VecData> {};
 TEST_P(VecMissingType, Handles_Missing_Type) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -221,7 +221,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 
 TEST_F(ParserImplTest, TypeDecl_Ptr) {
   auto p = parser("ptr<function, f32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -235,7 +235,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
   auto p = parser("ptr<function, vec2<f32>>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -253,7 +253,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
   auto p = parser("ptr private, f32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -263,7 +263,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThan) {
   auto p = parser("ptr<function, f32");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -273,7 +273,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThan) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingComma) {
   auto p = parser("ptr<function f32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -283,7 +283,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingComma) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingStorageClass) {
   auto p = parser("ptr<, f32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -293,7 +293,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingStorageClass) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
   auto p = parser("ptr<>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -303,7 +303,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
   auto p = parser("ptr<function,>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -313,7 +313,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadStorageClass) {
   auto p = parser("ptr<unknown, f32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -323,7 +323,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadStorageClass) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadType) {
   auto p = parser("ptr<function, unknown>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -333,7 +333,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadType) {
 
 TEST_F(ParserImplTest, TypeDecl_Array) {
   auto p = parser("array<f32, 5>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -349,7 +349,7 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   auto p = parser("[[stride(16)]] array<f32, 5>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -369,7 +369,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
   auto p = parser("[[stride(16)]] array<f32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -388,7 +388,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
   auto p = parser("[[stride(16), stride(32)]] array<f32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -409,7 +409,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
   auto p = parser("[[stride(16)]] [[stride(32)]] array<f32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -430,7 +430,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
   auto p = parser("[[stride(16)]] f32");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -440,7 +440,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingClosingAttr) {
   auto p = parser("[[stride(16) array<f32, 5>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -450,7 +450,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingClosingAttr) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_UnknownDecoration) {
   auto p = parser("[[unknown 16]] array<f32, 5>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -460,7 +460,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Decoration_UnknownDecoration) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingLeftParen) {
   auto p = parser("[[stride 4)]] array<f32, 5>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -470,7 +470,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingLeftParen) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingRightParen) {
   auto p = parser("[[stride(4]] array<f32, 5>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -480,7 +480,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingRightParen) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingValue) {
   auto p = parser("[[stride()]] array<f32, 5>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -491,7 +491,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_MissingValue) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue) {
   auto p = parser("[[stride(invalid)]] array<f32, 5>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -502,7 +502,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue_Negative) {
   auto p = parser("[[stride(-1)]] array<f32, 5>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -512,7 +512,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride_InvalidValue_Negative) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
   auto p = parser("array<u32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -526,7 +526,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
   auto p = parser("array<vec4<u32>>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -540,7 +540,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
   auto p = parser("array<unknown, 3>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -550,7 +550,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_ZeroSize) {
   auto p = parser("array<f32, 0>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -560,7 +560,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_ZeroSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_NegativeSize) {
   auto p = parser("array<f32, -1>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -570,7 +570,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_NegativeSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_BadSize) {
   auto p = parser("array<f32, invalid>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -580,7 +580,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_BadSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingLessThan) {
   auto p = parser("array f32>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -590,7 +590,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MissingLessThan) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingGreaterThan) {
   auto p = parser("array<f32");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -600,7 +600,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MissingGreaterThan) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingComma) {
   auto p = parser("array<f32 3>");
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -623,7 +623,7 @@ class MatrixTest : public ParserImplTestWithParam<MatrixData> {};
 TEST_P(MatrixTest, Parse) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -651,7 +651,7 @@ class MatrixMissingGreaterThanTest
 TEST_P(MatrixMissingGreaterThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -675,7 +675,7 @@ class MatrixMissingLessThanTest : public ParserImplTestWithParam<MatrixData> {};
 TEST_P(MatrixMissingLessThanTest, Handles_Missing_GreaterThan) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -699,7 +699,7 @@ class MatrixBadType : public ParserImplTestWithParam<MatrixData> {};
 TEST_P(MatrixBadType, Handles_Unknown_Type) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -723,7 +723,7 @@ class MatrixMissingType : public ParserImplTestWithParam<MatrixData> {};
 TEST_P(MatrixMissingType, Handles_Missing_Type) {
   auto params = GetParam();
   auto p = parser(params.input);
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
@@ -748,7 +748,7 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   auto& builder = p->builder();
   auto type = builder.ty.sampler(ast::SamplerKind::kSampler);
 
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr) << p->error();
@@ -764,7 +764,7 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
   auto* type = builder.create<sem::SampledTexture>(ast::TextureDimension::kCube,
                                                    ty.f32());
 
-  auto t = p->type_decl_DEPRECATED();
+  auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);

@@ -33,14 +33,14 @@ class Pointer : public Castable<Pointer, Type> {
   /// @param storage_class the storage class of the pointer
   Pointer(ProgramID program_id,
           const Source& source,
-          Type* subtype,
+          Type* const subtype,
           ast::StorageClass storage_class);
   /// Move constructor
   Pointer(Pointer&&);
   ~Pointer() override;
 
   /// @returns the pointee type
-  Type* type() const { return subtype_; }
+  Type* type() const { return const_cast<Type*>(subtype_); }
   /// @returns the storage class of the pointer
   ast::StorageClass storage_class() const { return storage_class_; }
 
@@ -58,7 +58,7 @@ class Pointer : public Castable<Pointer, Type> {
   Pointer* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* const subtype_;
+  Type const* const subtype_;
   ast::StorageClass const storage_class_;
 };
 

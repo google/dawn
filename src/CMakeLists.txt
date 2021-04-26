@@ -172,6 +172,8 @@ set(TINT_LIB_SRCS
   ast/type_name.h
   ast/ast_type.cc  # TODO(bclayton) - rename to type.cc
   ast/type.h
+  ast/type_name.cc
+  ast/type_name.h
   ast/u32.cc
   ast/u32.h
   ast/uint_literal.cc

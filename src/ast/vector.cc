@@ -23,7 +23,7 @@ namespace ast {
 
 Vector::Vector(ProgramID program_id,
                const Source& source,
-               Type* subtype,
+               Type const* subtype,
                uint32_t size)
     : Base(program_id, source), subtype_(subtype), size_(size) {
   TINT_ASSERT(size_ > 1);

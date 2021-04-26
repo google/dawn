@@ -32,14 +32,14 @@ class Vector : public Castable<Vector, Type> {
   /// @param size the number of elements in the vector
   Vector(ProgramID program_id,
          const Source& source,
-         Type* subtype,
+         Type const* subtype,
          uint32_t size);
   /// Move constructor
   Vector(Vector&&);
   ~Vector() override;
 
   /// @returns the type of the vector elements
-  Type* type() const { return subtype_; }
+  Type* type() const { return const_cast<Type*>(subtype_); }
   /// @returns the size of the vector
   uint32_t size() const { return size_; }
 
@@ -57,7 +57,7 @@ class Vector : public Castable<Vector, Type> {
   Vector* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* const subtype_;
+  Type const* const subtype_;
   uint32_t const size_;
 };
 

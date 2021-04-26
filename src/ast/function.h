@@ -28,6 +28,7 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/variable.h"
+#include "src/typepair.h"
 
 namespace tint {
 namespace ast {
@@ -48,7 +49,7 @@ class Function : public Castable<Function, Node> {
            const Source& source,
            Symbol symbol,
            VariableList params,
-           sem::Type* return_type,
+           typ::Type return_type,
            BlockStatement* body,
            DecorationList decorations,
            DecorationList return_type_decorations);
@@ -76,7 +77,7 @@ class Function : public Castable<Function, Node> {
   bool IsEntryPoint() const { return pipeline_stage() != PipelineStage::kNone; }
 
   /// @returns the function return type.
-  sem::Type* return_type() const { return return_type_; }
+  typ::Type return_type() const { return return_type_; }
 
   /// @returns the decorations attached to the function return type.
   const DecorationList& return_type_decorations() const {
@@ -114,7 +115,7 @@ class Function : public Castable<Function, Node> {
 
   Symbol const symbol_;
   VariableList const params_;
-  sem::Type* const return_type_;
+  typ::Type const return_type_;
   BlockStatement* const body_;
   DecorationList const decorations_;
   DecorationList const return_type_decorations_;

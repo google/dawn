@@ -23,7 +23,7 @@ namespace ast {
 
 Pointer::Pointer(ProgramID program_id,
                  const Source& source,
-                 Type* subtype,
+                 Type* const subtype,
                  ast::StorageClass storage_class)
     : Base(program_id, source),
       subtype_(subtype),

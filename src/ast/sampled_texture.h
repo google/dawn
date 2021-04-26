@@ -33,13 +33,13 @@ class SampledTexture : public Castable<SampledTexture, Texture> {
   SampledTexture(ProgramID program_id,
                  const Source& source,
                  TextureDimension dim,
-                 Type* type);
+                 Type const* type);
   /// Move constructor
   SampledTexture(SampledTexture&&);
   ~SampledTexture() override;
 
   /// @returns the subtype of the sampled texture
-  Type* type() const { return type_; }
+  Type* type() const { return const_cast<Type*>(type_); }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -55,7 +55,7 @@ class SampledTexture : public Castable<SampledTexture, Texture> {
   SampledTexture* Clone(CloneContext* ctx) const override;
 
  private:
-  Type* const type_;
+  Type const* const type_;
 };
 
 }  // namespace ast

@@ -15,13 +15,25 @@
 #include "src/reader/wgsl/parser_impl.h"
 
 #include "src/ast/access_decoration.h"
+#include "src/ast/array.h"
+#include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
+#include "src/ast/break_statement.h"
+#include "src/ast/call_statement.h"
 #include "src/ast/constant_id_decoration.h"
+#include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/if_statement.h"
+#include "src/ast/loop_statement.h"
+#include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
+#include "src/ast/switch_statement.h"
+#include "src/ast/type_name.h"
 #include "src/ast/unary_op_expression.h"
+#include "src/ast/variable_decl_statement.h"
+#include "src/ast/vector.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/reader/wgsl/lexer.h"
 #include "src/sem/access_control_type.h"
@@ -185,7 +197,7 @@ ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            std::string n,
                                            ast::VariableList p,
-                                           sem::Type* ret_ty,
+                                           typ::Type ret_ty,
                                            ast::DecorationList ret_decos)
     : source(src),
       name(n),
@@ -197,6 +209,21 @@ ParserImpl::FunctionHeader::~FunctionHeader() = default;
 
 ParserImpl::FunctionHeader& ParserImpl::FunctionHeader::operator=(
     const FunctionHeader& rhs) = default;
+
+ParserImpl::VarDeclInfo::VarDeclInfo() = default;
+
+ParserImpl::VarDeclInfo::VarDeclInfo(const VarDeclInfo&) = default;
+
+ParserImpl::VarDeclInfo::VarDeclInfo(Source source_in,
+                                     std::string name_in,
+                                     ast::StorageClass storage_class_in,
+                                     typ::Type type_in)
+    : source(std::move(source_in)),
+      name(std::move(name_in)),
+      storage_class(storage_class_in),
+      type(type_in) {}
+
+ParserImpl::VarDeclInfo::~VarDeclInfo() = default;
 
 ParserImpl::ParserImpl(Source::File const* file)
     : lexer_(std::make_unique<Lexer>(file->path, &file->content)) {}
@@ -519,14 +546,14 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
 //  | sampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | storage_texture_type LESS_THAN image_storage_type GREATER_THAN
-Maybe<sem::Type*> ParserImpl::texture_sampler_types() {
+Maybe<typ::Type> ParserImpl::texture_sampler_types() {
   auto type = sampler_type();
   if (type.matched)
     return type;
 
   type = depth_texture_type();
   if (type.matched)
-    return type.value;
+    return type;
 
   type = external_texture_type();
   if (type.matched)
@@ -540,7 +567,9 @@ Maybe<sem::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return builder_.create<sem::SampledTexture>(dim.value, subtype.value);
+    return typ::Type{
+        builder_.create<ast::SampledTexture>(dim.value, subtype.value),
+        builder_.create<sem::SampledTexture>(dim.value, subtype.value)};
   }
 
   auto ms_dim = multisampled_texture_type();
@@ -551,8 +580,9 @@ Maybe<sem::Type*> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return builder_.create<sem::MultisampledTexture>(ms_dim.value,
-                                                     subtype.value);
+    return typ::Type{
+        builder_.create<ast::MultisampledTexture>(ms_dim.value, subtype.value),
+        builder_.create<sem::MultisampledTexture>(ms_dim.value, subtype.value)};
   }
 
   auto storage = storage_texture_type();
@@ -565,10 +595,14 @@ Maybe<sem::Type*> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    auto* subtype =
+    auto* subtype = ast::StorageTexture::SubtypeFor(format.value, builder_);
+    auto* subtype_sem =
         sem::StorageTexture::SubtypeFor(format.value, builder_.Types());
-    return builder_.create<sem::StorageTexture>(storage.value, format.value,
-                                                subtype);
+
+    return typ::Type{builder_.create<ast::StorageTexture>(
+                         storage.value, format.value, subtype),
+                     builder_.create<sem::StorageTexture>(
+                         storage.value, format.value, subtype_sem)};
   }
 
   return Failure::kNoMatch;
@@ -577,12 +611,15 @@ Maybe<sem::Type*> ParserImpl::texture_sampler_types() {
 // sampler_type
 //  : SAMPLER
 //  | SAMPLER_COMPARISON
-Maybe<sem::Type*> ParserImpl::sampler_type() {
+Maybe<typ::Type> ParserImpl::sampler_type() {
   if (match(Token::Type::kSampler))
-    return builder_.create<sem::Sampler>(ast::SamplerKind::kSampler);
+    return typ::Type{builder_.create<ast::Sampler>(ast::SamplerKind::kSampler),
+                     builder_.create<sem::Sampler>(ast::SamplerKind::kSampler)};
 
   if (match(Token::Type::kComparisonSampler))
-    return builder_.create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
+    return typ::Type{
+        builder_.create<ast::Sampler>(ast::SamplerKind::kComparisonSampler),
+        builder_.create<sem::Sampler>(ast::SamplerKind::kComparisonSampler)};
 
   return Failure::kNoMatch;
 }
@@ -618,9 +655,10 @@ Maybe<ast::TextureDimension> ParserImpl::sampled_texture_type() {
 
 // external_texture_type
 //  : TEXTURE_EXTERNAL
-Maybe<sem::Type*> ParserImpl::external_texture_type() {
+Maybe<typ::Type> ParserImpl::external_texture_type() {
   if (match(Token::Type::kTextureExternal)) {
-    return builder_.create<sem::ExternalTexture>();
+    // TODO(crbug.com/tint/724): builder_.create<ast::ExternalTexture>()
+    return typ::Type{nullptr, builder_.create<sem::ExternalTexture>()};
   }
 
   return Failure::kNoMatch;
@@ -658,19 +696,26 @@ Maybe<ast::TextureDimension> ParserImpl::storage_texture_type() {
 //  | TEXTURE_DEPTH_2D_ARRAY
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
-Maybe<sem::Type*> ParserImpl::depth_texture_type() {
+Maybe<typ::Type> ParserImpl::depth_texture_type() {
   if (match(Token::Type::kTextureDepth2d))
-    return builder_.create<sem::DepthTexture>(ast::TextureDimension::k2d);
+    return typ::Type{
+        builder_.create<ast::DepthTexture>(ast::TextureDimension::k2d),
+        builder_.create<sem::DepthTexture>(ast::TextureDimension::k2d)};
 
   if (match(Token::Type::kTextureDepth2dArray))
-    return builder_.create<sem::DepthTexture>(ast::TextureDimension::k2dArray);
+    return typ::Type{
+        builder_.create<ast::DepthTexture>(ast::TextureDimension::k2dArray),
+        builder_.create<sem::DepthTexture>(ast::TextureDimension::k2dArray)};
 
   if (match(Token::Type::kTextureDepthCube))
-    return builder_.create<sem::DepthTexture>(ast::TextureDimension::kCube);
+    return typ::Type{
+        builder_.create<ast::DepthTexture>(ast::TextureDimension::kCube),
+        builder_.create<sem::DepthTexture>(ast::TextureDimension::kCube)};
 
   if (match(Token::Type::kTextureDepthCubeArray))
-    return builder_.create<sem::DepthTexture>(
-        ast::TextureDimension::kCubeArray);
+    return typ::Type{
+        builder_.create<ast::DepthTexture>(ast::TextureDimension::kCubeArray),
+        builder_.create<sem::DepthTexture>(ast::TextureDimension::kCubeArray)};
 
   return Failure::kNoMatch;
 }
@@ -906,7 +951,7 @@ Maybe<ast::StorageClass> ParserImpl::variable_storage_decoration() {
 
 // type_alias
 //   : TYPE IDENT EQUAL type_decl
-Maybe<sem::Type*> ParserImpl::type_alias() {
+Maybe<typ::Type> ParserImpl::type_alias() {
   auto t = peek();
   if (!t.IsType())
     return Failure::kNoMatch;
@@ -928,11 +973,14 @@ Maybe<sem::Type*> ParserImpl::type_alias() {
   if (!type.matched)
     return add_error(peek(), "invalid type alias");
 
+  // TODO(crbug.com/tint/724): remove
   auto* alias = builder_.create<sem::Alias>(
       builder_.Symbols().Register(name.value), type.value);
   register_constructed(name.value, alias);
 
-  return alias;
+  return typ::Type{builder_.create<ast::Alias>(
+                       builder_.Symbols().Register(name.value), type.value),
+                   alias};
 }
 
 // type_decl
@@ -979,55 +1027,58 @@ Maybe<typ::Type> ParserImpl::type_decl() {
 Maybe<typ::Type> ParserImpl::type_decl(ast::DecorationList& decos) {
   auto t = peek();
   if (match(Token::Type::kIdentifier)) {
+    // TODO(crbug.com/tint/697): Remove
     auto* ty = get_constructed(t.to_str());
     if (ty == nullptr)
       return add_error(t, "unknown constructed type '" + t.to_str() + "'");
 
-    // TODO(crbug.com/tint/724): builder_.create<ast::TypeName>(t.to_str())
-    return typ::Type{nullptr, ty};
+    return typ::Type{
+        builder_.create<ast::TypeName>(builder_.Symbols().Register(t.to_str())),
+        ty};
   }
 
   if (match(Token::Type::kBool))
-    return typ::Type{nullptr, builder_.create<sem::Bool>()};
+    return typ::Type{builder_.create<ast::Bool>(),
+                     builder_.create<sem::Bool>()};
 
   if (match(Token::Type::kF32))
-    return typ::Type{nullptr, builder_.create<sem::F32>()};
+    return typ::Type{builder_.create<ast::F32>(), builder_.create<sem::F32>()};
 
   if (match(Token::Type::kI32))
-    return typ::Type{nullptr, builder_.create<sem::I32>()};
+    return typ::Type{builder_.create<ast::I32>(), builder_.create<sem::I32>()};
 
   if (match(Token::Type::kU32))
-    return typ::Type{nullptr, builder_.create<sem::U32>()};
+    return typ::Type{builder_.create<ast::U32>(), builder_.create<sem::U32>()};
 
   if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
     next();  // Consume the peek
-    return from_deprecated(expect_type_decl_vector(t));
+    return expect_type_decl_vector(t);
   }
 
   if (match(Token::Type::kPtr))
-    return from_deprecated(expect_type_decl_pointer());
+    return expect_type_decl_pointer();
 
   if (match(Token::Type::kArray)) {
-    return from_deprecated(expect_type_decl_array(std::move(decos)));
+    return expect_type_decl_array(std::move(decos));
   }
 
   if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
       t.IsMat3x3() || t.IsMat3x4() || t.IsMat4x2() || t.IsMat4x3() ||
       t.IsMat4x4()) {
     next();  // Consume the peek
-    return from_deprecated(expect_type_decl_matrix(t));
+    return expect_type_decl_matrix(t);
   }
 
   auto texture_or_sampler = texture_sampler_types();
   if (texture_or_sampler.errored)
     return Failure::kErrored;
   if (texture_or_sampler.matched)
-    return typ::Type{nullptr, texture_or_sampler.value};
+    return texture_or_sampler;
 
   return Failure::kNoMatch;
 }
 
-Expect<sem::Type*> ParserImpl::expect_type(const std::string& use) {
+Expect<typ::Type> ParserImpl::expect_type(const std::string& use) {
   auto type = type_decl();
   if (type.errored)
     return Failure::kErrored;
@@ -1036,10 +1087,10 @@ Expect<sem::Type*> ParserImpl::expect_type(const std::string& use) {
   return type.value;
 }
 
-Expect<sem::Type*> ParserImpl::expect_type_decl_pointer() {
+Expect<typ::Type> ParserImpl::expect_type_decl_pointer() {
   const char* use = "ptr declaration";
 
-  return expect_lt_gt_block(use, [&]() -> Expect<sem::Type*> {
+  return expect_lt_gt_block(use, [&]() -> Expect<typ::Type> {
     auto sc = expect_storage_class(use);
     if (sc.errored)
       return Failure::kErrored;
@@ -1051,11 +1102,12 @@ Expect<sem::Type*> ParserImpl::expect_type_decl_pointer() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return builder_.create<sem::Pointer>(subtype.value, sc.value);
+    return typ::Type{builder_.create<ast::Pointer>(subtype.value, sc.value),
+                     builder_.create<sem::Pointer>(subtype.value, sc.value)};
   });
 }
 
-Expect<sem::Type*> ParserImpl::expect_type_decl_vector(Token t) {
+Expect<typ::Type> ParserImpl::expect_type_decl_vector(Token t) {
   uint32_t count = 2;
   if (t.IsVec3())
     count = 3;
@@ -1068,14 +1120,15 @@ Expect<sem::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return builder_.create<sem::Vector>(subtype.value, count);
+  return typ::Type{builder_.create<ast::Vector>(subtype.value.ast, count),
+                   builder_.create<sem::Vector>(subtype.value.sem, count)};
 }
 
-Expect<sem::Type*> ParserImpl::expect_type_decl_array(
+Expect<typ::Type> ParserImpl::expect_type_decl_array(
     ast::DecorationList decos) {
   const char* use = "array declaration";
 
-  return expect_lt_gt_block(use, [&]() -> Expect<sem::Type*> {
+  return expect_lt_gt_block(use, [&]() -> Expect<typ::Type> {
     auto subtype = expect_type(use);
     if (subtype.errored)
       return Failure::kErrored;
@@ -1088,11 +1141,13 @@ Expect<sem::Type*> ParserImpl::expect_type_decl_array(
       size = val.value;
     }
 
-    return create<sem::ArrayType>(subtype.value, size, std::move(decos));
+    return typ::Type{
+        create<ast::Array>(subtype.value, size, decos),
+        create<sem::ArrayType>(subtype.value, size, std::move(decos))};
   });
 }
 
-Expect<sem::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
+Expect<typ::Type> ParserImpl::expect_type_decl_matrix(Token t) {
   uint32_t rows = 2;
   uint32_t columns = 2;
   if (t.IsMat3x2() || t.IsMat3x3() || t.IsMat3x4()) {
@@ -1112,7 +1167,8 @@ Expect<sem::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return builder_.create<sem::Matrix>(subtype.value, rows, columns);
+  return typ::Type{builder_.create<ast::Matrix>(subtype.value, rows, columns),
+                   builder_.create<sem::Matrix>(subtype.value, rows, columns)};
 }
 
 // storage_class
@@ -1263,11 +1319,12 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
 // function_type_decl
 //   : type_decl
 //   | VOID
-Maybe<sem::Type*> ParserImpl::function_type_decl() {
+Maybe<typ::Type> ParserImpl::function_type_decl() {
   if (match(Token::Type::kVoid))
-    return builder_.create<sem::Void>();
+    return typ::Type{builder_.create<ast::Void>(),
+                     builder_.create<sem::Void>()};
 
-  return to_deprecated(type_decl());
+  return type_decl();
 }
 
 // function_header
@@ -1297,7 +1354,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
     }
   }
 
-  sem::Type* return_type = nullptr;
+  typ::Type return_type;
   ast::DecorationList return_decorations;
 
   if (match(Token::Type::kArrow)) {
@@ -1318,7 +1375,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
       return_type = type.value;
     }
 
-    if (return_type->Is<sem::Void>()) {
+    if (return_type.ast->Is<ast::Void>()) {
       // crbug.com/tint/677: void has been removed from the language
       deprecated(tok.source(),
                  "omit '-> void' for functions that do not return a value");

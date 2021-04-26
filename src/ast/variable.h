@@ -95,7 +95,7 @@ class Variable : public Castable<Variable, Node> {
   /// @param source the variable source
   /// @param sym the variable symbol
   /// @param declared_storage_class the declared storage class
-  /// @param declared_type the declared variable type
+  /// @param type the declared variable type
   /// @param is_const true if the variable is const
   /// @param constructor the constructor expression
   /// @param decorations the variable decorations
@@ -103,7 +103,7 @@ class Variable : public Castable<Variable, Node> {
            const Source& source,
            const Symbol& sym,
            StorageClass declared_storage_class,
-           const sem::Type* declared_type,
+           typ::Type type,
            bool is_const,
            Expression* constructor,
            DecorationList decorations);
@@ -116,9 +116,11 @@ class Variable : public Castable<Variable, Node> {
   const Symbol& symbol() const { return symbol_; }
 
   /// @returns the declared type
-  sem::Type* declared_type() const {
-    return const_cast<sem::Type*>(declared_type_);
-  }
+  // TODO(crbug.com/tint/697): Remove and use type() instead
+  sem::Type* declared_type() const { return const_cast<sem::Type*>(type_.sem); }
+
+  /// @returns the variable type
+  typ::Type type() const { return type_; }
 
   /// @returns the declared storage class
   StorageClass declared_storage_class() const {
@@ -177,7 +179,7 @@ class Variable : public Castable<Variable, Node> {
 
   Symbol const symbol_;
   // The value type if a const or formal paramter, and the store type if a var
-  const sem::Type* const declared_type_;
+  typ::Type const type_;
   bool const is_const_;
   Expression* const constructor_;
   DecorationList const decorations_;

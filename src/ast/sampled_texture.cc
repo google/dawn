@@ -24,7 +24,7 @@ namespace ast {
 SampledTexture::SampledTexture(ProgramID program_id,
                                const Source& source,
                                TextureDimension dim,
-                               Type* type)
+                               Type const* type)
     : Base(program_id, source, dim), type_(type) {
   TINT_ASSERT(type_);
 }

@@ -21,7 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Vector);
 namespace tint {
 namespace sem {
 
-Vector::Vector(Type* subtype, uint32_t size) : subtype_(subtype), size_(size) {
+Vector::Vector(Type const* subtype, uint32_t size)
+    : subtype_(subtype), size_(size) {
   TINT_ASSERT(size_ > 1);
   TINT_ASSERT(size_ < 5);
 }
