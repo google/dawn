@@ -160,8 +160,6 @@ namespace dawn_native {
             const RenderBundleEncoderDescriptor* descriptor);
         ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipeline(
             const RenderPipelineDescriptor2* descriptor);
-        ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipeline(
-            const RenderPipelineDescriptor* descriptor);
         ResultOrError<Ref<SamplerBase>> CreateSampler(const SamplerDescriptor* descriptor);
         ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
             const ShaderModuleDescriptor* descriptor,

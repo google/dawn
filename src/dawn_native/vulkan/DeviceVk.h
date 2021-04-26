@@ -57,7 +57,6 @@ namespace dawn_native { namespace vulkan {
         uint32_t GetGraphicsQueueFamily() const;
         VkQueue GetQueue() const;
 
-        BufferUploader* GetBufferUploader() const;
         FencedDeleter* GetFencedDeleter() const;
         RenderPassCache* GetRenderPassCache() const;
 
