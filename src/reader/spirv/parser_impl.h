@@ -507,6 +507,12 @@ class ParserImpl : Reader {
     return 0;
   }
 
+  /// @param entry_point the SPIR-V ID of an entry point.
+  /// @returns the entry point info for the given ID
+  const std::vector<EntryPointInfo>& GetEntryPointInfo(uint32_t entry_point) {
+    return function_to_ep_info_[entry_point];
+  }
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   sem::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
