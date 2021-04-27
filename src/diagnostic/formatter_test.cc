@@ -21,11 +21,11 @@ namespace tint {
 namespace diag {
 namespace {
 
-constexpr const char* content =
-    R"(the cat says meow
-the dog says woof
-the snake says quack
-the snail says ???
+constexpr const char* content =  // Note: words are tab-delimited
+    R"(the	cat	says	meow
+the	dog	says	woof
+the	snake	says	quack
+the	snail	says	???
 )";
 
 class DiagFormatterTest : public testing::Test {
@@ -96,16 +96,16 @@ TEST_F(DiagFormatterTest, WithLine) {
   Formatter fmt{{false, false, true, false}};
   auto got = fmt.format(List{diag_note, diag_warn, diag_err});
   auto* expect = R"(1:14: purr
-the cat says meow
-             ^
+the  cat  says  meow
+                ^
 
 2:14: grrr
-the dog says woof
-             ^^^^
+the  dog  says  woof
+                ^^^^
 
 3:16 abc123: hiss
-the snake says quack
-               ^^^^^
+the  snake  says  quack
+                  ^^^^^
 )";
   ASSERT_EQ(expect, got);
 }
@@ -114,16 +114,16 @@ TEST_F(DiagFormatterTest, BasicWithFileSeverityLine) {
   Formatter fmt{{true, true, true, false}};
   auto got = fmt.format(List{diag_note, diag_warn, diag_err});
   auto* expect = R"(file.name:1:14 note: purr
-the cat says meow
-             ^
+the  cat  says  meow
+                ^
 
 file.name:2:14 warning: grrr
-the dog says woof
-             ^^^^
+the  dog  says  woof
+                ^^^^
 
 file.name:3:16 error abc123: hiss
-the snake says quack
-               ^^^^^
+the  snake  says  quack
+                  ^^^^^
 )";
   ASSERT_EQ(expect, got);
 }
@@ -135,12 +135,47 @@ TEST_F(DiagFormatterTest, BasicWithMultiLine) {
   Formatter fmt{{false, false, true, false}};
   auto got = fmt.format(List{multiline});
   auto* expect = R"(2:9: multiline
-the dog says woof
-        ^^^^^^^^^
-the snake says quack
+the  dog  says  woof
+          ^^^^^^^^^^
+the  snake  says  quack
+^^^^^^^^^^^^^^^^^^^^^^^
+the  snail  says  ???
+^^^^^^^^^^^^^^^^
+)";
+  ASSERT_EQ(expect, got);
+}
+
+TEST_F(DiagFormatterTest, BasicWithFileSeverityLineTab4) {
+  Formatter fmt{{true, true, true, false, 4u}};
+  auto got = fmt.format(List{diag_note, diag_warn, diag_err});
+  auto* expect = R"(file.name:1:14 note: purr
+the    cat    says    meow
+                      ^
+
+file.name:2:14 warning: grrr
+the    dog    says    woof
+                      ^^^^
+
+file.name:3:16 error abc123: hiss
+the    snake    says    quack
+                        ^^^^^
+)";
+  ASSERT_EQ(expect, got);
+}
+
+TEST_F(DiagFormatterTest, BasicWithMultiLineTab4) {
+  Diagnostic multiline{Severity::Warning,
+                       Source{Source::Range{{2, 9}, {4, 15}}, &file},
+                       "multiline"};
+  Formatter fmt{{false, false, true, false, 4u}};
+  auto got = fmt.format(List{multiline});
+  auto* expect = R"(2:9: multiline
+the    dog    says    woof
+              ^^^^^^^^^^^^
+the    snake    says    quack
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+the    snail    says    ???
 ^^^^^^^^^^^^^^^^^^^^
-the snail says ???
-^^^^^^^^^^^^^^
 )";
   ASSERT_EQ(expect, got);
 }
@@ -149,8 +184,8 @@ TEST_F(DiagFormatterTest, ICE) {
   Formatter fmt{{}};
   auto got = fmt.format(List{diag_ice});
   auto* expect = R"(file.name:4:16 internal compiler error: unreachable
-the snail says ???
-               ^^^
+the  snail  says  ???
+                  ^^^
 
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *
@@ -167,8 +202,8 @@ TEST_F(DiagFormatterTest, Fatal) {
   Formatter fmt{{}};
   auto got = fmt.format(List{diag_fatal});
   auto* expect = R"(file.name:4:16 fatal: nothing
-the snail says ???
-               ^^^
+the  snail  says  ???
+                  ^^^
 
 ********************************************************************
 *  The tint shader compiler has encountered an unexpected error.   *

@@ -211,33 +211,52 @@ void Formatter::format(const Diagnostic& diag, State& state) const {
     state.newline();
     state.set_style({Color::kDefault, false});
 
-    for (size_t line = rng.begin.line; line <= rng.end.line; line++) {
-      if (line < src.file_content->lines.size() + 1) {
-        auto len = src.file_content->lines[line - 1].size();
+    for (size_t line_num = rng.begin.line;
+         (line_num <= rng.end.line) && (src.file_content->lines.size() + 1);
+         line_num++) {
+      auto& line = src.file_content->lines[line_num - 1];
+      auto line_len = line.size();
 
-        state << src.file_content->lines[line - 1];
-
-        state.newline();
-        state.set_style({Color::kCyan, false});
-
-        if (line == rng.begin.line && line == rng.end.line) {
-          // Single line
-          state.repeat(' ', rng.begin.column - 1);
-          state.repeat('^',
-                       std::max<size_t>(rng.end.column - rng.begin.column, 1));
-        } else if (line == rng.begin.line) {
-          // Start of multi-line
-          state.repeat(' ', rng.begin.column - 1);
-          state.repeat('^', len - (rng.begin.column - 1));
-        } else if (line == rng.end.line) {
-          // End of multi-line
-          state.repeat('^', rng.end.column - 1);
+      for (auto c : line) {
+        if (c == '\t') {
+          state.repeat(' ', style_.tab_width);
         } else {
-          // Middle of multi-line
-          state.repeat('^', len);
+          state << c;
         }
-        state.newline();
       }
+
+      state.newline();
+      state.set_style({Color::kCyan, false});
+
+      // Count the number of glyphs in the line span.
+      // start and end use 1-based indexing .
+      auto num_glyphs = [&](size_t start, size_t end) {
+        size_t count = 0;
+        start = (start > 0) ? (start - 1) : 0;
+        end = (end > 0) ? (end - 1) : 0;
+        for (size_t i = start; (i < end) && (i < line_len); i++) {
+          count += (line[i] == '\t') ? style_.tab_width : 1;
+        }
+        return count;
+      };
+
+      if (line_num == rng.begin.line && line_num == rng.end.line) {
+        // Single line
+        state.repeat(' ', num_glyphs(1, rng.begin.column));
+        state.repeat('^', std::max<size_t>(
+                              num_glyphs(rng.begin.column, rng.end.column), 1));
+      } else if (line_num == rng.begin.line) {
+        // Start of multi-line
+        state.repeat(' ', num_glyphs(1, rng.begin.column));
+        state.repeat('^', num_glyphs(rng.begin.column, line_len + 1));
+      } else if (line_num == rng.end.line) {
+        // End of multi-line
+        state.repeat('^', num_glyphs(1, rng.end.column));
+      } else {
+        // Middle of multi-line
+        state.repeat('^', num_glyphs(1, line_len + 1));
+      }
+      state.newline();
     }
 
     state.set_style({});

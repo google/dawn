@@ -37,6 +37,8 @@ class Formatter {
     bool print_line = true;
     /// print a newline at the end of a diagnostic list
     bool print_newline_at_end = true;
+    /// width of a tab character
+    size_t tab_width = 2u;
   };
 
   /// Constructor for the formatter using a default style.
