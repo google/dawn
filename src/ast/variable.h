@@ -32,7 +32,7 @@ class LocationDecoration;
 /// A Variable statement.
 ///
 /// An instance of this class represents one of three constructs in WGSL: "var"
-/// declaration, "const" declaration, or formal parameter to a function.
+/// declaration, "let" declaration, or formal parameter to a function.
 ///
 /// 1. A "var" declaration is a name for typed storage.  Examples:
 ///
@@ -68,14 +68,20 @@ class LocationDecoration;
 ///   and storage class S, then its reference type is pointer-to-T-in-S.
 ///
 /// This class uses the term "type" to refer to:
-///     the value type of a "const",
+///     the value type of a "let",
 ///     the value type of the formal parameter,
 ///     or the store type of the "var".
+//
+/// Setting is_const:
+///   - "var" gets false
+///   - "let" gets true
+///   - formal parameter gets true
 ///
-/// The storage class for a "var" is StorageClass::kNone when using the
-/// defaulting syntax for a "var" declared inside a function.
-/// The storage class for a "const" is always StorageClass::kNone.
-/// The storage class for a formal parameter is always StorageClass::kNone.
+/// Setting storage class:
+///   - "var" is StorageClass::kNone when using the
+///     defaulting syntax for a "var" declared inside a function.
+///   - "let" is always StorageClass::kNone.
+///   - formal parameter is always StorageClass::kNone.
 class Variable : public Castable<Variable, Node> {
  public:
   /// BindingPoint holds a group and binding decoration.
