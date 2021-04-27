@@ -68,12 +68,12 @@ namespace dawn_native { namespace d3d12 {
 
     D3D12_TEXTURE_COPY_LOCATION ComputeTextureCopyLocationForTexture(const Texture* texture,
                                                                      uint32_t level,
-                                                                     uint32_t slice,
+                                                                     uint32_t layer,
                                                                      Aspect aspect) {
         D3D12_TEXTURE_COPY_LOCATION copyLocation;
         copyLocation.pResource = texture->GetD3D12Resource();
         copyLocation.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-        copyLocation.SubresourceIndex = texture->GetSubresourceIndex(level, slice, aspect);
+        copyLocation.SubresourceIndex = texture->GetSubresourceIndex(level, layer, aspect);
 
         return copyLocation;
     }
@@ -149,11 +149,11 @@ namespace dawn_native { namespace d3d12 {
                                                        uint64_t bufferBytesPerRow,
                                                        Texture* texture,
                                                        uint32_t textureMiplevel,
-                                                       uint32_t textureSlice,
+                                                       uint32_t textureLayer,
                                                        Aspect aspect) {
         ASSERT(HasOneBit(aspect));
         const D3D12_TEXTURE_COPY_LOCATION textureLocation =
-            ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureSlice, aspect);
+            ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureLayer, aspect);
 
         const uint64_t offsetBytes = baseCopySplit.offset + baseOffset;
 
@@ -201,12 +201,12 @@ namespace dawn_native { namespace d3d12 {
         std::array<uint64_t, TextureCopySplits::kMaxTextureCopySplits> bufferOffsetsForNextSlice = {
             {0u, 0u}};
 
-        for (uint32_t copySlice = 0; copySlice < copySize.depthOrArrayLayers; ++copySlice) {
-            const uint32_t splitIndex = copySlice % copySplits.copies2D.size();
+        for (uint32_t copyLayer = 0; copyLayer < copySize.depthOrArrayLayers; ++copyLayer) {
+            const uint32_t splitIndex = copyLayer % copySplits.copies2D.size();
 
             const Texture2DCopySplit& copySplitPerLayerBase = copySplits.copies2D[splitIndex];
             const uint64_t bufferOffsetForNextSlice = bufferOffsetsForNextSlice[splitIndex];
-            const uint32_t copyTextureLayer = copySlice + textureCopy.origin.z;
+            const uint32_t copyTextureLayer = copyLayer + textureCopy.origin.z;
 
             RecordCopyBufferToTextureFromTextureCopySplit(
                 commandContext->GetCommandList(), copySplitPerLayerBase, bufferResource,
@@ -234,7 +234,7 @@ namespace dawn_native { namespace d3d12 {
 
         RecordCopyBufferToTextureFromTextureCopySplit(
             commandContext->GetCommandList(), copySplits.copies2D[0], bufferResource, 0,
-            bytesPerRow, texture, textureCopy.mipLevel, textureCopy.origin.z, aspect);
+            bytesPerRow, texture, textureCopy.mipLevel, 0, aspect);
     }
 
     void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
@@ -267,10 +267,10 @@ namespace dawn_native { namespace d3d12 {
                                                        uint64_t bufferBytesPerRow,
                                                        Texture* texture,
                                                        uint32_t textureMiplevel,
-                                                       uint32_t textureSlice,
+                                                       uint32_t textureLayer,
                                                        Aspect aspect) {
         const D3D12_TEXTURE_COPY_LOCATION textureLocation =
-            ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureSlice, aspect);
+            ComputeTextureCopyLocationForTexture(texture, textureMiplevel, textureLayer, aspect);
 
         const uint64_t offset = baseCopySplit.offset + baseOffset;
 
@@ -318,12 +318,12 @@ namespace dawn_native { namespace d3d12 {
         // that uses copySplits.copies2D[1].
         std::array<uint64_t, TextureCopySplits::kMaxTextureCopySplits> bufferOffsetsForNextSlice = {
             {0u, 0u}};
-        for (uint32_t copySlice = 0; copySlice < copySize.depthOrArrayLayers; ++copySlice) {
-            const uint32_t splitIndex = copySlice % copySplits.copies2D.size();
+        for (uint32_t copyLayer = 0; copyLayer < copySize.depthOrArrayLayers; ++copyLayer) {
+            const uint32_t splitIndex = copyLayer % copySplits.copies2D.size();
 
             const Texture2DCopySplit& copySplitPerLayerBase = copySplits.copies2D[splitIndex];
             const uint64_t bufferOffsetForNextSlice = bufferOffsetsForNextSlice[splitIndex];
-            const uint32_t copyTextureLayer = copySlice + textureCopy.origin.z;
+            const uint32_t copyTextureLayer = copyLayer + textureCopy.origin.z;
 
             RecordCopyTextureToBufferFromTextureCopySplit(
                 commandList, copySplitPerLayerBase, buffer, bufferOffsetForNextSlice,
@@ -349,9 +349,9 @@ namespace dawn_native { namespace d3d12 {
             ComputeTextureCopySplits(textureCopy.origin, copySize, blockInfo, bufferCopy.offset,
                                      bufferCopy.bytesPerRow, bufferCopy.rowsPerImage, true);
 
-        RecordCopyTextureToBufferFromTextureCopySplit(
-            commandList, copySplits.copies2D[0], buffer, 0, bufferCopy.bytesPerRow, texture,
-            textureCopy.mipLevel, textureCopy.origin.z, textureCopy.aspect);
+        RecordCopyTextureToBufferFromTextureCopySplit(commandList, copySplits.copies2D[0], buffer,
+                                                      0, bufferCopy.bytesPerRow, texture,
+                                                      textureCopy.mipLevel, 0, textureCopy.aspect);
     }
 
     void RecordCopyTextureToBuffer(ID3D12GraphicsCommandList* commandList,

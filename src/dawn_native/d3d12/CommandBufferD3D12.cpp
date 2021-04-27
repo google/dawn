@@ -842,17 +842,17 @@ namespace dawn_native { namespace d3d12 {
                             copy->copySize.width, copy->copySize.height, 1u};
 
                         for (Aspect aspect : IterateEnumMask(srcRange.aspects)) {
-                            for (uint32_t slice = 0; slice < copy->copySize.depthOrArrayLayers;
-                                 ++slice) {
+                            for (uint32_t layer = 0; layer < copy->copySize.depthOrArrayLayers;
+                                 ++layer) {
                                 D3D12_TEXTURE_COPY_LOCATION srcLocation =
                                     ComputeTextureCopyLocationForTexture(
                                         source, copy->source.mipLevel,
-                                        copy->source.origin.z + slice, aspect);
+                                        copy->source.origin.z + layer, aspect);
 
                                 D3D12_TEXTURE_COPY_LOCATION dstLocation =
                                     ComputeTextureCopyLocationForTexture(
                                         destination, copy->destination.mipLevel,
-                                        copy->destination.origin.z + slice, aspect);
+                                        copy->destination.origin.z + layer, aspect);
 
                                 Origin3D sourceOriginInSubresource = copy->source.origin;
                                 sourceOriginInSubresource.z = 0;

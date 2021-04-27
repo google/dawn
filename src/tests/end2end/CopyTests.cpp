@@ -962,6 +962,26 @@ TEST_P(CopyTests_T2B, Texture3DFull) {
            wgpu::TextureDimension::e3D);
 }
 
+// Test that copying a range of texture 3D depths in one texture-to-buffer-copy works.
+TEST_P(CopyTests_T2B, Texture3DSubRegion) {
+    // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
+    // backend.
+    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    constexpr uint32_t kDepth = 6u;
+    constexpr uint32_t kBaseDepth = 2u;
+    constexpr uint32_t kCopyDepth = 3u;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, kBaseDepth};
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kCopyDepth),
+           {kWidth, kHeight, kCopyDepth}, wgpu::TextureDimension::e3D);
+}
+
 // TODO(yunchao.he@intel.com): add T2B tests for 3D textures, like RowPitch,
 // RowsPerImage, buffer offset, partial depth range, non-zero level, etc.
 
@@ -1417,6 +1437,26 @@ TEST_P(CopyTests_B2T, Texture3DFull) {
 
     DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kDepth), {kWidth, kHeight, kDepth},
            wgpu::TextureDimension::e3D);
+}
+
+// Test that copying a range of texture 3D Depths in one texture-to-buffer-copy works.
+TEST_P(CopyTests_B2T, Texture3DSubRegion) {
+    // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
+    // backend.
+    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+
+    constexpr uint32_t kWidth = 256;
+    constexpr uint32_t kHeight = 128;
+    constexpr uint32_t kDepth = 6u;
+    constexpr uint32_t kBaseDepth = 2u;
+    constexpr uint32_t kCopyDepth = 3u;
+
+    TextureSpec textureSpec;
+    textureSpec.copyOrigin = {0, 0, kBaseDepth};
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+
+    DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kCopyDepth),
+           {kWidth, kHeight, kCopyDepth}, wgpu::TextureDimension::e3D);
 }
 
 // TODO(yunchao.he@intel.com): add more tests like RowPitch, RowsPerImage, buffer offset, partial
