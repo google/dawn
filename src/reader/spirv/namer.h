@@ -108,8 +108,8 @@ class Namer {
   /// @returns true if the ID did not have a previously registered name.
   bool Register(uint32_t id, const std::string& name);
 
-  /// Registers a name, but not associated to any ID. Fails if the name
-  /// was already registered.
+  /// Registers a name, but not associated to any ID. Fails and emits
+  /// a diagnostic if the name was already registered.
   /// @param name the name to register
   /// @returns true if the name was not already reegistered.
   bool RegisterWithoutId(const std::string& name);

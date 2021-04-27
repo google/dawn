@@ -621,7 +621,36 @@ bool ParserImpl::RegisterUserAndStructMemberNames() {
        module_->entry_points()) {
     const uint32_t function_id = entry_point.GetSingleWordInOperand(1);
     const std::string name = entry_point.GetInOperand(2).AsString();
+
+    // This translator requires the entry point to be a valid WGSL identifier.
+    // Allowing otherwise leads to difficulties in that the programmer needs
+    // to get a mapping from their original entry point name to the WGSL name,
+    // and we don't have a good mechanism for that.
+    if (!IsValidIdentifier(name)) {
+      return Fail() << "entry point name is not a valid WGSL identifier: "
+                    << name;
+    }
+
+    // SPIR-V allows a single function to be the implementation for more
+    // than one entry point.  In the common case, it's one-to-one, and we should
+    // try to name the function after the entry point.  Otherwise, give the
+    // function a name automatically derived from the entry point name.
     namer_.SuggestSanitizedName(function_id, name);
+
+    // There is another many-to-one relationship to take care of:  In SPIR-V
+    // the same name can be used for multiple entry points, provided they are
+    // for different shader stages. Take action now to ensure we can use the
+    // entry point name later on, and not have it taken for another identifier
+    // by an accidental collision with a derived name made for a different ID.
+    if (!namer_.IsRegistered(name)) {
+      // The entry point name is "unoccupied" becase an earlier entry point
+      // grabbed the slot for the function that implements both entry points.
+      // Register this new entry point's name, to avoid accidental collisions
+      // with a future generated ID.
+      if (!namer_.RegisterWithoutId(name)) {
+        return false;
+      }
+    }
   }
 
   // Register names from OpName and OpMemberName
@@ -683,11 +712,6 @@ bool ParserImpl::RegisterEntryPoints() {
     const std::string ep_name = entry_point.GetOperand(2).AsString();
 
     EntryPointInfo info{ep_name, enum_converter_.ToPipelineStage(stage)};
-    if (!IsValidIdentifier(ep_name)) {
-      return Fail() << "entry point name is not a valid WGSL identifier: "
-                    << ep_name;
-    }
-
     function_to_ep_info_[function_id].push_back(info);
   }
   // The enum conversion could have failed, so return the existing status value.

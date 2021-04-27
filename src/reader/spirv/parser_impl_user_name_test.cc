@@ -100,6 +100,42 @@ TEST_F(SpvParserTest, UserName_MemberNamesMixUserAndSynthesized) {
   EXPECT_THAT(p->namer().GetMemberName(3, 2), Eq("field2"));
 }
 
+TEST_F(SpvParserTest, EntryPointNamesAlwaysTakePrecedence) {
+  const std::string assembly = R"(
+   OpCapability Shader
+   OpMemoryModel Logical Simple
+   OpEntryPoint GLCompute %100 "main"
+   OpEntryPoint Fragment %100 "main_1"
+
+   ; attempt to grab the "main_1" that would be the derived name
+   ; for the second entry point.
+   OpName %1 "main_1"
+
+   %void = OpTypeVoid
+   %voidfn = OpTypeFunction %void
+   %uint = OpTypeInt 32 0
+   %uint_0 = OpConstant %uint 0
+
+   %100 = OpFunction %void None %voidfn
+   %100_entry = OpLabel
+   %1 = OpCopyObject %uint %uint_0
+   OpReturn
+   OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_TRUE(p->BuildAndParseInternalModule());
+  // The first entry point grabs the best name, "main"
+  EXPECT_THAT(p->namer().Name(100), Eq("main"));
+  // The OpName on %1 is overriden becuase the second entry point
+  // has grabbed "main_1" first.
+  EXPECT_THAT(p->namer().Name(1), Eq("main_1_1"));
+
+  const auto ep_info = p->GetEntryPointInfo(100);
+  ASSERT_EQ(2u, ep_info.size());
+  EXPECT_EQ(ep_info[0].name, "main");
+  EXPECT_EQ(ep_info[1].name, "main_1");
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
