@@ -87,15 +87,15 @@ TEST_F(SpvNamerTest, FindUnusedDerivedName_NoRecordedName) {
 
 TEST_F(SpvNamerTest, FindUnusedDerivedName_HasRecordedName) {
   Namer namer(fail_stream_);
-  namer.SaveName(12, "rigby");
+  namer.Register(12, "rigby");
   EXPECT_THAT(namer.FindUnusedDerivedName("rigby"), Eq("rigby_1"));
 }
 
 TEST_F(SpvNamerTest, FindUnusedDerivedName_HasMultipleConflicts) {
   Namer namer(fail_stream_);
-  namer.SaveName(12, "rigby");
-  namer.SaveName(13, "rigby_1");
-  namer.SaveName(14, "rigby_3");
+  namer.Register(12, "rigby");
+  namer.Register(13, "rigby_1");
+  namer.Register(14, "rigby_3");
   // It picks the first non-conflicting suffix.
   EXPECT_THAT(namer.FindUnusedDerivedName("rigby"), Eq("rigby_2"));
 }
@@ -107,7 +107,7 @@ TEST_F(SpvNamerTest, IsRegistered_NoRecordedName) {
 
 TEST_F(SpvNamerTest, IsRegistered_RegisteredById) {
   Namer namer(fail_stream_);
-  namer.SaveName(1, "abbey");
+  namer.Register(1, "abbey");
   EXPECT_TRUE(namer.IsRegistered("abbey"));
 }
 
@@ -127,25 +127,60 @@ TEST_F(SpvNamerTest, MakeDerivedName_NoRecordedName) {
 
 TEST_F(SpvNamerTest, MakeDerivedName_HasRecordedName) {
   Namer namer(fail_stream_);
-  namer.SaveName(12, "rigby");
+  namer.Register(12, "rigby");
   EXPECT_THAT(namer.MakeDerivedName("rigby"), Eq("rigby_1"));
 }
 
 TEST_F(SpvNamerTest, MakeDerivedName_HasMultipleConflicts) {
   Namer namer(fail_stream_);
-  namer.SaveName(12, "rigby");
-  namer.SaveName(13, "rigby_1");
-  namer.SaveName(14, "rigby_3");
+  namer.Register(12, "rigby");
+  namer.Register(13, "rigby_1");
+  namer.Register(14, "rigby_3");
   // It picks the first non-conflicting suffix.
   EXPECT_THAT(namer.MakeDerivedName("rigby"), Eq("rigby_2"));
 }
 
-TEST_F(SpvNamerTest, SaveNameOnce) {
+TEST_F(SpvNamerTest, RegisterWithoutId_Once) {
+  Namer namer(fail_stream_);
+
+  const std::string n("abbey");
+  EXPECT_FALSE(namer.IsRegistered(n));
+  EXPECT_TRUE(namer.RegisterWithoutId(n));
+  EXPECT_TRUE(namer.IsRegistered(n));
+  EXPECT_TRUE(success_);
+  EXPECT_TRUE(error().empty());
+}
+
+TEST_F(SpvNamerTest, RegisterWithoutId_Twice) {
+  Namer namer(fail_stream_);
+
+  const std::string n("abbey");
+  EXPECT_FALSE(namer.IsRegistered(n));
+  EXPECT_TRUE(namer.RegisterWithoutId(n));
+  // Fails on second attempt.
+  EXPECT_FALSE(namer.RegisterWithoutId(n));
+  EXPECT_FALSE(success_);
+  EXPECT_EQ(error(),"internal error: name already registered: abbey");
+}
+
+TEST_F(SpvNamerTest, RegisterWithoutId_ConflictsWithIdRegisteredName) {
+  Namer namer(fail_stream_);
+
+  const std::string n("abbey");
+  EXPECT_TRUE(namer.Register(1,n));
+  EXPECT_TRUE(namer.IsRegistered(n));
+  // Fails on attempt to register without ID.
+  EXPECT_FALSE(namer.RegisterWithoutId(n));
+  EXPECT_FALSE(success_);
+  EXPECT_EQ(error(),"internal error: name already registered: abbey");
+}
+
+TEST_F(SpvNamerTest, Register_Once) {
   Namer namer(fail_stream_);
 
   const uint32_t id = 9;
   EXPECT_FALSE(namer.HasName(id));
-  const bool save_result = namer.SaveName(id, "abbey road");
+  const bool save_result = namer.Register(id, "abbey road");
   EXPECT_TRUE(save_result);
   EXPECT_TRUE(namer.HasName(id));
   EXPECT_EQ(namer.GetName(id), "abbey road");
@@ -153,13 +188,13 @@ TEST_F(SpvNamerTest, SaveNameOnce) {
   EXPECT_TRUE(error().empty());
 }
 
-TEST_F(SpvNamerTest, SaveNameTwoIds) {
+TEST_F(SpvNamerTest, Register_TwoIds) {
   Namer namer(fail_stream_);
 
   EXPECT_FALSE(namer.HasName(8));
   EXPECT_FALSE(namer.HasName(9));
-  EXPECT_TRUE(namer.SaveName(8, "abbey road"));
-  EXPECT_TRUE(namer.SaveName(9, "rubber soul"));
+  EXPECT_TRUE(namer.Register(8, "abbey road"));
+  EXPECT_TRUE(namer.Register(9, "rubber soul"));
   EXPECT_TRUE(namer.HasName(8));
   EXPECT_TRUE(namer.HasName(9));
   EXPECT_EQ(namer.GetName(9), "rubber soul");
@@ -168,12 +203,12 @@ TEST_F(SpvNamerTest, SaveNameTwoIds) {
   EXPECT_TRUE(error().empty());
 }
 
-TEST_F(SpvNamerTest, SaveNameFailsDueToIdReuse) {
+TEST_F(SpvNamerTest, Register_FailsDueToIdReuse) {
   Namer namer(fail_stream_);
 
   const uint32_t id = 9;
-  EXPECT_TRUE(namer.SaveName(id, "abbey road"));
-  EXPECT_FALSE(namer.SaveName(id, "rubber soul"));
+  EXPECT_TRUE(namer.Register(id, "abbey road"));
+  EXPECT_FALSE(namer.Register(id, "rubber soul"));
   EXPECT_TRUE(namer.HasName(id));
   EXPECT_EQ(namer.GetName(id), "abbey road");
   EXPECT_FALSE(success_);
@@ -191,7 +226,7 @@ TEST_F(SpvNamerTest,
        SuggestSanitizedName_RejectSuggestionWhenConflictOnSameId) {
   Namer namer(fail_stream_);
 
-  namer.SaveName(1, "lennon");
+  namer.Register(1, "lennon");
   EXPECT_FALSE(namer.SuggestSanitizedName(1, "mccartney"));
   EXPECT_THAT(namer.GetName(1), Eq("lennon"));
 }
@@ -207,7 +242,7 @@ TEST_F(SpvNamerTest,
        SuggestSanitizedName_GenerateNewNameWhenConflictOnDifferentId) {
   Namer namer(fail_stream_);
 
-  namer.SaveName(7, "rice");
+  namer.Register(7, "rice");
   EXPECT_TRUE(namer.SuggestSanitizedName(9, "rice"));
   EXPECT_THAT(namer.GetName(9), Eq("rice_1"));
 }
@@ -260,13 +295,13 @@ TEST_F(SpvNamerTest, Name_GeneratesNameIfNoneRegistered) {
 
 TEST_F(SpvNamerTest, Name_GeneratesNameWithoutConflict) {
   Namer namer(fail_stream_);
-  namer.SaveName(42, "x_14");
+  namer.Register(42, "x_14");
   EXPECT_THAT(namer.Name(14), Eq("x_14_1"));
 }
 
 TEST_F(SpvNamerTest, Name_ReturnsRegisteredName) {
   Namer namer(fail_stream_);
-  namer.SaveName(14, "hello");
+  namer.Register(14, "hello");
   EXPECT_THAT(namer.Name(14), Eq("hello"));
 }
 

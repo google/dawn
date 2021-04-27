@@ -18,6 +18,8 @@
 #include <sstream>
 #include <unordered_set>
 
+#include "src/debug.h"
+
 namespace tint {
 namespace reader {
 namespace spirv {
@@ -120,18 +122,29 @@ std::string Namer::FindUnusedDerivedName(const std::string& base_name) const {
 
 std::string Namer::MakeDerivedName(const std::string& base_name) {
   auto result = FindUnusedDerivedName(base_name);
-  // Register it.
-  name_to_id_[result] = 0;
+  const bool registered = RegisterWithoutId(result);
+  TINT_ASSERT(registered);
   return result;
 }
 
-bool Namer::SaveName(uint32_t id, const std::string& name) {
+bool Namer::Register(uint32_t id, const std::string& name) {
   if (HasName(id)) {
     return Fail() << "internal error: ID " << id
                   << " already has registered name: " << id_to_name_[id];
   }
+  if (!RegisterWithoutId(name)) {
+    return false;
+  }
   id_to_name_[id] = name;
   name_to_id_[name] = id;
+  return true;
+}
+
+bool Namer::RegisterWithoutId(const std::string& name) {
+  if (IsRegistered(name)) {
+    return Fail() << "internal error: name already registered: " << name;
+  }
+  name_to_id_[name] = 0;
   return true;
 }
 
@@ -141,7 +154,7 @@ bool Namer::SuggestSanitizedName(uint32_t id,
     return false;
   }
 
-  return SaveName(id, FindUnusedDerivedName(Sanitize(suggested_name)));
+  return Register(id, FindUnusedDerivedName(Sanitize(suggested_name)));
 }
 
 bool Namer::SuggestSanitizedMemberName(uint32_t struct_id,

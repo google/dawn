@@ -106,7 +106,13 @@ class Namer {
   /// @param id the SPIR-V ID
   /// @param name the name to map to the ID
   /// @returns true if the ID did not have a previously registered name.
-  bool SaveName(uint32_t id, const std::string& name);
+  bool Register(uint32_t id, const std::string& name);
+
+  /// Registers a name, but not associated to any ID. Fails if the name
+  /// was already registered.
+  /// @param name the name to register
+  /// @returns true if the name was not already reegistered.
+  bool RegisterWithoutId(const std::string& name);
 
   /// Saves a sanitized name for the given ID, if that ID does not yet
   /// have a registered name, and if the sanitized name has not already
