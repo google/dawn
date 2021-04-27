@@ -80,6 +80,7 @@ namespace dawn_native {
         void TrackTask(std::unique_ptr<CreatePipelineAsyncTaskBase> task, ExecutionSerial serial);
         void Tick(ExecutionSerial finishedSerial);
         void ClearForShutDown();
+        void ClearForDeviceLoss();
 
       private:
         DeviceBase* mDevice;

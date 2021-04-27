@@ -238,6 +238,7 @@ namespace dawn_native {
             }
 
             mQueue->HandleDeviceLoss();
+            mCreatePipelineAsyncTracker->ClearForDeviceLoss();
 
             // Still forward device loss errors to the error scopes so they all reject.
             mErrorScopeStack->HandleError(ToWGPUErrorType(type), message);

@@ -128,17 +128,20 @@ namespace dawn_native {
         mCreatePipelineAsyncTasksInFlight.ClearUpTo(finishedSerial);
 
         for (auto& task : tasks) {
-            if (mDevice->IsLost()) {
-                task->HandleDeviceLoss();
-            } else {
-                task->Finish();
-            }
+            task->Finish();
         }
     }
 
     void CreatePipelineAsyncTracker::ClearForShutDown() {
         for (auto& task : mCreatePipelineAsyncTasksInFlight.IterateAll()) {
             task->HandleShutDown();
+        }
+        mCreatePipelineAsyncTasksInFlight.Clear();
+    }
+
+    void CreatePipelineAsyncTracker::ClearForDeviceLoss() {
+        for (auto& task : mCreatePipelineAsyncTasksInFlight.IterateAll()) {
+            task->HandleDeviceLoss();
         }
         mCreatePipelineAsyncTasksInFlight.Clear();
     }

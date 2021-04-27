@@ -554,6 +554,26 @@ TEST_P(DeviceLostTest, DeviceLostDoesntCallUncapturedError) {
     device.LoseForTesting();
 }
 
+// Test that WGPUCreatePipelineAsyncStatus_DeviceLost can be correctly returned when device is lost
+// before the callback of Create*PipelineAsync() is called.
+TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
+    wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(
+        [[stage(compute)]] fn main() {
+        })");
+
+    wgpu::ComputePipelineDescriptor descriptor;
+    descriptor.computeStage.module = csModule;
+    descriptor.computeStage.entryPoint = "main";
+
+    auto callback = [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline returnPipeline,
+                       const char* message, void* userdata) {
+        EXPECT_EQ(WGPUCreatePipelineAsyncStatus::WGPUCreatePipelineAsyncStatus_DeviceLost, status);
+    };
+
+    device.CreateComputePipelineAsync(&descriptor, callback, nullptr);
+    SetCallbackAndLoseForTesting();
+}
+
 DAWN_INSTANTIATE_TEST(DeviceLostTest,
                       D3D12Backend(),
                       MetalBackend(),
