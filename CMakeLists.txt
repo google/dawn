@@ -155,32 +155,40 @@ function(tint_default_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC
       -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
 
+  set(COMMON_GNU_OPTIONS
+    -Wall
+    -Werror
+    -Wextra
+    -Wno-documentation-unknown-command
+    -Wno-padded
+    -Wno-switch-enum
+    -Wno-unknown-pragmas
+  )
+
+  set(COMMON_CLANG_OPTIONS
+    -Wno-c++98-compat
+    -Wno-c++98-compat-pedantic
+    -Wno-format-pedantic
+    -Wno-return-std-move-in-c++11
+    -Wno-unknown-warning-option
+    -Wno-undefined-var-template
+    -Wno-used-but-marked-unused
+    -Weverything
+  )
+
   if (${COMPILER_IS_LIKE_GNU})
     target_compile_options(${TARGET} PRIVATE
       -std=c++14
       -fno-exceptions
       -fno-rtti
-      -Wall
-      -Werror
-      -Wextra
-      -Wno-documentation-unknown-command
-      -Wno-padded
-      -Wno-switch-enum
-      -Wno-unknown-pragmas
       -pedantic-errors
+      ${COMMON_GNU_OPTIONS}
     )
 
     if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang") OR
         ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang"))
       target_compile_options(${TARGET} PRIVATE
-        -Wno-c++98-compat
-        -Wno-c++98-compat-pedantic
-        -Wno-format-pedantic
-        -Wno-return-std-move-in-c++11
-        -Wno-unknown-warning-option
-        -Wno-undefined-var-template
-        -Wno-used-but-marked-unused
-        -Weverything
+        ${COMMON_CLANG_OPTIONS}
       )
     endif()
 
@@ -231,6 +239,20 @@ function(tint_default_compile_options TARGET)
       /wd5026
       /wd5027
     )
+
+    # When building with clang-cl on Windows, try to match our clang build
+    # options as much as possible.
+    if (COMPILER_IS_CLANG_CL)
+      target_compile_options(${TARGET} PRIVATE
+        ${COMMON_GNU_OPTIONS}
+        ${COMMON_CLANG_OPTIONS}
+        # Disable warnings that are usually disabled in downstream deps for
+        # gcc/clang, but aren't for clang-cl.
+        -Wno-global-constructors
+        -Wno-zero-as-null-pointer-constant
+        -Wno-shorten-64-to-32
+      )
+    endif()
   endif()
 
 endfunction()
