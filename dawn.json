@@ -1897,6 +1897,14 @@
             {"name": "window", "type": "uint32_t"}
         ]
     },
+    "surface descriptor from windows core window": {
+        "category": "structure",
+        "chained": true,
+        "javascript": false,
+        "members": [
+            {"name": "core window", "type": "void", "annotation": "*"}
+        ]
+    },
     "swap chain": {
         "category": "object",
         "methods": [
@@ -1937,7 +1945,8 @@
             {"value": 4, "name": "surface descriptor from canvas HTML selector"},
             {"value": 5, "name": "shader module SPIRV descriptor"},
             {"value": 6, "name": "shader module WGSL descriptor"},
-            {"value": 7, "name": "primitive depth clamping state"}
+            {"value": 7, "name": "primitive depth clamping state"},
+            {"value": 8, "name": "surface descriptor from windows core window"}
         ]
     },
     "texture": {

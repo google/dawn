@@ -149,7 +149,8 @@
         "client_side_structures": [
             "SurfaceDescriptorFromMetalLayer",
             "SurfaceDescriptorFromWindowsHWND",
-            "SurfaceDescriptorFromXlib"
+            "SurfaceDescriptorFromXlib",
+            "SurfaceDescriptorFromWindowsCoreWindow"
         ],
         "client_side_commands": [
             "BufferMapAsync",
