@@ -28,6 +28,7 @@
 #include "src/ast/call_expression.h"
 #include "src/ast/case_statement.h"
 #include "src/ast/depth_texture.h"
+#include "src/ast/external_texture.h"
 #include "src/ast/f32.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/i32.h"
@@ -62,6 +63,7 @@
 #include "src/sem/array_type.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/depth_texture_type.h"
+#include "src/sem/external_texture_type.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/i32_type.h"
 #include "src/sem/matrix_type.h"
@@ -352,9 +354,21 @@ class ProgramBuilder {
       return {builder->create<ast::Bool>(), builder->create<sem::Bool>()};
     }
 
+    /// @param source the Source of the node
+    /// @returns a boolean type
+    typ::Bool bool_(const Source& source) const {
+      return {builder->create<ast::Bool>(source), builder->create<sem::Bool>()};
+    }
+
     /// @returns a f32 type
     typ::F32 f32() const {
       return {builder->create<ast::F32>(), builder->create<sem::F32>()};
+    }
+
+    /// @param source the Source of the node
+    /// @returns a f32 type
+    typ::F32 f32(const Source& source) const {
+      return {builder->create<ast::F32>(source), builder->create<sem::F32>()};
     }
 
     /// @returns a i32 type
@@ -362,9 +376,21 @@ class ProgramBuilder {
       return {builder->create<ast::I32>(), builder->create<sem::I32>()};
     }
 
+    /// @param source the Source of the node
+    /// @returns a i32 type
+    typ::I32 i32(const Source& source) const {
+      return {builder->create<ast::I32>(source), builder->create<sem::I32>()};
+    }
+
     /// @returns a u32 type
     typ::U32 u32() const {
       return {builder->create<ast::U32>(), builder->create<sem::U32>()};
+    }
+
+    /// @param source the Source of the node
+    /// @returns a u32 type
+    typ::U32 u32(const Source& source) const {
+      return {builder->create<ast::U32>(source), builder->create<sem::U32>()};
     }
 
     /// @returns a void type
@@ -372,11 +398,26 @@ class ProgramBuilder {
       return {builder->create<ast::Void>(), builder->create<sem::Void>()};
     }
 
+    /// @param source the Source of the node
+    /// @returns a void type
+    typ::Void void_(const Source& source) const {
+      return {builder->create<ast::Void>(source), builder->create<sem::Void>()};
+    }
+
     /// @param type vector subtype
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
     typ::Vector vec(typ::Type type, uint32_t n) const {
       return {builder->create<ast::Vector>(type, n),
+              builder->create<sem::Vector>(type, n)};
+    }
+
+    /// @param source the Source of the node
+    /// @param type vector subtype
+    /// @param n vector width in elements
+    /// @return the tint AST type for a `n`-element vector of `type`.
+    typ::Vector vec(const Source& source, typ::Type type, uint32_t n) const {
+      return {builder->create<ast::Vector>(source, type, n),
               builder->create<sem::Vector>(type, n)};
     }
 
@@ -423,6 +464,19 @@ class ProgramBuilder {
     /// @return the tint AST type for a matrix of `type`
     typ::Matrix mat(typ::Type type, uint32_t columns, uint32_t rows) const {
       return {builder->create<ast::Matrix>(type, rows, columns),
+              builder->create<sem::Matrix>(type, rows, columns)};
+    }
+
+    /// @param source the Source of the node
+    /// @param type matrix subtype
+    /// @param columns number of columns for the matrix
+    /// @param rows number of rows for the matrix
+    /// @return the tint AST type for a matrix of `type`
+    typ::Matrix mat(const Source& source,
+                    typ::Type type,
+                    uint32_t columns,
+                    uint32_t rows) const {
+      return {builder->create<ast::Matrix>(source, type, rows, columns),
               builder->create<sem::Matrix>(type, rows, columns)};
     }
 
@@ -560,7 +614,21 @@ class ProgramBuilder {
                      ast::DecorationList decos = {}) const {
       subtype = MaybeCreateTypename(subtype);
       return {builder->create<ast::Array>(subtype, n, decos),
-              builder->create<sem::ArrayType>(subtype, n, decos)};
+              builder->create<sem::ArrayType>(subtype, n, std::move(decos))};
+    }
+
+    /// @param source the Source of the node
+    /// @param subtype the array element type
+    /// @param n the array size. 0 represents a runtime-array
+    /// @param decos the optional decorations for the array
+    /// @return the tint AST type for a array of size `n` of type `T`
+    typ::Array array(const Source& source,
+                     typ::Type subtype,
+                     uint32_t n = 0,
+                     ast::DecorationList decos = {}) const {
+      subtype = MaybeCreateTypename(subtype);
+      return {builder->create<ast::Array>(source, subtype, n, decos),
+              builder->create<sem::ArrayType>(subtype, n, std::move(decos))};
     }
 
     /// @param subtype the array element type
@@ -600,6 +668,21 @@ class ProgramBuilder {
       };
     }
 
+    /// Creates an alias type
+    /// @param source the Source of the node
+    /// @param name the alias name
+    /// @param type the alias type
+    /// @returns the alias pointer
+    template <typename NAME>
+    typ::Alias alias(const Source& source, NAME&& name, typ::Type type) const {
+      type = MaybeCreateTypename(type);
+      auto sym = builder->Sym(std::forward<NAME>(name));
+      return {
+          builder->create<ast::Alias>(source, sym, type),
+          builder->create<sem::Alias>(sym, type),
+      };
+    }
+
     /// Creates an access control qualifier type
     /// @param access the access control
     /// @param type the inner type
@@ -611,6 +694,19 @@ class ProgramBuilder {
               builder->create<sem::AccessControl>(access, type)};
     }
 
+    /// Creates an access control qualifier type
+    /// @param source the Source of the node
+    /// @param access the access control
+    /// @param type the inner type
+    /// @returns the access control qualifier type
+    typ::AccessControl access(const Source& source,
+                              ast::AccessControl::Access access,
+                              typ::Type type) const {
+      type = MaybeCreateTypename(type);
+      return {builder->create<ast::AccessControl>(source, access, type),
+              builder->create<sem::AccessControl>(access, type)};
+    }
+
     /// @param type the type of the pointer
     /// @param storage_class the storage class of the pointer
     /// @return the pointer to `type` with the given ast::StorageClass
@@ -618,6 +714,18 @@ class ProgramBuilder {
                          ast::StorageClass storage_class) const {
       type = MaybeCreateTypename(type);
       return {builder->create<ast::Pointer>(type, storage_class),
+              builder->create<sem::Pointer>(type, storage_class)};
+    }
+
+    /// @param source the Source of the node
+    /// @param type the type of the pointer
+    /// @param storage_class the storage class of the pointer
+    /// @return the pointer to `type` with the given ast::StorageClass
+    typ::Pointer pointer(const Source& source,
+                         typ::Type type,
+                         ast::StorageClass storage_class) const {
+      type = MaybeCreateTypename(type);
+      return {builder->create<ast::Pointer>(source, type, storage_class),
               builder->create<sem::Pointer>(type, storage_class)};
     }
 
@@ -641,10 +749,27 @@ class ProgramBuilder {
               builder->create<sem::Sampler>(kind)};
     }
 
+    /// @param source the Source of the node
+    /// @param kind the kind of sampler
+    /// @returns the sampler
+    typ::Sampler sampler(const Source& source, ast::SamplerKind kind) const {
+      return {builder->create<ast::Sampler>(source, kind),
+              builder->create<sem::Sampler>(kind)};
+    }
+
     /// @param dims the dimensionality of the texture
     /// @returns the depth texture
     typ::DepthTexture depth_texture(ast::TextureDimension dims) const {
       return {builder->create<ast::DepthTexture>(dims),
+              builder->create<sem::DepthTexture>(dims)};
+    }
+
+    /// @param source the Source of the node
+    /// @param dims the dimensionality of the texture
+    /// @returns the depth texture
+    typ::DepthTexture depth_texture(const Source& source,
+                                    ast::TextureDimension dims) const {
+      return {builder->create<ast::DepthTexture>(source, dims),
               builder->create<sem::DepthTexture>(dims)};
     }
 
@@ -657,12 +782,34 @@ class ProgramBuilder {
               builder->create<sem::SampledTexture>(dims, subtype)};
     }
 
+    /// @param source the Source of the node
+    /// @param dims the dimensionality of the texture
+    /// @param subtype the texture subtype.
+    /// @returns the sampled texture
+    typ::SampledTexture sampled_texture(const Source& source,
+                                        ast::TextureDimension dims,
+                                        typ::Type subtype) const {
+      return {builder->create<ast::SampledTexture>(source, dims, subtype),
+              builder->create<sem::SampledTexture>(dims, subtype)};
+    }
+
     /// @param dims the dimensionality of the texture
     /// @param subtype the texture subtype.
     /// @returns the multisampled texture
     typ::MultisampledTexture multisampled_texture(ast::TextureDimension dims,
                                                   typ::Type subtype) const {
       return {builder->create<ast::MultisampledTexture>(dims, subtype),
+              builder->create<sem::MultisampledTexture>(dims, subtype)};
+    }
+
+    /// @param source the Source of the node
+    /// @param dims the dimensionality of the texture
+    /// @param subtype the texture subtype.
+    /// @returns the multisampled texture
+    typ::MultisampledTexture multisampled_texture(const Source& source,
+                                                  ast::TextureDimension dims,
+                                                  typ::Type subtype) const {
+      return {builder->create<ast::MultisampledTexture>(source, dims, subtype),
               builder->create<sem::MultisampledTexture>(dims, subtype)};
     }
 
@@ -676,6 +823,28 @@ class ProgramBuilder {
           sem::StorageTexture::SubtypeFor(format, builder->Types());
       return {builder->create<ast::StorageTexture>(dims, format, ast_subtype),
               builder->create<sem::StorageTexture>(dims, format, sem_subtype)};
+    }
+
+    /// @param source the Source of the node
+    /// @param dims the dimensionality of the texture
+    /// @param format the image format of the texture
+    /// @returns the storage texture
+    typ::StorageTexture storage_texture(const Source& source,
+                                        ast::TextureDimension dims,
+                                        ast::ImageFormat format) const {
+      auto* ast_subtype = ast::StorageTexture::SubtypeFor(format, *builder);
+      auto* sem_subtype =
+          sem::StorageTexture::SubtypeFor(format, builder->Types());
+      return {builder->create<ast::StorageTexture>(source, dims, format,
+                                                   ast_subtype),
+              builder->create<sem::StorageTexture>(dims, format, sem_subtype)};
+    }
+
+    /// @param source the Source of the node
+    /// @returns the external texture
+    typ::ExternalTexture external_texture(const Source& source) const {
+      return {builder->create<ast::ExternalTexture>(source),
+              builder->create<sem::ExternalTexture>()};
     }
 
     /// If ty is a ast::Struct or ast::Alias, the returned type is an

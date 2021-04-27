@@ -331,6 +331,8 @@ class ParserImpl {
   /// @param idx the index of the token to return
   /// @returns the token `idx` positions ahead without advancing
   Token peek(size_t idx);
+  /// @returns the last token that was returned by `next()`
+  Token last_token() const;
   /// Appends an error at `t` with the message `msg`
   /// @param t the token to associate the error with
   /// @param msg the error message
@@ -821,9 +823,9 @@ class ParserImpl {
   /// Used to ensure that all decorations are consumed.
   bool expect_decorations_consumed(const ast::DecorationList& list);
 
-  Expect<typ::Type> expect_type_decl_pointer();
+  Expect<typ::Type> expect_type_decl_pointer(Token t);
   Expect<typ::Type> expect_type_decl_vector(Token t);
-  Expect<typ::Type> expect_type_decl_array(ast::DecorationList decos);
+  Expect<typ::Type> expect_type_decl_array(Token t, ast::DecorationList decos);
   Expect<typ::Type> expect_type_decl_matrix(Token t);
 
   Expect<typ::Type> expect_type(const std::string& use);
@@ -831,6 +833,10 @@ class ParserImpl {
   Maybe<ast::Statement*> non_block_statement();
   Maybe<ast::Statement*> for_header_initializer();
   Maybe<ast::Statement*> for_header_continuing();
+
+  class MultiTokenSource;
+  MultiTokenSource make_source_range();
+  MultiTokenSource make_source_range_from(const Source& start);
 
   /// Creates a new `ast::Node` owned by the Module. When the Module is
   /// destructed, the `ast::Node` will also be destructed.
@@ -843,6 +849,7 @@ class ParserImpl {
 
   std::unique_ptr<Lexer> lexer_;
   std::deque<Token> token_queue_;
+  Token last_token_;
   bool synchronized_ = true;
   uint32_t sync_depth_ = 0;
   std::vector<Token::Type> sync_tokens_;

@@ -177,8 +177,37 @@ struct BlockCounters {
     return 0;
   }
 };
-
 }  // namespace
+
+/// RAII helper that combines a Source on construction with the last token's
+/// source when implicitly converted to `Source`.
+class ParserImpl::MultiTokenSource {
+ public:
+  /// Constructor that starts with Source at the current peek position
+  /// @param parser the parser
+  explicit MultiTokenSource(ParserImpl* parser)
+      : MultiTokenSource(parser, parser->peek().source().Begin()) {}
+
+  /// Constructor that starts with the input `start` Source
+  /// @param parser the parser
+  /// @param start the start source of the range
+  MultiTokenSource(ParserImpl* parser, const Source& start)
+      : parser_(parser), start_(start) {}
+
+  /// Implicit conversion to Source that returns the combined source from start
+  /// to the current last token's source.
+  operator Source() const {
+    Source end = parser_->last_token().source().End();
+    if (end < start_) {
+      end = start_;
+    }
+    return Source::Combine(start_, end);
+  }
+
+ private:
+  ParserImpl* parser_;
+  Source start_;
+};
 
 ParserImpl::TypedIdentifier::TypedIdentifier() = default;
 
@@ -266,20 +295,25 @@ Token ParserImpl::next() {
   if (!token_queue_.empty()) {
     auto t = token_queue_.front();
     token_queue_.pop_front();
-    return t;
+    last_token_ = t;
+    return last_token_;
   }
-  return lexer_->next();
+  last_token_ = lexer_->next();
+  return last_token_;
 }
 
 Token ParserImpl::peek(size_t idx) {
   while (token_queue_.size() < (idx + 1))
     token_queue_.push_back(lexer_->next());
-
   return token_queue_[idx];
 }
 
 Token ParserImpl::peek() {
   return peek(0);
+}
+
+Token ParserImpl::last_token() const {
+  return last_token_;
 }
 
 void ParserImpl::register_constructed(const std::string& name,
@@ -560,6 +594,8 @@ Maybe<typ::Type> ParserImpl::texture_sampler_types() {
   if (type.matched)
     return type.value;
 
+  auto source_range = make_source_range();
+
   auto dim = sampled_texture_type();
   if (dim.matched) {
     const char* use = "sampled texture type";
@@ -568,9 +604,7 @@ Maybe<typ::Type> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return typ::Type{
-        builder_.create<ast::SampledTexture>(dim.value, subtype.value),
-        builder_.create<sem::SampledTexture>(dim.value, subtype.value)};
+    return builder_.ty.sampled_texture(source_range, dim.value, subtype.value);
   }
 
   auto ms_dim = multisampled_texture_type();
@@ -581,9 +615,8 @@ Maybe<typ::Type> ParserImpl::texture_sampler_types() {
     if (subtype.errored)
       return Failure::kErrored;
 
-    return typ::Type{
-        builder_.create<ast::MultisampledTexture>(ms_dim.value, subtype.value),
-        builder_.create<sem::MultisampledTexture>(ms_dim.value, subtype.value)};
+    return builder_.ty.multisampled_texture(source_range, ms_dim.value,
+                                            subtype.value);
   }
 
   auto storage = storage_texture_type();
@@ -596,14 +629,8 @@ Maybe<typ::Type> ParserImpl::texture_sampler_types() {
     if (format.errored)
       return Failure::kErrored;
 
-    auto* subtype = ast::StorageTexture::SubtypeFor(format.value, builder_);
-    auto* subtype_sem =
-        sem::StorageTexture::SubtypeFor(format.value, builder_.Types());
-
-    return typ::Type{builder_.create<ast::StorageTexture>(
-                         storage.value, format.value, subtype),
-                     builder_.create<sem::StorageTexture>(
-                         storage.value, format.value, subtype_sem)};
+    return builder_.ty.storage_texture(source_range, storage.value,
+                                       format.value);
   }
 
   return Failure::kNoMatch;
@@ -613,14 +640,12 @@ Maybe<typ::Type> ParserImpl::texture_sampler_types() {
 //  : SAMPLER
 //  | SAMPLER_COMPARISON
 Maybe<typ::Type> ParserImpl::sampler_type() {
-  if (match(Token::Type::kSampler))
-    return typ::Type{builder_.create<ast::Sampler>(ast::SamplerKind::kSampler),
-                     builder_.create<sem::Sampler>(ast::SamplerKind::kSampler)};
+  Source source;
+  if (match(Token::Type::kSampler, &source))
+    return builder_.ty.sampler(source, ast::SamplerKind::kSampler);
 
-  if (match(Token::Type::kComparisonSampler))
-    return typ::Type{
-        builder_.create<ast::Sampler>(ast::SamplerKind::kComparisonSampler),
-        builder_.create<sem::Sampler>(ast::SamplerKind::kComparisonSampler)};
+  if (match(Token::Type::kComparisonSampler, &source))
+    return builder_.ty.sampler(source, ast::SamplerKind::kComparisonSampler);
 
   return Failure::kNoMatch;
 }
@@ -657,9 +682,9 @@ Maybe<ast::TextureDimension> ParserImpl::sampled_texture_type() {
 // external_texture_type
 //  : TEXTURE_EXTERNAL
 Maybe<typ::Type> ParserImpl::external_texture_type() {
-  if (match(Token::Type::kTextureExternal)) {
-    return typ::Type{builder_.create<ast::ExternalTexture>(),
-                     builder_.create<sem::ExternalTexture>()};
+  Source source;
+  if (match(Token::Type::kTextureExternal, &source)) {
+    return builder_.ty.external_texture(source);
   }
 
   return Failure::kNoMatch;
@@ -698,25 +723,19 @@ Maybe<ast::TextureDimension> ParserImpl::storage_texture_type() {
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
 Maybe<typ::Type> ParserImpl::depth_texture_type() {
-  if (match(Token::Type::kTextureDepth2d))
-    return typ::Type{
-        builder_.create<ast::DepthTexture>(ast::TextureDimension::k2d),
-        builder_.create<sem::DepthTexture>(ast::TextureDimension::k2d)};
+  Source source;
 
-  if (match(Token::Type::kTextureDepth2dArray))
-    return typ::Type{
-        builder_.create<ast::DepthTexture>(ast::TextureDimension::k2dArray),
-        builder_.create<sem::DepthTexture>(ast::TextureDimension::k2dArray)};
+  if (match(Token::Type::kTextureDepth2d, &source))
+    return builder_.ty.depth_texture(source, ast::TextureDimension::k2d);
 
-  if (match(Token::Type::kTextureDepthCube))
-    return typ::Type{
-        builder_.create<ast::DepthTexture>(ast::TextureDimension::kCube),
-        builder_.create<sem::DepthTexture>(ast::TextureDimension::kCube)};
+  if (match(Token::Type::kTextureDepth2dArray, &source))
+    return builder_.ty.depth_texture(source, ast::TextureDimension::k2dArray);
 
-  if (match(Token::Type::kTextureDepthCubeArray))
-    return typ::Type{
-        builder_.create<ast::DepthTexture>(ast::TextureDimension::kCubeArray),
-        builder_.create<sem::DepthTexture>(ast::TextureDimension::kCubeArray)};
+  if (match(Token::Type::kTextureDepthCube, &source))
+    return builder_.ty.depth_texture(source, ast::TextureDimension::kCube);
+
+  if (match(Token::Type::kTextureDepthCubeArray, &source))
+    return builder_.ty.depth_texture(source, ast::TextureDimension::kCubeArray);
 
   return Failure::kNoMatch;
 }
@@ -897,26 +916,15 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (access_decos.size() > 1)
     return add_error(ident.source, "multiple access decorations not allowed");
 
-  // TODO(crbug.com/tint/724): Remove
-  auto* sem_ty = type.value.sem;
+  typ::Type ty = type.value;
+
   for (auto* deco : access_decos) {
     // If we have an access control decoration then we take it and wrap our
     // type up with that decoration
-    sem_ty = builder_.create<sem::AccessControl>(
-        deco->As<ast::AccessDecoration>()->value(), sem_ty);
+    ty = builder_.ty.access(deco->source(),
+                            deco->As<ast::AccessDecoration>()->value(), ty);
   }
-
-  auto* ty = type.value.ast;
-  // TODO(crbug.com/tint/724): Remove 'if'
-  if (ty) {
-    for (auto* deco : access_decos) {
-      // If we have an access control decoration then we take it and wrap our
-      // type up with that decoration
-      ty = builder_.create<ast::AccessControl>(
-          deco->As<ast::AccessDecoration>()->value(), ty);
-    }
-  }
-  return TypedIdentifier{typ::Type{ty, sem_ty}, ident.value, ident.source};
+  return TypedIdentifier{ty, ident.value, ident.source};
 }
 
 Expect<ast::AccessControl::Access> ParserImpl::expect_access_type() {
@@ -974,14 +982,10 @@ Maybe<typ::Type> ParserImpl::type_alias() {
   if (!type.matched)
     return add_error(peek(), "invalid type alias");
 
-  // TODO(crbug.com/tint/724): remove
-  auto* alias = builder_.create<sem::Alias>(
-      builder_.Symbols().Register(name.value), type.value);
+  auto alias = builder_.ty.alias(make_source_range_from(t.source()), name.value,
+                                 type.value);
   register_constructed(name.value, alias);
-
-  return typ::Type{builder_.create<ast::Alias>(
-                       builder_.Symbols().Register(name.value), type.value),
-                   alias};
+  return alias;
 }
 
 // type_decl
@@ -1027,29 +1031,29 @@ Maybe<typ::Type> ParserImpl::type_decl() {
 
 Maybe<typ::Type> ParserImpl::type_decl(ast::DecorationList& decos) {
   auto t = peek();
-  if (match(Token::Type::kIdentifier)) {
+  Source source;
+  if (match(Token::Type::kIdentifier, &source)) {
     // TODO(crbug.com/tint/697): Remove
     auto* ty = get_constructed(t.to_str());
     if (ty == nullptr)
       return add_error(t, "unknown constructed type '" + t.to_str() + "'");
 
-    return typ::Type{
-        builder_.create<ast::TypeName>(builder_.Symbols().Register(t.to_str())),
-        ty};
+    return typ::Type{builder_.create<ast::TypeName>(
+                         source, builder_.Symbols().Register(t.to_str())),
+                     ty};
   }
 
-  if (match(Token::Type::kBool))
-    return typ::Type{builder_.create<ast::Bool>(),
-                     builder_.create<sem::Bool>()};
+  if (match(Token::Type::kBool, &source))
+    return builder_.ty.bool_(source);
 
-  if (match(Token::Type::kF32))
-    return typ::Type{builder_.create<ast::F32>(), builder_.create<sem::F32>()};
+  if (match(Token::Type::kF32, &source))
+    return builder_.ty.f32(source);
 
-  if (match(Token::Type::kI32))
-    return typ::Type{builder_.create<ast::I32>(), builder_.create<sem::I32>()};
+  if (match(Token::Type::kI32, &source))
+    return builder_.ty.i32(source);
 
-  if (match(Token::Type::kU32))
-    return typ::Type{builder_.create<ast::U32>(), builder_.create<sem::U32>()};
+  if (match(Token::Type::kU32, &source))
+    return builder_.ty.u32(source);
 
   if (t.IsVec2() || t.IsVec3() || t.IsVec4()) {
     next();  // Consume the peek
@@ -1057,10 +1061,10 @@ Maybe<typ::Type> ParserImpl::type_decl(ast::DecorationList& decos) {
   }
 
   if (match(Token::Type::kPtr))
-    return expect_type_decl_pointer();
+    return expect_type_decl_pointer(t);
 
-  if (match(Token::Type::kArray)) {
-    return expect_type_decl_array(std::move(decos));
+  if (match(Token::Type::kArray, &source)) {
+    return expect_type_decl_array(t, std::move(decos));
   }
 
   if (t.IsMat2x2() || t.IsMat2x3() || t.IsMat2x4() || t.IsMat3x2() ||
@@ -1088,24 +1092,33 @@ Expect<typ::Type> ParserImpl::expect_type(const std::string& use) {
   return type.value;
 }
 
-Expect<typ::Type> ParserImpl::expect_type_decl_pointer() {
+Expect<typ::Type> ParserImpl::expect_type_decl_pointer(Token t) {
   const char* use = "ptr declaration";
 
-  return expect_lt_gt_block(use, [&]() -> Expect<typ::Type> {
+  ast::StorageClass storage_class = ast::StorageClass::kNone;
+
+  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<typ::Type> {
     auto sc = expect_storage_class(use);
     if (sc.errored)
       return Failure::kErrored;
+    storage_class = sc.value;
 
     if (!expect(use, Token::Type::kComma))
       return Failure::kErrored;
 
-    auto subtype = expect_type(use);
-    if (subtype.errored)
+    auto type = expect_type(use);
+    if (type.errored)
       return Failure::kErrored;
 
-    return typ::Type{builder_.create<ast::Pointer>(subtype.value, sc.value),
-                     builder_.create<sem::Pointer>(subtype.value, sc.value)};
+    return type.value;
   });
+
+  if (subtype.errored) {
+    return Failure::kErrored;
+  }
+
+  return builder_.ty.pointer(make_source_range_from(t.source()), subtype.value,
+                             storage_class);
 }
 
 Expect<typ::Type> ParserImpl::expect_type_decl_vector(Token t) {
@@ -1121,20 +1134,22 @@ Expect<typ::Type> ParserImpl::expect_type_decl_vector(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return typ::Type{builder_.create<ast::Vector>(subtype.value.ast, count),
-                   builder_.create<sem::Vector>(subtype.value.sem, count)};
+  return builder_.ty.vec(make_source_range_from(t.source()), subtype.value,
+                         count);
 }
 
 Expect<typ::Type> ParserImpl::expect_type_decl_array(
+    Token t,
     ast::DecorationList decos) {
   const char* use = "array declaration";
 
-  return expect_lt_gt_block(use, [&]() -> Expect<typ::Type> {
-    auto subtype = expect_type(use);
-    if (subtype.errored)
+  uint32_t size = 0;
+
+  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<typ::Type> {
+    auto type = expect_type(use);
+    if (type.errored)
       return Failure::kErrored;
 
-    uint32_t size = 0;
     if (match(Token::Type::kComma)) {
       auto val = expect_nonzero_positive_sint("array size");
       if (val.errored)
@@ -1142,10 +1157,15 @@ Expect<typ::Type> ParserImpl::expect_type_decl_array(
       size = val.value;
     }
 
-    return typ::Type{
-        create<ast::Array>(subtype.value, size, decos),
-        create<sem::ArrayType>(subtype.value, size, std::move(decos))};
+    return type.value;
   });
+
+  if (subtype.errored) {
+    return Failure::kErrored;
+  }
+
+  return builder_.ty.array(make_source_range_from(t.source()), subtype.value,
+                           size, std::move(decos));
 }
 
 Expect<typ::Type> ParserImpl::expect_type_decl_matrix(Token t) {
@@ -1168,8 +1188,8 @@ Expect<typ::Type> ParserImpl::expect_type_decl_matrix(Token t) {
   if (subtype.errored)
     return Failure::kErrored;
 
-  return typ::Type{builder_.create<ast::Matrix>(subtype.value, rows, columns),
-                   builder_.create<sem::Matrix>(subtype.value, rows, columns)};
+  return builder_.ty.mat(make_source_range_from(t.source()), subtype.value,
+                         columns, rows);
 }
 
 // storage_class
@@ -1321,9 +1341,9 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
 //   : type_decl
 //   | VOID
 Maybe<typ::Type> ParserImpl::function_type_decl() {
-  if (match(Token::Type::kVoid))
-    return typ::Type{builder_.create<ast::Void>(),
-                     builder_.create<sem::Void>()};
+  Source source;
+  if (match(Token::Type::kVoid, &source))
+    return builder_.ty.void_(source);
 
   return type_decl();
 }
@@ -3383,6 +3403,15 @@ T ParserImpl::without_error(F&& body) {
   auto result = body();
   silence_errors_--;
   return result;
+}
+
+ParserImpl::MultiTokenSource ParserImpl::make_source_range() {
+  return MultiTokenSource(this);
+}
+
+ParserImpl::MultiTokenSource ParserImpl::make_source_range_from(
+    const Source& start) {
+  return MultiTokenSource(this, start);
 }
 
 }  // namespace wgsl

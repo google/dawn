@@ -33,6 +33,8 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto* alias = t->As<sem::Alias>();
   ASSERT_TRUE(alias->type()->Is<sem::I32>());
   ASSERT_EQ(alias->type(), i32);
+
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 13u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
@@ -54,6 +56,8 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   auto* s = alias->type()->As<sem::StructType>();
   EXPECT_EQ(s->impl()->name(), p->builder().Symbols().Get("B"));
   EXPECT_EQ(s->impl()->name(), p->builder().Symbols().Get("B"));
+
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 11u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {

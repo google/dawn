@@ -50,6 +50,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   auto* alias = t->As<sem::Alias>();
   EXPECT_EQ(p->builder().Symbols().NameFor(alias->symbol()), "A");
   EXPECT_EQ(alias->type(), int_type);
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 2u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Identifier_NotFound) {
@@ -75,6 +76,7 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, bool_type);
   ASSERT_TRUE(t->Is<sem::Bool>());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_F32) {
@@ -89,6 +91,7 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, float_type);
   ASSERT_TRUE(t->Is<sem::F32>());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_I32) {
@@ -103,6 +106,7 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, int_type);
   ASSERT_TRUE(t->Is<sem::I32>());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_U32) {
@@ -117,11 +121,13 @@ TEST_F(ParserImplTest, TypeDecl_U32) {
   ASSERT_NE(t.value, nullptr) << p->error();
   EXPECT_EQ(t.value, uint_type);
   ASSERT_TRUE(t->Is<sem::U32>());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
 struct VecData {
   const char* input;
   size_t count;
+  Source::Range range;
 };
 inline std::ostream& operator<<(std::ostream& out, VecData data) {
   out << std::string(data.input);
@@ -140,12 +146,16 @@ TEST_P(VecTest, Parse) {
   ASSERT_FALSE(p->has_error());
   EXPECT_TRUE(t->Is<sem::Vector>());
   EXPECT_EQ(t->As<sem::Vector>()->size(), params.count);
+  EXPECT_EQ(t.value.ast->source().range, params.range);
 }
-INSTANTIATE_TEST_SUITE_P(ParserImplTest,
-                         VecTest,
-                         testing::Values(VecData{"vec2<f32>", 2},
-                                         VecData{"vec3<f32>", 3},
-                                         VecData{"vec4<f32>", 4}));
+INSTANTIATE_TEST_SUITE_P(
+    ParserImplTest,
+    VecTest,
+    testing::Values(VecData{"vec2<f32>", 2, Source::Range{{1u, 1u}, {1u, 10u}}},
+                    VecData{"vec3<f32>", 3, Source::Range{{1u, 1u}, {1u, 10u}}},
+                    VecData{"vec4<f32>", 4, Source::Range{{1u, 1u}, {1u, 10u}}}
+
+                    ));
 
 class VecMissingGreaterThanTest : public ParserImplTestWithParam<VecData> {};
 
@@ -161,9 +171,9 @@ TEST_P(VecMissingGreaterThanTest, Handles_Missing_GreaterThan) {
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecMissingGreaterThanTest,
-                         testing::Values(VecData{"vec2<f32", 2},
-                                         VecData{"vec3<f32", 3},
-                                         VecData{"vec4<f32", 4}));
+                         testing::Values(VecData{"vec2<f32", 2, {}},
+                                         VecData{"vec3<f32", 3, {}},
+                                         VecData{"vec4<f32", 4, {}}));
 
 class VecMissingLessThanTest : public ParserImplTestWithParam<VecData> {};
 
@@ -179,9 +189,9 @@ TEST_P(VecMissingLessThanTest, Handles_Missing_GreaterThan) {
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecMissingLessThanTest,
-                         testing::Values(VecData{"vec2", 2},
-                                         VecData{"vec3", 3},
-                                         VecData{"vec4", 4}));
+                         testing::Values(VecData{"vec2", 2, {}},
+                                         VecData{"vec3", 3, {}},
+                                         VecData{"vec4", 4, {}}));
 
 class VecBadType : public ParserImplTestWithParam<VecData> {};
 
@@ -197,9 +207,9 @@ TEST_P(VecBadType, Handles_Unknown_Type) {
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecBadType,
-                         testing::Values(VecData{"vec2<unknown", 2},
-                                         VecData{"vec3<unknown", 3},
-                                         VecData{"vec4<unknown", 4}));
+                         testing::Values(VecData{"vec2<unknown", 2, {}},
+                                         VecData{"vec3<unknown", 3, {}},
+                                         VecData{"vec4<unknown", 4, {}}));
 
 class VecMissingType : public ParserImplTestWithParam<VecData> {};
 
@@ -215,9 +225,9 @@ TEST_P(VecMissingType, Handles_Missing_Type) {
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          VecMissingType,
-                         testing::Values(VecData{"vec2<>", 2},
-                                         VecData{"vec3<>", 3},
-                                         VecData{"vec4<>", 4}));
+                         testing::Values(VecData{"vec2<>", 2, {}},
+                                         VecData{"vec3<>", 3, {}},
+                                         VecData{"vec4<>", 4, {}}));
 
 TEST_F(ParserImplTest, TypeDecl_Ptr) {
   auto p = parser("ptr<function, f32>");
@@ -231,6 +241,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
   auto* ptr = t->As<sem::Pointer>();
   ASSERT_TRUE(ptr->type()->Is<sem::F32>());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
@@ -249,6 +260,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
   auto* vec = ptr->type()->As<sem::Vector>();
   ASSERT_EQ(vec->size(), 2u);
   ASSERT_TRUE(vec->type()->Is<sem::F32>());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 25}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
@@ -345,6 +357,7 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
   ASSERT_EQ(a->size(), 5u);
   ASSERT_TRUE(a->type()->Is<sem::F32>());
   EXPECT_EQ(a->decorations().size(), 0u);
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 14u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
@@ -365,6 +378,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   auto* stride = a->decorations()[0];
   ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
   ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 16u);
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 16u}, {1u, 29u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
@@ -384,6 +398,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
   auto* stride = a->decorations()[0];
   ASSERT_TRUE(stride->Is<ast::StrideDecoration>());
   ASSERT_EQ(stride->As<ast::StrideDecoration>()->stride(), 16u);
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 16u}, {1u, 26u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
@@ -405,6 +420,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
   EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride(), 16u);
   EXPECT_TRUE(decos[1]->Is<ast::StrideDecoration>());
   EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride(), 32u);
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 28u}, {1u, 38u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
@@ -426,6 +442,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
   EXPECT_EQ(decos[0]->As<ast::StrideDecoration>()->stride(), 16u);
   EXPECT_TRUE(decos[1]->Is<ast::StrideDecoration>());
   EXPECT_EQ(decos[1]->As<ast::StrideDecoration>()->stride(), 32u);
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 31u}, {1u, 41u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Decoration_MissingArray) {
@@ -522,6 +539,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
   auto* a = t->As<sem::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->Is<sem::U32>());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 11u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
@@ -536,6 +554,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
   auto* a = t->As<sem::ArrayType>();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->is_unsigned_integer_vector());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array_BadType) {
@@ -612,6 +631,7 @@ struct MatrixData {
   const char* input;
   size_t columns;
   size_t rows;
+  Source::Range range;
 };
 inline std::ostream& operator<<(std::ostream& out, MatrixData data) {
   out << std::string(data.input);
@@ -632,18 +652,21 @@ TEST_P(MatrixTest, Parse) {
   auto* mat = t->As<sem::Matrix>();
   EXPECT_EQ(mat->rows(), params.rows);
   EXPECT_EQ(mat->columns(), params.columns);
+  EXPECT_EQ(t.value.ast->source().range, params.range);
 }
-INSTANTIATE_TEST_SUITE_P(ParserImplTest,
-                         MatrixTest,
-                         testing::Values(MatrixData{"mat2x2<f32>", 2, 2},
-                                         MatrixData{"mat2x3<f32>", 2, 3},
-                                         MatrixData{"mat2x4<f32>", 2, 4},
-                                         MatrixData{"mat3x2<f32>", 3, 2},
-                                         MatrixData{"mat3x3<f32>", 3, 3},
-                                         MatrixData{"mat3x4<f32>", 3, 4},
-                                         MatrixData{"mat4x2<f32>", 4, 2},
-                                         MatrixData{"mat4x3<f32>", 4, 3},
-                                         MatrixData{"mat4x4<f32>", 4, 4}));
+INSTANTIATE_TEST_SUITE_P(
+    ParserImplTest,
+    MatrixTest,
+    testing::Values(
+        MatrixData{"mat2x2<f32>", 2, 2, Source::Range{{1u, 1u}, {1u, 12u}}},
+        MatrixData{"mat2x3<f32>", 2, 3, Source::Range{{1u, 1u}, {1u, 12u}}},
+        MatrixData{"mat2x4<f32>", 2, 4, Source::Range{{1u, 1u}, {1u, 12u}}},
+        MatrixData{"mat3x2<f32>", 3, 2, Source::Range{{1u, 1u}, {1u, 12u}}},
+        MatrixData{"mat3x3<f32>", 3, 3, Source::Range{{1u, 1u}, {1u, 12u}}},
+        MatrixData{"mat3x4<f32>", 3, 4, Source::Range{{1u, 1u}, {1u, 12u}}},
+        MatrixData{"mat4x2<f32>", 4, 2, Source::Range{{1u, 1u}, {1u, 12u}}},
+        MatrixData{"mat4x3<f32>", 4, 3, Source::Range{{1u, 1u}, {1u, 12u}}},
+        MatrixData{"mat4x4<f32>", 4, 4, Source::Range{{1u, 1u}, {1u, 12u}}}));
 
 class MatrixMissingGreaterThanTest
     : public ParserImplTestWithParam<MatrixData> {};
@@ -660,15 +683,15 @@ TEST_P(MatrixMissingGreaterThanTest, Handles_Missing_GreaterThan) {
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          MatrixMissingGreaterThanTest,
-                         testing::Values(MatrixData{"mat2x2<f32", 2, 2},
-                                         MatrixData{"mat2x3<f32", 2, 3},
-                                         MatrixData{"mat2x4<f32", 2, 4},
-                                         MatrixData{"mat3x2<f32", 3, 2},
-                                         MatrixData{"mat3x3<f32", 3, 3},
-                                         MatrixData{"mat3x4<f32", 3, 4},
-                                         MatrixData{"mat4x2<f32", 4, 2},
-                                         MatrixData{"mat4x3<f32", 4, 3},
-                                         MatrixData{"mat4x4<f32", 4, 4}));
+                         testing::Values(MatrixData{"mat2x2<f32", 2, 2, {}},
+                                         MatrixData{"mat2x3<f32", 2, 3, {}},
+                                         MatrixData{"mat2x4<f32", 2, 4, {}},
+                                         MatrixData{"mat3x2<f32", 3, 2, {}},
+                                         MatrixData{"mat3x3<f32", 3, 3, {}},
+                                         MatrixData{"mat3x4<f32", 3, 4, {}},
+                                         MatrixData{"mat4x2<f32", 4, 2, {}},
+                                         MatrixData{"mat4x3<f32", 4, 3, {}},
+                                         MatrixData{"mat4x4<f32", 4, 4, {}}));
 
 class MatrixMissingLessThanTest : public ParserImplTestWithParam<MatrixData> {};
 
@@ -684,15 +707,15 @@ TEST_P(MatrixMissingLessThanTest, Handles_Missing_GreaterThan) {
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          MatrixMissingLessThanTest,
-                         testing::Values(MatrixData{"mat2x2 f32>", 2, 2},
-                                         MatrixData{"mat2x3 f32>", 2, 3},
-                                         MatrixData{"mat2x4 f32>", 2, 4},
-                                         MatrixData{"mat3x2 f32>", 3, 2},
-                                         MatrixData{"mat3x3 f32>", 3, 3},
-                                         MatrixData{"mat3x4 f32>", 3, 4},
-                                         MatrixData{"mat4x2 f32>", 4, 2},
-                                         MatrixData{"mat4x3 f32>", 4, 3},
-                                         MatrixData{"mat4x4 f32>", 4, 4}));
+                         testing::Values(MatrixData{"mat2x2 f32>", 2, 2, {}},
+                                         MatrixData{"mat2x3 f32>", 2, 3, {}},
+                                         MatrixData{"mat2x4 f32>", 2, 4, {}},
+                                         MatrixData{"mat3x2 f32>", 3, 2, {}},
+                                         MatrixData{"mat3x3 f32>", 3, 3, {}},
+                                         MatrixData{"mat3x4 f32>", 3, 4, {}},
+                                         MatrixData{"mat4x2 f32>", 4, 2, {}},
+                                         MatrixData{"mat4x3 f32>", 4, 3, {}},
+                                         MatrixData{"mat4x4 f32>", 4, 4, {}}));
 
 class MatrixBadType : public ParserImplTestWithParam<MatrixData> {};
 
@@ -706,17 +729,18 @@ TEST_P(MatrixBadType, Handles_Unknown_Type) {
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:8: unknown constructed type 'unknown'");
 }
-INSTANTIATE_TEST_SUITE_P(ParserImplTest,
-                         MatrixBadType,
-                         testing::Values(MatrixData{"mat2x2<unknown>", 2, 2},
-                                         MatrixData{"mat2x3<unknown>", 2, 3},
-                                         MatrixData{"mat2x4<unknown>", 2, 4},
-                                         MatrixData{"mat3x2<unknown>", 3, 2},
-                                         MatrixData{"mat3x3<unknown>", 3, 3},
-                                         MatrixData{"mat3x4<unknown>", 3, 4},
-                                         MatrixData{"mat4x2<unknown>", 4, 2},
-                                         MatrixData{"mat4x3<unknown>", 4, 3},
-                                         MatrixData{"mat4x4<unknown>", 4, 4}));
+INSTANTIATE_TEST_SUITE_P(
+    ParserImplTest,
+    MatrixBadType,
+    testing::Values(MatrixData{"mat2x2<unknown>", 2, 2, {}},
+                    MatrixData{"mat2x3<unknown>", 2, 3, {}},
+                    MatrixData{"mat2x4<unknown>", 2, 4, {}},
+                    MatrixData{"mat3x2<unknown>", 3, 2, {}},
+                    MatrixData{"mat3x3<unknown>", 3, 3, {}},
+                    MatrixData{"mat3x4<unknown>", 3, 4, {}},
+                    MatrixData{"mat4x2<unknown>", 4, 2, {}},
+                    MatrixData{"mat4x3<unknown>", 4, 3, {}},
+                    MatrixData{"mat4x4<unknown>", 4, 4, {}}));
 
 class MatrixMissingType : public ParserImplTestWithParam<MatrixData> {};
 
@@ -732,15 +756,15 @@ TEST_P(MatrixMissingType, Handles_Missing_Type) {
 }
 INSTANTIATE_TEST_SUITE_P(ParserImplTest,
                          MatrixMissingType,
-                         testing::Values(MatrixData{"mat2x2<>", 2, 2},
-                                         MatrixData{"mat2x3<>", 2, 3},
-                                         MatrixData{"mat2x4<>", 2, 4},
-                                         MatrixData{"mat3x2<>", 3, 2},
-                                         MatrixData{"mat3x3<>", 3, 3},
-                                         MatrixData{"mat3x4<>", 3, 4},
-                                         MatrixData{"mat4x2<>", 4, 2},
-                                         MatrixData{"mat4x3<>", 4, 3},
-                                         MatrixData{"mat4x4<>", 4, 4}));
+                         testing::Values(MatrixData{"mat2x2<>", 2, 2, {}},
+                                         MatrixData{"mat2x3<>", 2, 3, {}},
+                                         MatrixData{"mat2x4<>", 2, 4, {}},
+                                         MatrixData{"mat3x2<>", 3, 2, {}},
+                                         MatrixData{"mat3x3<>", 3, 3, {}},
+                                         MatrixData{"mat3x4<>", 3, 4, {}},
+                                         MatrixData{"mat4x2<>", 4, 2, {}},
+                                         MatrixData{"mat4x3<>", 4, 3, {}},
+                                         MatrixData{"mat4x4<>", 4, 4, {}}));
 
 TEST_F(ParserImplTest, TypeDecl_Sampler) {
   auto p = parser("sampler");
@@ -755,6 +779,7 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   EXPECT_EQ(t.value, type);
   ASSERT_TRUE(t->Is<sem::Sampler>());
   ASSERT_FALSE(t->As<sem::Sampler>()->IsComparison());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Texture) {
@@ -772,6 +797,7 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
   ASSERT_TRUE(t->Is<sem::Texture>());
   ASSERT_TRUE(t->Is<sem::SampledTexture>());
   ASSERT_TRUE(t->As<sem::SampledTexture>()->type()->Is<sem::F32>());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 18u}}));
 }
 
 }  // namespace

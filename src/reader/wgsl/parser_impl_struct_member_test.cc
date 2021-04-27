@@ -39,10 +39,8 @@ TEST_F(ParserImplTest, StructMember_Parses) {
   EXPECT_EQ(m->type(), i32);
   EXPECT_EQ(m->decorations().size(), 0u);
 
-  ASSERT_EQ(m->source().range.begin.line, 1u);
-  ASSERT_EQ(m->source().range.begin.column, 1u);
-  ASSERT_EQ(m->source().range.end.line, 1u);
-  ASSERT_EQ(m->source().range.end.column, 2u);
+  EXPECT_EQ(m->source().range, (Source::Range{{1u, 1u}, {1u, 2u}}));
+  EXPECT_EQ(m->type().ast->source().range, (Source::Range{{1u, 5u}, {1u, 8u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithOffsetDecoration_DEPRECATED) {
@@ -69,10 +67,9 @@ TEST_F(ParserImplTest, StructMember_ParsesWithOffsetDecoration_DEPRECATED) {
       m->decorations()[0]->As<ast::StructMemberOffsetDecoration>()->offset(),
       2u);
 
-  ASSERT_EQ(m->source().range.begin.line, 1u);
-  ASSERT_EQ(m->source().range.begin.column, 15u);
-  ASSERT_EQ(m->source().range.end.line, 1u);
-  ASSERT_EQ(m->source().range.end.column, 16u);
+  EXPECT_EQ(m->source().range, (Source::Range{{1u, 15u}, {1u, 16u}}));
+  EXPECT_EQ(m->type().ast->source().range,
+            (Source::Range{{1u, 19u}, {1u, 22u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithAlignDecoration) {
@@ -98,10 +95,9 @@ TEST_F(ParserImplTest, StructMember_ParsesWithAlignDecoration) {
   EXPECT_EQ(
       m->decorations()[0]->As<ast::StructMemberAlignDecoration>()->align(), 2u);
 
-  ASSERT_EQ(m->source().range.begin.line, 1u);
-  ASSERT_EQ(m->source().range.begin.column, 14u);
-  ASSERT_EQ(m->source().range.end.line, 1u);
-  ASSERT_EQ(m->source().range.end.column, 15u);
+  EXPECT_EQ(m->source().range, (Source::Range{{1u, 14u}, {1u, 15u}}));
+  EXPECT_EQ(m->type().ast->source().range,
+            (Source::Range{{1u, 18u}, {1u, 21u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithSizeDecoration) {
@@ -127,10 +123,9 @@ TEST_F(ParserImplTest, StructMember_ParsesWithSizeDecoration) {
   EXPECT_EQ(m->decorations()[0]->As<ast::StructMemberSizeDecoration>()->size(),
             2u);
 
-  ASSERT_EQ(m->source().range.begin.line, 1u);
-  ASSERT_EQ(m->source().range.begin.column, 13u);
-  ASSERT_EQ(m->source().range.end.line, 1u);
-  ASSERT_EQ(m->source().range.end.column, 14u);
+  EXPECT_EQ(m->source().range, (Source::Range{{1u, 13u}, {1u, 14u}}));
+  EXPECT_EQ(m->type().ast->source().range,
+            (Source::Range{{1u, 17u}, {1u, 20u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
@@ -156,10 +151,9 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   EXPECT_EQ(m->decorations()[0]->As<ast::StructMemberSizeDecoration>()->size(),
             2u);
 
-  ASSERT_EQ(m->source().range.begin.line, 1u);
-  ASSERT_EQ(m->source().range.begin.column, 13u);
-  ASSERT_EQ(m->source().range.end.line, 1u);
-  ASSERT_EQ(m->source().range.end.column, 14u);
+  EXPECT_EQ(m->source().range, (Source::Range{{1u, 13u}, {1u, 14u}}));
+  EXPECT_EQ(m->type().ast->source().range,
+            (Source::Range{{1u, 17u}, {1u, 20u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
@@ -189,10 +183,9 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
   EXPECT_EQ(
       m->decorations()[1]->As<ast::StructMemberAlignDecoration>()->align(), 4u);
 
-  ASSERT_EQ(m->source().range.begin.line, 2u);
-  ASSERT_EQ(m->source().range.begin.column, 14u);
-  ASSERT_EQ(m->source().range.end.line, 2u);
-  ASSERT_EQ(m->source().range.end.column, 15u);
+  EXPECT_EQ(m->source().range, (Source::Range{{2u, 14u}, {2u, 15u}}));
+  EXPECT_EQ(m->type().ast->source().range,
+            (Source::Range{{2u, 18u}, {2u, 21u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidDecoration) {

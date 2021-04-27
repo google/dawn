@@ -29,10 +29,8 @@ TEST_F(ParserImplTest, VariableDecl_Parses) {
   EXPECT_NE(v->type, nullptr);
   EXPECT_TRUE(v->type->Is<sem::F32>());
 
-  EXPECT_EQ(v->source.range.begin.line, 1u);
-  EXPECT_EQ(v->source.range.begin.column, 5u);
-  EXPECT_EQ(v->source.range.end.line, 1u);
-  EXPECT_EQ(v->source.range.end.column, 11u);
+  EXPECT_EQ(v->source.range, (Source::Range{{1u, 5u}, {1u, 11u}}));
+  EXPECT_EQ(v->type.ast->source().range, (Source::Range{{1u, 14u}, {1u, 17u}}));
 }
 
 TEST_F(ParserImplTest, VariableDecl_MissingVar) {

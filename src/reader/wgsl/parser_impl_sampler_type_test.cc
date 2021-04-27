@@ -37,6 +37,7 @@ TEST_F(ParserImplTest, SamplerType_Sampler) {
   ASSERT_TRUE(t->Is<sem::Sampler>());
   EXPECT_FALSE(t->As<sem::Sampler>()->IsComparison());
   EXPECT_FALSE(p->has_error());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
 
 TEST_F(ParserImplTest, SamplerType_ComparisonSampler) {
@@ -48,6 +49,7 @@ TEST_F(ParserImplTest, SamplerType_ComparisonSampler) {
   ASSERT_TRUE(t->Is<sem::Sampler>());
   EXPECT_TRUE(t->As<sem::Sampler>()->IsComparison());
   EXPECT_FALSE(p->has_error());
+  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
 
 }  // namespace

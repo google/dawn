@@ -84,13 +84,6 @@ class ScopedAssignment {
   T old_value_;
 };
 
-// Helper function that returns the range union of two source locations. The
-// `start` and `end` locations are assumed to refer to the same source file.
-Source CombineSourceRange(const Source& start, const Source& end) {
-  return Source(Source::Range(start.range.begin, end.range.end),
-                start.file_path, start.file_content);
-}
-
 bool IsValidStorageTextureDimension(ast::TextureDimension dim) {
   switch (dim) {
     case ast::TextureDimension::k1d:
@@ -1392,7 +1385,7 @@ bool Resolver::ValidateVectorConstructor(const sem::Vector* vec_type,
         "attempted to construct '" +
             vec_type->FriendlyName(builder_->Symbols()) + "' with " +
             std::to_string(value_cardinality_sum) + " component(s)",
-        CombineSourceRange(values_start, values_end));
+        Source::Combine(values_start, values_end));
     return false;
   }
   return true;
@@ -1414,7 +1407,7 @@ bool Resolver::ValidateMatrixConstructor(const sem::Matrix* matrix_type,
             VectorPretty(matrix_type->rows(), elem_type) + "' arguments in '" +
             matrix_type->FriendlyName(builder_->Symbols()) +
             "' constructor, found " + std::to_string(values.size()),
-        CombineSourceRange(values_start, values_end));
+        Source::Combine(values_start, values_end));
     return false;
   }
 

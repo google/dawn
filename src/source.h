@@ -18,6 +18,7 @@
 
 #include <iostream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 namespace tint {
@@ -65,6 +66,27 @@ class Source {
     size_t line = 0;
     /// the 1-based column number. 0 represents no column information.
     size_t column = 0;
+
+    /// Returns true of `this` location is lexicographically less than `rhs`
+    /// @param rhs location to compare against
+    /// @returns true if `this` < `rhs`
+    inline bool operator<(const Source::Location& rhs) {
+      return std::tie(line, column) < std::tie(rhs.line, rhs.column);
+    }
+
+    /// Returns true of `this` location is equal to `rhs`
+    /// @param rhs location to compare against
+    /// @returns true if `this` == `rhs`
+    inline bool operator==(const Location& rhs) const {
+      return line == rhs.line && column == rhs.column;
+    }
+
+    /// Returns true of `this` location is not equal to `rhs`
+    /// @param rhs location to compare against
+    /// @returns true if `this` != `rhs`
+    inline bool operator!=(const Location& rhs) const {
+      return !(*this == rhs);
+    }
   };
 
   /// Range holds a Location interval described by [begin, end).
@@ -75,12 +97,14 @@ class Source {
 
     /// Constructs a zero-length Range starting at `loc`
     /// @param loc the start and end location for the range
-    inline explicit Range(const Location& loc) : begin(loc), end(loc) {}
+    inline constexpr explicit Range(const Location& loc)
+        : begin(loc), end(loc) {}
 
     /// Constructs the Range beginning at `b` and ending at `e`
     /// @param b the range start location
     /// @param e the range end location
-    inline Range(const Location& b, const Location& e) : begin(b), end(e) {}
+    inline constexpr Range(const Location& b, const Location& e)
+        : begin(b), end(e) {}
 
     /// Return a column-shifted Range
     /// @param n the number of characters to shift by
@@ -88,6 +112,18 @@ class Source {
     inline Range operator+(size_t n) const {
       return Range{{begin.line, begin.column + n}, {end.line, end.column + n}};
     }
+
+    /// Returns true of `this` range is not equal to `rhs`
+    /// @param rhs range to compare against
+    /// @returns true if `this` != `rhs`
+    inline bool operator==(const Range& rhs) const {
+      return begin == rhs.begin && end == rhs.end;
+    }
+
+    /// Returns true of `this` range is equal to `rhs`
+    /// @param rhs range to compare against
+    /// @returns true if `this` == `rhs`
+    inline bool operator!=(const Range& rhs) const { return !(*this == rhs); }
 
     /// The location of the first character in the range.
     Location begin;
@@ -139,6 +175,29 @@ class Source {
     return Source(range + n, file_path, file_content);
   }
 
+  /// Returns true of `this` Source is lexicographically less than `rhs`
+  /// @param rhs source to compare against
+  /// @returns true if `this` < `rhs`
+  inline bool operator<(const Source& rhs) {
+    if (file_path != rhs.file_path) {
+      return false;
+    }
+    if (file_content != rhs.file_content) {
+      return false;
+    }
+    return range.begin < rhs.range.begin;
+  }
+
+  /// Helper function that returns the range union of two source locations. The
+  /// `start` and `end` locations are assumed to refer to the same source file.
+  /// @param start the start source of the range
+  /// @param end the end source of the range
+  /// @returns the combined source
+  inline static Source Combine(const Source& start, const Source& end) {
+    return Source(Source::Range(start.range.begin, end.range.end),
+                  start.file_path, start.file_content);
+  }
+
   /// range is the span of text this source refers to in #file_path
   Range range;
   /// file is the optional file path this source refers to
@@ -146,6 +205,25 @@ class Source {
   /// file is the optional source content this source refers to
   const FileContent* file_content = nullptr;
 };
+
+/// Writes the Source::Location to the std::ostream.
+/// @param out the std::ostream to write to
+/// @param loc the location to write
+/// @returns out so calls can be chained
+inline std::ostream& operator<<(std::ostream& out,
+                                const Source::Location& loc) {
+  out << loc.line << ":" << loc.column;
+  return out;
+}
+
+/// Writes the Source::Range to the std::ostream.
+/// @param out the std::ostream to write to
+/// @param range the range to write
+/// @returns out so calls can be chained
+inline std::ostream& operator<<(std::ostream& out, const Source::Range& range) {
+  out << "[" << range.begin << ", " << range.end << "]";
+  return out;
+}
 
 /// Writes the Source to the std::ostream.
 /// @param out the std::ostream to write to

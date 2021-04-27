@@ -29,6 +29,7 @@ TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.value, v);
+  EXPECT_EQ(e.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
 TEST_F(ParserImplTest, FunctionTypeDecl_Type) {
@@ -42,6 +43,7 @@ TEST_F(ParserImplTest, FunctionTypeDecl_Type) {
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
   ASSERT_EQ(e.value, vec2);
+  EXPECT_EQ(e.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 10u}}));
 }
 
 TEST_F(ParserImplTest, FunctionTypeDecl_InvalidType) {

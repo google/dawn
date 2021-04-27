@@ -30,10 +30,9 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   ASSERT_NE(decl->type, nullptr);
   ASSERT_TRUE(decl->type->Is<sem::F32>());
 
-  ASSERT_EQ(decl->source.range.begin.line, 1u);
-  ASSERT_EQ(decl->source.range.begin.column, 1u);
-  ASSERT_EQ(decl->source.range.end.line, 1u);
-  ASSERT_EQ(decl->source.range.end.column, 7u);
+  EXPECT_EQ(decl->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
+  EXPECT_EQ(decl->type.ast->source().range,
+            (Source::Range{{1u, 10u}, {1u, 13u}}));
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
