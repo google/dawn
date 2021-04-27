@@ -99,7 +99,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
 
     if (!func->params().empty()) {
       // Collect all parameters and build a list of new struct members.
-      auto new_struct_param_symbol = ctx.dst->Sym();
+      auto new_struct_param_symbol = ctx.dst->Symbols().New();
       ast::StructMemberList new_struct_members;
       for (auto* param : func->params()) {
         auto param_name = ctx.Clone(param->symbol());
@@ -175,7 +175,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
                 StructMemberComparator);
 
       // Create the new struct type.
-      auto in_struct_name = ctx.dst->Sym();
+      auto in_struct_name = ctx.dst->Symbols().New();
       auto* in_struct =
           ctx.dst->create<sem::StructType>(ctx.dst->create<ast::Struct>(
               in_struct_name, new_struct_members, ast::DecorationList{}));
@@ -221,7 +221,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
                 StructMemberComparator);
 
       // Create the new struct type.
-      auto out_struct_name = ctx.dst->Sym();
+      auto out_struct_name = ctx.dst->Symbols().New();
       auto* out_struct =
           ctx.dst->create<sem::StructType>(ctx.dst->create<ast::Struct>(
               out_struct_name, new_struct_members, ast::DecorationList{}));
@@ -242,7 +242,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
           if (!ret->value()->Is<ast::IdentifierExpression>()) {
             // Create a const to hold the return value expression to avoid
             // re-evaluating it multiple times.
-            auto temp = ctx.dst->Sym();
+            auto temp = ctx.dst->Symbols().New();
             auto* temp_var = ctx.dst->Decl(
                 ctx.dst->Const(temp, ctx.Clone(ret_type), new_ret_value()));
             ctx.InsertBefore(ret_sem->Block()->statements(), ret, temp_var);

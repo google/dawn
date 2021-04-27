@@ -80,7 +80,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
   std::unordered_map<sem::StructType*, Symbol> buffer_size_intrinsics;
   auto get_buffer_size_intrinsic = [&](sem::StructType* buffer_type) {
     return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
-      auto name = ctx.dst->Sym();
+      auto name = ctx.dst->Symbols().New();
       auto* func = ctx.dst->create<ast::Function>(
           name,
           ast::VariableList{
@@ -183,7 +183,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
                 // Construct the variable that'll hold the result of
                 // RWByteAddressBuffer.GetDimensions()
                 auto* buffer_size_result = ctx.dst->Decl(ctx.dst->Var(
-                    ctx.dst->Sym(), ctx.dst->ty.u32(),
+                    ctx.dst->Symbols().New(), ctx.dst->ty.u32(),
                     ast::StorageClass::kFunction, ctx.dst->Expr(0u)));
 
                 // Call storage_buffer.GetDimensions(buffer_size_result)
@@ -199,7 +199,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
                 //                total_storage_buffer_size - array_offset
                 // array_length = ----------------------------------------
                 //                             array_stride
-                auto name = ctx.dst->Sym();
+                auto name = ctx.dst->Symbols().New();
                 uint32_t array_offset = array_member_sem->Offset();
                 uint32_t array_stride = array_member_sem->Size();
                 auto* array_length_var = ctx.dst->Decl(ctx.dst->Const(

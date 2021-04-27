@@ -487,10 +487,11 @@ struct State {
         new_members.push_back(
             ctx.dst->Member(member_sym, member_type, std::move(member_decos)));
       }
-      auto new_struct = ctx.dst->Structure(ctx.dst->Sym(), new_members);
+      auto new_struct =
+          ctx.dst->Structure(ctx.dst->Symbols().New(), new_members);
 
       // Create a new function parameter with this struct.
-      auto* new_param = ctx.dst->Param(ctx.dst->Sym(), new_struct);
+      auto* new_param = ctx.dst->Param(ctx.dst->Symbols().New(), new_struct);
       new_function_parameters.push_back(new_param);
 
       // Copy values from the new parameter to the function-scope variable.
