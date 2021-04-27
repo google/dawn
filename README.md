@@ -102,3 +102,5 @@ https://bugs.chromium.org/p/tint/issues/entry
 ## Contributing
 Please see the CONTRIBUTING and CODE_OF_CONDUCT files on how to contribute to
 Tint.
+
+Tint has a process for supporting [experimental extensions](docs/experimental_extensions.md).
