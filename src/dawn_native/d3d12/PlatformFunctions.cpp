@@ -158,7 +158,14 @@ namespace dawn_native { namespace d3d12 {
 
     MaybeError PlatformFunctions::LoadDXGI() {
 #if DAWN_PLATFORM_WINUWP
+#    if defined(_DEBUG)
+        // DXGIGetDebugInterface1 is tagged as a development-only capability
+        // which implies that linking to this function will cause
+        // the application to fail Windows store certification
+        // But we need it when debuging using VS Graphics Diagnostics or PIX
+        // So we only link to it in debug build
         dxgiGetDebugInterface1 = &DXGIGetDebugInterface1;
+#    endif
         createDxgiFactory2 = &CreateDXGIFactory2;
 #else
         std::string error;

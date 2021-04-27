@@ -50,7 +50,8 @@ namespace dawn_native { namespace d3d12 {
 
                 if (beginCaptureOnStartup) {
                     ComPtr<IDXGraphicsAnalysis> graphicsAnalysis;
-                    if (SUCCEEDED(functions->dxgiGetDebugInterface1(
+                    if (functions->dxgiGetDebugInterface1 != nullptr &&
+                        SUCCEEDED(functions->dxgiGetDebugInterface1(
                             0, IID_PPV_ARGS(&graphicsAnalysis)))) {
                         graphicsAnalysis->BeginCapture();
                     }

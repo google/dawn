@@ -309,23 +309,27 @@ source_set("dawn_native_sources") {
     ]
   }
 
-  if (is_win) {
+  # Only win32 app needs to link with user32.lib
+  # In UWP, all availiable APIs are defined in WindowsApp.lib
+  if (is_win && !dawn_is_winuwp) {
     libs += [ "user32.lib" ]
-    if (dawn_is_winuwp) {
-      # UWP has a limited DLL search space.
-      # So we have to link with stub libs provided by Windows SDK
-      # to load DLLs correctly.
-      libs += [
-        "dxgi.lib",
-        "d3d12.lib",
-        "d3d11.lib",
-
-        # TODO(dawn:766):
-        # Somehow use dxcompiler.lib makes CoreApp unable to activate
-        # WinPIX should be added as third party tools and linked statically
-      ]
-    }
   }
+
+  if (dawn_is_winuwp && is_debug) {
+    # DXGIGetDebugInterface1 is defined in dxgi.lib
+    # But this API is tagged as a development-only capability
+    # which implies that linking to this function will cause
+    # the application to fail Windows store certification
+    # So we only link to it in debug build when compiling for UWP.
+    # In win32 we load dxgi.dll using LoadLibrary
+    # so no need for static linking.
+    libs += [ "dxgi.lib" ]
+  }
+
+  # TODO(dawn:766):
+  # Should link dxcompiler.lib and WinPixEventRuntime_UAP.lib in UWP
+  # Somehow use dxcompiler.lib makes CoreApp unable to activate
+  # WinPIX should be added as third party tools and linked statically
 
   if (dawn_enable_d3d12) {
     libs += [ "dxguid.lib" ]
