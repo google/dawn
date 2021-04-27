@@ -25,9 +25,6 @@ namespace {
         explicit AsyncWaitableEvent(std::function<void()> func) {
             mFuture = std::async(std::launch::async, func);
         }
-        virtual ~AsyncWaitableEvent() override {
-            ASSERT(IsComplete());
-        }
         void Wait() override {
             ASSERT(mFuture.valid());
             mFuture.wait();
@@ -38,6 +35,11 @@ namespace {
         }
 
       private:
+        // It is safe not to call Wait() in the destructor of AsyncWaitableEvent because since
+        // C++14 the destructor of std::future will always be blocked until its state becomes
+        // std::future_status::ready when it was created by a call of std::async and it is the
+        // last reference to the shared state.
+        // See https://en.cppreference.com/w/cpp/thread/future/~future for more details.
         std::future<void> mFuture;
     };
 
