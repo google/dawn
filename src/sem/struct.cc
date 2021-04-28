@@ -50,10 +50,15 @@ const StructMember* Struct::FindMember(Symbol name) const {
 }
 
 StructMember::StructMember(ast::StructMember* declaration,
+                           sem::Type* type,
                            uint32_t offset,
                            uint32_t align,
                            uint32_t size)
-    : declaration_(declaration), offset_(offset), align_(align), size_(size) {}
+    : declaration_(declaration),
+      type_(type),
+      offset_(offset),
+      align_(align),
+      size_(size) {}
 
 StructMember::~StructMember() = default;
 

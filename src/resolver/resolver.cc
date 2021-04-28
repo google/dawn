@@ -2392,10 +2392,12 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
   for (auto* member : str->impl()->members()) {
     Mark(member);
 
+    auto type = member->type();
+
     // First check the member type is legal
-    if (!IsStorable(member->type())) {
+    if (!IsStorable(type)) {
       builder_->Diagnostics().add_error(
-          std::string(member->type()->FriendlyName(builder_->Symbols())) +
+          std::string(type->FriendlyName(builder_->Symbols())) +
           " cannot be used as the type of a structure member");
       return nullptr;
     }
@@ -2403,7 +2405,7 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
     uint32_t offset = struct_size;
     uint32_t align = 0;
     uint32_t size = 0;
-    if (!DefaultAlignAndSize(member->type(), align, size, member->source())) {
+    if (!DefaultAlignAndSize(type, align, size, member->source())) {
       return nullptr;
     }
 
@@ -2455,7 +2457,7 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
     offset = utils::RoundUp(align, offset);
 
     auto* sem_member =
-        builder_->create<sem::StructMember>(member, offset, align, size);
+        builder_->create<sem::StructMember>(member, type, offset, align, size);
     builder_->Sem().Add(member, sem_member);
     sem_members.emplace_back(sem_member);
 

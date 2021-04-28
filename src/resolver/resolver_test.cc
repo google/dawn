@@ -892,13 +892,10 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 
   auto* ptr = TypeOf(mem)->As<sem::Pointer>();
   EXPECT_TRUE(ptr->type()->Is<sem::F32>());
-  ASSERT_TRUE(Sem().Get(mem)->Is<sem::StructMemberAccess>());
-  EXPECT_EQ(Sem()
-                .Get(mem)
-                ->As<sem::StructMemberAccess>()
-                ->Member()
-                ->Declaration()
-                ->symbol(),
+  auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
+  ASSERT_NE(sma, nullptr);
+  EXPECT_EQ(sma->Member()->Type(), ty.f32());
+  EXPECT_EQ(sma->Member()->Declaration()->symbol(),
             Symbols().Get("second_member"));
 }
 
@@ -918,7 +915,9 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
 
   auto* ptr = TypeOf(mem)->As<sem::Pointer>();
   EXPECT_TRUE(ptr->type()->Is<sem::F32>());
-  ASSERT_TRUE(Sem().Get(mem)->Is<sem::StructMemberAccess>());
+  auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
+  ASSERT_NE(sma, nullptr);
+  EXPECT_EQ(sma->Member()->Type(), ty.f32());
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {

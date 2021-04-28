@@ -36,6 +36,7 @@ namespace sem {
 // Forward declarations
 class StructType;
 class StructMember;
+class Type;
 
 /// A vector of StructMember pointers.
 using StructMemberList = std::vector<const StructMember*>;
@@ -141,10 +142,12 @@ class StructMember : public Castable<StructMember, Node> {
  public:
   /// Constructor
   /// @param declaration the AST declaration node
+  /// @param type the type of the member
   /// @param offset the byte offset from the base of the structure
   /// @param align the byte alignment of the member
   /// @param size the byte size of the member
   StructMember(ast::StructMember* declaration,
+               sem::Type* type,
                uint32_t offset,
                uint32_t align,
                uint32_t size);
@@ -154,6 +157,9 @@ class StructMember : public Castable<StructMember, Node> {
 
   /// @returns the AST declaration node
   ast::StructMember* Declaration() const { return declaration_; }
+
+  /// @returns the type of the member
+  sem::Type* Type() const { return type_; }
 
   /// @returns byte offset from base of structure
   uint32_t Offset() const { return offset_; }
@@ -166,6 +172,7 @@ class StructMember : public Castable<StructMember, Node> {
 
  private:
   ast::StructMember* const declaration_;
+  sem::Type* const type_;
   uint32_t const offset_;  // Byte offset from base of structure
   uint32_t const align_;   // Byte alignment of the member
   uint32_t const size_;    // Byte size of the member
