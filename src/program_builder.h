@@ -408,8 +408,8 @@ class ProgramBuilder {
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
     typ::Vector vec(typ::Type type, uint32_t n) const {
-      return {builder->create<ast::Vector>(type, n),
-              builder->create<sem::Vector>(type, n)};
+      return {type.ast ? builder->create<ast::Vector>(type, n) : nullptr,
+              type.sem ? builder->create<sem::Vector>(type, n) : nullptr};
     }
 
     /// @param source the Source of the node
@@ -417,8 +417,9 @@ class ProgramBuilder {
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
     typ::Vector vec(const Source& source, typ::Type type, uint32_t n) const {
-      return {builder->create<ast::Vector>(source, type, n),
-              builder->create<sem::Vector>(type, n)};
+      return {
+          type.ast ? builder->create<ast::Vector>(source, type, n) : nullptr,
+          type.sem ? builder->create<sem::Vector>(type, n) : nullptr};
     }
 
     /// @param type vector subtype
@@ -463,8 +464,10 @@ class ProgramBuilder {
     /// @param rows number of rows for the matrix
     /// @return the tint AST type for a matrix of `type`
     typ::Matrix mat(typ::Type type, uint32_t columns, uint32_t rows) const {
-      return {builder->create<ast::Matrix>(type, rows, columns),
-              builder->create<sem::Matrix>(type, rows, columns)};
+      return {type.ast ? builder->create<ast::Matrix>(type, rows, columns)
+                       : nullptr,
+              type.sem ? builder->create<sem::Matrix>(type, rows, columns)
+                       : nullptr};
     }
 
     /// @param source the Source of the node
@@ -476,72 +479,48 @@ class ProgramBuilder {
                     typ::Type type,
                     uint32_t columns,
                     uint32_t rows) const {
-      return {builder->create<ast::Matrix>(source, type, rows, columns),
-              builder->create<sem::Matrix>(type, rows, columns)};
+      return {type.ast
+                  ? builder->create<ast::Matrix>(source, type, rows, columns)
+                  : nullptr,
+              type.sem ? builder->create<sem::Matrix>(type, rows, columns)
+                       : nullptr};
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x3 matrix of `type`.
-    typ::Matrix mat2x2(typ::Type type) const {
-      return {builder->create<ast::Matrix>(type, 2u, 2u),
-              builder->create<sem::Matrix>(type, 2u, 2u)};
-    }
+    typ::Matrix mat2x2(typ::Type type) const { return mat(type, 2u, 2u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x3 matrix of `type`.
-    typ::Matrix mat2x3(typ::Type type) const {
-      return {builder->create<ast::Matrix>(type, 3u, 2u),
-              builder->create<sem::Matrix>(type, 3u, 2u)};
-    }
+    typ::Matrix mat2x3(typ::Type type) const { return mat(type, 2u, 3u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x4 matrix of `type`.
-    typ::Matrix mat2x4(typ::Type type) const {
-      return {builder->create<ast::Matrix>(type, 4u, 2u),
-              builder->create<sem::Matrix>(type, 4u, 2u)};
-    }
+    typ::Matrix mat2x4(typ::Type type) const { return mat(type, 2u, 4u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x2 matrix of `type`.
-    typ::Matrix mat3x2(typ::Type type) const {
-      return {builder->create<ast::Matrix>(type, 2u, 3u),
-              builder->create<sem::Matrix>(type, 2u, 3u)};
-    }
+    typ::Matrix mat3x2(typ::Type type) const { return mat(type, 3u, 2u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x3 matrix of `type`.
-    typ::Matrix mat3x3(typ::Type type) const {
-      return {builder->create<ast::Matrix>(type, 3u, 3u),
-              builder->create<sem::Matrix>(type, 3u, 3u)};
-    }
+    typ::Matrix mat3x3(typ::Type type) const { return mat(type, 3u, 3u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x4 matrix of `type`.
-    typ::Matrix mat3x4(typ::Type type) const {
-      return {builder->create<ast::Matrix>(type, 4u, 3u),
-              builder->create<sem::Matrix>(type, 4u, 3u)};
-    }
+    typ::Matrix mat3x4(typ::Type type) const { return mat(type, 3u, 4u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x2 matrix of `type`.
-    typ::Matrix mat4x2(typ::Type type) const {
-      return {builder->create<ast::Matrix>(type, 2u, 4u),
-              builder->create<sem::Matrix>(type, 2u, 4u)};
-    }
+    typ::Matrix mat4x2(typ::Type type) const { return mat(type, 4u, 2u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x3 matrix of `type`.
-    typ::Matrix mat4x3(typ::Type type) const {
-      return {builder->create<ast::Matrix>(type, 3u, 4u),
-              builder->create<sem::Matrix>(type, 3u, 4u)};
-    }
+    typ::Matrix mat4x3(typ::Type type) const { return mat(type, 4u, 3u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x4 matrix of `type`.
-    typ::Matrix mat4x4(typ::Type type) const {
-      return {builder->create<ast::Matrix>(type, 4u, 4u),
-              builder->create<sem::Matrix>(type, 4u, 4u)};
-    }
+    typ::Matrix mat4x4(typ::Type type) const { return mat(type, 4u, 4u); }
 
     /// @param columns number of columns for the matrix
     /// @param rows number of rows for the matrix
@@ -613,8 +592,11 @@ class ProgramBuilder {
                      uint32_t n = 0,
                      ast::DecorationList decos = {}) const {
       subtype = MaybeCreateTypename(subtype);
-      return {builder->create<ast::Array>(subtype, n, decos),
-              builder->create<sem::ArrayType>(subtype, n, std::move(decos))};
+      return {subtype.ast ? builder->create<ast::Array>(subtype, n, decos)
+                          : nullptr,
+              subtype.sem ? builder->create<sem::ArrayType>(subtype, n,
+                                                            std::move(decos))
+                          : nullptr};
     }
 
     /// @param source the Source of the node
@@ -627,8 +609,12 @@ class ProgramBuilder {
                      uint32_t n = 0,
                      ast::DecorationList decos = {}) const {
       subtype = MaybeCreateTypename(subtype);
-      return {builder->create<ast::Array>(source, subtype, n, decos),
-              builder->create<sem::ArrayType>(subtype, n, std::move(decos))};
+      return {
+          subtype.ast ? builder->create<ast::Array>(source, subtype, n, decos)
+                      : nullptr,
+          subtype.sem
+              ? builder->create<sem::ArrayType>(subtype, n, std::move(decos))
+              : nullptr};
     }
 
     /// @param subtype the array element type
@@ -678,8 +664,8 @@ class ProgramBuilder {
       type = MaybeCreateTypename(type);
       auto sym = builder->Sym(std::forward<NAME>(name));
       return {
-          builder->create<ast::Alias>(source, sym, type),
-          builder->create<sem::Alias>(sym, type),
+          type.ast ? builder->create<ast::Alias>(source, sym, type) : nullptr,
+          type.sem ? builder->create<sem::Alias>(sym, type) : nullptr,
       };
     }
 
@@ -690,8 +676,10 @@ class ProgramBuilder {
     typ::AccessControl access(ast::AccessControl::Access access,
                               typ::Type type) const {
       type = MaybeCreateTypename(type);
-      return {builder->create<ast::AccessControl>(access, type),
-              builder->create<sem::AccessControl>(access, type)};
+      return {type.ast ? builder->create<ast::AccessControl>(access, type)
+                       : nullptr,
+              type.sem ? builder->create<sem::AccessControl>(access, type)
+                       : nullptr};
     }
 
     /// Creates an access control qualifier type
@@ -703,8 +691,11 @@ class ProgramBuilder {
                               ast::AccessControl::Access access,
                               typ::Type type) const {
       type = MaybeCreateTypename(type);
-      return {builder->create<ast::AccessControl>(source, access, type),
-              builder->create<sem::AccessControl>(access, type)};
+      return {type.ast
+                  ? builder->create<ast::AccessControl>(source, access, type)
+                  : nullptr,
+              type.sem ? builder->create<sem::AccessControl>(access, type)
+                       : nullptr};
     }
 
     /// @param type the type of the pointer
@@ -713,8 +704,10 @@ class ProgramBuilder {
     typ::Pointer pointer(typ::Type type,
                          ast::StorageClass storage_class) const {
       type = MaybeCreateTypename(type);
-      return {builder->create<ast::Pointer>(type, storage_class),
-              builder->create<sem::Pointer>(type, storage_class)};
+      return {type.ast ? builder->create<ast::Pointer>(type, storage_class)
+                       : nullptr,
+              type.sem ? builder->create<sem::Pointer>(type, storage_class)
+                       : nullptr};
     }
 
     /// @param source the Source of the node
@@ -725,8 +718,11 @@ class ProgramBuilder {
                          typ::Type type,
                          ast::StorageClass storage_class) const {
       type = MaybeCreateTypename(type);
-      return {builder->create<ast::Pointer>(source, type, storage_class),
-              builder->create<sem::Pointer>(type, storage_class)};
+      return {type.ast
+                  ? builder->create<ast::Pointer>(source, type, storage_class)
+                  : nullptr,
+              type.sem ? builder->create<sem::Pointer>(type, storage_class)
+                       : nullptr};
     }
 
     /// @param storage_class the storage class of the pointer
@@ -778,8 +774,10 @@ class ProgramBuilder {
     /// @returns the sampled texture
     typ::SampledTexture sampled_texture(ast::TextureDimension dims,
                                         typ::Type subtype) const {
-      return {builder->create<ast::SampledTexture>(dims, subtype),
-              builder->create<sem::SampledTexture>(dims, subtype)};
+      return {subtype.ast ? builder->create<ast::SampledTexture>(dims, subtype)
+                          : nullptr,
+              subtype.sem ? builder->create<sem::SampledTexture>(dims, subtype)
+                          : nullptr};
     }
 
     /// @param source the Source of the node
@@ -789,8 +787,11 @@ class ProgramBuilder {
     typ::SampledTexture sampled_texture(const Source& source,
                                         ast::TextureDimension dims,
                                         typ::Type subtype) const {
-      return {builder->create<ast::SampledTexture>(source, dims, subtype),
-              builder->create<sem::SampledTexture>(dims, subtype)};
+      return {subtype.ast
+                  ? builder->create<ast::SampledTexture>(source, dims, subtype)
+                  : nullptr,
+              subtype.sem ? builder->create<sem::SampledTexture>(dims, subtype)
+                          : nullptr};
     }
 
     /// @param dims the dimensionality of the texture
@@ -798,8 +799,11 @@ class ProgramBuilder {
     /// @returns the multisampled texture
     typ::MultisampledTexture multisampled_texture(ast::TextureDimension dims,
                                                   typ::Type subtype) const {
-      return {builder->create<ast::MultisampledTexture>(dims, subtype),
-              builder->create<sem::MultisampledTexture>(dims, subtype)};
+      return {
+          subtype.ast ? builder->create<ast::MultisampledTexture>(dims, subtype)
+                      : nullptr,
+          subtype.sem ? builder->create<sem::MultisampledTexture>(dims, subtype)
+                      : nullptr};
     }
 
     /// @param source the Source of the node
@@ -809,8 +813,12 @@ class ProgramBuilder {
     typ::MultisampledTexture multisampled_texture(const Source& source,
                                                   ast::TextureDimension dims,
                                                   typ::Type subtype) const {
-      return {builder->create<ast::MultisampledTexture>(source, dims, subtype),
-              builder->create<sem::MultisampledTexture>(dims, subtype)};
+      return {
+          subtype.ast
+              ? builder->create<ast::MultisampledTexture>(source, dims, subtype)
+              : nullptr,
+          subtype.sem ? builder->create<sem::MultisampledTexture>(dims, subtype)
+                      : nullptr};
     }
 
     /// @param dims the dimensionality of the texture
