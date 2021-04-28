@@ -101,7 +101,6 @@ struct TypePair {
         sem(static_cast<const SEM*>(other.sem)) {}
   /// Constructor
   /// @param a the ast::Type pointer
-  template <typename U>
   TypePair(const AST* a) : ast(a) {}  // NOLINT: explicit
   /// Constructor
   /// @param s the sem::Type pointer
@@ -110,6 +109,8 @@ struct TypePair {
   /// @param a the ast::Type pointer
   /// @param s the sem::Type pointer
   TypePair(const AST* a, const SEM* s) : ast(a), sem(s) {}
+  /// Constructor
+  TypePair(std::nullptr_t) {}  // NOLINT: explicit
 
   /// @returns the ast::Type pointer
   operator AST*() const { return const_cast<AST*>(ast); }

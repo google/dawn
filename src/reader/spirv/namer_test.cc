@@ -160,19 +160,19 @@ TEST_F(SpvNamerTest, RegisterWithoutId_Twice) {
   // Fails on second attempt.
   EXPECT_FALSE(namer.RegisterWithoutId(n));
   EXPECT_FALSE(success_);
-  EXPECT_EQ(error(),"internal error: name already registered: abbey");
+  EXPECT_EQ(error(), "internal error: name already registered: abbey");
 }
 
 TEST_F(SpvNamerTest, RegisterWithoutId_ConflictsWithIdRegisteredName) {
   Namer namer(fail_stream_);
 
   const std::string n("abbey");
-  EXPECT_TRUE(namer.Register(1,n));
+  EXPECT_TRUE(namer.Register(1, n));
   EXPECT_TRUE(namer.IsRegistered(n));
   // Fails on attempt to register without ID.
   EXPECT_FALSE(namer.RegisterWithoutId(n));
   EXPECT_FALSE(success_);
-  EXPECT_EQ(error(),"internal error: name already registered: abbey");
+  EXPECT_EQ(error(), "internal error: name already registered: abbey");
 }
 
 TEST_F(SpvNamerTest, Register_Once) {

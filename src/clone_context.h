@@ -185,8 +185,7 @@ class CloneContext {
   /// @return the cloned type pair
   template <typename AST, typename SEM>
   typ::TypePair<AST, SEM> Clone(const typ::TypePair<AST, SEM>& tp) {
-    return {Clone(const_cast<ast::Type*>(tp.ast)),
-            Clone(const_cast<sem::Type*>(tp.sem))};
+    return Clone(const_cast<sem::Type*>(tp.sem));
   }
 
   /// Clones the Source `s` into #dst

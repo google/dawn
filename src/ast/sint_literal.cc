@@ -23,7 +23,7 @@ namespace ast {
 
 SintLiteral::SintLiteral(ProgramID program_id,
                          const Source& source,
-                         const sem::Type* type,
+                         typ::Type type,
                          int32_t value)
     : Base(program_id, source, type, static_cast<uint32_t>(value)) {}
 
@@ -40,7 +40,7 @@ std::string SintLiteral::name() const {
 SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  auto* ty = ctx->Clone(type());
+  auto ty = ctx->Clone(type());
   return ctx->dst->create<SintLiteral>(src, ty, value());
 }
 

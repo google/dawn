@@ -151,11 +151,9 @@ TEST_P(VecTest, Parse) {
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
     VecTest,
-    testing::Values(VecData{"vec2<f32>", 2, Source::Range{{1u, 1u}, {1u, 10u}}},
-                    VecData{"vec3<f32>", 3, Source::Range{{1u, 1u}, {1u, 10u}}},
-                    VecData{"vec4<f32>", 4, Source::Range{{1u, 1u}, {1u, 10u}}}
-
-                    ));
+    testing::Values(VecData{"vec2<f32>", 2, {{1u, 1u}, {1u, 10u}}},
+                    VecData{"vec3<f32>", 3, {{1u, 1u}, {1u, 10u}}},
+                    VecData{"vec4<f32>", 4, {{1u, 1u}, {1u, 10u}}}));
 
 class VecMissingGreaterThanTest : public ParserImplTestWithParam<VecData> {};
 
@@ -657,16 +655,15 @@ TEST_P(MatrixTest, Parse) {
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
     MatrixTest,
-    testing::Values(
-        MatrixData{"mat2x2<f32>", 2, 2, Source::Range{{1u, 1u}, {1u, 12u}}},
-        MatrixData{"mat2x3<f32>", 2, 3, Source::Range{{1u, 1u}, {1u, 12u}}},
-        MatrixData{"mat2x4<f32>", 2, 4, Source::Range{{1u, 1u}, {1u, 12u}}},
-        MatrixData{"mat3x2<f32>", 3, 2, Source::Range{{1u, 1u}, {1u, 12u}}},
-        MatrixData{"mat3x3<f32>", 3, 3, Source::Range{{1u, 1u}, {1u, 12u}}},
-        MatrixData{"mat3x4<f32>", 3, 4, Source::Range{{1u, 1u}, {1u, 12u}}},
-        MatrixData{"mat4x2<f32>", 4, 2, Source::Range{{1u, 1u}, {1u, 12u}}},
-        MatrixData{"mat4x3<f32>", 4, 3, Source::Range{{1u, 1u}, {1u, 12u}}},
-        MatrixData{"mat4x4<f32>", 4, 4, Source::Range{{1u, 1u}, {1u, 12u}}}));
+    testing::Values(MatrixData{"mat2x2<f32>", 2, 2, {{1u, 1u}, {1u, 12u}}},
+                    MatrixData{"mat2x3<f32>", 2, 3, {{1u, 1u}, {1u, 12u}}},
+                    MatrixData{"mat2x4<f32>", 2, 4, {{1u, 1u}, {1u, 12u}}},
+                    MatrixData{"mat3x2<f32>", 3, 2, {{1u, 1u}, {1u, 12u}}},
+                    MatrixData{"mat3x3<f32>", 3, 3, {{1u, 1u}, {1u, 12u}}},
+                    MatrixData{"mat3x4<f32>", 3, 4, {{1u, 1u}, {1u, 12u}}},
+                    MatrixData{"mat4x2<f32>", 4, 2, {{1u, 1u}, {1u, 12u}}},
+                    MatrixData{"mat4x3<f32>", 4, 3, {{1u, 1u}, {1u, 12u}}},
+                    MatrixData{"mat4x4<f32>", 4, 4, {{1u, 1u}, {1u, 12u}}}));
 
 class MatrixMissingGreaterThanTest
     : public ParserImplTestWithParam<MatrixData> {};

@@ -23,10 +23,10 @@ namespace ast {
 
 BitcastExpression::BitcastExpression(ProgramID program_id,
                                      const Source& source,
-                                     const sem::Type* type,
+                                     typ::Type type,
                                      Expression* expr)
     : Base(program_id, source), type_(type), expr_(expr) {
-  TINT_ASSERT(type_);
+  TINT_ASSERT(type_.sem);
   TINT_ASSERT(expr_);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(expr, program_id);
 }
@@ -37,7 +37,7 @@ BitcastExpression::~BitcastExpression() = default;
 BitcastExpression* BitcastExpression::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  auto* ty = ctx->Clone(type());
+  auto ty = ctx->Clone(type());
   auto* e = ctx->Clone(expr_);
   return ctx->dst->create<BitcastExpression>(src, ty, e);
 }

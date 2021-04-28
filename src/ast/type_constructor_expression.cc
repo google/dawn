@@ -23,10 +23,10 @@ namespace ast {
 
 TypeConstructorExpression::TypeConstructorExpression(ProgramID program_id,
                                                      const Source& source,
-                                                     const sem::Type* type,
+                                                     typ::Type type,
                                                      ExpressionList values)
     : Base(program_id, source), type_(type), values_(std::move(values)) {
-  TINT_ASSERT(type_);
+  TINT_ASSERT(type_.sem);
   for (auto* val : values_) {
     TINT_ASSERT(val);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(val, program_id);
@@ -42,7 +42,7 @@ TypeConstructorExpression* TypeConstructorExpression::Clone(
     CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  auto* ty = ctx->Clone(type());
+  auto ty = ctx->Clone(type());
   auto vals = ctx->Clone(values());
   return ctx->dst->create<TypeConstructorExpression>(src, ty, vals);
 }

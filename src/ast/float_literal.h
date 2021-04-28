@@ -32,7 +32,7 @@ class FloatLiteral : public Castable<FloatLiteral, Literal> {
   /// @param value the float literals value
   FloatLiteral(ProgramID program_id,
                const Source& source,
-               const sem::Type* type,
+               typ::Type type,
                float value);
   ~FloatLiteral() override;
 

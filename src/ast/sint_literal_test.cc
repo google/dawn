@@ -45,8 +45,7 @@ TEST_F(SintLiteralTest, Name_I32) {
 }
 
 TEST_F(SintLiteralTest, Name_U32) {
-  sem::U32 u32;
-  auto* i = create<SintLiteral>(&u32, 2);
+  auto* i = create<SintLiteral>(ty.u32(), 2);
   EXPECT_EQ("__sint__u32_2", i->name());
 }
 

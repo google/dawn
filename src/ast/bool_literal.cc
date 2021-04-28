@@ -23,7 +23,7 @@ namespace ast {
 
 BoolLiteral::BoolLiteral(ProgramID program_id,
                          const Source& source,
-                         const sem::Type* type,
+                         typ::Type type,
                          bool value)
     : Base(program_id, source, type), value_(value) {}
 
@@ -40,7 +40,7 @@ std::string BoolLiteral::name() const {
 BoolLiteral* BoolLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  auto* ty = ctx->Clone(type());
+  auto ty = ctx->Clone(type());
   return ctx->dst->create<BoolLiteral>(src, ty, value_);
 }
 

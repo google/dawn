@@ -25,7 +25,7 @@ namespace ast {
 
 FloatLiteral::FloatLiteral(ProgramID program_id,
                            const Source& source,
-                           const sem::Type* type,
+                           typ::Type type,
                            float value)
     : Base(program_id, source, type), value_(value) {}
 
@@ -46,7 +46,7 @@ std::string FloatLiteral::name() const {
 FloatLiteral* FloatLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  auto* ty = ctx->Clone(type());
+  auto ty = ctx->Clone(type());
   return ctx->dst->create<FloatLiteral>(src, ty, value_);
 }
 
