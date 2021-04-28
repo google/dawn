@@ -40,7 +40,8 @@ std::string TypeName::FriendlyName(const SymbolTable& symbols) const {
 
 TypeName* TypeName::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
-  return ctx->dst->create<TypeName>(src, name_);
+  auto n = ctx->Clone(name());
+  return ctx->dst->create<TypeName>(src, n);
 }
 
 }  // namespace ast
