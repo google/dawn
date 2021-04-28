@@ -41,7 +41,7 @@ Variable::Variable(ProgramID program_id,
   TINT_ASSERT(symbol_.IsValid());
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
   // no type means we must have a constructor to infer it
-  TINT_ASSERT(type_.sem || constructor);
+  TINT_ASSERT(type_.ast || type_.sem || constructor);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(constructor, program_id);
 }
 
@@ -90,9 +90,8 @@ void Variable::info_to_str(const sem::Info& sem,
   out << (var_sem ? var_sem->StorageClass() : declared_storage_class())
       << std::endl;
   make_indent(out, indent);
-  if (type_.sem) {
-    out << type_->type_name() << std::endl;
-  }
+  out << (type_.sem ? type_.sem->type_name() : type_.ast->type_name())
+      << std::endl;
 }
 
 void Variable::constructor_to_str(const sem::Info& sem,

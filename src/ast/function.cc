@@ -45,7 +45,7 @@ Function::Function(ProgramID program_id,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(param, program_id);
   }
   TINT_ASSERT(symbol_.IsValid());
-  TINT_ASSERT(return_type_.sem);
+  TINT_ASSERT(return_type_.ast || return_type_.sem);
   for (auto* deco : decorations_) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(deco, program_id);
   }
@@ -92,7 +92,9 @@ void Function::to_str(const sem::Info& sem,
                       std::ostream& out,
                       size_t indent) const {
   make_indent(out, indent);
-  out << "Function " << symbol_.to_str() << " -> " << return_type_->type_name()
+  out << "Function " << symbol_.to_str() << " -> "
+      << (return_type_.ast ? return_type_.ast->type_name()
+                           : return_type_.sem->type_name())
       << std::endl;
 
   for (auto* deco : decorations()) {

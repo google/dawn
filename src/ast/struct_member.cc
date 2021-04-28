@@ -30,7 +30,7 @@ StructMember::StructMember(ProgramID program_id,
       symbol_(sym),
       type_(type),
       decorations_(std::move(decorations)) {
-  TINT_ASSERT(type.sem);
+  TINT_ASSERT(type.ast || type.sem);
   TINT_ASSERT(symbol_.IsValid());
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(symbol_, program_id);
   for (auto* deco : decorations_) {
@@ -76,7 +76,9 @@ void StructMember::to_str(const sem::Info& sem,
     out << "]] ";
   }
 
-  out << symbol_.to_str() << ": " << type_->type_name() << "}" << std::endl;
+  out << symbol_.to_str() << ": "
+      << (type_.ast ? type_.ast->type_name() : type_.sem->type_name()) << "}"
+      << std::endl;
 }
 
 }  // namespace ast

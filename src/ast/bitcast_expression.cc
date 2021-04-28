@@ -26,7 +26,7 @@ BitcastExpression::BitcastExpression(ProgramID program_id,
                                      typ::Type type,
                                      Expression* expr)
     : Base(program_id, source), type_(type), expr_(expr) {
-  TINT_ASSERT(type_.sem);
+  TINT_ASSERT(type_.ast || type_.sem);
   TINT_ASSERT(expr_);
   TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(expr, program_id);
 }
@@ -46,8 +46,9 @@ void BitcastExpression::to_str(const sem::Info& sem,
                                std::ostream& out,
                                size_t indent) const {
   make_indent(out, indent);
-  out << "Bitcast[" << result_type_str(sem) << "]<" << type_->type_name()
-      << ">{" << std::endl;
+  out << "Bitcast[" << result_type_str(sem) << "]<"
+      << (type_.ast ? type_.ast->type_name() : type_.sem->type_name()) << ">{"
+      << std::endl;
   expr_->to_str(sem, out, indent + 2);
   make_indent(out, indent);
   out << "}" << std::endl;

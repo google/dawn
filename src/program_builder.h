@@ -861,6 +861,9 @@ class ProgramBuilder {
     /// @return either type or a pointer to a new ast::TypeName
     typ::Type MaybeCreateTypename(typ::Type type) const;
 
+    /// The ProgramBuilder
+    ProgramBuilder* const builder;
+
    private:
     /// CToAST<T> is specialized for various `T` types and each specialization
     /// contains a single static `get()` method for obtaining the corresponding
@@ -869,8 +872,6 @@ class ProgramBuilder {
     ///    `static typ::Type get(Types* t)`
     template <typename T>
     struct CToAST {};
-
-    ProgramBuilder* const builder;
   };
 
   //////////////////////////////////////////////////////////////////////////////

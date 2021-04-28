@@ -173,7 +173,8 @@ class InspectorHelper : public ProgramBuilder {
   /// @param type type of member
   /// @returns a string for the member
   std::string StructMemberName(size_t idx, typ::Type type) {
-    return std::to_string(idx) + type->type_name();
+    return std::to_string(idx) +
+           (type.sem ? type.sem->type_name() : type.ast->type_name());
   }
 
   /// Generates a struct type

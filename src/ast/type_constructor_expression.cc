@@ -26,7 +26,7 @@ TypeConstructorExpression::TypeConstructorExpression(ProgramID program_id,
                                                      typ::Type type,
                                                      ExpressionList values)
     : Base(program_id, source), type_(type), values_(std::move(values)) {
-  TINT_ASSERT(type_.sem);
+  TINT_ASSERT(type_.ast || type_.sem);
   for (auto* val : values_) {
     TINT_ASSERT(val);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(val, program_id);
@@ -53,7 +53,8 @@ void TypeConstructorExpression::to_str(const sem::Info& sem,
   make_indent(out, indent);
   out << "TypeConstructor[" << result_type_str(sem) << "]{" << std::endl;
   make_indent(out, indent + 2);
-  out << type_->type_name() << std::endl;
+  out << (type_.ast ? type_.ast->type_name() : type_.sem->type_name())
+      << std::endl;
 
   for (auto* val : values_) {
     val->to_str(sem, out, indent + 2);
