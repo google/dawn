@@ -275,6 +275,8 @@ set(TINT_LIB_SRCS
   transform/manager.h
   transform/renamer.cc
   transform/renamer.h
+  transform/single_entry_point.cc
+  transform/single_entry_point.h
   transform/transform.cc
   transform/transform.h
   transform/vertex_pulling.cc
@@ -763,7 +765,6 @@ if(${TINT_BUILD_TESTS})
       writer/wgsl/generator_impl_constructor_test.cc
       writer/wgsl/generator_impl_continue_test.cc
       writer/wgsl/generator_impl_discard_test.cc
-      writer/wgsl/generator_impl_entry_point_test.cc
       writer/wgsl/generator_impl_fallthrough_test.cc
       writer/wgsl/generator_impl_function_test.cc
       writer/wgsl/generator_impl_global_decl_test.cc
@@ -791,6 +792,7 @@ if(${TINT_BUILD_TESTS})
       transform/emit_vertex_point_size_test.cc
       transform/first_index_offset_test.cc
       transform/renamer_test.cc
+      transform/single_entry_point.cc
       transform/test_helper.h
       transform/vertex_pulling_test.cc
     )

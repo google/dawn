@@ -104,17 +104,6 @@ bool GeneratorImpl::Generate(const ast::Function* entry) {
   return true;
 }
 
-bool GeneratorImpl::GenerateEntryPoint(ast::PipelineStage stage,
-                                       const std::string& name) {
-  auto* func =
-      program_->AST().Functions().Find(program_->Symbols().Get(name), stage);
-  if (func == nullptr) {
-    diagnostics_.add_error("Unable to find requested entry point: " + name);
-    return false;
-  }
-  return Generate(func);
-}
-
 bool GeneratorImpl::EmitConstructedType(const sem::Type* ty) {
   make_indent();
   if (auto* alias = ty->As<sem::Alias>()) {

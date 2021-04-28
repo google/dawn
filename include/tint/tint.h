@@ -30,6 +30,7 @@
 #include "src/transform/first_index_offset.h"
 #include "src/transform/manager.h"
 #include "src/transform/renamer.h"
+#include "src/transform/single_entry_point.h"
 #include "src/transform/vertex_pulling.h"
 #include "src/writer/writer.h"
 

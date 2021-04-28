@@ -55,12 +55,6 @@ class GeneratorImpl : public TextGenerator {
   /// @returns true on successful generation; false otherwise
   bool Generate(const ast::Function* entry);
 
-  /// Generates a single entry point
-  /// @param stage the pipeline stage
-  /// @param name the entry point name
-  /// @returns true on successful generation; false otherwise
-  bool GenerateEntryPoint(ast::PipelineStage stage, const std::string& name);
-
   /// Handles generating a constructed type
   /// @param ty the constructed to generate
   /// @returns true if the constructed was emitted

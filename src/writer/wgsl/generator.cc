@@ -31,15 +31,6 @@ bool Generator::Generate() {
   return ret;
 }
 
-bool Generator::GenerateEntryPoint(ast::PipelineStage stage,
-                                   const std::string& name) {
-  auto ret = impl_->GenerateEntryPoint(stage, name);
-  if (!ret) {
-    error_ = impl_->error();
-  }
-  return ret;
-}
-
 std::string Generator::result() const {
   return impl_->result();
 }

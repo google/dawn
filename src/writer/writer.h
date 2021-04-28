@@ -34,13 +34,6 @@ class Writer {
   /// @returns true on success; false on failure
   virtual bool Generate() = 0;
 
-  /// Converts a single entry point
-  /// @param stage the pipeline stage
-  /// @param name the entry point name
-  /// @returns true on succes; false on failure
-  virtual bool GenerateEntryPoint(ast::PipelineStage stage,
-                                  const std::string& name) = 0;
-
  protected:
   /// Sets the error string
   /// @param msg the error message
