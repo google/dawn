@@ -33,6 +33,74 @@ namespace fuzzers {
   __builtin_trap();
 }
 
+bool ExtractBindingRemapperInputs(const uint8_t** data,
+                                  size_t* size,
+                                  tint::transform::DataMap* inputs) {
+  if ((*size) < sizeof(uint8_t)) {
+    return false;
+  }
+
+  auto count = *reinterpret_cast<const uint8_t*>(*data);
+  (*data) += sizeof(uint8_t);
+  (*size) -= sizeof(uint8_t);
+
+  struct Config {
+    uint32_t old_group;
+    uint32_t old_binding;
+    uint32_t new_group;
+    uint32_t new_binding;
+    ast::AccessControl::Access new_ac;
+  };
+
+  if ((*size) < count * sizeof(Config)) {
+    return false;
+  }
+
+  std::vector<Config> configs(count);
+
+  memcpy(configs.data(), *data, count * sizeof(Config));
+
+  (*data) += count * sizeof(Config);
+  (*size) -= count * sizeof(Config);
+
+  transform::BindingRemapper::BindingPoints binding_points;
+  transform::BindingRemapper::AccessControls access_controls;
+  for (const auto& config : configs) {
+    binding_points[{config.old_binding, config.old_group}] = {
+        config.new_binding, config.new_group};
+    access_controls[{config.old_binding, config.old_group}] = config.new_ac;
+  }
+
+  inputs->Add<transform::BindingRemapper::Remappings>(binding_points,
+                                                      access_controls);
+
+  return true;
+}
+
+bool ExtractFirstIndexOffsetInputs(const uint8_t** data,
+                                   size_t* size,
+                                   tint::transform::DataMap* inputs) {
+  struct Config {
+    uint32_t group;
+    uint32_t binding;
+  };
+
+  if ((*size) < sizeof(Config)) {
+    return false;
+  }
+
+  Config config;
+  memcpy(&config, data, sizeof(config));
+
+  (*data) += sizeof(Config);
+  (*size) -= sizeof(Config);
+
+  inputs->Add<tint::transform::FirstIndexOffset::BindingPoint>(config.binding,
+                                                               config.group);
+
+  return true;
+}
+
 CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
     : input_(input),
       output_(output),
