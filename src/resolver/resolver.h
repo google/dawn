@@ -73,34 +73,34 @@ class Resolver {
 
   /// @param type the given type
   /// @returns true if the given type is storable
-  static bool IsStorable(sem::Type* type);
+  static bool IsStorable(const sem::Type* type);
 
   /// @param type the given type
   /// @returns true if the given type is host-shareable
-  static bool IsHostShareable(sem::Type* type);
+  static bool IsHostShareable(const sem::Type* type);
 
   /// @param lhs the assignment store type (non-pointer)
   /// @param rhs the assignment source type (non-pointer or pointer with
   /// auto-deref)
   /// @returns true an expression of type `rhs` can be assigned to a variable,
   /// structure member or array element of type `lhs`
-  static bool IsValidAssignment(sem::Type* lhs, sem::Type* rhs);
+  static bool IsValidAssignment(const sem::Type* lhs, const sem::Type* rhs);
 
   /// @param type the input type
   /// @returns the canonical type for `type`; that is, a type with all aliases
   /// removed. For example, `Canonical(alias<alias<vec3<alias<f32>>>>)` is
   /// `vec3<f32>`.
-  sem::Type* Canonical(sem::Type* type);
+  const sem::Type* Canonical(const sem::Type* type);
 
  private:
   /// Structure holding semantic information about a variable.
   /// Used to build the sem::Variable nodes at the end of resolving.
   struct VariableInfo {
-    VariableInfo(ast::Variable* decl, sem::Type* type);
+    VariableInfo(const ast::Variable* decl, const sem::Type* type);
     ~VariableInfo();
 
-    ast::Variable* const declaration;
-    sem::Type* type;
+    ast::Variable const* const declaration;
+    sem::Type const* type;
     ast::StorageClass storage_class;
     std::vector<ast::IdentifierExpression*> users;
   };
@@ -124,7 +124,7 @@ class Resolver {
   /// Structure holding semantic information about an expression.
   /// Used to build the sem::Expression nodes at the end of resolving.
   struct ExpressionInfo {
-    sem::Type* type;
+    sem::Type const* type;
     sem::Statement* statement;
   };
 
@@ -260,25 +260,25 @@ class Resolver {
   /// hasn't been constructed already. If an error is raised, nullptr is
   /// returned.
   /// @param ty the ast::Type
-  sem::Type* Type(ast::Type* ty);
+  sem::Type* Type(const ast::Type* ty);
 
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
   /// returned.
   /// @param arr the Array to get semantic information for
   /// @param source the Source of the ast node with this array as its type
-  const sem::Array* Array(sem::ArrayType* arr, const Source& source);
+  const sem::Array* Array(const sem::ArrayType* arr, const Source& source);
 
   /// @returns the StructInfo for the structure `str`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
-  StructInfo* Structure(sem::StructType* str);
+  StructInfo* Structure(const sem::StructType* str);
 
   /// @returns the VariableInfo for the variable `var`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
   /// @param var the variable to create or return the `VariableInfo` for
   /// @param type optional type of `var` to use instead of
   /// `var->declared_type()`. For type inference.
-  VariableInfo* Variable(ast::Variable* var, sem::Type* type = nullptr);
+  VariableInfo* Variable(ast::Variable* var, const sem::Type* type = nullptr);
 
   /// Records the storage class usage for the given type, and any transient
   /// dependencies of the type. Validates that the type can be used for the
@@ -289,7 +289,7 @@ class Resolver {
   /// given type and storage class. Used for generating sensible error messages.
   /// @returns true on success, false on error
   bool ApplyStorageClassUsageToType(ast::StorageClass sc,
-                                    sem::Type* ty,
+                                    const sem::Type* ty,
                                     const Source& usage);
 
   /// @param align the output default alignment in bytes for the type `ty`
@@ -303,13 +303,13 @@ class Resolver {
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  sem::Type* TypeOf(ast::Expression* expr);
+  const sem::Type* TypeOf(ast::Expression* expr);
 
   /// Creates a sem::Expression node with the resolved type `type`, and
   /// assigns this semantic node to the expression `expr`.
   /// @param expr the expression
   /// @param type the resolved type
-  void SetType(ast::Expression* expr, sem::Type* type);
+  void SetType(ast::Expression* expr, const sem::Type* type);
 
   /// Constructs a new BlockInfo with the given type and with #current_block_ as
   /// its parent, assigns this to #current_block_, and then calls `callback`.
@@ -329,7 +329,7 @@ class Resolver {
   /// Mark records that the given AST node has been visited, and asserts that
   /// the given node has not already been seen. Diamonds in the AST are illegal.
   /// @param node the AST node.
-  void Mark(ast::Node* node);
+  void Mark(const ast::Node* node);
 
   ProgramBuilder* const builder_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
@@ -341,9 +341,9 @@ class Resolver {
   std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
   std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;
-  std::unordered_map<sem::StructType*, StructInfo*> struct_info_;
-  std::unordered_map<sem::Type*, sem::Type*> type_to_canonical_;
-  std::unordered_set<ast::Node*> marked_;
+  std::unordered_map<const sem::StructType*, StructInfo*> struct_info_;
+  std::unordered_map<const sem::Type*, const sem::Type*> type_to_canonical_;
+  std::unordered_set<const ast::Node*> marked_;
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;

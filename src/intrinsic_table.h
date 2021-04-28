@@ -51,7 +51,7 @@ class IntrinsicTable {
   /// @return the semantic intrinsic if found, otherwise nullptr
   virtual Result Lookup(ProgramBuilder& builder,
                         sem::IntrinsicType type,
-                        const std::vector<sem::Type*>& args,
+                        const std::vector<const sem::Type*>& args,
                         const Source& source) const = 0;
 };
 
