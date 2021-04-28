@@ -73,6 +73,40 @@ class Void;
 
 namespace typ {  //  type-pair
 
+/// A simple wrapper around a raw pointer. Used to prevent a whole bunch of
+/// warnings about `auto` needing to be declared as `auto*` while we're
+/// migrating code.
+template <typename T>
+struct Ptr {
+  /// The raw pointer
+  T* const ptr;
+
+  /// Constructor
+  Ptr() = default;
+
+  /// Copy constructor
+  /// @param other the Ptr to copy
+  template <typename OTHER>
+  Ptr(const Ptr<OTHER>& other) : ptr(static_cast<T*>(other.ptr)) {}
+
+  /// Constructor
+  /// @param p the pointer to wrap in a Ptr
+  template <typename U>
+  Ptr(U* p) : ptr(p) {}  // NOLINT: explicit
+
+  /// @returns the pointer
+  operator T*() { return ptr; }
+
+  /// @returns the pointer
+  operator const T*() const { return ptr; }
+
+  /// @returns the pointer
+  T* operator->() { return ptr; }
+
+  /// @returns the pointer
+  const T* operator->() const { return ptr; }
+};
+
 /// TypePair is a pair of ast::Type and sem::Type pointers used to simplify
 /// migration to the new ast::Type nodes.
 ///
@@ -109,6 +143,10 @@ struct TypePair {
   /// @param a the ast::Type pointer
   /// @param s the sem::Type pointer
   TypePair(const AST* a, const SEM* s) : ast(a), sem(s) {}
+  /// Constructor
+  /// @param ptr the Ptr<T>
+  template <typename T>
+  TypePair(Ptr<T> ptr) : TypePair(ptr.ptr) {}  // NOLINT: explicit
   /// Constructor
   TypePair(std::nullptr_t) {}  // NOLINT: explicit
 
