@@ -38,6 +38,21 @@ function status {
     echo ""
     task_begin $@
 }
+function with_retry {
+  local MAX_ATTEMPTS=5
+  local RETRY_DELAY_SECS=5
+  local ATTEMPT=1
+  while true; do
+    "$@" && break
+    if [[ $ATTEMPT -ge $MAX_ATTEMPTS ]]; then
+        echo "The command has failed after $ATTEMPT attempts."
+        exit $?
+    fi
+    ((ATTEMPT++))
+    echo "'$@' failed. Attempt ($ATTEMPT/$MAX_ATTEMPTS). Retrying..."
+    sleep $RETRY_DELAY_SECS;
+  done
+}
 
 ORIGINAL_SRC_DIR="$(pwd)"
 
@@ -55,7 +70,7 @@ git clone ${ORIGINAL_SRC_DIR} .
 
 status "Fetching dependencies"
 cp standalone.gclient .gclient
-gclient sync
+with_retry gclient sync
 
 status "Configuring build system"
 if [ "$BUILD_SYSTEM" == "cmake" ]; then
