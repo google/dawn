@@ -992,27 +992,19 @@ class ProgramBuilder {
 
   /// @param val the boolan value
   /// @return a boolean literal with the given value
-  ast::BoolLiteral* Literal(bool val) {
-    return create<ast::BoolLiteral>(ty.bool_(), val);
-  }
+  ast::BoolLiteral* Literal(bool val) { return create<ast::BoolLiteral>(val); }
 
   /// @param val the float value
   /// @return a float literal with the given value
-  ast::FloatLiteral* Literal(f32 val) {
-    return create<ast::FloatLiteral>(ty.f32(), val);
-  }
+  ast::FloatLiteral* Literal(f32 val) { return create<ast::FloatLiteral>(val); }
 
   /// @param val the unsigned int value
   /// @return a ast::UintLiteral with the given value
-  ast::UintLiteral* Literal(u32 val) {
-    return create<ast::UintLiteral>(ty.u32(), val);
-  }
+  ast::UintLiteral* Literal(u32 val) { return create<ast::UintLiteral>(val); }
 
   /// @param val the integer value
   /// @return the ast::SintLiteral with the given value
-  ast::SintLiteral* Literal(i32 val) {
-    return create<ast::SintLiteral>(ty.i32(), val);
-  }
+  ast::SintLiteral* Literal(i32 val) { return create<ast::SintLiteral>(val); }
 
   /// @param args the arguments for the type constructor
   /// @return an `ast::TypeConstructorExpression` of type `ty`, with the values

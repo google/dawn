@@ -27,7 +27,7 @@ using CaseStatementTest = TestHelper;
 
 TEST_F(CaseStatementTest, Creation_i32) {
   CaseSelectorList b;
-  auto* selector = create<SintLiteral>(ty.i32(), 2);
+  auto* selector = create<SintLiteral>(2);
   b.push_back(selector);
 
   auto* discard = create<DiscardStatement>();
@@ -42,7 +42,7 @@ TEST_F(CaseStatementTest, Creation_i32) {
 
 TEST_F(CaseStatementTest, Creation_u32) {
   CaseSelectorList b;
-  auto* selector = create<SintLiteral>(ty.u32(), 2);
+  auto* selector = create<UintLiteral>(2u);
   b.push_back(selector);
 
   auto* discard = create<DiscardStatement>();
@@ -57,7 +57,7 @@ TEST_F(CaseStatementTest, Creation_u32) {
 
 TEST_F(CaseStatementTest, Creation_WithSource) {
   CaseSelectorList b;
-  b.push_back(create<SintLiteral>(ty.i32(), 2));
+  b.push_back(create<SintLiteral>(2));
 
   auto* body = create<BlockStatement>(StatementList{
       create<DiscardStatement>(),
@@ -78,7 +78,7 @@ TEST_F(CaseStatementTest, IsDefault_WithoutSelectors) {
 
 TEST_F(CaseStatementTest, IsDefault_WithSelectors) {
   CaseSelectorList b;
-  b.push_back(create<SintLiteral>(ty.i32(), 2));
+  b.push_back(create<SintLiteral>(2));
 
   auto* c = create<CaseStatement>(b, create<BlockStatement>(StatementList{}));
   EXPECT_FALSE(c->IsDefault());
@@ -125,16 +125,15 @@ TEST_F(CaseStatementTest, Assert_DifferentProgramID_Selector) {
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
-        b1.create<CaseStatement>(
-            CaseSelectorList{b2.create<SintLiteral>(b2.ty.i32(), 2)},
-            b1.create<BlockStatement>(StatementList{}));
+        b1.create<CaseStatement>(CaseSelectorList{b2.create<SintLiteral>(2)},
+                                 b1.create<BlockStatement>(StatementList{}));
       },
       "internal compiler error");
 }
 
 TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
   CaseSelectorList b;
-  b.push_back(create<SintLiteral>(ty.i32(), -2));
+  b.push_back(create<SintLiteral>(-2));
 
   auto* body = create<BlockStatement>(StatementList{
       create<DiscardStatement>(),
@@ -149,7 +148,7 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_i32) {
 
 TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
   CaseSelectorList b;
-  b.push_back(create<UintLiteral>(ty.u32(), 2));
+  b.push_back(create<UintLiteral>(2));
 
   auto* body = create<BlockStatement>(StatementList{
       create<DiscardStatement>(),
@@ -164,8 +163,8 @@ TEST_F(CaseStatementTest, ToStr_WithSelectors_u32) {
 
 TEST_F(CaseStatementTest, ToStr_WithMultipleSelectors) {
   CaseSelectorList b;
-  b.push_back(create<SintLiteral>(ty.i32(), 1));
-  b.push_back(create<SintLiteral>(ty.i32(), 2));
+  b.push_back(create<SintLiteral>(1));
+  b.push_back(create<SintLiteral>(2));
 
   auto* body = create<BlockStatement>(StatementList{
       create<DiscardStatement>(),

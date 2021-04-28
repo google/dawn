@@ -21,13 +21,13 @@ namespace {
 using SintLiteralTest = TestHelper;
 
 TEST_F(SintLiteralTest, Value) {
-  auto* i = create<SintLiteral>(ty.i32(), 47);
+  auto* i = create<SintLiteral>(47);
   ASSERT_TRUE(i->Is<SintLiteral>());
   EXPECT_EQ(i->value(), 47);
 }
 
 TEST_F(SintLiteralTest, Is) {
-  ast::Literal* l = create<SintLiteral>(ty.i32(), 42);
+  ast::Literal* l = create<SintLiteral>(42);
   EXPECT_FALSE(l->Is<BoolLiteral>());
   EXPECT_TRUE(l->Is<SintLiteral>());
   EXPECT_FALSE(l->Is<FloatLiteral>());
@@ -35,18 +35,13 @@ TEST_F(SintLiteralTest, Is) {
 }
 
 TEST_F(SintLiteralTest, ToStr) {
-  auto* i = create<SintLiteral>(ty.i32(), -42);
+  auto* i = create<SintLiteral>(-42);
   EXPECT_EQ(str(i), "-42");
 }
 
 TEST_F(SintLiteralTest, Name_I32) {
-  auto* i = create<SintLiteral>(ty.i32(), 2);
-  EXPECT_EQ("__sint__i32_2", i->name());
-}
-
-TEST_F(SintLiteralTest, Name_U32) {
-  auto* i = create<SintLiteral>(ty.u32(), 2);
-  EXPECT_EQ("__sint__u32_2", i->name());
+  auto* i = create<SintLiteral>(2);
+  EXPECT_EQ("__sint_2", i->name());
 }
 
 }  // namespace

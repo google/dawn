@@ -21,9 +21,8 @@ namespace ast {
 
 IntLiteral::IntLiteral(ProgramID program_id,
                        const Source& source,
-                       typ::Type type,
                        uint32_t value)
-    : Base(program_id, source, type), value_(value) {}
+    : Base(program_id, source), value_(value) {}
 
 IntLiteral::~IntLiteral() = default;
 

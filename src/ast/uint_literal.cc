@@ -23,9 +23,8 @@ namespace ast {
 
 UintLiteral::UintLiteral(ProgramID program_id,
                          const Source& source,
-                         typ::Type type,
                          uint32_t value)
-    : Base(program_id, source, type, value) {}
+    : Base(program_id, source, value) {}
 
 UintLiteral::~UintLiteral() = default;
 
@@ -40,8 +39,7 @@ std::string UintLiteral::name() const {
 UintLiteral* UintLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  auto ty = ctx->Clone(type());
-  return ctx->dst->create<UintLiteral>(src, ty, value());
+  return ctx->dst->create<UintLiteral>(src, value());
 }
 
 }  // namespace ast

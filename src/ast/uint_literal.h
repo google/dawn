@@ -28,12 +28,8 @@ class UintLiteral : public Castable<UintLiteral, IntLiteral> {
   /// Constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the input source
-  /// @param type the type of the literal
   /// @param value the uint literals value
-  UintLiteral(ProgramID program_id,
-              const Source& source,
-              typ::Type type,
-              uint32_t value);
+  UintLiteral(ProgramID program_id, const Source& source, uint32_t value);
   ~UintLiteral() override;
 
   /// @returns the uint literal value

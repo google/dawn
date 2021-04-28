@@ -21,21 +21,21 @@ namespace {
 using BoolLiteralTest = TestHelper;
 
 TEST_F(BoolLiteralTest, True) {
-  auto* b = create<BoolLiteral>(ty.bool_(), true);
+  auto* b = create<BoolLiteral>(true);
   ASSERT_TRUE(b->Is<BoolLiteral>());
   ASSERT_TRUE(b->IsTrue());
   ASSERT_FALSE(b->IsFalse());
 }
 
 TEST_F(BoolLiteralTest, False) {
-  auto* b = create<BoolLiteral>(ty.bool_(), false);
+  auto* b = create<BoolLiteral>(false);
   ASSERT_TRUE(b->Is<BoolLiteral>());
   ASSERT_FALSE(b->IsTrue());
   ASSERT_TRUE(b->IsFalse());
 }
 
 TEST_F(BoolLiteralTest, Is) {
-  ast::Literal* l = create<BoolLiteral>(ty.bool_(), false);
+  ast::Literal* l = create<BoolLiteral>(false);
   EXPECT_TRUE(l->Is<BoolLiteral>());
   EXPECT_FALSE(l->Is<SintLiteral>());
   EXPECT_FALSE(l->Is<FloatLiteral>());
@@ -44,8 +44,8 @@ TEST_F(BoolLiteralTest, Is) {
 }
 
 TEST_F(BoolLiteralTest, ToStr) {
-  auto* t = create<BoolLiteral>(ty.bool_(), true);
-  auto* f = create<BoolLiteral>(ty.bool_(), false);
+  auto* t = create<BoolLiteral>(true);
+  auto* f = create<BoolLiteral>(false);
 
   EXPECT_EQ(str(t), "true");
   EXPECT_EQ(str(f), "false");

@@ -28,12 +28,8 @@ class SintLiteral : public Castable<SintLiteral, IntLiteral> {
   /// Constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the input source
-  /// @param type the type
   /// @param value the signed int literals value
-  SintLiteral(ProgramID program_id,
-              const Source& source,
-              typ::Type type,
-              int32_t value);
+  SintLiteral(ProgramID program_id, const Source& source, int32_t value);
   ~SintLiteral() override;
 
   /// @returns the int literal value

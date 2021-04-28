@@ -23,9 +23,8 @@ namespace ast {
 
 SintLiteral::SintLiteral(ProgramID program_id,
                          const Source& source,
-                         typ::Type type,
                          int32_t value)
-    : Base(program_id, source, type, static_cast<uint32_t>(value)) {}
+    : Base(program_id, source, static_cast<uint32_t>(value)) {}
 
 SintLiteral::~SintLiteral() = default;
 
@@ -34,14 +33,13 @@ std::string SintLiteral::to_str(const sem::Info&) const {
 }
 
 std::string SintLiteral::name() const {
-  return "__sint" + type()->type_name() + "_" + std::to_string(value());
+  return "__sint_" + std::to_string(value());
 }
 
 SintLiteral* SintLiteral::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  auto ty = ctx->Clone(type());
-  return ctx->dst->create<SintLiteral>(src, ty, value());
+  return ctx->dst->create<SintLiteral>(src, value());
 }
 
 }  // namespace ast

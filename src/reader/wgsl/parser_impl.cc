@@ -2840,20 +2840,16 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 Maybe<ast::Literal*> ParserImpl::const_literal() {
   auto t = peek();
   if (match(Token::Type::kTrue)) {
-    auto* type = builder_.create<sem::Bool>();
-    return create<ast::BoolLiteral>(Source{}, type, true);
+    return create<ast::BoolLiteral>(Source{}, true);
   }
   if (match(Token::Type::kFalse)) {
-    auto* type = builder_.create<sem::Bool>();
-    return create<ast::BoolLiteral>(Source{}, type, false);
+    return create<ast::BoolLiteral>(Source{}, false);
   }
   if (match(Token::Type::kSintLiteral)) {
-    auto* type = builder_.create<sem::I32>();
-    return create<ast::SintLiteral>(Source{}, type, t.to_i32());
+    return create<ast::SintLiteral>(Source{}, t.to_i32());
   }
   if (match(Token::Type::kUintLiteral)) {
-    auto* type = builder_.create<sem::U32>();
-    return create<ast::UintLiteral>(Source{}, type, t.to_u32());
+    return create<ast::UintLiteral>(Source{}, t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
     auto p = peek();
@@ -2861,8 +2857,7 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
       next();  // Consume 'f'
       add_error(p.source(), "float literals must not be suffixed with 'f'");
     }
-    auto* type = builder_.create<sem::F32>();
-    return create<ast::FloatLiteral>(Source{}, type, t.to_f32());
+    return create<ast::FloatLiteral>(Source{}, t.to_f32());
   }
   return Failure::kNoMatch;
 }

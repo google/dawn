@@ -97,19 +97,19 @@ ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
   auto* unwrapped_type = type->UnwrapAliasIfNeeded();
   if (unwrapped_type->Is<sem::Bool>()) {
     return create<ast::ScalarConstructorExpression>(
-        create<ast::BoolLiteral>(type, elem_value == 0 ? false : true));
+        create<ast::BoolLiteral>(elem_value == 0 ? false : true));
   }
   if (unwrapped_type->Is<sem::I32>()) {
-    return create<ast::ScalarConstructorExpression>(create<ast::SintLiteral>(
-        type, static_cast<ProgramBuilder::i32>(elem_value)));
+    return create<ast::ScalarConstructorExpression>(
+        create<ast::SintLiteral>(static_cast<i32>(elem_value)));
   }
   if (unwrapped_type->Is<sem::U32>()) {
-    return create<ast::ScalarConstructorExpression>(create<ast::UintLiteral>(
-        type, static_cast<ProgramBuilder::u32>(elem_value)));
+    return create<ast::ScalarConstructorExpression>(
+        create<ast::UintLiteral>(static_cast<u32>(elem_value)));
   }
   if (unwrapped_type->Is<sem::F32>()) {
-    return create<ast::ScalarConstructorExpression>(create<ast::FloatLiteral>(
-        type, static_cast<ProgramBuilder::f32>(elem_value)));
+    return create<ast::ScalarConstructorExpression>(
+        create<ast::FloatLiteral>(static_cast<f32>(elem_value)));
   }
   if (auto* v = unwrapped_type->As<sem::Vector>()) {
     ast::ExpressionList el(v->size());

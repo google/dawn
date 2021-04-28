@@ -77,7 +77,7 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
   WrapInFunction(Decl(a), Assign(a_ident, "a"));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
-  ASSERT_EQ(TypeOf(a_ident), ty.pointer(rhs_type, sc));
+  ASSERT_EQ(TypeOf(a_ident), ty.pointer(rhs_type->UnwrapAliasIfNeeded(), sc));
 }
 
 static constexpr Params from_constructor_expression_cases[] = {
@@ -173,7 +173,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
   WrapInFunction(Decl(a), Assign(a_ident, "a"));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
-  ASSERT_EQ(TypeOf(a_ident), ty.pointer(rhs_type, sc));
+  ASSERT_EQ(TypeOf(a_ident), ty.pointer(rhs_type->UnwrapAliasIfNeeded(), sc));
 }
 static constexpr Params from_call_expression_cases[] = {
     Params{ty_bool_},

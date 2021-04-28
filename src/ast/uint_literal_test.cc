@@ -21,13 +21,13 @@ namespace {
 using UintLiteralTest = TestHelper;
 
 TEST_F(UintLiteralTest, Value) {
-  auto* u = create<UintLiteral>(ty.u32(), 47);
+  auto* u = create<UintLiteral>(47);
   ASSERT_TRUE(u->Is<UintLiteral>());
   EXPECT_EQ(u->value(), 47u);
 }
 
 TEST_F(UintLiteralTest, Is) {
-  ast::Literal* l = create<UintLiteral>(ty.u32(), 42);
+  ast::Literal* l = create<UintLiteral>(42);
   EXPECT_FALSE(l->Is<BoolLiteral>());
   EXPECT_FALSE(l->Is<SintLiteral>());
   EXPECT_FALSE(l->Is<FloatLiteral>());
@@ -35,7 +35,7 @@ TEST_F(UintLiteralTest, Is) {
 }
 
 TEST_F(UintLiteralTest, ToStr) {
-  auto* u = create<UintLiteral>(ty.u32(), 42u);
+  auto* u = create<UintLiteral>(42u);
   EXPECT_EQ(str(u), "42u");
 }
 

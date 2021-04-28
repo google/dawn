@@ -1693,7 +1693,7 @@ TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: type in vector constructor does not match vector "
-            "type: expected 'f32', found 'u32'");
+            "type: expected 'f32', found 'UnsignedInt'");
 }
 
 TEST_F(ResolverValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
@@ -2040,7 +2040,7 @@ TEST_F(ResolverValidationTest, Expr_MatrixConstructor_ArgumentTypeAlias_Error) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error: expected argument type 'vec2<f32>' in 'mat2x2<f32>' "
-            "constructor, found 'vec2<u32>'");
+            "constructor, found 'VectorUnsigned2'");
 }
 
 TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {

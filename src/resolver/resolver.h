@@ -96,11 +96,14 @@ class Resolver {
   /// Structure holding semantic information about a variable.
   /// Used to build the sem::Variable nodes at the end of resolving.
   struct VariableInfo {
-    VariableInfo(const ast::Variable* decl, const sem::Type* type);
+    VariableInfo(const ast::Variable* decl,
+                 const sem::Type* type,
+                 const std::string& type_name);
     ~VariableInfo();
 
     ast::Variable const* const declaration;
     sem::Type const* type;
+    std::string const type_name;
     ast::StorageClass storage_class;
     std::vector<ast::IdentifierExpression*> users;
   };
@@ -125,6 +128,7 @@ class Resolver {
   /// Used to build the sem::Expression nodes at the end of resolving.
   struct ExpressionInfo {
     sem::Type const* type;
+    std::string const type_name;  // Declared type name
     sem::Statement* statement;
   };
 
@@ -246,14 +250,16 @@ class Resolver {
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
   bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);
   bool ValidateGlobalVariable(const VariableInfo* var);
-  bool ValidateMatrixConstructor(const sem::Matrix* matrix_type,
+  bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
+                                 const sem::Matrix* matrix_type,
                                  const ast::ExpressionList& values);
   bool ValidateParameter(const ast::Variable* param);
   bool ValidateReturn(const ast::ReturnStatement* ret);
   bool ValidateStructure(const sem::StructType* st);
   bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateVariable(const ast::Variable* param);
-  bool ValidateVectorConstructor(const sem::Vector* vec_type,
+  bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
+                                 const sem::Vector* vec_type,
                                  const ast::ExpressionList& values);
 
   /// @returns the sem::Type for the ast::Type `ty`, building it if it
@@ -303,13 +309,31 @@ class Resolver {
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  const sem::Type* TypeOf(ast::Expression* expr);
+  const sem::Type* TypeOf(const ast::Expression* expr);
+
+  /// @returns the declared type name of the ast::Expression `expr`
+  /// @param expr the type name
+  std::string TypeNameOf(const ast::Expression* expr);
+
+  /// @returns the semantic type of the AST literal `lit`
+  /// @param lit the literal
+  const sem::Type* TypeOf(const ast::Literal* lit);
 
   /// Creates a sem::Expression node with the resolved type `type`, and
   /// assigns this semantic node to the expression `expr`.
   /// @param expr the expression
   /// @param type the resolved type
   void SetType(ast::Expression* expr, const sem::Type* type);
+
+  /// Creates a sem::Expression node with the resolved type `type`, the declared
+  /// type name `type_name` and assigns this semantic node to the expression
+  /// `expr`.
+  /// @param expr the expression
+  /// @param type the resolved type
+  /// @param type_name the declared type name
+  void SetType(ast::Expression* expr,
+               const sem::Type* type,
+               const std::string& type_name);
 
   /// Constructs a new BlockInfo with the given type and with #current_block_ as
   /// its parent, assigns this to #current_block_, and then calls `callback`.
@@ -340,7 +364,7 @@ class Resolver {
   std::unordered_map<const ast::Function*, FunctionInfo*> function_to_info_;
   std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
-  std::unordered_map<ast::Expression*, ExpressionInfo> expr_info_;
+  std::unordered_map<const ast::Expression*, ExpressionInfo> expr_info_;
   std::unordered_map<const sem::StructType*, StructInfo*> struct_info_;
   std::unordered_map<const sem::Type*, const sem::Type*> type_to_canonical_;
   std::unordered_set<const ast::Node*> marked_;

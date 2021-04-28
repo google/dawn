@@ -81,7 +81,7 @@ TEST_F(ResolverTest, Stmt_Case) {
   auto* assign = Assign(lhs, rhs);
   auto* block = Block(assign);
   ast::CaseSelectorList lit;
-  lit.push_back(create<ast::SintLiteral>(ty.i32(), 3));
+  lit.push_back(create<ast::SintLiteral>(3));
   auto* cse = create<ast::CaseStatement>(lit, block);
   WrapInFunction(v, cse);
 

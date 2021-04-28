@@ -27,9 +27,6 @@ class Literal : public Castable<Literal, Node> {
  public:
   ~Literal() override;
 
-  /// @returns the type of the literal
-  typ::Type type() const { return type_; }
-
   /// Writes a representation of the node to the output stream
   /// @param sem the semantic info for the program
   /// @param out the stream to write to
@@ -49,11 +46,7 @@ class Literal : public Castable<Literal, Node> {
   /// Constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the input source
-  /// @param type the type of the literal
-  explicit Literal(ProgramID program_id, const Source& source, typ::Type type);
-
- private:
-  typ::Type const type_;
+  Literal(ProgramID program_id, const Source& source);
 };
 
 }  // namespace ast

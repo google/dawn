@@ -119,7 +119,7 @@ TEST_F(ResolverControlBlockValidationTest,
 
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList csl;
-  csl.push_back(create<ast::UintLiteral>(ty.u32(), 1));
+  csl.push_back(create<ast::UintLiteral>(1u));
   switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, csl, Block()));
 
@@ -178,12 +178,12 @@ TEST_F(ResolverControlBlockValidationTest,
 
   ast::CaseStatementList switch_body;
   ast::CaseSelectorList csl_1;
-  csl_1.push_back(create<ast::UintLiteral>(ty.u32(), 0));
+  csl_1.push_back(create<ast::UintLiteral>(0u));
   switch_body.push_back(create<ast::CaseStatement>(csl_1, Block()));
 
   ast::CaseSelectorList csl_2;
-  csl_2.push_back(create<ast::UintLiteral>(ty.u32(), 2));
-  csl_2.push_back(create<ast::UintLiteral>(ty.u32(), 2));
+  csl_2.push_back(create<ast::UintLiteral>(2u));
+  csl_2.push_back(create<ast::UintLiteral>(2u));
   switch_body.push_back(create<ast::CaseStatement>(
       Source{Source::Location{12, 34}}, csl_2, Block()));
 

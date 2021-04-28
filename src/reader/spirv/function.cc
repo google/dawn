@@ -2032,10 +2032,9 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
              << id;
       return {};
     case SkipReason::kPointSizeBuiltinValue: {
-      auto* f32 = create<sem::F32>();
-      return {f32,
+      return {create<sem::F32>(),
               create<ast::ScalarConstructorExpression>(
-                  Source{}, create<ast::FloatLiteral>(Source{}, f32, 1.0f))};
+                  Source{}, create<ast::FloatLiteral>(Source{}, 1.0f))};
     }
     case SkipReason::kPointSizeBuiltinPointer:
       Fail() << "unhandled use of a pointer to the PointSize builtin, with ID: "
@@ -2545,11 +2544,9 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
         // The Tint AST handles 32-bit values.
         const uint32_t value32 = uint32_t(value & 0xFFFFFFFF);
         if (selector.type->is_unsigned_scalar_or_vector()) {
-          selectors.emplace_back(
-              create<ast::UintLiteral>(Source{}, selector.type, value32));
+          selectors.emplace_back(create<ast::UintLiteral>(Source{}, value32));
         } else {
-          selectors.emplace_back(
-              create<ast::SintLiteral>(Source{}, selector.type, value32));
+          selectors.emplace_back(create<ast::SintLiteral>(Source{}, value32));
         }
       }
     }
@@ -3679,7 +3676,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
 
   auto make_index = [this](uint32_t literal) {
     return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::UintLiteral>(Source{}, u32_, literal));
+        Source{}, create<ast::UintLiteral>(Source{}, literal));
   };
 
   // Build up a nested expression for the decomposition by walking down the type
@@ -3795,13 +3792,13 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
 
 ast::Expression* FunctionEmitter::MakeTrue(const Source& source) const {
   return create<ast::ScalarConstructorExpression>(
-      source, create<ast::BoolLiteral>(source, parser_impl_.Bool(), true));
+      source, create<ast::BoolLiteral>(source, true));
 }
 
 ast::Expression* FunctionEmitter::MakeFalse(const Source& source) const {
   sem::Bool bool_type;
   return create<ast::ScalarConstructorExpression>(
-      source, create<ast::BoolLiteral>(source, parser_impl_.Bool(), false));
+      source, create<ast::BoolLiteral>(source, false));
 }
 
 TypedExpression FunctionEmitter::MakeVectorShuffle(

@@ -1066,9 +1066,8 @@ bool ParserImpl::EmitScalarSpecConstants() {
       case SpvOpSpecConstantFalse: {
         ast_type = ConvertType(inst.type_id());
         ast_expr = create<ast::ScalarConstructorExpression>(
-            Source{},
-            create<ast::BoolLiteral>(Source{}, ast_type,
-                                     inst.opcode() == SpvOpSpecConstantTrue));
+            Source{}, create<ast::BoolLiteral>(
+                          Source{}, inst.opcode() == SpvOpSpecConstantTrue));
         break;
       }
       case SpvOpSpecConstant: {
@@ -1076,21 +1075,18 @@ bool ParserImpl::EmitScalarSpecConstants() {
         const uint32_t literal_value = inst.GetSingleWordInOperand(0);
         if (ast_type->Is<sem::I32>()) {
           ast_expr = create<ast::ScalarConstructorExpression>(
-              Source{},
-              create<ast::SintLiteral>(Source{}, ast_type,
-                                       static_cast<int32_t>(literal_value)));
+              Source{}, create<ast::SintLiteral>(
+                            Source{}, static_cast<int32_t>(literal_value)));
         } else if (ast_type->Is<sem::U32>()) {
           ast_expr = create<ast::ScalarConstructorExpression>(
-              Source{},
-              create<ast::UintLiteral>(Source{}, ast_type,
-                                       static_cast<uint32_t>(literal_value)));
+              Source{}, create<ast::UintLiteral>(
+                            Source{}, static_cast<uint32_t>(literal_value)));
         } else if (ast_type->Is<sem::F32>()) {
           float float_value;
           // Copy the bits so we can read them as a float.
           std::memcpy(&float_value, &literal_value, sizeof(float_value));
           ast_expr = create<ast::ScalarConstructorExpression>(
-              Source{},
-              create<ast::FloatLiteral>(Source{}, ast_type, float_value));
+              Source{}, create<ast::FloatLiteral>(Source{}, float_value));
         } else {
           return Fail() << " invalid result type for OpSpecConstant "
                         << inst.PrettyPrint();
@@ -1421,30 +1417,26 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   // Currently "null<type>" is missing from the WGSL parser.
   // See https://bugs.chromium.org/p/tint/issues/detail?id=34
   if (ast_type->Is<sem::U32>()) {
-    return {ast_type,
-            create<ast::ScalarConstructorExpression>(
-                Source{}, create<ast::UintLiteral>(source, ast_type,
-                                                   spirv_const->GetU32()))};
+    return {ast_type, create<ast::ScalarConstructorExpression>(
+                          Source{}, create<ast::UintLiteral>(
+                                        source, spirv_const->GetU32()))};
   }
   if (ast_type->Is<sem::I32>()) {
-    return {ast_type,
-            create<ast::ScalarConstructorExpression>(
-                Source{}, create<ast::SintLiteral>(source, ast_type,
-                                                   spirv_const->GetS32()))};
+    return {ast_type, create<ast::ScalarConstructorExpression>(
+                          Source{}, create<ast::SintLiteral>(
+                                        source, spirv_const->GetS32()))};
   }
   if (ast_type->Is<sem::F32>()) {
-    return {ast_type,
-            create<ast::ScalarConstructorExpression>(
-                Source{}, create<ast::FloatLiteral>(source, ast_type,
-                                                    spirv_const->GetFloat()))};
+    return {ast_type, create<ast::ScalarConstructorExpression>(
+                          Source{}, create<ast::FloatLiteral>(
+                                        source, spirv_const->GetFloat()))};
   }
   if (ast_type->Is<sem::Bool>()) {
     const bool value = spirv_const->AsNullConstant()
                            ? false
                            : spirv_const->AsBoolConstant()->value();
-    return {ast_type,
-            create<ast::ScalarConstructorExpression>(
-                Source{}, create<ast::BoolLiteral>(source, ast_type, value))};
+    return {ast_type, create<ast::ScalarConstructorExpression>(
+                          Source{}, create<ast::BoolLiteral>(source, value))};
   }
   auto* spirv_composite_const = spirv_const->AsCompositeConstant();
   if (spirv_composite_const != nullptr) {
@@ -1498,19 +1490,19 @@ ast::Expression* ParserImpl::MakeNullValue(sem::Type* type) {
 
   if (type->Is<sem::Bool>()) {
     return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::BoolLiteral>(Source{}, type, false));
+        Source{}, create<ast::BoolLiteral>(Source{}, false));
   }
   if (type->Is<sem::U32>()) {
     return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::UintLiteral>(Source{}, type, 0u));
+        Source{}, create<ast::UintLiteral>(Source{}, 0u));
   }
   if (type->Is<sem::I32>()) {
     return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::SintLiteral>(Source{}, type, 0));
+        Source{}, create<ast::SintLiteral>(Source{}, 0));
   }
   if (type->Is<sem::F32>()) {
     return create<ast::ScalarConstructorExpression>(
-        Source{}, create<ast::FloatLiteral>(Source{}, type, 0.0f));
+        Source{}, create<ast::FloatLiteral>(Source{}, 0.0f));
   }
   if (const auto* vec_ty = type->As<sem::Vector>()) {
     ast::ExpressionList ast_components;

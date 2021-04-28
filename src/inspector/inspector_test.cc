@@ -147,41 +147,12 @@ class InspectorHelper : public ProgramBuilder {
   void AddConstantID(std::string name, uint32_t id, typ::Type type, T* val) {
     ast::Expression* constructor = nullptr;
     if (val) {
-      constructor =
-          create<ast::ScalarConstructorExpression>(MakeLiteral(type, val));
+      constructor = Expr(*val);
     }
     GlobalConst(name, type, constructor,
                 ast::DecorationList{
                     create<ast::ConstantIdDecoration>(id),
                 });
-  }
-
-  /// @param type AST type of the literal, must resolve to BoolLiteral
-  /// @param val scalar value for the literal to contain
-  /// @returns a Literal of the expected type and value
-  ast::Literal* MakeLiteral(typ::Type type, bool* val) {
-    return create<ast::BoolLiteral>(type, *val);
-  }
-
-  /// @param type AST type of the literal, must resolve to UIntLiteral
-  /// @param val scalar value for the literal to contain
-  /// @returns a Literal of the expected type and value
-  ast::Literal* MakeLiteral(typ::Type type, uint32_t* val) {
-    return create<ast::UintLiteral>(type, *val);
-  }
-
-  /// @param type AST type of the literal, must resolve to IntLiteral
-  /// @param val scalar value for the literal to contain
-  /// @returns a Literal of the expected type and value
-  ast::Literal* MakeLiteral(typ::Type type, int32_t* val) {
-    return create<ast::SintLiteral>(type, *val);
-  }
-
-  /// @param type AST type of the literal, must resolve to FloattLiteral
-  /// @param val scalar value for the literal to contain
-  /// @returns a Literal of the expected type and value
-  ast::Literal* MakeLiteral(typ::Type type, float* val) {
-    return create<ast::FloatLiteral>(type, *val);
   }
 
   /// @param vec Vector of StageVariable to be searched

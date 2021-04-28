@@ -25,7 +25,7 @@ using SwitchStatementTest = TestHelper;
 
 TEST_F(SwitchStatementTest, Creation) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32(), 1));
+  lit.push_back(create<SintLiteral>(1));
 
   auto* ident = Expr("ident");
   CaseStatementList body;
@@ -50,7 +50,7 @@ TEST_F(SwitchStatementTest, Creation_WithSource) {
 
 TEST_F(SwitchStatementTest, IsSwitch) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32(), 2));
+  lit.push_back(create<SintLiteral>(2));
 
   auto* ident = Expr("ident");
   CaseStatementList body;
@@ -127,7 +127,7 @@ TEST_F(SwitchStatementTest, ToStr_Empty) {
 
 TEST_F(SwitchStatementTest, ToStr) {
   CaseSelectorList lit;
-  lit.push_back(create<SintLiteral>(ty.i32(), 2));
+  lit.push_back(create<SintLiteral>(2));
 
   auto* ident = Expr("ident");
   CaseStatementList body;

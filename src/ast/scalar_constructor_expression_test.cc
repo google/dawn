@@ -22,7 +22,7 @@ namespace {
 using ScalarConstructorExpressionTest = TestHelper;
 
 TEST_F(ScalarConstructorExpressionTest, Creation) {
-  auto* b = create<BoolLiteral>(ty.bool_(), true);
+  auto* b = create<BoolLiteral>(true);
   auto* c = create<ScalarConstructorExpression>(b);
   EXPECT_EQ(c->literal(), b);
 }
@@ -45,8 +45,7 @@ TEST_F(ScalarConstructorExpressionTest, Assert_DifferentProgramID_Literal) {
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
-        b1.create<ScalarConstructorExpression>(
-            b2.create<BoolLiteral>(b2.ty.bool_(), true));
+        b1.create<ScalarConstructorExpression>(b2.create<BoolLiteral>(true));
       },
       "internal compiler error");
 }
