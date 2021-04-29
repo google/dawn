@@ -41,6 +41,7 @@ bool AddPlatformIndependentPasses(Config* config) {
                                                // transform used by sanitizers
   config->manager.Add<transform::FirstIndexOffset>();
   config->manager.Add<transform::BindingRemapper>();
+  config->manager.Add<transform::Renamer>();
 
   return true;
 }
