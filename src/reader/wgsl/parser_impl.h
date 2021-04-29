@@ -552,8 +552,10 @@ class ParserImpl {
   Maybe<ast::Expression*> primary_expression();
   /// Parses a `argument_expression_list` grammar element, erroring on parse
   /// failure.
+  /// @param use a description of what was being parsed if an error was raised
   /// @returns the list of arguments
-  Expect<ast::ExpressionList> expect_argument_expression_list();
+  Expect<ast::ExpressionList> expect_argument_expression_list(
+      const std::string& use);
   /// Parses the recursive portion of the postfix_expression
   /// @param prefix the left side of the expression
   /// @returns the parsed expression or nullptr

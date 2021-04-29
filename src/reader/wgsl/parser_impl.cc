@@ -2131,31 +2131,20 @@ Maybe<ast::Statement*> ParserImpl::for_stmt() {
 }
 
 // func_call_stmt
-//    : IDENT PAREN_LEFT argument_expression_list* PAREN_RIGHT
+//    : IDENT argument_expression_list
 Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
   auto t = peek();
   auto t2 = peek(1);
   if (!t.IsIdentifier() || !t2.IsParenLeft())
     return Failure::kNoMatch;
 
+  next();  // Consume the first peek
+
   auto source = t.source();
-
-  next();  // Consume the peek
-  next();  // Consume the 2nd peek
-
   auto name = t.to_str();
 
-  ast::ExpressionList params;
-
-  t = peek();
-  if (!t.IsParenRight() && !t.IsEof()) {
-    auto list = expect_argument_expression_list();
-    if (list.errored)
-      return Failure::kErrored;
-    params = std::move(list.value);
-  }
-
-  if (!expect("call statement", Token::Type::kParenRight))
+  auto params = expect_argument_expression_list("function call");
+  if (params.errored)
     return Failure::kErrored;
 
   return create<ast::CallStatement>(
@@ -2163,7 +2152,7 @@ Maybe<ast::CallStatement*> ParserImpl::func_call_stmt() {
                     source,
                     create<ast::IdentifierExpression>(
                         source, builder_.Symbols().Register(name)),
-                    std::move(params)));
+                    std::move(params.value)));
 }
 
 // break_stmt
@@ -2197,7 +2186,7 @@ Maybe<ast::BlockStatement*> ParserImpl::continuing_stmt() {
 
 // primary_expression
 //   : IDENT argument_expression_list?
-//   | type_decl PAREN_LEFT argument_expression_list* PAREN_RIGHT
+//   | type_decl argument_expression_list
 //   | const_literal
 //   | paren_rhs_stmt
 //   | BITCAST LESS_THAN type_decl GREATER_THAN paren_rhs_stmt
@@ -2239,23 +2228,13 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
     auto* ident = create<ast::IdentifierExpression>(
         t.source(), builder_.Symbols().Register(t.to_str()));
 
-    if (match(Token::Type::kParenLeft, &source)) {
-      return sync(Token::Type::kParenRight, [&]() -> Maybe<ast::Expression*> {
-        ast::ExpressionList params;
+    if (peek().IsParenLeft()) {
+      auto params = expect_argument_expression_list("function call");
+      if (params.errored)
+        return Failure::kErrored;
 
-        auto t2 = peek();
-        if (!t2.IsParenRight() && !t2.IsEof()) {
-          auto list = expect_argument_expression_list();
-          if (list.errored)
-            return Failure::kErrored;
-          params = list.value;
-        }
-
-        if (!expect("call expression", Token::Type::kParenRight))
-          return Failure::kErrored;
-
-        return create<ast::CallExpression>(source, ident, params);
-      });
+      return create<ast::CallExpression>(source, ident,
+                                         std::move(params.value));
     }
 
     return ident;
@@ -2265,25 +2244,12 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
   if (type.errored)
     return Failure::kErrored;
   if (type.matched) {
-    auto expr = expect_paren_block(
-        "type constructor", [&]() -> Expect<ast::TypeConstructorExpression*> {
-          t = peek();
-          if (t.IsParenRight() || t.IsEof())
-            return create<ast::TypeConstructorExpression>(
-                source, type.value, ast::ExpressionList{});
-
-          auto params = expect_argument_expression_list();
-          if (params.errored)
-            return Failure::kErrored;
-
-          return create<ast::TypeConstructorExpression>(source, type.value,
-                                                        params.value);
-        });
-
-    if (expr.errored)
+    auto params = expect_argument_expression_list("type constructor");
+    if (params.errored)
       return Failure::kErrored;
 
-    return expr.value;
+    return create<ast::TypeConstructorExpression>(source, type.value,
+                                                  std::move(params.value));
   }
 
   return Failure::kNoMatch;
@@ -2339,28 +2305,34 @@ Maybe<ast::Expression*> ParserImpl::singular_expression() {
 }
 
 // argument_expression_list
-//   : (logical_or_expression COMMA)* logical_or_expression
-Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list() {
-  auto arg = logical_or_expression();
-  if (arg.errored)
-    return Failure::kErrored;
-  if (!arg.matched)
-    return add_error(peek(), "unable to parse argument expression");
-
-  ast::ExpressionList ret;
-  ret.push_back(arg.value);
-
-  while (match(Token::Type::kComma)) {
-    arg = logical_or_expression();
-    if (arg.errored)
-      return Failure::kErrored;
-    if (!arg.matched) {
-      return add_error(peek(),
-                       "unable to parse argument expression after comma");
+//   : PAREN_LEFT (logical_or_expression COMMA)* logical_or_expression
+//   PAREN_RIGHT
+Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list(
+    const std::string& use) {
+  return expect_paren_block(use, [&]() -> Expect<ast::ExpressionList> {
+    // Check for empty list.
+    // TODO(crbug.com/tint/739): Remove this (handled by !arg.matched).
+    if (peek().IsParenRight()) {
+      return ast::ExpressionList{};
     }
-    ret.push_back(arg.value);
-  }
-  return ret;
+
+    ast::ExpressionList ret;
+    while (synchronized_) {
+      auto arg = logical_or_expression();
+      if (arg.errored)
+        return Failure::kErrored;
+      if (!arg.matched) {
+        // TODO(crbug.com/tint/739): remove error to allow trailing commas.
+        return add_error(peek(), "unable to parse argument expression");
+      }
+      ret.push_back(arg.value);
+
+      if (!match(Token::Type::kComma)) {
+        break;
+      }
+    }
+    return ret;
+  });
 }
 
 // unary_expression

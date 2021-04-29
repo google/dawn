@@ -145,7 +145,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_HangingComma) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:6: unable to parse argument expression after comma");
+  EXPECT_EQ(p->error(), "1:6: unable to parse argument expression");
 }
 
 TEST_F(ParserImplTest, SingularExpression_Call_MissingRightParen) {
@@ -155,7 +155,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_MissingRightParen) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:3: expected ')' for call expression");
+  EXPECT_EQ(p->error(), "1:3: unable to parse argument expression");
 }
 
 TEST_F(ParserImplTest, SingularExpression_MemberAccessor) {

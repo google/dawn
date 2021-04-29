@@ -20,8 +20,8 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, ArgumentExpressionList_Parses) {
-  auto p = parser("a");
-  auto e = p->expect_argument_expression_list();
+  auto p = parser("(a)");
+  auto e = p->expect_argument_expression_list("argument list");
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
 
@@ -29,9 +29,18 @@ TEST_F(ParserImplTest, ArgumentExpressionList_Parses) {
   ASSERT_TRUE(e.value[0]->Is<ast::IdentifierExpression>());
 }
 
+TEST_F(ParserImplTest, ArgumentExpressionList_ParsesEmptyList) {
+  auto p = parser("()");
+  auto e = p->expect_argument_expression_list("argument list");
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(e.errored);
+
+  ASSERT_EQ(e.value.size(), 0u);
+}
+
 TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
-  auto p = parser("a, -33, 1+2");
-  auto e = p->expect_argument_expression_list();
+  auto p = parser("(a, -33, 1+2)");
+  auto e = p->expect_argument_expression_list("argument list");
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
 
@@ -41,20 +50,36 @@ TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
   ASSERT_TRUE(e.value[2]->Is<ast::BinaryExpression>());
 }
 
-TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression) {
-  auto p = parser("a, ");
-  auto e = p->expect_argument_expression_list();
+TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingLeftParen) {
+  auto p = parser("a)");
+  auto e = p->expect_argument_expression_list("argument list");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
-  EXPECT_EQ(p->error(), "1:4: unable to parse argument expression after comma");
+  EXPECT_EQ(p->error(), "1:1: expected '(' for argument list");
+}
+
+TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingRightParen) {
+  auto p = parser("(a");
+  auto e = p->expect_argument_expression_list("argument list");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(e.errored);
+  EXPECT_EQ(p->error(), "1:3: expected ')' for argument list");
+}
+
+TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression) {
+  auto p = parser("(a, )");
+  auto e = p->expect_argument_expression_list("argument list");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(e.errored);
+  EXPECT_EQ(p->error(), "1:5: unable to parse argument expression");
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesInvalidExpression) {
-  auto p = parser("if(a) {}");
-  auto e = p->expect_argument_expression_list();
+  auto p = parser("(if(a) {})");
+  auto e = p->expect_argument_expression_list("argument list");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
-  EXPECT_EQ(p->error(), "1:1: unable to parse argument expression");
+  EXPECT_EQ(p->error(), "1:2: unable to parse argument expression");
 }
 
 }  // namespace

@@ -123,14 +123,14 @@ TEST_F(ParserImplErrorTest, BreakStmtMissingSemicolon) {
 
 TEST_F(ParserImplErrorTest, CallExprMissingRParen) {
   EXPECT("fn f() { x = f(1.; }",
-         "test.wgsl:1:18 error: expected ')' for call expression\n"
+         "test.wgsl:1:18 error: expected ')' for function call\n"
          "fn f() { x = f(1.; }\n"
          "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtMissingRParen) {
   EXPECT("fn f() { f(1.; }",
-         "test.wgsl:1:14 error: expected ')' for call statement\n"
+         "test.wgsl:1:14 error: expected ')' for function call\n"
          "fn f() { f(1.; }\n"
          "             ^\n");
 }
@@ -143,11 +143,10 @@ TEST_F(ParserImplErrorTest, CallStmtInvalidArgument0) {
 }
 
 TEST_F(ParserImplErrorTest, CallStmtInvalidArgument1) {
-  EXPECT(
-      "fn f() { f(1.0, <); }",
-      "test.wgsl:1:17 error: unable to parse argument expression after comma\n"
-      "fn f() { f(1.0, <); }\n"
-      "                ^\n");
+  EXPECT("fn f() { f(1.0, <); }",
+         "test.wgsl:1:17 error: unable to parse argument expression\n"
+         "fn f() { f(1.0, <); }\n"
+         "                ^\n");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtMissingSemicolon) {
