@@ -266,7 +266,8 @@ bool Resolver::ResolveInternal() {
       TINT_ICE(diagnostics_) << "AST node '" << node->TypeInfo().name
                              << "' was not reached by the resolver\n"
                              << "At: " << node->source() << "\n"
-                             << "Content: " << builder_->str(node);
+                             << "Content: " << builder_->str(node) << "\n"
+                             << "Pointer: " << node;
     }
   }
 
@@ -2774,7 +2775,9 @@ void Resolver::Mark(const ast::Node* node) {
   TINT_ICE(diagnostics_)
       << "AST node '" << node->TypeInfo().name
       << "' was encountered twice in the same AST of a Program\n"
-      << "At: " << node->source();
+      << "At: " << node->source() << "\n"
+      << "Content: " << builder_->str(node) << "\n"
+      << "Pointer: " << node;
 }
 
 Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,
