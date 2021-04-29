@@ -17,29 +17,70 @@
 namespace tint {
 namespace fuzzers {
 
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
-  transform::Manager transform_manager;
-  transform::DataMap transform_inputs;
+struct Config {
+  const uint8_t* data;
+  size_t size;
+  transform::Manager manager;
+  transform::DataMap inputs;
+};
 
-  if (!ExtractFirstIndexOffsetInputs(&data, &size, &transform_inputs)) {
-    return 0;
+bool AddPlatformIndependentPasses(Config* config) {
+  if (!ExtractFirstIndexOffsetInputs(&config->data, &config->size,
+                                     &config->inputs)) {
+    return false;
   }
 
-  if (!ExtractBindingRemapperInputs(&data, &size, &transform_inputs)) {
-    return 0;
+  if (!ExtractBindingRemapperInputs(&config->data, &config->size,
+                                    &config->inputs)) {
+    return false;
   }
 
-  transform_manager.Add<transform::BoundArrayAccessors>();
-  transform_manager
+  config->manager.Add<transform::BoundArrayAccessors>();
+  config->manager
       .Add<transform::EmitVertexPointSize>();  // TODO(tint:753): Remove once
                                                // transform used by sanitizers
-  transform_manager.Add<transform::FirstIndexOffset>();
-  transform_manager.Add<transform::BindingRemapper>();
+  config->manager.Add<transform::FirstIndexOffset>();
+  config->manager.Add<transform::BindingRemapper>();
 
-  fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
-  fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));
+  return true;
+}
 
-  return fuzzer.Run(data, size);
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+  {
+    Config config;
+    config.data = data;
+    config.size = size;
+
+    if (!AddPlatformIndependentPasses(&config)) {
+      return 0;
+    }
+
+    fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+    fuzzer.SetTransformManager(&(config.manager), std::move(config.inputs));
+
+    fuzzer.Run(config.data, config.size);
+  }
+
+#if TINT_BUILD_HLSL_WRITER
+  {
+    Config config;
+    config.data = data;
+    config.size = size;
+
+    if (!AddPlatformIndependentPasses(&config)) {
+      return 0;
+    }
+
+    config.manager.Add<transform::Hlsl>();
+
+    fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kHLSL);
+    fuzzer.SetTransformManager(&config.manager, std::move(config.inputs));
+
+    fuzzer.Run(config.data, config.size);
+  }
+#endif  // TINT_BUILD_HLSL_WRITER
+
+  return 0;
 }
 
 }  // namespace fuzzers

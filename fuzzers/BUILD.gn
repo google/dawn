@@ -94,6 +94,11 @@ if (build_with_chromium) {
   }
 
   if (tint_build_wgsl_reader && tint_build_hlsl_writer) {
+    fuzzer_test("tint_hlsl_transform_fuzzer") {
+      sources = [ "tint_hlsl_transform_fuzzer.cc" ]
+      deps = [ ":tint_fuzzer_common" ]
+    }
+
     fuzzer_test("tint_wgsl_reader_hlsl_writer_fuzzer") {
       sources = [ "tint_wgsl_reader_hlsl_writer_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
@@ -172,7 +177,10 @@ if (build_with_chromium) {
       ]
     }
     if (tint_build_wgsl_reader && tint_build_hlsl_writer) {
-      deps += [ ":tint_wgsl_reader_hlsl_writer_fuzzer" ]
+      deps += [
+        ":tint_hlsl_transform_fuzzer",
+        ":tint_wgsl_reader_hlsl_writer_fuzzer",
+      ]
     }
     if (tint_build_wgsl_reader && tint_build_msl_writer) {
       deps += [ ":tint_wgsl_reader_msl_writer_fuzzer" ]
