@@ -878,6 +878,9 @@ class ProgramBuilder {
   // AST helper methods
   //////////////////////////////////////////////////////////////////////////////
 
+  /// @return a new unnamed symbol
+  Symbol Sym() { return Symbols().New(); }
+
   /// @param name the symbol string
   /// @return a Symbol with the given name
   Symbol Sym(const std::string& name) { return Symbols().Register(name); }

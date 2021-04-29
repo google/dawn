@@ -98,7 +98,7 @@ void Hlsl::PromoteInitializersToConstVar(CloneContext& ctx) const {
       auto* src_ty = src_sem_expr->Type();
       if (src_ty->IsAnyOf<sem::ArrayType, sem::StructType>()) {
         // Create a new symbol for the constant
-        auto dst_symbol = ctx.dst->Symbols().New();
+        auto dst_symbol = ctx.dst->Sym();
         // Clone the type
         auto* dst_ty = ctx.Clone(src_ty);
         // Clone the initializer

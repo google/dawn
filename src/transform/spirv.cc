@@ -154,7 +154,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
 
     if (!func->return_type()->Is<sem::Void>()) {
       ast::StatementList stores;
-      auto store_value_symbol = ctx.dst->Symbols().New();
+      auto store_value_symbol = ctx.dst->Sym();
       HoistToOutputVariables(
           ctx, func, func->return_type(), func->return_type(),
           func->return_type_decorations(), {}, store_value_symbol, stores);
@@ -162,7 +162,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       // Create a function that writes a return value to all output variables.
       auto* store_value =
           ctx.dst->Param(store_value_symbol, ctx.Clone(func->return_type()));
-      auto return_func_symbol = ctx.dst->Symbols().New();
+      auto return_func_symbol = ctx.dst->Sym();
       auto* return_func = ctx.dst->create<ast::Function>(
           return_func_symbol, ast::VariableList{store_value},
           ctx.dst->ty.void_(), ctx.dst->create<ast::BlockStatement>(stores),
@@ -262,7 +262,7 @@ Symbol Spirv::HoistToInputVariables(
           return !deco->IsAnyOf<ast::BuiltinDecoration,
                                 ast::LocationDecoration>();
         });
-    auto global_var_symbol = ctx.dst->Symbols().New();
+    auto global_var_symbol = ctx.dst->Sym();
     auto* global_var =
         ctx.dst->Var(global_var_symbol, ctx.Clone(declared_ty),
                      ast::StorageClass::kInput, nullptr, new_decorations);
@@ -279,7 +279,7 @@ Symbol Spirv::HoistToInputVariables(
     init_value_names.emplace_back(member_var);
   }
 
-  auto func_var_symbol = ctx.dst->Symbols().New();
+  auto func_var_symbol = ctx.dst->Sym();
   if (func->body()->empty()) {
     // The return value should never get used.
     return func_var_symbol;
@@ -315,7 +315,7 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
           return !deco->IsAnyOf<ast::BuiltinDecoration,
                                 ast::LocationDecoration>();
         });
-    auto global_var_symbol = ctx.dst->Symbols().New();
+    auto global_var_symbol = ctx.dst->Sym();
     auto* global_var =
         ctx.dst->Var(global_var_symbol, ctx.Clone(declared_ty),
                      ast::StorageClass::kOutput, nullptr, new_decorations);
