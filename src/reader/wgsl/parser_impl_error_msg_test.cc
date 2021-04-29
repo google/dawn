@@ -137,14 +137,14 @@ TEST_F(ParserImplErrorTest, CallStmtMissingRParen) {
 
 TEST_F(ParserImplErrorTest, CallStmtInvalidArgument0) {
   EXPECT("fn f() { f(<); }",
-         "test.wgsl:1:12 error: unable to parse argument expression\n"
+         "test.wgsl:1:12 error: expected ')' for function call\n"
          "fn f() { f(<); }\n"
          "           ^\n");
 }
 
 TEST_F(ParserImplErrorTest, CallStmtInvalidArgument1) {
   EXPECT("fn f() { f(1.0, <); }",
-         "test.wgsl:1:17 error: unable to parse argument expression\n"
+         "test.wgsl:1:17 error: expected ')' for function call\n"
          "fn f() { f(1.0, <); }\n"
          "                ^\n");
 }
@@ -446,9 +446,9 @@ TEST_F(ParserImplErrorTest, FunctionDeclParamInvalidType) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclParamMissing) {
-  EXPECT("fn f(x : i32, ) {}",
-         "test.wgsl:1:15 error: expected identifier for parameter\n"
-         "fn f(x : i32, ) {}\n"
+  EXPECT("fn f(x : i32, ,) {}",
+         "test.wgsl:1:15 error: expected ')' for function declaration\n"
+         "fn f(x : i32, ,) {}\n"
          "              ^\n");
 }
 

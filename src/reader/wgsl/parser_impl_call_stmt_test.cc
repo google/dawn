@@ -59,13 +59,33 @@ TEST_F(ParserImplTest, Statement_Call_WithParams) {
   EXPECT_TRUE(c->params()[2]->Is<ast::BinaryExpression>());
 }
 
+TEST_F(ParserImplTest, Statement_Call_WithParams_TrailingComma) {
+  auto p = parser("a(1, b,);");
+  auto e = p->statement();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+
+  ASSERT_TRUE(e->Is<ast::CallStatement>());
+  auto* c = e->As<ast::CallStatement>()->expr();
+
+  ASSERT_TRUE(c->func()->Is<ast::IdentifierExpression>());
+  auto* ident = c->func()->As<ast::IdentifierExpression>();
+  EXPECT_EQ(ident->symbol(), p->builder().Symbols().Get("a"));
+
+  EXPECT_EQ(c->params().size(), 2u);
+  EXPECT_TRUE(c->params()[0]->Is<ast::ConstructorExpression>());
+  EXPECT_TRUE(c->params()[1]->Is<ast::IdentifierExpression>());
+}
+
 TEST_F(ParserImplTest, Statement_Call_Missing_RightParen) {
   auto p = parser("a(");
   auto e = p->statement();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
-  EXPECT_EQ(p->error(), "1:3: unable to parse argument expression");
+  EXPECT_EQ(p->error(), "1:3: expected ')' for function call");
 }
 
 TEST_F(ParserImplTest, Statement_Call_Missing_Semi) {

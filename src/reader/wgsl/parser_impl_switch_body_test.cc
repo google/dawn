@@ -28,8 +28,26 @@ TEST_F(ParserImplTest, SwitchBody_Case) {
   ASSERT_NE(e.value, nullptr);
   ASSERT_TRUE(e->Is<ast::CaseStatement>());
   EXPECT_FALSE(e->IsDefault());
+  auto* stmt = e->As<ast::CaseStatement>();
+  ASSERT_EQ(stmt->selectors().size(), 1u);
+  EXPECT_EQ(stmt->selectors()[0]->value_as_u32(), 1u);
   ASSERT_EQ(e->body()->size(), 1u);
   EXPECT_TRUE(e->body()->get(0)->Is<ast::AssignmentStatement>());
+}
+
+TEST_F(ParserImplTest, SwitchBody_Case_TrailingComma) {
+  auto p = parser("case 1, 2,: { }");
+  auto e = p->switch_body();
+  EXPECT_FALSE(p->has_error()) << p->error();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e->Is<ast::CaseStatement>());
+  EXPECT_FALSE(e->IsDefault());
+  auto* stmt = e->As<ast::CaseStatement>();
+  ASSERT_EQ(stmt->selectors().size(), 2u);
+  EXPECT_EQ(stmt->selectors()[0]->value_as_u32(), 1u);
+  EXPECT_EQ(stmt->selectors()[1]->value_as_u32(), 2u);
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_InvalidConstLiteral) {
@@ -134,17 +152,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsMissingComma) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:8: expected a comma after the previous selector");
-}
-
-TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsEndsWithComma) {
-  auto p = parser("case 1, 2,: { }");
-  auto e = p->switch_body();
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(e.errored);
-  EXPECT_FALSE(e.matched);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:11: a selector is expected after the comma");
+  EXPECT_EQ(p->error(), "1:8: expected ':' for case statement");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsStartsWithComma) {
@@ -154,7 +162,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectorsStartsWithComma) {
   EXPECT_TRUE(e.errored);
   EXPECT_FALSE(e.matched);
   EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:6: a selector is expected before the comma");
+  EXPECT_EQ(p->error(), "1:6: unable to parse case selectors");
 }
 
 TEST_F(ParserImplTest, SwitchBody_Default) {

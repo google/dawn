@@ -47,6 +47,38 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   EXPECT_FLOAT_EQ(c->literal()->As<ast::FloatLiteral>()->value(), 2.);
 }
 
+TEST_F(ParserImplTest, ConstExpr_TypeDecl_Empty) {
+  auto p = parser("vec2<f32>()");
+  auto e = p->expect_const_expr();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(e.errored);
+  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
+
+  auto* t = e->As<ast::TypeConstructorExpression>();
+  ASSERT_TRUE(t->type()->Is<sem::Vector>());
+  EXPECT_EQ(t->type()->As<sem::Vector>()->size(), 2u);
+
+  ASSERT_EQ(t->values().size(), 0u);
+}
+
+TEST_F(ParserImplTest, ConstExpr_TypeDecl_TrailingComma) {
+  auto p = parser("vec2<f32>(1., 2.,)");
+  auto e = p->expect_const_expr();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(e.errored);
+  ASSERT_TRUE(e->Is<ast::ConstructorExpression>());
+  ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
+
+  auto* t = e->As<ast::TypeConstructorExpression>();
+  ASSERT_TRUE(t->type()->Is<sem::Vector>());
+  EXPECT_EQ(t->type()->As<sem::Vector>()->size(), 2u);
+
+  ASSERT_EQ(t->values().size(), 2u);
+  ASSERT_TRUE(t->values()[0]->Is<ast::ScalarConstructorExpression>());
+  ASSERT_TRUE(t->values()[1]->Is<ast::ScalarConstructorExpression>());
+}
+
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingRightParen) {
   auto p = parser("vec2<f32>(1., 2.");
   auto e = p->expect_const_expr();
@@ -65,15 +97,6 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingLeftParen) {
   EXPECT_EQ(p->error(), "1:11: expected '(' for type constructor");
 }
 
-TEST_F(ParserImplTest, ConstExpr_TypeDecl_HangingComma) {
-  auto p = parser("vec2<f32>(1.,)");
-  auto e = p->expect_const_expr();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:14: unable to parse constant literal");
-}
-
 TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
   auto p = parser("vec2<f32>(1. 2.");
   auto e = p->expect_const_expr();
@@ -81,15 +104,6 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_MissingComma) {
   ASSERT_TRUE(e.errored);
   ASSERT_EQ(e.value, nullptr);
   EXPECT_EQ(p->error(), "1:14: expected ')' for type constructor");
-}
-
-TEST_F(ParserImplTest, ConstExpr_MissingExpr) {
-  auto p = parser("vec2<f32>()");
-  auto e = p->expect_const_expr();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  ASSERT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:11: unable to parse constant literal");
 }
 
 TEST_F(ParserImplTest, ConstExpr_InvalidExpr) {

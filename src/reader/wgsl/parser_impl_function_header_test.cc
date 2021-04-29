@@ -33,6 +33,18 @@ TEST_F(ParserImplTest, FunctionHeader) {
   EXPECT_TRUE(f->return_type->Is<sem::Void>());
 }
 
+TEST_F(ParserImplTest, FunctionHeader_TrailingComma) {
+  auto p = parser("fn main(a :i32,)");
+  auto f = p->function_header();
+  EXPECT_TRUE(f.matched);
+  EXPECT_FALSE(f.errored);
+
+  EXPECT_EQ(f->name, "main");
+  ASSERT_EQ(f->params.size(), 1u);
+  EXPECT_EQ(f->params[0]->symbol(), p->builder().Symbols().Get("a"));
+  EXPECT_TRUE(f->return_type->Is<sem::Void>());
+}
+
 TEST_F(ParserImplTest, FunctionHeader_DecoratedReturnType) {
   auto p = parser("fn main() -> [[location(1)]] f32");
   auto f = p->function_header();
@@ -77,12 +89,12 @@ TEST_F(ParserImplTest, FunctionHeader_MissingParenLeft) {
 }
 
 TEST_F(ParserImplTest, FunctionHeader_InvalidParamList) {
-  auto p = parser("fn main(a :i32,) -> i32");
+  auto p = parser("fn main(a :i32, ,) -> i32");
   auto f = p->function_header();
   EXPECT_FALSE(f.matched);
   EXPECT_TRUE(f.errored);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:16: expected identifier for parameter");
+  EXPECT_EQ(p->error(), "1:17: expected ')' for function declaration");
 }
 
 TEST_F(ParserImplTest, FunctionHeader_MissingParenRight) {

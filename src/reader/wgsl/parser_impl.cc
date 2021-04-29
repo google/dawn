@@ -1416,16 +1416,16 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
 
 // param_list
 //   :
-//   | (param COMMA)* param
+//   | (param COMMA)* param COMMA?
 Expect<ast::VariableList> ParserImpl::expect_param_list() {
-  // Check for an empty list.
-  auto t = peek();
-  if (!t.IsIdentifier() && !t.IsAttrLeft()) {
-    return ast::VariableList{};
-  }
-
   ast::VariableList ret;
   while (synchronized_) {
+    // Check for the end of the list.
+    auto t = peek();
+    if (!t.IsIdentifier() && !t.IsAttrLeft()) {
+      break;
+    }
+
     auto param = expect_param();
     if (param.errored)
       return Failure::kErrored;
@@ -1912,34 +1912,26 @@ Maybe<ast::CaseStatement*> ParserImpl::switch_body() {
 }
 
 // case_selectors
-//   : const_literal (COMMA const_literal)*
+//   : const_literal (COMMA const_literal)* COMMA?
 Expect<ast::CaseSelectorList> ParserImpl::expect_case_selectors() {
   ast::CaseSelectorList selectors;
 
-  for (;;) {
-    auto t = peek();
-    auto matched_comma = match(Token::Type::kComma);
-
-    if (selectors.empty() && matched_comma)
-      return add_error(t, "a selector is expected before the comma");
-    if (matched_comma)
-      t = peek();
-
+  while (synchronized_) {
     auto cond = const_literal();
-    if (cond.errored)
+    if (cond.errored) {
       return Failure::kErrored;
-    if (!cond.matched) {
-      if (matched_comma) {
-        return add_error(t, "a selector is expected after the comma");
-      }
+    } else if (!cond.matched) {
       break;
+    } else if (!cond->Is<ast::IntLiteral>()) {
+      return add_error(cond.value->source(),
+                       "invalid case selector must be an integer value");
     }
-    if (!cond->Is<ast::IntLiteral>())
-      return add_error(t, "invalid case selector must be an integer value");
-    if (!selectors.empty() && !matched_comma)
-      return add_error(t, "expected a comma after the previous selector");
 
     selectors.push_back(cond.value->As<ast::IntLiteral>());
+
+    if (!match(Token::Type::kComma)) {
+      break;
+    }
   }
 
   if (selectors.empty())
@@ -2305,25 +2297,18 @@ Maybe<ast::Expression*> ParserImpl::singular_expression() {
 }
 
 // argument_expression_list
-//   : PAREN_LEFT (logical_or_expression COMMA)* logical_or_expression
+//   : PAREN_LEFT ((logical_or_expression COMMA)* logical_or_expression COMMA?)?
 //   PAREN_RIGHT
 Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list(
     const std::string& use) {
   return expect_paren_block(use, [&]() -> Expect<ast::ExpressionList> {
-    // Check for empty list.
-    // TODO(crbug.com/tint/739): Remove this (handled by !arg.matched).
-    if (peek().IsParenRight()) {
-      return ast::ExpressionList{};
-    }
-
     ast::ExpressionList ret;
     while (synchronized_) {
       auto arg = logical_or_expression();
-      if (arg.errored)
+      if (arg.errored) {
         return Failure::kErrored;
-      if (!arg.matched) {
-        // TODO(crbug.com/tint/739): remove error to allow trailing commas.
-        return add_error(peek(), "unable to parse argument expression");
+      } else if (!arg.matched) {
+        break;
       }
       ret.push_back(arg.value);
 
@@ -2838,7 +2823,7 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
 }
 
 // const_expr
-//   : type_decl PAREN_LEFT (const_expr COMMA)? const_expr PAREN_RIGHT
+//   : type_decl PAREN_LEFT ((const_expr COMMA)? const_expr COMMA?)? PAREN_RIGHT
 //   | const_literal
 Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr() {
   auto t = peek();
@@ -2852,15 +2837,20 @@ Expect<ast::ConstructorExpression*> ParserImpl::expect_const_expr() {
     auto params = expect_paren_block("type constructor",
                                      [&]() -> Expect<ast::ExpressionList> {
                                        ast::ExpressionList list;
-                                       auto param = expect_const_expr();
-                                       if (param.errored)
-                                         return Failure::kErrored;
-                                       list.emplace_back(param.value);
-                                       while (match(Token::Type::kComma)) {
-                                         param = expect_const_expr();
-                                         if (param.errored)
+                                       while (synchronized_) {
+                                         if (peek().IsParenRight()) {
+                                           break;
+                                         }
+
+                                         auto arg = expect_const_expr();
+                                         if (arg.errored) {
                                            return Failure::kErrored;
-                                         list.emplace_back(param.value);
+                                         }
+                                         list.emplace_back(arg.value);
+
+                                         if (!match(Token::Type::kComma)) {
+                                           break;
+                                         }
                                        }
                                        return list;
                                      });

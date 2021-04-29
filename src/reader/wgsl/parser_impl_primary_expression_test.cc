@@ -121,7 +121,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:5: unable to parse argument expression");
+  EXPECT_EQ(p->error(), "1:5: expected ')' for type constructor");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {

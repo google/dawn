@@ -128,6 +128,18 @@ TEST_F(ParserImplTest, SingularExpression_Call_WithArgs) {
   EXPECT_TRUE(c->params()[2]->Is<ast::BinaryExpression>());
 }
 
+TEST_F(ParserImplTest, SingularExpression_Call_TrailingComma) {
+  auto p = parser("a(b, )");
+  auto e = p->singular_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  ASSERT_NE(e.value, nullptr);
+
+  ASSERT_TRUE(e->Is<ast::CallExpression>());
+  auto* c = e->As<ast::CallExpression>();
+  EXPECT_EQ(c->params().size(), 1u);
+}
+
 TEST_F(ParserImplTest, SingularExpression_Call_InvalidArg) {
   auto p = parser("a(if(a) {})");
   auto e = p->singular_expression();
@@ -135,17 +147,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_InvalidArg) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:3: unable to parse argument expression");
-}
-
-TEST_F(ParserImplTest, SingularExpression_Call_HangingComma) {
-  auto p = parser("a(b, )");
-  auto e = p->singular_expression();
-  EXPECT_FALSE(e.matched);
-  EXPECT_TRUE(e.errored);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:6: unable to parse argument expression");
+  EXPECT_EQ(p->error(), "1:3: expected ')' for function call");
 }
 
 TEST_F(ParserImplTest, SingularExpression_Call_MissingRightParen) {
@@ -155,7 +157,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_MissingRightParen) {
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:3: unable to parse argument expression");
+  EXPECT_EQ(p->error(), "1:3: expected ')' for function call");
 }
 
 TEST_F(ParserImplTest, SingularExpression_MemberAccessor) {

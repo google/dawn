@@ -50,6 +50,17 @@ TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
   ASSERT_TRUE(e.value[2]->Is<ast::BinaryExpression>());
 }
 
+TEST_F(ParserImplTest, ArgumentExpressionList_TrailingComma) {
+  auto p = parser("(a, 42,)");
+  auto e = p->expect_argument_expression_list("argument list");
+  ASSERT_FALSE(p->has_error()) << p->error();
+  ASSERT_FALSE(e.errored);
+
+  ASSERT_EQ(e.value.size(), 2u);
+  ASSERT_TRUE(e.value[0]->Is<ast::IdentifierExpression>());
+  ASSERT_TRUE(e.value[1]->Is<ast::ConstructorExpression>());
+}
+
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingLeftParen) {
   auto p = parser("a)");
   auto e = p->expect_argument_expression_list("argument list");
@@ -66,12 +77,20 @@ TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingRightParen) {
   EXPECT_EQ(p->error(), "1:3: expected ')' for argument list");
 }
 
-TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression) {
-  auto p = parser("(a, )");
+TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression_0) {
+  auto p = parser("(,)");
   auto e = p->expect_argument_expression_list("argument list");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
-  EXPECT_EQ(p->error(), "1:5: unable to parse argument expression");
+  EXPECT_EQ(p->error(), "1:2: expected ')' for argument list");
+}
+
+TEST_F(ParserImplTest, ArgumentExpressionList_HandlesMissingExpression_1) {
+  auto p = parser("(a, ,)");
+  auto e = p->expect_argument_expression_list("argument list");
+  ASSERT_TRUE(p->has_error());
+  ASSERT_TRUE(e.errored);
+  EXPECT_EQ(p->error(), "1:5: expected ')' for argument list");
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_HandlesInvalidExpression) {
@@ -79,7 +98,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_HandlesInvalidExpression) {
   auto e = p->expect_argument_expression_list("argument list");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(e.errored);
-  EXPECT_EQ(p->error(), "1:2: unable to parse argument expression");
+  EXPECT_EQ(p->error(), "1:2: expected ')' for argument list");
 }
 
 }  // namespace

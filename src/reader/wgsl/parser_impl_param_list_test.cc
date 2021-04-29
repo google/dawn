@@ -87,12 +87,12 @@ TEST_F(ParserImplTest, ParamList_Empty) {
   EXPECT_EQ(e.value.size(), 0u);
 }
 
-TEST_F(ParserImplTest, ParamList_HangingComma) {
+TEST_F(ParserImplTest, ParamList_TrailingComma) {
   auto p = parser("a : i32,");
   auto e = p->expect_param_list();
-  ASSERT_TRUE(p->has_error());
-  ASSERT_TRUE(e.errored);
-  EXPECT_EQ(p->error(), "1:9: expected identifier for parameter");
+  ASSERT_FALSE(p->has_error());
+  ASSERT_FALSE(e.errored);
+  EXPECT_EQ(e.value.size(), 1u);
 }
 
 TEST_F(ParserImplTest, ParamList_Decorations) {
