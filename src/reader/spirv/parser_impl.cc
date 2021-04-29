@@ -1072,6 +1072,16 @@ sem::Type* ParserImpl::ConvertType(uint32_t type_id,
     ast_storage_class = ast::StorageClass::kStorage;
     remap_buffer_block_type_.insert(type_id);
   }
+
+  if (hlsl_style_pipeline_io_) {
+    // When using HLSL-style pipeline IO, intput and output variables
+    // are mapped to private variables.
+    if (ast_storage_class == ast::StorageClass::kInput ||
+        ast_storage_class == ast::StorageClass::kOutput) {
+      ast_storage_class = ast::StorageClass::kPrivate;
+    }
+  }
+
   return builder_.create<sem::Pointer>(ast_elem_ty, ast_storage_class);
 }
 

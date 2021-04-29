@@ -3821,6 +3821,54 @@ TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
   EXPECT_THAT(info_1300[0].outputs, ElementsAre(15));
 }
 
+TEST_F(SpvModuleScopeVarParserTest, InputVarsConvertedToPrivate) {
+  const auto assembly = CommonTypes() + R"(
+     %ptr_in_uint = OpTypePointer Input %uint
+     %1 = OpVariable %ptr_in_uint Input
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Variable{
+    x_1
+    private
+    __u32
+  }
+)";
+  EXPECT_THAT(got, HasSubstr(expected)) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, OutputVarsConvertedToPrivate) {
+  const auto assembly = CommonTypes() + R"(
+     %ptr_out_uint = OpTypePointer Output %uint
+     %1 = OpVariable %ptr_out_uint Output
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(Variable{
+    x_1
+    private
+    __u32
+  }
+)";
+  EXPECT_THAT(got, HasSubstr(expected)) << got;
+}
+
 // TODO(dneto): Test passing pointer to SampleMask as function parameter,
 // both input case and output case.
 
