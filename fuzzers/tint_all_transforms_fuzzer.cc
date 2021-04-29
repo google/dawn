@@ -80,6 +80,25 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   }
 #endif  // TINT_BUILD_HLSL_WRITER
 
+#if TINT_BUILD_MSL_WRITER
+  {
+    Config config;
+    config.data = data;
+    config.size = size;
+
+    if (!AddPlatformIndependentPasses(&config)) {
+      return 0;
+    }
+
+    config.manager.Add<transform::Msl>();
+
+    fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kMSL);
+    fuzzer.SetTransformManager(&config.manager, std::move(config.inputs));
+
+    fuzzer.Run(config.data, config.size);
+  }
+#endif  // TINT_BUILD_MSL_WRITER
+
   return 0;
 }
 

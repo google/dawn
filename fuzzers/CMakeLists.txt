@@ -46,6 +46,7 @@ endif()
 
 if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_MSL_WRITER})
   add_tint_fuzzer(tint_wgsl_reader_msl_writer_fuzzer)
+  add_tint_fuzzer(tint_msl_transform_fuzzer)
 endif()
 
 if (${TINT_BUILD_SPV_READER})
