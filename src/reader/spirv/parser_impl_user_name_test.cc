@@ -130,7 +130,7 @@ TEST_F(SpvParserTest, EntryPointNamesAlwaysTakePrecedence) {
   // has grabbed "main_1" first.
   EXPECT_THAT(p->namer().Name(1), Eq("main_1_1"));
 
-  const auto ep_info = p->GetEntryPointInfo(100);
+  const auto& ep_info = p->GetEntryPointInfo(100);
   ASSERT_EQ(2u, ep_info.size());
   EXPECT_EQ(ep_info[0].name, "main");
   EXPECT_EQ(ep_info[1].name, "main_1");

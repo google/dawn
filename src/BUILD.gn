@@ -581,6 +581,7 @@ libtint_source_set("libtint_spv_reader_src") {
   sources = [
     "reader/spirv/construct.cc",
     "reader/spirv/construct.h",
+    "reader/spirv/entry_point_info.cc",
     "reader/spirv/entry_point_info.h",
     "reader/spirv/enum_converter.cc",
     "reader/spirv/enum_converter.h",

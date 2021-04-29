@@ -14,8 +14,10 @@
 
 #include "src/reader/spirv/parser_impl.h"
 
+#include <algorithm>
 #include <limits>
 #include <locale>
+#include <utility>
 
 #include "source/opt/build_module.h"
 #include "src/ast/bitcast_expression.h"
@@ -26,6 +28,7 @@
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
+#include "src/utils/unique_vector.h"
 
 namespace tint {
 namespace reader {
@@ -711,8 +714,32 @@ bool ParserImpl::RegisterEntryPoints() {
     const uint32_t function_id = entry_point.GetSingleWordInOperand(1);
     const std::string ep_name = entry_point.GetOperand(2).AsString();
 
-    EntryPointInfo info{ep_name, enum_converter_.ToPipelineStage(stage)};
-    function_to_ep_info_[function_id].push_back(info);
+    tint::UniqueVector<uint32_t> inputs;
+    tint::UniqueVector<uint32_t> outputs;
+    for (unsigned iarg = 3; iarg < entry_point.NumInOperands(); iarg++) {
+      const uint32_t var_id = entry_point.GetSingleWordInOperand(iarg);
+      if (const auto* var_inst = def_use_mgr_->GetDef(var_id)) {
+        switch (SpvStorageClass(var_inst->GetSingleWordInOperand(0))) {
+          case SpvStorageClassInput:
+            inputs.add(var_id);
+            break;
+          case SpvStorageClassOutput:
+            outputs.add(var_id);
+            break;
+          default:
+            break;
+        }
+      }
+    }
+    // Save the lists, in ID-sorted order.
+    std::vector<uint32_t> sorted_inputs(inputs.begin(), inputs.end());
+    std::sort(sorted_inputs.begin(), sorted_inputs.end());
+    std::vector<uint32_t> sorted_outputs(outputs.begin(), outputs.end());
+    std::sort(sorted_inputs.begin(), sorted_inputs.end());
+
+    function_to_ep_info_[function_id].emplace_back(
+        ep_name, enum_converter_.ToPipelineStage(stage),
+        std::move(sorted_inputs), std::move(sorted_outputs));
   }
   // The enum conversion could have failed, so return the existing status value.
   return success_;

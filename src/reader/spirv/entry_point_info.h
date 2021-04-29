@@ -16,6 +16,7 @@
 #define SRC_READER_SPIRV_ENTRY_POINT_INFO_H_
 
 #include <string>
+#include <vector>
 
 #include "src/ast/pipeline_stage.h"
 
@@ -25,10 +26,29 @@ namespace spirv {
 
 /// Entry point information for a function
 struct EntryPointInfo {
+  // Constructor.
+  // @param the_name the name of the entry point
+  // @param the_stage the pipeline stage
+  // @param the_inputs list of IDs for Input variables used by the shader
+  // @param the_outputs list of IDs for Output variables used by the shader
+  EntryPointInfo(std::string the_name,
+                 ast::PipelineStage the_stage,
+                 std::vector<uint32_t>&& the_inputs,
+                 std::vector<uint32_t>&& the_outputs);
+  // Copy constructor
+  // @param other the other entry point info to be built from
+  EntryPointInfo(const EntryPointInfo& other);
+  // Destructor
+  ~EntryPointInfo();
+
   /// The entry point name
   std::string name;
   /// The entry point stage
   ast::PipelineStage stage = ast::PipelineStage::kNone;
+  /// IDs of pipeline input variables, sorted and without duplicates.
+  std::vector<uint32_t> inputs;
+  /// IDs of pipeline output variables, sorted and without duplicates.
+  std::vector<uint32_t> outputs;
 };
 
 }  // namespace spirv

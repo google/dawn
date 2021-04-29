@@ -24,6 +24,7 @@ namespace {
 
 using SpvModuleScopeVarParserTest = SpvParserTest;
 
+using ::testing::ElementsAre;
 using ::testing::Eq;
 using ::testing::HasSubstr;
 using ::testing::Not;
@@ -3720,6 +3721,104 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_FunctParam) {
     Return{}
   }
 })")) << module_str;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
+  const std::string assembly =
+      R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint GLCompute %1000 "w1000"
+    OpEntryPoint GLCompute %1100 "w1100" %1
+    OpEntryPoint GLCompute %1200 "w1200" %2 %15
+    ; duplication is tolerated prior to SPIR-V 1.4
+    OpEntryPoint GLCompute %1300 "w1300" %1 %15 %2 %1
+
+)" + CommonTypes() +
+      R"(
+
+    %ptr_in_uint = OpTypePointer Input %uint
+    %ptr_out_uint = OpTypePointer Output %uint
+
+    %1 = OpVariable %ptr_in_uint Input
+    %2 = OpVariable %ptr_in_uint Input
+    %5 = OpVariable %ptr_in_uint Input
+    %11 = OpVariable %ptr_out_uint Output
+    %12 = OpVariable %ptr_out_uint Output
+    %15 = OpVariable %ptr_out_uint Output
+
+    %100 = OpFunction %void None %voidfn
+    %entry_100 = OpLabel
+    %load_100 = OpLoad %uint %1
+    OpReturn
+    OpFunctionEnd
+
+    %200 = OpFunction %void None %voidfn
+    %entry_200 = OpLabel
+    %load_200 = OpLoad %uint %2
+    OpStore %15 %load_200
+    OpStore %15 %load_200
+    OpReturn
+    OpFunctionEnd
+
+    %300 = OpFunction %void None %voidfn
+    %entry_300 = OpLabel
+    %dummy_300_1 = OpFunctionCall %void %100
+    %dummy_300_2 = OpFunctionCall %void %200
+    OpReturn
+    OpFunctionEnd
+
+    ; Call nothing
+    %1000 = OpFunction %void None %voidfn
+    %entry_1000 = OpLabel
+    OpReturn
+    OpFunctionEnd
+
+    ; Call %100
+    %1100 = OpFunction %void None %voidfn
+    %entry_1100 = OpLabel
+    %dummy_1100_1 = OpFunctionCall %void %100
+    OpReturn
+    OpFunctionEnd
+
+    ; Call %200
+    %1200 = OpFunction %void None %voidfn
+    %entry_1200 = OpLabel
+    %dummy_1200_1 = OpFunctionCall %void %200
+    OpReturn
+    OpFunctionEnd
+
+    ; Call %300
+    %1300 = OpFunction %void None %voidfn
+    %entry_1300 = OpLabel
+    %dummy_1300_1 = OpFunctionCall %void %300
+    OpReturn
+    OpFunctionEnd
+
+ )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  EXPECT_TRUE(p->error().empty());
+
+  const auto& info_1000 = p->GetEntryPointInfo(1000);
+  EXPECT_EQ(1u, info_1000.size());
+  EXPECT_TRUE(info_1000[0].inputs.empty());
+  EXPECT_TRUE(info_1000[0].outputs.empty());
+
+  const auto& info_1100 = p->GetEntryPointInfo(1100);
+  EXPECT_EQ(1u, info_1100.size());
+  EXPECT_THAT(info_1100[0].inputs, ElementsAre(1));
+  EXPECT_TRUE(info_1100[0].outputs.empty());
+
+  const auto& info_1200 = p->GetEntryPointInfo(1200);
+  EXPECT_EQ(1u, info_1200.size());
+  EXPECT_THAT(info_1200[0].inputs, ElementsAre(2));
+  EXPECT_THAT(info_1200[0].outputs, ElementsAre(15));
+
+  const auto& info_1300 = p->GetEntryPointInfo(1300);
+  EXPECT_EQ(1u, info_1300.size());
+  EXPECT_THAT(info_1300[0].inputs, ElementsAre(1, 2));
+  EXPECT_THAT(info_1300[0].outputs, ElementsAre(15));
 }
 
 // TODO(dneto): Test passing pointer to SampleMask as function parameter,

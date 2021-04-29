@@ -352,6 +352,7 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/construct.h
     reader/spirv/construct.cc
     reader/spirv/entry_point_info.h
+    reader/spirv/entry_point_info.cc
     reader/spirv/enum_converter.h
     reader/spirv/enum_converter.cc
     reader/spirv/fail_stream.h
