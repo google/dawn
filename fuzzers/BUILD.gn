@@ -92,6 +92,11 @@ if (build_with_chromium) {
       deps = [ ":tint_fuzzer_common" ]
     }
 
+    fuzzer_test("tint_single_entry_point_fuzzer") {
+      sources = [ "tint_single_entry_point_fuzzer.cc" ]
+      deps = [ ":tint_fuzzer_common" ]
+    }
+
     fuzzer_test("tint_spirv_transform_fuzzer") {
       sources = [ "tint_spirv_transform_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
@@ -189,6 +194,7 @@ if (build_with_chromium) {
         ":tint_first_index_offset_fuzzer",
         ":tint_inspector_fuzzer",
         ":tint_renamer_fuzzer",
+        ":tint_single_entry_point_fuzzer",
         ":tint_spirv_transform_fuzzer",
         ":tint_wgsl_reader_spv_writer_fuzzer",
       ]

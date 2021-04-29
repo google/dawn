@@ -101,6 +101,33 @@ bool ExtractFirstIndexOffsetInputs(const uint8_t** data,
   return true;
 }
 
+bool ExtractSingleEntryPointInputs(const uint8_t** data,
+                                   size_t* size,
+                                   tint::transform::DataMap* inputs) {
+  if ((*size) < sizeof(uint8_t)) {
+    return false;
+  }
+
+  auto count = *reinterpret_cast<const uint8_t*>(*data);
+  (*data) += sizeof(uint8_t);
+  (*size) -= sizeof(uint8_t);
+
+  if ((*size) < count) {
+    return false;
+  }
+
+  auto* c = reinterpret_cast<const char*>(*data);
+  std::string input(c, c + count);
+
+  (*data) += count * sizeof(char);
+  (*size) -= count * sizeof(char);
+
+  transform::SingleEntryPoint::Config cfg(input);
+  inputs->Add<transform::SingleEntryPoint::Config>(cfg);
+
+  return true;
+}
+
 CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
     : input_(input),
       output_(output),

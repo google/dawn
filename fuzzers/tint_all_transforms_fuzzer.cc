@@ -35,6 +35,11 @@ bool AddPlatformIndependentPasses(Config* config) {
     return false;
   }
 
+  if (!ExtractSingleEntryPointInputs(&config->data, &config->size,
+                                     &config->inputs)) {
+    return 0;
+  }
+
   config->manager.Add<transform::BoundArrayAccessors>();
   config->manager
       .Add<transform::EmitVertexPointSize>();  // TODO(tint:753): Remove once
@@ -42,6 +47,7 @@ bool AddPlatformIndependentPasses(Config* config) {
   config->manager.Add<transform::FirstIndexOffset>();
   config->manager.Add<transform::BindingRemapper>();
   config->manager.Add<transform::Renamer>();
+  config->manager.Add<tint::transform::SingleEntryPoint>();
 
   return true;
 }

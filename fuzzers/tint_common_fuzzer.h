@@ -29,6 +29,10 @@ bool ExtractFirstIndexOffsetInputs(const uint8_t** data,
                                    size_t* size,
                                    tint::transform::DataMap* inputs);
 
+bool ExtractSingleEntryPointInputs(const uint8_t** data,
+                                   size_t* size,
+                                   tint::transform::DataMap* inputs);
+
 enum class InputFormat { kWGSL, kSpv, kNone };
 
 enum class OutputFormat { kWGSL, kSpv, kHLSL, kMSL, kNone };
