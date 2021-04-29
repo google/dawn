@@ -2815,16 +2815,16 @@ Maybe<ast::AssignmentStatement*> ParserImpl::assignment_stmt() {
 Maybe<ast::Literal*> ParserImpl::const_literal() {
   auto t = peek();
   if (match(Token::Type::kTrue)) {
-    return create<ast::BoolLiteral>(Source{}, true);
+    return create<ast::BoolLiteral>(t.source(), true);
   }
   if (match(Token::Type::kFalse)) {
-    return create<ast::BoolLiteral>(Source{}, false);
+    return create<ast::BoolLiteral>(t.source(), false);
   }
   if (match(Token::Type::kSintLiteral)) {
-    return create<ast::SintLiteral>(Source{}, t.to_i32());
+    return create<ast::SintLiteral>(t.source(), t.to_i32());
   }
   if (match(Token::Type::kUintLiteral)) {
-    return create<ast::UintLiteral>(Source{}, t.to_u32());
+    return create<ast::UintLiteral>(t.source(), t.to_u32());
   }
   if (match(Token::Type::kFloatLiteral)) {
     auto p = peek();
@@ -2832,7 +2832,7 @@ Maybe<ast::Literal*> ParserImpl::const_literal() {
       next();  // Consume 'f'
       add_error(p.source(), "float literals must not be suffixed with 'f'");
     }
-    return create<ast::FloatLiteral>(Source{}, t.to_f32());
+    return create<ast::FloatLiteral>(t.source(), t.to_f32());
   }
   return Failure::kNoMatch;
 }

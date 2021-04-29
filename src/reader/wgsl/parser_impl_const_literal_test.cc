@@ -28,6 +28,7 @@ TEST_F(ParserImplTest, ConstLiteral_Int) {
   ASSERT_NE(c.value, nullptr);
   ASSERT_TRUE(c->Is<ast::SintLiteral>());
   EXPECT_EQ(c->As<ast::SintLiteral>()->value(), -234);
+  EXPECT_EQ(c->source().range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Uint) {
@@ -39,6 +40,7 @@ TEST_F(ParserImplTest, ConstLiteral_Uint) {
   ASSERT_NE(c.value, nullptr);
   ASSERT_TRUE(c->Is<ast::UintLiteral>());
   EXPECT_EQ(c->As<ast::UintLiteral>()->value(), 234u);
+  EXPECT_EQ(c->source().range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
 TEST_F(ParserImplTest, ConstLiteral_Float) {
@@ -50,6 +52,7 @@ TEST_F(ParserImplTest, ConstLiteral_Float) {
   ASSERT_NE(c.value, nullptr);
   ASSERT_TRUE(c->Is<ast::FloatLiteral>());
   EXPECT_FLOAT_EQ(c->As<ast::FloatLiteral>()->value(), 234e12f);
+  EXPECT_EQ(c->source().range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
 
 TEST_F(ParserImplTest, ConstLiteral_InvalidFloat) {
@@ -69,6 +72,7 @@ TEST_F(ParserImplTest, ConstLiteral_True) {
   ASSERT_NE(c.value, nullptr);
   ASSERT_TRUE(c->Is<ast::BoolLiteral>());
   EXPECT_TRUE(c->As<ast::BoolLiteral>()->IsTrue());
+  EXPECT_EQ(c->source().range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
 TEST_F(ParserImplTest, ConstLiteral_False) {
@@ -80,6 +84,7 @@ TEST_F(ParserImplTest, ConstLiteral_False) {
   ASSERT_NE(c.value, nullptr);
   ASSERT_TRUE(c->Is<ast::BoolLiteral>());
   EXPECT_TRUE(c->As<ast::BoolLiteral>()->IsFalse());
+  EXPECT_EQ(c->source().range, (Source::Range{{1u, 1u}, {1u, 6u}}));
 }
 
 TEST_F(ParserImplTest, ConstLiteral_NoMatch) {
