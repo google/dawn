@@ -22,10 +22,14 @@ namespace spirv {
 
 EntryPointInfo::EntryPointInfo(std::string the_name,
                                ast::PipelineStage the_stage,
+                               bool the_owns_inner_implementation,
+                               std::string the_inner_name,
                                std::vector<uint32_t>&& the_inputs,
                                std::vector<uint32_t>&& the_outputs)
     : name(the_name),
       stage(the_stage),
+      owns_inner_implementation(the_owns_inner_implementation),
+      inner_name(std::move(the_inner_name)),
       inputs(std::move(the_inputs)),
       outputs(std::move(the_outputs)) {}
 

@@ -712,7 +712,26 @@ bool ParserImpl::RegisterEntryPoints() {
        module_->entry_points()) {
     const auto stage = SpvExecutionModel(entry_point.GetSingleWordInOperand(0));
     const uint32_t function_id = entry_point.GetSingleWordInOperand(1);
+
     const std::string ep_name = entry_point.GetOperand(2).AsString();
+
+    bool owns_inner_implementation = false;
+    std::string inner_implementation_name;
+
+    if (hlsl_style_pipeline_io_) {
+      auto where = function_to_ep_info_.find(function_id);
+      if (where == function_to_ep_info_.end()) {
+        // If this is the first entry point to have function_id as its
+        // implementation, then this entry point is responsible for generating
+        // the inner implementation.
+        owns_inner_implementation = true;
+        inner_implementation_name = namer_.MakeDerivedName(ep_name);
+      } else {
+        // Reuse the inner implementation owned by the first entry point.
+        inner_implementation_name = where->second[0].inner_name;
+      }
+    }
+    TINT_ASSERT(ep_name != inner_implementation_name);
 
     tint::UniqueVector<uint32_t> inputs;
     tint::UniqueVector<uint32_t> outputs;
@@ -739,6 +758,7 @@ bool ParserImpl::RegisterEntryPoints() {
 
     function_to_ep_info_[function_id].emplace_back(
         ep_name, enum_converter_.ToPipelineStage(stage),
+        owns_inner_implementation, inner_implementation_name,
         std::move(sorted_inputs), std::move(sorted_outputs));
   }
   // The enum conversion could have failed, so return the existing status value.
