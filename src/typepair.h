@@ -159,6 +159,9 @@ struct TypePair {
   /// @returns the sem::Type pointer
   SEM* operator->() const { return const_cast<SEM*>(sem); }
 
+  /// @returns true if sem is valid
+  explicit operator bool() const { return sem != nullptr; }
+
   /// @param ty the semantic type to compare against
   /// @returns true if the semantic type is equal to `ty`
   bool operator==(sem::Type* ty) const { return sem == ty; }
@@ -180,6 +183,50 @@ struct TypePair {
     return ast < other.ast;
   }
 };
+
+/// @param lhs LHS value to compare
+/// @param rhs RHS value to compare
+/// @returns true if values compare equal
+template <typename AST, typename SEM>
+bool operator==(const TypePair<AST, SEM>& lhs, const TypePair<AST, SEM>& rhs) {
+  return lhs.sem == rhs.sem;
+}
+
+/// @param lhs LHS value to compare
+/// @param rhs RHS value to compare
+/// @returns true if values compare not equal
+template <typename AST, typename SEM>
+bool operator!=(const TypePair<AST, SEM>& lhs, const TypePair<AST, SEM>& rhs) {
+  return !(lhs == rhs);
+}
+
+/// @param lhs LHS value to compare
+/// @returns true if `lhs` is nullptr
+template <typename AST, typename SEM>
+bool operator==(const TypePair<AST, SEM>& lhs, std::nullptr_t) {
+  return lhs.sem == nullptr;
+}
+
+/// @param lhs LHS value to compare
+/// @returns true if `lhs` is not nullptr
+template <typename AST, typename SEM>
+bool operator!=(const TypePair<AST, SEM>& lhs, std::nullptr_t) {
+  return !(lhs == nullptr);
+}
+
+/// @param rhs RHS value to compare
+/// @returns true if `rhs` is nullptr
+template <typename AST, typename SEM>
+bool operator==(std::nullptr_t, const TypePair<AST, SEM>& rhs) {
+  return nullptr == rhs.sem;
+}
+
+/// @param rhs RHS value to compare
+/// @returns true if `rhs` is not nullptr
+template <typename AST, typename SEM>
+bool operator!=(std::nullptr_t, const TypePair<AST, SEM>& rhs) {
+  return !(nullptr == rhs);
+}
 
 using Type = TypePair<ast::Type, sem::Type>;
 
