@@ -321,20 +321,6 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
                      ast::StorageClass::kOutput, nullptr, new_decorations);
     ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func, global_var);
 
-    // Special case for PointSize. The EmitVertexPointSize transform will
-    // produce a struct containing a member with the [[builtin(pointsize)]]
-    // attribute. The SPIR-V reader currently requires that a variable decorated
-    // with PointSize is assigned a _literal_ 1.0 value, so generate that
-    // assignment here to prevent the RHS from using a non-literal expression.
-    if (auto* builtin =
-            ast::GetDecoration<ast::BuiltinDecoration>(new_decorations)) {
-      if (builtin->value() == ast::Builtin::kPointSize) {
-        stores.push_back(ctx.dst->Assign(ctx.dst->Expr(global_var_symbol),
-                                         ctx.dst->Expr(1.f)));
-        return;
-      }
-    }
-
     // Create the assignment instruction.
     ast::Expression* rhs = ctx.dst->Expr(store_value);
     for (auto member : member_accesses) {
