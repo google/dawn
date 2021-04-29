@@ -76,16 +76,7 @@ if (build_with_chromium) {
       deps = [ ":tint_fuzzer_common" ]
     }
 
-    fuzzer_test("tint_calculate_array_length_fuzzer") {
-      sources = [ "tint_calculate_array_length_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common" ]
-    }
-
-    fuzzer_test("tint_canonicalize_entry_point_io_fuzzer") {
-      sources = [ "tint_canonicalize_entry_point_io_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common" ]
-    }
-
+    # TODO(tint:753): Remove once transform used by sanitizers
     fuzzer_test("tint_emit_vertex_point_size_fuzzer") {
       sources = [ "tint_emit_vertex_point_size_fuzzer.cc" ]
       deps = [ ":tint_fuzzer_common" ]
@@ -173,9 +164,8 @@ if (build_with_chromium) {
         ":tint_all_transforms_fuzzer",
         ":tint_binding_remapper_fuzzer",
         ":tint_bound_array_accessors_fuzzer",
-        ":tint_calculate_array_length_fuzzer",
-        ":tint_canonicalize_entry_point_io_fuzzer",
-        ":tint_emit_vertex_point_size_fuzzer",
+        ":tint_emit_vertex_point_size_fuzzer",  # TODO(tint:753): Remove once
+                                                # transform used by sanitizers
         ":tint_first_index_offset_fuzzer",
         ":tint_inspector_fuzzer",
         ":tint_wgsl_reader_spv_writer_fuzzer",

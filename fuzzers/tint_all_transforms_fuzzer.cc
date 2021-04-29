@@ -30,11 +30,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   }
 
   transform_manager.Add<transform::BoundArrayAccessors>();
-  transform_manager.Add<transform::EmitVertexPointSize>();
+  transform_manager
+      .Add<transform::EmitVertexPointSize>();  // TODO(tint:753): Remove once
+                                               // transform used by sanitizers
   transform_manager.Add<transform::FirstIndexOffset>();
   transform_manager.Add<transform::BindingRemapper>();
-  transform_manager.Add<transform::CalculateArrayLength>();
-  transform_manager.Add<transform::CanonicalizeEntryPointIO>();
 
   fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
   fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));
