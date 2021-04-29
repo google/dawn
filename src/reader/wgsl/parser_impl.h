@@ -557,10 +557,10 @@ class ParserImpl {
   /// Parses the recursive portion of the postfix_expression
   /// @param prefix the left side of the expression
   /// @returns the parsed expression or nullptr
-  Maybe<ast::Expression*> postfix_expr(ast::Expression* prefix);
-  /// Parses a `postfix_expression` grammar elment
+  Maybe<ast::Expression*> postfix_expression(ast::Expression* prefix);
+  /// Parses a `singular_expression` grammar elment
   /// @returns the parsed expression or nullptr
-  Maybe<ast::Expression*> postfix_expression();
+  Maybe<ast::Expression*> singular_expression();
   /// Parses a `unary_expression` grammar element
   /// @returns the parsed expression or nullptr
   Maybe<ast::Expression*> unary_expression();

@@ -2196,7 +2196,7 @@ Maybe<ast::BlockStatement*> ParserImpl::continuing_stmt() {
 }
 
 // primary_expression
-//   : IDENT
+//   : IDENT argument_expression_list?
 //   | type_decl PAREN_LEFT argument_expression_list* PAREN_RIGHT
 //   | const_literal
 //   | paren_rhs_stmt
@@ -2235,8 +2235,30 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
 
   if (t.IsIdentifier() && !get_constructed(t.to_str())) {
     next();
-    return create<ast::IdentifierExpression>(
+
+    auto* ident = create<ast::IdentifierExpression>(
         t.source(), builder_.Symbols().Register(t.to_str()));
+
+    if (match(Token::Type::kParenLeft, &source)) {
+      return sync(Token::Type::kParenRight, [&]() -> Maybe<ast::Expression*> {
+        ast::ExpressionList params;
+
+        auto t2 = peek();
+        if (!t2.IsParenRight() && !t2.IsEof()) {
+          auto list = expect_argument_expression_list();
+          if (list.errored)
+            return Failure::kErrored;
+          params = list.value;
+        }
+
+        if (!expect("call expression", Token::Type::kParenRight))
+          return Failure::kErrored;
+
+        return create<ast::CallExpression>(source, ident, params);
+      });
+    }
+
+    return ident;
   }
 
   auto type = type_decl();
@@ -2267,12 +2289,12 @@ Maybe<ast::Expression*> ParserImpl::primary_expression() {
   return Failure::kNoMatch;
 }
 
-// postfix_expr
+// postfix_expression
 //   :
 //   | BRACE_LEFT logical_or_expression BRACE_RIGHT postfix_expr
-//   | PAREN_LEFT argument_expression_list* PAREN_RIGHT postfix_expr
 //   | PERIOD IDENTIFIER postfix_expr
-Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
+Maybe<ast::Expression*> ParserImpl::postfix_expression(
+    ast::Expression* prefix) {
   Source source;
   if (match(Token::Type::kBracketLeft, &source)) {
     return sync(Token::Type::kBracketRight, [&]() -> Maybe<ast::Expression*> {
@@ -2285,27 +2307,8 @@ Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
       if (!expect("array accessor", Token::Type::kBracketRight))
         return Failure::kErrored;
 
-      return postfix_expr(
+      return postfix_expression(
           create<ast::ArrayAccessorExpression>(source, prefix, param.value));
-    });
-  }
-
-  if (match(Token::Type::kParenLeft, &source)) {
-    return sync(Token::Type::kParenRight, [&]() -> Maybe<ast::Expression*> {
-      ast::ExpressionList params;
-
-      auto t = peek();
-      if (!t.IsParenRight() && !t.IsEof()) {
-        auto list = expect_argument_expression_list();
-        if (list.errored)
-          return Failure::kErrored;
-        params = list.value;
-      }
-
-      if (!expect("call expression", Token::Type::kParenRight))
-        return Failure::kErrored;
-
-      return postfix_expr(create<ast::CallExpression>(source, prefix, params));
     });
   }
 
@@ -2314,7 +2317,7 @@ Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
     if (ident.errored)
       return Failure::kErrored;
 
-    return postfix_expr(create<ast::MemberAccessorExpression>(
+    return postfix_expression(create<ast::MemberAccessorExpression>(
         ident.source, prefix,
         create<ast::IdentifierExpression>(
             ident.source, builder_.Symbols().Register(ident.value))));
@@ -2323,16 +2326,16 @@ Maybe<ast::Expression*> ParserImpl::postfix_expr(ast::Expression* prefix) {
   return prefix;
 }
 
-// postfix_expression
+// singular_expression
 //   : primary_expression postfix_expr
-Maybe<ast::Expression*> ParserImpl::postfix_expression() {
+Maybe<ast::Expression*> ParserImpl::singular_expression() {
   auto prefix = primary_expression();
   if (prefix.errored)
     return Failure::kErrored;
   if (!prefix.matched)
     return Failure::kNoMatch;
 
-  return postfix_expr(prefix.value);
+  return postfix_expression(prefix.value);
 }
 
 // argument_expression_list
@@ -2361,7 +2364,7 @@ Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list() {
 }
 
 // unary_expression
-//   : postfix_expression
+//   : singular_expression
 //   | MINUS unary_expression
 //   | BANG unary_expression
 Maybe<ast::Expression*> ParserImpl::unary_expression() {
@@ -2385,7 +2388,7 @@ Maybe<ast::Expression*> ParserImpl::unary_expression() {
 
     return create<ast::UnaryOpExpression>(source, op, expr.value);
   }
-  return postfix_expression();
+  return singular_expression();
 }
 
 // multiplicative_expr

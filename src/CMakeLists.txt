@@ -675,12 +675,12 @@ if(${TINT_BUILD_TESTS})
       reader/wgsl/parser_impl_param_list_test.cc
       reader/wgsl/parser_impl_paren_rhs_stmt_test.cc
       reader/wgsl/parser_impl_pipeline_stage_test.cc
-      reader/wgsl/parser_impl_postfix_expression_test.cc
       reader/wgsl/parser_impl_primary_expression_test.cc
       reader/wgsl/parser_impl_relational_expression_test.cc
       reader/wgsl/parser_impl_sampled_texture_type_test.cc
       reader/wgsl/parser_impl_sampler_type_test.cc
       reader/wgsl/parser_impl_shift_expression_test.cc
+      reader/wgsl/parser_impl_singular_expression_test.cc
       reader/wgsl/parser_impl_statement_test.cc
       reader/wgsl/parser_impl_statements_test.cc
       reader/wgsl/parser_impl_storage_class_test.cc

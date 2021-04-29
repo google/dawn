@@ -19,9 +19,9 @@ namespace reader {
 namespace wgsl {
 namespace {
 
-TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
+TEST_F(ParserImplTest, SingularExpression_Array_ConstantIndex) {
   auto p = parser("a[1]");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
@@ -41,9 +41,9 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ConstantIndex) {
   EXPECT_EQ(c->literal()->As<ast::SintLiteral>()->value(), 1);
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
+TEST_F(ParserImplTest, SingularExpression_Array_ExpressionIndex) {
   auto p = parser("a[1 + b / 4]");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
@@ -59,9 +59,9 @@ TEST_F(ParserImplTest, PostfixExpression_Array_ExpressionIndex) {
   ASSERT_TRUE(ary->idx_expr()->Is<ast::BinaryExpression>());
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Array_MissingIndex) {
+TEST_F(ParserImplTest, SingularExpression_Array_MissingIndex) {
   auto p = parser("a[]");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
@@ -69,9 +69,9 @@ TEST_F(ParserImplTest, PostfixExpression_Array_MissingIndex) {
   EXPECT_EQ(p->error(), "1:3: unable to parse expression inside []");
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Array_MissingRightBrace) {
+TEST_F(ParserImplTest, SingularExpression_Array_MissingRightBrace) {
   auto p = parser("a[1");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
@@ -79,9 +79,9 @@ TEST_F(ParserImplTest, PostfixExpression_Array_MissingRightBrace) {
   EXPECT_EQ(p->error(), "1:4: expected ']' for array accessor");
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Array_InvalidIndex) {
+TEST_F(ParserImplTest, SingularExpression_Array_InvalidIndex) {
   auto p = parser("a[if(a() {})]");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
@@ -89,9 +89,9 @@ TEST_F(ParserImplTest, PostfixExpression_Array_InvalidIndex) {
   EXPECT_EQ(p->error(), "1:3: unable to parse expression inside []");
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
+TEST_F(ParserImplTest, SingularExpression_Call_Empty) {
   auto p = parser("a()");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
@@ -107,9 +107,9 @@ TEST_F(ParserImplTest, PostfixExpression_Call_Empty) {
   EXPECT_EQ(c->params().size(), 0u);
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
+TEST_F(ParserImplTest, SingularExpression_Call_WithArgs) {
   auto p = parser("test(1, b, 2 + 3 / b)");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
@@ -128,9 +128,9 @@ TEST_F(ParserImplTest, PostfixExpression_Call_WithArgs) {
   EXPECT_TRUE(c->params()[2]->Is<ast::BinaryExpression>());
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Call_InvalidArg) {
+TEST_F(ParserImplTest, SingularExpression_Call_InvalidArg) {
   auto p = parser("a(if(a) {})");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
@@ -138,9 +138,9 @@ TEST_F(ParserImplTest, PostfixExpression_Call_InvalidArg) {
   EXPECT_EQ(p->error(), "1:3: unable to parse argument expression");
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Call_HangingComma) {
+TEST_F(ParserImplTest, SingularExpression_Call_HangingComma) {
   auto p = parser("a(b, )");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
@@ -148,9 +148,9 @@ TEST_F(ParserImplTest, PostfixExpression_Call_HangingComma) {
   EXPECT_EQ(p->error(), "1:6: unable to parse argument expression after comma");
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Call_MissingRightParen) {
+TEST_F(ParserImplTest, SingularExpression_Call_MissingRightParen) {
   auto p = parser("a(");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
@@ -158,9 +158,9 @@ TEST_F(ParserImplTest, PostfixExpression_Call_MissingRightParen) {
   EXPECT_EQ(p->error(), "1:3: expected ')' for call expression");
 }
 
-TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
+TEST_F(ParserImplTest, SingularExpression_MemberAccessor) {
   auto p = parser("a.b");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
@@ -177,9 +177,9 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor) {
             p->builder().Symbols().Get("b"));
 }
 
-TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {
+TEST_F(ParserImplTest, SingularExpression_MemberAccesssor_InvalidIdent) {
   auto p = parser("a.if");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
@@ -187,9 +187,9 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccesssor_InvalidIdent) {
   EXPECT_EQ(p->error(), "1:3: expected identifier for member accessor");
 }
 
-TEST_F(ParserImplTest, PostfixExpression_MemberAccessor_MissingIdent) {
+TEST_F(ParserImplTest, SingularExpression_MemberAccessor_MissingIdent) {
   auto p = parser("a.");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_FALSE(e.matched);
   EXPECT_TRUE(e.errored);
   EXPECT_EQ(e.value, nullptr);
@@ -197,9 +197,9 @@ TEST_F(ParserImplTest, PostfixExpression_MemberAccessor_MissingIdent) {
   EXPECT_EQ(p->error(), "1:3: expected identifier for member accessor");
 }
 
-TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
+TEST_F(ParserImplTest, SingularExpression_NonMatch_returnLHS) {
   auto p = parser("a b");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
@@ -207,9 +207,9 @@ TEST_F(ParserImplTest, PostfixExpression_NonMatch_returnLHS) {
   ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 }
 
-TEST_F(ParserImplTest, PostfixExpression_Array_NestedArrayAccessor) {
+TEST_F(ParserImplTest, SingularExpression_Array_NestedArrayAccessor) {
   auto p = parser("a[b[c]]");
-  auto e = p->postfix_expression();
+  auto e = p->singular_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
