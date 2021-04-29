@@ -98,6 +98,24 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzer.Run(config.data, config.size);
   }
 #endif  // TINT_BUILD_MSL_WRITER
+#if TINT_BUILD_SPV_WRITER
+  {
+    Config config;
+    config.data = data;
+    config.size = size;
+
+    if (!AddPlatformIndependentPasses(&config)) {
+      return 0;
+    }
+
+    config.manager.Add<transform::Spirv>();
+
+    fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
+    fuzzer.SetTransformManager(&config.manager, std::move(config.inputs));
+
+    fuzzer.Run(config.data, config.size);
+  }
+#endif  // TINT_BUILD_SPV_WRITER
 
   return 0;
 }
