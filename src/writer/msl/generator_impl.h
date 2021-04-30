@@ -195,14 +195,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitType(sem::Type* type, const std::string& name);
+  bool EmitType(typ::Type type, const std::string& name);
   /// Handles generating an MSL-packed storage type.
   /// If the type does not have a packed form, the standard non-packed form is
   /// emitted.
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitPackedType(sem::Type* type, const std::string& name);
+  bool EmitPackedType(typ::Type type, const std::string& name);
   /// Handles generating a struct declaration
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
@@ -227,7 +227,7 @@ class GeneratorImpl : public TextGenerator {
   /// Emits the zero value for the given type
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
-  bool EmitZeroValue(sem::Type* type);
+  bool EmitZeroValue(typ::Type type);
 
   /// Determines if the function needs the input struct passed to it.
   /// @param func the function to check
@@ -271,6 +271,12 @@ class GeneratorImpl : public TextGenerator {
   /// @param expr the expression
   sem::Type* TypeOf(ast::Expression* expr) const {
     return program_->TypeOf(expr);
+  }
+
+  /// @returns the resolved type of the ast::Type `type`
+  /// @param type the type
+  const sem::Type* TypeOf(ast::Type* type) const {
+    return program_->TypeOf(type);
   }
 
   // A pair of byte size and alignment `uint32_t`s.

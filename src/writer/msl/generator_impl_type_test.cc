@@ -602,7 +602,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_U32) {
-  auto u32 = ty.u32();
+  auto* u32 = create<sem::U32>();
 
   GeneratorImpl& gen = Build();
 
@@ -715,11 +715,12 @@ INSTANTIATE_TEST_SUITE_P(
                         "texturecube_array<float, access::sample>"}));
 
 TEST_F(MslGeneratorImplTest, Emit_TypeMultisampledTexture) {
-  sem::MultisampledTexture s(ast::TextureDimension::k2d, ty.u32());
+  auto* u32 = create<sem::U32>();
+  auto* ms = create<sem::MultisampledTexture>(ast::TextureDimension::k2d, u32);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(ms, "")) << gen.error();
   EXPECT_EQ(gen.result(), "texture2d_ms<uint, access::sample>");
 }
 

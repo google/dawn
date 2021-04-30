@@ -886,10 +886,12 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
-  if (expr->type()->IsAnyOf<sem::ArrayType, sem::StructType>()) {
+  auto* type = TypeOf(expr);
+
+  if (type->IsAnyOf<sem::ArrayType, sem::StructType>()) {
     out_ << "{";
   } else {
-    if (!EmitType(expr->type(), "")) {
+    if (!EmitType(type, "")) {
       return false;
     }
     out_ << "(";
@@ -898,7 +900,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
   // If the type constructor is empty then we need to construct with the zero
   // value for all components.
   if (expr->values().empty()) {
-    if (!EmitZeroValue(expr->type())) {
+    if (!EmitZeroValue(type)) {
       return false;
     }
   } else {
@@ -915,7 +917,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  if (expr->type()->IsAnyOf<sem::ArrayType, sem::StructType>()) {
+  if (type->IsAnyOf<sem::ArrayType, sem::StructType>()) {
     out_ << "}";
   } else {
     out_ << ")";
@@ -923,7 +925,10 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitZeroValue(sem::Type* type) {
+bool GeneratorImpl::EmitZeroValue(typ::Type type) {
+  if (!type.sem) {
+    type.sem = program_->Sem().Get(type.ast);
+  }
   if (type->Is<sem::Bool>()) {
     out_ << "false";
   } else if (type->Is<sem::F32>()) {
@@ -1891,7 +1896,11 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitType(sem::Type* type, const std::string& name) {
+bool GeneratorImpl::EmitType(typ::Type type, const std::string& name) {
+  if (!type.sem) {
+    type.sem = program_->Sem().Get(type.ast);
+  }
+
   std::string access_str = "";
   if (auto* ac = type->As<sem::AccessControl>()) {
     if (ac->access_control() == ast::AccessControl::kReadOnly) {
@@ -2025,7 +2034,11 @@ bool GeneratorImpl::EmitType(sem::Type* type, const std::string& name) {
   return true;
 }
 
-bool GeneratorImpl::EmitPackedType(sem::Type* type, const std::string& name) {
+bool GeneratorImpl::EmitPackedType(typ::Type type, const std::string& name) {
+  if (!type.sem) {
+    type.sem = program_->Sem().Get(type.ast);
+  }
+
   if (auto* alias = type->As<sem::Alias>()) {
     return EmitPackedType(alias->type(), name);
   }
@@ -2077,16 +2090,11 @@ bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
 
   increment_indent();
   uint32_t msl_offset = 0;
-  for (auto* mem : str->impl()->members()) {
+  for (auto* mem : sem_str->Members()) {
     make_indent();
 
-    auto* sem_mem = program_->Sem().Get(mem);
-    if (!sem_mem) {
-      TINT_ICE(diagnostics_) << "struct member missing semantic info";
-      return false;
-    }
-
-    auto wgsl_offset = sem_mem->Offset();
+    auto name = program_->Symbols().NameFor(mem->Declaration()->symbol());
+    auto wgsl_offset = mem->Offset();
 
     if (is_host_shareable) {
       if (wgsl_offset < msl_offset) {
@@ -2107,25 +2115,24 @@ bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
 
       add_byte_offset_comment(msl_offset);
 
-      if (!EmitPackedType(mem->type(),
-                          program_->Symbols().NameFor(mem->symbol()))) {
+      if (!EmitPackedType(mem->Type(), name)) {
         return false;
       }
     } else {
-      if (!EmitType(mem->type(), program_->Symbols().NameFor(mem->symbol()))) {
+      if (!EmitType(mem->Type(), name)) {
         return false;
       }
     }
 
-    auto* ty = mem->type()->UnwrapAliasIfNeeded();
+    auto* ty = mem->Type()->UnwrapAliasIfNeeded();
 
     // Array member name will be output with the type
     if (!ty->Is<sem::ArrayType>()) {
-      out_ << " " << program_->Symbols().NameFor(mem->symbol());
+      out_ << " " << name;
     }
 
     // Emit decorations
-    for (auto* deco : mem->decorations()) {
+    for (auto* deco : mem->Declaration()->decorations()) {
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
         auto attr = builtin_to_attribute(builtin->value());
         if (attr.empty()) {
@@ -2163,9 +2170,9 @@ bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
       // Calculate new MSL offset
       auto size_align = MslPackedTypeSizeAndAlign(ty);
       if (msl_offset % size_align.align) {
-        TINT_ICE(diagnostics_) << "Misaligned MSL structure member "
-                               << ty->FriendlyName(program_->Symbols()) << " "
-                               << program_->Symbols().NameFor(mem->symbol());
+        TINT_ICE(diagnostics_)
+            << "Misaligned MSL structure member "
+            << ty->FriendlyName(program_->Symbols()) << " " << name;
         return false;
       }
       msl_offset += size_align.size;
