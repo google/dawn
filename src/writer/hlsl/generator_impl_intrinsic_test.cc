@@ -230,6 +230,7 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{IntrinsicType::kMax, ParamType::kU32, "max"},
         IntrinsicData{IntrinsicType::kMin, ParamType::kF32, "min"},
         IntrinsicData{IntrinsicType::kMin, ParamType::kU32, "min"},
+        IntrinsicData{IntrinsicType::kMix, ParamType::kF32, "lerp"},
         IntrinsicData{IntrinsicType::kNormalize, ParamType::kF32, "normalize"},
         IntrinsicData{IntrinsicType::kPow, ParamType::kF32, "pow"},
         IntrinsicData{IntrinsicType::kReflect, ParamType::kF32, "reflect"},

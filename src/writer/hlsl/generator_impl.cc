@@ -1179,7 +1179,6 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kTan:
     case sem::IntrinsicType::kTanh:
     case sem::IntrinsicType::kTrunc:
-    case sem::IntrinsicType::kMix:
     case sem::IntrinsicType::kSign:
     case sem::IntrinsicType::kAbs:
     case sem::IntrinsicType::kMax:
@@ -1230,6 +1229,9 @@ std::string GeneratorImpl::generate_builtin_name(
       break;
     case sem::IntrinsicType::kIsNan:
       out = "isnan";
+      break;
+    case sem::IntrinsicType::kMix:
+      out = "lerp";
       break;
     case sem::IntrinsicType::kReverseBits:
       out = "reversebits";
