@@ -540,7 +540,9 @@
             {"name": "message", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "type", "type": "compilation message type"},
             {"name": "line num", "type": "uint64_t"},
-            {"name": "line pos", "type": "uint64_t"}
+            {"name": "line pos", "type": "uint64_t"},
+            {"name": "offset", "type": "uint64_t"},
+            {"name": "length", "type": "uint64_t"}
         ]
     },
     "compilation message type": {

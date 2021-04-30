@@ -44,27 +44,64 @@ namespace dawn_native {
     void OwnedCompilationMessages::AddMessage(std::string message,
                                               wgpu::CompilationMessageType type,
                                               uint64_t lineNum,
-                                              uint64_t linePos) {
+                                              uint64_t linePos,
+                                              uint64_t offset,
+                                              uint64_t length) {
         // Cannot add messages after GetCompilationInfo has been called.
         ASSERT(mCompilationInfo.messages == nullptr);
 
         mMessageStrings.push_back(message);
-        mMessages.push_back(
-            {nullptr, static_cast<WGPUCompilationMessageType>(type), lineNum, linePos});
+        mMessages.push_back({nullptr, static_cast<WGPUCompilationMessageType>(type), lineNum,
+                             linePos, offset, length});
     }
 
     void OwnedCompilationMessages::AddMessage(const tint::diag::Diagnostic& diagnostic) {
         // Cannot add messages after GetCompilationInfo has been called.
         ASSERT(mCompilationInfo.messages == nullptr);
 
+        // Tint line and column values are 1-based.
+        uint64_t lineNum = diagnostic.source.range.begin.line;
+        uint64_t linePos = diagnostic.source.range.begin.column;
+        // The offset is 0-based.
+        uint64_t offset = 0;
+        uint64_t length = 0;
+
+        if (lineNum && linePos && diagnostic.source.file_content) {
+            const std::vector<std::string>& lines = diagnostic.source.file_content->lines;
+            size_t i = 0;
+            // To find the offset of the message position, loop through each of the first lineNum-1
+            // lines and add it's length (+1 to account for the line break) to the offset.
+            for (; i < lineNum - 1; ++i) {
+                offset += lines[i].length() + 1;
+            }
+
+            // If the end line is on a different line from the beginning line, add the length of the
+            // lines in between to the ending offset.
+            uint64_t endLineNum = diagnostic.source.range.end.line;
+            uint64_t endLinePos = diagnostic.source.range.end.column;
+            uint64_t endOffset = offset;
+            for (; i < endLineNum - 1; ++i) {
+                endOffset += lines[i].length() + 1;
+            }
+
+            // Add the line positions to the offset and endOffset to get their final positions
+            // within the code string.
+            offset += linePos - 1;
+            endOffset += endLinePos - 1;
+
+            // The length of the message is the difference between the starting offset and the
+            // ending offset.
+            length = endOffset - offset;
+        }
+
         if (diagnostic.code) {
             mMessageStrings.push_back(std::string(diagnostic.code) + ": " + diagnostic.message);
         } else {
             mMessageStrings.push_back(diagnostic.message);
         }
-        mMessages.push_back({nullptr, tintSeverityToMessageType(diagnostic.severity),
-                             diagnostic.source.range.begin.line,
-                             diagnostic.source.range.begin.column});
+
+        mMessages.push_back({nullptr, tintSeverityToMessageType(diagnostic.severity), lineNum,
+                             linePos, offset, length});
     }
 
     void OwnedCompilationMessages::AddMessages(const tint::diag::List& diagnostics) {

@@ -37,7 +37,9 @@ namespace dawn_native {
         void AddMessage(std::string message,
                         wgpu::CompilationMessageType type = wgpu::CompilationMessageType::Info,
                         uint64_t lineNum = 0,
-                        uint64_t linePos = 0);
+                        uint64_t linePos = 0,
+                        uint64_t offset = 0,
+                        uint64_t length = 0);
         void AddMessage(const tint::diag::Diagnostic& diagnostic);
         void AddMessages(const tint::diag::List& diagnostics);
         void ClearMessages();
