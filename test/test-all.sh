@@ -82,7 +82,11 @@ function check() {
 
 for TEST_FILE in ${SCRIPT_DIR}/*.spvasm ${SCRIPT_DIR}/*.wgsl
 do
-    TEST_FILE=$(realpath --relative-to="$SCRIPT_DIR" "$TEST_FILE")
+    if [ -x realpath ]; then
+      TEST_FILE=$(realpath --relative-to="$SCRIPT_DIR" "$TEST_FILE")
+    else
+      TEST_FILE=$(echo -n "$TEST_FILE"| sed -e "s'${SCRIPT_DIR}/*''")
+    fi
     echo
     echo "Testing $TEST_FILE..."
     check "${TEST_FILE}" wgsl
