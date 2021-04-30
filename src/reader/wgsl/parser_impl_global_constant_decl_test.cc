@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 
 namespace tint {
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
   EXPECT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
 
   EXPECT_FALSE(
-      ast::HasDecoration<ast::ConstantIdDecoration>(e.value->decorations()));
+      ast::HasDecoration<ast::OverrideDecoration>(e.value->decorations()));
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
@@ -100,8 +100,8 @@ TEST_F(ParserImplTest, GlobalConstantDecl_MissingExpression) {
   EXPECT_EQ(p->error(), "1:14: unable to parse constant literal");
 }
 
-TEST_F(ParserImplTest, GlobalConstantDec_ConstantId) {
-  auto p = parser("[[constant_id(7)]] let a : f32 = 1.");
+TEST_F(ParserImplTest, GlobalConstantDec_Override_WithId) {
+  auto p = parser("[[override(7)]] let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
   EXPECT_TRUE(decos.matched);
@@ -118,20 +118,20 @@ TEST_F(ParserImplTest, GlobalConstantDec_ConstantId) {
   EXPECT_TRUE(e->declared_type()->Is<sem::F32>());
 
   EXPECT_EQ(e->source().range.begin.line, 1u);
-  EXPECT_EQ(e->source().range.begin.column, 24u);
+  EXPECT_EQ(e->source().range.begin.column, 21u);
   EXPECT_EQ(e->source().range.end.line, 1u);
-  EXPECT_EQ(e->source().range.end.column, 25u);
+  EXPECT_EQ(e->source().range.end.column, 22u);
 
   ASSERT_NE(e->constructor(), nullptr);
   EXPECT_TRUE(e->constructor()->Is<ast::ConstructorExpression>());
 
   EXPECT_TRUE(
-      ast::HasDecoration<ast::ConstantIdDecoration>(e.value->decorations()));
+      ast::HasDecoration<ast::OverrideDecoration>(e.value->decorations()));
   EXPECT_EQ(e.value->constant_id(), 7u);
 }
 
-TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Missing) {
-  auto p = parser("[[constant_id()]] let a : f32 = 1.");
+TEST_F(ParserImplTest, GlobalConstantDec_Override_MissingId) {
+  auto p = parser("[[override()]] let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -143,11 +143,11 @@ TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Missing) {
 
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(),
-            "1:15: expected signed integer literal for constant_id decoration");
+            "1:12: expected signed integer literal for override decoration");
 }
 
-TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Invalid) {
-  auto p = parser("[[constant_id(-7)]] let a : f32 = 1.");
+TEST_F(ParserImplTest, GlobalConstantDec_Override_InvalidId) {
+  auto p = parser("[[override(-7)]] let a : f32 = 1.");
   auto decos = p->decoration_list();
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
@@ -158,10 +158,10 @@ TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Invalid) {
   ASSERT_NE(e.value, nullptr);
 
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:15: constant_id decoration must be positive");
+  EXPECT_EQ(p->error(), "1:12: override decoration must be positive");
 }
 
-TEST_F(ParserImplTest, GlobalConstantDec_ConstantId_Const) {
+TEST_F(ParserImplTest, GlobalConstantDec_Const) {
   auto p = parser("const a : i32 = 1");
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);

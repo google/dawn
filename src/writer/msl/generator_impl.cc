@@ -21,10 +21,10 @@
 
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/constant_id_decoration.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
@@ -2250,7 +2250,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   make_indent();
 
   for (auto* d : var->decorations()) {
-    if (!d->Is<ast::ConstantIdDecoration>()) {
+    if (!d->Is<ast::OverrideDecoration>()) {
       diagnostics_.add_error("Decorated const values not valid");
       return false;
     }
@@ -2269,7 +2269,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     out_ << " " << program_->Symbols().NameFor(var->symbol());
   }
 
-  if (ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
+  if (ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
     out_ << " [[function_constant(" << var->constant_id() << ")]]";
   } else if (var->constructor() != nullptr) {
     out_ << " = ";

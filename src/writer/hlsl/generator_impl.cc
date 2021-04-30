@@ -18,9 +18,9 @@
 #include <vector>
 
 #include "src/ast/call_statement.h"
-#include "src/ast/constant_id_decoration.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/internal_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/sem/access_control_type.h"
 #include "src/sem/array.h"
@@ -2681,7 +2681,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
   make_indent(out);
 
   for (auto* d : var->decorations()) {
-    if (!d->Is<ast::ConstantIdDecoration>()) {
+    if (!d->Is<ast::OverrideDecoration>()) {
       diagnostics_.add_error("Decorated const values not valid");
       return false;
     }
@@ -2703,7 +2703,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
   auto* sem = builder_.Sem().Get(var);
   auto* type = sem->Type();
 
-  if (ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
+  if (ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
     auto const_id = var->constant_id();
 
     out << "#ifndef WGSL_SPEC_CONSTANT_" << const_id << std::endl;

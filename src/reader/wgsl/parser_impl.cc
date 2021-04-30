@@ -20,13 +20,13 @@
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/constant_id_decoration.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/external_texture.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
 #include "src/ast/loop_statement.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
@@ -121,9 +121,9 @@ const char kAccessDecoration[] = "access";
 const char kBindingDecoration[] = "binding";
 const char kBlockDecoration[] = "block";
 const char kBuiltinDecoration[] = "builtin";
-const char kConstantIdDecoration[] = "constant_id";
 const char kGroupDecoration[] = "group";
 const char kLocationDecoration[] = "location";
+const char kOverrideDecoration[] = "override";
 const char kOffsetDecoration[] = "offset";  // DEPRECATED
 const char kSizeDecoration[] = "size";
 const char kAlignDecoration[] = "align";
@@ -139,8 +139,8 @@ bool is_decoration(Token t) {
   auto s = t.to_str();
   return s == kAccessDecoration || s == kAlignDecoration ||
          s == kBindingDecoration || s == kBlockDecoration ||
-         s == kBuiltinDecoration || s == kConstantIdDecoration ||
-         s == kGroupDecoration || s == kLocationDecoration ||
+         s == kBuiltinDecoration || s == kGroupDecoration ||
+         s == kLocationDecoration || s == kOverrideDecoration ||
          s == kOffsetDecoration || s == kSetDecoration ||
          s == kSizeDecoration || s == kStageDecoration ||
          s == kStrideDecoration || s == kWorkgroupSizeDecoration;
@@ -3102,14 +3102,14 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
     });
   }
 
-  if (s == kConstantIdDecoration) {
-    const char* use = "constant_id decoration";
+  if (s == kOverrideDecoration) {
+    const char* use = "override decoration";
     return expect_paren_block(use, [&]() -> Result {
       auto val = expect_positive_sint(use);
       if (val.errored)
         return Failure::kErrored;
 
-      return create<ast::ConstantIdDecoration>(t.source(), val.value);
+      return create<ast::OverrideDecoration>(t.source(), val.value);
     });
   }
 

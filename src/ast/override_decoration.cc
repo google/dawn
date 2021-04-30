@@ -12,33 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 
 #include "src/program_builder.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::ast::ConstantIdDecoration);
+TINT_INSTANTIATE_TYPEINFO(tint::ast::OverrideDecoration);
 
 namespace tint {
 namespace ast {
 
-ConstantIdDecoration::ConstantIdDecoration(ProgramID program_id,
-                                           const Source& source,
-                                           uint32_t val)
+OverrideDecoration::OverrideDecoration(ProgramID program_id,
+                                       const Source& source,
+                                       uint32_t val)
     : Base(program_id, source), value_(val) {}
 
-ConstantIdDecoration::~ConstantIdDecoration() = default;
+OverrideDecoration::~OverrideDecoration() = default;
 
-void ConstantIdDecoration::to_str(const sem::Info&,
-                                  std::ostream& out,
-                                  size_t indent) const {
+void OverrideDecoration::to_str(const sem::Info&,
+                                std::ostream& out,
+                                size_t indent) const {
   make_indent(out, indent);
-  out << "ConstantIdDecoration{" << value_ << "}" << std::endl;
+  out << "OverrideDecoration{" << value_ << "}" << std::endl;
 }
 
-ConstantIdDecoration* ConstantIdDecoration::Clone(CloneContext* ctx) const {
+OverrideDecoration* OverrideDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  return ctx->dst->create<ConstantIdDecoration>(src, value_);
+  return ctx->dst->create<OverrideDecoration>(src, value_);
 }
 
 }  // namespace ast

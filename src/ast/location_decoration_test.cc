@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -30,7 +30,7 @@ TEST_F(LocationDecorationTest, Is) {
   Decoration* d = create<LocationDecoration>(2);
   EXPECT_FALSE(d->Is<BindingDecoration>());
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
-  EXPECT_FALSE(d->Is<ConstantIdDecoration>());
+  EXPECT_FALSE(d->Is<OverrideDecoration>());
   EXPECT_TRUE(d->Is<LocationDecoration>());
   EXPECT_FALSE(d->Is<GroupDecoration>());
 }

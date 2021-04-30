@@ -19,8 +19,8 @@
 
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/constant_id_decoration.h"
 #include "src/ast/fallthrough_statement.h"
+#include "src/ast/override_decoration.h"
 #include "src/sem/array.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_texture_type.h"
@@ -745,12 +745,12 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   } else if (!type_no_ac->Is<sem::Sampler>()) {
     // Certain cases require us to generate a constructor value.
     //
-    // 1- ConstantId's must be attached to the OpConstant, if we have a
-    //    variable with a constant_id that doesn't have a constructor we make
-    //    one
+    // 1- Pipeline constant IDs must be attached to the OpConstant, if we have a
+    //    variable with an override attribute that doesn't have a constructor we
+    //    make one
     // 2- If we don't have a constructor and we're an Output or Private variable
     //    then WGSL requires an initializer.
-    if (ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
+    if (ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
       if (type_no_ac->Is<sem::F32>()) {
         ast::FloatLiteral l(ProgramID(), Source{}, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
@@ -764,7 +764,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
         ast::BoolLiteral l(ProgramID(), Source{}, false);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else {
-        error_ = "invalid type for constant_id, must be scalar";
+        error_ = "invalid type for pipeline constant ID, must be scalar";
         return false;
       }
       if (init_id == 0) {
@@ -802,7 +802,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       push_annot(spv::Op::OpDecorate, {Operand::Int(var_id),
                                        Operand::Int(SpvDecorationDescriptorSet),
                                        Operand::Int(group->value())});
-    } else if (deco->Is<ast::ConstantIdDecoration>()) {
+    } else if (deco->Is<ast::OverrideDecoration>()) {
       // Spec constants are handled elsewhere
     } else {
       error_ = "unknown decoration";
@@ -1492,8 +1492,7 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
                                           ast::Literal* lit) {
   ScalarConstant constant;
 
-  if (var &&
-      ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
+  if (var && ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
     constant.is_spec_op = true;
     constant.constant_id = var->constant_id();
   }

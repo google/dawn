@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {
@@ -35,7 +35,7 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
   auto* var = Const("pos", ty.f32(), Expr(3.f),
                     ast::DecorationList{
-                        create<ast::ConstantIdDecoration>(23),
+                        create<ast::OverrideDecoration>(23),
                     });
   WrapInFunction(Decl(var));
 

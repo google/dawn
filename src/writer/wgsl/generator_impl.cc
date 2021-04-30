@@ -22,7 +22,6 @@
 #include "src/ast/bool.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/constant_id_decoration.h"
 #include "src/ast/depth_texture.h"
 #include "src/ast/f32.h"
 #include "src/ast/float_literal.h"
@@ -31,6 +30,7 @@
 #include "src/ast/matrix.h"
 #include "src/ast/module.h"
 #include "src/ast/multisampled_texture.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/pointer.h"
 #include "src/ast/sampled_texture.h"
 #include "src/ast/sint_literal.h"
@@ -811,8 +811,8 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
       out_ << "location(" << location->value() << ")";
     } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
       out_ << "builtin(" << builtin->value() << ")";
-    } else if (auto* constant = deco->As<ast::ConstantIdDecoration>()) {
-      out_ << "constant_id(" << constant->value() << ")";
+    } else if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
+      out_ << "override(" << override_deco->value() << ")";
     } else if (auto* size = deco->As<ast::StructMemberSizeDecoration>()) {
       out_ << "size(" << size->size() << ")";
     } else if (auto* align = deco->As<ast::StructMemberAlignDecoration>()) {

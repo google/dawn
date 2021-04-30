@@ -499,7 +499,7 @@ fn f() {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(BoundArrayAccessorsTest, DISABLED_Vector_Constant_Id_Clamps) {
-  // [[constant_id(1300)]] let idx : i32;
+  // [[override(1300)]] let idx : i32;
   // var a : vec3<f32>
   // var b : f32 = a[idx]
   //
@@ -508,7 +508,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Vector_Constant_Id_Clamps) {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(BoundArrayAccessorsTest, DISABLED_Array_Constant_Id_Clamps) {
-  // [[constant_id(1300)]] let idx : i32;
+  // [[override(1300)]] let idx : i32;
   // var a : array<f32, 4>
   // var b : f32 = a[idx]
   //
@@ -517,7 +517,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Array_Constant_Id_Clamps) {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
-  // [[constant_id(1300)]] let idx : i32;
+  // [[override(1300)]] let idx : i32;
   // var a : mat3x2<f32>
   // var b : f32 = a[idx][1]
   //
@@ -526,7 +526,7 @@ TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
 
 // TODO(dsinclair): Implement when constant_id exists
 TEST_F(BoundArrayAccessorsTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
-  // [[constant_id(1300)]] let idx : i32;
+  // [[override(1300)]] let idx : i32;
   // var a : mat3x2<f32>
   // var b : f32 = a[1][idx]
   //

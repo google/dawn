@@ -14,7 +14,7 @@
 
 #include "src/ast/variable.h"
 
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/program_builder.h"
 #include "src/sem/variable.h"
 
@@ -63,7 +63,7 @@ Variable::BindingPoint Variable::binding_point() const {
 }
 
 uint32_t Variable::constant_id() const {
-  if (auto* cid = GetDecoration<ConstantIdDecoration>(decorations_)) {
+  if (auto* cid = GetDecoration<OverrideDecoration>(decorations_)) {
     return cid->value();
   }
   TINT_ASSERT(false);

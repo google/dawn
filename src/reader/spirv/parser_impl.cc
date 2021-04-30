@@ -21,7 +21,7 @@
 
 #include "source/opt/build_module.h"
 #include "src/ast/bitcast_expression.h"
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/reader/spirv/function.h"
 #include "src/sem/access_control_type.h"
@@ -1157,7 +1157,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
       ast::DecorationList spec_id_decos;
       for (const auto& deco : GetDecorationsFor(inst.result_id())) {
         if ((deco.size() == 2) && (deco[0] == SpvDecorationSpecId)) {
-          auto* cid = create<ast::ConstantIdDecoration>(Source{}, deco[1]);
+          auto* cid = create<ast::OverrideDecoration>(Source{}, deco[1]);
           spec_id_decos.push_back(cid);
           break;
         }

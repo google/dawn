@@ -12,27 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_AST_CONSTANT_ID_DECORATION_H_
-#define SRC_AST_CONSTANT_ID_DECORATION_H_
+#ifndef SRC_AST_OVERRIDE_DECORATION_H_
+#define SRC_AST_OVERRIDE_DECORATION_H_
 
 #include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
 
-/// A constant id decoration
-class ConstantIdDecoration : public Castable<ConstantIdDecoration, Decoration> {
+/// An override decoration
+class OverrideDecoration : public Castable<OverrideDecoration, Decoration> {
  public:
   /// constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
-  /// @param val the constant_id value
-  ConstantIdDecoration(ProgramID program_id,
-                       const Source& source,
-                       uint32_t val);
-  ~ConstantIdDecoration() override;
+  /// @param val the override value
+  OverrideDecoration(ProgramID program_id, const Source& source, uint32_t val);
+  ~OverrideDecoration() override;
 
-  /// @returns the constant id value
+  /// @returns the override id value
   uint32_t value() const { return value_; }
 
   /// Outputs the decoration to the given stream
@@ -47,7 +45,7 @@ class ConstantIdDecoration : public Castable<ConstantIdDecoration, Decoration> {
   /// `ctx`.
   /// @param ctx the clone context
   /// @return the newly cloned node
-  ConstantIdDecoration* Clone(CloneContext* ctx) const override;
+  OverrideDecoration* Clone(CloneContext* ctx) const override;
 
  private:
   uint32_t const value_;
@@ -56,4 +54,4 @@ class ConstantIdDecoration : public Castable<ConstantIdDecoration, Decoration> {
 }  // namespace ast
 }  // namespace tint
 
-#endif  // SRC_AST_CONSTANT_ID_DECORATION_H_
+#endif  // SRC_AST_OVERRIDE_DECORATION_H_

@@ -1851,7 +1851,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_True) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
-      ConstantIdDecoration{12}
+      OverrideDecoration{12}
     }
     myconst
     none
@@ -1876,7 +1876,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_False) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
-      ConstantIdDecoration{12}
+      OverrideDecoration{12}
     }
     myconst
     none
@@ -1901,7 +1901,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_U32) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
-      ConstantIdDecoration{12}
+      OverrideDecoration{12}
     }
     myconst
     none
@@ -1926,7 +1926,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_I32) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
-      ConstantIdDecoration{12}
+      OverrideDecoration{12}
     }
     myconst
     none
@@ -1951,7 +1951,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_DeclareConst_F32) {
   EXPECT_THAT(module_str, HasSubstr(R"(
   VariableConst{
     Decorations{
-      ConstantIdDecoration{12}
+      OverrideDecoration{12}
     }
     myconst
     none

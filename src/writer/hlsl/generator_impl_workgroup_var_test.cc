@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/stage_decoration.h"
 #include "src/writer/hlsl/test_helper.h"
 

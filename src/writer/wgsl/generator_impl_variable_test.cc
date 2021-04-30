@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
@@ -62,7 +62,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
                        create<ast::BindingDecoration>(0),
                        create<ast::GroupDecoration>(1),
                        Location(2),
-                       create<ast::ConstantIdDecoration>(42),
+                       create<ast::OverrideDecoration>(42),
                    });
 
   GeneratorImpl& gen = Build();
@@ -70,7 +70,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(
       gen.result(),
-      R"([[builtin(position), binding(0), group(1), location(2), constant_id(42)]] var<private> a : f32;
+      R"([[builtin(position), binding(0), group(1), location(2), override(42)]] var<private> a : f32;
 )");
 }
 

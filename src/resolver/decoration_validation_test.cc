@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "src/ast/access_decoration.h"
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
@@ -64,7 +64,7 @@ static ast::Decoration* createDecoration(const Source& source,
     case DecorationKind::kBuiltin:
       return builder.Builtin(source, ast::Builtin::kPosition);
     case DecorationKind::kConstantId:
-      return builder.create<ast::ConstantIdDecoration>(source, 0u);
+      return builder.create<ast::OverrideDecoration>(source, 0u);
     case DecorationKind::kGroup:
       return builder.create<ast::GroupDecoration>(source, 1u);
     case DecorationKind::kLocation:

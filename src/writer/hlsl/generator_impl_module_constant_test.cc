@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
@@ -35,7 +35,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_ModuleConstant) {
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
   auto* var = Const("pos", ty.f32(), Expr(3.0f),
                     ast::DecorationList{
-                        create<ast::ConstantIdDecoration>(23),
+                        create<ast::OverrideDecoration>(23),
                     });
   WrapInFunction(Decl(var));
 
@@ -53,7 +53,7 @@ static const float pos = WGSL_SPEC_CONSTANT_23;
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
   auto* var = Const("pos", ty.f32(), nullptr,
                     ast::DecorationList{
-                        create<ast::ConstantIdDecoration>(23),
+                        create<ast::OverrideDecoration>(23),
                     });
   WrapInFunction(Decl(var));
 

@@ -17,9 +17,9 @@
 #include <utility>
 
 #include "src/ast/bool_literal.h"
-#include "src/ast/constant_id_decoration.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
@@ -273,7 +273,7 @@ std::string Inspector::GetRemappedNameForEntryPoint(
 std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
   std::map<uint32_t, Scalar> result;
   for (auto* var : program_->AST().GlobalVariables()) {
-    if (!ast::HasDecoration<ast::ConstantIdDecoration>(var->decorations())) {
+    if (!ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
       continue;
     }
 

@@ -14,7 +14,7 @@
 
 #include "gtest/gtest.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/workgroup_decoration.h"
@@ -151,7 +151,7 @@ class InspectorHelper : public ProgramBuilder {
     }
     GlobalConst(name, type, constructor,
                 ast::DecorationList{
-                    create<ast::ConstantIdDecoration>(id),
+                    create<ast::OverrideDecoration>(id),
                 });
   }
 

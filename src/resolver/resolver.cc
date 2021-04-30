@@ -24,7 +24,6 @@
 #include "src/ast/bitcast_expression.h"
 #include "src/ast/break_statement.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/constant_id_decoration.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/depth_texture.h"
 #include "src/ast/discard_statement.h"
@@ -33,6 +32,7 @@
 #include "src/ast/internal_decoration.h"
 #include "src/ast/loop_statement.h"
 #include "src/ast/matrix.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sampled_texture.h"
@@ -401,7 +401,7 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     Mark(deco);
     if (!(deco->Is<ast::BindingDecoration>() ||
           deco->Is<ast::BuiltinDecoration>() ||
-          deco->Is<ast::ConstantIdDecoration>() ||
+          deco->Is<ast::OverrideDecoration>() ||
           deco->Is<ast::GroupDecoration>() ||
           deco->Is<ast::LocationDecoration>())) {
       diagnostics_.add_error("decoration is not valid for variables",

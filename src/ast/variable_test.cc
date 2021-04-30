@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include "gtest/gtest-spi.h"
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/test_helper.h"
 
 namespace tint {
@@ -115,13 +115,13 @@ TEST_F(VariableTest, WithDecorations) {
                   DecorationList{
                       create<LocationDecoration>(1),
                       create<BuiltinDecoration>(Builtin::kPosition),
-                      create<ConstantIdDecoration>(1200),
+                      create<OverrideDecoration>(1200),
                   });
 
   auto& decorations = var->decorations();
   EXPECT_TRUE(ast::HasDecoration<ast::LocationDecoration>(decorations));
   EXPECT_TRUE(ast::HasDecoration<ast::BuiltinDecoration>(decorations));
-  EXPECT_TRUE(ast::HasDecoration<ast::ConstantIdDecoration>(decorations));
+  EXPECT_TRUE(ast::HasDecoration<ast::OverrideDecoration>(decorations));
 
   auto* location = ast::GetDecoration<ast::LocationDecoration>(decorations);
   ASSERT_NE(nullptr, location);
@@ -172,7 +172,7 @@ TEST_F(VariableTest, BindingPointMissingBindingDecoration) {
 TEST_F(VariableTest, ConstantId) {
   auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
                   DecorationList{
-                      create<ConstantIdDecoration>(1200),
+                      create<OverrideDecoration>(1200),
                   });
 
   EXPECT_EQ(var->constant_id(), 1200u);

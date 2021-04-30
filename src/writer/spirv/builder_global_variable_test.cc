@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/writer/spirv/spv_dump.h"
@@ -206,7 +206,7 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
   auto* v = Global("var", ty.bool_(), ast::StorageClass::kInput, Expr(true),
                    ast::DecorationList{
-                       create<ast::ConstantIdDecoration>(1200),
+                       create<ast::OverrideDecoration>(1200),
                    });
 
   spirv::Builder& b = Build();
@@ -226,7 +226,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
 TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
   auto* v = Global("var", ty.bool_(), ast::StorageClass::kInput, nullptr,
                    ast::DecorationList{
-                       create<ast::ConstantIdDecoration>(1200),
+                       create<ast::OverrideDecoration>(1200),
                    });
 
   spirv::Builder& b = Build();
@@ -246,7 +246,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kInput, Expr(2.f),
                    ast::DecorationList{
-                       create<ast::ConstantIdDecoration>(0),
+                       create<ast::OverrideDecoration>(0),
                    });
 
   spirv::Builder& b = Build();
@@ -266,7 +266,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
   auto* v = Global("var", ty.f32(), ast::StorageClass::kInput, nullptr,
                    ast::DecorationList{
-                       create<ast::ConstantIdDecoration>(0),
+                       create<ast::OverrideDecoration>(0),
                    });
 
   spirv::Builder& b = Build();
@@ -286,7 +286,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
   auto* v = Global("var", ty.i32(), ast::StorageClass::kInput, nullptr,
                    ast::DecorationList{
-                       create<ast::ConstantIdDecoration>(0),
+                       create<ast::OverrideDecoration>(0),
                    });
 
   spirv::Builder& b = Build();
@@ -306,7 +306,7 @@ TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
 TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
   auto* v = Global("var", ty.u32(), ast::StorageClass::kInput, nullptr,
                    ast::DecorationList{
-                       create<ast::ConstantIdDecoration>(0),
+                       create<ast::OverrideDecoration>(0),
                    });
 
   spirv::Builder& b = Build();

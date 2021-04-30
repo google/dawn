@@ -146,8 +146,8 @@ class Variable : public Castable<Variable, Node> {
   /// @returns the binding point information for the variable
   BindingPoint binding_point() const;
 
-  /// @returns the constant_id value for the variable. Assumes that this
-  /// variable has a constant ID decoration.
+  /// @returns the pipeline constant id value for the variable. Assumes that
+  /// this variable has an override decoration.
   uint32_t constant_id() const;
 
   /// Clones this node and all transitive child nodes using the `CloneContext`

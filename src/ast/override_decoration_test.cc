@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/ast/constant_id_decoration.h"
+#include "src/ast/override_decoration.h"
 
 #include "src/ast/test_helper.h"
 
@@ -20,25 +20,25 @@ namespace tint {
 namespace ast {
 namespace {
 
-using ConstantIdDecorationTest = TestHelper;
+using OverrideDecorationTest = TestHelper;
 
-TEST_F(ConstantIdDecorationTest, Creation) {
-  auto* d = create<ConstantIdDecoration>(12);
+TEST_F(OverrideDecorationTest, Creation) {
+  auto* d = create<OverrideDecoration>(12);
   EXPECT_EQ(12u, d->value());
 }
 
-TEST_F(ConstantIdDecorationTest, Is) {
-  Decoration* d = create<ConstantIdDecoration>(27);
+TEST_F(OverrideDecorationTest, Is) {
+  Decoration* d = create<OverrideDecoration>(27);
   EXPECT_FALSE(d->Is<BindingDecoration>());
   EXPECT_FALSE(d->Is<BuiltinDecoration>());
-  EXPECT_TRUE(d->Is<ConstantIdDecoration>());
+  EXPECT_TRUE(d->Is<OverrideDecoration>());
   EXPECT_FALSE(d->Is<LocationDecoration>());
   EXPECT_FALSE(d->Is<GroupDecoration>());
 }
 
-TEST_F(ConstantIdDecorationTest, ToStr) {
-  auto* d = create<ConstantIdDecoration>(1200);
-  EXPECT_EQ(str(d), R"(ConstantIdDecoration{1200}
+TEST_F(OverrideDecorationTest, ToStr) {
+  auto* d = create<OverrideDecoration>(1200);
+  EXPECT_EQ(str(d), R"(OverrideDecoration{1200}
 )");
 }
 

@@ -74,8 +74,6 @@ set(TINT_LIB_SRCS
   ast/call_statement.h
   ast/case_statement.cc
   ast/case_statement.h
-  ast/constant_id_decoration.cc
-  ast/constant_id_decoration.h
   ast/constructor_expression.cc
   ast/constructor_expression.h
   ast/continue_statement.cc
@@ -128,6 +126,8 @@ set(TINT_LIB_SRCS
   ast/multisampled_texture.h
   ast/node.cc
   ast/node.h
+  ast/override_decoration.cc
+  ast/override_decoration.h
   ast/pipeline_stage.cc
   ast/pipeline_stage.h
   ast/pointer.cc
@@ -479,7 +479,6 @@ if(${TINT_BUILD_TESTS})
     ast/call_expression_test.cc
     ast/call_statement_test.cc
     ast/case_statement_test.cc
-    ast/constant_id_decoration_test.cc
     ast/continue_statement_test.cc
     ast/depth_texture_test.cc
     ast/discard_statement_test.cc
@@ -503,6 +502,7 @@ if(${TINT_BUILD_TESTS})
     ast/module_clone_test.cc
     ast/module_test.cc
     ast/multisampled_texture_test.cc
+    ast/override_decoration_test.cc
     ast/pointer_test.cc
     ast/return_statement_test.cc
     ast/sampled_texture_test.cc
