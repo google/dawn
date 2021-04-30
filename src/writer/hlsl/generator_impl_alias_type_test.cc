@@ -34,16 +34,6 @@ TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_F32) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_NameCollision) {
-  AST().AddConstructedType(ty.alias("float", ty.f32()));
-
-  GeneratorImpl& gen = SanitizeAndBuild();
-
-  ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr(R"(typedef float tint_symbol;
-)"));
-}
-
 TEST_F(HlslGeneratorImplTest_Alias, EmitAlias_Struct) {
   auto s = Structure("A", {
                               Member("a", ty.f32()),

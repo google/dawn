@@ -32,7 +32,7 @@ inline typ::Type ty_i32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.i32();
 }
 inline typ::Type ty_u32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.u32();
+  return ty.builder->create<sem::U32>();
 }
 inline typ::Type ty_f32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.f32();
@@ -250,15 +250,14 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
 
   auto p = GetParam();
 
-  auto type = p.member_type(ty);
-
   SetupStorageBuffer({
       Member("a", ty.i32()),
-      Member("b", type),
+      Member("b", p.member_type(ty)),
   });
 
   SetupFunction({
-      Decl(Var("value", type, ast::StorageClass::kFunction, Construct(type))),
+      Decl(Var("value", p.member_type(ty), ast::StorageClass::kFunction,
+               Construct(p.member_type(ty)))),
       Assign(MemberAccessor("data", "b"), Expr("value")),
   });
 

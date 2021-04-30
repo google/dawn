@@ -379,6 +379,12 @@ class GeneratorImpl : public TextGenerator {
     return builder_.TypeOf(expr);
   }
 
+  /// @returns the resolved type of the ast::Type `type`
+  /// @param type the type
+  const sem::Type* TypeOf(ast::Type* type) const {
+    return builder_.TypeOf(type);
+  }
+
   ProgramBuilder builder_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;

@@ -226,7 +226,8 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
       return false;
     }
   } else {
-    diagnostics_.add_error("unknown constructed type: " + ty->type_name());
+    TINT_UNREACHABLE(diagnostics_)
+        << "constructed type: " << ty->TypeInfo().name;
     return false;
   }
 
@@ -252,14 +253,14 @@ bool GeneratorImpl::EmitArrayAccessor(std::ostream& pre,
 bool GeneratorImpl::EmitBitcast(std::ostream& pre,
                                 std::ostream& out,
                                 ast::BitcastExpression* expr) {
-  if (!expr->type()->is_integer_scalar() && !expr->type()->is_float_scalar()) {
-    diagnostics_.add_error("Unable to do bitcast to type " +
-                           expr->type()->type_name());
+  auto* type = TypeOf(expr);
+  if (!type->is_integer_scalar() && !type->is_float_scalar()) {
+    diagnostics_.add_error("Unable to do bitcast to type " + type->type_name());
     return false;
   }
 
   out << "as";
-  if (!EmitType(out, expr->type(), ast::StorageClass::kNone, "")) {
+  if (!EmitType(out, type, ast::StorageClass::kNone, "")) {
     return false;
   }
   out << "(";
@@ -1312,20 +1313,21 @@ bool GeneratorImpl::EmitScalarConstructor(
 bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
                                         std::ostream& out,
                                         ast::TypeConstructorExpression* expr) {
+  auto* type = TypeOf(expr);
+
   // If the type constructor is empty then we need to construct with the zero
   // value for all components.
   if (expr->values().empty()) {
-    return EmitZeroValue(out, expr->type());
+    return EmitZeroValue(out, type);
   }
 
-  bool brackets = expr->type()
-                      ->UnwrapAliasIfNeeded()
-                      ->IsAnyOf<sem::ArrayType, sem::StructType>();
+  bool brackets =
+      type->UnwrapAliasIfNeeded()->IsAnyOf<sem::ArrayType, sem::StructType>();
 
   if (brackets) {
     out << "{";
   } else {
-    if (!EmitType(out, expr->type(), ast::StorageClass::kNone, "")) {
+    if (!EmitType(out, type, ast::StorageClass::kNone, "")) {
       return false;
     }
     out << "(";
@@ -1578,27 +1580,27 @@ bool GeneratorImpl::EmitFunction(std::ostream& out, ast::Function* func) {
 }
 
 bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
-                                         ast::Function* func,
+                                         ast::Function* func_ast,
                                          bool emit_duplicate_functions,
                                          Symbol ep_sym) {
-  auto name = func->symbol().to_str();
+  auto* func = builder_.Sem().Get(func_ast);
 
-  if (!EmitType(out, func->return_type(), ast::StorageClass::kNone, "")) {
+  if (!EmitType(out, func->ReturnType(), ast::StorageClass::kNone, "")) {
     return false;
   }
 
   out << " ";
 
+  std::string name;
   if (emit_duplicate_functions) {
-    auto func_name = name;
     auto ep_name = ep_sym.to_str();
     // TODO(dsinclair): The SymbolToName should go away and just use
     // to_str() here when the conversion is complete.
-    name = generate_name(builder_.Symbols().NameFor(func->symbol()) + "_" +
+    name = generate_name(builder_.Symbols().NameFor(func_ast->symbol()) + "_" +
                          builder_.Symbols().NameFor(ep_sym));
-    ep_func_name_remapped_[ep_name + "_" + func_name] = name;
+    ep_func_name_remapped_[ep_name + "_" + func_ast->symbol().to_str()] = name;
   } else {
-    name = builder_.Symbols().NameFor(func->symbol());
+    name = builder_.Symbols().NameFor(func_ast->symbol());
   }
 
   out << name << "(";
@@ -1628,27 +1630,26 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
     }
   }
 
-  for (auto* v : func->params()) {
+  for (auto* v : func->Parameters()) {
     if (!first) {
       out << ", ";
     }
     first = false;
 
-    auto* sem = builder_.Sem().Get(v);
-    auto* type = sem->Type();
+    auto* type = v->Type();
 
     // Note: WGSL only allows for StorageClass::kNone on parameters, however the
     // sanitizer transforms generates load / store functions for storage
     // buffers. These functions have a storage buffer parameter with
     // StorageClass::kStorage. This is required to correctly translate the
     // parameter to [RW]ByteAddressBuffer.
-    if (!EmitType(out, type, sem->StorageClass(),
-                  builder_.Symbols().NameFor(v->symbol()))) {
+    if (!EmitType(out, type, v->StorageClass(),
+                  builder_.Symbols().NameFor(v->Declaration()->symbol()))) {
       return false;
     }
     // Array name is output as part of the type
     if (!type->Is<sem::ArrayType>()) {
-      out << " " << builder_.Symbols().NameFor(v->symbol());
+      out << " " << builder_.Symbols().NameFor(v->Declaration()->symbol());
     }
   }
 
@@ -1656,7 +1657,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
 
   current_ep_sym_ = ep_sym;
 
-  if (!EmitBlockAndNewline(out, func->body())) {
+  if (!EmitBlockAndNewline(out, func_ast->body())) {
     return false;
   }
 
@@ -1885,7 +1886,7 @@ bool GeneratorImpl::EmitEntryPointData(
     for (auto* var : func_sem->ReferencedModuleVariables()) {
       auto* decl = var->Declaration();
 
-      auto* unwrapped_type = var->DeclaredType()->UnwrapAll();
+      auto* unwrapped_type = var->Type()->UnwrapAll();
       if (!emitted_globals.emplace(decl->symbol()).second) {
         continue;  // Global already emitted
       }
@@ -1911,10 +1912,10 @@ bool GeneratorImpl::EmitEntryPointData(
       }
 
       auto name = builder_.Symbols().NameFor(decl->symbol());
-      if (!EmitType(out, var->DeclaredType(), var->StorageClass(), name)) {
+      if (!EmitType(out, var->Type(), var->StorageClass(), name)) {
         return false;
       }
-      if (!var->DeclaredType()->UnwrapAliasIfNeeded()->Is<sem::ArrayType>()) {
+      if (!var->Type()->UnwrapAliasIfNeeded()->Is<sem::ArrayType>()) {
         out << " " << name;
       }
 
@@ -2139,12 +2140,12 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, sem::Type* type) {
   } else if (auto* str = type->As<sem::StructType>()) {
     out << "{";
     bool first = true;
-    for (auto* member : str->impl()->members()) {
+    for (auto* member : builder_.Sem().Get(str)->Members()) {
       if (!first) {
         out << ", ";
       }
       first = false;
-      if (!EmitZeroValue(out, member->type())) {
+      if (!EmitZeroValue(out, member->Type())) {
         return false;
       }
     }
@@ -2559,21 +2560,21 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
   out << "struct " << name << " {" << std::endl;
 
   increment_indent();
-  for (auto* mem : str->impl()->members()) {
+  for (auto* mem : sem_str->Members()) {
     make_indent(out);
     // TODO(dsinclair): Handle [[offset]] annotation on structs
     // https://bugs.chromium.org/p/tint/issues/detail?id=184
 
-    if (!EmitType(out, mem->type(), ast::StorageClass::kNone,
-                  builder_.Symbols().NameFor(mem->symbol()))) {
+    auto mem_name = builder_.Symbols().NameFor(mem->Declaration()->symbol());
+    if (!EmitType(out, mem->Type(), ast::StorageClass::kNone, mem_name)) {
       return false;
     }
     // Array member name will be output with the type
-    if (!mem->type()->Is<sem::ArrayType>()) {
-      out << " " << builder_.Symbols().NameFor(mem->symbol());
+    if (!mem->Type()->Is<sem::ArrayType>()) {
+      out << " " << mem_name;
     }
 
-    for (auto* deco : mem->decorations()) {
+    for (auto* deco : mem->Declaration()->decorations()) {
       if (auto* location = deco->As<ast::LocationDecoration>()) {
         auto& pipeline_stage_uses =
             builder_.Sem().Get(str)->PipelineStageUses();

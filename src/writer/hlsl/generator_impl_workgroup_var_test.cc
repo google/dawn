@@ -49,7 +49,7 @@ TEST_F(HlslGeneratorImplTest_WorkgroupVar, Aliased) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
-  EXPECT_THAT(result(), HasSubstr("groupshared F32 wg;\n"));
+  EXPECT_THAT(result(), HasSubstr("groupshared float wg;\n"));
 
   Validate();
 }
