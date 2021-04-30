@@ -274,69 +274,116 @@ bool Resolver::ResolveInternal() {
   return true;
 }
 
-sem::Type* Resolver::Type(const ast::Type* ty) {
+const sem::Type* Resolver::Type(const ast::Type* ty) {
   Mark(ty);
-  sem::Type* s = nullptr;
-  if (ty->Is<ast::Void>()) {
-    s = builder_->create<sem::Void>();
-  } else if (ty->Is<ast::Bool>()) {
-    s = builder_->create<sem::Bool>();
-  } else if (ty->Is<ast::I32>()) {
-    s = builder_->create<sem::I32>();
-  } else if (ty->Is<ast::U32>()) {
-    s = builder_->create<sem::U32>();
-  } else if (ty->Is<ast::F32>()) {
-    s = builder_->create<sem::F32>();
-  } else if (auto* alias = ty->As<ast::Alias>()) {
-    auto* el = Type(alias->type());
-    s = builder_->create<sem::Alias>(alias->symbol(), el);
-  } else if (auto* access = ty->As<ast::AccessControl>()) {
-    auto* el = Type(access->type());
-    s = builder_->create<sem::AccessControl>(access->access_control(), el);
-  } else if (auto* vec = ty->As<ast::Vector>()) {
-    auto* el = Type(vec->type());
-    s = builder_->create<sem::Vector>(el, vec->size());
-  } else if (auto* mat = ty->As<ast::Matrix>()) {
-    auto* el = Type(mat->type());
-    s = builder_->create<sem::Matrix>(el, mat->rows(), mat->columns());
-  } else if (auto* arr = ty->As<ast::Array>()) {
-    auto* el = Type(arr->type());
-    s = builder_->create<sem::ArrayType>(el, arr->size(), arr->decorations());
-  } else if (auto* ptr = ty->As<ast::Pointer>()) {
-    auto* el = Type(ptr->type());
-    s = builder_->create<sem::Pointer>(el, ptr->storage_class());
-  } else if (auto* str = ty->As<ast::Struct>()) {
-    s = builder_->create<sem::StructType>(const_cast<ast::Struct*>(str));
-  } else if (auto* sampler = ty->As<ast::Sampler>()) {
-    s = builder_->create<sem::Sampler>(sampler->kind());
-  } else if (auto* sampled_tex = ty->As<ast::SampledTexture>()) {
-    auto* el = Type(sampled_tex->type());
-    s = builder_->create<sem::SampledTexture>(sampled_tex->dim(), el);
-  } else if (auto* depth_tex = ty->As<ast::DepthTexture>()) {
-    s = builder_->create<sem::DepthTexture>(depth_tex->dim());
-  } else if (auto* storage_tex = ty->As<ast::StorageTexture>()) {
-    auto* el = Type(storage_tex->type());
-    s = builder_->create<sem::StorageTexture>(storage_tex->dim(),
-                                              storage_tex->image_format(), el);
-  }
+  auto* s = [&]() -> const sem::Type* {
+    if (ty->Is<ast::Void>()) {
+      return builder_->create<sem::Void>();
+    }
+    if (ty->Is<ast::Bool>()) {
+      return builder_->create<sem::Bool>();
+    }
+    if (ty->Is<ast::I32>()) {
+      return builder_->create<sem::I32>();
+    }
+    if (ty->Is<ast::U32>()) {
+      return builder_->create<sem::U32>();
+    }
+    if (ty->Is<ast::F32>()) {
+      return builder_->create<sem::F32>();
+    }
+    if (auto* t = ty->As<ast::Alias>()) {
+      return Type(t->type());
+    }
+    if (auto* t = ty->As<ast::AccessControl>()) {
+      if (auto* el = Type(t->type())) {
+        return builder_->create<sem::AccessControl>(t->access_control(),
+                                                    const_cast<sem::Type*>(el));
+      }
+      return nullptr;
+    }
+    if (auto* t = ty->As<ast::Vector>()) {
+      if (auto* el = Type(t->type())) {
+        return builder_->create<sem::Vector>(const_cast<sem::Type*>(el),
+                                             t->size());
+      }
+      return nullptr;
+    }
+    if (auto* t = ty->As<ast::Matrix>()) {
+      if (auto* el = Type(t->type())) {
+        return builder_->create<sem::Matrix>(const_cast<sem::Type*>(el),
+                                             t->rows(), t->columns());
+      }
+      return nullptr;
+    }
+    if (auto* t = ty->As<ast::Array>()) {
+      if (auto* el = Type(t->type())) {
+        return builder_->create<sem::ArrayType>(const_cast<sem::Type*>(el),
+                                                t->size(), t->decorations());
+      }
+      return nullptr;
+    }
+    if (auto* t = ty->As<ast::Pointer>()) {
+      if (auto* el = Type(t->type())) {
+        return builder_->create<sem::Pointer>(const_cast<sem::Type*>(el),
+                                              t->storage_class());
+      }
+      return nullptr;
+    }
+    if (auto* t = ty->As<ast::Struct>()) {
+      return builder_->create<sem::StructType>(const_cast<ast::Struct*>(t));
+    }
+    if (auto* t = ty->As<ast::Sampler>()) {
+      return builder_->create<sem::Sampler>(t->kind());
+    }
+    if (auto* t = ty->As<ast::SampledTexture>()) {
+      if (auto* el = Type(t->type())) {
+        return builder_->create<sem::SampledTexture>(
+            t->dim(), const_cast<sem::Type*>(el));
+      }
+      return nullptr;
+    }
+    if (auto* t = ty->As<ast::MultisampledTexture>()) {
+      if (auto* el = Type(t->type())) {
+        return builder_->create<sem::MultisampledTexture>(
+            t->dim(), const_cast<sem::Type*>(el));
+      }
+      return nullptr;
+    }
+    if (auto* t = ty->As<ast::DepthTexture>()) {
+      return builder_->create<sem::DepthTexture>(t->dim());
+    }
+    if (auto* t = ty->As<ast::StorageTexture>()) {
+      if (auto* el = Type(t->type())) {
+        return builder_->create<sem::StorageTexture>(
+            t->dim(), t->image_format(), const_cast<sem::Type*>(el));
+      }
+      return nullptr;
+    }
+    TINT_UNREACHABLE(diagnostics_)
+        << "Unhandled ast::Type: " << ty->TypeInfo().name;
+    return nullptr;
+  }();
+
   if (s == nullptr) {
     return nullptr;
   }
-  if (!Type(s)) {
+  if (!Type(s, ty->source())) {
     return nullptr;
   }
+  builder_->Sem().Add(ty, s);
   return s;
 }
 
-// TODO(crbug.com/tint/724): This method should be replaced by Type(ast::Type*)
-bool Resolver::Type(sem::Type* ty) {
+// TODO(crbug.com/tint/724): This method should be merged into Type(ast::Type*)
+bool Resolver::Type(const sem::Type* ty, const Source& source /* = {} */) {
   ty = ty->UnwrapAliasIfNeeded();
   if (auto* str = ty->As<sem::StructType>()) {
     if (!Structure(str)) {
       return false;
     }
   } else if (auto* arr = ty->As<sem::ArrayType>()) {
-    if (!Array(arr, Source{})) {
+    if (!Array(arr, source)) {
       return false;
     }
   }

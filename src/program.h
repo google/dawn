@@ -131,6 +131,12 @@ class Program {
   /// expression has no resolved type.
   sem::Type* TypeOf(const ast::Expression* expr) const;
 
+  /// Helper for returning the resolved semantic type of the AST type `type`.
+  /// @param expr the AST type
+  /// @return the resolved semantic type for the type, or nullptr if the type
+  /// has no resolved type.
+  const sem::Type* TypeOf(const ast::Type* expr) const;
+
   /// @param demangle whether to automatically demangle the symbols in the
   /// returned string
   /// @returns a string describing this program.

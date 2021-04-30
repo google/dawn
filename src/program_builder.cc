@@ -86,9 +86,13 @@ void ProgramBuilder::AssertNotMoved() const {
   }
 }
 
-sem::Type* ProgramBuilder::TypeOf(ast::Expression* expr) const {
+sem::Type* ProgramBuilder::TypeOf(const ast::Expression* expr) const {
   auto* sem = Sem().Get(expr);
   return sem ? sem->Type() : nullptr;
+}
+
+const sem::Type* ProgramBuilder::TypeOf(const ast::Type* type) const {
+  return Sem().Get(type);
 }
 
 ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(

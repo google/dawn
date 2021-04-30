@@ -88,7 +88,9 @@ class Info {
   }
 
  private:
-  std::unordered_map<const CastableBase*, const sem::Node*> map;
+  // TODO(crbug.com/tint/724): Once finished, this map should be:
+  // std::unordered_map<const ast::Node*, const sem::Node*>
+  std::unordered_map<const CastableBase*, const CastableBase*> map;
 };
 
 }  // namespace sem

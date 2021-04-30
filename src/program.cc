@@ -107,6 +107,10 @@ sem::Type* Program::TypeOf(const ast::Expression* expr) const {
   return sem ? sem->Type() : nullptr;
 }
 
+const sem::Type* Program::TypeOf(const ast::Type* type) const {
+  return Sem().Get(type);
+}
+
 std::string Program::to_str(bool demangle) const {
   AssertNotMoved();
   auto str = ast_->to_str(Sem());

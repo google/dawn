@@ -1788,7 +1788,15 @@ class ProgramBuilder {
   /// @param expr the AST expression
   /// @return the resolved semantic type for the expression, or nullptr if the
   /// expression has no resolved type.
-  sem::Type* TypeOf(ast::Expression* expr) const;
+  sem::Type* TypeOf(const ast::Expression* expr) const;
+
+  /// Helper for returning the resolved semantic type of the AST type `type`.
+  /// @note As the Resolver is run when the Program is built, this will only be
+  /// useful for the Resolver itself and tests that use their own Resolver.
+  /// @param expr the AST type
+  /// @return the resolved semantic type for the type, or nullptr if the type
+  /// has no resolved type.
+  const sem::Type* TypeOf(const ast::Type* expr) const;
 
   /// Wraps the ast::Literal in a statement. This is used by tests that
   /// construct a partial AST and require the Resolver to reach these

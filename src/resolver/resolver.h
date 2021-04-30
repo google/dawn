@@ -236,7 +236,7 @@ class Resolver {
   bool Statement(ast::Statement*);
   bool Statements(const ast::StatementList&);
   bool Switch(ast::SwitchStatement* s);
-  bool Type(sem::Type* ty);
+  bool Type(const sem::Type* ty, const Source& source = {});
   bool UnaryOp(ast::UnaryOpExpression*);
   bool VariableDeclStatement(const ast::VariableDeclStatement*);
 
@@ -268,7 +268,7 @@ class Resolver {
   /// hasn't been constructed already. If an error is raised, nullptr is
   /// returned.
   /// @param ty the ast::Type
-  sem::Type* Type(const ast::Type* ty);
+  const sem::Type* Type(const ast::Type* ty);
 
   /// @returns the semantic information for the array `arr`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is

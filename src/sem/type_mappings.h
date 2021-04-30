@@ -27,6 +27,7 @@ class Function;
 class MemberAccessorExpression;
 class Statement;
 class StructMember;
+class Type;
 class Variable;
 }  // namespace ast
 
@@ -42,6 +43,7 @@ class Statement;
 class Struct;
 class StructType;
 class StructMember;
+class Type;
 class Variable;
 
 /// TypeMappings is a struct that holds undefined `operator()` methods that's
@@ -58,6 +60,7 @@ struct TypeMappings {
   Statement* operator()(ast::Statement*);
   Struct* operator()(sem::StructType*);
   StructMember* operator()(ast::StructMember*);
+  Type* operator()(ast::Type*);
   Variable* operator()(ast::Variable*);
   //! @endcond
 };
