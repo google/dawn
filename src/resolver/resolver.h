@@ -119,6 +119,8 @@ class Resolver {
     UniqueVector<VariableInfo*> referenced_module_vars;
     UniqueVector<VariableInfo*> local_referenced_module_vars;
     std::vector<const ast::ReturnStatement*> return_statements;
+    sem::Type const* return_type = nullptr;
+    std::string return_type_name;
 
     // List of transitive calls this function makes
     UniqueVector<FunctionInfo*> transitive_calls;

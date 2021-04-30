@@ -758,6 +758,7 @@ TEST_F(ResolverTest, Function_Parameters) {
   EXPECT_EQ(func_sem->Parameters()[0]->Declaration(), param_a);
   EXPECT_EQ(func_sem->Parameters()[1]->Declaration(), param_b);
   EXPECT_EQ(func_sem->Parameters()[2]->Declaration(), param_c);
+  EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
@@ -785,6 +786,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
   EXPECT_EQ(func_sem->Parameters().size(), 0u);
+  EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 
   const auto& vars = func_sem->ReferencedModuleVariables();
   ASSERT_EQ(vars.size(), 5u);
@@ -851,6 +853,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
   ASSERT_NE(func_sem, nullptr);
 
   EXPECT_EQ(func_sem->ReferencedModuleVariables().size(), 0u);
+  EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 }
 
 TEST_F(ResolverTest, Function_ReturnStatements) {
@@ -875,6 +878,7 @@ TEST_F(ResolverTest, Function_ReturnStatements) {
   EXPECT_EQ(func_sem->ReturnStatements().size(), 2u);
   EXPECT_EQ(func_sem->ReturnStatements()[0], ret_1);
   EXPECT_EQ(func_sem->ReturnStatements()[1], ret_foo);
+  EXPECT_TRUE(func_sem->ReturnType()->Is<sem::F32>());
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {

@@ -46,6 +46,7 @@ class Function : public Castable<Function, CallTarget> {
 
   /// Constructor
   /// @param declaration the ast::Function
+  /// @param return_type the return type of the function
   /// @param parameters the parameters to the function
   /// @param referenced_module_vars the referenced module variables
   /// @param local_referenced_module_vars the locally referenced module
@@ -53,6 +54,7 @@ class Function : public Castable<Function, CallTarget> {
   /// variables
   /// @param ancestor_entry_points the ancestor entry points
   Function(ast::Function* declaration,
+           Type* return_type,
            std::vector<const Variable*> parameters,
            std::vector<const Variable*> referenced_module_vars,
            std::vector<const Variable*> local_referenced_module_vars,

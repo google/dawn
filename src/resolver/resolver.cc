@@ -588,7 +588,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
     }
   }
 
-  if (!func->return_type()->Is<sem::Void>()) {
+  if (!info->return_type->Is<sem::Void>()) {
     if (func->body()) {
       if (!func->get_last_statement() ||
           !func->get_last_statement()->Is<ast::ReturnStatement>()) {
@@ -809,9 +809,9 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
   builtins.clear();
   locations.clear();
 
-  if (!func->return_type()->Is<sem::Void>()) {
+  if (!info->return_type->Is<sem::Void>()) {
     if (!validate_entry_point_decorations(func->return_type_decorations(),
-                                          func->return_type(), func->source(),
+                                          info->return_type, func->source(),
                                           ParamOrRetType::kReturnType)) {
       return false;
     }
@@ -844,9 +844,9 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
 }
 
 bool Resolver::Function(ast::Function* func) {
-  auto* func_info = function_infos_.Create<FunctionInfo>(func);
+  auto* info = function_infos_.Create<FunctionInfo>(func);
 
-  ScopedAssignment<FunctionInfo*> sa(current_function_, func_info);
+  ScopedAssignment<FunctionInfo*> sa(current_function_, info);
 
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
@@ -862,11 +862,10 @@ bool Resolver::Function(ast::Function* func) {
     }
 
     variable_stack_.set(param->symbol(), param_info);
-    func_info->parameters.emplace_back(param_info);
+    info->parameters.emplace_back(param_info);
 
     if (!ApplyStorageClassUsageToType(param->declared_storage_class(),
-                                      param->declared_type(),
-                                      param->source())) {
+                                      param_info->type, param->source())) {
       diagnostics_.add_note("while instantiating parameter " +
                                 builder_->Symbols().NameFor(param->symbol()),
                             param->source());
@@ -874,21 +873,21 @@ bool Resolver::Function(ast::Function* func) {
     }
 
     if (auto* str = param_info->type->As<sem::StructType>()) {
-      auto* info = Structure(str);
-      if (!info) {
+      auto* str_info = Structure(str);
+      if (!str_info) {
         return false;
       }
       switch (func->pipeline_stage()) {
         case ast::PipelineStage::kVertex:
-          info->pipeline_stage_uses.emplace(
+          str_info->pipeline_stage_uses.emplace(
               sem::PipelineStageUsage::kVertexInput);
           break;
         case ast::PipelineStage::kFragment:
-          info->pipeline_stage_uses.emplace(
+          str_info->pipeline_stage_uses.emplace(
               sem::PipelineStageUsage::kFragmentInput);
           break;
         case ast::PipelineStage::kCompute:
-          info->pipeline_stage_uses.emplace(
+          str_info->pipeline_stage_uses.emplace(
               sem::PipelineStageUsage::kComputeInput);
           break;
         case ast::PipelineStage::kNone:
@@ -897,7 +896,22 @@ bool Resolver::Function(ast::Function* func) {
     }
   }
 
-  if (auto* str = Canonical(func->return_type())->As<sem::StructType>()) {
+  if (func->return_type().ast || func->return_type().sem) {
+    info->return_type = func->return_type();
+    if (!info->return_type) {
+      info->return_type = Type(func->return_type().ast);
+    }
+    if (!info->return_type) {
+      return false;
+    }
+  } else {
+    info->return_type = builder_->create<sem::Void>();
+  }
+
+  info->return_type_name = info->return_type->FriendlyName(builder_->Symbols());
+  info->return_type = Canonical(info->return_type);
+
+  if (auto* str = info->return_type->As<sem::StructType>()) {
     if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, str,
                                       func->source())) {
       diagnostics_.add_note("while instantiating return type for " +
@@ -906,21 +920,21 @@ bool Resolver::Function(ast::Function* func) {
       return false;
     }
 
-    auto* info = Structure(str);
-    if (!info) {
+    auto* str_info = Structure(str);
+    if (!str_info) {
       return false;
     }
     switch (func->pipeline_stage()) {
       case ast::PipelineStage::kVertex:
-        info->pipeline_stage_uses.emplace(
+        str_info->pipeline_stage_uses.emplace(
             sem::PipelineStageUsage::kVertexOutput);
         break;
       case ast::PipelineStage::kFragment:
-        info->pipeline_stage_uses.emplace(
+        str_info->pipeline_stage_uses.emplace(
             sem::PipelineStageUsage::kFragmentOutput);
         break;
       case ast::PipelineStage::kCompute:
-        info->pipeline_stage_uses.emplace(
+        str_info->pipeline_stage_uses.emplace(
             sem::PipelineStageUsage::kComputeOutput);
         break;
       case ast::PipelineStage::kNone:
@@ -943,15 +957,15 @@ bool Resolver::Function(ast::Function* func) {
     Mark(deco);
   }
 
-  if (!ValidateFunction(func, func_info)) {
+  if (!ValidateFunction(func, info)) {
     return false;
   }
 
   // Register the function information _after_ processing the statements. This
   // allows us to catch a function calling itself when determining the call
   // information as this function doesn't exist until it's finished.
-  symbol_to_function_[func->symbol()] = func_info;
-  function_to_info_.emplace(func, func_info);
+  symbol_to_function_[func->symbol()] = info;
+  function_to_info_.emplace(func, info);
 
   return true;
 }
@@ -1274,7 +1288,7 @@ bool Resolver::Call(ast::CallExpression* call) {
     auto* function = iter->second;
     function_calls_.emplace(call,
                             FunctionCallInfo{function, current_statement_});
-    SetType(call, function->declaration->return_type());
+    SetType(call, function->return_type, function->return_type_name);
   }
 
   return true;
@@ -2093,8 +2107,8 @@ void Resolver::CreateSemanticNodes() const {
     auto* info = it.second;
 
     auto* sem_func = builder_->create<sem::Function>(
-        info->declaration, remap_vars(info->parameters),
-        remap_vars(info->referenced_module_vars),
+        info->declaration, const_cast<sem::Type*>(info->return_type),
+        remap_vars(info->parameters), remap_vars(info->referenced_module_vars),
         remap_vars(info->local_referenced_module_vars), info->return_statements,
         ancestor_entry_points[func->symbol()]);
     func_info_to_sem_func.emplace(info, sem_func);
@@ -2479,19 +2493,19 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
 }
 
 bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
-  sem::Type* func_type = current_function_->declaration->return_type();
+  auto* func_type = current_function_->return_type;
 
   auto* ret_type = ret->has_value() ? TypeOf(ret->value())->UnwrapAll()
                                     : builder_->ty.void_();
 
   if (func_type->UnwrapAll() != ret_type) {
-    diagnostics_.add_error(
-        "v-000y",
-        "return statement type must match its function "
-        "return type, returned '" +
-            ret_type->FriendlyName(builder_->Symbols()) + "', expected '" +
-            func_type->FriendlyName(builder_->Symbols()) + "'",
-        ret->source());
+    diagnostics_.add_error("v-000y",
+                           "return statement type must match its function "
+                           "return type, returned '" +
+                               ret_type->FriendlyName(builder_->Symbols()) +
+                               "', expected '" +
+                               current_function_->return_type_name + "'",
+                           ret->source());
     return false;
   }
 
