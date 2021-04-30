@@ -39,8 +39,8 @@ namespace utils {
 
         TextureDataCopyLayout layout;
 
-        layout.mipSize = {textureSizeAtLevel0.width >> mipmapLevel,
-                          textureSizeAtLevel0.height >> mipmapLevel,
+        layout.mipSize = {std::max(textureSizeAtLevel0.width >> mipmapLevel, 1u),
+                          std::max(textureSizeAtLevel0.height >> mipmapLevel, 1u),
                           textureSizeAtLevel0.depthOrArrayLayers};
 
         layout.bytesPerRow = GetMinimumBytesPerRow(format, layout.mipSize.width);

@@ -671,6 +671,27 @@ TEST_P(CopyTests_T2B, TextureMipAligned) {
     }
 }
 
+// Test that copying mips when one dimension is 256-byte aligned and another dimension reach one
+// works
+TEST_P(CopyTests_T2B, TextureMipDimensionReachOne) {
+    constexpr uint32_t mipLevelCount = 4;
+    constexpr uint32_t kWidth = 256 << mipLevelCount;
+    constexpr uint32_t kHeight = 2;
+
+    TextureSpec defaultTextureSpec;
+    defaultTextureSpec.textureSize = {kWidth, kHeight, 1};
+
+    TextureSpec textureSpec = defaultTextureSpec;
+    textureSpec.levelCount = mipLevelCount;
+
+    for (unsigned int i = 0; i < 4; ++i) {
+        textureSpec.copyLevel = i;
+        DoTest(textureSpec,
+               MinimumBufferSpec(std::max(kWidth >> i, 1u), std::max(kHeight >> i, 1u)),
+               {std::max(kWidth >> i, 1u), std::max(kHeight >> i, 1u), 1});
+    }
+}
+
 // Test that copying mips without 256-byte aligned sizes works
 TEST_P(CopyTests_T2B, TextureMipUnaligned) {
     constexpr uint32_t kWidth = 259;

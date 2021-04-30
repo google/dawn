@@ -179,17 +179,13 @@ namespace dawn_native {
                 return DAWN_VALIDATION_ERROR("The mip level count of the resolve target must be 1");
             }
 
-            uint32_t colorAttachmentBaseMipLevel = attachment->GetBaseMipLevel();
-            const Extent3D& colorTextureSize = attachment->GetTexture()->GetSize();
-            uint32_t colorAttachmentWidth = colorTextureSize.width >> colorAttachmentBaseMipLevel;
-            uint32_t colorAttachmentHeight = colorTextureSize.height >> colorAttachmentBaseMipLevel;
-
-            uint32_t resolveTargetBaseMipLevel = resolveTarget->GetBaseMipLevel();
-            const Extent3D& resolveTextureSize = resolveTarget->GetTexture()->GetSize();
-            uint32_t resolveTargetWidth = resolveTextureSize.width >> resolveTargetBaseMipLevel;
-            uint32_t resolveTargetHeight = resolveTextureSize.height >> resolveTargetBaseMipLevel;
-            if (colorAttachmentWidth != resolveTargetWidth ||
-                colorAttachmentHeight != resolveTargetHeight) {
+            const Extent3D& colorTextureSize =
+                attachment->GetTexture()->GetMipLevelVirtualSize(attachment->GetBaseMipLevel());
+            const Extent3D& resolveTextureSize =
+                resolveTarget->GetTexture()->GetMipLevelVirtualSize(
+                    resolveTarget->GetBaseMipLevel());
+            if (colorTextureSize.width != resolveTextureSize.width ||
+                colorTextureSize.height != resolveTextureSize.height) {
                 return DAWN_VALIDATION_ERROR(
                     "The size of the resolve target must be the same as the color attachment");
             }
