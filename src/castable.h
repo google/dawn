@@ -196,7 +196,13 @@ class CastableBase {
   /// Copy constructor
   CastableBase(const CastableBase&) = default;
 
+  /// Destructor
   virtual ~CastableBase() = default;
+
+  /// Copy assignment
+  /// @param other the CastableBase to copy
+  /// @returns the new CastableBase
+  CastableBase& operator=(const CastableBase& other) = default;
 
   /// @returns the TypeInfo of the object
   virtual const tint::TypeInfo& TypeInfo() const = 0;
