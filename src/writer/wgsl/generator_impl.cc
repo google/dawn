@@ -17,20 +17,35 @@
 #include <algorithm>
 #include <limits>
 
+#include "src/ast/alias.h"
+#include "src/ast/array.h"
+#include "src/ast/bool.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/constant_id_decoration.h"
+#include "src/ast/depth_texture.h"
+#include "src/ast/f32.h"
 #include "src/ast/float_literal.h"
+#include "src/ast/i32.h"
 #include "src/ast/internal_decoration.h"
+#include "src/ast/matrix.h"
 #include "src/ast/module.h"
+#include "src/ast/multisampled_texture.h"
+#include "src/ast/pointer.h"
+#include "src/ast/sampled_texture.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/stage_decoration.h"
+#include "src/ast/storage_texture.h"
 #include "src/ast/stride_decoration.h"
 #include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/struct_member_size_decoration.h"
+#include "src/ast/type_name.h"
+#include "src/ast/u32.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/vector.h"
+#include "src/ast/void.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/sem/access_control_type.h"
 #include "src/sem/alias_type.h"
@@ -64,8 +79,12 @@ GeneratorImpl::~GeneratorImpl() = default;
 bool GeneratorImpl::Generate(const ast::Function* entry) {
   // Generate global declarations in the order they appear in the module.
   for (auto* decl : program_->AST().GlobalDeclarations()) {
-    if (auto* ty = decl->As<sem::Type>()) {
+    if (auto* ty = decl->As<ast::Type>()) {
       if (!EmitConstructedType(ty)) {
+        return false;
+      }
+    } else if (auto* sem_ty = decl->As<sem::Type>()) {
+      if (!EmitConstructedType(sem_ty)) {
         return false;
       }
     } else if (auto* func = decl->As<ast::Function>()) {
@@ -104,24 +123,47 @@ bool GeneratorImpl::Generate(const ast::Function* entry) {
   return true;
 }
 
-bool GeneratorImpl::EmitConstructedType(const sem::Type* ty) {
+bool GeneratorImpl::EmitConstructedType(typ::Type type) {
   make_indent();
-  if (auto* alias = ty->As<sem::Alias>()) {
-    out_ << "type " << program_->Symbols().NameFor(alias->symbol()) << " = ";
-    if (!EmitType(alias->type())) {
+
+  if (auto* ty = type.ast) {
+    if (auto* alias = ty->As<ast::Alias>()) {
+      out_ << "type " << program_->Symbols().NameFor(alias->symbol()) << " = ";
+      if (!EmitType(alias->type())) {
+        return false;
+      }
+      out_ << ";" << std::endl;
+    } else if (auto* str = ty->As<ast::Struct>()) {
+      if (!EmitStructType(str)) {
+        return false;
+      }
+    } else {
+      diagnostics_.add_error("unknown constructed type: " + ty->type_name());
       return false;
     }
-    out_ << ";" << std::endl;
-  } else if (auto* str = ty->As<sem::StructType>()) {
-    if (!EmitStructType(str)) {
-      return false;
-    }
-  } else {
-    diagnostics_.add_error("unknown constructed type: " + ty->type_name());
-    return false;
+    return true;
   }
 
-  return true;
+  if (auto* ty = type.sem) {
+    if (auto* alias = ty->As<sem::Alias>()) {
+      out_ << "type " << program_->Symbols().NameFor(alias->symbol()) << " = ";
+      if (!EmitType(alias->type())) {
+        return false;
+      }
+      out_ << ";" << std::endl;
+    } else if (auto* str = ty->As<sem::StructType>()) {
+      if (!EmitStructType(str->impl())) {
+        return false;
+      }
+    } else {
+      diagnostics_.add_error("unknown constructed type: " + ty->type_name());
+      return false;
+    }
+    return true;
+  }
+
+  TINT_ICE(diagnostics_) << "EmitConstructedType() called with nullptr";
+  return false;
 }
 
 bool GeneratorImpl::EmitExpression(ast::Expression* expr) {
@@ -314,14 +356,15 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 
     out_ << program_->Symbols().NameFor(v->symbol()) << " : ";
 
-    if (!EmitType(program_->Sem().Get(v)->DeclaredType())) {
+    if (!EmitType(v->type())) {
       return false;
     }
   }
 
   out_ << ")";
 
-  if (!func->return_type()->Is<sem::Void>() ||
+  if (!(Is<ast::Void>(func->return_type().ast) ||
+        Is<sem::Void>(func->return_type().sem)) ||
       !func->return_type_decorations().empty()) {
     out_ << " -> ";
 
@@ -358,156 +401,300 @@ bool GeneratorImpl::EmitImageFormat(const ast::ImageFormat fmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitType(sem::Type* type) {
-  std::string storage_texture_access = "";
-  if (auto* ac = type->As<sem::AccessControl>()) {
-    out_ << "[[access(";
-    if (ac->IsReadOnly()) {
-      out_ << "read";
-    } else if (ac->IsWriteOnly()) {
-      out_ << "write";
-    } else if (ac->IsReadWrite()) {
-      out_ << "read_write";
+bool GeneratorImpl::EmitType(typ::Type type) {
+  if (auto* ty = type.ast) {
+    if (auto* ac = ty->As<ast::AccessControl>()) {
+      out_ << "[[access(";
+      if (ac->IsReadOnly()) {
+        out_ << "read";
+      } else if (ac->IsWriteOnly()) {
+        out_ << "write";
+      } else if (ac->IsReadWrite()) {
+        out_ << "read_write";
+      } else {
+        diagnostics_.add_error("invalid access control");
+        return false;
+      }
+      out_ << ")]] ";
+      if (!EmitType(ac->type())) {
+        return false;
+      }
+      return true;
+    } else if (auto* alias = ty->As<ast::Alias>()) {
+      out_ << program_->Symbols().NameFor(alias->symbol());
+    } else if (auto* ary = ty->As<ast::Array>()) {
+      for (auto* deco : ary->decorations()) {
+        if (auto* stride = deco->As<ast::StrideDecoration>()) {
+          out_ << "[[stride(" << stride->stride() << ")]] ";
+        }
+      }
+
+      out_ << "array<";
+      if (!EmitType(ary->type())) {
+        return false;
+      }
+
+      if (!ary->IsRuntimeArray())
+        out_ << ", " << ary->size();
+
+      out_ << ">";
+    } else if (ty->Is<ast::Bool>()) {
+      out_ << "bool";
+    } else if (ty->Is<ast::F32>()) {
+      out_ << "f32";
+    } else if (ty->Is<ast::I32>()) {
+      out_ << "i32";
+    } else if (auto* mat = ty->As<ast::Matrix>()) {
+      out_ << "mat" << mat->columns() << "x" << mat->rows() << "<";
+      if (!EmitType(mat->type())) {
+        return false;
+      }
+      out_ << ">";
+    } else if (auto* ptr = ty->As<ast::Pointer>()) {
+      out_ << "ptr<" << ptr->storage_class() << ", ";
+      if (!EmitType(ptr->type())) {
+        return false;
+      }
+      out_ << ">";
+    } else if (auto* sampler = ty->As<ast::Sampler>()) {
+      out_ << "sampler";
+
+      if (sampler->IsComparison()) {
+        out_ << "_comparison";
+      }
+    } else if (auto* str = ty->As<ast::Struct>()) {
+      // The struct, as a type, is just the name. We should have already emitted
+      // the declaration through a call to |EmitStructType| earlier.
+      out_ << program_->Symbols().NameFor(str->name());
+    } else if (auto* texture = ty->As<ast::Texture>()) {
+      out_ << "texture_";
+      if (texture->Is<ast::DepthTexture>()) {
+        out_ << "depth_";
+      } else if (texture->Is<ast::SampledTexture>()) {
+        /* nothing to emit */
+      } else if (texture->Is<ast::MultisampledTexture>()) {
+        out_ << "multisampled_";
+      } else if (texture->Is<ast::StorageTexture>()) {
+        out_ << "storage_";
+      } else {
+        diagnostics_.add_error("unknown texture type");
+        return false;
+      }
+
+      switch (texture->dim()) {
+        case ast::TextureDimension::k1d:
+          out_ << "1d";
+          break;
+        case ast::TextureDimension::k2d:
+          out_ << "2d";
+          break;
+        case ast::TextureDimension::k2dArray:
+          out_ << "2d_array";
+          break;
+        case ast::TextureDimension::k3d:
+          out_ << "3d";
+          break;
+        case ast::TextureDimension::kCube:
+          out_ << "cube";
+          break;
+        case ast::TextureDimension::kCubeArray:
+          out_ << "cube_array";
+          break;
+        default:
+          diagnostics_.add_error("unknown texture dimension");
+          return false;
+      }
+
+      if (auto* sampled = texture->As<ast::SampledTexture>()) {
+        out_ << "<";
+        if (!EmitType(sampled->type())) {
+          return false;
+        }
+        out_ << ">";
+      } else if (auto* ms = texture->As<ast::MultisampledTexture>()) {
+        out_ << "<";
+        if (!EmitType(ms->type())) {
+          return false;
+        }
+        out_ << ">";
+      } else if (auto* storage = texture->As<ast::StorageTexture>()) {
+        out_ << "<";
+        if (!EmitImageFormat(storage->image_format())) {
+          return false;
+        }
+        out_ << ">";
+      }
+
+    } else if (ty->Is<ast::U32>()) {
+      out_ << "u32";
+    } else if (auto* vec = ty->As<ast::Vector>()) {
+      out_ << "vec" << vec->size() << "<";
+      if (!EmitType(vec->type())) {
+        return false;
+      }
+      out_ << ">";
+    } else if (ty->Is<ast::Void>()) {
+      out_ << "void";
+    } else if (auto* tn = ty->As<ast::TypeName>()) {
+      out_ << program_->Symbols().NameFor(tn->name());
     } else {
-      diagnostics_.add_error("invalid access control");
-      return false;
-    }
-    out_ << ")]] ";
-    if (!EmitType(ac->type())) {
+      diagnostics_.add_error("unknown type in EmitType: " + ty->type_name());
       return false;
     }
     return true;
-  } else if (auto* alias = type->As<sem::Alias>()) {
-    out_ << program_->Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = type->As<sem::ArrayType>()) {
-    for (auto* deco : ary->decorations()) {
-      if (auto* stride = deco->As<ast::StrideDecoration>()) {
-        out_ << "[[stride(" << stride->stride() << ")]] ";
-      }
-    }
-
-    out_ << "array<";
-    if (!EmitType(ary->type())) {
-      return false;
-    }
-
-    if (!ary->IsRuntimeArray())
-      out_ << ", " << ary->size();
-
-    out_ << ">";
-  } else if (type->Is<sem::Bool>()) {
-    out_ << "bool";
-  } else if (type->Is<sem::F32>()) {
-    out_ << "f32";
-  } else if (type->Is<sem::I32>()) {
-    out_ << "i32";
-  } else if (auto* mat = type->As<sem::Matrix>()) {
-    out_ << "mat" << mat->columns() << "x" << mat->rows() << "<";
-    if (!EmitType(mat->type())) {
-      return false;
-    }
-    out_ << ">";
-  } else if (auto* ptr = type->As<sem::Pointer>()) {
-    out_ << "ptr<" << ptr->storage_class() << ", ";
-    if (!EmitType(ptr->type())) {
-      return false;
-    }
-    out_ << ">";
-  } else if (auto* sampler = type->As<sem::Sampler>()) {
-    out_ << "sampler";
-
-    if (sampler->IsComparison()) {
-      out_ << "_comparison";
-    }
-  } else if (auto* str = type->As<sem::StructType>()) {
-    // The struct, as a type, is just the name. We should have already emitted
-    // the declaration through a call to |EmitStructType| earlier.
-    out_ << program_->Symbols().NameFor(str->impl()->name());
-  } else if (auto* texture = type->As<sem::Texture>()) {
-    out_ << "texture_";
-    if (texture->Is<sem::DepthTexture>()) {
-      out_ << "depth_";
-    } else if (texture->Is<sem::SampledTexture>()) {
-      /* nothing to emit */
-    } else if (texture->Is<sem::MultisampledTexture>()) {
-      out_ << "multisampled_";
-    } else if (texture->Is<sem::StorageTexture>()) {
-      out_ << "storage_";
-    } else {
-      diagnostics_.add_error("unknown texture type");
-      return false;
-    }
-
-    switch (texture->dim()) {
-      case ast::TextureDimension::k1d:
-        out_ << "1d";
-        break;
-      case ast::TextureDimension::k2d:
-        out_ << "2d";
-        break;
-      case ast::TextureDimension::k2dArray:
-        out_ << "2d_array";
-        break;
-      case ast::TextureDimension::k3d:
-        out_ << "3d";
-        break;
-      case ast::TextureDimension::kCube:
-        out_ << "cube";
-        break;
-      case ast::TextureDimension::kCubeArray:
-        out_ << "cube_array";
-        break;
-      default:
-        diagnostics_.add_error("unknown texture dimension");
-        return false;
-    }
-
-    if (auto* sampled = texture->As<sem::SampledTexture>()) {
-      out_ << "<";
-      if (!EmitType(sampled->type())) {
-        return false;
-      }
-      out_ << ">";
-    } else if (auto* ms = texture->As<sem::MultisampledTexture>()) {
-      out_ << "<";
-      if (!EmitType(ms->type())) {
-        return false;
-      }
-      out_ << ">";
-    } else if (auto* storage = texture->As<sem::StorageTexture>()) {
-      out_ << "<";
-      if (!EmitImageFormat(storage->image_format())) {
-        return false;
-      }
-      out_ << ">";
-    }
-
-  } else if (type->Is<sem::U32>()) {
-    out_ << "u32";
-  } else if (auto* vec = type->As<sem::Vector>()) {
-    out_ << "vec" << vec->size() << "<";
-    if (!EmitType(vec->type())) {
-      return false;
-    }
-    out_ << ">";
-  } else if (type->Is<sem::Void>()) {
-    out_ << "void";
-  } else {
-    diagnostics_.add_error("unknown type in EmitType: " + type->type_name());
-    return false;
   }
 
-  return true;
+  if (auto* ty = type.sem) {
+    if (auto* ac = ty->As<sem::AccessControl>()) {
+      out_ << "[[access(";
+      if (ac->IsReadOnly()) {
+        out_ << "read";
+      } else if (ac->IsWriteOnly()) {
+        out_ << "write";
+      } else if (ac->IsReadWrite()) {
+        out_ << "read_write";
+      } else {
+        diagnostics_.add_error("invalid access control");
+        return false;
+      }
+      out_ << ")]] ";
+      if (!EmitType(ac->type())) {
+        return false;
+      }
+      return true;
+    } else if (auto* alias = ty->As<sem::Alias>()) {
+      out_ << program_->Symbols().NameFor(alias->symbol());
+    } else if (auto* ary = ty->As<sem::ArrayType>()) {
+      for (auto* deco : ary->decorations()) {
+        if (auto* stride = deco->As<ast::StrideDecoration>()) {
+          out_ << "[[stride(" << stride->stride() << ")]] ";
+        }
+      }
+
+      out_ << "array<";
+      if (!EmitType(ary->type())) {
+        return false;
+      }
+
+      if (!ary->IsRuntimeArray())
+        out_ << ", " << ary->size();
+
+      out_ << ">";
+    } else if (ty->Is<sem::Bool>()) {
+      out_ << "bool";
+    } else if (ty->Is<sem::F32>()) {
+      out_ << "f32";
+    } else if (ty->Is<sem::I32>()) {
+      out_ << "i32";
+    } else if (auto* mat = ty->As<sem::Matrix>()) {
+      out_ << "mat" << mat->columns() << "x" << mat->rows() << "<";
+      if (!EmitType(mat->type())) {
+        return false;
+      }
+      out_ << ">";
+    } else if (auto* ptr = ty->As<sem::Pointer>()) {
+      out_ << "ptr<" << ptr->storage_class() << ", ";
+      if (!EmitType(ptr->type())) {
+        return false;
+      }
+      out_ << ">";
+    } else if (auto* sampler = ty->As<sem::Sampler>()) {
+      out_ << "sampler";
+
+      if (sampler->IsComparison()) {
+        out_ << "_comparison";
+      }
+    } else if (auto* str = ty->As<sem::StructType>()) {
+      // The struct, as a type, is just the name. We should have already emitted
+      // the declaration through a call to |EmitStructType| earlier.
+      out_ << program_->Symbols().NameFor(str->impl()->name());
+    } else if (auto* texture = ty->As<sem::Texture>()) {
+      out_ << "texture_";
+      if (texture->Is<sem::DepthTexture>()) {
+        out_ << "depth_";
+      } else if (texture->Is<sem::SampledTexture>()) {
+        /* nothing to emit */
+      } else if (texture->Is<sem::MultisampledTexture>()) {
+        out_ << "multisampled_";
+      } else if (texture->Is<sem::StorageTexture>()) {
+        out_ << "storage_";
+      } else {
+        diagnostics_.add_error("unknown texture type");
+        return false;
+      }
+
+      switch (texture->dim()) {
+        case ast::TextureDimension::k1d:
+          out_ << "1d";
+          break;
+        case ast::TextureDimension::k2d:
+          out_ << "2d";
+          break;
+        case ast::TextureDimension::k2dArray:
+          out_ << "2d_array";
+          break;
+        case ast::TextureDimension::k3d:
+          out_ << "3d";
+          break;
+        case ast::TextureDimension::kCube:
+          out_ << "cube";
+          break;
+        case ast::TextureDimension::kCubeArray:
+          out_ << "cube_array";
+          break;
+        default:
+          diagnostics_.add_error("unknown texture dimension");
+          return false;
+      }
+
+      if (auto* sampled = texture->As<sem::SampledTexture>()) {
+        out_ << "<";
+        if (!EmitType(sampled->type())) {
+          return false;
+        }
+        out_ << ">";
+      } else if (auto* ms = texture->As<sem::MultisampledTexture>()) {
+        out_ << "<";
+        if (!EmitType(ms->type())) {
+          return false;
+        }
+        out_ << ">";
+      } else if (auto* storage = texture->As<sem::StorageTexture>()) {
+        out_ << "<";
+        if (!EmitImageFormat(storage->image_format())) {
+          return false;
+        }
+        out_ << ">";
+      }
+
+    } else if (ty->Is<sem::U32>()) {
+      out_ << "u32";
+    } else if (auto* vec = ty->As<sem::Vector>()) {
+      out_ << "vec" << vec->size() << "<";
+      if (!EmitType(vec->type())) {
+        return false;
+      }
+      out_ << ">";
+    } else if (ty->Is<sem::Void>()) {
+      out_ << "void";
+    } else {
+      diagnostics_.add_error("unknown type in EmitType: " + ty->type_name());
+      return false;
+    }
+    return true;
+  }
+
+  TINT_ICE(diagnostics_) << "EmitType() called with nullptr";
+  return false;
 }
 
-bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
-  auto* impl = str->impl();
-  for (auto* deco : impl->decorations()) {
+bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
+  for (auto* deco : str->decorations()) {
     out_ << "[[";
     program_->to_str(deco, out_, 0);
     out_ << "]]" << std::endl;
   }
-  out_ << "struct " << program_->Symbols().NameFor(str->impl()->name()) << " {"
+  out_ << "struct " << program_->Symbols().NameFor(str->name()) << " {"
        << std::endl;
 
   auto add_padding = [&](uint32_t size) {
@@ -521,7 +708,7 @@ bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
 
   increment_indent();
   uint32_t offset = 0;
-  for (auto* mem : impl->members()) {
+  for (auto* mem : str->members()) {
     auto* mem_sem = program_->Sem().Get(mem);
 
     offset = utils::RoundUp(mem_sem->Align(), offset);
@@ -589,9 +776,9 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
 
   out_ << " " << program_->Symbols().NameFor(var->symbol());
 
-  if (var->declared_type()) {
+  if (var->type().ast || var->type().sem) {
     out_ << " : ";
-    if (!EmitType(var->declared_type())) {
+    if (!EmitType(var->type())) {
       return false;
     }
   }
