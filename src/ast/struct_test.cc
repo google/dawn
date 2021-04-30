@@ -107,7 +107,7 @@ TEST_F(AstStructTest, Assert_DifferentProgramID_StructMember) {
       {
         ProgramBuilder b1;
         ProgramBuilder b2;
-        b1.create<Struct>(b2.Sym("S"),
+        b1.create<Struct>(b1.Sym("S"),
                           StructMemberList{b2.Member("a", b2.ty.i32())},
                           DecorationList{});
       },

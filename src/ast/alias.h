@@ -17,40 +17,36 @@
 
 #include <string>
 
-#include "src/ast/type.h"
+#include "src/ast/named_type.h"
 
 namespace tint {
 namespace ast {
 
 /// A type alias type. Holds a name and pointer to another type.
-class Alias : public Castable<Alias, Type> {
+class Alias : public Castable<Alias, NamedType> {
  public:
   /// Constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this node
-  /// @param sym the symbol for the alias
+  /// @param name the symbol for the alias
   /// @param subtype the alias'd type
   Alias(ProgramID program_id,
         const Source& source,
-        const Symbol& sym,
+        const Symbol& name,
         Type* subtype);
   /// Move constructor
   Alias(Alias&&);
   /// Destructor
   ~Alias() override;
 
+  /// [DEPRECATED] use name()
   /// @returns the alias symbol
-  Symbol symbol() const { return symbol_; }
+  Symbol symbol() const { return name(); }
   /// @returns the alias type
   Type* type() const { return subtype_; }
 
   /// @returns the type_name for this type
   std::string type_name() const override;
-
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
 
   /// Clones this type and all transitive types using the `CloneContext` `ctx`.
   /// @param ctx the clone context
@@ -58,7 +54,6 @@ class Alias : public Castable<Alias, Type> {
   Alias* Clone(CloneContext* ctx) const override;
 
  private:
-  Symbol const symbol_;
   Type* const subtype_;
   std::string const type_name_;
 };

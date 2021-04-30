@@ -19,14 +19,14 @@
 #include <utility>
 
 #include "src/ast/decoration.h"
+#include "src/ast/named_type.h"
 #include "src/ast/struct_member.h"
-#include "src/ast/type.h"
 
 namespace tint {
 namespace ast {
 
 /// A struct statement.
-class Struct : public Castable<Struct, Type> {
+class Struct : public Castable<Struct, NamedType> {
  public:
   /// Create a new struct statement
   /// @param program_id the identifier of the program that owns this node
@@ -43,9 +43,6 @@ class Struct : public Castable<Struct, Type> {
   Struct(Struct&&);
 
   ~Struct() override;
-
-  /// @returns the name of the structure
-  Symbol name() const { return name_; }
 
   /// @returns the struct decorations
   const DecorationList& decorations() const { return decorations_; }
@@ -78,15 +75,9 @@ class Struct : public Castable<Struct, Type> {
   /// @returns the name for the type
   std::string type_name() const override;
 
-  /// @param symbols the program's symbol table
-  /// @returns the name for this type that closely resembles how it would be
-  /// declared in WGSL.
-  std::string FriendlyName(const SymbolTable& symbols) const override;
-
  private:
   Struct(const Struct&) = delete;
 
-  Symbol const name_;
   StructMemberList const members_;
   DecorationList const decorations_;
 };

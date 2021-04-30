@@ -23,12 +23,11 @@ namespace ast {
 
 Alias::Alias(ProgramID program_id,
              const Source& source,
-             const Symbol& sym,
+             const Symbol& name,
              Type* subtype)
-    : Base(program_id, source),
-      symbol_(sym),
+    : Base(program_id, source, name),
       subtype_(subtype),
-      type_name_("__alias_" + sym.to_str() + subtype->type_name()) {
+      type_name_("__alias_" + name.to_str() + subtype->type_name()) {
   TINT_ASSERT(subtype_);
 }
 
@@ -40,14 +39,10 @@ std::string Alias::type_name() const {
   return type_name_;
 }
 
-std::string Alias::FriendlyName(const SymbolTable& symbols) const {
-  return symbols.NameFor(symbol_);
-}
-
 Alias* Alias::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  auto sym = ctx->Clone(symbol());
+  auto sym = ctx->Clone(name());
   auto* ty = ctx->Clone(type());
   return ctx->dst->create<Alias>(src, sym, ty);
 }
