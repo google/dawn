@@ -15,6 +15,7 @@
 #ifndef SRC_SEM_INFO_H_
 #define SRC_SEM_INFO_H_
 
+#include <type_traits>
 #include <unordered_map>
 
 #include "src/debug.h"
@@ -26,6 +27,9 @@ namespace sem {
 
 /// Info holds all the resolved semantic information for a Program.
 class Info {
+  /// Placeholder type used by Get() to provide a default value for EXPLICIT_SEM
+  using InferFromAST = std::nullptr_t;
+
  public:
   /// Constructor
   Info();
@@ -44,14 +48,18 @@ class Info {
   /// Get looks up the semantic information for the AST or type node `node`.
   /// @param node the AST or type node
   /// @returns a pointer to the semantic node if found, otherwise nullptr
-  template <typename AST_OR_TYPE,
-            typename SEM = SemanticNodeTypeFor<AST_OR_TYPE>>
-  const SEM* Get(const AST_OR_TYPE* node) const {
+  template <typename SEM = InferFromAST,
+            typename AST_OR_TYPE = CastableBase,
+            typename RESULT =
+                std::conditional_t<std::is_same<SEM, InferFromAST>::value,
+                                   SemanticNodeTypeFor<AST_OR_TYPE>,
+                                   SEM>>
+  const RESULT* Get(const AST_OR_TYPE* node) const {
     auto it = map.find(node);
     if (it == map.end()) {
       return nullptr;
     }
-    return it->second->template As<SEM>();
+    return As<RESULT>(it->second);
   }
 
   /// Add registers the semantic node `sem_node` for the AST or type node

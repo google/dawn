@@ -627,8 +627,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* ident = node->As<ast::IdentifierExpression>()) {
       // X
-      auto* expr = sem.Get(ident);
-      if (auto* var = expr->As<sem::VariableUser>()) {
+      if (auto* var = sem.Get<sem::VariableUser>(ident)) {
         if (var->Variable()->StorageClass() == ast::StorageClass::kStorage) {
           // Variable to a storage buffer
           state.AddAccesss(ident, {

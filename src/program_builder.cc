@@ -132,10 +132,10 @@ ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
 
 typ::Type ProgramBuilder::TypesBuilder::MaybeCreateTypename(
     typ::Type type) const {
-  if (auto* alias = type.ast->As<ast::Alias>()) {
+  if (auto* alias = As<ast::Alias>(type.ast)) {
     return {builder->create<ast::TypeName>(alias->symbol()), type.sem};
   }
-  if (auto* str = type.ast->As<ast::Struct>()) {
+  if (auto* str = As<ast::Struct>(type.ast)) {
     return {builder->create<ast::TypeName>(str->name()), type.sem};
   }
   return type;

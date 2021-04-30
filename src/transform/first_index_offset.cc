@@ -148,19 +148,22 @@ Output FirstIndexOffset::Run(const Program* in, const DataMap& data) {
 
     // Fix up all references to the builtins with the offsets
     ctx.ReplaceAll([=, &ctx](ast::Expression* expr) -> ast::Expression* {
-      auto* sem = ctx.src->Sem().Get(expr);
-      if (auto* user = sem->As<sem::VariableUser>()) {
-        auto it = builtin_vars.find(user->Variable());
-        if (it != builtin_vars.end()) {
-          return ctx.dst->Add(ctx.CloneWithoutTransform(expr),
-                              ctx.dst->MemberAccessor(buffer_name, it->second));
+      if (auto* sem = ctx.src->Sem().Get(expr)) {
+        if (auto* user = sem->As<sem::VariableUser>()) {
+          auto it = builtin_vars.find(user->Variable());
+          if (it != builtin_vars.end()) {
+            return ctx.dst->Add(
+                ctx.CloneWithoutTransform(expr),
+                ctx.dst->MemberAccessor(buffer_name, it->second));
+          }
         }
-      }
-      if (auto* access = sem->As<sem::StructMemberAccess>()) {
-        auto it = builtin_members.find(access->Member());
-        if (it != builtin_members.end()) {
-          return ctx.dst->Add(ctx.CloneWithoutTransform(expr),
-                              ctx.dst->MemberAccessor(buffer_name, it->second));
+        if (auto* access = sem->As<sem::StructMemberAccess>()) {
+          auto it = builtin_members.find(access->Member());
+          if (it != builtin_members.end()) {
+            return ctx.dst->Add(
+                ctx.CloneWithoutTransform(expr),
+                ctx.dst->MemberAccessor(buffer_name, it->second));
+          }
         }
       }
       // Not interested in this experssion. Just clone.

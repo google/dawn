@@ -173,11 +173,18 @@ inline bool IsAnyOf(FROM* obj) {
 /// @see CastFlags
 template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
 inline TO* As(FROM* obj) {
-  using castable =
-      typename std::conditional<std::is_const<FROM>::value, const CastableBase,
-                                CastableBase>::type;
-  auto* as_castable = static_cast<castable*>(obj);
+  auto* as_castable = static_cast<CastableBase*>(obj);
   return Is<TO, FLAGS>(obj) ? static_cast<TO*>(as_castable) : nullptr;
+}
+
+/// @returns obj dynamically cast to the type `TO` or `nullptr` if
+/// this object does not derive from `TO`.
+/// @param obj the object to cast from
+/// @see CastFlags
+template <typename TO, int FLAGS = 0, typename FROM = detail::Infer>
+inline const TO* As(const FROM* obj) {
+  auto* as_castable = static_cast<const CastableBase*>(obj);
+  return Is<TO, FLAGS>(obj) ? static_cast<const TO*>(as_castable) : nullptr;
 }
 
 /// CastableBase is the base class for all Castable objects.

@@ -1396,7 +1396,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
       return_type = type.value;
     }
 
-    if (return_type.ast->Is<ast::Void>()) {
+    if (Is<ast::Void>(return_type.ast)) {
       // crbug.com/tint/677: void has been removed from the language
       deprecated(tok.source(),
                  "omit '-> void' for functions that do not return a value");
