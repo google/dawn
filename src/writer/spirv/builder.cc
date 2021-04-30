@@ -508,7 +508,9 @@ uint32_t Builder::GenerateExpression(ast::Expression* expr) {
   return 0;
 }
 
-bool Builder::GenerateFunction(ast::Function* func) {
+bool Builder::GenerateFunction(ast::Function* func_ast) {
+  auto* func = builder_.Sem().Get(func_ast);
+
   uint32_t func_type_id = GenerateFunctionTypeIfNeeded(func);
   if (func_type_id == 0) {
     return false;
@@ -519,9 +521,9 @@ bool Builder::GenerateFunction(ast::Function* func) {
 
   push_debug(spv::Op::OpName,
              {Operand::Int(func_id),
-              Operand::String(builder_.Symbols().NameFor(func->symbol()))});
+              Operand::String(builder_.Symbols().NameFor(func_ast->symbol()))});
 
-  auto ret_id = GenerateTypeIfNeeded(func->return_type());
+  auto ret_id = GenerateTypeIfNeeded(func->ReturnType());
   if (ret_id == 0) {
     return false;
   }
@@ -534,51 +536,50 @@ bool Builder::GenerateFunction(ast::Function* func) {
        Operand::Int(func_type_id)}};
 
   InstructionList params;
-  for (auto* param : func->params()) {
+  for (auto* param : func->Parameters()) {
     auto param_op = result_op();
     auto param_id = param_op.to_i();
 
-    auto param_type_id =
-        GenerateTypeIfNeeded(builder_.Sem().Get(param)->Type());
+    auto param_type_id = GenerateTypeIfNeeded(param->Type());
     if (param_type_id == 0) {
       return false;
     }
 
-    push_debug(spv::Op::OpName,
-               {Operand::Int(param_id),
-                Operand::String(builder_.Symbols().NameFor(param->symbol()))});
+    push_debug(spv::Op::OpName, {Operand::Int(param_id),
+                                 Operand::String(builder_.Symbols().NameFor(
+                                     param->Declaration()->symbol()))});
     params.push_back(Instruction{spv::Op::OpFunctionParameter,
                                  {Operand::Int(param_type_id), param_op}});
 
-    scope_stack_.set(param->symbol(), param_id);
+    scope_stack_.set(param->Declaration()->symbol(), param_id);
   }
 
   push_function(Function{definition_inst, result_op(), std::move(params)});
 
-  for (auto* stmt : *func->body()) {
+  for (auto* stmt : *func_ast->body()) {
     if (!GenerateStatement(stmt)) {
       return false;
     }
   }
 
-  if (func->IsEntryPoint()) {
-    if (!GenerateEntryPoint(func, func_id)) {
+  if (func_ast->IsEntryPoint()) {
+    if (!GenerateEntryPoint(func_ast, func_id)) {
       return false;
     }
-    if (!GenerateExecutionModes(func, func_id)) {
+    if (!GenerateExecutionModes(func_ast, func_id)) {
       return false;
     }
   }
 
   scope_stack_.pop_scope();
 
-  func_symbol_to_id_[func->symbol()] = func_id;
+  func_symbol_to_id_[func_ast->symbol()] = func_id;
 
   return true;
 }
 
-uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
-  auto val = type_name_to_id_.find(func->type_name());
+uint32_t Builder::GenerateFunctionTypeIfNeeded(const sem::Function* func) {
+  auto val = type_name_to_id_.find(func->Declaration()->type_name());
   if (val != type_name_to_id_.end()) {
     return val->second;
   }
@@ -586,15 +587,14 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
   auto func_op = result_op();
   auto func_type_id = func_op.to_i();
 
-  auto ret_id = GenerateTypeIfNeeded(func->return_type());
+  auto ret_id = GenerateTypeIfNeeded(func->ReturnType());
   if (ret_id == 0) {
     return 0;
   }
 
   OperandList ops = {func_op, Operand::Int(ret_id)};
-  for (auto* param : func->params()) {
-    auto param_type_id =
-        GenerateTypeIfNeeded(builder_.Sem().Get(param)->Type());
+  for (auto* param : func->Parameters()) {
+    auto param_type_id = GenerateTypeIfNeeded(param->Type());
     if (param_type_id == 0) {
       return 0;
     }
@@ -603,7 +603,7 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(ast::Function* func) {
 
   push_type(spv::Op::OpTypeFunction, std::move(ops));
 
-  type_name_to_id_[func->type_name()] = func_type_id;
+  type_name_to_id_[func->Declaration()->type_name()] = func_type_id;
   return func_type_id;
 }
 
@@ -1217,7 +1217,7 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
   }
 
   auto* tc = constructor->As<ast::TypeConstructorExpression>();
-  auto* result_type = tc->type()->UnwrapAll();
+  auto* result_type = TypeOf(tc)->UnwrapAll();
   for (size_t i = 0; i < tc->values().size(); ++i) {
     auto* e = tc->values()[i];
 
@@ -1253,7 +1253,7 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
     } else if (auto* arr = subtype->As<sem::ArrayType>()) {
       subtype = arr->type()->UnwrapAll();
     } else if (auto* str = subtype->As<sem::StructType>()) {
-      subtype = str->impl()->members()[i]->type()->UnwrapAll();
+      subtype = builder_.Sem().Get(str)->Members()[i]->Type()->UnwrapAll();
     }
     if (subtype != TypeOf(sc)->UnwrapAll()) {
       return false;
@@ -1267,15 +1267,17 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     bool is_global_init) {
   auto& values = init->values();
 
+  auto* result_type = TypeOf(init);
+
   // Generate the zero initializer if there are no values provided.
   if (values.empty()) {
-    return GenerateConstantNullIfNeeded(init->type()->UnwrapPtrIfNeeded());
+    return GenerateConstantNullIfNeeded(result_type->UnwrapPtrIfNeeded());
   }
 
   std::ostringstream out;
   out << "__const";
 
-  auto* result_type = init->type()->UnwrapAll();
+  result_type = result_type->UnwrapAll();
   bool constructor_is_const = is_constructor_const(init, is_global_init);
   if (has_error()) {
     return 0;
@@ -1298,7 +1300,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     return GenerateCastOrCopyOrPassthrough(result_type, values[0]);
   }
 
-  auto type_id = GenerateTypeIfNeeded(init->type());
+  auto type_id = GenerateTypeIfNeeded(result_type);
   if (type_id == 0) {
     return 0;
   }
@@ -1426,7 +1428,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   return result.to_i();
 }
 
-uint32_t Builder::GenerateCastOrCopyOrPassthrough(sem::Type* to_type,
+uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
                                                   ast::Expression* from_expr) {
   auto result = result_op();
   auto result_id = result.to_i();
@@ -1598,7 +1600,7 @@ uint32_t Builder::GenerateConstantIfNeeded(const ScalarConstant& constant) {
   return result_id;
 }
 
-uint32_t Builder::GenerateConstantNullIfNeeded(sem::Type* type) {
+uint32_t Builder::GenerateConstantNullIfNeeded(const sem::Type* type) {
   auto type_id = GenerateTypeIfNeeded(type);
   if (type_id == 0) {
     return 0;
@@ -2413,12 +2415,15 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
       if (TypeOf(arg(Usage::kLevel))->Is<sem::I32>()) {
         // Depth textures have i32 parameters for the level, but SPIR-V expects
         // F32. Cast.
-        auto* f32 = builder_.create<sem::F32>();
-        ast::TypeConstructorExpression cast(ProgramID(), Source{}, f32,
-                                            {arg(Usage::kLevel)});
-        level = Operand::Int(GenerateExpression(&cast));
-        if (level.to_i() == 0) {
-          return false;
+        auto f32_type_id = GenerateTypeIfNeeded(builder_.create<sem::F32>());
+        if (f32_type_id == 0) {
+          return 0;
+        }
+        level = result_op();
+        if (!push_function_inst(
+                spv::Op::OpConvertSToF,
+                {Operand::Int(f32_type_id), level, gen_arg(Usage::kLevel)})) {
+          return 0;
         }
       } else {
         level = gen_arg(Usage::kLevel);
@@ -2920,7 +2925,7 @@ bool Builder::GenerateVariableDeclStatement(ast::VariableDeclStatement* stmt) {
   return GenerateFunctionVariable(stmt->variable());
 }
 
-uint32_t Builder::GenerateTypeIfNeeded(sem::Type* type) {
+uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
   if (type == nullptr) {
     error_ = "attempting to generate type from null type";
     return 0;
@@ -3002,7 +3007,7 @@ uint32_t Builder::GenerateTypeIfNeeded(sem::Type* type) {
 }
 
 // TODO(tommek): Cover multisampled textures here when they're included in AST
-bool Builder::GenerateTextureType(sem::Texture* texture,
+bool Builder::GenerateTextureType(const sem::Texture* texture,
                                   const Operand& result) {
   uint32_t array_literal = 0u;
   const auto dim = texture->dim();
@@ -3080,7 +3085,8 @@ bool Builder::GenerateTextureType(sem::Texture* texture,
   return true;
 }
 
-bool Builder::GenerateArrayType(sem::ArrayType* ary, const Operand& result) {
+bool Builder::GenerateArrayType(const sem::ArrayType* ary,
+                                const Operand& result) {
   auto elem_type = GenerateTypeIfNeeded(ary->type());
   if (elem_type == 0) {
     return false;
@@ -3110,7 +3116,8 @@ bool Builder::GenerateArrayType(sem::ArrayType* ary, const Operand& result) {
   return true;
 }
 
-bool Builder::GenerateMatrixType(sem::Matrix* mat, const Operand& result) {
+bool Builder::GenerateMatrixType(const sem::Matrix* mat,
+                                 const Operand& result) {
   sem::Vector col_type(mat->type(), mat->rows());
   auto col_type_id = GenerateTypeIfNeeded(&col_type);
   if (has_error()) {
@@ -3122,7 +3129,8 @@ bool Builder::GenerateMatrixType(sem::Matrix* mat, const Operand& result) {
   return true;
 }
 
-bool Builder::GeneratePointerType(sem::Pointer* ptr, const Operand& result) {
+bool Builder::GeneratePointerType(const sem::Pointer* ptr,
+                                  const Operand& result) {
   auto pointee_id = GenerateTypeIfNeeded(ptr->type());
   if (pointee_id == 0) {
     return false;
@@ -3140,7 +3148,7 @@ bool Builder::GeneratePointerType(sem::Pointer* ptr, const Operand& result) {
   return true;
 }
 
-bool Builder::GenerateStructType(sem::StructType* struct_type,
+bool Builder::GenerateStructType(const sem::StructType* struct_type,
                                  ast::AccessControl::Access access_control,
                                  const Operand& result) {
   auto struct_id = result.to_i();
@@ -3212,7 +3220,7 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
        Operand::Int(SpvDecorationOffset), Operand::Int(sem_member->Offset())});
 
   // Infer and emit matrix layout.
-  auto* matrix_type = GetNestedMatrixType(member->type());
+  auto* matrix_type = GetNestedMatrixType(sem_member->Type());
   if (matrix_type) {
     push_annot(spv::Op::OpMemberDecorate,
                {Operand::Int(struct_id), Operand::Int(idx),
@@ -3229,10 +3237,11 @@ uint32_t Builder::GenerateStructMember(uint32_t struct_id,
                 Operand::Int(effective_row_count * scalar_elem_size)});
   }
 
-  return GenerateTypeIfNeeded(member->type());
+  return GenerateTypeIfNeeded(sem_member->Type());
 }
 
-bool Builder::GenerateVectorType(sem::Vector* vec, const Operand& result) {
+bool Builder::GenerateVectorType(const sem::Vector* vec,
+                                 const Operand& result) {
   auto type_id = GenerateTypeIfNeeded(vec->type());
   if (has_error()) {
     return false;

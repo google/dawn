@@ -258,7 +258,7 @@ class Builder {
   /// Generates a function type if not already created
   /// @param func the function to generate for
   /// @returns the ID to use for the function type. Returns 0 on failure.
-  uint32_t GenerateFunctionTypeIfNeeded(ast::Function* func);
+  uint32_t GenerateFunctionTypeIfNeeded(const sem::Function* func);
   /// Generates access control annotations if needed
   /// @param type the type to generate for
   /// @param struct_id the struct id
@@ -381,7 +381,7 @@ class Builder {
   /// @param to_type the type we're casting too
   /// @param from_expr the expression to cast
   /// @returns the expression ID on success or 0 otherwise
-  uint32_t GenerateCastOrCopyOrPassthrough(sem::Type* to_type,
+  uint32_t GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
                                            ast::Expression* from_expr);
   /// Generates a loop statement
   /// @param stmt the statement to generate
@@ -423,33 +423,33 @@ class Builder {
   /// Generates a type if not already created
   /// @param type the type to create
   /// @returns the ID to use for the given type. Returns 0 on unknown type.
-  uint32_t GenerateTypeIfNeeded(sem::Type* type);
+  uint32_t GenerateTypeIfNeeded(const sem::Type* type);
   /// Generates a texture type declaration
   /// @param texture the texture to generate
   /// @param result the result operand
   /// @returns true if the texture was successfully generated
-  bool GenerateTextureType(sem::Texture* texture, const Operand& result);
+  bool GenerateTextureType(const sem::Texture* texture, const Operand& result);
   /// Generates an array type declaration
   /// @param ary the array to generate
   /// @param result the result operand
   /// @returns true if the array was successfully generated
-  bool GenerateArrayType(sem::ArrayType* ary, const Operand& result);
+  bool GenerateArrayType(const sem::ArrayType* ary, const Operand& result);
   /// Generates a matrix type declaration
   /// @param mat the matrix to generate
   /// @param result the result operand
   /// @returns true if the matrix was successfully generated
-  bool GenerateMatrixType(sem::Matrix* mat, const Operand& result);
+  bool GenerateMatrixType(const sem::Matrix* mat, const Operand& result);
   /// Generates a pointer type declaration
   /// @param ptr the pointer type to generate
   /// @param result the result operand
   /// @returns true if the pointer was successfully generated
-  bool GeneratePointerType(sem::Pointer* ptr, const Operand& result);
+  bool GeneratePointerType(const sem::Pointer* ptr, const Operand& result);
   /// Generates a vector type declaration
   /// @param struct_type the vector to generate
   /// @param access_control the access controls to assign to the struct
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
-  bool GenerateStructType(sem::StructType* struct_type,
+  bool GenerateStructType(const sem::StructType* struct_type,
                           ast::AccessControl::Access access_control,
                           const Operand& result);
   /// Generates a struct member
@@ -468,7 +468,7 @@ class Builder {
   /// @param vec the vector to generate
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
-  bool GenerateVectorType(sem::Vector* vec, const Operand& result);
+  bool GenerateVectorType(const sem::Vector* vec, const Operand& result);
 
   /// Converts AST image format to SPIR-V and pushes an appropriate capability.
   /// @param format AST image format type
@@ -500,7 +500,7 @@ class Builder {
   /// Generates a constant-null of the given type, if needed
   /// @param type the type of the constant null to generate.
   /// @returns the ID on success or 0 on failure
-  uint32_t GenerateConstantNullIfNeeded(sem::Type* type);
+  uint32_t GenerateConstantNullIfNeeded(const sem::Type* type);
 
   ProgramBuilder builder_;
   std::string error_;
