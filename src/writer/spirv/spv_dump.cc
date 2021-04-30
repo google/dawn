@@ -54,7 +54,7 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 
   std::string result;
   if (!tools.Disassemble(data, &result, SPV_BINARY_TO_TEXT_OPTION_NO_HEADER)) {
-    printf("%s\n", spv_errors.c_str());
+    return "*** Invalid SPIR-V ***\n" + spv_errors;
   }
   return result;
 }
