@@ -25,12 +25,22 @@ namespace spirv {
 Program Parse(const std::vector<uint32_t>& input) {
   ParserImpl parser(input);
   bool parsed = parser.Parse();
-  ProgramBuilder builder = std::move(parser.builder());
+
+  ProgramBuilder& builder = parser.builder();
   if (!parsed) {
     // TODO(bclayton): Migrate spirv::ParserImpl to using diagnostics.
     builder.Diagnostics().add_error(parser.error());
+    return Program(std::move(builder));
   }
-  return Program(std::move(builder));
+
+  // The SPIR-V parser can construct disjoint AST nodes, which is invalid for
+  // the Resolver. Clone the Program to clean these up.
+  builder.SetResolveOnBuild(false);
+  Program program_with_disjoint_ast(std::move(builder));
+
+  ProgramBuilder output;
+  CloneContext(&output, &program_with_disjoint_ast, false).Clone();
+  return Program(std::move(output));
 }
 
 }  // namespace spirv

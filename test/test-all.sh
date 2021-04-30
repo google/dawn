@@ -16,6 +16,7 @@
 
 set -e # Fail on any error.
 
+TEXT_YELLOW="\033[0;33m"
 TEXT_GREEN="\033[0;32m"
 TEXT_RED="\033[0;31m"
 TEXT_DEFAULT="\033[0m"
@@ -33,15 +34,42 @@ fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
 NUM_PASS=0
+NUM_SKIP=0
 NUM_FAIL=0
+
+SKIPPED=""
+SKIPPED+="msl:bug_tint_749.spvasm"  # TINT_UNIMPLEMENTED crbug.com/tint/726: module-scope private and workgroup variables not yet implemented
+SKIPPED+="hlsl:bug_tint_749.spvasm" # Failed to generate: error: pointers not supported in HLSL
+
+# should_skip(TEST_FILE, FORMAT)
+function should_skip() {
+    local TEST="$1-$2"
+    if [[ "$TEST" == "bug_tint_749.spvasm-msl" ]]; then
+        echo 1
+        return
+    fi
+    echo 0
+    return
+}
 
 # check(TEST_FILE, FORMAT)
 function check() {
-    TEST_FILE=$1
-    FORMAT=$2
+    local TEST_FILE=$1
+    local FORMAT=$2
+    SKIP=
+
+    if [[ $SKIPPED == *"${FORMAT}:${TEST_FILE}"* ]]; then
+        SKIP=1
+    fi
+
     printf "%7s: " "${FORMAT}"
+    if [[ -n "$SKIP" ]]; then
+        echo -e "${TEXT_YELLOW}SKIPPED${TEXT_DEFAULT}"
+        NUM_SKIP=$((${NUM_SKIP}+1))
+        return
+    fi
     set +e
-    ${TINT} ${TEST_FILE} --format ${FORMAT} -o /dev/null
+    ${TINT} ${SCRIPT_DIR}/${TEST_FILE} --format ${FORMAT} -o /dev/null
     if [ $? -eq 0 ]; then
         echo -e "${TEXT_GREEN}PASS${TEXT_DEFAULT}"
         NUM_PASS=$((${NUM_PASS}+1))
@@ -54,6 +82,7 @@ function check() {
 
 for TEST_FILE in ${SCRIPT_DIR}/*.spvasm ${SCRIPT_DIR}/*.wgsl
 do
+    TEST_FILE=$(realpath --relative-to="$SCRIPT_DIR" "$TEST_FILE")
     echo
     echo "Testing $TEST_FILE..."
     check "${TEST_FILE}" wgsl
@@ -64,11 +93,11 @@ done
 
 if [ ${NUM_FAIL} -ne 0 ]; then
     echo
-    echo -e "${TEXT_RED}${NUM_FAIL} tests failed. ${TEXT_DEFAULT}${NUM_PASS} passed${TEXT_DEFAULT}"
+    echo -e "${TEXT_RED}${NUM_FAIL} tests failed. ${TEXT_DEFAULT}${NUM_SKIP} skipped. ${NUM_PASS} passed.${TEXT_DEFAULT}"
     echo
     exit 1
 else
     echo
-    echo -e "${TEXT_GREEN}All ${NUM_PASS} tests pass${TEXT_DEFAULT}"
+    echo -e "${NUM_SKIP} tests skipped. ${TEXT_GREEN}${NUM_PASS} passed.${TEXT_DEFAULT}"
     echo
 fi
