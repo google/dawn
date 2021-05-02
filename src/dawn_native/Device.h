@@ -34,7 +34,7 @@ namespace dawn_native {
     class AttachmentState;
     class AttachmentStateBlueprint;
     class BindGroupLayoutBase;
-    class CreatePipelineAsyncTracker;
+    class CallbackTaskManager;
     class DynamicUploader;
     class ErrorScopeStack;
     class ExternalTextureBase;
@@ -402,7 +402,7 @@ namespace dawn_native {
         Ref<BindGroupLayoutBase> mEmptyBindGroupLayout;
 
         std::unique_ptr<DynamicUploader> mDynamicUploader;
-        std::unique_ptr<CreatePipelineAsyncTracker> mCreatePipelineAsyncTracker;
+        std::unique_ptr<CallbackTaskManager> mCallbackTaskManager;
         Ref<QueueBase> mQueue;
 
         struct DeprecationWarnings;

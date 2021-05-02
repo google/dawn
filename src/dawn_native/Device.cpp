@@ -20,11 +20,12 @@
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
+#include "dawn_native/CallbackTaskManager.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CompilationMessages.h"
 #include "dawn_native/ComputePipeline.h"
-#include "dawn_native/CreatePipelineAsyncTracker.h"
+#include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/DynamicUploader.h"
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/ErrorScope.h"
@@ -125,7 +126,7 @@ namespace dawn_native {
         mCaches = std::make_unique<DeviceBase::Caches>();
         mErrorScopeStack = std::make_unique<ErrorScopeStack>();
         mDynamicUploader = std::make_unique<DynamicUploader>(this);
-        mCreatePipelineAsyncTracker = std::make_unique<CreatePipelineAsyncTracker>(this);
+        mCallbackTaskManager = std::make_unique<CallbackTaskManager>();
         mDeprecationWarnings = std::make_unique<DeprecationWarnings>();
         mInternalPipelineStore = std::make_unique<InternalPipelineStore>();
         mPersistentCache = std::make_unique<PersistentCache>(this);
@@ -142,8 +143,11 @@ namespace dawn_native {
     void DeviceBase::ShutDownBase() {
         // Skip handling device facilities if they haven't even been created (or failed doing so)
         if (mState != State::BeingCreated) {
-            // Reject all async pipeline creations.
-            mCreatePipelineAsyncTracker->ClearForShutDown();
+            // Call all the callbacks immediately as the device is about to shut down.
+            auto callbackTasks = mCallbackTaskManager->AcquireCallbackTasks();
+            for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
+                callbackTask->HandleShutDown();
+            }
         }
 
         // Disconnect the device, depending on which state we are currently in.
@@ -188,7 +192,7 @@ namespace dawn_native {
         mState = State::Disconnected;
 
         mDynamicUploader = nullptr;
-        mCreatePipelineAsyncTracker = nullptr;
+        mCallbackTaskManager = nullptr;
         mPersistentCache = nullptr;
 
         mEmptyBindGroupLayout = nullptr;
@@ -238,7 +242,10 @@ namespace dawn_native {
             }
 
             mQueue->HandleDeviceLoss();
-            mCreatePipelineAsyncTracker->ClearForDeviceLoss();
+            auto callbackTasks = mCallbackTaskManager->AcquireCallbackTasks();
+            for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
+                callbackTask->HandleDeviceLoss();
+            }
 
             // Still forward device loss errors to the error scopes so they all reject.
             mErrorScopeStack->HandleError(ToWGPUErrorType(type), message);
@@ -766,10 +773,10 @@ namespace dawn_native {
         }
 
         Ref<RenderPipelineBase> result = maybeResult.AcquireSuccess();
-        std::unique_ptr<CreateRenderPipelineAsyncTask> request =
-            std::make_unique<CreateRenderPipelineAsyncTask>(std::move(result), "", callback,
-                                                            userdata);
-        mCreatePipelineAsyncTracker->TrackTask(std::move(request), GetPendingCommandSerial());
+        std::unique_ptr<CreateRenderPipelineAsyncCallbackTask> callbackTask =
+            std::make_unique<CreateRenderPipelineAsyncCallbackTask>(std::move(result), "", callback,
+                                                                    userdata);
+        mCallbackTaskManager->AddCallbackTask(std::move(callbackTask));
     }
     RenderBundleEncoder* DeviceBase::APICreateRenderBundleEncoder(
         const RenderBundleEncoderDescriptor* descriptor) {
@@ -951,8 +958,19 @@ namespace dawn_native {
             // reclaiming resources one tick earlier.
             mDynamicUploader->Deallocate(mCompletedSerial);
             mQueue->Tick(mCompletedSerial);
+        }
 
-            mCreatePipelineAsyncTracker->Tick(mCompletedSerial);
+        // We have to check mCallbackTaskManager in every Tick because it is not related to any
+        // global serials.
+        if (!mCallbackTaskManager->IsEmpty()) {
+            // If a user calls Queue::Submit inside the callback, then the device will be ticked,
+            // which in turns ticks the tracker, causing reentrance and dead lock here. To prevent
+            // such reentrant call, we remove all the callback tasks from mCallbackTaskManager,
+            // update mCallbackTaskManager, then call all the callbacks.
+            auto callbackTasks = mCallbackTaskManager->AcquireCallbackTasks();
+            for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
+                callbackTask->Finish();
+            }
         }
 
         return {};
@@ -1158,10 +1176,10 @@ namespace dawn_native {
             result = AddOrGetCachedPipeline(resultOrError.AcquireSuccess(), blueprintHash);
         }
 
-        std::unique_ptr<CreateComputePipelineAsyncTask> request =
-            std::make_unique<CreateComputePipelineAsyncTask>(result, errorMessage, callback,
-                                                             userdata);
-        mCreatePipelineAsyncTracker->TrackTask(std::move(request), GetPendingCommandSerial());
+        std::unique_ptr<CreateComputePipelineAsyncCallbackTask> callbackTask =
+            std::make_unique<CreateComputePipelineAsyncCallbackTask>(
+                std::move(result), errorMessage, callback, userdata);
+        mCallbackTaskManager->AddCallbackTask(std::move(callbackTask));
     }
 
     ResultOrError<Ref<PipelineLayoutBase>> DeviceBase::CreatePipelineLayout(
