@@ -20,6 +20,8 @@
 #define SRC_TYPEPAIR_H_
 
 #include <cstddef>
+#include <type_traits>
+#include <utility>
 
 // X11 likes to #define Bool leading to confusing error messages.
 // If its defined, undefine it.
@@ -45,6 +47,7 @@ class Sampler;
 class SampledTexture;
 class StorageTexture;
 class Struct;
+class Texture;
 class Type;
 class U32;
 class Vector;
@@ -67,6 +70,7 @@ class Sampler;
 class SampledTexture;
 class StorageTexture;
 class StructType;
+class Texture;
 class Type;
 class U32;
 class Vector;
@@ -122,6 +126,11 @@ struct Ptr {
 ///   will switch to returning the ast::Type pointer.
 template <typename AST, typename SEM>
 struct TypePair {
+  /// Alias of the `AST` template type parameter
+  using AST_TYPE = AST;
+  /// Alias of the `SEM` template type parameter
+  using SEM_TYPE = SEM;
+
   /// The ast::Type pointer
   AST const* ast = nullptr;
   /// The sem::Type pointer
@@ -246,9 +255,43 @@ using Sampler = TypePair<ast::Sampler, sem::Sampler>;
 using SampledTexture = TypePair<ast::SampledTexture, sem::SampledTexture>;
 using StorageTexture = TypePair<ast::StorageTexture, sem::StorageTexture>;
 using Struct = TypePair<ast::Struct, sem::StructType>;
+using Texture = TypePair<ast::Texture, sem::Texture>;
 using U32 = TypePair<ast::U32, sem::U32>;
 using Vector = TypePair<ast::Vector, sem::Vector>;
 using Void = TypePair<ast::Void, sem::Void>;
+
+// Helpers
+
+/// Makes a type pair, deducing the return type from input args
+/// @parm ast the ast node
+/// @param sem the sem node
+/// @returns a type pair
+template <typename AST, typename SEM>
+inline auto MakeTypePair(AST* ast, SEM* sem) {
+  return TypePair<AST, SEM>{ast, sem};
+}
+
+/// Performs an As operation on the `ast` and `sem` members of the input type
+/// pair, deducing the mapped type from typ::* to ast::* and sem::*
+/// respectively.
+/// @param tp the type pair to call As on
+/// @returns a new type pair after As has been called on each of `sem` and `ast`
+template <typename TargetTYP, typename AST, typename SEM>
+auto As(TypePair<AST, SEM> tp)
+    -> TypePair<typename TargetTYP::AST_TYPE, typename TargetTYP::SEM_TYPE> {
+  return MakeTypePair(
+      tp.ast ? tp.ast->template As<typename TargetTYP::AST_TYPE>() : nullptr,
+      tp.sem ? tp.sem->template As<typename TargetTYP::SEM_TYPE>() : nullptr);
+}
+
+/// Invokes the `type()` member function on each of `ast` and `sem` of the input
+/// type pair
+/// @param tp the type pair
+/// @returns a type pair with the result of calling `type()` on `ast` and `sem`
+template <typename AST, typename SEM>
+TypePair<AST, SEM> Call_type(TypePair<AST, SEM> tp) {
+  return MakeTypePair(tp.ast->type(), tp.sem->type());
+}
 
 }  // namespace typ
 

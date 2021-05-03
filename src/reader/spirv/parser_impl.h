@@ -29,6 +29,7 @@
 #include "src/reader/spirv/enum_converter.h"
 #include "src/reader/spirv/namer.h"
 #include "src/reader/spirv/usage.h"
+#include "src/typepair.h"
 
 /// This is the implementation of the SPIR-V parser for Tint.
 
@@ -60,8 +61,22 @@ using DecorationList = std::vector<Decoration>;
 
 /// An AST expression with its type.
 struct TypedExpression {
+  /// Constructor
+  TypedExpression();
+
+  /// Copy constructor
+  TypedExpression(const TypedExpression&);
+
+  /// Assignment operator
+  TypedExpression& operator=(const TypedExpression&);
+
+  /// Constructor
+  /// @param type_in the type of the expression
+  /// @param expr_in the expression
+  TypedExpression(typ::Type type_in, ast::Expression* expr_in);
+
   /// The type
-  sem::Type* type = nullptr;
+  typ::Type type;
   /// The expression
   ast::Expression* expr = nullptr;
 };
@@ -140,7 +155,7 @@ class ParserImpl : Reader {
   /// after the internal representation of the module has been built.
   /// @param type_id the SPIR-V ID of a type.
   /// @returns a Tint type, or nullptr
-  sem::Type* ConvertType(uint32_t type_id);
+  typ::Type ConvertType(uint32_t type_id);
 
   /// Emits an alias type declaration for the given type, if necessary, and
   /// also updates the mapping of the SPIR-V type ID to the alias type.
@@ -151,8 +166,11 @@ class ParserImpl : Reader {
   /// This is a no-op if the parser has already failed.
   /// @param type_id the SPIR-V ID for the type
   /// @param type the type that might get an alias
-  void MaybeGenerateAlias(uint32_t type_id,
-                          const spvtools::opt::analysis::Type* type);
+  /// @param ast_type the ast type that might get an alias
+  /// @returns an alias type or `ast_type` if no alias was created
+  typ::Type MaybeGenerateAlias(uint32_t type_id,
+                               const spvtools::opt::analysis::Type* type,
+                               typ::Type ast_type);
 
   /// @returns the fail stream object
   FailStream& fail_stream() { return fail_stream_; }
@@ -302,7 +320,7 @@ class ParserImpl : Reader {
   /// in the error case
   ast::Variable* MakeVariable(uint32_t id,
                               ast::StorageClass sc,
-                              sem::Type* type,
+                              typ::Type type,
                               bool is_const,
                               ast::Expression* constructor,
                               ast::DecorationList decorations);
@@ -315,12 +333,12 @@ class ParserImpl : Reader {
   /// Creates an AST expression node for the null value for the given type.
   /// @param type the AST type
   /// @returns a new expression
-  ast::Expression* MakeNullValue(sem::Type* type);
+  ast::Expression* MakeNullValue(typ::Type type);
 
   /// Make a typed expression for the null value for the given type.
   /// @param type the AST type
   /// @returns a new typed expression
-  TypedExpression MakeNullExpression(sem::Type* type);
+  TypedExpression MakeNullExpression(typ::Type type);
 
   /// Converts a given expression to the signedness demanded for an operand
   /// of the given SPIR-V instruction, if required.  If the instruction assumes
@@ -345,7 +363,7 @@ class ParserImpl : Reader {
   /// @returns second_operand_expr, or a cast of it
   TypedExpression RectifySecondOperandSignedness(
       const spvtools::opt::Instruction& inst,
-      sem::Type* first_operand_type,
+      typ::Type first_operand_type,
       TypedExpression&& second_operand_expr);
 
   /// Returns the "forced" result type for the given SPIR-V instruction.
@@ -356,8 +374,8 @@ class ParserImpl : Reader {
   /// @param inst the SPIR-V instruction
   /// @param first_operand_type the AST type for the first operand.
   /// @returns the forced AST result type, or nullptr if no forcing is required.
-  sem::Type* ForcedResultType(const spvtools::opt::Instruction& inst,
-                              sem::Type* first_operand_type);
+  typ::Type ForcedResultType(const spvtools::opt::Instruction& inst,
+                             typ::Type first_operand_type);
 
   /// Returns a signed integer scalar or vector type matching the shape (scalar,
   /// vector, and component bit width) of another type, which itself is a
@@ -365,7 +383,7 @@ class ParserImpl : Reader {
   /// requirement.
   /// @param other the type whose shape must be matched
   /// @returns the signed scalar or vector type
-  sem::Type* GetSignedIntMatchingShape(sem::Type* other);
+  typ::Type GetSignedIntMatchingShape(typ::Type other);
 
   /// Returns a signed integer scalar or vector type matching the shape (scalar,
   /// vector, and component bit width) of another type, which itself is a
@@ -373,7 +391,7 @@ class ParserImpl : Reader {
   /// requirement.
   /// @param other the type whose shape must be matched
   /// @returns the unsigned scalar or vector type
-  sem::Type* GetUnsignedIntMatchingShape(sem::Type* other);
+  typ::Type GetUnsignedIntMatchingShape(typ::Type other);
 
   /// Wraps the given expression in an as-cast to the given expression's type,
   /// when the underlying operation produces a forced result type different
@@ -386,10 +404,7 @@ class ParserImpl : Reader {
   TypedExpression RectifyForcedResultType(
       TypedExpression expr,
       const spvtools::opt::Instruction& inst,
-      sem::Type* first_operand_type);
-
-  /// @returns the registered boolean type.
-  sem::Type* Bool() const { return bool_type_; }
+      typ::Type first_operand_type);
 
   /// Bookkeeping used for tracking the "position" builtin variable.
   struct BuiltInPositionInfo {
@@ -477,18 +492,18 @@ class ParserImpl : Reader {
   /// @param var the OpVariable instruction
   /// @returns the Tint AST type for the poiner-to-{sampler|texture} or null on
   /// error
-  sem::Pointer* GetTypeForHandleVar(const spvtools::opt::Instruction& var);
+  typ::Pointer GetTypeForHandleVar(const spvtools::opt::Instruction& var);
 
   /// Returns the channel component type corresponding to the given image
   /// format.
   /// @param format image texel format
   /// @returns the component type, one of f32, i32, u32
-  sem::Type* GetComponentTypeForFormat(ast::ImageFormat format);
+  typ::Type GetComponentTypeForFormat(ast::ImageFormat format);
 
   /// Returns texel type corresponding to the given image format.
   /// @param format image texel format
   /// @returns the texel format
-  sem::Type* GetTexelTypeForFormat(ast::ImageFormat format);
+  typ::Type GetTexelTypeForFormat(ast::ImageFormat format);
 
   /// Returns the SPIR-V instruction with the given ID, or nullptr.
   /// @param id the SPIR-V result ID
@@ -523,19 +538,19 @@ class ParserImpl : Reader {
 
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
-  sem::Type* ConvertType(const spvtools::opt::analysis::Integer* int_ty);
+  typ::Type ConvertType(const spvtools::opt::analysis::Integer* int_ty);
   /// Converts a specific SPIR-V type to a Tint type. Float case
-  sem::Type* ConvertType(const spvtools::opt::analysis::Float* float_ty);
+  typ::Type ConvertType(const spvtools::opt::analysis::Float* float_ty);
   /// Converts a specific SPIR-V type to a Tint type. Vector case
-  sem::Type* ConvertType(const spvtools::opt::analysis::Vector* vec_ty);
+  typ::Type ConvertType(const spvtools::opt::analysis::Vector* vec_ty);
   /// Converts a specific SPIR-V type to a Tint type. Matrix case
-  sem::Type* ConvertType(const spvtools::opt::analysis::Matrix* mat_ty);
+  typ::Type ConvertType(const spvtools::opt::analysis::Matrix* mat_ty);
   /// Converts a specific SPIR-V type to a Tint type. RuntimeArray case
   /// @param rtarr_ty the Tint type
-  sem::Type* ConvertType(const spvtools::opt::analysis::RuntimeArray* rtarr_ty);
+  typ::Type ConvertType(const spvtools::opt::analysis::RuntimeArray* rtarr_ty);
   /// Converts a specific SPIR-V type to a Tint type. Array case
   /// @param arr_ty the Tint type
-  sem::Type* ConvertType(const spvtools::opt::analysis::Array* arr_ty);
+  typ::Type ConvertType(const spvtools::opt::analysis::Array* arr_ty);
   /// Converts a specific SPIR-V type to a Tint type. Struct case.
   /// SPIR-V allows distinct struct type definitions for two OpTypeStruct
   /// that otherwise have the same set of members (and struct and member
@@ -547,15 +562,27 @@ class ParserImpl : Reader {
   /// not significant to the optimizer's module representation.
   /// @param type_id the SPIR-V ID for the type.
   /// @param struct_ty the Tint type
-  sem::Type* ConvertType(uint32_t type_id,
-                         const spvtools::opt::analysis::Struct* struct_ty);
+  typ::Type ConvertType(uint32_t type_id,
+                        const spvtools::opt::analysis::Struct* struct_ty);
   /// Converts a specific SPIR-V type to a Tint type. Pointer case
   /// The pointer to gl_PerVertex maps to nullptr, and instead is recorded
   /// in member #builtin_position_.
   /// @param type_id the SPIR-V ID for the type.
   /// @param ptr_ty the Tint type
-  sem::Type* ConvertType(uint32_t type_id,
-                         const spvtools::opt::analysis::Pointer* ptr_ty);
+  typ::Type ConvertType(uint32_t type_id,
+                        const spvtools::opt::analysis::Pointer* ptr_ty);
+
+  /// If `type` is a signed integral, or vector of signed integral,
+  /// returns the unsigned type, otherwise returns `type`.
+  /// @param type the possibly signed type
+  /// @returns the unsigned type
+  typ::Type UnsignedTypeFor(typ::Type type);
+
+  /// If `type` is a unsigned integral, or vector of unsigned integral,
+  /// returns the signed type, otherwise returns `type`.
+  /// @param type the possibly unsigned type
+  /// @returns the signed type
+  typ::Type SignedTypeFor(typ::Type type);
 
   /// Parses the array or runtime-array decorations.
   /// @param spv_type the SPIR-V array or runtime-array type.
@@ -584,9 +611,6 @@ class ParserImpl : Reader {
   std::stringstream errors_;
   FailStream fail_stream_;
   spvtools::MessageConsumer message_consumer_;
-
-  // The registered boolean type.
-  sem::Type* bool_type_;
 
   // An object used to store and generate names for SPIR-V objects.
   Namer namer_;
@@ -621,14 +645,6 @@ class ParserImpl : Reader {
   // "NonSemanticInfo." import is ignored.
   std::unordered_set<uint32_t> ignored_imports_;
 
-  // Maps a SPIR-V type ID to the corresponding Tint type.
-  std::unordered_map<uint32_t, sem::Type*> id_to_type_;
-
-  // Maps an unsigned type corresponding to the given signed type.
-  std::unordered_map<sem::Type*, sem::Type*> signed_type_for_;
-  // Maps an signed type corresponding to the given unsigned type.
-  std::unordered_map<sem::Type*, sem::Type*> unsigned_type_for_;
-
   // Bookkeeping for the gl_Position builtin.
   // In Vulkan SPIR-V, it's the 0 member of the gl_PerVertex structure.
   // But in WGSL we make a module-scope variable:
@@ -646,8 +662,8 @@ class ParserImpl : Reader {
   // and Block decoration.
   std::unordered_set<uint32_t> remap_buffer_block_type_;
 
-  // The struct types with only read-only members.
-  std::unordered_set<sem::Type*> read_only_struct_types_;
+  // The ast::Struct type names with only read-only members.
+  std::unordered_set<Symbol> read_only_struct_types_;
 
   // The IDs of scalar spec constants
   std::unordered_set<uint32_t> scalar_spec_constants_;
@@ -672,7 +688,7 @@ class ParserImpl : Reader {
   // usages implied by usages of the memory-object-declaration.
   std::unordered_map<const spvtools::opt::Instruction*, Usage> handle_usage_;
   // The inferred pointer type for the given handle variable.
-  std::unordered_map<const spvtools::opt::Instruction*, sem::Pointer*>
+  std::unordered_map<const spvtools::opt::Instruction*, typ::Pointer>
       handle_type_;
 
   /// Maps the SPIR-V ID of a module-scope builtin variable that should be

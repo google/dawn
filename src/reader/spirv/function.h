@@ -25,6 +25,7 @@
 #include "src/program_builder.h"
 #include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/parser_impl.h"
+#include "src/typepair.h"
 
 namespace tint {
 namespace reader {
@@ -512,7 +513,7 @@ class FunctionEmitter {
   /// @param type the AST type
   /// @param result_id the SPIR-V ID for the locally defined value
   /// @returns an possibly updated type
-  sem::Type* RemapStorageClass(sem::Type* type, uint32_t result_id);
+  typ::Type RemapStorageClass(typ::Type type, uint32_t result_id);
 
   /// Marks locally defined values when they should get a 'const'
   /// definition in WGSL, or a 'var' definition at an outer scope.
@@ -853,7 +854,7 @@ class FunctionEmitter {
     /// Function parameters
     ast::VariableList params;
     /// Function return type
-    sem::Type* return_type;
+    typ::Type return_type;
     /// Function decorations
     ast::DecorationList decorations;
   };
@@ -866,7 +867,7 @@ class FunctionEmitter {
 
   /// @returns the store type for the OpVariable instruction, or
   /// null on failure.
-  sem::Type* GetVariableStoreType(
+  typ::Type GetVariableStoreType(
       const spvtools::opt::Instruction& var_decl_inst);
 
   /// Returns an expression for an instruction operand. Signedness conversion is
@@ -934,7 +935,7 @@ class FunctionEmitter {
   /// Get the AST texture the SPIR-V image memory object declaration.
   /// @param inst the SPIR-V memory object declaration for the image.
   /// @returns a texture type, or null on error
-  sem::Texture* GetImageType(const spvtools::opt::Instruction& inst);
+  typ::Texture GetImageType(const spvtools::opt::Instruction& inst);
 
   /// Get the expression for the image operand from the first operand to the
   /// given instruction.
@@ -971,7 +972,7 @@ class FunctionEmitter {
   ast::Expression* ConvertTexelForStorage(
       const spvtools::opt::Instruction& inst,
       TypedExpression texel,
-      sem::Texture* texture_type);
+      typ::Texture texture_type);
 
   /// Returns an expression for an OpSelect, if its operands are scalars
   /// or vectors. These translate directly to WGSL select.  Otherwise, return
@@ -1133,8 +1134,6 @@ class FunctionEmitter {
   FailStream& fail_stream_;
   Namer& namer_;
   const spvtools::opt::Function& function_;
-  sem::I32* const i32_;  // The unique I32 type object.
-  sem::U32* const u32_;  // The unique U32 type object.
 
   // The SPIR-V ID for the SampleMask input variable.
   uint32_t sample_mask_in_id;
