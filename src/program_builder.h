@@ -51,6 +51,7 @@
 #include "src/ast/struct_member_size_decoration.h"
 #include "src/ast/switch_statement.h"
 #include "src/ast/type_constructor_expression.h"
+#include "src/ast/type_name.h"
 #include "src/ast/u32.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
@@ -408,6 +409,7 @@ class ProgramBuilder {
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
     typ::Vector vec(typ::Type type, uint32_t n) const {
+      type = MaybeCreateTypename(type);
       return {type.ast ? builder->create<ast::Vector>(type, n) : nullptr,
               type.sem ? builder->create<sem::Vector>(type, n) : nullptr};
     }
@@ -417,6 +419,7 @@ class ProgramBuilder {
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
     typ::Vector vec(const Source& source, typ::Type type, uint32_t n) const {
+      type = MaybeCreateTypename(type);
       return {
           type.ast ? builder->create<ast::Vector>(source, type, n) : nullptr,
           type.sem ? builder->create<sem::Vector>(type, n) : nullptr};
@@ -464,6 +467,7 @@ class ProgramBuilder {
     /// @param rows number of rows for the matrix
     /// @return the tint AST type for a matrix of `type`
     typ::Matrix mat(typ::Type type, uint32_t columns, uint32_t rows) const {
+      type = MaybeCreateTypename(type);
       return {type.ast ? builder->create<ast::Matrix>(type, rows, columns)
                        : nullptr,
               type.sem ? builder->create<sem::Matrix>(type, rows, columns)
@@ -627,6 +631,20 @@ class ProgramBuilder {
                    {builder->create<ast::StrideDecoration>(stride)});
     }
 
+    /// @param source the Source of the node
+    /// @param subtype the array element type
+    /// @param n the array size. 0 represents a runtime-array
+    /// @param stride the array stride
+    /// @return the tint AST type for a array of size `n` of type `T`
+    typ::Array array(const Source& source,
+                     typ::Type subtype,
+                     uint32_t n,
+                     uint32_t stride) const {
+      subtype = MaybeCreateTypename(subtype);
+      return array(source, subtype, n,
+                   {builder->create<ast::StrideDecoration>(stride)});
+    }
+
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
     typ::Array array() const {
@@ -640,6 +658,25 @@ class ProgramBuilder {
       return array(Of<T>(), N, stride);
     }
 
+    /// Creates a type name
+    /// @param name the name
+    /// @returns the type name
+    template <typename NAME>
+    ast::TypeName* type_name(NAME&& name) const {
+      return builder->create<ast::TypeName>(
+          builder->Sym(std::forward<NAME>(name)));
+    }
+
+    /// Creates a type name
+    /// @param source the Source of the node
+    /// @param name the name
+    /// @returns the type name
+    template <typename NAME>
+    ast::TypeName* type_name(const Source& source, NAME&& name) const {
+      return builder->create<ast::TypeName>(
+          source, builder->Sym(std::forward<NAME>(name)));
+    }
+
     /// Creates an alias type
     /// @param name the alias name
     /// @param type the alias type
@@ -649,8 +686,8 @@ class ProgramBuilder {
       type = MaybeCreateTypename(type);
       auto sym = builder->Sym(std::forward<NAME>(name));
       return {
-          builder->create<ast::Alias>(sym, type),
-          builder->create<sem::Alias>(sym, type),
+          type.ast ? builder->create<ast::Alias>(sym, type) : nullptr,
+          type.sem ? builder->create<sem::Alias>(sym, type) : nullptr,
       };
     }
 
@@ -1015,8 +1052,7 @@ class ProgramBuilder {
   /// of `args` converted to `ast::Expression`s using `Expr()`
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* Construct(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.Of<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.Of<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param type the type to construct
@@ -1025,6 +1061,7 @@ class ProgramBuilder {
   /// values `args`.
   template <typename... ARGS>
   ast::TypeConstructorExpression* Construct(typ::Type type, ARGS&&... args) {
+    type = ty.MaybeCreateTypename(type);
     return create<ast::TypeConstructorExpression>(
         type, ExprList(std::forward<ARGS>(args)...));
   }
@@ -1045,8 +1082,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* vec2(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.vec2<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.vec2<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the vector constructor
@@ -1054,8 +1090,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* vec3(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.vec3<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.vec3<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the vector constructor
@@ -1063,8 +1098,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* vec4(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.vec4<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.vec4<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
@@ -1072,8 +1106,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* mat2x2(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.mat2x2<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.mat2x2<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
@@ -1081,8 +1114,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* mat2x3(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.mat2x3<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.mat2x3<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
@@ -1090,8 +1122,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* mat2x4(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.mat2x4<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.mat2x4<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
@@ -1099,8 +1130,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* mat3x2(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.mat3x2<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.mat3x2<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
@@ -1108,8 +1138,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* mat3x3(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.mat3x3<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.mat3x3<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
@@ -1117,8 +1146,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* mat3x4(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.mat3x4<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.mat3x4<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
@@ -1126,8 +1154,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* mat4x2(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.mat4x2<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.mat4x2<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
@@ -1135,8 +1162,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* mat4x3(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.mat4x3<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.mat4x3<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the matrix constructor
@@ -1144,8 +1170,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, typename... ARGS>
   ast::TypeConstructorExpression* mat4x4(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.mat4x4<T>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.mat4x4<T>(), std::forward<ARGS>(args)...);
   }
 
   /// @param args the arguments for the array constructor
@@ -1153,8 +1178,7 @@ class ProgramBuilder {
   /// `T`, constructed with the values `args`.
   template <typename T, int N = 0, typename... ARGS>
   ast::TypeConstructorExpression* array(ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.array<T, N>(), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.array<T, N>(), std::forward<ARGS>(args)...);
   }
 
   /// @param subtype the array element type
@@ -1166,8 +1190,7 @@ class ProgramBuilder {
   ast::TypeConstructorExpression* array(typ::Type subtype,
                                         uint32_t n,
                                         ARGS&&... args) {
-    return create<ast::TypeConstructorExpression>(
-        ty.array(subtype, n), ExprList(std::forward<ARGS>(args)...));
+    return Construct(ty.array(subtype, n), std::forward<ARGS>(args)...);
   }
 
   /// @param name the variable name
