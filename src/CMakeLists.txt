@@ -564,6 +564,7 @@ if(${TINT_BUILD_TESTS})
     sem/intrinsic_test.cc
     symbol_table_test.cc
     symbol_test.cc
+    transform/transform_test.cc
     test_main.cc
     sem/access_control_type_test.cc
     sem/alias_type_test.cc

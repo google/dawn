@@ -179,6 +179,14 @@ class Transform {
       CloneContext* ctx,
       const ast::DecorationList& in,
       std::function<bool(const ast::Decoration*)> should_remove);
+
+  /// CreateASTTypeFor constructs new ast::Type nodes that reconstructs the
+  /// semantic type `ty`.
+  /// @param ctx the clone context
+  /// @param ty the semantic type to reconstruct
+  /// @returns a ast::Type that when resolved, will produce the semantic type
+  /// `ty`.
+  static ast::Type* CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty);
 };
 
 }  // namespace transform

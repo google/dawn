@@ -71,5 +71,49 @@ ast::DecorationList Transform::RemoveDecorations(
   return new_decorations;
 }
 
+ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
+  if (ty->Is<sem::Void>()) {
+    return ctx->dst->create<ast::Void>();
+  }
+  if (ty->Is<sem::I32>()) {
+    return ctx->dst->create<ast::I32>();
+  }
+  if (ty->Is<sem::U32>()) {
+    return ctx->dst->create<ast::U32>();
+  }
+  if (ty->Is<sem::F32>()) {
+    return ctx->dst->create<ast::F32>();
+  }
+  if (ty->Is<sem::Bool>()) {
+    return ctx->dst->create<ast::Bool>();
+  }
+  if (auto* m = ty->As<sem::Matrix>()) {
+    auto* el = CreateASTTypeFor(ctx, m->type());
+    return ctx->dst->create<ast::Matrix>(el, m->rows(), m->columns());
+  }
+  if (auto* v = ty->As<sem::Vector>()) {
+    auto* el = CreateASTTypeFor(ctx, v->type());
+    return ctx->dst->create<ast::Vector>(el, v->size());
+  }
+  if (auto* a = ty->As<sem::ArrayType>()) {
+    auto* el = CreateASTTypeFor(ctx, a->type());
+    auto decos = ctx->Clone(a->decorations());
+    return ctx->dst->create<ast::Array>(el, a->size(), std::move(decos));
+  }
+  if (auto* ac = ty->As<sem::AccessControl>()) {
+    auto* el = CreateASTTypeFor(ctx, ac->type());
+    return ctx->dst->create<ast::AccessControl>(ac->access_control(), el);
+  }
+  if (auto* a = ty->As<sem::Alias>()) {
+    return ctx->dst->create<ast::TypeName>(ctx->Clone(a->symbol()));
+  }
+  if (auto* s = ty->As<sem::StructType>()) {
+    return ctx->dst->create<ast::TypeName>(ctx->Clone(s->impl()->name()));
+  }
+  TINT_UNREACHABLE(ctx->dst->Diagnostics())
+      << "Unhandled type: " << ty->TypeInfo().name;
+  return nullptr;
+}
+
 }  // namespace transform
 }  // namespace tint
