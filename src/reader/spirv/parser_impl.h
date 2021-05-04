@@ -68,6 +68,7 @@ struct TypedExpression {
   TypedExpression(const TypedExpression&);
 
   /// Assignment operator
+  /// @returns this TypedExpression
   TypedExpression& operator=(const TypedExpression&);
 
   /// Constructor

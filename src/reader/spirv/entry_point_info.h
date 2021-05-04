@@ -29,6 +29,10 @@ struct EntryPointInfo {
   /// Constructor.
   /// @param the_name the name of the entry point
   /// @param the_stage the pipeline stage
+  /// @param the_owns_inner_implementation if true, this entry point is
+  /// responsible for generating the inner implementation function.
+  /// @param the_inner_name the name of the inner implementation function of the
+  /// entry point
   /// @param the_inputs list of IDs for Input variables used by the shader
   /// @param the_outputs list of IDs for Output variables used by the shader
   EntryPointInfo(std::string the_name,
