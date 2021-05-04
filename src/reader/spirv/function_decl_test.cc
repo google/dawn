@@ -53,7 +53,7 @@ TEST_F(SpvParserTest, Emit_VoidFunctionWithoutParams) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.Emit());
   auto got = p->program().to_str();
   std::string expect = R"(Module{
@@ -76,7 +76,7 @@ TEST_F(SpvParserTest, Emit_NonVoidResultType) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.Emit());
 
   auto got = p->program().to_str();
@@ -108,7 +108,7 @@ TEST_F(SpvParserTest, Emit_MixedParamTypes) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.Emit());
 
   auto got = p->program().to_str();
@@ -152,7 +152,7 @@ TEST_F(SpvParserTest, Emit_GenerateParamNames) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.Emit());
 
   auto got = p->program().to_str();

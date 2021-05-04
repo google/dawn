@@ -1999,7 +1999,7 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_TRUE(p->error().empty());
 

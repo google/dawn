@@ -85,7 +85,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   {
-    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+    auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody());
     EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
                 HasSubstr(R"(VariableDeclStatement{
@@ -106,7 +106,7 @@ Return{})"));
   }
 
   {
-    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 50));
+    auto fe = p->function_emitter(50);
     EXPECT_TRUE(fe.EmitBody());
     EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Return{
   {
@@ -141,7 +141,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   {
-    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+    auto fe = p->function_emitter(100);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
                 HasSubstr(R"(VariableDeclStatement{
@@ -176,7 +176,7 @@ Assignment{
 Return{})"));
   }
   {
-    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 50));
+    auto fe = p->function_emitter(50);
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(Return{
   {

@@ -17,15 +17,102 @@
 
 #include <memory>
 #include <string>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "source/opt/ir_context.h"
 #include "src/demangler.h"
+#include "src/reader/spirv/fail_stream.h"
+#include "src/reader/spirv/function.h"
+#include "src/reader/spirv/namer.h"
 #include "src/reader/spirv/parser_impl.h"
+#include "src/reader/spirv/usage.h"
 
 namespace tint {
 namespace reader {
 namespace spirv {
+namespace test {
+
+// A test class that wraps ParseImpl
+class ParserImplWrapperForTest {
+ public:
+  explicit ParserImplWrapperForTest(const std::vector<uint32_t>& input)
+      : impl_(input) {}
+
+  // Returns a new function emitter for the given function ID.
+  // Assumes ParserImpl::BuildInternalRepresentation has been run and
+  // succeeded.
+  FunctionEmitter function_emitter(uint32_t function_id) {
+    auto* spirv_function = impl_.ir_context()->GetFunction(function_id);
+    return FunctionEmitter(&impl_, *spirv_function);
+  }
+
+  // Forward methods used by tests to the real implementation.
+  bool Parse() { return impl_.Parse(); }
+  Program program() { return impl_.program(); }
+  Namer& namer() { return impl_.namer(); }
+  ProgramBuilder& builder() { return impl_.builder(); }
+  const std::string error() { return impl_.error(); }
+  FailStream& Fail() { return impl_.Fail(); }
+  spvtools::opt::IRContext* ir_context() { return impl_.ir_context(); }
+  bool BuildInternalModule() { return impl_.BuildInternalModule(); }
+  bool BuildAndParseInternalModuleExceptFunctions() {
+    return impl_.BuildAndParseInternalModuleExceptFunctions();
+  }
+  bool BuildAndParseInternalModule() {
+    return impl_.BuildAndParseInternalModule();
+  }
+  bool RegisterUserAndStructMemberNames() {
+    return impl_.RegisterUserAndStructMemberNames();
+  }
+  const std::unordered_set<uint32_t>& glsl_std_450_imports() const {
+    return impl_.glsl_std_450_imports();
+  }
+  sem::Type* ConvertType(uint32_t id) { return impl_.ConvertType(id); }
+  DecorationList GetDecorationsFor(uint32_t id) const {
+    return impl_.GetDecorationsFor(id);
+  }
+  DecorationList GetDecorationsForMember(uint32_t id,
+                                         uint32_t member_index) const {
+    return impl_.GetDecorationsForMember(id, member_index);
+  }
+  ast::Decoration* ConvertMemberDecoration(uint32_t struct_type_id,
+                                           uint32_t member_index,
+                                           const Decoration& decoration) {
+    return impl_.ConvertMemberDecoration(struct_type_id, member_index,
+                                         decoration);
+  }
+  const spvtools::opt::Instruction* GetMemoryObjectDeclarationForHandle(
+      uint32_t id,
+      bool follow_image) {
+    return impl_.GetMemoryObjectDeclarationForHandle(id, follow_image);
+  }
+  const std::vector<EntryPointInfo>& GetEntryPointInfo(uint32_t entry_point) {
+    return impl_.GetEntryPointInfo(entry_point);
+  }
+  Usage GetHandleUsage(uint32_t id) const { return impl_.GetHandleUsage(id); }
+  bool RegisterHandleUsage() { return impl_.RegisterHandleUsage(); }
+  bool EmitModuleScopeVariables() { return impl_.EmitModuleScopeVariables(); }
+  const spvtools::opt::Instruction* GetInstructionForTest(uint32_t id) const {
+    return impl_.GetInstructionForTest(id);
+  }
+  bool RegisterTypes() { return impl_.RegisterTypes(); }
+  const ParserImpl::BuiltInPositionInfo& GetBuiltInPositionInfo() {
+    return impl_.GetBuiltInPositionInfo();
+  }
+  Source GetSourceForResultIdForTest(uint32_t id) const {
+    return impl_.GetSourceForResultIdForTest(id);
+  }
+  void SetHLSLStylePipelineIO() { impl_.SetHLSLStylePipelineIO(); }
+  bool UseHLSLStylePipelineIO() const { return impl_.UseHLSLStylePipelineIO(); }
+
+ private:
+  ParserImpl impl_;
+};
+
+}  // namespace test
 
 /// SPIR-V Parser test class
 template <typename T>
@@ -37,22 +124,13 @@ class SpvParserTestBase : public T {
   /// Retrieves the parser from the helper
   /// @param input the SPIR-V binary to parse
   /// @returns a parser for the given binary
-  std::unique_ptr<ParserImpl> parser(const std::vector<uint32_t>& input) {
-    auto parser = std::make_unique<ParserImpl>(input);
+  std::unique_ptr<test::ParserImplWrapperForTest> parser(
+      const std::vector<uint32_t>& input) {
+    auto parser = std::make_unique<test::ParserImplWrapperForTest>(input);
     // Don't run the Resolver when building the program.
     // We're not interested in type information with these tests.
     parser->builder().SetResolveOnBuild(false);
     return parser;
-  }
-
-  /// Gets the internal representation of the function with the given ID.
-  /// Assumes ParserImpl::BuildInternalRepresentation has been run and
-  /// succeeded.
-  /// @param parser the parser
-  /// @param id the SPIR-V ID of the function
-  /// @returns the internal representation of the function
-  spvtools::opt::Function* spirv_function(ParserImpl* parser, uint32_t id) {
-    return parser->ir_context()->GetFunction(id);
   }
 };
 

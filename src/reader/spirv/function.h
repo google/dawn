@@ -397,6 +397,9 @@ class FunctionEmitter {
   FunctionEmitter(ParserImpl* pi,
                   const spvtools::opt::Function& function,
                   const EntryPointInfo* ep_info);
+  /// Move constructor. Only valid when the other object was newly created.
+  /// @param other the emitter to clone
+  FunctionEmitter(FunctionEmitter&& other);
   /// Destructor
   ~FunctionEmitter();
 

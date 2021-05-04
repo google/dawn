@@ -85,7 +85,7 @@ TEST_F(SpvParserTest_Composite_Construct, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
@@ -142,7 +142,7 @@ TEST_F(SpvParserTest_Composite_Construct, Matrix) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -182,7 +182,7 @@ TEST_F(SpvParserTest_Composite_Construct, Array) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -212,7 +212,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -246,7 +246,7 @@ TEST_F(SpvParserTest_CompositeExtract, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -276,7 +276,7 @@ TEST_F(SpvParserTest_CompositeExtract, Vector_IndexTooBigError) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(), Eq("OpCompositeExtract %1 index value 900 is out of "
                              "bounds for vector of 2 elements"));
@@ -296,7 +296,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -326,7 +326,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_IndexTooBigError) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody()) << p->error();
   EXPECT_THAT(p->error(), Eq("OpCompositeExtract %2 index value 3 is out of "
                              "bounds for matrix of 3 elements"));
@@ -346,7 +346,7 @@ TEST_F(SpvParserTest_CompositeExtract, Matrix_Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -379,7 +379,7 @@ TEST_F(SpvParserTest_CompositeExtract, Array) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -410,7 +410,7 @@ TEST_F(SpvParserTest_CompositeExtract, RuntimeArray_IsError) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody()) << p->error();
   EXPECT_THAT(p->error(),
               HasSubstr("can't do OpCompositeExtract on a runtime array: "));
@@ -430,7 +430,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -471,7 +471,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_DifferOnlyInMemberName) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto got = fe.ast_body();
   EXPECT_THAT(ToString(p->builder(), got), HasSubstr(R"(
@@ -516,7 +516,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_IndexTooBigError) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(), Eq("OpCompositeExtract %2 index value 40 is out of "
                              "bounds for structure %26 having 3 members"));
@@ -538,7 +538,7 @@ TEST_F(SpvParserTest_CompositeExtract, Struct_Array_Matrix_Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -575,7 +575,7 @@ TEST_F(SpvParserTest_CompositeInsert, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
@@ -621,7 +621,7 @@ TEST_F(SpvParserTest_CompositeInsert, Vector_IndexTooBigError) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(), Eq("OpCompositeInsert %1 index value 900 is out of "
                              "bounds for vector of 2 elements"));
@@ -641,7 +641,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
@@ -691,7 +691,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix_IndexTooBigError) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody()) << p->error();
   EXPECT_THAT(p->error(), Eq("OpCompositeInsert %2 index value 3 is out of "
                              "bounds for matrix of 3 elements"));
@@ -711,7 +711,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix_Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
@@ -761,7 +761,7 @@ TEST_F(SpvParserTest_CompositeInsert, Array) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
@@ -808,7 +808,7 @@ TEST_F(SpvParserTest_CompositeInsert, RuntimeArray_IsError) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody()) << p->error();
   EXPECT_THAT(p->error(),
               HasSubstr("can't do OpCompositeInsert on a runtime array: "));
@@ -828,7 +828,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
@@ -902,7 +902,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
@@ -1037,7 +1037,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_IndexTooBigError) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(), Eq("OpCompositeInsert %2 index value 40 is out of "
                              "bounds for structure %26 having 3 members"));
@@ -1059,7 +1059,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_Array_Matrix_Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
@@ -1130,7 +1130,7 @@ TEST_F(SpvParserTest_CopyObject, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
@@ -1169,7 +1169,7 @@ TEST_F(SpvParserTest_CopyObject, Pointer) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
               HasSubstr(R"(VariableDeclStatement{
@@ -1210,7 +1210,7 @@ TEST_F(SpvParserTest_VectorShuffle, FunctionScopeOperands_UseBoth) {
 
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
@@ -1252,7 +1252,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_UseBoth) {
 
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
@@ -1310,7 +1310,7 @@ TEST_F(SpvParserTest_VectorShuffle, ConstantOperands_AllOnesMapToNull) {
 
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
@@ -1340,7 +1340,7 @@ TEST_F(SpvParserTest_VectorShuffle, IndexTooBig_IsError) {
 
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody()) << p->error();
   EXPECT_THAT(p->error(),
               Eq("invalid vectorshuffle ID %10: index too large: 9"));
@@ -1361,7 +1361,7 @@ TEST_F(SpvParserTest_VectorExtractDynamic, SignedIndex) {
 
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto got = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(got, HasSubstr(R"(VariableConst{
@@ -1391,7 +1391,7 @@ TEST_F(SpvParserTest_VectorExtractDynamic, UnsignedIndex) {
 
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto got = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(got, HasSubstr(R"(VariableConst{
@@ -1424,7 +1424,7 @@ TEST_F(SpvParserTest_VectorExtractDynamic, Sample) {
 
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto got = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(got, HasSubstr(R"(

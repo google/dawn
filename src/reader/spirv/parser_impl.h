@@ -537,6 +537,9 @@ class ParserImpl : Reader {
     return function_to_ep_info_[entry_point];
   }
 
+  /// Returns the SPIR-V binary.
+  const std::vector<uint32_t>& spv_binary() { return spv_binary_; }
+
  private:
   /// Converts a specific SPIR-V type to a Tint type. Integer case
   typ::Type ConvertType(const spvtools::opt::analysis::Integer* int_ty);

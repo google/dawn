@@ -181,7 +181,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -212,7 +212,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_Floating, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -243,7 +243,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -275,7 +275,7 @@ TEST_P(SpvParserTest_GlslStd450_Float_FloatingFloating, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -307,7 +307,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -338,7 +338,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_Floating, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -369,7 +369,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -401,7 +401,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloating, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -433,7 +433,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -467,7 +467,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingFloatingFloating, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -500,7 +500,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -533,7 +533,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingUinting, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -565,7 +565,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -598,7 +598,7 @@ TEST_P(SpvParserTest_GlslStd450_Floating_FloatingInting, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -631,7 +631,7 @@ TEST_P(SpvParserTest_GlslStd450_Float3_Float3Float3, Samples) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -738,7 +738,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -770,7 +770,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_Inting, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -802,7 +802,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -835,7 +835,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingInting, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -868,7 +868,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -902,7 +902,7 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -948,7 +948,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -981,7 +981,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1013,7 +1013,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Scalar) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1047,7 +1047,7 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1092,7 +1092,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SAbs) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1144,7 +1144,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMax) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1202,7 +1202,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SMin) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1260,7 +1260,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_SClamp) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1320,7 +1320,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMax) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1378,7 +1378,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UMin) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1436,7 +1436,7 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UClamp) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1512,7 +1512,7 @@ TEST_P(SpvParserTest_GlslStd450_DataPacking, Valid) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1556,7 +1556,7 @@ TEST_P(SpvParserTest_GlslStd450_DataUnpacking, Valid) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(

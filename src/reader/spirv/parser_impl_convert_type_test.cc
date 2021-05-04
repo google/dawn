@@ -26,14 +26,14 @@ using ::testing::Eq;
 TEST_F(SpvParserTest, ConvertType_PreservesExistingFailure) {
   auto p = parser(std::vector<uint32_t>{});
   p->Fail() << "boing";
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("boing"));
 }
 
 TEST_F(SpvParserTest, ConvertType_RequiresInternalRepresntation) {
   auto p = parser(std::vector<uint32_t>{});
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(
       p->error(),
@@ -44,7 +44,7 @@ TEST_F(SpvParserTest, ConvertType_NotAnId) {
   auto p = parser(test::Assemble("%1 = OpExtInstImport \"GLSL.std.450\""));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_EQ(nullptr, type);
   EXPECT_THAT(p->error(), Eq("ID is not a SPIR-V type: 10"));
@@ -54,7 +54,7 @@ TEST_F(SpvParserTest, ConvertType_IdExistsButIsNotAType) {
   auto p = parser(test::Assemble("%1 = OpExtInstImport \"GLSL.std.450\""));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
+  auto* type = p->ConvertType(1);
   EXPECT_EQ(nullptr, type);
   EXPECT_THAT(p->error(), Eq("ID is not a SPIR-V type: 1"));
 }
@@ -64,7 +64,7 @@ TEST_F(SpvParserTest, ConvertType_UnhandledType) {
   auto p = parser(test::Assemble("%70 = OpTypePipe WriteOnly"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(70);
+  auto* type = p->ConvertType(70);
   EXPECT_EQ(nullptr, type);
   EXPECT_THAT(p->error(),
               Eq("unknown SPIR-V type with ID 70: %70 = OpTypePipe WriteOnly"));
@@ -74,7 +74,7 @@ TEST_F(SpvParserTest, ConvertType_Void) {
   auto p = parser(test::Assemble("%1 = OpTypeVoid"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
+  auto* type = p->ConvertType(1);
   EXPECT_TRUE(type->Is<sem::Void>());
   EXPECT_TRUE(p->error().empty());
 }
@@ -83,7 +83,7 @@ TEST_F(SpvParserTest, ConvertType_Bool) {
   auto p = parser(test::Assemble("%100 = OpTypeBool"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(100);
+  auto* type = p->ConvertType(100);
   EXPECT_TRUE(type->Is<sem::Bool>());
   EXPECT_TRUE(p->error().empty());
 }
@@ -92,7 +92,7 @@ TEST_F(SpvParserTest, ConvertType_I32) {
   auto p = parser(test::Assemble("%2 = OpTypeInt 32 1"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(2);
+  auto* type = p->ConvertType(2);
   EXPECT_TRUE(type->Is<sem::I32>());
   EXPECT_TRUE(p->error().empty());
 }
@@ -101,7 +101,7 @@ TEST_F(SpvParserTest, ConvertType_U32) {
   auto p = parser(test::Assemble("%3 = OpTypeInt 32 0"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::U32>());
   EXPECT_TRUE(p->error().empty());
 }
@@ -110,7 +110,7 @@ TEST_F(SpvParserTest, ConvertType_F32) {
   auto p = parser(test::Assemble("%4 = OpTypeFloat 32"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(4);
+  auto* type = p->ConvertType(4);
   EXPECT_TRUE(type->Is<sem::F32>());
   EXPECT_TRUE(p->error().empty());
 }
@@ -119,7 +119,7 @@ TEST_F(SpvParserTest, ConvertType_BadIntWidth) {
   auto p = parser(test::Assemble("%5 = OpTypeInt 17 1"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(5);
+  auto* type = p->ConvertType(5);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("unhandled integer width: 17"));
 }
@@ -128,7 +128,7 @@ TEST_F(SpvParserTest, ConvertType_BadFloatWidth) {
   auto p = parser(test::Assemble("%6 = OpTypeFloat 19"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(6);
+  auto* type = p->ConvertType(6);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("unhandled float width: 19"));
 }
@@ -140,7 +140,7 @@ TEST_F(SpvParserTest, DISABLED_ConvertType_InvalidVectorElement) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(20);
+  auto* type = p->ConvertType(20);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("unknown SPIR-V type: 5"));
 }
@@ -154,17 +154,17 @@ TEST_F(SpvParserTest, ConvertType_VecOverF32) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto v2xf32 = p->ConvertType(20);
+  auto* v2xf32 = p->ConvertType(20);
   EXPECT_TRUE(v2xf32->Is<sem::Vector>());
   EXPECT_TRUE(v2xf32->As<sem::Vector>()->type()->Is<sem::F32>());
   EXPECT_EQ(v2xf32->As<sem::Vector>()->size(), 2u);
 
-  auto v3xf32 = p->ConvertType(30);
+  auto* v3xf32 = p->ConvertType(30);
   EXPECT_TRUE(v3xf32->Is<sem::Vector>());
   EXPECT_TRUE(v3xf32->As<sem::Vector>()->type()->Is<sem::F32>());
   EXPECT_EQ(v3xf32->As<sem::Vector>()->size(), 3u);
 
-  auto v4xf32 = p->ConvertType(40);
+  auto* v4xf32 = p->ConvertType(40);
   EXPECT_TRUE(v4xf32->Is<sem::Vector>());
   EXPECT_TRUE(v4xf32->As<sem::Vector>()->type()->Is<sem::F32>());
   EXPECT_EQ(v4xf32->As<sem::Vector>()->size(), 4u);
@@ -181,17 +181,17 @@ TEST_F(SpvParserTest, ConvertType_VecOverI32) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto v2xi32 = p->ConvertType(20);
+  auto* v2xi32 = p->ConvertType(20);
   EXPECT_TRUE(v2xi32->Is<sem::Vector>());
   EXPECT_TRUE(v2xi32->As<sem::Vector>()->type()->Is<sem::I32>());
   EXPECT_EQ(v2xi32->As<sem::Vector>()->size(), 2u);
 
-  auto v3xi32 = p->ConvertType(30);
+  auto* v3xi32 = p->ConvertType(30);
   EXPECT_TRUE(v3xi32->Is<sem::Vector>());
   EXPECT_TRUE(v3xi32->As<sem::Vector>()->type()->Is<sem::I32>());
   EXPECT_EQ(v3xi32->As<sem::Vector>()->size(), 3u);
 
-  auto v4xi32 = p->ConvertType(40);
+  auto* v4xi32 = p->ConvertType(40);
   EXPECT_TRUE(v4xi32->Is<sem::Vector>());
   EXPECT_TRUE(v4xi32->As<sem::Vector>()->type()->Is<sem::I32>());
   EXPECT_EQ(v4xi32->As<sem::Vector>()->size(), 4u);
@@ -208,17 +208,17 @@ TEST_F(SpvParserTest, ConvertType_VecOverU32) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto v2xu32 = p->ConvertType(20);
+  auto* v2xu32 = p->ConvertType(20);
   EXPECT_TRUE(v2xu32->Is<sem::Vector>());
   EXPECT_TRUE(v2xu32->As<sem::Vector>()->type()->Is<sem::U32>());
   EXPECT_EQ(v2xu32->As<sem::Vector>()->size(), 2u);
 
-  auto v3xu32 = p->ConvertType(30);
+  auto* v3xu32 = p->ConvertType(30);
   EXPECT_TRUE(v3xu32->Is<sem::Vector>());
   EXPECT_TRUE(v3xu32->As<sem::Vector>()->type()->Is<sem::U32>());
   EXPECT_EQ(v3xu32->As<sem::Vector>()->size(), 3u);
 
-  auto v4xu32 = p->ConvertType(40);
+  auto* v4xu32 = p->ConvertType(40);
   EXPECT_TRUE(v4xu32->Is<sem::Vector>());
   EXPECT_TRUE(v4xu32->As<sem::Vector>()->type()->Is<sem::U32>());
   EXPECT_EQ(v4xu32->As<sem::Vector>()->size(), 4u);
@@ -234,7 +234,7 @@ TEST_F(SpvParserTest, DISABLED_ConvertType_InvalidMatrixElement) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(20);
+  auto* type = p->ConvertType(20);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("unknown SPIR-V type: 5"));
 }
@@ -260,55 +260,55 @@ TEST_F(SpvParserTest, ConvertType_MatrixOverF32) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto m22 = p->ConvertType(22);
+  auto* m22 = p->ConvertType(22);
   EXPECT_TRUE(m22->Is<sem::Matrix>());
   EXPECT_TRUE(m22->As<sem::Matrix>()->type()->Is<sem::F32>());
   EXPECT_EQ(m22->As<sem::Matrix>()->rows(), 2u);
   EXPECT_EQ(m22->As<sem::Matrix>()->columns(), 2u);
 
-  auto m23 = p->ConvertType(23);
+  auto* m23 = p->ConvertType(23);
   EXPECT_TRUE(m23->Is<sem::Matrix>());
   EXPECT_TRUE(m23->As<sem::Matrix>()->type()->Is<sem::F32>());
   EXPECT_EQ(m23->As<sem::Matrix>()->rows(), 2u);
   EXPECT_EQ(m23->As<sem::Matrix>()->columns(), 3u);
 
-  auto m24 = p->ConvertType(24);
+  auto* m24 = p->ConvertType(24);
   EXPECT_TRUE(m24->Is<sem::Matrix>());
   EXPECT_TRUE(m24->As<sem::Matrix>()->type()->Is<sem::F32>());
   EXPECT_EQ(m24->As<sem::Matrix>()->rows(), 2u);
   EXPECT_EQ(m24->As<sem::Matrix>()->columns(), 4u);
 
-  auto m32 = p->ConvertType(32);
+  auto* m32 = p->ConvertType(32);
   EXPECT_TRUE(m32->Is<sem::Matrix>());
   EXPECT_TRUE(m32->As<sem::Matrix>()->type()->Is<sem::F32>());
   EXPECT_EQ(m32->As<sem::Matrix>()->rows(), 3u);
   EXPECT_EQ(m32->As<sem::Matrix>()->columns(), 2u);
 
-  auto m33 = p->ConvertType(33);
+  auto* m33 = p->ConvertType(33);
   EXPECT_TRUE(m33->Is<sem::Matrix>());
   EXPECT_TRUE(m33->As<sem::Matrix>()->type()->Is<sem::F32>());
   EXPECT_EQ(m33->As<sem::Matrix>()->rows(), 3u);
   EXPECT_EQ(m33->As<sem::Matrix>()->columns(), 3u);
 
-  auto m34 = p->ConvertType(34);
+  auto* m34 = p->ConvertType(34);
   EXPECT_TRUE(m34->Is<sem::Matrix>());
   EXPECT_TRUE(m34->As<sem::Matrix>()->type()->Is<sem::F32>());
   EXPECT_EQ(m34->As<sem::Matrix>()->rows(), 3u);
   EXPECT_EQ(m34->As<sem::Matrix>()->columns(), 4u);
 
-  auto m42 = p->ConvertType(42);
+  auto* m42 = p->ConvertType(42);
   EXPECT_TRUE(m42->Is<sem::Matrix>());
   EXPECT_TRUE(m42->As<sem::Matrix>()->type()->Is<sem::F32>());
   EXPECT_EQ(m42->As<sem::Matrix>()->rows(), 4u);
   EXPECT_EQ(m42->As<sem::Matrix>()->columns(), 2u);
 
-  auto m43 = p->ConvertType(43);
+  auto* m43 = p->ConvertType(43);
   EXPECT_TRUE(m43->Is<sem::Matrix>());
   EXPECT_TRUE(m43->As<sem::Matrix>()->type()->Is<sem::F32>());
   EXPECT_EQ(m43->As<sem::Matrix>()->rows(), 4u);
   EXPECT_EQ(m43->As<sem::Matrix>()->columns(), 3u);
 
-  auto m44 = p->ConvertType(44);
+  auto* m44 = p->ConvertType(44);
   EXPECT_TRUE(m44->Is<sem::Matrix>());
   EXPECT_TRUE(m44->As<sem::Matrix>()->type()->Is<sem::F32>());
   EXPECT_EQ(m44->As<sem::Matrix>()->rows(), 4u);
@@ -324,7 +324,7 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->UnwrapAliasIfNeeded()->Is<sem::ArrayType>());
   auto* arr_type = type->UnwrapAliasIfNeeded()->As<sem::ArrayType>();
@@ -345,7 +345,7 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_InvalidDecoration) {
     %10 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(
       p->error(),
@@ -359,7 +359,7 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_ArrayStride_Valid) {
     %10 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
   auto* arr_type = type->UnwrapAliasIfNeeded()->As<sem::ArrayType>();
   EXPECT_TRUE(arr_type->IsRuntimeArray());
@@ -378,7 +378,7 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_ArrayStride_ZeroIsError) {
     %10 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("invalid array type ID 10: ArrayStride can't be 0"));
@@ -393,7 +393,7 @@ TEST_F(SpvParserTest,
     %10 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("invalid array type ID 10: multiple ArrayStride decorations"));
@@ -407,7 +407,7 @@ TEST_F(SpvParserTest, ConvertType_Array) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->Is<sem::ArrayType>());
   auto* arr_type = type->As<sem::ArrayType>();
@@ -430,7 +430,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayBadLengthIsSpecConstantValue) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("Array type 10 length is a specialization constant"));
@@ -445,7 +445,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayBadLengthIsSpecConstantExpr) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("Array type 10 length is a specialization constant"));
@@ -463,7 +463,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayBadTooBig) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   // TODO(dneto): Right now it's rejected earlier in the flow because
   // we can't even utter the uint64 type.
@@ -478,7 +478,7 @@ TEST_F(SpvParserTest, ConvertType_Array_InvalidDecoration) {
     %10 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(
       p->error(),
@@ -494,7 +494,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_Valid) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->UnwrapAliasIfNeeded()->Is<sem::ArrayType>());
   auto* arr_type = type->UnwrapAliasIfNeeded()->As<sem::ArrayType>();
@@ -517,7 +517,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_ZeroIsError) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("invalid array type ID 10: ArrayStride can't be 0"));
@@ -533,7 +533,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_SpecifiedTwiceIsError) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("invalid array type ID 10: multiple ArrayStride decorations"));
@@ -548,7 +548,7 @@ TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
   EXPECT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->RegisterUserAndStructMemberNames());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->Is<sem::StructType>());
 
@@ -569,7 +569,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
   EXPECT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->RegisterUserAndStructMemberNames());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->Is<sem::StructType>());
 
@@ -594,7 +594,7 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
   EXPECT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->RegisterUserAndStructMemberNames());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
   EXPECT_TRUE(type->Is<sem::StructType>());
 
@@ -621,7 +621,7 @@ TEST_F(SpvParserTest, ConvertType_InvalidPointeetype) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule()) << p->error();
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("SPIR-V pointer type with ID 3 has invalid pointee type 42"));
@@ -644,7 +644,7 @@ TEST_F(SpvParserTest, ConvertType_PointerInput) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::Pointer>());
   auto* ptr_ty = type->As<sem::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
@@ -660,7 +660,7 @@ TEST_F(SpvParserTest, ConvertType_PointerOutput) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::Pointer>());
   auto* ptr_ty = type->As<sem::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
@@ -676,7 +676,7 @@ TEST_F(SpvParserTest, ConvertType_PointerUniform) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::Pointer>());
   auto* ptr_ty = type->As<sem::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
@@ -692,7 +692,7 @@ TEST_F(SpvParserTest, ConvertType_PointerWorkgroup) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::Pointer>());
   auto* ptr_ty = type->As<sem::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
@@ -708,7 +708,7 @@ TEST_F(SpvParserTest, ConvertType_PointerUniformConstant) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::Pointer>());
   auto* ptr_ty = type->As<sem::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
@@ -724,7 +724,7 @@ TEST_F(SpvParserTest, ConvertType_PointerStorageBuffer) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::Pointer>());
   auto* ptr_ty = type->As<sem::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
@@ -740,7 +740,7 @@ TEST_F(SpvParserTest, ConvertType_PointerImage) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::Pointer>());
   auto* ptr_ty = type->As<sem::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
@@ -756,7 +756,7 @@ TEST_F(SpvParserTest, ConvertType_PointerPrivate) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::Pointer>());
   auto* ptr_ty = type->As<sem::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
@@ -772,7 +772,7 @@ TEST_F(SpvParserTest, ConvertType_PointerFunction) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_TRUE(type->Is<sem::Pointer>());
   auto* ptr_ty = type->As<sem::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
@@ -790,7 +790,7 @@ TEST_F(SpvParserTest, ConvertType_PointerToPointer) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_NE(type, nullptr);
   EXPECT_TRUE(type->Is<sem::Pointer>());
 
@@ -814,7 +814,7 @@ TEST_F(SpvParserTest, ConvertType_Sampler_PretendVoid) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
+  auto* type = p->ConvertType(1);
   EXPECT_TRUE(type->Is<sem::Void>());
   EXPECT_TRUE(p->error().empty());
 }
@@ -827,7 +827,7 @@ TEST_F(SpvParserTest, ConvertType_Image_PretendVoid) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
+  auto* type = p->ConvertType(1);
   EXPECT_TRUE(type->Is<sem::Void>());
   EXPECT_TRUE(p->error().empty());
 }
@@ -840,7 +840,7 @@ TEST_F(SpvParserTest, ConvertType_SampledImage_PretendVoid) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
+  auto* type = p->ConvertType(1);
   EXPECT_TRUE(type->Is<sem::Void>());
   EXPECT_TRUE(p->error().empty());
 }

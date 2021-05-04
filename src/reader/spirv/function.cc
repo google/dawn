@@ -743,6 +743,23 @@ FunctionEmitter::FunctionEmitter(ParserImpl* pi,
                                  const spvtools::opt::Function& function)
     : FunctionEmitter(pi, function, nullptr) {}
 
+FunctionEmitter::FunctionEmitter(FunctionEmitter&& other)
+    : parser_impl_(other.parser_impl_),
+      builder_(other.builder_),
+      ir_context_(other.ir_context_),
+      def_use_mgr_(ir_context_.get_def_use_mgr()),
+      constant_mgr_(ir_context_.get_constant_mgr()),
+      type_mgr_(ir_context_.get_type_mgr()),
+      fail_stream_(other.fail_stream_),
+      namer_(other.namer_),
+      function_(other.function_),
+      sample_mask_in_id(other.sample_mask_out_id),
+      sample_mask_out_id(other.sample_mask_in_id),
+      ep_info_(other.ep_info_) {
+  other.statements_stack_.clear();
+  PushNewStatementBlock(nullptr, 0, nullptr);
+}
+
 FunctionEmitter::~FunctionEmitter() = default;
 
 FunctionEmitter::StatementBlock::StatementBlock(

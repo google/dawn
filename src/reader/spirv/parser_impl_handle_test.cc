@@ -4827,7 +4827,7 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
     EXPECT_THAT(p->error(), StartsWith(GetParam().expected_error)) << assembly;
   } else {
     EXPECT_TRUE(p->error().empty()) << p->error();
-    FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+    auto fe = p->function_emitter(100);
     // We actually have to generate the module to cache expressions for the
     // result IDs, particularly the OpCopyObject
     fe.Emit();
@@ -5691,7 +5691,7 @@ TEST_F(SpvParserTest, NeverGenerateConstDeclForHandle_UseVariableDirectly) {
   )";
   auto p = parser(test::Assemble(assembly));
   EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_TRUE(p->error().empty()) << p->error();
   const auto got = ToString(p->builder(), fe.ast_body());

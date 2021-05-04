@@ -84,7 +84,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_AnonymousVars) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -123,7 +123,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_NamedVars) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -162,7 +162,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MixedTypes) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -204,7 +204,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -278,7 +278,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -338,7 +338,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -377,7 +377,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -424,7 +424,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -459,7 +459,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -494,7 +494,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -529,7 +529,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -564,7 +564,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -604,7 +604,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
      OpFunctionEnd
   )"));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitFunctionVariables());
 
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()),
@@ -649,7 +649,7 @@ TEST_F(SpvParserTest,
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -697,7 +697,7 @@ TEST_F(SpvParserTest, EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -769,7 +769,7 @@ TEST_F(SpvParserTest,
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -868,7 +868,7 @@ TEST_F(
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -984,7 +984,7 @@ TEST_F(
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   // We don't hoist x_1 into its own mutable variable. It is emitted as
@@ -1071,7 +1071,7 @@ TEST_F(SpvParserTest,
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -1158,7 +1158,7 @@ TEST_F(
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -1239,7 +1239,7 @@ TEST_F(SpvParserTest,
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   // We don't hoist x_1 into its own mutable variable. It is emitted as
@@ -1315,7 +1315,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -1459,7 +1459,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -1617,7 +1617,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << assembly << p->error();
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -1786,7 +1786,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -1908,7 +1908,7 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -2032,7 +2032,7 @@ TEST_F(SpvParserTest,
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());
@@ -2122,7 +2122,7 @@ TEST_F(SpvParserTest, EmitStatement_UseInPhiCountsAsUse) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
 
   auto got = ToString(p->builder(), fe.ast_body());

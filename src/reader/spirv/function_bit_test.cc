@@ -149,7 +149,7 @@ TEST_P(SpvBinaryBitTest, EmitExpression) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << p->error() << "\n"
       << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   std::ostringstream ss;
   ss << R"(VariableConst{
@@ -194,7 +194,7 @@ TEST_P(SpvBinaryBitGeneralTest, EmitExpression) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
       << p->error() << "\n"
       << assembly;
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   std::ostringstream ss;
   ss << R"(VariableConst{
@@ -692,7 +692,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Int) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -718,7 +718,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Uint) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -746,7 +746,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Int) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -774,7 +774,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Uint) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -800,7 +800,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_SignedVec) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -830,7 +830,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_UnsignedVec) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -862,7 +862,7 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_SignedVec) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -893,7 +893,7 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_UnsignedVec) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
   VariableConst{
@@ -947,7 +947,7 @@ TEST_F(SpvUnaryBitTest, BitCount_Uint_Uint) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -975,7 +975,7 @@ TEST_F(SpvUnaryBitTest, BitCount_Uint_Int) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1005,7 +1005,7 @@ TEST_F(SpvUnaryBitTest, BitCount_Int_Uint) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1035,7 +1035,7 @@ TEST_F(SpvUnaryBitTest, BitCount_Int_Int) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1063,7 +1063,7 @@ TEST_F(SpvUnaryBitTest, BitCount_UintVector_UintVector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1091,7 +1091,7 @@ TEST_F(SpvUnaryBitTest, BitCount_UintVector_IntVector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1121,7 +1121,7 @@ TEST_F(SpvUnaryBitTest, BitCount_IntVector_UintVector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1151,7 +1151,7 @@ TEST_F(SpvUnaryBitTest, BitCount_IntVector_IntVector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1179,7 +1179,7 @@ TEST_F(SpvUnaryBitTest, BitReverse_Uint_Uint) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1207,7 +1207,7 @@ TEST_F(SpvUnaryBitTest, BitReverse_Uint_Int) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1237,7 +1237,7 @@ TEST_F(SpvUnaryBitTest, BitReverse_Int_Uint) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1267,7 +1267,7 @@ TEST_F(SpvUnaryBitTest, BitReverse_Int_Int) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1295,7 +1295,7 @@ TEST_F(SpvUnaryBitTest, BitReverse_UintVector_UintVector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1323,7 +1323,7 @@ TEST_F(SpvUnaryBitTest, BitReverse_UintVector_IntVector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1353,7 +1353,7 @@ TEST_F(SpvUnaryBitTest, BitReverse_IntVector_UintVector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
@@ -1383,7 +1383,7 @@ TEST_F(SpvUnaryBitTest, BitReverse_IntVector_IntVector) {
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  FunctionEmitter fe(p.get(), *spirv_function(p.get(), 100));
+  auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto body = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body, HasSubstr(R"(
