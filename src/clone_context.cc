@@ -39,9 +39,15 @@ CloneContext::CloneContext(ProgramBuilder* to,
   }
 }
 
+CloneContext::CloneContext(ProgramBuilder* builder)
+    : CloneContext(builder, nullptr, false) {}
+
 CloneContext::~CloneContext() = default;
 
 Symbol CloneContext::Clone(Symbol s) {
+  if (!src) {
+    return s;  // In-place clone
+  }
   return utils::GetOrCreate(cloned_symbols_, s, [&]() -> Symbol {
     if (symbol_transform_) {
       return symbol_transform_(s);

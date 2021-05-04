@@ -126,17 +126,17 @@ struct ShareableTypes {
 };
 
 template <typename T>
-struct CloneContextTest : public ::testing::Test {
+struct CloneContextNodeTest : public ::testing::Test {
   using Node = typename T::Node;
   using Replaceable = typename T::Replaceable;
   using Replacement = typename T::Replacement;
   static constexpr bool is_unique = std::is_same<Node, UniqueNode>::value;
 };
 
-using CloneContextTestTypes = ::testing::Types<UniqueTypes, ShareableTypes>;
-TYPED_TEST_SUITE(CloneContextTest, CloneContextTestTypes, /**/);
+using CloneContextTestNodeTypes = ::testing::Types<UniqueTypes, ShareableTypes>;
+TYPED_TEST_SUITE(CloneContextNodeTest, CloneContextTestNodeTypes, /**/);
 
-TYPED_TEST(CloneContextTest, Clone) {
+TYPED_TEST(CloneContextNodeTest, Clone) {
   using Node = typename TestFixture::Node;
   constexpr bool is_unique = TestFixture::is_unique;
 
@@ -199,7 +199,7 @@ TYPED_TEST(CloneContextTest, Clone) {
   EXPECT_EQ(cloned_root->c->name, cloned_root->b->name);
 }
 
-TYPED_TEST(CloneContextTest, CloneWithReplaceAll_Cloneable) {
+TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_Cloneable) {
   using Node = typename TestFixture::Node;
   using Replaceable = typename TestFixture::Replaceable;
   using Replacement = typename TestFixture::Replacement;
@@ -301,7 +301,7 @@ TYPED_TEST(CloneContextTest, CloneWithReplaceAll_Cloneable) {
   EXPECT_FALSE(Is<Replacement>(cloned_root->b->b));
 }
 
-TYPED_TEST(CloneContextTest, CloneWithReplaceAll_Symbols) {
+TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_Symbols) {
   using Node = typename TestFixture::Node;
 
   Allocator a;
@@ -342,7 +342,7 @@ TYPED_TEST(CloneContextTest, CloneWithReplaceAll_Symbols) {
   EXPECT_EQ(cloned_root->b->b->name, cloned.Symbols().Get("transformed<b->b>"));
 }
 
-TYPED_TEST(CloneContextTest, CloneWithoutTransform) {
+TYPED_TEST(CloneContextNodeTest, CloneWithoutTransform) {
   using Node = typename TestFixture::Node;
   using Replacement = typename TestFixture::Replacement;
 
@@ -363,7 +363,7 @@ TYPED_TEST(CloneContextTest, CloneWithoutTransform) {
   EXPECT_EQ(cloned_node->name, cloned.Symbols().Get("root"));
 }
 
-TYPED_TEST(CloneContextTest, CloneWithReplace) {
+TYPED_TEST(CloneContextNodeTest, CloneWithReplace) {
   using Node = typename TestFixture::Node;
 
   Allocator a;
@@ -397,7 +397,7 @@ TYPED_TEST(CloneContextTest, CloneWithReplace) {
   EXPECT_EQ(cloned_root->c->name, cloned.Symbols().Get("c"));
 }
 
-TYPED_TEST(CloneContextTest, CloneWithInsertBefore) {
+TYPED_TEST(CloneContextNodeTest, CloneWithInsertBefore) {
   using Node = typename TestFixture::Node;
   constexpr bool is_unique = TestFixture::is_unique;
 
@@ -437,7 +437,7 @@ TYPED_TEST(CloneContextTest, CloneWithInsertBefore) {
   EXPECT_EQ(cloned_root->vec[3]->name, cloned.Symbols().Get("c"));
 }
 
-TYPED_TEST(CloneContextTest, CloneWithInsertAfter) {
+TYPED_TEST(CloneContextNodeTest, CloneWithInsertAfter) {
   using Node = typename TestFixture::Node;
   constexpr bool is_unique = TestFixture::is_unique;
 
@@ -477,7 +477,26 @@ TYPED_TEST(CloneContextTest, CloneWithInsertAfter) {
   EXPECT_EQ(cloned_root->vec[3]->name, cloned.Symbols().Get("c"));
 }
 
-TYPED_TEST(CloneContextTest, CloneWithReplaceAll_SameTypeTwice) {
+TYPED_TEST(CloneContextNodeTest, CloneIntoSameBuilder) {
+  using Node = typename TestFixture::Node;
+  constexpr bool is_unique = TestFixture::is_unique;
+
+  ProgramBuilder builder;
+  CloneContext ctx(&builder);
+  Allocator allocator;
+  auto* original = allocator.Create<Node>(builder.Symbols().New());
+  auto* cloned_a = ctx.Clone(original);
+  auto* cloned_b = ctx.Clone(original);
+  EXPECT_NE(original, cloned_a);
+  EXPECT_NE(original, cloned_b);
+  if (is_unique) {
+    EXPECT_NE(cloned_a, cloned_b);
+  } else {
+    EXPECT_EQ(cloned_a, cloned_b);
+  }
+}
+
+TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_SameTypeTwice) {
   std::string node_name = TypeInfo::Of<typename TestFixture::Node>().name;
 
   EXPECT_FATAL_FAILURE(
@@ -494,7 +513,7 @@ TYPED_TEST(CloneContextTest, CloneWithReplaceAll_SameTypeTwice) {
           node_name);
 }
 
-TYPED_TEST(CloneContextTest, CloneWithReplaceAll_BaseThenDerived) {
+TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_BaseThenDerived) {
   std::string node_name = TypeInfo::Of<typename TestFixture::Node>().name;
   std::string replaceable_name =
       TypeInfo::Of<typename TestFixture::Replaceable>().name;
@@ -515,7 +534,7 @@ TYPED_TEST(CloneContextTest, CloneWithReplaceAll_BaseThenDerived) {
           node_name);
 }
 
-TYPED_TEST(CloneContextTest, CloneWithReplaceAll_DerivedThenBase) {
+TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_DerivedThenBase) {
   std::string node_name = TypeInfo::Of<typename TestFixture::Node>().name;
   std::string replaceable_name =
       TypeInfo::Of<typename TestFixture::Replaceable>().name;
@@ -535,20 +554,7 @@ TYPED_TEST(CloneContextTest, CloneWithReplaceAll_DerivedThenBase) {
           replaceable_name);
 }
 
-TYPED_TEST(CloneContextTest, CloneWithReplaceAll_SymbolsTwice) {
-  EXPECT_FATAL_FAILURE(
-      {
-        ProgramBuilder cloned;
-        Program original;
-        CloneContext ctx(&cloned, &original);
-        ctx.ReplaceAll([](Symbol s) { return s; });
-        ctx.ReplaceAll([](Symbol s) { return s; });
-      },
-      "internal compiler error: ReplaceAll(const SymbolTransform&) called "
-      "multiple times on the same CloneContext");
-}
-
-TYPED_TEST(CloneContextTest, CloneWithReplace_WithNotANode) {
+TYPED_TEST(CloneContextNodeTest, CloneWithReplace_WithNotANode) {
   EXPECT_FATAL_FAILURE(
       {
         using Node = typename TestFixture::Node;
@@ -577,7 +583,22 @@ TYPED_TEST(CloneContextTest, CloneWithReplace_WithNotANode) {
       "internal compiler error");
 }
 
-TYPED_TEST(CloneContextTest, CloneNewUnnamedSymbols) {
+using CloneContextTest = ::testing::Test;
+
+TEST_F(CloneContextTest, CloneWithReplaceAll_SymbolsTwice) {
+  EXPECT_FATAL_FAILURE(
+      {
+        ProgramBuilder cloned;
+        Program original;
+        CloneContext ctx(&cloned, &original);
+        ctx.ReplaceAll([](Symbol s) { return s; });
+        ctx.ReplaceAll([](Symbol s) { return s; });
+      },
+      "internal compiler error: ReplaceAll(const SymbolTransform&) called "
+      "multiple times on the same CloneContext");
+}
+
+TEST_F(CloneContextTest, CloneNewUnnamedSymbols) {
   ProgramBuilder builder;
   Symbol old_a = builder.Symbols().New();
   Symbol old_b = builder.Symbols().New();
@@ -605,7 +626,7 @@ TYPED_TEST(CloneContextTest, CloneNewUnnamedSymbols) {
   EXPECT_EQ(cloned.Symbols().NameFor(new_c), "tint_symbol_2_1");
 }
 
-TYPED_TEST(CloneContextTest, CloneNewSymbols) {
+TEST_F(CloneContextTest, CloneNewSymbols) {
   ProgramBuilder builder;
   Symbol old_a = builder.Symbols().New("a");
   Symbol old_b = builder.Symbols().New("b");
@@ -633,7 +654,7 @@ TYPED_TEST(CloneContextTest, CloneNewSymbols) {
   EXPECT_EQ(cloned.Symbols().NameFor(new_c), "c_1");
 }
 
-TYPED_TEST(CloneContextTest, CloneNewSymbols_AfterCloneSymbols) {
+TEST_F(CloneContextTest, CloneNewSymbols_AfterCloneSymbols) {
   ProgramBuilder builder;
   Symbol old_a = builder.Symbols().New("a");
   Symbol old_b = builder.Symbols().New("b");
@@ -661,15 +682,16 @@ TYPED_TEST(CloneContextTest, CloneNewSymbols_AfterCloneSymbols) {
   EXPECT_EQ(cloned.Symbols().NameFor(new_c), "c");
 }
 
-TYPED_TEST(CloneContextTest, ProgramIDs) {
+TEST_F(CloneContextTest, ProgramIDs) {
   ProgramBuilder dst;
   Program src(ProgramBuilder{});
   CloneContext ctx(&dst, &src);
   Allocator allocator;
-  ctx.Clone(allocator.Create<ProgramNode>(src.ID(), dst.ID()));
+  auto* cloned = ctx.Clone(allocator.Create<ProgramNode>(src.ID(), dst.ID()));
+  EXPECT_EQ(cloned->program_id, dst.ID());
 }
 
-TYPED_TEST(CloneContextTest, ProgramIDs_ObjectNotOwnedBySrc) {
+TEST_F(CloneContextTest, ProgramIDs_ObjectNotOwnedBySrc) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder dst;
@@ -681,7 +703,7 @@ TYPED_TEST(CloneContextTest, ProgramIDs_ObjectNotOwnedBySrc) {
       R"(internal compiler error: TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a))");
 }
 
-TYPED_TEST(CloneContextTest, ProgramIDs_ObjectNotOwnedByDst) {
+TEST_F(CloneContextTest, ProgramIDs_ObjectNotOwnedByDst) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder dst;

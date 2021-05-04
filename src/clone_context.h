@@ -74,13 +74,17 @@ class CloneContext {
   /// symbol.
   using SymbolTransform = std::function<Symbol(Symbol)>;
 
-  /// Constructor
+  /// Constructor for cloning objects from `from` into `to`.
   /// @param to the target ProgramBuilder to clone into
   /// @param from the source Program to clone from
   /// @param auto_clone_symbols clone all symbols in `from` before returning
   CloneContext(ProgramBuilder* to,
                Program const* from,
                bool auto_clone_symbols = true);
+
+  /// Constructor for cloning objects from and to the ProgramBuilder `builder`.
+  /// @param builder the ProgramBuilder
+  explicit CloneContext(ProgramBuilder* builder);
 
   /// Destructor
   ~CloneContext();
@@ -93,7 +97,8 @@ class CloneContext {
   /// Clone() may use a function registered with ReplaceAll() to create a
   /// transformed version of the object. See ReplaceAll() for more information.
   ///
-  /// The Node or sem::Type `a` must be owned by the Program #src.
+  /// If the CloneContext is cloning from a Program to a ProgramBuilder, then
+  /// the Node or sem::Type `a` must be owned by the Program #src.
   ///
   /// @param a the `Node` or `sem::Type` to clone
   /// @return the cloned node
@@ -104,7 +109,9 @@ class CloneContext {
       return nullptr;
     }
 
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a);
+    if (src) {
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a);
+    }
 
     // Have we cloned this object already, or was Replace() called for this
     // object?
@@ -133,7 +140,7 @@ class CloneContext {
 
     // Does the type derive from ShareableCloneable?
     if (Is<ShareableCloneable, kDontErrorOnImpossibleCast>(a)) {
-      // Yes. Record this src -> dst mapping so that future calls to Clone()
+      // Yes. Record this clone mapping so that future calls to Clone()
       // return the same cloned object.
       cloned_.emplace(a, cloned);
     }
@@ -153,7 +160,8 @@ class CloneContext {
   /// Unlike Clone(), this method does not invoke or use any transformations
   /// registered by ReplaceAll().
   ///
-  /// The Node or sem::Type `a` must be owned by the Program #src.
+  /// If the CloneContext is cloning from a Program to a ProgramBuilder, then
+  /// the Node or sem::Type `a` must be owned by the Program #src.
   ///
   /// @param a the `Node` or `sem::Type` to clone
   /// @return the cloned node
@@ -164,7 +172,9 @@ class CloneContext {
       return nullptr;
     }
 
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a);
+    if (src) {
+      TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a);
+    }
 
     // Have we seen this object before? If so, return the previously cloned
     // version instead of making yet another copy.
@@ -371,7 +381,7 @@ class CloneContext {
   /// @returns this CloneContext so calls can be chained
   template <typename T, typename BEFORE, typename OBJECT>
   CloneContext& InsertBefore(const std::vector<T>& vector,
-                             BEFORE* before,
+                             const BEFORE* before,
                              OBJECT* object) {
     if (std::find(vector.begin(), vector.end(), before) == vector.end()) {
       TINT_ICE(Diagnostics())
@@ -393,7 +403,7 @@ class CloneContext {
   /// @returns this CloneContext so calls can be chained
   template <typename T, typename AFTER, typename OBJECT>
   CloneContext& InsertAfter(const std::vector<T>& vector,
-                            AFTER* after,
+                            const AFTER* after,
                             OBJECT* object) {
     if (std::find(vector.begin(), vector.end(), after) == vector.end()) {
       TINT_ICE(Diagnostics())
