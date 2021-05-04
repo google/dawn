@@ -591,6 +591,11 @@ class ParserImpl : Reader {
   bool ParseArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
                              ast::DecorationList* decorations);
 
+  /// Adds `type` as a constructed type if it hasn't been added yet.
+  /// @param name the type's unique name
+  /// @param type the type to add
+  void AddConstructedType(Symbol name, typ::Type type);
+
   /// Creates a new `ast::Node` owned by the ProgramBuilder.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
@@ -690,6 +695,10 @@ class ParserImpl : Reader {
   // The inferred pointer type for the given handle variable.
   std::unordered_map<const spvtools::opt::Instruction*, typ::Pointer>
       handle_type_;
+
+  // Set of symbols of constructed types that have been added, used to avoid
+  // adding duplicates.
+  std::unordered_set<Symbol> constructed_types_;
 
   /// Maps the SPIR-V ID of a module-scope builtin variable that should be
   /// ignored or type-converted, to its builtin kind.

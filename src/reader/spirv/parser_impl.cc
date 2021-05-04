@@ -1033,8 +1033,15 @@ typ::Type ParserImpl::ConvertType(
   if (num_non_writable_members == members.size()) {
     read_only_struct_types_.insert(result.ast->name());
   }
-  builder_.AST().AddConstructedType(result);
+  AddConstructedType(sym, result);
   return result;
+}
+
+void ParserImpl::AddConstructedType(Symbol name, typ::Type type) {
+  auto iter = constructed_types_.insert(name);
+  if (iter.second) {
+    builder_.AST().AddConstructedType(type);
+  }
 }
 
 typ::Type ParserImpl::ConvertType(uint32_t type_id,
@@ -1202,11 +1209,11 @@ typ::Type ParserImpl::MaybeGenerateAlias(
     return {};
   }
   const auto name = namer_.GetName(type_id);
-  auto ast_alias_type =
-      builder_.ty.alias(builder_.Symbols().Register(name), ast_underlying_type);
+  const auto sym = builder_.Symbols().Register(name);
+  auto ast_alias_type = builder_.ty.alias(sym, ast_underlying_type);
 
   // Record this new alias as the AST type for this SPIR-V ID.
-  builder_.AST().AddConstructedType(ast_alias_type);
+  AddConstructedType(sym, ast_alias_type);
 
   return ast_alias_type;
 }
