@@ -19,9 +19,12 @@
 #include <vector>
 
 #include "src/ast/function.h"
+#include "src/ast/type.h"
 
 namespace tint {
 namespace ast {
+
+class NamedType;
 
 /// Module holds the top-level AST types, functions and global variables used by
 /// a Program.
@@ -58,6 +61,17 @@ class Module : public Castable<Module, Node> {
     global_declarations_.push_back(var);
   }
 
+  /// @returns true if the module has the global declaration `decl`
+  /// @param decl the declaration to check
+  bool HasGlobalDeclaration(const Cloneable* decl) const {
+    for (auto* d : global_declarations_) {
+      if (d == decl) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// @returns the global variables for the translation unit
   const VariableList& GlobalVariables() const { return global_variables_; }
 
@@ -67,14 +81,18 @@ class Module : public Castable<Module, Node> {
   /// Adds a constructed type to the Builder.
   /// The type must be an alias or a struct.
   /// @param type the constructed type to add
-  void AddConstructedType(sem::Type* type) {
+  void AddConstructedType(typ::Type type) {
     TINT_ASSERT(type);
     constructed_types_.push_back(type);
-    global_declarations_.push_back(type);
+    global_declarations_.push_back(const_cast<sem::Type*>(type.sem));
   }
 
+  /// @returns the NamedType registered as a ConstructedType()
+  /// @param name the name of the type to search for
+  const ast::NamedType* LookupType(Symbol name) const;
+
   /// @returns the constructed types in the translation unit
-  const std::vector<sem::Type*>& ConstructedTypes() const {
+  const std::vector<typ::Type>& ConstructedTypes() const {
     return constructed_types_;
   }
 
@@ -115,7 +133,7 @@ class Module : public Castable<Module, Node> {
 
  private:
   std::vector<Cloneable*> global_declarations_;
-  std::vector<sem::Type*> constructed_types_;
+  std::vector<typ::Type> constructed_types_;
   FunctionList functions_;
   VariableList global_variables_;
 };

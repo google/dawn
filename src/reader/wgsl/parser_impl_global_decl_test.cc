@@ -163,7 +163,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   auto program = p->program();
   ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
 
-  auto* t = program.AST().ConstructedTypes()[0];
+  auto t = program.AST().ConstructedTypes()[0];
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->Is<sem::StructType>());
 
@@ -181,7 +181,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   auto program = p->program();
   ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
 
-  auto* t = program.AST().ConstructedTypes()[0];
+  auto t = program.AST().ConstructedTypes()[0];
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->Is<sem::StructType>());
 
@@ -208,7 +208,7 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   auto program = p->program();
   ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
 
-  auto* t = program.AST().ConstructedTypes()[0];
+  auto t = program.AST().ConstructedTypes()[0];
   ASSERT_NE(t, nullptr);
   ASSERT_TRUE(t->Is<sem::StructType>());
 

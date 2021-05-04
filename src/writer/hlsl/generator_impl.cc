@@ -119,7 +119,7 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     register_global(global);
   }
 
-  for (auto* const ty : builder_.AST().ConstructedTypes()) {
+  for (auto const ty : builder_.AST().ConstructedTypes()) {
     if (!EmitConstructedType(out, ty)) {
       return false;
     }

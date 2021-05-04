@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include "src/ast/named_type.h"
 #include "src/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Module);
@@ -50,6 +51,17 @@ Module::Module(ProgramID program_id,
 
 Module::~Module() = default;
 
+const ast::NamedType* Module::LookupType(Symbol name) const {
+  for (auto ct : ConstructedTypes()) {
+    if (auto* ty = ct.ast->As<ast::NamedType>()) {
+      if (ty->name() == name) {
+        return ty;
+      }
+    }
+  }
+  return nullptr;
+}
+
 Module* Module::Clone(CloneContext* ctx) const {
   auto* out = ctx->dst->create<Module>();
   out->Copy(ctx, this);
@@ -80,7 +92,7 @@ void Module::to_str(const sem::Info& sem,
   make_indent(out, indent);
   out << "Module{" << std::endl;
   indent += 2;
-  for (auto* const ty : constructed_types_) {
+  for (auto const ty : constructed_types_) {
     make_indent(out, indent);
     if (auto* alias = ty->As<sem::Alias>()) {
       out << alias->symbol().to_str() << " -> " << alias->type()->type_name()

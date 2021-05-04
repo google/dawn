@@ -65,7 +65,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
 
   // Strip entry point IO decorations from struct declarations.
   // TODO(jrprice): This code is duplicated with the SPIR-V transform.
-  for (auto* ty : ctx.src->AST().ConstructedTypes()) {
+  for (auto ty : ctx.src->AST().ConstructedTypes()) {
     if (auto* struct_ty = ty->As<sem::StructType>()) {
       // Build new list of struct members without entry point IO decorations.
       ast::StructMemberList new_struct_members;
