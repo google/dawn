@@ -1411,7 +1411,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructInitializer) {
     __struct_S
     {
       TypeConstructor[not set]{
-        __struct_S
+        __type_name_S
         ScalarConstructor[not set]{1u}
         ScalarConstructor[not set]{1.500000}
         TypeConstructor[not set]{
@@ -1440,7 +1440,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructNullInitializer) {
     __struct_S
     {
       TypeConstructor[not set]{
-        __struct_S
+        __type_name_S
         ScalarConstructor[not set]{0u}
         ScalarConstructor[not set]{0.000000}
         TypeConstructor[not set]{
@@ -1469,7 +1469,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
     __struct_S
     {
       TypeConstructor[not set]{
-        __struct_S
+        __type_name_S
         ScalarConstructor[not set]{0u}
         ScalarConstructor[not set]{0.000000}
         TypeConstructor[not set]{

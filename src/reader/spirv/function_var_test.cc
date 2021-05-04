@@ -470,7 +470,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias) {
     __alias_Arr__array__u32_2_stride_16
     {
       TypeConstructor[not set]{
-        __alias_Arr__array__u32_2_stride_16
+        __type_name_Arr
         ScalarConstructor[not set]{1u}
         ScalarConstructor[not set]{2u}
       }
@@ -540,7 +540,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
     __alias_Arr__array__u32_2_stride_16
     {
       TypeConstructor[not set]{
-        __alias_Arr__array__u32_2_stride_16
+        __type_name_Arr
         ScalarConstructor[not set]{0u}
         ScalarConstructor[not set]{0u}
       }
@@ -575,7 +575,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
     __struct_S
     {
       TypeConstructor[not set]{
-        __struct_S
+        __type_name_S
         ScalarConstructor[not set]{1u}
         ScalarConstructor[not set]{1.500000}
         TypeConstructor[not set]{
@@ -615,7 +615,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
     __struct_S
     {
       TypeConstructor[not set]{
-        __struct_S
+        __type_name_S
         ScalarConstructor[not set]{0u}
         ScalarConstructor[not set]{0.000000}
         TypeConstructor[not set]{

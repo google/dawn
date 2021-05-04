@@ -1442,13 +1442,9 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
   }
 
   std::string name = namer_.Name(id);
-  return create<ast::Variable>(Source{},                           // source
-                               builder_.Symbols().Register(name),  // symbol
-                               sc,            // storage_class
-                               type,          // type
-                               is_const,      // is_const
-                               constructor,   // constructor
-                               decorations);  // decorations
+  return create<ast::Variable>(Source{}, builder_.Symbols().Register(name), sc,
+                               builder_.ty.MaybeCreateTypename(type), is_const,
+                               constructor, decorations);
 }
 
 TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
@@ -1530,8 +1526,9 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
       ast_components.emplace_back(ast_component.expr);
     }
     return {original_ast_type,
-            create<ast::TypeConstructorExpression>(Source{}, original_ast_type,
-                                                   std::move(ast_components))};
+            create<ast::TypeConstructorExpression>(
+                Source{}, builder_.ty.MaybeCreateTypename(original_ast_type),
+                std::move(ast_components))};
   }
   auto* spirv_null_const = spirv_const->AsNullConstant();
   if (spirv_null_const != nullptr) {
@@ -1583,8 +1580,9 @@ ast::Expression* ParserImpl::MakeNullValue(typ::Type type) {
     for (size_t i = 0; i < vec_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(typ::Call_type(vec_ty)));
     }
-    return create<ast::TypeConstructorExpression>(Source{}, type,
-                                                  std::move(ast_components));
+    return create<ast::TypeConstructorExpression>(
+        Source{}, builder_.ty.MaybeCreateTypename(type),
+        std::move(ast_components));
   }
   if (auto mat_ty = typ::As<typ::Matrix>(type)) {
     // Matrix components are columns
@@ -1593,24 +1591,27 @@ ast::Expression* ParserImpl::MakeNullValue(typ::Type type) {
     for (size_t i = 0; i < mat_ty->columns(); ++i) {
       ast_components.emplace_back(MakeNullValue(column_ty));
     }
-    return create<ast::TypeConstructorExpression>(Source{}, type,
-                                                  std::move(ast_components));
+    return create<ast::TypeConstructorExpression>(
+        Source{}, builder_.ty.MaybeCreateTypename(type),
+        std::move(ast_components));
   }
   if (auto arr_ty = typ::As<typ::Array>(type)) {
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < arr_ty->size(); ++i) {
       ast_components.emplace_back(MakeNullValue(typ::Call_type(arr_ty)));
     }
-    return create<ast::TypeConstructorExpression>(Source{}, original_type,
-                                                  std::move(ast_components));
+    return create<ast::TypeConstructorExpression>(
+        Source{}, builder_.ty.MaybeCreateTypename(original_type),
+        std::move(ast_components));
   }
   if (auto struct_ty = typ::As<typ::Struct>(type)) {
     ast::ExpressionList ast_components;
     for (auto* member : struct_ty.ast->members()) {
       ast_components.emplace_back(MakeNullValue(member->type()));
     }
-    return create<ast::TypeConstructorExpression>(Source{}, original_type,
-                                                  std::move(ast_components));
+    return create<ast::TypeConstructorExpression>(
+        Source{}, builder_.ty.MaybeCreateTypename(original_type),
+        std::move(ast_components));
   }
   Fail() << "can't make null value for type: " << type->type_name();
   return nullptr;

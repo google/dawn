@@ -3358,7 +3358,8 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
       operands.emplace_back(MakeOperand(inst, iarg).expr);
     }
     return {ast_type, create<ast::TypeConstructorExpression>(
-                          Source{}, ast_type, std::move(operands))};
+                          Source{}, builder_.ty.MaybeCreateTypename(ast_type),
+                          std::move(operands))};
   }
 
   if (opcode == SpvOpCompositeExtract) {
@@ -3885,7 +3886,8 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
     }
   }
   return {result_type,
-          create<ast::TypeConstructorExpression>(source, result_type, values)};
+          create<ast::TypeConstructorExpression>(
+              source, builder_.ty.MaybeCreateTypename(result_type), values)};
 }
 
 bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
@@ -4230,8 +4232,9 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
   ast::ExpressionList params;
   params.push_back(arg_expr.expr);
   TypedExpression result{
-      expr_type, create<ast::TypeConstructorExpression>(Source{}, expr_type,
-                                                        std::move(params))};
+      expr_type, create<ast::TypeConstructorExpression>(
+                     Source{}, builder_.ty.MaybeCreateTypename(expr_type),
+                     std::move(params))};
 
   if (requested_type == expr_type) {
     return result;
@@ -4660,7 +4663,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
       if (is_non_dref_sample || (opcode == SpvOpImageFetch)) {
         value = create<ast::TypeConstructorExpression>(
             Source{},
-            result_type,  // a vec4
+            builder_.ty.MaybeCreateTypename(result_type),  // a vec4
             ast::ExpressionList{
                 value, parser_impl_.MakeNullValue(result_component_type),
                 parser_impl_.MakeNullValue(result_component_type),
@@ -4738,7 +4741,8 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       auto result_type = parser_impl_.ConvertType(inst.type_id());
       TypedExpression expr = {
           result_type,
-          create<ast::TypeConstructorExpression>(Source{}, result_type, exprs)};
+          create<ast::TypeConstructorExpression>(
+              Source{}, builder_.ty.MaybeCreateTypename(result_type), exprs)};
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
     case SpvOpImageQueryLod:
@@ -4760,7 +4764,8 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       // returns i32. If they aren't the same then convert the result.
       if (result_type != builder_.ty.i32()) {
         ast_expr = create<ast::TypeConstructorExpression>(
-            Source{}, result_type, ast::ExpressionList{ast_expr});
+            Source{}, builder_.ty.MaybeCreateTypename(result_type),
+            ast::ExpressionList{ast_expr});
       }
       TypedExpression expr{result_type, ast_expr};
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
@@ -5069,11 +5074,12 @@ TypedExpression FunctionEmitter::MakeOuterProduct(
           Source{}, ast::BinaryOp::kMultiply, row_factor, column_factor);
       result_row.push_back(elem);
     }
-    result_columns.push_back(
-        create<ast::TypeConstructorExpression>(Source{}, col_ty, result_row));
+    result_columns.push_back(create<ast::TypeConstructorExpression>(
+        Source{}, builder_.ty.MaybeCreateTypename(col_ty), result_row));
   }
-  return {result_ty, create<ast::TypeConstructorExpression>(Source{}, result_ty,
-                                                            result_columns)};
+  return {result_ty, create<ast::TypeConstructorExpression>(
+                         Source{}, builder_.ty.MaybeCreateTypename(result_ty),
+                         result_columns)};
 }
 
 bool FunctionEmitter::MakeVectorInsertDynamic(
@@ -5102,8 +5108,9 @@ bool FunctionEmitter::MakeVectorInsertDynamic(
   auto registered_temp_name = builder_.Symbols().Register(temp_name);
 
   auto* temp_var = create<ast::Variable>(
-      Source{}, registered_temp_name, ast::StorageClass::kFunction, ast_type,
-      false, src_vector.expr, ast::DecorationList{});
+      Source{}, registered_temp_name, ast::StorageClass::kFunction,
+      builder_.ty.MaybeCreateTypename(ast_type), false, src_vector.expr,
+      ast::DecorationList{});
   AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
 
   auto* lhs = create<ast::ArrayAccessorExpression>(
@@ -5148,8 +5155,9 @@ bool FunctionEmitter::MakeCompositeInsert(
   auto registered_temp_name = builder_.Symbols().Register(temp_name);
 
   auto* temp_var = create<ast::Variable>(
-      Source{}, registered_temp_name, ast::StorageClass::kFunction, ast_type,
-      false, src_composite.expr, ast::DecorationList{});
+      Source{}, registered_temp_name, ast::StorageClass::kFunction,
+      builder_.ty.MaybeCreateTypename(ast_type), false, src_composite.expr,
+      ast::DecorationList{});
   AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
 
   TypedExpression seed_expr{ast_type, create<ast::IdentifierExpression>(

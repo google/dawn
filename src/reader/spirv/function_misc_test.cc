@@ -412,7 +412,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
     __struct_S
     {
       TypeConstructor[not set]{
-        __struct_S
+        __type_name_S
         ScalarConstructor[not set]{false}
         ScalarConstructor[not set]{0u}
         ScalarConstructor[not set]{0}

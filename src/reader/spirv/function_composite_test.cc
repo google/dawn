@@ -221,7 +221,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
     __struct_S
     {
       TypeConstructor[not set]{
-        __struct_S
+        __type_name_S
         TypeConstructor[not set]{
           __vec_2__f32
           ScalarConstructor[not set]{50.000000}
@@ -833,6 +833,23 @@ TEST_F(SpvParserTest_CompositeInsert, Struct) {
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
+    x_35
+    function
+    __struct_S
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    __struct_S
+    {
+      Identifier[not set]{x_35}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
     x_2_1
     function
     __struct_S
@@ -890,6 +907,30 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
+    x_40
+    function
+    __struct_S_2
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_41
+    function
+    __struct_S_2
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    __struct_S_1
+    {
+      Identifier[not set]{x_40}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
     x_2_1
     function
     __struct_S_1
@@ -912,6 +953,43 @@ VariableDeclStatement{
     __struct_S_1
     {
       Identifier[not set]{x_2_1}
+    }
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_3
+    none
+    __struct_S_2
+    {
+      Identifier[not set]{x_41}
+    }
+  }
+}
+VariableDeclStatement{
+  Variable{
+    x_4_1
+    function
+    __struct_S_2
+    {
+      Identifier[not set]{x_3}
+    }
+  }
+}
+Assignment{
+  MemberAccessor[not set]{
+    Identifier[not set]{x_4_1}
+    Identifier[not set]{rithm}
+  }
+  ScalarConstructor[not set]{10u}
+}
+VariableDeclStatement{
+  VariableConst{
+    x_4
+    none
+    __struct_S_2
+    {
+      Identifier[not set]{x_4_1}
     }
   }
 }
@@ -985,6 +1063,23 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_Array_Matrix_Vector) {
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto body_str = ToString(p->builder(), fe.ast_body());
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
+  Variable{
+    x_37
+    function
+    __struct_S_1
+  }
+}
+VariableDeclStatement{
+  VariableConst{
+    x_1
+    none
+    __struct_S_1
+    {
+      Identifier[not set]{x_37}
+    }
+  }
+}
+VariableDeclStatement{
   Variable{
     x_2_1
     function
