@@ -58,10 +58,12 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
 
 TEST_F(ResolverHostShareableValidationTest, Aliases) {
   auto a1 = ty.alias("a1", ty.bool_());
+  AST().AddConstructedType(a1);
   auto s = Structure("S", {Member(Source{{12, 34}}, "x", a1)},
                      {create<ast::StructBlockDecoration>()});
   auto ac = ty.access(ast::AccessControl::kReadOnly, s);
   auto a2 = ty.alias("a2", ac);
+  AST().AddConstructedType(a2);
   Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
@@ -102,17 +104,20 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
                           Member(Source{{2, 1}}, "y1", ty.vec3<f32>()),
                           Member(Source{{3, 1}}, "z1", ty.array<i32, 4>()),
                       });
+  auto a1 = ty.alias("a1", i1);
+  AST().AddConstructedType(a1);
   auto i2 = Structure("I2", {
                                 Member(Source{{4, 1}}, "x2", ty.mat2x2<f32>()),
                                 Member(Source{{5, 1}}, "y2", i1),
                                 Member(Source{{6, 1}}, "z2", ty.mat3x2<i32>()),
                             });
-  auto i3 =
-      Structure("I3", {
-                          Member(Source{{4, 1}}, "x3", ty.alias("a1", i1)),
-                          Member(Source{{5, 1}}, "y3", i2),
-                          Member(Source{{6, 1}}, "z3", ty.alias("a2", i2)),
-                      });
+  auto a2 = ty.alias("a2", i2);
+  AST().AddConstructedType(a2);
+  auto i3 = Structure("I3", {
+                                Member(Source{{4, 1}}, "x3", a1),
+                                Member(Source{{5, 1}}, "y3", i2),
+                                Member(Source{{6, 1}}, "z3", a2),
+                            });
 
   auto s = Structure("S", {Member(Source{{7, 8}}, "m", i3)},
                      {create<ast::StructBlockDecoration>()});

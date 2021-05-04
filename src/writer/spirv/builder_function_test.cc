@@ -204,9 +204,9 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   auto s = Structure("Data", {Member("d", ty.f32())},
                      {create<ast::StructBlockDecoration>()});
 
-  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  auto ac = ty.access(ast::AccessControl::kReadWrite, s);
 
-  Global("data", &ac, ast::StorageClass::kStorage, nullptr,
+  Global("data", ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

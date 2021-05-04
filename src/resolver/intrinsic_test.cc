@@ -1947,9 +1947,19 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
       case ast::intrinsic::test::TextureKind::kRegular:
       case ast::intrinsic::test::TextureKind::kMultisampled:
       case ast::intrinsic::test::TextureKind::kStorage: {
-        auto datatype = param.resultVectorComponentType(this);
-        ASSERT_TRUE(TypeOf(call)->Is<sem::Vector>());
-        EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->type(), datatype);
+        auto* vec = TypeOf(call)->As<sem::Vector>();
+        ASSERT_NE(vec, nullptr);
+        switch (param.texture_data_type) {
+          case ast::intrinsic::test::TextureDataType::kF32:
+            EXPECT_TRUE(vec->type()->Is<sem::F32>());
+            break;
+          case ast::intrinsic::test::TextureDataType::kU32:
+            EXPECT_TRUE(vec->type()->Is<sem::U32>());
+            break;
+          case ast::intrinsic::test::TextureDataType::kI32:
+            EXPECT_TRUE(vec->type()->Is<sem::I32>());
+            break;
+        }
         break;
       }
       case ast::intrinsic::test::TextureKind::kDepth: {

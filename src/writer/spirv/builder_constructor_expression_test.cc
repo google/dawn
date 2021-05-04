@@ -94,6 +94,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
   // cast<Int>(2.3f)
 
   auto alias = ty.alias("Int", ty.i32());
+  AST().AddConstructedType(alias);
   auto* cast = Construct(alias, 2.3f);
   WrapInFunction(cast);
 

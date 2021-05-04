@@ -408,9 +408,9 @@ TEST_F(HlslGeneratorImplTest_Function,
                      },
                      {create<ast::StructBlockDecoration>()});
 
-  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  auto ac = ty.access(ast::AccessControl::kReadWrite, s);
 
-  Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
+  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -454,9 +454,9 @@ TEST_F(HlslGeneratorImplTest_Function,
                      },
                      {create<ast::StructBlockDecoration>()});
 
-  sem::AccessControl ac(ast::AccessControl::kReadOnly, s);
+  auto ac = ty.access(ast::AccessControl::kReadOnly, s);
 
-  Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
+  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -500,9 +500,9 @@ TEST_F(HlslGeneratorImplTest_Function,
                      },
                      {create<ast::StructBlockDecoration>()});
 
-  sem::AccessControl ac(ast::AccessControl::kWriteOnly, s);
+  auto ac = ty.access(ast::AccessControl::kWriteOnly, s);
 
-  Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
+  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -543,9 +543,9 @@ TEST_F(HlslGeneratorImplTest_Function,
                      },
                      {create<ast::StructBlockDecoration>()});
 
-  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  auto ac = ty.access(ast::AccessControl::kReadWrite, s);
 
-  Global("coord", &ac, ast::StorageClass::kStorage, nullptr,
+  Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
@@ -984,9 +984,9 @@ TEST_F(HlslGeneratorImplTest_Function,
   auto s = Structure("Data", {Member("d", ty.f32())},
                      {create<ast::StructBlockDecoration>()});
 
-  sem::AccessControl ac(ast::AccessControl::kReadWrite, s);
+  auto ac = ty.access(ast::AccessControl::kReadWrite, s);
 
-  Global("data", &ac, ast::StorageClass::kStorage, nullptr,
+  Global("data", ac, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),

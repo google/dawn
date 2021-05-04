@@ -754,12 +754,10 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   //   vec2<f32>(0.5, -0.5));
   // pos[1]
 
-  auto arr = ty.array(ty.vec2<f32>(), 3);
-
   auto* var =
-      GlobalConst("pos", arr,
-                  Construct(arr, vec2<f32>(0.0f, 0.5f), vec2<f32>(-0.5f, -0.5f),
-                            vec2<f32>(0.5f, -0.5f)));
+      GlobalConst("pos", ty.array(ty.vec2<f32>(), 3),
+                  Construct(ty.array(ty.vec2<f32>(), 3), vec2<f32>(0.0f, 0.5f),
+                            vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)));
 
   auto* expr = IndexAccessor("pos", 1u);
   WrapInFunction(expr);

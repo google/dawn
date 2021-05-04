@@ -158,6 +158,7 @@ TEST_F(ResolverFunctionValidationTest,
   // type myf32 = f32;
   // fn func -> myf32 { return 2.0; }
   auto myf32 = ty.alias("myf32", ty.f32());
+  AST().AddConstructedType(myf32);
   Func("func", ast::VariableList{}, myf32,
        ast::StatementList{
            Return(Source{Source::Location{12, 34}}, Expr(2.f)),
@@ -172,6 +173,7 @@ TEST_F(ResolverFunctionValidationTest,
   // type myf32 = f32;
   // fn func -> myf32 { return 2; }
   auto myf32 = ty.alias("myf32", ty.f32());
+  AST().AddConstructedType(myf32);
   Func("func", ast::VariableList{}, myf32,
        ast::StatementList{
            Return(Source{Source::Location{12, 34}}, Expr(2u)),

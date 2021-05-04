@@ -39,24 +39,24 @@ TEST_F(ResolverIsStorableTest, Vector) {
   EXPECT_TRUE(r()->IsStorable(ty.vec2<i32>()));
   EXPECT_TRUE(r()->IsStorable(ty.vec3<i32>()));
   EXPECT_TRUE(r()->IsStorable(ty.vec4<i32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec2<unsigned>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec3<unsigned>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec4<unsigned>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec2<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec3<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec4<float>()));
+  EXPECT_TRUE(r()->IsStorable(ty.vec2<u32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.vec3<u32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.vec4<u32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.vec2<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.vec3<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.vec4<f32>()));
 }
 
 TEST_F(ResolverIsStorableTest, Matrix) {
-  EXPECT_TRUE(r()->IsStorable(ty.mat2x2<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat2x3<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat2x4<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat3x2<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat3x3<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat3x4<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat4x2<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat4x3<float>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat4x4<float>()));
+  EXPECT_TRUE(r()->IsStorable(ty.mat2x2<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.mat2x3<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.mat2x4<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.mat3x2<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.mat3x3<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.mat3x4<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.mat4x2<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.mat4x3<f32>()));
+  EXPECT_TRUE(r()->IsStorable(ty.mat4x4<f32>()));
 }
 
 TEST_F(ResolverIsStorableTest, Pointer) {

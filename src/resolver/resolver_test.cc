@@ -261,6 +261,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl) {
 
 TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
   auto my_int = ty.alias("MyInt", ty.i32());
+  AST().AddConstructedType(my_int);
   auto* var = Var("my_var", my_int, ast::StorageClass::kNone, Expr(2));
   auto* init = var->constructor();
 
@@ -408,6 +409,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Array) {
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Alias_Array) {
   auto aary = ty.alias("myarrty", ty.array<f32, 3>());
+  AST().AddConstructedType(aary);
 
   Global("my_var", aary, ast::StorageClass::kFunction);
 
@@ -904,9 +906,10 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
-  auto st = Structure("alias", {Member("first_member", ty.i32()),
-                                Member("second_member", ty.f32())});
+  auto st = Structure("S", {Member("first_member", ty.i32()),
+                            Member("second_member", ty.f32())});
   auto alias = ty.alias("alias", st);
+  AST().AddConstructedType(alias);
   Global("my_struct", alias, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
@@ -985,10 +988,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   //
 
   auto stB = Structure("B", {Member("foo", ty.vec4<f32>())});
-
-  sem::Vector vecB(stB, 3);
-
-  auto stA = Structure("A", {Member("mem", &vecB)});
+  auto stA = Structure("A", {Member("mem", ty.vec(stB, 3))});
   Global("c", stA, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor(

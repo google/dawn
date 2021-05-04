@@ -370,12 +370,12 @@ TEST_F(IntrinsicBuilderTest, Call_Select) {
 
 // This tests that we do not push OpTypeSampledImage and float_0 type twice.
 TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
-  sem::Sampler s(ast::SamplerKind::kComparisonSampler);
-  sem::DepthTexture t(ast::TextureDimension::k2d);
+  auto s = ty.sampler(ast::SamplerKind::kComparisonSampler);
+  auto t = ty.depth_texture(ast::TextureDimension::k2d);
 
-  auto* tex = Global("texture", &t, ast::StorageClass::kInput);
+  auto* tex = Global("texture", t, ast::StorageClass::kInput);
 
-  auto* sampler = Global("sampler", &s, ast::StorageClass::kInput);
+  auto* sampler = Global("sampler", s, ast::StorageClass::kInput);
 
   auto* expr1 = Call("textureSampleCompare", "texture", "sampler",
                      vec2<f32>(1.0f, 2.0f), 2.0f);

@@ -76,6 +76,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
   // type a = bool;
   // var<storage> g : [[access(read)]] a;
   auto a = ty.alias("a", ty.bool_());
+  AST().AddConstructedType(a);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage);
 
   ASSERT_FALSE(r()->Resolve());
@@ -131,8 +132,10 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
   auto s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                      {create<ast::StructBlockDecoration>()});
   auto a1 = ty.alias("a1", s);
+  AST().AddConstructedType(a1);
   auto ac = ty.access(ast::AccessControl::kReadOnly, a1);
   auto a2 = ty.alias("a2", ac);
+  AST().AddConstructedType(a2);
   Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage);
 
   ASSERT_TRUE(r()->Resolve());
@@ -181,6 +184,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
   // type a = bool;
   // var<uniform> g : [[access(read)]] a;
   auto a = ty.alias("a", ty.bool_());
+  AST().AddConstructedType(a);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform);
 
   ASSERT_FALSE(r()->Resolve());
@@ -221,6 +225,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Aliases) {
   auto s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                      {create<ast::StructBlockDecoration>()});
   auto a1 = ty.alias("a1", s);
+  AST().AddConstructedType(a1);
   Global(Source{{56, 78}}, "g", a1, ast::StorageClass::kUniform);
 
   ASSERT_TRUE(r()->Resolve());

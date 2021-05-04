@@ -79,6 +79,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableFromGlobal) {
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalAlias) {
   auto s = Structure("S", {Member("a", ty.f32())});
   auto a = ty.alias("A", s);
+  AST().AddConstructedType(a);
   Global("g", a, ast::StorageClass::kPrivate);
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -131,6 +132,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableFromLocal) {
 TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalAlias) {
   auto s = Structure("S", {Member("a", ty.f32())});
   auto a = ty.alias("A", s);
+  AST().AddConstructedType(a);
   WrapInFunction(Var("g", a, ast::StorageClass::kFunction));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();

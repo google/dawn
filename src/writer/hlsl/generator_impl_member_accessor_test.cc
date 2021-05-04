@@ -32,7 +32,7 @@ inline typ::Type ty_i32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.i32();
 }
 inline typ::Type ty_u32(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::U32>();
+  return ty.u32();
 }
 inline typ::Type ty_f32(const ProgramBuilder::TypesBuilder& ty) {
   return ty.f32();

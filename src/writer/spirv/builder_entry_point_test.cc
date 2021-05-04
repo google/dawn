@@ -42,12 +42,11 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
   //              [[location(1)]] loc1 : f32) {
   //   var col : f32 = (coord.x * loc1);
   // }
-  auto f32 = ty.f32();
-  auto vec4 = ty.vec4<float>();
-  auto* coord = Param("coord", vec4, {Builtin(ast::Builtin::kPosition)});
-  auto* loc1 = Param("loc1", f32, {Location(1u)});
+  auto* coord =
+      Param("coord", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
+  auto* loc1 = Param("loc1", ty.f32(), {Location(1u)});
   auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
-  auto* col = Var("col", f32, ast::StorageClass::kFunction, mul, {});
+  auto* col = Var("col", ty.f32(), ast::StorageClass::kFunction, mul, {});
   Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
        ast::StatementList{WrapInStatement(col)},
        ast::DecorationList{
@@ -105,12 +104,10 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
   //   }
   //   return 1.0;
   // }
-  auto f32 = ty.f32();
-  auto u32 = ty.u32();
-  auto* loc_in = Param("loc_in", u32, {Location(0)});
+  auto* loc_in = Param("loc_in", ty.u32(), {Location(0)});
   auto* cond = create<ast::BinaryExpression>(ast::BinaryOp::kGreaterThan,
                                              Expr("loc_in"), Expr(10u));
-  Func("frag_main", ast::VariableList{loc_in}, f32,
+  Func("frag_main", ast::VariableList{loc_in}, ty.f32(),
        ast::StatementList{
            If(cond, Block(Return(0.5f))),
            Return(1.0f),

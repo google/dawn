@@ -495,11 +495,11 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   auto A = Structure("A", {Member("a", ty.i32())},
                      {create<ast::StructBlockDecoration>()});
-  sem::AccessControl read{ast::AccessControl::kReadOnly, A};
-  sem::AccessControl rw{ast::AccessControl::kReadWrite, A};
+  auto read = ty.access(ast::AccessControl::kReadOnly, A);
+  auto rw = ty.access(ast::AccessControl::kReadWrite, A);
 
-  auto* var_b = Global("b", &read, ast::StorageClass::kStorage);
-  auto* var_c = Global("c", &rw, ast::StorageClass::kStorage);
+  auto* var_b = Global("b", read, ast::StorageClass::kStorage);
+  auto* var_c = Global("c", rw, ast::StorageClass::kStorage);
 
   spirv::Builder& b = Build();
 

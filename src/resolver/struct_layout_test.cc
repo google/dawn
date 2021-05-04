@@ -52,9 +52,14 @@ TEST_F(ResolverStructLayoutTest, Scalars) {
 }
 
 TEST_F(ResolverStructLayoutTest, Alias) {
+  auto alias_a = ty.alias("a", ty.f32());
+  AST().AddConstructedType(alias_a);
+  auto alias_b = ty.alias("b", ty.f32());
+  AST().AddConstructedType(alias_b);
+
   auto s = Structure("S", {
-                              Member("a", ty.alias("a", ty.f32())),
-                              Member("b", ty.alias("b", ty.f32())),
+                              Member("a", alias_a),
+                              Member("b", alias_b),
                           });
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
