@@ -88,10 +88,12 @@ source_set("tint_unittests_main") {
     sources = [ "//gpu/tint_unittests_main.cc" ]
   } else {
     sources = [ "../src/test_main.cc" ]
+    configs += [ ":tint_unittests_config" ]
     deps += [
       ":tint_test_helpers",
       ":tint_unittests_hlsl_writer_src",
       ":tint_unittests_msl_writer_src",
+      ":tint_unittests_spv_reader_src",
       "${tint_root_dir}/src:libtint",
     ]
   }
@@ -343,6 +345,8 @@ tint_unittests_source_set("tint_unittests_spv_reader_src") {
     "../src/reader/spirv/parser_impl_module_var_test.cc",
     "../src/reader/spirv/parser_impl_named_types_test.cc",
     "../src/reader/spirv/parser_impl_test.cc",
+    "../src/reader/spirv/parser_impl_test_helper.cc",
+    "../src/reader/spirv/parser_impl_test_helper.h",
     "../src/reader/spirv/parser_impl_user_name_test.cc",
     "../src/reader/spirv/parser_test.cc",
     "../src/reader/spirv/spirv_tools_helpers_test.cc",

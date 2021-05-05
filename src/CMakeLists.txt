@@ -625,6 +625,8 @@ if(${TINT_BUILD_TESTS})
       reader/spirv/parser_impl_import_test.cc
       reader/spirv/parser_impl_module_var_test.cc
       reader/spirv/parser_impl_named_types_test.cc
+      reader/spirv/parser_impl_test_helper.cc
+      reader/spirv/parser_impl_test_helper.h
       reader/spirv/parser_impl_test.cc
       reader/spirv/parser_impl_user_name_test.cc
       reader/spirv/parser_test.cc

@@ -75,7 +75,7 @@ std::string Disassemble(const std::vector<uint32_t>& spirv_module) {
 
   std::string result;
   const auto success = tools.Disassemble(
-      spirv_module, &result, 0 /* no friendly names, so we get raw IDs */);
+      spirv_module, &result, SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES);
   EXPECT_TRUE(success) << errors.str();
 
   return result;

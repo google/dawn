@@ -21,14 +21,15 @@ TEXT_GREEN="\033[0;32m"
 TEXT_RED="\033[0;31m"
 TEXT_DEFAULT="\033[0m"
 
-TINT=$1
+TINT="$1"
+SUBDIR="$2"
 
 if [ ! -x "$TINT" ]; then
     echo "test-all.sh compiles with tint all the .wgsl files in the tint/test"
     echo "directory, for each of the SPIR-V, MSL, HLSL and WGSL backends."
     echo "Any errors are reported as test failures."
     echo ""
-    echo "Usage: test-all.sh <path-to-tint-executable>"
+    echo "Usage: test-all.sh <path-to-tint-executable> [<subdir-with-more-samples>]"
     exit 1
 fi
 
@@ -54,7 +55,7 @@ function should_skip() {
 
 # check(TEST_FILE, FORMAT)
 function check() {
-    local TEST_FILE=$1
+    local TEST_FILE="$1"
     local FORMAT=$2
     SKIP=
 
@@ -69,7 +70,7 @@ function check() {
         return
     fi
     set +e
-    ${TINT} ${SCRIPT_DIR}/${TEST_FILE} --format ${FORMAT} -o /dev/null
+    "${TINT}" ${SCRIPT_DIR}/${TEST_FILE} --format ${FORMAT} -o /dev/null
     if [ $? -eq 0 ]; then
         echo -e "${TEXT_GREEN}PASS${TEXT_DEFAULT}"
         NUM_PASS=$((${NUM_PASS}+1))
@@ -80,20 +81,33 @@ function check() {
     set -e
 }
 
-for TEST_FILE in ${SCRIPT_DIR}/*.spvasm ${SCRIPT_DIR}/*.wgsl
-do
+# check_formats(TEST_FILE)
+function check_formats() {
+    local TEST_FILE="$1"
     if [ -x realpath ]; then
       TEST_FILE=$(realpath --relative-to="$SCRIPT_DIR" "$TEST_FILE")
     else
       TEST_FILE=$(echo -n "$TEST_FILE"| sed -e "s'${SCRIPT_DIR}/*''")
     fi
     echo
-    echo "Testing $TEST_FILE..."
+    echo "Testing ${TEST_FILE}..."
     check "${TEST_FILE}" wgsl
     check "${TEST_FILE}" spirv
     check "${TEST_FILE}" msl
     check "${TEST_FILE}" hlsl
+}
+
+for F in ${SCRIPT_DIR}/*.spvasm ${SCRIPT_DIR}/*.wgsl
+do
+    check_formats "$F"
 done
+
+if [ -d "${SUBDIR}" ]; then
+    for F in "${SUBDIR}"/*;
+    do
+        check_formats "$F"
+    done
+fi
 
 if [ ${NUM_FAIL} -ne 0 ]; then
     echo

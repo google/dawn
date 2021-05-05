@@ -28,6 +28,7 @@
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/namer.h"
 #include "src/reader/spirv/parser_impl.h"
+#include "src/reader/spirv/spirv_tools_helpers_test.h"
 #include "src/reader/spirv/usage.h"
 
 namespace tint {
@@ -38,8 +39,16 @@ namespace test {
 // A test class that wraps ParseImpl
 class ParserImplWrapperForTest {
  public:
-  explicit ParserImplWrapperForTest(const std::vector<uint32_t>& input)
-      : impl_(input) {}
+  // Constructor
+  explicit ParserImplWrapperForTest(const std::vector<uint32_t>& input);
+  // Dumps SPIR-V if the conversion succeeded, then destroys the wrapper.
+  ~ParserImplWrapperForTest();
+
+  // Sets global state to force dumping of the assembly text of succesfully
+  // SPIR-V.
+  static void DumpSuccessfullyConvertedSpirv() {
+    dump_successfully_converted_spirv_ = true;
+  }
 
   // Returns a new function emitter for the given function ID.
   // Assumes ParserImpl::BuildInternalRepresentation has been run and
@@ -57,6 +66,7 @@ class ParserImplWrapperForTest {
   const std::string error() { return impl_.error(); }
   FailStream& Fail() { return impl_.Fail(); }
   spvtools::opt::IRContext* ir_context() { return impl_.ir_context(); }
+
   bool BuildInternalModule() { return impl_.BuildInternalModule(); }
   bool BuildAndParseInternalModuleExceptFunctions() {
     return impl_.BuildAndParseInternalModuleExceptFunctions();
@@ -67,9 +77,14 @@ class ParserImplWrapperForTest {
   bool RegisterUserAndStructMemberNames() {
     return impl_.RegisterUserAndStructMemberNames();
   }
+  bool RegisterTypes() { return impl_.RegisterTypes(); }
+  bool RegisterHandleUsage() { return impl_.RegisterHandleUsage(); }
+  bool EmitModuleScopeVariables() { return impl_.EmitModuleScopeVariables(); }
+
   const std::unordered_set<uint32_t>& glsl_std_450_imports() const {
     return impl_.glsl_std_450_imports();
   }
+
   sem::Type* ConvertType(uint32_t id) { return impl_.ConvertType(id); }
   DecorationList GetDecorationsFor(uint32_t id) const {
     return impl_.GetDecorationsFor(id);
@@ -93,12 +108,9 @@ class ParserImplWrapperForTest {
     return impl_.GetEntryPointInfo(entry_point);
   }
   Usage GetHandleUsage(uint32_t id) const { return impl_.GetHandleUsage(id); }
-  bool RegisterHandleUsage() { return impl_.RegisterHandleUsage(); }
-  bool EmitModuleScopeVariables() { return impl_.EmitModuleScopeVariables(); }
   const spvtools::opt::Instruction* GetInstructionForTest(uint32_t id) const {
     return impl_.GetInstructionForTest(id);
   }
-  bool RegisterTypes() { return impl_.RegisterTypes(); }
   const ParserImpl::BuiltInPositionInfo& GetBuiltInPositionInfo() {
     return impl_.GetBuiltInPositionInfo();
   }
@@ -110,7 +122,14 @@ class ParserImplWrapperForTest {
 
  private:
   ParserImpl impl_;
+  static bool dump_successfully_converted_spirv_;
 };
+
+// Sets global state to force dumping of the assembly text of succesfully
+// SPIR-V.
+inline void DumpSuccessfullyConvertedSpirv() {
+  ParserImplWrapperForTest::DumpSuccessfullyConvertedSpirv();
+}
 
 }  // namespace test
 
@@ -127,6 +146,7 @@ class SpvParserTestBase : public T {
   std::unique_ptr<test::ParserImplWrapperForTest> parser(
       const std::vector<uint32_t>& input) {
     auto parser = std::make_unique<test::ParserImplWrapperForTest>(input);
+
     // Don't run the Resolver when building the program.
     // We're not interested in type information with these tests.
     parser->builder().SetResolveOnBuild(false);

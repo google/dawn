@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "gmock/gmock.h"
+#include "src/reader/spirv/parser_impl_test_helper.h"
 #include "src/utils/command.h"
 #include "src/writer/hlsl/test_helper.h"
 #include "src/writer/msl/test_helper.h"
@@ -28,6 +29,7 @@ struct Flags {
   std::string dxc_path;
   bool validate_msl = false;
   std::string xcrun_path;
+  bool spirv_reader_dump_converted = false;
 
   bool parse(int argc, char** argv) {
     bool errored = false;
@@ -53,6 +55,8 @@ struct Flags {
       } else if (match("--validate-msl") ||
                  parse_value("--xcrun-path", xcrun_path)) {
         validate_msl = true;
+      } else if (match("--dump-spirv")) {
+        spirv_reader_dump_converted = true;
       } else {
         std::cout << "Unknown flag '" << argv[i] << "'" << std::endl;
         return false;
@@ -121,6 +125,12 @@ int main(int argc, char** argv) {
     std::cout << "MSL validation with XCode SDK is not enabled" << std::endl;
   }
 #endif  // TINT_BUILD_MSL_WRITER
+
+#if TINT_BUILD_SPV_READER
+  if (flags.spirv_reader_dump_converted) {
+    tint::reader::spirv::test::DumpSuccessfullyConvertedSpirv();
+  }
+#endif  // TINT_BUILD_SPV_READER
 
   tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
