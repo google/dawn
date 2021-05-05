@@ -356,8 +356,9 @@ class OpenSizeMatBuilder : public Builder {
     auto* el = element_builder_->Build(state);
     auto columns = state.open_numbers.at(columns_);
     auto rows = state.open_numbers.at(rows_);
-    return state.ty_mgr.Get<sem::Matrix>(const_cast<sem::Type*>(el), rows,
-                                         columns);
+    auto* column_type =
+        state.ty_mgr.Get<sem::Vector>(const_cast<sem::Type*>(el), rows);
+    return state.ty_mgr.Get<sem::Matrix>(column_type, columns);
   }
 
   std::string str() const override {

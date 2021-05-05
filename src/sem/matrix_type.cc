@@ -15,18 +15,22 @@
 #include "src/sem/matrix_type.h"
 
 #include "src/program_builder.h"
+#include "src/sem/vector_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Matrix);
 
 namespace tint {
 namespace sem {
 
-Matrix::Matrix(Type* subtype, uint32_t rows, uint32_t columns)
-    : subtype_(subtype), rows_(rows), columns_(columns) {
-  TINT_ASSERT(rows > 1);
-  TINT_ASSERT(rows < 5);
-  TINT_ASSERT(columns > 1);
-  TINT_ASSERT(columns < 5);
+Matrix::Matrix(Vector* column_type, uint32_t columns)
+    : subtype_(column_type->type()),
+      column_type_(column_type),
+      rows_(column_type->size()),
+      columns_(columns) {
+  TINT_ASSERT(rows_ > 1);
+  TINT_ASSERT(rows_ < 5);
+  TINT_ASSERT(columns_ > 1);
+  TINT_ASSERT(columns_ < 5);
 }
 
 Matrix::Matrix(Matrix&&) = default;
@@ -47,8 +51,8 @@ std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
 
 Matrix* Matrix::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
-  auto* ty = ctx->Clone(type());
-  return ctx->dst->create<Matrix>(ty, rows_, columns_);
+  auto* column_type = ctx->Clone(ColumnType());
+  return ctx->dst->create<Matrix>(column_type, columns_);
 }
 
 }  // namespace sem

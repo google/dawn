@@ -22,14 +22,16 @@
 namespace tint {
 namespace sem {
 
+// Forward declaration
+class Vector;
+
 /// A matrix type
 class Matrix : public Castable<Matrix, Type> {
  public:
   /// Constructor
-  /// @param subtype type matrix type
-  /// @param rows the number of rows in the matrix
+  /// @param column_type the type of a column of the matrix
   /// @param columns the number of columns in the matrix
-  Matrix(Type* subtype, uint32_t rows, uint32_t columns);
+  Matrix(Vector* column_type, uint32_t columns);
   /// Move constructor
   Matrix(Matrix&&);
   ~Matrix() override;
@@ -40,6 +42,9 @@ class Matrix : public Castable<Matrix, Type> {
   uint32_t rows() const { return rows_; }
   /// @returns the number of columns in the matrix
   uint32_t columns() const { return columns_; }
+
+  /// @returns the column-vector type of the matrix
+  Vector* ColumnType() const { return column_type_; }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -56,6 +61,7 @@ class Matrix : public Castable<Matrix, Type> {
 
  private:
   Type* const subtype_;
+  Vector* const column_type_;
   uint32_t const rows_;
   uint32_t const columns_;
 };

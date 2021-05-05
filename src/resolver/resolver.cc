@@ -347,8 +347,9 @@ const sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::Matrix>()) {
       if (auto* el = Type(t->type())) {
-        return builder_->create<sem::Matrix>(const_cast<sem::Type*>(el),
-                                             t->rows(), t->columns());
+        auto* column_type = builder_->create<sem::Vector>(
+            const_cast<sem::Type*>(el), t->rows());
+        return builder_->create<sem::Matrix>(column_type, t->columns());
       }
       return nullptr;
     }
@@ -1958,8 +1959,10 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     auto* rhs_vec = rhs_type->As<sem::Vector>();
     const sem::Type* result_type = nullptr;
     if (lhs_mat && rhs_mat) {
-      result_type = builder_->create<sem::Matrix>(
-          lhs_mat->type(), lhs_mat->rows(), rhs_mat->columns());
+      auto* column_type =
+          builder_->create<sem::Vector>(lhs_mat->type(), lhs_mat->rows());
+      result_type =
+          builder_->create<sem::Matrix>(column_type, rhs_mat->columns());
     } else if (lhs_mat && rhs_vec) {
       result_type =
           builder_->create<sem::Vector>(lhs_mat->type(), lhs_mat->rows());
@@ -2886,9 +2889,9 @@ const sem::Type* Resolver::Canonical(const sem::Type* type) {
           const_cast<sem::Type*>(make_canonical(v->type())), v->size());
     }
     if (auto* m = ct->As<Matrix>()) {
-      return builder_->create<Matrix>(
-          const_cast<sem::Type*>(make_canonical(m->type())), m->rows(),
-          m->columns());
+      auto* column_type =
+          builder_->create<sem::Vector>(make_canonical(m->type()), m->rows());
+      return builder_->create<Matrix>(column_type, m->columns());
     }
     if (auto* ac = ct->As<AccessControl>()) {
       return builder_->create<AccessControl>(ac->access_control(),

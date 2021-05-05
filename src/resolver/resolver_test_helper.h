@@ -239,17 +239,20 @@ sem::Type* sem_vec4(const ProgramBuilder::TypesBuilder& ty) {
 
 template <create_sem_type_func_ptr create_type>
 sem::Type* sem_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::Matrix>(create_type(ty), 2, 2);
+  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 2u);
+  return ty.builder->create<sem::Matrix>(column_type, 2u);
 }
 
 template <create_sem_type_func_ptr create_type>
 sem::Type* sem_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::Matrix>(create_type(ty), 3, 3);
+  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 3u);
+  return ty.builder->create<sem::Matrix>(column_type, 3u);
 }
 
 template <create_sem_type_func_ptr create_type>
 sem::Type* sem_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
-  return ty.builder->create<sem::Matrix>(create_type(ty), 4, 4);
+  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 4u);
+  return ty.builder->create<sem::Matrix>(column_type, 4u);
 }
 
 template <create_sem_type_func_ptr create_type>

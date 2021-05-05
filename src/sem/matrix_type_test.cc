@@ -24,7 +24,8 @@ using MatrixTest = TestHelper;
 
 TEST_F(MatrixTest, Creation) {
   I32 i32;
-  Matrix m{&i32, 2, 4};
+  Vector c{&i32, 2};
+  Matrix m{&c, 4};
   EXPECT_EQ(m.type(), &i32);
   EXPECT_EQ(m.rows(), 2u);
   EXPECT_EQ(m.columns(), 4u);
@@ -32,7 +33,8 @@ TEST_F(MatrixTest, Creation) {
 
 TEST_F(MatrixTest, Is) {
   I32 i32;
-  Matrix m{&i32, 2, 3};
+  Vector c{&i32, 2};
+  Matrix m{&c, 4};
   Type* ty = &m;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -51,12 +53,15 @@ TEST_F(MatrixTest, Is) {
 
 TEST_F(MatrixTest, TypeName) {
   I32 i32;
-  Matrix m{&i32, 2, 3};
+  Vector c{&i32, 2};
+  Matrix m{&c, 3};
   EXPECT_EQ(m.type_name(), "__mat_2_3__i32");
 }
 
 TEST_F(MatrixTest, FriendlyName) {
-  Matrix m{ty.i32(), 3, 2};
+  I32 i32;
+  Vector c{&i32, 3};
+  Matrix m{&c, 2};
   EXPECT_EQ(m.FriendlyName(Symbols()), "mat2x3<i32>");
 }
 

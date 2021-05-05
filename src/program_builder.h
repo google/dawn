@@ -470,7 +470,7 @@ class ProgramBuilder {
       type = MaybeCreateTypename(type);
       return {type.ast ? builder->create<ast::Matrix>(type, rows, columns)
                        : nullptr,
-              type.sem ? builder->create<sem::Matrix>(type, rows, columns)
+              type.sem ? builder->create<sem::Matrix>(vec(type, rows), columns)
                        : nullptr};
     }
 
@@ -486,7 +486,7 @@ class ProgramBuilder {
       return {type.ast
                   ? builder->create<ast::Matrix>(source, type, rows, columns)
                   : nullptr,
-              type.sem ? builder->create<sem::Matrix>(type, rows, columns)
+              type.sem ? builder->create<sem::Matrix>(vec(type, rows), columns)
                        : nullptr};
     }
 
