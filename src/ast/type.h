@@ -134,13 +134,6 @@ class Type : public Castable<Type, Node> {
   Type(ProgramID program_id, const Source& source);
 };
 
-/// @returns the ProgramID of the given type.
-inline ProgramID ProgramIDOf(const Type*) {
-  /// TODO(crbug.com/tint/724): Actually implement this once we split the `type`
-  /// namespace into ast::Type and sem::Type.
-  return ProgramID();
-}
-
 }  // namespace ast
 }  // namespace tint
 
