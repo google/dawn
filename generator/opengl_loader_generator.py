@@ -273,7 +273,10 @@ class OpenGLLoaderGenerator(Generator):
         ]
 
     def get_dependencies(self, args):
-        return [os.path.abspath(args.gl_xml)]
+        return [
+            os.path.abspath(args.gl_xml),
+            os.path.abspath(args.supported_extensions)
+        ]
 
 
 if __name__ == '__main__':
