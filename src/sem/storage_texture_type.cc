@@ -42,12 +42,6 @@ std::string StorageTexture::FriendlyName(const SymbolTable&) const {
   return out.str();
 }
 
-StorageTexture* StorageTexture::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto* ty = ctx->Clone(type());
-  return ctx->dst->create<StorageTexture>(dim(), image_format_, ty);
-}
-
 sem::Type* StorageTexture::SubtypeFor(ast::ImageFormat format,
                                       sem::Manager& type_mgr) {
   switch (format) {

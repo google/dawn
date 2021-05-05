@@ -35,9 +35,5 @@ std::string Bool::FriendlyName(const SymbolTable&) const {
   return "bool";
 }
 
-Bool* Bool::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Bool>();
-}
-
 }  // namespace sem
 }  // namespace tint

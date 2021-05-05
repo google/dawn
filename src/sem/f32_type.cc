@@ -35,9 +35,5 @@ std::string F32::FriendlyName(const SymbolTable&) const {
   return "f32";
 }
 
-F32* F32::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<F32>();
-}
-
 }  // namespace sem
 }  // namespace tint

@@ -44,11 +44,5 @@ Pointer::Pointer(Pointer&&) = default;
 
 Pointer::~Pointer() = default;
 
-Pointer* Pointer::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto* ty = ctx->Clone(type());
-  return ctx->dst->create<Pointer>(ty, storage_class_);
-}
-
 }  // namespace sem
 }  // namespace tint

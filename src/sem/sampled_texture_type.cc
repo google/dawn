@@ -42,11 +42,5 @@ std::string SampledTexture::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-SampledTexture* SampledTexture::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto* ty = ctx->Clone(type());
-  return ctx->dst->create<SampledTexture>(dim(), ty);
-}
-
 }  // namespace sem
 }  // namespace tint

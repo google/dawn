@@ -49,11 +49,5 @@ std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-Matrix* Matrix::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto* column_type = ctx->Clone(ColumnType());
-  return ctx->dst->create<Matrix>(column_type, columns_);
-}
-
 }  // namespace sem
 }  // namespace tint

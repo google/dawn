@@ -66,11 +66,5 @@ std::string AccessControl::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-AccessControl* AccessControl::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto* ty = ctx->Clone(type());
-  return ctx->dst->create<AccessControl>(access_, ty);
-}
-
 }  // namespace sem
 }  // namespace tint

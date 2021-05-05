@@ -44,11 +44,6 @@ class Bool : public Castable<Bool, Type> {
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
-
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  Bool* Clone(CloneContext* ctx) const override;
 };
 
 }  // namespace sem

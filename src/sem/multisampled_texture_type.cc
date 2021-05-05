@@ -45,11 +45,5 @@ std::string MultisampledTexture::FriendlyName(
   return out.str();
 }
 
-MultisampledTexture* MultisampledTexture::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto* ty = ctx->Clone(type());
-  return ctx->dst->create<MultisampledTexture>(dim(), ty);
-}
-
 }  // namespace sem
 }  // namespace tint

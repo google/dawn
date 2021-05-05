@@ -47,11 +47,6 @@ class StructType : public Castable<StructType, Type> {
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  StructType* Clone(CloneContext* ctx) const override;
-
  private:
   ast::Struct* const struct_;
 

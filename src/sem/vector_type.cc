@@ -41,11 +41,5 @@ std::string Vector::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-Vector* Vector::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto* ty = ctx->Clone(type());
-  return ctx->dst->create<Vector>(ty, size_);
-}
-
 }  // namespace sem
 }  // namespace tint

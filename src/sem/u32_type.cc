@@ -35,9 +35,5 @@ std::string U32::FriendlyName(const SymbolTable&) const {
   return "u32";
 }
 
-U32* U32::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<U32>();
-}
-
 }  // namespace sem
 }  // namespace tint

@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/clone_context.h"
+#include "src/castable.h"
 
 namespace tint {
 
@@ -31,7 +31,7 @@ namespace sem {
 enum class MemoryLayout { kUniformBuffer, kStorageBuffer };
 
 /// Base class for a type in the system
-class Type : public Castable<Type, ShareableCloneable> {
+class Type : public Castable<Type> {
  public:
   /// Move constructor
   Type(Type&&);
@@ -131,13 +131,6 @@ class Type : public Castable<Type, ShareableCloneable> {
  protected:
   Type();
 };
-
-/// @returns the ProgramID of the given type.
-inline ProgramID ProgramIDOf(const Type*) {
-  /// TODO(crbug.com/tint/724): Actually implement this once we split the `type`
-  /// namespace into ast::Type and sem::Type.
-  return ProgramID();
-}
 
 }  // namespace sem
 }  // namespace tint

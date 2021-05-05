@@ -54,11 +54,6 @@ class StorageTexture : public Castable<StorageTexture, Texture> {
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  StorageTexture* Clone(CloneContext* ctx) const override;
-
   /// @param format the storage texture image format
   /// @param type_mgr the sem::Manager used to build the returned type
   /// @returns the storage texture subtype for the given ImageFormat

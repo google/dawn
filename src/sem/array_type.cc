@@ -63,12 +63,5 @@ std::string ArrayType::FriendlyName(const SymbolTable& symbols) const {
   return out.str();
 }
 
-ArrayType* ArrayType::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto* ty = ctx->Clone(type());
-  auto decos = ctx->Clone(decorations());
-  return ctx->dst->create<ArrayType>(ty, size_, decos);
-}
-
 }  // namespace sem
 }  // namespace tint

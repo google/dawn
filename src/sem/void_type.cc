@@ -35,9 +35,5 @@ std::string Void::FriendlyName(const SymbolTable&) const {
   return "void";
 }
 
-Void* Void::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<Void>();
-}
-
 }  // namespace sem
 }  // namespace tint

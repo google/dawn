@@ -444,8 +444,7 @@ struct DecomposeStorageAccess::State {
       } else {
         ast::ExpressionList values;
         if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
-          auto* vec_ty = ctx.dst->create<sem::Vector>(ctx.Clone(mat_ty->type()),
-                                                      mat_ty->rows());
+          auto* vec_ty = mat_ty->ColumnType();
           Symbol load = LoadFunc(ctx, insert_after, buf_ty, vec_ty);
           for (uint32_t i = 0; i < mat_ty->columns(); i++) {
             auto* offset =
@@ -517,8 +516,7 @@ struct DecomposeStorageAccess::State {
       } else {
         ast::StatementList body;
         if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
-          auto* vec_ty = ctx.dst->create<sem::Vector>(ctx.Clone(mat_ty->type()),
-                                                      mat_ty->rows());
+          auto* vec_ty = mat_ty->ColumnType();
           Symbol store = StoreFunc(ctx, insert_after, buf_ty, vec_ty);
           for (uint32_t i = 0; i < mat_ty->columns(); i++) {
             auto* offset =
@@ -719,13 +717,11 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
         }
         if (auto* mat_ty = access.type->As<sem::Matrix>()) {
           auto offset = Mul(MatrixColumnStride(mat_ty), accessor->idx_expr());
-          auto* vec_ty = ctx.dst->create<sem::Vector>(
-              ctx.Clone(mat_ty->type()->UnwrapAll()), mat_ty->rows());
           state.AddAccess(accessor,
                           {
                               access.var,
                               Add(std::move(access.offset), std::move(offset)),
-                              vec_ty,
+                              mat_ty->ColumnType(),
                           });
           continue;
         }

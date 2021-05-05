@@ -51,9 +51,5 @@ std::string DepthTexture::FriendlyName(const SymbolTable&) const {
   return out.str();
 }
 
-DepthTexture* DepthTexture::Clone(CloneContext* ctx) const {
-  return ctx->dst->create<DepthTexture>(dim());
-}
-
 }  // namespace sem
 }  // namespace tint

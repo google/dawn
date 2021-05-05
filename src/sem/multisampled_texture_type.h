@@ -44,11 +44,6 @@ class MultisampledTexture : public Castable<MultisampledTexture, Texture> {
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
 
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  MultisampledTexture* Clone(CloneContext* ctx) const override;
-
  private:
   const Type* const type_;
 };

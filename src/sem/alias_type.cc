@@ -40,12 +40,5 @@ std::string Alias::FriendlyName(const SymbolTable& symbols) const {
   return symbols.NameFor(symbol_);
 }
 
-Alias* Alias::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto sym = ctx->Clone(symbol());
-  auto* ty = ctx->Clone(type());
-  return ctx->dst->create<Alias>(sym, ty);
-}
-
 }  // namespace sem
 }  // namespace tint

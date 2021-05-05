@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/sem/type.h"
+#include "src/symbol.h"
 
 namespace tint {
 namespace sem {
@@ -46,11 +47,6 @@ class Alias : public Castable<Alias, Type> {
   /// @returns the name for this type that closely resembles how it would be
   /// declared in WGSL.
   std::string FriendlyName(const SymbolTable& symbols) const override;
-
-  /// Clones this type and all transitive types using the `CloneContext` `ctx`.
-  /// @param ctx the clone context
-  /// @return the newly cloned type
-  Alias* Clone(CloneContext* ctx) const override;
 
  private:
   Symbol const symbol_;

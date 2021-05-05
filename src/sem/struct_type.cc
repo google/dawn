@@ -37,11 +37,5 @@ std::string StructType::FriendlyName(const SymbolTable& symbols) const {
   return impl()->FriendlyName(symbols);
 }
 
-StructType* StructType::Clone(CloneContext* ctx) const {
-  // Clone arguments outside of create() call to have deterministic ordering
-  auto* str = ctx->Clone(impl());
-  return ctx->dst->create<StructType>(str);
-}
-
 }  // namespace sem
 }  // namespace tint
