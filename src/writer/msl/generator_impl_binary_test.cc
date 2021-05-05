@@ -31,11 +31,11 @@ using MslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(MslBinaryTest, Emit) {
   auto params = GetParam();
 
-  auto type = [&]() {
+  auto type = [&] {
     return ((params.op == ast::BinaryOp::kLogicalAnd) ||
             (params.op == ast::BinaryOp::kLogicalOr))
-               ? static_cast<typ::Type>(ty.bool_())
-               : static_cast<typ::Type>(ty.u32());
+               ? static_cast<ast::Type*>(ty.bool_())
+               : static_cast<ast::Type*>(ty.u32());
   };
 
   auto* left = Var("left", type(), ast::StorageClass::kFunction);

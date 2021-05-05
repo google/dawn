@@ -328,7 +328,7 @@ typ::Type ParserImpl::ConvertType(uint32_t type_id) {
 
   auto maybe_generate_alias = [this, type_id,
                                spirv_type](typ::Type type) -> typ::Type {
-    if (type != nullptr) {
+    if (type.ast != nullptr) {
       return MaybeGenerateAlias(type_id, spirv_type, type);
     }
     return {};
@@ -802,7 +802,7 @@ typ::Type ParserImpl::ConvertType(
     const spvtools::opt::analysis::Vector* vec_ty) {
   const auto num_elem = vec_ty->element_count();
   auto ast_elem_ty = ConvertType(type_mgr_->GetId(vec_ty->element_type()));
-  if (ast_elem_ty == nullptr) {
+  if (ast_elem_ty.ast == nullptr) {
     return nullptr;
   }
   return builder_.ty.vec(ast_elem_ty, num_elem);
@@ -815,7 +815,7 @@ typ::Type ParserImpl::ConvertType(
   const auto num_rows = vec_ty->element_count();
   const auto num_columns = mat_ty->element_count();
   auto ast_scalar_ty = ConvertType(type_mgr_->GetId(scalar_ty));
-  if (ast_scalar_ty == nullptr) {
+  if (ast_scalar_ty.ast == nullptr) {
     return nullptr;
   }
   return builder_.ty.mat(ast_scalar_ty, num_columns, num_rows);
@@ -824,7 +824,7 @@ typ::Type ParserImpl::ConvertType(
 typ::Type ParserImpl::ConvertType(
     const spvtools::opt::analysis::RuntimeArray* rtarr_ty) {
   auto ast_elem_ty = ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
-  if (ast_elem_ty == nullptr) {
+  if (ast_elem_ty.ast == nullptr) {
     return nullptr;
   }
   ast::DecorationList decorations;
@@ -838,7 +838,7 @@ typ::Type ParserImpl::ConvertType(
     const spvtools::opt::analysis::Array* arr_ty) {
   const auto elem_type_id = type_mgr_->GetId(arr_ty->element_type());
   auto ast_elem_ty = ConvertType(elem_type_id);
-  if (ast_elem_ty == nullptr) {
+  if (ast_elem_ty.ast == nullptr) {
     return nullptr;
   }
   const auto& length_info = arr_ty->length_info();
@@ -940,7 +940,7 @@ typ::Type ParserImpl::ConvertType(
        ++member_index) {
     const auto member_type_id = type_mgr_->GetId(members[member_index]);
     auto ast_member_ty = ConvertType(member_type_id);
-    if (ast_member_ty == nullptr) {
+    if (ast_member_ty.ast == nullptr) {
       // Already emitted diagnostics.
       return nullptr;
     }
@@ -1058,7 +1058,7 @@ typ::Type ParserImpl::ConvertType(uint32_t type_id,
     return nullptr;
   }
   auto ast_elem_ty = ConvertType(pointee_type_id);
-  if (ast_elem_ty == nullptr) {
+  if (ast_elem_ty.ast == nullptr) {
     Fail() << "SPIR-V pointer type with ID " << type_id
            << " has invalid pointee type " << pointee_type_id;
     return nullptr;
@@ -1206,7 +1206,7 @@ typ::Type ParserImpl::MaybeGenerateAlias(
       return ast_type;
   }
   auto ast_underlying_type = ast_type;
-  if (ast_underlying_type == nullptr) {
+  if (ast_underlying_type.ast == nullptr) {
     Fail() << "internal error: no type registered for SPIR-V ID: " << type_id;
     return {};
   }
@@ -1267,7 +1267,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
       }
     } else {
       ast_type = ConvertType(type_id);
-      if (ast_type == nullptr) {
+      if (ast_type.ast == nullptr) {
         return Fail() << "internal error: failed to register Tint AST type for "
                          "SPIR-V type with ID: "
                       << var.type_id();
@@ -1346,7 +1346,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                                         bool is_const,
                                         ast::Expression* constructor,
                                         ast::DecorationList decorations) {
-  if (type == nullptr) {
+  if (type.ast == nullptr) {
     Fail() << "internal error: can't make ast::Variable for null type";
     return nullptr;
   }
@@ -1459,7 +1459,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
     return {};
   }
   auto original_ast_type = ConvertType(inst->type_id());
-  if (original_ast_type == nullptr) {
+  if (original_ast_type.ast == nullptr) {
     return {};
   }
 
@@ -1671,7 +1671,7 @@ TypedExpression ParserImpl::RectifyOperandSignedness(
     return {};
   }
   auto type = expr.type;
-  if (!type) {
+  if (!type.ast) {
     Fail() << "internal error: unmapped type for: " << builder_.str(expr.expr)
            << "\n";
     return {};
@@ -1725,7 +1725,7 @@ typ::Type ParserImpl::ForcedResultType(const spvtools::opt::Instruction& inst,
 }
 
 typ::Type ParserImpl::GetSignedIntMatchingShape(typ::Type other) {
-  if (other == nullptr) {
+  if (other.ast == nullptr) {
     Fail() << "no type provided";
   }
   auto i32 = builder_.ty.i32();
@@ -1742,7 +1742,7 @@ typ::Type ParserImpl::GetSignedIntMatchingShape(typ::Type other) {
 }
 
 typ::Type ParserImpl::GetUnsignedIntMatchingShape(typ::Type other) {
-  if (other == nullptr) {
+  if (other.ast == nullptr) {
     Fail() << "no type provided";
     return nullptr;
   }
@@ -1764,7 +1764,7 @@ TypedExpression ParserImpl::RectifyForcedResultType(
     const spvtools::opt::Instruction& inst,
     typ::Type first_operand_type) {
   auto forced_result_ty = ForcedResultType(inst, first_operand_type);
-  if ((forced_result_ty == nullptr) || (forced_result_ty == expr.type)) {
+  if ((forced_result_ty.ast == nullptr) || (forced_result_ty == expr.type)) {
     return expr;
   }
   return {expr.type,

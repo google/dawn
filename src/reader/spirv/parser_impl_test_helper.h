@@ -86,7 +86,7 @@ class ParserImplWrapperForTest {
     return impl_.glsl_std_450_imports();
   }
 
-  sem::Type* ConvertType(uint32_t id) { return impl_.ConvertType(id); }
+  typ::Type ConvertType(uint32_t id) { return impl_.ConvertType(id); }
   DecorationList GetDecorationsFor(uint32_t id) const {
     return impl_.GetDecorationsFor(id);
   }

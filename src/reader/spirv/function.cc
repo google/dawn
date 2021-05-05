@@ -3209,7 +3209,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         return true;
       }
       auto expr = MakeExpression(value_id);
-      if (!expr.type || !expr.expr) {
+      if (!expr.type.ast || !expr.expr) {
         return false;
       }
       expr.type = RemapStorageClass(expr.type, result_id);
@@ -3686,7 +3686,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
     const auto pointer_type_id =
         type_mgr_->FindPointerToType(pointee_type_id, storage_class);
     auto ast_pointer_type = parser_impl_.ConvertType(pointer_type_id);
-    TINT_ASSERT(ast_pointer_type);
+    TINT_ASSERT(ast_pointer_type.ast);
     TINT_ASSERT(ast_pointer_type.ast->Is<ast::Pointer>());
     current_expr = TypedExpression{ast_pointer_type, next_expr};
   }
@@ -4276,7 +4276,7 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   auto* call_expr =
       create<ast::CallExpression>(Source{}, function, std::move(params));
   auto result_type = parser_impl_.ConvertType(inst.type_id());
-  if (!result_type) {
+  if (!result_type.ast) {
     return Fail() << "internal error: no mapped type result of call: "
                   << inst.PrettyPrint();
   }
@@ -4355,7 +4355,7 @@ TypedExpression FunctionEmitter::MakeIntrinsicCall(
   auto* call_expr =
       create<ast::CallExpression>(Source{}, ident, std::move(params));
   auto result_type = parser_impl_.ConvertType(inst.type_id());
-  if (!result_type) {
+  if (!result_type.ast) {
     Fail() << "internal error: no mapped type result of call: "
            << inst.PrettyPrint();
     return {};
@@ -4482,13 +4482,13 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
   }
 
   typ::Pointer texture_ptr_type = parser_impl_.GetTypeForHandleVar(*image);
-  if (!texture_ptr_type) {
+  if (!texture_ptr_type.ast) {
     return Fail();
   }
   typ::Texture texture_type =
       typ::As<typ::Texture>(UnwrapAll(typ::Call_type(texture_ptr_type)));
 
-  if (!texture_type) {
+  if (!texture_type.ast) {
     return Fail();
   }
 
@@ -4908,13 +4908,13 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
     typ::Texture texture_type) {
   auto storage_texture_type = typ::As<typ::StorageTexture>(texture_type);
   auto src_type = texel.type;
-  if (!storage_texture_type) {
+  if (!storage_texture_type.ast) {
     Fail() << "writing to other than storage texture: " << inst.PrettyPrint();
     return nullptr;
   }
-  const auto format = storage_texture_type->image_format();
+  const auto format = storage_texture_type.ast->image_format();
   auto dest_type = parser_impl_.GetTexelTypeForFormat(format);
-  if (!dest_type) {
+  if (!dest_type.ast) {
     Fail();
     return nullptr;
   }
@@ -4923,14 +4923,14 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
   }
 
   const uint32_t dest_count =
-      dest_type->is_scalar() ? 1 : dest_type.ast->As<ast::Vector>()->size();
+      dest_type.ast->is_scalar() ? 1 : dest_type.ast->As<ast::Vector>()->size();
   if (dest_count == 3) {
     Fail() << "3-channel storage textures are not supported: "
            << inst.PrettyPrint();
     return nullptr;
   }
   const uint32_t src_count =
-      src_type->is_scalar() ? 1 : src_type.ast->As<ast::Vector>()->size();
+      src_type.ast->is_scalar() ? 1 : src_type.ast->As<ast::Vector>()->size();
   if (src_count < dest_count) {
     Fail() << "texel has too few components for storage texture: " << src_count
            << " provided but " << dest_count
@@ -4945,29 +4945,29 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
           : create<ast::MemberAccessorExpression>(Source{}, texel.expr,
                                                   PrefixSwizzle(dest_count));
 
-  if (!(dest_type->is_float_scalar_or_vector() ||
-        dest_type->is_unsigned_scalar_or_vector() ||
-        dest_type->is_signed_scalar_or_vector())) {
+  if (!(dest_type.ast->is_float_scalar_or_vector() ||
+        dest_type.ast->is_unsigned_scalar_or_vector() ||
+        dest_type.ast->is_signed_scalar_or_vector())) {
     Fail() << "invalid destination type for storage texture write: "
-           << dest_type->type_name();
+           << dest_type.ast->type_name();
     return nullptr;
   }
-  if (!(src_type->is_float_scalar_or_vector() ||
-        src_type->is_unsigned_scalar_or_vector() ||
-        src_type->is_signed_scalar_or_vector())) {
+  if (!(src_type.ast->is_float_scalar_or_vector() ||
+        src_type.ast->is_unsigned_scalar_or_vector() ||
+        src_type.ast->is_signed_scalar_or_vector())) {
     Fail() << "invalid texel type for storage texture write: "
            << inst.PrettyPrint();
     return nullptr;
   }
-  if (dest_type->is_float_scalar_or_vector() &&
-      !src_type->is_float_scalar_or_vector()) {
+  if (dest_type.ast->is_float_scalar_or_vector() &&
+      !src_type.ast->is_float_scalar_or_vector()) {
     Fail() << "can only write float or float vector to a storage image with "
               "floating texel format: "
            << inst.PrettyPrint();
     return nullptr;
   }
-  if (!dest_type->is_float_scalar_or_vector() &&
-      src_type->is_float_scalar_or_vector()) {
+  if (!dest_type.ast->is_float_scalar_or_vector() &&
+      src_type.ast->is_float_scalar_or_vector()) {
     Fail()
         << "float or float vector can only be written to a storage image with "
            "floating texel format: "
@@ -4975,13 +4975,13 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
     return nullptr;
   }
 
-  if (dest_type->is_float_scalar_or_vector()) {
+  if (dest_type.ast->is_float_scalar_or_vector()) {
     return texel_prefix;
   }
   // The only remaining cases are signed/unsigned source, and signed/unsigned
   // destination.
-  if (dest_type->is_unsigned_scalar_or_vector() ==
-      src_type->is_unsigned_scalar_or_vector()) {
+  if (dest_type.ast->is_unsigned_scalar_or_vector() ==
+      src_type.ast->is_unsigned_scalar_or_vector()) {
     return texel_prefix;
   }
   // We must do a bitcast conversion.

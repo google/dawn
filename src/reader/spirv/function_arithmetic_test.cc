@@ -145,7 +145,9 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -171,7 +173,9 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -199,7 +203,9 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -227,7 +233,9 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -257,7 +265,9 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -287,7 +297,9 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -319,7 +331,9 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -351,7 +365,9 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -385,7 +401,9 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -411,7 +429,9 @@ TEST_F(SpvUnaryArithTest, FNegate_Vector) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(
@@ -1221,7 +1241,8 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
      OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
@@ -1249,7 +1270,8 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
      OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
@@ -1277,7 +1299,8 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
      OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
@@ -1305,7 +1328,8 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
      OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
@@ -1333,7 +1357,8 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
      OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
@@ -1361,7 +1386,8 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
      OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
@@ -1393,7 +1419,8 @@ TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
      OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   auto got = ToString(p->builder(), fe.ast_body());
@@ -1519,7 +1546,8 @@ TEST_P(SpvBinaryDerivativeTest, Derivatives) {
      OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << assembly << p->error();
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
@@ -1565,7 +1593,9 @@ TEST_F(SpvUnaryArithTest, Transpose_2x2) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto* expected = R"(
@@ -1598,7 +1628,9 @@ TEST_F(SpvUnaryArithTest, Transpose_2x3) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   // Note, in the AST dump mat_2_3 means 2 rows and 3 columns.
@@ -1634,7 +1666,9 @@ TEST_F(SpvUnaryArithTest, Transpose_3x2) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions())
+      << p->error() << "\n"
+      << assembly;
   auto fe = p->function_emitter(100);
   EXPECT_TRUE(fe.EmitBody()) << p->error();
   const auto* expected = R"(

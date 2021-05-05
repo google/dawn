@@ -362,10 +362,12 @@ class ParserImpl {
   /// @param msg the warning message
   void deprecated(const Source& source, const std::string& msg);
   /// Registers a constructed type into the parser
+  /// TODO(crbug.com/tint/724): Remove
   /// @param name the constructed name
   /// @param type the constructed type
   void register_constructed(const std::string& name, sem::Type* type);
   /// Retrieves a constructed type
+  /// TODO(crbug.com/tint/724): Remove
   /// @param name The name to lookup
   /// @returns the constructed type for `name` or `nullptr` if not found
   sem::Type* get_constructed(const std::string& name);

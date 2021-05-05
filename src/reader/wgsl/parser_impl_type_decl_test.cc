@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/alias.h"
+#include "src/ast/array.h"
+#include "src/ast/matrix.h"
+#include "src/ast/sampler.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
 #include "src/sem/sampled_texture_type.h"
 
@@ -43,14 +47,11 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
-  EXPECT_EQ(t.value, alias_type);
-  ASSERT_TRUE(t->Is<sem::Alias>());
-
-  auto* alias = t->As<sem::Alias>();
-  EXPECT_EQ(p->builder().Symbols().NameFor(alias->symbol()), "A");
-  EXPECT_EQ(alias->type(), int_type);
-  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 2u}}));
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
+  auto* type_name = t.value.ast->As<ast::TypeName>();
+  ASSERT_NE(type_name, nullptr);
+  EXPECT_EQ(p->builder().Symbols().Get("A"), type_name->name());
+  EXPECT_EQ(type_name->source().range, (Source::Range{{1u, 1u}, {1u, 2u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_Identifier_NotFound) {
@@ -73,9 +74,9 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   EXPECT_EQ(t.value, bool_type);
-  ASSERT_TRUE(t->Is<sem::Bool>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Bool>());
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
@@ -88,9 +89,9 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   EXPECT_EQ(t.value, float_type);
-  ASSERT_TRUE(t->Is<sem::F32>());
+  ASSERT_TRUE(t.value.ast->Is<ast::F32>());
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -103,24 +104,20 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   EXPECT_EQ(t.value, int_type);
-  ASSERT_TRUE(t->Is<sem::I32>());
+  ASSERT_TRUE(t.value.ast->Is<ast::I32>());
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_U32) {
   auto p = parser("u32");
 
-  auto& builder = p->builder();
-  auto* uint_type = builder.create<sem::U32>();
-
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
-  EXPECT_EQ(t.value, uint_type);
-  ASSERT_TRUE(t->Is<sem::U32>());
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
+  ASSERT_TRUE(t.value.ast->Is<ast::U32>());
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 4u}}));
 }
 
@@ -142,10 +139,10 @@ TEST_P(VecTest, Parse) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  EXPECT_TRUE(t->Is<sem::Vector>());
-  EXPECT_EQ(t->As<sem::Vector>()->size(), params.count);
+  EXPECT_TRUE(t.value.ast->Is<ast::Vector>());
+  EXPECT_EQ(t.value.ast->As<ast::Vector>()->size(), params.count);
   EXPECT_EQ(t.value.ast->source().range, params.range);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -232,12 +229,12 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<sem::Pointer>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Pointer>());
 
-  auto* ptr = t->As<sem::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<sem::F32>());
+  auto* ptr = t.value.ast->As<ast::Pointer>();
+  ASSERT_TRUE(ptr->type()->Is<ast::F32>());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
@@ -247,17 +244,17 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<sem::Pointer>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Pointer>());
 
-  auto* ptr = t->As<sem::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<sem::Vector>());
+  auto* ptr = t.value.ast->As<ast::Pointer>();
+  ASSERT_TRUE(ptr->type()->Is<ast::Vector>());
   ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
 
-  auto* vec = ptr->type()->As<sem::Vector>();
+  auto* vec = ptr->type()->As<ast::Vector>();
   ASSERT_EQ(vec->size(), 2u);
-  ASSERT_TRUE(vec->type()->Is<sem::F32>());
+  ASSERT_TRUE(vec->type()->Is<ast::F32>());
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 25}}));
 }
 
@@ -346,14 +343,14 @@ TEST_F(ParserImplTest, TypeDecl_Array) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<sem::ArrayType>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Array>());
 
-  auto* a = t->As<sem::ArrayType>();
+  auto* a = t.value.ast->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
-  ASSERT_TRUE(a->type()->Is<sem::F32>());
+  ASSERT_TRUE(a->type()->Is<ast::F32>());
   EXPECT_EQ(a->decorations().size(), 0u);
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 14u}}));
 }
@@ -363,14 +360,14 @@ TEST_F(ParserImplTest, TypeDecl_Array_Stride) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<sem::ArrayType>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Array>());
 
-  auto* a = t->As<sem::ArrayType>();
+  auto* a = t.value.ast->As<ast::Array>();
   ASSERT_FALSE(a->IsRuntimeArray());
   ASSERT_EQ(a->size(), 5u);
-  ASSERT_TRUE(a->type()->Is<sem::F32>());
+  ASSERT_TRUE(a->type()->Is<ast::F32>());
 
   ASSERT_EQ(a->decorations().size(), 1u);
   auto* stride = a->decorations()[0];
@@ -384,13 +381,13 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Stride) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<sem::ArrayType>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Array>());
 
-  auto* a = t->As<sem::ArrayType>();
+  auto* a = t.value.ast->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<sem::F32>());
+  ASSERT_TRUE(a->type()->Is<ast::F32>());
 
   ASSERT_EQ(a->decorations().size(), 1u);
   auto* stride = a->decorations()[0];
@@ -404,13 +401,13 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_OneBlock) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<sem::ArrayType>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Array>());
 
-  auto* a = t->As<sem::ArrayType>();
+  auto* a = t.value.ast->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<sem::F32>());
+  ASSERT_TRUE(a->type()->Is<ast::F32>());
 
   auto& decos = a->decorations();
   ASSERT_EQ(decos.size(), 2u);
@@ -426,13 +423,13 @@ TEST_F(ParserImplTest, TypeDecl_Array_MultipleDecorations_MultipleBlocks) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<sem::ArrayType>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Array>());
 
-  auto* a = t->As<sem::ArrayType>();
+  auto* a = t.value.ast->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<sem::F32>());
+  ASSERT_TRUE(a->type()->Is<ast::F32>());
 
   auto& decos = a->decorations();
   ASSERT_EQ(decos.size(), 2u);
@@ -530,13 +527,13 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<sem::ArrayType>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Array>());
 
-  auto* a = t->As<sem::ArrayType>();
+  auto* a = t.value.ast->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
-  ASSERT_TRUE(a->type()->Is<sem::U32>());
+  ASSERT_TRUE(a->type()->Is<ast::U32>());
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 11u}}));
 }
 
@@ -545,11 +542,11 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  ASSERT_TRUE(t->Is<sem::ArrayType>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Array>());
 
-  auto* a = t->As<sem::ArrayType>();
+  auto* a = t.value.ast->As<ast::Array>();
   ASSERT_TRUE(a->IsRuntimeArray());
   ASSERT_TRUE(a->type()->is_unsigned_integer_vector());
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 17u}}));
@@ -644,10 +641,10 @@ TEST_P(MatrixTest, Parse) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   ASSERT_FALSE(p->has_error());
-  EXPECT_TRUE(t->Is<sem::Matrix>());
-  auto* mat = t->As<sem::Matrix>();
+  EXPECT_TRUE(t.value.ast->Is<ast::Matrix>());
+  auto* mat = t.value.ast->As<ast::Matrix>();
   EXPECT_EQ(mat->rows(), params.rows);
   EXPECT_EQ(mat->columns(), params.columns);
   EXPECT_EQ(t.value.ast->source().range, params.range);
@@ -772,10 +769,10 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_NE(t.value.ast, nullptr) << p->error();
   EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t->Is<sem::Sampler>());
-  ASSERT_FALSE(t->As<sem::Sampler>()->IsComparison());
+  ASSERT_TRUE(t.value.ast->Is<ast::Sampler>());
+  ASSERT_FALSE(t.value.ast->As<ast::Sampler>()->IsComparison());
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 8u}}));
 }
 
@@ -789,11 +786,11 @@ TEST_F(ParserImplTest, TypeDecl_Texture) {
   auto t = p->type_decl();
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
-  ASSERT_NE(t.value, nullptr);
+  ASSERT_NE(t.value.ast, nullptr);
   EXPECT_EQ(t.value, type);
-  ASSERT_TRUE(t->Is<sem::Texture>());
-  ASSERT_TRUE(t->Is<sem::SampledTexture>());
-  ASSERT_TRUE(t->As<sem::SampledTexture>()->type()->Is<sem::F32>());
+  ASSERT_TRUE(t.value.ast->Is<ast::Texture>());
+  ASSERT_TRUE(t.value.ast->Is<ast::SampledTexture>());
+  ASSERT_TRUE(t.value.ast->As<ast::SampledTexture>()->type()->Is<ast::F32>());
   EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 18u}}));
 }
 
