@@ -25,8 +25,12 @@ namespace {
 using ::testing::Eq;
 using ::testing::HasSubstr;
 
-std::string CommonTypes() {
+std::string Preamble() {
   return R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint Vertex %100 "main"
+
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
@@ -67,7 +71,7 @@ std::string CommonTypes() {
 using SpvUnaryConversionTest = SpvParserTestBase<::testing::Test>;
 
 TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpBitcast %uint %float_50
@@ -92,7 +96,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Scalar) {
 }
 
 TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpBitcast %v2float %v2uint_10_20
@@ -121,7 +125,7 @@ TEST_F(SpvUnaryConversionTest, Bitcast_Vector) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_BadArg) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertSToF %float %void
@@ -137,7 +141,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_BadArg) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_BadArg) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertUToF %float %void
@@ -153,7 +157,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_BadArg) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_BadArg) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToS %float %void
@@ -169,7 +173,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_BadArg) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_BadArg) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToU %float %void
@@ -185,7 +189,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_BadArg) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_BadArgType) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertSToF %float %false
@@ -202,7 +206,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_BadArgType) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_BadArgType) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertSToF %v2float %v2bool_t_f
@@ -220,7 +224,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_BadArgType) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %int %int_30
@@ -246,7 +250,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %uint %uint_10
@@ -274,7 +278,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromUnsigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2int %v2int_30_40
@@ -300,7 +304,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromSigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2uint %v2uint_10_20
@@ -328,7 +332,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_FromUnsigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_BadArgType) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertUToF %float %false
@@ -344,7 +348,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_BadArgType) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_BadArgType) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertUToF %v2float %v2bool_t_f
@@ -361,7 +365,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_BadArgType) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %int %int_30
@@ -389,7 +393,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %uint %uint_10
@@ -415,7 +419,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromUnsigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2int %v2int_30_40
@@ -443,7 +447,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromSigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2uint %v2uint_10_20
@@ -469,7 +473,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_FromUnsigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_BadArgType) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToS %int %uint_10
@@ -486,7 +490,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_BadArgType) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_BadArgType) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToS %v2float %v2bool_t_f
@@ -503,7 +507,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_BadArgType) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %float %float_50
@@ -529,7 +533,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %float %float_50
@@ -557,7 +561,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToUnsigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2float %v2float_50_60
@@ -583,7 +587,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToSigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2float %v2float_50_60
@@ -611,7 +615,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_ToUnsigned) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_BadArgType) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToU %int %uint_10
@@ -628,7 +632,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_BadArgType) {
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_BadArgType) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpConvertFToU %v2float %v2bool_t_f
@@ -644,8 +648,8 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_BadArgType) {
                  "point scalar or vector, but got: __vec_2__bool"));
 }
 
-TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned) {
-  const auto assembly = CommonTypes() + R"(
+TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned_IsError) {
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %float %float_50
@@ -654,26 +658,14 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
-    x_1
-    none
-    __i32
-    {
-      Bitcast[not set]<__i32>{
-        TypeConstructor[not set]{
-          __u32
-          Identifier[not set]{x_30}
-        }
-      }
-    }
-  })"));
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(p->error(), HasSubstr("Expected unsigned int scalar or vector "
+                                    "type as Result Type: ConvertFToU"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %float %float_50
@@ -698,8 +690,8 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToUnsigned) {
   })"));
 }
 
-TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned) {
-  const auto assembly = CommonTypes() + R"(
+TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned_IsError) {
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2float %v2float_50_60
@@ -708,26 +700,14 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToSigned) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
-    x_1
-    none
-    __vec_2__i32
-    {
-      Bitcast[not set]<__vec_2__i32>{
-        TypeConstructor[not set]{
-          __vec_2__u32
-          Identifier[not set]{x_30}
-        }
-      }
-    }
-  })"));
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(p->error(), HasSubstr("Expected unsigned int scalar or vector "
+                                    "type as Result Type: ConvertFToU"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %30 = OpCopyObject %v2float %v2float_50_60
