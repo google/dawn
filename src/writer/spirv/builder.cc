@@ -839,21 +839,48 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
     return false;
   }
 
-  // We don't have a pointer, so we have to extract value from the vector
+  // We don't have a pointer, so we can just directly extract the value.
   auto extract = result_op();
   auto extract_id = extract.to_i();
 
-  if (!push_function_inst(
-          spv::Op::OpVectorExtractDynamic,
-          {Operand::Int(result_type_id), extract, Operand::Int(info->source_id),
-           Operand::Int(idx_id)})) {
-    return false;
+  // If the index is a literal, we use OpCompositeExtract.
+  if (auto* scalar = expr->idx_expr()->As<ast::ScalarConstructorExpression>()) {
+    auto* literal = scalar->literal()->As<ast::IntLiteral>();
+    if (!literal) {
+      TINT_ICE(builder_.Diagnostics()) << "bad literal in array accessor";
+      return false;
+    }
+
+    if (!push_function_inst(spv::Op::OpCompositeExtract,
+                            {Operand::Int(result_type_id), extract,
+                             Operand::Int(info->source_id),
+                             Operand::Int(literal->value_as_u32())})) {
+      return false;
+    }
+
+    info->source_id = extract_id;
+    info->source_type = TypeOf(expr);
+
+    return true;
   }
 
-  info->source_id = extract_id;
-  info->source_type = TypeOf(expr);
+  // If the source is a vector, we use OpVectorExtractDynamic.
+  if (info->source_type->Is<sem::Vector>()) {
+    if (!push_function_inst(
+            spv::Op::OpVectorExtractDynamic,
+            {Operand::Int(result_type_id), extract,
+             Operand::Int(info->source_id), Operand::Int(idx_id)})) {
+      return false;
+    }
 
-  return true;
+    info->source_id = extract_id;
+    info->source_type = TypeOf(expr);
+
+    return true;
+  }
+
+  TINT_ICE(builder_.Diagnostics()) << "unsupported array accessor expression";
+  return false;
 }
 
 bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,

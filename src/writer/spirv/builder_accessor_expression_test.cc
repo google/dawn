@@ -676,7 +676,7 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%6 = OpLoad %3 %1
 %7 = OpVectorShuffle %3 %6 %6 1 0 2
-%10 = OpVectorExtractDynamic %4 %7 %9
+%10 = OpCompositeExtract %4 %7 1
 )");
 }
 
@@ -806,7 +806,7 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   spirv::Builder& b = Build();
 
   b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
   EXPECT_EQ(b.GenerateAccessorExpression(expr), 8u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -819,16 +819,89 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), "");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%8 = OpVectorExtractDynamic %2 %5 %7
+            R"(%8 = OpCompositeExtract %2 %5 1
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Accessor_Array_NonPointer) {
+TEST_F(BuilderTest, Accessor_Const_Vec_Dynamic) {
+  // let pos : vec2<f32> = vec2<f32>(0.0, 0.5);
+  // idx : i32
+  // pos[idx]
+
+  auto* var = GlobalConst("pos", ty.vec2<f32>(), vec2<f32>(0.0f, 0.5f));
+
+  auto* idx = Var("idx", ty.i32(), ast::StorageClass::kFunction);
+  auto* expr = IndexAccessor("pos", idx);
+
+  ast::StatementList body;
+  body.push_back(WrapInStatement(idx));
+  body.push_back(WrapInStatement(expr));
+  WrapInFunction(body);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(idx)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 11u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 2
+%3 = OpConstant %2 0
+%4 = OpConstant %2 0.5
+%5 = OpConstantComposite %1 %3 %4
+%8 = OpTypeInt 32 1
+%7 = OpTypePointer Function %8
+%9 = OpConstantNull %8
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%6 = OpVariable %7 Function %9
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%10 = OpLoad %8 %6
+%11 = OpVectorExtractDynamic %2 %5 %10
+)");
+}
+
+TEST_F(BuilderTest, Accessor_Array_NonPointer) {
   // let a : array<f32, 3>;
   // a[2]
+
+  auto* var = GlobalConst("a", ty.array<f32, 3>(),
+                          Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
+  auto* expr = IndexAccessor("a", 2);
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 11u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 3
+%1 = OpTypeArray %2 %4
+%5 = OpConstant %2 0
+%6 = OpConstant %2 0.5
+%7 = OpConstant %2 1
+%8 = OpConstantComposite %1 %5 %6 %7
+%9 = OpTypeInt 32 1
+%10 = OpConstant %9 2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), "");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%11 = OpCompositeExtract %2 %8 2
+)");
+}
+
+TEST_F(BuilderTest, DISABLED_Accessor_Array_NonPointer_Dynamic) {
+  // let a : array<f32, 3>;
+  // idx : i32
+  // a[idx]
   //
-  // This has to generate an OpConstantExtract and will need to read the 3 value
-  // out of the ScalarConstructor as extract requires integer indices.
+  // This needs to copy the array to an OpVariable in the Function storage class
+  // and then access chain into it and load the result.
 }
 
 }  // namespace
