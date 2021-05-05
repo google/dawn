@@ -24,7 +24,9 @@ Expression::Expression(ast::Expression* declaration,
                        Statement* statement)
     : declaration_(declaration),
       type_(type->UnwrapIfNeeded()),
-      statement_(statement) {}
+      statement_(statement) {
+  TINT_ASSERT(type_);
+}
 
 }  // namespace sem
 }  // namespace tint

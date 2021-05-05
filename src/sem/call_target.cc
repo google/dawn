@@ -22,7 +22,9 @@ namespace tint {
 namespace sem {
 
 CallTarget::CallTarget(sem::Type* return_type, const ParameterList& parameters)
-    : return_type_(return_type), parameters_(parameters) {}
+    : return_type_(return_type), parameters_(parameters) {
+  TINT_ASSERT(return_type);
+}
 
 CallTarget::~CallTarget() = default;
 
