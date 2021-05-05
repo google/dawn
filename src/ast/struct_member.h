@@ -36,7 +36,7 @@ class StructMember : public Castable<StructMember, Node> {
   StructMember(ProgramID program_id,
                const Source& source,
                const Symbol& sym,
-               typ::Type type,
+               ast::Type* type,
                DecorationList decorations);
   /// Move constructor
   StructMember(StructMember&&);
@@ -47,7 +47,7 @@ class StructMember : public Castable<StructMember, Node> {
   const Symbol& symbol() const { return symbol_; }
 
   /// @returns the type
-  typ::Type type() const { return type_; }
+  ast::Type* type() const { return type_; }
 
   /// @returns the decorations
   const DecorationList& decorations() const { return decorations_; }
@@ -75,7 +75,7 @@ class StructMember : public Castable<StructMember, Node> {
   StructMember(const StructMember&) = delete;
 
   Symbol const symbol_;
-  typ::Type const type_;
+  ast::Type* const type_;
   DecorationList const decorations_;
 };
 

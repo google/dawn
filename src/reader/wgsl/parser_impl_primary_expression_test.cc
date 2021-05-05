@@ -141,7 +141,9 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* constructor = e->As<ast::TypeConstructorExpression>();
-  EXPECT_EQ(constructor->type(), p->get_constructed("S"));
+  ASSERT_TRUE(constructor->type()->Is<ast::TypeName>());
+  EXPECT_EQ(constructor->type()->As<ast::TypeName>()->name(),
+            p->builder().Symbols().Get("S"));
 
   auto values = constructor->values();
   ASSERT_EQ(values.size(), 0u);
@@ -164,7 +166,9 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* constructor = e->As<ast::TypeConstructorExpression>();
-  EXPECT_EQ(constructor->type(), p->get_constructed("S"));
+  ASSERT_TRUE(constructor->type()->Is<ast::TypeName>());
+  EXPECT_EQ(constructor->type()->As<ast::TypeName>()->name(),
+            p->builder().Symbols().Get("S"));
 
   auto values = constructor->values();
   ASSERT_EQ(values.size(), 2u);
@@ -237,8 +241,6 @@ TEST_F(ParserImplTest, PrimaryExpression_ParenExpr_InvalidExpr) {
 TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   auto p = parser("f32(1)");
 
-  auto* f32 = p->builder().create<sem::F32>();
-
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -248,7 +250,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* c = e->As<ast::TypeConstructorExpression>();
-  ASSERT_EQ(c->type(), f32);
+  ASSERT_TRUE(c->type()->Is<ast::F32>());
   ASSERT_EQ(c->values().size(), 1u);
 
   ASSERT_TRUE(c->values()[0]->Is<ast::ConstructorExpression>());
@@ -258,8 +260,6 @@ TEST_F(ParserImplTest, PrimaryExpression_Cast) {
 TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   auto p = parser("bitcast<f32>(1)");
 
-  auto* f32 = p->builder().create<sem::F32>();
-
   auto e = p->primary_expression();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
@@ -268,8 +268,7 @@ TEST_F(ParserImplTest, PrimaryExpression_Bitcast) {
   ASSERT_TRUE(e->Is<ast::BitcastExpression>());
 
   auto* c = e->As<ast::BitcastExpression>();
-  ASSERT_EQ(c->type(), f32);
-
+  ASSERT_TRUE(c->type()->Is<ast::F32>());
   ASSERT_TRUE(c->expr()->Is<ast::ConstructorExpression>());
   ASSERT_TRUE(c->expr()->Is<ast::ScalarConstructorExpression>());
 }

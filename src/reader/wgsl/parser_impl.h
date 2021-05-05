@@ -398,7 +398,7 @@ class ParserImpl {
   Maybe<ast::StorageClass> variable_storage_decoration();
   /// Parses a `type_alias` grammar element
   /// @returns the type alias or nullptr on error
-  Maybe<typ::Type> type_alias();
+  Maybe<typ::Alias> type_alias();
   /// Parses a `type_decl` grammar element
   /// @returns the parsed Type or nullptr if none matched.
   Maybe<typ::Type> type_decl();
@@ -415,7 +415,7 @@ class ParserImpl {
   /// `struct_decoration_decl*` provided as `decos`.
   /// @returns the struct type or nullptr on error
   /// @param decos the list of decorations for the struct declaration.
-  Maybe<sem::StructType*> struct_decl(ast::DecorationList& decos);
+  Maybe<typ::Struct> struct_decl(ast::DecorationList& decos);
   /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
   /// @returns the struct members
   Expect<ast::StructMemberList> expect_struct_body_decl();

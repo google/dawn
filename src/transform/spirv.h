@@ -60,7 +60,7 @@ class Spirv : public Transform {
   Symbol HoistToInputVariables(CloneContext& ctx,
                                const ast::Function* func,
                                sem::Type* ty,
-                               sem::Type* declared_ty,
+                               ast::Type* declared_ty,
                                const ast::DecorationList& decorations) const;
 
   /// Recursively create module-scope output variables for `ty` and build a list
@@ -74,7 +74,7 @@ class Spirv : public Transform {
   void HoistToOutputVariables(CloneContext& ctx,
                               const ast::Function* func,
                               sem::Type* ty,
-                              sem::Type* declared_ty,
+                              ast::Type* declared_ty,
                               const ast::DecorationList& decorations,
                               std::vector<Symbol> member_accesses,
                               Symbol store_value,

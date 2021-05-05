@@ -49,7 +49,7 @@ ast::Function* Transform::CloneWithStatementsAtStart(
   auto source = ctx->Clone(in->source());
   auto symbol = ctx->Clone(in->symbol());
   auto params = ctx->Clone(in->params());
-  auto return_type = ctx->Clone(in->return_type());
+  auto* return_type = ctx->Clone(in->return_type());
   auto* body = ctx->dst->create<ast::BlockStatement>(
       ctx->Clone(in->body()->source()), statements);
   auto decos = ctx->Clone(in->decorations());

@@ -1024,15 +1024,15 @@ namespace ExprBinaryTest {
 
 struct Params {
   ast::BinaryOp op;
-  create_type_func_ptr create_lhs_type;
-  create_type_func_ptr create_rhs_type;
-  create_type_func_ptr create_result_type;
+  create_ast_type_func_ptr create_lhs_type;
+  create_ast_type_func_ptr create_rhs_type;
+  create_sem_type_func_ptr create_result_type;
 };
 
-static constexpr create_type_func_ptr all_create_type_funcs[] = {
-    ty_bool_,       ty_u32,         ty_i32,        ty_f32,
-    ty_vec3<bool>,  ty_vec3<i32>,   ty_vec3<u32>,  ty_vec3<f32>,
-    ty_mat3x3<i32>, ty_mat3x3<u32>, ty_mat3x3<f32>};
+static constexpr create_ast_type_func_ptr all_create_type_funcs[] = {
+    ast_bool,        ast_u32,         ast_i32,        ast_f32,
+    ast_vec3<bool>,  ast_vec3<i32>,   ast_vec3<u32>,  ast_vec3<f32>,
+    ast_mat3x3<i32>, ast_mat3x3<u32>, ast_mat3x3<f32>};
 
 // A list of all valid test cases for 'lhs op rhs', except that for vecN and
 // matNxN, we only test N=3.
@@ -1041,156 +1041,163 @@ static constexpr Params all_valid_cases[] = {
     // https://gpuweb.github.io/gpuweb/wgsl.html#logical-expr
 
     // Binary logical expressions
-    Params{Op::kLogicalAnd, ty_bool_, ty_bool_, ty_bool_},
-    Params{Op::kLogicalOr, ty_bool_, ty_bool_, ty_bool_},
+    Params{Op::kLogicalAnd, ast_bool, ast_bool, sem_bool},
+    Params{Op::kLogicalOr, ast_bool, ast_bool, sem_bool},
 
-    Params{Op::kAnd, ty_bool_, ty_bool_, ty_bool_},
-    Params{Op::kOr, ty_bool_, ty_bool_, ty_bool_},
-    Params{Op::kAnd, ty_vec3<bool>, ty_vec3<bool>, ty_vec3<bool>},
-    Params{Op::kOr, ty_vec3<bool>, ty_vec3<bool>, ty_vec3<bool>},
+    Params{Op::kAnd, ast_bool, ast_bool, sem_bool},
+    Params{Op::kOr, ast_bool, ast_bool, sem_bool},
+    Params{Op::kAnd, ast_vec3<bool>, ast_vec3<bool>, sem_vec3<sem_bool>},
+    Params{Op::kOr, ast_vec3<bool>, ast_vec3<bool>, sem_vec3<sem_bool>},
 
     // Arithmetic expressions
     // https://gpuweb.github.io/gpuweb/wgsl.html#arithmetic-expr
 
     // Binary arithmetic expressions over scalars
-    Params{Op::kAdd, ty_i32, ty_i32, ty_i32},
-    Params{Op::kSubtract, ty_i32, ty_i32, ty_i32},
-    Params{Op::kMultiply, ty_i32, ty_i32, ty_i32},
-    Params{Op::kDivide, ty_i32, ty_i32, ty_i32},
-    Params{Op::kModulo, ty_i32, ty_i32, ty_i32},
+    Params{Op::kAdd, ast_i32, ast_i32, sem_i32},
+    Params{Op::kSubtract, ast_i32, ast_i32, sem_i32},
+    Params{Op::kMultiply, ast_i32, ast_i32, sem_i32},
+    Params{Op::kDivide, ast_i32, ast_i32, sem_i32},
+    Params{Op::kModulo, ast_i32, ast_i32, sem_i32},
 
-    Params{Op::kAdd, ty_u32, ty_u32, ty_u32},
-    Params{Op::kSubtract, ty_u32, ty_u32, ty_u32},
-    Params{Op::kMultiply, ty_u32, ty_u32, ty_u32},
-    Params{Op::kDivide, ty_u32, ty_u32, ty_u32},
-    Params{Op::kModulo, ty_u32, ty_u32, ty_u32},
+    Params{Op::kAdd, ast_u32, ast_u32, sem_u32},
+    Params{Op::kSubtract, ast_u32, ast_u32, sem_u32},
+    Params{Op::kMultiply, ast_u32, ast_u32, sem_u32},
+    Params{Op::kDivide, ast_u32, ast_u32, sem_u32},
+    Params{Op::kModulo, ast_u32, ast_u32, sem_u32},
 
-    Params{Op::kAdd, ty_f32, ty_f32, ty_f32},
-    Params{Op::kSubtract, ty_f32, ty_f32, ty_f32},
-    Params{Op::kMultiply, ty_f32, ty_f32, ty_f32},
-    Params{Op::kDivide, ty_f32, ty_f32, ty_f32},
-    Params{Op::kModulo, ty_f32, ty_f32, ty_f32},
+    Params{Op::kAdd, ast_f32, ast_f32, sem_f32},
+    Params{Op::kSubtract, ast_f32, ast_f32, sem_f32},
+    Params{Op::kMultiply, ast_f32, ast_f32, sem_f32},
+    Params{Op::kDivide, ast_f32, ast_f32, sem_f32},
+    Params{Op::kModulo, ast_f32, ast_f32, sem_f32},
 
     // Binary arithmetic expressions over vectors
-    Params{Op::kAdd, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<i32>},
-    Params{Op::kSubtract, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<i32>},
-    Params{Op::kMultiply, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<i32>},
-    Params{Op::kDivide, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<i32>},
-    Params{Op::kModulo, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<i32>},
+    Params{Op::kAdd, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kSubtract, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kMultiply, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kDivide, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kModulo, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_i32>},
 
-    Params{Op::kAdd, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<u32>},
-    Params{Op::kSubtract, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<u32>},
-    Params{Op::kMultiply, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<u32>},
-    Params{Op::kDivide, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<u32>},
-    Params{Op::kModulo, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<u32>},
+    Params{Op::kAdd, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kSubtract, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kMultiply, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kDivide, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kModulo, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>},
 
-    Params{Op::kAdd, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<f32>},
-    Params{Op::kSubtract, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<f32>},
-    Params{Op::kMultiply, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<f32>},
-    Params{Op::kDivide, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<f32>},
-    Params{Op::kModulo, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<f32>},
+    Params{Op::kAdd, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
+    Params{Op::kSubtract, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
+    Params{Op::kMultiply, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
+    Params{Op::kDivide, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
+    Params{Op::kModulo, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
 
     // Binary arithmetic expressions with mixed scalar, vector, and matrix
     // operands
-    Params{Op::kMultiply, ty_vec3<f32>, ty_f32, ty_vec3<f32>},
-    Params{Op::kMultiply, ty_f32, ty_vec3<f32>, ty_vec3<f32>},
+    Params{Op::kMultiply, ast_vec3<f32>, ast_f32, sem_vec3<sem_f32>},
+    Params{Op::kMultiply, ast_f32, ast_vec3<f32>, sem_vec3<sem_f32>},
 
-    Params{Op::kMultiply, ty_mat3x3<f32>, ty_f32, ty_mat3x3<f32>},
-    Params{Op::kMultiply, ty_f32, ty_mat3x3<f32>, ty_mat3x3<f32>},
+    Params{Op::kMultiply, ast_mat3x3<f32>, ast_f32, sem_mat3x3<sem_f32>},
+    Params{Op::kMultiply, ast_f32, ast_mat3x3<f32>, sem_mat3x3<sem_f32>},
 
-    Params{Op::kMultiply, ty_vec3<f32>, ty_mat3x3<f32>, ty_vec3<f32>},
-    Params{Op::kMultiply, ty_mat3x3<f32>, ty_vec3<f32>, ty_vec3<f32>},
-    Params{Op::kMultiply, ty_mat3x3<f32>, ty_mat3x3<f32>, ty_mat3x3<f32>},
+    Params{Op::kMultiply, ast_vec3<f32>, ast_mat3x3<f32>, sem_vec3<sem_f32>},
+    Params{Op::kMultiply, ast_mat3x3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
+    Params{Op::kMultiply, ast_mat3x3<f32>, ast_mat3x3<f32>,
+           sem_mat3x3<sem_f32>},
 
     // Comparison expressions
     // https://gpuweb.github.io/gpuweb/wgsl.html#comparison-expr
 
     // Comparisons over scalars
-    Params{Op::kEqual, ty_bool_, ty_bool_, ty_bool_},
-    Params{Op::kNotEqual, ty_bool_, ty_bool_, ty_bool_},
+    Params{Op::kEqual, ast_bool, ast_bool, sem_bool},
+    Params{Op::kNotEqual, ast_bool, ast_bool, sem_bool},
 
-    Params{Op::kEqual, ty_i32, ty_i32, ty_bool_},
-    Params{Op::kNotEqual, ty_i32, ty_i32, ty_bool_},
-    Params{Op::kLessThan, ty_i32, ty_i32, ty_bool_},
-    Params{Op::kLessThanEqual, ty_i32, ty_i32, ty_bool_},
-    Params{Op::kGreaterThan, ty_i32, ty_i32, ty_bool_},
-    Params{Op::kGreaterThanEqual, ty_i32, ty_i32, ty_bool_},
+    Params{Op::kEqual, ast_i32, ast_i32, sem_bool},
+    Params{Op::kNotEqual, ast_i32, ast_i32, sem_bool},
+    Params{Op::kLessThan, ast_i32, ast_i32, sem_bool},
+    Params{Op::kLessThanEqual, ast_i32, ast_i32, sem_bool},
+    Params{Op::kGreaterThan, ast_i32, ast_i32, sem_bool},
+    Params{Op::kGreaterThanEqual, ast_i32, ast_i32, sem_bool},
 
-    Params{Op::kEqual, ty_u32, ty_u32, ty_bool_},
-    Params{Op::kNotEqual, ty_u32, ty_u32, ty_bool_},
-    Params{Op::kLessThan, ty_u32, ty_u32, ty_bool_},
-    Params{Op::kLessThanEqual, ty_u32, ty_u32, ty_bool_},
-    Params{Op::kGreaterThan, ty_u32, ty_u32, ty_bool_},
-    Params{Op::kGreaterThanEqual, ty_u32, ty_u32, ty_bool_},
+    Params{Op::kEqual, ast_u32, ast_u32, sem_bool},
+    Params{Op::kNotEqual, ast_u32, ast_u32, sem_bool},
+    Params{Op::kLessThan, ast_u32, ast_u32, sem_bool},
+    Params{Op::kLessThanEqual, ast_u32, ast_u32, sem_bool},
+    Params{Op::kGreaterThan, ast_u32, ast_u32, sem_bool},
+    Params{Op::kGreaterThanEqual, ast_u32, ast_u32, sem_bool},
 
-    Params{Op::kEqual, ty_f32, ty_f32, ty_bool_},
-    Params{Op::kNotEqual, ty_f32, ty_f32, ty_bool_},
-    Params{Op::kLessThan, ty_f32, ty_f32, ty_bool_},
-    Params{Op::kLessThanEqual, ty_f32, ty_f32, ty_bool_},
-    Params{Op::kGreaterThan, ty_f32, ty_f32, ty_bool_},
-    Params{Op::kGreaterThanEqual, ty_f32, ty_f32, ty_bool_},
+    Params{Op::kEqual, ast_f32, ast_f32, sem_bool},
+    Params{Op::kNotEqual, ast_f32, ast_f32, sem_bool},
+    Params{Op::kLessThan, ast_f32, ast_f32, sem_bool},
+    Params{Op::kLessThanEqual, ast_f32, ast_f32, sem_bool},
+    Params{Op::kGreaterThan, ast_f32, ast_f32, sem_bool},
+    Params{Op::kGreaterThanEqual, ast_f32, ast_f32, sem_bool},
 
     // Comparisons over vectors
-    Params{Op::kEqual, ty_vec3<bool>, ty_vec3<bool>, ty_vec3<bool>},
-    Params{Op::kNotEqual, ty_vec3<bool>, ty_vec3<bool>, ty_vec3<bool>},
+    Params{Op::kEqual, ast_vec3<bool>, ast_vec3<bool>, sem_vec3<sem_bool>},
+    Params{Op::kNotEqual, ast_vec3<bool>, ast_vec3<bool>, sem_vec3<sem_bool>},
 
-    Params{Op::kEqual, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<bool>},
-    Params{Op::kNotEqual, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<bool>},
-    Params{Op::kLessThan, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<bool>},
-    Params{Op::kLessThanEqual, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<bool>},
-    Params{Op::kGreaterThan, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<bool>},
-    Params{Op::kGreaterThanEqual, ty_vec3<i32>, ty_vec3<i32>, ty_vec3<bool>},
+    Params{Op::kEqual, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_bool>},
+    Params{Op::kNotEqual, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_bool>},
+    Params{Op::kLessThan, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_bool>},
+    Params{Op::kLessThanEqual, ast_vec3<i32>, ast_vec3<i32>,
+           sem_vec3<sem_bool>},
+    Params{Op::kGreaterThan, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_bool>},
+    Params{Op::kGreaterThanEqual, ast_vec3<i32>, ast_vec3<i32>,
+           sem_vec3<sem_bool>},
 
-    Params{Op::kEqual, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<bool>},
-    Params{Op::kNotEqual, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<bool>},
-    Params{Op::kLessThan, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<bool>},
-    Params{Op::kLessThanEqual, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<bool>},
-    Params{Op::kGreaterThan, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<bool>},
-    Params{Op::kGreaterThanEqual, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<bool>},
+    Params{Op::kEqual, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_bool>},
+    Params{Op::kNotEqual, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_bool>},
+    Params{Op::kLessThan, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_bool>},
+    Params{Op::kLessThanEqual, ast_vec3<u32>, ast_vec3<u32>,
+           sem_vec3<sem_bool>},
+    Params{Op::kGreaterThan, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_bool>},
+    Params{Op::kGreaterThanEqual, ast_vec3<u32>, ast_vec3<u32>,
+           sem_vec3<sem_bool>},
 
-    Params{Op::kEqual, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<bool>},
-    Params{Op::kNotEqual, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<bool>},
-    Params{Op::kLessThan, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<bool>},
-    Params{Op::kLessThanEqual, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<bool>},
-    Params{Op::kGreaterThan, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<bool>},
-    Params{Op::kGreaterThanEqual, ty_vec3<f32>, ty_vec3<f32>, ty_vec3<bool>},
+    Params{Op::kEqual, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_bool>},
+    Params{Op::kNotEqual, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_bool>},
+    Params{Op::kLessThan, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_bool>},
+    Params{Op::kLessThanEqual, ast_vec3<f32>, ast_vec3<f32>,
+           sem_vec3<sem_bool>},
+    Params{Op::kGreaterThan, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_bool>},
+    Params{Op::kGreaterThanEqual, ast_vec3<f32>, ast_vec3<f32>,
+           sem_vec3<sem_bool>},
 
     // Bit expressions
     // https://gpuweb.github.io/gpuweb/wgsl.html#bit-expr
 
     // Binary bitwise operations
-    Params{Op::kOr, ty_i32, ty_i32, ty_i32},
-    Params{Op::kAnd, ty_i32, ty_i32, ty_i32},
-    Params{Op::kXor, ty_i32, ty_i32, ty_i32},
+    Params{Op::kOr, ast_i32, ast_i32, sem_i32},
+    Params{Op::kAnd, ast_i32, ast_i32, sem_i32},
+    Params{Op::kXor, ast_i32, ast_i32, sem_i32},
 
-    Params{Op::kOr, ty_u32, ty_u32, ty_u32},
-    Params{Op::kAnd, ty_u32, ty_u32, ty_u32},
-    Params{Op::kXor, ty_u32, ty_u32, ty_u32},
+    Params{Op::kOr, ast_u32, ast_u32, sem_u32},
+    Params{Op::kAnd, ast_u32, ast_u32, sem_u32},
+    Params{Op::kXor, ast_u32, ast_u32, sem_u32},
 
     // Bit shift expressions
-    Params{Op::kShiftLeft, ty_i32, ty_u32, ty_i32},
-    Params{Op::kShiftLeft, ty_vec3<i32>, ty_vec3<u32>, ty_vec3<i32>},
+    Params{Op::kShiftLeft, ast_i32, ast_u32, sem_i32},
+    Params{Op::kShiftLeft, ast_vec3<i32>, ast_vec3<u32>, sem_vec3<sem_i32>},
 
-    Params{Op::kShiftLeft, ty_u32, ty_u32, ty_u32},
-    Params{Op::kShiftLeft, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<u32>},
+    Params{Op::kShiftLeft, ast_u32, ast_u32, sem_u32},
+    Params{Op::kShiftLeft, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>},
 
-    Params{Op::kShiftRight, ty_i32, ty_u32, ty_i32},
-    Params{Op::kShiftRight, ty_vec3<i32>, ty_vec3<u32>, ty_vec3<i32>},
+    Params{Op::kShiftRight, ast_i32, ast_u32, sem_i32},
+    Params{Op::kShiftRight, ast_vec3<i32>, ast_vec3<u32>, sem_vec3<sem_i32>},
 
-    Params{Op::kShiftRight, ty_u32, ty_u32, ty_u32},
-    Params{Op::kShiftRight, ty_vec3<u32>, ty_vec3<u32>, ty_vec3<u32>}};
+    Params{Op::kShiftRight, ast_u32, ast_u32, sem_u32},
+    Params{Op::kShiftRight, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>}};
 
 using Expr_Binary_Test_Valid = ResolverTestWithParam<Params>;
 TEST_P(Expr_Binary_Test_Valid, All) {
   auto& params = GetParam();
 
-  auto lhs_type = params.create_lhs_type(ty);
-  auto rhs_type = params.create_rhs_type(ty);
-  auto result_type = params.create_result_type(ty);
+  auto* lhs_type = params.create_lhs_type(ty);
+  auto* rhs_type = params.create_rhs_type(ty);
+  auto* result_type = params.create_result_type(ty);
 
   std::stringstream ss;
-  ss << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
-     << rhs_type->FriendlyName(Symbols());
+  ss << FriendlyName(lhs_type) << " " << params.op << " "
+     << FriendlyName(rhs_type);
   SCOPED_TRACE(ss.str());
 
   Global("lhs", lhs_type, ast::StorageClass::kInput);
@@ -1215,27 +1222,28 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
   const Params& params = std::get<0>(GetParam());
   BinaryExprSide side = std::get<1>(GetParam());
 
-  auto lhs_type = params.create_lhs_type(ty);
-  auto rhs_type = params.create_rhs_type(ty);
+  auto* lhs_type = params.create_lhs_type(ty);
+  auto* rhs_type = params.create_rhs_type(ty);
 
   std::stringstream ss;
-  ss << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
-     << rhs_type->FriendlyName(Symbols());
+  ss << FriendlyName(lhs_type) << " " << params.op << " "
+     << FriendlyName(rhs_type);
 
   // For vectors and matrices, wrap the sub type in an alias
-  auto make_alias = [this](sem::Type* type) -> sem::Type* {
-    sem::Type* result;
-    if (auto* v = type->As<sem::Vector>()) {
-      result = create<sem::Vector>(
-          create<sem::Alias>(Symbols().New(), v->type()), v->size());
-    } else if (auto* m = type->As<sem::Matrix>()) {
-      result =
-          create<sem::Matrix>(create<sem::Alias>(Symbols().New(), m->type()),
-                              m->rows(), m->columns());
-    } else {
-      result = create<sem::Alias>(Symbols().New(), type);
+  auto make_alias = [this](ast::Type* type) -> ast::Type* {
+    if (auto* v = type->As<ast::Vector>()) {
+      auto alias = ty.alias(Symbols().New(), v->type());
+      AST().AddConstructedType(alias);
+      return ty.vec(alias, v->size());
     }
-    return result;
+    if (auto* m = type->As<ast::Matrix>()) {
+      auto alias = ty.alias(Symbols().New(), m->type());
+      AST().AddConstructedType(alias);
+      return ty.mat(alias, m->columns(), m->rows());
+    }
+    auto alias = ty.alias(Symbols().New(), type);
+    AST().AddConstructedType(alias);
+    return ty.type_name(alias.ast->name());
   };
 
   // Wrap in alias
@@ -1246,8 +1254,8 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
     rhs_type = make_alias(rhs_type);
   }
 
-  ss << ", After aliasing: " << lhs_type->FriendlyName(Symbols()) << " "
-     << params.op << " " << rhs_type->FriendlyName(Symbols());
+  ss << ", After aliasing: " << FriendlyName(lhs_type) << " " << params.op
+     << " " << FriendlyName(rhs_type);
   SCOPED_TRACE(ss.str());
 
   Global("lhs", lhs_type, ast::StorageClass::kInput);
@@ -1261,7 +1269,7 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
   ASSERT_NE(TypeOf(expr), nullptr);
   // TODO(amaiorano): Bring this back once we have a way to get the canonical
   // type
-  // auto* result_type = params.create_result_type(ty);
+  // auto* *result_type = params.create_result_type(ty);
   // ASSERT_TRUE(TypeOf(expr) == result_type);
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -1273,10 +1281,10 @@ INSTANTIATE_TEST_SUITE_P(
                                      BinaryExprSide::Both)));
 
 using Expr_Binary_Test_Invalid =
-    ResolverTestWithParam<std::tuple<Params, create_type_func_ptr>>;
+    ResolverTestWithParam<std::tuple<Params, create_ast_type_func_ptr>>;
 TEST_P(Expr_Binary_Test_Invalid, All) {
   const Params& params = std::get<0>(GetParam());
-  const create_type_func_ptr& create_type_func = std::get<1>(GetParam());
+  auto& create_type_func = std::get<1>(GetParam());
 
   // Currently, for most operations, for a given lhs type, there is exactly one
   // rhs type allowed.  The only exception is for multiplication, which allows
@@ -1290,8 +1298,8 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
     return;
   }
 
-  auto lhs_type = params.create_lhs_type(ty);
-  auto rhs_type = create_type_func(ty);
+  auto* lhs_type = params.create_lhs_type(ty);
+  auto* rhs_type = create_type_func(ty);
 
   // Skip exceptions: multiplication of f32, vecN<f32>, and matNxN<f32>
   if (params.op == Op::kMultiply &&
@@ -1301,8 +1309,8 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
   }
 
   std::stringstream ss;
-  ss << lhs_type->FriendlyName(Symbols()) << " " << params.op << " "
-     << rhs_type->FriendlyName(Symbols());
+  ss << FriendlyName(lhs_type) << " " << params.op << " "
+     << FriendlyName(rhs_type);
   SCOPED_TRACE(ss.str());
 
   Global("lhs", lhs_type, ast::StorageClass::kInput);
@@ -1316,9 +1324,8 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
   ASSERT_EQ(r()->error(),
             "12:34 error: Binary expression operand types are invalid for "
             "this operation: " +
-                lhs_type->FriendlyName(Symbols()) + " " +
-                FriendlyName(expr->op()) + " " +
-                rhs_type->FriendlyName(Symbols()));
+                FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op()) +
+                " " + FriendlyName(rhs_type));
 }
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
@@ -1365,9 +1372,8 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
     ASSERT_EQ(r()->error(),
               "12:34 error: Binary expression operand types are invalid for "
               "this operation: " +
-                  lhs_type->FriendlyName(Symbols()) + " " +
-                  FriendlyName(expr->op()) + " " +
-                  rhs_type->FriendlyName(Symbols()));
+                  FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op()) +
+                  " " + FriendlyName(rhs_type));
   }
 }
 auto all_dimension_values = testing::Values(2u, 3u, 4u);
@@ -1405,9 +1411,8 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
     ASSERT_EQ(r()->error(),
               "12:34 error: Binary expression operand types are invalid for "
               "this operation: " +
-                  lhs_type->FriendlyName(Symbols()) + " " +
-                  FriendlyName(expr->op()) + " " +
-                  rhs_type->FriendlyName(Symbols()));
+                  FriendlyName(lhs_type) + " " + ast::FriendlyName(expr->op()) +
+                  " " + FriendlyName(rhs_type));
   }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTest,

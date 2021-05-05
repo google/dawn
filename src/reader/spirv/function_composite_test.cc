@@ -218,7 +218,7 @@ TEST_F(SpvParserTest_Composite_Construct, Struct) {
   VariableConst{
     x_1
     none
-    __struct_S
+    __type_name_S
     {
       TypeConstructor[not set]{
         __type_name_S
@@ -835,14 +835,14 @@ TEST_F(SpvParserTest_CompositeInsert, Struct) {
   Variable{
     x_35
     function
-    __struct_S
+    __type_name_S
   }
 }
 VariableDeclStatement{
   VariableConst{
     x_1
     none
-    __struct_S
+    __type_name_S
     {
       Identifier[not set]{x_35}
     }
@@ -852,7 +852,7 @@ VariableDeclStatement{
   Variable{
     x_2_1
     function
-    __struct_S
+    __type_name_S
     {
       Identifier[not set]{x_1}
     }
@@ -869,7 +869,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
-    __struct_S
+    __type_name_S
     {
       Identifier[not set]{x_2_1}
     }
@@ -909,21 +909,21 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
   Variable{
     x_40
     function
-    __struct_S_2
+    __type_name_S_2
   }
 }
 VariableDeclStatement{
   Variable{
     x_41
     function
-    __struct_S_2
+    __type_name_S_2
   }
 }
 VariableDeclStatement{
   VariableConst{
     x_1
     none
-    __struct_S_1
+    __type_name_S_1
     {
       Identifier[not set]{x_40}
     }
@@ -933,7 +933,7 @@ VariableDeclStatement{
   Variable{
     x_2_1
     function
-    __struct_S_1
+    __type_name_S_1
     {
       Identifier[not set]{x_1}
     }
@@ -950,7 +950,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
-    __struct_S_1
+    __type_name_S_1
     {
       Identifier[not set]{x_2_1}
     }
@@ -960,7 +960,7 @@ VariableDeclStatement{
   VariableConst{
     x_3
     none
-    __struct_S_2
+    __type_name_S_2
     {
       Identifier[not set]{x_41}
     }
@@ -970,7 +970,7 @@ VariableDeclStatement{
   Variable{
     x_4_1
     function
-    __struct_S_2
+    __type_name_S_2
     {
       Identifier[not set]{x_3}
     }
@@ -987,7 +987,7 @@ VariableDeclStatement{
   VariableConst{
     x_4
     none
-    __struct_S_2
+    __type_name_S_2
     {
       Identifier[not set]{x_4_1}
     }
@@ -998,7 +998,7 @@ VariableDeclStatement{
   Variable{
     x_4_1
     function
-    __struct_S_2
+    __type_name_S_2
     {
       Identifier[not set]{x_3}
     }
@@ -1015,7 +1015,7 @@ VariableDeclStatement{
   VariableConst{
     x_4
     none
-    __struct_S_2
+    __type_name_S_2
     {
       Identifier[not set]{x_4_1}
     }
@@ -1066,14 +1066,14 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_Array_Matrix_Vector) {
   Variable{
     x_37
     function
-    __struct_S_1
+    __type_name_S_1
   }
 }
 VariableDeclStatement{
   VariableConst{
     x_1
     none
-    __struct_S_1
+    __type_name_S_1
     {
       Identifier[not set]{x_37}
     }
@@ -1083,7 +1083,7 @@ VariableDeclStatement{
   Variable{
     x_2_1
     function
-    __struct_S_1
+    __type_name_S_1
     {
       Identifier[not set]{x_1}
     }
@@ -1109,7 +1109,7 @@ VariableDeclStatement{
   VariableConst{
     x_2
     none
-    __struct_S_1
+    __type_name_S_1
     {
       Identifier[not set]{x_2_1}
     }

@@ -445,48 +445,57 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
 
 namespace GetCanonicalTests {
 struct Params {
-  create_type_func_ptr create_type;
-  create_type_func_ptr create_canonical_type;
+  create_ast_type_func_ptr create_ast_type;
+  create_sem_type_func_ptr create_sem_type;
 };
 
 static constexpr Params cases[] = {
-    Params{ty_bool_, ty_bool_},
-    Params{ty_alias<ty_bool_>, ty_bool_},
-    Params{ty_alias<ty_alias<ty_bool_>>, ty_bool_},
+    Params{ast_bool, sem_bool},
+    Params{ast_alias<ast_bool>, sem_bool},
+    Params{ast_alias<ast_alias<ast_bool>>, sem_bool},
 
-    Params{ty_vec3<ty_f32>, ty_vec3<ty_f32>},
-    Params{ty_alias<ty_vec3<ty_f32>>, ty_vec3<ty_f32>},
-    Params{ty_alias<ty_alias<ty_vec3<ty_f32>>>, ty_vec3<ty_f32>},
+    Params{ast_vec3<ast_f32>, sem_vec3<sem_f32>},
+    Params{ast_alias<ast_vec3<ast_f32>>, sem_vec3<sem_f32>},
+    Params{ast_alias<ast_alias<ast_vec3<ast_f32>>>, sem_vec3<sem_f32>},
 
-    Params{ty_vec3<ty_alias<ty_f32>>, ty_vec3<ty_f32>},
-    Params{ty_alias<ty_vec3<ty_alias<ty_f32>>>, ty_vec3<ty_f32>},
-    Params{ty_alias<ty_alias<ty_vec3<ty_alias<ty_f32>>>>, ty_vec3<ty_f32>},
-    Params{ty_alias<ty_alias<ty_vec3<ty_alias<ty_alias<ty_f32>>>>>,
-           ty_vec3<ty_f32>},
+    Params{ast_vec3<ast_alias<ast_f32>>, sem_vec3<sem_f32>},
+    Params{ast_alias<ast_vec3<ast_alias<ast_f32>>>, sem_vec3<sem_f32>},
+    Params{ast_alias<ast_alias<ast_vec3<ast_alias<ast_f32>>>>,
+           sem_vec3<sem_f32>},
+    Params{ast_alias<ast_alias<ast_vec3<ast_alias<ast_alias<ast_f32>>>>>,
+           sem_vec3<sem_f32>},
 
-    Params{ty_mat3x3<ty_alias<ty_f32>>, ty_mat3x3<ty_f32>},
-    Params{ty_alias<ty_mat3x3<ty_alias<ty_f32>>>, ty_mat3x3<ty_f32>},
-    Params{ty_alias<ty_alias<ty_mat3x3<ty_alias<ty_f32>>>>, ty_mat3x3<ty_f32>},
-    Params{ty_alias<ty_alias<ty_mat3x3<ty_alias<ty_alias<ty_f32>>>>>,
-           ty_mat3x3<ty_f32>},
+    Params{ast_mat3x3<ast_alias<ast_f32>>, sem_mat3x3<sem_f32>},
+    Params{ast_alias<ast_mat3x3<ast_alias<ast_f32>>>, sem_mat3x3<sem_f32>},
+    Params{ast_alias<ast_alias<ast_mat3x3<ast_alias<ast_f32>>>>,
+           sem_mat3x3<sem_f32>},
+    Params{ast_alias<ast_alias<ast_mat3x3<ast_alias<ast_alias<ast_f32>>>>>,
+           sem_mat3x3<sem_f32>},
 
-    Params{ty_alias<ty_access<ty_alias<ty_bool_>>>, ty_access<ty_bool_>},
-    Params{ty_alias<ty_access<ty_alias<ty_vec3<ty_access<ty_f32>>>>>,
-           ty_access<ty_vec3<ty_access<ty_f32>>>},
-    Params{ty_alias<ty_access<ty_alias<ty_mat3x3<ty_access<ty_f32>>>>>,
-           ty_access<ty_mat3x3<ty_access<ty_f32>>>},
+    Params{ast_alias<ast_access<ast_alias<ast_bool>>>, sem_access<sem_bool>},
+    Params{ast_alias<ast_access<ast_alias<ast_vec3<ast_access<ast_f32>>>>>,
+           sem_access<sem_vec3<sem_access<sem_f32>>>},
+    Params{ast_alias<ast_access<ast_alias<ast_mat3x3<ast_access<ast_f32>>>>>,
+           sem_access<sem_mat3x3<sem_access<sem_f32>>>},
 };
 
 using CanonicalTest = ResolverTestWithParam<Params>;
 TEST_P(CanonicalTest, All) {
   auto& params = GetParam();
 
-  auto type = params.create_type(ty);
-  auto expected_canonical_type = params.create_canonical_type(ty);
+  auto* type = params.create_ast_type(ty);
 
-  auto* canonical_type = r()->Canonical(type);
+  auto* var = Var("v", type, ast::StorageClass::kFunction);
+  auto* expr = Expr("v");
+  WrapInFunction(var, expr);
 
-  EXPECT_EQ(canonical_type, expected_canonical_type);
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* got = TypeOf(expr)->UnwrapPtrIfNeeded();
+  auto* expected = params.create_sem_type(ty);
+
+  EXPECT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
+                           << "expected: " << FriendlyName(expected) << "\n";
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          CanonicalTest,
@@ -529,26 +538,26 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          testing::ValuesIn(dimension_cases));
 
 struct TypeParams {
-  create_type_func_ptr type_func;
+  create_ast_type_func_ptr type_func;
   bool is_valid;
 };
 
 static constexpr TypeParams type_cases[] = {
-    TypeParams{ty_bool_, false},
-    TypeParams{ty_i32, true},
-    TypeParams{ty_u32, true},
-    TypeParams{ty_f32, true},
+    TypeParams{ast_bool, false},
+    TypeParams{ast_i32, true},
+    TypeParams{ast_u32, true},
+    TypeParams{ast_f32, true},
 
-    TypeParams{ty_alias<ty_bool_>, false},
-    TypeParams{ty_alias<ty_i32>, true},
-    TypeParams{ty_alias<ty_u32>, true},
-    TypeParams{ty_alias<ty_f32>, true},
+    TypeParams{ast_alias<ast_bool>, false},
+    TypeParams{ast_alias<ast_i32>, true},
+    TypeParams{ast_alias<ast_u32>, true},
+    TypeParams{ast_alias<ast_f32>, true},
 
-    TypeParams{ty_vec3<ty_f32>, false},
-    TypeParams{ty_mat3x3<ty_f32>, false},
+    TypeParams{ast_vec3<ast_f32>, false},
+    TypeParams{ast_mat3x3<ast_f32>, false},
 
-    TypeParams{ty_alias<ty_vec3<ty_f32>>, false},
-    TypeParams{ty_alias<ty_mat3x3<ty_f32>>, false}};
+    TypeParams{ast_alias<ast_vec3<ast_f32>>, false},
+    TypeParams{ast_alias<ast_mat3x3<ast_f32>>, false}};
 
 using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {

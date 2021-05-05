@@ -100,7 +100,7 @@ void Hlsl::PromoteInitializersToConstVar(CloneContext& ctx) const {
         // Create a new symbol for the constant
         auto dst_symbol = ctx.dst->Sym();
         // Clone the type
-        auto* dst_ty = ctx.Clone(src_ty);
+        auto* dst_ty = ctx.Clone(src_init->type());
         // Clone the initializer
         auto* dst_init = ctx.Clone(src_init);
         // Construct the constant that holds the hoisted initializer

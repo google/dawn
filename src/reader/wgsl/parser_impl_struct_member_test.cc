@@ -23,7 +23,6 @@ TEST_F(ParserImplTest, StructMember_Parses) {
   auto p = parser("a : i32;");
 
   auto& builder = p->builder();
-  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -36,18 +35,17 @@ TEST_F(ParserImplTest, StructMember_Parses) {
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol(), builder.Symbols().Get("a"));
-  EXPECT_EQ(m->type(), i32);
+  EXPECT_TRUE(m->type()->Is<ast::I32>());
   EXPECT_EQ(m->decorations().size(), 0u);
 
   EXPECT_EQ(m->source().range, (Source::Range{{1u, 1u}, {1u, 2u}}));
-  EXPECT_EQ(m->type().ast->source().range, (Source::Range{{1u, 5u}, {1u, 8u}}));
+  EXPECT_EQ(m->type()->source().range, (Source::Range{{1u, 5u}, {1u, 8u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithOffsetDecoration_DEPRECATED) {
   auto p = parser("[[offset(2)]] a : i32;");
 
   auto& builder = p->builder();
-  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -60,7 +58,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithOffsetDecoration_DEPRECATED) {
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol(), builder.Symbols().Get("a"));
-  EXPECT_EQ(m->type(), i32);
+  EXPECT_TRUE(m->type()->Is<ast::I32>());
   EXPECT_EQ(m->decorations().size(), 1u);
   EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberOffsetDecoration>());
   EXPECT_EQ(
@@ -68,15 +66,13 @@ TEST_F(ParserImplTest, StructMember_ParsesWithOffsetDecoration_DEPRECATED) {
       2u);
 
   EXPECT_EQ(m->source().range, (Source::Range{{1u, 15u}, {1u, 16u}}));
-  EXPECT_EQ(m->type().ast->source().range,
-            (Source::Range{{1u, 19u}, {1u, 22u}}));
+  EXPECT_EQ(m->type()->source().range, (Source::Range{{1u, 19u}, {1u, 22u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithAlignDecoration) {
   auto p = parser("[[align(2)]] a : i32;");
 
   auto& builder = p->builder();
-  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -89,22 +85,20 @@ TEST_F(ParserImplTest, StructMember_ParsesWithAlignDecoration) {
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol(), builder.Symbols().Get("a"));
-  EXPECT_EQ(m->type(), i32);
+  EXPECT_TRUE(m->type()->Is<ast::I32>());
   EXPECT_EQ(m->decorations().size(), 1u);
   EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberAlignDecoration>());
   EXPECT_EQ(
       m->decorations()[0]->As<ast::StructMemberAlignDecoration>()->align(), 2u);
 
   EXPECT_EQ(m->source().range, (Source::Range{{1u, 14u}, {1u, 15u}}));
-  EXPECT_EQ(m->type().ast->source().range,
-            (Source::Range{{1u, 18u}, {1u, 21u}}));
+  EXPECT_EQ(m->type()->source().range, (Source::Range{{1u, 18u}, {1u, 21u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithSizeDecoration) {
   auto p = parser("[[size(2)]] a : i32;");
 
   auto& builder = p->builder();
-  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -117,22 +111,20 @@ TEST_F(ParserImplTest, StructMember_ParsesWithSizeDecoration) {
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol(), builder.Symbols().Get("a"));
-  EXPECT_EQ(m->type(), i32);
+  EXPECT_TRUE(m->type()->Is<ast::I32>());
   EXPECT_EQ(m->decorations().size(), 1u);
   EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberSizeDecoration>());
   EXPECT_EQ(m->decorations()[0]->As<ast::StructMemberSizeDecoration>()->size(),
             2u);
 
   EXPECT_EQ(m->source().range, (Source::Range{{1u, 13u}, {1u, 14u}}));
-  EXPECT_EQ(m->type().ast->source().range,
-            (Source::Range{{1u, 17u}, {1u, 20u}}));
+  EXPECT_EQ(m->type()->source().range, (Source::Range{{1u, 17u}, {1u, 20u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   auto p = parser("[[size(2)]] a : i32;");
 
   auto& builder = p->builder();
-  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -145,15 +137,14 @@ TEST_F(ParserImplTest, StructMember_ParsesWithDecoration) {
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol(), builder.Symbols().Get("a"));
-  EXPECT_EQ(m->type(), i32);
+  EXPECT_TRUE(m->type()->Is<ast::I32>());
   EXPECT_EQ(m->decorations().size(), 1u);
   EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberSizeDecoration>());
   EXPECT_EQ(m->decorations()[0]->As<ast::StructMemberSizeDecoration>()->size(),
             2u);
 
   EXPECT_EQ(m->source().range, (Source::Range{{1u, 13u}, {1u, 14u}}));
-  EXPECT_EQ(m->type().ast->source().range,
-            (Source::Range{{1u, 17u}, {1u, 20u}}));
+  EXPECT_EQ(m->type()->source().range, (Source::Range{{1u, 17u}, {1u, 20u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
@@ -161,7 +152,6 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
 [[align(4)]] a : i32;)");
 
   auto& builder = p->builder();
-  auto i32 = builder.ty.i32();
 
   auto decos = p->decoration_list();
   EXPECT_FALSE(decos.errored);
@@ -174,7 +164,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
   ASSERT_NE(m.value, nullptr);
 
   EXPECT_EQ(m->symbol(), builder.Symbols().Get("a"));
-  EXPECT_EQ(m->type(), i32);
+  EXPECT_TRUE(m->type()->Is<ast::I32>());
   EXPECT_EQ(m->decorations().size(), 2u);
   EXPECT_TRUE(m->decorations()[0]->Is<ast::StructMemberSizeDecoration>());
   EXPECT_EQ(m->decorations()[0]->As<ast::StructMemberSizeDecoration>()->size(),
@@ -184,8 +174,7 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleDecorations) {
       m->decorations()[1]->As<ast::StructMemberAlignDecoration>()->align(), 4u);
 
   EXPECT_EQ(m->source().range, (Source::Range{{2u, 14u}, {2u, 15u}}));
-  EXPECT_EQ(m->type().ast->source().range,
-            (Source::Range{{2u, 18u}, {2u, 21u}}));
+  EXPECT_EQ(m->type()->source().range, (Source::Range{{2u, 18u}, {2u, 21u}}));
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidDecoration) {

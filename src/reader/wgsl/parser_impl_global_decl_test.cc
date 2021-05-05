@@ -84,10 +84,10 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
 
   auto program = p->program();
   ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
-  ASSERT_TRUE(program.AST().ConstructedTypes()[0]->Is<sem::Alias>());
+  ASSERT_TRUE(program.AST().ConstructedTypes()[0]->Is<ast::Alias>());
   EXPECT_EQ(
       program.Symbols().NameFor(
-          program.AST().ConstructedTypes()[0]->As<sem::Alias>()->symbol()),
+          program.AST().ConstructedTypes()[0]->As<ast::Alias>()->symbol()),
       "A");
 }
 
@@ -102,14 +102,16 @@ type B = A;)");
 
   auto program = p->program();
   ASSERT_EQ(program.AST().ConstructedTypes().size(), 2u);
-  ASSERT_TRUE(program.AST().ConstructedTypes()[0]->Is<sem::StructType>());
-  auto* str = program.AST().ConstructedTypes()[0]->As<sem::StructType>();
-  EXPECT_EQ(str->impl()->name(), program.Symbols().Get("A"));
+  ASSERT_TRUE(program.AST().ConstructedTypes()[0]->Is<ast::Struct>());
+  auto* str = program.AST().ConstructedTypes()[0]->As<ast::Struct>();
+  EXPECT_EQ(str->name(), program.Symbols().Get("A"));
 
-  ASSERT_TRUE(program.AST().ConstructedTypes()[1]->Is<sem::Alias>());
-  auto* alias = program.AST().ConstructedTypes()[1]->As<sem::Alias>();
+  ASSERT_TRUE(program.AST().ConstructedTypes()[1]->Is<ast::Alias>());
+  auto* alias = program.AST().ConstructedTypes()[1]->As<ast::Alias>();
   EXPECT_EQ(alias->symbol(), program.Symbols().Get("B"));
-  EXPECT_EQ(alias->type(), str);
+  auto* tn = alias->type()->As<ast::TypeName>();
+  EXPECT_NE(tn, nullptr);
+  EXPECT_EQ(tn->name(), str->name());
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias_Invalid) {
@@ -163,13 +165,13 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
   auto program = p->program();
   ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
 
-  auto t = program.AST().ConstructedTypes()[0];
+  auto* t = program.AST().ConstructedTypes()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<sem::StructType>());
+  ASSERT_TRUE(t->Is<ast::Struct>());
 
-  auto* str = t->As<sem::StructType>();
-  EXPECT_EQ(str->impl()->name(), program.Symbols().Get("A"));
-  EXPECT_EQ(str->impl()->members().size(), 2u);
+  auto* str = t->As<ast::Struct>();
+  EXPECT_EQ(str->name(), program.Symbols().Get("A"));
+  EXPECT_EQ(str->members().size(), 2u);
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
@@ -181,18 +183,18 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithStride) {
   auto program = p->program();
   ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
 
-  auto t = program.AST().ConstructedTypes()[0];
+  auto* t = program.AST().ConstructedTypes()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<sem::StructType>());
+  ASSERT_TRUE(t->Is<ast::Struct>());
 
-  auto* str = t->As<sem::StructType>();
-  EXPECT_EQ(str->impl()->name(), program.Symbols().Get("A"));
-  EXPECT_EQ(str->impl()->members().size(), 1u);
+  auto* str = t->As<ast::Struct>();
+  EXPECT_EQ(str->name(), program.Symbols().Get("A"));
+  EXPECT_EQ(str->members().size(), 1u);
   EXPECT_FALSE(str->IsBlockDecorated());
 
-  const auto ty = str->impl()->members()[0]->type();
-  ASSERT_TRUE(ty->Is<sem::ArrayType>());
-  const auto* arr = ty->As<sem::ArrayType>();
+  const auto* ty = str->members()[0]->type();
+  ASSERT_TRUE(ty->Is<ast::Array>());
+  const auto* arr = ty->As<ast::Array>();
 
   ASSERT_EQ(arr->decorations().size(), 1u);
   auto* stride = arr->decorations()[0];
@@ -208,13 +210,13 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_WithDecoration) {
   auto program = p->program();
   ASSERT_EQ(program.AST().ConstructedTypes().size(), 1u);
 
-  auto t = program.AST().ConstructedTypes()[0];
+  auto* t = program.AST().ConstructedTypes()[0];
   ASSERT_NE(t, nullptr);
-  ASSERT_TRUE(t->Is<sem::StructType>());
+  ASSERT_TRUE(t->Is<ast::Struct>());
 
-  auto* str = t->As<sem::StructType>();
-  EXPECT_EQ(str->impl()->name(), program.Symbols().Get("A"));
-  EXPECT_EQ(str->impl()->members().size(), 1u);
+  auto* str = t->As<ast::Struct>();
+  EXPECT_EQ(str->name(), program.Symbols().Get("A"));
+  EXPECT_EQ(str->members().size(), 1u);
   EXPECT_TRUE(str->IsBlockDecorated());
 }
 

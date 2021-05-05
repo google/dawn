@@ -2041,9 +2041,10 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ElementTypeAlias_Success) {
 TEST_F(ResolverValidationTest, Expr_MatrixConstructor_ArgumentTypeAlias_Error) {
   auto alias = ty.alias("VectorUnsigned2", ty.vec2<u32>());
   AST().AddConstructedType(alias);
-  auto* tc = mat2x2<f32>(create<ast::TypeConstructorExpression>(
-                             Source{{12, 34}}, alias, ExprList()),
-                         vec2<f32>());
+  auto* tc = mat2x2<f32>(
+      create<ast::TypeConstructorExpression>(
+          Source{{12, 34}}, ty.MaybeCreateTypename(alias), ExprList()),
+      vec2<f32>());
   WrapInFunction(tc);
 
   EXPECT_FALSE(r()->Resolve());
@@ -2062,7 +2063,7 @@ TEST_P(MatrixConstructorTest, Expr_Constructor_ArgumentTypeAlias_Success) {
   ast::ExpressionList args;
   for (uint32_t i = 1; i <= param.columns; i++) {
     args.push_back(create<ast::TypeConstructorExpression>(
-        Source{{12, i}}, vec_alias, ExprList()));
+        Source{{12, i}}, ty.MaybeCreateTypename(vec_alias), ExprList()));
   }
 
   auto* tc = create<ast::TypeConstructorExpression>(Source{}, matrix_type,

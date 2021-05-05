@@ -32,7 +32,7 @@ TEST_F(FunctionTest, Creation) {
   auto* f = Func("func", params, ty.void_(), StatementList{}, DecorationList{});
   EXPECT_EQ(f->symbol(), Symbols().Get("func"));
   ASSERT_EQ(f->params().size(), 1u);
-  EXPECT_EQ(f->return_type(), ty.void_());
+  EXPECT_TRUE(f->return_type()->Is<ast::Void>());
   EXPECT_EQ(f->params()[0], var);
 }
 

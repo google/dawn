@@ -40,6 +40,7 @@
 #include "src/ast/storage_texture.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/switch_statement.h"
+#include "src/ast/type_name.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/vector.h"
@@ -151,7 +152,16 @@ void Resolver::set_referenced_from_function_if_needed(VariableInfo* var,
 }
 
 bool Resolver::Resolve() {
+  if (builder_->Diagnostics().contains_errors()) {
+    return false;
+  }
+
   bool result = ResolveInternal();
+
+  if (result && diagnostics_.contains_errors()) {
+    TINT_ICE(diagnostics_) << "resolving failed, but no error was raised";
+    return false;
+  }
 
   // Even if resolving failed, create all the semantic nodes for information we
   // did generate.
@@ -169,13 +179,15 @@ bool Resolver::IsStorable(const sem::Type* type) {
   if (auto* arr = type->As<sem::ArrayType>()) {
     return IsStorable(arr->type());
   }
-  if (auto* str = type->As<sem::StructType>()) {
-    for (const auto* member : str->impl()->members()) {
-      if (!IsStorable(member->type())) {
-        return false;
+  if (auto* str_ty = type->As<sem::StructType>()) {
+    if (auto* str = Structure(str_ty)) {
+      for (const auto* member : str->members) {
+        if (!IsStorable(member->Type())) {
+          return false;
+        }
       }
+      return true;
     }
-    return true;
   }
   return false;
 }
@@ -196,8 +208,12 @@ bool Resolver::IsHostShareable(const sem::Type* type) {
     return IsHostShareable(arr->type());
   }
   if (auto* str = type->As<sem::StructType>()) {
-    for (auto* member : str->impl()->members()) {
-      if (!IsHostShareable(member->type())) {
+    auto* info = Structure(str);
+    if (!info) {
+      return false;
+    }
+    for (auto* member : info->members) {
+      if (!IsHostShareable(member->Type())) {
         return false;
       }
     }
@@ -225,11 +241,28 @@ bool Resolver::IsValidAssignment(const sem::Type* lhs, const sem::Type* rhs) {
 bool Resolver::ResolveInternal() {
   Mark(&builder_->AST());
 
+  auto register_named_type = [this](Symbol name, const sem::Type* type,
+                                    const Source& source) {
+    auto added = named_types_.emplace(name, type).second;
+    if (!added) {
+      diagnostics_.add_error("type with the name '" +
+                                 builder_->Symbols().NameFor(name) +
+                                 "' was already declared",
+                             source);
+      return false;
+    }
+    return true;
+  };
+
   // Process everything else in the order they appear in the module. This is
   // necessary for validation of use-before-declaration.
   for (auto* decl : builder_->AST().GlobalDeclarations()) {
-    if (auto* ty = decl->As<sem::Type>()) {
-      if (!Type(ty)) {
+    if (auto* ty = decl->As<ast::NamedType>()) {
+      auto* sem_ty = Type(ty);
+      if (sem_ty == nullptr) {
+        return false;
+      }
+      if (!register_named_type(ty->name(), sem_ty, ty->source())) {
         return false;
       }
     } else if (auto* func = decl->As<ast::Function>()) {
@@ -248,6 +281,8 @@ bool Resolver::ResolveInternal() {
       return false;
     }
   }
+
+  bool result = true;
 
   for (auto* node : builder_->ASTNodes().Objects()) {
     if (marked_.count(node) == 0) {
@@ -268,10 +303,11 @@ bool Resolver::ResolveInternal() {
                              << "At: " << node->source() << "\n"
                              << "Content: " << builder_->str(node) << "\n"
                              << "Pointer: " << node;
+      result = false;
     }
   }
 
-  return true;
+  return result;
 }
 
 const sem::Type* Resolver::Type(const ast::Type* ty) {
@@ -360,6 +396,16 @@ const sem::Type* Resolver::Type(const ast::Type* ty) {
       }
       return nullptr;
     }
+    if (auto* t = ty->As<ast::TypeName>()) {
+      auto it = named_types_.find(t->name());
+      if (it == named_types_.end()) {
+        diagnostics_.add_error(
+            "unknown type '" + builder_->Symbols().NameFor(t->name()) + "'",
+            t->source());
+        return nullptr;
+      }
+      return it->second;
+    }
     TINT_UNREACHABLE(diagnostics_)
         << "Unhandled ast::Type: " << ty->TypeInfo().name;
     return nullptr;
@@ -392,21 +438,26 @@ bool Resolver::Type(const sem::Type* ty, const Source& source /* = {} */) {
 
 Resolver::VariableInfo* Resolver::Variable(
     ast::Variable* var,
-    const sem::Type* type /* = nullptr*/) {
+    const sem::Type* type, /* = nullptr */
+    std::string type_name /* = "" */) {
   auto it = variable_to_info_.find(var);
   if (it != variable_to_info_.end()) {
     return it->second;
   }
 
-  if (!type) {
-    type = var->declared_type();
+  if (type == nullptr && var->type()) {
+    type = Type(var->type());
+    type_name = var->type()->FriendlyName(builder_->Symbols());
+  }
+  if (type == nullptr) {
+    return nullptr;
   }
 
-  auto type_name = type->FriendlyName(builder_->Symbols());
   auto* ctype = Canonical(type);
   auto* info = variable_infos_.Create(var, ctype, type_name);
   variable_to_info_.emplace(var, info);
 
+  // TODO(bclayton): Why is this here? Needed?
   // Resolve variable's type
   if (auto* arr = info->type->As<sem::ArrayType>()) {
     if (!Array(arr, var->source())) {
@@ -805,12 +856,12 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     if (auto* struct_ty = Canonical(ty)->As<sem::StructType>()) {
       // Validate the decorations for each struct members, and also check for
       // invalid member types.
-      for (auto* member : struct_ty->impl()->members()) {
-        auto* member_ty = Canonical(member->type());
+      for (auto* member : Structure(struct_ty)->members) {
+        auto* member_ty = Canonical(member->Type());
         if (member_ty->Is<sem::StructType>()) {
           diagnostics_.add_error(
               "entry point IO types cannot contain nested structures",
-              member->source());
+              member->Declaration()->source());
           diagnostics_.add_note("while analysing entry point " +
                                     builder_->Symbols().NameFor(func->symbol()),
                                 func->source());
@@ -819,7 +870,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           if (arr->IsRuntimeArray()) {
             diagnostics_.add_error(
                 "entry point IO types cannot contain runtime sized arrays",
-                member->source());
+                member->Declaration()->source());
             diagnostics_.add_note(
                 "while analysing entry point " +
                     builder_->Symbols().NameFor(func->symbol()),
@@ -828,9 +879,9 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           }
         }
 
-        if (!validate_entry_point_decorations_inner(member->decorations(),
-                                                    member_ty, member->source(),
-                                                    param_or_ret, true)) {
+        if (!validate_entry_point_decorations_inner(
+                member->Declaration()->decorations(), member_ty,
+                member->Declaration()->source(), param_or_ret, true)) {
           diagnostics_.add_note("while analysing entry point " +
                                     builder_->Symbols().NameFor(func->symbol()),
                                 func->source());
@@ -842,10 +893,10 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     return true;
   };
 
-  for (auto* param : func->params()) {
+  for (auto* param : info->parameters) {
     if (!validate_entry_point_decorations(
-            param->decorations(), param->declared_type(), param->source(),
-            ParamOrRetType::kParameter)) {
+            param->declaration->decorations(), param->type,
+            param->declaration->source(), ParamOrRetType::kParameter)) {
       return false;
     }
   }
@@ -943,19 +994,18 @@ bool Resolver::Function(ast::Function* func) {
     }
   }
 
-  if (func->return_type().ast || func->return_type().sem) {
-    info->return_type = func->return_type();
-    if (!info->return_type) {
-      info->return_type = Type(func->return_type().ast);
-    }
+  if (auto* ty = func->return_type()) {
+    info->return_type = Type(ty);
+    info->return_type_name = ty->FriendlyName(builder_->Symbols());
     if (!info->return_type) {
       return false;
     }
   } else {
     info->return_type = builder_->create<sem::Void>();
+    info->return_type_name =
+        info->return_type->FriendlyName(builder_->Symbols());
   }
 
-  info->return_type_name = info->return_type->FriendlyName(builder_->Symbols());
   info->return_type = Canonical(info->return_type);
 
   if (auto* str = info->return_type->As<sem::StructType>()) {
@@ -1374,17 +1424,16 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
 
     SetType(expr, type_ctor->type());
 
+    const sem::Type* type = TypeOf(expr);
+
     // Now that the argument types have been determined, make sure that they
     // obey the constructor type rules laid out in
     // https://gpuweb.github.io/gpuweb/wgsl.html#type-constructor-expr.
-    if (auto* vec_type = type_ctor->type()->As<sem::Vector>()) {
-      return ValidateVectorConstructor(type_ctor, vec_type,
-                                       type_ctor->values());
+    if (auto* vec_type = type->As<sem::Vector>()) {
+      return ValidateVectorConstructor(type_ctor, vec_type);
     }
-    if (auto* mat_type = type_ctor->type()->As<sem::Matrix>()) {
-      auto mat_typename = TypeNameOf(type_ctor);
-      return ValidateMatrixConstructor(type_ctor, mat_type,
-                                       type_ctor->values());
+    if (auto* mat_type = type->As<sem::Matrix>()) {
+      return ValidateMatrixConstructor(type_ctor, mat_type);
     }
     // TODO(crbug.com/tint/634): Validate array constructor
   } else if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
@@ -1398,8 +1447,8 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
 
 bool Resolver::ValidateVectorConstructor(
     const ast::TypeConstructorExpression* ctor,
-    const sem::Vector* vec_type,
-    const ast::ExpressionList& values) {
+    const sem::Vector* vec_type) {
+  auto& values = ctor->values();
   auto* elem_type = vec_type->type()->UnwrapAll();
   size_t value_cardinality_sum = 0;
   for (auto* value : values) {
@@ -1467,8 +1516,8 @@ bool Resolver::ValidateVectorConstructor(
 
 bool Resolver::ValidateMatrixConstructor(
     const ast::TypeConstructorExpression* ctor,
-    const sem::Matrix* matrix_type,
-    const ast::ExpressionList& values) {
+    const sem::Matrix* matrix_type) {
+  auto& values = ctor->values();
   // Zero Value expression
   if (values.empty()) {
     return true;
@@ -1600,7 +1649,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     const sem::StructMember* member = nullptr;
     for (auto* m : str->members) {
       if (m->Declaration()->symbol() == symbol) {
-        ret = m->Declaration()->type();
+        ret = m->Type();
         member = m;
         break;
       }
@@ -1961,7 +2010,16 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   ast::Variable* var = stmt->variable();
   Mark(var);
 
-  const sem::Type* type = var->declared_type();
+  // If the variable has a declared type, resolve it.
+  std::string type_name;
+  const sem::Type* type = nullptr;
+  if (auto* ast_ty = var->type()) {
+    type_name = ast_ty->FriendlyName(builder_->Symbols());
+    type = Type(ast_ty);
+    if (!type) {
+      return false;
+    }
+  }
 
   bool is_global = false;
   if (variable_stack_.get(var->symbol(), nullptr, &is_global)) {
@@ -1982,14 +2040,15 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
 
     // If the variable has no type, infer it from the rhs
     if (type == nullptr) {
+      type_name = TypeNameOf(ctor);
       type = rhs_type->UnwrapPtrIfNeeded();
     }
 
     if (!IsValidAssignment(type, rhs_type)) {
       diagnostics_.add_error(
-          "variable of type '" + type->FriendlyName(builder_->Symbols()) +
+          "variable of type '" + type_name +
               "' cannot be initialized with a value of type '" +
-              rhs_type->FriendlyName(builder_->Symbols()) + "'",
+              TypeNameOf(ctor) + "'",
           stmt->source());
       return false;
     }
@@ -2000,7 +2059,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     Mark(deco);
   }
 
-  auto* info = Variable(var, type);
+  auto* info = Variable(var, type, type_name);
   if (!info) {
     return false;
   }
@@ -2071,13 +2130,19 @@ const sem::Type* Resolver::TypeOf(const ast::Literal* lit) {
   return nullptr;
 }
 
-void Resolver::SetType(ast::Expression* expr, const sem::Type* type) {
-  SetType(expr, type, type->FriendlyName(builder_->Symbols()));
+void Resolver::SetType(ast::Expression* expr, typ::Type type) {
+  SetType(expr, type,
+          type.sem ? type.sem->FriendlyName(builder_->Symbols())
+                   : type.ast->FriendlyName(builder_->Symbols()));
 }
 
 void Resolver::SetType(ast::Expression* expr,
-                       const sem::Type* type,
+                       typ::Type type,
                        const std::string& type_name) {
+  if (!type.sem) {
+    type.sem = Type(type.ast);
+    TINT_ASSERT(type.sem);
+  }
   if (expr_info_.count(expr)) {
     TINT_ICE(builder_->Diagnostics())
         << "SetType() called twice for the same expression";
@@ -2195,7 +2260,7 @@ void Resolver::CreateSemanticNodes() const {
   }
 }
 
-bool Resolver::DefaultAlignAndSize(sem::Type* ty,
+bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
                                    uint32_t& align,
                                    uint32_t& size,
                                    const Source& source) {
@@ -2363,24 +2428,24 @@ bool Resolver::ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
   return true;
 }
 
-bool Resolver::ValidateStructure(const sem::StructType* st) {
-  for (auto* member : st->impl()->members()) {
-    if (auto* r = member->type()->UnwrapAll()->As<sem::ArrayType>()) {
+bool Resolver::ValidateStructure(const StructInfo* st) {
+  for (auto* member : st->members) {
+    if (auto* r = member->Type()->UnwrapAll()->As<sem::ArrayType>()) {
       if (r->IsRuntimeArray()) {
-        if (member != st->impl()->members().back()) {
+        if (member != st->members.back()) {
           diagnostics_.add_error(
               "v-0015",
               "runtime arrays may only appear as the last member of a struct",
-              member->source());
+              member->Declaration()->source());
           return false;
         }
-        if (!st->IsBlockDecorated()) {
+        if (!st->type->impl()->IsBlockDecorated()) {
           diagnostics_.add_error(
               "v-0015",
               "a struct containing a runtime-sized array "
               "requires the [[block]] attribute: '" +
-                  builder_->Symbols().NameFor(st->impl()->name()) + "'",
-              member->source());
+                  builder_->Symbols().NameFor(st->type->impl()->name()) + "'",
+              member->Declaration()->source());
           return false;
         }
 
@@ -2394,7 +2459,7 @@ bool Resolver::ValidateStructure(const sem::StructType* st) {
       }
     }
 
-    for (auto* deco : member->decorations()) {
+    for (auto* deco : member->Declaration()->decorations()) {
       if (!(deco->Is<ast::BuiltinDecoration>() ||
             deco->Is<ast::LocationDecoration>() ||
             deco->Is<ast::StructMemberOffsetDecoration>() ||
@@ -2407,7 +2472,7 @@ bool Resolver::ValidateStructure(const sem::StructType* st) {
     }
   }
 
-  for (auto* deco : st->impl()->decorations()) {
+  for (auto* deco : st->type->impl()->decorations()) {
     if (!(deco->Is<ast::StructBlockDecoration>())) {
       diagnostics_.add_error("decoration is not valid for struct declarations",
                              deco->source());
@@ -2425,13 +2490,8 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
     return info_it->second;
   }
 
-  Mark(str->impl());
   for (auto* deco : str->impl()->decorations()) {
     Mark(deco);
-  }
-
-  if (!ValidateStructure(str)) {
-    return nullptr;
   }
 
   sem::StructMemberList sem_members;
@@ -2454,12 +2514,16 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
   for (auto* member : str->impl()->members()) {
     Mark(member);
 
-    auto type = member->type();
+    // Resolve member type
+    auto* type = Type(member->type());
+    if (!type) {
+      return nullptr;
+    }
 
-    // First check the member type is legal
+    // Validate member type
     if (!IsStorable(type)) {
       builder_->Diagnostics().add_error(
-          std::string(type->FriendlyName(builder_->Symbols())) +
+          type->FriendlyName(builder_->Symbols()) +
           " cannot be used as the type of a structure member");
       return nullptr;
     }
@@ -2518,8 +2582,8 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
 
     offset = utils::RoundUp(align, offset);
 
-    auto* sem_member =
-        builder_->create<sem::StructMember>(member, type, offset, align, size);
+    auto* sem_member = builder_->create<sem::StructMember>(
+        member, const_cast<sem::Type*>(type), offset, align, size);
     builder_->Sem().Add(member, sem_member);
     sem_members.emplace_back(sem_member);
 
@@ -2531,11 +2595,17 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
   struct_size = utils::RoundUp(struct_align, struct_size);
 
   auto* info = struct_infos_.Create();
+  info->type = str;
   info->members = std::move(sem_members);
   info->align = struct_align;
   info->size = struct_size;
   info->size_no_padding = size_no_padding;
   struct_info_.emplace(str, info);
+
+  if (!ValidateStructure(info)) {
+    return nullptr;
+  }
+
   return info;
 }
 
@@ -2745,13 +2815,13 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
       return true;  // Already applied
     }
     info->storage_class_usage.emplace(sc);
-    for (auto* member : str->impl()->members()) {
-      if (!ApplyStorageClassUsageToType(sc, member->type(), usage)) {
+    for (auto* member : info->members) {
+      if (!ApplyStorageClassUsageToType(sc, member->Type(), usage)) {
         std::stringstream err;
         err << "while analysing structure member "
             << str->FriendlyName(builder_->Symbols()) << "."
-            << builder_->Symbols().NameFor(member->symbol());
-        diagnostics_.add_note(err.str(), member->source());
+            << builder_->Symbols().NameFor(member->Declaration()->symbol());
+        diagnostics_.add_note(err.str(), member->Declaration()->source());
         return false;
       }
     }
@@ -2797,6 +2867,11 @@ const sem::Type* Resolver::Canonical(const sem::Type* type) {
   using Matrix = sem::Matrix;
   using Type = sem::Type;
   using Vector = sem::Vector;
+
+  if (!type) {
+    TINT_ICE(diagnostics_) << "Canonical() called with nullptr";
+    return nullptr;
+  }
 
   std::function<const Type*(const Type*)> make_canonical;
   make_canonical = [&](const Type* t) -> const sem::Type* {

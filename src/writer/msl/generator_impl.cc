@@ -28,6 +28,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/void.h"
 #include "src/sem/access_control_type.h"
 #include "src/sem/alias_type.h"
 #include "src/sem/array.h"
@@ -86,8 +87,8 @@ bool GeneratorImpl::Generate() {
     global_variables_.set(global->symbol(), sem);
   }
 
-  for (auto const ty : program_->AST().ConstructedTypes()) {
-    if (!EmitConstructedType(ty)) {
+  for (auto* const ty : program_->AST().ConstructedTypes()) {
+    if (!EmitConstructedType(TypeOf(ty))) {
       return false;
     }
   }
@@ -1400,7 +1401,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
   bool has_out_data = out_data != ep_sym_to_out_data_.end();
   if (has_out_data) {
     // TODO(crbug.com/tint/697): Remove this.
-    if (!func->return_type()->Is<sem::Void>()) {
+    if (!func->return_type()->Is<ast::Void>()) {
       TINT_ICE(diagnostics_) << "Mixing module-scope variables and return "
                                 "types for shader outputs";
     }

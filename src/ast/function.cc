@@ -27,7 +27,7 @@ Function::Function(ProgramID program_id,
                    const Source& source,
                    Symbol symbol,
                    VariableList params,
-                   typ::Type return_type,
+                   ast::Type* return_type,
                    BlockStatement* body,
                    DecorationList decorations,
                    DecorationList return_type_decorations)
@@ -45,7 +45,7 @@ Function::Function(ProgramID program_id,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(param, program_id);
   }
   TINT_ASSERT(symbol_.IsValid());
-  TINT_ASSERT(return_type_.ast || return_type_.sem);
+  TINT_ASSERT(return_type_);
   for (auto* deco : decorations_) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(deco, program_id);
   }
@@ -81,7 +81,7 @@ Function* Function::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto sym = ctx->Clone(symbol());
   auto p = ctx->Clone(params_);
-  auto ret = ctx->Clone(return_type_);
+  auto* ret = ctx->Clone(return_type_);
   auto* b = ctx->Clone(body_);
   auto decos = ctx->Clone(decorations_);
   auto ret_decos = ctx->Clone(return_type_decorations_);
@@ -92,9 +92,7 @@ void Function::to_str(const sem::Info& sem,
                       std::ostream& out,
                       size_t indent) const {
   make_indent(out, indent);
-  out << "Function " << symbol_.to_str() << " -> "
-      << (return_type_.ast ? return_type_.ast->type_name()
-                           : return_type_.sem->type_name())
+  out << "Function " << symbol_.to_str() << " -> " << return_type_->type_name()
       << std::endl;
 
   for (auto* deco : decorations()) {
@@ -134,7 +132,7 @@ std::string Function::type_name() const {
   for (auto* param : params_) {
     // No need for the sem::Variable here, functions params must have a
     // type
-    out << param->declared_type()->type_name();
+    out << param->type()->type_name();
   }
 
   return out.str();

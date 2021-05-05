@@ -81,6 +81,8 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
   auto get_buffer_size_intrinsic = [&](sem::StructType* buffer_type) {
     return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
       auto name = ctx.dst->Sym();
+      auto* buffer_typename =
+          ctx.dst->ty.type_name(ctx.Clone(buffer_type->impl()->name()));
       auto* func = ctx.dst->create<ast::Function>(
           name,
           ast::VariableList{
@@ -88,7 +90,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
               // in order for HLSL to emit this as a ByteAddressBuffer.
               ctx.dst->create<ast::Variable>(
                   ctx.dst->Sym("buffer"), ast::StorageClass::kStorage,
-                  ctx.Clone(buffer_type), true, nullptr, ast::DecorationList{}),
+                  buffer_typename, true, nullptr, ast::DecorationList{}),
               ctx.dst->Param("result",
                              ctx.dst->ty.pointer(ctx.dst->ty.u32(),
                                                  ast::StorageClass::kFunction)),
@@ -98,7 +100,8 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
               ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID()),
           },
           ast::DecorationList{});
-      ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), buffer_type, func);
+      ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), buffer_type->impl(),
+                      func);
       return name;
     });
   };

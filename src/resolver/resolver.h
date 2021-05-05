@@ -73,11 +73,11 @@ class Resolver {
 
   /// @param type the given type
   /// @returns true if the given type is storable
-  static bool IsStorable(const sem::Type* type);
+  bool IsStorable(const sem::Type* type);
 
   /// @param type the given type
   /// @returns true if the given type is host-shareable
-  static bool IsHostShareable(const sem::Type* type);
+  bool IsHostShareable(const sem::Type* type);
 
   /// @param lhs the assignment store type (non-pointer)
   /// @param rhs the assignment source type (non-pointer or pointer with
@@ -148,6 +148,7 @@ class Resolver {
     StructInfo();
     ~StructInfo();
 
+    sem::StructType const* type = nullptr;
     std::vector<const sem::StructMember*> members;
     uint32_t align = 0;
     uint32_t size = 0;
@@ -253,16 +254,14 @@ class Resolver {
   bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);
   bool ValidateGlobalVariable(const VariableInfo* var);
   bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Matrix* matrix_type,
-                                 const ast::ExpressionList& values);
+                                 const sem::Matrix* matrix_type);
   bool ValidateParameter(const ast::Variable* param);
   bool ValidateReturn(const ast::ReturnStatement* ret);
-  bool ValidateStructure(const sem::StructType* st);
+  bool ValidateStructure(const StructInfo* st);
   bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateVariable(const ast::Variable* param);
   bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
-                                 const sem::Vector* vec_type,
-                                 const ast::ExpressionList& values);
+                                 const sem::Vector* vec_type);
 
   /// @returns the sem::Type for the ast::Type `ty`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
@@ -284,9 +283,12 @@ class Resolver {
   /// @returns the VariableInfo for the variable `var`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
   /// @param var the variable to create or return the `VariableInfo` for
-  /// @param type optional type of `var` to use instead of
-  /// `var->declared_type()`. For type inference.
-  VariableInfo* Variable(ast::Variable* var, const sem::Type* type = nullptr);
+  /// @param type optional type of `var` to use instead of `var->type()`.
+  /// @param type_name optional type name of `var` to use instead of
+  /// `var->type()->FriendlyName()`.
+  VariableInfo* Variable(ast::Variable* var,
+                         const sem::Type* type = nullptr,
+                         std::string type_name = "");
 
   /// Records the storage class usage for the given type, and any transient
   /// dependencies of the type. Validates that the type can be used for the
@@ -304,7 +306,7 @@ class Resolver {
   /// @param size the output default size in bytes for the type `ty`
   /// @param source the Source of the variable declaration of type `ty`
   /// @returns true on success, false on error
-  bool DefaultAlignAndSize(sem::Type* ty,
+  bool DefaultAlignAndSize(const sem::Type* ty,
                            uint32_t& align,
                            uint32_t& size,
                            const Source& source);
@@ -325,7 +327,7 @@ class Resolver {
   /// assigns this semantic node to the expression `expr`.
   /// @param expr the expression
   /// @param type the resolved type
-  void SetType(ast::Expression* expr, const sem::Type* type);
+  void SetType(ast::Expression* expr, typ::Type type);
 
   /// Creates a sem::Expression node with the resolved type `type`, the declared
   /// type name `type_name` and assigns this semantic node to the expression
@@ -334,7 +336,7 @@ class Resolver {
   /// @param type the resolved type
   /// @param type_name the declared type name
   void SetType(ast::Expression* expr,
-               const sem::Type* type,
+               typ::Type type,
                const std::string& type_name);
 
   /// Constructs a new BlockInfo with the given type and with #current_block_ as
@@ -369,6 +371,7 @@ class Resolver {
   std::unordered_map<const ast::Expression*, ExpressionInfo> expr_info_;
   std::unordered_map<const sem::StructType*, StructInfo*> struct_info_;
   std::unordered_map<const sem::Type*, const sem::Type*> type_to_canonical_;
+  std::unordered_map<Symbol, const sem::Type*> named_types_;
   std::unordered_set<const ast::Node*> marked_;
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;

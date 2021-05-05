@@ -409,7 +409,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
   VariableConst{
     x_11
     none
-    __struct_S
+    __type_name_S
     {
       TypeConstructor[not set]{
         __type_name_S

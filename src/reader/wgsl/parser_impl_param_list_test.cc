@@ -22,15 +22,13 @@ namespace {
 TEST_F(ParserImplTest, ParamList_Single) {
   auto p = parser("a : i32");
 
-  auto* i32 = p->builder().create<sem::I32>();
-
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
   EXPECT_EQ(e.value.size(), 1u);
 
   EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("a"));
-  EXPECT_EQ(e.value[0]->declared_type(), i32);
+  EXPECT_TRUE(e.value[0]->type()->Is<ast::I32>());
   EXPECT_TRUE(e.value[0]->is_const());
 
   ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
@@ -42,17 +40,13 @@ TEST_F(ParserImplTest, ParamList_Single) {
 TEST_F(ParserImplTest, ParamList_Multiple) {
   auto p = parser("a : i32, b: f32, c: vec2<f32>");
 
-  auto* i32 = p->builder().create<sem::I32>();
-  auto* f32 = p->builder().create<sem::F32>();
-  auto* vec2 = p->builder().create<sem::Vector>(f32, 2);
-
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
   EXPECT_EQ(e.value.size(), 3u);
 
   EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("a"));
-  EXPECT_EQ(e.value[0]->declared_type(), i32);
+  EXPECT_TRUE(e.value[0]->type()->Is<ast::I32>());
   EXPECT_TRUE(e.value[0]->is_const());
 
   ASSERT_EQ(e.value[0]->source().range.begin.line, 1u);
@@ -61,7 +55,7 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_EQ(e.value[0]->source().range.end.column, 2u);
 
   EXPECT_EQ(e.value[1]->symbol(), p->builder().Symbols().Get("b"));
-  EXPECT_EQ(e.value[1]->declared_type(), f32);
+  EXPECT_TRUE(e.value[1]->type()->Is<ast::F32>());
   EXPECT_TRUE(e.value[1]->is_const());
 
   ASSERT_EQ(e.value[1]->source().range.begin.line, 1u);
@@ -70,7 +64,9 @@ TEST_F(ParserImplTest, ParamList_Multiple) {
   ASSERT_EQ(e.value[1]->source().range.end.column, 11u);
 
   EXPECT_EQ(e.value[2]->symbol(), p->builder().Symbols().Get("c"));
-  EXPECT_EQ(e.value[2]->declared_type(), vec2);
+  ASSERT_TRUE(e.value[2]->type()->Is<ast::Vector>());
+  ASSERT_TRUE(e.value[2]->type()->As<ast::Vector>()->type()->Is<ast::F32>());
+  EXPECT_EQ(e.value[2]->type()->As<ast::Vector>()->size(), 2u);
   EXPECT_TRUE(e.value[2]->is_const());
 
   ASSERT_EQ(e.value[2]->source().range.begin.line, 1u);
@@ -100,16 +96,15 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
       "[[builtin(position)]] coord : vec4<f32>, "
       "[[location(1)]] loc1 : f32");
 
-  auto* f32 = p->builder().create<sem::F32>();
-  auto* vec4 = p->builder().create<sem::Vector>(f32, 4);
-
   auto e = p->expect_param_list();
   ASSERT_FALSE(p->has_error()) << p->error();
   ASSERT_FALSE(e.errored);
   ASSERT_EQ(e.value.size(), 2u);
 
   EXPECT_EQ(e.value[0]->symbol(), p->builder().Symbols().Get("coord"));
-  EXPECT_EQ(e.value[0]->declared_type(), vec4);
+  ASSERT_TRUE(e.value[0]->type()->Is<ast::Vector>());
+  EXPECT_TRUE(e.value[0]->type()->As<ast::Vector>()->type()->Is<ast::F32>());
+  EXPECT_EQ(e.value[0]->type()->As<ast::Vector>()->size(), 4u);
   EXPECT_TRUE(e.value[0]->is_const());
   auto decos0 = e.value[0]->decorations();
   ASSERT_EQ(decos0.size(), 1u);
@@ -123,7 +118,7 @@ TEST_F(ParserImplTest, ParamList_Decorations) {
   ASSERT_EQ(e.value[0]->source().range.end.column, 28u);
 
   EXPECT_EQ(e.value[1]->symbol(), p->builder().Symbols().Get("loc1"));
-  EXPECT_EQ(e.value[1]->declared_type(), f32);
+  EXPECT_TRUE(e.value[1]->type()->Is<ast::F32>());
   EXPECT_TRUE(e.value[1]->is_const());
   auto decos1 = e.value[1]->decorations();
   ASSERT_EQ(decos1.size(), 1u);

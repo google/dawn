@@ -194,6 +194,8 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       continue;
     }
 
+    auto* sem = program_->Sem().Get(func);
+
     EntryPoint entry_point;
     entry_point.name = program_->Symbols().NameFor(func->symbol());
     entry_point.remapped_name = program_->Symbols().NameFor(func->symbol());
@@ -201,20 +203,21 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
              entry_point.workgroup_size_z) = func->workgroup_size();
 
-    for (auto* param : func->params()) {
-      AddEntryPointInOutVariables(program_->Symbols().NameFor(param->symbol()),
-                                  param->declared_type(), param->decorations(),
-                                  entry_point.input_variables);
+    for (auto* param : sem->Parameters()) {
+      AddEntryPointInOutVariables(
+          program_->Symbols().NameFor(param->Declaration()->symbol()),
+          param->Type(), param->Declaration()->decorations(),
+          entry_point.input_variables);
     }
 
-    if (!func->return_type()->Is<sem::Void>()) {
-      AddEntryPointInOutVariables("<retval>", func->return_type(),
+    if (!sem->ReturnType()->Is<sem::Void>()) {
+      AddEntryPointInOutVariables("<retval>", sem->ReturnType(),
                                   func->return_type_decorations(),
                                   entry_point.output_variables);
     }
 
     // TODO(crbug.com/tint/697): Remove this.
-    for (auto* var : program_->Sem().Get(func)->ReferencedModuleVariables()) {
+    for (auto* var : sem->ReferencedModuleVariables()) {
       auto* decl = var->Declaration();
 
       auto name = program_->Symbols().NameFor(decl->symbol());
@@ -553,10 +556,12 @@ void Inspector::AddEntryPointInOutVariables(
 
   if (auto* struct_ty = unwrapped_type->As<sem::StructType>()) {
     // Recurse into members.
-    for (auto* member : struct_ty->impl()->members()) {
+    auto* sem = program_->Sem().Get(struct_ty);
+    for (auto* member : sem->Members()) {
       AddEntryPointInOutVariables(
-          name + "." + program_->Symbols().NameFor(member->symbol()),
-          member->type(), member->decorations(), variables);
+          name + "." +
+              program_->Symbols().NameFor(member->Declaration()->symbol()),
+          member->Type(), member->Declaration()->decorations(), variables);
     }
     return;
   }

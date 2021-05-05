@@ -233,7 +233,8 @@ bool AssumesResultSignednessMatchesFirstOperand(GLSLstd450 extended_opcode) {
 // @param tp the type pair
 // @returns the unwrapped type pair
 typ::Type UnwrapIfNeeded(typ::Type tp) {
-  return typ::Type{tp.ast->UnwrapIfNeeded(), tp.sem->UnwrapIfNeeded()};
+  return typ::Type{tp.ast ? tp.ast->UnwrapIfNeeded() : nullptr,
+                   tp.sem ? tp.sem->UnwrapIfNeeded() : nullptr};
 }
 
 }  // namespace
@@ -1037,7 +1038,7 @@ typ::Type ParserImpl::ConvertType(
   return result;
 }
 
-void ParserImpl::AddConstructedType(Symbol name, typ::Type type) {
+void ParserImpl::AddConstructedType(Symbol name, ast::NamedType* type) {
   auto iter = constructed_types_.insert(name);
   if (iter.second) {
     builder_.AST().AddConstructedType(type);
@@ -1539,7 +1540,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   return {};
 }
 
-ast::Expression* ParserImpl::MakeNullValue(typ::Type type) {
+ast::Expression* ParserImpl::MakeNullValue(ast::Type* type) {
   // TODO(dneto): Use the no-operands constructor syntax when it becomes
   // available in Tint.
   // https://github.com/gpuweb/gpuweb/issues/685
@@ -1550,43 +1551,43 @@ ast::Expression* ParserImpl::MakeNullValue(typ::Type type) {
     return nullptr;
   }
 
-  auto original_type = type;
+  auto* original_type = type;
   type = UnwrapIfNeeded(type);
 
-  if (type.ast->Is<ast::Bool>()) {
+  if (type->Is<ast::Bool>()) {
     return create<ast::ScalarConstructorExpression>(
         Source{}, create<ast::BoolLiteral>(Source{}, false));
   }
-  if (type.ast->Is<ast::U32>()) {
+  if (type->Is<ast::U32>()) {
     return create<ast::ScalarConstructorExpression>(
         Source{}, create<ast::UintLiteral>(Source{}, 0u));
   }
-  if (type.ast->Is<ast::I32>()) {
+  if (type->Is<ast::I32>()) {
     return create<ast::ScalarConstructorExpression>(
         Source{}, create<ast::SintLiteral>(Source{}, 0));
   }
-  if (type.ast->Is<ast::F32>()) {
+  if (type->Is<ast::F32>()) {
     return create<ast::ScalarConstructorExpression>(
         Source{}, create<ast::FloatLiteral>(Source{}, 0.0f));
   }
-  if (type.ast->Is<ast::TypeName>()) {
+  if (type->Is<ast::TypeName>()) {
     // TODO(amaiorano): No type constructor for TypeName (yet?)
     ast::ExpressionList ast_components;
     return create<ast::TypeConstructorExpression>(Source{}, original_type,
                                                   std::move(ast_components));
   }
-  if (auto vec_ty = typ::As<typ::Vector>(type)) {
+  if (auto* vec_ty = type->As<ast::Vector>()) {
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < vec_ty->size(); ++i) {
-      ast_components.emplace_back(MakeNullValue(typ::Call_type(vec_ty)));
+      ast_components.emplace_back(MakeNullValue(vec_ty->type()));
     }
     return create<ast::TypeConstructorExpression>(
         Source{}, builder_.ty.MaybeCreateTypename(type),
         std::move(ast_components));
   }
-  if (auto mat_ty = typ::As<typ::Matrix>(type)) {
+  if (auto* mat_ty = type->As<ast::Matrix>()) {
     // Matrix components are columns
-    auto column_ty = builder_.ty.vec(typ::Call_type(mat_ty), mat_ty->rows());
+    auto column_ty = builder_.ty.vec(mat_ty->type(), mat_ty->rows());
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < mat_ty->columns(); ++i) {
       ast_components.emplace_back(MakeNullValue(column_ty));
@@ -1595,18 +1596,18 @@ ast::Expression* ParserImpl::MakeNullValue(typ::Type type) {
         Source{}, builder_.ty.MaybeCreateTypename(type),
         std::move(ast_components));
   }
-  if (auto arr_ty = typ::As<typ::Array>(type)) {
+  if (auto* arr_ty = type->As<ast::Array>()) {
     ast::ExpressionList ast_components;
     for (size_t i = 0; i < arr_ty->size(); ++i) {
-      ast_components.emplace_back(MakeNullValue(typ::Call_type(arr_ty)));
+      ast_components.emplace_back(MakeNullValue(arr_ty->type()));
     }
     return create<ast::TypeConstructorExpression>(
         Source{}, builder_.ty.MaybeCreateTypename(original_type),
         std::move(ast_components));
   }
-  if (auto struct_ty = typ::As<typ::Struct>(type)) {
+  if (auto* struct_ty = type->As<ast::Struct>()) {
     ast::ExpressionList ast_components;
-    for (auto* member : struct_ty.ast->members()) {
+    for (auto* member : struct_ty->members()) {
       ast_components.emplace_back(MakeNullValue(member->type()));
     }
     return create<ast::TypeConstructorExpression>(

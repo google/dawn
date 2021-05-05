@@ -23,7 +23,6 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
   auto p = parser("{a : i32;}");
 
   auto& builder = p->builder();
-  auto* i32 = builder.create<sem::I32>();
 
   auto m = p->expect_struct_body_decl();
   ASSERT_FALSE(p->has_error());
@@ -32,7 +31,7 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
 
   const auto* mem = m.value[0];
   EXPECT_EQ(mem->symbol(), builder.Symbols().Get("a"));
-  EXPECT_EQ(mem->type(), i32);
+  EXPECT_TRUE(mem->type()->Is<ast::I32>());
   EXPECT_EQ(mem->decorations().size(), 0u);
 }
 

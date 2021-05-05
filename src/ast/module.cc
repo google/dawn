@@ -29,14 +29,14 @@ Module::Module(ProgramID program_id, const Source& source)
 
 Module::Module(ProgramID program_id,
                const Source& source,
-               std::vector<Cloneable*> global_decls)
+               std::vector<ast::Node*> global_decls)
     : Base(program_id, source), global_declarations_(std::move(global_decls)) {
   for (auto* decl : global_declarations_) {
     if (decl == nullptr) {
       continue;
     }
 
-    if (auto* ty = decl->As<sem::Type>()) {
+    if (auto* ty = decl->As<ast::NamedType>()) {
       constructed_types_.push_back(ty);
     } else if (auto* func = decl->As<Function>()) {
       functions_.push_back(func);
@@ -52,14 +52,32 @@ Module::Module(ProgramID program_id,
 Module::~Module() = default;
 
 const ast::NamedType* Module::LookupType(Symbol name) const {
-  for (auto ct : ConstructedTypes()) {
-    if (auto* ty = ct.ast->As<ast::NamedType>()) {
-      if (ty->name() == name) {
-        return ty;
-      }
+  for (auto* ty : ConstructedTypes()) {
+    if (ty->name() == name) {
+      return ty;
     }
   }
   return nullptr;
+}
+
+void Module::AddGlobalVariable(ast::Variable* var) {
+  TINT_ASSERT(var);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(var, program_id());
+  global_variables_.push_back(var);
+  global_declarations_.push_back(var);
+}
+
+void Module::AddConstructedType(ast::NamedType* type) {
+  TINT_ASSERT(type);
+  constructed_types_.push_back(type);
+  global_declarations_.push_back(type);
+}
+
+void Module::AddFunction(ast::Function* func) {
+  TINT_ASSERT(func);
+  TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(func, program_id());
+  functions_.push_back(func);
+  global_declarations_.push_back(func);
 }
 
 Module* Module::Clone(CloneContext* ctx) const {
@@ -74,7 +92,7 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
       TINT_ICE(ctx->dst->Diagnostics()) << "src global declaration was nullptr";
       continue;
     }
-    if (auto* ty = decl->As<sem::Type>()) {
+    if (auto* ty = decl->As<ast::NamedType>()) {
       AddConstructedType(ty);
     } else if (auto* func = decl->As<Function>()) {
       AddFunction(func);
@@ -92,16 +110,16 @@ void Module::to_str(const sem::Info& sem,
   make_indent(out, indent);
   out << "Module{" << std::endl;
   indent += 2;
-  for (auto const ty : constructed_types_) {
+  for (auto* ty : constructed_types_) {
     make_indent(out, indent);
-    if (auto* alias = ty->As<sem::Alias>()) {
+    if (auto* alias = ty->As<ast::Alias>()) {
       out << alias->symbol().to_str() << " -> " << alias->type()->type_name()
           << std::endl;
-      if (auto* str = alias->type()->As<sem::StructType>()) {
-        str->impl()->to_str(sem, out, indent);
+      if (auto* str = alias->type()->As<ast::Struct>()) {
+        str->to_str(sem, out, indent);
       }
-    } else if (auto* str = ty->As<sem::StructType>()) {
-      str->impl()->to_str(sem, out, indent);
+    } else if (auto* str = ty->As<ast::Struct>()) {
+      str->to_str(sem, out, indent);
     }
   }
   for (auto* var : global_variables_) {

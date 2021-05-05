@@ -1060,7 +1060,7 @@ class ProgramBuilder {
   /// @return an `ast::TypeConstructorExpression` of `type` constructed with the
   /// values `args`.
   template <typename... ARGS>
-  ast::TypeConstructorExpression* Construct(typ::Type type, ARGS&&... args) {
+  ast::TypeConstructorExpression* Construct(ast::Type* type, ARGS&&... args) {
     type = ty.MaybeCreateTypename(type);
     return create<ast::TypeConstructorExpression>(
         type, ExprList(std::forward<ARGS>(args)...));
@@ -1074,7 +1074,7 @@ class ProgramBuilder {
   /// @param elem_value the initial or element value (for vec and mat) to
   /// construct with
   /// @return the constructor expression
-  ast::ConstructorExpression* ConstructValueFilledWith(typ::Type type,
+  ast::ConstructorExpression* ConstructValueFilledWith(const ast::Type* type,
                                                        int elem_value = 0);
 
   /// @param args the arguments for the vector constructor
@@ -1187,7 +1187,7 @@ class ProgramBuilder {
   /// @return an `ast::TypeConstructorExpression` of an array with element type
   /// `subtype`, constructed with the values `args`.
   template <typename... ARGS>
-  ast::TypeConstructorExpression* array(typ::Type subtype,
+  ast::TypeConstructorExpression* array(ast::Type* subtype,
                                         uint32_t n,
                                         ARGS&&... args) {
     return Construct(ty.array(subtype, n), std::forward<ARGS>(args)...);
@@ -1201,7 +1201,7 @@ class ProgramBuilder {
   /// @returns a `ast::Variable` with the given name, storage and type
   template <typename NAME>
   ast::Variable* Var(NAME&& name,
-                     typ::Type type,
+                     ast::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
@@ -1220,7 +1220,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Var(const Source& source,
                      NAME&& name,
-                     typ::Type type,
+                     ast::Type* type,
                      ast::StorageClass storage,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
@@ -1236,7 +1236,7 @@ class ProgramBuilder {
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Const(NAME&& name,
-                       typ::Type type,
+                       ast::Type* type,
                        ast::Expression* constructor = nullptr,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
@@ -1254,7 +1254,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Const(const Source& source,
                        NAME&& name,
-                       typ::Type type,
+                       ast::Type* type,
                        ast::Expression* constructor = nullptr,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
@@ -1269,7 +1269,7 @@ class ProgramBuilder {
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Param(NAME&& name,
-                       typ::Type type,
+                       ast::Type* type,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(Sym(std::forward<NAME>(name)),
@@ -1285,7 +1285,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Param(const Source& source,
                        NAME&& name,
-                       typ::Type type,
+                       ast::Type* type,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
@@ -1302,7 +1302,7 @@ class ProgramBuilder {
   /// global variable with the ast::Module.
   template <typename NAME>
   ast::Variable* Global(NAME&& name,
-                        typ::Type type,
+                        ast::Type* type,
                         ast::StorageClass storage,
                         ast::Expression* constructor = nullptr,
                         ast::DecorationList decorations = {}) {
@@ -1323,7 +1323,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Global(const Source& source,
                         NAME&& name,
-                        typ::Type type,
+                        ast::Type* type,
                         ast::StorageClass storage,
                         ast::Expression* constructor = nullptr,
                         ast::DecorationList decorations = {}) {
@@ -1476,7 +1476,7 @@ class ProgramBuilder {
   ast::Function* Func(const Source& source,
                       NAME&& name,
                       ast::VariableList params,
-                      typ::Type type,
+                      ast::Type* type,
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
@@ -1501,7 +1501,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Function* Func(NAME&& name,
                       ast::VariableList params,
-                      typ::Type type,
+                      ast::Type* type,
                       ast::StatementList body,
                       ast::DecorationList decorations = {},
                       ast::DecorationList return_type_decorations = {}) {
@@ -1588,7 +1588,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::StructMember* Member(const Source& source,
                             NAME&& name,
-                            typ::Type type,
+                            ast::Type* type,
                             ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
     return create<ast::StructMember>(source, Sym(std::forward<NAME>(name)),
@@ -1602,7 +1602,7 @@ class ProgramBuilder {
   /// @returns the struct member pointer
   template <typename NAME>
   ast::StructMember* Member(NAME&& name,
-                            typ::Type type,
+                            ast::Type* type,
                             ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
     return create<ast::StructMember>(source_, Sym(std::forward<NAME>(name)),
@@ -1615,7 +1615,7 @@ class ProgramBuilder {
   /// @param type the struct member type
   /// @returns the struct member pointer
   template <typename NAME>
-  ast::StructMember* Member(uint32_t offset, NAME&& name, typ::Type type) {
+  ast::StructMember* Member(uint32_t offset, NAME&& name, ast::Type* type) {
     type = ty.MaybeCreateTypename(type);
     return create<ast::StructMember>(
         source_, Sym(std::forward<NAME>(name)), type,

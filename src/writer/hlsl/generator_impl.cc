@@ -119,8 +119,11 @@ bool GeneratorImpl::Generate(std::ostream& out) {
     register_global(global);
   }
 
-  for (auto const ty : builder_.AST().ConstructedTypes()) {
-    if (!EmitConstructedType(out, ty)) {
+  for (auto* const ty : builder_.AST().ConstructedTypes()) {
+    if (ty->Is<ast::Alias>()) {
+      continue;
+    }
+    if (!EmitConstructedType(out, TypeOf(ty))) {
       return false;
     }
   }
@@ -2012,7 +2015,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   bool has_outdata = outdata != ep_sym_to_out_data_.end();
   if (has_outdata) {
     // TODO(crbug.com/tint/697): Remove this.
-    if (!func->return_type()->Is<sem::Void>()) {
+    if (!func->return_type()->Is<ast::Void>()) {
       TINT_ICE(diagnostics_) << "Mixing module-scope variables and return "
                                 "types for shader outputs";
     }

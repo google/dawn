@@ -28,12 +28,11 @@ namespace sem {
 
 namespace {
 
-ParameterList GetParameters(ast::Function* ast) {
+ParameterList GetParameters(const std::vector<const Variable*>& params) {
   ParameterList parameters;
-  parameters.reserve(ast->params().size());
-  for (auto* param : ast->params()) {
-    parameters.emplace_back(
-        Parameter{param->declared_type(), Parameter::Usage::kNone});
+  parameters.reserve(params.size());
+  for (auto* param : params) {
+    parameters.emplace_back(Parameter{param->Type(), Parameter::Usage::kNone});
   }
   return parameters;
 }
@@ -47,7 +46,7 @@ Function::Function(ast::Function* declaration,
                    std::vector<const Variable*> local_referenced_module_vars,
                    std::vector<const ast::ReturnStatement*> return_statements,
                    std::vector<Symbol> ancestor_entry_points)
-    : Base(return_type, GetParameters(declaration)),
+    : Base(return_type, GetParameters(parameters)),
       declaration_(declaration),
       parameters_(std::move(parameters)),
       referenced_module_vars_(std::move(referenced_module_vars)),

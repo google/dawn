@@ -83,10 +83,6 @@ bool GeneratorImpl::Generate(const ast::Function* entry) {
       if (!EmitConstructedType(ty)) {
         return false;
       }
-    } else if (auto* sem_ty = decl->As<sem::Type>()) {
-      if (!EmitConstructedType(sem_ty)) {
-        return false;
-      }
     } else if (auto* func = decl->As<ast::Function>()) {
       if (entry && func != entry) {
         // Skip functions that are not reachable by the target entry point.
@@ -363,8 +359,7 @@ bool GeneratorImpl::EmitFunction(ast::Function* func) {
 
   out_ << ")";
 
-  if (!(Is<ast::Void>(func->return_type().ast) ||
-        Is<sem::Void>(func->return_type().sem)) ||
+  if (!func->return_type()->Is<ast::Void>() ||
       !func->return_type_decorations().empty()) {
     out_ << " -> ";
 
@@ -776,9 +771,9 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
 
   out_ << " " << program_->Symbols().NameFor(var->symbol());
 
-  if (var->type().ast || var->type().sem) {
+  if (auto* ty = var->type()) {
     out_ << " : ";
-    if (!EmitType(var->type())) {
+    if (!EmitType(ty)) {
       return false;
     }
   }

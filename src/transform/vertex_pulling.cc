@@ -184,7 +184,7 @@ struct State {
           // identifier strings instead of pointers, so we don't need to update
           // any other place in the AST.
           auto name = ctx.Clone(v->symbol());
-          auto* replacement = ctx.dst->Var(name, ctx.Clone(v->declared_type()),
+          auto* replacement = ctx.dst->Var(name, ctx.Clone(v->type()),
                                            ast::StorageClass::kPrivate);
           location_to_expr[location] = [this, name]() {
             return ctx.dst->Expr(name);
@@ -212,9 +212,9 @@ struct State {
         {
             ctx.dst->create<ast::StructBlockDecoration>(),
         });
-    auto access =
-        ctx.dst->ty.access(ast::AccessControl::kReadOnly, struct_type);
     for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
+      auto access =
+          ctx.dst->ty.access(ast::AccessControl::kReadOnly, struct_type);
       // The decorated variable with struct type
       ctx.dst->Global(
           GetVertexBufferName(i), access, ast::StorageClass::kStorage, nullptr,
@@ -369,7 +369,7 @@ struct State {
   /// @param count how many elements the vector has
   ast::Expression* AccessVec(uint32_t buffer,
                              uint32_t element_stride,
-                             sem::Type* base_type,
+                             ast::Type* base_type,
                              VertexFormat base_format,
                              uint32_t count) {
     ast::ExpressionList expr_list;
@@ -381,7 +381,7 @@ struct State {
     }
 
     return ctx.dst->create<ast::TypeConstructorExpression>(
-        ctx.dst->create<sem::Vector>(base_type, count), std::move(expr_list));
+        ctx.dst->create<ast::Vector>(base_type, count), std::move(expr_list));
   }
 
   /// Process a non-struct entry point parameter.
@@ -394,7 +394,7 @@ struct State {
             ast::GetDecoration<ast::LocationDecoration>(param->decorations())) {
       // Create a function-scope variable to replace the parameter.
       auto func_var_sym = ctx.Clone(param->symbol());
-      auto* func_var_type = ctx.Clone(param->declared_type());
+      auto* func_var_type = ctx.Clone(param->type());
       auto* func_var = ctx.dst->Var(func_var_sym, func_var_type,
                                     ast::StorageClass::kFunction);
       ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
@@ -428,18 +428,16 @@ struct State {
   /// instance_index builtins.
   /// @param func the entry point function
   /// @param param the parameter to process
-  void ProcessStructParameter(ast::Function* func, ast::Variable* param) {
-    auto* struct_ty = param->declared_type()->As<sem::StructType>();
-    if (!struct_ty) {
-      TINT_ICE(ctx.dst->Diagnostics()) << "Invalid struct parameter";
-    }
-
+  /// @param struct_ty the structure type
+  void ProcessStructParameter(ast::Function* func,
+                              ast::Variable* param,
+                              ast::Struct* struct_ty) {
     auto param_sym = ctx.Clone(param->symbol());
 
     // Process the struct members.
     bool has_locations = false;
     ast::StructMemberList members_to_clone;
-    for (auto* member : struct_ty->impl()->members()) {
+    for (auto* member : struct_ty->members()) {
       auto member_sym = ctx.Clone(member->symbol());
       std::function<ast::Expression*()> member_expr = [this, param_sym,
                                                        member_sym]() {
@@ -472,7 +470,7 @@ struct State {
     }
 
     // Create a function-scope variable to replace the parameter.
-    auto* func_var = ctx.dst->Var(param_sym, ctx.Clone(param->declared_type()),
+    auto* func_var = ctx.dst->Var(param_sym, ctx.Clone(param->type()),
                                   ast::StorageClass::kFunction);
     ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
                      ctx.dst->Decl(func_var));
@@ -482,7 +480,7 @@ struct State {
       ast::StructMemberList new_members;
       for (auto* member : members_to_clone) {
         auto member_sym = ctx.Clone(member->symbol());
-        auto member_type = ctx.Clone(member->type());
+        auto* member_type = ctx.Clone(member->type());
         auto member_decos = ctx.Clone(member->decorations());
         new_members.push_back(
             ctx.dst->Member(member_sym, member_type, std::move(member_decos)));
@@ -514,8 +512,8 @@ struct State {
     // Process entry point parameters.
     for (auto* param : func->params()) {
       auto* sem = ctx.src->Sem().Get(param);
-      if (sem->Type()->Is<sem::StructType>()) {
-        ProcessStructParameter(func, param);
+      if (auto* str = sem->Type()->As<sem::StructType>()) {
+        ProcessStructParameter(func, param, str->impl());
       } else {
         ProcessNonStructParameter(func, param);
       }
@@ -553,7 +551,7 @@ struct State {
 
     // Rewrite the function header with the new parameters.
     auto func_sym = ctx.Clone(func->symbol());
-    auto ret_type = ctx.Clone(func->return_type());
+    auto* ret_type = ctx.Clone(func->return_type());
     auto* body = ctx.Clone(func->body());
     auto decos = ctx.Clone(func->decorations());
     auto ret_decos = ctx.Clone(func->return_type_decorations());

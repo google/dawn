@@ -28,8 +28,8 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl) {
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* t = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(t->type()->Is<sem::Vector>());
-  EXPECT_EQ(t->type()->As<sem::Vector>()->size(), 2u);
+  ASSERT_TRUE(t->type()->Is<ast::Vector>());
+  EXPECT_EQ(t->type()->As<ast::Vector>()->size(), 2u);
 
   ASSERT_EQ(t->values().size(), 2u);
   auto& v = t->values();
@@ -56,8 +56,8 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_Empty) {
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* t = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(t->type()->Is<sem::Vector>());
-  EXPECT_EQ(t->type()->As<sem::Vector>()->size(), 2u);
+  ASSERT_TRUE(t->type()->Is<ast::Vector>());
+  EXPECT_EQ(t->type()->As<ast::Vector>()->size(), 2u);
 
   ASSERT_EQ(t->values().size(), 0u);
 }
@@ -71,8 +71,8 @@ TEST_F(ParserImplTest, ConstExpr_TypeDecl_TrailingComma) {
   ASSERT_TRUE(e->Is<ast::TypeConstructorExpression>());
 
   auto* t = e->As<ast::TypeConstructorExpression>();
-  ASSERT_TRUE(t->type()->Is<sem::Vector>());
-  EXPECT_EQ(t->type()->As<sem::Vector>()->size(), 2u);
+  ASSERT_TRUE(t->type()->Is<ast::Vector>());
+  EXPECT_EQ(t->type()->As<ast::Vector>()->size(), 2u);
 
   ASSERT_EQ(t->values().size(), 2u);
   ASSERT_TRUE(t->values()[0]->Is<ast::ScalarConstructorExpression>());

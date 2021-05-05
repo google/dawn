@@ -26,7 +26,7 @@ TEST_F(TypeConstructorExpressionTest, Creation) {
   expr.push_back(Expr("expr"));
 
   auto* t = create<TypeConstructorExpression>(ty.f32(), expr);
-  EXPECT_EQ(t->type(), ty.f32());
+  EXPECT_TRUE(t->type()->Is<ast::F32>());
   ASSERT_EQ(t->values().size(), 1u);
   EXPECT_EQ(t->values()[0], expr[0]);
 }

@@ -30,14 +30,14 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
   /// @param expr the expr
   BitcastExpression(ProgramID program_id,
                     const Source& source,
-                    typ::Type type,
+                    ast::Type* type,
                     Expression* expr);
   /// Move constructor
   BitcastExpression(BitcastExpression&&);
   ~BitcastExpression() override;
 
   /// @returns the left side expression
-  typ::Type type() const { return type_; }
+  ast::Type* type() const { return type_; }
   /// @returns the expression
   Expression* expr() const { return expr_; }
 
@@ -58,7 +58,7 @@ class BitcastExpression : public Castable<BitcastExpression, Expression> {
  private:
   BitcastExpression(const BitcastExpression&) = delete;
 
-  typ::Type const type_;
+  ast::Type* const type_;
   Expression* const expr_;
 };
 

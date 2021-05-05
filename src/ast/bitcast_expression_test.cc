@@ -27,7 +27,7 @@ TEST_F(BitcastExpressionTest, Create) {
   auto* expr = Expr("expr");
 
   auto* exp = create<BitcastExpression>(ty.f32(), expr);
-  ASSERT_EQ(exp->type(), ty.f32());
+  EXPECT_TRUE(exp->type()->Is<ast::F32>());
   ASSERT_EQ(exp->expr(), expr);
 }
 

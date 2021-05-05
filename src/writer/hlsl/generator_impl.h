@@ -381,7 +381,7 @@ class GeneratorImpl : public TextGenerator {
 
   /// @returns the resolved type of the ast::Type `type`
   /// @param type the type
-  const sem::Type* TypeOf(ast::Type* type) const {
+  const sem::Type* TypeOf(const ast::Type* type) const {
     return builder_.TypeOf(type);
   }
 

@@ -190,12 +190,12 @@ class CloneContext {
     return CheckedCast<T>(c);
   }
 
-  /// Clones the type pair
+  /// Clones the AST node of the type pair
   /// @param tp the type pair to clone
-  /// @return the cloned type pair
+  /// @return the cloned AST node wrapped in a type pair
   template <typename AST, typename SEM>
   typ::TypePair<AST, SEM> Clone(const typ::TypePair<AST, SEM>& tp) {
-    return Clone(const_cast<sem::Type*>(tp.sem));
+    return Clone(const_cast<ast::Type*>(tp.ast));
   }
 
   /// Clones the Source `s` into #dst

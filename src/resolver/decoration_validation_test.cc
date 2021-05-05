@@ -308,7 +308,7 @@ namespace ArrayStrideTests {
 namespace {
 
 struct Params {
-  create_type_func_ptr create_el_type;
+  create_ast_type_func_ptr create_el_type;
   uint32_t stride;
   bool should_pass;
 };
@@ -318,17 +318,16 @@ struct TestWithParams : ResolverTestWithParam<Params> {};
 using ArrayStrideTest = TestWithParams;
 TEST_P(ArrayStrideTest, All) {
   auto& params = GetParam();
-  auto el_ty = params.create_el_type(ty);
+  auto* el_ty = params.create_el_type(ty);
 
   std::stringstream ss;
-  ss << "el_ty: " << el_ty->FriendlyName(Symbols())
-     << ", stride: " << params.stride
+  ss << "el_ty: " << FriendlyName(el_ty) << ", stride: " << params.stride
      << ", should_pass: " << params.should_pass;
   SCOPED_TRACE(ss.str());
 
-  auto arr = ty.array(el_ty, 4, params.stride);
+  auto arr = ty.array(Source{{12, 34}}, el_ty, 4, params.stride);
 
-  Global(Source{{12, 34}}, "myarray", arr, ast::StorageClass::kInput);
+  Global("myarray", arr, ast::StorageClass::kInput);
 
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -366,58 +365,58 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(
         // Succeed because stride >= element size (while being multiple of
         // element alignment)
-        Params{ty_u32, default_u32.size, true},
-        Params{ty_i32, default_i32.size, true},
-        Params{ty_f32, default_f32.size, true},
-        Params{ty_vec2<f32>, default_vec2.size, true},
+        Params{ast_u32, default_u32.size, true},
+        Params{ast_i32, default_i32.size, true},
+        Params{ast_f32, default_f32.size, true},
+        Params{ast_vec2<f32>, default_vec2.size, true},
         // vec3's default size is not a multiple of its alignment
-        // Params{ty_vec3<f32>, default_vec3.size, true},
-        Params{ty_vec4<f32>, default_vec4.size, true},
-        Params{ty_mat2x2<f32>, default_mat2x2.size, true},
-        Params{ty_mat3x3<f32>, default_mat3x3.size, true},
-        Params{ty_mat4x4<f32>, default_mat4x4.size, true},
+        // Params{ast_vec3<f32>, default_vec3.size, true},
+        Params{ast_vec4<f32>, default_vec4.size, true},
+        Params{ast_mat2x2<f32>, default_mat2x2.size, true},
+        Params{ast_mat3x3<f32>, default_mat3x3.size, true},
+        Params{ast_mat4x4<f32>, default_mat4x4.size, true},
 
         // Fail because stride is < element size
-        Params{ty_u32, default_u32.size - 1, false},
-        Params{ty_i32, default_i32.size - 1, false},
-        Params{ty_f32, default_f32.size - 1, false},
-        Params{ty_vec2<f32>, default_vec2.size - 1, false},
-        Params{ty_vec3<f32>, default_vec3.size - 1, false},
-        Params{ty_vec4<f32>, default_vec4.size - 1, false},
-        Params{ty_mat2x2<f32>, default_mat2x2.size - 1, false},
-        Params{ty_mat3x3<f32>, default_mat3x3.size - 1, false},
-        Params{ty_mat4x4<f32>, default_mat4x4.size - 1, false},
+        Params{ast_u32, default_u32.size - 1, false},
+        Params{ast_i32, default_i32.size - 1, false},
+        Params{ast_f32, default_f32.size - 1, false},
+        Params{ast_vec2<f32>, default_vec2.size - 1, false},
+        Params{ast_vec3<f32>, default_vec3.size - 1, false},
+        Params{ast_vec4<f32>, default_vec4.size - 1, false},
+        Params{ast_mat2x2<f32>, default_mat2x2.size - 1, false},
+        Params{ast_mat3x3<f32>, default_mat3x3.size - 1, false},
+        Params{ast_mat4x4<f32>, default_mat4x4.size - 1, false},
 
         // Succeed because stride equals multiple of element alignment
-        Params{ty_u32, default_u32.align * 7, true},
-        Params{ty_i32, default_i32.align * 7, true},
-        Params{ty_f32, default_f32.align * 7, true},
-        Params{ty_vec2<f32>, default_vec2.align * 7, true},
-        Params{ty_vec3<f32>, default_vec3.align * 7, true},
-        Params{ty_vec4<f32>, default_vec4.align * 7, true},
-        Params{ty_mat2x2<f32>, default_mat2x2.align * 7, true},
-        Params{ty_mat3x3<f32>, default_mat3x3.align * 7, true},
-        Params{ty_mat4x4<f32>, default_mat4x4.align * 7, true},
+        Params{ast_u32, default_u32.align * 7, true},
+        Params{ast_i32, default_i32.align * 7, true},
+        Params{ast_f32, default_f32.align * 7, true},
+        Params{ast_vec2<f32>, default_vec2.align * 7, true},
+        Params{ast_vec3<f32>, default_vec3.align * 7, true},
+        Params{ast_vec4<f32>, default_vec4.align * 7, true},
+        Params{ast_mat2x2<f32>, default_mat2x2.align * 7, true},
+        Params{ast_mat3x3<f32>, default_mat3x3.align * 7, true},
+        Params{ast_mat4x4<f32>, default_mat4x4.align * 7, true},
 
         // Fail because stride is not multiple of element alignment
-        Params{ty_u32, (default_u32.align - 1) * 7, false},
-        Params{ty_i32, (default_i32.align - 1) * 7, false},
-        Params{ty_f32, (default_f32.align - 1) * 7, false},
-        Params{ty_vec2<f32>, (default_vec2.align - 1) * 7, false},
-        Params{ty_vec3<f32>, (default_vec3.align - 1) * 7, false},
-        Params{ty_vec4<f32>, (default_vec4.align - 1) * 7, false},
-        Params{ty_mat2x2<f32>, (default_mat2x2.align - 1) * 7, false},
-        Params{ty_mat3x3<f32>, (default_mat3x3.align - 1) * 7, false},
-        Params{ty_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}));
+        Params{ast_u32, (default_u32.align - 1) * 7, false},
+        Params{ast_i32, (default_i32.align - 1) * 7, false},
+        Params{ast_f32, (default_f32.align - 1) * 7, false},
+        Params{ast_vec2<f32>, (default_vec2.align - 1) * 7, false},
+        Params{ast_vec3<f32>, (default_vec3.align - 1) * 7, false},
+        Params{ast_vec4<f32>, (default_vec4.align - 1) * 7, false},
+        Params{ast_mat2x2<f32>, (default_mat2x2.align - 1) * 7, false},
+        Params{ast_mat3x3<f32>, (default_mat3x3.align - 1) * 7, false},
+        Params{ast_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}));
 
 TEST_F(ArrayStrideTest, MultipleDecorations) {
-  auto arr = ty.array(ty.i32(), 4,
+  auto arr = ty.array(Source{{12, 34}}, ty.i32(), 4,
                       {
                           create<ast::StrideDecoration>(4),
                           create<ast::StrideDecoration>(4),
                       });
 
-  Global(Source{{12, 34}}, "myarray", arr, ast::StorageClass::kInput);
+  Global("myarray", arr, ast::StorageClass::kInput);
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),

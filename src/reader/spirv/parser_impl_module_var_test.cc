@@ -1408,7 +1408,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
-    __struct_S
+    __type_name_S
     {
       TypeConstructor[not set]{
         __type_name_S
@@ -1437,7 +1437,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructNullInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
-    __struct_S
+    __type_name_S
     {
       TypeConstructor[not set]{
         __type_name_S
@@ -1466,7 +1466,7 @@ TEST_F(SpvModuleScopeVarParserTest, StructUndefInitializer) {
   EXPECT_THAT(module_str, HasSubstr(R"(Variable{
     x_200
     private
-    __struct_S
+    __type_name_S
     {
       TypeConstructor[not set]{
         __type_name_S
@@ -1553,7 +1553,7 @@ TEST_F(SpvModuleScopeVarParserTest, DescriptorGroupDecoration_Valid) {
     }
     myvar
     storage
-    __access_control_read_write__struct_S
+    __access_control_read_write__type_name_S
   })"))
       << module_str;
 }
@@ -1607,7 +1607,7 @@ TEST_F(SpvModuleScopeVarParserTest, BindingDecoration_Valid) {
     }
     myvar
     storage
-    __access_control_read_write__struct_S
+    __access_control_read_write__type_name_S
   })"))
       << module_str;
 }
@@ -1664,7 +1664,7 @@ TEST_F(SpvModuleScopeVarParserTest,
   Variable{
     myvar
     storage
-    __access_control_read_write__struct_S
+    __access_control_read_write__type_name_S
   }
 )")) << module_str;
 }
@@ -1693,7 +1693,7 @@ TEST_F(SpvModuleScopeVarParserTest, ColMajorDecoration_Dropped) {
   Variable{
     myvar
     storage
-    __access_control_read_write__struct_S
+    __access_control_read_write__type_name_S
   }
 })")) << module_str;
 }
@@ -1722,7 +1722,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Dropped) {
   Variable{
     myvar
     storage
-    __access_control_read_write__struct_S
+    __access_control_read_write__type_name_S
   }
 })")) << module_str;
 }
@@ -1772,7 +1772,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_AllMembers) {
   Variable{
     myvar
     storage
-    __access_control_read_only__struct_S
+    __access_control_read_only__type_name_S
   }
 })")) << module_str;
 }
@@ -1801,7 +1801,7 @@ TEST_F(SpvModuleScopeVarParserTest, StorageBuffer_NonWritable_NotAllMembers) {
   Variable{
     myvar
     storage
-    __access_control_read_write__struct_S
+    __access_control_read_write__type_name_S
   }
 })")) << module_str;
 }
@@ -1833,7 +1833,7 @@ TEST_F(
   Variable{
     myvar
     storage
-    __access_control_read_write__struct_S
+    __access_control_read_write__type_name_S
   }
 })")) << module_str;
 }

@@ -34,14 +34,14 @@ TEST_F(ParserImplTest, FunctionDecl) {
 
   EXPECT_EQ(f->symbol(), p->builder().Symbols().Get("main"));
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<sem::Void>());
+  EXPECT_TRUE(f->return_type()->Is<ast::Void>());
 
   ASSERT_EQ(f->params().size(), 2u);
   EXPECT_EQ(f->params()[0]->symbol(), p->builder().Symbols().Get("a"));
   EXPECT_EQ(f->params()[1]->symbol(), p->builder().Symbols().Get("b"));
 
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<sem::Void>());
+  EXPECT_TRUE(f->return_type()->Is<ast::Void>());
 
   auto* body = f->body();
   ASSERT_EQ(body->size(), 1u);
@@ -62,10 +62,8 @@ TEST_F(ParserImplTest, FunctionDecl_DecorationList) {
 
   EXPECT_EQ(f->symbol(), p->builder().Symbols().Get("main"));
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<sem::Void>());
+  EXPECT_TRUE(f->return_type()->Is<ast::Void>());
   ASSERT_EQ(f->params().size(), 0u);
-  ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<sem::Void>());
 
   auto& decorations = f->decorations();
   ASSERT_EQ(decorations.size(), 1u);
@@ -100,10 +98,8 @@ fn main() { return; })");
 
   EXPECT_EQ(f->symbol(), p->builder().Symbols().Get("main"));
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<sem::Void>());
+  EXPECT_TRUE(f->return_type()->Is<ast::Void>());
   ASSERT_EQ(f->params().size(), 0u);
-  ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<sem::Void>());
 
   auto& decorations = f->decorations();
   ASSERT_EQ(decorations.size(), 2u);
@@ -145,10 +141,8 @@ fn main() { return; })");
 
   EXPECT_EQ(f->symbol(), p->builder().Symbols().Get("main"));
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<sem::Void>());
+  EXPECT_TRUE(f->return_type()->Is<ast::Void>());
   ASSERT_EQ(f->params().size(), 0u);
-  ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<sem::Void>());
 
   auto& decos = f->decorations();
   ASSERT_EQ(decos.size(), 2u);
@@ -187,7 +181,7 @@ TEST_F(ParserImplTest, FunctionDecl_ReturnTypeDecorationList) {
 
   EXPECT_EQ(f->symbol(), p->builder().Symbols().Get("main"));
   ASSERT_NE(f->return_type(), nullptr);
-  EXPECT_TRUE(f->return_type()->Is<sem::F32>());
+  EXPECT_TRUE(f->return_type()->Is<ast::F32>());
   ASSERT_EQ(f->params().size(), 0u);
 
   auto& decorations = f->decorations();

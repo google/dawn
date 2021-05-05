@@ -144,7 +144,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @param val value to initialize the variable with, if NULL no initializer
   ///            will be added.
   template <class T>
-  void AddConstantID(std::string name, uint32_t id, typ::Type type, T* val) {
+  void AddConstantID(std::string name, uint32_t id, ast::Type* type, T* val) {
     ast::Expression* constructor = nullptr;
     if (val) {
       constructor = Expr(*val);
@@ -172,9 +172,8 @@ class InspectorHelper : public ProgramBuilder {
   /// @param idx index of member
   /// @param type type of member
   /// @returns a string for the member
-  std::string StructMemberName(size_t idx, typ::Type type) {
-    return std::to_string(idx) +
-           (type.sem ? type.sem->type_name() : type.ast->type_name());
+  std::string StructMemberName(size_t idx, ast::Type* type) {
+    return std::to_string(idx) + type->type_name();
   }
 
   /// Generates a struct type
@@ -182,11 +181,11 @@ class InspectorHelper : public ProgramBuilder {
   /// @param member_types a vector of member types
   /// @param is_block whether or not to decorate as a Block
   /// @returns a struct type
-  typ::Struct MakeStructType(const std::string& name,
-                             std::vector<typ::Type> member_types,
-                             bool is_block) {
+  ast::Struct* MakeStructType(const std::string& name,
+                              std::vector<ast::Type*> member_types,
+                              bool is_block) {
     ast::StructMemberList members;
-    for (auto type : member_types) {
+    for (auto* type : member_types) {
       members.push_back(Member(StructMemberName(members.size(), type), type));
     }
 
@@ -202,37 +201,37 @@ class InspectorHelper : public ProgramBuilder {
   /// @param name name for the type
   /// @param member_types a vector of member types
   /// @returns a struct type that has the layout for an uniform buffer.
-  typ::Struct MakeUniformBufferType(const std::string& name,
-                                    std::vector<typ::Type> member_types) {
+  ast::Struct* MakeUniformBufferType(const std::string& name,
+                                     std::vector<ast::Type*> member_types) {
     return MakeStructType(name, member_types, true);
   }
 
   /// Generates types appropriate for using in a storage buffer
   /// @param name name for the type
   /// @param member_types a vector of member types
-  /// @returns a tuple {struct type, access control type}, where the struct has
-  ///          the layout for a storage buffer, and the control type wraps the
-  ///          struct.
-  std::tuple<typ::Struct, typ::AccessControl> MakeStorageBufferTypes(
+  /// @returns a function that returns an ast::AccessControl to the created
+  /// structure.
+  std::function<ast::AccessControl*()> MakeStorageBufferTypes(
       const std::string& name,
-      std::vector<typ::Type> member_types) {
-    auto struct_type = MakeStructType(name, member_types, true);
-    auto access_type = ty.access(ast::AccessControl::kReadWrite, struct_type);
-    return {struct_type, std::move(access_type)};
+      std::vector<ast::Type*> member_types) {
+    MakeStructType(name, member_types, true);
+    return [this, name] {
+      return ty.access(ast::AccessControl::kReadWrite, ty.type_name(name));
+    };
   }
 
   /// Generates types appropriate for using in a read-only storage buffer
   /// @param name name for the type
   /// @param member_types a vector of member types
-  /// @returns a tuple {struct type, access control type}, where the struct has
-  ///          the layout for a read-only storage buffer, and the control type
-  ///          wraps the struct.
-  std::tuple<typ::Struct, typ::AccessControl> MakeReadOnlyStorageBufferTypes(
+  /// @returns a function that returns an ast::AccessControl to the created
+  /// structure.
+  std::function<ast::AccessControl*()> MakeReadOnlyStorageBufferTypes(
       const std::string& name,
-      std::vector<typ::Type> member_types) {
-    auto struct_type = MakeStructType(name, member_types, true);
-    auto access_type = ty.access(ast::AccessControl::kReadOnly, struct_type);
-    return {struct_type, std::move(access_type)};
+      std::vector<ast::Type*> member_types) {
+    MakeStructType(name, member_types, true);
+    return [this, name] {
+      return ty.access(ast::AccessControl::kReadOnly, ty.type_name(name));
+    };
   }
 
   /// Adds a binding variable with a struct type to the program
@@ -242,7 +241,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @param group the binding and group to use for the uniform buffer
   /// @param binding the binding number to use for the uniform buffer
   void AddBinding(const std::string& name,
-                  typ::Type type,
+                  ast::Type* type,
                   ast::StorageClass storage_class,
                   uint32_t group,
                   uint32_t binding) {
@@ -259,7 +258,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @param group the binding/group/ to use for the uniform buffer
   /// @param binding the binding number to use for the uniform buffer
   void AddUniformBuffer(const std::string& name,
-                        typ::Type type,
+                        ast::Type* type,
                         uint32_t group,
                         uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kUniform, group, binding);
@@ -271,7 +270,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
   void AddStorageBuffer(const std::string& name,
-                        typ::Type type,
+                        ast::Type* type,
                         uint32_t group,
                         uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kStorage, group, binding);
@@ -284,11 +283,11 @@ class InspectorHelper : public ProgramBuilder {
   void MakeStructVariableReferenceBodyFunction(
       std::string func_name,
       std::string struct_name,
-      std::vector<std::tuple<size_t, typ::Type>> members) {
+      std::vector<std::tuple<size_t, ast::Type*>> members) {
     ast::StatementList stmts;
     for (auto member : members) {
       size_t member_idx;
-      typ::Type member_type;
+      ast::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
 
@@ -298,7 +297,7 @@ class InspectorHelper : public ProgramBuilder {
 
     for (auto member : members) {
       size_t member_idx;
-      typ::Type member_type;
+      ast::Type* member_type;
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
 
@@ -337,7 +336,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @param type the data type of the sampled texture
   /// @returns the generated SampleTextureType
   typ::SampledTexture MakeSampledTextureType(ast::TextureDimension dim,
-                                             typ::Type type) {
+                                             ast::Type* type) {
     return ty.sampled_texture(dim, type);
   }
 
@@ -354,7 +353,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @returns the generated SampleTextureType
   typ::MultisampledTexture MakeMultisampledTextureType(
       ast::TextureDimension dim,
-      typ::Type type) {
+      ast::Type* type) {
     return ty.multisampled_texture(dim, type);
   }
 
@@ -364,7 +363,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @param group the binding/group to use for the sampled texture
   /// @param binding the binding number to use for the sampled texture
   void AddSampledTexture(const std::string& name,
-                         typ::Type type,
+                         ast::Type* type,
                          uint32_t group,
                          uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
@@ -376,13 +375,13 @@ class InspectorHelper : public ProgramBuilder {
   /// @param group the binding/group to use for the multi-sampled texture
   /// @param binding the binding number to use for the multi-sampled texture
   void AddMultisampledTexture(const std::string& name,
-                              typ::Type type,
+                              ast::Type* type,
                               uint32_t group,
                               uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
   }
 
-  void AddGlobalVariable(const std::string& name, typ::Type type) {
+  void AddGlobalVariable(const std::string& name, ast::Type* type) {
     Global(name, type, ast::StorageClass::kUniformConstant);
   }
 
@@ -392,7 +391,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @param group the binding/group to use for the depth texture
   /// @param binding the binding number to use for the depth texture
   void AddDepthTexture(const std::string& name,
-                       typ::Type type,
+                       ast::Type* type,
                        uint32_t group,
                        uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
@@ -411,7 +410,7 @@ class InspectorHelper : public ProgramBuilder {
       const std::string& texture_name,
       const std::string& sampler_name,
       const std::string& coords_name,
-      typ::Type base_type,
+      ast::Type* base_type,
       ast::DecorationList decorations) {
     std::string result_name = "sampler_result";
 
@@ -442,7 +441,7 @@ class InspectorHelper : public ProgramBuilder {
       const std::string& sampler_name,
       const std::string& coords_name,
       const std::string& array_index,
-      typ::Type base_type,
+      ast::Type* base_type,
       ast::DecorationList decorations) {
     std::string result_name = "sampler_result";
 
@@ -475,7 +474,7 @@ class InspectorHelper : public ProgramBuilder {
       const std::string& sampler_name,
       const std::string& coords_name,
       const std::string& depth_name,
-      typ::Type base_type,
+      ast::Type* base_type,
       ast::DecorationList decorations) {
     std::string result_name = "sampler_result";
 
@@ -494,7 +493,7 @@ class InspectorHelper : public ProgramBuilder {
   /// Gets an appropriate type for the data in a given texture type.
   /// @param sampled_kind type of in the texture
   /// @returns a pointer to a type appropriate for the coord param
-  typ::Type GetBaseType(ResourceBinding::SampledKind sampled_kind) {
+  ast::Type* GetBaseType(ResourceBinding::SampledKind sampled_kind) {
     switch (sampled_kind) {
       case ResourceBinding::SampledKind::kFloat:
         return ty.f32();
@@ -512,17 +511,17 @@ class InspectorHelper : public ProgramBuilder {
   /// @param dim dimensionality of the texture being sampled
   /// @param scalar the scalar type
   /// @returns a pointer to a type appropriate for the coord param
-  typ::Type GetCoordsType(ast::TextureDimension dim, typ::Type scalar) {
+  ast::Type* GetCoordsType(ast::TextureDimension dim, ast::Type* scalar) {
     switch (dim) {
       case ast::TextureDimension::k1d:
         return scalar;
       case ast::TextureDimension::k2d:
       case ast::TextureDimension::k2dArray:
-        return create<sem::Vector>(scalar, 2);
+        return create<ast::Vector>(scalar, 2);
       case ast::TextureDimension::k3d:
       case ast::TextureDimension::kCube:
       case ast::TextureDimension::kCubeArray:
-        return create<sem::Vector>(scalar, 3);
+        return create<ast::Vector>(scalar, 3);
       default:
         [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
     }
@@ -604,8 +603,10 @@ class InspectorHelper : public ProgramBuilder {
     return *inspector_;
   }
 
-  typ::Sampler sampler_type() { return ty.sampler(ast::SamplerKind::kSampler); }
-  typ::Sampler comparison_sampler_type() {
+  ast::Sampler* sampler_type() {
+    return ty.sampler(ast::SamplerKind::kSampler);
+  }
+  ast::Sampler* comparison_sampler_type() {
     return ty.sampler(ast::SamplerKind::kComparisonSampler);
   }
 
@@ -835,23 +836,23 @@ TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
 
 TEST_P(InspectorGetEntryPointTestWithComponentTypeParam, InOutVariables) {
   ComponentType inspector_type = GetParam();
-  typ::Type tint_type = nullptr;
+  std::function<typ::Type()> tint_type;
   switch (inspector_type) {
     case ComponentType::kFloat:
-      tint_type = ty.f32();
+      tint_type = [this]() -> typ::Type { return ty.f32(); };
       break;
     case ComponentType::kSInt:
-      tint_type = ty.i32();
+      tint_type = [this]() -> typ::Type { return ty.i32(); };
       break;
     case ComponentType::kUInt:
-      tint_type = ty.u32();
+      tint_type = [this]() -> typ::Type { return ty.u32(); };
       break;
     case ComponentType::kUnknown:
       return;
   }
 
-  auto* in_var = Param("in_var", tint_type, {Location(0u)});
-  Func("foo", {in_var}, tint_type, {Return("in_var")},
+  auto* in_var = Param("in_var", tint_type(), {Location(0u)});
+  Func("foo", {in_var}, tint_type(), {Return("in_var")},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0u)});
   Inspector& inspector = Build();
 
@@ -1600,18 +1601,12 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   AddUniformBuffer("ub_var", ub_struct_type, 0, 0);
   MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
 
-  typ::Struct sb_struct_type;
-  typ::AccessControl sb_control_type;
-  std::tie(sb_struct_type, sb_control_type) =
-      MakeStorageBufferTypes("sb_type", {ty.i32()});
-  AddStorageBuffer("sb_var", sb_control_type, 1, 0);
+  auto sb = MakeStorageBufferTypes("sb_type", {ty.i32()});
+  AddStorageBuffer("sb_var", sb(), 1, 0);
   MakeStructVariableReferenceBodyFunction("sb_func", "sb_var", {{0, ty.i32()}});
 
-  typ::Struct rosb_struct_type;
-  typ::AccessControl rosb_control_type;
-  std::tie(rosb_struct_type, rosb_control_type) =
-      MakeReadOnlyStorageBufferTypes("rosb_type", {ty.i32()});
-  AddStorageBuffer("rosb_var", rosb_control_type, 1, 1);
+  auto ro_sb = MakeReadOnlyStorageBufferTypes("rosb_type", {ty.i32()});
+  AddStorageBuffer("rosb_var", ro_sb(), 1, 1);
   MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
                                           {{0, ty.i32()}});
 
@@ -1896,11 +1891,8 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeStorageBufferTypes("foo_type", {ty.i32()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -1924,11 +1916,12 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeStorageBufferTypes("foo_type", {ty.i32(), ty.u32(), ty.f32()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  auto foo_struct_type = MakeStorageBufferTypes("foo_type", {
+                                                                ty.i32(),
+                                                                ty.u32(),
+                                                                ty.f32(),
+                                                            });
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction(
       "sb_func", "foo_sb", {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
@@ -1953,13 +1946,14 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
-  typ::Struct sb_struct_type;
-  typ::AccessControl sb_control_type;
-  std::tie(sb_struct_type, sb_control_type) =
-      MakeStorageBufferTypes("sb_type", {ty.i32(), ty.u32(), ty.f32()});
-  AddStorageBuffer("sb_foo", sb_control_type, 0, 0);
-  AddStorageBuffer("sb_bar", sb_control_type, 0, 1);
-  AddStorageBuffer("sb_baz", sb_control_type, 2, 0);
+  auto sb_struct_type = MakeStorageBufferTypes("sb_type", {
+                                                              ty.i32(),
+                                                              ty.u32(),
+                                                              ty.f32(),
+                                                          });
+  AddStorageBuffer("sb_foo", sb_struct_type(), 0, 0);
+  AddStorageBuffer("sb_bar", sb_struct_type(), 0, 1);
+  AddStorageBuffer("sb_baz", sb_struct_type(), 2, 0);
 
   auto AddReferenceFunc = [this](const std::string& func_name,
                                  const std::string& var_name) {
@@ -2014,11 +2008,9 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
+  auto foo_struct_type =
       MakeStorageBufferTypes("foo_type", {ty.i32(), ty.array<u32, 4>()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2042,11 +2034,11 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeStorageBufferTypes("foo_type", {ty.i32(), ty.array<u32>()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  auto foo_struct_type = MakeStorageBufferTypes("foo_type", {
+                                                                ty.i32(),
+                                                                ty.array<u32>(),
+                                                            });
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2070,11 +2062,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeStorageBufferTypes("foo_type", {ty.vec3<f32>()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.vec3<f32>()});
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
                                           {{0, ty.vec3<f32>()}});
@@ -2099,11 +2088,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  auto foo_struct_type = MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32()});
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2120,11 +2106,8 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  auto foo_struct_type = MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32()});
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2149,13 +2132,14 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        MultipleStorageBuffers) {
-  typ::Struct sb_struct_type;
-  typ::AccessControl sb_control_type;
-  std::tie(sb_struct_type, sb_control_type) =
-      MakeReadOnlyStorageBufferTypes("sb_type", {ty.i32(), ty.u32(), ty.f32()});
-  AddStorageBuffer("sb_foo", sb_control_type, 0, 0);
-  AddStorageBuffer("sb_bar", sb_control_type, 0, 1);
-  AddStorageBuffer("sb_baz", sb_control_type, 2, 0);
+  auto sb_struct_type = MakeReadOnlyStorageBufferTypes("sb_type", {
+                                                                      ty.i32(),
+                                                                      ty.u32(),
+                                                                      ty.f32(),
+                                                                  });
+  AddStorageBuffer("sb_foo", sb_struct_type(), 0, 0);
+  AddStorageBuffer("sb_bar", sb_struct_type(), 0, 1);
+  AddStorageBuffer("sb_baz", sb_struct_type(), 2, 0);
 
   auto AddReferenceFunc = [this](const std::string& func_name,
                                  const std::string& var_name) {
@@ -2210,11 +2194,12 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) = MakeReadOnlyStorageBufferTypes(
-      "foo_type", {ty.i32(), ty.array<u32, 4>()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  auto foo_struct_type =
+      MakeReadOnlyStorageBufferTypes("foo_type", {
+                                                     ty.i32(),
+                                                     ty.array<u32, 4>(),
+                                                 });
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2239,11 +2224,12 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
        ContainingRuntimeArray) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeReadOnlyStorageBufferTypes("foo_type", {ty.i32(), ty.array<u32>()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  auto foo_struct_type =
+      MakeReadOnlyStorageBufferTypes("foo_type", {
+                                                     ty.i32(),
+                                                     ty.array<u32>(),
+                                                 });
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2267,11 +2253,8 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest,
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
-  typ::Struct foo_struct_type;
-  typ::AccessControl foo_control_type;
-  std::tie(foo_struct_type, foo_control_type) =
-      MakeStorageBufferTypes("foo_type", {ty.i32()});
-  AddStorageBuffer("foo_sb", foo_control_type, 0, 0);
+  auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
+  AddStorageBuffer("foo_sb", foo_struct_type(), 0, 0);
 
   MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
 
@@ -2514,7 +2497,7 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
       GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
   AddSampledTexture("foo_texture", sampled_texture_type, 0, 0);
   AddSampler("foo_sampler", 0, 1);
-  auto coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
+  auto* coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
   AddGlobalVariable("foo_coords", coord_type);
 
   MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler",
@@ -2572,7 +2555,7 @@ TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam,
       GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
   AddSampledTexture("foo_texture", sampled_texture_type, 0, 0);
   AddSampler("foo_sampler", 0, 1);
-  auto coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
+  auto* coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
   AddGlobalVariable("foo_coords", coord_type);
   AddGlobalVariable("foo_array_index", ty.i32());
 
@@ -2615,7 +2598,7 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
   auto multisampled_texture_type = MakeMultisampledTextureType(
       GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
   AddMultisampledTexture("foo_texture", multisampled_texture_type, 0, 0);
-  auto coord_type = GetCoordsType(GetParam().type_dim, ty.i32());
+  auto* coord_type = GetCoordsType(GetParam().type_dim, ty.i32());
   AddGlobalVariable("foo_coords", coord_type);
   AddGlobalVariable("foo_sample_index", ty.i32());
 
@@ -2633,9 +2616,9 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam,
   auto result = inspector.GetMultisampledTextureResourceBindings("ep");
   ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
+  ASSERT_EQ(1u, result.size());
   EXPECT_EQ(ResourceBinding::ResourceType::kMultisampledTexture,
             result[0].resource_type);
-  ASSERT_EQ(1u, result.size());
   EXPECT_EQ(0u, result[0].bind_group);
   EXPECT_EQ(0u, result[0].binding);
   EXPECT_EQ(GetParam().inspector_dim, result[0].dim);
@@ -2685,7 +2668,7 @@ TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
       GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
   AddMultisampledTexture("foo_texture", multisampled_texture_type, 0, 0);
   AddSampler("foo_sampler", 0, 1);
-  auto coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
+  auto* coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
   AddGlobalVariable("foo_coords", coord_type);
   AddGlobalVariable("foo_array_index", ty.i32());
 

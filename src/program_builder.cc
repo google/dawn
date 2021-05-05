@@ -16,7 +16,6 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/call_statement.h"
-#include "src/ast/type_name.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/debug.h"
 #include "src/demangler.h"
@@ -96,51 +95,62 @@ const sem::Type* ProgramBuilder::TypeOf(const ast::Type* type) const {
 }
 
 ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
-    typ::Type type,
+    const ast::Type* type,
     int elem_value) {
-  auto* unwrapped_type = type->UnwrapAliasIfNeeded();
-  if (unwrapped_type->Is<sem::Bool>()) {
+  CloneContext ctx(this);
+
+  if (type->Is<ast::Bool>()) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::BoolLiteral>(elem_value == 0 ? false : true));
   }
-  if (unwrapped_type->Is<sem::I32>()) {
+  if (type->Is<ast::I32>()) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::SintLiteral>(static_cast<i32>(elem_value)));
   }
-  if (unwrapped_type->Is<sem::U32>()) {
+  if (type->Is<ast::U32>()) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::UintLiteral>(static_cast<u32>(elem_value)));
   }
-  if (unwrapped_type->Is<sem::F32>()) {
+  if (type->Is<ast::F32>()) {
     return create<ast::ScalarConstructorExpression>(
         create<ast::FloatLiteral>(static_cast<f32>(elem_value)));
   }
-  if (auto* v = unwrapped_type->As<sem::Vector>()) {
+  if (auto* v = type->As<ast::Vector>()) {
     ast::ExpressionList el(v->size());
     for (size_t i = 0; i < el.size(); i++) {
-      el[i] = ConstructValueFilledWith(v->type(), elem_value);
+      el[i] = ConstructValueFilledWith(ctx.Clone(v->type()), elem_value);
     }
-    return create<ast::TypeConstructorExpression>(type, std::move(el));
+    return create<ast::TypeConstructorExpression>(const_cast<ast::Type*>(type),
+                                                  std::move(el));
   }
-  if (auto* m = unwrapped_type->As<sem::Matrix>()) {
-    auto* col_vec_type = create<sem::Vector>(m->type(), m->rows());
-    ast::ExpressionList el(col_vec_type->size());
+  if (auto* m = type->As<ast::Matrix>()) {
+    ast::ExpressionList el(m->columns());
     for (size_t i = 0; i < el.size(); i++) {
+      auto* col_vec_type = create<ast::Vector>(ctx.Clone(m->type()), m->rows());
       el[i] = ConstructValueFilledWith(col_vec_type, elem_value);
     }
-    return create<ast::TypeConstructorExpression>(type, std::move(el));
+    return create<ast::TypeConstructorExpression>(const_cast<ast::Type*>(type),
+                                                  std::move(el));
   }
-  TINT_ASSERT(false);
+  if (auto* tn = type->As<ast::TypeName>()) {
+    if (auto* lookup = AST().LookupType(tn->name())) {
+      if (auto* alias = lookup->As<ast::Alias>()) {
+        return ConstructValueFilledWith(ctx.Clone(alias->type()), elem_value);
+      }
+    }
+    TINT_ICE(diagnostics_) << "unable to find NamedType '"
+                           << Symbols().NameFor(tn->name()) << "'";
+    return nullptr;
+  }
+
+  TINT_ICE(diagnostics_) << "unhandled type: " << type->TypeInfo().name;
   return nullptr;
 }
 
 typ::Type ProgramBuilder::TypesBuilder::MaybeCreateTypename(
     typ::Type type) const {
-  if (auto* alias = As<ast::Alias>(type.ast)) {
-    return {builder->create<ast::TypeName>(alias->symbol()), type.sem};
-  }
-  if (auto* str = As<ast::Struct>(type.ast)) {
-    return {builder->create<ast::TypeName>(str->name()), type.sem};
+  if (auto* nt = As<ast::NamedType>(type.ast)) {
+    return {type_name(nt->name()), type.sem};
   }
   return type;
 }

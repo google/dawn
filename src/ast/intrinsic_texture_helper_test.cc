@@ -132,7 +132,7 @@ std::ostream& operator<<(std::ostream& out, const TextureOverloadCase& data) {
   return out;
 }
 
-typ::Type TextureOverloadCase::resultVectorComponentType(
+ast::Type* TextureOverloadCase::resultVectorComponentType(
     ProgramBuilder* b) const {
   switch (texture_data_type) {
     case ast::intrinsic::test::TextureDataType::kF32:
@@ -149,7 +149,7 @@ typ::Type TextureOverloadCase::resultVectorComponentType(
 
 ast::Variable* TextureOverloadCase::buildTextureVariable(
     ProgramBuilder* b) const {
-  auto datatype = resultVectorComponentType(b);
+  auto* datatype = resultVectorComponentType(b);
 
   DecorationList decos = {
       b->create<ast::GroupDecoration>(0),
@@ -166,10 +166,9 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
                        ast::StorageClass::kUniformConstant, nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kMultisampled:
-      return b->Global(
-          "texture",
-          b->ty.multisampled_texture(texture_dimension, datatype),
-          ast::StorageClass::kUniformConstant, nullptr, decos);
+      return b->Global("texture",
+                       b->ty.multisampled_texture(texture_dimension, datatype),
+                       ast::StorageClass::kUniformConstant, nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kStorage: {
       auto st = b->ty.storage_texture(texture_dimension, image_format);

@@ -334,7 +334,7 @@ class ParserImpl : Reader {
   /// Creates an AST expression node for the null value for the given type.
   /// @param type the AST type
   /// @returns a new expression
-  ast::Expression* MakeNullValue(typ::Type type);
+  ast::Expression* MakeNullValue(ast::Type* type);
 
   /// Make a typed expression for the null value for the given type.
   /// @param type the AST type
@@ -598,7 +598,7 @@ class ParserImpl : Reader {
   /// Adds `type` as a constructed type if it hasn't been added yet.
   /// @param name the type's unique name
   /// @param type the type to add
-  void AddConstructedType(Symbol name, typ::Type type);
+  void AddConstructedType(Symbol name, ast::NamedType* type);
 
   /// Creates a new `ast::Node` owned by the ProgramBuilder.
   /// @param args the arguments to pass to the type constructor

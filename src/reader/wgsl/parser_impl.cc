@@ -401,7 +401,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("type alias", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      builder_.AST().AddConstructedType(ta.value);
+      builder_.AST().AddConstructedType(const_cast<ast::Alias*>(ta.value.ast));
       return true;
     }
 
@@ -415,7 +415,8 @@ Expect<bool> ParserImpl::expect_global_decl() {
 
       register_constructed(
           builder_.Symbols().NameFor(str.value->impl()->name()), str.value);
-      builder_.AST().AddConstructedType(str.value);
+      builder_.AST().AddConstructedType(
+          const_cast<ast::Struct*>(str.value.ast));
       return true;
     }
 
@@ -561,7 +562,8 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
   if (decl.errored)
     return Failure::kErrored;
 
-  if (decl->type->UnwrapAll()->is_handle()) {
+  if ((decl->type.sem && decl->type.sem->UnwrapAll()->is_handle()) ||
+      (decl->type.ast && decl->type.ast->UnwrapAll()->is_handle())) {
     // handle types implicitly have the `UniformConstant` storage class.
     if (explicit_sc.matched) {
       return add_error(
@@ -960,7 +962,7 @@ Maybe<ast::StorageClass> ParserImpl::variable_storage_decoration() {
 
 // type_alias
 //   : TYPE IDENT EQUAL type_decl
-Maybe<typ::Type> ParserImpl::type_alias() {
+Maybe<typ::Alias> ParserImpl::type_alias() {
   auto t = peek();
   if (!t.IsType())
     return Failure::kNoMatch;
@@ -1234,7 +1236,7 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 
 // struct_decl
 //   : struct_decoration_decl* STRUCT IDENT struct_body_decl
-Maybe<sem::StructType*> ParserImpl::struct_decl(ast::DecorationList& decos) {
+Maybe<typ::Struct> ParserImpl::struct_decl(ast::DecorationList& decos) {
   auto t = peek();
   auto source = t.source();
 
@@ -1250,8 +1252,9 @@ Maybe<sem::StructType*> ParserImpl::struct_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   auto sym = builder_.Symbols().Register(name.value);
-  return create<sem::StructType>(create<ast::Struct>(
-      source, sym, std::move(body.value), std::move(decos)));
+  auto* str =
+      create<ast::Struct>(source, sym, std::move(body.value), std::move(decos));
+  return typ::Struct{str, create<sem::StructType>(str)};
 }
 
 // struct_body_decl

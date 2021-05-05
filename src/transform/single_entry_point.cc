@@ -69,7 +69,7 @@ Output SingleEntryPoint::Run(const Program* in, const DataMap& data) {
   // Clone any module-scope variables, types, and functions that are statically
   // referenced by the target entry point.
   for (auto* decl : in->AST().GlobalDeclarations()) {
-    if (auto* ty = decl->As<sem::Type>()) {
+    if (auto* ty = decl->As<ast::NamedType>()) {
       // TODO(jrprice): Strip unused types.
       out.AST().AddConstructedType(ctx.Clone(ty));
     } else if (auto* var = decl->As<ast::Variable>()) {

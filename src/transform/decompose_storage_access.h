@@ -95,6 +95,8 @@ class DecomposeStorageAccess : public Transform {
   /// @param data optional extra transform-specific data
   /// @returns the transformation result
   Output Run(const Program* program, const DataMap& data = {}) override;
+
+  struct State;
 };
 
 }  // namespace transform

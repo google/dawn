@@ -23,9 +23,10 @@ namespace writer {
 
 namespace {
 
-ast::TypeConstructorExpression* AsVectorConstructor(ast::Expression* expr) {
+ast::TypeConstructorExpression* AsVectorConstructor(ProgramBuilder* b,
+                                                    ast::Expression* expr) {
   if (auto* constructor = expr->As<ast::TypeConstructorExpression>()) {
-    if (constructor->type()->Is<sem::Vector>()) {
+    if (b->TypeOf(constructor)->Is<sem::Vector>()) {
       return constructor;
     }
   }
@@ -38,42 +39,52 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
                                              ast::Expression* vector,
                                              ast::Expression* scalar) {
   uint32_t packed_size;
-  sem::Type* packed_el_ty;  // Currently must be f32.
+  sem::Type* packed_el_sem_ty;
   auto* vector_sem = b->Sem().Get(vector);
   auto* vector_ty = vector_sem->Type()->UnwrapPtrIfNeeded();
   if (auto* vec = vector_ty->As<sem::Vector>()) {
     packed_size = vec->size() + 1;
-    packed_el_ty = vec->type();
+    packed_el_sem_ty = vec->type();
   } else {
     packed_size = 2;
-    packed_el_ty = vector_ty;
+    packed_el_sem_ty = vector_ty;
+  }
+
+  ast::Type* packed_el_ty = nullptr;
+  if (packed_el_sem_ty->Is<sem::I32>()) {
+    packed_el_ty = b->create<ast::I32>();
+  } else if (packed_el_sem_ty->Is<sem::U32>()) {
+    packed_el_ty = b->create<ast::U32>();
+  } else if (packed_el_sem_ty->Is<sem::F32>()) {
+    packed_el_ty = b->create<ast::F32>();
   }
 
   auto* statement = vector_sem->Stmt();
 
-  auto* packed_ty = b->create<sem::Vector>(packed_el_ty, packed_size);
+  auto* packed_ty = b->create<ast::Vector>(packed_el_ty, packed_size);
+  auto* packed_sem_ty = b->create<sem::Vector>(packed_el_sem_ty, packed_size);
 
   // If the coordinates are already passed in a vector constructor, extract
   // the elements into the new vector instead of nesting a vector-in-vector.
   ast::ExpressionList packed;
-  if (auto* vc = AsVectorConstructor(vector)) {
+  if (auto* vc = AsVectorConstructor(b, vector)) {
     packed = vc->values();
   } else {
     packed.emplace_back(vector);
   }
-  if (packed_el_ty != b->Sem().Get(scalar)->Type()->UnwrapPtrIfNeeded()) {
+  if (packed_el_sem_ty != b->TypeOf(scalar)->UnwrapPtrIfNeeded()) {
     // Cast scalar to the vector element type
     auto* scalar_cast = b->Construct(packed_el_ty, scalar);
     b->Sem().Add(scalar_cast, b->create<sem::Expression>(
-                                  scalar_cast, packed_el_ty, statement));
+                                  scalar_cast, packed_el_sem_ty, statement));
     packed.emplace_back(scalar_cast);
   } else {
     packed.emplace_back(scalar);
   }
 
   auto* constructor = b->Construct(packed_ty, std::move(packed));
-  b->Sem().Add(constructor,
-               b->create<sem::Expression>(constructor, packed_ty, statement));
+  b->Sem().Add(constructor, b->create<sem::Expression>(
+                                constructor, packed_sem_ty, statement));
 
   return constructor;
 }

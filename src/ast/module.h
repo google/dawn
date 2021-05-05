@@ -42,28 +42,23 @@ class Module : public Castable<Module, Node> {
   /// the order they were declared in the source program
   Module(ProgramID program_id,
          const Source& source,
-         std::vector<Cloneable*> global_decls);
+         std::vector<ast::Node*> global_decls);
 
   /// Destructor
   ~Module() override;
 
   /// @returns the ordered global declarations for the translation unit
-  const std::vector<Cloneable*>& GlobalDeclarations() const {
+  const std::vector<ast::Node*>& GlobalDeclarations() const {
     return global_declarations_;
   }
 
   /// Add a global variable to the Builder
   /// @param var the variable to add
-  void AddGlobalVariable(ast::Variable* var) {
-    TINT_ASSERT(var);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(var, program_id());
-    global_variables_.push_back(var);
-    global_declarations_.push_back(var);
-  }
+  void AddGlobalVariable(ast::Variable* var);
 
   /// @returns true if the module has the global declaration `decl`
   /// @param decl the declaration to check
-  bool HasGlobalDeclaration(const Cloneable* decl) const {
+  bool HasGlobalDeclaration(ast::Node* decl) const {
     for (auto* d : global_declarations_) {
       if (d == decl) {
         return true;
@@ -79,31 +74,21 @@ class Module : public Castable<Module, Node> {
   VariableList& GlobalVariables() { return global_variables_; }
 
   /// Adds a constructed type to the Builder.
-  /// The type must be an alias or a struct.
   /// @param type the constructed type to add
-  void AddConstructedType(typ::Type type) {
-    TINT_ASSERT(type);
-    constructed_types_.push_back(type);
-    global_declarations_.push_back(const_cast<sem::Type*>(type.sem));
-  }
+  void AddConstructedType(ast::NamedType* type);
 
   /// @returns the NamedType registered as a ConstructedType()
   /// @param name the name of the type to search for
   const ast::NamedType* LookupType(Symbol name) const;
 
   /// @returns the constructed types in the translation unit
-  const std::vector<typ::Type>& ConstructedTypes() const {
+  const std::vector<ast::NamedType*>& ConstructedTypes() const {
     return constructed_types_;
   }
 
   /// Add a function to the Builder
   /// @param func the function to add
-  void AddFunction(ast::Function* func) {
-    TINT_ASSERT(func);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(func, program_id());
-    functions_.push_back(func);
-    global_declarations_.push_back(func);
-  }
+  void AddFunction(ast::Function* func);
 
   /// @returns the functions declared in the translation unit
   const FunctionList& Functions() const { return functions_; }
@@ -132,8 +117,8 @@ class Module : public Castable<Module, Node> {
   std::string to_str(const sem::Info& sem) const;
 
  private:
-  std::vector<Cloneable*> global_declarations_;
-  std::vector<typ::Type> constructed_types_;
+  std::vector<ast::Node*> global_declarations_;
+  std::vector<ast::NamedType*> constructed_types_;
   FunctionList functions_;
   VariableList global_variables_;
 };

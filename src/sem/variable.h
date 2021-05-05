@@ -54,9 +54,6 @@ class Variable : public Castable<Variable, Node> {
   /// @returns the canonical type for the variable
   sem::Type* Type() const { return const_cast<sem::Type*>(type_); }
 
-  /// @returns the AST node's type. May be nullptr.
-  sem::Type* DeclaredType() const;
-
   /// @returns the storage class for the variable
   ast::StorageClass StorageClass() const { return storage_class_; }
 

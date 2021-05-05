@@ -30,10 +30,6 @@ Variable::Variable(const ast::Variable* declaration,
 
 Variable::~Variable() = default;
 
-sem::Type* Variable::DeclaredType() const {
-  return declaration_->declared_type();
-}
-
 VariableUser::VariableUser(ast::IdentifierExpression* declaration,
                            const sem::Type* type,
                            Statement* statement,
