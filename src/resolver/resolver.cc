@@ -397,6 +397,9 @@ const sem::Type* Resolver::Type(const ast::Type* ty) {
       }
       return nullptr;
     }
+    if (auto* t = ty->As<ast::ExternalTexture>()) {
+      return builder_->create<sem::ExternalTexture>();
+    }
     if (auto* t = ty->As<ast::TypeName>()) {
       auto it = named_types_.find(t->name());
       if (it == named_types_.end()) {

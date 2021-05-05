@@ -24,33 +24,24 @@ using ExternalTextureTransformTest = TransformTest;
 
 TEST_F(ExternalTextureTransformTest, SinglePlane) {
   auto* src = R"(
-[[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
-
 [[group(0), binding(0)]] var s : sampler;
 
 [[group(0), binding(1)]] var t : texture_external;
 
-[[location(0)]] var<out> FragColor : vec4<f32>;
 [[stage(fragment)]]
-fn main() {
-  FragColor = textureSample(t, s, (FragCoord.xy / vec2<f32>(4.0, 4.0)));
-  return;
+fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return textureSample(t, s, (coord.xy / vec2<f32>(4.0, 4.0)));
 }
 )";
 
   auto* expect = R"(
-[[builtin(frag_coord)]] var<in> FragCoord : vec4<f32>;
-
 [[group(0), binding(0)]] var s : sampler;
 
 [[group(0), binding(1)]] var t : texture_2d<f32>;
 
-[[location(0)]] var<out> FragColor : vec4<f32>;
-
 [[stage(fragment)]]
-fn main() {
-  FragColor = textureSample(t, s, (FragCoord.xy / vec2<f32>(4.0, 4.0)));
-  return;
+fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return textureSample(t, s, (coord.xy / vec2<f32>(4.0, 4.0)));
 }
 )";
 

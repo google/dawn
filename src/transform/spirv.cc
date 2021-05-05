@@ -377,8 +377,7 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
   }
 }
 
-Spirv::Config::Config(bool emit_vertex_point_size)
-    : emit_vertex_point_size(emit_vertex_point_size) {}
+Spirv::Config::Config(bool emit_vps) : emit_vertex_point_size(emit_vps) {}
 
 Spirv::Config::Config(const Config&) = default;
 Spirv::Config::~Config() = default;

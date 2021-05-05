@@ -28,23 +28,18 @@ Output ExternalTextureTransform::Run(const Program* in, const DataMap&) {
   // Scan the AST nodes for external texture declarations.
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* var = node->As<ast::Variable>()) {
-      if (var->type().ast->Is<ast::ExternalTexture>()) {
+      if (var->type()->Is<ast::ExternalTexture>()) {
         // Replace a single-plane external texture with a 2D, f32 sampled
         // texture.
-        auto* newAstType = ctx.dst->create<ast::SampledTexture>(
-            ast::TextureDimension::k2d, ctx.dst->create<ast::F32>());
-        auto* newSemType = ctx.dst->create<sem::SampledTexture>(
-            ast::TextureDimension::k2d, ctx.dst->ty.f32());
-
+        auto newType = ctx.dst->ty.sampled_texture(ast::TextureDimension::k2d,
+                                                   ctx.dst->ty.f32());
         auto clonedSrc = ctx.Clone(var->source());
         auto clonedSym = ctx.Clone(var->symbol());
         auto* clonedConstructor = ctx.Clone(var->constructor());
         auto clonedDecorations = ctx.Clone(var->decorations());
-
         auto* newVar = ctx.dst->create<ast::Variable>(
-            clonedSrc, clonedSym, var->declared_storage_class(),
-            typ::Type(newAstType, newSemType), var->is_const(),
-            clonedConstructor, clonedDecorations);
+            clonedSrc, clonedSym, var->declared_storage_class(), newType,
+            var->is_const(), clonedConstructor, clonedDecorations);
 
         ctx.Replace(var, newVar);
       }
