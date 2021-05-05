@@ -64,6 +64,7 @@ class ParserImplWrapperForTest {
   Namer& namer() { return impl_.namer(); }
   ProgramBuilder& builder() { return impl_.builder(); }
   const std::string error() { return impl_.error(); }
+  bool success() { return impl_.success(); }
   FailStream& Fail() { return impl_.Fail(); }
   spvtools::opt::IRContext* ir_context() { return impl_.ir_context(); }
 

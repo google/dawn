@@ -2184,13 +2184,13 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_I32_FunctParam) {
     OpFunctionEnd
  )";
   auto p = parser(test::Assemble(assembly));
-  // TODO(dneto): We can handle this if we make a shadow variable and mutate
-  // the parameter type.
-  ASSERT_FALSE(p->BuildAndParseInternalModule());
-  EXPECT_THAT(
-      p->error(),
-      HasSubstr(
-          "unhandled use of a pointer to the SampleId builtin, with ID: 1"));
+
+  // This example is invalid because you can't pass pointer-to-Input
+  // as a function parameter.
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(p->error(),
+              HasSubstr("Invalid storage class for pointer operand 1"));
 }
 
 TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_Direct) {

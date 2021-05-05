@@ -291,6 +291,7 @@ bool ParserImpl::Parse() {
   // Only consider modules valid for Vulkan 1.0.  On failure, the message
   // consumer will set the error status.
   if (!spv_tools.Validate(spv_binary_)) {
+    success_ = false;
     return false;
   }
   if (!BuildInternalModule()) {
