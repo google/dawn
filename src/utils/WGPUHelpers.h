@@ -28,8 +28,6 @@ namespace utils {
 
     enum Expectation { Success, Failure };
 
-    enum class SingleShaderStage { Vertex, Fragment, Compute };
-
     wgpu::ShaderModule CreateShaderModuleFromASM(const wgpu::Device& device, const char* source);
     wgpu::ShaderModule CreateShaderModule(const wgpu::Device& device, const char* source);
 
