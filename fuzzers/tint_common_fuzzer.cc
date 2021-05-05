@@ -33,6 +33,15 @@ namespace fuzzers {
   __builtin_trap();
 }
 
+[[noreturn]] void ValidityErrorReporter() {
+  auto printer = tint::diag::Printer::create(stderr, true);
+  printer->write(
+      "Fuzzing detected valid input program being transformed into an invalid "
+      "output progam",
+      {diag::Color::kRed, true});
+  __builtin_trap();
+}
+
 bool ExtractBindingRemapperInputs(const uint8_t** data,
                                   size_t* size,
                                   tint::transform::DataMap* inputs) {
@@ -244,7 +253,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
   if (transform_manager_) {
     auto out = transform_manager_->Run(&program, transform_inputs_);
     if (!out.program.IsValid()) {
-      return 0;
+      ValidityErrorReporter();
     }
 
     program = std::move(out.program);
