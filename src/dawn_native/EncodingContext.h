@@ -39,15 +39,11 @@ namespace dawn_native {
         CommandIterator* GetIterator();
 
         // Functions to handle encoder errors
-        void HandleError(InternalErrorType type, const char* message);
-
-        inline void ConsumeError(std::unique_ptr<ErrorData> error) {
-            HandleError(error->GetType(), error->GetMessage().c_str());
-        }
+        void HandleError(std::unique_ptr<ErrorData> error);
 
         inline bool ConsumedError(MaybeError maybeError) {
             if (DAWN_UNLIKELY(maybeError.IsError())) {
-                ConsumeError(maybeError.AcquireError());
+                HandleError(maybeError.AcquireError());
                 return true;
             }
             return false;
@@ -57,11 +53,10 @@ namespace dawn_native {
             if (DAWN_UNLIKELY(encoder != mCurrentEncoder)) {
                 if (mCurrentEncoder != mTopLevelEncoder) {
                     // The top level encoder was used when a pass encoder was current.
-                    HandleError(InternalErrorType::Validation,
-                                "Command cannot be recorded inside a pass");
+                    HandleError(DAWN_VALIDATION_ERROR("Command cannot be recorded inside a pass"));
                 } else {
-                    HandleError(InternalErrorType::Validation,
-                                "Recording in an error or already ended pass encoder");
+                    HandleError(DAWN_VALIDATION_ERROR(
+                        "Recording in an error or already ended pass encoder"));
                 }
                 return false;
             }
@@ -113,8 +108,7 @@ namespace dawn_native {
         bool mWasMovedToIterator = false;
         bool mWereCommandsAcquired = false;
 
-        bool mGotError = false;
-        std::string mErrorMessage;
+        std::unique_ptr<ErrorData> mError;
     };
 
 }  // namespace dawn_native

@@ -815,7 +815,7 @@ namespace dawn_native {
 
     void CommandEncoder::APIInjectValidationError(const char* message) {
         if (mEncodingContext.CheckCurrentEncoder(this)) {
-            mEncodingContext.HandleError(InternalErrorType::Validation, message);
+            mEncodingContext.HandleError(DAWN_VALIDATION_ERROR(message));
         }
     }
 

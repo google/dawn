@@ -53,18 +53,17 @@ namespace dawn_native {
         }
     }
 
-    void EncodingContext::HandleError(InternalErrorType type, const char* message) {
+    void EncodingContext::HandleError(std::unique_ptr<ErrorData> error) {
         if (!IsFinished()) {
             // Encoding should only generate validation errors.
-            ASSERT(type == InternalErrorType::Validation);
+            ASSERT(error->GetType() == InternalErrorType::Validation);
             // If the encoding context is not finished, errors are deferred until
             // Finish() is called.
-            if (!mGotError) {
-                mGotError = true;
-                mErrorMessage = message;
+            if (mError == nullptr) {
+                mError = std::move(error);
             }
         } else {
-            mDevice->HandleError(type, message);
+            mDevice->HandleError(error->GetType(), error->GetMessage().c_str());
         }
     }
 
@@ -129,8 +128,8 @@ namespace dawn_native {
         mCurrentEncoder = nullptr;
         mTopLevelEncoder = nullptr;
 
-        if (mGotError) {
-            return DAWN_VALIDATION_ERROR(mErrorMessage);
+        if (mError != nullptr) {
+            return std::move(mError);
         }
         if (currentEncoder != topLevelEncoder) {
             return DAWN_VALIDATION_ERROR("Command buffer recording ended mid-pass");
