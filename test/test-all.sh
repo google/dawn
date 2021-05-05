@@ -21,16 +21,79 @@ TEXT_GREEN="\033[0;32m"
 TEXT_RED="\033[0;31m"
 TEXT_DEFAULT="\033[0m"
 
-TINT="$1"
-SUBDIR="$2"
+CHECK_WGSL=1
+CHECK_SPV=1
+CHECK_MSL=1
+CHECK_HLSL=1
 
-if [ ! -x "$TINT" ]; then
+TINT="$1"
+ONLY_FORMAT="$2"
+SUBDIR="$3"
+
+function usage() {
     echo "test-all.sh compiles with tint all the .wgsl files in the tint/test"
     echo "directory, for each of the SPIR-V, MSL, HLSL and WGSL backends."
     echo "Any errors are reported as test failures."
     echo ""
-    echo "Usage: test-all.sh <path-to-tint-executable> [<subdir-with-more-samples>]"
+    echo "Usage: test-all.sh <path-to-tint-executable> [<only-format> [<subdir-with-more-samples>]]"
+    echo
+    echo "<only-format> limits which output format is tested.  The default is all."
+    echo "       Possible values are: all, wgsl, spv, msl, hlsl"
+    echo
+    echo "<subdir-with-more-samples> specifies which directory has the sample files, relative to the script."
+    echo "       When not specified, check the .wgsl and .spvasm files in the script directory."
+}
+
+if [ ! -x "$TINT" ]; then
+    usage
     exit 1
+fi
+
+if [ ! -z "$ONLY_FORMAT" ]; then
+  case "${ONLY_FORMAT}" in
+    all)
+      ;;
+    wgsl)
+      CHECK_WGSL=1
+      CHECK_SPV=0
+      CHECK_MSL=0
+      CHECK_HLSL=0
+      ;;
+    spv)
+      CHECK_WGSL=0
+      CHECK_SPV=1
+      CHECK_MSL=0
+      CHECK_HLSL=0
+      ;;
+    msl)
+      CHECK_WGSL=0
+      CHECK_SPV=0
+      CHECK_MSL=1
+      CHECK_HLSL=0
+      ;;
+    hlsl)
+      CHECK_WGSL=0
+      CHECK_SPV=0
+      CHECK_MSL=0
+      CHECK_HLSL=1
+      ;;
+    *)
+      usage
+      exit 1
+  esac
+fi
+
+if [ ! -z "${SUBDIR}" ]; then
+  if [ ! -d "${SUBDIR}" ]; then
+    echo "error: ${SUBDIR} is not a directory"
+    exit 1
+  fi
+fi
+
+if [ ! -z "$4" ]; then
+  echo "error: Too many arguments"
+  usage
+  exit 1
 fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
@@ -83,7 +146,7 @@ function check() {
 
 # check_formats(TEST_FILE)
 function check_formats() {
-    local TEST_FILE="$1"
+    local TEST_FILE=$1
     if [ -x realpath ]; then
       TEST_FILE=$(realpath --relative-to="$SCRIPT_DIR" "$TEST_FILE")
     else
@@ -91,19 +154,19 @@ function check_formats() {
     fi
     echo
     echo "Testing ${TEST_FILE}..."
-    check "${TEST_FILE}" wgsl
-    check "${TEST_FILE}" spirv
-    check "${TEST_FILE}" msl
-    check "${TEST_FILE}" hlsl
+    [ ${CHECK_WGSL} -eq 0 ] || check "${TEST_FILE}" wgsl
+    [ ${CHECK_SPV} -eq 0 ] || check "${TEST_FILE}" spirv
+    [ ${CHECK_MSL} -eq 0 ] || check "${TEST_FILE}" msl
+    [ ${CHECK_HLSL} -eq 0 ] || check "${TEST_FILE}" hlsl
 }
 
-for F in ${SCRIPT_DIR}/*.spvasm ${SCRIPT_DIR}/*.wgsl
-do
-    check_formats "$F"
-done
-
-if [ -d "${SUBDIR}" ]; then
-    for F in "${SUBDIR}"/*;
+if [ -z "${SUBDIR}" ]; then
+    for F in ${SCRIPT_DIR}/*.spvasm ${SCRIPT_DIR}/*.wgsl
+    do
+        check_formats "$F"
+    done
+else
+    for F in "${SCRIPT_DIR}/${SUBDIR}"/*;
     do
         check_formats "$F"
     done
