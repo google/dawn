@@ -271,6 +271,8 @@ set(TINT_LIB_SRCS
   transform/decompose_storage_access.h
   transform/emit_vertex_point_size.cc
   transform/emit_vertex_point_size.h
+  transform/external_texture_transform.cc
+  transform/external_texture_transform.h
   transform/first_index_offset.cc
   transform/first_index_offset.h
   transform/manager.cc
@@ -796,6 +798,7 @@ if(${TINT_BUILD_TESTS})
       transform/canonicalize_entry_point_io_test.cc
       transform/decompose_storage_access_test.cc
       transform/emit_vertex_point_size_test.cc
+      transform/external_texture_transform_test.cc
       transform/first_index_offset_test.cc
       transform/renamer_test.cc
       transform/single_entry_point.cc

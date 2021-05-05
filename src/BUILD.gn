@@ -515,6 +515,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/decompose_storage_access.h",
     "transform/emit_vertex_point_size.cc",
     "transform/emit_vertex_point_size.h",
+    "transform/external_texture_transform.cc",
+    "transform/external_texture_transform.h",
     "transform/first_index_offset.cc",
     "transform/first_index_offset.h",
     "transform/manager.cc",
