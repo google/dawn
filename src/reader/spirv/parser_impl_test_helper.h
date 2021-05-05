@@ -49,6 +49,7 @@ class ParserImplWrapperForTest {
   static void DumpSuccessfullyConvertedSpirv() {
     dump_successfully_converted_spirv_ = true;
   }
+  void DeliberatelyInvalidSpirv() { deliberately_invalid_spirv_ = true; }
 
   // Returns a new function emitter for the given function ID.
   // Assumes ParserImpl::BuildInternalRepresentation has been run and
@@ -123,6 +124,9 @@ class ParserImplWrapperForTest {
 
  private:
   ParserImpl impl_;
+  // When true, indicates the input SPIR-V module is expected to fail
+  // validation, but the SPIR-V reader parser is permissive and lets it through.
+  bool deliberately_invalid_spirv_ = false;
   static bool dump_successfully_converted_spirv_;
 };
 
