@@ -123,18 +123,17 @@ namespace dawn_native {
         // errors.
         DAWN_TRY(mBundleEncodingContext.Finish());
 
-        PassResourceUsage usages = mUsageTracker.AcquireResourceUsage();
+        RenderPassResourceUsage usages = mUsageTracker.AcquireResourceUsage();
         if (IsValidationEnabled()) {
             DAWN_TRY(GetDevice()->ValidateObject(this));
             DAWN_TRY(ValidateProgrammableEncoderEnd());
-            DAWN_TRY(ValidateFinish(mBundleEncodingContext.GetIterator(), usages));
+            DAWN_TRY(ValidateFinish(usages));
         }
 
         return new RenderBundleBase(this, descriptor, AcquireAttachmentState(), std::move(usages));
     }
 
-    MaybeError RenderBundleEncoder::ValidateFinish(CommandIterator* commands,
-                                                   const PassResourceUsage& usages) const {
+    MaybeError RenderBundleEncoder::ValidateFinish(const RenderPassResourceUsage& usages) const {
         TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
         DAWN_TRY(ValidateSyncScopeResourceUsage(usages));

@@ -32,7 +32,7 @@ namespace dawn_native {
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                          EncodingContext* encodingContext,
                                          Ref<AttachmentState> attachmentState)
-        : ProgrammablePassEncoder(device, encodingContext, PassType::Render),
+        : ProgrammablePassEncoder(device, encodingContext),
           mAttachmentState(std::move(attachmentState)),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
           mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
@@ -41,7 +41,7 @@ namespace dawn_native {
     RenderEncoderBase::RenderEncoderBase(DeviceBase* device,
                                          EncodingContext* encodingContext,
                                          ErrorTag errorTag)
-        : ProgrammablePassEncoder(device, encodingContext, errorTag, PassType::Render),
+        : ProgrammablePassEncoder(device, encodingContext, errorTag),
           mDisableBaseVertex(device->IsToggleEnabled(Toggle::DisableBaseVertex)),
           mDisableBaseInstance(device->IsToggleEnabled(Toggle::DisableBaseInstance)) {
     }
@@ -303,6 +303,26 @@ namespace dawn_native {
             cmd->size = size;
 
             mUsageTracker.BufferUsedAs(buffer, wgpu::BufferUsage::Vertex);
+
+            return {};
+        });
+    }
+
+    void RenderEncoderBase::APISetBindGroup(uint32_t groupIndexIn,
+                                            BindGroupBase* group,
+                                            uint32_t dynamicOffsetCount,
+                                            const uint32_t* dynamicOffsets) {
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            BindGroupIndex groupIndex(groupIndexIn);
+
+            if (IsValidationEnabled()) {
+                DAWN_TRY(
+                    ValidateSetBindGroup(groupIndex, group, dynamicOffsetCount, dynamicOffsets));
+            }
+
+            RecordSetBindGroup(allocator, groupIndex, group, dynamicOffsetCount, dynamicOffsets);
+            mCommandBufferState.SetBindGroup(groupIndex, group);
+            mUsageTracker.AddBindGroup(group);
 
             return {};
         });

@@ -612,7 +612,7 @@ namespace dawn_native { namespace d3d12 {
 
         // Records the necessary barriers for the resource usage pre-computed by the frontend
         auto PrepareResourcesForRenderPass = [](CommandRecordingContext* commandContext,
-                                                const PassResourceUsage& usages) -> bool {
+                                                const RenderPassResourceUsage& usages) -> bool {
             std::vector<D3D12_RESOURCE_BARRIER> barriers;
 
             ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
@@ -666,7 +666,7 @@ namespace dawn_native { namespace d3d12 {
         // TODO(jiawei.shao@intel.com): move the resource lazy clearing inside the barrier tracking
         // for compute passes.
         auto PrepareResourcesForComputePass = [](CommandRecordingContext* commandContext,
-                                                 const PassResourceUsage& usages) {
+                                                 const ComputePassResourceUsage& usages) {
             for (size_t i = 0; i < usages.buffers.size(); ++i) {
                 Buffer* buffer = ToBackend(usages.buffers[i]);
 

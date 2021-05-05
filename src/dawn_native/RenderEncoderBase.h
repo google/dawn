@@ -16,7 +16,9 @@
 #define DAWNNATIVE_RENDERENCODERBASE_H_
 
 #include "dawn_native/AttachmentState.h"
+#include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/PassResourceUsageTracker.h"
 #include "dawn_native/ProgrammablePassEncoder.h"
 
 namespace dawn_native {
@@ -52,12 +54,20 @@ namespace dawn_native {
                                          uint64_t offset,
                                          uint64_t size);
 
+        void APISetBindGroup(uint32_t groupIndex,
+                             BindGroupBase* group,
+                             uint32_t dynamicOffsetCount = 0,
+                             const uint32_t* dynamicOffsets = nullptr);
+
         const AttachmentState* GetAttachmentState() const;
         Ref<AttachmentState> AcquireAttachmentState();
 
       protected:
         // Construct an "error" render encoder base.
         RenderEncoderBase(DeviceBase* device, EncodingContext* encodingContext, ErrorTag errorTag);
+
+        CommandBufferStateTracker mCommandBufferState;
+        RenderPassResourceUsageTracker mUsageTracker;
 
       private:
         Ref<AttachmentState> mAttachmentState;

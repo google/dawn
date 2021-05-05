@@ -75,21 +75,20 @@ namespace dawn_native {
         mCurrentEncoder = passEncoder;
     }
 
-    void EncodingContext::ExitPass(const ObjectBase* passEncoder,
-                                   PassResourceUsage passUsage,
-                                   PassType type) {
-        // Assert we're not at the top level.
+    void EncodingContext::ExitPass(const ObjectBase* passEncoder, RenderPassResourceUsage usages) {
         ASSERT(mCurrentEncoder != mTopLevelEncoder);
-        // Assert the pass encoder is current.
         ASSERT(mCurrentEncoder == passEncoder);
 
         mCurrentEncoder = mTopLevelEncoder;
+        mRenderPassUsages.push_back(std::move(usages));
+    }
 
-        if (type == PassType::Render) {
-            mRenderPassUsages.push_back(std::move(passUsage));
-        } else {
-            mComputePassUsages.push_back(std::move(passUsage));
-        }
+    void EncodingContext::ExitPass(const ObjectBase* passEncoder, ComputePassResourceUsage usages) {
+        ASSERT(mCurrentEncoder != mTopLevelEncoder);
+        ASSERT(mCurrentEncoder == passEncoder);
+
+        mCurrentEncoder = mTopLevelEncoder;
+        mComputePassUsages.push_back(std::move(usages));
     }
 
     const RenderPassUsages& EncodingContext::GetRenderPassUsages() const {

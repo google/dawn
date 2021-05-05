@@ -41,7 +41,7 @@ namespace dawn_native {
         RenderBundleEncoder(DeviceBase* device, ErrorTag errorTag);
 
         ResultOrError<RenderBundleBase*> FinishImpl(const RenderBundleDescriptor* descriptor);
-        MaybeError ValidateFinish(CommandIterator* commands, const PassResourceUsage& usages) const;
+        MaybeError ValidateFinish(const RenderPassResourceUsage& usages) const;
 
         EncodingContext mBundleEncodingContext;
     };

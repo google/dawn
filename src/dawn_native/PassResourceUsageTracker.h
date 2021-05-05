@@ -23,35 +23,56 @@
 
 namespace dawn_native {
 
+    class BindGroupBase;
     class BufferBase;
     class QuerySetBase;
     class TextureBase;
 
     using QueryAvailabilityMap = std::map<QuerySetBase*, std::vector<bool>>;
 
-    // Helper class to encapsulate the logic of tracking per-resource usage during the
-    // validation of command buffer passes. It is used both to know if there are validation
-    // errors, and to get a list of resources used per pass for backends that need the
-    // information.
-    class PassResourceUsageTracker {
+    // Helper class to build SyncScopeResourceUsages
+    class SyncScopeUsageTracker {
       public:
-        PassResourceUsageTracker(PassType passType);
         void BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage);
         void TextureViewUsedAs(TextureViewBase* texture, wgpu::TextureUsage usage);
         void AddTextureUsage(TextureBase* texture, const TextureSubresourceUsage& textureUsage);
+
+        // Walks the bind groups and tracks all its resources.
+        void AddBindGroup(BindGroupBase* group);
+
+        // Returns the per-pass usage for use by backends for APIs with explicit barriers.
+        SyncScopeResourceUsage AcquireSyncScopeUsage();
+
+      private:
+        std::map<BufferBase*, wgpu::BufferUsage> mBufferUsages;
+        std::map<TextureBase*, TextureSubresourceUsage> mTextureUsages;
+    };
+
+    // Helper class to build ComputePassResourceUsages
+    class ComputePassResourceUsageTracker : public SyncScopeUsageTracker {
+      public:
+        ComputePassResourceUsage AcquireResourceUsage();
+
+      private:
+        // Hide AcquireSyncScopeUsage since users of this class should use AcquireResourceUsage
+        // instead.
+        using SyncScopeUsageTracker::AcquireSyncScopeUsage;
+    };
+
+    // Helper class to build RenderPassResourceUsages
+    class RenderPassResourceUsageTracker : public SyncScopeUsageTracker {
+      public:
         void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
         const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
 
-        // Returns the per-pass usage for use by backends for APIs with explicit barriers.
-        PassResourceUsage AcquireResourceUsage();
+        RenderPassResourceUsage AcquireResourceUsage();
 
       private:
-        PassType mPassType;
-        std::map<BufferBase*, wgpu::BufferUsage> mBufferUsages;
-        std::map<TextureBase*, TextureSubresourceUsage> mTextureUsages;
-        // Dedicated to track the availability of the queries used on render pass. The same query
-        // cannot be written twice in same render pass, so each render pass also need to have its
-        // own query availability map for validation.
+        // Hide AcquireSyncScopeUsage since users of this class should use AcquireResourceUsage
+        // instead.
+        using SyncScopeUsageTracker::AcquireSyncScopeUsage;
+
+        // Tracks queries used in the render pass to validate that they aren't written twice.
         QueryAvailabilityMap mQueryAvailabilities;
     };
 

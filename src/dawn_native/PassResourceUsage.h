@@ -23,11 +23,14 @@
 
 namespace dawn_native {
 
+    // This file declares various "ResourceUsage" structures. They are produced by the frontend
+    // while recording commands to be used for later validation and also some operations in the
+    // backends. The are produced by the "Encoder" objects that finalize them on "EndPass" or
+    // "Finish". Internally the "Encoder" may use the "StateTracker" to create them.
+
     class BufferBase;
     class QuerySetBase;
     class TextureBase;
-
-    enum class PassType { Render, Compute };
 
     // The texture usage inside passes must be tracked per-subresource.
     using TextureSubresourceUsage = SubresourceStorage<wgpu::TextureUsage>;
@@ -43,18 +46,36 @@ namespace dawn_native {
         std::vector<TextureSubresourceUsage> textureUsages;
     };
 
-    // Additional data tracked per-pass.
-    struct PassResourceUsage : public SyncScopeResourceUsage {
+    // Contains all the resource usage data for a compute pass.
+    //
+    // TODO(dawn:632) Not now, but in the future, compute passes will contain a list of
+    // SyncScopeResourceUsage, one per Dispatch as required by the WebGPU specification. They will
+    // also store inline the set of all buffers and textures used, because some unused BindGroups
+    // may not be used at all in synchronization scope but their resources still need to be
+    // validated on Queue::Submit.
+    struct ComputePassResourceUsage : public SyncScopeResourceUsage {};
+
+    // Contains all the resource usage data for a render pass.
+    //
+    // In the WebGPU specification render passes are synchronization scopes but we also need to
+    // track additional data. It is stored for render passes used by a CommandBuffer, but also in
+    // RenderBundle so they can be merged into the render passes' usage on ExecuteBundles().
+    struct RenderPassResourceUsage : public SyncScopeResourceUsage {
+        // Storage to track the occlusion queries used during the pass.
         std::vector<QuerySetBase*> querySets;
         std::vector<std::vector<bool>> queryAvailabilities;
     };
 
-    using RenderPassUsages = std::vector<PassResourceUsage>;
-    using ComputePassUsages = std::vector<PassResourceUsage>;
+    using RenderPassUsages = std::vector<RenderPassResourceUsage>;
+    using ComputePassUsages = std::vector<ComputePassResourceUsage>;
 
+    // Contains a hierarchy of "ResourceUsage" that mirrors the hierarchy of the CommandBuffer and
+    // is used for validation and to produce barriers and lazy clears in the backends.
     struct CommandBufferResourceUsage {
         RenderPassUsages renderPasses;
         ComputePassUsages computePasses;
+
+        // Resources used in commands that aren't in a pass.
         std::set<BufferBase*> topLevelBuffers;
         std::set<TextureBase*> topLevelTextures;
         std::set<QuerySetBase*> usedQuerySets;

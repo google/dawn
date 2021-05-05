@@ -15,11 +15,10 @@
 #ifndef DAWNNATIVE_PROGRAMMABLEPASSENCODER_H_
 #define DAWNNATIVE_PROGRAMMABLEPASSENCODER_H_
 
-#include "dawn_native/CommandBufferStateTracker.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Error.h"
+#include "dawn_native/IntegerTypes.h"
 #include "dawn_native/ObjectBase.h"
-#include "dawn_native/PassResourceUsageTracker.h"
 
 #include "dawn_native/dawn_platform.h"
 
@@ -30,34 +29,36 @@ namespace dawn_native {
     // Base class for shared functionality between ComputePassEncoder and RenderPassEncoder.
     class ProgrammablePassEncoder : public ObjectBase {
       public:
-        ProgrammablePassEncoder(DeviceBase* device,
-                                EncodingContext* encodingContext,
-                                PassType passType);
+        ProgrammablePassEncoder(DeviceBase* device, EncodingContext* encodingContext);
 
         void APIInsertDebugMarker(const char* groupLabel);
         void APIPopDebugGroup();
         void APIPushDebugGroup(const char* groupLabel);
 
-        void APISetBindGroup(uint32_t groupIndex,
-                             BindGroupBase* group,
-                             uint32_t dynamicOffsetCount = 0,
-                             const uint32_t* dynamicOffsets = nullptr);
-
       protected:
         bool IsValidationEnabled() const;
         MaybeError ValidateProgrammableEncoderEnd() const;
 
+        // Compute and render passes do different things on SetBindGroup. These are helper functions
+        // for the logic they have in common.
+        MaybeError ValidateSetBindGroup(BindGroupIndex index,
+                                        BindGroupBase* group,
+                                        uint32_t dynamicOffsetCountIn,
+                                        const uint32_t* dynamicOffsetsIn) const;
+        void RecordSetBindGroup(CommandAllocator* allocator,
+                                BindGroupIndex index,
+                                BindGroupBase* group,
+                                uint32_t dynamicOffsetCount,
+                                const uint32_t* dynamicOffsets) const;
+
         // Construct an "error" programmable pass encoder.
         ProgrammablePassEncoder(DeviceBase* device,
                                 EncodingContext* encodingContext,
-                                ErrorTag errorTag,
-                                PassType passType);
+                                ErrorTag errorTag);
 
         EncodingContext* mEncodingContext = nullptr;
-        PassResourceUsageTracker mUsageTracker;
 
         uint64_t mDebugGroupStackSize = 0;
-        CommandBufferStateTracker mCommandBufferState;
 
       private:
         const bool mValidationEnabled;

@@ -522,7 +522,7 @@ namespace dawn_native {
     RenderPassEncoder* CommandEncoder::APIBeginRenderPass(const RenderPassDescriptor* descriptor) {
         DeviceBase* device = GetDevice();
 
-        PassResourceUsageTracker usageTracker(PassType::Render);
+        RenderPassResourceUsageTracker usageTracker;
 
         uint32_t width = 0;
         uint32_t height = 0;
@@ -946,7 +946,7 @@ namespace dawn_native {
         TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "CommandEncoder::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        for (const PassResourceUsage& passUsage : mEncodingContext.GetRenderPassUsages()) {
+        for (const RenderPassResourceUsage& passUsage : mEncodingContext.GetRenderPassUsages()) {
             DAWN_TRY(ValidateSyncScopeResourceUsage(passUsage));
         }
         // TODO(dawn:632): The synchronization scopes of compute passes should be validated here

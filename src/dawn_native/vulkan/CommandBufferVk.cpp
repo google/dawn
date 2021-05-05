@@ -531,7 +531,7 @@ namespace dawn_native { namespace vulkan {
         // And resets the used query sets which are rewritten on the render pass.
         auto PrepareResourcesForRenderPass = [](Device* device,
                                                 CommandRecordingContext* recordingContext,
-                                                const PassResourceUsage& usages) {
+                                                const RenderPassResourceUsage& usages) {
             std::vector<VkBufferMemoryBarrier> bufferBarriers;
             std::vector<VkImageMemoryBarrier> imageBarriers;
             VkPipelineStageFlags srcStages = 0;
@@ -583,7 +583,7 @@ namespace dawn_native { namespace vulkan {
         // for compute passes.
         auto PrepareResourcesForComputePass = [](Device* device,
                                                  CommandRecordingContext* recordingContext,
-                                                 const PassResourceUsage& usages) {
+                                                 const ComputePassResourceUsage& usages) {
             for (size_t i = 0; i < usages.buffers.size(); ++i) {
                 Buffer* buffer = ToBackend(usages.buffers[i]);
                 buffer->EnsureDataInitialized(recordingContext);

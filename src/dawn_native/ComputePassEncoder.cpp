@@ -27,15 +27,14 @@ namespace dawn_native {
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext)
-        : ProgrammablePassEncoder(device, encodingContext, PassType::Compute),
-          mCommandEncoder(commandEncoder) {
+        : ProgrammablePassEncoder(device, encodingContext), mCommandEncoder(commandEncoder) {
     }
 
     ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                            CommandEncoder* commandEncoder,
                                            EncodingContext* encodingContext,
                                            ErrorTag errorTag)
-        : ProgrammablePassEncoder(device, encodingContext, errorTag, PassType::Compute),
+        : ProgrammablePassEncoder(device, encodingContext, errorTag),
           mCommandEncoder(commandEncoder) {
     }
 
@@ -55,8 +54,7 @@ namespace dawn_native {
 
                 return {};
             })) {
-            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage(),
-                                       PassType::Compute);
+            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage());
         }
     }
 
@@ -129,6 +127,29 @@ namespace dawn_native {
             SetComputePipelineCmd* cmd =
                 allocator->Allocate<SetComputePipelineCmd>(Command::SetComputePipeline);
             cmd->pipeline = pipeline;
+
+            return {};
+        });
+    }
+
+    void ComputePassEncoder::APISetBindGroup(uint32_t groupIndexIn,
+                                             BindGroupBase* group,
+                                             uint32_t dynamicOffsetCount,
+                                             const uint32_t* dynamicOffsets) {
+        mEncodingContext->TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
+            BindGroupIndex groupIndex(groupIndexIn);
+
+            if (IsValidationEnabled()) {
+                DAWN_TRY(
+                    ValidateSetBindGroup(groupIndex, group, dynamicOffsetCount, dynamicOffsets));
+            }
+
+            RecordSetBindGroup(allocator, groupIndex, group, dynamicOffsetCount, dynamicOffsets);
+            mCommandBufferState.SetBindGroup(groupIndex, group);
+
+            // TODO(dawn:632): This doesn't match the WebGPU specification. Instead the
+            // synchronization scopes should be created on Dispatch().
+            mUsageTracker.AddBindGroup(group);
 
             return {};
         });

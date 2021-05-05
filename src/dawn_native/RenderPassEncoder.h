@@ -27,7 +27,7 @@ namespace dawn_native {
         RenderPassEncoder(DeviceBase* device,
                           CommandEncoder* commandEncoder,
                           EncodingContext* encodingContext,
-                          PassResourceUsageTracker usageTracker,
+                          RenderPassResourceUsageTracker usageTracker,
                           Ref<AttachmentState> attachmentState,
                           QuerySetBase* occlusionQuerySet,
                           uint32_t renderTargetWidth,

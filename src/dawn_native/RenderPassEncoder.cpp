@@ -51,7 +51,7 @@ namespace dawn_native {
     RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
                                          CommandEncoder* commandEncoder,
                                          EncodingContext* encodingContext,
-                                         PassResourceUsageTracker usageTracker,
+                                         RenderPassResourceUsageTracker usageTracker,
                                          Ref<AttachmentState> attachmentState,
                                          QuerySetBase* occlusionQuerySet,
                                          uint32_t renderTargetWidth,
@@ -101,8 +101,7 @@ namespace dawn_native {
                 allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
                 return {};
             })) {
-            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage(),
-                                       PassType::Render);
+            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage());
         }
     }
 
@@ -222,7 +221,7 @@ namespace dawn_native {
             for (uint32_t i = 0; i < count; ++i) {
                 bundles[i] = renderBundles[i];
 
-                const PassResourceUsage& usages = bundles[i]->GetResourceUsage();
+                const RenderPassResourceUsage& usages = bundles[i]->GetResourceUsage();
                 for (uint32_t i = 0; i < usages.buffers.size(); ++i) {
                     mUsageTracker.BufferUsedAs(usages.buffers[i], usages.bufferUsages[i]);
                 }

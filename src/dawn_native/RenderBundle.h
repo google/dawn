@@ -36,14 +36,14 @@ namespace dawn_native {
         RenderBundleBase(RenderBundleEncoder* encoder,
                          const RenderBundleDescriptor* descriptor,
                          Ref<AttachmentState> attachmentState,
-                         PassResourceUsage resourceUsage);
+                         RenderPassResourceUsage resourceUsage);
 
         static RenderBundleBase* MakeError(DeviceBase* device);
 
         CommandIterator* GetCommands();
 
         const AttachmentState* GetAttachmentState() const;
-        const PassResourceUsage& GetResourceUsage() const;
+        const RenderPassResourceUsage& GetResourceUsage() const;
 
       protected:
         ~RenderBundleBase() override;
@@ -53,7 +53,7 @@ namespace dawn_native {
 
         CommandIterator mCommands;
         Ref<AttachmentState> mAttachmentState;
-        PassResourceUsage mResourceUsage;
+        RenderPassResourceUsage mResourceUsage;
     };
 
 }  // namespace dawn_native

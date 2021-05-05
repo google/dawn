@@ -14,6 +14,7 @@
 
 #include "dawn_native/PassResourceUsageTracker.h"
 
+#include "dawn_native/BindGroup.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/EnumMaskIterator.h"
 #include "dawn_native/Format.h"
@@ -23,17 +24,14 @@
 #include <utility>
 
 namespace dawn_native {
-    PassResourceUsageTracker::PassResourceUsageTracker(PassType passType) : mPassType(passType) {
-    }
 
-    void PassResourceUsageTracker::BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage) {
+    void SyncScopeUsageTracker::BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage) {
         // std::map's operator[] will create the key and return 0 if the key didn't exist
         // before.
         mBufferUsages[buffer] |= usage;
     }
 
-    void PassResourceUsageTracker::TextureViewUsedAs(TextureViewBase* view,
-                                                     wgpu::TextureUsage usage) {
+    void SyncScopeUsageTracker::TextureViewUsedAs(TextureViewBase* view, wgpu::TextureUsage usage) {
         TextureBase* texture = view->GetTexture();
         const SubresourceRange& range = view->GetSubresourceRange();
 
@@ -51,8 +49,8 @@ namespace dawn_native {
                             });
     }
 
-    void PassResourceUsageTracker::AddTextureUsage(TextureBase* texture,
-                                                   const TextureSubresourceUsage& textureUsage) {
+    void SyncScopeUsageTracker::AddTextureUsage(TextureBase* texture,
+                                                const TextureSubresourceUsage& textureUsage) {
         // Get or create a new TextureSubresourceUsage for that texture (initially filled with
         // wgpu::TextureUsage::None)
         auto it = mTextureUsages.emplace(
@@ -66,32 +64,63 @@ namespace dawn_native {
                              const wgpu::TextureUsage& addedUsage) { *storedUsage |= addedUsage; });
     }
 
-    void PassResourceUsageTracker::TrackQueryAvailability(QuerySetBase* querySet,
-                                                          uint32_t queryIndex) {
-        // The query availability only need to be tracked again on render pass for checking query
-        // overwrite on render pass and resetting query set on Vulkan backend.
-        DAWN_ASSERT(mPassType == PassType::Render);
-        DAWN_ASSERT(querySet != nullptr);
+    void SyncScopeUsageTracker::AddBindGroup(BindGroupBase* group) {
+        for (BindingIndex bindingIndex{0}; bindingIndex < group->GetLayout()->GetBindingCount();
+             ++bindingIndex) {
+            const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(bindingIndex);
 
-        // Gets the iterator for that querySet or create a new vector of bool set to false
-        // if the querySet wasn't registered.
-        auto it = mQueryAvailabilities.emplace(querySet, querySet->GetQueryCount()).first;
-        it->second[queryIndex] = true;
+            switch (bindingInfo.bindingType) {
+                case BindingInfoType::Buffer: {
+                    BufferBase* buffer = group->GetBindingAsBufferBinding(bindingIndex).buffer;
+                    switch (bindingInfo.buffer.type) {
+                        case wgpu::BufferBindingType::Uniform:
+                            BufferUsedAs(buffer, wgpu::BufferUsage::Uniform);
+                            break;
+                        case wgpu::BufferBindingType::Storage:
+                            BufferUsedAs(buffer, wgpu::BufferUsage::Storage);
+                            break;
+                        case wgpu::BufferBindingType::ReadOnlyStorage:
+                            BufferUsedAs(buffer, kReadOnlyStorageBuffer);
+                            break;
+                        case wgpu::BufferBindingType::Undefined:
+                            UNREACHABLE();
+                    }
+                    break;
+                }
+
+                case BindingInfoType::Texture: {
+                    TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
+                    TextureViewUsedAs(view, wgpu::TextureUsage::Sampled);
+                    break;
+                }
+
+                case BindingInfoType::StorageTexture: {
+                    TextureViewBase* view = group->GetBindingAsTextureView(bindingIndex);
+                    switch (bindingInfo.storageTexture.access) {
+                        case wgpu::StorageTextureAccess::ReadOnly:
+                            TextureViewUsedAs(view, kReadOnlyStorageTexture);
+                            break;
+                        case wgpu::StorageTextureAccess::WriteOnly:
+                            TextureViewUsedAs(view, wgpu::TextureUsage::Storage);
+                            break;
+                        case wgpu::StorageTextureAccess::Undefined:
+                            UNREACHABLE();
+                    }
+                    break;
+                }
+
+                case BindingInfoType::Sampler:
+                    break;
+            }
+        }
     }
 
-    const QueryAvailabilityMap& PassResourceUsageTracker::GetQueryAvailabilityMap() const {
-        return mQueryAvailabilities;
-    }
-
-    // Returns the per-pass usage for use by backends for APIs with explicit barriers.
-    PassResourceUsage PassResourceUsageTracker::AcquireResourceUsage() {
-        PassResourceUsage result;
+    SyncScopeResourceUsage SyncScopeUsageTracker::AcquireSyncScopeUsage() {
+        SyncScopeResourceUsage result;
         result.buffers.reserve(mBufferUsages.size());
         result.bufferUsages.reserve(mBufferUsages.size());
         result.textures.reserve(mTextureUsages.size());
         result.textureUsages.reserve(mTextureUsages.size());
-        result.querySets.reserve(mQueryAvailabilities.size());
-        result.queryAvailabilities.reserve(mQueryAvailabilities.size());
 
         for (auto& it : mBufferUsages) {
             result.buffers.push_back(it.first);
@@ -103,16 +132,49 @@ namespace dawn_native {
             result.textureUsages.push_back(std::move(it.second));
         }
 
+        mBufferUsages.clear();
+        mTextureUsages.clear();
+
+        return result;
+    }
+
+    ComputePassResourceUsage ComputePassResourceUsageTracker::AcquireResourceUsage() {
+        ComputePassResourceUsage result;
+        *static_cast<SyncScopeResourceUsage*>(&result) = AcquireSyncScopeUsage();
+        return result;
+    }
+
+    RenderPassResourceUsage RenderPassResourceUsageTracker::AcquireResourceUsage() {
+        RenderPassResourceUsage result;
+        *static_cast<SyncScopeResourceUsage*>(&result) = AcquireSyncScopeUsage();
+
+        result.querySets.reserve(mQueryAvailabilities.size());
+        result.queryAvailabilities.reserve(mQueryAvailabilities.size());
+
         for (auto& it : mQueryAvailabilities) {
             result.querySets.push_back(it.first);
             result.queryAvailabilities.push_back(std::move(it.second));
         }
 
-        mBufferUsages.clear();
-        mTextureUsages.clear();
         mQueryAvailabilities.clear();
 
         return result;
+    }
+
+    void RenderPassResourceUsageTracker::TrackQueryAvailability(QuerySetBase* querySet,
+                                                                uint32_t queryIndex) {
+        // The query availability only needs to be tracked again on render passes for checking
+        // query overwrite on render pass and resetting query sets on the Vulkan backend.
+        DAWN_ASSERT(querySet != nullptr);
+
+        // Gets the iterator for that querySet or create a new vector of bool set to false
+        // if the querySet wasn't registered.
+        auto it = mQueryAvailabilities.emplace(querySet, querySet->GetQueryCount()).first;
+        it->second[queryIndex] = true;
+    }
+
+    const QueryAvailabilityMap& RenderPassResourceUsageTracker::GetQueryAvailabilityMap() const {
+        return mQueryAvailabilities;
     }
 
 }  // namespace dawn_native
