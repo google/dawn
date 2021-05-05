@@ -120,6 +120,8 @@ let declaration_order_check_3 : i32 = 1;
   // Clone the src program to dst
   Program dst(src.Clone());
 
+  ASSERT_TRUE(dst.IsValid()) << diag::Formatter().format(dst.Diagnostics());
+
   // Expect the AST printed with to_str() to match
   EXPECT_EQ(src.to_str(), dst.to_str());
 
