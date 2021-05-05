@@ -24,10 +24,10 @@
 namespace dawn_native {
 
     class QuerySetBase;
-    struct PassResourceUsage;
+    struct SyncScopeResourceUsage;
     struct TexelBlockInfo;
 
-    MaybeError ValidatePassResourceUsage(const PassResourceUsage& usage);
+    MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& usage);
 
     MaybeError ValidateTimestampQuery(QuerySetBase* querySet, uint32_t queryIndex);
 

@@ -55,7 +55,8 @@ namespace dawn_native {
 
                 return {};
             })) {
-            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage());
+            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage(),
+                                       PassType::Compute);
         }
     }
 

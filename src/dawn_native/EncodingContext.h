@@ -79,11 +79,13 @@ namespace dawn_native {
 
         // Functions to set current encoder state
         void EnterPass(const ObjectBase* passEncoder);
-        void ExitPass(const ObjectBase* passEncoder, PassResourceUsage passUsages);
+        void ExitPass(const ObjectBase* passEncoder, PassResourceUsage passUsages, PassType type);
         MaybeError Finish();
 
-        const PerPassUsages& GetPassUsages() const;
-        PerPassUsages AcquirePassUsages();
+        const RenderPassUsages& GetRenderPassUsages() const;
+        const ComputePassUsages& GetComputePassUsages() const;
+        RenderPassUsages AcquireRenderPassUsages();
+        ComputePassUsages AcquireComputePassUsages();
 
       private:
         bool IsFinished() const;
@@ -101,8 +103,10 @@ namespace dawn_native {
         // CommandEncoder::Begin/EndPass.
         const ObjectBase* mCurrentEncoder;
 
-        PerPassUsages mPassUsages;
-        bool mWerePassUsagesAcquired = false;
+        RenderPassUsages mRenderPassUsages;
+        bool mWereRenderPassUsagesAcquired = false;
+        ComputePassUsages mComputePassUsages;
+        bool mWereComputePassUsagesAcquired = false;
 
         CommandAllocator mAllocator;
         CommandIterator mIterator;

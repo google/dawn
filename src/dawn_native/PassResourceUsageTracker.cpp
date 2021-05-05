@@ -37,13 +37,13 @@ namespace dawn_native {
         TextureBase* texture = view->GetTexture();
         const SubresourceRange& range = view->GetSubresourceRange();
 
-        // Get or create a new PassTextureUsage for that texture (initially filled with
+        // Get or create a new TextureSubresourceUsage for that texture (initially filled with
         // wgpu::TextureUsage::None)
         auto it = mTextureUsages.emplace(
             std::piecewise_construct, std::forward_as_tuple(texture),
             std::forward_as_tuple(texture->GetFormat().aspects, texture->GetArrayLayers(),
                                   texture->GetNumMipLevels(), wgpu::TextureUsage::None));
-        PassTextureUsage& textureUsage = it.first->second;
+        TextureSubresourceUsage& textureUsage = it.first->second;
 
         textureUsage.Update(range,
                             [usage](const SubresourceRange&, wgpu::TextureUsage* storedUsage) {
@@ -52,14 +52,14 @@ namespace dawn_native {
     }
 
     void PassResourceUsageTracker::AddTextureUsage(TextureBase* texture,
-                                                   const PassTextureUsage& textureUsage) {
-        // Get or create a new PassTextureUsage for that texture (initially filled with
+                                                   const TextureSubresourceUsage& textureUsage) {
+        // Get or create a new TextureSubresourceUsage for that texture (initially filled with
         // wgpu::TextureUsage::None)
         auto it = mTextureUsages.emplace(
             std::piecewise_construct, std::forward_as_tuple(texture),
             std::forward_as_tuple(texture->GetFormat().aspects, texture->GetArrayLayers(),
                                   texture->GetNumMipLevels(), wgpu::TextureUsage::None));
-        PassTextureUsage* passTextureUsage = &it.first->second;
+        TextureSubresourceUsage* passTextureUsage = &it.first->second;
 
         passTextureUsage->Merge(
             textureUsage, [](const SubresourceRange&, wgpu::TextureUsage* storedUsage,
@@ -86,7 +86,6 @@ namespace dawn_native {
     // Returns the per-pass usage for use by backends for APIs with explicit barriers.
     PassResourceUsage PassResourceUsageTracker::AcquireResourceUsage() {
         PassResourceUsage result;
-        result.passType = mPassType;
         result.buffers.reserve(mBufferUsages.size());
         result.bufferUsages.reserve(mBufferUsages.size());
         result.textures.reserve(mTextureUsages.size());

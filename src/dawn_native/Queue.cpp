@@ -37,6 +37,18 @@ namespace dawn_native {
 
     namespace {
 
+        MaybeError ValidateSyncScopeUsedInSubmit(const SyncScopeResourceUsage& scope) {
+            for (const BufferBase* buffer : scope.buffers) {
+                DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
+            }
+
+            for (const TextureBase* texture : scope.textures) {
+                DAWN_TRY(texture->ValidateCanUseInSubmitNow());
+            }
+
+            return {};
+        }
+
         void CopyTextureData(uint8_t* dstPointer,
                              const uint8_t* srcPointer,
                              uint32_t depth,
@@ -410,13 +422,11 @@ namespace dawn_native {
 
             const CommandBufferResourceUsage& usages = commands[i]->GetResourceUsages();
 
-            for (const PassResourceUsage& passUsages : usages.perPass) {
-                for (const BufferBase* buffer : passUsages.buffers) {
-                    DAWN_TRY(buffer->ValidateCanUseOnQueueNow());
-                }
-                for (const TextureBase* texture : passUsages.textures) {
-                    DAWN_TRY(texture->ValidateCanUseInSubmitNow());
-                }
+            for (const SyncScopeResourceUsage& scope : usages.renderPasses) {
+                DAWN_TRY(ValidateSyncScopeUsedInSubmit(scope));
+            }
+            for (const SyncScopeResourceUsage& scope : usages.computePasses) {
+                DAWN_TRY(ValidateSyncScopeUsedInSubmit(scope));
             }
 
             for (const BufferBase* buffer : usages.topLevelBuffers) {

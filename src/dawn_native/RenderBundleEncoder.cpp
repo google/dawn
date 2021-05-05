@@ -137,7 +137,7 @@ namespace dawn_native {
                                                    const PassResourceUsage& usages) const {
         TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "RenderBundleEncoder::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
-        DAWN_TRY(ValidatePassResourceUsage(usages));
+        DAWN_TRY(ValidateSyncScopeResourceUsage(usages));
         return {};
     }
 

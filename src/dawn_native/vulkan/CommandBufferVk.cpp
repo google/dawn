@@ -596,8 +596,8 @@ namespace dawn_native { namespace vulkan {
             }
         };
 
-        const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
-        size_t nextPassNumber = 0;
+        size_t nextComputePassNumber = 0;
+        size_t nextRenderPassNumber = 0;
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
@@ -774,24 +774,26 @@ namespace dawn_native { namespace vulkan {
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
-                    PrepareResourcesForRenderPass(device, recordingContext,
-                                                  passResourceUsages[nextPassNumber]);
+                    PrepareResourcesForRenderPass(
+                        device, recordingContext,
+                        GetResourceUsages().renderPasses[nextRenderPassNumber]);
 
                     LazyClearRenderPassAttachments(cmd);
                     DAWN_TRY(RecordRenderPass(recordingContext, cmd));
 
-                    nextPassNumber++;
+                    nextRenderPassNumber++;
                     break;
                 }
 
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
 
-                    PrepareResourcesForComputePass(device, recordingContext,
-                                                   passResourceUsages[nextPassNumber]);
+                    PrepareResourcesForComputePass(
+                        device, recordingContext,
+                        GetResourceUsages().computePasses[nextComputePassNumber]);
                     DAWN_TRY(RecordComputePass(recordingContext));
 
-                    nextPassNumber++;
+                    nextComputePassNumber++;
                     break;
                 }
 

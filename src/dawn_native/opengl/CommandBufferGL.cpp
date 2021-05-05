@@ -536,14 +536,14 @@ namespace dawn_native { namespace opengl {
     MaybeError CommandBuffer::Execute() {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
-        auto TransitionForPass = [](const PassResourceUsage& usages) {
-            for (size_t i = 0; i < usages.textures.size(); i++) {
-                Texture* texture = ToBackend(usages.textures[i]);
+        auto LazyClearForPass = [](const SyncScopeResourceUsage& scope) {
+            for (size_t i = 0; i < scope.textures.size(); i++) {
+                Texture* texture = ToBackend(scope.textures[i]);
 
                 // Clear subresources that are not render attachments. Render attachments will be
                 // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
                 // subresource has not been initialized before the render pass.
-                usages.textureUsages[i].Iterate(
+                scope.textureUsages[i].Iterate(
                     [&](const SubresourceRange& range, wgpu::TextureUsage usage) {
                         if (usage & ~wgpu::TextureUsage::RenderAttachment) {
                             texture->EnsureSubresourceContentInitialized(range);
@@ -551,34 +551,33 @@ namespace dawn_native { namespace opengl {
                     });
             }
 
-            for (BufferBase* bufferBase : usages.buffers) {
+            for (BufferBase* bufferBase : scope.buffers) {
                 ToBackend(bufferBase)->EnsureDataInitialized();
             }
         };
 
-        const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
-        uint32_t nextPassNumber = 0;
+        size_t nextComputePassNumber = 0;
+        size_t nextRenderPassNumber = 0;
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
             switch (type) {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
-                    TransitionForPass(passResourceUsages[nextPassNumber]);
+                    LazyClearForPass(GetResourceUsages().computePasses[nextComputePassNumber]);
                     DAWN_TRY(ExecuteComputePass());
 
-                    nextPassNumber++;
+                    nextComputePassNumber++;
                     break;
                 }
 
                 case Command::BeginRenderPass: {
                     auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                    TransitionForPass(passResourceUsages[nextPassNumber]);
-
+                    LazyClearForPass(GetResourceUsages().renderPasses[nextRenderPassNumber]);
                     LazyClearRenderPassAttachments(cmd);
                     DAWN_TRY(ExecuteRenderPass(cmd));
 
-                    nextPassNumber++;
+                    nextRenderPassNumber++;
                     break;
                 }
 

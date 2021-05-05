@@ -470,9 +470,9 @@ namespace dawn_native {
     }
 
     CommandBufferResourceUsage CommandEncoder::AcquireResourceUsages() {
-        return CommandBufferResourceUsage{mEncodingContext.AcquirePassUsages(),
-                                          std::move(mTopLevelBuffers), std::move(mTopLevelTextures),
-                                          std::move(mUsedQuerySets)};
+        return CommandBufferResourceUsage{
+            mEncodingContext.AcquireRenderPassUsages(), mEncodingContext.AcquireComputePassUsages(),
+            std::move(mTopLevelBuffers), std::move(mTopLevelTextures), std::move(mUsedQuerySets)};
     }
 
     CommandIterator CommandEncoder::AcquireCommands() {
@@ -936,21 +936,21 @@ namespace dawn_native {
         DAWN_TRY(device->ValidateIsAlive());
 
         if (device->IsValidationEnabled()) {
-            DAWN_TRY(
-                ValidateFinish(mEncodingContext.GetIterator(), mEncodingContext.GetPassUsages()));
+            DAWN_TRY(ValidateFinish());
         }
         return device->CreateCommandBuffer(this, descriptor);
     }
 
     // Implementation of the command buffer validation that can be precomputed before submit
-    MaybeError CommandEncoder::ValidateFinish(CommandIterator* commands,
-                                              const PerPassUsages& perPassUsages) const {
+    MaybeError CommandEncoder::ValidateFinish() const {
         TRACE_EVENT0(GetDevice()->GetPlatform(), Validation, "CommandEncoder::ValidateFinish");
         DAWN_TRY(GetDevice()->ValidateObject(this));
 
-        for (const PassResourceUsage& passUsage : perPassUsages) {
-            DAWN_TRY(ValidatePassResourceUsage(passUsage));
+        for (const PassResourceUsage& passUsage : mEncodingContext.GetRenderPassUsages()) {
+            DAWN_TRY(ValidateSyncScopeResourceUsage(passUsage));
         }
+        // TODO(dawn:632): The synchronization scopes of compute passes should be validated here
+        // once they are tracked per-dispatch.
 
         if (mDebugGroupStackSize != 0) {
             return DAWN_VALIDATION_ERROR("Each Push must be balanced by a corresponding Pop.");

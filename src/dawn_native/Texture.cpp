@@ -441,7 +441,7 @@ namespace dawn_native {
         mIsSubresourceContentInitializedAtIndex = std::vector<bool>(subresourceCount, false);
 
         // Add readonly storage usage if the texture has a storage usage. The validation rules in
-        // ValidatePassResourceUsage will make sure we don't use both at the same time.
+        // ValidateSyncScopeResourceUsage will make sure we don't use both at the same time.
         if (mUsage & wgpu::TextureUsage::Storage) {
             mUsage |= kReadOnlyStorageTexture;
         }

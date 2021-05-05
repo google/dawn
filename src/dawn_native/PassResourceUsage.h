@@ -30,27 +30,31 @@ namespace dawn_native {
     enum class PassType { Render, Compute };
 
     // The texture usage inside passes must be tracked per-subresource.
-    using PassTextureUsage = SubresourceStorage<wgpu::TextureUsage>;
+    using TextureSubresourceUsage = SubresourceStorage<wgpu::TextureUsage>;
 
-    // Which resources are used by pass and how they are used. The command buffer validation
-    // pre-computes this information so that backends with explicit barriers don't have to
-    // re-compute it.
-    struct PassResourceUsage {
-        PassType passType;
+    // Which resources are used by a synchronization scope and how they are used. The command
+    // buffer validation pre-computes this information so that backends with explicit barriers
+    // don't have to re-compute it.
+    struct SyncScopeResourceUsage {
         std::vector<BufferBase*> buffers;
         std::vector<wgpu::BufferUsage> bufferUsages;
 
         std::vector<TextureBase*> textures;
-        std::vector<PassTextureUsage> textureUsages;
+        std::vector<TextureSubresourceUsage> textureUsages;
+    };
 
+    // Additional data tracked per-pass.
+    struct PassResourceUsage : public SyncScopeResourceUsage {
         std::vector<QuerySetBase*> querySets;
         std::vector<std::vector<bool>> queryAvailabilities;
     };
 
-    using PerPassUsages = std::vector<PassResourceUsage>;
+    using RenderPassUsages = std::vector<PassResourceUsage>;
+    using ComputePassUsages = std::vector<PassResourceUsage>;
 
     struct CommandBufferResourceUsage {
-        PerPassUsages perPass;
+        RenderPassUsages renderPasses;
+        ComputePassUsages computePasses;
         std::set<BufferBase*> topLevelBuffers;
         std::set<TextureBase*> topLevelTextures;
         std::set<QuerySetBase*> usedQuerySets;

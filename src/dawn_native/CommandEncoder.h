@@ -73,8 +73,7 @@ namespace dawn_native {
         ResultOrError<Ref<CommandBufferBase>> FinishInternal(
             const CommandBufferDescriptor* descriptor);
 
-        MaybeError ValidateFinish(CommandIterator* commands,
-                                  const PerPassUsages& perPassUsages) const;
+        MaybeError ValidateFinish() const;
 
         EncodingContext mEncodingContext;
         std::set<BufferBase*> mTopLevelBuffers;

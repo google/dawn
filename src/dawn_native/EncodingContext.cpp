@@ -76,25 +76,43 @@ namespace dawn_native {
         mCurrentEncoder = passEncoder;
     }
 
-    void EncodingContext::ExitPass(const ObjectBase* passEncoder, PassResourceUsage passUsage) {
+    void EncodingContext::ExitPass(const ObjectBase* passEncoder,
+                                   PassResourceUsage passUsage,
+                                   PassType type) {
         // Assert we're not at the top level.
         ASSERT(mCurrentEncoder != mTopLevelEncoder);
         // Assert the pass encoder is current.
         ASSERT(mCurrentEncoder == passEncoder);
 
         mCurrentEncoder = mTopLevelEncoder;
-        mPassUsages.push_back(std::move(passUsage));
+
+        if (type == PassType::Render) {
+            mRenderPassUsages.push_back(std::move(passUsage));
+        } else {
+            mComputePassUsages.push_back(std::move(passUsage));
+        }
     }
 
-    const PerPassUsages& EncodingContext::GetPassUsages() const {
-        ASSERT(!mWerePassUsagesAcquired);
-        return mPassUsages;
+    const RenderPassUsages& EncodingContext::GetRenderPassUsages() const {
+        ASSERT(!mWereRenderPassUsagesAcquired);
+        return mRenderPassUsages;
     }
 
-    PerPassUsages EncodingContext::AcquirePassUsages() {
-        ASSERT(!mWerePassUsagesAcquired);
-        mWerePassUsagesAcquired = true;
-        return std::move(mPassUsages);
+    RenderPassUsages EncodingContext::AcquireRenderPassUsages() {
+        ASSERT(!mWereRenderPassUsagesAcquired);
+        mWereRenderPassUsagesAcquired = true;
+        return std::move(mRenderPassUsages);
+    }
+
+    const ComputePassUsages& EncodingContext::GetComputePassUsages() const {
+        ASSERT(!mWereComputePassUsagesAcquired);
+        return mComputePassUsages;
+    }
+
+    ComputePassUsages EncodingContext::AcquireComputePassUsages() {
+        ASSERT(!mWereComputePassUsagesAcquired);
+        mWereComputePassUsagesAcquired = true;
+        return std::move(mComputePassUsages);
     }
 
     MaybeError EncodingContext::Finish() {

@@ -863,7 +863,7 @@ namespace dawn_native { namespace vulkan {
     }
 
     void Texture::TransitionUsageForPass(CommandRecordingContext* recordingContext,
-                                         const PassTextureUsage& textureUsages,
+                                         const TextureSubresourceUsage& textureUsages,
                                          std::vector<VkImageMemoryBarrier>* imageBarriers,
                                          VkPipelineStageFlags* srcStages,
                                          VkPipelineStageFlags* dstStages) {

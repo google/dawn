@@ -38,7 +38,7 @@ namespace dawn_native {
         PassResourceUsageTracker(PassType passType);
         void BufferUsedAs(BufferBase* buffer, wgpu::BufferUsage usage);
         void TextureViewUsedAs(TextureViewBase* texture, wgpu::TextureUsage usage);
-        void AddTextureUsage(TextureBase* texture, const PassTextureUsage& textureUsage);
+        void AddTextureUsage(TextureBase* texture, const TextureSubresourceUsage& textureUsage);
         void TrackQueryAvailability(QuerySetBase* querySet, uint32_t queryIndex);
         const QueryAvailabilityMap& GetQueryAvailabilityMap() const;
 
@@ -48,7 +48,7 @@ namespace dawn_native {
       private:
         PassType mPassType;
         std::map<BufferBase*, wgpu::BufferUsage> mBufferUsages;
-        std::map<TextureBase*, PassTextureUsage> mTextureUsages;
+        std::map<TextureBase*, TextureSubresourceUsage> mTextureUsages;
         // Dedicated to track the availability of the queries used on render pass. The same query
         // cannot be written twice in same render pass, so each render pass also need to have its
         // own query availability map for validation.

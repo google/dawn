@@ -101,7 +101,8 @@ namespace dawn_native {
                 allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
                 return {};
             })) {
-            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage());
+            mEncodingContext->ExitPass(this, mUsageTracker.AcquireResourceUsage(),
+                                       PassType::Render);
         }
     }
 

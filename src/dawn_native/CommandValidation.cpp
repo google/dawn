@@ -28,20 +28,10 @@
 
 namespace dawn_native {
 
-    // Performs the per-pass usage validation checks
-    // This will eventually need to differentiate between render and compute passes.
-    // It will be valid to use a buffer both as uniform and storage in the same compute pass.
-    // TODO(yunchao.he@intel.com): add read/write usage tracking for compute
-    MaybeError ValidatePassResourceUsage(const PassResourceUsage& pass) {
-        // TODO(cwallez@chromium.org): Remove this special casing once the PassResourceUsage is a
-        // SyncScopeResourceUsage.
-        if (pass.passType != PassType::Render) {
-            return {};
-        }
-
+    // Performs validation of the "synchronization scope" rules of WebGPU.
+    MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
         // Buffers can only be used as single-write or multiple read.
-        for (size_t i = 0; i < pass.buffers.size(); ++i) {
-            wgpu::BufferUsage usage = pass.bufferUsages[i];
+        for (wgpu::BufferUsage usage : scope.bufferUsages) {
             bool readOnly = IsSubset(usage, kReadOnlyBufferUsages);
             bool singleUse = wgpu::HasZeroOrOneBits(usage);
 
@@ -53,7 +43,7 @@ namespace dawn_native {
 
         // Check that every single subresource is used as either a single-write usage or a
         // combination of readonly usages.
-        for (const PassTextureUsage& textureUsage : pass.textureUsages) {
+        for (const TextureSubresourceUsage& textureUsage : scope.textureUsages) {
             MaybeError error = {};
             textureUsage.Iterate([&](const SubresourceRange&, const wgpu::TextureUsage& usage) {
                 bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);

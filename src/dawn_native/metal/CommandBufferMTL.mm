@@ -551,25 +551,25 @@ namespace dawn_native { namespace metal {
     }
 
     MaybeError CommandBuffer::FillCommands(CommandRecordingContext* commandContext) {
-        const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
-        size_t nextPassNumber = 0;
+        size_t nextComputePassNumber = 0;
+        size_t nextRenderPassNumber = 0;
 
-        auto LazyClearForPass = [](const PassResourceUsage& usages,
+        auto LazyClearForPass = [](const SyncScopeResourceUsage& scope,
                                    CommandRecordingContext* commandContext) {
-            for (size_t i = 0; i < usages.textures.size(); ++i) {
-                Texture* texture = ToBackend(usages.textures[i]);
+            for (size_t i = 0; i < scope.textures.size(); ++i) {
+                Texture* texture = ToBackend(scope.textures[i]);
 
                 // Clear subresources that are not render attachments. Render attachments will be
                 // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
                 // subresource has not been initialized before the render pass.
-                usages.textureUsages[i].Iterate(
+                scope.textureUsages[i].Iterate(
                     [&](const SubresourceRange& range, wgpu::TextureUsage usage) {
                         if (usage & ~wgpu::TextureUsage::RenderAttachment) {
                             texture->EnsureSubresourceContentInitialized(range);
                         }
                     });
             }
-            for (BufferBase* bufferBase : usages.buffers) {
+            for (BufferBase* bufferBase : scope.buffers) {
                 ToBackend(bufferBase)->EnsureDataInitialized(commandContext);
             }
         };
@@ -580,19 +580,21 @@ namespace dawn_native { namespace metal {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
 
-                    LazyClearForPass(passResourceUsages[nextPassNumber], commandContext);
+                    LazyClearForPass(GetResourceUsages().computePasses[nextComputePassNumber],
+                                     commandContext);
                     commandContext->EndBlit();
 
                     DAWN_TRY(EncodeComputePass(commandContext));
 
-                    nextPassNumber++;
+                    nextComputePassNumber++;
                     break;
                 }
 
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
-                    LazyClearForPass(passResourceUsages[nextPassNumber], commandContext);
+                    LazyClearForPass(GetResourceUsages().renderPasses[nextRenderPassNumber],
+                                     commandContext);
                     commandContext->EndBlit();
 
                     LazyClearRenderPassAttachments(cmd);
@@ -600,7 +602,7 @@ namespace dawn_native { namespace metal {
                     DAWN_TRY(EncodeRenderPass(commandContext, descriptor.Get(), cmd->width,
                                               cmd->height));
 
-                    nextPassNumber++;
+                    nextRenderPassNumber++;
                     break;
                 }
 

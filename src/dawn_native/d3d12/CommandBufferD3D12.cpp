@@ -682,8 +682,8 @@ namespace dawn_native { namespace d3d12 {
             }
         };
 
-        const std::vector<PassResourceUsage>& passResourceUsages = GetResourceUsages().perPass;
-        uint32_t nextPassNumber = 0;
+        size_t nextComputePassNumber = 0;
+        size_t nextRenderPassNumber = 0;
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
@@ -691,12 +691,12 @@ namespace dawn_native { namespace d3d12 {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
 
-                    PrepareResourcesForComputePass(commandContext,
-                                                   passResourceUsages[nextPassNumber]);
+                    PrepareResourcesForComputePass(
+                        commandContext, GetResourceUsages().computePasses[nextComputePassNumber]);
                     bindingTracker.SetInComputePass(true);
                     DAWN_TRY(RecordComputePass(commandContext, &bindingTracker));
 
-                    nextPassNumber++;
+                    nextComputePassNumber++;
                     break;
                 }
 
@@ -705,14 +705,14 @@ namespace dawn_native { namespace d3d12 {
                         mCommands.NextCommand<BeginRenderPassCmd>();
 
                     const bool passHasUAV = PrepareResourcesForRenderPass(
-                        commandContext, passResourceUsages[nextPassNumber]);
+                        commandContext, GetResourceUsages().renderPasses[nextRenderPassNumber]);
                     bindingTracker.SetInComputePass(false);
 
                     LazyClearRenderPassAttachments(beginRenderPassCmd);
                     DAWN_TRY(RecordRenderPass(commandContext, &bindingTracker, beginRenderPassCmd,
                                               passHasUAV));
 
-                    nextPassNumber++;
+                    nextRenderPassNumber++;
                     break;
                 }
 

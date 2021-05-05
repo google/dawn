@@ -776,7 +776,7 @@ namespace dawn_native { namespace d3d12 {
     void Texture::TrackUsageAndGetResourceBarrierForPass(
         CommandRecordingContext* commandContext,
         std::vector<D3D12_RESOURCE_BARRIER>* barriers,
-        const PassTextureUsage& textureUsages) {
+        const TextureSubresourceUsage& textureUsages) {
         if (mResourceAllocation.GetInfo().mMethod != AllocationMethod::kExternal) {
             // Track the underlying heap to ensure residency.
             Heap* heap = ToBackend(mResourceAllocation.GetResourceHeap());
