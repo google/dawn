@@ -24,8 +24,12 @@ namespace {
 
 using ::testing::HasSubstr;
 
-std::string CommonTypes() {
+std::string Preamble() {
   return R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint Vertex %100 "main"
+
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
@@ -56,8 +60,8 @@ std::string CommonTypes() {
   %v2int_40_30 = OpConstantComposite %v2int %int_40 %int_30
   %v2float_50_60 = OpConstantComposite %v2float %float_50 %float_60
   %v2float_60_50 = OpConstantComposite %v2float %float_60 %float_50
-  %v3float_50_60_70 = OpConstantComposite %v2float %float_50 %float_60 %float_70
-  %v3float_60_70_50 = OpConstantComposite %v2float %float_60 %float_70 %float_50
+  %v3float_50_60_70 = OpConstantComposite %v3float %float_50 %float_60 %float_70
+  %v3float_60_70_50 = OpConstantComposite %v3float %float_60 %float_70 %float_50
 
   %m2v2float = OpTypeMatrix %v2float 2
   %m2v3float = OpTypeMatrix %v3float 2
@@ -137,7 +141,7 @@ std::string AstFor(std::string assembly) {
 using SpvUnaryArithTest = SpvParserTestBase<::testing::Test>;
 
 TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %int %int_30
@@ -165,7 +169,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Int) {
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %int %uint_10
@@ -195,7 +199,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Int_Uint) {
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %uint %int_30
@@ -225,7 +229,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Int) {
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %uint %uint_10
@@ -257,7 +261,7 @@ TEST_F(SpvUnaryArithTest, SNegate_Uint_Uint) {
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %v2int %v2int_30_40
@@ -289,7 +293,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_SignedVec) {
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %v2int %v2uint_10_20
@@ -323,7 +327,7 @@ TEST_F(SpvUnaryArithTest, SNegate_SignedVec_UnsignedVec) {
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %v2uint %v2int_30_40
@@ -357,7 +361,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_SignedVec) {
 }
 
 TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSNegate %v2uint %v2uint_10_20
@@ -393,7 +397,7 @@ TEST_F(SpvUnaryArithTest, SNegate_UnsignedVec_UnsignedVec) {
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFNegate %float %float_50
@@ -421,7 +425,7 @@ TEST_F(SpvUnaryArithTest, FNegate_Scalar) {
 }
 
 TEST_F(SpvUnaryArithTest, FNegate_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFNegate %v2float %v2float_50_60
@@ -474,7 +478,7 @@ using SpvBinaryArithTest =
 using SpvBinaryArithTestBasic = SpvParserTestBase<::testing::Test>;
 
 TEST_P(SpvBinaryArithTest, EmitExpression) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = )" + GetParam().op +
@@ -519,7 +523,7 @@ using SpvBinaryArithGeneralTest =
     SpvParserTestBase<::testing::TestWithParam<BinaryDataGeneral>>;
 
 TEST_P(SpvBinaryArithGeneralTest, EmitExpression) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = )" + GetParam().op +
@@ -999,7 +1003,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Scalar_UnsignedResult) {
   // and the result is signed as well.
   // In this test SPIR-V demands an unsigned result, so we have to
   // wrap the result with an as-cast.
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSDiv %uint %int_30 %int_40
@@ -1034,7 +1038,7 @@ TEST_F(SpvBinaryArithTestBasic, SDiv_Vector_UnsignedResult) {
   // and the result is signed as well.
   // In this test SPIR-V demands an unsigned result, so we have to
   // wrap the result with an as-cast.
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSDiv %v2uint %v2int_30_40 %v2int_40_30
@@ -1144,7 +1148,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Scalar_UnsignedResult) {
   // and the result is signed as well.
   // In this test SPIR-V demands an unsigned result, so we have to
   // wrap the result with an as-cast.
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSMod %uint %int_30 %int_40
@@ -1179,7 +1183,7 @@ TEST_F(SpvBinaryArithTestBasic, SMod_Vector_UnsignedResult) {
   // and the result is signed as well.
   // In this test SPIR-V demands an unsigned result, so we have to
   // wrap the result with an as-cast.
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSMod %v2uint %v2int_30_40 %v2int_40_30
@@ -1231,7 +1235,7 @@ INSTANTIATE_TEST_SUITE_P(
                    AstFor("v2float_60_50")}));
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %v2float %v2float_50_60
@@ -1260,7 +1264,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesScalar) {
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v2float %m2v2float_a
@@ -1289,12 +1293,12 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesScalar) {
 }
 
 TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
-     %1 = OpCopyObject %v2float %v2float_50_60
-     %2 = OpCopyObject %m2v2float %m2v2float_a
-     %10 = OpMatrixTimesVector %m2v2float %1 %2
+     %1 = OpCopyObject %m2v2float %m2v2float_a
+     %2 = OpCopyObject %v2float %v2float_50_60
+     %10 = OpMatrixTimesVector %v2float %1 %2
      OpReturn
      OpFunctionEnd
 )";
@@ -1306,7 +1310,7 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
-    __mat_2_2__f32
+    __vec_2__f32
     {
       Binary[not set]{
         Identifier[not set]{x_1}
@@ -1318,12 +1322,12 @@ TEST_F(SpvBinaryArithTestBasic, VectorTimesMatrix) {
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v2float %m2v2float_a
      %2 = OpCopyObject %v2float %v2float_50_60
-     %10 = OpMatrixTimesVector %m2v2float %1 %2
+     %10 = OpMatrixTimesVector %v2float %1 %2
      OpReturn
      OpFunctionEnd
 )";
@@ -1335,7 +1339,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
   EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
     x_10
     none
-    __mat_2_2__f32
+    __vec_2__f32
     {
       Binary[not set]{
         Identifier[not set]{x_1}
@@ -1347,7 +1351,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesVector) {
 }
 
 TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v2float %m2v2float_a
@@ -1376,7 +1380,7 @@ TEST_F(SpvBinaryArithTestBasic, MatrixTimesMatrix) {
 }
 
 TEST_F(SpvBinaryArithTestBasic, Dot) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %v2float %v2float_50_60
@@ -1409,7 +1413,7 @@ TEST_F(SpvBinaryArithTestBasic, Dot) {
 TEST_F(SpvBinaryArithTestBasic, OuterProduct) {
   // OpOuterProduct is expanded to basic operations.
   // The operands, even if used once, are given their own const definitions.
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFAdd %v3float %v3float_50_60_70 %v3float_50_60_70 ; column vector
@@ -1535,7 +1539,7 @@ TEST_P(SpvBinaryDerivativeTest, Derivatives) {
   auto& intrinsic = std::get<0>(GetParam());
   auto& arg = std::get<1>(GetParam());
 
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %)" +
@@ -1584,7 +1588,7 @@ INSTANTIATE_TEST_SUITE_P(
             ArgAndTypeData{"v3float", "v3float_50_60_70", "__vec_3__f32"})));
 
 TEST_F(SpvUnaryArithTest, Transpose_2x2) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v2float %m2v2float_a
@@ -1619,7 +1623,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvUnaryArithTest, Transpose_2x3) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m2v3float %m2v3float_a
@@ -1657,7 +1661,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvUnaryArithTest, Transpose_3x2) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %m3v2float %m3v2float_a
