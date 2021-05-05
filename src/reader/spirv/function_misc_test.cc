@@ -25,6 +25,15 @@ namespace {
 using ::testing::Eq;
 using ::testing::HasSubstr;
 
+std::string Preamble() {
+  return R"(
+   OpCapability Shader
+   OpMemoryModel Logical Simple
+   OpEntryPoint Fragment %100 "main"
+   OpExecutionMode %100 OriginUpperLeft
+)";
+}
+
 std::string CommonTypes() {
   return R"(
   %void = OpTypeVoid
@@ -45,7 +54,7 @@ std::string CommonTypes() {
 using SpvParserTestMiscInstruction = SpvParserTest;
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + CommonTypes() + R"(
      %1 = OpUndef %bool
      %2 = OpUndef %uint
      %3 = OpUndef %int
@@ -108,7 +117,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_BeforeFunction_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + CommonTypes() + R"(
      %4 = OpUndef %v2bool
      %1 = OpUndef %v2uint
      %2 = OpUndef %v2int
@@ -188,7 +197,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpUndef %bool
@@ -251,7 +260,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpUndef %v2uint
@@ -314,7 +323,7 @@ VariableDeclStatement{
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + CommonTypes() + R"(
      %mat = OpTypeMatrix %v2float 2
 
      %100 = OpFunction %void None %voidfn
@@ -355,7 +364,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Matrix) {
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + CommonTypes() + R"(
      %uint_2 = OpConstant %uint 2
      %arr = OpTypeArray %uint %uint_2
 
@@ -389,7 +398,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Array) {
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + CommonTypes() + R"(
      %strct = OpTypeStruct %bool %uint %int %float
 
      %100 = OpFunction %void None %voidfn
@@ -424,7 +433,7 @@ TEST_F(SpvParserTestMiscInstruction, OpUndef_InFunction_Struct) {
 }
 
 TEST_F(SpvParserTestMiscInstruction, OpNop) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      OpNop
@@ -452,7 +461,7 @@ using SpvParserSwizzleTest =
 
 TEST_P(SpvParserSwizzleTest, Sample) {
   // We need a function so we can get a FunctionEmitter.
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      OpReturn

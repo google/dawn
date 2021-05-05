@@ -33,7 +33,15 @@ std::string Preamble() {
     OpCapability Sampled1D
     OpCapability Image1D
     OpCapability StorageImageExtendedFormats
+    OpCapability ImageQuery
     OpMemoryModel Logical Simple
+  )";
+}
+
+std::string FragMain() {
+  return R"(
+    OpEntryPoint Fragment %main "main" ; assume no IO
+    OpExecutionMode %main OriginUpperLeft
   )";
 }
 
@@ -811,7 +819,7 @@ using SpvParserTest_RegisterHandleUsage_SampledImage =
     SpvParserTestBase<::testing::TestWithParam<UsageImageAccessCase>>;
 
 TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, Variable) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %si_ty = OpTypeSampledImage %f_texture_2d
      %coords = OpConstantNull %v2float
 
@@ -1098,6 +1106,7 @@ using SpvParserTest_DeclUnderspecifiedHandle =
 
 TEST_P(SpvParserTest_DeclUnderspecifiedHandle, Variable) {
   const auto assembly = Preamble() + R"(
+     OpEntryPoint GLCompute %main "main"
      OpDecorate %10 DescriptorSet 0
      OpDecorate %10 Binding 0
 )" + GetParam().decorations +
