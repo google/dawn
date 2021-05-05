@@ -975,6 +975,82 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3) {
 )");
 }
 
+TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoVectors) {
+  auto* v1 = vec3<f32>(2.0f, 2.0f, 2.0f);
+  auto* v2 = vec3<f32>(2.0f, 2.0f, 2.0f);
+  ast::StatementList stmts = {
+      WrapInStatement(v1),
+      WrapInStatement(v2),
+  };
+  WrapInFunction(stmts);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(v1), 4u);
+  EXPECT_EQ(b.GenerateExpression(v2), 4u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3 %3
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoArrays) {
+  auto* a1 = array<f32, 3>(2.0f, 2.0f, 2.0f);
+  auto* a2 = array<f32, 3>(2.0f, 2.0f, 2.0f);
+  ast::StatementList stmts = {
+      WrapInStatement(a1),
+      WrapInStatement(a2),
+  };
+  WrapInFunction(stmts);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(a1), 6u);
+  EXPECT_EQ(b.GenerateExpression(a2), 6u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 3
+%1 = OpTypeArray %2 %4
+%5 = OpConstant %2 2
+%6 = OpConstantComposite %1 %5 %5 %5
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
+  // Test that initializers of different types with the same values produce
+  // different OpConstantComposite instructions.
+  // crbug.com/tint/777
+  auto* a1 = array<f32, 2>(1.0f, 2.0f);
+  auto* a2 = array<f32, 2>(vec2<f32>(1.0f, 2.0f), vec2<f32>(1.0f, 2.0f));
+  ast::StatementList stmts = {
+      WrapInStatement(a1),
+      WrapInStatement(a2),
+  };
+  WrapInFunction(stmts);
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  EXPECT_EQ(b.GenerateExpression(a1), 7u);
+  EXPECT_EQ(b.GenerateExpression(a2), 10u);
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 2
+%1 = OpTypeArray %2 %4
+%5 = OpConstant %2 1
+%6 = OpConstant %2 2
+%7 = OpConstantComposite %1 %5 %6
+%8 = OpTypeVector %2 2
+%9 = OpConstantComposite %8 %5 %6
+%10 = OpConstantComposite %1 %9 %9
+)");
+}
+
 TEST_F(SpvBuilderConstructorTest, Type_Struct) {
   auto s = Structure("my_struct", {
                                       Member("a", ty.f32()),

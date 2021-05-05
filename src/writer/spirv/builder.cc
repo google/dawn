@@ -1302,7 +1302,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
   }
 
   std::ostringstream out;
-  out << "__const";
+  out << "__const_" << init->type()->FriendlyName(builder_.Symbols()) << "_";
 
   result_type = result_type->UnwrapAll();
   bool constructor_is_const = is_constructor_const(init, is_global_init);
