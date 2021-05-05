@@ -20,6 +20,7 @@
 namespace tint {
 namespace transform {
 
+/// DEPRECATED: This should now be performed using the SPIR-V sanitizer.
 /// EmitVertexPointSize is a Transform that adds a PointSize builtin global
 /// output variable to the program which is assigned 1.0 as the new first
 /// statement for all vertex stage entry points.

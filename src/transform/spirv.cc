@@ -26,13 +26,17 @@
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 
+TINT_INSTANTIATE_TYPEINFO(tint::transform::Spirv::Config);
+
 namespace tint {
 namespace transform {
 
 Spirv::Spirv() = default;
 Spirv::~Spirv() = default;
 
-Output Spirv::Run(const Program* in, const DataMap&) {
+Output Spirv::Run(const Program* in, const DataMap& data) {
+  auto* cfg = data.Get<Config>();
+
   ProgramBuilder out;
   CloneContext ctx(&out, in);
   HandleEntryPointIOTypes(ctx);
@@ -45,6 +49,9 @@ Output Spirv::Run(const Program* in, const DataMap&) {
   CloneContext ctx2(&out2, &tmp);
   HandleSampleMaskBuiltins(ctx2);
   AddEmptyEntryPoint(ctx2);
+  if (cfg && cfg->emit_vertex_point_size) {
+    EmitVertexPointSize(ctx2);
+  }
   ctx2.Clone();
 
   return Output{Program(std::move(out2))};
@@ -242,6 +249,29 @@ void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
   }
 }
 
+void Spirv::EmitVertexPointSize(CloneContext& ctx) const {
+  // No-op if there are no vertex stages in the module.
+  if (!ctx.src->AST().Functions().HasStage(ast::PipelineStage::kVertex)) {
+    return;
+  }
+
+  // Create a module-scope pointsize builtin output variable.
+  Symbol pointsize = ctx.dst->Symbols().New("tint_pointsize");
+  ctx.dst->Global(pointsize, ctx.dst->ty.f32(), ast::StorageClass::kOutput,
+                  nullptr, {ctx.dst->Builtin(ast::Builtin::kPointSize)});
+
+  // Assign 1.0 to the global at the start of all vertex shader entry points.
+  ctx.ReplaceAll([&ctx, pointsize](ast::Function* func) -> ast::Function* {
+    if (func->pipeline_stage() != ast::PipelineStage::kVertex) {
+      return nullptr;
+    }
+    return CloneWithStatementsAtStart(&ctx, func,
+                                      {
+                                          ctx.dst->Assign(pointsize, 1.0f),
+                                      });
+  });
+}
+
 void Spirv::AddEmptyEntryPoint(CloneContext& ctx) const {
   for (auto* func : ctx.src->AST().Functions()) {
     if (func->IsEntryPoint()) {
@@ -346,6 +376,13 @@ void Spirv::HoistToOutputVariables(CloneContext& ctx,
     member_accesses.pop_back();
   }
 }
+
+Spirv::Config::Config(bool emit_vertex_point_size)
+    : emit_vertex_point_size(emit_vertex_point_size) {}
+
+Spirv::Config::Config(const Config&) = default;
+Spirv::Config::~Config() = default;
+Spirv::Config& Spirv::Config::operator=(const Config&) = default;
 
 }  // namespace transform
 }  // namespace tint

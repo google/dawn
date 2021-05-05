@@ -566,6 +566,128 @@ fn main() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SpirvTest, EmitVertexPointSize_Basic) {
+  auto* src = R"(
+fn non_entry_point() {
+}
+
+[[stage(vertex)]]
+fn main() -> [[builtin(position)]] vec4<f32> {
+  non_entry_point();
+  return vec4<f32>();
+}
+)";
+
+  auto* expect = R"(
+[[builtin(pointsize)]] var<out> tint_pointsize : f32;
+
+fn non_entry_point() {
+}
+
+[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+
+fn tint_symbol_2(tint_symbol : vec4<f32>) {
+  tint_symbol_1 = tint_symbol;
+}
+
+[[stage(vertex)]]
+fn main() {
+  tint_pointsize = 1.0;
+  non_entry_point();
+  tint_symbol_2(vec4<f32>());
+  return;
+}
+)";
+
+  DataMap data;
+  data.Add<Spirv::Config>(true);
+  auto got = Run<Spirv>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvTest, EmitVertexPointSize_MultipleVertexShaders) {
+  auto* src = R"(
+[[stage(vertex)]]
+fn main1() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
+
+[[stage(vertex)]]
+fn main2() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
+
+[[stage(vertex)]]
+fn main3() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
+)";
+
+  auto* expect = R"(
+[[builtin(pointsize)]] var<out> tint_pointsize : f32;
+
+[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
+
+fn tint_symbol_2(tint_symbol : vec4<f32>) {
+  tint_symbol_1 = tint_symbol;
+}
+
+[[stage(vertex)]]
+fn main1() {
+  tint_pointsize = 1.0;
+  tint_symbol_2(vec4<f32>());
+  return;
+}
+
+[[builtin(position)]] var<out> tint_symbol_4 : vec4<f32>;
+
+fn tint_symbol_5(tint_symbol_3 : vec4<f32>) {
+  tint_symbol_4 = tint_symbol_3;
+}
+
+[[stage(vertex)]]
+fn main2() {
+  tint_pointsize = 1.0;
+  tint_symbol_5(vec4<f32>());
+  return;
+}
+
+[[builtin(position)]] var<out> tint_symbol_7 : vec4<f32>;
+
+fn tint_symbol_8(tint_symbol_6 : vec4<f32>) {
+  tint_symbol_7 = tint_symbol_6;
+}
+
+[[stage(vertex)]]
+fn main3() {
+  tint_pointsize = 1.0;
+  tint_symbol_8(vec4<f32>());
+  return;
+}
+)";
+
+  DataMap data;
+  data.Add<Spirv::Config>(true);
+  auto got = Run<Spirv>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvTest, EmitVertexPointSize_NoVertexShaders) {
+  auto* src = R"(
+[[stage(compute)]]
+fn main() {
+}
+)";
+
+  DataMap data;
+  data.Add<Spirv::Config>(true);
+  auto got = Run<Spirv>(src, data);
+
+  EXPECT_EQ(src, str(got));
+}
+
 TEST_F(SpirvTest, AddEmptyEntryPoint) {
   auto* src = R"()";
 
@@ -583,8 +705,13 @@ fn _tint_unused_entry_point() {
 // Test that different transforms within the sanitizer interact correctly.
 TEST_F(SpirvTest, MultipleTransforms) {
   auto* src = R"(
+[[stage(vertex)]]
+fn vert_main() -> [[builtin(position)]] vec4<f32> {
+  return vec4<f32>();
+}
+
 [[stage(fragment)]]
-fn main([[builtin(sample_index)]] sample_index : u32,
+fn frag_main([[builtin(sample_index)]] sample_index : u32,
         [[builtin(sample_mask)]] mask_in : u32)
         -> [[builtin(sample_mask)]] u32 {
   return mask_in;
@@ -592,24 +719,41 @@ fn main([[builtin(sample_index)]] sample_index : u32,
 )";
 
   auto* expect = R"(
-[[builtin(sample_index)]] var<in> tint_symbol : u32;
+[[builtin(pointsize)]] var<out> tint_pointsize : f32;
 
-[[builtin(sample_mask)]] var<in> tint_symbol_1 : array<u32, 1>;
+[[builtin(position)]] var<out> tint_symbol_1 : vec4<f32>;
 
-[[builtin(sample_mask)]] var<out> tint_symbol_3 : array<u32, 1>;
+fn tint_symbol_2(tint_symbol : vec4<f32>) {
+  tint_symbol_1 = tint_symbol;
+}
 
-fn tint_symbol_4(tint_symbol_2 : u32) {
-  tint_symbol_3[0] = tint_symbol_2;
+[[stage(vertex)]]
+fn vert_main() {
+  tint_pointsize = 1.0;
+  tint_symbol_2(vec4<f32>());
+  return;
+}
+
+[[builtin(sample_index)]] var<in> tint_symbol_3 : u32;
+
+[[builtin(sample_mask)]] var<in> tint_symbol_4 : array<u32, 1>;
+
+[[builtin(sample_mask)]] var<out> tint_symbol_6 : array<u32, 1>;
+
+fn tint_symbol_7(tint_symbol_5 : u32) {
+  tint_symbol_6[0] = tint_symbol_5;
 }
 
 [[stage(fragment)]]
-fn main() {
-  tint_symbol_4(tint_symbol_1[0]);
+fn frag_main() {
+  tint_symbol_7(tint_symbol_4[0]);
   return;
 }
 )";
 
-  auto got = Run<Spirv>(src);
+  DataMap data;
+  data.Add<Spirv::Config>(true);
+  auto got = Run<Spirv>(src, data);
 
   EXPECT_EQ(expect, str(got));
 }

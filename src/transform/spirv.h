@@ -31,6 +31,27 @@ namespace transform {
 /// undefined behavior.
 class Spirv : public Transform {
  public:
+  /// Configuration options for the transform.
+  struct Config : public Castable<Config, Data> {
+    /// Constructor
+    /// @param emit_vertex_point_size `true` to generate a PointSize builtin
+    explicit Config(bool emit_vertex_point_size = false);
+
+    /// Copy constructor.
+    Config(const Config&);
+
+    /// Destructor.
+    ~Config() override;
+
+    /// Assignment operator.
+    /// @returns this Config
+    Config& operator=(const Config&);
+
+    /// Set to `true` to generate a PointSize builtin and have it set to 1.0
+    /// from all vertex shaders in the module.
+    bool emit_vertex_point_size;
+  };
+
   /// Constructor
   Spirv();
   ~Spirv() override;
@@ -47,6 +68,9 @@ class Spirv : public Transform {
   void HandleEntryPointIOTypes(CloneContext& ctx) const;
   /// Change type of sample mask builtin variables to single element arrays.
   void HandleSampleMaskBuiltins(CloneContext& ctx) const;
+  /// Add a PointSize builtin output to the module and set it to 1.0 from all
+  /// vertex stage entry points.
+  void EmitVertexPointSize(CloneContext& ctx) const;
   /// Add an empty shader entry point if none exist in the module.
   void AddEmptyEntryPoint(CloneContext& ctx) const;
 
