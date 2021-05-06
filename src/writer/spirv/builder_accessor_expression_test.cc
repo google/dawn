@@ -895,13 +895,54 @@ TEST_F(BuilderTest, Accessor_Array_NonPointer) {
 )");
 }
 
-TEST_F(BuilderTest, DISABLED_Accessor_Array_NonPointer_Dynamic) {
+TEST_F(BuilderTest, Accessor_Array_NonPointer_Dynamic) {
   // let a : array<f32, 3>;
   // idx : i32
   // a[idx]
-  //
-  // This needs to copy the array to an OpVariable in the Function storage class
-  // and then access chain into it and load the result.
+
+  auto* var = GlobalConst("a", ty.array<f32, 3>(),
+                          Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
+
+  auto* idx = Var("idx", ty.i32(), ast::StorageClass::kFunction);
+  auto* expr = IndexAccessor("a", idx);
+
+  ast::StatementList body;
+  body.push_back(WrapInStatement(idx));
+  body.push_back(WrapInStatement(expr));
+  WrapInFunction(body);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunctionVariable(idx)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 19u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
+%3 = OpTypeInt 32 0
+%4 = OpConstant %3 3
+%1 = OpTypeArray %2 %4
+%5 = OpConstant %2 0
+%6 = OpConstant %2 0.5
+%7 = OpConstant %2 1
+%8 = OpConstantComposite %1 %5 %6 %7
+%11 = OpTypeInt 32 1
+%10 = OpTypePointer Function %11
+%12 = OpConstantNull %11
+%13 = OpTypePointer Function %1
+%15 = OpConstantNull %1
+%17 = OpTypePointer Function %2
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%9 = OpVariable %10 Function %12
+%14 = OpVariable %13 Function %15
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %14 %8
+%16 = OpLoad %11 %9
+%18 = OpAccessChain %17 %14 %16
+%19 = OpLoad %2 %18
+)");
 }
 
 }  // namespace

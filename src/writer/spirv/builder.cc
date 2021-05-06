@@ -822,11 +822,8 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   auto* type = TypeOf(expr->idx_expr());
   idx_id = GenerateLoadIfNeeded(type, idx_id);
 
-  // If the source is a pointer we access chain into it. We also access chain
-  // into an array of non-scalar types.
-  if (info->source_type->Is<sem::Pointer>() ||
-      (info->source_type->Is<sem::ArrayType>() &&
-       !info->source_type->As<sem::ArrayType>()->type()->is_scalar())) {
+  // If the source is a pointer, we access chain into it.
+  if (info->source_type->Is<sem::Pointer>()) {
     info->access_chain_indices.push_back(idx_id);
     info->source_type = TypeOf(expr);
     return true;
@@ -1063,17 +1060,21 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   }
   info.source_type = TypeOf(source);
 
-  // If our initial access is into an array of non-scalar types, and that array
-  // is not a pointer, then we need to load that array into a variable in order
-  // to access chain into the array.
+  // If our initial access is into a non-pointer array, and either has a
+  // non-scalar element type or the accessor uses a non-literal index, then we
+  // need to load that array into a variable in order to access chain into it.
+  // TODO(jrprice): The non-scalar part shouldn't be necessary, but is tied to
+  // how the Resolver currently determines the type of these expression. This
+  // should be fixed when proper support for ptr/ref types is implemented.
   if (auto* array = accessors[0]->As<ast::ArrayAccessorExpression>()) {
-    auto* ary_res_type = TypeOf(array->array());
-
-    if (!ary_res_type->Is<sem::Pointer>() &&
-        (ary_res_type->Is<sem::ArrayType>() &&
-         !ary_res_type->As<sem::ArrayType>()->type()->is_scalar())) {
-      sem::Pointer ptr(ary_res_type, ast::StorageClass::kFunction);
-      auto result_type_id = GenerateTypeIfNeeded(&ptr);
+    auto* ary_res_type = TypeOf(array->array())->As<sem::ArrayType>();
+    if (ary_res_type &&
+        (!ary_res_type->type()->is_scalar() ||
+         !array->idx_expr()->Is<ast::ScalarConstructorExpression>())) {
+      // Wrap the source type in a pointer to function storage.
+      auto ptr =
+          builder_.ty.pointer(ary_res_type, ast::StorageClass::kFunction);
+      auto result_type_id = GenerateTypeIfNeeded(ptr);
       if (result_type_id == 0) {
         return 0;
       }
@@ -1094,6 +1095,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
       }
 
       info.source_id = ary_result.to_i();
+      info.source_type = ptr;
     }
   }
 
@@ -1115,7 +1117,17 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   }
 
   if (!info.access_chain_indices.empty()) {
-    auto result_type_id = GenerateTypeIfNeeded(TypeOf(expr));
+    bool needs_load = false;
+    auto* ptr = TypeOf(expr);
+    if (!ptr->Is<sem::Pointer>()) {
+      // We are performing an access chain but the final result is not a
+      // pointer, so we need to perform a load to get it. This happens when we
+      // have to copy the source expression into a function variable.
+      ptr = builder_.ty.pointer(ptr, ast::StorageClass::kFunction);
+      needs_load = true;
+    }
+
+    auto result_type_id = GenerateTypeIfNeeded(ptr);
     if (result_type_id == 0) {
       return 0;
     }
@@ -1133,6 +1145,11 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
       return false;
     }
     info.source_id = result_id;
+
+    // Load from the access chain result if required.
+    if (needs_load) {
+      info.source_id = GenerateLoadIfNeeded(ptr, result_id);
+    }
   }
 
   return info.source_id;
