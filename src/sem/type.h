@@ -17,7 +17,7 @@
 
 #include <string>
 
-#include "src/castable.h"
+#include "src/sem/node.h"
 
 namespace tint {
 
@@ -31,7 +31,7 @@ namespace sem {
 enum class MemoryLayout { kUniformBuffer, kStorageBuffer };
 
 /// Base class for a type in the system
-class Type : public Castable<Type> {
+class Type : public Castable<Type, Node> {
  public:
   /// Move constructor
   Type(Type&&);

@@ -304,7 +304,10 @@ class ProgramBuilder {
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
   template <typename T, typename... ARGS>
-  traits::EnableIfIsType<T, sem::Node>* create(ARGS&&... args) {
+  traits::EnableIf<traits::IsTypeOrDerived<T, sem::Node>::value &&
+                       !traits::IsTypeOrDerived<T, sem::Type>::value,
+                   T>*
+  create(ARGS&&... args) {
     AssertNotMoved();
     return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
   }
