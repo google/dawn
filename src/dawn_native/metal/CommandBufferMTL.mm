@@ -858,6 +858,11 @@ namespace dawn_native { namespace metal {
                 case Command::Dispatch: {
                     DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
 
+                    // Skip noop dispatches, it can causes issues on some systems.
+                    if (dispatch->x == 0 || dispatch->y == 0 || dispatch->z == 0) {
+                        break;
+                    }
+
                     bindGroups.Apply(encoder);
                     storageBufferLengths.Apply(encoder, lastPipeline);
 
