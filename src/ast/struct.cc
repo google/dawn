@@ -65,19 +65,7 @@ Struct* Struct::Clone(CloneContext* ctx) const {
   auto n = ctx->Clone(name());
   auto mem = ctx->Clone(members());
   auto decos = ctx->Clone(decorations());
-  auto* out = ctx->dst->create<Struct>(src, n, mem, decos);
-
-  // HACK(crbug.com/tint/724): AST nodes do not derive from ShareableCloneable,
-  // and so each call to Clone() produces a new copy of the node. However,
-  // during the type system migration of tint:724, we have the situation where
-  // we have diamonds pointers to the ast::Struct - one from the ast::Module and
-  // one from the sem::StructType. This is a hack to make ast::Struct act like
-  // it derives from ShareableCloneable.
-  // This should be removed (possibly along with ShareableCloneable) once
-  // tint:724 is complete.
-  ctx->Replace(this, out);
-
-  return out;
+  return ctx->dst->create<Struct>(src, n, mem, decos);
 }
 
 void Struct::to_str(const sem::Info& sem,
