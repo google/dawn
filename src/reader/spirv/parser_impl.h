@@ -549,7 +549,7 @@ class ParserImpl : Reader {
     return function_to_ep_info_[entry_point];
   }
 
-  /// Returns the SPIR-V binary.
+  /// @returns the SPIR-V binary.
   const std::vector<uint32_t>& spv_binary() { return spv_binary_; }
 
  private:

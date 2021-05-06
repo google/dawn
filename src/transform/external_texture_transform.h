@@ -22,11 +22,11 @@
 namespace tint {
 namespace transform {
 
-// Because an external texture is comprised of 1-3 texture views we can simply
-// transform external textures into the appropriate number of sampled textures.
-// This allows us to share SPIR-V/HLSL writer paths for sampled textures instead
-// of adding dedicated writer paths for external textures.
-// ExternalTextureTransform performs this transformation.
+/// Because an external texture is comprised of 1-3 texture views we can simply
+/// transform external textures into the appropriate number of sampled textures.
+/// This allows us to share SPIR-V/HLSL writer paths for sampled textures
+/// instead of adding dedicated writer paths for external textures.
+/// ExternalTextureTransform performs this transformation.
 class ExternalTextureTransform : public Transform {
  public:
   /// Constructor
