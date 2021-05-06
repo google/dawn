@@ -124,7 +124,9 @@ bool IsValidStorageTextureImageFormat(ast::ImageFormat format) {
 }  // namespace
 
 Resolver::Resolver(ProgramBuilder* builder)
-    : builder_(builder), intrinsic_table_(IntrinsicTable::Create()) {}
+    : builder_(builder),
+      diagnostics_(builder->Diagnostics()),
+      intrinsic_table_(IntrinsicTable::Create()) {}
 
 Resolver::~Resolver() = default;
 
@@ -158,7 +160,7 @@ bool Resolver::Resolve() {
 
   bool result = ResolveInternal();
 
-  if (result && diagnostics_.contains_errors()) {
+  if (!result && !diagnostics_.contains_errors()) {
     TINT_ICE(diagnostics_) << "resolving failed, but no error was raised";
     return false;
   }

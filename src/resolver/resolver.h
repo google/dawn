@@ -360,8 +360,8 @@ class Resolver {
   void Mark(const ast::Node* node);
 
   ProgramBuilder* const builder_;
+  diag::List& diagnostics_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
-  diag::List diagnostics_;
   BlockInfo* current_block_ = nullptr;
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;

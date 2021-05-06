@@ -45,7 +45,6 @@ Program::Program(ProgramBuilder&& builder) {
   if (builder.ResolveOnBuild() && builder.IsValid()) {
     resolver::Resolver resolver(&builder);
     if (!resolver.Resolve()) {
-      diagnostics_.add_error(resolver.error());
       is_valid_ = false;
     }
   }
