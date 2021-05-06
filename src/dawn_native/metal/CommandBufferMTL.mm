@@ -554,8 +554,8 @@ namespace dawn_native { namespace metal {
         size_t nextComputePassNumber = 0;
         size_t nextRenderPassNumber = 0;
 
-        auto LazyClearForPass = [](const SyncScopeResourceUsage& scope,
-                                   CommandRecordingContext* commandContext) {
+        auto LazyClearSyncScope = [](const SyncScopeResourceUsage& scope,
+                                     CommandRecordingContext* commandContext) {
             for (size_t i = 0; i < scope.textures.size(); ++i) {
                 Texture* texture = ToBackend(scope.textures[i]);
 
@@ -580,8 +580,10 @@ namespace dawn_native { namespace metal {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
 
-                    LazyClearForPass(GetResourceUsages().computePasses[nextComputePassNumber],
-                                     commandContext);
+                    for (const SyncScopeResourceUsage& scope :
+                         GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
+                        LazyClearSyncScope(scope, commandContext);
+                    }
                     commandContext->EndBlit();
 
                     DAWN_TRY(EncodeComputePass(commandContext));
@@ -593,8 +595,8 @@ namespace dawn_native { namespace metal {
                 case Command::BeginRenderPass: {
                     BeginRenderPassCmd* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
 
-                    LazyClearForPass(GetResourceUsages().renderPasses[nextRenderPassNumber],
-                                     commandContext);
+                    LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber],
+                                       commandContext);
                     commandContext->EndBlit();
 
                     LazyClearRenderPassAttachments(cmd);

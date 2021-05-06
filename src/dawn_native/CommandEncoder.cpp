@@ -949,8 +949,12 @@ namespace dawn_native {
         for (const RenderPassResourceUsage& passUsage : mEncodingContext.GetRenderPassUsages()) {
             DAWN_TRY(ValidateSyncScopeResourceUsage(passUsage));
         }
-        // TODO(dawn:632): The synchronization scopes of compute passes should be validated here
-        // once they are tracked per-dispatch.
+
+        for (const ComputePassResourceUsage& passUsage : mEncodingContext.GetComputePassUsages()) {
+            for (const SyncScopeResourceUsage& scope : passUsage.dispatchUsages) {
+                DAWN_TRY(ValidateSyncScopeResourceUsage(scope));
+            }
+        }
 
         if (mDebugGroupStackSize != 0) {
             return DAWN_VALIDATION_ERROR("Each Push must be balanced by a corresponding Pop.");

@@ -226,6 +226,14 @@ namespace utils {
         return device.CreatePipelineLayout(&descriptor);
     }
 
+    wgpu::PipelineLayout MakePipelineLayout(const wgpu::Device& device,
+                                            std::vector<wgpu::BindGroupLayout> bgls) {
+        wgpu::PipelineLayoutDescriptor descriptor;
+        descriptor.bindGroupLayoutCount = uint32_t(bgls.size());
+        descriptor.bindGroupLayouts = bgls.data();
+        return device.CreatePipelineLayout(&descriptor);
+    }
+
     wgpu::BindGroupLayout MakeBindGroupLayout(
         const wgpu::Device& device,
         std::initializer_list<BindingLayoutEntryInitializationHelper> entriesInitializer) {

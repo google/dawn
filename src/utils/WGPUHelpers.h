@@ -94,6 +94,9 @@ namespace utils {
     wgpu::PipelineLayout MakeBasicPipelineLayout(const wgpu::Device& device,
                                                  const wgpu::BindGroupLayout* bindGroupLayout);
 
+    wgpu::PipelineLayout MakePipelineLayout(const wgpu::Device& device,
+                                            std::vector<wgpu::BindGroupLayout> bgls);
+
     // Helpers to make creating bind group layouts look nicer:
     //
     //   utils::MakeBindGroupLayout(device, {

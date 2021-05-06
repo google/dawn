@@ -49,14 +49,16 @@ namespace dawn_native {
     };
 
     // Helper class to build ComputePassResourceUsages
-    class ComputePassResourceUsageTracker : public SyncScopeUsageTracker {
+    class ComputePassResourceUsageTracker {
       public:
+        void AddDispatch(SyncScopeResourceUsage scope);
+        void AddReferencedBuffer(BufferBase* buffer);
+        void AddResourcesReferencedByBindGroup(BindGroupBase* group);
+
         ComputePassResourceUsage AcquireResourceUsage();
 
       private:
-        // Hide AcquireSyncScopeUsage since users of this class should use AcquireResourceUsage
-        // instead.
-        using SyncScopeUsageTracker::AcquireSyncScopeUsage;
+        ComputePassResourceUsage mUsage;
     };
 
     // Helper class to build RenderPassResourceUsages

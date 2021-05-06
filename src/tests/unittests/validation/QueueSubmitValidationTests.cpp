@@ -219,4 +219,147 @@ namespace {
         WaitForAllOperations(device);
     }
 
+    // Test that buffers in unused compute pass bindgroups are still checked for in
+    // Queue::Submit validation.
+    TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeBuffer) {
+        wgpu::Queue queue = device.GetQueue();
+
+        wgpu::BindGroupLayout emptyBGL = utils::MakeBindGroupLayout(device, {});
+        wgpu::BindGroup emptyBG = utils::MakeBindGroup(device, emptyBGL, {});
+
+        wgpu::BindGroupLayout testBGL = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::BufferBindingType::Storage}});
+
+        // In this test we check that BindGroup 1 is checked, the texture test will check
+        // BindGroup 2. This is to provide coverage of for loops in validation code.
+        wgpu::ComputePipelineDescriptor cpDesc;
+        cpDesc.layout = utils::MakePipelineLayout(device, {emptyBGL, testBGL});
+        cpDesc.computeStage.entryPoint = "main";
+        cpDesc.computeStage.module =
+            utils::CreateShaderModule(device, "[[stage(compute)]] fn main() {}");
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
+
+        wgpu::BufferDescriptor bufDesc;
+        bufDesc.size = 4;
+        bufDesc.usage = wgpu::BufferUsage::Storage;
+
+        // Test that completely unused bindgroups still have their buffers checked.
+        for (bool destroy : {true, false}) {
+            wgpu::Buffer unusedBuffer = device.CreateBuffer(&bufDesc);
+            wgpu::BindGroup unusedBG = utils::MakeBindGroup(device, testBGL, {{0, unusedBuffer}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(1, unusedBG);
+            pass.EndPass();
+            wgpu::CommandBuffer commands = encoder.Finish();
+
+            if (destroy) {
+                unusedBuffer.Destroy();
+                ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+            } else {
+                queue.Submit(1, &commands);
+            }
+        }
+
+        // Test that unused bindgroups because they were replaced still have their buffers checked.
+        for (bool destroy : {true, false}) {
+            wgpu::Buffer unusedBuffer = device.CreateBuffer(&bufDesc);
+            wgpu::BindGroup unusedBG = utils::MakeBindGroup(device, testBGL, {{0, unusedBuffer}});
+
+            wgpu::Buffer usedBuffer = device.CreateBuffer(&bufDesc);
+            wgpu::BindGroup usedBG = utils::MakeBindGroup(device, testBGL, {{0, unusedBuffer}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, emptyBG);
+            pass.SetBindGroup(1, unusedBG);
+            pass.SetBindGroup(1, usedBG);
+            pass.SetPipeline(pipeline);
+            pass.Dispatch(1);
+            pass.EndPass();
+            wgpu::CommandBuffer commands = encoder.Finish();
+
+            if (destroy) {
+                unusedBuffer.Destroy();
+                ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+            } else {
+                queue.Submit(1, &commands);
+            }
+        }
+    }
+
+    // Test that textures in unused compute pass bindgroups are still checked for in
+    // Queue::Submit validation.
+    TEST_F(QueueSubmitValidationTest, SubmitWithUnusedComputeTextures) {
+        wgpu::Queue queue = device.GetQueue();
+
+        wgpu::BindGroupLayout emptyBGL = utils::MakeBindGroupLayout(device, {});
+        wgpu::BindGroup emptyBG = utils::MakeBindGroup(device, emptyBGL, {});
+
+        wgpu::BindGroupLayout testBGL = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float}});
+
+        wgpu::ComputePipelineDescriptor cpDesc;
+        cpDesc.layout = utils::MakePipelineLayout(device, {emptyBGL, emptyBGL, testBGL});
+        cpDesc.computeStage.entryPoint = "main";
+        cpDesc.computeStage.module =
+            utils::CreateShaderModule(device, "[[stage(compute)]] fn main() {}");
+        wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cpDesc);
+
+        wgpu::TextureDescriptor texDesc;
+        texDesc.size = {1, 1, 1};
+        texDesc.usage = wgpu::TextureUsage::Sampled;
+        texDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+
+        // Test that completely unused bindgroups still have their buffers checked.
+        for (bool destroy : {true, false}) {
+            wgpu::Texture unusedTexture = device.CreateTexture(&texDesc);
+            wgpu::BindGroup unusedBG =
+                utils::MakeBindGroup(device, testBGL, {{0, unusedTexture.CreateView()}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(2, unusedBG);
+            pass.EndPass();
+            wgpu::CommandBuffer commands = encoder.Finish();
+
+            if (destroy) {
+                unusedTexture.Destroy();
+                ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+            } else {
+                queue.Submit(1, &commands);
+            }
+        }
+
+        // Test that unused bindgroups because they were replaced still have their buffers checked.
+        for (bool destroy : {true, false}) {
+            wgpu::Texture unusedTexture = device.CreateTexture(&texDesc);
+            wgpu::BindGroup unusedBG =
+                utils::MakeBindGroup(device, testBGL, {{0, unusedTexture.CreateView()}});
+
+            wgpu::Texture usedTexture = device.CreateTexture(&texDesc);
+            wgpu::BindGroup usedBG =
+                utils::MakeBindGroup(device, testBGL, {{0, unusedTexture.CreateView()}});
+
+            wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+            wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+            pass.SetBindGroup(0, emptyBG);
+            pass.SetBindGroup(1, emptyBG);
+            pass.SetBindGroup(2, unusedBG);
+            pass.SetBindGroup(2, usedBG);
+            pass.SetPipeline(pipeline);
+            pass.Dispatch(1);
+            pass.EndPass();
+            wgpu::CommandBuffer commands = encoder.Finish();
+
+            if (destroy) {
+                unusedTexture.Destroy();
+                ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
+            } else {
+                queue.Submit(1, &commands);
+            }
+        }
+    }
+
 }  // anonymous namespace

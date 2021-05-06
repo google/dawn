@@ -39,7 +39,8 @@ namespace dawn_native { namespace d3d12 {
         CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
         MaybeError RecordComputePass(CommandRecordingContext* commandContext,
-                                     BindGroupStateTracker* bindingTracker);
+                                     BindGroupStateTracker* bindingTracker,
+                                     const ComputePassResourceUsage& resourceUsages);
         MaybeError RecordRenderPass(CommandRecordingContext* commandContext,
                                     BindGroupStateTracker* bindingTracker,
                                     BeginRenderPassCmd* renderPass,

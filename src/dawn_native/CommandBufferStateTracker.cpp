@@ -227,4 +227,12 @@ namespace dawn_native {
         mAspects &= ~kLazyAspects;
     }
 
+    BindGroupBase* CommandBufferStateTracker::GetBindGroup(BindGroupIndex index) const {
+        return mBindgroups[index];
+    }
+
+    PipelineLayoutBase* CommandBufferStateTracker::GetPipelineLayout() const {
+        return mLastPipelineLayout;
+    }
+
 }  // namespace dawn_native

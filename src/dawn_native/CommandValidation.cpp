@@ -37,7 +37,8 @@ namespace dawn_native {
 
             if (!readOnly && !singleUse) {
                 return DAWN_VALIDATION_ERROR(
-                    "Buffer used as writable usage and another usage in pass");
+                    "Buffer used as writable usage and another usage in the same synchronization "
+                    "scope");
             }
         }
 
@@ -50,7 +51,8 @@ namespace dawn_native {
                 bool singleUse = wgpu::HasZeroOrOneBits(usage);
                 if (!readOnly && !singleUse && !error.IsError()) {
                     error = DAWN_VALIDATION_ERROR(
-                        "Texture used as writable usage and another usage in render pass");
+                        "Texture used as writable usage and another usage in the same "
+                        "synchronization scope");
                 }
             });
             DAWN_TRY(std::move(error));

@@ -100,129 +100,72 @@ namespace dawn_native { namespace vulkan {
             return region;
         }
 
-        void ApplyDescriptorSets(
-            Device* device,
-            VkCommandBuffer commands,
-            VkPipelineBindPoint bindPoint,
-            VkPipelineLayout pipelineLayout,
-            const BindGroupLayoutMask& bindGroupsToApply,
-            const ityp::array<BindGroupIndex, BindGroupBase*, kMaxBindGroups>& bindGroups,
-            const ityp::array<BindGroupIndex, uint32_t, kMaxBindGroups>& dynamicOffsetCounts,
-            const ityp::array<BindGroupIndex,
-                              std::array<uint32_t, kMaxDynamicBuffersPerPipelineLayout>,
-                              kMaxBindGroups>& dynamicOffsets) {
-            for (BindGroupIndex dirtyIndex : IterateBitSet(bindGroupsToApply)) {
-                VkDescriptorSet set = ToBackend(bindGroups[dirtyIndex])->GetHandle();
-                const uint32_t* dynamicOffset = dynamicOffsetCounts[dirtyIndex] > 0
-                                                    ? dynamicOffsets[dirtyIndex].data()
-                                                    : nullptr;
-                device->fn.CmdBindDescriptorSets(commands, bindPoint, pipelineLayout,
-                                                 static_cast<uint32_t>(dirtyIndex), 1, &*set,
-                                                 dynamicOffsetCounts[dirtyIndex], dynamicOffset);
+        class DescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
+          public:
+            DescriptorSetTracker() = default;
+
+            void Apply(Device* device,
+                       CommandRecordingContext* recordingContext,
+                       VkPipelineBindPoint bindPoint) {
+                for (BindGroupIndex dirtyIndex :
+                     IterateBitSet(mDirtyBindGroupsObjectChangedOrIsDynamic)) {
+                    VkDescriptorSet set = ToBackend(mBindGroups[dirtyIndex])->GetHandle();
+                    const uint32_t* dynamicOffset = mDynamicOffsetCounts[dirtyIndex] > 0
+                                                        ? mDynamicOffsets[dirtyIndex].data()
+                                                        : nullptr;
+                    device->fn.CmdBindDescriptorSets(
+                        recordingContext->commandBuffer, bindPoint,
+                        ToBackend(mPipelineLayout)->GetHandle(), static_cast<uint32_t>(dirtyIndex),
+                        1, &*set, mDynamicOffsetCounts[dirtyIndex], dynamicOffset);
+                }
+                DidApply();
+            }
+        };
+
+        // Records the necessary barriers for a synchronization scope using the resource usage
+        // data pre-computed in the frontend. Also performs lazy initialization if required.
+        void TransitionAndClearForSyncScope(Device* device,
+                                            CommandRecordingContext* recordingContext,
+                                            const SyncScopeResourceUsage& scope) {
+            std::vector<VkBufferMemoryBarrier> bufferBarriers;
+            std::vector<VkImageMemoryBarrier> imageBarriers;
+            VkPipelineStageFlags srcStages = 0;
+            VkPipelineStageFlags dstStages = 0;
+
+            for (size_t i = 0; i < scope.buffers.size(); ++i) {
+                Buffer* buffer = ToBackend(scope.buffers[i]);
+                buffer->EnsureDataInitialized(recordingContext);
+
+                VkBufferMemoryBarrier bufferBarrier;
+                if (buffer->TransitionUsageAndGetResourceBarrier(
+                        scope.bufferUsages[i], &bufferBarrier, &srcStages, &dstStages)) {
+                    bufferBarriers.push_back(bufferBarrier);
+                }
+            }
+
+            for (size_t i = 0; i < scope.textures.size(); ++i) {
+                Texture* texture = ToBackend(scope.textures[i]);
+
+                // Clear subresources that are not render attachments. Render attachments will be
+                // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
+                // subresource has not been initialized before the render pass.
+                scope.textureUsages[i].Iterate(
+                    [&](const SubresourceRange& range, wgpu::TextureUsage usage) {
+                        if (usage & ~wgpu::TextureUsage::RenderAttachment) {
+                            texture->EnsureSubresourceContentInitialized(recordingContext, range);
+                        }
+                    });
+                texture->TransitionUsageForPass(recordingContext, scope.textureUsages[i],
+                                                &imageBarriers, &srcStages, &dstStages);
+            }
+
+            if (bufferBarriers.size() || imageBarriers.size()) {
+                device->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages,
+                                              0, 0, nullptr, bufferBarriers.size(),
+                                              bufferBarriers.data(), imageBarriers.size(),
+                                              imageBarriers.data());
             }
         }
-
-        class RenderDescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
-          public:
-            RenderDescriptorSetTracker() = default;
-
-            void Apply(Device* device,
-                       CommandRecordingContext* recordingContext,
-                       VkPipelineBindPoint bindPoint) {
-                ApplyDescriptorSets(device, recordingContext->commandBuffer, bindPoint,
-                                    ToBackend(mPipelineLayout)->GetHandle(),
-                                    mDirtyBindGroupsObjectChangedOrIsDynamic, mBindGroups,
-                                    mDynamicOffsetCounts, mDynamicOffsets);
-                DidApply();
-            }
-        };
-
-        class ComputeDescriptorSetTracker : public BindGroupTrackerBase<true, uint32_t> {
-          public:
-            ComputeDescriptorSetTracker() = default;
-
-            void Apply(Device* device,
-                       CommandRecordingContext* recordingContext,
-                       VkPipelineBindPoint bindPoint) {
-                ApplyDescriptorSets(device, recordingContext->commandBuffer, bindPoint,
-                                    ToBackend(mPipelineLayout)->GetHandle(),
-                                    mDirtyBindGroupsObjectChangedOrIsDynamic, mBindGroups,
-                                    mDynamicOffsetCounts, mDynamicOffsets);
-
-                std::vector<VkBufferMemoryBarrier> bufferBarriers;
-                std::vector<VkImageMemoryBarrier> imageBarriers;
-                VkPipelineStageFlags srcStages = 0;
-                VkPipelineStageFlags dstStages = 0;
-
-                for (BindGroupIndex index : IterateBitSet(mBindGroupLayoutsMask)) {
-                    BindGroupLayoutBase* layout = mBindGroups[index]->GetLayout();
-                    for (BindingIndex binding{0}; binding < layout->GetBindingCount(); ++binding) {
-                        const BindingInfo& bindingInfo = layout->GetBindingInfo(binding);
-
-                        switch (bindingInfo.bindingType) {
-                            case BindingInfoType::Buffer: {
-                                wgpu::BufferUsage usage;
-                                switch (bindingInfo.buffer.type) {
-                                    case wgpu::BufferBindingType::Uniform:
-                                        usage = wgpu::BufferUsage::Uniform;
-                                        break;
-                                    case wgpu::BufferBindingType::Storage:
-                                    case wgpu::BufferBindingType::ReadOnlyStorage:
-                                        usage = wgpu::BufferUsage::Storage;
-                                        break;
-                                    case wgpu::BufferBindingType::Undefined:
-                                        UNREACHABLE();
-                                }
-
-                                VkBufferMemoryBarrier bufferBarrier;
-                                if (ToBackend(mBindGroups[index]
-                                                  ->GetBindingAsBufferBinding(binding)
-                                                  .buffer)
-                                        ->TransitionUsageAndGetResourceBarrier(
-                                            usage, &bufferBarrier, &srcStages, &dstStages)) {
-                                    bufferBarriers.push_back(bufferBarrier);
-                                }
-                                break;
-                            }
-
-                            case BindingInfoType::StorageTexture: {
-                                TextureViewBase* view =
-                                    mBindGroups[index]->GetBindingAsTextureView(binding);
-                                ToBackend(view->GetTexture())
-                                    ->TransitionUsageAndGetResourceBarrier(
-                                        wgpu::TextureUsage::Storage, view->GetSubresourceRange(),
-                                        &imageBarriers, &srcStages, &dstStages);
-                                break;
-                            }
-
-                            case BindingInfoType::Texture: {
-                                TextureViewBase* view =
-                                    mBindGroups[index]->GetBindingAsTextureView(binding);
-                                ToBackend(view->GetTexture())
-                                    ->TransitionUsageAndGetResourceBarrier(
-                                        wgpu::TextureUsage::Sampled, view->GetSubresourceRange(),
-                                        &imageBarriers, &srcStages, &dstStages);
-                                break;
-                            }
-
-                            case BindingInfoType::Sampler:
-                                // Don't require barriers.
-                                break;
-                        }
-                    }
-                }
-
-                if (!bufferBarriers.empty() || !imageBarriers.empty()) {
-                    ASSERT(srcStages != 0 && dstStages != 0);
-                    device->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages,
-                                                  dstStages, 0, 0, nullptr, bufferBarriers.size(),
-                                                  bufferBarriers.data(), imageBarriers.size(),
-                                                  imageBarriers.data());
-                }
-
-                DidApply();
-            }
-        };
 
         MaybeError RecordBeginRenderPass(CommandRecordingContext* recordingContext,
                                          Device* device,
@@ -532,67 +475,13 @@ namespace dawn_native { namespace vulkan {
         auto PrepareResourcesForRenderPass = [](Device* device,
                                                 CommandRecordingContext* recordingContext,
                                                 const RenderPassResourceUsage& usages) {
-            std::vector<VkBufferMemoryBarrier> bufferBarriers;
-            std::vector<VkImageMemoryBarrier> imageBarriers;
-            VkPipelineStageFlags srcStages = 0;
-            VkPipelineStageFlags dstStages = 0;
-
-            for (size_t i = 0; i < usages.buffers.size(); ++i) {
-                Buffer* buffer = ToBackend(usages.buffers[i]);
-                buffer->EnsureDataInitialized(recordingContext);
-
-                VkBufferMemoryBarrier bufferBarrier;
-                if (buffer->TransitionUsageAndGetResourceBarrier(
-                        usages.bufferUsages[i], &bufferBarrier, &srcStages, &dstStages)) {
-                    bufferBarriers.push_back(bufferBarrier);
-                }
-            }
-
-            for (size_t i = 0; i < usages.textures.size(); ++i) {
-                Texture* texture = ToBackend(usages.textures[i]);
-
-                // Clear subresources that are not render attachments. Render attachments will be
-                // cleared in RecordBeginRenderPass by setting the loadop to clear when the texture
-                // subresource has not been initialized before the render pass.
-                usages.textureUsages[i].Iterate(
-                    [&](const SubresourceRange& range, wgpu::TextureUsage usage) {
-                        if (usage & ~wgpu::TextureUsage::RenderAttachment) {
-                            texture->EnsureSubresourceContentInitialized(recordingContext, range);
-                        }
-                    });
-                texture->TransitionUsageForPass(recordingContext, usages.textureUsages[i],
-                                                &imageBarriers, &srcStages, &dstStages);
-            }
-
-            if (bufferBarriers.size() || imageBarriers.size()) {
-                device->fn.CmdPipelineBarrier(recordingContext->commandBuffer, srcStages, dstStages,
-                                              0, 0, nullptr, bufferBarriers.size(),
-                                              bufferBarriers.data(), imageBarriers.size(),
-                                              imageBarriers.data());
-            }
+            TransitionAndClearForSyncScope(device, recordingContext, usages);
 
             // Reset all query set used on current render pass together before beginning render pass
             // because the reset command must be called outside render pass
             for (size_t i = 0; i < usages.querySets.size(); ++i) {
                 ResetUsedQuerySetsOnRenderPass(device, recordingContext->commandBuffer,
                                                usages.querySets[i], usages.queryAvailabilities[i]);
-            }
-        };
-
-        // TODO(jiawei.shao@intel.com): move the resource lazy clearing inside the barrier tracking
-        // for compute passes.
-        auto PrepareResourcesForComputePass = [](Device* device,
-                                                 CommandRecordingContext* recordingContext,
-                                                 const ComputePassResourceUsage& usages) {
-            for (size_t i = 0; i < usages.buffers.size(); ++i) {
-                Buffer* buffer = ToBackend(usages.buffers[i]);
-                buffer->EnsureDataInitialized(recordingContext);
-            }
-
-            for (size_t i = 0; i < usages.textures.size(); ++i) {
-                Texture* texture = ToBackend(usages.textures[i]);
-                texture->EnsureSubresourceContentInitialized(recordingContext,
-                                                             texture->GetAllSubresources());
             }
         };
 
@@ -788,10 +677,9 @@ namespace dawn_native { namespace vulkan {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
 
-                    PrepareResourcesForComputePass(
-                        device, recordingContext,
-                        GetResourceUsages().computePasses[nextComputePassNumber]);
-                    DAWN_TRY(RecordComputePass(recordingContext));
+                    DAWN_TRY(RecordComputePass(
+                        recordingContext,
+                        GetResourceUsages().computePasses[nextComputePassNumber]));
 
                     nextComputePassNumber++;
                     break;
@@ -903,11 +791,13 @@ namespace dawn_native { namespace vulkan {
         return {};
     }
 
-    MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingContext) {
+    MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingContext,
+                                                const ComputePassResourceUsage& resourceUsages) {
         Device* device = ToBackend(GetDevice());
         VkCommandBuffer commands = recordingContext->commandBuffer;
 
-        ComputeDescriptorSetTracker descriptorSets = {};
+        uint64_t currentDispatch = 0;
+        DescriptorSetTracker descriptorSets = {};
 
         Command type;
         while (mCommands.NextCommandId(&type)) {
@@ -920,21 +810,27 @@ namespace dawn_native { namespace vulkan {
                 case Command::Dispatch: {
                     DispatchCmd* dispatch = mCommands.NextCommand<DispatchCmd>();
 
+                    TransitionAndClearForSyncScope(device, recordingContext,
+                                                   resourceUsages.dispatchUsages[currentDispatch]);
                     descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_COMPUTE);
+
                     device->fn.CmdDispatch(commands, dispatch->x, dispatch->y, dispatch->z);
+                    currentDispatch++;
                     break;
                 }
 
                 case Command::DispatchIndirect: {
                     DispatchIndirectCmd* dispatch = mCommands.NextCommand<DispatchIndirectCmd>();
-                    ToBackend(dispatch->indirectBuffer)
-                        ->TransitionUsageNow(recordingContext, wgpu::BufferUsage::Indirect);
                     VkBuffer indirectBuffer = ToBackend(dispatch->indirectBuffer)->GetHandle();
 
+                    TransitionAndClearForSyncScope(device, recordingContext,
+                                                   resourceUsages.dispatchUsages[currentDispatch]);
                     descriptorSets.Apply(device, recordingContext, VK_PIPELINE_BIND_POINT_COMPUTE);
+
                     device->fn.CmdDispatchIndirect(
                         commands, indirectBuffer,
                         static_cast<VkDeviceSize>(dispatch->indirectOffset));
+                    currentDispatch++;
                     break;
                 }
 
@@ -1072,7 +968,7 @@ namespace dawn_native { namespace vulkan {
             device->fn.CmdSetScissor(commands, 0, 1, &scissorRect);
         }
 
-        RenderDescriptorSetTracker descriptorSets = {};
+        DescriptorSetTracker descriptorSets = {};
         RenderPipeline* lastPipeline = nullptr;
 
         auto EncodeRenderBundleCommand = [&](CommandIterator* iter, Command type) {

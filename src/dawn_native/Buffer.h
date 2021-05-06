@@ -34,7 +34,8 @@ namespace dawn_native {
 
     static constexpr wgpu::BufferUsage kReadOnlyBufferUsages =
         wgpu::BufferUsage::MapRead | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Index |
-        wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Uniform | kReadOnlyStorageBuffer;
+        wgpu::BufferUsage::Vertex | wgpu::BufferUsage::Uniform | kReadOnlyStorageBuffer |
+        wgpu::BufferUsage::Indirect;
 
     class BufferBase : public ObjectBase {
         enum class BufferState {

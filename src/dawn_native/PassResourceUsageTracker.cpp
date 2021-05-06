@@ -138,10 +138,39 @@ namespace dawn_native {
         return result;
     }
 
+    void ComputePassResourceUsageTracker::AddDispatch(SyncScopeResourceUsage scope) {
+        mUsage.dispatchUsages.push_back(std::move(scope));
+    }
+
+    void ComputePassResourceUsageTracker::AddReferencedBuffer(BufferBase* buffer) {
+        mUsage.referencedBuffers.insert(buffer);
+    }
+
+    void ComputePassResourceUsageTracker::AddResourcesReferencedByBindGroup(BindGroupBase* group) {
+        for (BindingIndex index{0}; index < group->GetLayout()->GetBindingCount(); ++index) {
+            const BindingInfo& bindingInfo = group->GetLayout()->GetBindingInfo(index);
+
+            switch (bindingInfo.bindingType) {
+                case BindingInfoType::Buffer: {
+                    mUsage.referencedBuffers.insert(group->GetBindingAsBufferBinding(index).buffer);
+                    break;
+                }
+
+                case BindingInfoType::Texture: {
+                    mUsage.referencedTextures.insert(
+                        group->GetBindingAsTextureView(index)->GetTexture());
+                    break;
+                }
+
+                case BindingInfoType::StorageTexture:
+                case BindingInfoType::Sampler:
+                    break;
+            }
+        }
+    }
+
     ComputePassResourceUsage ComputePassResourceUsageTracker::AcquireResourceUsage() {
-        ComputePassResourceUsage result;
-        *static_cast<SyncScopeResourceUsage*>(&result) = AcquireSyncScopeUsage();
-        return result;
+        return std::move(mUsage);
     }
 
     RenderPassResourceUsage RenderPassResourceUsageTracker::AcquireResourceUsage() {

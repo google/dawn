@@ -536,7 +536,7 @@ namespace dawn_native { namespace opengl {
     MaybeError CommandBuffer::Execute() {
         const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
 
-        auto LazyClearForPass = [](const SyncScopeResourceUsage& scope) {
+        auto LazyClearSyncScope = [](const SyncScopeResourceUsage& scope) {
             for (size_t i = 0; i < scope.textures.size(); i++) {
                 Texture* texture = ToBackend(scope.textures[i]);
 
@@ -564,7 +564,10 @@ namespace dawn_native { namespace opengl {
             switch (type) {
                 case Command::BeginComputePass: {
                     mCommands.NextCommand<BeginComputePassCmd>();
-                    LazyClearForPass(GetResourceUsages().computePasses[nextComputePassNumber]);
+                    for (const SyncScopeResourceUsage& scope :
+                         GetResourceUsages().computePasses[nextComputePassNumber].dispatchUsages) {
+                        LazyClearSyncScope(scope);
+                    }
                     DAWN_TRY(ExecuteComputePass());
 
                     nextComputePassNumber++;
@@ -573,7 +576,7 @@ namespace dawn_native { namespace opengl {
 
                 case Command::BeginRenderPass: {
                     auto* cmd = mCommands.NextCommand<BeginRenderPassCmd>();
-                    LazyClearForPass(GetResourceUsages().renderPasses[nextRenderPassNumber]);
+                    LazyClearSyncScope(GetResourceUsages().renderPasses[nextRenderPassNumber]);
                     LazyClearRenderPassAttachments(cmd);
                     DAWN_TRY(ExecuteRenderPass(cmd));
 

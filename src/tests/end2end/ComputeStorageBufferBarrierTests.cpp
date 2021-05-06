@@ -343,6 +343,84 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
     EXPECT_BUFFER_U32_RANGE_EQ(expectedB.data(), bufferB, 0, kNumValues);
 }
 
+// Test that barriers for dispatches correctly combine Indirect | Storage in backends with explicit
+// barriers. Do this by:
+//  1 - Initializing an indirect buffer with zeros.
+//  2 - Write ones into it with a compute shader.
+//  3 - Use the indirect buffer in a Dispatch while also reading its data.
+TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
+    // For some reason SPIRV-Cross crashes when translating the step3 shader to HLSL. Suppress the
+    // failure since we'll remove SPIRV-Cross at some point.
+    DAWN_SKIP_TEST_IF(IsD3D12() && !HasToggleEnabled("use_tint_generator"));
+
+    wgpu::ComputePipelineDescriptor step2PipelineDesc;
+    step2PipelineDesc.computeStage.entryPoint = "main";
+    step2PipelineDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+        [[block]] struct Buf {
+            data : array<u32, 3>;
+        };
+        [[group(0), binding(0)]] var<storage> buf : [[access(read_write)]] Buf;
+
+        [[stage(compute)]] fn main() {
+            buf.data = array<u32, 3>(1u, 1u, 1u);
+        }
+    )");
+    wgpu::ComputePipeline step2Pipeline = device.CreateComputePipeline(&step2PipelineDesc);
+
+    wgpu::ComputePipelineDescriptor step3PipelineDesc;
+    step3PipelineDesc.computeStage.entryPoint = "main";
+    step3PipelineDesc.computeStage.module = utils::CreateShaderModule(device, R"(
+        [[block]] struct Buf {
+            data : array<u32, 3>;
+        };
+        [[group(0), binding(0)]] var<storage> buf : [[access(read)]] Buf;
+
+        [[block]] struct Result {
+            data : u32;
+        };
+        [[group(0), binding(1)]] var<storage> result : [[access(read_write)]] Result;
+
+        [[stage(compute)]] fn main() {
+            result.data = 2u;
+            if (buf.data[0] == 1u && buf.data[1] == 1u && buf.data[2] == 1u) {
+                result.data = 1u;
+            }
+        }
+    )");
+    wgpu::ComputePipeline step3Pipeline = device.CreateComputePipeline(&step3PipelineDesc);
+
+    //  1 - Initializing an indirect buffer with zeros.
+    wgpu::Buffer buf = utils::CreateBufferFromData<uint32_t>(
+        device, wgpu::BufferUsage::Storage | wgpu::BufferUsage::Indirect, {0u, 0u, 0u});
+
+    //  2 - Write ones into it with a compute shader.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+
+    wgpu::BindGroup step2Group =
+        utils::MakeBindGroup(device, step2Pipeline.GetBindGroupLayout(0), {{0, buf}});
+
+    pass.SetPipeline(step2Pipeline);
+    pass.SetBindGroup(0, step2Group);
+    pass.Dispatch(1);
+
+    //  3 - Use the indirect buffer in a Dispatch while also reading its data.
+    wgpu::Buffer resultBuffer = utils::CreateBufferFromData<uint32_t>(
+        device, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc, {0u});
+    wgpu::BindGroup step3Group = utils::MakeBindGroup(device, step3Pipeline.GetBindGroupLayout(0),
+                                                      {{0, buf}, {1, resultBuffer}});
+
+    pass.SetPipeline(step3Pipeline);
+    pass.SetBindGroup(0, step3Group);
+    pass.DispatchIndirect(buf, 0);
+
+    pass.EndPass();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_EQ(1u, resultBuffer, 0);
+}
+
 DAWN_INSTANTIATE_TEST(ComputeStorageBufferBarrierTests,
                       D3D12Backend(),
                       MetalBackend(),
