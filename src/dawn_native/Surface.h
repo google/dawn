@@ -27,6 +27,11 @@
 #    include "dawn_native/d3d12/d3d12_platform.h"
 #endif  // defined(DAWN_PLATFORM_WINDOWS)
 
+// Forward declare IUnknown
+// GetCoreWindow needs to return an IUnknown pointer
+// non-windows platforms don't have this type
+struct IUnknown;
+
 namespace dawn_native {
 
     MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
@@ -57,7 +62,7 @@ namespace dawn_native {
         void* GetHWND() const;
 
         // Valid to call if the type is WindowsCoreWindow
-        void* GetCoreWindow() const;
+        IUnknown* GetCoreWindow() const;
 
         // Valid to call if the type is WindowsXlib
         void* GetXDisplay() const;

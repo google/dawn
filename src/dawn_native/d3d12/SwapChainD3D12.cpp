@@ -245,7 +245,6 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<IDXGISwapChain1> swapChain1;
         switch (GetSurface()->GetType()) {
-#if defined(DAWN_PLATFORM_WIN32)
             case Surface::Type::WindowsHWND: {
                 DAWN_TRY(CheckHRESULT(
                     factory2->CreateSwapChainForHwnd(device->GetCommandQueue().Get(),
@@ -254,13 +253,12 @@ namespace dawn_native { namespace d3d12 {
                     "Creating the IDXGISwapChain1"));
                 break;
             }
-#endif  // defined(DAWN_PLATFORM_WIN32)
             case Surface::Type::WindowsCoreWindow: {
-                DAWN_TRY(CheckHRESULT(factory2->CreateSwapChainForCoreWindow(
-                                          device->GetCommandQueue().Get(),
-                                          static_cast<IUnknown*>(GetSurface()->GetCoreWindow()),
-                                          &swapChainDesc, nullptr, &swapChain1),
-                                      "Creating the IDXGISwapChain1"));
+                DAWN_TRY(CheckHRESULT(
+                    factory2->CreateSwapChainForCoreWindow(device->GetCommandQueue().Get(),
+                                                           GetSurface()->GetCoreWindow(),
+                                                           &swapChainDesc, nullptr, &swapChain1),
+                    "Creating the IDXGISwapChain1"));
                 break;
             }
             default:

@@ -124,11 +124,9 @@ namespace dawn_native {
             mType = Type::MetalLayer;
             mMetalLayer = metalDesc->layer;
         } else if (hwndDesc) {
-#if defined(DAWN_PLATFORM_WIN32)
             mType = Type::WindowsHWND;
             mHInstance = hwndDesc->hinstance;
             mHWND = hwndDesc->hwnd;
-#endif  // defined(DAWN_PLATFORM_WIN32)
         } else if (coreWindowDesc) {
 #if defined(DAWN_PLATFORM_WINDOWS)
             mType = Type::WindowsCoreWindow;
@@ -180,7 +178,7 @@ namespace dawn_native {
         return mHWND;
     }
 
-    void* Surface::GetCoreWindow() const {
+    IUnknown* Surface::GetCoreWindow() const {
         ASSERT(mType == Type::WindowsCoreWindow);
 #if defined(DAWN_PLATFORM_WINDOWS)
         return mCoreWindow.Get();
