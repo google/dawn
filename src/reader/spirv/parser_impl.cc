@@ -232,14 +232,6 @@ bool AssumesResultSignednessMatchesFirstOperand(GLSLstd450 extended_opcode) {
   return false;
 }
 
-// Forwards UnwrapIfNeeded to both the ast and sem types of the TypePair
-// @param tp the type pair
-// @returns the unwrapped type pair
-typ::Type UnwrapIfNeeded(typ::Type tp) {
-  return typ::Type{tp.ast ? tp.ast->UnwrapIfNeeded() : nullptr,
-                   tp.sem ? tp.sem->UnwrapIfNeeded() : nullptr};
-}
-
 }  // namespace
 
 TypedExpression::TypedExpression() = default;
@@ -248,7 +240,7 @@ TypedExpression::TypedExpression(const TypedExpression&) = default;
 
 TypedExpression& TypedExpression::operator=(const TypedExpression&) = default;
 
-TypedExpression::TypedExpression(typ::Type type_in, ast::Expression* expr_in)
+TypedExpression::TypedExpression(ast::Type* type_in, ast::Expression* expr_in)
     : type(type_in), expr(expr_in) {}
 
 ParserImpl::ParserImpl(const std::vector<uint32_t>& spv_binary)
@@ -313,7 +305,7 @@ Program ParserImpl::program() {
   return tint::Program(std::move(builder_));
 }
 
-typ::Type ParserImpl::ConvertType(uint32_t type_id) {
+ast::Type* ParserImpl::ConvertType(uint32_t type_id) {
   if (!success_) {
     return nullptr;
   }
@@ -330,8 +322,8 @@ typ::Type ParserImpl::ConvertType(uint32_t type_id) {
   }
 
   auto maybe_generate_alias = [this, type_id,
-                               spirv_type](typ::Type type) -> typ::Type {
-    if (type.ast != nullptr) {
+                               spirv_type](ast::Type* type) -> ast::Type* {
+    if (type != nullptr) {
       return MaybeGenerateAlias(type_id, spirv_type, type);
     }
     return {};
@@ -782,17 +774,17 @@ bool ParserImpl::RegisterEntryPoints() {
   return success_;
 }
 
-typ::Type ParserImpl::ConvertType(
+ast::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Integer* int_ty) {
   if (int_ty->width() == 32) {
-    return int_ty->IsSigned() ? typ::Type{builder_.ty.i32()}
-                              : typ::Type{builder_.ty.u32()};
+    return int_ty->IsSigned() ? static_cast<ast::Type*>(builder_.ty.i32())
+                              : static_cast<ast::Type*>(builder_.ty.u32());
   }
   Fail() << "unhandled integer width: " << int_ty->width();
   return nullptr;
 }
 
-typ::Type ParserImpl::ConvertType(
+ast::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Float* float_ty) {
   if (float_ty->width() == 32) {
     return builder_.ty.f32();
@@ -801,33 +793,33 @@ typ::Type ParserImpl::ConvertType(
   return nullptr;
 }
 
-typ::Type ParserImpl::ConvertType(
+ast::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Vector* vec_ty) {
   const auto num_elem = vec_ty->element_count();
-  auto ast_elem_ty = ConvertType(type_mgr_->GetId(vec_ty->element_type()));
-  if (ast_elem_ty.ast == nullptr) {
+  auto* ast_elem_ty = ConvertType(type_mgr_->GetId(vec_ty->element_type()));
+  if (ast_elem_ty == nullptr) {
     return nullptr;
   }
   return builder_.ty.vec(ast_elem_ty, num_elem);
 }
 
-typ::Type ParserImpl::ConvertType(
+ast::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Matrix* mat_ty) {
   const auto* vec_ty = mat_ty->element_type()->AsVector();
   const auto* scalar_ty = vec_ty->element_type();
   const auto num_rows = vec_ty->element_count();
   const auto num_columns = mat_ty->element_count();
-  auto ast_scalar_ty = ConvertType(type_mgr_->GetId(scalar_ty));
-  if (ast_scalar_ty.ast == nullptr) {
+  auto* ast_scalar_ty = ConvertType(type_mgr_->GetId(scalar_ty));
+  if (ast_scalar_ty == nullptr) {
     return nullptr;
   }
   return builder_.ty.mat(ast_scalar_ty, num_columns, num_rows);
 }
 
-typ::Type ParserImpl::ConvertType(
+ast::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::RuntimeArray* rtarr_ty) {
-  auto ast_elem_ty = ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
-  if (ast_elem_ty.ast == nullptr) {
+  auto* ast_elem_ty = ConvertType(type_mgr_->GetId(rtarr_ty->element_type()));
+  if (ast_elem_ty == nullptr) {
     return nullptr;
   }
   ast::DecorationList decorations;
@@ -837,11 +829,11 @@ typ::Type ParserImpl::ConvertType(
   return builder_.ty.array(ast_elem_ty, 0, std::move(decorations));
 }
 
-typ::Type ParserImpl::ConvertType(
+ast::Type* ParserImpl::ConvertType(
     const spvtools::opt::analysis::Array* arr_ty) {
   const auto elem_type_id = type_mgr_->GetId(arr_ty->element_type());
-  auto ast_elem_ty = ConvertType(elem_type_id);
-  if (ast_elem_ty.ast == nullptr) {
+  auto* ast_elem_ty = ConvertType(elem_type_id);
+  if (ast_elem_ty == nullptr) {
     return nullptr;
   }
   const auto& length_info = arr_ty->length_info();
@@ -912,7 +904,7 @@ bool ParserImpl::ParseArrayDecorations(
   return true;
 }
 
-typ::Type ParserImpl::ConvertType(
+ast::Type* ParserImpl::ConvertType(
     uint32_t type_id,
     const spvtools::opt::analysis::Struct* struct_ty) {
   // Compute the struct decoration.
@@ -942,8 +934,8 @@ typ::Type ParserImpl::ConvertType(
   for (uint32_t member_index = 0; member_index < members.size();
        ++member_index) {
     const auto member_type_id = type_mgr_->GetId(members[member_index]);
-    auto ast_member_ty = ConvertType(member_type_id);
-    if (ast_member_ty.ast == nullptr) {
+    auto* ast_member_ty = ConvertType(member_type_id);
+    if (ast_member_ty == nullptr) {
       // Already emitted diagnostics.
       return nullptr;
     }
@@ -1034,12 +1026,11 @@ typ::Type ParserImpl::ConvertType(
   }
   auto* ast_struct = create<ast::Struct>(Source{}, sym, std::move(ast_members),
                                          std::move(ast_struct_decorations));
-  auto result = builder_.ty.struct_(ast_struct);
   if (num_non_writable_members == members.size()) {
-    read_only_struct_types_.insert(result.ast->name());
+    read_only_struct_types_.insert(ast_struct->name());
   }
-  AddConstructedType(sym, result);
-  return result;
+  AddConstructedType(sym, ast_struct);
+  return ast_struct;
 }
 
 void ParserImpl::AddConstructedType(Symbol name, ast::NamedType* type) {
@@ -1049,8 +1040,8 @@ void ParserImpl::AddConstructedType(Symbol name, ast::NamedType* type) {
   }
 }
 
-typ::Type ParserImpl::ConvertType(uint32_t type_id,
-                                  const spvtools::opt::analysis::Pointer*) {
+ast::Type* ParserImpl::ConvertType(uint32_t type_id,
+                                   const spvtools::opt::analysis::Pointer*) {
   const auto* inst = def_use_mgr_->GetDef(type_id);
   const auto pointee_type_id = inst->GetSingleWordInOperand(1);
   const auto storage_class = SpvStorageClass(inst->GetSingleWordInOperand(0));
@@ -1060,8 +1051,8 @@ typ::Type ParserImpl::ConvertType(uint32_t type_id,
     builtin_position_.storage_class = storage_class;
     return nullptr;
   }
-  auto ast_elem_ty = ConvertType(pointee_type_id);
-  if (ast_elem_ty.ast == nullptr) {
+  auto* ast_elem_ty = ConvertType(pointee_type_id);
+  if (ast_elem_ty == nullptr) {
     Fail() << "SPIR-V pointer type with ID " << type_id
            << " has invalid pointee type " << pointee_type_id;
     return nullptr;
@@ -1123,7 +1114,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
   // that is OpSpecConstantTrue, OpSpecConstantFalse, or OpSpecConstant.
   for (auto& inst : module_->types_values()) {
     // These will be populated for a valid scalar spec constant.
-    typ::Type ast_type;
+    ast::Type* ast_type = nullptr;
     ast::ScalarConstructorExpression* ast_expr = nullptr;
 
     switch (inst.opcode()) {
@@ -1138,15 +1129,15 @@ bool ParserImpl::EmitScalarSpecConstants() {
       case SpvOpSpecConstant: {
         ast_type = ConvertType(inst.type_id());
         const uint32_t literal_value = inst.GetSingleWordInOperand(0);
-        if (ast_type.ast->Is<ast::I32>()) {
+        if (ast_type->Is<ast::I32>()) {
           ast_expr = create<ast::ScalarConstructorExpression>(
               Source{}, create<ast::SintLiteral>(
                             Source{}, static_cast<int32_t>(literal_value)));
-        } else if (ast_type.ast->Is<ast::U32>()) {
+        } else if (ast_type->Is<ast::U32>()) {
           ast_expr = create<ast::ScalarConstructorExpression>(
               Source{}, create<ast::UintLiteral>(
                             Source{}, static_cast<uint32_t>(literal_value)));
-        } else if (ast_type.ast->Is<ast::F32>()) {
+        } else if (ast_type->Is<ast::F32>()) {
           float float_value;
           // Copy the bits so we can read them as a float.
           std::memcpy(&float_value, &literal_value, sizeof(float_value));
@@ -1182,10 +1173,10 @@ bool ParserImpl::EmitScalarSpecConstants() {
   return success_;
 }
 
-typ::Type ParserImpl::MaybeGenerateAlias(
+ast::Type* ParserImpl::MaybeGenerateAlias(
     uint32_t type_id,
     const spvtools::opt::analysis::Type* type,
-    typ::Type ast_type) {
+    ast::Type* ast_type) {
   if (!success_) {
     return {};
   }
@@ -1208,8 +1199,8 @@ typ::Type ParserImpl::MaybeGenerateAlias(
       // Ignore constants, and any other types.
       return ast_type;
   }
-  auto ast_underlying_type = ast_type;
-  if (ast_underlying_type.ast == nullptr) {
+  auto* ast_underlying_type = ast_type;
+  if (ast_underlying_type == nullptr) {
     Fail() << "internal error: no type registered for SPIR-V ID: " << type_id;
     return {};
   }
@@ -1261,7 +1252,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
     if (!success_) {
       return false;
     }
-    typ::Type ast_type;
+    ast::Type* ast_type;
     if (spirv_storage_class == SpvStorageClassUniformConstant) {
       // These are opaque handles: samplers or textures
       ast_type = GetTypeForHandleVar(var);
@@ -1270,19 +1261,19 @@ bool ParserImpl::EmitModuleScopeVariables() {
       }
     } else {
       ast_type = ConvertType(type_id);
-      if (ast_type.ast == nullptr) {
+      if (ast_type == nullptr) {
         return Fail() << "internal error: failed to register Tint AST type for "
                          "SPIR-V type with ID: "
                       << var.type_id();
       }
-      if (!ast_type.ast->Is<ast::Pointer>()) {
+      if (!ast_type->Is<ast::Pointer>()) {
         return Fail() << "variable with ID " << var.result_id()
                       << " has non-pointer type " << var.type_id();
       }
     }
 
-    auto ast_store_type = typ::Call_type(typ::As<typ::Pointer>(ast_type));
-    auto ast_storage_class = ast_type.ast->As<ast::Pointer>()->storage_class();
+    auto* ast_store_type = ast_type->As<ast::Pointer>()->type();
+    auto ast_storage_class = ast_type->As<ast::Pointer>()->storage_class();
     ast::Expression* ast_constructor = nullptr;
     if (var.NumInOperands() > 1) {
       // SPIR-V initializers are always constants.
@@ -1345,18 +1336,18 @@ const spvtools::opt::analysis::IntConstant* ParserImpl::GetArraySize(
 
 ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                                         ast::StorageClass sc,
-                                        typ::Type type,
+                                        ast::Type* type,
                                         bool is_const,
                                         ast::Expression* constructor,
                                         ast::DecorationList decorations) {
-  if (type.ast == nullptr) {
+  if (type == nullptr) {
     Fail() << "internal error: can't make ast::Variable for null type";
     return nullptr;
   }
 
   if (sc == ast::StorageClass::kStorage) {
     bool read_only = false;
-    if (auto* tn = type.ast->As<ast::TypeName>()) {
+    if (auto* tn = type->As<ast::TypeName>()) {
       read_only = read_only_struct_types_.count(tn->name()) > 0;
     }
 
@@ -1388,7 +1379,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
           // The SPIR-V variable is likely to be signed (because GLSL
           // requires signed), but WGSL requires unsigned.  Handle specially
           // so we always perform the conversion at load and store.
-          if (auto forced_type = UnsignedTypeFor(type)) {
+          if (auto* forced_type = UnsignedTypeFor(type)) {
             // Requires conversion and special handling in code generation.
             special_builtins_[id] = spv_builtin;
             type = forced_type;
@@ -1461,8 +1452,8 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
     Fail() << "ID " << id << " is not a registered instruction";
     return {};
   }
-  auto original_ast_type = ConvertType(inst->type_id());
-  if (original_ast_type.ast == nullptr) {
+  auto* original_ast_type = ConvertType(inst->type_id());
+  if (original_ast_type == nullptr) {
     return {};
   }
 
@@ -1479,28 +1470,28 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   }
 
   auto source = GetSourceForInst(inst);
-  auto ast_type = UnwrapIfNeeded(original_ast_type);
+  auto* ast_type = original_ast_type->UnwrapIfNeeded();
 
   // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
   // So canonicalization should map that way too.
   // Currently "null<type>" is missing from the WGSL parser.
   // See https://bugs.chromium.org/p/tint/issues/detail?id=34
-  if (ast_type.ast->Is<ast::U32>()) {
+  if (ast_type->Is<ast::U32>()) {
     return {ast_type, create<ast::ScalarConstructorExpression>(
                           Source{}, create<ast::UintLiteral>(
                                         source, spirv_const->GetU32()))};
   }
-  if (ast_type.ast->Is<ast::I32>()) {
+  if (ast_type->Is<ast::I32>()) {
     return {ast_type, create<ast::ScalarConstructorExpression>(
                           Source{}, create<ast::SintLiteral>(
                                         source, spirv_const->GetS32()))};
   }
-  if (ast_type.ast->Is<ast::F32>()) {
+  if (ast_type->Is<ast::F32>()) {
     return {ast_type, create<ast::ScalarConstructorExpression>(
                           Source{}, create<ast::FloatLiteral>(
                                         source, spirv_const->GetFloat()))};
   }
-  if (ast_type.ast->Is<ast::Bool>()) {
+  if (ast_type->Is<ast::Bool>()) {
     const bool value = spirv_const->AsNullConstant()
                            ? false
                            : spirv_const->AsBoolConstant()->value();
@@ -1556,7 +1547,7 @@ ast::Expression* ParserImpl::MakeNullValue(ast::Type* type) {
   }
 
   auto* original_type = type;
-  type = UnwrapIfNeeded(type);
+  type = type->UnwrapIfNeeded();
 
   if (type->Is<ast::Bool>()) {
     return create<ast::ScalarConstructorExpression>(
@@ -1622,15 +1613,15 @@ ast::Expression* ParserImpl::MakeNullValue(ast::Type* type) {
   return nullptr;
 }
 
-TypedExpression ParserImpl::MakeNullExpression(typ::Type type) {
+TypedExpression ParserImpl::MakeNullExpression(ast::Type* type) {
   return {type, MakeNullValue(type)};
 }
 
-typ::Type ParserImpl::UnsignedTypeFor(typ::Type type) {
-  if (type.ast->Is<ast::I32>()) {
+ast::Type* ParserImpl::UnsignedTypeFor(ast::Type* type) {
+  if (type->Is<ast::I32>()) {
     return builder_.ty.u32();
   }
-  if (auto* v = type.ast->As<ast::Vector>()) {
+  if (auto* v = type->As<ast::Vector>()) {
     if (v->type()->Is<ast::I32>()) {
       return builder_.ty.vec(builder_.ty.u32(), v->size());
     }
@@ -1638,11 +1629,11 @@ typ::Type ParserImpl::UnsignedTypeFor(typ::Type type) {
   return {};
 }
 
-typ::Type ParserImpl::SignedTypeFor(typ::Type type) {
-  if (type.ast->Is<ast::U32>()) {
+ast::Type* ParserImpl::SignedTypeFor(ast::Type* type) {
+  if (type->Is<ast::U32>()) {
     return builder_.ty.i32();
   }
-  if (auto* v = type.ast->As<ast::Vector>()) {
+  if (auto* v = type->As<ast::Vector>()) {
     if (v->type()->Is<ast::U32>()) {
       return builder_.ty.vec(builder_.ty.i32(), v->size());
     }
@@ -1673,20 +1664,20 @@ TypedExpression ParserImpl::RectifyOperandSignedness(
     Fail() << "internal error: RectifyOperandSignedness given a null expr\n";
     return {};
   }
-  auto type = expr.type;
-  if (!type.ast) {
+  auto* type = expr.type;
+  if (!type) {
     Fail() << "internal error: unmapped type for: " << builder_.str(expr.expr)
            << "\n";
     return {};
   }
   if (requires_unsigned) {
-    if (auto unsigned_ty = UnsignedTypeFor(type)) {
+    if (auto* unsigned_ty = UnsignedTypeFor(type)) {
       // Conversion is required.
       return {unsigned_ty,
               create<ast::BitcastExpression>(Source{}, unsigned_ty, expr.expr)};
     }
   } else if (requires_signed) {
-    if (auto signed_ty = SignedTypeFor(type)) {
+    if (auto* signed_ty = SignedTypeFor(type)) {
       // Conversion is required.
       return {signed_ty,
               create<ast::BitcastExpression>(Source{}, signed_ty, expr.expr)};
@@ -1698,9 +1689,9 @@ TypedExpression ParserImpl::RectifyOperandSignedness(
 
 TypedExpression ParserImpl::RectifySecondOperandSignedness(
     const spvtools::opt::Instruction& inst,
-    typ::Type first_operand_type,
+    ast::Type* first_operand_type,
     TypedExpression&& second_operand_expr) {
-  if ((first_operand_type != second_operand_expr.type) &&
+  if (!AstTypesEquivalent(first_operand_type, second_operand_expr.type) &&
       AssumesSecondOperandSignednessMatchesFirstOperand(inst.opcode())) {
     // Conversion is required.
     return {first_operand_type,
@@ -1711,8 +1702,8 @@ TypedExpression ParserImpl::RectifySecondOperandSignedness(
   return std::move(second_operand_expr);
 }
 
-typ::Type ParserImpl::ForcedResultType(const spvtools::opt::Instruction& inst,
-                                       typ::Type first_operand_type) {
+ast::Type* ParserImpl::ForcedResultType(const spvtools::opt::Instruction& inst,
+                                        ast::Type* first_operand_type) {
   const auto opcode = inst.opcode();
   if (AssumesResultSignednessMatchesFirstOperand(opcode)) {
     return first_operand_type;
@@ -1727,16 +1718,15 @@ typ::Type ParserImpl::ForcedResultType(const spvtools::opt::Instruction& inst,
   return nullptr;
 }
 
-typ::Type ParserImpl::GetSignedIntMatchingShape(typ::Type other) {
-  if (other.ast == nullptr) {
+ast::Type* ParserImpl::GetSignedIntMatchingShape(ast::Type* other) {
+  if (other == nullptr) {
     Fail() << "no type provided";
   }
   auto i32 = builder_.ty.i32();
-  if (other.ast->Is<ast::F32>() || other.ast->Is<ast::U32>() ||
-      other.ast->Is<ast::I32>()) {
+  if (other->Is<ast::F32>() || other->Is<ast::U32>() || other->Is<ast::I32>()) {
     return i32;
   }
-  auto* vec_ty = other.ast->As<ast::Vector>();
+  auto* vec_ty = other->As<ast::Vector>();
   if (vec_ty) {
     return builder_.ty.vec(i32, vec_ty->size());
   }
@@ -1744,17 +1734,16 @@ typ::Type ParserImpl::GetSignedIntMatchingShape(typ::Type other) {
   return nullptr;
 }
 
-typ::Type ParserImpl::GetUnsignedIntMatchingShape(typ::Type other) {
-  if (other.ast == nullptr) {
+ast::Type* ParserImpl::GetUnsignedIntMatchingShape(ast::Type* other) {
+  if (other == nullptr) {
     Fail() << "no type provided";
     return nullptr;
   }
   auto u32 = builder_.ty.u32();
-  if (other.ast->Is<ast::F32>() || other.ast->Is<ast::U32>() ||
-      other.ast->Is<ast::I32>()) {
+  if (other->Is<ast::F32>() || other->Is<ast::U32>() || other->Is<ast::I32>()) {
     return u32;
   }
-  auto* vec_ty = other.ast->As<ast::Vector>();
+  auto* vec_ty = other->As<ast::Vector>();
   if (vec_ty) {
     return builder_.ty.vec(u32, vec_ty->size());
   }
@@ -1765,9 +1754,10 @@ typ::Type ParserImpl::GetUnsignedIntMatchingShape(typ::Type other) {
 TypedExpression ParserImpl::RectifyForcedResultType(
     TypedExpression expr,
     const spvtools::opt::Instruction& inst,
-    typ::Type first_operand_type) {
-  auto forced_result_ty = ForcedResultType(inst, first_operand_type);
-  if ((forced_result_ty.ast == nullptr) || (forced_result_ty == expr.type)) {
+    ast::Type* first_operand_type) {
+  auto* forced_result_ty = ForcedResultType(inst, first_operand_type);
+  if ((forced_result_ty == nullptr) ||
+      AstTypesEquivalent(forced_result_ty, expr.type)) {
     return expr;
   }
   return {expr.type,
@@ -1776,7 +1766,7 @@ TypedExpression ParserImpl::RectifyForcedResultType(
 
 TypedExpression ParserImpl::AsUnsigned(TypedExpression expr) {
   if (expr.type && expr.type->is_signed_scalar_or_vector()) {
-    auto new_type = GetUnsignedIntMatchingShape(expr.type);
+    auto* new_type = GetUnsignedIntMatchingShape(expr.type);
     return {new_type,
             create<ast::BitcastExpression>(Source{}, new_type, expr.expr)};
   }
@@ -1785,7 +1775,7 @@ TypedExpression ParserImpl::AsUnsigned(TypedExpression expr) {
 
 TypedExpression ParserImpl::AsSigned(TypedExpression expr) {
   if (expr.type && expr.type->is_unsigned_scalar_or_vector()) {
-    auto new_type = GetSignedIntMatchingShape(expr.type);
+    auto* new_type = GetSignedIntMatchingShape(expr.type);
     return {new_type,
             create<ast::BitcastExpression>(Source{}, new_type, expr.expr)};
   }
@@ -1962,7 +1952,7 @@ ParserImpl::GetSpirvTypeForHandleMemoryObjectDeclaration(
   return raw_handle_type;
 }
 
-typ::Pointer ParserImpl::GetTypeForHandleVar(
+ast::Pointer* ParserImpl::GetTypeForHandleVar(
     const spvtools::opt::Instruction& var) {
   auto where = handle_type_.find(&var);
   if (where != handle_type_.end()) {
@@ -2046,7 +2036,7 @@ typ::Pointer ParserImpl::GetTypeForHandleVar(
   }
 
   // Construct the Tint handle type.
-  typ::Type ast_store_type;
+  ast::Type* ast_store_type;
   if (usage.IsSampler()) {
     ast_store_type = builder_.ty.sampler(
         usage.IsComparisonSampler() ? ast::SamplerKind::kComparisonSampler
@@ -2071,7 +2061,7 @@ typ::Pointer ParserImpl::GetTypeForHandleVar(
     if (usage.IsSampledTexture() ||
         (image_type->format() == SpvImageFormatUnknown)) {
       // Make a sampled texture type.
-      auto ast_sampled_component_type =
+      auto* ast_sampled_component_type =
           ConvertType(raw_handle_type->GetSingleWordInOperand(0));
 
       // Vulkan ignores the depth parameter on OpImage, so pay attention to the
@@ -2114,7 +2104,7 @@ typ::Pointer ParserImpl::GetTypeForHandleVar(
   return result;
 }
 
-typ::Type ParserImpl::GetComponentTypeForFormat(ast::ImageFormat format) {
+ast::Type* ParserImpl::GetComponentTypeForFormat(ast::ImageFormat format) {
   switch (format) {
     case ast::ImageFormat::kR8Uint:
     case ast::ImageFormat::kR16Uint:
@@ -2163,8 +2153,8 @@ typ::Type ParserImpl::GetComponentTypeForFormat(ast::ImageFormat format) {
   return nullptr;
 }
 
-typ::Type ParserImpl::GetTexelTypeForFormat(ast::ImageFormat format) {
-  auto component_type = GetComponentTypeForFormat(format);
+ast::Type* ParserImpl::GetTexelTypeForFormat(ast::ImageFormat format) {
+  auto* component_type = GetComponentTypeForFormat(format);
   if (!component_type) {
     return nullptr;
   }

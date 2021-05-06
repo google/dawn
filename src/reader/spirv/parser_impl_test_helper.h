@@ -158,7 +158,7 @@ class ParserImplWrapperForTest {
   /// after the internal representation of the module has been built.
   /// @param id the SPIR-V ID of a type.
   /// @returns a Tint type, or nullptr
-  typ::Type ConvertType(uint32_t id) { return impl_.ConvertType(id); }
+  ast::Type* ConvertType(uint32_t id) { return impl_.ConvertType(id); }
 
   /// Gets the list of decorations for a SPIR-V result ID.  Returns an empty
   /// vector if the ID is not a result ID, or if no decorations target that ID.

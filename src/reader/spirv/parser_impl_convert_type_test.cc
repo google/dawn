@@ -26,14 +26,14 @@ using ::testing::Eq;
 TEST_F(SpvParserTest, ConvertType_PreservesExistingFailure) {
   auto p = parser(std::vector<uint32_t>{});
   p->Fail() << "boing";
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("boing"));
 }
 
 TEST_F(SpvParserTest, ConvertType_RequiresInternalRepresntation) {
   auto p = parser(std::vector<uint32_t>{});
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(
       p->error(),
@@ -44,7 +44,7 @@ TEST_F(SpvParserTest, ConvertType_NotAnId) {
   auto p = parser(test::Assemble("%1 = OpExtInstImport \"GLSL.std.450\""));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_EQ(nullptr, type);
   EXPECT_THAT(p->error(), Eq("ID is not a SPIR-V type: 10"));
@@ -54,7 +54,7 @@ TEST_F(SpvParserTest, ConvertType_IdExistsButIsNotAType) {
   auto p = parser(test::Assemble("%1 = OpExtInstImport \"GLSL.std.450\""));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
+  auto* type = p->ConvertType(1);
   EXPECT_EQ(nullptr, type);
   EXPECT_THAT(p->error(), Eq("ID is not a SPIR-V type: 1"));
 }
@@ -64,7 +64,7 @@ TEST_F(SpvParserTest, ConvertType_UnhandledType) {
   auto p = parser(test::Assemble("%70 = OpTypePipe WriteOnly"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(70);
+  auto* type = p->ConvertType(70);
   EXPECT_EQ(nullptr, type);
   EXPECT_THAT(p->error(),
               Eq("unknown SPIR-V type with ID 70: %70 = OpTypePipe WriteOnly"));
@@ -74,8 +74,8 @@ TEST_F(SpvParserTest, ConvertType_Void) {
   auto p = parser(test::Assemble("%1 = OpTypeVoid"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
-  EXPECT_TRUE(type.ast->Is<ast::Void>());
+  auto* type = p->ConvertType(1);
+  EXPECT_TRUE(type->Is<ast::Void>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -83,8 +83,8 @@ TEST_F(SpvParserTest, ConvertType_Bool) {
   auto p = parser(test::Assemble("%100 = OpTypeBool"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(100);
-  EXPECT_TRUE(type.ast->Is<ast::Bool>());
+  auto* type = p->ConvertType(100);
+  EXPECT_TRUE(type->Is<ast::Bool>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -92,8 +92,8 @@ TEST_F(SpvParserTest, ConvertType_I32) {
   auto p = parser(test::Assemble("%2 = OpTypeInt 32 1"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(2);
-  EXPECT_TRUE(type.ast->Is<ast::I32>());
+  auto* type = p->ConvertType(2);
+  EXPECT_TRUE(type->Is<ast::I32>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -101,8 +101,8 @@ TEST_F(SpvParserTest, ConvertType_U32) {
   auto p = parser(test::Assemble("%3 = OpTypeInt 32 0"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::U32>());
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::U32>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -110,8 +110,8 @@ TEST_F(SpvParserTest, ConvertType_F32) {
   auto p = parser(test::Assemble("%4 = OpTypeFloat 32"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(4);
-  EXPECT_TRUE(type.ast->Is<ast::F32>());
+  auto* type = p->ConvertType(4);
+  EXPECT_TRUE(type->Is<ast::F32>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -119,7 +119,7 @@ TEST_F(SpvParserTest, ConvertType_BadIntWidth) {
   auto p = parser(test::Assemble("%5 = OpTypeInt 17 1"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(5);
+  auto* type = p->ConvertType(5);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("unhandled integer width: 17"));
 }
@@ -128,7 +128,7 @@ TEST_F(SpvParserTest, ConvertType_BadFloatWidth) {
   auto p = parser(test::Assemble("%6 = OpTypeFloat 19"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(6);
+  auto* type = p->ConvertType(6);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("unhandled float width: 19"));
 }
@@ -140,7 +140,7 @@ TEST_F(SpvParserTest, DISABLED_ConvertType_InvalidVectorElement) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(20);
+  auto* type = p->ConvertType(20);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("unknown SPIR-V type: 5"));
 }
@@ -154,20 +154,20 @@ TEST_F(SpvParserTest, ConvertType_VecOverF32) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto v2xf32 = p->ConvertType(20);
-  EXPECT_TRUE(v2xf32.ast->Is<ast::Vector>());
-  EXPECT_TRUE(v2xf32.ast->As<ast::Vector>()->type()->Is<ast::F32>());
-  EXPECT_EQ(v2xf32.ast->As<ast::Vector>()->size(), 2u);
+  auto* v2xf32 = p->ConvertType(20);
+  EXPECT_TRUE(v2xf32->Is<ast::Vector>());
+  EXPECT_TRUE(v2xf32->As<ast::Vector>()->type()->Is<ast::F32>());
+  EXPECT_EQ(v2xf32->As<ast::Vector>()->size(), 2u);
 
-  auto v3xf32 = p->ConvertType(30);
-  EXPECT_TRUE(v3xf32.ast->Is<ast::Vector>());
-  EXPECT_TRUE(v3xf32.ast->As<ast::Vector>()->type()->Is<ast::F32>());
-  EXPECT_EQ(v3xf32.ast->As<ast::Vector>()->size(), 3u);
+  auto* v3xf32 = p->ConvertType(30);
+  EXPECT_TRUE(v3xf32->Is<ast::Vector>());
+  EXPECT_TRUE(v3xf32->As<ast::Vector>()->type()->Is<ast::F32>());
+  EXPECT_EQ(v3xf32->As<ast::Vector>()->size(), 3u);
 
-  auto v4xf32 = p->ConvertType(40);
-  EXPECT_TRUE(v4xf32.ast->Is<ast::Vector>());
-  EXPECT_TRUE(v4xf32.ast->As<ast::Vector>()->type()->Is<ast::F32>());
-  EXPECT_EQ(v4xf32.ast->As<ast::Vector>()->size(), 4u);
+  auto* v4xf32 = p->ConvertType(40);
+  EXPECT_TRUE(v4xf32->Is<ast::Vector>());
+  EXPECT_TRUE(v4xf32->As<ast::Vector>()->type()->Is<ast::F32>());
+  EXPECT_EQ(v4xf32->As<ast::Vector>()->size(), 4u);
 
   EXPECT_TRUE(p->error().empty());
 }
@@ -181,20 +181,20 @@ TEST_F(SpvParserTest, ConvertType_VecOverI32) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto v2xi32 = p->ConvertType(20);
-  EXPECT_TRUE(v2xi32.ast->Is<ast::Vector>());
-  EXPECT_TRUE(v2xi32.ast->As<ast::Vector>()->type()->Is<ast::I32>());
-  EXPECT_EQ(v2xi32.ast->As<ast::Vector>()->size(), 2u);
+  auto* v2xi32 = p->ConvertType(20);
+  EXPECT_TRUE(v2xi32->Is<ast::Vector>());
+  EXPECT_TRUE(v2xi32->As<ast::Vector>()->type()->Is<ast::I32>());
+  EXPECT_EQ(v2xi32->As<ast::Vector>()->size(), 2u);
 
-  auto v3xi32 = p->ConvertType(30);
-  EXPECT_TRUE(v3xi32.ast->Is<ast::Vector>());
-  EXPECT_TRUE(v3xi32.ast->As<ast::Vector>()->type()->Is<ast::I32>());
-  EXPECT_EQ(v3xi32.ast->As<ast::Vector>()->size(), 3u);
+  auto* v3xi32 = p->ConvertType(30);
+  EXPECT_TRUE(v3xi32->Is<ast::Vector>());
+  EXPECT_TRUE(v3xi32->As<ast::Vector>()->type()->Is<ast::I32>());
+  EXPECT_EQ(v3xi32->As<ast::Vector>()->size(), 3u);
 
-  auto v4xi32 = p->ConvertType(40);
-  EXPECT_TRUE(v4xi32.ast->Is<ast::Vector>());
-  EXPECT_TRUE(v4xi32.ast->As<ast::Vector>()->type()->Is<ast::I32>());
-  EXPECT_EQ(v4xi32.ast->As<ast::Vector>()->size(), 4u);
+  auto* v4xi32 = p->ConvertType(40);
+  EXPECT_TRUE(v4xi32->Is<ast::Vector>());
+  EXPECT_TRUE(v4xi32->As<ast::Vector>()->type()->Is<ast::I32>());
+  EXPECT_EQ(v4xi32->As<ast::Vector>()->size(), 4u);
 
   EXPECT_TRUE(p->error().empty());
 }
@@ -208,20 +208,20 @@ TEST_F(SpvParserTest, ConvertType_VecOverU32) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto v2xu32 = p->ConvertType(20);
-  EXPECT_TRUE(v2xu32.ast->Is<ast::Vector>());
-  EXPECT_TRUE(v2xu32.ast->As<ast::Vector>()->type()->Is<ast::U32>());
-  EXPECT_EQ(v2xu32.ast->As<ast::Vector>()->size(), 2u);
+  auto* v2xu32 = p->ConvertType(20);
+  EXPECT_TRUE(v2xu32->Is<ast::Vector>());
+  EXPECT_TRUE(v2xu32->As<ast::Vector>()->type()->Is<ast::U32>());
+  EXPECT_EQ(v2xu32->As<ast::Vector>()->size(), 2u);
 
-  auto v3xu32 = p->ConvertType(30);
-  EXPECT_TRUE(v3xu32.ast->Is<ast::Vector>());
-  EXPECT_TRUE(v3xu32.ast->As<ast::Vector>()->type()->Is<ast::U32>());
-  EXPECT_EQ(v3xu32.ast->As<ast::Vector>()->size(), 3u);
+  auto* v3xu32 = p->ConvertType(30);
+  EXPECT_TRUE(v3xu32->Is<ast::Vector>());
+  EXPECT_TRUE(v3xu32->As<ast::Vector>()->type()->Is<ast::U32>());
+  EXPECT_EQ(v3xu32->As<ast::Vector>()->size(), 3u);
 
-  auto v4xu32 = p->ConvertType(40);
-  EXPECT_TRUE(v4xu32.ast->Is<ast::Vector>());
-  EXPECT_TRUE(v4xu32.ast->As<ast::Vector>()->type()->Is<ast::U32>());
-  EXPECT_EQ(v4xu32.ast->As<ast::Vector>()->size(), 4u);
+  auto* v4xu32 = p->ConvertType(40);
+  EXPECT_TRUE(v4xu32->Is<ast::Vector>());
+  EXPECT_TRUE(v4xu32->As<ast::Vector>()->type()->Is<ast::U32>());
+  EXPECT_EQ(v4xu32->As<ast::Vector>()->size(), 4u);
 
   EXPECT_TRUE(p->error().empty());
 }
@@ -234,7 +234,7 @@ TEST_F(SpvParserTest, DISABLED_ConvertType_InvalidMatrixElement) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(20);
+  auto* type = p->ConvertType(20);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(), Eq("unknown SPIR-V type: 5"));
 }
@@ -260,59 +260,59 @@ TEST_F(SpvParserTest, ConvertType_MatrixOverF32) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto m22 = p->ConvertType(22);
-  EXPECT_TRUE(m22.ast->Is<ast::Matrix>());
-  EXPECT_TRUE(m22.ast->As<ast::Matrix>()->type()->Is<ast::F32>());
-  EXPECT_EQ(m22.ast->As<ast::Matrix>()->rows(), 2u);
-  EXPECT_EQ(m22.ast->As<ast::Matrix>()->columns(), 2u);
+  auto* m22 = p->ConvertType(22);
+  EXPECT_TRUE(m22->Is<ast::Matrix>());
+  EXPECT_TRUE(m22->As<ast::Matrix>()->type()->Is<ast::F32>());
+  EXPECT_EQ(m22->As<ast::Matrix>()->rows(), 2u);
+  EXPECT_EQ(m22->As<ast::Matrix>()->columns(), 2u);
 
-  auto m23 = p->ConvertType(23);
-  EXPECT_TRUE(m23.ast->Is<ast::Matrix>());
-  EXPECT_TRUE(m23.ast->As<ast::Matrix>()->type()->Is<ast::F32>());
-  EXPECT_EQ(m23.ast->As<ast::Matrix>()->rows(), 2u);
-  EXPECT_EQ(m23.ast->As<ast::Matrix>()->columns(), 3u);
+  auto* m23 = p->ConvertType(23);
+  EXPECT_TRUE(m23->Is<ast::Matrix>());
+  EXPECT_TRUE(m23->As<ast::Matrix>()->type()->Is<ast::F32>());
+  EXPECT_EQ(m23->As<ast::Matrix>()->rows(), 2u);
+  EXPECT_EQ(m23->As<ast::Matrix>()->columns(), 3u);
 
-  auto m24 = p->ConvertType(24);
-  EXPECT_TRUE(m24.ast->Is<ast::Matrix>());
-  EXPECT_TRUE(m24.ast->As<ast::Matrix>()->type()->Is<ast::F32>());
-  EXPECT_EQ(m24.ast->As<ast::Matrix>()->rows(), 2u);
-  EXPECT_EQ(m24.ast->As<ast::Matrix>()->columns(), 4u);
+  auto* m24 = p->ConvertType(24);
+  EXPECT_TRUE(m24->Is<ast::Matrix>());
+  EXPECT_TRUE(m24->As<ast::Matrix>()->type()->Is<ast::F32>());
+  EXPECT_EQ(m24->As<ast::Matrix>()->rows(), 2u);
+  EXPECT_EQ(m24->As<ast::Matrix>()->columns(), 4u);
 
-  auto m32 = p->ConvertType(32);
-  EXPECT_TRUE(m32.ast->Is<ast::Matrix>());
-  EXPECT_TRUE(m32.ast->As<ast::Matrix>()->type()->Is<ast::F32>());
-  EXPECT_EQ(m32.ast->As<ast::Matrix>()->rows(), 3u);
-  EXPECT_EQ(m32.ast->As<ast::Matrix>()->columns(), 2u);
+  auto* m32 = p->ConvertType(32);
+  EXPECT_TRUE(m32->Is<ast::Matrix>());
+  EXPECT_TRUE(m32->As<ast::Matrix>()->type()->Is<ast::F32>());
+  EXPECT_EQ(m32->As<ast::Matrix>()->rows(), 3u);
+  EXPECT_EQ(m32->As<ast::Matrix>()->columns(), 2u);
 
-  auto m33 = p->ConvertType(33);
-  EXPECT_TRUE(m33.ast->Is<ast::Matrix>());
-  EXPECT_TRUE(m33.ast->As<ast::Matrix>()->type()->Is<ast::F32>());
-  EXPECT_EQ(m33.ast->As<ast::Matrix>()->rows(), 3u);
-  EXPECT_EQ(m33.ast->As<ast::Matrix>()->columns(), 3u);
+  auto* m33 = p->ConvertType(33);
+  EXPECT_TRUE(m33->Is<ast::Matrix>());
+  EXPECT_TRUE(m33->As<ast::Matrix>()->type()->Is<ast::F32>());
+  EXPECT_EQ(m33->As<ast::Matrix>()->rows(), 3u);
+  EXPECT_EQ(m33->As<ast::Matrix>()->columns(), 3u);
 
-  auto m34 = p->ConvertType(34);
-  EXPECT_TRUE(m34.ast->Is<ast::Matrix>());
-  EXPECT_TRUE(m34.ast->As<ast::Matrix>()->type()->Is<ast::F32>());
-  EXPECT_EQ(m34.ast->As<ast::Matrix>()->rows(), 3u);
-  EXPECT_EQ(m34.ast->As<ast::Matrix>()->columns(), 4u);
+  auto* m34 = p->ConvertType(34);
+  EXPECT_TRUE(m34->Is<ast::Matrix>());
+  EXPECT_TRUE(m34->As<ast::Matrix>()->type()->Is<ast::F32>());
+  EXPECT_EQ(m34->As<ast::Matrix>()->rows(), 3u);
+  EXPECT_EQ(m34->As<ast::Matrix>()->columns(), 4u);
 
-  auto m42 = p->ConvertType(42);
-  EXPECT_TRUE(m42.ast->Is<ast::Matrix>());
-  EXPECT_TRUE(m42.ast->As<ast::Matrix>()->type()->Is<ast::F32>());
-  EXPECT_EQ(m42.ast->As<ast::Matrix>()->rows(), 4u);
-  EXPECT_EQ(m42.ast->As<ast::Matrix>()->columns(), 2u);
+  auto* m42 = p->ConvertType(42);
+  EXPECT_TRUE(m42->Is<ast::Matrix>());
+  EXPECT_TRUE(m42->As<ast::Matrix>()->type()->Is<ast::F32>());
+  EXPECT_EQ(m42->As<ast::Matrix>()->rows(), 4u);
+  EXPECT_EQ(m42->As<ast::Matrix>()->columns(), 2u);
 
-  auto m43 = p->ConvertType(43);
-  EXPECT_TRUE(m43.ast->Is<ast::Matrix>());
-  EXPECT_TRUE(m43.ast->As<ast::Matrix>()->type()->Is<ast::F32>());
-  EXPECT_EQ(m43.ast->As<ast::Matrix>()->rows(), 4u);
-  EXPECT_EQ(m43.ast->As<ast::Matrix>()->columns(), 3u);
+  auto* m43 = p->ConvertType(43);
+  EXPECT_TRUE(m43->Is<ast::Matrix>());
+  EXPECT_TRUE(m43->As<ast::Matrix>()->type()->Is<ast::F32>());
+  EXPECT_EQ(m43->As<ast::Matrix>()->rows(), 4u);
+  EXPECT_EQ(m43->As<ast::Matrix>()->columns(), 3u);
 
-  auto m44 = p->ConvertType(44);
-  EXPECT_TRUE(m44.ast->Is<ast::Matrix>());
-  EXPECT_TRUE(m44.ast->As<ast::Matrix>()->type()->Is<ast::F32>());
-  EXPECT_EQ(m44.ast->As<ast::Matrix>()->rows(), 4u);
-  EXPECT_EQ(m44.ast->As<ast::Matrix>()->columns(), 4u);
+  auto* m44 = p->ConvertType(44);
+  EXPECT_TRUE(m44->Is<ast::Matrix>());
+  EXPECT_TRUE(m44->As<ast::Matrix>()->type()->Is<ast::F32>());
+  EXPECT_EQ(m44->As<ast::Matrix>()->rows(), 4u);
+  EXPECT_EQ(m44->As<ast::Matrix>()->columns(), 4u);
 
   EXPECT_TRUE(p->error().empty());
 }
@@ -324,10 +324,10 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type.ast->UnwrapAliasIfNeeded()->Is<ast::Array>());
-  auto* arr_type = type.ast->UnwrapAliasIfNeeded()->As<ast::Array>();
+  EXPECT_TRUE(type->UnwrapAliasIfNeeded()->Is<ast::Array>());
+  auto* arr_type = type->UnwrapAliasIfNeeded()->As<ast::Array>();
   EXPECT_TRUE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
   EXPECT_EQ(arr_type->size(), 0u);
@@ -345,7 +345,7 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_InvalidDecoration) {
     %10 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(
       p->error(),
@@ -359,9 +359,9 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_ArrayStride_Valid) {
     %10 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  auto* arr_type = type.ast->UnwrapAliasIfNeeded()->As<ast::Array>();
+  auto* arr_type = type->UnwrapAliasIfNeeded()->As<ast::Array>();
   EXPECT_TRUE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
   ASSERT_EQ(arr_type->decorations().size(), 1u);
@@ -378,7 +378,7 @@ TEST_F(SpvParserTest, ConvertType_RuntimeArray_ArrayStride_ZeroIsError) {
     %10 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("invalid array type ID 10: ArrayStride can't be 0"));
@@ -393,7 +393,7 @@ TEST_F(SpvParserTest,
     %10 = OpTypeRuntimeArray %uint
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("invalid array type ID 10: multiple ArrayStride decorations"));
@@ -407,10 +407,10 @@ TEST_F(SpvParserTest, ConvertType_Array) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type.ast->Is<ast::Array>());
-  auto* arr_type = type.ast->As<ast::Array>();
+  EXPECT_TRUE(type->Is<ast::Array>());
+  auto* arr_type = type->As<ast::Array>();
   EXPECT_FALSE(arr_type->IsRuntimeArray());
   ASSERT_NE(arr_type, nullptr);
   EXPECT_EQ(arr_type->size(), 42u);
@@ -430,7 +430,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayBadLengthIsSpecConstantValue) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("Array type 10 length is a specialization constant"));
@@ -445,7 +445,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayBadLengthIsSpecConstantExpr) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("Array type 10 length is a specialization constant"));
@@ -463,7 +463,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayBadTooBig) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   // TODO(dneto): Right now it's rejected earlier in the flow because
   // we can't even utter the uint64 type.
@@ -478,7 +478,7 @@ TEST_F(SpvParserTest, ConvertType_Array_InvalidDecoration) {
     %10 = OpTypeArray %uint %uint_5
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(
       p->error(),
@@ -494,10 +494,10 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_Valid) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type.ast->UnwrapAliasIfNeeded()->Is<ast::Array>());
-  auto* arr_type = type.ast->UnwrapAliasIfNeeded()->As<ast::Array>();
+  EXPECT_TRUE(type->UnwrapAliasIfNeeded()->Is<ast::Array>());
+  auto* arr_type = type->UnwrapAliasIfNeeded()->As<ast::Array>();
   ASSERT_NE(arr_type, nullptr);
 
   ASSERT_EQ(arr_type->decorations().size(), 1u);
@@ -517,7 +517,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_ZeroIsError) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("invalid array type ID 10: ArrayStride can't be 0"));
@@ -533,7 +533,7 @@ TEST_F(SpvParserTest, ConvertType_ArrayStride_SpecifiedTwiceIsError) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("invalid array type ID 10: multiple ArrayStride decorations"));
@@ -548,12 +548,12 @@ TEST_F(SpvParserTest, ConvertType_StructTwoMembers) {
   EXPECT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->RegisterUserAndStructMemberNames());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type.ast->Is<ast::Struct>());
+  EXPECT_TRUE(type->Is<ast::Struct>());
 
   Program program = p->program();
-  EXPECT_THAT(program.str(type.ast->As<ast::Struct>()), Eq(R"(Struct S {
+  EXPECT_THAT(program.str(type->As<ast::Struct>()), Eq(R"(Struct S {
   StructMember{field0: __u32}
   StructMember{field1: __f32}
 }
@@ -569,12 +569,12 @@ TEST_F(SpvParserTest, ConvertType_StructWithBlockDecoration) {
   EXPECT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->RegisterUserAndStructMemberNames());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type.ast->Is<ast::Struct>());
+  EXPECT_TRUE(type->Is<ast::Struct>());
 
   Program program = p->program();
-  EXPECT_THAT(program.str(type.ast->As<ast::Struct>()), Eq(R"(Struct S {
+  EXPECT_THAT(program.str(type->As<ast::Struct>()), Eq(R"(Struct S {
   [[block]]
   StructMember{field0: __u32}
 }
@@ -594,12 +594,12 @@ TEST_F(SpvParserTest, ConvertType_StructWithMemberDecorations) {
   EXPECT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->RegisterUserAndStructMemberNames());
 
-  auto type = p->ConvertType(10);
+  auto* type = p->ConvertType(10);
   ASSERT_NE(type, nullptr);
-  EXPECT_TRUE(type.ast->Is<ast::Struct>());
+  EXPECT_TRUE(type->Is<ast::Struct>());
 
   Program program = p->program();
-  EXPECT_THAT(program.str(type.ast->As<ast::Struct>()), Eq(R"(Struct S {
+  EXPECT_THAT(program.str(type->As<ast::Struct>()), Eq(R"(Struct S {
   StructMember{[[ offset 0 ]] field0: __f32}
   StructMember{[[ offset 8 ]] field1: __vec_2__f32}
   StructMember{[[ offset 16 ]] field2: __mat_2_2__f32}
@@ -621,7 +621,7 @@ TEST_F(SpvParserTest, ConvertType_InvalidPointeetype) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule()) << p->error();
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_EQ(type, nullptr);
   EXPECT_THAT(p->error(),
               Eq("SPIR-V pointer type with ID 3 has invalid pointee type 42"));
@@ -644,9 +644,9 @@ TEST_F(SpvParserTest, ConvertType_PointerInput) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::Pointer>());
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::F32>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kInput);
@@ -660,9 +660,9 @@ TEST_F(SpvParserTest, ConvertType_PointerOutput) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::Pointer>());
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::F32>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kOutput);
@@ -676,9 +676,9 @@ TEST_F(SpvParserTest, ConvertType_PointerUniform) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::Pointer>());
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::F32>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kUniform);
@@ -692,9 +692,9 @@ TEST_F(SpvParserTest, ConvertType_PointerWorkgroup) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::Pointer>());
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::F32>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kWorkgroup);
@@ -708,9 +708,9 @@ TEST_F(SpvParserTest, ConvertType_PointerUniformConstant) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::Pointer>());
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::F32>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kUniformConstant);
@@ -724,9 +724,9 @@ TEST_F(SpvParserTest, ConvertType_PointerStorageBuffer) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::Pointer>());
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::F32>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kStorage);
@@ -740,9 +740,9 @@ TEST_F(SpvParserTest, ConvertType_PointerImage) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::Pointer>());
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::F32>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kImage);
@@ -756,9 +756,9 @@ TEST_F(SpvParserTest, ConvertType_PointerPrivate) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::Pointer>());
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::F32>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kPrivate);
@@ -772,9 +772,9 @@ TEST_F(SpvParserTest, ConvertType_PointerFunction) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* type = p->ConvertType(3);
+  EXPECT_TRUE(type->Is<ast::Pointer>());
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::F32>());
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kFunction);
@@ -790,11 +790,11 @@ TEST_F(SpvParserTest, ConvertType_PointerToPointer) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(3);
+  auto* type = p->ConvertType(3);
   EXPECT_NE(type, nullptr);
-  EXPECT_TRUE(type.ast->Is<ast::Pointer>());
+  EXPECT_TRUE(type->Is<ast::Pointer>());
 
-  auto* ptr_ty = type.ast->As<ast::Pointer>();
+  auto* ptr_ty = type->As<ast::Pointer>();
   EXPECT_NE(ptr_ty, nullptr);
   EXPECT_EQ(ptr_ty->storage_class(), ast::StorageClass::kInput);
   EXPECT_TRUE(ptr_ty->type()->Is<ast::Pointer>());
@@ -814,8 +814,8 @@ TEST_F(SpvParserTest, ConvertType_Sampler_PretendVoid) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
-  EXPECT_TRUE(type.ast->Is<ast::Void>());
+  auto* type = p->ConvertType(1);
+  EXPECT_TRUE(type->Is<ast::Void>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -827,8 +827,8 @@ TEST_F(SpvParserTest, ConvertType_Image_PretendVoid) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
-  EXPECT_TRUE(type.ast->Is<ast::Void>());
+  auto* type = p->ConvertType(1);
+  EXPECT_TRUE(type->Is<ast::Void>());
   EXPECT_TRUE(p->error().empty());
 }
 
@@ -840,8 +840,8 @@ TEST_F(SpvParserTest, ConvertType_SampledImage_PretendVoid) {
   )"));
   EXPECT_TRUE(p->BuildInternalModule());
 
-  auto type = p->ConvertType(1);
-  EXPECT_TRUE(type.ast->Is<ast::Void>());
+  auto* type = p->ConvertType(1);
+  EXPECT_TRUE(type->Is<ast::Void>());
   EXPECT_TRUE(p->error().empty());
 }
 

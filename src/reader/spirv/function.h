@@ -25,7 +25,6 @@
 #include "src/program_builder.h"
 #include "src/reader/spirv/construct.h"
 #include "src/reader/spirv/parser_impl.h"
-#include "src/typepair.h"
 
 namespace tint {
 namespace reader {
@@ -516,7 +515,7 @@ class FunctionEmitter {
   /// @param type the AST type
   /// @param result_id the SPIR-V ID for the locally defined value
   /// @returns an possibly updated type
-  typ::Type RemapStorageClass(typ::Type type, uint32_t result_id);
+  ast::Type* RemapStorageClass(ast::Type* type, uint32_t result_id);
 
   /// Marks locally defined values when they should get a 'const'
   /// definition in WGSL, or a 'var' definition at an outer scope.
@@ -857,7 +856,7 @@ class FunctionEmitter {
     /// Function parameters
     ast::VariableList params;
     /// Function return type
-    typ::Type return_type;
+    ast::Type* return_type;
     /// Function decorations
     ast::DecorationList decorations;
   };
@@ -870,7 +869,7 @@ class FunctionEmitter {
 
   /// @returns the store type for the OpVariable instruction, or
   /// null on failure.
-  typ::Type GetVariableStoreType(
+  ast::Type* GetVariableStoreType(
       const spvtools::opt::Instruction& var_decl_inst);
 
   /// Returns an expression for an instruction operand. Signedness conversion is
@@ -938,7 +937,7 @@ class FunctionEmitter {
   /// Get the AST texture the SPIR-V image memory object declaration.
   /// @param inst the SPIR-V memory object declaration for the image.
   /// @returns a texture type, or null on error
-  typ::Texture GetImageType(const spvtools::opt::Instruction& inst);
+  ast::Texture* GetImageType(const spvtools::opt::Instruction& inst);
 
   /// Get the expression for the image operand from the first operand to the
   /// given instruction.
@@ -975,7 +974,7 @@ class FunctionEmitter {
   ast::Expression* ConvertTexelForStorage(
       const spvtools::opt::Instruction& inst,
       TypedExpression texel,
-      typ::Texture texture_type);
+      ast::Texture* texture_type);
 
   /// Returns an expression for an OpSelect, if its operands are scalars
   /// or vectors. These translate directly to WGSL select.  Otherwise, return
