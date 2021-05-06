@@ -2144,7 +2144,6 @@ TEST_F(SpvModuleScopeVarParserTest, ScalarSpecConstant_UsedInFunction) {
      OpReturnValue %1
      OpFunctionEnd
   )" + MainBody();
-  std::cout << assembly << std::endl;
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
   auto fe = p->function_emitter(100);
