@@ -85,7 +85,9 @@ namespace dawn_native { namespace metal {
                 // this MSL buffer index.
             }
         }
-        transformManager.Add<tint::transform::BoundArrayAccessors>();
+        if (GetDevice()->IsRobustnessEnabled()) {
+            transformManager.Add<tint::transform::BoundArrayAccessors>();
+        }
         transformManager.Add<tint::transform::Renamer>();
         transformManager.Add<tint::transform::Msl>();
 

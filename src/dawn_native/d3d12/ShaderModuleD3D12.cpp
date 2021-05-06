@@ -245,7 +245,9 @@ namespace dawn_native { namespace d3d12 {
         tint::transform::Manager transformManager;
         tint::transform::DataMap transformInputs;
 
-        transformManager.Add<tint::transform::BoundArrayAccessors>();
+        if (GetDevice()->IsRobustnessEnabled()) {
+            transformManager.Add<tint::transform::BoundArrayAccessors>();
+        }
         if (stage == SingleShaderStage::Vertex) {
             transformManager.Add<tint::transform::FirstIndexOffset>();
             transformInputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(

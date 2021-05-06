@@ -55,7 +55,9 @@ namespace dawn_native { namespace vulkan {
             errorStream << "Tint SPIR-V writer failure:" << std::endl;
 
             tint::transform::Manager transformManager;
-            transformManager.Add<tint::transform::BoundArrayAccessors>();
+            if (GetDevice()->IsRobustnessEnabled()) {
+                transformManager.Add<tint::transform::BoundArrayAccessors>();
+            }
             transformManager.Add<tint::transform::EmitVertexPointSize>();
             transformManager.Add<tint::transform::Spirv>();
 
