@@ -354,7 +354,7 @@ class ParserImpl : Reader {
       const spvtools::opt::Instruction& inst,
       TypedExpression&& expr);
 
-  /// Conversts a second operand to the signedness of the first operand
+  /// Converts a second operand to the signedness of the first operand
   /// of a binary operator, if the WGSL operator requires they be the same.
   /// Returns the converted expression, or the original expression if the
   /// conversion is not needed.
@@ -406,6 +406,18 @@ class ParserImpl : Reader {
       TypedExpression expr,
       const spvtools::opt::Instruction& inst,
       typ::Type first_operand_type);
+
+  /// Returns the given expression, but ensuring it's an unsigned type of the
+  /// same shape as the operand. Wraps the expresison with a bitcast if needed.
+  /// Assumes the given expresion is a integer scalar or vector.
+  /// @param expr an integer scalar or integer vector expression.
+  TypedExpression AsUnsigned(TypedExpression expr);
+
+  /// Returns the given expression, but ensuring it's a signed type of the
+  /// same shape as the operand. Wraps the expresison with a bitcast if needed.
+  /// Assumes the given expresion is a integer scalar or vector.
+  /// @param expr an integer scalar or integer vector expression.
+  TypedExpression AsSigned(TypedExpression expr);
 
   /// Bookkeeping used for tracking the "position" builtin variable.
   struct BuiltInPositionInfo {

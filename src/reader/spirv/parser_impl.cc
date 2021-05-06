@@ -199,6 +199,9 @@ bool AssumesResultSignednessMatchesFirstOperand(SpvOp opcode) {
     case SpvOpBitwiseAnd:
     case SpvOpBitwiseOr:
     case SpvOpBitwiseXor:
+    case SpvOpShiftLeftLogical:
+    case SpvOpShiftRightLogical:
+    case SpvOpShiftRightArithmetic:
       return true;
     default:
       break;
@@ -1769,6 +1772,24 @@ TypedExpression ParserImpl::RectifyForcedResultType(
   }
   return {expr.type,
           create<ast::BitcastExpression>(Source{}, expr.type, expr.expr)};
+}
+
+TypedExpression ParserImpl::AsUnsigned(TypedExpression expr) {
+  if (expr.type && expr.type->is_signed_scalar_or_vector()) {
+    auto new_type = GetUnsignedIntMatchingShape(expr.type);
+    return {new_type,
+            create<ast::BitcastExpression>(Source{}, new_type, expr.expr)};
+  }
+  return expr;
+}
+
+TypedExpression ParserImpl::AsSigned(TypedExpression expr) {
+  if (expr.type && expr.type->is_unsigned_scalar_or_vector()) {
+    auto new_type = GetSignedIntMatchingShape(expr.type);
+    return {new_type,
+            create<ast::BitcastExpression>(Source{}, new_type, expr.expr)};
+  }
+  return expr;
 }
 
 bool ParserImpl::EmitFunctions() {

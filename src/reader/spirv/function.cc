@@ -210,11 +210,6 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
     case SpvOpSMod:
     case SpvOpFMod:
       return ast::BinaryOp::kModulo;
-    case SpvOpShiftLeftLogical:
-      return ast::BinaryOp::kShiftLeft;
-    case SpvOpShiftRightLogical:
-    case SpvOpShiftRightArithmetic:
-      return ast::BinaryOp::kShiftRight;
     case SpvOpLogicalEqual:
     case SpvOpIEqual:
     case SpvOpFOrdEqual:
@@ -3343,6 +3338,34 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
   if (opcode == SpvOpBitcast) {
     return {ast_type, create<ast::BitcastExpression>(
                           Source{}, ast_type, MakeOperand(inst, 0).expr)};
+  }
+
+  if (opcode == SpvOpShiftLeftLogical || opcode == SpvOpShiftRightLogical ||
+      opcode == SpvOpShiftRightArithmetic) {
+    auto arg0 = MakeOperand(inst, 0);
+    // The second operand must be unsigned. It's ok to wrap the shift amount
+    // since the shift is modulo the bit width of the first operand.
+    auto arg1 = parser_impl_.AsUnsigned(MakeOperand(inst, 1));
+
+    switch (opcode) {
+      case SpvOpShiftLeftLogical:
+        binary_op = ast::BinaryOp::kShiftLeft;
+        break;
+      case SpvOpShiftRightLogical:
+        arg0 = parser_impl_.AsUnsigned(arg0);
+        binary_op = ast::BinaryOp::kShiftRight;
+        break;
+      case SpvOpShiftRightArithmetic:
+        arg0 = parser_impl_.AsSigned(arg0);
+        binary_op = ast::BinaryOp::kShiftRight;
+        break;
+      default:
+        break;
+    }
+    TypedExpression result{
+        ast_type, create<ast::BinaryExpression>(Source{}, binary_op, arg0.expr,
+                                                arg1.expr)};
+    return parser_impl_.RectifyForcedResultType(result, inst, arg0.type);
   }
 
   auto negated_op = NegatedFloatCompare(opcode);

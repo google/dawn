@@ -203,7 +203,7 @@ TEST_P(SpvBinaryBitGeneralTest, EmitExpression) {
       << p->error() << "\n"
       << assembly;
   auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_TRUE(fe.EmitBody()) << p->error() << assembly;
   std::ostringstream ss;
   ss << R"(VariableConst{
     x_1
@@ -215,115 +215,536 @@ TEST_P(SpvBinaryBitGeneralTest, EmitExpression) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_ShiftLeftLogical,
+    SpvParserTest_ShiftLeftLogical_Arg2Unsigned,
     SpvBinaryBitTest,
     ::testing::Values(
-        // Both uint
+        // uint uint -> uint
         BinaryData{"uint", "uint_10", "OpShiftLeftLogical", "uint_20", "__u32",
                    "ScalarConstructor[not set]{10u}", "shift_left",
                    "ScalarConstructor[not set]{20u}"},
-        // Both int
-        BinaryData{"int", "int_30", "OpShiftLeftLogical", "int_40", "__i32",
+        // int, uint -> int
+        BinaryData{"int", "int_30", "OpShiftLeftLogical", "uint_20", "__i32",
                    "ScalarConstructor[not set]{30}", "shift_left",
-                   "ScalarConstructor[not set]{40}"},
-        // Mixed, returning uint
-        BinaryData{"uint", "int_30", "OpShiftLeftLogical", "uint_10", "__u32",
-                   "ScalarConstructor[not set]{30}", "shift_left",
-                   "ScalarConstructor[not set]{10u}"},
-        // Mixed, returning int
-        BinaryData{"int", "int_30", "OpShiftLeftLogical", "uint_10", "__i32",
-                   "ScalarConstructor[not set]{30}", "shift_left",
-                   "ScalarConstructor[not set]{10u}"},
-        // Both v2uint
+                   "ScalarConstructor[not set]{20u}"},
+        // v2uint v2uint -> v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpShiftLeftLogical",
                    "v2uint_20_10", "__vec_2__u32", AstFor("v2uint_10_20"),
                    "shift_left", AstFor("v2uint_20_10")},
-        // Both v2int
-        BinaryData{"v2int", "v2int_30_40", "OpShiftLeftLogical", "v2int_40_30",
+        // v2int, v2uint -> v2int
+        BinaryData{"v2int", "v2int_30_40", "OpShiftLeftLogical", "v2uint_20_10",
                    "__vec_2__i32", AstFor("v2int_30_40"), "shift_left",
-                   AstFor("v2int_40_30")},
-        // Mixed, returning v2uint
-        BinaryData{"v2uint", "v2int_30_40", "OpShiftLeftLogical",
-                   "v2uint_10_20", "__vec_2__u32", AstFor("v2int_30_40"),
-                   "shift_left", AstFor("v2uint_10_20")},
-        // Mixed, returning v2int
-        BinaryData{"v2int", "v2int_40_30", "OpShiftLeftLogical", "v2uint_20_10",
-                   "__vec_2__i32", AstFor("v2int_40_30"), "shift_left",
                    AstFor("v2uint_20_10")}));
 
 INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_ShiftRightLogical,
-    SpvBinaryBitTest,
+    // WGSL requires second operand to be unsigned, so insert bitcasts
+    SpvParserTest_ShiftLeftLogical_Arg2Signed,
+    SpvBinaryBitGeneralTest,
     ::testing::Values(
-        // Both uint
-        BinaryData{"uint", "uint_10", "OpShiftRightLogical", "uint_20", "__u32",
-                   "ScalarConstructor[not set]{10u}", "shift_right",
-                   "ScalarConstructor[not set]{20u}"},
-        // Both int
-        BinaryData{"int", "int_30", "OpShiftRightLogical", "int_40", "__i32",
-                   "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{40}"},
-        // Mixed, returning uint
-        BinaryData{"uint", "int_30", "OpShiftRightLogical", "uint_10", "__u32",
-                   "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{10u}"},
-        // Mixed, returning int
-        BinaryData{"int", "int_30", "OpShiftRightLogical", "uint_10", "__i32",
-                   "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{10u}"},
-        // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpShiftRightLogical",
-                   "v2uint_20_10", "__vec_2__u32", AstFor("v2uint_10_20"),
-                   "shift_right", AstFor("v2uint_20_10")},
-        // Both v2int
-        BinaryData{"v2int", "v2int_30_40", "OpShiftRightLogical", "v2int_40_30",
-                   "__vec_2__i32", AstFor("v2int_30_40"), "shift_right",
-                   AstFor("v2int_40_30")},
-        // Mixed, returning v2uint
-        BinaryData{"v2uint", "v2int_30_40", "OpShiftRightLogical",
-                   "v2uint_10_20", "__vec_2__u32", AstFor("v2int_30_40"),
-                   "shift_right", AstFor("v2uint_10_20")},
-        // Mixed, returning v2int
-        BinaryData{"v2int", "v2int_40_30", "OpShiftRightLogical",
-                   "v2uint_20_10", "__vec_2__i32", AstFor("v2int_40_30"),
-                   "shift_right", AstFor("v2uint_20_10")}));
+        // int, int -> int
+        BinaryDataGeneral{"int", "int_30", "OpShiftLeftLogical", "int_40",
+                          R"(__i32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{30}
+        shift_left
+        Bitcast[not set]<__u32>{
+          ScalarConstructor[not set]{40}
+        }
+      }
+    }
+)"},
+        // uint, int -> uint
+        BinaryDataGeneral{"uint", "uint_10", "OpShiftLeftLogical", "int_40",
+                          R"(__u32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{10u}
+        shift_left
+        Bitcast[not set]<__u32>{
+          ScalarConstructor[not set]{40}
+        }
+      }
+    }
+)"},
+        // v2uint, v2int -> v2uint
+        BinaryDataGeneral{"v2uint", "v2uint_10_20", "OpShiftLeftLogical",
+                          "v2uint_20_10",
+                          R"(__vec_2__u32
+    {
+      Binary[not set]{
+        TypeConstructor[not set]{
+          __vec_2__u32
+          ScalarConstructor[not set]{10u}
+          ScalarConstructor[not set]{20u}
+        }
+        shift_left
+        TypeConstructor[not set]{
+          __vec_2__u32
+          ScalarConstructor[not set]{20u}
+          ScalarConstructor[not set]{10u}
+        }
+      }
+    }
+)"},
+        // v2int, v2int -> v2int
+        BinaryDataGeneral{"v2int", "v2int_30_40", "OpShiftLeftLogical",
+                          "v2int_40_30",
+                          R"(__vec_2__i32
+    {
+      Binary[not set]{
+        TypeConstructor[not set]{
+          __vec_2__i32
+          ScalarConstructor[not set]{30}
+          ScalarConstructor[not set]{40}
+        }
+        shift_left
+        Bitcast[not set]<__vec_2__u32>{
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{40}
+            ScalarConstructor[not set]{30}
+          }
+        }
+      }
+    }
+)"}));
 
 INSTANTIATE_TEST_SUITE_P(
-    SpvParserTest_ShiftRightArithmetic,
-    SpvBinaryBitTest,
+    SpvParserTest_ShiftLeftLogical_BitcastResult,
+    SpvBinaryBitGeneralTest,
     ::testing::Values(
-        // Both uint
-        BinaryData{"uint", "uint_10", "OpShiftRightArithmetic", "uint_20",
-                   "__u32", "ScalarConstructor[not set]{10u}", "shift_right",
-                   "ScalarConstructor[not set]{20u}"},
-        // Both int
-        BinaryData{"int", "int_30", "OpShiftRightArithmetic", "int_40", "__i32",
-                   "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{40}"},
-        // Mixed, returning uint
-        BinaryData{"uint", "int_30", "OpShiftRightArithmetic", "uint_10",
-                   "__u32", "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{10u}"},
-        // Mixed, returning int
-        BinaryData{"int", "int_30", "OpShiftRightArithmetic", "uint_10",
-                   "__i32", "ScalarConstructor[not set]{30}", "shift_right",
-                   "ScalarConstructor[not set]{10u}"},
-        // Both v2uint
-        BinaryData{"v2uint", "v2uint_10_20", "OpShiftRightArithmetic",
-                   "v2uint_20_10", "__vec_2__u32", AstFor("v2uint_10_20"),
-                   "shift_right", AstFor("v2uint_20_10")},
-        // Both v2int
-        BinaryData{"v2int", "v2int_30_40", "OpShiftRightArithmetic",
-                   "v2int_40_30", "__vec_2__i32", AstFor("v2int_30_40"),
-                   "shift_right", AstFor("v2int_40_30")},
-        // Mixed, returning v2uint
-        BinaryData{"v2uint", "v2int_30_40", "OpShiftRightArithmetic",
-                   "v2uint_10_20", "__vec_2__u32", AstFor("v2int_30_40"),
-                   "shift_right", AstFor("v2uint_10_20")},
-        // Mixed, returning v2int
-        BinaryData{"v2int", "v2int_40_30", "OpShiftRightArithmetic",
-                   "v2uint_20_10", "__vec_2__i32", AstFor("v2int_40_30"),
-                   "shift_right", AstFor("v2uint_20_10")}));
+        // int, int -> uint
+        BinaryDataGeneral{"uint", "int_30", "OpShiftLeftLogical", "uint_10",
+                          R"(__u32
+    {
+      Bitcast[not set]<__u32>{
+        Binary[not set]{
+          ScalarConstructor[not set]{30}
+          shift_left
+          ScalarConstructor[not set]{10u}
+        }
+      }
+    }
+)"},
+        // v2uint, v2int -> v2uint
+        BinaryDataGeneral{"v2uint", "v2int_30_40", "OpShiftLeftLogical",
+                          "v2uint_20_10",
+                          R"(__vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{30}
+            ScalarConstructor[not set]{40}
+          }
+          shift_left
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{20u}
+            ScalarConstructor[not set]{10u}
+          }
+        }
+      }
+    }
+)"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_ShiftRightLogical_Arg2Unsigned,
+    SpvBinaryBitGeneralTest,
+    ::testing::Values(
+        // uint, uint -> uint
+        BinaryDataGeneral{"uint", "uint_10", "OpShiftRightLogical", "uint_20",
+                          R"(__u32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{10u}
+        shift_right
+        ScalarConstructor[not set]{20u}
+      }
+    }
+)"},
+        // int, uint -> int
+        BinaryDataGeneral{"int", "int_30", "OpShiftRightLogical", "uint_20",
+                          R"(__i32
+    {
+      Bitcast[not set]<__i32>{
+        Binary[not set]{
+          Bitcast[not set]<__u32>{
+            ScalarConstructor[not set]{30}
+          }
+          shift_right
+          ScalarConstructor[not set]{20u}
+        }
+      }
+    }
+)"},
+        // v2uint, v2uint -> v2uint
+        BinaryDataGeneral{"v2uint", "v2uint_10_20", "OpShiftRightLogical",
+                          "v2uint_20_10",
+                          R"(__vec_2__u32
+    {
+      Binary[not set]{
+        TypeConstructor[not set]{
+          __vec_2__u32
+          ScalarConstructor[not set]{10u}
+          ScalarConstructor[not set]{20u}
+        }
+        shift_right
+        TypeConstructor[not set]{
+          __vec_2__u32
+          ScalarConstructor[not set]{20u}
+          ScalarConstructor[not set]{10u}
+        }
+      }
+    }
+)"},
+        // v2int, v2uint -> v2int
+        BinaryDataGeneral{"v2int", "v2int_30_40", "OpShiftRightLogical",
+                          "v2uint_10_20",
+                          R"(__vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Binary[not set]{
+          Bitcast[not set]<__vec_2__u32>{
+            TypeConstructor[not set]{
+              __vec_2__i32
+              ScalarConstructor[not set]{30}
+              ScalarConstructor[not set]{40}
+            }
+          }
+          shift_right
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
+          }
+        }
+      }
+    }
+)"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_ShiftRightLogical_Arg2Signed,
+    SpvBinaryBitGeneralTest,
+    ::testing::Values(
+        // uint, int -> uint
+        BinaryDataGeneral{"uint", "uint_10", "OpShiftRightLogical", "int_30",
+                          R"(__u32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{10u}
+        shift_right
+        Bitcast[not set]<__u32>{
+          ScalarConstructor[not set]{30}
+        }
+      }
+    }
+)"},
+        // int, int -> int
+        BinaryDataGeneral{"int", "int_30", "OpShiftRightLogical", "int_40",
+                          R"(__i32
+    {
+      Bitcast[not set]<__i32>{
+        Binary[not set]{
+          Bitcast[not set]<__u32>{
+            ScalarConstructor[not set]{30}
+          }
+          shift_right
+          Bitcast[not set]<__u32>{
+            ScalarConstructor[not set]{40}
+          }
+        }
+      }
+    }
+)"},
+        // v2uint, v2int -> v2uint
+        BinaryDataGeneral{"v2uint", "v2uint_10_20", "OpShiftRightLogical",
+                          "v2int_30_40",
+                          R"(__vec_2__u32
+    {
+      Binary[not set]{
+        TypeConstructor[not set]{
+          __vec_2__u32
+          ScalarConstructor[not set]{10u}
+          ScalarConstructor[not set]{20u}
+        }
+        shift_right
+        Bitcast[not set]<__vec_2__u32>{
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{30}
+            ScalarConstructor[not set]{40}
+          }
+        }
+      }
+    }
+)"},
+        // v2int, v2int -> v2int
+        BinaryDataGeneral{"v2int", "v2int_40_30", "OpShiftRightLogical",
+                          "v2int_30_40",
+                          R"(__vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Binary[not set]{
+          Bitcast[not set]<__vec_2__u32>{
+            TypeConstructor[not set]{
+              __vec_2__i32
+              ScalarConstructor[not set]{40}
+              ScalarConstructor[not set]{30}
+            }
+          }
+          shift_right
+          Bitcast[not set]<__vec_2__u32>{
+            TypeConstructor[not set]{
+              __vec_2__i32
+              ScalarConstructor[not set]{30}
+              ScalarConstructor[not set]{40}
+            }
+          }
+        }
+      }
+    }
+)"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_ShiftRightLogical_BitcastResult,
+    SpvBinaryBitGeneralTest,
+    ::testing::Values(
+        // uint, uint -> int
+        BinaryDataGeneral{"int", "uint_20", "OpShiftRightLogical", "uint_10",
+                          R"(__i32
+    {
+      Bitcast[not set]<__i32>{
+        Binary[not set]{
+          ScalarConstructor[not set]{20u}
+          shift_right
+          ScalarConstructor[not set]{10u}
+        }
+      }
+    }
+)"},
+        // v2uint, v2uint -> v2int
+        BinaryDataGeneral{"v2int", "v2uint_10_20", "OpShiftRightLogical",
+                          "v2uint_20_10",
+                          R"(__vec_2__i32
+    {
+      Bitcast[not set]<__vec_2__i32>{
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{10u}
+            ScalarConstructor[not set]{20u}
+          }
+          shift_right
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{20u}
+            ScalarConstructor[not set]{10u}
+          }
+        }
+      }
+    }
+)"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_ShiftRightArithmetic_Arg2Unsigned,
+    SpvBinaryBitGeneralTest,
+    ::testing::Values(
+        // uint, uint -> uint
+        BinaryDataGeneral{"uint", "uint_10", "OpShiftRightArithmetic",
+                          "uint_20",
+                          R"(__u32
+    {
+      Bitcast[not set]<__u32>{
+        Binary[not set]{
+          Bitcast[not set]<__i32>{
+            ScalarConstructor[not set]{10u}
+          }
+          shift_right
+          ScalarConstructor[not set]{20u}
+        }
+      }
+    }
+)"},
+        // int, uint -> int
+        BinaryDataGeneral{"int", "int_30", "OpShiftRightArithmetic", "uint_10",
+                          R"(__i32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{30}
+        shift_right
+        ScalarConstructor[not set]{10u}
+      }
+    }
+)"},
+        // v2uint, v2uint -> v2uint
+        BinaryDataGeneral{"v2uint", "v2uint_10_20", "OpShiftRightArithmetic",
+                          "v2uint_20_10",
+                          R"(__vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Binary[not set]{
+          Bitcast[not set]<__vec_2__i32>{
+            TypeConstructor[not set]{
+              __vec_2__u32
+              ScalarConstructor[not set]{10u}
+              ScalarConstructor[not set]{20u}
+            }
+          }
+          shift_right
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{20u}
+            ScalarConstructor[not set]{10u}
+          }
+        }
+      }
+    }
+)"},
+        // v2int, v2uint -> v2int
+        BinaryDataGeneral{"v2int", "v2int_40_30", "OpShiftRightArithmetic",
+                          "v2uint_20_10",
+                          R"(__vec_2__i32
+    {
+      Binary[not set]{
+        TypeConstructor[not set]{
+          __vec_2__i32
+          ScalarConstructor[not set]{40}
+          ScalarConstructor[not set]{30}
+        }
+        shift_right
+        TypeConstructor[not set]{
+          __vec_2__u32
+          ScalarConstructor[not set]{20u}
+          ScalarConstructor[not set]{10u}
+        }
+      }
+    }
+)"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_ShiftRightArithmetic_Arg2Signed,
+    SpvBinaryBitGeneralTest,
+    ::testing::Values(
+        // uint, int -> uint
+        BinaryDataGeneral{"uint", "uint_10", "OpShiftRightArithmetic", "int_30",
+                          R"(__u32
+    {
+      Bitcast[not set]<__u32>{
+        Binary[not set]{
+          Bitcast[not set]<__i32>{
+            ScalarConstructor[not set]{10u}
+          }
+          shift_right
+          Bitcast[not set]<__u32>{
+            ScalarConstructor[not set]{30}
+          }
+        }
+      }
+    }
+)"},
+        // int, int -> int
+        BinaryDataGeneral{"int", "int_30", "OpShiftRightArithmetic", "int_40",
+                          R"(__i32
+    {
+      Binary[not set]{
+        ScalarConstructor[not set]{30}
+        shift_right
+        Bitcast[not set]<__u32>{
+          ScalarConstructor[not set]{40}
+        }
+      }
+    }
+)"},
+        // v2uint, v2int -> v2uint
+        BinaryDataGeneral{"v2uint", "v2uint_10_20", "OpShiftRightArithmetic",
+                          "v2int_30_40",
+                          R"(__vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Binary[not set]{
+          Bitcast[not set]<__vec_2__i32>{
+            TypeConstructor[not set]{
+              __vec_2__u32
+              ScalarConstructor[not set]{10u}
+              ScalarConstructor[not set]{20u}
+            }
+          }
+          shift_right
+          Bitcast[not set]<__vec_2__u32>{
+            TypeConstructor[not set]{
+              __vec_2__i32
+              ScalarConstructor[not set]{30}
+              ScalarConstructor[not set]{40}
+            }
+          }
+        }
+      }
+    }
+)"},
+        // v2int, v2int -> v2int
+        BinaryDataGeneral{"v2int", "v2int_40_30", "OpShiftRightArithmetic",
+                          "v2int_30_40",
+                          R"(__vec_2__i32
+    {
+      Binary[not set]{
+        TypeConstructor[not set]{
+          __vec_2__i32
+          ScalarConstructor[not set]{40}
+          ScalarConstructor[not set]{30}
+        }
+        shift_right
+        Bitcast[not set]<__vec_2__u32>{
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{30}
+            ScalarConstructor[not set]{40}
+          }
+        }
+      }
+    }
+)"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    SpvParserTest_ShiftRightArithmetic_BitcastResult,
+    SpvBinaryBitGeneralTest,
+    ::testing::Values(
+        // int, uint -> uint
+        BinaryDataGeneral{"uint", "int_30", "OpShiftRightArithmetic", "uint_10",
+                          R"(__u32
+    {
+      Bitcast[not set]<__u32>{
+        Binary[not set]{
+          ScalarConstructor[not set]{30}
+          shift_right
+          ScalarConstructor[not set]{10u}
+        }
+      }
+    }
+)"},
+        // v2int, v2uint -> v2uint
+        BinaryDataGeneral{"v2uint", "v2int_30_40", "OpShiftRightArithmetic",
+                          "v2uint_20_10",
+                          R"(__vec_2__u32
+    {
+      Bitcast[not set]<__vec_2__u32>{
+        Binary[not set]{
+          TypeConstructor[not set]{
+            __vec_2__i32
+            ScalarConstructor[not set]{30}
+            ScalarConstructor[not set]{40}
+          }
+          shift_right
+          TypeConstructor[not set]{
+            __vec_2__u32
+            ScalarConstructor[not set]{20u}
+            ScalarConstructor[not set]{10u}
+          }
+        }
+      }
+    }
+)"}));
 
 INSTANTIATE_TEST_SUITE_P(
     SpvParserTest_BitwiseAnd,
