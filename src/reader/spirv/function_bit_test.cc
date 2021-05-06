@@ -56,6 +56,14 @@ std::string CommonTypes() {
 )";
 }
 
+std::string SimplePreamble() {
+  return R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint Vertex %100 "main"
+)" + CommonTypes();
+}
+
 // Returns the AST dump for a given SPIR-V assembly constant.
 std::string AstFor(std::string assembly) {
   if (assembly == "v2uint_10_20") {
@@ -136,7 +144,7 @@ using SpvBinaryBitTest =
 using SpvBinaryBitTestBasic = SpvParserTestBase<::testing::Test>;
 
 TEST_P(SpvBinaryBitTest, EmitExpression) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = )" + GetParam().op +
@@ -181,7 +189,7 @@ using SpvBinaryBitGeneralTest =
     SpvParserTestBase<::testing::TestWithParam<BinaryDataGeneral>>;
 
 TEST_P(SpvBinaryBitGeneralTest, EmitExpression) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = )" + GetParam().op +
@@ -329,6 +337,7 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"int", "int_30", "OpBitwiseAnd", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "and",
                    "ScalarConstructor[not set]{40}"},
+        // TODO(crbug.com/tint/678): Resolver fails on vector bitwise operations
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseAnd", "v2uint_20_10",
                    "__vec_2__u32", AstFor("v2uint_10_20"), "and",
@@ -451,6 +460,7 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"int", "int_30", "OpBitwiseOr", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "or",
                    "ScalarConstructor[not set]{40}"},
+        // TODO(crbug.com/tint/678): Resolver fails on vector bitwise operations
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseOr", "v2uint_20_10",
                    "__vec_2__u32", AstFor("v2uint_10_20"), "or",
@@ -572,6 +582,7 @@ INSTANTIATE_TEST_SUITE_P(
         BinaryData{"int", "int_30", "OpBitwiseXor", "int_40", "__i32",
                    "ScalarConstructor[not set]{30}", "xor",
                    "ScalarConstructor[not set]{40}"},
+        // TODO(crbug.com/tint/678): Resolver fails on vector bitwise operations
         // Both v2uint
         BinaryData{"v2uint", "v2uint_10_20", "OpBitwiseXor", "v2uint_20_10",
                    "__vec_2__u32", AstFor("v2uint_10_20"), "xor",
@@ -683,7 +694,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"}));
 
 TEST_F(SpvUnaryBitTest, Not_Int_Int) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpNot %int %int_30
@@ -709,7 +720,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Int) {
 }
 
 TEST_F(SpvUnaryBitTest, Not_Int_Uint) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpNot %int %uint_10
@@ -737,7 +748,7 @@ TEST_F(SpvUnaryBitTest, Not_Int_Uint) {
 }
 
 TEST_F(SpvUnaryBitTest, Not_Uint_Int) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpNot %uint %int_30
@@ -765,7 +776,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Int) {
 }
 
 TEST_F(SpvUnaryBitTest, Not_Uint_Uint) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpNot %uint %uint_10
@@ -791,7 +802,7 @@ TEST_F(SpvUnaryBitTest, Not_Uint_Uint) {
 }
 
 TEST_F(SpvUnaryBitTest, Not_SignedVec_SignedVec) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpNot %v2int %v2int_30_40
@@ -821,7 +832,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_SignedVec) {
 }
 
 TEST_F(SpvUnaryBitTest, Not_SignedVec_UnsignedVec) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpNot %v2int %v2uint_10_20
@@ -853,7 +864,7 @@ TEST_F(SpvUnaryBitTest, Not_SignedVec_UnsignedVec) {
 }
 
 TEST_F(SpvUnaryBitTest, Not_UnsignedVec_SignedVec) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpNot %v2uint %v2int_30_40
@@ -884,7 +895,7 @@ TEST_F(SpvUnaryBitTest, Not_UnsignedVec_SignedVec) {
   })"));
 }
 TEST_F(SpvUnaryBitTest, Not_UnsignedVec_UnsignedVec) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = SimplePreamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpNot %v2uint %v2uint_10_20
@@ -1206,27 +1217,11 @@ TEST_F(SpvUnaryBitTest, BitReverse_Uint_Int) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    __u32
-    {
-      Bitcast[not set]<__u32>{
-        Call[not set]{
-          Identifier[not set]{reverseBits}
-          (
-            Identifier[not set]{i1}
-          )
-        }
-      }
-    }
-  })"))
-      << body;
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("Expected Base Type to be equal to Result Type: BitReverse"));
 }
 
 TEST_F(SpvUnaryBitTest, BitReverse_Int_Uint) {
@@ -1236,27 +1231,11 @@ TEST_F(SpvUnaryBitTest, BitReverse_Int_Uint) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    __i32
-    {
-      Bitcast[not set]<__i32>{
-        Call[not set]{
-          Identifier[not set]{reverseBits}
-          (
-            Identifier[not set]{u1}
-          )
-        }
-      }
-    }
-  })"))
-      << body;
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("Expected Base Type to be equal to Result Type: BitReverse"));
 }
 
 TEST_F(SpvUnaryBitTest, BitReverse_Int_Int) {
@@ -1322,27 +1301,11 @@ TEST_F(SpvUnaryBitTest, BitReverse_UintVector_IntVector) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    __vec_2__u32
-    {
-      Bitcast[not set]<__vec_2__u32>{
-        Call[not set]{
-          Identifier[not set]{reverseBits}
-          (
-            Identifier[not set]{v2i1}
-          )
-        }
-      }
-    }
-  })"))
-      << body;
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("Expected Base Type to be equal to Result Type: BitReverse"));
 }
 
 TEST_F(SpvUnaryBitTest, BitReverse_IntVector_UintVector) {
@@ -1352,27 +1315,11 @@ TEST_F(SpvUnaryBitTest, BitReverse_IntVector_UintVector) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
-  auto fe = p->function_emitter(100);
-  EXPECT_TRUE(fe.EmitBody()) << p->error();
-  const auto body = ToString(p->builder(), fe.ast_body());
-  EXPECT_THAT(body, HasSubstr(R"(
-  VariableConst{
-    x_1
-    none
-    __vec_2__i32
-    {
-      Bitcast[not set]<__vec_2__i32>{
-        Call[not set]{
-          Identifier[not set]{reverseBits}
-          (
-            Identifier[not set]{v2u1}
-          )
-        }
-      }
-    }
-  })"))
-      << body;
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("Expected Base Type to be equal to Result Type: BitReverse"));
 }
 
 TEST_F(SpvUnaryBitTest, BitReverse_IntVector_IntVector) {
