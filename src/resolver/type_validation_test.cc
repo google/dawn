@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/override_decoration.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
@@ -49,6 +50,35 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
   ASSERT_NE(TypeOf(rhs), nullptr);
 }
 
+TEST_F(ResolverTypeValidationTest, FunctionConstantNoConstructor_Fail) {
+  // {
+  // let a :i32;
+  // }
+  auto* var = Const(Source{{12, 34}}, "a", ty.i32(), nullptr);
+  WrapInFunction(var);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: let declarations must have initializers");
+}
+
+TEST_F(ResolverTypeValidationTest, GlobalConstantNoConstructor_Fail) {
+  // let a :i32;
+  GlobalConst(Source{{12, 34}}, "a", ty.i32(), nullptr);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: let declarations must have initializers");
+}
+
+TEST_F(ResolverTypeValidationTest, GlobalConstantNoConstructor_Pass) {
+  // [[override(0)]] let a :i32;
+  GlobalConst(Source{{12, 34}}, "a", ty.i32(), nullptr,
+              ast::DecorationList{create<ast::OverrideDecoration>(0)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverTypeValidationTest, GlobalVariableWithStorageClass_Pass) {
   // var<in> global_var: f32;
   Global(Source{{12, 34}}, "global_var", ty.f32(), ast::StorageClass::kInput);
@@ -71,7 +101,7 @@ TEST_F(ResolverTypeValidationTest, GlobalConstantWithStorageClass_Fail) {
 
 TEST_F(ResolverTypeValidationTest, GlobalConstNoStorageClass_Pass) {
   // let global_var: f32;
-  GlobalConst(Source{{12, 34}}, "global_var", ty.f32());
+  GlobalConst(Source{{12, 34}}, "global_var", ty.f32(), Construct(ty.f32()));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }

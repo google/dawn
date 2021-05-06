@@ -39,7 +39,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
-  auto* var = Const("a", ty.f32());
+  auto* var = Const("a", ty.f32(), Construct(ty.f32()));
   auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
@@ -48,7 +48,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, stmt)) << gen.error();
-  EXPECT_EQ(result(), "  const float a;\n");
+  EXPECT_EQ(result(), "  const float a = 0.0f;\n");
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {

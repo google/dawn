@@ -426,7 +426,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Alias_Array) {
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Array_Constant) {
-  GlobalConst("my_var", ty.array<f32, 3>());
+  GlobalConst("my_var", ty.array<f32, 3>(), array<f32, 3>());
 
   auto* acc = IndexAccessor("my_var", 2);
   WrapInFunction(acc);
@@ -624,7 +624,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
 }
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalConstant) {
-  auto* my_var = GlobalConst("my_var", ty.f32());
+  auto* my_var = GlobalConst("my_var", ty.f32(), Construct(ty.f32()));
 
   auto* ident = Expr("my_var");
   WrapInFunction(ident);
@@ -640,7 +640,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalConstant) {
 
 TEST_F(ResolverTest, Expr_Identifier_FunctionVariable_Const) {
   auto* my_var_a = Expr("my_var");
-  auto* var = Const("my_var", ty.f32());
+  auto* var = Const("my_var", ty.f32(), Construct(ty.f32()));
   auto* decl = Decl(Var("b", ty.f32(), ast::StorageClass::kFunction, my_var_a));
 
   Func("my_func", ast::VariableList{}, ty.void_(),
@@ -1457,7 +1457,7 @@ TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
 }
 
 TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {
-  auto* var = Const("var", ty.i32());
+  auto* var = Const("var", ty.i32(), Construct(ty.i32()));
   auto* stmt = Decl(var);
   Func("func", ast::VariableList{}, ty.void_(), ast::StatementList{stmt},
        ast::DecorationList{});

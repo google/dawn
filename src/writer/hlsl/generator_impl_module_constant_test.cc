@@ -51,11 +51,10 @@ static const float pos = WGSL_SPEC_CONSTANT_23;
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
-  auto* var = Const("pos", ty.f32(), nullptr,
-                    ast::DecorationList{
-                        create<ast::OverrideDecoration>(23),
-                    });
-  WrapInFunction(Decl(var));
+  auto* var = GlobalConst("pos", ty.f32(), nullptr,
+                          ast::DecorationList{
+                              create<ast::OverrideDecoration>(23),
+                          });
 
   GeneratorImpl& gen = Build();
 

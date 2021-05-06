@@ -522,6 +522,13 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     if (!Expression(var->constructor())) {
       return false;
     }
+  } else {
+    if (var->is_const() &&
+        !ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
+      diagnostics_.add_error("let declarations must have initializers",
+                             var->source());
+      return false;
+    }
   }
 
   if (!ValidateGlobalVariable(info)) {
@@ -2061,6 +2068,12 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
               "' cannot be initialized with a value of type '" +
               TypeNameOf(ctor) + "'",
           stmt->source());
+      return false;
+    }
+  } else {
+    if (stmt->variable()->is_const()) {
+      diagnostics_.add_error("let declarations must have initializers",
+                             var->source());
       return false;
     }
   }
