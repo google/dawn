@@ -35,6 +35,14 @@ MaybeError OpenGLFunctionsBase::LoadOpenGLESProcs(GetProcAddress getProc, int ma
         }
 
     {% endfor %}
+
+    {% for block in extension_gles_blocks %}
+        // {{block.extension}}
+        {% for proc in block.procs %}
+            DAWN_TRY(LoadProc(getProc, &{{proc.ProcName()}}, "{{proc.glProcName()}}"));
+        {% endfor %}
+    {% endfor %}
+
     return {};
 }
 
@@ -48,6 +56,14 @@ MaybeError OpenGLFunctionsBase::LoadDesktopGLProcs(GetProcAddress getProc, int m
         }
 
     {% endfor %}
+
+    {% for block in extension_desktop_gl_blocks %}
+        // {{block.extension}}
+        {% for proc in block.procs %}
+            DAWN_TRY(LoadProc(getProc, &{{proc.ProcName()}}, "{{proc.glProcName()}}"));
+        {% endfor %}
+    {% endfor %}
+
     return {};
 }
 

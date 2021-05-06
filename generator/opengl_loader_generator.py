@@ -166,8 +166,7 @@ def compute_params(root, supported_extensions):
         for command in section.findall('./require/command'):
             proc_name = command.attrib['name']
             assert all_procs[proc_name].alias == None
-            if proc_name not in removed_procs:
-                section_procs.append(all_procs[proc_name])
+            section_procs.append(all_procs[proc_name])
 
         section_enums = []
         for enum in section.findall('./require/enum'):
