@@ -501,11 +501,16 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 
   for (auto* deco : var->decorations()) {
     Mark(deco);
-    if (!(deco->Is<ast::BindingDecoration>() ||
-          deco->Is<ast::BuiltinDecoration>() ||
-          deco->Is<ast::OverrideDecoration>() ||
-          deco->Is<ast::GroupDecoration>() ||
-          deco->Is<ast::LocationDecoration>())) {
+    if (var->is_const()) {
+      if (!deco->Is<ast::OverrideDecoration>()) {
+        diagnostics_.add_error("decoration is not valid for constants",
+                               deco->source());
+        return false;
+      }
+    } else if (!(deco->Is<ast::BindingDecoration>() ||
+                 deco->Is<ast::BuiltinDecoration>() ||
+                 deco->Is<ast::GroupDecoration>() ||
+                 deco->Is<ast::LocationDecoration>())) {
       diagnostics_.add_error("decoration is not valid for variables",
                              deco->source());
       return false;

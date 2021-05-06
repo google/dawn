@@ -34,9 +34,9 @@ enum class DecorationKind {
   kAlign,
   kBinding,
   kBuiltin,
-  kConstantId,
   kGroup,
   kLocation,
+  kOverride,
   kOffset,
   kSize,
   kStage,
@@ -63,12 +63,12 @@ static ast::Decoration* createDecoration(const Source& source,
       return builder.create<ast::BindingDecoration>(source, 1);
     case DecorationKind::kBuiltin:
       return builder.Builtin(source, ast::Builtin::kPosition);
-    case DecorationKind::kConstantId:
-      return builder.create<ast::OverrideDecoration>(source, 0u);
     case DecorationKind::kGroup:
       return builder.create<ast::GroupDecoration>(source, 1u);
     case DecorationKind::kLocation:
       return builder.Location(source, 1);
+    case DecorationKind::kOverride:
+      return builder.create<ast::OverrideDecoration>(source, 0u);
     case DecorationKind::kOffset:
       return builder.create<ast::StructMemberOffsetDecoration>(source, 4u);
     case DecorationKind::kSize:
@@ -108,9 +108,9 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
-                    TestParams{DecorationKind::kConstantId, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kLocation, true},
+                    TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
                     TestParams{DecorationKind::kSize, false},
                     TestParams{DecorationKind::kStage, false},
@@ -150,9 +150,9 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
-                    TestParams{DecorationKind::kConstantId, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
                     TestParams{DecorationKind::kSize, false},
                     TestParams{DecorationKind::kStage, false},
@@ -184,9 +184,9 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
-                    TestParams{DecorationKind::kConstantId, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
                     TestParams{DecorationKind::kSize, false},
                     TestParams{DecorationKind::kStage, false},
@@ -222,9 +222,9 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kAlign, true},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
-                    TestParams{DecorationKind::kConstantId, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kLocation, true},
+                    TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, true},
                     TestParams{DecorationKind::kSize, true},
                     TestParams{DecorationKind::kStage, false},
@@ -257,9 +257,44 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, true},
                     TestParams{DecorationKind::kBuiltin, true},
-                    TestParams{DecorationKind::kConstantId, true},
                     TestParams{DecorationKind::kGroup, true},
                     TestParams{DecorationKind::kLocation, true},
+                    TestParams{DecorationKind::kOverride, false},
+                    TestParams{DecorationKind::kOffset, false},
+                    TestParams{DecorationKind::kSize, false},
+                    TestParams{DecorationKind::kStage, false},
+                    TestParams{DecorationKind::kStride, false},
+                    TestParams{DecorationKind::kStructBlock, false},
+                    TestParams{DecorationKind::kWorkgroup, false}));
+
+using ConstantDecorationTest = TestWithParams;
+TEST_P(ConstantDecorationTest, IsValid) {
+  auto& params = GetParam();
+
+  GlobalConst("a", ty.f32(), nullptr,
+              ast::DecorationList{
+                  createDecoration(Source{{12, 34}}, *this, params.kind)});
+
+  WrapInFunction();
+
+  if (params.should_pass) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(),
+              "12:34 error: decoration is not valid for constants");
+  }
+}
+INSTANTIATE_TEST_SUITE_P(
+    ResolverDecorationValidationTest,
+    ConstantDecorationTest,
+    testing::Values(TestParams{DecorationKind::kAccess, false},
+                    TestParams{DecorationKind::kAlign, false},
+                    TestParams{DecorationKind::kBinding, false},
+                    TestParams{DecorationKind::kBuiltin, false},
+                    TestParams{DecorationKind::kGroup, false},
+                    TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, true},
                     TestParams{DecorationKind::kOffset, false},
                     TestParams{DecorationKind::kSize, false},
                     TestParams{DecorationKind::kStage, false},
@@ -291,9 +326,9 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kAlign, false},
                     TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, false},
-                    TestParams{DecorationKind::kConstantId, false},
                     TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kLocation, false},
+                    TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
                     TestParams{DecorationKind::kSize, false},
                     // Skip kStage as we always apply it in this test
