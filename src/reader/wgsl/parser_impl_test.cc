@@ -57,7 +57,7 @@ TEST_F(ParserImplTest, GetRegisteredType) {
 
   auto* alias = p->get_constructed("my_alias");
   ASSERT_NE(alias, nullptr);
-  ASSERT_EQ(alias, ty.i32());
+  EXPECT_TRUE(alias->Is<ast::I32>());
 }
 
 TEST_F(ParserImplTest, GetUnregisteredType) {

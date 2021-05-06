@@ -22,28 +22,25 @@ namespace {
 TEST_F(ParserImplTest, FunctionTypeDecl_Void) {
   auto p = parser("void");
 
-  auto* v = p->builder().create<sem::Void>();
-
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.value, v);
-  EXPECT_EQ(e.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 5u}}));
+  EXPECT_TRUE(e.value->Is<ast::Void>());
+  EXPECT_EQ(e.value->source().range, (Source::Range{{1u, 1u}, {1u, 5u}}));
 }
 
 TEST_F(ParserImplTest, FunctionTypeDecl_Type) {
   auto p = parser("vec2<f32>");
 
-  auto* f32 = p->builder().create<sem::F32>();
-  auto* vec2 = p->builder().create<sem::Vector>(f32, 2);
-
   auto e = p->function_type_decl();
   EXPECT_TRUE(e.matched);
   EXPECT_FALSE(e.errored);
   EXPECT_FALSE(p->has_error()) << p->error();
-  ASSERT_EQ(e.value, vec2);
-  EXPECT_EQ(e.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 10u}}));
+  ASSERT_TRUE(e.value->Is<ast::Vector>());
+  EXPECT_EQ(e.value->As<ast::Vector>()->size(), 2u);
+  EXPECT_TRUE(e.value->As<ast::Vector>()->type()->Is<ast::F32>());
+  EXPECT_EQ(e.value->source().range, (Source::Range{{1u, 1u}, {1u, 10u}}));
 }
 
 TEST_F(ParserImplTest, FunctionTypeDecl_InvalidType) {

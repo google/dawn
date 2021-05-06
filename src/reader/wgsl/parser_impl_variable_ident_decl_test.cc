@@ -28,11 +28,10 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<sem::F32>());
+  ASSERT_TRUE(decl->type->Is<ast::F32>());
 
   EXPECT_EQ(decl->source.range, (Source::Range{{1u, 1u}, {1u, 7u}}));
-  EXPECT_EQ(decl->type.ast->source().range,
-            (Source::Range{{1u, 10u}, {1u, 13u}}));
+  EXPECT_EQ(decl->type->source().range, (Source::Range{{1u, 10u}, {1u, 13u}}));
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
@@ -83,10 +82,10 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Read) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<sem::AccessControl>());
-  EXPECT_TRUE(decl->type->As<sem::AccessControl>()->IsReadOnly());
+  ASSERT_TRUE(decl->type->Is<ast::AccessControl>());
+  EXPECT_TRUE(decl->type->As<ast::AccessControl>()->IsReadOnly());
   ASSERT_TRUE(
-      decl->type->As<sem::AccessControl>()->type()->Is<sem::StorageTexture>());
+      decl->type->As<ast::AccessControl>()->type()->Is<ast::StorageTexture>());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Write) {
@@ -97,10 +96,10 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithTextureAccessDeco_Write) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<sem::AccessControl>());
-  EXPECT_TRUE(decl->type->As<sem::AccessControl>()->IsWriteOnly());
+  ASSERT_TRUE(decl->type->Is<ast::AccessControl>());
+  EXPECT_TRUE(decl->type->As<ast::AccessControl>()->IsWriteOnly());
   ASSERT_TRUE(
-      decl->type->As<sem::AccessControl>()->type()->Is<sem::StorageTexture>());
+      decl->type->As<ast::AccessControl>()->type()->Is<ast::StorageTexture>());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
@@ -123,8 +122,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_Read) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<sem::AccessControl>());
-  EXPECT_TRUE(decl->type->As<sem::AccessControl>()->IsReadOnly());
+  ASSERT_TRUE(decl->type->Is<ast::AccessControl>());
+  EXPECT_TRUE(decl->type->As<ast::AccessControl>()->IsReadOnly());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
@@ -147,8 +146,8 @@ TEST_F(ParserImplTest, VariableIdentDecl_ParsesWithAccessDeco_ReadWrite) {
   ASSERT_FALSE(decl.errored);
   ASSERT_EQ(decl->name, "my_var");
   ASSERT_NE(decl->type, nullptr);
-  ASSERT_TRUE(decl->type->Is<sem::AccessControl>());
-  EXPECT_TRUE(decl->type->As<sem::AccessControl>()->IsReadWrite());
+  ASSERT_TRUE(decl->type->Is<ast::AccessControl>());
+  EXPECT_TRUE(decl->type->As<ast::AccessControl>()->IsReadWrite());
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_MultipleAccessDecoFail) {

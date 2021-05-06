@@ -213,7 +213,7 @@ ParserImpl::TypedIdentifier::TypedIdentifier() = default;
 
 ParserImpl::TypedIdentifier::TypedIdentifier(const TypedIdentifier&) = default;
 
-ParserImpl::TypedIdentifier::TypedIdentifier(typ::Type type_in,
+ParserImpl::TypedIdentifier::TypedIdentifier(ast::Type* type_in,
                                              std::string name_in,
                                              Source source_in)
     : type(type_in), name(std::move(name_in)), source(std::move(source_in)) {}
@@ -227,7 +227,7 @@ ParserImpl::FunctionHeader::FunctionHeader(const FunctionHeader&) = default;
 ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            std::string n,
                                            ast::VariableList p,
-                                           typ::Type ret_ty,
+                                           ast::Type* ret_ty,
                                            ast::DecorationList ret_decos)
     : source(src),
       name(n),
@@ -247,7 +247,7 @@ ParserImpl::VarDeclInfo::VarDeclInfo(const VarDeclInfo&) = default;
 ParserImpl::VarDeclInfo::VarDeclInfo(Source source_in,
                                      std::string name_in,
                                      ast::StorageClass storage_class_in,
-                                     typ::Type type_in)
+                                     ast::Type* type_in)
     : source(std::move(source_in)),
       name(std::move(name_in)),
       storage_class(storage_class_in),
@@ -317,11 +317,11 @@ Token ParserImpl::last_token() const {
 }
 
 void ParserImpl::register_constructed(const std::string& name,
-                                      sem::Type* type) {
+                                      const ast::Type* type) {
   registered_constructs_[name] = type;
 }
 
-sem::Type* ParserImpl::get_constructed(const std::string& name) {
+const ast::Type* ParserImpl::get_constructed(const std::string& name) {
   if (registered_constructs_.find(name) == registered_constructs_.end()) {
     return nullptr;
   }
@@ -401,7 +401,7 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("type alias", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      builder_.AST().AddConstructedType(const_cast<ast::Alias*>(ta.value.ast));
+      builder_.AST().AddConstructedType(const_cast<ast::Alias*>(ta.value));
       return true;
     }
 
@@ -413,10 +413,9 @@ Expect<bool> ParserImpl::expect_global_decl() {
       if (!expect("struct declaration", Token::Type::kSemicolon))
         return Failure::kErrored;
 
-      register_constructed(
-          builder_.Symbols().NameFor(str.value->impl()->name()), str.value);
-      builder_.AST().AddConstructedType(
-          const_cast<ast::Struct*>(str.value.ast));
+      register_constructed(builder_.Symbols().NameFor(str.value->name()),
+                           str.value);
+      builder_.AST().AddConstructedType(str.value);
       return true;
     }
 
@@ -565,8 +564,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
   if (decl.errored)
     return Failure::kErrored;
 
-  if ((decl->type.sem && decl->type.sem->UnwrapAll()->is_handle()) ||
-      (decl->type.ast && decl->type.ast->UnwrapAll()->is_handle())) {
+  if (decl->type && decl->type->UnwrapAll()->is_handle()) {
     // handle types implicitly have the `UniformConstant` storage class.
     if (explicit_sc.matched) {
       return add_error(
@@ -586,7 +584,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
 //  | sampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | storage_texture_type LESS_THAN image_storage_type GREATER_THAN
-Maybe<typ::Type> ParserImpl::texture_sampler_types() {
+Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
   auto type = sampler_type();
   if (type.matched)
     return type;
@@ -644,7 +642,7 @@ Maybe<typ::Type> ParserImpl::texture_sampler_types() {
 // sampler_type
 //  : SAMPLER
 //  | SAMPLER_COMPARISON
-Maybe<typ::Type> ParserImpl::sampler_type() {
+Maybe<ast::Type*> ParserImpl::sampler_type() {
   Source source;
   if (match(Token::Type::kSampler, &source))
     return builder_.ty.sampler(source, ast::SamplerKind::kSampler);
@@ -686,7 +684,7 @@ Maybe<ast::TextureDimension> ParserImpl::sampled_texture_type() {
 
 // external_texture_type
 //  : TEXTURE_EXTERNAL
-Maybe<typ::Type> ParserImpl::external_texture_type() {
+Maybe<ast::Type*> ParserImpl::external_texture_type() {
   Source source;
   if (match(Token::Type::kTextureExternal, &source)) {
     return builder_.ty.external_texture(source);
@@ -727,7 +725,7 @@ Maybe<ast::TextureDimension> ParserImpl::storage_texture_type() {
 //  | TEXTURE_DEPTH_2D_ARRAY
 //  | TEXTURE_DEPTH_CUBE
 //  | TEXTURE_DEPTH_CUBE_ARRAY
-Maybe<typ::Type> ParserImpl::depth_texture_type() {
+Maybe<ast::Type*> ParserImpl::depth_texture_type() {
   Source source;
 
   if (match(Token::Type::kTextureDepth2d, &source))
@@ -921,7 +919,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(
   if (access_decos.size() > 1)
     return add_error(ident.source, "multiple access decorations not allowed");
 
-  typ::Type ty = type.value;
+  ast::Type* ty = type.value;
 
   for (auto* deco : access_decos) {
     // If we have an access control decoration then we take it and wrap our
@@ -965,7 +963,7 @@ Maybe<ast::StorageClass> ParserImpl::variable_storage_decoration() {
 
 // type_alias
 //   : TYPE IDENT EQUAL type_decl
-Maybe<typ::Alias> ParserImpl::type_alias() {
+Maybe<ast::Alias*> ParserImpl::type_alias() {
   auto t = peek();
   if (!t.IsType())
     return Failure::kNoMatch;
@@ -1017,7 +1015,7 @@ Maybe<typ::Alias> ParserImpl::type_alias() {
 //   | MAT4x3 LESS_THAN type_decl GREATER_THAN
 //   | MAT4x4 LESS_THAN type_decl GREATER_THAN
 //   | texture_sampler_types
-Maybe<typ::Type> ParserImpl::type_decl() {
+Maybe<ast::Type*> ParserImpl::type_decl() {
   auto decos = decoration_list();
   if (decos.errored)
     return Failure::kErrored;
@@ -1034,7 +1032,7 @@ Maybe<typ::Type> ParserImpl::type_decl() {
   return type;
 }
 
-Maybe<typ::Type> ParserImpl::type_decl(ast::DecorationList& decos) {
+Maybe<ast::Type*> ParserImpl::type_decl(ast::DecorationList& decos) {
   auto t = peek();
   Source source;
   if (match(Token::Type::kIdentifier, &source)) {
@@ -1043,9 +1041,8 @@ Maybe<typ::Type> ParserImpl::type_decl(ast::DecorationList& decos) {
     if (ty == nullptr)
       return add_error(t, "unknown constructed type '" + t.to_str() + "'");
 
-    return typ::Type{builder_.create<ast::TypeName>(
-                         source, builder_.Symbols().Register(t.to_str())),
-                     ty};
+    return builder_.create<ast::TypeName>(
+        source, builder_.Symbols().Register(t.to_str()));
   }
 
   if (match(Token::Type::kBool, &source))
@@ -1088,7 +1085,7 @@ Maybe<typ::Type> ParserImpl::type_decl(ast::DecorationList& decos) {
   return Failure::kNoMatch;
 }
 
-Expect<typ::Type> ParserImpl::expect_type(const std::string& use) {
+Expect<ast::Type*> ParserImpl::expect_type(const std::string& use) {
   auto type = type_decl();
   if (type.errored)
     return Failure::kErrored;
@@ -1097,12 +1094,12 @@ Expect<typ::Type> ParserImpl::expect_type(const std::string& use) {
   return type.value;
 }
 
-Expect<typ::Type> ParserImpl::expect_type_decl_pointer(Token t) {
+Expect<ast::Type*> ParserImpl::expect_type_decl_pointer(Token t) {
   const char* use = "ptr declaration";
 
   ast::StorageClass storage_class = ast::StorageClass::kNone;
 
-  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<typ::Type> {
+  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<ast::Type*> {
     auto sc = expect_storage_class(use);
     if (sc.errored)
       return Failure::kErrored;
@@ -1126,7 +1123,7 @@ Expect<typ::Type> ParserImpl::expect_type_decl_pointer(Token t) {
                              storage_class);
 }
 
-Expect<typ::Type> ParserImpl::expect_type_decl_vector(Token t) {
+Expect<ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {
   uint32_t count = 2;
   if (t.IsVec3())
     count = 3;
@@ -1143,14 +1140,14 @@ Expect<typ::Type> ParserImpl::expect_type_decl_vector(Token t) {
                          count);
 }
 
-Expect<typ::Type> ParserImpl::expect_type_decl_array(
+Expect<ast::Type*> ParserImpl::expect_type_decl_array(
     Token t,
     ast::DecorationList decos) {
   const char* use = "array declaration";
 
   uint32_t size = 0;
 
-  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<typ::Type> {
+  auto subtype = expect_lt_gt_block(use, [&]() -> Expect<ast::Type*> {
     auto type = expect_type(use);
     if (type.errored)
       return Failure::kErrored;
@@ -1173,7 +1170,7 @@ Expect<typ::Type> ParserImpl::expect_type_decl_array(
                            size, std::move(decos));
 }
 
-Expect<typ::Type> ParserImpl::expect_type_decl_matrix(Token t) {
+Expect<ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
   uint32_t rows = 2;
   uint32_t columns = 2;
   if (t.IsMat3x2() || t.IsMat3x3() || t.IsMat3x4()) {
@@ -1239,7 +1236,7 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(
 
 // struct_decl
 //   : struct_decoration_decl* STRUCT IDENT struct_body_decl
-Maybe<typ::Struct> ParserImpl::struct_decl(ast::DecorationList& decos) {
+Maybe<ast::Struct*> ParserImpl::struct_decl(ast::DecorationList& decos) {
   auto t = peek();
   auto source = t.source();
 
@@ -1255,9 +1252,8 @@ Maybe<typ::Struct> ParserImpl::struct_decl(ast::DecorationList& decos) {
     return Failure::kErrored;
 
   auto sym = builder_.Symbols().Register(name.value);
-  auto* str =
-      create<ast::Struct>(source, sym, std::move(body.value), std::move(decos));
-  return typ::Struct{str, create<sem::StructType>(str)};
+  return create<ast::Struct>(source, sym, std::move(body.value),
+                             std::move(decos));
 }
 
 // struct_body_decl
@@ -1346,7 +1342,7 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
 // function_type_decl
 //   : type_decl
 //   | VOID
-Maybe<typ::Type> ParserImpl::function_type_decl() {
+Maybe<ast::Type*> ParserImpl::function_type_decl() {
   Source source;
   if (match(Token::Type::kVoid, &source))
     return builder_.ty.void_(source);
@@ -1381,7 +1377,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
     }
   }
 
-  typ::Type return_type;
+  ast::Type* return_type = nullptr;
   ast::DecorationList return_decorations;
 
   if (match(Token::Type::kArrow)) {
@@ -1402,7 +1398,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
       return_type = type.value;
     }
 
-    if (Is<ast::Void>(return_type.ast)) {
+    if (Is<ast::Void>(return_type)) {
       // crbug.com/tint/677: void has been removed from the language
       deprecated(tok.source(),
                  "omit '-> void' for functions that do not return a value");

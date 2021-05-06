@@ -34,11 +34,11 @@ TEST_F(ParserImplTest, DepthTextureType_2d) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<sem::Texture>());
-  ASSERT_TRUE(t->Is<sem::DepthTexture>());
-  EXPECT_EQ(t->As<sem::Texture>()->dim(), ast::TextureDimension::k2d);
+  ASSERT_TRUE(t->Is<ast::Texture>());
+  ASSERT_TRUE(t->Is<ast::DepthTexture>());
+  EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::k2d);
   EXPECT_FALSE(p->has_error());
-  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 17u}}));
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 }
 
 TEST_F(ParserImplTest, DepthTextureType_2dArray) {
@@ -47,11 +47,11 @@ TEST_F(ParserImplTest, DepthTextureType_2dArray) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<sem::Texture>());
-  ASSERT_TRUE(t->Is<sem::DepthTexture>());
-  EXPECT_EQ(t->As<sem::Texture>()->dim(), ast::TextureDimension::k2dArray);
+  ASSERT_TRUE(t->Is<ast::Texture>());
+  ASSERT_TRUE(t->Is<ast::DepthTexture>());
+  EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::k2dArray);
   EXPECT_FALSE(p->has_error());
-  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 23u}}));
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 23u}}));
 }
 
 TEST_F(ParserImplTest, DepthTextureType_Cube) {
@@ -60,11 +60,11 @@ TEST_F(ParserImplTest, DepthTextureType_Cube) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<sem::Texture>());
-  ASSERT_TRUE(t->Is<sem::DepthTexture>());
-  EXPECT_EQ(t->As<sem::Texture>()->dim(), ast::TextureDimension::kCube);
+  ASSERT_TRUE(t->Is<ast::Texture>());
+  ASSERT_TRUE(t->Is<ast::DepthTexture>());
+  EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::kCube);
   EXPECT_FALSE(p->has_error());
-  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 19u}}));
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
 
 TEST_F(ParserImplTest, DepthTextureType_CubeArray) {
@@ -73,11 +73,11 @@ TEST_F(ParserImplTest, DepthTextureType_CubeArray) {
   EXPECT_TRUE(t.matched);
   EXPECT_FALSE(t.errored);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<sem::Texture>());
-  ASSERT_TRUE(t->Is<sem::DepthTexture>());
-  EXPECT_EQ(t->As<sem::Texture>()->dim(), ast::TextureDimension::kCubeArray);
+  ASSERT_TRUE(t->Is<ast::Texture>());
+  ASSERT_TRUE(t->Is<ast::DepthTexture>());
+  EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::kCubeArray);
   EXPECT_FALSE(p->has_error());
-  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 25u}}));
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 25u}}));
 }
 
 }  // namespace

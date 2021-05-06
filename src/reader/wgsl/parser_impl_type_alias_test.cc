@@ -22,19 +22,16 @@ namespace {
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
   auto p = parser("type a = i32");
 
-  auto* i32 = p->builder().create<sem::I32>();
-
   auto t = p->type_alias();
   EXPECT_FALSE(p->has_error());
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<sem::Alias>());
-  auto* alias = t->As<sem::Alias>();
-  ASSERT_TRUE(alias->type()->Is<sem::I32>());
-  ASSERT_EQ(alias->type(), i32);
+  ASSERT_TRUE(t->Is<ast::Alias>());
+  auto* alias = t->As<ast::Alias>();
+  ASSERT_TRUE(alias->type()->Is<ast::I32>());
 
-  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 13u}}));
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 13u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
@@ -48,16 +45,11 @@ TEST_F(ParserImplTest, TypeDecl_ParsesStruct_Ident) {
   EXPECT_FALSE(t.errored);
   EXPECT_TRUE(t.matched);
   ASSERT_NE(t.value, nullptr);
-  ASSERT_TRUE(t->Is<sem::Alias>());
-  auto* alias = t->As<sem::Alias>();
+  ASSERT_TRUE(t.value->Is<ast::Alias>());
+  auto* alias = t.value->As<ast::Alias>();
   EXPECT_EQ(p->builder().Symbols().NameFor(alias->symbol()), "a");
-  ASSERT_TRUE(alias->type()->Is<sem::StructType>());
-
-  auto* s = alias->type()->As<sem::StructType>();
-  EXPECT_EQ(s->impl()->name(), p->builder().Symbols().Get("B"));
-  EXPECT_EQ(s->impl()->name(), p->builder().Symbols().Get("B"));
-
-  EXPECT_EQ(t.value.ast->source().range, (Source::Range{{1u, 1u}, {1u, 11u}}));
+  EXPECT_TRUE(alias->type()->Is<ast::TypeName>());
+  EXPECT_EQ(alias->source().range, (Source::Range{{1u, 1u}, {1u, 11u}}));
 }
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
