@@ -203,123 +203,111 @@ TEST_F(BuilderTest, GlobalVar_WithBuiltin) {
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_ConstantId_Bool) {
-  auto* v = Global("var", ty.bool_(), ast::StorageClass::kInput, Expr(true),
-                   ast::DecorationList{
-                       create<ast::OverrideDecoration>(1200),
-                   });
+TEST_F(BuilderTest, GlobalVar_Override_Bool) {
+  auto* v = GlobalConst("var", ty.bool_(), Expr(true),
+                        ast::DecorationList{
+                            create<ast::OverrideDecoration>(1200),
+                        });
 
   spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %2 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 1200
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
 %2 = OpSpecConstantTrue %1
-%4 = OpTypePointer Input %1
-%3 = OpVariable %4 Input %2
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_ConstantId_Bool_NoConstructor) {
-  auto* v = Global("var", ty.bool_(), ast::StorageClass::kInput, nullptr,
-                   ast::DecorationList{
-                       create<ast::OverrideDecoration>(1200),
-                   });
+TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
+  auto* v = GlobalConst("var", ty.bool_(), nullptr,
+                        ast::DecorationList{
+                            create<ast::OverrideDecoration>(1200),
+                        });
 
   spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %2 "var"
 )");
-  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 1200
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 1200
 )");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
-%2 = OpTypePointer Input %3
-%4 = OpSpecConstantFalse %3
-%1 = OpVariable %2 Input %4
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+%2 = OpSpecConstantFalse %1
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kInput, Expr(2.f),
-                   ast::DecorationList{
-                       create<ast::OverrideDecoration>(0),
-                   });
+TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
+  auto* v = GlobalConst("var", ty.f32(), Expr(2.f),
+                        ast::DecorationList{
+                            create<ast::OverrideDecoration>(0),
+                        });
 
   spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %2 "var"
 )");
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 0
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
 %2 = OpSpecConstant %1 2
-%4 = OpTypePointer Input %1
-%3 = OpVariable %4 Input %2
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_F32_NoConstructor) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kInput, nullptr,
-                   ast::DecorationList{
-                       create<ast::OverrideDecoration>(0),
-                   });
+TEST_F(BuilderTest, GlobalVar_Override_Scalar_F32_NoConstructor) {
+  auto* v = GlobalConst("var", ty.f32(), nullptr,
+                        ast::DecorationList{
+                            create<ast::OverrideDecoration>(0),
+                        });
 
   spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %2 "var"
 )");
-  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 0
 )");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypePointer Input %3
-%4 = OpSpecConstant %3 0
-%1 = OpVariable %2 Input %4
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpSpecConstant %1 0
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_I32_NoConstructor) {
-  auto* v = Global("var", ty.i32(), ast::StorageClass::kInput, nullptr,
-                   ast::DecorationList{
-                       create<ast::OverrideDecoration>(0),
-                   });
+TEST_F(BuilderTest, GlobalVar_Override_Scalar_I32_NoConstructor) {
+  auto* v = GlobalConst("var", ty.i32(), nullptr,
+                        ast::DecorationList{
+                            create<ast::OverrideDecoration>(0),
+                        });
 
   spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %2 "var"
 )");
-  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 0
 )");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 1
-%2 = OpTypePointer Input %3
-%4 = OpSpecConstant %3 0
-%1 = OpVariable %2 Input %4
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
+%2 = OpSpecConstant %1 0
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_ConstantId_Scalar_U32_NoConstructor) {
-  auto* v = Global("var", ty.u32(), ast::StorageClass::kInput, nullptr,
-                   ast::DecorationList{
-                       create<ast::OverrideDecoration>(0),
-                   });
+TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
+  auto* v = GlobalConst("var", ty.u32(), nullptr,
+                        ast::DecorationList{
+                            create<ast::OverrideDecoration>(0),
+                        });
 
   spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %1 "var"
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %2 "var"
 )");
-  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %4 SpecId 0
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 0
 )");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeInt 32 0
-%2 = OpTypePointer Input %3
-%4 = OpSpecConstant %3 0
-%1 = OpVariable %2 Input %4
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
+%2 = OpSpecConstant %1 0
 )");
 }
 

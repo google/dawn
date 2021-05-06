@@ -688,8 +688,33 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
 
   if (var->is_const()) {
     if (!var->has_constructor()) {
-      error_ = "missing constructor for constant";
-      return false;
+      // Constants must have an initializer unless they have an override
+      // decoration.
+      if (!ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
+        error_ = "missing constructor for constant";
+        return false;
+      }
+
+      // SPIR-V requires specialization constants to have initializers.
+      if (sem->Type()->Is<sem::F32>()) {
+        ast::FloatLiteral l(ProgramID(), Source{}, 0.0f);
+        init_id = GenerateLiteralIfNeeded(var, &l);
+      } else if (sem->Type()->Is<sem::U32>()) {
+        ast::UintLiteral l(ProgramID(), Source{}, 0);
+        init_id = GenerateLiteralIfNeeded(var, &l);
+      } else if (sem->Type()->Is<sem::I32>()) {
+        ast::SintLiteral l(ProgramID(), Source{}, 0);
+        init_id = GenerateLiteralIfNeeded(var, &l);
+      } else if (sem->Type()->Is<sem::Bool>()) {
+        ast::BoolLiteral l(ProgramID(), Source{}, false);
+        init_id = GenerateLiteralIfNeeded(var, &l);
+      } else {
+        error_ = "invalid type for pipeline constant ID, must be scalar";
+        return false;
+      }
+      if (init_id == 0) {
+        return 0;
+      }
     }
     push_debug(spv::Op::OpName,
                {Operand::Int(init_id),
@@ -743,37 +768,10 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       }
     }
   } else if (!type_no_ac->Is<sem::Sampler>()) {
-    // Certain cases require us to generate a constructor value.
-    //
-    // 1- Pipeline constant IDs must be attached to the OpConstant, if we have a
-    //    variable with an override attribute that doesn't have a constructor we
-    //    make one
-    // 2- If we don't have a constructor and we're an Output or Private variable
-    //    then WGSL requires an initializer.
-    if (ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
-      if (type_no_ac->Is<sem::F32>()) {
-        ast::FloatLiteral l(ProgramID(), Source{}, 0.0f);
-        init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (type_no_ac->Is<sem::U32>()) {
-        ast::UintLiteral l(ProgramID(), Source{}, 0);
-        init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (type_no_ac->Is<sem::I32>()) {
-        ast::SintLiteral l(ProgramID(), Source{}, 0);
-        init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (type_no_ac->Is<sem::Bool>()) {
-        ast::BoolLiteral l(ProgramID(), Source{}, false);
-        init_id = GenerateLiteralIfNeeded(var, &l);
-      } else {
-        error_ = "invalid type for pipeline constant ID, must be scalar";
-        return false;
-      }
-      if (init_id == 0) {
-        return 0;
-      }
-      ops.push_back(Operand::Int(init_id));
-    } else if (sem->StorageClass() == ast::StorageClass::kPrivate ||
-               sem->StorageClass() == ast::StorageClass::kNone ||
-               sem->StorageClass() == ast::StorageClass::kOutput) {
+    // If we don't have a constructor and we're an Output or Private variable,
+    // then WGSL requires that we zero-initialize.
+    if (sem->StorageClass() == ast::StorageClass::kPrivate ||
+        sem->StorageClass() == ast::StorageClass::kOutput) {
       init_id = GenerateConstantNullIfNeeded(type_no_ac);
       if (init_id == 0) {
         return 0;
