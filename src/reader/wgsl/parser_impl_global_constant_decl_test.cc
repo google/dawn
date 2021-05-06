@@ -48,19 +48,6 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
       ast::HasDecoration<ast::OverrideDecoration>(e.value->decorations()));
 }
 
-TEST_F(ParserImplTest, GlobalConstantDecl_MissingEqual) {
-  auto p = parser("let a : f32 1.");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-  auto e = p->global_constant_decl(decos.value);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_TRUE(e.errored);
-  EXPECT_FALSE(e.matched);
-  EXPECT_EQ(e.value, nullptr);
-  EXPECT_EQ(p->error(), "1:13: expected '=' for let declaration");
-}
-
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidVariable) {
   auto p = parser("let a : invalid = 1.");
   auto decos = p->decoration_list();

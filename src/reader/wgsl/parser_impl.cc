@@ -496,7 +496,9 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
 }
 
 // global_constant_decl
-//  : variable_decoration_list* CONST variable_ident_decl EQUAL const_expr
+//  : attribute_list* LET variable_ident_decl global_const_initializer?
+// global_const_initializer
+//  : EQUAL const_expr
 Maybe<ast::Variable*> ParserImpl::global_constant_decl(
     ast::DecorationList& decos) {
   if (!match(Token::Type::kLet)) {
@@ -515,12 +517,13 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl(
   if (decl.errored)
     return Failure::kErrored;
 
-  if (!expect(use, Token::Type::kEqual))
-    return Failure::kErrored;
-
-  auto init = expect_const_expr();
-  if (init.errored)
-    return Failure::kErrored;
+  ast::ConstructorExpression* initializer = nullptr;
+  if (match(Token::Type::kEqual)) {
+    auto init = expect_const_expr();
+    if (init.errored)
+      return Failure::kErrored;
+    initializer = std::move(init.value);
+  }
 
   return create<ast::Variable>(
       decl->source,                             // source
@@ -528,7 +531,7 @@ Maybe<ast::Variable*> ParserImpl::global_constant_decl(
       ast::StorageClass::kNone,                 // storage_class
       decl->type,                               // type
       true,                                     // is_const
-      init.value,                               // constructor
+      initializer,                              // constructor
       std::move(decos));                        // decorations
 }
 

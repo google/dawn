@@ -508,13 +508,6 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstMissingRParen) {
          "                                    ^\n");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstMissingAssignment) {
-  EXPECT("let i : vec2<i32>;",
-         "test.wgsl:1:18 error: expected '=' for let declaration\n"
-         "let i : vec2<i32>;\n"
-         "                 ^\n");
-}
-
 TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteral) {
   EXPECT("let i : vec2<i32> = vec2<i32>(!);",
          "test.wgsl:1:31 error: unable to parse constant literal\n"

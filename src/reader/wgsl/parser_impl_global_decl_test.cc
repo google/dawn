@@ -64,10 +64,10 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_Invalid) {
-  auto p = parser("let a : vec2<i32>;");
+  auto p = parser("let a : vec2<i32> 1.0;");
   p->expect_global_decl();
   ASSERT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(), "1:18: expected '=' for let declaration");
+  EXPECT_EQ(p->error(), "1:19: expected ';' for let declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_MissingSemicolon) {
