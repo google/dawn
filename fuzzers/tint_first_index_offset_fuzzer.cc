@@ -20,8 +20,10 @@ namespace fuzzers {
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::transform::Manager transform_manager;
   tint::transform::DataMap transform_inputs;
+  Reader r(data, size);
 
-  if (!ExtractFirstIndexOffsetInputs(&data, &size, &transform_inputs)) {
+  ExtractFirstIndexOffsetInputs(&r, &transform_inputs);
+  if (r.failed()) {
     return 0;
   }
 
@@ -30,7 +32,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
   fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));
 
-  return fuzzer.Run(data, size);
+  return fuzzer.Run(r.data(), r.size());
 }
 
 }  // namespace fuzzers

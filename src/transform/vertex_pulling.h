@@ -56,12 +56,13 @@ enum class VertexFormat {
   kI32,
   kVec2I32,
   kVec3I32,
-  kVec4I32
+  kVec4I32,
+  kLastEntry = kVec4I32
 };
 
 /// Describes if a vertex attributes increments with vertex index or instance
 /// index
-enum class InputStepMode { kVertex, kInstance };
+enum class InputStepMode { kVertex, kInstance, kLastEntry = kInstance };
 
 /// Describes a vertex attribute within a buffer
 struct VertexAttributeDescriptor {

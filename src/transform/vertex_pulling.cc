@@ -28,6 +28,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::VertexPulling::Config);
 
 namespace tint {
 namespace transform {
+
 namespace {
 
 struct State {

@@ -39,6 +39,7 @@ if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_SPV_WRITER})
   add_tint_fuzzer(tint_renamer_fuzzer)
   add_tint_fuzzer(tint_single_entry_point_fuzzer)
   add_tint_fuzzer(tint_spirv_transform_fuzzer)
+  add_tint_fuzzer(tint_vertex_pulling_fuzzer)
   add_tint_fuzzer(tint_wgsl_reader_spv_writer_fuzzer)
 endif()
 

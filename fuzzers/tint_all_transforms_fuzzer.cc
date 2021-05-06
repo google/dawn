@@ -18,27 +18,17 @@ namespace tint {
 namespace fuzzers {
 
 struct Config {
-  const uint8_t* data;
-  size_t size;
+  Config(const uint8_t* data, size_t size) : reader(data, size) {}
+  Reader reader;
   transform::Manager manager;
   transform::DataMap inputs;
 };
 
 bool AddPlatformIndependentPasses(Config* config) {
-  if (!ExtractFirstIndexOffsetInputs(&config->data, &config->size,
-                                     &config->inputs)) {
-    return false;
-  }
-
-  if (!ExtractBindingRemapperInputs(&config->data, &config->size,
-                                    &config->inputs)) {
-    return false;
-  }
-
-  if (!ExtractSingleEntryPointInputs(&config->data, &config->size,
-                                     &config->inputs)) {
-    return 0;
-  }
+  ExtractFirstIndexOffsetInputs(&config->reader, &config->inputs);
+  ExtractBindingRemapperInputs(&config->reader, &config->inputs);
+  ExtractSingleEntryPointInputs(&config->reader, &config->inputs);
+  ExtractVertexPullingInputs(&config->reader, &config->inputs);
 
   config->manager.Add<transform::BoundArrayAccessors>();
   config->manager
@@ -48,15 +38,14 @@ bool AddPlatformIndependentPasses(Config* config) {
   config->manager.Add<transform::BindingRemapper>();
   config->manager.Add<transform::Renamer>();
   config->manager.Add<tint::transform::SingleEntryPoint>();
+  config->manager.Add<tint::transform::VertexPulling>();
 
-  return true;
+  return !config->reader.failed();
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   {
-    Config config;
-    config.data = data;
-    config.size = size;
+    Config config(data, size);
 
     if (!AddPlatformIndependentPasses(&config)) {
       return 0;
@@ -65,14 +54,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
     fuzzer.SetTransformManager(&(config.manager), std::move(config.inputs));
 
-    fuzzer.Run(config.data, config.size);
+    fuzzer.Run(config.reader.data(), config.reader.size());
   }
 
 #if TINT_BUILD_HLSL_WRITER
   {
-    Config config;
-    config.data = data;
-    config.size = size;
+    Config config(data, size);
 
     if (!AddPlatformIndependentPasses(&config)) {
       return 0;
@@ -83,15 +70,13 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kHLSL);
     fuzzer.SetTransformManager(&config.manager, std::move(config.inputs));
 
-    fuzzer.Run(config.data, config.size);
+    fuzzer.Run(config.reader.data(), config.reader.size());
   }
 #endif  // TINT_BUILD_HLSL_WRITER
 
 #if TINT_BUILD_MSL_WRITER
   {
-    Config config;
-    config.data = data;
-    config.size = size;
+    Config config(data, size);
 
     if (!AddPlatformIndependentPasses(&config)) {
       return 0;
@@ -102,14 +87,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kMSL);
     fuzzer.SetTransformManager(&config.manager, std::move(config.inputs));
 
-    fuzzer.Run(config.data, config.size);
+    fuzzer.Run(config.reader.data(), config.reader.size());
   }
 #endif  // TINT_BUILD_MSL_WRITER
 #if TINT_BUILD_SPV_WRITER
   {
-    Config config;
-    config.data = data;
-    config.size = size;
+    Config config(data, size);
 
     if (!AddPlatformIndependentPasses(&config)) {
       return 0;
@@ -120,7 +103,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
     fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
     fuzzer.SetTransformManager(&config.manager, std::move(config.inputs));
 
-    fuzzer.Run(config.data, config.size);
+    fuzzer.Run(config.reader.data(), config.reader.size());
   }
 #endif  // TINT_BUILD_SPV_WRITER
 

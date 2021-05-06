@@ -26,6 +26,8 @@
 namespace tint {
 namespace fuzzers {
 
+namespace {
+
 [[noreturn]] void TintInternalCompilerErrorReporter(
     const tint::diag::List& diagnostics) {
   auto printer = tint::diag::Printer::create(stderr, true);
@@ -37,41 +39,72 @@ namespace fuzzers {
   auto printer = tint::diag::Printer::create(stderr, true);
   printer->write(
       "Fuzzing detected valid input program being transformed into an invalid "
-      "output progam",
+      "output progam\n",
       {diag::Color::kRed, true});
   __builtin_trap();
 }
 
-bool ExtractBindingRemapperInputs(const uint8_t** data,
-                                  size_t* size,
-                                  tint::transform::DataMap* inputs) {
-  if ((*size) < sizeof(uint8_t)) {
-    return false;
+transform::VertexAttributeDescriptor ExtractVertexAttributeDescriptor(
+    Reader* r) {
+  transform::VertexAttributeDescriptor desc;
+  desc.format = r->enum_class<transform::VertexFormat>(
+      static_cast<uint8_t>(transform::VertexFormat::kLastEntry) + 1);
+  desc.offset = r->read<uint64_t>();
+  desc.shader_location = r->read<uint32_t>();
+  return desc;
+}
+
+transform::VertexBufferLayoutDescriptor ExtractVertexBufferLayoutDescriptor(
+    Reader* r) {
+  transform::VertexBufferLayoutDescriptor desc;
+  desc.array_stride = r->read<uint64_t>();
+  desc.step_mode = r->enum_class<transform::InputStepMode>(
+      static_cast<uint8_t>(transform::InputStepMode::kLastEntry) + 1);
+  desc.attributes = r->vector(ExtractVertexAttributeDescriptor);
+  return desc;
+}
+
+}  // namespace
+
+Reader::Reader(const uint8_t* data, size_t size) : data_(data), size_(size) {}
+
+std::string Reader::string() {
+  auto count = read<uint8_t>();
+  if (failed_ || size_ < count) {
+    mark_failed();
+    return "";
   }
+  std::string out(data_, data_ + count);
+  data_ += count;
+  size_ -= count;
+  return out;
+}
 
-  auto count = *reinterpret_cast<const uint8_t*>(*data);
-  (*data) += sizeof(uint8_t);
-  (*size) -= sizeof(uint8_t);
+void Reader::mark_failed() {
+  size_ = 0;
+  failed_ = true;
+}
 
+void Reader::read(void* out, size_t n) {
+  if (n > size_) {
+    mark_failed();
+    return;
+  }
+  memcpy(&out, data_, n);
+  data_ += n;
+  size_ -= n;
+}
+
+void ExtractBindingRemapperInputs(Reader* r, tint::transform::DataMap* inputs) {
   struct Config {
-    uint32_t old_group;
-    uint32_t old_binding;
-    uint32_t new_group;
-    uint32_t new_binding;
+    uint8_t old_group;
+    uint8_t old_binding;
+    uint8_t new_group;
+    uint8_t new_binding;
     ast::AccessControl::Access new_ac;
   };
 
-  if ((*size) < count * sizeof(Config)) {
-    return false;
-  }
-
-  std::vector<Config> configs(count);
-
-  memcpy(configs.data(), *data, count * sizeof(Config));
-
-  (*data) += count * sizeof(Config);
-  (*size) -= count * sizeof(Config);
-
+  std::vector<Config> configs = r->vector<Config>();
   transform::BindingRemapper::BindingPoints binding_points;
   transform::BindingRemapper::AccessControls access_controls;
   for (const auto& config : configs) {
@@ -82,59 +115,33 @@ bool ExtractBindingRemapperInputs(const uint8_t** data,
 
   inputs->Add<transform::BindingRemapper::Remappings>(binding_points,
                                                       access_controls);
-
-  return true;
 }
 
-bool ExtractFirstIndexOffsetInputs(const uint8_t** data,
-                                   size_t* size,
+void ExtractFirstIndexOffsetInputs(Reader* r,
                                    tint::transform::DataMap* inputs) {
   struct Config {
     uint32_t group;
     uint32_t binding;
   };
 
-  if ((*size) < sizeof(Config)) {
-    return false;
-  }
-
-  Config config;
-  memcpy(&config, data, sizeof(config));
-
-  (*data) += sizeof(Config);
-  (*size) -= sizeof(Config);
-
+  Config config = r->read<Config>();
   inputs->Add<tint::transform::FirstIndexOffset::BindingPoint>(config.binding,
                                                                config.group);
-
-  return true;
 }
 
-bool ExtractSingleEntryPointInputs(const uint8_t** data,
-                                   size_t* size,
+void ExtractSingleEntryPointInputs(Reader* r,
                                    tint::transform::DataMap* inputs) {
-  if ((*size) < sizeof(uint8_t)) {
-    return false;
-  }
-
-  auto count = *reinterpret_cast<const uint8_t*>(*data);
-  (*data) += sizeof(uint8_t);
-  (*size) -= sizeof(uint8_t);
-
-  if ((*size) < count) {
-    return false;
-  }
-
-  auto* c = reinterpret_cast<const char*>(*data);
-  std::string input(c, c + count);
-
-  (*data) += count * sizeof(char);
-  (*size) -= count * sizeof(char);
-
+  std::string input = r->string();
   transform::SingleEntryPoint::Config cfg(input);
   inputs->Add<transform::SingleEntryPoint::Config>(cfg);
+}
 
-  return true;
+void ExtractVertexPullingInputs(Reader* r, tint::transform::DataMap* inputs) {
+  transform::VertexPulling::Config cfg;
+  cfg.entry_point_name = r->string();
+  cfg.vertex_state = r->vector(ExtractVertexBufferLayoutDescriptor);
+  cfg.pulling_group = r->read<uint32_t>();
+  inputs->Add<transform::VertexPulling::Config>(cfg);
 }
 
 CommonFuzzer::CommonFuzzer(InputFormat input, OutputFormat output)
@@ -158,7 +165,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #if TINT_BUILD_WGSL_READER
     case InputFormat::kWGSL: {
       std::string str(reinterpret_cast<const char*>(data), size);
-
       file = std::make_unique<Source::File>("test.wgsl", str);
       program = reader::wgsl::Parse(file.get());
       break;

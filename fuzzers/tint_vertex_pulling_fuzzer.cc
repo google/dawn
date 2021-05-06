@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO(tint:753): Remove this fuzzer once that transform is only
+// being used from sanitizers.
+
 #include "fuzzers/tint_common_fuzzer.h"
 
 namespace tint {
@@ -22,15 +25,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
   tint::transform::DataMap transform_inputs;
   Reader r(data, size);
 
-  ExtractSingleEntryPointInputs(&r, &transform_inputs);
+  ExtractVertexPullingInputs(&r, &transform_inputs);
   if (r.failed()) {
     return 0;
   }
 
-  transform_manager.Add<tint::transform::SingleEntryPoint>();
+  transform_manager.Add<tint::transform::VertexPulling>();
 
   tint::fuzzers::CommonFuzzer fuzzer(InputFormat::kWGSL, OutputFormat::kSpv);
-  fuzzer.SetTransformManager(&transform_manager, std::move(transform_inputs));
+  fuzzer.SetTransformManager(&transform_manager, {});
 
   return fuzzer.Run(r.data(), r.size());
 }
