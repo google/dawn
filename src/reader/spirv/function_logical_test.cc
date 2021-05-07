@@ -24,8 +24,12 @@ namespace {
 
 using ::testing::HasSubstr;
 
-std::string CommonTypes() {
+std::string Preamble() {
   return R"(
+  OpCapability Shader
+  OpMemoryModel Logical Simple
+  OpEntryPoint Vertex %100 "main"
+
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
 
@@ -191,7 +195,7 @@ std::string AstFor(std::string assembly) {
 using SpvUnaryLogicalTest = SpvParserTestBase<::testing::Test>;
 
 TEST_F(SpvUnaryLogicalTest, LogicalNot_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpLogicalNot %bool %true
@@ -217,7 +221,7 @@ TEST_F(SpvUnaryLogicalTest, LogicalNot_Scalar) {
 }
 
 TEST_F(SpvUnaryLogicalTest, LogicalNot_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpLogicalNot %v2bool %v2bool_t_f
@@ -267,7 +271,7 @@ using SpvBinaryLogicalTest =
     SpvParserTestBase<::testing::TestWithParam<BinaryData>>;
 
 TEST_P(SpvBinaryLogicalTest, EmitExpression) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = )" + GetParam().op +
@@ -709,7 +713,7 @@ INSTANTIATE_TEST_SUITE_P(
 using SpvFUnordTest = SpvParserTestBase<::testing::Test>;
 
 TEST_F(SpvFUnordTest, FUnordEqual_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFUnordEqual %bool %float_50 %float_60
@@ -739,10 +743,10 @@ TEST_F(SpvFUnordTest, FUnordEqual_Scalar) {
 }
 
 TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
-     %1 = OpFUnordEqual %bool %v2float_50_60 %v2float_60_50
+     %1 = OpFUnordEqual %v2bool %v2float_50_60 %v2float_60_50
      OpReturn
      OpFunctionEnd
   )";
@@ -754,7 +758,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
   VariableConst{
     x_1
     none
-    __bool
+    __vec_2__bool
     {
       UnaryOp[not set]{
         not
@@ -777,7 +781,7 @@ TEST_F(SpvFUnordTest, FUnordEqual_Vector) {
 }
 
 TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFUnordNotEqual %bool %float_50 %float_60
@@ -807,10 +811,10 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Scalar) {
 }
 
 TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
-     %1 = OpFUnordNotEqual %bool %v2float_50_60 %v2float_60_50
+     %1 = OpFUnordNotEqual %v2bool %v2float_50_60 %v2float_60_50
      OpReturn
      OpFunctionEnd
   )";
@@ -822,7 +826,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
   VariableConst{
     x_1
     none
-    __bool
+    __vec_2__bool
     {
       UnaryOp[not set]{
         not
@@ -845,7 +849,7 @@ TEST_F(SpvFUnordTest, FUnordNotEqual_Vector) {
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFUnordLessThan %bool %float_50 %float_60
@@ -875,10 +879,10 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Scalar) {
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
-     %1 = OpFUnordLessThan %bool %v2float_50_60 %v2float_60_50
+     %1 = OpFUnordLessThan %v2bool %v2float_50_60 %v2float_60_50
      OpReturn
      OpFunctionEnd
   )";
@@ -890,7 +894,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
   VariableConst{
     x_1
     none
-    __bool
+    __vec_2__bool
     {
       UnaryOp[not set]{
         not
@@ -913,7 +917,7 @@ TEST_F(SpvFUnordTest, FUnordLessThan_Vector) {
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFUnordLessThanEqual %bool %float_50 %float_60
@@ -943,10 +947,10 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Scalar) {
 }
 
 TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
-     %1 = OpFUnordLessThanEqual %bool %v2float_50_60 %v2float_60_50
+     %1 = OpFUnordLessThanEqual %v2bool %v2float_50_60 %v2float_60_50
      OpReturn
      OpFunctionEnd
   )";
@@ -958,7 +962,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
   VariableConst{
     x_1
     none
-    __bool
+    __vec_2__bool
     {
       UnaryOp[not set]{
         not
@@ -981,7 +985,7 @@ TEST_F(SpvFUnordTest, FUnordLessThanEqual_Vector) {
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFUnordGreaterThan %bool %float_50 %float_60
@@ -1011,10 +1015,10 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Scalar) {
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
-     %1 = OpFUnordGreaterThan %bool %v2float_50_60 %v2float_60_50
+     %1 = OpFUnordGreaterThan %v2bool %v2float_50_60 %v2float_60_50
      OpReturn
      OpFunctionEnd
   )";
@@ -1026,7 +1030,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
   VariableConst{
     x_1
     none
-    __bool
+    __vec_2__bool
     {
       UnaryOp[not set]{
         not
@@ -1049,7 +1053,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThan_Vector) {
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpFUnordGreaterThanEqual %bool %float_50 %float_60
@@ -1079,10 +1083,10 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Scalar) {
 }
 
 TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
-     %1 = OpFUnordGreaterThanEqual %bool %v2float_50_60 %v2float_60_50
+     %1 = OpFUnordGreaterThanEqual %v2bool %v2float_50_60 %v2float_60_50
      OpReturn
      OpFunctionEnd
   )";
@@ -1094,7 +1098,7 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
   VariableConst{
     x_1
     none
-    __bool
+    __vec_2__bool
     {
       UnaryOp[not set]{
         not
@@ -1116,8 +1120,10 @@ TEST_F(SpvFUnordTest, FUnordGreaterThanEqual_Vector) {
   })"));
 }
 
-TEST_F(SpvFUnordTest, Select_BoolCond_BoolParams) {
-  const auto assembly = CommonTypes() + R"(
+using SpvLogicalTest = SpvParserTestBase<::testing::Test>;
+
+TEST_F(SpvLogicalTest, Select_BoolCond_BoolParams) {
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSelect %bool %true %true %false
@@ -1148,8 +1154,8 @@ TEST_F(SpvFUnordTest, Select_BoolCond_BoolParams) {
 })"));
 }
 
-TEST_F(SpvFUnordTest, Select_BoolCond_IntScalarParams) {
-  const auto assembly = CommonTypes() + R"(
+TEST_F(SpvLogicalTest, Select_BoolCond_IntScalarParams) {
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSelect %uint %true %uint_10 %uint_20
@@ -1180,8 +1186,8 @@ TEST_F(SpvFUnordTest, Select_BoolCond_IntScalarParams) {
 })"));
 }
 
-TEST_F(SpvFUnordTest, Select_BoolCond_FloatScalarParams) {
-  const auto assembly = CommonTypes() + R"(
+TEST_F(SpvLogicalTest, Select_BoolCond_FloatScalarParams) {
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSelect %float %true %float_50 %float_60
@@ -1212,8 +1218,11 @@ TEST_F(SpvFUnordTest, Select_BoolCond_FloatScalarParams) {
 })"));
 }
 
-TEST_F(SpvFUnordTest, Select_BoolCond_VectorParams) {
-  const auto assembly = CommonTypes() + R"(
+TEST_F(SpvLogicalTest, Select_BoolCond_VectorParams) {
+  // Prior to SPIR-V 1.4, the condition must be a vector of bools
+  // when the value operands are vectors.
+  // "Before version 1.4, results are only computed per component."
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSelect %v2uint %true %v2uint_10_20 %v2uint_20_10
@@ -1250,10 +1259,16 @@ TEST_F(SpvFUnordTest, Select_BoolCond_VectorParams) {
     }
   }
 })"));
+
+  // Fails validation prior to SPIR-V 1.4: If the value operands are vectors,
+  // then the condition must be a vector.
+  // "Expected vector sizes of Result Type and the condition to be equal:
+  // Select"
+  p->DeliberatelyInvalidSpirv();
 }
 
-TEST_F(SpvFUnordTest, Select_VecBoolCond_VectorParams) {
-  const auto assembly = CommonTypes() + R"(
+TEST_F(SpvLogicalTest, Select_VecBoolCond_VectorParams) {
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpSelect %v2uint %v2bool_t_f %v2uint_10_20 %v2uint_20_10
@@ -1296,10 +1311,8 @@ TEST_F(SpvFUnordTest, Select_VecBoolCond_VectorParams) {
 })"));
 }
 
-using SpvLogicalTest = SpvParserTestBase<::testing::Test>;
-
 TEST_F(SpvLogicalTest, Any) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpAny %bool %v2bool_t_f
@@ -1333,7 +1346,7 @@ TEST_F(SpvLogicalTest, Any) {
 }
 
 TEST_F(SpvLogicalTest, All) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpAll %bool %v2bool_t_f
@@ -1367,7 +1380,7 @@ TEST_F(SpvLogicalTest, All) {
 }
 
 TEST_F(SpvLogicalTest, IsNan_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpIsNan %bool %float_50
@@ -1397,7 +1410,7 @@ TEST_F(SpvLogicalTest, IsNan_Scalar) {
 }
 
 TEST_F(SpvLogicalTest, IsNan_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpIsNan %v2bool %v2float_50_60
@@ -1431,7 +1444,7 @@ TEST_F(SpvLogicalTest, IsNan_Vector) {
 }
 
 TEST_F(SpvLogicalTest, IsInf_Scalar) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpIsInf %bool %float_50
@@ -1461,7 +1474,7 @@ TEST_F(SpvLogicalTest, IsInf_Scalar) {
 }
 
 TEST_F(SpvLogicalTest, IsInf_Vector) {
-  const auto assembly = CommonTypes() + R"(
+  const auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpIsInf %v2bool %v2float_50_60
