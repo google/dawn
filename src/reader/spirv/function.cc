@@ -4033,7 +4033,7 @@ ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
   const auto type_id = def_use_mgr_->GetDef(id)->type_id();
   if (type_id) {
     auto* ast_type = parser_impl_.ConvertType(type_id);
-    if (auto* ptr = ast_type->As<ast::Pointer>()) {
+    if (auto* ptr = As<ast::Pointer>(ast_type)) {
       return ptr->storage_class();
     }
   }
