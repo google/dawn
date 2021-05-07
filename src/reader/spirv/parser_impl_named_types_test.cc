@@ -30,6 +30,8 @@ TEST_F(SpvParserTest, NamedTypes_AnonStruct) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->program().to_str(), HasSubstr("Struct S"));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
@@ -40,6 +42,8 @@ TEST_F(SpvParserTest, NamedTypes_NamedStruct) {
   )"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->program().to_str(), HasSubstr("Struct mystruct"));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
@@ -57,6 +61,8 @@ TEST_F(SpvParserTest, NamedTypes_Dup_EmitBoth) {
     StructMember{field0: __u32}
     StructMember{field1: __u32}
   })"));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
 // TODO(dneto): Should we make an alias for an un-decoratrd array with
@@ -72,6 +78,8 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArrayWithDecoration) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->program().to_str(),
               HasSubstr("RTArr -> __array__u32_stride_8\n"));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
@@ -86,6 +94,8 @@ TEST_F(SpvParserTest, NamedTypes_AnonRTArray_Dup_EmitBoth) {
   EXPECT_THAT(p->program().to_str(),
               HasSubstr("RTArr -> __array__u32_stride_8\n  RTArr_1 -> "
                         "__array__u32_stride_8\n"));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
@@ -98,6 +108,8 @@ TEST_F(SpvParserTest, NamedTypes_NamedRTArray) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->program().to_str(),
               HasSubstr("myrtarr -> __array__u32_stride_8\n"));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_NamedArray) {
@@ -112,6 +124,8 @@ TEST_F(SpvParserTest, NamedTypes_NamedArray) {
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->program().to_str(),
               HasSubstr("myarr -> __array__u32_5_stride_8"));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
@@ -127,6 +141,8 @@ TEST_F(SpvParserTest, NamedTypes_AnonArray_Dup_EmitBoth) {
   EXPECT_THAT(p->program().to_str(),
               HasSubstr("Arr -> __array__u32_5_stride_8\n  Arr_1 -> "
                         "__array__u32_5_stride_8"));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
 // TODO(dneto): Handle arrays sized by a spec constant.
