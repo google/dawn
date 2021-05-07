@@ -52,6 +52,12 @@ constexpr char kVulkanLibName[] = "libvulkan.so";
 #    error "Unimplemented Vulkan backend platform"
 #endif
 
+// List of Vulkan MessageIdNames to suppress validation messages for. These should be used sparingly
+// but may be useful to temporarily quiet issues while a fix is in the works.
+constexpr const char* kSuppressedValidationMessageNames[] = {
+    "UNASSIGNED-CoreValidation-DrawState-InvalidImageLayout",  // (ISSUE: dawn:785)
+};
+
 namespace dawn_native { namespace vulkan {
 
     namespace {
@@ -61,6 +67,13 @@ namespace dawn_native { namespace vulkan {
                              VkDebugUtilsMessageTypeFlagsEXT /* messageTypes */,
                              const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                              void* /* pUserData */) {
+            // If the message is of a suppressed type, ignore it.
+            for (const char* msgName : kSuppressedValidationMessageNames) {
+                if (strstr(pCallbackData->pMessageIdName, msgName) != nullptr) {
+                    return VK_FALSE;
+                }
+            }
+
             dawn::WarningLog() << pCallbackData->pMessage;
             ASSERT((messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) == 0);
 
