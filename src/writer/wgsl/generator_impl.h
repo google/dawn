@@ -58,7 +58,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a constructed type
   /// @param ty the constructed to generate
   /// @returns true if the constructed was emitted
-  bool EmitConstructedType(typ::Type ty);
+  bool EmitConstructedType(const ast::Type* ty);
   /// Handles an array accessor expression
   /// @param expr the expression to emit
   /// @returns true if the array accessor was emitted
@@ -166,7 +166,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating type
   /// @param type the type to generate
   /// @returns true if the type is emitted
-  bool EmitType(typ::Type type);
+  bool EmitType(const ast::Type* type);
   /// Handles generating a struct declaration
   /// @param str the struct
   /// @returns true if the struct is emitted
