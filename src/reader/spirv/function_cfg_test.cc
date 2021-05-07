@@ -1683,6 +1683,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_SingleBlock_Simple) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1707,6 +1709,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_SingleBlock_Infinite) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1731,6 +1735,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_SingleBlock_DupInfinite) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1760,6 +1766,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_HeaderHasBreakIf) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1789,6 +1797,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_HeaderHasBreakUnless) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1818,6 +1828,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasBreak) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1850,6 +1862,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasBreakIf) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1883,6 +1897,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasBreakUnless) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1923,6 +1939,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_If) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1960,6 +1978,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_If_Break) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -1993,6 +2013,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasContinueIf) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2026,6 +2048,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasContinueUnless) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2063,6 +2087,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_If_Continue) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2103,6 +2129,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_Switch) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2145,6 +2173,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_Switch_CaseBreaks) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2185,6 +2215,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_Switch_CaseContinues) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2218,6 +2250,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2250,6 +2284,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_Sequence) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2289,6 +2325,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_ContainsIf) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2318,6 +2356,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_HasBreakIf) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2347,6 +2387,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_HasBreakUnless) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2376,6 +2418,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_SwitchBreak) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2418,6 +2462,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2461,6 +2507,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_InnerBreak) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2504,6 +2552,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_InnerContinue) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2547,6 +2597,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_InnerContinueBreaks) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2590,6 +2642,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_InnerContinueContinues) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -2638,6 +2692,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_SwitchBackedgeBreakContinue
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4369,6 +4425,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_BranchEscapesIfConstruct) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4400,6 +4458,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_ReturnInContinueConstruct) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4428,6 +4488,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_KillInContinueConstruct) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4456,6 +4518,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_UnreachableInContinueConstruct) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4484,6 +4548,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_BackEdge_NotInContinueConstruct) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4517,6 +4583,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4551,6 +4619,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_BackEdge_ToWrongHeader) {
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4573,6 +4643,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_BackEdge_SingleBlockLoop) {
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4605,6 +4677,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4641,6 +4715,8 @@ TEST_F(
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4677,6 +4753,8 @@ TEST_F(
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4711,6 +4789,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_PrematureExitFromContinueConstruct) {
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4736,6 +4816,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4764,6 +4846,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4795,6 +4879,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4823,6 +4909,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopBreak_FromContinueConstructHeader)
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4848,6 +4936,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_IfBreak_FromIfHeader) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4876,6 +4966,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_IfBreak_FromIfThenElse) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4911,6 +5003,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_IfBreak_BypassesMerge_IsError) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4951,6 +5045,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_IfBreak_EscapeSwitchCase_IsError) {
 
      %99 = OpLabel ; if-selection's merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -4975,6 +5071,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromSwitchCaseDirect) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5000,6 +5098,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromSwitchCaseBody) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5028,6 +5128,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultBody) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5053,6 +5155,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultIsMerge) 
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5085,6 +5189,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Unconditional
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5117,6 +5223,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Conditional) 
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5145,6 +5253,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_BypassesMerge_IsError) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5180,6 +5290,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromNestedLoop_IsError) {
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5212,6 +5324,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromNestedSwitch_IsError) 
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5242,6 +5356,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopBreak_FromLoopBody) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5276,6 +5392,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopBreak_FromContinueConstructTail) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5307,6 +5425,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopBreak_FromLoopBodyDirect) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5346,6 +5466,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5385,6 +5507,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5427,6 +5551,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5461,6 +5587,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5498,6 +5626,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5528,6 +5658,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopContinue_LoopBodyToContinue) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5566,6 +5698,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopContinue_FromNestedIf) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5604,6 +5738,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopContinue_ConditionalFromNestedIf) 
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5643,6 +5779,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5679,6 +5817,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5717,6 +5857,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5758,6 +5900,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5798,6 +5942,8 @@ TEST_F(
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5879,6 +6025,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Fallthrough_CaseTailToCase) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5910,6 +6058,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Fallthrough_CaseTailToDefaultNotMerge)
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5941,6 +6091,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Fallthrough_DefaultToCase) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -5981,6 +6133,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel ; if-selection's merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6015,6 +6169,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel ; if-selection's merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6061,6 +6217,8 @@ TEST_F(
 
      %99 = OpLabel ; loop merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6100,6 +6258,8 @@ TEST_F(
 
      %99 = OpLabel ; switch merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6143,6 +6303,8 @@ TEST_F(
 
      %99 = OpLabel ; switch merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6184,6 +6346,8 @@ TEST_F(
 
      %99 = OpLabel ; switch merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6228,6 +6392,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6274,6 +6440,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6297,6 +6465,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Forward_IfToThen) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6322,6 +6492,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Forward_IfToElse) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6347,6 +6519,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Forward_SwitchToCase) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6375,6 +6549,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Forward_SwitchToDefaultNotMerge) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6406,6 +6582,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Forward_LoopHeadToBody) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6439,6 +6617,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6470,6 +6650,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6504,6 +6686,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6544,6 +6728,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6611,6 +6797,8 @@ TEST_F(
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6643,6 +6831,8 @@ TEST_F(
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6672,6 +6862,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_TooManyBackedges) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6697,6 +6889,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_NeededMerge_BranchConditional) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6722,6 +6916,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_NeededMerge_Switch) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6756,6 +6952,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Pathological_Forward_LoopHeadSplitBody
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6793,6 +6991,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Pathological_Forward_Premerge) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6834,6 +7034,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Pathological_Forward_Regardless) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6857,6 +7059,8 @@ TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_NoIf) {
 
      %10 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6886,6 +7090,8 @@ TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_ThenElse) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6930,6 +7136,8 @@ TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_IfOnly) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -6968,6 +7176,8 @@ TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_ElseOnly) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7009,6 +7219,8 @@ TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_Regardless) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7043,6 +7255,8 @@ TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_Premerge_Simple) {
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7078,6 +7292,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7113,6 +7329,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7154,6 +7372,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7297,6 +7517,8 @@ TEST_F(
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7330,6 +7552,8 @@ TEST_F(
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7369,6 +7593,8 @@ TEST_F(
 
      %99 = OpLabel ; outer merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7408,6 +7634,8 @@ TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_TrueBranch_LoopBreak_Ok)
 
      %99 = OpLabel ; loop merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7444,6 +7672,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel ; loop merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7474,6 +7704,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel ; switch merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7509,6 +7741,8 @@ TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_FalseBranch_LoopBreak_Ok
 
      %99 = OpLabel ; loop merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7545,6 +7779,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel ; loop merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -7575,6 +7811,8 @@ TEST_F(SpvParserCFGTest,
 
      %99 = OpLabel ; switch merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -14087,6 +14325,8 @@ TEST_F(SpvParserCFGTest, EmitBody_TrueBranch_LoopContinue) {
 
      %99 = OpLabel ; loop merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -14129,6 +14369,8 @@ TEST_F(SpvParserCFGTest, EmitBody_TrueBranch_SwitchBreak) {
 
      %99 = OpLabel ; switch merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -14184,6 +14426,8 @@ TEST_F(SpvParserCFGTest, EmitBody_FalseBranch_LoopBreak) {
 
      %99 = OpLabel ; loop merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -14236,6 +14480,8 @@ TEST_F(SpvParserCFGTest, EmitBody_FalseBranch_LoopContinue) {
 
      %99 = OpLabel ; loop merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
@@ -14282,6 +14528,8 @@ TEST_F(SpvParserCFGTest, EmitBody_FalseBranch_SwitchBreak) {
 
      %99 = OpLabel ; switch merge
      OpReturn
+
+     OpFunctionEnd
 )";
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
