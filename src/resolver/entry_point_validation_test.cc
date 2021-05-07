@@ -23,13 +23,14 @@
 #include "gmock/gmock.h"
 
 namespace tint {
+namespace resolver {
 namespace {
 
-class ResolverEntryPointValidationTest : public resolver::TestHelper,
+class ResolverEntryPointValidationTest : public TestHelper,
                                          public testing::Test {};
 
 TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Location) {
-  // [[stage(vertex)]]
+  // [[stage(fragment)]]
   // fn main() -> [[location(0)]] f32 { return 1.0; }
   Func(Source{{12, 34}}, "main", {}, ty.f32(), {Return(1.0f)},
        {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
@@ -514,5 +515,118 @@ TEST_F(ResolverEntryPointValidationTest,
             "in its return type");
 }
 
+namespace TypeValidationTests {
+struct Params {
+  create_ast_type_func_ptr create_ast_type;
+  bool is_valid;
+};
+
+using TypeValidationTest = resolver::ResolverTestWithParam<Params>;
+
+static constexpr Params cases[] = {
+    {ast_f32, true},
+    {ast_i32, true},
+    {ast_u32, true},
+    {ast_bool, false},
+    {ast_vec2<ast_f32>, true},
+    {ast_vec3<ast_f32>, true},
+    {ast_vec4<ast_f32>, true},
+    {ast_mat2x2<ast_f32>, false},
+    {ast_mat2x2<ast_i32>, false},
+    {ast_mat2x2<ast_u32>, false},
+    {ast_mat2x2<ast_bool>, false},
+    {ast_mat3x3<ast_f32>, false},
+    {ast_mat3x3<ast_i32>, false},
+    {ast_mat3x3<ast_u32>, false},
+    {ast_mat3x3<ast_bool>, false},
+    {ast_mat4x4<ast_f32>, false},
+    {ast_mat4x4<ast_i32>, false},
+    {ast_mat4x4<ast_u32>, false},
+    {ast_mat4x4<ast_bool>, false},
+    {ast_alias<ast_f32>, true},
+    {ast_alias<ast_i32>, true},
+    {ast_alias<ast_u32>, true},
+    {ast_alias<ast_bool>, false},
+};
+
+TEST_P(TypeValidationTest, BareInputs) {
+  // [[stage(fragment)]]
+  // fn main([[location(0)]] a : *) {}
+  auto params = GetParam();
+  auto* a = Param("a", params.create_ast_type(ty), {Location(0)});
+  Func(Source{{12, 34}}, "main", {a}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  if (params.is_valid) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+  }
+}
+
+TEST_P(TypeValidationTest, StructInputs) {
+  // struct Input {
+  //   [[location(0)]] a : *;
+  // };
+  // [[stage(fragment)]]
+  // fn main(a : Input) {}
+  auto params = GetParam();
+  auto* input = Structure(
+      "Input", {Member("a", params.create_ast_type(ty), {Location(0)})});
+  auto* a = Param("a", input, {});
+  Func(Source{{12, 34}}, "main", {a}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  if (params.is_valid) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+  }
+}
+
+TEST_P(TypeValidationTest, BareOutputs) {
+  // [[stage(fragment)]]
+  // fn main() -> [[location(0)]] * {
+  //   return *();
+  // }
+  auto params = GetParam();
+  Func(Source{{12, 34}}, "main", {}, params.create_ast_type(ty),
+       {Return(Construct(params.create_ast_type(ty)))},
+       {Stage(ast::PipelineStage::kFragment)}, {Location(0)});
+
+  if (params.is_valid) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+  }
+}
+
+TEST_P(TypeValidationTest, StructOutputs) {
+  // struct Output {
+  //   [[location(0)]] a : *;
+  // };
+  // [[stage(fragment)]]
+  // fn main() -> Output {
+  //   return Output();
+  // }
+  auto params = GetParam();
+  auto* output = Structure(
+      "Output", {Member("a", params.create_ast_type(ty), {Location(0)})});
+  Func(Source{{12, 34}}, "main", {}, output, {Return(Construct(output))},
+       {Stage(ast::PipelineStage::kFragment)});
+
+  if (params.is_valid) {
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+  } else {
+    EXPECT_FALSE(r()->Resolve());
+  }
+}
+INSTANTIATE_TEST_SUITE_P(ResolverEntryPointValidationTest,
+                         TypeValidationTest,
+                         testing::ValuesIn(cases));
+
+}  // namespace TypeValidationTests
+
 }  // namespace
+}  // namespace resolver
 }  // namespace tint

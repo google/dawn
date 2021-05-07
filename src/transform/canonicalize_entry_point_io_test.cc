@@ -508,13 +508,13 @@ TEST_F(CanonicalizeEntryPointIOTest, SortedMembers) {
 struct VertexOutput {
   [[location(1)]] b : u32;
   [[builtin(position)]] pos : vec4<f32>;
-  [[location(3)]] d : bool;
+  [[location(3)]] d : u32;
   [[location(0)]] a : f32;
   [[location(2)]] c : i32;
 };
 
 struct FragmentInputExtra {
-  [[location(3)]] d : bool;
+  [[location(3)]] d : u32;
   [[builtin(position)]] pos : vec4<f32>;
   [[location(0)]] a : f32;
 };
@@ -536,13 +536,13 @@ fn frag_main([[builtin(front_facing)]] ff : bool,
 struct VertexOutput {
   b : u32;
   pos : vec4<f32>;
-  d : bool;
+  d : u32;
   a : f32;
   c : i32;
 };
 
 struct FragmentInputExtra {
-  d : bool;
+  d : u32;
   pos : vec4<f32>;
   a : f32;
 };
@@ -555,7 +555,7 @@ struct tint_symbol {
   [[location(2)]]
   c : i32;
   [[location(3)]]
-  d : bool;
+  d : u32;
   [[builtin(position)]]
   pos : vec4<f32>;
 };
@@ -574,7 +574,7 @@ struct tint_symbol_3 {
   [[location(2)]]
   c : i32;
   [[location(3)]]
-  d : bool;
+  d : u32;
   [[builtin(position)]]
   pos : vec4<f32>;
   [[builtin(front_facing)]]

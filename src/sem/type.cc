@@ -132,6 +132,15 @@ bool Type::is_bool_scalar_or_vector() const {
   return Is<Bool>() || is_bool_vector();
 }
 
+bool Type::is_numeric_vector() const {
+  return Is<Vector>(
+      [](const Vector* v) { return v->type()->is_numeric_scalar(); });
+}
+
+bool Type::is_numeric_scalar_or_vector() const {
+  return is_numeric_scalar() || is_numeric_vector();
+}
+
 bool Type::is_handle() const {
   return IsAnyOf<Sampler, Texture>();
 }

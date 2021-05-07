@@ -832,6 +832,19 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
             diagnostics_.add_error(err, source);
             return false;
           }
+
+          // Check that all user defined attributes are numeric scalars, vectors
+          // of numeric scalars.
+          // Testing for being a struct is handled by the if portion above.
+          if (!pipeline_io_attribute->Is<ast::BuiltinDecoration>()) {
+            if (!Canonical(ty)->is_numeric_scalar_or_vector()) {
+              diagnostics_.add_error(
+                  "User defined entry point IO types must be a numeric scalar, "
+                  "a numeric vector, or a structure",
+                  source);
+              return false;
+            }
+          }
         }
 
         return true;
