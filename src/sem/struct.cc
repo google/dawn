@@ -56,11 +56,13 @@ std::string Struct::FriendlyName(const SymbolTable& symbols) const {
 
 StructMember::StructMember(ast::StructMember* declaration,
                            sem::Type* type,
+                           uint32_t index,
                            uint32_t offset,
                            uint32_t align,
                            uint32_t size)
     : declaration_(declaration),
       type_(type),
+      index_(index),
       offset_(offset),
       align_(align),
       size_(size) {}

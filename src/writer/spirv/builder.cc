@@ -26,6 +26,7 @@
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/function.h"
 #include "src/sem/intrinsic.h"
+#include "src/sem/member_accessor_expression.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/struct.h"
@@ -87,24 +88,6 @@ bool LastIsTerminator(const ast::BlockStatement* stmts) {
          last->Is<ast::DiscardStatement>() ||
          last->Is<ast::ReturnStatement>() ||
          last->Is<ast::FallthroughStatement>();
-}
-
-uint32_t IndexFromName(char name) {
-  switch (name) {
-    case 'x':
-    case 'r':
-      return 0;
-    case 'y':
-    case 'g':
-      return 1;
-    case 'z':
-    case 'b':
-      return 2;
-    case 'w':
-    case 'a':
-      return 3;
-  }
-  return std::numeric_limits<uint32_t>::max();
 }
 
 /// Returns the matrix type that is `type` or that is wrapped by
@@ -880,23 +863,11 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
 
 bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
                                      AccessorInfo* info) {
-  auto* data_type =
-      TypeOf(expr->structure())->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
-  auto* expr_type = TypeOf(expr);
+  auto* expr_sem = builder_.Sem().Get(expr);
+  auto* expr_type = expr_sem->Type();
 
-  // If the data_type is a structure we're accessing a member, if it's a
-  // vector we're accessing a swizzle.
-  if (auto* str = data_type->As<sem::Struct>()) {
-    auto* impl = str->Declaration();
-    auto symbol = expr->member()->symbol();
-
-    uint32_t idx = 0;
-    for (; idx < impl->members().size(); ++idx) {
-      auto* member = impl->members()[idx];
-      if (member->symbol() == symbol) {
-        break;
-      }
-    }
+  if (auto* access = expr_sem->As<sem::StructMemberAccess>()) {
+    uint32_t idx = access->Member()->Index();
 
     if (info->source_type->Is<sem::Pointer>()) {
       auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(idx));
@@ -927,106 +898,93 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     return true;
   }
 
-  if (!data_type->Is<sem::Vector>()) {
-    error_ = "Member accessor without a struct or vector. Something is wrong";
-    return false;
-  }
+  if (auto* swizzle = expr_sem->As<sem::Swizzle>()) {
+    // Single element swizzle is either an access chain or a composite extract
+    auto& indices = swizzle->Indices();
+    if (indices.size() == 1) {
+      if (info->source_type->Is<sem::Pointer>()) {
+        auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(indices[0]));
+        if (idx_id == 0) {
+          return 0;
+        }
+        info->access_chain_indices.push_back(idx_id);
+      } else {
+        auto result_type_id = GenerateTypeIfNeeded(expr_type);
+        if (result_type_id == 0) {
+          return 0;
+        }
 
-  // TODO(dsinclair): Swizzle stuff
-  auto swiz = builder_.Symbols().NameFor(expr->member()->symbol());
-  // Single element swizzle is either an access chain or a composite extract
-  if (swiz.size() == 1) {
-    auto val = IndexFromName(swiz[0]);
-    if (val == std::numeric_limits<uint32_t>::max()) {
-      error_ = "invalid swizzle name: " + swiz;
-      return false;
+        auto extract = result_op();
+        auto extract_id = extract.to_i();
+        if (!push_function_inst(
+                spv::Op::OpCompositeExtract,
+                {Operand::Int(result_type_id), extract,
+                 Operand::Int(info->source_id), Operand::Int(indices[0])})) {
+          return false;
+        }
+
+        info->source_id = extract_id;
+        info->source_type = expr_type;
+      }
+      return true;
     }
 
-    if (info->source_type->Is<sem::Pointer>()) {
-      auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(val));
-      if (idx_id == 0) {
-        return 0;
-      }
-      info->access_chain_indices.push_back(idx_id);
-    } else {
-      auto result_type_id = GenerateTypeIfNeeded(expr_type);
+    // Store the type away as it may change if we run the access chain
+    auto* incoming_type = info->source_type;
+
+    // Multi-item extract is a VectorShuffle. We have to emit any existing
+    // access chain data, then load the access chain and shuffle that.
+    if (!info->access_chain_indices.empty()) {
+      auto result_type_id = GenerateTypeIfNeeded(info->source_type);
       if (result_type_id == 0) {
         return 0;
       }
-
       auto extract = result_op();
       auto extract_id = extract.to_i();
-      if (!push_function_inst(
-              spv::Op::OpCompositeExtract,
-              {Operand::Int(result_type_id), extract,
-               Operand::Int(info->source_id), Operand::Int(val)})) {
+
+      OperandList ops = {Operand::Int(result_type_id), extract,
+                         Operand::Int(info->source_id)};
+      for (auto id : info->access_chain_indices) {
+        ops.push_back(Operand::Int(id));
+      }
+
+      if (!push_function_inst(spv::Op::OpAccessChain, ops)) {
         return false;
       }
 
-      info->source_id = extract_id;
-      info->source_type = expr_type;
+      info->source_id = GenerateLoadIfNeeded(expr_type, extract_id);
+      info->source_type = expr_type->UnwrapPtrIfNeeded();
+      info->access_chain_indices.clear();
     }
+
+    auto result_type_id = GenerateTypeIfNeeded(expr_type);
+    if (result_type_id == 0) {
+      return false;
+    }
+
+    auto vec_id = GenerateLoadIfNeeded(incoming_type, info->source_id);
+
+    auto result = result_op();
+    auto result_id = result.to_i();
+
+    OperandList ops = {Operand::Int(result_type_id), result,
+                       Operand::Int(vec_id), Operand::Int(vec_id)};
+
+    for (auto idx : indices) {
+      ops.push_back(Operand::Int(idx));
+    }
+
+    if (!push_function_inst(spv::Op::OpVectorShuffle, ops)) {
+      return false;
+    }
+    info->source_id = result_id;
+    info->source_type = expr_type;
     return true;
   }
 
-  // Store the type away as it may change if we run the access chain
-  auto* incoming_type = info->source_type;
-
-  // Multi-item extract is a VectorShuffle. We have to emit any existing access
-  // chain data, then load the access chain and shuffle that.
-  if (!info->access_chain_indices.empty()) {
-    auto result_type_id = GenerateTypeIfNeeded(info->source_type);
-    if (result_type_id == 0) {
-      return 0;
-    }
-    auto extract = result_op();
-    auto extract_id = extract.to_i();
-
-    OperandList ops = {Operand::Int(result_type_id), extract,
-                       Operand::Int(info->source_id)};
-    for (auto id : info->access_chain_indices) {
-      ops.push_back(Operand::Int(id));
-    }
-
-    if (!push_function_inst(spv::Op::OpAccessChain, ops)) {
-      return false;
-    }
-
-    info->source_id = GenerateLoadIfNeeded(expr_type, extract_id);
-    info->source_type = expr_type->UnwrapPtrIfNeeded();
-    info->access_chain_indices.clear();
-  }
-
-  auto result_type_id = GenerateTypeIfNeeded(expr_type);
-  if (result_type_id == 0) {
-    return false;
-  }
-
-  auto vec_id = GenerateLoadIfNeeded(incoming_type, info->source_id);
-
-  auto result = result_op();
-  auto result_id = result.to_i();
-
-  OperandList ops = {Operand::Int(result_type_id), result, Operand::Int(vec_id),
-                     Operand::Int(vec_id)};
-
-  for (uint32_t i = 0; i < swiz.size(); ++i) {
-    auto val = IndexFromName(swiz[i]);
-    if (val == std::numeric_limits<uint32_t>::max()) {
-      error_ = "invalid swizzle name: " + swiz;
-      return false;
-    }
-
-    ops.push_back(Operand::Int(val));
-  }
-
-  if (!push_function_inst(spv::Op::OpVectorShuffle, ops)) {
-    return false;
-  }
-  info->source_id = result_id;
-  info->source_type = expr_type;
-
-  return true;
+  TINT_ICE(builder_.Diagnostics())
+      << "unhandled member index type: " << expr_sem->TypeInfo().name;
+  return false;
 }
 
 uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {

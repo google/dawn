@@ -2535,7 +2535,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     offset = utils::RoundUp(align, offset);
 
     auto* sem_member = builder_->create<sem::StructMember>(
-        member, const_cast<sem::Type*>(type), offset, align, size);
+        member, const_cast<sem::Type*>(type),
+        static_cast<uint32_t>(sem_members.size()), offset, align, size);
     builder_->Sem().Add(member, sem_member);
     sem_members.emplace_back(sem_member);
 
