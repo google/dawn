@@ -90,41 +90,55 @@ TEST_F(ResolverIsStorableTest, ArrayUnsizedOfStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_AllMembersStorable) {
-  EXPECT_TRUE(r()->IsStorable(Structure("S", {
-                                                 Member("a", ty.i32()),
-                                                 Member("b", ty.f32()),
-                                             })));
+  Structure("S", {
+                     Member("a", ty.i32()),
+                     Member("b", ty.f32()),
+                 });
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverIsStorableTest, Struct_SomeMembersNonStorable) {
   auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
-  EXPECT_FALSE(r()->IsStorable(Structure("S", {
-                                                  Member("a", ty.i32()),
-                                                  Member("b", ptr_ty),
-                                              })));
+  Structure("S", {
+                     Member("a", ty.i32()),
+                     Member("b", ptr_ty),
+                 });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(error: ptr<private, i32> cannot be used as the type of a structure member)");
 }
 
 TEST_F(ResolverIsStorableTest, Struct_NestedStorable) {
-  auto storable = Structure("S", {
-                                     Member("a", ty.i32()),
-                                     Member("b", ty.f32()),
-                                 });
-  EXPECT_TRUE(r()->IsStorable(Structure("S", {
-                                                 Member("a", ty.i32()),
-                                                 Member("b", storable),
-                                             })));
+  auto* storable = Structure("Storable", {
+                                             Member("a", ty.i32()),
+                                             Member("b", ty.f32()),
+                                         });
+  Structure("S", {
+                     Member("a", ty.i32()),
+                     Member("b", storable),
+                 });
+
+  ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverIsStorableTest, Struct_NestedNonStorable) {
   auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
-  auto non_storable = Structure("nonstorable", {
-                                                   Member("a", ty.i32()),
-                                                   Member("b", ptr_ty),
-                                               });
-  EXPECT_FALSE(r()->IsStorable(Structure("S", {
-                                                  Member("a", ty.i32()),
-                                                  Member("b", non_storable),
-                                              })));
+  auto* non_storable = Structure("nonstorable", {
+                                                    Member("a", ty.i32()),
+                                                    Member("b", ptr_ty),
+                                                });
+  Structure("S", {
+                     Member("a", ty.i32()),
+                     Member("b", non_storable),
+                 });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(error: ptr<private, i32> cannot be used as the type of a structure member)");
 }
 
 }  // namespace

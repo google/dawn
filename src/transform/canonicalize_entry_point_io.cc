@@ -110,12 +110,11 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
 
         std::function<ast::Expression*()> func_const_initializer;
 
-        if (auto* struct_ty = param_ty->As<sem::StructType>()) {
-          auto* str = ctx.src->Sem().Get(struct_ty);
+        if (auto* str = param_ty->As<sem::Struct>()) {
           // Pull out all struct members and build initializer list.
           std::vector<Symbol> member_names;
           for (auto* member : str->Members()) {
-            if (member->Type()->UnwrapAll()->Is<sem::StructType>()) {
+            if (member->Type()->UnwrapAll()->Is<sem::Struct>()) {
               TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
             }
 
@@ -202,11 +201,10 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
     } else {
       ast::StructMemberList new_struct_members;
 
-      if (auto* struct_ty = ret_type->As<sem::StructType>()) {
-        auto* str = ctx.src->Sem().Get(struct_ty);
+      if (auto* str = ret_type->As<sem::Struct>()) {
         // Rebuild struct with only the entry point IO attributes.
         for (auto* member : str->Members()) {
-          if (member->Type()->UnwrapAll()->Is<sem::StructType>()) {
+          if (member->Type()->UnwrapAll()->Is<sem::Struct>()) {
             TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
           }
 
@@ -251,7 +249,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
         };
 
         ast::ExpressionList ret_values;
-        if (ret_type->Is<sem::StructType>()) {
+        if (ret_type->Is<sem::Struct>()) {
           if (!ret->value()->Is<ast::IdentifierExpression>()) {
             // Create a const to hold the return value expression to avoid
             // re-evaluating it multiple times.

@@ -201,8 +201,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
   //   return;
   // }
 
-  auto s = Structure("Data", {Member("d", ty.f32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("Data", {Member("d", ty.f32())},
+                      {create<ast::StructBlockDecoration>()});
 
   auto ac = ty.access(ast::AccessControl::kReadWrite, s);
 

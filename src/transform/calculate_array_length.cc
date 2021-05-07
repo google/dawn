@@ -77,12 +77,12 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
   // get_buffer_size_intrinsic() emits the function decorated with
   // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to
   // [RW]ByteAddressBuffer.GetDimensions().
-  std::unordered_map<sem::StructType*, Symbol> buffer_size_intrinsics;
-  auto get_buffer_size_intrinsic = [&](sem::StructType* buffer_type) {
+  std::unordered_map<sem::Struct*, Symbol> buffer_size_intrinsics;
+  auto get_buffer_size_intrinsic = [&](sem::Struct* buffer_type) {
     return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
       auto name = ctx.dst->Sym();
       auto* buffer_typename =
-          ctx.dst->ty.type_name(ctx.Clone(buffer_type->impl()->name()));
+          ctx.dst->ty.type_name(ctx.Clone(buffer_type->Declaration()->name()));
       auto* func = ctx.dst->create<ast::Function>(
           name,
           ast::VariableList{
@@ -100,8 +100,8 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
               ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID()),
           },
           ast::DecorationList{});
-      ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), buffer_type->impl(),
-                      func);
+      ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(),
+                      buffer_type->Declaration(), func);
       return name;
     });
   };
@@ -141,7 +141,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
           auto* storage_buffer_expr = accessor->structure();
           auto* storage_buffer_sem = sem.Get(storage_buffer_expr);
           auto* storage_buffer_type =
-              storage_buffer_sem->Type()->UnwrapAll()->As<sem::StructType>();
+              storage_buffer_sem->Type()->UnwrapAll()->As<sem::Struct>();
 
           // Generate BufferSizeIntrinsic for this storage type if we haven't
           // already
@@ -149,7 +149,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
 
           if (!storage_buffer_type) {
             TINT_ICE(ctx.dst->Diagnostics())
-                << "arrayLength(X.Y) expected X to be sem::StructType, got "
+                << "arrayLength(X.Y) expected X to be sem::Struct, got "
                 << storage_buffer_type->FriendlyName(ctx.src->Symbols());
             break;
           }
@@ -176,12 +176,8 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
                 // First time this array length is used for this block.
                 // Let's calculate it.
 
-                // Semantic info for the storage buffer structure
-                auto* storage_buffer_type_sem =
-                    ctx.src->Sem().Get(storage_buffer_type);
                 // Semantic info for the runtime array structure member
-                auto* array_member_sem =
-                    storage_buffer_type_sem->Members().back();
+                auto* array_member_sem = storage_buffer_type->Members().back();
 
                 // Construct the variable that'll hold the result of
                 // RWByteAddressBuffer.GetDimensions()

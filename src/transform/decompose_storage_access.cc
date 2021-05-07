@@ -331,7 +331,7 @@ void InsertGlobal(CloneContext& ctx,
 }
 
 /// @returns the unwrapped, user-declared constructed type of ty.
-ast::NamedType* ConstructedTypeOf(sem::Type* ty) {
+const ast::NamedType* ConstructedTypeOf(sem::Type* ty) {
   while (true) {
     if (auto* ptr = ty->As<sem::Pointer>()) {
       ty = ptr->type();
@@ -341,8 +341,8 @@ ast::NamedType* ConstructedTypeOf(sem::Type* ty) {
       ty = access->type();
       continue;
     }
-    if (auto* str = ty->As<sem::StructType>()) {
-      return str->impl();
+    if (auto* str = ty->As<sem::Struct>()) {
+      return str->Declaration();
     }
     // Not a constructed type
     return nullptr;
@@ -421,7 +421,7 @@ struct DecomposeStorageAccess::State {
   /// @param el_ty the storage buffer element type
   /// @return the name of the function that performs the load
   Symbol LoadFunc(CloneContext& ctx,
-                  ast::NamedType* insert_after,
+                  const ast::NamedType* insert_after,
                   sem::Type* buf_ty,
                   sem::Type* el_ty) {
     return utils::GetOrCreate(load_funcs, TypePair{buf_ty, el_ty}, [&] {
@@ -451,9 +451,7 @@ struct DecomposeStorageAccess::State {
                 ctx.dst->Add("offset", i * MatrixColumnStride(mat_ty));
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
-        } else if (auto* str_ty = el_ty->As<sem::StructType>()) {
-          auto& sem = ctx.src->Sem();
-          auto* str = sem.Get(str_ty);
+        } else if (auto* str = el_ty->As<sem::Struct>()) {
           for (auto* member : str->Members()) {
             auto* offset = ctx.dst->Add("offset", member->Offset());
             Symbol load = LoadFunc(ctx, insert_after, buf_ty,
@@ -492,7 +490,7 @@ struct DecomposeStorageAccess::State {
   /// @param el_ty the storage buffer element type
   /// @return the name of the function that performs the store
   Symbol StoreFunc(CloneContext& ctx,
-                   ast::NamedType* insert_after,
+                   const ast::NamedType* insert_after,
                    sem::Type* buf_ty,
                    sem::Type* el_ty) {
     return utils::GetOrCreate(store_funcs, TypePair{buf_ty, el_ty}, [&] {
@@ -525,9 +523,7 @@ struct DecomposeStorageAccess::State {
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
-        } else if (auto* str_ty = el_ty->As<sem::StructType>()) {
-          auto& sem = ctx.src->Sem();
-          auto* str = sem.Get(str_ty);
+        } else if (auto* str = el_ty->As<sem::Struct>()) {
           for (auto* member : str->Members()) {
             auto* offset = ctx.dst->Add("offset", member->Offset());
             auto* access = ctx.dst->MemberAccessor(
@@ -676,9 +672,8 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
         }
       } else {
         if (auto access = state.TakeAccess(accessor->structure())) {
-          auto* str_ty = access.type->As<sem::StructType>();
-          auto* member =
-              sem.Get(str_ty)->FindMember(accessor->member()->symbol());
+          auto* str_ty = access.type->As<sem::Struct>();
+          auto* member = str_ty->FindMember(accessor->member()->symbol());
           auto offset = member->Offset();
           state.AddAccess(accessor,
                           {

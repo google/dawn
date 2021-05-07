@@ -34,7 +34,7 @@ TEST_F(I32Test, Is) {
   EXPECT_FALSE(ty->Is<Matrix>());
   EXPECT_FALSE(ty->Is<Pointer>());
   EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<StructType>());
+  EXPECT_FALSE(ty->Is<Struct>());
   EXPECT_FALSE(ty->Is<Texture>());
   EXPECT_FALSE(ty->Is<U32>());
   EXPECT_FALSE(ty->Is<Vector>());

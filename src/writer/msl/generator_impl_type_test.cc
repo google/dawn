@@ -173,10 +173,10 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Pointer) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct) {
-  auto s = Structure("S", {
-                              Member("a", ty.i32()),
-                              Member("b", ty.f32()),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -185,14 +185,15 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
-  auto s = Structure("S", {
-                              Member("a", ty.i32()),
-                              Member("b", ty.f32()),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   int a;
   float b;
@@ -201,7 +202,7 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
-  auto s =
+  auto* s =
       Structure("S",
                 {
                     Member("a", ty.i32(), {MemberSize(32)}),
@@ -238,7 +239,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
 
   // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, NAME, SUFFIX)
   // for each field of the structure s.
@@ -315,35 +317,36 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
   // inner_x: size(1024), align(512)
-  auto inner_x =
+  auto* inner_x =
       Structure("inner_x", {
                                Member("a", ty.i32()),
                                Member("b", ty.f32(), {MemberAlign(512)}),
                            });
 
   // inner_y: size(516), align(4)
-  auto inner_y =
+  auto* inner_y =
       Structure("inner_y", {
                                Member("a", ty.i32(), {MemberSize(512)}),
                                Member("b", ty.f32()),
                            });
 
-  auto s = Structure("S",
-                     {
-                         Member("a", ty.i32()),
-                         Member("b", inner_x),
-                         Member("c", ty.f32()),
-                         Member("d", inner_y),
-                         Member("e", ty.f32()),
-                     },
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", inner_x),
+                          Member("c", ty.f32()),
+                          Member("d", inner_y),
+                          Member("e", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   Global("G", ty.access(ast::AccessControl::kReadOnly, s),
          ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
 
   // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, NAME, SUFFIX)
   // for each field of the structure s.
@@ -401,10 +404,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
   // inner: size(1024), align(512)
-  auto inner = Structure("inner", {
-                                      Member("a", ty.i32()),
-                                      Member("b", ty.f32(), {MemberAlign(512)}),
-                                  });
+  auto* inner =
+      Structure("inner", {
+                             Member("a", ty.i32()),
+                             Member("b", ty.f32(), {MemberAlign(512)}),
+                         });
 
   // array_x: size(28), align(4)
   auto array_x = ty.array<f32, 7>();
@@ -415,23 +419,25 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
   // array_z: size(4), align(4)
   auto array_z = ty.array<f32>();
 
-  auto s = Structure("S",
-                     {
-                         Member("a", ty.i32()),
-                         Member("b", array_x),
-                         Member("c", ty.f32()),
-                         Member("d", array_y),
-                         Member("e", ty.f32()),
-                         Member("f", array_z),
-                     },
-                     ast::DecorationList{create<ast::StructBlockDecoration>()});
+  auto* s =
+      Structure("S",
+                {
+                    Member("a", ty.i32()),
+                    Member("b", array_x),
+                    Member("c", ty.f32()),
+                    Member("d", array_y),
+                    Member("e", ty.f32()),
+                    Member("f", array_z),
+                },
+                ast::DecorationList{create<ast::StructBlockDecoration>()});
 
   Global("G", ty.access(ast::AccessControl::kReadOnly, s),
          ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
 
   // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, NAME, SUFFIX)
   // for each field of the structure s.
@@ -495,7 +501,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 }
 
 TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
-  auto s = Structure(
+  auto* s = Structure(
       "S",
       {
           // uses symbols tint_pad_[0..9] and tint_pad_[20..35]
@@ -533,7 +539,8 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStructType(s)) << gen.error();
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(sem_s)) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   /* 0x0000 */ int tint_pad_2;
   /* 0x0004 */ int8_t tint_pad_10[124];
@@ -582,12 +589,12 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
-  auto s = Structure("S",
-                     {
-                         Member("a", ty.i32()),
-                         Member("b", ty.f32()),
-                     },
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   Global("G", ty.access(ast::AccessControl::kReadOnly, s),
          ast::StorageClass::kStorage);

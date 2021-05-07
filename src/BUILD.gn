@@ -480,8 +480,6 @@ libtint_source_set("libtint_core_all_src") {
     "sem/sampler_type.h",
     "sem/storage_texture_type.cc",
     "sem/storage_texture_type.h",
-    "sem/struct_type.cc",
-    "sem/struct_type.h",
     "sem/texture_type.cc",
     "sem/texture_type.h",
     "sem/type.cc",

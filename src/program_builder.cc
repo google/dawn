@@ -80,7 +80,7 @@ void ProgramBuilder::MarkAsMoved() {
 
 void ProgramBuilder::AssertNotMoved() const {
   if (moved_) {
-    TINT_ICE(const_cast<ProgramBuilder*>(this)->Diagnostics())
+    TINT_ICE(const_cast<ProgramBuilder*>(this)->diagnostics_)
         << "Attempting to use ProgramBuilder after it has been moved";
   }
 }

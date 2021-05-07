@@ -1052,10 +1052,10 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Struct) {
-  auto s = Structure("my_struct", {
-                                      Member("a", ty.f32()),
-                                      Member("b", ty.vec3<f32>()),
-                                  });
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
   auto* t = Construct(s, 2.0f, vec3<f32>(2.0f, 2.0f, 2.0f));
   WrapInFunction(t);
@@ -1202,7 +1202,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
-  auto s = Structure("my_struct", {Member("a", ty.f32())});
+  auto* s = Structure("my_struct", {Member("a", ty.f32())});
   auto* t = Construct(s);
   WrapInFunction(t);
 
@@ -1622,10 +1622,10 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
 }
 
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
-  auto s = Structure("my_struct", {
-                                      Member("a", ty.f32()),
-                                      Member("b", ty.vec3<f32>()),
-                                  });
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
   auto* t = Construct(s, 2.f, vec3<f32>(2.f, 2.f, 2.f));
   WrapInFunction(t);
@@ -1638,10 +1638,10 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
 
 TEST_F(SpvBuilderConstructorTest,
        IsConstructorConst_Struct_WithIdentSubExpression) {
-  auto s = Structure("my_struct", {
-                                      Member("a", ty.f32()),
-                                      Member("b", ty.vec3<f32>()),
-                                  });
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
   Global("b", ty.f32(), ast::StorageClass::kPrivate);

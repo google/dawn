@@ -313,8 +313,6 @@ set(TINT_LIB_SRCS
   sem/sampler_type.h
   sem/storage_texture_type.cc
   sem/storage_texture_type.h
-  sem/struct_type.cc
-  sem/struct_type.h
   sem/texture_type.cc
   sem/texture_type.h
   sem/type.cc
@@ -581,8 +579,8 @@ if(${TINT_BUILD_TESTS})
     sem/pointer_type_test.cc
     sem/sampled_texture_type_test.cc
     sem/sampler_type_test.cc
+    sem/sem_struct_test.cc
     sem/storage_texture_type_test.cc
-    sem/struct_type_test.cc
     sem/texture_type_test.cc
     sem/type_manager_test.cc
     sem/u32_type_test.cc
@@ -809,7 +807,6 @@ if(${TINT_BUILD_TESTS})
 
   if(${TINT_BUILD_MSL_WRITER})
     list(APPEND TINT_TEST_SRCS
-      writer/msl/generator_impl_alias_type_test.cc
       writer/msl/generator_impl_array_accessor_test.cc
       writer/msl/generator_impl_assign_test.cc
       writer/msl/generator_impl_binary_test.cc
@@ -846,7 +843,6 @@ if(${TINT_BUILD_TESTS})
   if (${TINT_BUILD_HLSL_WRITER})
     list(APPEND TINT_TEST_SRCS
       transform/hlsl_test.cc
-      writer/hlsl/generator_impl_alias_type_test.cc
       writer/hlsl/generator_impl_array_accessor_test.cc
       writer/hlsl/generator_impl_assign_test.cc
       writer/hlsl/generator_impl_binary_test.cc

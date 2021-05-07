@@ -156,15 +156,16 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
-  auto s = Structure("S", {
-                              Member("a", ty.i32()),
-                              Member("b", ty.f32()),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
   Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStructType(out, s, "S")) << gen.error();
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(out, sem_s, "S")) << gen.error();
   EXPECT_EQ(result(), R"(struct S {
   int a;
   float b;
@@ -173,31 +174,33 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
-  auto s = Structure("S",
-                     {
-                         Member("a", ty.i32()),
-                         Member("b", ty.f32()),
-                     },
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
   Global("g", ty.access(ast::AccessControl::kReadWrite, s),
          ast::StorageClass::kStorage);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStructType(out, s, "S")) << gen.error();
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(out, sem_s, "S")) << gen.error();
   EXPECT_EQ(result(), "");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
-  auto s = Structure("S", {
-                              Member("a", ty.i32()),
-                              Member("b", ty.f32()),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
   Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, s, ast::StorageClass::kNone, ""))
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitType(out, sem_s, ast::StorageClass::kNone, ""))
       << gen.error();
   EXPECT_EQ(result(), "S");
 }
@@ -205,7 +208,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct) {
 /// TODO(bclayton): Enable this, fix it, add tests for vector, matrix, array and
 /// nested structures.
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
-  auto s = Structure(
+  auto* s = Structure(
       "S", {
                Member("a", ty.i32(), {MemberSize(32)}),
                Member("b", ty.f32()),
@@ -215,7 +218,8 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, s, ast::StorageClass::kNone, ""))
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitType(out, sem_s, ast::StorageClass::kNone, ""))
       << gen.error();
   EXPECT_EQ(gen.result(), R"(struct S {
   int a;
@@ -229,10 +233,10 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_InjectPadding) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
-  auto s = Structure("S", {
-                              Member("double", ty.i32()),
-                              Member("float", ty.f32()),
-                          });
+  auto* s = Structure("S", {
+                               Member("double", ty.i32()),
+                               Member("float", ty.f32()),
+                           });
   Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = SanitizeAndBuild();
@@ -247,17 +251,18 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
 // TODO(dsinclair): How to translate [[block]]
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
-  auto s = Structure("S",
-                     {
-                         Member("a", ty.i32()),
-                         Member("b", ty.f32()),
-                     },
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
   Global("g", s, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitStructType(out, s, "B")) << gen.error();
+  auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
+  ASSERT_TRUE(gen.EmitStructType(out, sem_s, "B")) << gen.error();
   EXPECT_EQ(result(), R"(struct B {
   int a;
   float b;

@@ -96,7 +96,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
   void SetupStorageBuffer(ast::StructMemberList members) {
     ProgramBuilder& b = *this;
 
-    auto s =
+    auto* s =
         b.Structure("Data", members, {b.create<ast::StructBlockDecoration>()});
 
     auto ac_ty = b.ty.access(ast::AccessControl::kReadWrite, s);
@@ -125,7 +125,7 @@ using HlslGeneratorImplTest_MemberAccessorWithParam =
     HlslGeneratorImplTest_MemberAccessorBase<TestParamHelper<T>>;
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
-  auto s = Structure("Data", {Member("mem", ty.f32())});
+  auto* s = Structure("Data", {Member("mem", ty.f32())});
   Global("str", s, ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("str", "mem");
@@ -522,10 +522,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
   // var<storage> data : Pre;
   // data.c[2].b
 
-  auto inner = Structure("Inner", {
-                                      Member("a", ty.vec3<f32>()),
-                                      Member("b", ty.vec3<f32>()),
-                                  });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
   SetupStorageBuffer({
       Member("c", ty.array(inner, 4, 32)),
@@ -568,10 +568,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage> data : Pre;
   // data.c[2].b.xy
 
-  auto inner = Structure("Inner", {
-                                      Member("a", ty.vec3<f32>()),
-                                      Member("b", ty.vec3<f32>()),
-                                  });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
   SetupStorageBuffer({
       Member("c", ty.array(inner, 4, 32)),
@@ -616,10 +616,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage> data : Pre;
   // data.c[2].b.g
 
-  auto inner = Structure("Inner", {
-                                      Member("a", ty.vec3<f32>()),
-                                      Member("b", ty.vec3<f32>()),
-                                  });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
   SetupStorageBuffer({
       Member("c", ty.array(inner, 4, 32)),
@@ -664,10 +664,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage> data : Pre;
   // data.c[2].b[1]
 
-  auto inner = Structure("Inner", {
-                                      Member("a", ty.vec3<f32>()),
-                                      Member("b", ty.vec3<f32>()),
-                                  });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
   SetupStorageBuffer({
       Member("c", ty.array(inner, 4, 32)),
@@ -711,10 +711,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_MultiLevel) {
   // var<storage> data : Pre;
   // data.c[2].b = vec3<f32>(1.f, 2.f, 3.f);
 
-  auto inner = Structure("Inner", {
-                                      Member("a", ty.vec3<f32>()),
-                                      Member("b", ty.vec3<f32>()),
-                                  });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<f32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
   SetupStorageBuffer({
       Member("c", ty.array(inner, 4, 32)),
@@ -756,10 +756,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   // var<storage> data : Pre;
   // data.c[2].b.y = 1.f;
 
-  auto inner = Structure("Inner", {
-                                      Member("a", ty.vec3<i32>()),
-                                      Member("b", ty.vec3<f32>()),
-                                  });
+  auto* inner = Structure("Inner", {
+                                       Member("a", ty.vec3<i32>()),
+                                       Member("b", ty.vec3<f32>()),
+                                   });
 
   SetupStorageBuffer({
       Member("c", ty.array(inner, 4, 32)),

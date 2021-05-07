@@ -145,7 +145,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
-  auto str = Structure("S", {
+  auto* str = Structure("S", {
                                 Member("a", ty.i32()),
                                 Member("b", ty.f32()),
                                 Member("c", ty.vec3<i32>()),

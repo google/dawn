@@ -188,7 +188,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
   //   return inputs.value;
   // }
 
-  auto interface = Structure(
+  auto* interface = Structure(
       "Interface",
       {
           Member("value", ty.f32(), ast::DecorationList{Location(1u)}),

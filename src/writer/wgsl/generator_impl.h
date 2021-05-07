@@ -35,7 +35,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/program.h"
 #include "src/sem/storage_texture_type.h"
-#include "src/sem/struct_type.h"
+#include "src/sem/struct.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {

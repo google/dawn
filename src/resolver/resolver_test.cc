@@ -764,8 +764,8 @@ TEST_F(ResolverTest, Function_Parameters) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
-  auto s = Structure("S", {Member("m", ty.u32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S", {Member("m", ty.u32())},
+                      {create<ast::StructBlockDecoration>()});
   auto a = ty.access(ast::AccessControl::kReadOnly, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
@@ -800,8 +800,8 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 }
 
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
-  auto s = Structure("S", {Member("m", ty.u32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S", {Member("m", ty.u32())},
+                      {create<ast::StructBlockDecoration>()});
   auto a = ty.access(ast::AccessControl::kReadOnly, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
@@ -884,8 +884,8 @@ TEST_F(ResolverTest, Function_ReturnStatements) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
-  auto st = Structure("S", {Member("first_member", ty.i32()),
-                            Member("second_member", ty.f32())});
+  auto* st = Structure("S", {Member("first_member", ty.i32()),
+                             Member("second_member", ty.f32())});
   Global("my_struct", st, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_struct", "second_member");
@@ -906,8 +906,8 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
-  auto st = Structure("S", {Member("first_member", ty.i32()),
-                            Member("second_member", ty.f32())});
+  auto* st = Structure("S", {Member("first_member", ty.i32()),
+                             Member("second_member", ty.f32())});
   auto alias = ty.alias("alias", st);
   AST().AddConstructedType(alias);
   Global("my_struct", alias, ast::StorageClass::kInput);
@@ -987,8 +987,8 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
   // }
   //
 
-  auto stB = Structure("B", {Member("foo", ty.vec4<f32>())});
-  auto stA = Structure("A", {Member("mem", ty.vec(stB, 3))});
+  auto* stB = Structure("B", {Member("foo", ty.vec4<f32>())});
+  auto* stA = Structure("A", {Member("mem", ty.vec(stB, 3))});
   Global("c", stA, ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor(
@@ -1006,8 +1006,8 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
-  auto st = Structure("S", {Member("first_member", ty.f32()),
-                            Member("second_member", ty.f32())});
+  auto* st = Structure("S", {Member("first_member", ty.f32()),
+                             Member("second_member", ty.f32())});
   Global("my_struct", st, ast::StorageClass::kInput);
 
   auto* expr = Add(MemberAccessor("my_struct", "first_member"),

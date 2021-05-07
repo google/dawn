@@ -17,11 +17,14 @@
 
 #include <stdint.h>
 
+#include <string>
 #include <unordered_set>
 #include <vector>
 
 #include "src/ast/storage_class.h"
+#include "src/ast/struct.h"
 #include "src/sem/node.h"
+#include "src/sem/type.h"
 #include "src/symbol.h"
 
 namespace tint {
@@ -34,7 +37,6 @@ class StructMember;
 namespace sem {
 
 // Forward declarations
-class StructType;
 class StructMember;
 class Type;
 
@@ -52,30 +54,26 @@ enum class PipelineStageUsage {
 };
 
 /// Struct holds the semantic information for structures.
-class Struct : public Castable<Struct, Node> {
+class Struct : public Castable<Struct, Type> {
  public:
   /// Constructor
-  /// @param type the structure type
+  /// @param declaration the AST structure declaration
   /// @param members the structure members
   /// @param align the byte alignment of the structure
   /// @param size the byte size of the structure
   /// @param size_no_padding size of the members without the end of structure
   /// alignment padding
-  /// @param storage_class_usage a set of all the storage class usages
-  /// @param pipeline_stage_uses a set of all the pipeline stage uses
-  Struct(sem::StructType* type,
+  Struct(const ast::Struct* declaration,
          StructMemberList members,
          uint32_t align,
          uint32_t size,
-         uint32_t size_no_padding,
-         std::unordered_set<ast::StorageClass> storage_class_usage,
-         std::unordered_set<PipelineStageUsage> pipeline_stage_uses);
+         uint32_t size_no_padding);
 
   /// Destructor
   ~Struct() override;
 
-  /// @returns the structure type
-  sem::StructType* Type() const { return type_; }
+  /// @returns the struct
+  const ast::Struct* Declaration() const { return declaration_; }
 
   /// @returns the members of the structure
   const StructMemberList& Members() const { return members_; }
@@ -100,6 +98,12 @@ class Struct : public Castable<Struct, Node> {
   /// alignment padding
   uint32_t SizeNoPadding() const { return size_no_padding_; }
 
+  /// Adds the StorageClass usage to the structure.
+  /// @param usage the storage usage
+  void AddUsage(ast::StorageClass usage) {
+    storage_class_usage_.emplace(usage);
+  }
+
   /// @returns the set of storage class uses of this structure
   const std::unordered_set<ast::StorageClass>& StorageClassUsage() const {
     return storage_class_usage_;
@@ -122,19 +126,38 @@ class Struct : public Castable<Struct, Node> {
     return false;
   }
 
+  /// Adds the pipeline stage usage to the structure.
+  /// @param usage the storage usage
+  void AddUsage(PipelineStageUsage usage) {
+    pipeline_stage_uses_.emplace(usage);
+  }
+
   /// @returns the set of entry point uses of this structure
   const std::unordered_set<PipelineStageUsage>& PipelineStageUses() const {
     return pipeline_stage_uses_;
   }
 
+  /// @returns true if the struct has a block decoration
+  bool IsBlockDecorated() const { return declaration_->IsBlockDecorated(); }
+
+  /// @returns the name for the type
+  std::string type_name() const override;
+
+  /// @param symbols the program's symbol table
+  /// @returns the name for this type that closely resembles how it would be
+  /// declared in WGSL.
+  std::string FriendlyName(const SymbolTable& symbols) const override;
+
  private:
-  sem::StructType* const type_;
+  uint64_t LargestMemberBaseAlignment(MemoryLayout mem_layout) const;
+
+  ast::Struct const* const declaration_;
   StructMemberList const members_;
   uint32_t const align_;
   uint32_t const size_;
   uint32_t const size_no_padding_;
-  std::unordered_set<ast::StorageClass> const storage_class_usage_;
-  std::unordered_set<PipelineStageUsage> const pipeline_stage_uses_;
+  std::unordered_set<ast::StorageClass> storage_class_usage_;
+  std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
 };
 
 /// StructMember holds the semantic information for structure members.

@@ -414,14 +414,14 @@ class ParserImpl : Reader {
       const spvtools::opt::Instruction& inst,
       ast::Type* first_operand_type);
 
-  /// Returns the given expression, but ensuring it's an unsigned type of the
-  /// same shape as the operand. Wraps the expresison with a bitcast if needed.
+  /// @returns the given expression, but ensuring it's an unsigned type of the
+  /// same shape as the operand. Wraps the expresion with a bitcast if needed.
   /// Assumes the given expresion is a integer scalar or vector.
   /// @param expr an integer scalar or integer vector expression.
   TypedExpression AsUnsigned(TypedExpression expr);
 
-  /// Returns the given expression, but ensuring it's a signed type of the
-  /// same shape as the operand. Wraps the expresison with a bitcast if needed.
+  /// @returns the given expression, but ensuring it's a signed type of the
+  /// same shape as the operand. Wraps the expresion with a bitcast if needed.
   /// Assumes the given expresion is a integer scalar or vector.
   /// @param expr an integer scalar or integer vector expression.
   TypedExpression AsSigned(TypedExpression expr);

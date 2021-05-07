@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/sem/access_control_type.h"
+#include "src/sem/struct.h"
 #include "src/sem/test_helper.h"
 #include "src/sem/texture_type.h"
 
@@ -20,22 +21,27 @@ namespace tint {
 namespace sem {
 namespace {
 
-using StructTypeTest = TestHelper;
+using StructTest = TestHelper;
 
-TEST_F(StructTypeTest, Creation) {
+TEST_F(StructTest, Creation) {
   auto name = Sym("S");
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
   auto* ptr = impl;
-  auto s = ty.struct_(impl);
-  EXPECT_EQ(s->impl(), ptr);
+  auto* s = create<sem::Struct>(impl, StructMemberList{}, 4 /* align */,
+                                8 /* size */, 16 /* size_no_padding */);
+  EXPECT_EQ(s->Declaration(), ptr);
+  EXPECT_EQ(s->Align(), 4u);
+  EXPECT_EQ(s->Size(), 8u);
+  EXPECT_EQ(s->SizeNoPadding(), 16u);
 }
 
-TEST_F(StructTypeTest, Is) {
+TEST_F(StructTest, Is) {
   auto name = Sym("S");
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
-  auto s = ty.struct_(impl);
+  auto* s = create<sem::Struct>(impl, StructMemberList{}, 4 /* align */,
+                                4 /* size */, 4 /* size_no_padding */);
   sem::Type* ty = s;
   EXPECT_FALSE(ty->Is<AccessControl>());
   EXPECT_FALSE(ty->Is<Alias>());
@@ -46,25 +52,27 @@ TEST_F(StructTypeTest, Is) {
   EXPECT_FALSE(ty->Is<Matrix>());
   EXPECT_FALSE(ty->Is<Pointer>());
   EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_TRUE(ty->Is<StructType>());
+  EXPECT_TRUE(ty->Is<Struct>());
   EXPECT_FALSE(ty->Is<Texture>());
   EXPECT_FALSE(ty->Is<U32>());
   EXPECT_FALSE(ty->Is<Vector>());
 }
 
-TEST_F(StructTypeTest, TypeName) {
+TEST_F(StructTest, TypeName) {
   auto name = Sym("my_struct");
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
-  auto s = ty.struct_(impl);
+  auto* s = create<sem::Struct>(impl, StructMemberList{}, 4 /* align */,
+                                4 /* size */, 4 /* size_no_padding */);
   EXPECT_EQ(s->type_name(), "__struct_$1");
 }
 
-TEST_F(StructTypeTest, FriendlyName) {
+TEST_F(StructTest, FriendlyName) {
   auto name = Sym("my_struct");
   auto* impl =
       create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
-  auto s = ty.struct_(impl);
+  auto* s = create<sem::Struct>(impl, StructMemberList{}, 4 /* align */,
+                                4 /* size */, 4 /* size_no_padding */);
   EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
 }
 

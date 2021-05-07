@@ -219,10 +219,10 @@ TEST_F(BuilderTest, MemberAccessor) {
   // var ident : my_struct
   // ident.b
 
-  auto s = Structure("my_struct", {
-                                      Member("a", ty.f32()),
-                                      Member("b", ty.f32()),
-                                  });
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.f32()),
+                                   });
 
   auto* var = Global("ident", s, ast::StorageClass::kFunction);
 
@@ -263,12 +263,12 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
   //
   // var ident : my_struct
   // ident.inner.a
-  auto inner_struct = Structure("Inner", {
-                                             Member("a", ty.f32()),
-                                             Member("b", ty.f32()),
-                                         });
+  auto* inner_struct = Structure("Inner", {
+                                              Member("a", ty.f32()),
+                                              Member("b", ty.f32()),
+                                          });
 
-  auto s_type = Structure("my_struct", {Member("inner", inner_struct)});
+  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "b");
@@ -307,10 +307,10 @@ TEST_F(BuilderTest, MemberAccessor_NonPointer) {
   // let ident : my_struct = my_struct();
   // ident.b
 
-  auto s = Structure("my_struct", {
-                                      Member("a", ty.f32()),
-                                      Member("b", ty.f32()),
-                                  });
+  auto* s = Structure("my_struct", {
+                                       Member("a", ty.f32()),
+                                       Member("b", ty.f32()),
+                                   });
 
   auto* var = GlobalConst("ident", s, Construct(s, 0.f, 0.f));
 
@@ -345,12 +345,12 @@ TEST_F(BuilderTest, MemberAccessor_Nested_NonPointer) {
   //
   // let ident : my_struct = my_struct();
   // ident.inner.a
-  auto inner_struct = Structure("Inner", {
-                                             Member("a", ty.f32()),
-                                             Member("b", ty.f32()),
-                                         });
+  auto* inner_struct = Structure("Inner", {
+                                              Member("a", ty.f32()),
+                                              Member("b", ty.f32()),
+                                          });
 
-  auto s_type = Structure("my_struct", {Member("inner", inner_struct)});
+  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
   auto* var = GlobalConst("ident", s_type,
                           Construct(s_type, Construct(inner_struct, 0.f, 0.f)));
@@ -388,13 +388,13 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   //
   // var ident : my_struct
   // ident.inner.a
-  auto inner_struct = Structure("Inner", {
-                                             Member("a", ty.f32()),
-                                             Member("b", ty.f32()),
-                                         });
+  auto* inner_struct = Structure("Inner", {
+                                              Member("a", ty.f32()),
+                                              Member("b", ty.f32()),
+                                          });
 
   auto alias = ty.alias("Inner", inner_struct);
-  auto s_type = Structure("Outer", {Member("inner", alias)});
+  auto* s_type = Structure("Outer", {Member("inner", alias)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
@@ -434,12 +434,12 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
   //
   // var ident : my_struct
   // ident.inner.a = 2.0f;
-  auto inner_struct = Structure("Inner", {
-                                             Member("a", ty.f32()),
-                                             Member("b", ty.f32()),
-                                         });
+  auto* inner_struct = Structure("Inner", {
+                                              Member("a", ty.f32()),
+                                              Member("b", ty.f32()),
+                                          });
 
-  auto s_type = Structure("my_struct", {Member("inner", inner_struct)});
+  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* expr =
@@ -483,12 +483,12 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
   // var ident : my_struct
   // var store : f32 = ident.inner.a
 
-  auto inner_struct = Structure("Inner", {
-                                             Member("a", ty.f32()),
-                                             Member("b", ty.f32()),
-                                         });
+  auto* inner_struct = Structure("Inner", {
+                                              Member("a", ty.f32()),
+                                              Member("b", ty.f32()),
+                                          });
 
-  auto s_type = Structure("my_struct", {Member("inner", inner_struct)});
+  auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
   auto* store = Global("store", ty.f32(), ast::StorageClass::kFunction);
@@ -693,11 +693,11 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   // var index : array<A, 2>
   // index[0].foo[2].bar.baz.yx
 
-  auto c_type = Structure("C", {Member("baz", ty.vec3<f32>())});
+  auto* c_type = Structure("C", {Member("baz", ty.vec3<f32>())});
 
-  auto b_type = Structure("B", {Member("bar", c_type)});
+  auto* b_type = Structure("B", {Member("bar", c_type)});
   auto b_ary_type = ty.array(b_type, 3);
-  auto a_type = Structure("A", {Member("foo", b_ary_type)});
+  auto* a_type = Structure("A", {Member("foo", b_ary_type)});
 
   auto a_ary_type = ty.array(a_type, 2);
   auto* var = Global("index", a_ary_type, ast::StorageClass::kFunction);

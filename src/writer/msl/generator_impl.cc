@@ -156,7 +156,7 @@ bool GeneratorImpl::EmitConstructedType(const sem::Type* ty) {
     }
     out_ << " " << program_->Symbols().NameFor(alias->symbol()) << ";"
          << std::endl;
-  } else if (auto* str = ty->As<sem::StructType>()) {
+  } else if (auto* str = ty->As<sem::Struct>()) {
     if (!EmitStructType(str)) {
       return false;
     }
@@ -889,7 +889,7 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
   auto* type = TypeOf(expr);
 
-  if (type->IsAnyOf<sem::ArrayType, sem::StructType>()) {
+  if (type->IsAnyOf<sem::ArrayType, sem::Struct>()) {
     out_ << "{";
   } else {
     if (!EmitType(type, "")) {
@@ -918,7 +918,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  if (type->IsAnyOf<sem::ArrayType, sem::StructType>()) {
+  if (type->IsAnyOf<sem::ArrayType, sem::Struct>()) {
     out_ << "}";
   } else {
     out_ << ")";
@@ -948,7 +948,7 @@ bool GeneratorImpl::EmitZeroValue(typ::Type type) {
       return false;
     }
     out_ << "}";
-  } else if (type->As<sem::StructType>()) {
+  } else if (type->As<sem::Struct>()) {
     out_ << "{}";
   } else {
     diagnostics_.add_error("Invalid type for zero emission: " +
@@ -1435,7 +1435,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
     out_ << " " << program_->Symbols().NameFor(var->symbol());
 
-    if (type->Is<sem::StructType>()) {
+    if (type->Is<sem::Struct>()) {
       out_ << " [[stage_in]]";
     } else {
       auto& decos = var->decorations();
@@ -1957,10 +1957,10 @@ bool GeneratorImpl::EmitType(typ::Type type, const std::string& name) {
     out_ << "*";
   } else if (type->Is<sem::Sampler>()) {
     out_ << "sampler";
-  } else if (auto* str = type->As<sem::StructType>()) {
+  } else if (auto* str = type->As<sem::Struct>()) {
     // The struct type emits as just the name. The declaration would be emitted
     // as part of emitting the constructed types.
-    out_ << program_->Symbols().NameFor(str->impl()->name());
+    out_ << program_->Symbols().NameFor(str->Declaration()->name());
   } else if (auto* tex = type->As<sem::Texture>()) {
     if (tex->Is<sem::DepthTexture>()) {
       out_ << "depth";
@@ -2056,20 +2056,14 @@ bool GeneratorImpl::EmitPackedType(typ::Type type, const std::string& name) {
   return EmitType(type, name);
 }
 
-bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
+bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
   // TODO(dsinclair): Block decoration?
   // if (str->impl()->decoration() != ast::Decoration::kNone) {
   // }
-  out_ << "struct " << program_->Symbols().NameFor(str->impl()->name()) << " {"
-       << std::endl;
+  out_ << "struct " << program_->Symbols().NameFor(str->Declaration()->name())
+       << " {" << std::endl;
 
-  auto* sem_str = program_->Sem().Get(str);
-  if (!sem_str) {
-    TINT_ICE(diagnostics_) << "struct  missing semantic info";
-    return false;
-  }
-
-  bool is_host_shareable = sem_str->IsHostShareable();
+  bool is_host_shareable = str->IsHostShareable();
 
   // Emits a `/* 0xnnnn */` byte offset comment for a struct member.
   auto add_byte_offset_comment = [&](uint32_t offset) {
@@ -2084,14 +2078,14 @@ bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
     std::string name;
     do {
       name = "tint_pad_" + std::to_string(pad_count++);
-    } while (sem_str->FindMember(program_->Symbols().Get(name)));
+    } while (str->FindMember(program_->Symbols().Get(name)));
 
     out_ << "int8_t " << name << "[" << size << "];" << std::endl;
   };
 
   increment_indent();
   uint32_t msl_offset = 0;
-  for (auto* mem : sem_str->Members()) {
+  for (auto* mem : str->Members()) {
     make_indent();
 
     auto name = program_->Symbols().NameFor(mem->Declaration()->symbol());
@@ -2142,8 +2136,7 @@ bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
         }
         out_ << " [[" << attr << "]]";
       } else if (auto* loc = deco->As<ast::LocationDecoration>()) {
-        auto& pipeline_stage_uses =
-            program_->Sem().Get(str)->PipelineStageUses();
+        auto& pipeline_stage_uses = str->PipelineStageUses();
         if (pipeline_stage_uses.size() != 1) {
           TINT_ICE(diagnostics_) << "invalid entry point IO struct uses";
         }
@@ -2180,10 +2173,10 @@ bool GeneratorImpl::EmitStructType(const sem::StructType* str) {
     }
   }
 
-  if (is_host_shareable && sem_str->Size() != msl_offset) {
+  if (is_host_shareable && str->Size() != msl_offset) {
     make_indent();
     add_byte_offset_comment(msl_offset);
-    add_padding(sem_str->Size() - msl_offset);
+    add_padding(str->Size() - msl_offset);
   }
 
   decrement_indent();
@@ -2353,15 +2346,10 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     return SizeAndAlign{el_size_align.size * num_els, el_size_align.align};
   }
 
-  if (auto* str = ty->As<sem::StructType>()) {
+  if (auto* str = ty->As<sem::Struct>()) {
     // TODO(crbug.com/tint/650): There's an assumption here that MSL's default
     // structure size and alignment matches WGSL's. We need to confirm this.
-    auto* sem = program_->Sem().Get(str);
-    if (!sem) {
-      TINT_ICE(diagnostics_) << "Array missing semantic info";
-      return {};
-    }
-    return SizeAndAlign{sem->Size(), sem->Align()};
+    return SizeAndAlign{str->Size(), str->Align()};
   }
 
   TINT_UNREACHABLE(diagnostics_) << "Unhandled type " << ty->TypeInfo().name;

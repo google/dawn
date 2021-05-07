@@ -376,12 +376,12 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
   // };
   // var b : [[access(read)]] A
 
-  auto A = Structure("A",
-                     {
-                         Member("a", ty.i32()),
-                         Member("b", ty.i32()),
-                     },
-                     {create<ast::StructBlockDecoration>()});
+  auto* A = Structure("A",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.i32()),
+                      },
+                      {create<ast::StructBlockDecoration>()});
   auto ac = ty.access(ast::AccessControl::kReadOnly, A);
 
   auto* var = Global("b", ac, ast::StorageClass::kStorage);
@@ -415,8 +415,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   // type B = A;
   // var b : [[access(read)]] B
 
-  auto A = Structure("A", {Member("a", ty.i32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* A = Structure("A", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
   auto B = ty.alias("B", A);
   AST().AddConstructedType(B);
   auto ac = ty.access(ast::AccessControl::kReadOnly, B);
@@ -448,8 +448,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   // type B = [[access(read)]] A;
   // var b : B
 
-  auto A = Structure("A", {Member("a", ty.i32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* A = Structure("A", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
   auto ac = ty.access(ast::AccessControl::kReadOnly, A);
   auto B = ty.alias("B", ac);
   AST().AddConstructedType(B);
@@ -481,8 +481,8 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   // var b : [[access(read)]] A
   // var c : [[access(read_write)]] A
 
-  auto A = Structure("A", {Member("a", ty.i32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* A = Structure("A", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
   auto read = ty.access(ast::AccessControl::kReadOnly, A);
   auto rw = ty.access(ast::AccessControl::kReadWrite, A);
 

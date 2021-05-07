@@ -886,13 +886,13 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
 
   // If the data_type is a structure we're accessing a member, if it's a
   // vector we're accessing a swizzle.
-  if (data_type->Is<sem::StructType>()) {
-    auto* strct = data_type->As<sem::StructType>()->impl();
+  if (auto* str = data_type->As<sem::Struct>()) {
+    auto* impl = str->Declaration();
     auto symbol = expr->member()->symbol();
 
     uint32_t idx = 0;
-    for (; idx < strct->members().size(); ++idx) {
-      auto* member = strct->members()[idx];
+    for (; idx < impl->members().size(); ++idx) {
+      auto* member = impl->members()[idx];
       if (member->symbol() == symbol) {
         break;
       }
@@ -1294,8 +1294,8 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
       subtype = mat->type()->UnwrapAll();
     } else if (auto* arr = subtype->As<sem::ArrayType>()) {
       subtype = arr->type()->UnwrapAll();
-    } else if (auto* str = subtype->As<sem::StructType>()) {
-      subtype = builder_.Sem().Get(str)->Members()[i]->Type()->UnwrapAll();
+    } else if (auto* str = subtype->As<sem::Struct>()) {
+      subtype = str->Members()[i]->Type()->UnwrapAll();
     }
     if (subtype != TypeOf(sc)->UnwrapAll()) {
       return false;
@@ -1373,8 +1373,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
     if (result_type == value_type || result_type->Is<sem::Matrix>() ||
-        result_type->Is<sem::ArrayType>() ||
-        result_type->Is<sem::StructType>()) {
+        result_type->Is<sem::ArrayType>() || result_type->Is<sem::Struct>()) {
       out << "_" << id;
 
       ops.push_back(Operand::Int(id));
@@ -2024,14 +2023,14 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       params.push_back(Operand::Int(struct_id));
 
       auto* type = TypeOf(accessor->structure())->UnwrapAll();
-      if (!type->Is<sem::StructType>()) {
+      if (!type->Is<sem::Struct>()) {
         error_ =
             "invalid type (" + type->type_name() + ") for runtime array length";
         return 0;
       }
       // Runtime array must be the last member in the structure
-      params.push_back(Operand::Int(
-          uint32_t(type->As<sem::StructType>()->impl()->members().size() - 1)));
+      params.push_back(Operand::Int(uint32_t(
+          type->As<sem::Struct>()->Declaration()->members().size() - 1)));
 
       if (!push_function_inst(spv::Op::OpArrayLength, params)) {
         return 0;
@@ -2978,7 +2977,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
     return GenerateTypeIfNeeded(alias->type());
   }
   if (auto* ac = type->As<sem::AccessControl>()) {
-    if (!ac->type()->UnwrapIfNeeded()->Is<sem::StructType>()) {
+    if (!ac->type()->UnwrapIfNeeded()->Is<sem::Struct>()) {
       return GenerateTypeIfNeeded(ac->type());
     }
   }
@@ -2993,8 +2992,8 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
   if (auto* ac = type->As<sem::AccessControl>()) {
     // The non-struct case was handled above.
     auto* subtype = ac->type()->UnwrapIfNeeded();
-    if (!GenerateStructType(subtype->As<sem::StructType>(),
-                            ac->access_control(), result)) {
+    if (!GenerateStructType(subtype->As<sem::Struct>(), ac->access_control(),
+                            result)) {
       return 0;
     }
   } else if (auto* arr = type->As<sem::ArrayType>()) {
@@ -3015,7 +3014,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
     if (!GeneratePointerType(ptr, result)) {
       return 0;
     }
-  } else if (auto* str = type->As<sem::StructType>()) {
+  } else if (auto* str = type->As<sem::Struct>()) {
     if (!GenerateStructType(str, ast::AccessControl::kReadWrite, result)) {
       return 0;
     }
@@ -3190,16 +3189,16 @@ bool Builder::GeneratePointerType(const sem::Pointer* ptr,
   return true;
 }
 
-bool Builder::GenerateStructType(const sem::StructType* struct_type,
+bool Builder::GenerateStructType(const sem::Struct* struct_type,
                                  ast::AccessControl::Access access_control,
                                  const Operand& result) {
   auto struct_id = result.to_i();
-  auto* impl = struct_type->impl();
+  auto* impl = struct_type->Declaration();
 
-  if (struct_type->impl()->name().IsValid()) {
-    push_debug(spv::Op::OpName, {Operand::Int(struct_id),
-                                 Operand::String(builder_.Symbols().NameFor(
-                                     struct_type->impl()->name()))});
+  if (impl->name().IsValid()) {
+    push_debug(spv::Op::OpName,
+               {Operand::Int(struct_id),
+                Operand::String(builder_.Symbols().NameFor(impl->name()))});
   }
 
   OperandList ops;

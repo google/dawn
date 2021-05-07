@@ -147,8 +147,8 @@ bool GeneratorImpl::EmitConstructedType(typ::Type type) {
         return false;
       }
       out_ << ";" << std::endl;
-    } else if (auto* str = ty->As<sem::StructType>()) {
-      if (!EmitStructType(str->impl())) {
+    } else if (auto* str = ty->As<sem::Struct>()) {
+      if (!EmitStructType(str->Declaration())) {
         return false;
       }
     } else {
@@ -599,10 +599,10 @@ bool GeneratorImpl::EmitType(typ::Type type) {
       if (sampler->IsComparison()) {
         out_ << "_comparison";
       }
-    } else if (auto* str = ty->As<sem::StructType>()) {
+    } else if (auto* str = ty->As<sem::Struct>()) {
       // The struct, as a type, is just the name. We should have already emitted
       // the declaration through a call to |EmitStructType| earlier.
-      out_ << program_->Symbols().NameFor(str->impl()->name());
+      out_ << program_->Symbols().NameFor(str->Declaration()->name());
     } else if (auto* texture = ty->As<sem::Texture>()) {
       out_ << "texture_";
       if (texture->Is<sem::DepthTexture>()) {

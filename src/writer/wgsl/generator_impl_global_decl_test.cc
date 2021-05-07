@@ -48,7 +48,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
 TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
   Global("a0", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto s0 = Structure("S0", {Member("a", ty.i32())});
+  auto* s0 = Structure("S0", {Member("a", ty.i32())});
 
   Func("func", ast::VariableList{}, ty.f32(),
        ast::StatementList{
@@ -58,7 +58,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
   Global("a1", ty.f32(), ast::StorageClass::kOutput);
 
-  auto s1 = Structure("S1", {Member("a", ty.i32())});
+  auto* s1 = Structure("S1", {Member("a", ty.i32())});
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{

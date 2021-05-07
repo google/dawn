@@ -181,15 +181,13 @@ bool Resolver::IsStorable(const sem::Type* type) {
   if (auto* arr = type->As<sem::ArrayType>()) {
     return IsStorable(arr->type());
   }
-  if (auto* str_ty = type->As<sem::StructType>()) {
-    if (auto* str = Structure(str_ty)) {
-      for (const auto* member : str->members) {
-        if (!IsStorable(member->Type())) {
-          return false;
-        }
+  if (auto* str = type->As<sem::Struct>()) {
+    for (const auto* member : str->Members()) {
+      if (!IsStorable(member->Type())) {
+        return false;
       }
-      return true;
     }
+    return true;
   }
   return false;
 }
@@ -209,12 +207,8 @@ bool Resolver::IsHostShareable(const sem::Type* type) {
   if (auto* arr = type->As<sem::ArrayType>()) {
     return IsHostShareable(arr->type());
   }
-  if (auto* str = type->As<sem::StructType>()) {
-    auto* info = Structure(str);
-    if (!info) {
-      return false;
-    }
-    for (auto* member : info->members) {
+  if (auto* str = type->As<sem::Struct>()) {
+    for (auto* member : str->Members()) {
       if (!IsHostShareable(member->Type())) {
         return false;
       }
@@ -243,7 +237,7 @@ bool Resolver::IsValidAssignment(const sem::Type* lhs, const sem::Type* rhs) {
 bool Resolver::ResolveInternal() {
   Mark(&builder_->AST());
 
-  auto register_named_type = [this](Symbol name, const sem::Type* type,
+  auto register_named_type = [this](Symbol name, sem::Type* type,
                                     const Source& source) {
     auto added = named_types_.emplace(name, type).second;
     if (!added) {
@@ -312,9 +306,9 @@ bool Resolver::ResolveInternal() {
   return result;
 }
 
-const sem::Type* Resolver::Type(const ast::Type* ty) {
+sem::Type* Resolver::Type(const ast::Type* ty) {
   Mark(ty);
-  auto* s = [&]() -> const sem::Type* {
+  auto* s = [&]() -> sem::Type* {
     if (ty->Is<ast::Void>()) {
       return builder_->create<sem::Void>();
     }
@@ -357,8 +351,11 @@ const sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::Array>()) {
       if (auto* el = Type(t->type())) {
-        return builder_->create<sem::ArrayType>(const_cast<sem::Type*>(el),
-                                                t->size(), t->decorations());
+        auto* sem = builder_->create<sem::ArrayType>(
+            const_cast<sem::Type*>(el), t->size(), t->decorations());
+        if (Array(sem, ty->source())) {
+          return sem;
+        }
       }
       return nullptr;
     }
@@ -370,7 +367,7 @@ const sem::Type* Resolver::Type(const ast::Type* ty) {
       return nullptr;
     }
     if (auto* t = ty->As<ast::Struct>()) {
-      return builder_->create<sem::StructType>(const_cast<ast::Struct*>(t));
+      return Structure(t);
     }
     if (auto* t = ty->As<ast::Sampler>()) {
       return builder_->create<sem::Sampler>(t->kind());
@@ -417,35 +414,15 @@ const sem::Type* Resolver::Type(const ast::Type* ty) {
     return nullptr;
   }();
 
-  if (s == nullptr) {
-    return nullptr;
+  if (s) {
+    builder_->Sem().Add(ty, s);
   }
-  if (!Type(s, ty->source())) {
-    return nullptr;
-  }
-  builder_->Sem().Add(ty, s);
   return s;
 }
 
-// TODO(crbug.com/tint/724): This method should be merged into Type(ast::Type*)
-bool Resolver::Type(const sem::Type* ty, const Source& source /* = {} */) {
-  ty = ty->UnwrapAliasIfNeeded();
-  if (auto* str = ty->As<sem::StructType>()) {
-    if (!Structure(str)) {
-      return false;
-    }
-  } else if (auto* arr = ty->As<sem::ArrayType>()) {
-    if (!Array(arr, source)) {
-      return false;
-    }
-  }
-  return true;
-}
-
-Resolver::VariableInfo* Resolver::Variable(
-    ast::Variable* var,
-    const sem::Type* type, /* = nullptr */
-    std::string type_name /* = "" */) {
+Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
+                                           sem::Type* type, /* = nullptr */
+                                           std::string type_name /* = "" */) {
   auto it = variable_to_info_.find(var);
   if (it != variable_to_info_.end()) {
     return it->second;
@@ -561,7 +538,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       // attribute, satisfying the storage class constraints.
 
       auto* access = info->type->As<sem::AccessControl>();
-      auto* str = access ? access->type()->As<sem::StructType>() : nullptr;
+      auto* str = access ? access->type()->As<sem::Struct>() : nullptr;
       if (!str) {
         diagnostics_.add_error(
             "variables declared in the <storage> storage class must be of an "
@@ -574,7 +551,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         diagnostics_.add_error(
             "structure used as a storage buffer must be declared with the "
             "[[block]] decoration",
-            str->impl()->source());
+            str->Declaration()->source());
         if (info->declaration->source().range.begin.line) {
           diagnostics_.add_note("structure used as storage buffer here",
                                 info->declaration->source());
@@ -588,7 +565,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       // A variable in the uniform storage class is a uniform buffer variable.
       // Its store type must be a host-shareable structure type with block
       // attribute, satisfying the storage class constraints.
-      auto* str = info->type->As<sem::StructType>();
+      auto* str = info->type->As<sem::Struct>();
       if (!str) {
         diagnostics_.add_error(
             "variables declared in the <uniform> storage class must be of a "
@@ -601,7 +578,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
         diagnostics_.add_error(
             "structure used as a uniform buffer must be declared with the "
             "[[block]] decoration",
-            str->impl()->source());
+            str->Declaration()->source());
         if (info->declaration->source().range.begin.line) {
           diagnostics_.add_note("structure used as uniform buffer here",
                                 info->declaration->source());
@@ -781,7 +758,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
   };
   // Inner lambda that is applied to a type and all of its members.
   auto validate_entry_point_decorations_inner =
-      [&](const ast::DecorationList& decos, const sem::Type* ty, Source source,
+      [&](const ast::DecorationList& decos, sem::Type* ty, Source source,
           ParamOrRetType param_or_ret, bool is_struct_member) {
         // Scan decorations for pipeline IO attributes.
         // Check for overlap with attributes that have been seen previously.
@@ -834,7 +811,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         }
 
         // Check that we saw a pipeline IO attribute iff we need one.
-        if (Canonical(ty)->Is<sem::StructType>()) {
+        if (Canonical(ty)->Is<sem::Struct>()) {
           if (pipeline_io_attribute) {
             diagnostics_.add_error(
                 "entry point IO attributes must not be used on structure " +
@@ -862,8 +839,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
 
   // Outer lambda for validating the entry point decorations for a type.
   auto validate_entry_point_decorations = [&](const ast::DecorationList& decos,
-                                              const sem::Type* ty,
-                                              Source source,
+                                              sem::Type* ty, Source source,
                                               ParamOrRetType param_or_ret) {
     // Validate the decorations for the type.
     if (!validate_entry_point_decorations_inner(decos, ty, source, param_or_ret,
@@ -871,12 +847,12 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
       return false;
     }
 
-    if (auto* struct_ty = Canonical(ty)->As<sem::StructType>()) {
+    if (auto* str = Canonical(ty)->As<sem::Struct>()) {
       // Validate the decorations for each struct members, and also check for
       // invalid member types.
-      for (auto* member : Structure(struct_ty)->members) {
+      for (auto* member : str->Members()) {
         auto* member_ty = Canonical(member->Type());
-        if (member_ty->Is<sem::StructType>()) {
+        if (member_ty->Is<sem::Struct>()) {
           diagnostics_.add_error(
               "entry point IO types cannot contain nested structures",
               member->Declaration()->source());
@@ -988,23 +964,16 @@ bool Resolver::Function(ast::Function* func) {
       return false;
     }
 
-    if (auto* str = param_info->type->As<sem::StructType>()) {
-      auto* str_info = Structure(str);
-      if (!str_info) {
-        return false;
-      }
+    if (auto* str = param_info->type->As<sem::Struct>()) {
       switch (func->pipeline_stage()) {
         case ast::PipelineStage::kVertex:
-          str_info->pipeline_stage_uses.emplace(
-              sem::PipelineStageUsage::kVertexInput);
+          str->AddUsage(sem::PipelineStageUsage::kVertexInput);
           break;
         case ast::PipelineStage::kFragment:
-          str_info->pipeline_stage_uses.emplace(
-              sem::PipelineStageUsage::kFragmentInput);
+          str->AddUsage(sem::PipelineStageUsage::kFragmentInput);
           break;
         case ast::PipelineStage::kCompute:
-          str_info->pipeline_stage_uses.emplace(
-              sem::PipelineStageUsage::kComputeInput);
+          str->AddUsage(sem::PipelineStageUsage::kComputeInput);
           break;
         case ast::PipelineStage::kNone:
           break;
@@ -1026,7 +995,7 @@ bool Resolver::Function(ast::Function* func) {
 
   info->return_type = Canonical(info->return_type);
 
-  if (auto* str = info->return_type->As<sem::StructType>()) {
+  if (auto* str = info->return_type->As<sem::Struct>()) {
     if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, str,
                                       func->source())) {
       diagnostics_.add_note("while instantiating return type for " +
@@ -1035,22 +1004,15 @@ bool Resolver::Function(ast::Function* func) {
       return false;
     }
 
-    auto* str_info = Structure(str);
-    if (!str_info) {
-      return false;
-    }
     switch (func->pipeline_stage()) {
       case ast::PipelineStage::kVertex:
-        str_info->pipeline_stage_uses.emplace(
-            sem::PipelineStageUsage::kVertexOutput);
+        str->AddUsage(sem::PipelineStageUsage::kVertexOutput);
         break;
       case ast::PipelineStage::kFragment:
-        str_info->pipeline_stage_uses.emplace(
-            sem::PipelineStageUsage::kFragmentOutput);
+        str->AddUsage(sem::PipelineStageUsage::kFragmentOutput);
         break;
       case ast::PipelineStage::kCompute:
-        str_info->pipeline_stage_uses.emplace(
-            sem::PipelineStageUsage::kComputeOutput);
+        str->AddUsage(sem::PipelineStageUsage::kComputeOutput);
         break;
       case ast::PipelineStage::kNone:
         break;
@@ -1659,13 +1621,12 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
   sem::Type* ret = nullptr;
   std::vector<uint32_t> swizzle;
 
-  if (auto* ty = data_type->As<sem::StructType>()) {
+  if (auto* str = data_type->As<sem::Struct>()) {
     Mark(expr->member());
     auto symbol = expr->member()->symbol();
-    auto* str = Structure(ty);
 
     const sem::StructMember* member = nullptr;
-    for (auto* m : str->members) {
+    for (auto* m : str->Members()) {
       if (m->Declaration()->symbol() == symbol) {
         ret = m->Type();
         member = m;
@@ -1689,11 +1650,11 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
                                   expr, ret, current_statement_, member));
   } else if (auto* vec = data_type->As<sem::Vector>()) {
     Mark(expr->member());
-    std::string str = builder_->Symbols().NameFor(expr->member()->symbol());
-    auto size = str.size();
-    swizzle.reserve(str.size());
+    std::string s = builder_->Symbols().NameFor(expr->member()->symbol());
+    auto size = s.size();
+    swizzle.reserve(s.size());
 
-    for (auto c : str) {
+    for (auto c : s) {
       switch (c) {
         case 'x':
         case 'r':
@@ -1732,8 +1693,8 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     auto is_xyzw = [](char c) {
       return c == 'x' || c == 'y' || c == 'z' || c == 'w';
     };
-    if (!std::all_of(str.begin(), str.end(), is_rgba) &&
-        !std::all_of(str.begin(), str.end(), is_xyzw)) {
+    if (!std::all_of(s.begin(), s.end(), is_rgba) &&
+        !std::all_of(s.begin(), s.end(), is_xyzw)) {
       diagnostics_.add_error(
           "invalid mixing of vector swizzle characters rgba with xyzw",
           expr->member()->source());
@@ -2032,7 +1993,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
 
   // If the variable has a declared type, resolve it.
   std::string type_name;
-  const sem::Type* type = nullptr;
+  sem::Type* type = nullptr;
   if (auto* ast_ty = var->type()) {
     type_name = ast_ty->FriendlyName(builder_->Symbols());
     type = Type(ast_ty);
@@ -2122,7 +2083,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   return true;
 }
 
-const sem::Type* Resolver::TypeOf(const ast::Expression* expr) {
+sem::Type* Resolver::TypeOf(const ast::Expression* expr) {
   auto it = expr_info_.find(expr);
   if (it != expr_info_.end()) {
     return it->second.type;
@@ -2138,7 +2099,7 @@ std::string Resolver::TypeNameOf(const ast::Expression* expr) {
   return "";
 }
 
-const sem::Type* Resolver::TypeOf(const ast::Literal* lit) {
+sem::Type* Resolver::TypeOf(const ast::Literal* lit) {
   if (lit->Is<ast::SintLiteral>()) {
     return builder_->create<sem::I32>();
   }
@@ -2273,17 +2234,6 @@ void Resolver::CreateSemanticNodes() const {
             builder_->create<sem::Expression>(
                 const_cast<ast::Expression*>(expr), info.type, info.statement));
   }
-
-  // Create semantic nodes for all structs
-  for (auto it : struct_info_) {
-    auto* str = it.first;
-    auto* info = it.second;
-    builder_->Sem().Add(
-        str, builder_->create<sem::Struct>(
-                 const_cast<sem::StructType*>(str), std::move(info->members),
-                 info->align, info->size, info->size_no_padding,
-                 info->storage_class_usage, info->pipeline_stage_uses));
-  }
 }
 
 bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
@@ -2305,7 +2255,7 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
       /*vec4*/ 16,
   };
 
-  auto* cty = Canonical(ty);
+  auto* cty = Canonical(const_cast<sem::Type*>(ty));
   if (cty->is_scalar()) {
     // Note: Also captures booleans, but these are not host-shareable.
     align = 4;
@@ -2330,13 +2280,10 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
     align = vector_align[mat->rows()];
     size = vector_align[mat->rows()] * mat->columns();
     return true;
-  } else if (auto* s = cty->As<sem::StructType>()) {
-    if (auto* si = Structure(s)) {
-      align = si->align;
-      size = si->size;
-      return true;
-    }
-    return false;
+  } else if (auto* s = cty->As<sem::Struct>()) {
+    align = s->Align();
+    size = s->Size();
+    return true;
   } else if (cty->Is<sem::ArrayType>()) {
     if (auto* sem =
             Array(ty->UnwrapAliasIfNeeded()->As<sem::ArrayType>(), source)) {
@@ -2416,8 +2363,8 @@ bool Resolver::ValidateArray(const sem::ArrayType* arr, const Source& source) {
     return false;
   }
 
-  if (auto* el_str = el_ty->As<sem::StructType>()) {
-    if (el_str->impl()->IsBlockDecorated()) {
+  if (auto* el_str = el_ty->As<sem::Struct>()) {
+    if (el_str->IsBlockDecorated()) {
       // https://gpuweb.github.io/gpuweb/wgsl/#attributes
       // A structure type with the block attribute must not be:
       // * the element type of an array type
@@ -2454,23 +2401,23 @@ bool Resolver::ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
   return true;
 }
 
-bool Resolver::ValidateStructure(const StructInfo* st) {
-  for (auto* member : st->members) {
+bool Resolver::ValidateStructure(const sem::Struct* str) {
+  for (auto* member : str->Members()) {
     if (auto* r = member->Type()->UnwrapAll()->As<sem::ArrayType>()) {
       if (r->IsRuntimeArray()) {
-        if (member != st->members.back()) {
+        if (member != str->Members().back()) {
           diagnostics_.add_error(
               "v-0015",
               "runtime arrays may only appear as the last member of a struct",
               member->Declaration()->source());
           return false;
         }
-        if (!st->type->impl()->IsBlockDecorated()) {
+        if (!str->IsBlockDecorated()) {
           diagnostics_.add_error(
               "v-0015",
               "a struct containing a runtime-sized array "
               "requires the [[block]] attribute: '" +
-                  builder_->Symbols().NameFor(st->type->impl()->name()) + "'",
+                  builder_->Symbols().NameFor(str->Declaration()->name()) + "'",
               member->Declaration()->source());
           return false;
         }
@@ -2498,7 +2445,7 @@ bool Resolver::ValidateStructure(const StructInfo* st) {
     }
   }
 
-  for (auto* deco : st->type->impl()->decorations()) {
+  for (auto* deco : str->Declaration()->decorations()) {
     if (!(deco->Is<ast::StructBlockDecoration>())) {
       diagnostics_.add_error("decoration is not valid for struct declarations",
                              deco->source());
@@ -2509,19 +2456,13 @@ bool Resolver::ValidateStructure(const StructInfo* st) {
   return true;
 }
 
-Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
-  auto info_it = struct_info_.find(str);
-  if (info_it != struct_info_.end()) {
-    // StructInfo already resolved for this structure type
-    return info_it->second;
-  }
-
-  for (auto* deco : str->impl()->decorations()) {
+sem::Struct* Resolver::Structure(const ast::Struct* str) {
+  for (auto* deco : str->decorations()) {
     Mark(deco);
   }
 
   sem::StructMemberList sem_members;
-  sem_members.reserve(str->impl()->members().size());
+  sem_members.reserve(str->members().size());
 
   // Calculate the effective size and alignment of each field, and the overall
   // size of the structure.
@@ -2537,7 +2478,7 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
   uint32_t struct_size = 0;
   uint32_t struct_align = 1;
 
-  for (auto* member : str->impl()->members()) {
+  for (auto* member : str->members()) {
     Mark(member);
 
     // Resolve member type
@@ -2548,7 +2489,7 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
 
     // Validate member type
     if (!IsStorable(type)) {
-      builder_->Diagnostics().add_error(
+      diagnostics_.add_error(
           type->FriendlyName(builder_->Symbols()) +
           " cannot be used as the type of a structure member");
       return nullptr;
@@ -2620,19 +2561,14 @@ Resolver::StructInfo* Resolver::Structure(const sem::StructType* str) {
   auto size_no_padding = struct_size;
   struct_size = utils::RoundUp(struct_align, struct_size);
 
-  auto* info = struct_infos_.Create();
-  info->type = str;
-  info->members = std::move(sem_members);
-  info->align = struct_align;
-  info->size = struct_size;
-  info->size_no_padding = size_no_padding;
-  struct_info_.emplace(str, info);
+  auto* out = builder_->create<sem::Struct>(
+      str, std::move(sem_members), struct_align, struct_size, size_no_padding);
 
-  if (!ValidateStructure(info)) {
+  if (!ValidateStructure(out)) {
     return nullptr;
   }
 
-  return info;
+  return out;
 }
 
 bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
@@ -2828,20 +2764,18 @@ bool Resolver::Assignment(ast::AssignmentStatement* a) {
 }
 
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
-                                            const sem::Type* ty,
+                                            sem::Type* ty,
                                             const Source& usage) {
   ty = ty->UnwrapIfNeeded();
 
-  if (auto* str = ty->As<sem::StructType>()) {
-    auto* info = Structure(str);
-    if (!info) {
-      return false;
-    }
-    if (info->storage_class_usage.count(sc)) {
+  if (auto* str = ty->As<sem::Struct>()) {
+    if (str->StorageClassUsage().count(sc)) {
       return true;  // Already applied
     }
-    info->storage_class_usage.emplace(sc);
-    for (auto* member : info->members) {
+
+    str->AddUsage(sc);
+
+    for (auto* member : str->Members()) {
       if (!ApplyStorageClassUsageToType(sc, member->Type(), usage)) {
         std::stringstream err;
         err << "while analysing structure member "
@@ -2887,7 +2821,7 @@ std::string Resolver::VectorPretty(uint32_t size, sem::Type* element_type) {
   return vec_type.FriendlyName(builder_->Symbols());
 }
 
-const sem::Type* Resolver::Canonical(const sem::Type* type) {
+sem::Type* Resolver::Canonical(sem::Type* type) {
   using AccessControl = sem::AccessControl;
   using Alias = sem::Alias;
   using Matrix = sem::Matrix;
@@ -2899,17 +2833,16 @@ const sem::Type* Resolver::Canonical(const sem::Type* type) {
     return nullptr;
   }
 
-  std::function<const Type*(const Type*)> make_canonical;
-  make_canonical = [&](const Type* t) -> const sem::Type* {
+  std::function<Type*(Type*)> make_canonical;
+  make_canonical = [&](Type* t) -> sem::Type* {
     // Unwrap alias sequence
-    const Type* ct = t;
+    Type* ct = t;
     while (auto* p = ct->As<Alias>()) {
       ct = p->type();
     }
 
     if (auto* v = ct->As<Vector>()) {
-      return builder_->create<Vector>(
-          const_cast<sem::Type*>(make_canonical(v->type())), v->size());
+      return builder_->create<Vector>(make_canonical(v->type()), v->size());
     }
     if (auto* m = ct->As<Matrix>()) {
       auto* column_type =
@@ -2943,7 +2876,7 @@ void Resolver::Mark(const ast::Node* node) {
 }
 
 Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,
-                                     const sem::Type* ctype,
+                                     sem::Type* ctype,
                                      const std::string& tn)
     : declaration(decl),
       type(ctype),
@@ -2954,9 +2887,6 @@ Resolver::VariableInfo::~VariableInfo() = default;
 
 Resolver::FunctionInfo::FunctionInfo(ast::Function* decl) : declaration(decl) {}
 Resolver::FunctionInfo::~FunctionInfo() = default;
-
-Resolver::StructInfo::StructInfo() = default;
-Resolver::StructInfo::~StructInfo() = default;
 
 }  // namespace resolver
 }  // namespace tint

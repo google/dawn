@@ -107,8 +107,9 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
   if (auto* a = ty->As<sem::Alias>()) {
     return ctx->dst->create<ast::TypeName>(ctx->Clone(a->symbol()));
   }
-  if (auto* s = ty->As<sem::StructType>()) {
-    return ctx->dst->create<ast::TypeName>(ctx->Clone(s->impl()->name()));
+  if (auto* s = ty->As<sem::Struct>()) {
+    return ctx->dst->create<ast::TypeName>(
+        ctx->Clone(s->Declaration()->name()));
   }
   TINT_UNREACHABLE(ctx->dst->Diagnostics())
       << "Unhandled type: " << ty->TypeInfo().name;

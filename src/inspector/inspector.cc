@@ -33,7 +33,6 @@
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
-#include "src/sem/struct_type.h"
 #include "src/sem/u32_type.h"
 #include "src/sem/variable.h"
 #include "src/sem/vector_type.h"
@@ -389,7 +388,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     auto binding_info = ruv.second;
 
     auto* unwrapped_type = var->Type()->UnwrapIfNeeded();
-    auto* str = unwrapped_type->As<sem::StructType>();
+    auto* str = unwrapped_type->As<sem::Struct>();
     if (str == nullptr) {
       continue;
     }
@@ -398,19 +397,12 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
       continue;
     }
 
-    auto* sem = program_->Sem().Get(str);
-    if (!sem) {
-      error_ = "Missing semantic information for structure " +
-               program_->Symbols().NameFor(str->impl()->name());
-      continue;
-    }
-
     ResourceBinding entry;
     entry.resource_type = ResourceBinding::ResourceType::kUniformBuffer;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
-    entry.size = sem->Size();
-    entry.size_no_padding = sem->SizeNoPadding();
+    entry.size = str->Size();
+    entry.size_no_padding = str->SizeNoPadding();
 
     result.push_back(entry);
   }
@@ -554,10 +546,9 @@ void Inspector::AddEntryPointInOutVariables(
 
   auto* unwrapped_type = type->UnwrapAll();
 
-  if (auto* struct_ty = unwrapped_type->As<sem::StructType>()) {
+  if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {
     // Recurse into members.
-    auto* sem = program_->Sem().Get(struct_ty);
-    for (auto* member : sem->Members()) {
+    for (auto* member : struct_ty->Members()) {
       AddEntryPointInOutVariables(
           name + "." +
               program_->Symbols().NameFor(member->Declaration()->symbol()),
@@ -611,15 +602,8 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    auto* str = var->Type()->UnwrapIfNeeded()->As<sem::StructType>();
+    auto* str = var->Type()->UnwrapIfNeeded()->As<sem::Struct>();
     if (!str) {
-      continue;
-    }
-
-    auto* sem = program_->Sem().Get(str);
-    if (!sem) {
-      error_ = "Missing semantic information for structure " +
-               program_->Symbols().NameFor(str->impl()->name());
       continue;
     }
 
@@ -629,8 +613,8 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
                   : ResourceBinding::ResourceType::kStorageBuffer;
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
-    entry.size = sem->Size();
-    entry.size_no_padding = sem->SizeNoPadding();
+    entry.size = str->Size();
+    entry.size_no_padding = str->SizeNoPadding();
 
     result.push_back(entry);
   }

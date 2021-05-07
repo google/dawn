@@ -15,6 +15,7 @@
 #include "src/sem/struct.h"
 #include "src/ast/struct_member.h"
 
+#include <string>
 #include <utility>
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
@@ -23,20 +24,16 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
 namespace tint {
 namespace sem {
 
-Struct::Struct(sem::StructType* type,
+Struct::Struct(const ast::Struct* declaration,
                StructMemberList members,
                uint32_t align,
                uint32_t size,
-               uint32_t size_no_padding,
-               std::unordered_set<ast::StorageClass> storage_class_usage,
-               std::unordered_set<PipelineStageUsage> pipeline_stage_uses)
-    : type_(type),
+               uint32_t size_no_padding)
+    : declaration_(declaration),
       members_(std::move(members)),
       align_(align),
       size_(size),
-      size_no_padding_(size_no_padding),
-      storage_class_usage_(std::move(storage_class_usage)),
-      pipeline_stage_uses_(std::move(pipeline_stage_uses)) {}
+      size_no_padding_(size_no_padding) {}
 
 Struct::~Struct() = default;
 
@@ -47,6 +44,14 @@ const StructMember* Struct::FindMember(Symbol name) const {
     }
   }
   return nullptr;
+}
+
+std::string Struct::type_name() const {
+  return declaration_->type_name();
+}
+
+std::string Struct::FriendlyName(const SymbolTable& symbols) const {
+  return declaration_->FriendlyName(symbols);
 }
 
 StructMember::StructMember(ast::StructMember* declaration,

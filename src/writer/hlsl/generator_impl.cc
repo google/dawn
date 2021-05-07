@@ -210,7 +210,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
   if (auto* alias = ty->As<sem::Alias>()) {
     // HLSL typedef is for intrinsic types only. For an alias'd struct,
     // generate a secondary struct with the new name.
-    if (auto* str = alias->type()->As<sem::StructType>()) {
+    if (auto* str = alias->type()->As<sem::Struct>()) {
       if (!EmitStructType(out, str,
                           builder_.Symbols().NameFor(alias->symbol()))) {
         return false;
@@ -223,9 +223,9 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
     }
     out << " " << builder_.Symbols().NameFor(alias->symbol()) << ";"
         << std::endl;
-  } else if (auto* str = ty->As<sem::StructType>()) {
-    if (!EmitStructType(out, str,
-                        builder_.Symbols().NameFor(str->impl()->name()))) {
+  } else if (auto* str = ty->As<sem::Struct>()) {
+    if (!EmitStructType(
+            out, str, builder_.Symbols().NameFor(str->Declaration()->name()))) {
       return false;
     }
   } else {
@@ -1325,7 +1325,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
   }
 
   bool brackets =
-      type->UnwrapAliasIfNeeded()->IsAnyOf<sem::ArrayType, sem::StructType>();
+      type->UnwrapAliasIfNeeded()->IsAnyOf<sem::ArrayType, sem::Struct>();
 
   if (brackets) {
     out << "{";
@@ -1715,9 +1715,9 @@ bool GeneratorImpl::EmitEntryPointData(
     }
 
     auto* type = var->Type()->UnwrapIfNeeded();
-    if (auto* strct = type->As<sem::StructType>()) {
+    if (auto* strct = type->As<sem::Struct>()) {
       out << "ConstantBuffer<"
-          << builder_.Symbols().NameFor(strct->impl()->name()) << "> "
+          << builder_.Symbols().NameFor(strct->Declaration()->name()) << "> "
           << builder_.Symbols().NameFor(decl->symbol())
           << RegisterAndSpace('b', binding_point) << ";" << std::endl;
     } else {
@@ -2038,7 +2038,7 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   for (auto* var : func->params()) {
     auto* sem = builder_.Sem().Get(var);
     auto* type = sem->Type();
-    if (!type->Is<sem::StructType>()) {
+    if (!type->Is<sem::Struct>()) {
       TINT_ICE(diagnostics_) << "Unsupported non-struct entry point parameter";
     }
 
@@ -2140,10 +2140,10 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, sem::Type* type) {
         return false;
       }
     }
-  } else if (auto* str = type->As<sem::StructType>()) {
+  } else if (auto* str = type->As<sem::Struct>()) {
     out << "{";
     bool first = true;
-    for (auto* member : builder_.Sem().Get(str)->Members()) {
+    for (auto* member : str->Members()) {
       if (!first) {
         out << ", ";
       }
@@ -2383,7 +2383,7 @@ bool GeneratorImpl::EmitSwitch(std::ostream& out, ast::SwitchStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitType(std::ostream& out,
-                             sem::Type* type,
+                             const sem::Type* type,
                              ast::StorageClass storage_class,
                              const std::string& name) {
   auto* access = type->As<sem::AccessControl>();
@@ -2407,7 +2407,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
   if (auto* alias = type->As<sem::Alias>()) {
     out << builder_.Symbols().NameFor(alias->symbol());
   } else if (auto* ary = type->As<sem::ArrayType>()) {
-    sem::Type* base_type = ary;
+    const sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
     while (auto* arr = base_type->As<sem::ArrayType>()) {
       if (arr->IsRuntimeArray()) {
@@ -2457,8 +2457,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
       out << "Comparison";
     }
     out << "State";
-  } else if (auto* str = type->As<sem::StructType>()) {
-    out << builder_.Symbols().NameFor(str->impl()->name());
+  } else if (auto* str = type->As<sem::Struct>()) {
+    out << builder_.Symbols().NameFor(str->Declaration()->name());
   } else if (auto* tex = type->As<sem::Texture>()) {
     auto* storage = tex->As<sem::StorageTexture>();
     auto* multism = tex->As<sem::MultisampledTexture>();
@@ -2547,11 +2547,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 }
 
 bool GeneratorImpl::EmitStructType(std::ostream& out,
-                                   const sem::StructType* str,
+                                   const sem::Struct* str,
                                    const std::string& name) {
-  auto* sem_str = builder_.Sem().Get(str);
-
-  auto storage_class_uses = sem_str->StorageClassUsage();
+  auto storage_class_uses = str->StorageClassUsage();
   if (storage_class_uses.size() ==
       storage_class_uses.count(ast::StorageClass::kStorage)) {
     // The only use of the structure is as a storage buffer.
@@ -2563,7 +2561,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
   out << "struct " << name << " {" << std::endl;
 
   increment_indent();
-  for (auto* mem : sem_str->Members()) {
+  for (auto* mem : str->Members()) {
     make_indent(out);
     // TODO(dsinclair): Handle [[offset]] annotation on structs
     // https://bugs.chromium.org/p/tint/issues/detail?id=184
@@ -2579,8 +2577,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
 
     for (auto* deco : mem->Declaration()->decorations()) {
       if (auto* location = deco->As<ast::LocationDecoration>()) {
-        auto& pipeline_stage_uses =
-            builder_.Sem().Get(str)->PipelineStageUses();
+        auto& pipeline_stage_uses = str->PipelineStageUses();
         if (pipeline_stage_uses.size() != 1) {
           TINT_ICE(diagnostics_) << "invalid entry point IO struct uses";
         }

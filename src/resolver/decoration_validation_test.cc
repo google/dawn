@@ -466,8 +466,8 @@ namespace {
 
 using StructBlockTest = ResolverTest;
 TEST_F(StructBlockTest, StructUsedAsArrayElement) {
-  auto s = Structure("S", {Member("x", ty.i32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S", {Member("x", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
   auto a = ty.array(s, 4);
   Global("G", a, ast::StorageClass::kPrivate);
 

@@ -47,8 +47,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
-  auto s = Structure("S", {Member("a", ty.i32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
 
   auto a = ty.access(ast::AccessControl::kReadOnly, s);
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
@@ -60,8 +60,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
-  auto s = Structure("S", {Member("a", ty.i32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S", {Member("a", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
 
   auto a = ty.access(ast::AccessControl::kReadWrite, s);
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
@@ -143,10 +143,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
-  auto s = Structure("S", {
-                              Member("a", ty.i32()),
-                              Member("b", ty.f32()),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.i32()),
+                               Member("b", ty.f32()),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -155,10 +155,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
-  auto s = Structure("S", {
-                              Member("a", ty.i32(), {MemberOffset(8)}),
-                              Member("b", ty.f32(), {MemberOffset(16)}),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.i32(), {MemberOffset(8)}),
+                               Member("b", ty.f32(), {MemberOffset(16)}),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -175,7 +175,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
-  auto s =
+  auto* s =
       Structure("S", {
                          Member("tint_0_padding", ty.i32(), {MemberOffset(8)}),
                          Member("tint_2_padding", ty.f32(), {MemberOffset(16)}),
@@ -196,10 +196,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructAlignDecl) {
-  auto s = Structure("S", {
-                              Member("a", ty.i32(), {MemberAlign(8)}),
-                              Member("b", ty.f32(), {MemberAlign(16)}),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.i32(), {MemberAlign(8)}),
+                               Member("b", ty.f32(), {MemberAlign(16)}),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -214,10 +214,10 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructAlignDecl) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
-  auto s = Structure("S", {
-                              Member("a", ty.i32(), {MemberSize(16)}),
-                              Member("b", ty.f32(), {MemberSize(32)}),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.i32(), {MemberSize(16)}),
+                               Member("b", ty.f32(), {MemberSize(32)}),
+                           });
 
   GeneratorImpl& gen = Build();
 
@@ -232,12 +232,12 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithDecoration) {
-  auto s = Structure("S",
-                     {
-                         Member("a", ty.i32()),
-                         Member("b", ty.f32(), {MemberAlign(8)}),
-                     },
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("S",
+                      {
+                          Member("a", ty.i32()),
+                          Member("b", ty.f32(), {MemberAlign(8)}),
+                      },
+                      {create<ast::StructBlockDecoration>()});
 
   GeneratorImpl& gen = Build();
 
@@ -255,7 +255,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithEntryPointDecorations) {
   ast::DecorationList decos;
   decos.push_back(create<ast::StructBlockDecoration>());
 
-  auto s = Structure(
+  auto* s = Structure(
       "S",
       ast::StructMemberList{
           Member("a", ty.u32(), {Builtin(ast::Builtin::kVertexIndex)}),

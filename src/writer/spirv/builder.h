@@ -449,7 +449,7 @@ class Builder {
   /// @param access_control the access controls to assign to the struct
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
-  bool GenerateStructType(const sem::StructType* struct_type,
+  bool GenerateStructType(const sem::Struct* struct_type,
                           ast::AccessControl::Access access_control,
                           const Operand& result);
   /// Generates a struct member

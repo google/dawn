@@ -105,46 +105,7 @@ TEST_F(ResolverIsHostShareable, ArrayUnsizedOfHostShareable) {
   EXPECT_TRUE(r()->IsHostShareable(ty.array<i32>()));
 }
 
-TEST_F(ResolverIsHostShareable, Struct_AllMembersHostShareable) {
-  EXPECT_TRUE(r()->IsHostShareable(Structure("S", {
-                                                      Member("a", ty.i32()),
-                                                      Member("b", ty.f32()),
-                                                  })));
-}
-
-TEST_F(ResolverIsHostShareable, Struct_SomeMembersNonHostShareable) {
-  auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
-  EXPECT_FALSE(r()->IsHostShareable(Structure("S", {
-                                                       Member("a", ty.i32()),
-                                                       Member("b", ptr_ty),
-                                                   })));
-}
-
-TEST_F(ResolverIsHostShareable, Struct_NestedHostShareable) {
-  auto host_shareable = Structure("S", {
-                                           Member("a", ty.i32()),
-                                           Member("b", ty.f32()),
-                                       });
-  EXPECT_TRUE(
-      r()->IsHostShareable(Structure("S", {
-                                              Member("a", ty.i32()),
-                                              Member("b", host_shareable),
-                                          })));
-}
-
-TEST_F(ResolverIsHostShareable, Struct_NestedNonHostShareable) {
-  auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
-  auto non_host_shareable =
-      Structure("non_host_shareable", {
-                                          Member("a", ty.i32()),
-                                          Member("b", ptr_ty),
-                                      });
-  EXPECT_FALSE(
-      r()->IsHostShareable(Structure("S", {
-                                              Member("a", ty.i32()),
-                                              Member("b", non_host_shareable),
-                                          })));
-}
+// Note: Structure tests covered in host_shareable_validation_test.cc
 
 }  // namespace
 }  // namespace resolver

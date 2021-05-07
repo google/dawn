@@ -290,7 +290,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
   bool EmitType(std::ostream& out,
-                sem::Type* type,
+                const sem::Type* type,
                 ast::StorageClass storage_class,
                 const std::string& name);
   /// Handles generating a structure declaration
@@ -299,7 +299,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param name the struct name
   /// @returns true if the struct is emitted
   bool EmitStructType(std::ostream& out,
-                      const sem::StructType* ty,
+                      const sem::Struct* ty,
                       const std::string& name);
   /// Handles a unary op expression
   /// @param pre the preamble for the expression stream

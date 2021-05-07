@@ -59,8 +59,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   auto ary = ty.array(ty.i32(), 0);
-  auto str = Structure("S", {Member("x", ary)},
-                       {create<ast::StructBlockDecoration>()});
+  auto* str = Structure("S", {Member("x", ary)},
+                        {create<ast::StructBlockDecoration>()});
   auto ac = ty.access(ast::AccessControl::kReadOnly, str);
   Global("a", ac, ast::StorageClass::kStorage);
 
@@ -77,8 +77,8 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
   auto ary = ty.array(ty.i32(), 0);
-  auto str = Structure("S", {Member("x", ary)},
-                       {create<ast::StructBlockDecoration>()});
+  auto* str = Structure("S", {Member("x", ary)},
+                        {create<ast::StructBlockDecoration>()});
   auto ac = ty.access(ast::AccessControl::kReadOnly, str);
   Global("a", ac, ast::StorageClass::kStorage);
 
@@ -285,11 +285,11 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
-  auto s = Structure("S", {});
+  auto* s = Structure("S", {});
 
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(s);
+  auto id = b.GenerateTypeIfNeeded(program->TypeOf(s));
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -301,11 +301,11 @@ TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct) {
-  auto s = Structure("my_struct", {Member("a", ty.f32())});
+  auto* s = Structure("my_struct", {Member("a", ty.f32())});
 
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(s);
+  auto id = b.GenerateTypeIfNeeded(program->TypeOf(s));
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -318,12 +318,12 @@ OpMemberName %1 0 "a"
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Decorated) {
-  auto s = Structure("my_struct", {Member("a", ty.f32())},
-                     {create<ast::StructBlockDecoration>()});
+  auto* s = Structure("my_struct", {Member("a", ty.f32())},
+                      {create<ast::StructBlockDecoration>()});
 
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(s);
+  auto id = b.GenerateTypeIfNeeded(program->TypeOf(s));
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -339,14 +339,14 @@ OpMemberDecorate %1 0 Offset 0
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
-  auto s = Structure("S", {
-                              Member("a", ty.f32()),
-                              Member("b", ty.f32(), {MemberAlign(8)}),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.f32()),
+                               Member("b", ty.f32(), {MemberAlign(8)}),
+                           });
 
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(s);
+  auto id = b.GenerateTypeIfNeeded(program->TypeOf(s));
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -363,15 +363,15 @@ OpMemberDecorate %1 1 Offset 8
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
-  auto s = Structure("S", {
-                              Member("a", ty.mat2x2<f32>()),
-                              Member("b", ty.mat2x3<f32>()),
-                              Member("c", ty.mat4x4<f32>()),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.mat2x2<f32>()),
+                               Member("b", ty.mat2x3<f32>()),
+                               Member("c", ty.mat4x4<f32>()),
+                           });
 
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(s);
+  auto id = b.GenerateTypeIfNeeded(program->TypeOf(s));
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -403,15 +403,15 @@ OpMemberDecorate %1 2 MatrixStride 16
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
   // We have to infer layout for matrix when it also has an offset.
-  auto s = Structure("S", {
-                              Member("a", ty.mat2x2<f32>()),
-                              Member("b", ty.mat2x3<f32>()),
-                              Member("c", ty.mat4x4<f32>()),
-                          });
+  auto* s = Structure("S", {
+                               Member("a", ty.mat2x2<f32>()),
+                               Member("b", ty.mat2x3<f32>()),
+                               Member("c", ty.mat4x4<f32>()),
+                           });
 
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(s);
+  auto id = b.GenerateTypeIfNeeded(program->TypeOf(s));
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 
@@ -449,17 +449,18 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
   auto arr_arr_mat2x3 = ty.array(ty.mat2x3<f32>(), 1);  // Doubly nested array
   auto rtarr_mat4x4 = ty.array(ty.mat4x4<f32>(), 0);    // Runtime array
 
-  auto s = Structure("S",
-                     {
-                         Member("a", arr_mat2x2),
-                         Member("b", arr_arr_mat2x3),
-                         Member("c", rtarr_mat4x4),
-                     },
-                     ast::DecorationList{create<ast::StructBlockDecoration>()});
+  auto* s =
+      Structure("S",
+                {
+                    Member("a", arr_mat2x2),
+                    Member("b", arr_arr_mat2x3),
+                    Member("c", rtarr_mat4x4),
+                },
+                ast::DecorationList{create<ast::StructBlockDecoration>()});
 
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(s);
+  auto id = b.GenerateTypeIfNeeded(program->TypeOf(s));
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(id, 1u);
 

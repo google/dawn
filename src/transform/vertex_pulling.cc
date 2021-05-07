@@ -204,7 +204,7 @@ struct State {
 
     // Creating the struct type
     static const char kStructName[] = "TintVertexData";
-    auto struct_type = ctx.dst->Structure(
+    auto* struct_type = ctx.dst->Structure(
         ctx.dst->Symbols().New(kStructName),
         {
             ctx.dst->Member(GetStructBufferName(),
@@ -432,7 +432,7 @@ struct State {
   /// @param struct_ty the structure type
   void ProcessStructParameter(ast::Function* func,
                               ast::Variable* param,
-                              ast::Struct* struct_ty) {
+                              const ast::Struct* struct_ty) {
     auto param_sym = ctx.Clone(param->symbol());
 
     // Process the struct members.
@@ -486,7 +486,7 @@ struct State {
         new_members.push_back(
             ctx.dst->Member(member_sym, member_type, std::move(member_decos)));
       }
-      auto new_struct = ctx.dst->Structure(ctx.dst->Sym(), new_members);
+      auto* new_struct = ctx.dst->Structure(ctx.dst->Sym(), new_members);
 
       // Create a new function parameter with this struct.
       auto* new_param = ctx.dst->Param(ctx.dst->Sym(), new_struct);
@@ -513,8 +513,8 @@ struct State {
     // Process entry point parameters.
     for (auto* param : func->params()) {
       auto* sem = ctx.src->Sem().Get(param);
-      if (auto* str = sem->Type()->As<sem::StructType>()) {
-        ProcessStructParameter(func, param, str->impl());
+      if (auto* str = sem->Type()->As<sem::Struct>()) {
+        ProcessStructParameter(func, param, str->Declaration());
       } else {
         ProcessNonStructParameter(func, param);
       }

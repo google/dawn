@@ -69,7 +69,7 @@ class Pointer;
 class Sampler;
 class SampledTexture;
 class StorageTexture;
-class StructType;
+class Struct;
 class Texture;
 class Type;
 class U32;
@@ -254,7 +254,7 @@ using Pointer = TypePair<ast::Pointer, sem::Pointer>;
 using Sampler = TypePair<ast::Sampler, sem::Sampler>;
 using SampledTexture = TypePair<ast::SampledTexture, sem::SampledTexture>;
 using StorageTexture = TypePair<ast::StorageTexture, sem::StorageTexture>;
-using Struct = TypePair<ast::Struct, sem::StructType>;
+using Struct = TypePair<ast::Struct, sem::Struct>;
 using Texture = TypePair<ast::Texture, sem::Texture>;
 using U32 = TypePair<ast::U32, sem::U32>;
 using Vector = TypePair<ast::Vector, sem::Vector>;
@@ -270,7 +270,6 @@ template <typename AST, typename SEM>
 inline auto MakeTypePair(AST* ast, SEM* sem) {
   return TypePair<AST, SEM>{ast, sem};
 }
-
 
 }  // namespace typ
 

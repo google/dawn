@@ -35,7 +35,7 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/program.h"
 #include "src/scope_stack.h"
-#include "src/sem/struct_type.h"
+#include "src/sem/struct.h"
 #include "src/writer/text_generator.h"
 
 namespace tint {
@@ -206,7 +206,7 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a struct declaration
   /// @param str the struct to generate
   /// @returns true if the struct is emitted
-  bool EmitStructType(const sem::StructType* str);
+  bool EmitStructType(const sem::Struct* str);
   /// Handles emitting a type constructor
   /// @param expr the type constructor expression
   /// @returns true if the constructor is emitted

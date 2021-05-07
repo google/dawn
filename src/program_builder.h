@@ -72,7 +72,7 @@
 #include "src/sem/pointer_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
-#include "src/sem/struct_type.h"
+#include "src/sem/struct.h"
 #include "src/sem/u32_type.h"
 #include "src/sem/vector_type.h"
 #include "src/sem/void_type.h"
@@ -770,12 +770,6 @@ class ProgramBuilder {
     template <typename T>
     typ::Pointer pointer(ast::StorageClass storage_class) const {
       return pointer(Of<T>(), storage_class);
-    }
-
-    /// @param impl the struct implementation
-    /// @returns a struct pointer
-    typ::Struct struct_(ast::Struct* impl) const {
-      return {impl, builder->create<sem::StructType>(impl)};
     }
 
     /// @param kind the kind of sampler
@@ -1544,40 +1538,36 @@ class ProgramBuilder {
     return create<ast::ReturnStatement>(Expr(std::forward<EXPR>(val)));
   }
 
-  /// Creates a ast::Struct and sem::StructType, registering the
-  /// sem::StructType with the AST().ConstructedTypes().
+  /// Creates a ast::Struct registering it with the AST().ConstructedTypes().
   /// @param source the source information
   /// @param name the struct name
   /// @param members the struct members
   /// @param decorations the optional struct decorations
   /// @returns the struct type
   template <typename NAME>
-  typ::Struct Structure(const Source& source,
-                        NAME&& name,
-                        ast::StructMemberList members,
-                        ast::DecorationList decorations = {}) {
+  ast::Struct* Structure(const Source& source,
+                         NAME&& name,
+                         ast::StructMemberList members,
+                         ast::DecorationList decorations = {}) {
     auto sym = Sym(std::forward<NAME>(name));
-    auto* impl = create<ast::Struct>(source, sym, std::move(members),
+    auto* type = create<ast::Struct>(source, sym, std::move(members),
                                      std::move(decorations));
-    auto type = ty.struct_(impl);
     AST().AddConstructedType(type);
     return type;
   }
 
-  /// Creates a ast::Struct and sem::StructType, registering the
-  /// sem::StructType with the AST().ConstructedTypes().
+  /// Creates a ast::Struct registering it with the AST().ConstructedTypes().
   /// @param name the struct name
   /// @param members the struct members
   /// @param decorations the optional struct decorations
   /// @returns the struct type
   template <typename NAME>
-  typ::Struct Structure(NAME&& name,
-                        ast::StructMemberList members,
-                        ast::DecorationList decorations = {}) {
+  ast::Struct* Structure(NAME&& name,
+                         ast::StructMemberList members,
+                         ast::DecorationList decorations = {}) {
     auto sym = Sym(std::forward<NAME>(name));
-    auto* impl =
+    auto* type =
         create<ast::Struct>(sym, std::move(members), std::move(decorations));
-    auto type = ty.struct_(impl);
     AST().AddConstructedType(type);
     return type;
   }

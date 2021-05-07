@@ -281,8 +281,8 @@ tint_unittests_source_set("tint_unittests_core_src") {
     "../src/sem/pointer_type_test.cc",
     "../src/sem/sampled_texture_type_test.cc",
     "../src/sem/sampler_type_test.cc",
+    "../src/sem/sem_struct_test.cc",
     "../src/sem/storage_texture_type_test.cc",
-    "../src/sem/struct_type_test.cc",
     "../src/sem/texture_type_test.cc",
     "../src/sem/type_manager_test.cc",
     "../src/sem/u32_type_test.cc",
@@ -521,7 +521,6 @@ tint_unittests_source_set("tint_unittests_wgsl_writer_src") {
 tint_unittests_source_set("tint_unittests_msl_writer_src") {
   sources = [
     "../src/transform/msl_test.cc",
-    "../src/writer/msl/generator_impl_alias_type_test.cc",
     "../src/writer/msl/generator_impl_array_accessor_test.cc",
     "../src/writer/msl/generator_impl_assign_test.cc",
     "../src/writer/msl/generator_impl_binary_test.cc",
@@ -560,7 +559,6 @@ tint_unittests_source_set("tint_unittests_msl_writer_src") {
 tint_unittests_source_set("tint_unittests_hlsl_writer_src") {
   sources = [
     "../src/transform/hlsl_test.cc",
-    "../src/writer/hlsl/generator_impl_alias_type_test.cc",
     "../src/writer/hlsl/generator_impl_array_accessor_test.cc",
     "../src/writer/hlsl/generator_impl_assign_test.cc",
     "../src/writer/hlsl/generator_impl_binary_test.cc",
