@@ -58,10 +58,13 @@ namespace dawn_native { namespace vulkan {
             if (GetDevice()->IsRobustnessEnabled()) {
                 transformManager.Add<tint::transform::BoundArrayAccessors>();
             }
-            transformManager.Add<tint::transform::EmitVertexPointSize>();
             transformManager.Add<tint::transform::Spirv>();
 
             tint::transform::DataMap transformInputs;
+
+            tint::transform::Spirv::Config spirv_cfg;
+            spirv_cfg.emit_vertex_point_size = true;
+            transformInputs.Add<tint::transform::Spirv::Config>(spirv_cfg);
 
             tint::Program program;
             DAWN_TRY_ASSIGN(program,
