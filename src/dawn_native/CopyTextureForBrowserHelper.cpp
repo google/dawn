@@ -142,6 +142,30 @@ namespace dawn_native {
             return {};
         }
 
+        MaybeError ValidateSourceOriginAndCopyExtent(const ImageCopyTexture source,
+                                                     const Extent3D copySize) {
+            if (source.origin.z > 0) {
+                return DAWN_VALIDATION_ERROR("Source origin cannot have non-zero z value");
+            }
+
+            if (copySize.depthOrArrayLayers > 1) {
+                return DAWN_VALIDATION_ERROR("Cannot copy to multiple slices");
+            }
+
+            return {};
+        }
+
+        MaybeError ValidateSourceAndDestinationTextureSampleCount(
+            const ImageCopyTexture source,
+            const ImageCopyTexture destination) {
+            if (source.texture->GetSampleCount() > 1 || destination.texture->GetSampleCount() > 1) {
+                return DAWN_VALIDATION_ERROR(
+                    "Source and destiantion textures cannot be multisampled");
+            }
+
+            return {};
+        }
+
         RenderPipelineBase* GetCachedPipeline(InternalPipelineStore* store,
                                               wgpu::TextureFormat dstFormat) {
             auto pipeline = store->copyTextureForBrowserPipelines.find(dstFormat);
@@ -231,13 +255,18 @@ namespace dawn_native {
         DAWN_TRY(ValidateImageCopyTexture(device, *source, *copySize));
         DAWN_TRY(ValidateImageCopyTexture(device, *destination, *copySize));
 
+        DAWN_TRY(ValidateSourceOriginAndCopyExtent(*source, *copySize));
         DAWN_TRY(ValidateCopyTextureForBrowserRestrictions(*source, *destination, *copySize));
+        DAWN_TRY(ValidateSourceAndDestinationTextureSampleCount(*source, *destination));
 
         DAWN_TRY(ValidateTextureCopyRange(device, *source, *copySize));
         DAWN_TRY(ValidateTextureCopyRange(device, *destination, *copySize));
 
         DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
+        DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::Sampled));
+
         DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
+        DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::RenderAttachment));
 
         DAWN_TRY(ValidateCopyTextureFormatConversion(source->texture->GetFormat().format,
                                                      destination->texture->GetFormat().format));
@@ -254,6 +283,11 @@ namespace dawn_native {
                                        const CopyTextureForBrowserOptions* options) {
         // TODO(shaobo.yan@intel.com): In D3D12 and Vulkan, compatible texture format can directly
         // copy to each other. This can be a potential fast path.
+
+        // Noop copy
+        if (copySize->width == 0 || copySize->height == 0 || copySize->depthOrArrayLayers == 0) {
+            return {};
+        }
 
         RenderPipelineBase* pipeline;
         DAWN_TRY_ASSIGN(pipeline, GetOrCreateCopyTextureForBrowserPipeline(
@@ -307,6 +341,7 @@ namespace dawn_native {
         TextureViewDescriptor srcTextureViewDesc = {};
         srcTextureViewDesc.baseMipLevel = source->mipLevel;
         srcTextureViewDesc.mipLevelCount = 1;
+        srcTextureViewDesc.arrayLayerCount = 1;
         Ref<TextureViewBase> srcTextureView;
         DAWN_TRY_ASSIGN(srcTextureView,
                         device->CreateTextureView(source->texture, &srcTextureViewDesc));
@@ -333,6 +368,8 @@ namespace dawn_native {
         TextureViewDescriptor dstTextureViewDesc;
         dstTextureViewDesc.baseMipLevel = destination->mipLevel;
         dstTextureViewDesc.mipLevelCount = 1;
+        dstTextureViewDesc.baseArrayLayer = destination->origin.z;
+        dstTextureViewDesc.arrayLayerCount = 1;
         Ref<TextureViewBase> dstView;
         DAWN_TRY_ASSIGN(dstView,
                         device->CreateTextureView(destination->texture, &dstTextureViewDesc));
