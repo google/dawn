@@ -642,12 +642,13 @@ int main(int argc, const char** argv) {
   if (program->Diagnostics().count() > 0) {
     diag_formatter.format(program->Diagnostics(), diag_printer.get());
   }
-  if (!program->IsValid()) {
-    return 1;
-  }
 
   if (options.dump_ast) {
     std::cout << std::endl << program->to_str(options.demangle) << std::endl;
+  }
+
+  if (!program->IsValid()) {
+    return 1;
   }
   if (options.parse_only) {
     return 1;
