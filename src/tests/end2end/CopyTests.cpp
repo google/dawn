@@ -1697,6 +1697,10 @@ TEST_P(CopyTests_T2T, MultipleMipSrcSingleMipDst) {
 // A regression test for a bug on D3D12 backend that causes crash when doing texture-to-texture
 // copy one row with the texture format Depth32Float.
 TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
+    // Currently this test fails on many D3D12 drivers. See https://crbug.com/dawn/727 for more
+    // details.
+    DAWN_SKIP_TEST_IF(IsD3D12());
+
     constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::Depth32Float;
     constexpr uint32_t kPixelsPerRow = 4u;
 
