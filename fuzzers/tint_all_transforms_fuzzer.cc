@@ -31,9 +31,6 @@ bool AddPlatformIndependentPasses(Config* config) {
   ExtractVertexPullingInputs(&config->reader, &config->inputs);
 
   config->manager.Add<transform::BoundArrayAccessors>();
-  config->manager
-      .Add<transform::EmitVertexPointSize>();  // TODO(tint:753): Remove once
-                                               // transform used by sanitizers
   config->manager.Add<transform::FirstIndexOffset>();
   config->manager.Add<transform::BindingRemapper>();
   config->manager.Add<transform::Renamer>();

@@ -33,7 +33,6 @@ if (${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_SPV_WRITER})
   add_tint_fuzzer(tint_all_transforms_fuzzer)
   add_tint_fuzzer(tint_binding_remapper_fuzzer)
   add_tint_fuzzer(tint_bound_array_accessors_fuzzer)
-  add_tint_fuzzer(tint_emit_vertex_point_size_fuzzer) # TODO(tint:753): Remove once transform used by sanitizers
   add_tint_fuzzer(tint_first_index_offset_fuzzer)
   add_tint_fuzzer(tint_inspector_fuzzer)
   add_tint_fuzzer(tint_renamer_fuzzer)

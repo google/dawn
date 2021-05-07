@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO(tint:753): Remove this fuzzer once that transform is only
-// being used from sanitizers.
-
 #include "fuzzers/tint_common_fuzzer.h"
 
 namespace tint {
