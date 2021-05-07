@@ -46,6 +46,8 @@ std::string CommonTypes() {
   return R"(
     OpCapability Shader
     OpMemoryModel Logical Simple
+    OpEntryPoint Fragment %100 "main"
+    OpExecutionMode %100 OriginUpperLeft
 
     OpName %var "var"
 
@@ -1078,13 +1080,17 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_ReorderSequence) {
      %100 = OpFunction %void None %voidfn
 
      %10 = OpLabel
-     OpBranch %20
+     OpSelectionMerge %99 None
+     OpBranchConditional %cond %20 %30
 
      %30 = OpLabel
      OpReturn
 
      %20 = OpLabel
-     OpBranch %30 ; backtrack
+     OpBranch %30 ; backtrack, but does dominate %30
+
+     %99 = OpLabel
+     OpReturn
 
      OpFunctionEnd
   )"));
@@ -1093,7 +1099,7 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_ReorderSequence) {
   fe.RegisterBasicBlocks();
   fe.ComputeBlockOrderAndPositions();
 
-  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30));
+  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 99));
 
   const auto* bi10 = fe.GetBlockInfo(10);
   ASSERT_NE(bi10, nullptr);
@@ -1104,6 +1110,9 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_ReorderSequence) {
   const auto* bi30 = fe.GetBlockInfo(30);
   ASSERT_NE(bi30, nullptr);
   EXPECT_EQ(bi30->pos, 2u);
+  const auto* bi99 = fe.GetBlockInfo(99);
+  ASSERT_NE(bi99, nullptr);
+  EXPECT_EQ(bi99->pos, 3u);
 }
 
 TEST_F(SpvParserCFGTest, ComputeBlockOrder_DupConditionalBranch) {
@@ -1114,11 +1123,11 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_DupConditionalBranch) {
      OpSelectionMerge %99 None
      OpBranchConditional %cond %20 %20
 
-     %99 = OpLabel
-     OpReturn
-
      %20 = OpLabel
      OpBranch %99
+
+     %99 = OpLabel
+     OpReturn
 
      OpFunctionEnd
   )"));
@@ -1138,14 +1147,14 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_RespectConditionalBranchOrder) {
      OpSelectionMerge %99 None
      OpBranchConditional %cond %20 %30
 
-     %99 = OpLabel
-     OpReturn
-
      %30 = OpLabel
      OpReturn
 
      %20 = OpLabel
      OpBranch %99
+
+     %99 = OpLabel ; dominated by %20, so follow %20
+     OpReturn
 
      OpFunctionEnd
   )"));
@@ -1299,7 +1308,9 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_RespectSwitchCaseFallthrough) {
 
      %10 = OpLabel
      OpSelectionMerge %99 None
-     OpSwitch %selector %99 20 %20 30 %30 40 %40 50 %50
+     ; SPIR-V validation requires a fallthrough destination to immediately
+     ; follow the source. So %20 -> %40, %30 -> %50
+     OpSwitch %selector %99 20 %20 40 %40 30 %30 50 %50
 
      %50 = OpLabel
      OpBranch %99
@@ -1373,9 +1384,6 @@ TEST_F(SpvParserCFGTest,
      OpSelectionMerge %99 None
      OpSwitch %selector %80 20 %20 30 %30
 
-     %99 = OpLabel
-     OpReturn
-
      %20 = OpLabel
      OpBranch %80 ; fallthrough to default
 
@@ -1384,6 +1392,9 @@ TEST_F(SpvParserCFGTest,
 
      %30 = OpLabel
      OpBranch %99
+
+     %99 = OpLabel ; dominated by %30, so follow %30
+     OpReturn
 
      OpFunctionEnd
   )";
@@ -1432,6 +1443,9 @@ TEST_F(SpvParserCFGTest,
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 50, 40, 20, 30, 99))
       << assembly;
+
+  // We're deliberately testing a case that SPIR-V doesn't allow.
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserCFGTest,
@@ -1441,7 +1455,9 @@ TEST_F(SpvParserCFGTest,
 
      %10 = OpLabel
      OpSelectionMerge %99 None
-     OpSwitch %selector %99 20 %20 30 %30 40 %40 50 %50
+     ; SPIR-V validation requires a fallthrough destination to immediately
+     ; follow the source. So %20 -> %40
+     OpSwitch %selector %99 20 %20 40 %40 30 %30 50 %50
 
      %99 = OpLabel
      OpReturn
@@ -1641,21 +1657,21 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Nest_IfBreak_In_SwitchCase) {
      OpSelectionMerge %49 None
      OpBranchConditional %cond %99 %40 ; break-if
 
-     %49 = OpLabel
-     OpBranch %99
-
      %40 = OpLabel
      OpBranch %49
+
+     %49 = OpLabel
+     OpBranch %99
 
      %50 = OpLabel
      OpSelectionMerge %79 None
      OpBranchConditional %cond %60 %99 ; break-unless
 
-     %79 = OpLabel
-     OpBranch %99
-
      %60 = OpLabel
      OpBranch %79
+
+     %79 = OpLabel ; dominated by 60, so must follow 60
+     OpBranch %99
 
      OpFunctionEnd
   )";
@@ -2184,6 +2200,11 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_Switch_CaseBreaks) {
 
   EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99))
       << assembly;
+
+  // Fails SPIR-V validation:
+  // Branch from block 40 to block 99 is an invalid exit from construct starting
+  // at block 30; branch bypasses merge block 49
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_Switch_CaseContinues) {
@@ -2240,6 +2261,7 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
      OpBranchConditional %cond %30 %99
 
      %30 = OpLabel
+     ; OpSwitch must be preceded by a selection merge
      OpSwitch %selector %99 50 %50 ; default is break, 50 is continue
 
      %40 = OpLabel
@@ -2254,12 +2276,10 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  fe.RegisterBasicBlocks();
-  fe.ComputeBlockOrderAndPositions();
-
-  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(p->error(),
+              HasSubstr("OpSwitch must be preceeded by an OpSelectionMerge"));
 }
 
 TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_Sequence) {
@@ -2414,7 +2434,9 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_SwitchBreak) {
      OpBranch %50
 
      %50 = OpLabel
-     OpSwitch %selector %20 99 %99 ; yes, this is obtuse but valid
+     ; Updated SPIR-V rule:
+     ; OpSwitch must be preceded by a selection.
+     OpSwitch %selector %20 99 %99
 
      %99 = OpLabel
      OpReturn
@@ -2422,12 +2444,10 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_SwitchBreak) {
      OpFunctionEnd
   )";
   auto p = parser(test::Assemble(assembly));
-  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-  auto fe = p->function_emitter(100);
-  fe.RegisterBasicBlocks();
-  fe.ComputeBlockOrderAndPositions();
-
-  EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(p->error(),
+              HasSubstr("OpSwitch must be preceeded by an OpSelectionMerge"));
 }
 
 TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop) {
@@ -2653,6 +2673,11 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_InnerContinueContinues) {
 
   EXPECT_THAT(fe.block_order(),
               ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
+
+  p->DeliberatelyInvalidSpirv();
+  // SPIR-V validation fails:
+  //    block <ID> 40[%40] exits the continue headed by <ID> 40[%40], but not
+  //    via a structured exit"
 }
 
 TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_SwitchBackedgeBreakContinue) {
@@ -2703,6 +2728,11 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_SwitchBackedgeBreakContinue
 
   EXPECT_THAT(fe.block_order(),
               ElementsAre(10, 20, 30, 35, 37, 40, 49, 50, 99));
+
+  p->DeliberatelyInvalidSpirv();
+  // SPIR-V validation fails:
+  //    block <ID> 40[%40] exits the continue headed by <ID> 40[%40], but not
+  //    via a structured exit"
 }
 
 TEST_F(SpvParserCFGTest, VerifyHeaderContinueMergeOrder_Selection_Good) {
@@ -3178,7 +3208,7 @@ TEST_F(SpvParserCFGTest,
 
      %20 = OpLabel
      OpLoopMerge %99 %20 None
-     OpBranchConditional %cond %30 %99
+     OpBranch %30
 
      %30 = OpLabel
      OpBranch %40
@@ -3187,7 +3217,7 @@ TEST_F(SpvParserCFGTest,
      OpBranch %50
 
      %50 = OpLabel
-     OpBranch %20
+     OpBranchConditional %cond %20 %99
 
      %99 = OpLabel
      OpReturn
@@ -3487,7 +3517,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_Loop_Loop) {
 
      %20 = OpLabel
      OpLoopMerge %89 %50 None
-     OpBranchConditional %cond %30 %99
+     OpBranchConditional %cond %30 %89
 
      %30 = OpLabel ; single block loop
      OpLoopMerge %40 %30 None
@@ -3650,7 +3680,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_SingleBlockLoop) {
 
      %20 = OpLabel
      OpLoopMerge %89 %20 None
-     OpBranchConditional %cond %20 %99
+     OpBranchConditional %cond %20 %89
 
      %89 = OpLabel
      OpBranch %99
@@ -3702,7 +3732,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_MultiBlockLoop) {
      OpBranch %20
 
      %89 = OpLabel ; merge for the loop
-     OpBranch %20
+     OpBranch %99
 
      %99 = OpLabel ; merge for the if
      OpReturn
@@ -4050,6 +4080,9 @@ TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_CaseCanBeSwitchMerge) {
   fe.RegisterMerges();
   fe.LabelControlFlowConstructs();
   EXPECT_TRUE(fe.FindSwitchCaseHeaders());
+
+  // TODO(crbug.com/tint/774) Re-enable after codegen bug fixed.
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_CaseCantEscapeSwitch) {
@@ -7493,6 +7526,10 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_IfBreak_WithForwardToPremerge) {
   EXPECT_EQ(bi20->succ_edge[99], EdgeKind::kIfBreak);
 
   EXPECT_THAT(p->error(), Eq(""));
+
+  // TODO(crbug.com/tint/775): The SPIR-V reader errors out on this case.
+  // Remove this when it's fixed.
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(
@@ -10460,7 +10497,7 @@ Return{
 
 TEST_F(SpvParserCFGTest, EmitBody_ReturnValue_Loop) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
-     %200 = OpFunction %void None %voidfn
+     %200 = OpFunction %uint None %uintfn
 
      %210 = OpLabel
      OpBranch %220
@@ -11002,8 +11039,9 @@ TEST_F(
                  "(violates post-dominance rule)"));
 }
 
-TEST_F(SpvParserCFGTest,
-       EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd) {
+TEST_F(
+    SpvParserCFGTest,
+    EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Unconditional) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -11017,6 +11055,52 @@ TEST_F(SpvParserCFGTest,
      %80 = OpLabel ; continue target
      OpStore %var %uint_1
      OpBranch %99  ; should be a backedge
+     ; This is invalid as there must be a backedge to the loop header.
+     ; The SPIR-V allows this and understands how to emit it, even if it's not
+     ; permitted by the SPIR-V validator.
+
+     %99 = OpLabel
+     OpReturn
+
+     OpFunctionEnd
+  )"));
+
+  p->DeliberatelyInvalidSpirv();
+
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  auto got = ToString(p->builder(), fe.ast_body());
+  auto* expect = R"(Loop{
+  continuing {
+    Assignment{
+      Identifier[not set]{var_1}
+      ScalarConstructor[not set]{1u}
+    }
+    Break{}
+  }
+}
+Return{}
+)";
+  ASSERT_EQ(expect, got);
+}
+
+TEST_F(
+    SpvParserCFGTest,
+    EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional) {
+  auto p = parser(test::Assemble(CommonTypes() + R"(
+     %100 = OpFunction %void None %voidfn
+
+     %10 = OpLabel
+     OpBranch %20
+
+     %20 = OpLabel
+     OpLoopMerge %99 %80 None
+     OpBranch %80
+
+     %80 = OpLabel ; continue target
+     OpStore %var %uint_1
+     OpBranchConditional %cond %20 %99  ; backedge, and exit
 
      %99 = OpLabel
      OpReturn
@@ -11033,7 +11117,18 @@ TEST_F(SpvParserCFGTest,
       Identifier[not set]{var_1}
       ScalarConstructor[not set]{1u}
     }
-    Break{}
+    If{
+      (
+        ScalarConstructor[not set]{false}
+      )
+      {
+      }
+    }
+    Else{
+      {
+        Break{}
+      }
+    }
   }
 }
 Return{}
@@ -14198,10 +14293,10 @@ TEST_F(SpvParserCFGTest, SiblingLoopConstruct_ContinueIsWholeMultiBlockLoop) {
 
      %20 = OpLabel
      OpLoopMerge %99 %20 None ; continue target is also loop header
-     OpBranchConditional %cond %30 %99
+     OpBranch %30
 
      %30 = OpLabel
-     OpBranch %20
+     OpBranchConditional %cond %20 %99
 
      %99 = OpLabel
      OpReturn
