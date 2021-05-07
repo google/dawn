@@ -24,7 +24,7 @@
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
 #include "src/sem/access_control_type.h"
-#include "src/sem/array_type.h"
+#include "src/sem/array.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/function.h"
 #include "src/sem/i32_type.h"
@@ -76,13 +76,13 @@ TypeTextureDimensionToResourceBindingTextureDimension(
   return ResourceBinding::TextureDimension::kNone;
 }
 
-ResourceBinding::SampledKind BaseTypeToSampledKind(sem::Type* base_type) {
+ResourceBinding::SampledKind BaseTypeToSampledKind(const sem::Type* base_type) {
   if (!base_type) {
     return ResourceBinding::SampledKind::kUnknown;
   }
 
-  if (auto* at = base_type->As<sem::ArrayType>()) {
-    base_type = at->type();
+  if (auto* at = base_type->As<sem::Array>()) {
+    base_type = const_cast<sem::Type*>(at->ElemType());
   } else if (auto* mt = base_type->As<sem::Matrix>()) {
     base_type = mt->type();
   } else if (auto* vt = base_type->As<sem::Vector>()) {
@@ -650,7 +650,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
-    sem::Type* base_type = nullptr;
+    const sem::Type* base_type = nullptr;
     if (multisampled_only) {
       base_type = texture_type->As<sem::MultisampledTexture>()
                       ->type()
@@ -702,7 +702,7 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
-    sem::Type* base_type = texture_type->type()->UnwrapIfNeeded();
+    auto* base_type = texture_type->type()->UnwrapIfNeeded();
     entry.sampled_kind = BaseTypeToSampledKind(base_type);
     entry.image_format = TypeImageFormatToResourceBindingImageFormat(
         texture_type->image_format());

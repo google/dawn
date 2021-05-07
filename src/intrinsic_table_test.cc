@@ -202,14 +202,15 @@ TEST_F(IntrinsicTableTest, MismatchPointer) {
 }
 
 TEST_F(IntrinsicTableTest, MatchArray) {
-  auto result = table->Lookup(*this, IntrinsicType::kArrayLength,
-                              {ty.array<f32>()}, Source{});
+  auto* arr = create<sem::Array>(create<sem::U32>(), 0, 4, 4, 4, true);
+  auto result =
+      table->Lookup(*this, IntrinsicType::kArrayLength, {arr}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kArrayLength);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.u32());
-  EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{ty.array<f32>()}));
+  ASSERT_EQ(result.intrinsic->Parameters().size(), 1u);
+  EXPECT_TRUE(result.intrinsic->Parameters()[0].type->Is<sem::Array>());
 }
 
 TEST_F(IntrinsicTableTest, MismatchArray) {

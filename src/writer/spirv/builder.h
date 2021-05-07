@@ -65,7 +65,7 @@ class Builder {
     uint32_t source_id;
     /// The type of the current chain source. This type matches the deduced
     /// result_type of the current source defined above.
-    sem::Type* source_type;
+    const sem::Type* source_type;
     /// A list of access chain indices to emit. Note, we _only_ have access
     /// chain indices if the source is pointer.
     std::vector<uint32_t> access_chain_indices;
@@ -263,7 +263,7 @@ class Builder {
   /// @param type the type to generate for
   /// @param struct_id the struct id
   /// @param member_idx the member index
-  void GenerateMemberAccessControlIfNeeded(sem::Type* type,
+  void GenerateMemberAccessControlIfNeeded(const sem::Type* type,
                                            uint32_t struct_id,
                                            uint32_t member_idx);
   /// Generates a function variable
@@ -372,7 +372,7 @@ class Builder {
   /// @param texture_operand the texture operand
   /// @param sampler_operand the sampler operand
   /// @returns the expression ID
-  uint32_t GenerateSampledImage(sem::Type* texture_type,
+  uint32_t GenerateSampledImage(const sem::Type* texture_type,
                                 Operand texture_operand,
                                 Operand sampler_operand);
   /// Generates a cast or object copy for the expression result,
@@ -413,7 +413,7 @@ class Builder {
   /// @param type the type to load
   /// @param id the variable id to load
   /// @returns the ID of the loaded value or `id` if type is not a pointer
-  uint32_t GenerateLoadIfNeeded(sem::Type* type, uint32_t id);
+  uint32_t GenerateLoadIfNeeded(const sem::Type* type, uint32_t id);
   /// Generates an OpStore. Emits an error and returns false if we're
   /// currently outside a function.
   /// @param to the ID to store too
@@ -433,7 +433,7 @@ class Builder {
   /// @param ary the array to generate
   /// @param result the result operand
   /// @returns true if the array was successfully generated
-  bool GenerateArrayType(const sem::ArrayType* ary, const Operand& result);
+  bool GenerateArrayType(const sem::Array* ary, const Operand& result);
   /// Generates a matrix type declaration
   /// @param mat the matrix to generate
   /// @param result the result operand
@@ -488,7 +488,7 @@ class Builder {
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
-  sem::Type* TypeOf(ast::Expression* expr) const {
+  const sem::Type* TypeOf(ast::Expression* expr) const {
     return builder_.TypeOf(expr);
   }
 

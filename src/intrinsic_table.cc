@@ -408,9 +408,9 @@ class ArrayBuilder : public Builder {
       : element_builder_(element_builder) {}
 
   bool MatchUnwrapped(MatchState& state, const sem::Type* ty) const override {
-    if (auto* arr = ty->As<sem::ArrayType>()) {
-      if (arr->size() == 0) {
-        return element_builder_->Match(state, arr->type());
+    if (auto* arr = ty->As<sem::Array>()) {
+      if (arr->IsRuntimeSized()) {
+        return element_builder_->Match(state, arr->ElemType());
       }
     }
     return false;
@@ -418,8 +418,7 @@ class ArrayBuilder : public Builder {
 
   sem::Type* Build(BuildState& state) const override {
     auto* el = element_builder_->Build(state);
-    return state.ty_mgr.Get<sem::ArrayType>(const_cast<sem::Type*>(el), 0,
-                                            ast::DecorationList{});
+    return state.ty_mgr.Get<sem::Array>(el, 0, 0, 0, 0, true);
   }
 
   std::string str() const override {

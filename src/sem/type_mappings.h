@@ -34,7 +34,6 @@ class Variable;
 namespace sem {
 // Forward declarations
 class Array;
-class ArrayType;
 class Call;
 class Expression;
 class Function;
@@ -51,7 +50,6 @@ class Variable;
 /// rules will be used to infer the return type based on the argument type.
 struct TypeMappings {
   //! @cond Doxygen_Suppress
-  Array* operator()(sem::ArrayType*);
   Call* operator()(ast::CallExpression*);
   Expression* operator()(ast::Expression*);
   Function* operator()(ast::Function*);

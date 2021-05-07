@@ -57,7 +57,7 @@ class Void;
 namespace sem {
 class AccessControl;
 class Alias;
-class ArrayType;
+class Array;
 class Bool;
 class DepthTexture;
 class ExternalTexture;
@@ -241,7 +241,7 @@ using Type = TypePair<ast::Type, sem::Type>;
 
 using AccessControl = TypePair<ast::AccessControl, sem::AccessControl>;
 using Alias = TypePair<ast::Alias, sem::Alias>;
-using Array = TypePair<ast::Array, sem::ArrayType>;
+using Array = TypePair<ast::Array, sem::Array>;
 using Bool = TypePair<ast::Bool, sem::Bool>;
 using DepthTexture = TypePair<ast::DepthTexture, sem::DepthTexture>;
 using ExternalTexture = TypePair<ast::ExternalTexture, sem::ExternalTexture>;

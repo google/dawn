@@ -39,7 +39,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
                                              ast::Expression* vector,
                                              ast::Expression* scalar) {
   uint32_t packed_size;
-  sem::Type* packed_el_sem_ty;
+  const sem::Type* packed_el_sem_ty;
   auto* vector_sem = b->Sem().Get(vector);
   auto* vector_ty = vector_sem->Type()->UnwrapPtrIfNeeded();
   if (auto* vec = vector_ty->As<sem::Vector>()) {

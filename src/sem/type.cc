@@ -37,28 +37,28 @@ Type::Type(Type&&) = default;
 
 Type::~Type() = default;
 
-Type* Type::UnwrapPtrIfNeeded() {
+const Type* Type::UnwrapPtrIfNeeded() const {
   if (auto* ptr = As<sem::Pointer>()) {
     return ptr->type();
   }
   return this;
 }
 
-Type* Type::UnwrapAliasIfNeeded() {
-  Type* unwrapped = this;
+const Type* Type::UnwrapAliasIfNeeded() const {
+  const Type* unwrapped = this;
   while (auto* ptr = unwrapped->As<sem::Alias>()) {
     unwrapped = ptr->type();
   }
   return unwrapped;
 }
 
-Type* Type::UnwrapIfNeeded() {
+const Type* Type::UnwrapIfNeeded() const {
   auto* where = this;
   while (true) {
     if (auto* alias = where->As<sem::Alias>()) {
-          where = alias->type();
+      where = alias->type();
     } else if (auto* access = where->As<sem::AccessControl>()) {
-          where = access->type();
+      where = access->type();
     } else {
       break;
     }
@@ -66,7 +66,7 @@ Type* Type::UnwrapIfNeeded() {
   return where;
 }
 
-Type* Type::UnwrapAll() {
+const Type* Type::UnwrapAll() const {
   return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
 }
 

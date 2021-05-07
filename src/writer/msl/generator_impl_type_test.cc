@@ -67,62 +67,68 @@ TEST_F(MslGeneratorImplTest, EmitType_Alias) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
-  auto arr = ty.array<bool, 4>();
+  auto* arr = ty.array<bool, 4>();
+  Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(arr, "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(arr), "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
-  auto a = ty.array<bool, 4>();
-  auto b = ty.array(a, 5);
+  auto* a = ty.array<bool, 4>();
+  auto* b = ty.array(a, 5);
+  Global("G", b, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(b, "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(b), "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[5][4]");
 }
 
 // TODO(dsinclair): Is this possible? What order should it output in?
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
-  auto a = ty.array<bool, 4>();
-  auto b = ty.array(a, 5);
-  auto c = ty.array(b, 0);
+  auto* a = ty.array<bool, 4>();
+  auto* b = ty.array(a, 5);
+  auto* c = ty.array(b, 0);
+  Global("G", c, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(c, "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(c), "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[5][4][1]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
-  auto a = ty.array<bool, 4>();
-  auto b = ty.array(a, 5);
-  auto c = ty.array(b, 6);
+  auto* a = ty.array<bool, 4>();
+  auto* b = ty.array(a, 5);
+  auto* c = ty.array(b, 6);
+  Global("G", c, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(c, "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(c), "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[6][5][4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
-  auto arr = ty.array<bool, 4>();
+  auto* arr = ty.array<bool, 4>();
+  Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(arr, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(arr), "")) << gen.error();
   EXPECT_EQ(gen.result(), "bool[4]");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
-  auto arr = ty.array<bool, 1>();
+  auto* arr = ty.array<bool, 1>();
+  Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(arr, "ary")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(arr), "ary")) << gen.error();
   EXPECT_EQ(gen.result(), "bool ary[1]");
 }
 
@@ -411,13 +417,13 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                          });
 
   // array_x: size(28), align(4)
-  auto array_x = ty.array<f32, 7>();
+  auto* array_x = ty.array<f32, 7>();
 
   // array_y: size(4096), align(512)
-  auto array_y = ty.array(inner, 4);
+  auto* array_y = ty.array(inner, 4);
 
   // array_z: size(4), align(4)
-  auto array_z = ty.array<f32>();
+  auto* array_z = ty.array<f32>();
 
   auto* s =
       Structure("S",

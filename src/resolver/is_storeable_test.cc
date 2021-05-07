@@ -82,11 +82,13 @@ TEST_F(ResolverIsStorableTest, AccessControlI32) {
 }
 
 TEST_F(ResolverIsStorableTest, ArraySizedOfStorable) {
-  EXPECT_TRUE(r()->IsStorable(ty.array(ty.i32(), 5)));
+  auto* arr = create<sem::Array>(create<sem::I32>(), 5, 4, 20, 4, true);
+  EXPECT_TRUE(r()->IsStorable(arr));
 }
 
 TEST_F(ResolverIsStorableTest, ArrayUnsizedOfStorable) {
-  EXPECT_TRUE(r()->IsStorable(ty.array<i32>()));
+  auto* arr = create<sem::Array>(create<sem::I32>(), 0, 4, 4, 4, true);
+  EXPECT_TRUE(r()->IsStorable(arr));
 }
 
 TEST_F(ResolverIsStorableTest, Struct_AllMembersStorable) {

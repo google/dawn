@@ -42,7 +42,7 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
   auto& diags = ctx->dst->Diagnostics();
 
   auto* ret_type = ctx->src->Sem().Get(expr->array())->Type()->UnwrapAll();
-  if (!ret_type->Is<sem::ArrayType>() && !ret_type->Is<sem::Matrix>() &&
+  if (!ret_type->Is<sem::Array>() && !ret_type->Is<sem::Matrix>() &&
       !ret_type->Is<sem::Vector>()) {
     return nullptr;
   }
@@ -52,10 +52,10 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
 
   uint32_t size = 0;
   bool is_vec = ret_type->Is<sem::Vector>();
-  bool is_arr = ret_type->Is<sem::ArrayType>();
+  bool is_arr = ret_type->Is<sem::Array>();
   if (is_vec || is_arr) {
     size = is_vec ? ret_type->As<sem::Vector>()->size()
-                  : ret_type->As<sem::ArrayType>()->size();
+                  : ret_type->As<sem::Array>()->Count();
   } else {
     // The row accessor would have been an embedded array accessor and already
     // handled, so we just need to do columns here.

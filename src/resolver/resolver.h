@@ -224,7 +224,7 @@ class Resolver {
 
   // AST and Type validation methods
   // Each return true on success, false on failure.
-  bool ValidateArray(const sem::ArrayType* arr, const Source& source);
+  bool ValidateArray(const sem::Array* arr, const Source& source);
   bool ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
                                      uint32_t el_size,
                                      uint32_t el_align,
@@ -250,15 +250,18 @@ class Resolver {
   /// @param ty the ast::Type
   sem::Type* Type(const ast::Type* ty);
 
-  /// @returns the semantic information for the array `arr`, building it if it
-  /// hasn't been constructed already. If an error is raised, nullptr is
-  /// returned.
+  /// Builds and returns the semantic information for the array `arr`.
+  /// This method does not mark the ast::Array node, nor attach the generated
+  /// semantic information to the AST node.
+  /// @returns the semantic Array information, or nullptr if an error is raised.
   /// @param arr the Array to get semantic information for
-  /// @param source the Source of the ast node with this array as its type
-  const sem::Array* Array(const sem::ArrayType* arr, const Source& source);
+  sem::Array* Array(const ast::Array* arr);
 
-  /// @returns the sem::Struct for the AST structure `str`. If an error is
-  /// raised, nullptr is returned.
+  /// Builds and returns the semantic information for the structure `str`.
+  /// This method does not mark the ast::Struct node, nor attach the generated
+  /// semantic information to the AST node.
+  /// @returns the semantic Struct information, or nullptr if an error is
+  /// raised. raised, nullptr is returned.
   sem::Struct* Structure(const ast::Struct* str);
 
   /// @returns the VariableInfo for the variable `var`, building it if it hasn't
@@ -268,7 +271,7 @@ class Resolver {
   /// @param type_name optional type name of `var` to use instead of
   /// `var->type()->FriendlyName()`.
   VariableInfo* Variable(ast::Variable* var,
-                         sem::Type* type = nullptr,
+                         const sem::Type* type = nullptr,
                          std::string type_name = "");
 
   /// Records the storage class usage for the given type, and any transient
@@ -285,12 +288,10 @@ class Resolver {
 
   /// @param align the output default alignment in bytes for the type `ty`
   /// @param size the output default size in bytes for the type `ty`
-  /// @param source the Source of the variable declaration of type `ty`
   /// @returns true on success, false on error
   bool DefaultAlignAndSize(const sem::Type* ty,
                            uint32_t& align,
-                           uint32_t& size,
-                           const Source& source);
+                           uint32_t& size);
 
   /// @returns the resolved type of the ast::Expression `expr`
   /// @param expr the expression
@@ -333,7 +334,7 @@ class Resolver {
   /// @param size the vector dimension
   /// @param element_type scalar vector sub-element type
   /// @return pretty string representation
-  std::string VectorPretty(uint32_t size, sem::Type* element_type);
+  std::string VectorPretty(uint32_t size, const sem::Type* element_type);
 
   /// Mark records that the given AST node has been visited, and asserts that
   /// the given node has not already been seen. Diamonds in the AST are illegal.

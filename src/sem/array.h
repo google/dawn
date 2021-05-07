@@ -16,28 +16,47 @@
 #define SRC_SEM_ARRAY_H_
 
 #include <stdint.h>
+#include <string>
 
 #include "src/sem/node.h"
+#include "src/sem/type.h"
+
+// Forward declarations
+namespace tint {
+namespace ast {
+class Array;
+}  // namespace ast
+}  // namespace tint
 
 namespace tint {
-
 namespace sem {
-// Forward declarations
-class ArrayType;
 
 /// Array holds the semantic information for Array nodes.
-class Array : public Castable<Array, Node> {
+class Array : public Castable<Array, Type> {
  public:
   /// Constructor
-  /// @param type the Array type
-  /// @param align the byte alignment of the structure
-  /// @param size the byte size of the structure
+  /// @param element the array element type
+  /// @param count the number of elements in the array. 0 represents a
+  /// runtime-sized array.
+  /// @param align the byte alignment of the array
+  /// @param size the byte size of the array
   /// @param stride the number of bytes from the start of one element of the
   /// array to the start of the next element
-  Array(sem::ArrayType* type, uint32_t align, uint32_t size, uint32_t stride);
+  /// @param stride_implicit is true if the value of `stride` matches the
+  /// element's natural stride.
+  Array(Type const* element,
+        uint32_t count,
+        uint32_t align,
+        uint32_t size,
+        uint32_t stride,
+        bool stride_implicit);
 
-  /// @return the resolved type of the Array
-  sem::ArrayType* Type() const { return type_; }
+  /// @return the array element type
+  Type const* ElemType() const { return element_; }
+
+  /// @returns the number of elements in the array. 0 represents a runtime-sized
+  /// array.
+  uint32_t Count() const { return count_; }
 
   /// @returns the byte alignment of the array
   /// @note this may differ from the alignment of a structure member of this
@@ -47,17 +66,34 @@ class Array : public Castable<Array, Node> {
   /// @returns the byte size of the array
   /// @note this may differ from the size of a structure member of this array
   /// type, if the member is annotated with the `[[size(n)]]` decoration.
-  uint32_t Size() const { return size_; }
+  uint32_t SizeInBytes() const { return size_; }
 
   /// @returns the number of bytes from the start of one element of the
   /// array to the start of the next element
   uint32_t Stride() const { return stride_; }
 
+  /// @returns true if the value returned by Stride() does matches the
+  /// element's natural stride
+  bool IsStrideImplicit() const { return stride_implicit_; }
+
+  /// @returns true if this array is runtime sized
+  bool IsRuntimeSized() const { return count_ == 0; }
+
+  /// @returns the name for the type
+  std::string type_name() const override;
+
+  /// @param symbols the program's symbol table
+  /// @returns the name for this type that closely resembles how it would be
+  /// declared in WGSL.
+  std::string FriendlyName(const SymbolTable& symbols) const override;
+
  private:
-  sem::ArrayType* const type_;
+  Type const* const element_;
+  uint32_t const count_;
   uint32_t const align_;
   uint32_t const size_;
   uint32_t const stride_;
+  bool const stride_implicit_;
 };
 
 }  // namespace sem

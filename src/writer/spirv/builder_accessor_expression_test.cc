@@ -135,7 +135,7 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
 }
 
 TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
-  auto ary4 = ty.array(ty.vec3<f32>(), 4);
+  auto* ary4 = ty.array(ty.vec3<f32>(), 4);
 
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
@@ -173,7 +173,7 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 }
 
 TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
-  auto ary4 = ty.array(ty.vec3<f32>(), 4);
+  auto* ary4 = ty.array(ty.vec3<f32>(), 4);
 
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
@@ -696,10 +696,10 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   auto* c_type = Structure("C", {Member("baz", ty.vec3<f32>())});
 
   auto* b_type = Structure("B", {Member("bar", c_type)});
-  auto b_ary_type = ty.array(b_type, 3);
+  auto* b_ary_type = ty.array(b_type, 3);
   auto* a_type = Structure("A", {Member("foo", b_ary_type)});
 
-  auto a_ary_type = ty.array(a_type, 2);
+  auto* a_ary_type = ty.array(a_type, 2);
   auto* var = Global("index", a_ary_type, ast::StorageClass::kFunction);
   auto* expr = MemberAccessor(
       MemberAccessor(

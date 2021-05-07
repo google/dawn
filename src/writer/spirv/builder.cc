@@ -111,9 +111,9 @@ uint32_t IndexFromName(char name) {
 /// one or more levels of an arrays inside of `type`.
 /// @param type the given type, which must not be null
 /// @returns the nested matrix type, or nullptr if none
-sem::Matrix* GetNestedMatrixType(sem::Type* type) {
-  while (auto* arr = type->As<sem::ArrayType>()) {
-    type = arr->type();
+const sem::Matrix* GetNestedMatrixType(const sem::Type* type) {
+  while (auto* arr = type->As<sem::Array>()) {
+    type = arr->ElemType();
   }
   return type->As<sem::Matrix>();
 }
@@ -251,7 +251,7 @@ uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
 }
 
 /// @return the vector element type if ty is a vector, otherwise return ty.
-sem::Type* ElementTypeOf(sem::Type* ty) {
+const sem::Type* ElementTypeOf(const sem::Type* ty) {
   if (auto* v = ty->As<sem::Vector>()) {
     return v->type();
   }
@@ -1067,9 +1067,9 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   // how the Resolver currently determines the type of these expression. This
   // should be fixed when proper support for ptr/ref types is implemented.
   if (auto* array = accessors[0]->As<ast::ArrayAccessorExpression>()) {
-    auto* ary_res_type = TypeOf(array->array())->As<sem::ArrayType>();
+    auto* ary_res_type = TypeOf(array->array())->As<sem::Array>();
     if (ary_res_type &&
-        (!ary_res_type->type()->is_scalar() ||
+        (!ary_res_type->ElemType()->is_scalar() ||
          !array->idx_expr()->Is<ast::ScalarConstructorExpression>())) {
       // Wrap the source type in a pointer to function storage.
       auto ptr =
@@ -1167,7 +1167,7 @@ uint32_t Builder::GenerateIdentifierExpression(
   return 0;
 }
 
-uint32_t Builder::GenerateLoadIfNeeded(sem::Type* type, uint32_t id) {
+uint32_t Builder::GenerateLoadIfNeeded(const sem::Type* type, uint32_t id) {
   if (!type->Is<sem::Pointer>()) {
     return id;
   }
@@ -1287,13 +1287,13 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
       continue;
     }
 
-    sem::Type* subtype = result_type->UnwrapAll();
+    const sem::Type* subtype = result_type->UnwrapAll();
     if (auto* vec = subtype->As<sem::Vector>()) {
       subtype = vec->type()->UnwrapAll();
     } else if (auto* mat = subtype->As<sem::Matrix>()) {
       subtype = mat->type()->UnwrapAll();
-    } else if (auto* arr = subtype->As<sem::ArrayType>()) {
-      subtype = arr->type()->UnwrapAll();
+    } else if (auto* arr = subtype->As<sem::Array>()) {
+      subtype = arr->ElemType()->UnwrapAll();
     } else if (auto* str = subtype->As<sem::Struct>()) {
       subtype = str->Members()[i]->Type()->UnwrapAll();
     }
@@ -1373,7 +1373,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
     if (result_type == value_type || result_type->Is<sem::Matrix>() ||
-        result_type->Is<sem::ArrayType>() || result_type->Is<sem::Struct>()) {
+        result_type->Is<sem::Array>() || result_type->Is<sem::Struct>()) {
       out << "_" << id;
 
       ops.push_back(Operand::Int(id));
@@ -2574,7 +2574,7 @@ bool Builder::GenerateControlBarrierIntrinsic(const sem::Intrinsic* intrinsic) {
                                 });
 }
 
-uint32_t Builder::GenerateSampledImage(sem::Type* texture_type,
+uint32_t Builder::GenerateSampledImage(const sem::Type* texture_type,
                                        Operand texture_operand,
                                        Operand sampler_operand) {
   uint32_t sampled_image_type_id = 0;
@@ -2996,7 +2996,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
                             result)) {
       return 0;
     }
-  } else if (auto* arr = type->As<sem::ArrayType>()) {
+  } else if (auto* arr = type->As<sem::Array>()) {
     if (!GenerateArrayType(arr, result)) {
       return 0;
     }
@@ -3126,18 +3126,17 @@ bool Builder::GenerateTextureType(const sem::Texture* texture,
   return true;
 }
 
-bool Builder::GenerateArrayType(const sem::ArrayType* ary,
-                                const Operand& result) {
-  auto elem_type = GenerateTypeIfNeeded(ary->type());
+bool Builder::GenerateArrayType(const sem::Array* ary, const Operand& result) {
+  auto elem_type = GenerateTypeIfNeeded(ary->ElemType());
   if (elem_type == 0) {
     return false;
   }
 
   auto result_id = result.to_i();
-  if (ary->IsRuntimeArray()) {
+  if (ary->IsRuntimeSized()) {
     push_type(spv::Op::OpTypeRuntimeArray, {result, Operand::Int(elem_type)});
   } else {
-    auto len_id = GenerateConstantIfNeeded(ScalarConstant::U32(ary->size()));
+    auto len_id = GenerateConstantIfNeeded(ScalarConstant::U32(ary->Count()));
     if (len_id == 0) {
       return false;
     }
@@ -3146,14 +3145,9 @@ bool Builder::GenerateArrayType(const sem::ArrayType* ary,
               {result, Operand::Int(elem_type), Operand::Int(len_id)});
   }
 
-  auto* sem_arr = builder_.Sem().Get(ary);
-  if (!sem_arr) {
-    error_ = "array type missing semantic info";
-    return false;
-  }
   push_annot(spv::Op::OpDecorate,
              {Operand::Int(result_id), Operand::Int(SpvDecorationArrayStride),
-              Operand::Int(sem_arr->Stride())});
+              Operand::Int(ary->Stride())});
   return true;
 }
 

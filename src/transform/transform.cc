@@ -95,10 +95,13 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
     auto* el = CreateASTTypeFor(ctx, v->type());
     return ctx->dst->create<ast::Vector>(el, v->size());
   }
-  if (auto* a = ty->As<sem::ArrayType>()) {
-    auto* el = CreateASTTypeFor(ctx, a->type());
-    auto decos = ctx->Clone(a->decorations());
-    return ctx->dst->create<ast::Array>(el, a->size(), std::move(decos));
+  if (auto* a = ty->As<sem::Array>()) {
+    auto* el = CreateASTTypeFor(ctx, a->ElemType());
+    ast::DecorationList decos;
+    if (!a->IsStrideImplicit()) {
+      decos.emplace_back(ctx->dst->create<ast::StrideDecoration>(a->Stride()));
+    }
+    return ctx->dst->create<ast::Array>(el, a->Count(), std::move(decos));
   }
   if (auto* ac = ty->As<sem::AccessControl>()) {
     auto* el = CreateASTTypeFor(ctx, ac->type());

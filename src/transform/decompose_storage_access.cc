@@ -175,8 +175,8 @@ std::unique_ptr<Offset> Mul(LHS&& lhs_, RHS&& rhs_) {
 
 /// TypePair is a pair of types that can be used as a unordered map or set key.
 struct TypePair {
-  sem::Type* first;
-  sem::Type* second;
+  sem::Type const* first;
+  sem::Type const* second;
   bool operator==(const TypePair& rhs) const {
     return first == rhs.first && second == rhs.second;
   }
@@ -188,20 +188,20 @@ struct TypePair {
 };
 
 /// @returns the size in bytes of a scalar
-uint32_t ScalarSize(sem::Type*) {
+uint32_t ScalarSize(const sem::Type*) {
   // TODO(bclayton): Assumes 32-bit elements
   return 4;
 }
 
 /// @returns the numer of bytes between columns of the given matrix
-uint32_t MatrixColumnStride(sem::Matrix* mat) {
+uint32_t MatrixColumnStride(const sem::Matrix* mat) {
   return ScalarSize(mat->type()) * ((mat->rows() == 2) ? 2 : 4);
 }
 
 /// @returns a DecomposeStorageAccess::Intrinsic decoration that can be applied
 /// to a stub function to load the type `ty`.
 DecomposeStorageAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
-                                                    sem::Type* ty) {
+                                                    const sem::Type* ty) {
   using Intrinsic = DecomposeStorageAccess::Intrinsic;
 
   auto intrinsic = [builder](Intrinsic::Type type) {
@@ -260,7 +260,7 @@ DecomposeStorageAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
 /// @returns a DecomposeStorageAccess::Intrinsic decoration that can be applied
 /// to a stub function to store the type `ty`.
 DecomposeStorageAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
-                                                     sem::Type* ty) {
+                                                     const sem::Type* ty) {
   using Intrinsic = DecomposeStorageAccess::Intrinsic;
 
   auto intrinsic = [builder](Intrinsic::Type type) {
@@ -331,7 +331,7 @@ void InsertGlobal(CloneContext& ctx,
 }
 
 /// @returns the unwrapped, user-declared constructed type of ty.
-const ast::NamedType* ConstructedTypeOf(sem::Type* ty) {
+const ast::NamedType* ConstructedTypeOf(const sem::Type* ty) {
   while (true) {
     if (auto* ptr = ty->As<sem::Pointer>()) {
       ty = ptr->type();
@@ -350,7 +350,7 @@ const ast::NamedType* ConstructedTypeOf(sem::Type* ty) {
 }
 
 /// @returns the given type with all pointers and aliases removed.
-sem::Type* UnwrapPtrAndAlias(sem::Type* ty) {
+const sem::Type* UnwrapPtrAndAlias(const sem::Type* ty) {
   return ty->UnwrapPtrIfNeeded()->UnwrapAliasIfNeeded()->UnwrapPtrIfNeeded();
 }
 
@@ -358,7 +358,7 @@ sem::Type* UnwrapPtrAndAlias(sem::Type* ty) {
 struct StorageBufferAccess {
   sem::Expression const* var = nullptr;  // Storage buffer variable
   std::unique_ptr<Offset> offset;        // The byte offset on var
-  sem::Type* type = nullptr;             // The type of the access
+  sem::Type const* type = nullptr;       // The type of the access
   operator bool() const { return var; }  // Returns true if valid
 };
 
@@ -422,8 +422,8 @@ struct DecomposeStorageAccess::State {
   /// @return the name of the function that performs the load
   Symbol LoadFunc(CloneContext& ctx,
                   const ast::NamedType* insert_after,
-                  sem::Type* buf_ty,
-                  sem::Type* el_ty) {
+                  const sem::Type* buf_ty,
+                  const sem::Type* el_ty) {
     return utils::GetOrCreate(load_funcs, TypePair{buf_ty, el_ty}, [&] {
       auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
       ast::VariableList params = {
@@ -458,13 +458,11 @@ struct DecomposeStorageAccess::State {
                                    member->Type()->UnwrapAll());
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
-        } else if (auto* arr_ty = el_ty->As<sem::ArrayType>()) {
-          auto& sem = ctx.src->Sem();
-          auto* arr = sem.Get(arr_ty);
-          for (uint32_t i = 0; i < arr_ty->size(); i++) {
+        } else if (auto* arr = el_ty->As<sem::Array>()) {
+          for (uint32_t i = 0; i < arr->Count(); i++) {
             auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
             Symbol load = LoadFunc(ctx, insert_after, buf_ty,
-                                   arr_ty->type()->UnwrapAll());
+                                   arr->ElemType()->UnwrapAll());
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
         }
@@ -491,8 +489,8 @@ struct DecomposeStorageAccess::State {
   /// @return the name of the function that performs the store
   Symbol StoreFunc(CloneContext& ctx,
                    const ast::NamedType* insert_after,
-                   sem::Type* buf_ty,
-                   sem::Type* el_ty) {
+                   const sem::Type* buf_ty,
+                   const sem::Type* el_ty) {
     return utils::GetOrCreate(store_funcs, TypePair{buf_ty, el_ty}, [&] {
       auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
       auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
@@ -533,14 +531,12 @@ struct DecomposeStorageAccess::State {
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
-        } else if (auto* arr_ty = el_ty->As<sem::ArrayType>()) {
-          auto& sem = ctx.src->Sem();
-          auto* arr = sem.Get(arr_ty);
-          for (uint32_t i = 0; i < arr_ty->size(); i++) {
+        } else if (auto* arr = el_ty->As<sem::Array>()) {
+          for (uint32_t i = 0; i < arr->Count(); i++) {
             auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
             auto* access = ctx.dst->IndexAccessor("value", ctx.dst->Expr(i));
             Symbol store = StoreFunc(ctx, insert_after, buf_ty,
-                                     arr_ty->type()->UnwrapAll());
+                                     arr->ElemType()->UnwrapAll());
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
@@ -689,14 +685,13 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     if (auto* accessor = node->As<ast::ArrayAccessorExpression>()) {
       if (auto access = state.TakeAccess(accessor->array())) {
         // X[Y]
-        if (auto* arr_ty = access.type->As<sem::ArrayType>()) {
-          auto stride = sem.Get(arr_ty)->Stride();
-          auto offset = Mul(stride, accessor->idx_expr());
+        if (auto* arr = access.type->As<sem::Array>()) {
+          auto offset = Mul(arr->Stride(), accessor->idx_expr());
           state.AddAccess(accessor,
                           {
                               access.var,
                               Add(std::move(access.offset), std::move(offset)),
-                              arr_ty->type()->UnwrapAll(),
+                              arr->ElemType()->UnwrapAll(),
                           });
           continue;
         }

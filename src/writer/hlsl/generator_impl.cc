@@ -1325,7 +1325,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
   }
 
   bool brackets =
-      type->UnwrapAliasIfNeeded()->IsAnyOf<sem::ArrayType, sem::Struct>();
+      type->UnwrapAliasIfNeeded()->IsAnyOf<sem::Array, sem::Struct>();
 
   if (brackets) {
     out << "{";
@@ -1651,7 +1651,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
       return false;
     }
     // Array name is output as part of the type
-    if (!type->Is<sem::ArrayType>()) {
+    if (!type->Is<sem::Array>()) {
       out << " " << builder_.Symbols().NameFor(v->Declaration()->symbol());
     }
   }
@@ -1918,7 +1918,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (!EmitType(out, var->Type(), var->StorageClass(), name)) {
         return false;
       }
-      if (!var->Type()->UnwrapAliasIfNeeded()->Is<sem::ArrayType>()) {
+      if (!var->Type()->UnwrapAliasIfNeeded()->Is<sem::Array>()) {
         out << " " << name;
       }
 
@@ -2406,18 +2406,18 @@ bool GeneratorImpl::EmitType(std::ostream& out,
 
   if (auto* alias = type->As<sem::Alias>()) {
     out << builder_.Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = type->As<sem::ArrayType>()) {
+  } else if (auto* ary = type->As<sem::Array>()) {
     const sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (auto* arr = base_type->As<sem::ArrayType>()) {
-      if (arr->IsRuntimeArray()) {
+    while (auto* arr = base_type->As<sem::Array>()) {
+      if (arr->IsRuntimeSized()) {
         TINT_ICE(diagnostics_)
             << "Runtime arrays may only exist in storage buffers, which should "
                "have been transformed into a ByteAddressBuffer";
         return false;
       }
-      sizes.push_back(arr->size());
-      base_type = arr->type();
+      sizes.push_back(arr->Count());
+      base_type = arr->ElemType();
     }
     if (!EmitType(out, base_type, storage_class, "")) {
       return false;
@@ -2571,7 +2571,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
       return false;
     }
     // Array member name will be output with the type
-    if (!mem->Type()->Is<sem::ArrayType>()) {
+    if (!mem->Type()->Is<sem::Array>()) {
       out << " " << mem_name;
     }
 
@@ -2669,7 +2669,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
                 builder_.Symbols().NameFor(var->symbol()))) {
     return false;
   }
-  if (!type->Is<sem::ArrayType>()) {
+  if (!type->Is<sem::Array>()) {
     out << " " << builder_.Symbols().NameFor(var->symbol());
   }
   out << constructor_out.str() << ";" << std::endl;
@@ -2731,7 +2731,7 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
                   builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
-    if (!type->Is<sem::ArrayType>()) {
+    if (!type->Is<sem::Array>()) {
       out << " " << builder_.Symbols().NameFor(var->symbol());
     }
 

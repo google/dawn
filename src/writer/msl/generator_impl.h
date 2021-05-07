@@ -287,7 +287,7 @@ class GeneratorImpl : public TextGenerator {
 
   /// @returns the MSL packed type size and alignment in bytes for the given
   /// type.
-  SizeAndAlign MslPackedTypeSizeAndAlign(sem::Type* ty);
+  SizeAndAlign MslPackedTypeSizeAndAlign(const sem::Type* ty);
 
   ScopeStack<const sem::Variable*> global_variables_;
   Symbol current_ep_sym_;

@@ -61,7 +61,7 @@
 #include "src/program_id.h"
 #include "src/sem/access_control_type.h"
 #include "src/sem/alias_type.h"
-#include "src/sem/array_type.h"
+#include "src/sem/array.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
@@ -595,15 +595,11 @@ class ProgramBuilder {
     /// @param n the array size. 0 represents a runtime-array
     /// @param decos the optional decorations for the array
     /// @return the tint AST type for a array of size `n` of type `T`
-    typ::Array array(typ::Type subtype,
-                     uint32_t n = 0,
-                     ast::DecorationList decos = {}) const {
+    ast::Array* array(typ::Type subtype,
+                      uint32_t n = 0,
+                      ast::DecorationList decos = {}) const {
       subtype = MaybeCreateTypename(subtype);
-      return {subtype.ast ? builder->create<ast::Array>(subtype, n, decos)
-                          : nullptr,
-              subtype.sem ? builder->create<sem::ArrayType>(subtype, n,
-                                                            std::move(decos))
-                          : nullptr};
+      return builder->create<ast::Array>(subtype, n, decos);
     }
 
     /// @param source the Source of the node
@@ -611,24 +607,19 @@ class ProgramBuilder {
     /// @param n the array size. 0 represents a runtime-array
     /// @param decos the optional decorations for the array
     /// @return the tint AST type for a array of size `n` of type `T`
-    typ::Array array(const Source& source,
-                     typ::Type subtype,
-                     uint32_t n = 0,
-                     ast::DecorationList decos = {}) const {
+    ast::Array* array(const Source& source,
+                      typ::Type subtype,
+                      uint32_t n = 0,
+                      ast::DecorationList decos = {}) const {
       subtype = MaybeCreateTypename(subtype);
-      return {
-          subtype.ast ? builder->create<ast::Array>(source, subtype, n, decos)
-                      : nullptr,
-          subtype.sem
-              ? builder->create<sem::ArrayType>(subtype, n, std::move(decos))
-              : nullptr};
+      return builder->create<ast::Array>(source, subtype, n, decos);
     }
 
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array
     /// @param stride the array stride
     /// @return the tint AST type for a array of size `n` of type `T`
-    typ::Array array(typ::Type subtype, uint32_t n, uint32_t stride) const {
+    ast::Array* array(typ::Type subtype, uint32_t n, uint32_t stride) const {
       subtype = MaybeCreateTypename(subtype);
       return array(subtype, n,
                    {builder->create<ast::StrideDecoration>(stride)});
@@ -639,10 +630,10 @@ class ProgramBuilder {
     /// @param n the array size. 0 represents a runtime-array
     /// @param stride the array stride
     /// @return the tint AST type for a array of size `n` of type `T`
-    typ::Array array(const Source& source,
-                     typ::Type subtype,
-                     uint32_t n,
-                     uint32_t stride) const {
+    ast::Array* array(const Source& source,
+                      typ::Type subtype,
+                      uint32_t n,
+                      uint32_t stride) const {
       subtype = MaybeCreateTypename(subtype);
       return array(source, subtype, n,
                    {builder->create<ast::StrideDecoration>(stride)});
@@ -650,14 +641,14 @@ class ProgramBuilder {
 
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
-    typ::Array array() const {
+    ast::Array* array() const {
       return array(Of<T>(), N);
     }
 
     /// @param stride the array stride
     /// @return the tint AST type for an array of size `N` of type `T`
     template <typename T, int N = 0>
-    typ::Array array(uint32_t stride) const {
+    ast::Array* array(uint32_t stride) const {
       return array(Of<T>(), N, stride);
     }
 

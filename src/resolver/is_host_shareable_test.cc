@@ -98,11 +98,13 @@ TEST_F(ResolverIsHostShareable, AccessControlI32) {
 }
 
 TEST_F(ResolverIsHostShareable, ArraySizedOfHostShareable) {
-  EXPECT_TRUE(r()->IsHostShareable(ty.array(ty.i32(), 5)));
+  auto* arr = create<sem::Array>(create<sem::I32>(), 5, 4, 20, 4, true);
+  EXPECT_TRUE(r()->IsHostShareable(arr));
 }
 
 TEST_F(ResolverIsHostShareable, ArrayUnsizedOfHostShareable) {
-  EXPECT_TRUE(r()->IsHostShareable(ty.array<i32>()));
+  auto* arr = create<sem::Array>(create<sem::I32>(), 0, 4, 4, 4, true);
+  EXPECT_TRUE(r()->IsHostShareable(arr));
 }
 
 // Note: Structure tests covered in host_shareable_validation_test.cc

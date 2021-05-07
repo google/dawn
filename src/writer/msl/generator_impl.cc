@@ -19,6 +19,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/ast/alias.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/fallthrough_statement.h"
@@ -32,7 +33,6 @@
 #include "src/sem/access_control_type.h"
 #include "src/sem/alias_type.h"
 #include "src/sem/array.h"
-#include "src/sem/array_type.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_texture_type.h"
@@ -88,8 +88,10 @@ bool GeneratorImpl::Generate() {
   }
 
   for (auto* const ty : program_->AST().ConstructedTypes()) {
-    if (!EmitConstructedType(TypeOf(ty))) {
-      return false;
+    if (!ty->Is<ast::Alias>()) {
+      if (!EmitConstructedType(TypeOf(ty))) {
+        return false;
+      }
     }
   }
   if (!program_->AST().ConstructedTypes().empty()) {
@@ -889,7 +891,7 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
   auto* type = TypeOf(expr);
 
-  if (type->IsAnyOf<sem::ArrayType, sem::Struct>()) {
+  if (type->IsAnyOf<sem::Array, sem::Struct>()) {
     out_ << "{";
   } else {
     if (!EmitType(type, "")) {
@@ -918,7 +920,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     }
   }
 
-  if (type->IsAnyOf<sem::ArrayType, sem::Struct>()) {
+  if (type->IsAnyOf<sem::Array, sem::Struct>()) {
     out_ << "}";
   } else {
     out_ << ")";
@@ -942,9 +944,9 @@ bool GeneratorImpl::EmitZeroValue(typ::Type type) {
     return EmitZeroValue(vec->type());
   } else if (auto* mat = type->As<sem::Matrix>()) {
     return EmitZeroValue(mat->type());
-  } else if (auto* arr = type->As<sem::ArrayType>()) {
+  } else if (auto* arr = type->As<sem::Array>()) {
     out_ << "{";
-    if (!EmitZeroValue(arr->type())) {
+    if (!EmitZeroValue(arr->ElemType())) {
       return false;
     }
     out_ << "}";
@@ -1331,7 +1333,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
       return false;
     }
     // Array name is output as part of the type
-    if (!type->Is<sem::ArrayType>()) {
+    if (!type->Is<sem::Array>()) {
       out_ << " " << program_->Symbols().NameFor(v->symbol());
     }
   }
@@ -1918,16 +1920,16 @@ bool GeneratorImpl::EmitType(typ::Type type, const std::string& name) {
 
   if (auto* alias = type->As<sem::Alias>()) {
     out_ << program_->Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = type->As<sem::ArrayType>()) {
-    sem::Type* base_type = ary;
+  } else if (auto* ary = type->As<sem::Array>()) {
+    const sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
-    while (auto* arr = base_type->As<sem::ArrayType>()) {
-      if (arr->IsRuntimeArray()) {
+    while (auto* arr = base_type->As<sem::Array>()) {
+      if (arr->IsRuntimeSized()) {
         sizes.push_back(1);
       } else {
-        sizes.push_back(arr->size());
+        sizes.push_back(arr->Count());
       }
-      base_type = arr->type();
+      base_type = arr->ElemType();
     }
     if (!EmitType(base_type, "")) {
       return false;
@@ -2122,7 +2124,7 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
     auto* ty = mem->Type()->UnwrapAliasIfNeeded();
 
     // Array member name will be output with the type
-    if (!ty->Is<sem::ArrayType>()) {
+    if (!ty->Is<sem::Array>()) {
       out_ << " " << name;
     }
 
@@ -2223,7 +2225,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
   if (!EmitType(var->Type(), program_->Symbols().NameFor(decl->symbol()))) {
     return false;
   }
-  if (!var->Type()->Is<sem::ArrayType>()) {
+  if (!var->Type()->Is<sem::Array>()) {
     out_ << " " << program_->Symbols().NameFor(decl->symbol());
   }
 
@@ -2266,7 +2268,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   if (!EmitType(type, program_->Symbols().NameFor(var->symbol()))) {
     return false;
   }
-  if (!type->Is<sem::ArrayType>()) {
+  if (!type->Is<sem::Array>()) {
     out_ << " " << program_->Symbols().NameFor(var->symbol());
   }
 
@@ -2284,7 +2286,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
 }
 
 GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
-    sem::Type* ty) {
+    const sem::Type* ty) {
   ty = ty->UnwrapAliasIfNeeded();
 
   if (ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
@@ -2327,14 +2329,9 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     }
   }
 
-  if (auto* arr = ty->As<sem::ArrayType>()) {
-    auto* sem = program_->Sem().Get(arr);
-    if (!sem) {
-      TINT_ICE(diagnostics_) << "Array missing semantic info";
-      return {};
-    }
-    auto el_size_align = MslPackedTypeSizeAndAlign(arr->type());
-    if (sem->Stride() != el_size_align.size) {
+  if (auto* arr = ty->As<sem::Array>()) {
+    auto el_size_align = MslPackedTypeSizeAndAlign(arr->ElemType());
+    if (arr->Stride() != el_size_align.size) {
       // TODO(crbug.com/tint/649): transform::Msl needs to replace these arrays
       // with a new array type that has the element type padded to the required
       // stride.
@@ -2342,7 +2339,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
           << "Arrays with custom strides not yet implemented";
       return {};
     }
-    auto num_els = std::max<uint32_t>(arr->size(), 1);
+    auto num_els = std::max<uint32_t>(arr->Count(), 1);
     return SizeAndAlign{el_size_align.size * num_els, el_size_align.align};
   }
 

@@ -122,7 +122,7 @@ using ArrayDecorationTest = TestWithParams;
 TEST_P(ArrayDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  auto arr =
+  auto* arr =
       ty.array(ty.f32(), 0,
                {
                    createDecoration(Source{{12, 34}}, *this, params.kind),
@@ -360,7 +360,7 @@ TEST_P(ArrayStrideTest, All) {
      << ", should_pass: " << params.should_pass;
   SCOPED_TRACE(ss.str());
 
-  auto arr = ty.array(Source{{12, 34}}, el_ty, 4, params.stride);
+  auto* arr = ty.array(Source{{12, 34}}, el_ty, 4, params.stride);
 
   Global("myarray", arr, ast::StorageClass::kInput);
 
@@ -445,11 +445,11 @@ INSTANTIATE_TEST_SUITE_P(
         Params{ast_mat4x4<f32>, (default_mat4x4.align - 1) * 7, false}));
 
 TEST_F(ArrayStrideTest, MultipleDecorations) {
-  auto arr = ty.array(Source{{12, 34}}, ty.i32(), 4,
-                      {
-                          create<ast::StrideDecoration>(4),
-                          create<ast::StrideDecoration>(4),
-                      });
+  auto* arr = ty.array(Source{{12, 34}}, ty.i32(), 4,
+                       {
+                           create<ast::StrideDecoration>(4),
+                           create<ast::StrideDecoration>(4),
+                       });
 
   Global("myarray", arr, ast::StorageClass::kInput);
 
@@ -468,7 +468,7 @@ using StructBlockTest = ResolverTest;
 TEST_F(StructBlockTest, StructUsedAsArrayElement) {
   auto* s = Structure("S", {Member("x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto a = ty.array(s, 4);
+  auto* a = ty.array(s, 4);
   Global("G", a, ast::StorageClass::kPrivate);
 
   EXPECT_FALSE(r()->Resolve());

@@ -43,21 +43,25 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
-  auto arr = ty.array<bool, 4>();
+  auto* arr = ty.array<bool, 4>();
+  Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, arr, ast::StorageClass::kNone, "ary"))
+  ASSERT_TRUE(
+      gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
-  auto arr = ty.array(ty.array<bool, 4>(), 5);
+  auto* arr = ty.array(ty.array<bool, 4>(), 5);
+  Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, arr, ast::StorageClass::kNone, "ary"))
+  ASSERT_TRUE(
+      gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4]");
 }
@@ -65,41 +69,49 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
 // TODO(dsinclair): Is this possible? What order should it output in?
 TEST_F(HlslGeneratorImplTest_Type,
        DISABLED_EmitType_ArrayOfArrayOfRuntimeArray) {
-  auto arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 0);
+  auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 0);
+  Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, arr, ast::StorageClass::kNone, "ary"))
+  ASSERT_TRUE(
+      gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[5][4][1]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
-  auto arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 6);
+  auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5), 6);
+  Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, arr, ast::StorageClass::kNone, "ary"))
+  ASSERT_TRUE(
+      gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[6][5][4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
-  auto arr = ty.array<bool, 4>();
+  auto* arr = ty.array<bool, 4>();
+  Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, arr, ast::StorageClass::kNone, ""))
+  ASSERT_TRUE(
+      gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone, ""))
       << gen.error();
   EXPECT_EQ(result(), "bool[4]");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
-  auto arr = ty.array<bool>();
+  auto* arr = ty.array<bool>();
+  Global("G", arr, ast::StorageClass::kPrivate);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, arr, ast::StorageClass::kNone, "ary"))
+  ASSERT_TRUE(
+      gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone, "ary"))
       << gen.error();
   EXPECT_EQ(result(), "bool ary[]");
 }

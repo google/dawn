@@ -450,8 +450,6 @@ libtint_source_set("libtint_core_all_src") {
     "sem/alias_type.cc",
     "sem/alias_type.h",
     "sem/array.h",
-    "sem/array_type.cc",
-    "sem/array_type.h",
     "sem/bool_type.cc",
     "sem/bool_type.h",
     "sem/call.h",

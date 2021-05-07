@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Pointer);
 namespace tint {
 namespace sem {
 
-Pointer::Pointer(Type* subtype, ast::StorageClass storage_class)
+Pointer::Pointer(const Type* subtype, ast::StorageClass storage_class)
     : subtype_(subtype), storage_class_(storage_class) {}
 
 std::string Pointer::type_name() const {

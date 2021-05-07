@@ -77,8 +77,8 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
   // get_buffer_size_intrinsic() emits the function decorated with
   // BufferSizeIntrinsic that is transformed by the HLSL writer into a call to
   // [RW]ByteAddressBuffer.GetDimensions().
-  std::unordered_map<sem::Struct*, Symbol> buffer_size_intrinsics;
-  auto get_buffer_size_intrinsic = [&](sem::Struct* buffer_type) {
+  std::unordered_map<const sem::Struct*, Symbol> buffer_size_intrinsics;
+  auto get_buffer_size_intrinsic = [&](const sem::Struct* buffer_type) {
     return utils::GetOrCreate(buffer_size_intrinsics, buffer_type, [&] {
       auto name = ctx.dst->Sym();
       auto* buffer_typename =

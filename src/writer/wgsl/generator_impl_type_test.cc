@@ -37,7 +37,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array) {
-  auto arr = ty.array<bool, 4>();
+  auto* arr = ty.array<bool, 4>();
   AST().AddConstructedType(ty.alias("make_type_reachable", arr));
 
   GeneratorImpl& gen = Build();
@@ -73,7 +73,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
-  auto a = ty.array(ty.bool_(), 4, 16u);
+  auto* a = ty.array(ty.bool_(), 4, 16u);
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();
@@ -83,7 +83,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_Array_Decoration) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_RuntimeArray) {
-  auto a = ty.array(ty.bool_(), 0);
+  auto* a = ty.array(ty.bool_(), 0);
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();

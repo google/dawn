@@ -76,16 +76,23 @@ TEST_F(CreateASTTypeForTest, Vector) {
   ASSERT_EQ(vec->As<ast::Vector>()->size(), 2u);
 }
 
-TEST_F(CreateASTTypeForTest, Array) {
+TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
   auto* arr = create([](ProgramBuilder& b) {
-    return b.create<sem::ArrayType>(b.create<sem::F32>(), 4,
-                                    ast::DecorationList{
-                                        b.create<ast::StrideDecoration>(32u),
-                                    });
+    return b.create<sem::Array>(b.create<sem::F32>(), 2, 4, 4, 32u, true);
   });
   ASSERT_TRUE(arr->Is<ast::Array>());
   ASSERT_TRUE(arr->As<ast::Array>()->type()->Is<ast::F32>());
-  ASSERT_EQ(arr->As<ast::Array>()->size(), 4u);
+  ASSERT_EQ(arr->As<ast::Array>()->size(), 2u);
+  ASSERT_EQ(arr->As<ast::Array>()->decorations().size(), 0u);
+}
+
+TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
+  auto* arr = create([](ProgramBuilder& b) {
+    return b.create<sem::Array>(b.create<sem::F32>(), 2, 4, 4, 32u, false);
+  });
+  ASSERT_TRUE(arr->Is<ast::Array>());
+  ASSERT_TRUE(arr->As<ast::Array>()->type()->Is<ast::F32>());
+  ASSERT_EQ(arr->As<ast::Array>()->size(), 2u);
   ASSERT_EQ(arr->As<ast::Array>()->decorations().size(), 1u);
   ASSERT_TRUE(
       arr->As<ast::Array>()->decorations()[0]->Is<ast::StrideDecoration>());
@@ -95,7 +102,6 @@ TEST_F(CreateASTTypeForTest, Array) {
                 ->stride(),
             32u);
 }
-
 TEST_F(CreateASTTypeForTest, AccessControl) {
   auto* ac = create([](ProgramBuilder& b) {
     auto* decl = b.Structure("S", {}, {});
