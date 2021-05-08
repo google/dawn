@@ -25,6 +25,7 @@
 
 namespace dawn_native { namespace metal {
 
+    class CommandRecordingContext;
     class Device;
 
     MTLPixelFormat MetalPixelFormat(wgpu::TextureFormat format);
@@ -48,7 +49,8 @@ namespace dawn_native { namespace metal {
 
         id<MTLTexture> GetMTLTexture();
 
-        void EnsureSubresourceContentInitialized(const SubresourceRange& range);
+        void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
+                                                 const SubresourceRange& range);
 
       private:
         Texture(Device* device, const TextureDescriptor* descriptor);
@@ -56,7 +58,9 @@ namespace dawn_native { namespace metal {
 
         void DestroyImpl() override;
 
-        MaybeError ClearTexture(const SubresourceRange& range, TextureBase::ClearValue clearValue);
+        MaybeError ClearTexture(CommandRecordingContext* commandContext,
+                                const SubresourceRange& range,
+                                TextureBase::ClearValue clearValue);
 
         NSPRef<id<MTLTexture>> mMtlTexture;
     };

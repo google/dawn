@@ -306,7 +306,8 @@ namespace dawn_native { namespace metal {
         ASSERT(dataLayout.bytesPerRow ==
                copySizePixels.width / blockInfo.width * blockInfo.byteSize);
 
-        EnsureDestinationTextureInitialized(texture, *dst, copySizePixels);
+        EnsureDestinationTextureInitialized(GetPendingCommandContext(), texture, *dst,
+                                            copySizePixels);
 
         // Metal validation layer requires that if the texture's pixel format is a compressed
         // format, the sourceSize must be a multiple of the pixel format's block size or be

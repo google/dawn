@@ -359,8 +359,9 @@ namespace dawn_native { namespace metal {
             AcquireNSPRef([device->GetMTLDevice() newTextureWithDescriptor:mtlDesc.Get()]);
 
         if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
-            device->ConsumedError(
-                ClearTexture(GetAllSubresources(), TextureBase::ClearValue::NonZero));
+            device->ConsumedError(ClearTexture(device->GetPendingCommandContext(),
+                                               GetAllSubresources(),
+                                               TextureBase::ClearValue::NonZero));
         }
     }
 
@@ -401,11 +402,10 @@ namespace dawn_native { namespace metal {
         return mMtlTexture.Get();
     }
 
-    MaybeError Texture::ClearTexture(const SubresourceRange& range,
+    MaybeError Texture::ClearTexture(CommandRecordingContext* commandContext,
+                                     const SubresourceRange& range,
                                      TextureBase::ClearValue clearValue) {
         Device* device = ToBackend(GetDevice());
-
-        CommandRecordingContext* commandContext = device->GetPendingCommandContext();
 
         const uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
         const double dClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.0 : 1.0;
@@ -595,14 +595,16 @@ namespace dawn_native { namespace metal {
         return {};
     }
 
-    void Texture::EnsureSubresourceContentInitialized(const SubresourceRange& range) {
+    void Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
+                                                      const SubresourceRange& range) {
         if (!GetDevice()->IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
             return;
         }
         if (!IsSubresourceContentInitialized(range)) {
             // If subresource has not been initialized, clear it to black as it could
             // contain dirty bits from recycled memory
-            GetDevice()->ConsumedError(ClearTexture(range, TextureBase::ClearValue::Zero));
+            GetDevice()->ConsumedError(
+                ClearTexture(commandContext, range, TextureBase::ClearValue::Zero));
         }
     }
 

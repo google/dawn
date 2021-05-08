@@ -50,7 +50,8 @@ namespace dawn_native { namespace metal {
                                                          uint32_t rowsPerImage,
                                                          Aspect aspect);
 
-    void EnsureDestinationTextureInitialized(Texture* texture,
+    void EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext,
+                                             Texture* texture,
                                              const TextureCopy& dst,
                                              const Extent3D& size);
 

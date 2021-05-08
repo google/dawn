@@ -154,7 +154,8 @@ namespace dawn_native { namespace metal {
         return copy;
     }
 
-    void EnsureDestinationTextureInitialized(Texture* texture,
+    void EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext,
+                                             Texture* texture,
                                              const TextureCopy& dst,
                                              const Extent3D& size) {
         ASSERT(texture == dst.texture.Get());
@@ -162,7 +163,7 @@ namespace dawn_native { namespace metal {
         if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), size, dst.mipLevel)) {
             texture->SetIsSubresourceContentInitialized(true, range);
         } else {
-            texture->EnsureSubresourceContentInitialized(range);
+            texture->EnsureSubresourceContentInitialized(commandContext, range);
         }
     }
 
