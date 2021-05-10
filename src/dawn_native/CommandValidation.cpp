@@ -421,12 +421,13 @@ namespace dawn_native {
         }
 
         if (src.texture == dst.texture && src.mipLevel == dst.mipLevel) {
-            ASSERT(src.texture->GetDimension() == wgpu::TextureDimension::e2D &&
-                   dst.texture->GetDimension() == wgpu::TextureDimension::e2D);
-            if (IsRangeOverlapped(src.origin.z, dst.origin.z, copySize.depthOrArrayLayers)) {
+            wgpu::TextureDimension dimension = src.texture->GetDimension();
+            ASSERT(dimension != wgpu::TextureDimension::e1D);
+            if ((dimension == wgpu::TextureDimension::e2D &&
+                 IsRangeOverlapped(src.origin.z, dst.origin.z, copySize.depthOrArrayLayers)) ||
+                dimension == wgpu::TextureDimension::e3D) {
                 return DAWN_VALIDATION_ERROR(
-                    "Copy subresources cannot be overlapped when copying within the same "
-                    "texture.");
+                    "Cannot copy between overlapping subresources of the same texture.");
             }
         }
 

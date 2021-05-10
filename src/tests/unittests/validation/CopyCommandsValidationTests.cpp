@@ -50,6 +50,24 @@ class CopyCommandTest : public ValidationTest {
         return tex;
     }
 
+    wgpu::Texture Create3DTexture(uint32_t width,
+                                  uint32_t height,
+                                  uint32_t depth,
+                                  uint32_t mipLevelCount,
+                                  wgpu::TextureFormat format,
+                                  wgpu::TextureUsage usage) {
+        wgpu::TextureDescriptor descriptor;
+        descriptor.dimension = wgpu::TextureDimension::e3D;
+        descriptor.size.width = width;
+        descriptor.size.height = height;
+        descriptor.size.depthOrArrayLayers = depth;
+        descriptor.format = format;
+        descriptor.mipLevelCount = mipLevelCount;
+        descriptor.usage = usage;
+        wgpu::Texture tex = device.CreateTexture(&descriptor);
+        return tex;
+    }
+
     uint32_t BufferSizeForTextureCopy(
         uint32_t width,
         uint32_t height,
@@ -1900,6 +1918,36 @@ TEST_F(CopyCommandTest_T2T, CopyWithinSameTexture) {
     // Copy between different mipmap levels and array slices is allowed.
     TestT2TCopy(utils::Expectation::Success, texture, 0, {0, 0, 1}, texture, 1, {1, 1, 0},
                 {1, 1, 1});
+
+    // Copy between 3D texture of both overlapping depth ranges is not allowed.
+    {
+        wgpu::Texture texture3D =
+            Create3DTexture(32, 32, 4, 2, wgpu::TextureFormat::RGBA8Unorm,
+                            wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst);
+
+        constexpr uint32_t kMipmapLevel = 0;
+        constexpr wgpu::Origin3D kSrcOrigin = {0, 0, 0};
+        constexpr wgpu::Origin3D kDstOrigin = {0, 0, 1};
+        constexpr wgpu::Extent3D kCopyExtent = {4, 4, 2};
+
+        TestT2TCopy(utils::Expectation::Failure, texture3D, kMipmapLevel, kSrcOrigin, texture3D,
+                    kMipmapLevel, kDstOrigin, kCopyExtent);
+    }
+
+    // Copy between 3D texture of both non-overlapping depth ranges is not allowed.
+    {
+        wgpu::Texture texture3D =
+            Create3DTexture(32, 32, 4, 2, wgpu::TextureFormat::RGBA8Unorm,
+                            wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst);
+
+        constexpr uint32_t kMipmapLevel = 0;
+        constexpr wgpu::Origin3D kSrcOrigin = {0, 0, 0};
+        constexpr wgpu::Origin3D kDstOrigin = {0, 0, 2};
+        constexpr wgpu::Extent3D kCopyExtent = {4, 4, 1};
+
+        TestT2TCopy(utils::Expectation::Failure, texture3D, kMipmapLevel, kSrcOrigin, texture3D,
+                    kMipmapLevel, kDstOrigin, kCopyExtent);
+    }
 }
 
 class CopyCommandTest_CompressedTextureFormats : public CopyCommandTest {
