@@ -17,6 +17,7 @@
 #include <utility>
 
 #include "src/transform/canonicalize_entry_point_io.h"
+#include "src/transform/external_texture_transform.h"
 #include "src/transform/manager.h"
 
 namespace tint {
@@ -28,6 +29,7 @@ Msl::~Msl() = default;
 Output Msl::Run(const Program* in, const DataMap& data) {
   Manager manager;
   manager.Add<CanonicalizeEntryPointIO>();
+  manager.Add<ExternalTextureTransform>();
   auto out = manager.Run(in, data);
   if (!out.program.IsValid()) {
     return out;

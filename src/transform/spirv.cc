@@ -25,6 +25,8 @@
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
+#include "src/transform/external_texture_transform.h"
+#include "src/transform/manager.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Spirv::Config);
 
@@ -35,10 +37,14 @@ Spirv::Spirv() = default;
 Spirv::~Spirv() = default;
 
 Output Spirv::Run(const Program* in, const DataMap& data) {
+  Manager manager;
+  manager.Add<ExternalTextureTransform>();
+  auto transformedInput = manager.Run(in, data);
+
   auto* cfg = data.Get<Config>();
 
   ProgramBuilder out;
-  CloneContext ctx(&out, in);
+  CloneContext ctx(&out, &transformedInput.program);
   HandleEntryPointIOTypes(ctx);
   ctx.Clone();
 

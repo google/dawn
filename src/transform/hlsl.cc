@@ -25,6 +25,7 @@
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/decompose_storage_access.h"
+#include "src/transform/external_texture_transform.h"
 #include "src/transform/manager.h"
 
 namespace tint {
@@ -38,6 +39,7 @@ Output Hlsl::Run(const Program* in, const DataMap& data) {
   manager.Add<CanonicalizeEntryPointIO>();
   manager.Add<DecomposeStorageAccess>();
   manager.Add<CalculateArrayLength>();
+  manager.Add<ExternalTextureTransform>();
   auto out = manager.Run(in, data);
   if (!out.program.IsValid()) {
     return out;
