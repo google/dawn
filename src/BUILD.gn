@@ -590,6 +590,8 @@ libtint_source_set("libtint_spv_reader_src") {
     "reader/spirv/function.h",
     "reader/spirv/namer.cc",
     "reader/spirv/namer.h",
+    "reader/spirv/parser_type.cc",
+    "reader/spirv/parser_type.h",
     "reader/spirv/parser.cc",
     "reader/spirv/parser.h",
     "reader/spirv/parser_impl.cc",

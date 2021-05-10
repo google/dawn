@@ -1772,7 +1772,7 @@ TEST_F(SpvModuleScopeVarParserTest,
     [[block]]
     StructMember{[[ offset 0 ]] field0: __u32}
     StructMember{[[ offset 4 ]] field1: __f32}
-    StructMember{[[ offset 8 ]] field2: __alias_Arr__array__u32_2_stride_4}
+    StructMember{[[ offset 8 ]] field2: __type_name_Arr}
   }
   Variable{
     x_1

@@ -836,7 +836,7 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_TypesAndVarDeclarations) {
   Struct S {
     [[block]]
     StructMember{[[ offset 0 ]] field0: __u32}
-    StructMember{[[ offset 4 ]] field1: __alias_RTArr__array__u32_stride_4}
+    StructMember{[[ offset 4 ]] field1: __type_name_RTArr}
   }
   Variable{
     Decorations{

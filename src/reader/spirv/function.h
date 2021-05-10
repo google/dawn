@@ -515,7 +515,7 @@ class FunctionEmitter {
   /// @param type the AST type
   /// @param result_id the SPIR-V ID for the locally defined value
   /// @returns an possibly updated type
-  ast::Type* RemapStorageClass(ast::Type* type, uint32_t result_id);
+  const Type* RemapStorageClass(const Type* type, uint32_t result_id);
 
   /// Marks locally defined values when they should get a 'const'
   /// definition in WGSL, or a 'var' definition at an outer scope.
@@ -856,7 +856,7 @@ class FunctionEmitter {
     /// Function parameters
     ast::VariableList params;
     /// Function return type
-    ast::Type* return_type;
+    const Type* return_type;
     /// Function decorations
     ast::DecorationList decorations;
   };
@@ -869,7 +869,7 @@ class FunctionEmitter {
 
   /// @returns the store type for the OpVariable instruction, or
   /// null on failure.
-  ast::Type* GetVariableStoreType(
+  const Type* GetVariableStoreType(
       const spvtools::opt::Instruction& var_decl_inst);
 
   /// Returns an expression for an instruction operand. Signedness conversion is
@@ -937,7 +937,7 @@ class FunctionEmitter {
   /// Get the AST texture the SPIR-V image memory object declaration.
   /// @param inst the SPIR-V memory object declaration for the image.
   /// @returns a texture type, or null on error
-  ast::Texture* GetImageType(const spvtools::opt::Instruction& inst);
+  const Texture* GetImageType(const spvtools::opt::Instruction& inst);
 
   /// Get the expression for the image operand from the first operand to the
   /// given instruction.
@@ -974,7 +974,7 @@ class FunctionEmitter {
   ast::Expression* ConvertTexelForStorage(
       const spvtools::opt::Instruction& inst,
       TypedExpression texel,
-      ast::Texture* texture_type);
+      const Texture* texture_type);
 
   /// Returns an expression for an OpSelect, if its operands are scalars
   /// or vectors. These translate directly to WGSL select.  Otherwise, return
@@ -1128,6 +1128,7 @@ class FunctionEmitter {
   using StatementsStack = std::vector<StatementBlock>;
 
   ParserImpl& parser_impl_;
+  TypeManager& ty_;
   ProgramBuilder& builder_;
   spvtools::opt::IRContext& ir_context_;
   spvtools::opt::analysis::DefUseManager* def_use_mgr_;

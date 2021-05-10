@@ -617,26 +617,32 @@ class ProgramBuilder {
 
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array
-    /// @param stride the array stride
+    /// @param stride the array stride. 0 represents implicit stride
     /// @return the tint AST type for a array of size `n` of type `T`
     ast::Array* array(typ::Type subtype, uint32_t n, uint32_t stride) const {
       subtype = MaybeCreateTypename(subtype);
-      return array(subtype, n,
-                   {builder->create<ast::StrideDecoration>(stride)});
+      ast::DecorationList decos;
+      if (stride) {
+        decos.emplace_back(builder->create<ast::StrideDecoration>(stride));
+      }
+      return array(subtype, n, std::move(decos));
     }
 
     /// @param source the Source of the node
     /// @param subtype the array element type
     /// @param n the array size. 0 represents a runtime-array
-    /// @param stride the array stride
+    /// @param stride the array stride. 0 represents implicit stride
     /// @return the tint AST type for a array of size `n` of type `T`
     ast::Array* array(const Source& source,
                       typ::Type subtype,
                       uint32_t n,
                       uint32_t stride) const {
       subtype = MaybeCreateTypename(subtype);
-      return array(source, subtype, n,
-                   {builder->create<ast::StrideDecoration>(stride)});
+      ast::DecorationList decos;
+      if (stride) {
+        decos.emplace_back(builder->create<ast::StrideDecoration>(stride));
+      }
+      return array(source, subtype, n, std::move(decos));
     }
 
     /// @return the tint AST type for an array of size `N` of type `T`

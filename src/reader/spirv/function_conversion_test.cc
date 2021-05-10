@@ -202,7 +202,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_BadArgType) {
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(),
               HasSubstr("operand for conversion to floating point must be "
-                        "integral scalar or vector, but got: __bool"));
+                        "integral scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_BadArgType) {
@@ -220,7 +220,7 @@ TEST_F(SpvUnaryConversionTest, ConvertSToF_Vector_BadArgType) {
   EXPECT_THAT(
       p->error(),
       HasSubstr("operand for conversion to floating point must be integral "
-                "scalar or vector, but got: __vec_2__bool"));
+                "scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertSToF_Scalar_FromSigned) {
@@ -344,7 +344,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_BadArgType) {
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(), Eq("operand for conversion to floating point must be "
-                             "integral scalar or vector, but got: __bool"));
+                             "integral scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_BadArgType) {
@@ -361,7 +361,7 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_BadArgType) {
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(),
               Eq("operand for conversion to floating point must be integral "
-                 "scalar or vector, but got: __vec_2__bool"));
+                 "scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
@@ -486,7 +486,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_BadArgType) {
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(),
               Eq("operand for conversion to signed integer must be floating "
-                 "point scalar or vector, but got: __u32"));
+                 "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_BadArgType) {
@@ -503,7 +503,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_BadArgType) {
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(),
               Eq("operand for conversion to signed integer must be floating "
-                 "point scalar or vector, but got: __vec_2__bool"));
+                 "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
@@ -628,7 +628,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_BadArgType) {
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(),
               Eq("operand for conversion to unsigned integer must be floating "
-                 "point scalar or vector, but got: __u32"));
+                 "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_BadArgType) {
@@ -645,7 +645,7 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_BadArgType) {
   EXPECT_FALSE(fe.EmitBody());
   EXPECT_THAT(p->error(),
               Eq("operand for conversion to unsigned integer must be floating "
-                 "point scalar or vector, but got: __vec_2__bool"));
+                 "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned_IsError) {

@@ -360,6 +360,8 @@ if(${TINT_BUILD_SPV_READER})
     reader/spirv/function.h
     reader/spirv/namer.cc
     reader/spirv/namer.h
+    reader/spirv/parser_type.cc
+    reader/spirv/parser_type.h
     reader/spirv/parser.cc
     reader/spirv/parser.h
     reader/spirv/parser_impl.cc
@@ -627,6 +629,7 @@ if(${TINT_BUILD_TESTS})
       reader/spirv/parser_impl_test_helper.h
       reader/spirv/parser_impl_test.cc
       reader/spirv/parser_impl_user_name_test.cc
+      reader/spirv/parser_type_test.cc
       reader/spirv/parser_test.cc
       reader/spirv/spirv_tools_helpers_test.cc
       reader/spirv/spirv_tools_helpers_test.h
