@@ -47,6 +47,15 @@ std::string FragMain() {
   )";
 }
 
+std::string MainBody() {
+  return R"(
+    %main = OpFunction %void None %voidfn
+    %main_entry = OpLabel
+    OpReturn
+    OpFunctionEnd
+  )";
+}
+
 std::string CommonBasicTypes() {
   return R"(
     %void = OpTypeVoid
@@ -128,10 +137,10 @@ std::string CommonImageTypes() {
     %f_texture_cube_array  = OpTypeImage %float Cube 0 1 0 1 Unknown
 
     ; storage images
-    %f_storage_1d         = OpTypeImage %float 1D   0 0 0 1 Rg32f
-    %f_storage_2d         = OpTypeImage %float 2D   0 0 0 1 Rg32f
-    %f_storage_2d_array   = OpTypeImage %float 2D   0 1 0 1 Rg32f
-    %f_storage_3d         = OpTypeImage %float 3D   0 0 0 1 Rg32f
+    %f_storage_1d         = OpTypeImage %float 1D   0 0 0 2 Rg32f
+    %f_storage_2d         = OpTypeImage %float 2D   0 0 0 2 Rg32f
+    %f_storage_2d_array   = OpTypeImage %float 2D   0 1 0 2 Rg32f
+    %f_storage_3d         = OpTypeImage %float 3D   0 0 0 2 Rg32f
 
     ; Now all the same, but for unsigned integer sampled type.
 
@@ -144,10 +153,10 @@ std::string CommonImageTypes() {
     %u_texture_cube        = OpTypeImage %uint  Cube 0 0 0 1 Unknown
     %u_texture_cube_array  = OpTypeImage %uint  Cube 0 1 0 1 Unknown
 
-    %u_storage_1d         = OpTypeImage %uint  1D   0 0 0 1 Rg32ui
-    %u_storage_2d         = OpTypeImage %uint  2D   0 0 0 1 Rg32ui
-    %u_storage_2d_array   = OpTypeImage %uint  2D   0 1 0 1 Rg32ui
-    %u_storage_3d         = OpTypeImage %uint  3D   0 0 0 1 Rg32ui
+    %u_storage_1d         = OpTypeImage %uint  1D   0 0 0 2 Rg32ui
+    %u_storage_2d         = OpTypeImage %uint  2D   0 0 0 2 Rg32ui
+    %u_storage_2d_array   = OpTypeImage %uint  2D   0 1 0 2 Rg32ui
+    %u_storage_3d         = OpTypeImage %uint  3D   0 0 0 2 Rg32ui
 
     ; Now all the same, but for signed integer sampled type.
 
@@ -160,10 +169,10 @@ std::string CommonImageTypes() {
     %i_texture_cube        = OpTypeImage %int  Cube 0 0 0 1 Unknown
     %i_texture_cube_array  = OpTypeImage %int  Cube 0 1 0 1 Unknown
 
-    %i_storage_1d         = OpTypeImage %int  1D   0 0 0 1 Rg32i
-    %i_storage_2d         = OpTypeImage %int  2D   0 0 0 1 Rg32i
-    %i_storage_2d_array   = OpTypeImage %int  2D   0 1 0 1 Rg32i
-    %i_storage_3d         = OpTypeImage %int  3D   0 0 0 1 Rg32i
+    %i_storage_1d         = OpTypeImage %int  1D   0 0 0 2 Rg32i
+    %i_storage_2d         = OpTypeImage %int  2D   0 0 0 2 Rg32i
+    %i_storage_2d_array   = OpTypeImage %int  2D   0 1 0 2 Rg32i
+    %i_storage_3d         = OpTypeImage %int  3D   0 0 0 2 Rg32i
 
     ;; Now pointers to each of the above, so we can declare variables for them.
 
@@ -225,10 +234,10 @@ std::string CommonTypes() {
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_WellFormedButNotAHandle) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %10 = OpConstantNull %ptr_sampler
      %20 = OpConstantNull %ptr_f_texture_1d
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule()) << assembly;
   const auto* sampler = p->GetMemoryObjectDeclarationForHandle(10, false);
@@ -241,10 +250,10 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_Direct) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_1d UniformConstant
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -262,7 +271,7 @@ TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_AccessChain) {
   // Show that we would generalize to arrays of handles, even though that
   // is not supported in WGSL MVP.
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
 
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
@@ -297,7 +306,7 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_InBoundsAccessChain) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
 
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
@@ -404,7 +413,7 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_CopyObject) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
 
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_1d UniformConstant
@@ -432,7 +441,7 @@ TEST_F(SpvParserHandleTest,
 }
 
 TEST_F(SpvParserHandleTest, GetMemoryObjectDeclarationForHandle_Variable_Load) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
 
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_1d UniformConstant
@@ -463,7 +472,7 @@ TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_SampledImage) {
   // Trace through the sampled image instruction, but in two different
   // directions.
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %sampled_image_type = OpTypeSampledImage %f_texture_1d
 
      %10 = OpVariable %ptr_sampler UniformConstant
@@ -494,7 +503,7 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_Image) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %sampled_image_type = OpTypeSampledImage %f_texture_1d
 
      %10 = OpVariable %ptr_sampler UniformConstant
@@ -522,7 +531,7 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_Direct) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %fty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_1d
 
      %func = OpFunction %void None %fty
@@ -530,7 +539,8 @@ TEST_F(SpvParserHandleTest,
      %20 = OpFunctionParameter %ptr_f_texture_1d
      %entry = OpLabel
      OpReturn
-  )";
+     OpFunctionEnd
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -548,7 +558,7 @@ TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_AccessChain) {
   // Show that we would generalize to arrays of handles, even though that
   // is not supported in WGSL MVP.
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
 
@@ -567,7 +577,7 @@ TEST_F(SpvParserHandleTest,
 
      OpReturn
      OpFunctionEnd
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -583,7 +593,7 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_InBoundsAccessChain) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
 
@@ -602,7 +612,7 @@ TEST_F(SpvParserHandleTest,
 
      OpReturn
      OpFunctionEnd
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -620,7 +630,7 @@ TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_PtrAccessChain) {
   // Show that we would generalize to arrays of handles, even though that
   // is not supported in WGSL MVP.
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
 
@@ -639,7 +649,7 @@ TEST_F(SpvParserHandleTest,
 
      OpReturn
      OpFunctionEnd
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -655,7 +665,7 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_InBoundsPtrAccessChain) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
 
@@ -674,7 +684,7 @@ TEST_F(SpvParserHandleTest,
 
      OpReturn
      OpFunctionEnd
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -690,7 +700,7 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_CopyObject) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %fty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_1d
 
      %func = OpFunction %void None %fty
@@ -703,7 +713,7 @@ TEST_F(SpvParserHandleTest,
 
      OpReturn
      OpFunctionEnd
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -719,7 +729,7 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_Load) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %fty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_1d
 
      %func = OpFunction %void None %fty
@@ -732,7 +742,7 @@ TEST_F(SpvParserHandleTest,
 
      OpReturn
      OpFunctionEnd
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -750,7 +760,7 @@ TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_SampledImage) {
   // Trace through the sampled image instruction, but in two different
   // directions.
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %sampled_image_type = OpTypeSampledImage %f_texture_1d
 
      %fty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_1d
@@ -766,7 +776,7 @@ TEST_F(SpvParserHandleTest,
 
      OpReturn
      OpFunctionEnd
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -782,7 +792,7 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_Image) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %sampled_image_type = OpTypeSampledImage %f_texture_1d
 
      %fty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_1d
@@ -799,7 +809,7 @@ TEST_F(SpvParserHandleTest,
 
      OpReturn
      OpFunctionEnd
-  )";
+  )" + MainBody();
   auto p = parser(test::Assemble(assembly));
   ASSERT_TRUE(p->BuildInternalModule());
   EXPECT_TRUE(p->error().empty());
@@ -857,7 +867,7 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, Variable) {
 }
 
 TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, FunctionParam) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %f_ty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_2d
      %si_ty = OpTypeSampledImage %f_texture_2d
      %coords = OpConstantNull %v2float
@@ -985,7 +995,7 @@ using SpvParserHandleTest_RegisterHandleUsage_RawImage =
     SpvParserTestBase<::testing::TestWithParam<UsageRawImageCase>>;
 
 TEST_P(SpvParserHandleTest_RegisterHandleUsage_RawImage, Variable) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %20 = OpVariable %ptr_)" +
                         GetParam().type + R"( UniformConstant
 
@@ -1011,7 +1021,7 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_RawImage, Variable) {
 }
 
 TEST_P(SpvParserHandleTest_RegisterHandleUsage_RawImage, FunctionParam) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %f_ty = OpTypeFunction %void %ptr_)" +
                         GetParam().type + R"(
 
@@ -1223,7 +1233,12 @@ using SpvParserHandleTest_SampledImageAccessTest =
     SpvParserTestBase<::testing::TestWithParam<ImageAccessCase>>;
 
 TEST_P(SpvParserHandleTest_SampledImageAccessTest, Variable) {
-  const auto assembly = Preamble() + R"(
+  // Only declare the sampled image type, and the associated variable
+  // if the requested image type is a sampled image type.
+  const bool sampled_image_type = GetParam().spirv_image_type_details.find(
+                                      "1 Unknown") != std::string::npos;
+  const auto assembly =
+      Preamble() + R"(
      OpEntryPoint Fragment %main "main"
      OpExecutionMode %main OriginUpperLeft
      OpName %f1 "f1"
@@ -1251,17 +1266,22 @@ TEST_P(SpvParserHandleTest_SampledImageAccessTest, Variable) {
      OpDecorate %30 DescriptorSet 0
      OpDecorate %30 Binding 1
 )" + CommonBasicTypes() +
-                        R"(
+      R"(
      %sampler = OpTypeSampler
      %ptr_sampler = OpTypePointer UniformConstant %sampler
      %im_ty = OpTypeImage )" +
-                        GetParam().spirv_image_type_details + R"(
+      GetParam().spirv_image_type_details + R"(
      %ptr_im_ty = OpTypePointer UniformConstant %im_ty
-     %si_ty = OpTypeSampledImage %im_ty
+)" + (sampled_image_type ? " %si_ty = OpTypeSampledImage %im_ty " : "") +
+      R"(
 
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_im_ty UniformConstant
      %30 = OpVariable %ptr_sampler UniformConstant ; comparison sampler, when needed
+
+     ; ConstOffset operands must be constants
+     %offsets2d = OpConstantComposite %v2int %int_3 %int_4
+     %u_offsets2d = OpConstantComposite %v2uint %uint_3 %uint_4
 
      %main = OpFunction %void None %voidfn
      %entry = OpLabel
@@ -1286,18 +1306,13 @@ TEST_P(SpvParserHandleTest_SampledImageAccessTest, Variable) {
      %coords123 = OpCopyObject %v3float %vf123
      %coords1234 = OpCopyObject %v4float %vf1234
 
-     %value_offset = OpCompositeConstruct %v2int %int_3 %int_4
-     %offsets2d = OpCopyObject %v2int %value_offset
-
-     %u_value_offset = OpCompositeConstruct %v2uint %uint_3 %uint_4
-     %u_offsets2d = OpCopyObject %v2uint %u_value_offset
-
      %sam = OpLoad %sampler %10
      %im = OpLoad %im_ty %20
-     %sampled_image = OpSampledImage %si_ty %im %sam
-
-)" + GetParam().spirv_image_access +
-                        R"(
+)" +
+      (sampled_image_type ? " %sampled_image = OpSampledImage %si_ty %im %sam "
+                          : "") +
+      GetParam().spirv_image_access +
+      R"(
 
      OpReturn
      OpFunctionEnd
@@ -1450,7 +1465,11 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
               Identifier[not set]{coords12}
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"},
 
@@ -1495,7 +1514,11 @@ INSTANTIATE_TEST_SUITE_P(
                   Identifier[not set]{z}
                 }
               }
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"},
 
@@ -1609,7 +1632,11 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{x_10}
               Identifier[not set]{coords12}
               ScalarConstructor[not set]{7.000000}
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"},
 
@@ -1648,7 +1675,11 @@ INSTANTIATE_TEST_SUITE_P(
               ScalarConstructor[not set]{7.000000}
               TypeConstructor[not set]{
                 __vec_2__i32
-                Identifier[not set]{u_offsets2d}
+                TypeConstructor[not set]{
+                  __vec_2__u32
+                  ScalarConstructor[not set]{3u}
+                  ScalarConstructor[not set]{4u}
+                }
               }
             )
           })"},
@@ -1694,7 +1725,11 @@ INSTANTIATE_TEST_SUITE_P(
                 }
               }
               ScalarConstructor[not set]{7.000000}
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"}));
 
@@ -1897,7 +1932,11 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{x_10}
               Identifier[not set]{coords12}
               ScalarConstructor[not set]{0.200000}
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"},
         // ImageSampleDrefImplicitLod arrayed with ConstOffset
@@ -1942,7 +1981,11 @@ INSTANTIATE_TEST_SUITE_P(
                 }
               }
               ScalarConstructor[not set]{0.200000}
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"}));
 
@@ -2061,7 +2104,11 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{x_10}
               Identifier[not set]{coords12}
               ScalarConstructor[not set]{0.000000}
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"},
 
@@ -2100,7 +2147,11 @@ INSTANTIATE_TEST_SUITE_P(
               ScalarConstructor[not set]{0.000000}
               TypeConstructor[not set]{
                 __vec_2__i32
-                Identifier[not set]{u_offsets2d}
+                TypeConstructor[not set]{
+                  __vec_2__u32
+                  ScalarConstructor[not set]{3u}
+                  ScalarConstructor[not set]{4u}
+                }
               }
             )
           })"},
@@ -2147,7 +2198,11 @@ INSTANTIATE_TEST_SUITE_P(
                 }
               }
               ScalarConstructor[not set]{0.000000}
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"},
 
@@ -2266,7 +2321,11 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{coords12}
               ScalarConstructor[not set]{7.000000}
               ScalarConstructor[not set]{0.000000}
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"},
 
@@ -2305,7 +2364,11 @@ INSTANTIATE_TEST_SUITE_P(
               ScalarConstructor[not set]{0.000000}
               TypeConstructor[not set]{
                 __vec_2__i32
-                Identifier[not set]{u_offsets2d}
+                TypeConstructor[not set]{
+                  __vec_2__u32
+                  ScalarConstructor[not set]{3u}
+                  ScalarConstructor[not set]{4u}
+                }
               }
             )
           })"},
@@ -2353,7 +2416,11 @@ INSTANTIATE_TEST_SUITE_P(
               }
               ScalarConstructor[not set]{7.000000}
               ScalarConstructor[not set]{0.000000}
-              Identifier[not set]{offsets2d}
+              TypeConstructor[not set]{
+                __vec_2__i32
+                ScalarConstructor[not set]{3}
+                ScalarConstructor[not set]{4}
+              }
             )
           })"},
 
@@ -2403,7 +2470,11 @@ INSTANTIATE_TEST_SUITE_P(
               ScalarConstructor[not set]{0.000000}
               TypeConstructor[not set]{
                 __vec_2__i32
-                Identifier[not set]{u_offsets2d}
+                TypeConstructor[not set]{
+                  __vec_2__u32
+                  ScalarConstructor[not set]{3u}
+                  ScalarConstructor[not set]{4u}
+                }
               }
             )
           })"}));
@@ -3392,35 +3463,10 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
         // OpImageFetch requires conversion, uint -> v4int
-        {"%uint 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __sampled_texture_2d__u32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__i32
-        {
-          Bitcast[not set]<__vec_4__i32>{
-            Call[not set]{
-              Identifier[not set]{textureLoad}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{vi12}
-                ScalarConstructor[not set]{0}
-              )
-            }
-          }
-        }
-      }
-    })"},
+        // is invalid SPIR-V:
+        // "Expected Image 'Sampled Type' to be the same as Result Type
+        // components"
+
         // OpImageFetch requires no conversion, int -> v4int
         {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4int %im %vi12",
          R"(Variable{
@@ -3450,42 +3496,16 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
         // OpImageFetch requires conversion, int -> v4uint
-        {"%int 2D 0 0 0 1 Unknown", "%99 = OpImageFetch %v4uint %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __sampled_texture_2d__i32
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__u32
-        {
-          Bitcast[not set]<__vec_4__u32>{
-            Call[not set]{
-              Identifier[not set]{textureLoad}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{vi12}
-                ScalarConstructor[not set]{0}
-              )
-            }
-          }
-        }
-      }
-    })"},
+        // is invalid SPIR-V:
+        // "Expected Image 'Sampled Type' to be the same as Result Type
+        // components"
 
         //
         // OpImageRead
         //
 
         // OpImageRead requires no conversion, float -> v4float
-        {"%float 2D 0 0 0 1 Rgba32f", "%99 = OpImageRead %v4float %im %vi12",
+        {"%float 2D 0 0 0 2 Rgba32f", "%99 = OpImageRead %v4float %im %vi12",
          R"(Variable{
     Decorations{
       GroupDecoration{2}
@@ -3512,7 +3532,7 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
         // OpImageRead requires no conversion, uint -> v4uint
-        {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4uint %im %vi12",
+        {"%uint 2D 0 0 0 2 Rgba32ui", "%99 = OpImageRead %v4uint %im %vi12",
          R"(Variable{
     Decorations{
       GroupDecoration{2}
@@ -3538,37 +3558,14 @@ INSTANTIATE_TEST_SUITE_P(
         }
       }
     })"},
+
         // OpImageRead requires conversion, uint -> v4int
-        {"%uint 2D 0 0 0 1 Rgba32ui", "%99 = OpImageRead %v4int %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __access_control_read_only__storage_texture_2d_rgba32uint
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__i32
-        {
-          Bitcast[not set]<__vec_4__i32>{
-            Call[not set]{
-              Identifier[not set]{textureLoad}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{vi12}
-              )
-            }
-          }
-        }
-      }
-    })"},
+        // is invalid SPIR-V:
+        // "Expected Image 'Sampled Type' to be the same as Result Type
+        // components"
+
         // OpImageRead requires no conversion, int -> v4int
-        {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4int %im %vi12",
+        {"%int 2D 0 0 0 2 Rgba32i", "%99 = OpImageRead %v4int %im %vi12",
          R"(Variable{
     Decorations{
       GroupDecoration{2}
@@ -3594,35 +3591,11 @@ INSTANTIATE_TEST_SUITE_P(
         }
       }
     })"},
+
         // OpImageRead requires conversion, int -> v4uint
-        {"%int 2D 0 0 0 1 Rgba32i", "%99 = OpImageRead %v4uint %im %vi12",
-         R"(Variable{
-    Decorations{
-      GroupDecoration{2}
-      BindingDecoration{1}
-    }
-    x_20
-    uniform_constant
-    __access_control_read_only__storage_texture_2d_rgba32sint
-  })",
-         R"(VariableDeclStatement{
-      VariableConst{
-        x_99
-        none
-        __vec_4__u32
-        {
-          Bitcast[not set]<__vec_4__u32>{
-            Call[not set]{
-              Identifier[not set]{textureLoad}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{vi12}
-              )
-            }
-          }
-        }
-      }
-    })"},
+        // is invalid SPIR-V:
+        // "Expected Image 'Sampled Type' to be the same as Result Type
+        // components"
 
         //
         // Sampling operations, using OpImageSampleImplicitLod as an example.
@@ -4769,7 +4742,12 @@ using SpvParserHandleTest_ImageCoordsTest =
 
 TEST_P(SpvParserHandleTest_ImageCoordsTest,
        MakeCoordinateOperandsForImageAccess) {
-  const auto assembly = Preamble() + R"(
+  // Only declare the sampled image type, and the associated variable
+  // if the requested image type is a sampled image type.
+  const bool sampled_image_type = GetParam().spirv_image_type_details.find(
+                                      "1 Unknown") != std::string::npos;
+  const auto assembly =
+      Preamble() + R"(
      OpEntryPoint Fragment %100 "main"
      OpExecutionMode %100 OriginUpperLeft
      OpName %float_var "float_var"
@@ -4793,14 +4771,14 @@ TEST_P(SpvParserHandleTest_ImageCoordsTest,
      OpDecorate %30 DescriptorSet 0
      OpDecorate %30 Binding 1
 )" + CommonBasicTypes() +
-                        R"(
+      R"(
      %sampler = OpTypeSampler
      %ptr_sampler = OpTypePointer UniformConstant %sampler
      %im_ty = OpTypeImage )" +
-                        GetParam().spirv_image_type_details + R"(
+      GetParam().spirv_image_type_details + R"(
      %ptr_im_ty = OpTypePointer UniformConstant %im_ty
-
-     %si_ty = OpTypeSampledImage %im_ty
+)" + (sampled_image_type ? " %si_ty = OpTypeSampledImage %im_ty " : "") +
+      R"(
 
      %ptr_float = OpTypePointer Function %float
 
@@ -4830,10 +4808,12 @@ TEST_P(SpvParserHandleTest_ImageCoordsTest,
 
      %sam = OpLoad %sampler %10
      %im = OpLoad %im_ty %20
-     %sampled_image = OpSampledImage %si_ty %im %sam
 
-)" + GetParam().spirv_image_access +
-                        R"(
+)" +
+      (sampled_image_type ? " %sampled_image = OpSampledImage %si_ty %im %sam "
+                          : "") +
+      GetParam().spirv_image_access +
+      R"(
      ; Use an anchor for the cases when the image access doesn't have a result ID.
      %1000 = OpCopyObject %uint %uint_0
 
