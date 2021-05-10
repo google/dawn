@@ -377,7 +377,12 @@ TEST_F(ResolverValidationTest, StorageClass_NonFunctionClassError) {
 
 TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {
   auto t = ty.sampler(ast::SamplerKind::kSampler);
-  Global(Source{{12, 34}}, "var", t, ast::StorageClass::kUniformConstant);
+  Global(Source{{12, 34}}, "var", t, ast::StorageClass::kUniformConstant,
+         nullptr,
+         {
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
   EXPECT_FALSE(r()->Resolve());
 
@@ -388,7 +393,12 @@ TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {
 
 TEST_F(ResolverValidationTest, StorageClass_TextureExplicitStorageClass) {
   auto t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-  Global(Source{{12, 34}}, "var", t, ast::StorageClass::kUniformConstant);
+  Global(Source{{12, 34}}, "var", t, ast::StorageClass::kUniformConstant,
+         nullptr,
+         {
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
   EXPECT_FALSE(r()->Resolve()) << r()->error();
 

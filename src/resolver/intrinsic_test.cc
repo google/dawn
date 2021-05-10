@@ -243,10 +243,17 @@ class ResolverIntrinsicTest_TextureOperation
   void add_call_param(std::string name,
                       typ::Type type,
                       ast::ExpressionList* call_params) {
-    ast::StorageClass storage_class = type->UnwrapAll()->is_handle()
-                                          ? ast::StorageClass::kNone
-                                          : ast::StorageClass::kPrivate;
-    Global(name, type, storage_class);
+    if (type->UnwrapAll()->is_handle()) {
+      Global(name, type, ast::StorageClass::kNone, nullptr,
+             {
+                 create<ast::BindingDecoration>(0),
+                 create<ast::GroupDecoration>(0),
+             });
+
+    } else {
+      Global(name, type, ast::StorageClass::kPrivate);
+    }
+
     call_params->push_back(Expr(name));
   }
   typ::Type subtype(Texture type) {
@@ -763,7 +770,11 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
   auto ac = ty.access(ast::AccessControl::kReadOnly, str);
-  Global("a", ac, ast::StorageClass::kStorage);
+  Global("a", ac, ast::StorageClass::kStorage, nullptr,
+         {
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
 
   auto* call = Call("arrayLength", MemberAccessor("a", "x"));
   WrapInFunction(call);

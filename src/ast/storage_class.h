@@ -42,6 +42,10 @@ inline bool IsHostShareable(StorageClass sc) {
   return sc == ast::StorageClass::kUniform || sc == ast::StorageClass::kStorage;
 }
 
+/// @param sc the StorageClass
+/// @return the name of the given storage class
+const char* str(StorageClass sc);
+
 /// @param out the std::ostream to write to
 /// @param sc the StorageClass
 /// @return the std::ostream so calls can be chained

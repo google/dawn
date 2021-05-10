@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TRANSFORM_BINDING_POINT_H_
-#define SRC_TRANSFORM_BINDING_POINT_H_
+#ifndef SRC_SEM_BINDING_POINT_H_
+#define SRC_SEM_BINDING_POINT_H_
 
 #include <stdint.h>
 
@@ -22,7 +22,7 @@
 #include "src/utils/hash.h"
 
 namespace tint {
-namespace transform {
+namespace sem {
 
 /// BindingPoint holds a group and binding index.
 struct BindingPoint {
@@ -46,25 +46,25 @@ struct BindingPoint {
   }
 };
 
-}  // namespace transform
+}  // namespace sem
 }  // namespace tint
 
 namespace std {
 
-/// Custom std::hash specialization for tint::transform::BindingPoint so
+/// Custom std::hash specialization for tint::sem::BindingPoint so
 /// BindingPoints can be used as keys for std::unordered_map and
 /// std::unordered_set.
 template <>
-class hash<tint::transform::BindingPoint> {
+class hash<tint::sem::BindingPoint> {
  public:
   /// @param binding_point the binding point to create a hash for
   /// @return the hash value
   inline std::size_t operator()(
-      const tint::transform::BindingPoint& binding_point) const {
+      const tint::sem::BindingPoint& binding_point) const {
     return tint::utils::Hash(binding_point.group, binding_point.binding);
   }
 };
 
 }  // namespace std
 
-#endif  // SRC_TRANSFORM_BINDING_POINT_H_
+#endif  // SRC_SEM_BINDING_POINT_H_

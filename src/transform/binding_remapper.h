@@ -18,11 +18,14 @@
 #include <unordered_map>
 
 #include "src/ast/access_control.h"
-#include "src/transform/binding_point.h"
+#include "src/sem/binding_point.h"
 #include "src/transform/transform.h"
 
 namespace tint {
 namespace transform {
+
+/// BindingPoint is an alias to sem::BindingPoint
+using BindingPoint = sem::BindingPoint;
 
 /// BindingRemapper is a transform used to remap resource binding points and
 /// access controls.

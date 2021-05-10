@@ -381,7 +381,7 @@ class InspectorHelper : public ProgramBuilder {
   }
 
   void AddGlobalVariable(const std::string& name, ast::Type* type) {
-    Global(name, type, ast::StorageClass::kUniformConstant);
+    Global(name, type, ast::StorageClass::kPrivate);
   }
 
   /// Adds a depth texture variable to the program

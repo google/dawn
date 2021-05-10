@@ -373,9 +373,17 @@ TEST_F(IntrinsicBuilderTest, Call_TextureSampleCompare_Twice) {
   auto s = ty.sampler(ast::SamplerKind::kComparisonSampler);
   auto t = ty.depth_texture(ast::TextureDimension::k2d);
 
-  auto* tex = Global("texture", t, ast::StorageClass::kNone);
+  auto* tex = Global("texture", t, ast::StorageClass::kNone, nullptr,
+                     {
+                         create<ast::BindingDecoration>(0),
+                         create<ast::GroupDecoration>(0),
+                     });
 
-  auto* sampler = Global("sampler", s, ast::StorageClass::kNone);
+  auto* sampler = Global("sampler", s, ast::StorageClass::kNone, nullptr,
+                         {
+                             create<ast::BindingDecoration>(1),
+                             create<ast::GroupDecoration>(0),
+                         });
 
   auto* expr1 = Call("textureSampleCompare", "texture", "sampler",
                      vec2<f32>(1.0f, 2.0f), 2.0f);

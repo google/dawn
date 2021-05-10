@@ -466,20 +466,10 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 
   for (auto* deco : var->decorations()) {
     Mark(deco);
-    if (var->is_const()) {
-      if (!deco->Is<ast::OverrideDecoration>()) {
-        diagnostics_.add_error("decoration is not valid for constants",
-                               deco->source());
-        return false;
-      }
-    } else if (!(deco->Is<ast::BindingDecoration>() ||
-                 deco->Is<ast::BuiltinDecoration>() ||
-                 deco->Is<ast::GroupDecoration>() ||
-                 deco->Is<ast::LocationDecoration>())) {
-      diagnostics_.add_error("decoration is not valid for variables",
-                             deco->source());
-      return false;
-    }
+  }
+
+  if (auto bp = var->binding_point()) {
+    info->binding_point = {bp.group->value(), bp.binding->value()};
   }
 
   if (var->has_constructor()) {
@@ -512,6 +502,53 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 }
 
 bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
+  for (auto* deco : info->declaration->decorations()) {
+    if (info->declaration->is_const()) {
+      if (!deco->Is<ast::OverrideDecoration>()) {
+        diagnostics_.add_error("decoration is not valid for constants",
+                               deco->source());
+        return false;
+      }
+    } else {
+      if (!(deco->Is<ast::BindingDecoration>() ||
+            deco->Is<ast::BuiltinDecoration>() ||
+            deco->Is<ast::GroupDecoration>() ||
+            deco->Is<ast::LocationDecoration>())) {
+        diagnostics_.add_error("decoration is not valid for variables",
+                               deco->source());
+        return false;
+      }
+    }
+  }
+
+  auto binding_point = info->declaration->binding_point();
+  switch (info->storage_class) {
+    case ast::StorageClass::kUniform:
+    case ast::StorageClass::kStorage:
+    case ast::StorageClass::kUniformConstant: {
+      // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
+      // Each resource variable must be declared with both group and binding
+      // attributes.
+      if (!binding_point) {
+        diagnostics_.add_error(
+            "resource variables require [[group]] and [[binding]] decorations",
+            info->declaration->source());
+        return false;
+      }
+      break;
+    }
+    default:
+      if (binding_point.binding || binding_point.group) {
+        // https://gpuweb.github.io/gpuweb/wgsl/#attribute-binding
+        // Must only be applied to a resource variable
+        diagnostics_.add_error(
+            "non-resource variables must not have [[group]] or [[binding]] "
+            "decorations",
+            info->declaration->source());
+        return false;
+      }
+  }
+
   switch (info->storage_class) {
     case ast::StorageClass::kStorage: {
       // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
@@ -941,6 +978,33 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           "a vertex shader must include the 'position' builtin in its return "
           "type",
           func->source());
+      return false;
+    }
+  }
+
+  // Validate there are no resource variable binding collisions
+  std::unordered_map<sem::BindingPoint, const ast::Variable*> binding_points;
+  for (auto* var_info : info->referenced_module_vars) {
+    if (!var_info->declaration->binding_point()) {
+      continue;
+    }
+    auto bp = var_info->binding_point;
+    auto res = binding_points.emplace(bp, var_info->declaration);
+    if (!res.second) {
+      // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
+      // Bindings must not alias within a shader stage: two different
+      // variables in the resource interface of a given shader must not have
+      // the same group and binding values, when considered as a pair of
+      // values.
+      auto func_name = builder_->Symbols().NameFor(info->declaration->symbol());
+      diagnostics_.add_error("entry point '" + func_name +
+                                 "' references multiple variables that use the "
+                                 "same resource binding [[group(" +
+                                 std::to_string(bp.group) + "), binding(" +
+                                 std::to_string(bp.binding) + ")]]",
+                             var_info->declaration->source());
+      diagnostics_.add_note("first resource binding usage declared here",
+                            res.first->second->source());
       return false;
     }
   }

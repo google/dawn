@@ -162,7 +162,8 @@ TEST_F(BuilderTest, GlobalVar_WithLocation) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, nullptr,
+  auto* v = Global("var", ty.sampler(ast::SamplerKind::kSampler),
+                   ast::StorageClass::kNone, nullptr,
                    ast::DecorationList{
                        create<ast::BindingDecoration>(2),
                        create<ast::GroupDecoration>(3),
@@ -176,10 +177,9 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 Binding 2
 OpDecorate %1 DescriptorSet 3
 )");
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypePointer Output %3
-%4 = OpConstantNull %3
-%1 = OpVariable %2 Output %4
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeSampler
+%2 = OpTypePointer UniformConstant %3
+%1 = OpVariable %2 UniformConstant
 )");
 }
 
@@ -384,7 +384,11 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                       {create<ast::StructBlockDecoration>()});
   auto ac = ty.access(ast::AccessControl::kReadOnly, A);
 
-  auto* var = Global("b", ac, ast::StorageClass::kStorage);
+  auto* var = Global("b", ac, ast::StorageClass::kStorage, nullptr,
+                     {
+                         create<ast::BindingDecoration>(0),
+                         create<ast::GroupDecoration>(0),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -395,6 +399,8 @@ OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %3 0 NonWritable
 OpMemberDecorate %3 1 Offset 4
 OpMemberDecorate %3 1 NonWritable
+OpDecorate %1 Binding 0
+OpDecorate %1 DescriptorSet 0
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
 OpMemberName %3 0 "a"
@@ -420,7 +426,11 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   auto* B = ty.alias("B", A);
   AST().AddConstructedType(B);
   auto ac = ty.access(ast::AccessControl::kReadOnly, B);
-  auto* var = Global("b", ac, ast::StorageClass::kStorage);
+  auto* var = Global("b", ac, ast::StorageClass::kStorage, nullptr,
+                     {
+                         create<ast::BindingDecoration>(0),
+                         create<ast::GroupDecoration>(0),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -429,6 +439,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %3 0 NonWritable
+OpDecorate %1 Binding 0
+OpDecorate %1 DescriptorSet 0
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
 OpMemberName %3 0 "a"
@@ -453,7 +465,11 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   auto ac = ty.access(ast::AccessControl::kReadOnly, A);
   auto* B = ty.alias("B", ac);
   AST().AddConstructedType(B);
-  auto* var = Global("b", B, ast::StorageClass::kStorage);
+  auto* var = Global("b", B, ast::StorageClass::kStorage, nullptr,
+                     {
+                         create<ast::BindingDecoration>(0),
+                         create<ast::GroupDecoration>(0),
+                     });
 
   spirv::Builder& b = Build();
 
@@ -462,6 +478,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %3 0 NonWritable
+OpDecorate %1 Binding 0
+OpDecorate %1 DescriptorSet 0
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
 OpMemberName %3 0 "a"
@@ -486,8 +504,16 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   auto read = ty.access(ast::AccessControl::kReadOnly, A);
   auto rw = ty.access(ast::AccessControl::kReadWrite, A);
 
-  auto* var_b = Global("b", read, ast::StorageClass::kStorage);
-  auto* var_c = Global("c", rw, ast::StorageClass::kStorage);
+  auto* var_b = Global("b", read, ast::StorageClass::kStorage, nullptr,
+                       {
+                           create<ast::GroupDecoration>(0),
+                           create<ast::BindingDecoration>(0),
+                       });
+  auto* var_c = Global("c", rw, ast::StorageClass::kStorage, nullptr,
+                       {
+                           create<ast::GroupDecoration>(1),
+                           create<ast::BindingDecoration>(0),
+                       });
 
   spirv::Builder& b = Build();
 
@@ -498,8 +524,12 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
             R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
 OpMemberDecorate %3 0 NonWritable
+OpDecorate %1 DescriptorSet 0
+OpDecorate %1 Binding 0
 OpDecorate %7 Block
 OpMemberDecorate %7 0 Offset 0
+OpDecorate %5 DescriptorSet 1
+OpDecorate %5 Binding 0
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
 OpMemberName %3 0 "a"
@@ -526,13 +556,19 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
 
   auto ac = ty.access(ast::AccessControl::kReadOnly, type);
 
-  auto* var_a = Global("a", ac, ast::StorageClass::kNone);
+  auto* var_a = Global("a", ac, ast::StorageClass::kNone, nullptr,
+                       {
+                           create<ast::BindingDecoration>(0),
+                           create<ast::GroupDecoration>(0),
+                       });
 
   spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonWritable
+OpDecorate %1 Binding 0
+OpDecorate %1 DescriptorSet 0
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 R32ui
@@ -549,13 +585,19 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
 
   auto ac = ty.access(ast::AccessControl::kWriteOnly, type);
 
-  auto* var_a = Global("a", ac, ast::StorageClass::kNone);
+  auto* var_a = Global("a", ac, ast::StorageClass::kNone, nullptr,
+                       {
+                           create<ast::BindingDecoration>(0),
+                           create<ast::GroupDecoration>(0),
+                       });
 
   spirv::Builder& b = Build();
 
   EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonReadable
+OpDecorate %1 Binding 0
+OpDecorate %1 DescriptorSet 0
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
 %3 = OpTypeImage %4 2D 0 0 0 2 R32ui
@@ -573,12 +615,20 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
   auto type_a = ty.access(ast::AccessControl::kReadOnly,
                           ty.storage_texture(ast::TextureDimension::k2d,
                                              ast::ImageFormat::kR32Uint));
-  auto* var_a = Global("a", type_a, ast::StorageClass::kNone);
+  auto* var_a = Global("a", type_a, ast::StorageClass::kNone, nullptr,
+                       {
+                           create<ast::BindingDecoration>(0),
+                           create<ast::GroupDecoration>(0),
+                       });
 
   auto type_b = ty.access(ast::AccessControl::kWriteOnly,
                           ty.storage_texture(ast::TextureDimension::k2d,
                                              ast::ImageFormat::kR32Uint));
-  auto* var_b = Global("b", type_b, ast::StorageClass::kNone);
+  auto* var_b = Global("b", type_b, ast::StorageClass::kNone, nullptr,
+                       {
+                           create<ast::BindingDecoration>(1),
+                           create<ast::GroupDecoration>(0),
+                       });
 
   spirv::Builder& b = Build();
 
@@ -586,7 +636,11 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
   EXPECT_TRUE(b.GenerateGlobalVariable(var_b)) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonWritable
+OpDecorate %1 Binding 0
+OpDecorate %1 DescriptorSet 0
 OpDecorate %5 NonReadable
+OpDecorate %5 Binding 1
+OpDecorate %5 DescriptorSet 0
 )");
   // There must only be one OpTypeImage declaration with the same
   // arguments

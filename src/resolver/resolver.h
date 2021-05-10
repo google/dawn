@@ -24,6 +24,7 @@
 #include "src/intrinsic_table.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
+#include "src/sem/binding_point.h"
 #include "src/sem/struct.h"
 #include "src/utils/unique_vector.h"
 
@@ -97,6 +98,7 @@ class Resolver {
     std::string const type_name;
     ast::StorageClass storage_class;
     std::vector<ast::IdentifierExpression*> users;
+    sem::BindingPoint binding_point;
   };
 
   /// Structure holding semantic information about a function.

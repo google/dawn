@@ -17,53 +17,35 @@
 namespace tint {
 namespace ast {
 
-std::ostream& operator<<(std::ostream& out, StorageClass sc) {
+const char* str(StorageClass sc) {
   switch (sc) {
-    case StorageClass::kInvalid: {
-      out << "invalid";
-      break;
-    }
-    case StorageClass::kNone: {
-      out << "none";
-      break;
-    }
-    case StorageClass::kInput: {
-      out << "in";
-      break;
-    }
-    case StorageClass::kOutput: {
-      out << "out";
-      break;
-    }
-    case StorageClass::kUniform: {
-      out << "uniform";
-      break;
-    }
-    case StorageClass::kWorkgroup: {
-      out << "workgroup";
-      break;
-    }
-    case StorageClass::kUniformConstant: {
-      out << "uniform_constant";
-      break;
-    }
-    case StorageClass::kStorage: {
-      out << "storage";
-      break;
-    }
-    case StorageClass::kImage: {
-      out << "image";
-      break;
-    }
-    case StorageClass::kPrivate: {
-      out << "private";
-      break;
-    }
-    case StorageClass::kFunction: {
-      out << "function";
-      break;
-    }
+    case StorageClass::kInvalid:
+      return "invalid";
+    case StorageClass::kNone:
+      return "none";
+    case StorageClass::kInput:
+      return "in";
+    case StorageClass::kOutput:
+      return "out";
+    case StorageClass::kUniform:
+      return "uniform";
+    case StorageClass::kWorkgroup:
+      return "workgroup";
+    case StorageClass::kUniformConstant:
+      return "uniform_constant";
+    case StorageClass::kStorage:
+      return "storage";
+    case StorageClass::kImage:
+      return "image";
+    case StorageClass::kPrivate:
+      return "private";
+    case StorageClass::kFunction:
+      return "function";
   }
+  return "<unknown>";
+}
+std::ostream& operator<<(std::ostream& out, StorageClass sc) {
+  out << str(sc);
   return out;
 }
 

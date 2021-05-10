@@ -173,8 +173,16 @@ TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
   auto* s = Structure("S", {Member("a", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
   auto ac = ty.access(ast::AccessControl::kReadOnly, s);
-  Global("x", s, ast::StorageClass::kUniform);
-  Global("y", ac, ast::StorageClass::kStorage);
+  Global("x", s, ast::StorageClass::kUniform, nullptr,
+         {
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+  Global("y", ac, ast::StorageClass::kStorage, nullptr,
+         {
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(0),
+         });
   WrapInFunction(Var("g", s, ast::StorageClass::kFunction));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();

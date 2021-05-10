@@ -43,46 +43,63 @@ enum class DecorationKind {
   kStride,
   kStructBlock,
   kWorkgroup,
+
+  kBindingAndGroup,
 };
+
+bool IsBindingDecoration(DecorationKind kind) {
+  switch (kind) {
+    case DecorationKind::kBinding:
+    case DecorationKind::kGroup:
+    case DecorationKind::kBindingAndGroup:
+      return true;
+    default:
+      return false;
+  }
+}
+
 struct TestParams {
   DecorationKind kind;
   bool should_pass;
 };
 struct TestWithParams : ResolverTestWithParam<TestParams> {};
 
-static ast::Decoration* createDecoration(const Source& source,
-                                         ProgramBuilder& builder,
-                                         DecorationKind kind) {
+static ast::DecorationList createDecorations(const Source& source,
+                                             ProgramBuilder& builder,
+                                             DecorationKind kind) {
   switch (kind) {
     case DecorationKind::kAccess:
-      return builder.create<ast::AccessDecoration>(
-          source, ast::AccessControl::kReadOnly);
+      return {builder.create<ast::AccessDecoration>(
+          source, ast::AccessControl::kReadOnly)};
     case DecorationKind::kAlign:
-      return builder.create<ast::StructMemberAlignDecoration>(source, 4u);
+      return {builder.create<ast::StructMemberAlignDecoration>(source, 4u)};
     case DecorationKind::kBinding:
-      return builder.create<ast::BindingDecoration>(source, 1);
+      return {builder.create<ast::BindingDecoration>(source, 1u)};
     case DecorationKind::kBuiltin:
-      return builder.Builtin(source, ast::Builtin::kPosition);
+      return {builder.Builtin(source, ast::Builtin::kPosition)};
     case DecorationKind::kGroup:
-      return builder.create<ast::GroupDecoration>(source, 1u);
+      return {builder.create<ast::GroupDecoration>(source, 1u)};
     case DecorationKind::kLocation:
-      return builder.Location(source, 1);
+      return {builder.Location(source, 1)};
     case DecorationKind::kOverride:
-      return builder.create<ast::OverrideDecoration>(source, 0u);
+      return {builder.create<ast::OverrideDecoration>(source, 0u)};
     case DecorationKind::kOffset:
-      return builder.create<ast::StructMemberOffsetDecoration>(source, 4u);
+      return {builder.create<ast::StructMemberOffsetDecoration>(source, 4u)};
     case DecorationKind::kSize:
-      return builder.create<ast::StructMemberSizeDecoration>(source, 4u);
+      return {builder.create<ast::StructMemberSizeDecoration>(source, 4u)};
     case DecorationKind::kStage:
-      return builder.Stage(source, ast::PipelineStage::kCompute);
+      return {builder.Stage(source, ast::PipelineStage::kCompute)};
     case DecorationKind::kStride:
-      return builder.create<ast::StrideDecoration>(source, 4u);
+      return {builder.create<ast::StrideDecoration>(source, 4u)};
     case DecorationKind::kStructBlock:
-      return builder.create<ast::StructBlockDecoration>(source);
+      return {builder.create<ast::StructBlockDecoration>(source)};
     case DecorationKind::kWorkgroup:
-      return builder.create<ast::WorkgroupDecoration>(source, 1u, 1u, 1u);
+      return {builder.create<ast::WorkgroupDecoration>(source, 1u, 1u, 1u)};
+    case DecorationKind::kBindingAndGroup:
+      return {builder.create<ast::BindingDecoration>(source, 1u),
+              builder.create<ast::GroupDecoration>(source, 1u)};
   }
-  return nullptr;
+  return {};
 }
 
 using FunctionReturnTypeDecorationTest = TestWithParams;
@@ -91,7 +108,7 @@ TEST_P(FunctionReturnTypeDecorationTest, IsValid) {
 
   Func("main", ast::VariableList{}, ty.f32(), ast::StatementList{Return(1.f)},
        ast::DecorationList{Stage(ast::PipelineStage::kCompute)},
-       ast::DecorationList{createDecoration({}, *this, params.kind)});
+       createDecorations({}, *this, params.kind));
 
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -116,17 +133,15 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStage, false},
                     TestParams{DecorationKind::kStride, false},
                     TestParams{DecorationKind::kStructBlock, false},
-                    TestParams{DecorationKind::kWorkgroup, false}));
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
 
 using ArrayDecorationTest = TestWithParams;
 TEST_P(ArrayDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  auto* arr =
-      ty.array(ty.f32(), 0,
-               {
-                   createDecoration(Source{{12, 34}}, *this, params.kind),
-               });
+  auto* arr = ty.array(ty.f32(), 0,
+                       createDecorations(Source{{12, 34}}, *this, params.kind));
   Structure("mystruct",
             {
                 Member("a", arr),
@@ -158,14 +173,15 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStage, false},
                     TestParams{DecorationKind::kStride, true},
                     TestParams{DecorationKind::kStructBlock, false},
-                    TestParams{DecorationKind::kWorkgroup, false}));
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
 
 using StructDecorationTest = TestWithParams;
 TEST_P(StructDecorationTest, IsValid) {
   auto& params = GetParam();
 
   Structure("mystruct", {},
-            {createDecoration(Source{{12, 34}}, *this, params.kind)});
+            createDecorations(Source{{12, 34}}, *this, params.kind));
 
   WrapInFunction();
 
@@ -192,16 +208,15 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStage, false},
                     TestParams{DecorationKind::kStride, false},
                     TestParams{DecorationKind::kStructBlock, true},
-                    TestParams{DecorationKind::kWorkgroup, false}));
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
 
 using StructMemberDecorationTest = TestWithParams;
 TEST_P(StructMemberDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  ast::StructMemberList members{
-      Member("a", ty.i32(),
-             ast::DecorationList{
-                 createDecoration(Source{{12, 34}}, *this, params.kind)})};
+  ast::StructMemberList members{Member(
+      "a", ty.i32(), createDecorations(Source{{12, 34}}, *this, params.kind))};
 
   Structure("mystruct", members);
 
@@ -230,15 +245,21 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStage, false},
                     TestParams{DecorationKind::kStride, false},
                     TestParams{DecorationKind::kStructBlock, false},
-                    TestParams{DecorationKind::kWorkgroup, false}));
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
 
 using VariableDecorationTest = TestWithParams;
 TEST_P(VariableDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  Global("a", ty.f32(), ast::StorageClass::kInput, nullptr,
-         ast::DecorationList{
-             createDecoration(Source{{12, 34}}, *this, params.kind)});
+  if (IsBindingDecoration(params.kind)) {
+    Global("a", ty.sampler(ast::SamplerKind::kSampler),
+           ast::StorageClass::kNone, nullptr,
+           createDecorations(Source{{12, 34}}, *this, params.kind));
+  } else {
+    Global("a", ty.f32(), ast::StorageClass::kInput, nullptr,
+           createDecorations(Source{{12, 34}}, *this, params.kind));
+  }
 
   WrapInFunction();
 
@@ -246,8 +267,10 @@ TEST_P(VariableDecorationTest, IsValid) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
     EXPECT_FALSE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(),
-              "12:34 error: decoration is not valid for variables");
+    if (!IsBindingDecoration(params.kind)) {
+      EXPECT_EQ(r()->error(),
+                "12:34 error: decoration is not valid for variables");
+    }
   }
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -255,9 +278,9 @@ INSTANTIATE_TEST_SUITE_P(
     VariableDecorationTest,
     testing::Values(TestParams{DecorationKind::kAccess, false},
                     TestParams{DecorationKind::kAlign, false},
-                    TestParams{DecorationKind::kBinding, true},
+                    TestParams{DecorationKind::kBinding, false},
                     TestParams{DecorationKind::kBuiltin, true},
-                    TestParams{DecorationKind::kGroup, true},
+                    TestParams{DecorationKind::kGroup, false},
                     TestParams{DecorationKind::kLocation, true},
                     TestParams{DecorationKind::kOverride, false},
                     TestParams{DecorationKind::kOffset, false},
@@ -265,15 +288,15 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStage, false},
                     TestParams{DecorationKind::kStride, false},
                     TestParams{DecorationKind::kStructBlock, false},
-                    TestParams{DecorationKind::kWorkgroup, false}));
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, true}));
 
 using ConstantDecorationTest = TestWithParams;
 TEST_P(ConstantDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  GlobalConst("a", ty.f32(), nullptr,
-              ast::DecorationList{
-                  createDecoration(Source{{12, 34}}, *this, params.kind)});
+  GlobalConst("a", ty.f32(), Expr(1.23f),
+              createDecorations(Source{{12, 34}}, *this, params.kind));
 
   WrapInFunction();
 
@@ -300,16 +323,17 @@ INSTANTIATE_TEST_SUITE_P(
                     TestParams{DecorationKind::kStage, false},
                     TestParams{DecorationKind::kStride, false},
                     TestParams{DecorationKind::kStructBlock, false},
-                    TestParams{DecorationKind::kWorkgroup, false}));
+                    TestParams{DecorationKind::kWorkgroup, false},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
 
 using FunctionDecorationTest = TestWithParams;
 TEST_P(FunctionDecorationTest, IsValid) {
   auto& params = GetParam();
 
-  Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{},
-       ast::DecorationList{
-           Stage(ast::PipelineStage::kCompute),
-           createDecoration(Source{{12, 34}}, *this, params.kind)});
+  ast::DecorationList decos =
+      createDecorations(Source{{12, 34}}, *this, params.kind);
+  decos.emplace_back(Stage(ast::PipelineStage::kCompute));
+  Func("foo", ast::VariableList{}, ty.void_(), ast::StatementList{}, decos);
 
   if (params.should_pass) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -334,7 +358,8 @@ INSTANTIATE_TEST_SUITE_P(
                     // Skip kStage as we always apply it in this test
                     TestParams{DecorationKind::kStride, false},
                     TestParams{DecorationKind::kStructBlock, false},
-                    TestParams{DecorationKind::kWorkgroup, true}));
+                    TestParams{DecorationKind::kWorkgroup, true},
+                    TestParams{DecorationKind::kBindingAndGroup, false}));
 
 }  // namespace
 }  // namespace DecorationTests
@@ -479,6 +504,159 @@ TEST_F(StructBlockTest, StructUsedAsArrayElement) {
 
 }  // namespace
 }  // namespace StructBlockTests
+
+namespace ResourceTests {
+namespace {
+
+using ResourceDecorationTest = ResolverTest;
+TEST_F(ResourceDecorationTest, UniformBufferMissingBinding) {
+  auto* s = Structure("S", {Member("x", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  Global(Source{{12, 34}}, "G", s, ast::StorageClass::kUniform);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: resource variables require [[group]] and [[binding]] "
+            "decorations");
+}
+
+TEST_F(ResourceDecorationTest, StorageBufferMissingBinding) {
+  auto* s = Structure("S", {Member("x", ty.i32())},
+                      {create<ast::StructBlockDecoration>()});
+  auto ac = ty.access(ast::AccessControl::kReadOnly, s);
+  Global(Source{{12, 34}}, "G", ac, ast::StorageClass::kStorage);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: resource variables require [[group]] and [[binding]] "
+            "decorations");
+}
+
+TEST_F(ResourceDecorationTest, TextureMissingBinding) {
+  Global(Source{{12, 34}}, "G", ty.depth_texture(ast::TextureDimension::k2d),
+         ast::StorageClass::kNone);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: resource variables require [[group]] and [[binding]] "
+            "decorations");
+}
+
+TEST_F(ResourceDecorationTest, SamplerMissingBinding) {
+  Global(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
+         ast::StorageClass::kNone);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: resource variables require [[group]] and [[binding]] "
+            "decorations");
+}
+
+TEST_F(ResourceDecorationTest, BindingPairMissingBinding) {
+  Global(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
+         ast::StorageClass::kNone, nullptr,
+         {
+             create<ast::GroupDecoration>(1),
+         });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: resource variables require [[group]] and [[binding]] "
+            "decorations");
+}
+
+TEST_F(ResourceDecorationTest, BindingPairMissingGroup) {
+  Global(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
+         ast::StorageClass::kNone, nullptr,
+         {
+             create<ast::BindingDecoration>(1),
+         });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: resource variables require [[group]] and [[binding]] "
+            "decorations");
+}
+
+TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByEntryPoint) {
+  Global(Source{{12, 34}}, "A",
+         ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         ast::StorageClass::kNone, nullptr,
+         {
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+  Global(Source{{56, 78}}, "B",
+         ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         ast::StorageClass::kNone, nullptr,
+         {
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("F", {}, ty.void_(),
+       {
+           Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kFunction,
+                    Call("textureLoad", "A", vec2<i32>(1, 2), 0))),
+           Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kFunction,
+                    Call("textureLoad", "B", vec2<i32>(1, 2), 0))),
+       },
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      R"(56:78 error: entry point 'F' references multiple variables that use the same resource binding [[group(2), binding(1)]]
+12:34 note: first resource binding usage declared here)");
+}
+
+TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByDifferentEntryPoints) {
+  Global(Source{{12, 34}}, "A",
+         ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         ast::StorageClass::kNone, nullptr,
+         {
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+  Global(Source{{56, 78}}, "B",
+         ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+         ast::StorageClass::kNone, nullptr,
+         {
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  Func("F_A", {}, ty.void_(),
+       {
+           Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kFunction,
+                    Call("textureLoad", "A", vec2<i32>(1, 2), 0))),
+       },
+       {Stage(ast::PipelineStage::kFragment)});
+  Func("F_B", {}, ty.void_(),
+       {
+           Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kFunction,
+                    Call("textureLoad", "B", vec2<i32>(1, 2), 0))),
+       },
+       {Stage(ast::PipelineStage::kFragment)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResourceDecorationTest, BindingPointOnNonResource) {
+  Global(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate, nullptr,
+         {
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(2),
+         });
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: non-resource variables must not have [[group]] or "
+            "[[binding]] decorations");
+}
+
+}  // namespace
+}  // namespace ResourceTests
 
 }  // namespace resolver
 }  // namespace tint

@@ -232,6 +232,7 @@ set(TINT_LIB_SRCS
   scope_stack.h
   sem/array.cc
   sem/array.h
+  sem/binding_point.h
   sem/call_target.cc
   sem/call_target.h
   sem/call.cc
@@ -258,7 +259,6 @@ set(TINT_LIB_SRCS
   symbol.h
   traits.h
   typepair.h
-  transform/binding_point.h
   transform/binding_remapper.cc
   transform/binding_remapper.h
   transform/bound_array_accessors.cc

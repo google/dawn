@@ -244,8 +244,16 @@ TEST_F(ResolverAssignmentValidationTest, AssignFromPointer_Fail) {
     return ty.access(ast::AccessControl::kReadOnly, tex_type);
   };
 
-  auto* var_a = Global("a", make_type(), ast::StorageClass::kNone);
-  auto* var_b = Global("b", make_type(), ast::StorageClass::kNone);
+  auto* var_a = Global("a", make_type(), ast::StorageClass::kNone, nullptr,
+                       {
+                           create<ast::BindingDecoration>(0),
+                           create<ast::GroupDecoration>(0),
+                       });
+  auto* var_b = Global("b", make_type(), ast::StorageClass::kNone, nullptr,
+                       {
+                           create<ast::BindingDecoration>(1),
+                           create<ast::GroupDecoration>(0),
+                       });
 
   WrapInFunction(Assign(Source{{12, 34}}, var_a, var_b));
 
