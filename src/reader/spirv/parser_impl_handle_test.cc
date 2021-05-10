@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <ostream>
+
 #include "gmock/gmock.h"
 #include "src/reader/spirv/function.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
@@ -232,6 +234,16 @@ std::string CommonTypes() {
   return CommonBasicTypes() + CommonImageTypes();
 }
 
+std::string Bindings(std::vector<uint32_t> ids) {
+  std::ostringstream os;
+  int binding = 0;
+  for (auto id : ids) {
+    os << "  OpDecorate %" << id << " DescriptorSet 0\n"
+       << "  OpDecorate %" << id << " Binding " << binding++ << "\n";
+  }
+  return os.str();
+}
+
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_WellFormedButNotAHandle) {
   const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
@@ -250,7 +262,8 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_Direct) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly =
+      Preamble() + FragMain() + Bindings({10, 20}) + CommonTypes() + R"(
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_1d UniformConstant
   )" + MainBody();
@@ -271,7 +284,8 @@ TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_AccessChain) {
   // Show that we would generalize to arrays of handles, even though that
   // is not supported in WGSL MVP.
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly =
+      Preamble() + FragMain() + Bindings({10, 20}) + CommonTypes() + R"(
 
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
@@ -306,7 +320,8 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_InBoundsAccessChain) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly =
+      Preamble() + FragMain() + Bindings({10, 20}) + CommonTypes() + R"(
 
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
@@ -343,7 +358,9 @@ TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_PtrAccessChain) {
   // Show that we would generalize to arrays of handles, even though that
   // is not supported in WGSL MVP.
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  // Use VariablePointers for the OpInBoundsPtrAccessChain.
+  const auto assembly = "OpCapability VariablePointers " + Preamble() +
+                        FragMain() + Bindings({10, 20}) + CommonTypes() + R"(
 
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
@@ -378,7 +395,9 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_InBoundsPtrAccessChain) {
-  const auto assembly = Preamble() + CommonTypes() + R"(
+  // Use VariablePointers for the OpInBoundsPtrAccessChain.
+  const auto assembly = "OpCapability VariablePointers " + Preamble() +
+                        FragMain() + Bindings({10, 20}) + CommonTypes() + R"(
 
      %sampler_array = OpTypeArray %sampler %uint_100
      %image_array = OpTypeArray %f_texture_1d %uint_100
@@ -413,7 +432,8 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_CopyObject) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly =
+      Preamble() + FragMain() + Bindings({10, 20}) + CommonTypes() + R"(
 
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_1d UniformConstant
@@ -441,7 +461,8 @@ TEST_F(SpvParserHandleTest,
 }
 
 TEST_F(SpvParserHandleTest, GetMemoryObjectDeclarationForHandle_Variable_Load) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly =
+      Preamble() + FragMain() + Bindings({10, 20}) + CommonTypes() + R"(
 
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_1d UniformConstant
@@ -472,7 +493,8 @@ TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_SampledImage) {
   // Trace through the sampled image instruction, but in two different
   // directions.
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly =
+      Preamble() + FragMain() + Bindings({10, 20}) + CommonTypes() + R"(
      %sampled_image_type = OpTypeSampledImage %f_texture_1d
 
      %10 = OpVariable %ptr_sampler UniformConstant
@@ -503,7 +525,8 @@ TEST_F(SpvParserHandleTest,
 
 TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_Image) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly =
+      Preamble() + FragMain() + Bindings({10, 20}) + CommonTypes() + R"(
      %sampled_image_type = OpTypeSampledImage %f_texture_1d
 
      %10 = OpVariable %ptr_sampler UniformConstant
@@ -837,7 +860,8 @@ using SpvParserHandleTest_RegisterHandleUsage_SampledImage =
     SpvParserTestBase<::testing::TestWithParam<UsageImageAccessCase>>;
 
 TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, Variable) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + Bindings({10, 20}) +
+                        CommonTypes() + R"(
      %si_ty = OpTypeSampledImage %f_texture_2d
      %coords = OpConstantNull %v2float
 
@@ -867,7 +891,8 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, Variable) {
 }
 
 TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, FunctionParam) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + Bindings({10, 20}) +
+                        CommonTypes() + R"(
      %f_ty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_2d
      %si_ty = OpTypeSampledImage %f_texture_2d
      %coords = OpConstantNull %v2float
@@ -995,7 +1020,8 @@ using SpvParserHandleTest_RegisterHandleUsage_RawImage =
     SpvParserTestBase<::testing::TestWithParam<UsageRawImageCase>>;
 
 TEST_P(SpvParserHandleTest_RegisterHandleUsage_RawImage, Variable) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + Bindings({20}) +
+                        CommonTypes() + R"(
      %20 = OpVariable %ptr_)" +
                         GetParam().type + R"( UniformConstant
 
@@ -1021,7 +1047,8 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_RawImage, Variable) {
 }
 
 TEST_P(SpvParserHandleTest_RegisterHandleUsage_RawImage, FunctionParam) {
-  const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
+  const auto assembly = Preamble() + FragMain() + Bindings({20}) +
+                        CommonTypes() + R"(
      %f_ty = OpTypeFunction %void %ptr_)" +
                         GetParam().type + R"(
 
@@ -5291,7 +5318,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // Scalar cases
         {"%float 1D 0 0 0 1 Unknown",
-         "%result = OpImageFetch %float %im %u1",
+         "%result = OpImageFetch %v4float %im %u1",
          "",
          {R"(TypeConstructor[not set]{
   __i32
@@ -5299,7 +5326,7 @@ INSTANTIATE_TEST_SUITE_P(
 }
 )"}},
         {"%float 1D 0 0 0 2 R32f",
-         "%result = OpImageRead %float %im %u1",
+         "%result = OpImageRead %v4float %im %u1",
          "",
          {R"(TypeConstructor[not set]{
   __i32
@@ -5316,7 +5343,7 @@ INSTANTIATE_TEST_SUITE_P(
 )"}},
         // Vector cases
         {"%float 2D 0 0 0 1 Unknown",
-         "%result = OpImageFetch %float %im %vu12",
+         "%result = OpImageFetch %v4float %im %vu12",
          "",
          {R"(TypeConstructor[not set]{
   __vec_2__i32
@@ -5324,7 +5351,7 @@ INSTANTIATE_TEST_SUITE_P(
 }
 )"}},
         {"%float 2D 0 0 0 2 R32f",
-         "%result = OpImageRead %float %im %vu12",
+         "%result = OpImageRead %v4float %im %vu12",
          "",
          {R"(TypeConstructor[not set]{
   __vec_2__i32
@@ -5347,7 +5374,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         {"%float 2D 0 1 0 1 Unknown",
-         "%result = OpImageFetch %float %im %vu123",
+         "%result = OpImageFetch %v4float %im %vu123",
          "",
          {
              R"(TypeConstructor[not set]{
@@ -5367,7 +5394,7 @@ INSTANTIATE_TEST_SUITE_P(
 }
 )"}},
         {"%float 2D 0 1 0 2 R32f",
-         "%result = OpImageRead %float %im %vu123",
+         "%result = OpImageRead %v4float %im %vu123",
          "",
          {
              R"(TypeConstructor[not set]{
