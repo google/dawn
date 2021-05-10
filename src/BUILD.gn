@@ -471,6 +471,8 @@ libtint_source_set("libtint_core_all_src") {
     "sem/node.h",
     "sem/pointer_type.cc",
     "sem/pointer_type.h",
+    "sem/reference_type.cc",
+    "sem/reference_type.h",
     "sem/sampled_texture_type.cc",
     "sem/sampled_texture_type.h",
     "sem/sampler_type.cc",

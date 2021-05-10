@@ -303,6 +303,8 @@ set(TINT_LIB_SRCS
   sem/multisampled_texture_type.h
   sem/pointer_type.cc
   sem/pointer_type.h
+  sem/reference_type.cc
+  sem/reference_type.h
   sem/sampled_texture_type.cc
   sem/sampled_texture_type.h
   sem/sampler_type.cc
@@ -573,6 +575,7 @@ if(${TINT_BUILD_TESTS})
     sem/matrix_type_test.cc
     sem/multisampled_texture_type_test.cc
     sem/pointer_type_test.cc
+    sem/reference_type_test.cc
     sem/sampled_texture_type_test.cc
     sem/sampler_type_test.cc
     sem/sem_array_test.cc
