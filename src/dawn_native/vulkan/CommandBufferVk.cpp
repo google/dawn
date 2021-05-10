@@ -69,33 +69,56 @@ namespace dawn_native { namespace vulkan {
             const Texture* dstTexture = ToBackend(dstCopy.texture.Get());
 
             VkImageCopy region;
-
-            // TODO(jiawei.shao@intel.com): support 1D and 3D textures
-            ASSERT(srcTexture->GetDimension() == wgpu::TextureDimension::e2D &&
-                   dstTexture->GetDimension() == wgpu::TextureDimension::e2D);
             region.srcSubresource.aspectMask = VulkanAspectMask(aspect);
             region.srcSubresource.mipLevel = srcCopy.mipLevel;
-            region.srcSubresource.baseArrayLayer = srcCopy.origin.z;
-            region.srcSubresource.layerCount = copySize.depthOrArrayLayers;
+            region.dstSubresource.aspectMask = VulkanAspectMask(aspect);
+            region.dstSubresource.mipLevel = dstCopy.mipLevel;
+
+            bool has3DTextureInCopy = false;
 
             region.srcOffset.x = srcCopy.origin.x;
             region.srcOffset.y = srcCopy.origin.y;
-            region.srcOffset.z = 0;
-
-            region.dstSubresource.aspectMask = VulkanAspectMask(aspect);
-            region.dstSubresource.mipLevel = dstCopy.mipLevel;
-            region.dstSubresource.baseArrayLayer = dstCopy.origin.z;
-            region.dstSubresource.layerCount = copySize.depthOrArrayLayers;
+            switch (srcTexture->GetDimension()) {
+                case wgpu::TextureDimension::e2D:
+                    region.srcSubresource.baseArrayLayer = srcCopy.origin.z;
+                    region.srcSubresource.layerCount = copySize.depthOrArrayLayers;
+                    region.srcOffset.z = 0;
+                    break;
+                case wgpu::TextureDimension::e3D:
+                    has3DTextureInCopy = true;
+                    region.srcSubresource.baseArrayLayer = 0;
+                    region.srcSubresource.layerCount = 1;
+                    region.srcOffset.z = srcCopy.origin.z;
+                    break;
+                case wgpu::TextureDimension::e1D:
+                    // TODO(jiawei.shao@intel.com): support 1D textures
+                    UNREACHABLE();
+            }
 
             region.dstOffset.x = dstCopy.origin.x;
             region.dstOffset.y = dstCopy.origin.y;
-            region.dstOffset.z = 0;
+            switch (dstTexture->GetDimension()) {
+                case wgpu::TextureDimension::e2D:
+                    region.dstSubresource.baseArrayLayer = dstCopy.origin.z;
+                    region.dstSubresource.layerCount = copySize.depthOrArrayLayers;
+                    region.dstOffset.z = 0;
+                    break;
+                case wgpu::TextureDimension::e3D:
+                    has3DTextureInCopy = true;
+                    region.dstSubresource.baseArrayLayer = 0;
+                    region.dstSubresource.layerCount = 1;
+                    region.dstOffset.z = dstCopy.origin.z;
+                    break;
+                case wgpu::TextureDimension::e1D:
+                    // TODO(jiawei.shao@intel.com): support 1D textures
+                    UNREACHABLE();
+            }
 
             ASSERT(HasSameTextureCopyExtent(srcCopy, dstCopy, copySize));
             Extent3D imageExtent = ComputeTextureCopyExtent(dstCopy, copySize);
             region.extent.width = imageExtent.width;
             region.extent.height = imageExtent.height;
-            region.extent.depth = 1;
+            region.extent.depth = has3DTextureInCopy ? copySize.depthOrArrayLayers : 1;
 
             return region;
         }
@@ -526,7 +549,7 @@ namespace dawn_native { namespace vulkan {
                         ComputeBufferImageCopyRegion(src, dst, copy->copySize);
                     VkImageSubresourceLayers subresource = region.imageSubresource;
 
-                    ASSERT(dst.texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    ASSERT(dst.texture->GetDimension() != wgpu::TextureDimension::e1D);
                     SubresourceRange range =
                         GetSubresourcesAffectedByCopy(copy->destination, copy->copySize);
 
@@ -564,7 +587,7 @@ namespace dawn_native { namespace vulkan {
                     VkBufferImageCopy region =
                         ComputeBufferImageCopyRegion(dst, src, copy->copySize);
 
-                    ASSERT(src.texture->GetDimension() == wgpu::TextureDimension::e2D);
+                    ASSERT(src.texture->GetDimension() != wgpu::TextureDimension::e1D);
                     SubresourceRange range =
                         GetSubresourcesAffectedByCopy(copy->source, copy->copySize);
 

@@ -968,9 +968,9 @@ TEST_P(CopyTests_T2B, Texture2DArrayRegionWithOffsetEvenRowsPerImage) {
 
 // Test that copying whole 3D texture in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture3DFull) {
-    // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
+    // TODO(yunchao.he@intel.com): implement 3D texture copy on Metal, OpenGL and OpenGLES
     // backend.
-    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+    DAWN_SKIP_TEST_IF(IsMetal() || IsOpenGL() || IsOpenGLES());
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -985,9 +985,9 @@ TEST_P(CopyTests_T2B, Texture3DFull) {
 
 // Test that copying a range of texture 3D depths in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture3DSubRegion) {
-    // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
+    // TODO(yunchao.he@intel.com): implement 3D texture copy on Metal, OpenGL and OpenGLES
     // backend.
-    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+    DAWN_SKIP_TEST_IF(IsMetal() || IsOpenGL() || IsOpenGLES());
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -1445,9 +1445,9 @@ TEST_P(CopyTests_B2T, Texture2DArrayRegionWithOffsetEvenRowsPerImage) {
 
 // Test that copying whole texture 3D in one buffer-to-texture-copy works.
 TEST_P(CopyTests_B2T, Texture3DFull) {
-    // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
+    // TODO(yunchao.he@intel.com): implement 3D texture copy on Metal, OpenGL and OpenGLES
     // backend.
-    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+    DAWN_SKIP_TEST_IF(IsMetal() || IsOpenGL() || IsOpenGLES());
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -1462,9 +1462,9 @@ TEST_P(CopyTests_B2T, Texture3DFull) {
 
 // Test that copying a range of texture 3D Depths in one texture-to-buffer-copy works.
 TEST_P(CopyTests_B2T, Texture3DSubRegion) {
-    // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
+    // TODO(yunchao.he@intel.com): implement 3D texture copy on Metal, OpenGL and OpenGLES
     // backend.
-    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+    DAWN_SKIP_TEST_IF(IsMetal() || IsOpenGL() || IsOpenGLES());
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -1799,9 +1799,9 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
 
 // Test that copying whole 3D texture in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DFull) {
-    // TODO(yunchao.he@intel.com): implement 3D texture copy on Vulkan, Metal, OpenGL and OpenGLES
+    // TODO(yunchao.he@intel.com): implement 3D texture copy, Metal, OpenGL and OpenGLES
     // backend.
-    DAWN_SKIP_TEST_IF(IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+    DAWN_SKIP_TEST_IF(IsMetal() || IsOpenGL() || IsOpenGLES());
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;

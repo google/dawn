@@ -650,7 +650,7 @@ namespace dawn_native { namespace vulkan {
         VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, *dst, copySizePixels);
         VkImageSubresourceLayers subresource = region.imageSubresource;
 
-        ASSERT(dst->texture->GetDimension() == wgpu::TextureDimension::e2D);
+        ASSERT(dst->texture->GetDimension() != wgpu::TextureDimension::e1D);
         SubresourceRange range = GetSubresourcesAffectedByCopy(*dst, copySizePixels);
 
         if (IsCompleteSubresourceCopiedTo(dst->texture.Get(), copySizePixels,

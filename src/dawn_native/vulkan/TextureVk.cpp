@@ -986,9 +986,6 @@ namespace dawn_native { namespace vulkan {
         ASSERT(imageBarriers != nullptr);
         const Format& format = GetFormat();
 
-        // This transitions assume it is a 2D texture
-        ASSERT(GetDimension() == wgpu::TextureDimension::e2D);
-
         wgpu::TextureUsage allLastUsages = wgpu::TextureUsage::None;
         mSubresourceLastUsages.Update(
             range, [&](const SubresourceRange& range, wgpu::TextureUsage* lastUsage) {

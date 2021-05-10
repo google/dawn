@@ -139,8 +139,22 @@ namespace dawn_native { namespace vulkan {
                 break;
             }
 
+            case wgpu::TextureDimension::e3D: {
+                region.imageOffset.x = textureCopy.origin.x;
+                region.imageOffset.y = textureCopy.origin.y;
+                region.imageOffset.z = textureCopy.origin.z;
+
+                region.imageSubresource.baseArrayLayer = 0;
+                region.imageSubresource.layerCount = 1;
+
+                Extent3D imageExtent = ComputeTextureCopyExtent(textureCopy, copySize);
+                region.imageExtent.width = imageExtent.width;
+                region.imageExtent.height = imageExtent.height;
+                region.imageExtent.depth = imageExtent.depthOrArrayLayers;
+                break;
+            }
+
             case wgpu::TextureDimension::e1D:
-            case wgpu::TextureDimension::e3D:
                 UNREACHABLE();
         }
 
