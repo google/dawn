@@ -2930,10 +2930,6 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
     return 0;
   }
 
-  // The alias is a wrapper around the subtype, so emit the subtype
-  if (auto* alias = type->As<sem::Alias>()) {
-    return GenerateTypeIfNeeded(alias->type());
-  }
   if (auto* ac = type->As<sem::AccessControl>()) {
     if (!ac->type()->UnwrapIfNeeded()->Is<sem::Struct>()) {
       return GenerateTypeIfNeeded(ac->type());

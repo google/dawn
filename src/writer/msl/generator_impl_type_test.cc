@@ -57,15 +57,6 @@ using uint = unsigned int;
 
 using MslGeneratorImplTest = TestHelper;
 
-TEST_F(MslGeneratorImplTest, EmitType_Alias) {
-  auto alias = ty.alias("alias", ty.f32());
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(alias, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "alias");
-}
-
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
   auto* arr = ty.array<bool, 4>();
   Global("G", arr, ast::StorageClass::kPrivate);
@@ -186,7 +177,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(s, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(s), "")) << gen.error();
   EXPECT_EQ(gen.result(), "S");
 }
 
@@ -607,7 +598,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(s, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(s), "")) << gen.error();
   EXPECT_EQ(gen.result(), R"(struct {
   /* 0x0000 */ int a;
   /* 0x0004 */ float b;

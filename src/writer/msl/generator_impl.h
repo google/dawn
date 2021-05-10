@@ -195,14 +195,14 @@ class GeneratorImpl : public TextGenerator {
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitType(typ::Type type, const std::string& name);
+  bool EmitType(const sem::Type* type, const std::string& name);
   /// Handles generating an MSL-packed storage type.
   /// If the type does not have a packed form, the standard non-packed form is
   /// emitted.
   /// @param type the type to generate
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
-  bool EmitPackedType(typ::Type type, const std::string& name);
+  bool EmitPackedType(const sem::Type* type, const std::string& name);
   /// Handles generating a struct declaration
   /// @param str the struct to generate
   /// @returns true if the struct is emitted

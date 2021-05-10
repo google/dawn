@@ -430,8 +430,8 @@ Resolver::VariableInfo* Resolver::Variable(
     return nullptr;
   }
 
-  auto* ctype = Canonical(const_cast<sem::Type*>(type));
-  auto* info = variable_infos_.Create(var, ctype, type_name);
+  auto* info =
+      variable_infos_.Create(var, const_cast<sem::Type*>(type), type_name);
   variable_to_info_.emplace(var, info);
 
   return info;
@@ -797,7 +797,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         }
 
         // Check that we saw a pipeline IO attribute iff we need one.
-        if (Canonical(ty)->Is<sem::Struct>()) {
+        if (ty->Is<sem::Struct>()) {
           if (pipeline_io_attribute) {
             diagnostics_.add_error(
                 "entry point IO attributes must not be used on structure " +
@@ -823,7 +823,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
           // of numeric scalars.
           // Testing for being a struct is handled by the if portion above.
           if (!pipeline_io_attribute->Is<ast::BuiltinDecoration>()) {
-            if (!Canonical(ty)->is_numeric_scalar_or_vector()) {
+            if (!ty->is_numeric_scalar_or_vector()) {
               diagnostics_.add_error(
                   "User defined entry point IO types must be a numeric scalar, "
                   "a numeric vector, or a structure",
@@ -846,12 +846,11 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
       return false;
     }
 
-    if (auto* str = Canonical(ty)->As<sem::Struct>()) {
+    if (auto* str = ty->As<sem::Struct>()) {
       // Validate the decorations for each struct members, and also check for
       // invalid member types.
       for (auto* member : str->Members()) {
-        auto* member_ty = Canonical(member->Type());
-        if (member_ty->Is<sem::Struct>()) {
+        if (member->Type()->Is<sem::Struct>()) {
           diagnostics_.add_error(
               "entry point IO types cannot contain nested structures",
               member->Declaration()->source());
@@ -859,7 +858,9 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
                                     builder_->Symbols().NameFor(func->symbol()),
                                 func->source());
           return false;
-        } else if (auto* arr = member_ty->As<sem::Array>()) {
+        }
+
+        if (auto* arr = member->Type()->As<sem::Array>()) {
           if (arr->IsRuntimeSized()) {
             diagnostics_.add_error(
                 "entry point IO types cannot contain runtime sized arrays",
@@ -873,7 +874,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
         }
 
         if (!validate_entry_point_decorations_inner(
-                member->Declaration()->decorations(), member_ty,
+                member->Declaration()->decorations(), member->Type(),
                 member->Declaration()->source(), param_or_ret, true)) {
           diagnostics_.add_note("while analysing entry point " +
                                     builder_->Symbols().NameFor(func->symbol()),
@@ -991,8 +992,6 @@ bool Resolver::Function(ast::Function* func) {
     info->return_type_name =
         info->return_type->FriendlyName(builder_->Symbols());
   }
-
-  info->return_type = Canonical(info->return_type);
 
   if (auto* str = info->return_type->As<sem::Struct>()) {
     if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, str,
@@ -1746,11 +1745,8 @@ bool Resolver::ValidateBinary(ast::BinaryExpression* expr) {
   using Matrix = sem::Matrix;
   using Vector = sem::Vector;
 
-  auto* lhs_declared_type = TypeOf(expr->lhs())->UnwrapAll();
-  auto* rhs_declared_type = TypeOf(expr->rhs())->UnwrapAll();
-
-  auto* lhs_type = Canonical(const_cast<sem::Type*>(lhs_declared_type));
-  auto* rhs_type = Canonical(const_cast<sem::Type*>(rhs_declared_type));
+  auto* lhs_type = const_cast<sem::Type*>(TypeOf(expr->lhs())->UnwrapAll());
+  auto* rhs_type = const_cast<sem::Type*>(TypeOf(expr->rhs())->UnwrapAll());
 
   auto* lhs_vec = lhs_type->As<Vector>();
   auto* lhs_vec_elem_type = lhs_vec ? lhs_vec->type() : nullptr;
@@ -1895,9 +1891,9 @@ bool Resolver::ValidateBinary(ast::BinaryExpression* expr) {
 
   diagnostics_.add_error(
       "Binary expression operand types are invalid for this operation: " +
-          lhs_declared_type->FriendlyName(builder_->Symbols()) + " " +
+          lhs_type->FriendlyName(builder_->Symbols()) + " " +
           FriendlyName(expr->op()) + " " +
-          rhs_declared_type->FriendlyName(builder_->Symbols()),
+          rhs_type->FriendlyName(builder_->Symbols()),
       expr->source());
   return false;
 }
@@ -2142,7 +2138,6 @@ void Resolver::SetType(ast::Expression* expr,
     TINT_ICE(builder_->Diagnostics())
         << "SetType() called twice for the same expression";
   }
-  type = Canonical(type);
   expr_info_.emplace(expr, ExpressionInfo{type, type_name, current_statement_});
 }
 
@@ -2262,13 +2257,12 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
       /*vec4*/ 16,
   };
 
-  auto* cty = Canonical(const_cast<sem::Type*>(ty));
-  if (cty->is_scalar()) {
+  if (ty->is_scalar()) {
     // Note: Also captures booleans, but these are not host-shareable.
     align = 4;
     size = 4;
     return true;
-  } else if (auto* vec = cty->As<sem::Vector>()) {
+  } else if (auto* vec = ty->As<sem::Vector>()) {
     if (vec->size() < 2 || vec->size() > 4) {
       TINT_UNREACHABLE(diagnostics_)
           << "Invalid vector size: vec" << vec->size();
@@ -2277,7 +2271,7 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
     align = vector_align[vec->size()];
     size = vector_size[vec->size()];
     return true;
-  } else if (auto* mat = cty->As<sem::Matrix>()) {
+  } else if (auto* mat = ty->As<sem::Matrix>()) {
     if (mat->columns() < 2 || mat->columns() > 4 || mat->rows() < 2 ||
         mat->rows() > 4) {
       TINT_UNREACHABLE(diagnostics_)
@@ -2287,11 +2281,11 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
     align = vector_align[mat->rows()];
     size = vector_align[mat->rows()] * mat->columns();
     return true;
-  } else if (auto* s = cty->As<sem::Struct>()) {
+  } else if (auto* s = ty->As<sem::Struct>()) {
     align = s->Align();
     size = s->Size();
     return true;
-  } else if (auto* a = cty->As<sem::Array>()) {
+  } else if (auto* a = ty->As<sem::Array>()) {
     align = a->Align();
     size = a->SizeInBytes();
     return true;
@@ -2816,45 +2810,6 @@ std::string Resolver::VectorPretty(uint32_t size,
                                    const sem::Type* element_type) {
   sem::Vector vec_type(element_type, size);
   return vec_type.FriendlyName(builder_->Symbols());
-}
-
-sem::Type* Resolver::Canonical(sem::Type* type) {
-  using AccessControl = sem::AccessControl;
-  using Alias = sem::Alias;
-  using Matrix = sem::Matrix;
-  using Type = sem::Type;
-  using Vector = sem::Vector;
-
-  if (!type) {
-    TINT_ICE(diagnostics_) << "Canonical() called with nullptr";
-    return nullptr;
-  }
-
-  std::function<Type*(Type*)> make_canonical;
-  make_canonical = [&](Type* t) -> sem::Type* {
-    // Unwrap alias sequence
-    Type* ct = t;
-    while (auto* p = ct->As<Alias>()) {
-      ct = p->type();
-    }
-
-    if (auto* v = ct->As<Vector>()) {
-      return builder_->create<Vector>(make_canonical(v->type()), v->size());
-    }
-    if (auto* m = ct->As<Matrix>()) {
-      auto* column_type =
-          builder_->create<sem::Vector>(make_canonical(m->type()), m->rows());
-      return builder_->create<Matrix>(column_type, m->columns());
-    }
-    if (auto* ac = ct->As<AccessControl>()) {
-      return builder_->create<AccessControl>(ac->access_control(),
-                                             make_canonical(ac->type()));
-    }
-    return ct;
-  };
-
-  return utils::GetOrCreate(type_to_canonical_, type,
-                            [&] { return make_canonical(type); });
 }
 
 void Resolver::Mark(const ast::Node* node) {

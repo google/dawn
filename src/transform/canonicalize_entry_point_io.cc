@@ -194,7 +194,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
     }
 
     // Handle return type.
-    auto* ret_type = func->ReturnType()->UnwrapAliasIfNeeded();
+    auto* ret_type = func->ReturnType();
     std::function<ast::Type*()> new_ret_type;
     if (ret_type->Is<sem::Void>()) {
       new_ret_type = [&ctx] { return ctx.dst->ty.void_(); };

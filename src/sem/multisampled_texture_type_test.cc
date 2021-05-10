@@ -32,7 +32,6 @@ TEST_F(MultisampledTextureTest, Is) {
   MultisampledTexture s(ast::TextureDimension::kCube, &f32);
   Type* ty = &s;
   EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Alias>());
   EXPECT_FALSE(ty->Is<Array>());
   EXPECT_FALSE(ty->Is<Bool>());
   EXPECT_FALSE(ty->Is<F32>());

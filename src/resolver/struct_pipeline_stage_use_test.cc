@@ -158,7 +158,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
   auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
-  auto s_alias = ty.alias("S_alias", s);
+  auto* s_alias = ty.alias("S_alias", s);
   AST().AddConstructedType(s_alias);
 
   Func("main", {Param("param", s_alias)}, ty.void_(), {},
@@ -174,7 +174,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeViaAlias) {
   auto* s = Structure("S", {Member("a", ty.f32(), {Location(0)})});
-  auto s_alias = ty.alias("S_alias", s);
+  auto* s_alias = ty.alias("S_alias", s);
   AST().AddConstructedType(s_alias);
 
   Func("main", {}, s_alias, {Return(Construct(s_alias, Expr(0.f)))},

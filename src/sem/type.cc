@@ -15,7 +15,6 @@
 #include "src/sem/type.h"
 
 #include "src/sem/access_control_type.h"
-#include "src/sem/alias_type.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/i32_type.h"
@@ -38,36 +37,34 @@ Type::Type(Type&&) = default;
 Type::~Type() = default;
 
 const Type* Type::UnwrapPtrIfNeeded() const {
-  if (auto* ptr = As<sem::Pointer>()) {
-    return ptr->type();
+  auto* type = this;
+  while (auto* ptr = type->As<sem::Pointer>()) {
+    type = ptr->type();
   }
-  return this;
-}
-
-const Type* Type::UnwrapAliasIfNeeded() const {
-  const Type* unwrapped = this;
-  while (auto* ptr = unwrapped->As<sem::Alias>()) {
-    unwrapped = ptr->type();
-  }
-  return unwrapped;
+  return type;
 }
 
 const Type* Type::UnwrapIfNeeded() const {
-  auto* where = this;
-  while (true) {
-    if (auto* alias = where->As<sem::Alias>()) {
-      where = alias->type();
-    } else if (auto* access = where->As<sem::AccessControl>()) {
-      where = access->type();
-    } else {
-      break;
-    }
+  auto* type = this;
+  while (auto* access = type->As<sem::AccessControl>()) {
+    type = access->type();
   }
-  return where;
+  return type;
 }
 
 const Type* Type::UnwrapAll() const {
-  return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
+  auto* type = this;
+  while (true) {
+    if (auto* ptr = type->As<sem::Pointer>()) {
+      type = ptr->type();
+      continue;
+    }
+    if (auto* access = type->As<sem::AccessControl>()) {
+      type = access->type();
+      continue;
+    }
+    return type;
+  }
 }
 
 bool Type::is_scalar() const {

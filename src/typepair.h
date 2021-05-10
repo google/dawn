@@ -33,7 +33,6 @@ namespace tint {
 
 namespace ast {
 class AccessControl;
-class Alias;
 class Array;
 class Bool;
 class DepthTexture;
@@ -56,7 +55,6 @@ class Void;
 
 namespace sem {
 class AccessControl;
-class Alias;
 class Array;
 class Bool;
 class DepthTexture;
@@ -240,7 +238,6 @@ bool operator!=(std::nullptr_t, const TypePair<AST, SEM>& rhs) {
 using Type = TypePair<ast::Type, sem::Type>;
 
 using AccessControl = TypePair<ast::AccessControl, sem::AccessControl>;
-using Alias = TypePair<ast::Alias, sem::Alias>;
 using Array = TypePair<ast::Array, sem::Array>;
 using Bool = TypePair<ast::Bool, sem::Bool>;
 using DepthTexture = TypePair<ast::DepthTexture, sem::DepthTexture>;

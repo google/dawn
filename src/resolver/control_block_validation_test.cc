@@ -294,7 +294,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCaseAlias_Pass) {
   //   default: {}
   // }
 
-  auto my_int = ty.alias("MyInt", ty.u32());
+  auto* my_int = ty.alias("MyInt", ty.u32());
   auto* var = Var("a", my_int, ast::StorageClass::kNone, Expr(2u));
 
   ast::CaseSelectorList default_csl;

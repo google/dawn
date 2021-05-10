@@ -1206,7 +1206,7 @@ const Type* ParserImpl::MaybeGenerateAlias(
   }
   const auto name = namer_.GetName(type_id);
   const auto sym = builder_.Symbols().Register(name);
-  auto ast_alias_type =
+  auto* ast_alias_type =
       builder_.ty.alias(sym, ast_underlying_type->Build(builder_));
 
   // Record this new alias as the AST type for this SPIR-V ID.

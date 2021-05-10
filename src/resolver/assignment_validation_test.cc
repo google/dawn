@@ -166,7 +166,7 @@ TEST_F(ResolverAssignmentValidationTest,
   // alias myint = i32;
   // var a :myint = 2;
   // a = 2
-  auto myint = ty.alias("myint", ty.i32());
+  auto* myint = ty.alias("myint", ty.i32());
   AST().AddConstructedType(myint);
   auto* var = Var("a", myint, ast::StorageClass::kNone, Expr(2));
 

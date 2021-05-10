@@ -349,11 +349,6 @@ const ast::NamedType* ConstructedTypeOf(const sem::Type* ty) {
   }
 }
 
-/// @returns the given type with all pointers and aliases removed.
-const sem::Type* UnwrapPtrAndAlias(const sem::Type* ty) {
-  return ty->UnwrapPtrIfNeeded()->UnwrapAliasIfNeeded()->UnwrapPtrIfNeeded();
-}
-
 /// StorageBufferAccess describes a single storage buffer access
 struct StorageBufferAccess {
   sem::Expression const* var = nullptr;  // Storage buffer variable
@@ -751,7 +746,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
 
     auto* buf = access.var->Declaration();
     auto* offset = access.offset->Build(ctx);
-    auto* buf_ty = UnwrapPtrAndAlias(access.var->Type());
+    auto* buf_ty = access.var->Type()->UnwrapPtrIfNeeded();
     auto* el_ty = access.type->UnwrapAll();
     auto* insert_after = ConstructedTypeOf(access.var->Type());
     Symbol func = state.LoadFunc(ctx, insert_after, buf_ty, el_ty);
@@ -765,7 +760,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
   for (auto& store : state.stores) {
     auto* buf = store.target.var->Declaration();
     auto* offset = store.target.offset->Build(ctx);
-    auto* buf_ty = UnwrapPtrAndAlias(store.target.var->Type());
+    auto* buf_ty = store.target.var->Type()->UnwrapPtrIfNeeded();
     auto* el_ty = store.target.type->UnwrapAll();
     auto* value = store.assignment->rhs();
     auto* insert_after = ConstructedTypeOf(store.target.var->Type());

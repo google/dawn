@@ -207,23 +207,7 @@ bool GeneratorImpl::EmitConstructedType(std::ostream& out,
                                         const sem::Type* ty) {
   make_indent(out);
 
-  if (auto* alias = ty->As<sem::Alias>()) {
-    // HLSL typedef is for intrinsic types only. For an alias'd struct,
-    // generate a secondary struct with the new name.
-    if (auto* str = alias->type()->As<sem::Struct>()) {
-      if (!EmitStructType(out, str,
-                          builder_.Symbols().NameFor(alias->symbol()))) {
-        return false;
-      }
-      return true;
-    }
-    out << "typedef ";
-    if (!EmitType(out, alias->type(), ast::StorageClass::kNone, "")) {
-      return false;
-    }
-    out << " " << builder_.Symbols().NameFor(alias->symbol()) << ";"
-        << std::endl;
-  } else if (auto* str = ty->As<sem::Struct>()) {
+  if (auto* str = ty->As<sem::Struct>()) {
     if (!EmitStructType(
             out, str, builder_.Symbols().NameFor(str->Declaration()->name()))) {
       return false;
@@ -1324,8 +1308,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
     return EmitZeroValue(out, type);
   }
 
-  bool brackets =
-      type->UnwrapAliasIfNeeded()->IsAnyOf<sem::Array, sem::Struct>();
+  bool brackets = type->IsAnyOf<sem::Array, sem::Struct>();
 
   if (brackets) {
     out << "{";
@@ -1918,7 +1901,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (!EmitType(out, var->Type(), var->StorageClass(), name)) {
         return false;
       }
-      if (!var->Type()->UnwrapAliasIfNeeded()->Is<sem::Array>()) {
+      if (!var->Type()->Is<sem::Array>()) {
         out << " " << name;
       }
 
@@ -2404,9 +2387,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     return true;
   }
 
-  if (auto* alias = type->As<sem::Alias>()) {
-    out << builder_.Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = type->As<sem::Array>()) {
+  if (auto* ary = type->As<sem::Array>()) {
     const sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
     while (auto* arr = base_type->As<sem::Array>()) {

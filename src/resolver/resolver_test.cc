@@ -260,7 +260,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl) {
 }
 
 TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
-  auto my_int = ty.alias("MyInt", ty.i32());
+  auto* my_int = ty.alias("MyInt", ty.i32());
   AST().AddConstructedType(my_int);
   auto* var = Var("my_var", my_int, ast::StorageClass::kNone, Expr(2));
   auto* init = var->constructor();
@@ -408,7 +408,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Array) {
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Alias_Array) {
-  auto aary = ty.alias("myarrty", ty.array<f32, 3>());
+  auto* aary = ty.alias("myarrty", ty.array<f32, 3>());
   AST().AddConstructedType(aary);
 
   Global("my_var", aary, ast::StorageClass::kFunction);
@@ -909,7 +909,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
   auto* st = Structure("S", {Member("first_member", ty.i32()),
                              Member("second_member", ty.f32())});
-  auto alias = ty.alias("alias", st);
+  auto* alias = ty.alias("alias", st);
   AST().AddConstructedType(alias);
   Global("my_struct", alias, ast::StorageClass::kInput);
 
@@ -1234,18 +1234,18 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
   // For vectors and matrices, wrap the sub type in an alias
   auto make_alias = [this](ast::Type* type) -> ast::Type* {
     if (auto* v = type->As<ast::Vector>()) {
-      auto alias = ty.alias(Symbols().New(), v->type());
+      auto* alias = ty.alias(Symbols().New(), v->type());
       AST().AddConstructedType(alias);
       return ty.vec(alias, v->size());
     }
     if (auto* m = type->As<ast::Matrix>()) {
-      auto alias = ty.alias(Symbols().New(), m->type());
+      auto* alias = ty.alias(Symbols().New(), m->type());
       AST().AddConstructedType(alias);
       return ty.mat(alias, m->columns(), m->rows());
     }
-    auto alias = ty.alias(Symbols().New(), type);
+    auto* alias = ty.alias(Symbols().New(), type);
     AST().AddConstructedType(alias);
-    return ty.type_name(alias.ast->name());
+    return ty.type_name(alias->name());
   };
 
   // Wrap in alias

@@ -27,7 +27,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitType_Alias) {
-  auto alias = ty.alias("alias", ty.f32());
+  auto* alias = ty.alias("alias", ty.f32());
   AST().AddConstructedType(alias);
 
   GeneratorImpl& gen = Build();

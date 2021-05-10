@@ -431,7 +431,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
   //  a: u32;
   //}
 
-  auto alias = ty.alias("RTArr", ty.array<u32>());
+  auto* alias = ty.alias("RTArr", ty.array<u32>());
   AST().AddConstructedType(alias);
 
   Structure("s",
@@ -458,7 +458,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
   //  b: RTArr;
   //}
 
-  auto alias = ty.alias("RTArr", ty.array<u32>());
+  auto* alias = ty.alias("RTArr", ty.array<u32>());
   AST().AddConstructedType(alias);
 
   Structure("s",

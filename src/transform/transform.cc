@@ -107,9 +107,6 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
     auto* el = CreateASTTypeFor(ctx, ac->type());
     return ctx->dst->create<ast::AccessControl>(ac->access_control(), el);
   }
-  if (auto* a = ty->As<sem::Alias>()) {
-    return ctx->dst->create<ast::TypeName>(ctx->Clone(a->symbol()));
-  }
   if (auto* s = ty->As<sem::Struct>()) {
     return ctx->dst->create<ast::TypeName>(
         ctx->Clone(s->Declaration()->name()));

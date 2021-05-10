@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
   auto p = parser("A");
 
   auto& builder = p->builder();
-  auto alias_type = builder.ty.alias("A", builder.ty.i32());
+  auto* alias_type = builder.ty.alias("A", builder.ty.i32());
   p->register_constructed("A", alias_type);
 
   auto t = p->type_decl();

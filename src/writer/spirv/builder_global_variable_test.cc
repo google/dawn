@@ -417,7 +417,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto B = ty.alias("B", A);
+  auto* B = ty.alias("B", A);
   AST().AddConstructedType(B);
   auto ac = ty.access(ast::AccessControl::kReadOnly, B);
   auto* var = Global("b", ac, ast::StorageClass::kStorage);
@@ -451,7 +451,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
   auto ac = ty.access(ast::AccessControl::kReadOnly, A);
-  auto B = ty.alias("B", ac);
+  auto* B = ty.alias("B", ac);
   AST().AddConstructedType(B);
   auto* var = Global("b", B, ast::StorageClass::kStorage);
 

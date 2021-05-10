@@ -36,7 +36,6 @@ TEST_F(AccessControlTest, Is) {
   AccessControl at{ast::AccessControl::kReadOnly, &i32};
   Type* ty = &at;
   EXPECT_TRUE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Alias>());
   EXPECT_FALSE(ty->Is<Array>());
   EXPECT_FALSE(ty->Is<Bool>());
   EXPECT_FALSE(ty->Is<F32>());

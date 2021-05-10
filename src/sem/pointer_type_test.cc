@@ -34,7 +34,6 @@ TEST_F(PointerTest, Is) {
   Pointer p{&i32, ast::StorageClass::kFunction};
   Type* ty = &p;
   EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Alias>());
   EXPECT_FALSE(ty->Is<Array>());
   EXPECT_FALSE(ty->Is<Bool>());
   EXPECT_FALSE(ty->Is<F32>());

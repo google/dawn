@@ -51,7 +51,6 @@ TEST_F(ArrayTest, Is) {
 
   Type* ty = create<Array>(&i32, 2, 4, 8, 4, true);
   EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Alias>());
   EXPECT_TRUE(ty->Is<Array>());
   EXPECT_FALSE(ty->Is<Bool>());
   EXPECT_FALSE(ty->Is<F32>());

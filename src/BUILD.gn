@@ -447,8 +447,6 @@ libtint_source_set("libtint_core_all_src") {
     "scope_stack.h",
     "sem/access_control_type.cc",
     "sem/access_control_type.h",
-    "sem/alias_type.cc",
-    "sem/alias_type.h",
     "sem/array.h",
     "sem/bool_type.cc",
     "sem/bool_type.h",

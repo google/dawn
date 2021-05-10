@@ -32,16 +32,6 @@ using ::testing::HasSubstr;
 
 using HlslGeneratorImplTest_Type = TestHelper;
 
-TEST_F(HlslGeneratorImplTest_Type, EmitType_Alias) {
-  auto alias = ty.alias("alias", ty.f32());
-
-  GeneratorImpl& gen = Build();
-
-  ASSERT_TRUE(gen.EmitType(out, alias, ast::StorageClass::kNone, ""))
-      << gen.error();
-  EXPECT_EQ(result(), "alias");
-}
-
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Array) {
   auto* arr = ty.array<bool, 4>();
   Global("G", arr, ast::StorageClass::kPrivate);

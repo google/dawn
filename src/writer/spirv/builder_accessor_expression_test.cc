@@ -393,7 +393,7 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
                                               Member("b", ty.f32()),
                                           });
 
-  auto alias = ty.alias("Inner", inner_struct);
+  auto* alias = ty.alias("Inner", inner_struct);
   auto* s_type = Structure("Outer", {Member("inner", alias)});
 
   auto* var = Global("ident", s_type, ast::StorageClass::kFunction);

@@ -31,7 +31,6 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/void.h"
 #include "src/sem/access_control_type.h"
-#include "src/sem/alias_type.h"
 #include "src/sem/array.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/call.h"
@@ -151,14 +150,7 @@ bool GeneratorImpl::Generate() {
 bool GeneratorImpl::EmitConstructedType(const sem::Type* ty) {
   make_indent();
 
-  if (auto* alias = ty->As<sem::Alias>()) {
-    out_ << "typedef ";
-    if (!EmitType(alias->type(), "")) {
-      return false;
-    }
-    out_ << " " << program_->Symbols().NameFor(alias->symbol()) << ";"
-         << std::endl;
-  } else if (auto* str = ty->As<sem::Struct>()) {
+  if (auto* str = ty->As<sem::Struct>()) {
     if (!EmitStructType(str)) {
       return false;
     }
@@ -186,7 +178,7 @@ bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
 
 bool GeneratorImpl::EmitBitcast(ast::BitcastExpression* expr) {
   out_ << "as_type<";
-  if (!EmitType(expr->type(), "")) {
+  if (!EmitType(TypeOf(expr), "")) {
     return false;
   }
 
@@ -1224,7 +1216,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
   auto* func_sem = program_->Sem().Get(func);
 
   auto name = func->symbol().to_str();
-  if (!EmitType(func->return_type(), "")) {
+  if (!EmitType(func_sem->ReturnType(), "")) {
     return false;
   }
 
@@ -1899,11 +1891,7 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
   return true;
 }
 
-bool GeneratorImpl::EmitType(typ::Type type, const std::string& name) {
-  if (!type.sem) {
-    type.sem = program_->Sem().Get(type.ast);
-  }
-
+bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
   std::string access_str = "";
   if (auto* ac = type->As<sem::AccessControl>()) {
     if (ac->access_control() == ast::AccessControl::kReadOnly) {
@@ -1918,9 +1906,7 @@ bool GeneratorImpl::EmitType(typ::Type type, const std::string& name) {
     type = ac->type();
   }
 
-  if (auto* alias = type->As<sem::Alias>()) {
-    out_ << program_->Symbols().NameFor(alias->symbol());
-  } else if (auto* ary = type->As<sem::Array>()) {
+  if (auto* ary = type->As<sem::Array>()) {
     const sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
     while (auto* arr = base_type->As<sem::Array>()) {
@@ -2037,15 +2023,8 @@ bool GeneratorImpl::EmitType(typ::Type type, const std::string& name) {
   return true;
 }
 
-bool GeneratorImpl::EmitPackedType(typ::Type type, const std::string& name) {
-  if (!type.sem) {
-    type.sem = program_->Sem().Get(type.ast);
-  }
-
-  if (auto* alias = type->As<sem::Alias>()) {
-    return EmitPackedType(alias->type(), name);
-  }
-
+bool GeneratorImpl::EmitPackedType(const sem::Type* type,
+                                   const std::string& name) {
   if (auto* vec = type->As<sem::Vector>()) {
     out_ << "packed_";
     if (!EmitType(vec->type(), "")) {
@@ -2121,7 +2100,7 @@ bool GeneratorImpl::EmitStructType(const sem::Struct* str) {
       }
     }
 
-    auto* ty = mem->Type()->UnwrapAliasIfNeeded();
+    auto* ty = mem->Type();
 
     // Array member name will be output with the type
     if (!ty->Is<sem::Array>()) {
@@ -2287,8 +2266,6 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
 
 GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     const sem::Type* ty) {
-  ty = ty->UnwrapAliasIfNeeded();
-
   if (ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
     // 2.1 Scalar Data Types

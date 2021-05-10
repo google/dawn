@@ -63,14 +63,6 @@ TEST_F(ResolverIsStorableTest, Pointer) {
   EXPECT_FALSE(r()->IsStorable(ty.pointer<i32>(ast::StorageClass::kPrivate)));
 }
 
-TEST_F(ResolverIsStorableTest, AliasVoid) {
-  EXPECT_FALSE(r()->IsStorable(ty.alias("a", ty.void_())));
-}
-
-TEST_F(ResolverIsStorableTest, AliasI32) {
-  EXPECT_TRUE(r()->IsStorable(ty.alias("a", ty.i32())));
-}
-
 TEST_F(ResolverIsStorableTest, AccessControlVoid) {
   EXPECT_FALSE(r()->IsStorable(
       create<sem::AccessControl>(ast::AccessControl::kReadOnly, ty.void_())));

@@ -60,7 +60,6 @@
 #include "src/program.h"
 #include "src/program_id.h"
 #include "src/sem/access_control_type.h"
-#include "src/sem/alias_type.h"
 #include "src/sem/array.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/depth_texture_type.h"
@@ -682,13 +681,10 @@ class ProgramBuilder {
     /// @param type the alias type
     /// @returns the alias pointer
     template <typename NAME>
-    typ::Alias alias(NAME&& name, typ::Type type) const {
+    ast::Alias* alias(NAME&& name, typ::Type type) const {
       type = MaybeCreateTypename(type);
       auto sym = builder->Sym(std::forward<NAME>(name));
-      return {
-          type.ast ? builder->create<ast::Alias>(sym, type) : nullptr,
-          type.sem ? builder->create<sem::Alias>(sym, type) : nullptr,
-      };
+      return builder->create<ast::Alias>(sym, type);
     }
 
     /// Creates an alias type
@@ -697,13 +693,10 @@ class ProgramBuilder {
     /// @param type the alias type
     /// @returns the alias pointer
     template <typename NAME>
-    typ::Alias alias(const Source& source, NAME&& name, typ::Type type) const {
+    ast::Alias* alias(const Source& source, NAME&& name, typ::Type type) const {
       type = MaybeCreateTypename(type);
       auto sym = builder->Sym(std::forward<NAME>(name));
-      return {
-          type.ast ? builder->create<ast::Alias>(source, sym, type) : nullptr,
-          type.sem ? builder->create<sem::Alias>(sym, type) : nullptr,
-      };
+      return builder->create<ast::Alias>(source, sym, type);
     }
 
     /// Creates an access control qualifier type

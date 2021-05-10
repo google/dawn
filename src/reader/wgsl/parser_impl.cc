@@ -985,8 +985,8 @@ Maybe<ast::Alias*> ParserImpl::type_alias() {
   if (!type.matched)
     return add_error(peek(), "invalid type alias");
 
-  auto alias = builder_.ty.alias(make_source_range_from(t.source()), name.value,
-                                 type.value);
+  auto* alias = builder_.ty.alias(make_source_range_from(t.source()),
+                                  name.value, type.value);
   register_constructed(name.value, alias);
   return alias;
 }

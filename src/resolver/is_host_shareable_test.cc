@@ -79,14 +79,6 @@ TEST_F(ResolverIsHostShareable, Pointer) {
       r()->IsHostShareable(ty.pointer<i32>(ast::StorageClass::kPrivate)));
 }
 
-TEST_F(ResolverIsHostShareable, AliasVoid) {
-  EXPECT_FALSE(r()->IsHostShareable(ty.alias("a", ty.void_())));
-}
-
-TEST_F(ResolverIsHostShareable, AliasI32) {
-  EXPECT_TRUE(r()->IsHostShareable(ty.alias("a", ty.i32())));
-}
-
 TEST_F(ResolverIsHostShareable, AccessControlVoid) {
   EXPECT_FALSE(r()->IsHostShareable(
       ty.access(ast::AccessControl::kReadOnly, ty.void_())));

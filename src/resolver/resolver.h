@@ -83,12 +83,6 @@ class Resolver {
   /// structure member or array element of type `lhs`
   static bool IsValidAssignment(const sem::Type* lhs, const sem::Type* rhs);
 
-  /// @param type the input type
-  /// @returns the canonical type for `type`; that is, a type with all aliases
-  /// removed. For example, `Canonical(alias<alias<vec3<alias<f32>>>>)` is
-  /// `vec3<f32>`.
-  sem::Type* Canonical(sem::Type* type);
-
  private:
   /// Structure holding semantic information about a variable.
   /// Used to build the sem::Variable nodes at the end of resolving.
@@ -351,7 +345,6 @@ class Resolver {
   std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
   std::unordered_map<const ast::Expression*, ExpressionInfo> expr_info_;
-  std::unordered_map<sem::Type*, sem::Type*> type_to_canonical_;
   std::unordered_map<Symbol, sem::Type*> named_types_;
   std::unordered_set<const ast::Node*> marked_;
   FunctionInfo* current_function_ = nullptr;

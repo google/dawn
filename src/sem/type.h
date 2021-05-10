@@ -48,11 +48,7 @@ class Type : public Castable<Type, Node> {
   /// @returns the pointee type if this is a pointer, `this` otherwise
   const Type* UnwrapPtrIfNeeded() const;
 
-  /// @returns the most deeply nested aliased type if this is an alias, `this`
-  /// otherwise
-  const Type* UnwrapAliasIfNeeded() const;
-
-  /// Removes all levels of aliasing and access control.
+  /// Removes all levels of access control.
   /// This is just enough to assist with WGSL translation
   /// in that you want see through one level of pointer to get from an
   /// identifier-like expression as an l-value to its corresponding r-value,
@@ -60,10 +56,8 @@ class Type : public Castable<Type, Node> {
   /// @returns the completely unaliased type.
   const Type* UnwrapIfNeeded() const;
 
-  /// Returns the type found after:
-  /// - removing all layers of aliasing and access control if they exist, then
-  /// - removing the pointer, if it exists, then
-  /// - removing all further layers of aliasing or access control, if they exist
+  /// Returns the type found after removing all layers of access control and
+  /// pointer.
   /// @returns the unwrapped type
   const Type* UnwrapAll() const;
 

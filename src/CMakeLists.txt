@@ -287,8 +287,6 @@ set(TINT_LIB_SRCS
   transform/vertex_pulling.h
   sem/access_control_type.cc
   sem/access_control_type.h
-  sem/alias_type.cc
-  sem/alias_type.h
   sem/bool_type.cc
   sem/bool_type.h
   sem/depth_texture_type.cc
@@ -567,7 +565,6 @@ if(${TINT_BUILD_TESTS})
     transform/transform_test.cc
     test_main.cc
     sem/access_control_type_test.cc
-    sem/alias_type_test.cc
     sem/bool_type_test.cc
     sem/depth_texture_type_test.cc
     sem/external_texture_type_test.cc

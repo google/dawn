@@ -26,37 +26,6 @@ namespace {
 
 using BuilderTest_Type = TestHelper;
 
-TEST_F(BuilderTest_Type, GenerateAlias) {
-  auto alias_type = ty.alias("my_type", ty.f32());
-
-  spirv::Builder& b = Build();
-
-  auto id = b.GenerateTypeIfNeeded(alias_type);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(id, 1u);
-
-  EXPECT_EQ(b.types().size(), 1u);
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
-)");
-}
-
-TEST_F(BuilderTest_Type, ReturnsGeneratedAlias) {
-  auto i32 = ty.i32();
-  auto f32 = ty.f32();
-  auto alias_type = ty.alias("my_type", f32);
-
-  spirv::Builder& b = Build();
-
-  EXPECT_EQ(b.GenerateTypeIfNeeded(alias_type), 1u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 2u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(alias_type), 1u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-  EXPECT_EQ(b.GenerateTypeIfNeeded(f32), 1u);
-  ASSERT_FALSE(b.has_error()) << b.error();
-}
-
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
   auto* ary = ty.array(ty.i32(), 0);
   auto* str = Structure("S", {Member("x", ary)},
