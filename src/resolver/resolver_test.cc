@@ -83,7 +83,9 @@ TEST_F(ResolverTest, Stmt_Case) {
   ast::CaseSelectorList lit;
   lit.push_back(create<ast::SintLiteral>(3));
   auto* cse = create<ast::CaseStatement>(lit, block);
-  WrapInFunction(v, cse);
+  auto* cond_var = Var("c", ty.i32(), ast::StorageClass::kFunction);
+  auto* sw = Switch(cond_var, cse, DefaultCase());
+  WrapInFunction(v, cond_var, sw);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
