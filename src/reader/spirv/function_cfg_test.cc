@@ -2680,7 +2680,8 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_InnerContinueContinues) {
   //    via a structured exit"
 }
 
-TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop_SwitchBackedgeBreakContinue) {
+TEST_F(SpvParserCFGTest,
+       ComputeBlockOrder_Loop_Loop_SwitchBackedgeBreakContinue) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -4926,7 +4927,8 @@ TEST_F(SpvParserCFGTest,
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kLoopBreak);
 }
 
-TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopBreak_FromContinueConstructHeader) {
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_LoopBreak_FromContinueConstructHeader) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -5175,7 +5177,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultBody) {
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
-TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultIsMerge) {
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultIsMerge) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -5202,7 +5205,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromSwitchDefaultIsMerge) 
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
-TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Unconditional) {
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_SwitchBreak_FromNestedIf_Unconditional) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -5236,7 +5240,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Unconditional
   EXPECT_EQ(bi->succ_edge[99], EdgeKind::kSwitchBreak);
 }
 
-TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromNestedIf_Conditional) {
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_SwitchBreak_FromNestedIf_Conditional) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -5336,7 +5341,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromNestedLoop_IsError) {
          "construct starting at block 20; branch bypasses merge block 80"));
 }
 
-TEST_F(SpvParserCFGTest, ClassifyCFGEdges_SwitchBreak_FromNestedSwitch_IsError) {
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_SwitchBreak_FromNestedSwitch_IsError) {
   // It's an error because the break can only go as far as inner switch
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -5745,7 +5751,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopContinue_FromNestedIf) {
   EXPECT_EQ(bi->succ_edge[80], EdgeKind::kLoopContinue);
 }
 
-TEST_F(SpvParserCFGTest, ClassifyCFGEdges_LoopContinue_ConditionalFromNestedIf) {
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_LoopContinue_ConditionalFromNestedIf) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -6072,7 +6079,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Fallthrough_CaseTailToCase) {
   EXPECT_EQ(bi->succ_edge[40], EdgeKind::kCaseFallThrough);
 }
 
-TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Fallthrough_CaseTailToDefaultNotMerge) {
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_Fallthrough_CaseTailToDefaultNotMerge) {
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -6961,7 +6969,8 @@ TEST_F(SpvParserCFGTest, ClassifyCFGEdges_NeededMerge_Switch) {
                  "a structured header (it has no merge instruction)"));
 }
 
-TEST_F(SpvParserCFGTest, ClassifyCFGEdges_Pathological_Forward_LoopHeadSplitBody) {
+TEST_F(SpvParserCFGTest,
+       ClassifyCFGEdges_Pathological_Forward_LoopHeadSplitBody) {
   // In this case the branch-conditional in the loop header is really also a
   // selection header.
   auto assembly = CommonTypes() + R"(
@@ -7644,7 +7653,8 @@ TEST_F(
                  "(violates dominance rule)"));
 }
 
-TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_TrueBranch_LoopBreak_Ok) {
+TEST_F(SpvParserCFGTest,
+       FindIfSelectionInternalHeaders_TrueBranch_LoopBreak_Ok) {
   // crbug.com/tint/243
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -7751,7 +7761,8 @@ TEST_F(SpvParserCFGTest,
   EXPECT_THAT(p->error(), Eq(""));
 }
 
-TEST_F(SpvParserCFGTest, FindIfSelectionInternalHeaders_FalseBranch_LoopBreak_Ok) {
+TEST_F(SpvParserCFGTest,
+       FindIfSelectionInternalHeaders_FalseBranch_LoopBreak_Ok) {
   // crbug.com/tint/243
   auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
@@ -9763,7 +9774,8 @@ Return{}
   ASSERT_EQ(expect, got);
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_Loop_BodyConditionallyBreaks_FromFalse_Early) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_Loop_BodyConditionallyBreaks_FromFalse_Early) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -11041,7 +11053,7 @@ TEST_F(
 
 TEST_F(
     SpvParserCFGTest,
-    EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Unconditional) {
+    EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Unconditional) {  // NOLINT - line length
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -11087,7 +11099,7 @@ Return{}
 
 TEST_F(
     SpvParserCFGTest,
-    EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional) {
+    EmitBody_Branch_LoopBreak_MultiBlockLoop_FromContinueConstructEnd_Conditional) {  // NOLINT - line length
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -11978,7 +11990,8 @@ Return{}
   ASSERT_EQ(expect, got);
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_SwitchBreak_Continue_OnTrue) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_SwitchBreak_Continue_OnTrue) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -12073,7 +12086,8 @@ Return{}
   ASSERT_EQ(expect, got);
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_SwitchBreak_Continue_OnFalse) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_SwitchBreak_Continue_OnFalse) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -12172,7 +12186,8 @@ Return{}
   ASSERT_EQ(expect, got);
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_SwitchBreak_Forward_OnTrue) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_SwitchBreak_Forward_OnTrue) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -12241,7 +12256,8 @@ Return{}
   ASSERT_EQ(expect, got);
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_SwitchBreak_Forward_OnFalse) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_SwitchBreak_Forward_OnFalse) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -12662,7 +12678,8 @@ Return{}
   ASSERT_EQ(expect, got);
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_LoopBreak_Continue_OnFalse) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_LoopBreak_Continue_OnFalse) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -12966,7 +12983,8 @@ Return{}
   ASSERT_EQ(expect, got);
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Continue_Continue_FromHeader) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_Continue_Continue_FromHeader) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -13526,7 +13544,8 @@ Return{}
   ASSERT_EQ(expect, got);
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Continue_Fallthrough_OnTrue) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_Continue_Fallthrough_OnTrue) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -13635,7 +13654,8 @@ Return{}
   ASSERT_EQ(expect, got);
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Continue_Fallthrough_OnFalse) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_Continue_Fallthrough_OnFalse) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -13978,7 +13998,8 @@ TEST_F(SpvParserCFGTest,
          "starting at block 20; branch bypasses merge block 89"));
 }
 
-TEST_F(SpvParserCFGTest, EmitBody_BranchConditional_Fallthrough_Fallthrough_Same) {
+TEST_F(SpvParserCFGTest,
+       EmitBody_BranchConditional_Fallthrough_Fallthrough_Same) {
   auto p = parser(test::Assemble(CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
