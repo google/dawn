@@ -27,6 +27,8 @@ using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::StartsWith;
 
+using SpvParserHandleTest = SpvParserTest;
+
 std::string Preamble() {
   return R"(
     OpCapability Shader
@@ -221,7 +223,7 @@ std::string CommonTypes() {
   return CommonBasicTypes() + CommonImageTypes();
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_WellFormedButNotAHandle) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %10 = OpConstantNull %ptr_sampler
@@ -237,7 +239,8 @@ TEST_F(SpvParserTest,
   EXPECT_TRUE(p->error().empty());
 }
 
-TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Direct) {
+TEST_F(SpvParserHandleTest,
+       GetMemoryObjectDeclarationForHandle_Variable_Direct) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_1d UniformConstant
@@ -255,7 +258,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Direct) {
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_AccessChain) {
   // Show that we would generalize to arrays of handles, even though that
   // is not supported in WGSL MVP.
@@ -292,7 +295,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_InBoundsAccessChain) {
   const auto assembly = Preamble() + CommonTypes() + R"(
 
@@ -327,7 +330,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_PtrAccessChain) {
   // Show that we would generalize to arrays of handles, even though that
   // is not supported in WGSL MVP.
@@ -364,7 +367,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_InBoundsPtrAccessChain) {
   const auto assembly = Preamble() + CommonTypes() + R"(
 
@@ -399,7 +402,8 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_CopyObject) {
+TEST_F(SpvParserHandleTest,
+       GetMemoryObjectDeclarationForHandle_Variable_CopyObject) {
   const auto assembly = Preamble() + CommonTypes() + R"(
 
      %10 = OpVariable %ptr_sampler UniformConstant
@@ -427,7 +431,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_CopyObject) {
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Load) {
+TEST_F(SpvParserHandleTest, GetMemoryObjectDeclarationForHandle_Variable_Load) {
   const auto assembly = Preamble() + CommonTypes() + R"(
 
      %10 = OpVariable %ptr_sampler UniformConstant
@@ -455,7 +459,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Load) {
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_Variable_SampledImage) {
   // Trace through the sampled image instruction, but in two different
   // directions.
@@ -488,7 +492,8 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Image) {
+TEST_F(SpvParserHandleTest,
+       GetMemoryObjectDeclarationForHandle_Variable_Image) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %sampled_image_type = OpTypeSampledImage %f_texture_1d
 
@@ -515,7 +520,8 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_Variable_Image) {
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Direct) {
+TEST_F(SpvParserHandleTest,
+       GetMemoryObjectDeclarationForHandle_FuncParam_Direct) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %fty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_1d
 
@@ -538,7 +544,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Direct) {
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_AccessChain) {
   // Show that we would generalize to arrays of handles, even though that
   // is not supported in WGSL MVP.
@@ -575,7 +581,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_InBoundsAccessChain) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %sampler_array = OpTypeArray %sampler %uint_100
@@ -610,7 +616,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_PtrAccessChain) {
   // Show that we would generalize to arrays of handles, even though that
   // is not supported in WGSL MVP.
@@ -647,7 +653,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_InBoundsPtrAccessChain) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %sampler_array = OpTypeArray %sampler %uint_100
@@ -682,7 +688,7 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_CopyObject) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %fty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_1d
@@ -711,7 +717,8 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Load) {
+TEST_F(SpvParserHandleTest,
+       GetMemoryObjectDeclarationForHandle_FuncParam_Load) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %fty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_1d
 
@@ -739,7 +746,7 @@ TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Load) {
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserHandleTest,
        GetMemoryObjectDeclarationForHandle_FuncParam_SampledImage) {
   // Trace through the sampled image instruction, but in two different
   // directions.
@@ -773,7 +780,8 @@ TEST_F(SpvParserTest,
   EXPECT_EQ(image->result_id(), 20u);
 }
 
-TEST_F(SpvParserTest, GetMemoryObjectDeclarationForHandle_FuncParam_Image) {
+TEST_F(SpvParserHandleTest,
+       GetMemoryObjectDeclarationForHandle_FuncParam_Image) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %sampled_image_type = OpTypeSampledImage %f_texture_1d
 
@@ -815,10 +823,10 @@ inline std::ostream& operator<<(std::ostream& out,
   return out;
 }
 
-using SpvParserTest_RegisterHandleUsage_SampledImage =
+using SpvParserHandleTest_RegisterHandleUsage_SampledImage =
     SpvParserTestBase<::testing::TestWithParam<UsageImageAccessCase>>;
 
-TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, Variable) {
+TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, Variable) {
   const auto assembly = Preamble() + FragMain() + CommonTypes() + R"(
      %si_ty = OpTypeSampledImage %f_texture_2d
      %coords = OpConstantNull %v2float
@@ -848,7 +856,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, Variable) {
   EXPECT_THAT(iu.to_str(), Eq(GetParam().expected_image_usage));
 }
 
-TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, FunctionParam) {
+TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, FunctionParam) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %f_ty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_2d
      %si_ty = OpTypeSampledImage %f_texture_2d
@@ -890,7 +898,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, FunctionParam) {
 
 INSTANTIATE_TEST_SUITE_P(
     Samples,
-    SpvParserTest_RegisterHandleUsage_SampledImage,
+    SpvParserHandleTest_RegisterHandleUsage_SampledImage,
     ::testing::Values(
 
         // OpImageGather
@@ -973,10 +981,10 @@ inline std::ostream& operator<<(std::ostream& out, const UsageRawImageCase& c) {
   return out;
 }
 
-using SpvParserTest_RegisterHandleUsage_RawImage =
+using SpvParserHandleTest_RegisterHandleUsage_RawImage =
     SpvParserTestBase<::testing::TestWithParam<UsageRawImageCase>>;
 
-TEST_P(SpvParserTest_RegisterHandleUsage_RawImage, Variable) {
+TEST_P(SpvParserHandleTest_RegisterHandleUsage_RawImage, Variable) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %20 = OpVariable %ptr_)" +
                         GetParam().type + R"( UniformConstant
@@ -1002,7 +1010,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_RawImage, Variable) {
   Usage su = p->GetHandleUsage(20);
 }
 
-TEST_P(SpvParserTest_RegisterHandleUsage_RawImage, FunctionParam) {
+TEST_P(SpvParserHandleTest_RegisterHandleUsage_RawImage, FunctionParam) {
   const auto assembly = Preamble() + CommonTypes() + R"(
      %f_ty = OpTypeFunction %void %ptr_)" +
                         GetParam().type + R"(
@@ -1039,7 +1047,7 @@ TEST_P(SpvParserTest_RegisterHandleUsage_RawImage, FunctionParam) {
 
 INSTANTIATE_TEST_SUITE_P(
     Samples,
-    SpvParserTest_RegisterHandleUsage_RawImage,
+    SpvParserHandleTest_RegisterHandleUsage_RawImage,
     ::testing::Values(
 
         // OpImageRead
@@ -1101,10 +1109,10 @@ inline std::ostream& operator<<(std::ostream& out,
   return out;
 }
 
-using SpvParserTest_DeclUnderspecifiedHandle =
+using SpvParserHandleTest_DeclUnderspecifiedHandle =
     SpvParserTestBase<::testing::TestWithParam<DeclUnderspecifiedHandleCase>>;
 
-TEST_P(SpvParserTest_DeclUnderspecifiedHandle, Variable) {
+TEST_P(SpvParserHandleTest_DeclUnderspecifiedHandle, Variable) {
   const auto assembly = Preamble() + R"(
      OpEntryPoint GLCompute %main "main"
      OpDecorate %10 DescriptorSet 0
@@ -1126,7 +1134,7 @@ TEST_P(SpvParserTest_DeclUnderspecifiedHandle, Variable) {
 }
 
 INSTANTIATE_TEST_SUITE_P(Samplers,
-                         SpvParserTest_DeclUnderspecifiedHandle,
+                         SpvParserHandleTest_DeclUnderspecifiedHandle,
                          ::testing::Values(
 
                              DeclUnderspecifiedHandleCase{"", R"(
@@ -1145,7 +1153,7 @@ INSTANTIATE_TEST_SUITE_P(Samplers,
   })"}));
 
 INSTANTIATE_TEST_SUITE_P(Images,
-                         SpvParserTest_DeclUnderspecifiedHandle,
+                         SpvParserHandleTest_DeclUnderspecifiedHandle,
                          ::testing::Values(
 
                              DeclUnderspecifiedHandleCase{"", R"(
@@ -1211,10 +1219,10 @@ inline std::ostream& operator<<(std::ostream& out, const ImageAccessCase& c) {
   return out;
 }
 
-using SpvParserTest_SampledImageAccessTest =
+using SpvParserHandleTest_SampledImageAccessTest =
     SpvParserTestBase<::testing::TestWithParam<ImageAccessCase>>;
 
-TEST_P(SpvParserTest_SampledImageAccessTest, Variable) {
+TEST_P(SpvParserHandleTest_SampledImageAccessTest, Variable) {
   const auto assembly = Preamble() + R"(
      OpEntryPoint Fragment %main "main"
      OpExecutionMode %main OriginUpperLeft
@@ -1306,12 +1314,12 @@ TEST_P(SpvParserTest_SampledImageAccessTest, Variable) {
 
 // TODO(dneto): Test variable declaration and texture builtins provoked by
 // use of an image access instruction inside helper function.
-TEST_P(SpvParserTest_RegisterHandleUsage_SampledImage, DISABLED_FunctionParam) {
-}
+TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage,
+       DISABLED_FunctionParam) {}
 
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_ImageGather,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // TODO(dneto): OpImageGather
         // TODO(dneto): OpImageGather with ConstOffset (signed and unsigned)
@@ -1321,7 +1329,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     DISABLED_ImageDrefGather,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // TODO(dneto): OpImageDrefGather
         // TODO(dneto): OpImageDrefGather with ConstOffset (signed and
@@ -1332,7 +1340,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleImplicitLod,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::Values(
 
         // OpImageSampleImplicitLod
@@ -1695,7 +1703,7 @@ INSTANTIATE_TEST_SUITE_P(
     // sampling and depth-reference sampling.  The texture is a depth-texture,
     // and we use builtins textureSample and textureSampleCompare
     ImageSampleImplicitLod_BothDrefAndNonDref,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::Values(
 
         // OpImageSampleImplicitLod
@@ -1779,7 +1787,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDrefImplicitLod,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::Values(
         // ImageSampleDrefImplicitLod
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
@@ -1940,7 +1948,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::Values(
 
         // OpImageSampleExplicitLod - using Lod
@@ -2406,7 +2414,7 @@ INSTANTIATE_TEST_SUITE_P(
 // This corresponds to SPIR-V OpSampleExplicitLod and WGSL textureSampleLevel.
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleExplicitLod_DepthTexture,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Test a non-depth case.
         // (This is already tested above in the ImageSampleExplicitLod suite,
@@ -2486,10 +2494,10 @@ INSTANTIATE_TEST_SUITE_P(
             ScalarConstructor[not set]{0.000000}
           })"}}));
 
-using SpvParserTest_ImageAccessTest =
+using SpvParserHandleTest_ImageAccessTest =
     SpvParserTestBase<::testing::TestWithParam<ImageAccessCase>>;
 
-TEST_P(SpvParserTest_ImageAccessTest, Variable) {
+TEST_P(SpvParserHandleTest_ImageAccessTest, Variable) {
   // In this test harness, we only create an image.
   const auto assembly = Preamble() + R"(
      OpEntryPoint Fragment %main "main"
@@ -2554,7 +2562,7 @@ TEST_P(SpvParserTest_ImageAccessTest, Variable) {
 }
 
 INSTANTIATE_TEST_SUITE_P(ImageWrite_OptionalParams,
-                         SpvParserTest_ImageAccessTest,
+                         SpvParserHandleTest_ImageAccessTest,
                          ::testing::ValuesIn(std::vector<ImageAccessCase>{
                              // OpImageWrite with no extra params
                              {"%float 2D 0 0 0 2 Rgba32f",
@@ -2583,7 +2591,7 @@ INSTANTIATE_TEST_SUITE_P(
     // type matching the sampled type. WGSL's texel parameter might be
     // scalar or vector, depending on the number of channels in the texture.
     ImageWrite_ConvertTexelOperand_Arity,
-    SpvParserTest_ImageAccessTest,
+    SpvParserHandleTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Source 1 component, dest 1 component
         {"%float 2D 0 0 0 2 R32f", "OpImageWrite %im %vi12 %f1",
@@ -2762,7 +2770,7 @@ INSTANTIATE_TEST_SUITE_P(
       )
     })"}}));
 
-TEST_F(SpvParserTest, ImageWrite_TooFewSrcTexelComponents_1_vs_4) {
+TEST_F(SpvParserHandleTest, ImageWrite_TooFewSrcTexelComponents_1_vs_4) {
   const auto assembly = Preamble() + R"(
      OpEntryPoint Fragment %main "main"
      OpExecutionMode %main OriginUpperLeft
@@ -2797,7 +2805,7 @@ TEST_F(SpvParserTest, ImageWrite_TooFewSrcTexelComponents_1_vs_4) {
       << p->error();
 }
 
-TEST_F(SpvParserTest, ImageWrite_ThreeComponentStorageTexture_IsError) {
+TEST_F(SpvParserHandleTest, ImageWrite_ThreeComponentStorageTexture_IsError) {
   // SPIR-V doesn't allow a 3-element storage texture format.
   const auto assembly = Preamble() + R"(
      OpEntryPoint Fragment %main "main"
@@ -2829,7 +2837,7 @@ TEST_F(SpvParserTest, ImageWrite_ThreeComponentStorageTexture_IsError) {
   EXPECT_THAT(error, HasSubstr("Invalid image format 'Rgb32f'"));
 }
 
-TEST_F(SpvParserTest, ImageWrite_FloatDest_IntegralSrc_IsError) {
+TEST_F(SpvParserHandleTest, ImageWrite_FloatDest_IntegralSrc_IsError) {
   const auto assembly = Preamble() + R"(
      OpEntryPoint Fragment %main "main"
      OpExecutionMode %main OriginUpperLeft
@@ -2863,7 +2871,7 @@ TEST_F(SpvParserTest, ImageWrite_FloatDest_IntegralSrc_IsError) {
       << p->error();
 }
 
-TEST_F(SpvParserTest, ImageWrite_IntegralDest_FloatSrc_IsError) {
+TEST_F(SpvParserHandleTest, ImageWrite_IntegralDest_FloatSrc_IsError) {
   const auto assembly = Preamble() + R"(
      OpEntryPoint Fragment %main "main"
      OpExecutionMode %main OriginUpperLeft
@@ -2905,7 +2913,7 @@ INSTANTIATE_TEST_SUITE_P(
     // (It is already a SPIR-V validation rule that floating point texels
     // must already be used with textures of floating point sampled types)
     ImageWrite_ConvertTexelOperand_Signedness,
-    SpvParserTest_ImageAccessTest,
+    SpvParserHandleTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Sampled type is unsigned int, texel is unsigned int
         {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vi12 %vu1234",
@@ -2993,7 +3001,7 @@ INSTANTIATE_TEST_SUITE_P(
     })"}}));
 
 INSTANTIATE_TEST_SUITE_P(ImageRead_OptionalParams,
-                         SpvParserTest_ImageAccessTest,
+                         SpvParserHandleTest_ImageAccessTest,
                          ::testing::ValuesIn(std::vector<ImageAccessCase>{
                              // OpImageRead with no extra params
                              {"%float 2D 0 0 0 2 Rgba32f",
@@ -3026,7 +3034,7 @@ INSTANTIATE_TEST_SUITE_P(ImageRead_OptionalParams,
 
 INSTANTIATE_TEST_SUITE_P(
     ImageFetch_OptionalParams,
-    SpvParserTest_ImageAccessTest,
+    SpvParserHandleTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // OpImageFetch with no extra params, on sampled texture
         // Level of detail is injected for sampled texture
@@ -3162,7 +3170,7 @@ INSTANTIATE_TEST_SUITE_P(ImageFetch_Depth,
                          // elements, even for depth images.  But in WGSL,
                          // textureLoad on a depth image yields f32.
                          // crbug.com/tint/439
-                         SpvParserTest_ImageAccessTest,
+                         SpvParserHandleTest_ImageAccessTest,
                          ::testing::ValuesIn(std::vector<ImageAccessCase>{
                              // ImageFetch on depth image.
                              {"%float 2D 1 0 0 1 Unknown",
@@ -3202,7 +3210,7 @@ INSTANTIATE_TEST_SUITE_P(ImageFetch_Depth,
 
 INSTANTIATE_TEST_SUITE_P(
     ImageFetch_Multisampled,
-    SpvParserTest_ImageAccessTest,
+    SpvParserHandleTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // SPIR-V requires a Sample image operand when operating on a
         // multisampled image.
@@ -3275,7 +3283,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageFetch_Multisampled_ConvertSampleOperand,
-    SpvParserTest_ImageAccessTest,
+    SpvParserHandleTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         {"%float 2D 0 0 1 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Sample %u1",
@@ -3311,7 +3319,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ConvertResultSignedness,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Valid SPIR-V only has:
         //      float scalar sampled type vs. floating result
@@ -3667,7 +3675,7 @@ INSTANTIATE_TEST_SUITE_P(
     // ImageQuerySize requires storage image or multisampled
     // For storage image, use another instruction to indicate whether it
     // is readonly or writeonly.
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // 1D storage image
         {"%float 1D 0 0 0 2 Rgba32f",
@@ -3800,7 +3808,7 @@ INSTANTIATE_TEST_SUITE_P(
     // ImageQuerySize requires storage image or multisampled
     // For storage image, use another instruction to indicate whether it
     // is readonly or writeonly.
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // 1D array storage image doesn't exist.
 
@@ -3886,7 +3894,7 @@ INSTANTIATE_TEST_SUITE_P(
     // ImageQuerySize requires storage image or multisampled
     // For storage image, use another instruction to indicate whether it
     // is readonly or writeonly.
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
 
         // 1D
@@ -4086,7 +4094,7 @@ INSTANTIATE_TEST_SUITE_P(
     // ImageQuerySize requires storage image or multisampled
     // For storage image, use another instruction to indicate whether it
     // is readonly or writeonly.
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
 
         // There is no 1D array
@@ -4250,7 +4258,7 @@ INSTANTIATE_TEST_SUITE_P(
     // integer, we must convert it before using it as an argument
     // to textureDimensions.
     ImageQuerySizeLod_NonArrayed_SignedResult_UnsignedLevel,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
 
         {"%float 1D 0 0 0 1 Unknown",
@@ -4293,7 +4301,7 @@ INSTANTIATE_TEST_SUITE_P(
     // coercion. But the algorithm already does that as a matter
     // of course.
     ImageQuerySizeLod_NonArrayed_UnsignedResult_SignedLevel,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
 
         {"%float 1D 0 0 0 1 Unknown",
@@ -4329,7 +4337,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageQueryLevels_SignedResult,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // In Vulkan:
         //      Dim must be 1D, 2D, 3D, Cube
@@ -4583,7 +4591,7 @@ INSTANTIATE_TEST_SUITE_P(
     // Spot check that a type conversion is inserted when SPIR-V asks for
     // an unsigned int result.
     ImageQueryLevels_UnsignedResult,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %uint %im\n",
          R"(Variable{
@@ -4616,7 +4624,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageQuerySamples_SignedResult,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Multsample 2D
         {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %int %im\n",
@@ -4675,7 +4683,7 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     // Translation must inject a type coersion from signed to unsigned.
     ImageQuerySamples_UnsignedResult,
-    SpvParserTest_SampledImageAccessTest,
+    SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Multsample 2D
         {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %uint %im\n",
@@ -4756,10 +4764,11 @@ inline std::ostream& operator<<(std::ostream& out, const ImageCoordsCase& c) {
   return out;
 }
 
-using SpvParserTest_ImageCoordsTest =
+using SpvParserHandleTest_ImageCoordsTest =
     SpvParserTestBase<::testing::TestWithParam<ImageCoordsCase>>;
 
-TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
+TEST_P(SpvParserHandleTest_ImageCoordsTest,
+       MakeCoordinateOperandsForImageAccess) {
   const auto assembly = Preamble() + R"(
      OpEntryPoint Fragment %100 "main"
      OpExecutionMode %100 OriginUpperLeft
@@ -4867,7 +4876,7 @@ TEST_P(SpvParserTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess) {
 }
 
 INSTANTIATE_TEST_SUITE_P(Good_1D,
-                         SpvParserTest_ImageCoordsTest,
+                         SpvParserHandleTest_ImageCoordsTest,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float 1D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
@@ -4903,7 +4912,7 @@ INSTANTIATE_TEST_SUITE_P(Good_1D,
 )"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_1DArray,
-                         SpvParserTest_ImageCoordsTest,
+                         SpvParserHandleTest_ImageCoordsTest,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float 1D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
@@ -4961,7 +4970,7 @@ INSTANTIATE_TEST_SUITE_P(Good_1DArray,
 )"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_2D,
-                         SpvParserTest_ImageCoordsTest,
+                         SpvParserHandleTest_ImageCoordsTest,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float 2D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
@@ -4988,7 +4997,7 @@ INSTANTIATE_TEST_SUITE_P(Good_2D,
 )"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_2DArray,
-                         SpvParserTest_ImageCoordsTest,
+                         SpvParserHandleTest_ImageCoordsTest,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float 2D 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod %v4float "
@@ -5028,7 +5037,7 @@ INSTANTIATE_TEST_SUITE_P(Good_2DArray,
 )"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_3D,
-                         SpvParserTest_ImageCoordsTest,
+                         SpvParserHandleTest_ImageCoordsTest,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float 3D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
@@ -5049,7 +5058,7 @@ INSTANTIATE_TEST_SUITE_P(Good_3D,
 )"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_Cube,
-                         SpvParserTest_ImageCoordsTest,
+                         SpvParserHandleTest_ImageCoordsTest,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float Cube 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
@@ -5070,7 +5079,7 @@ INSTANTIATE_TEST_SUITE_P(Good_Cube,
 )"}}}));
 
 INSTANTIATE_TEST_SUITE_P(Good_CubeArray,
-                         SpvParserTest_ImageCoordsTest,
+                         SpvParserHandleTest_ImageCoordsTest,
                          ::testing::ValuesIn(std::vector<ImageCoordsCase>{
                              {"%float Cube 0 1 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
@@ -5096,7 +5105,7 @@ INSTANTIATE_TEST_SUITE_P(
     // In SPIR-V, sampling and dref sampling operations use floating point
     // coordinates.  Prove that we preserve floating point-ness.
     // Test across all such instructions.
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // Scalar cases
         {"%float 1D 0 0 0 1 Unknown",
@@ -5137,7 +5146,7 @@ INSTANTIATE_TEST_SUITE_P(
     // coordinates.  Prove that we preserve floating point-ness of the
     // coordinate part, but convert the array index to signed integer. Test
     // across all such instructions.
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         {"%float 2D 0 1 0 1 Unknown",
          "%result = OpImageSampleImplicitLod %v4float %sampled_image %vf123",
@@ -5216,7 +5225,7 @@ INSTANTIATE_TEST_SUITE_P(
     PreserveIntCoords_NonArrayed,
     // In SPIR-V, image read, fetch, and write use integer coordinates.
     // Prove that we preserve signed integer coordinates.
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // Scalar cases
         {"%float 1D 0 0 0 1 Unknown",
@@ -5249,7 +5258,7 @@ INSTANTIATE_TEST_SUITE_P(
     PreserveIntCoords_Arrayed,
     // In SPIR-V, image read, fetch, and write use integer coordinates.
     // Prove that we preserve signed integer coordinates.
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         {"%float 2D 0 1 0 1 Unknown",
          "%result = OpImageFetch %float %im %vi123",
@@ -5298,7 +5307,7 @@ INSTANTIATE_TEST_SUITE_P(
     ConvertUintCoords_NonArrayed,
     // In SPIR-V, image read, fetch, and write use integer coordinates.
     // Prove that we convert unsigned integer coordinates to signed.
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // Scalar cases
         {"%float 1D 0 0 0 1 Unknown",
@@ -5355,7 +5364,7 @@ INSTANTIATE_TEST_SUITE_P(
     ConvertUintCoords_Arrayed,
     // In SPIR-V, image read, fetch, and write use integer coordinates.
     // Prove that we convert unsigned integer coordinates to signed.
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         {"%float 2D 0 1 0 1 Unknown",
          "%result = OpImageFetch %float %im %vu123",
@@ -5420,7 +5429,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     BadInstructions,
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         {"%float 1D 0 0 0 1 Unknown",
          "OpNop",
@@ -5442,7 +5451,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     Bad_Coordinate,
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         {"%float 1D 0 0 0 1 Unknown",
          "%result = OpImageSampleImplicitLod "
@@ -5476,7 +5485,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     SampleNonFloatTexture_IsError,
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // ImageSampleImplicitLod
         {"%uint 2D 0 0 0 1 Unknown",
@@ -5523,7 +5532,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ConstOffset_BadInstruction_Errors,
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // ImageFetch
         {"%uint 2D 0 0 0 1 Unknown",
@@ -5547,7 +5556,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ConstOffset_BadDim_Errors,
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // 1D
         {"%uint 1D 0 0 0 1 Unknown",
@@ -5570,7 +5579,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDref_Bias_IsError,
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // Implicit Lod
         {"%float 2D 1 0 0 1 Unknown",
@@ -5589,7 +5598,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 INSTANTIATE_TEST_SUITE_P(
     ImageSampleDref_Grad_IsError,
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         // Implicit Lod
         {"%float 2D 1 0 0 1 Unknown",
@@ -5606,7 +5615,7 @@ INSTANTIATE_TEST_SUITE_P(
          "gradient: ",
          {}}}));
 
-TEST_F(SpvParserTest, CombinedImageSampler_IsError) {
+TEST_F(SpvParserHandleTest, CombinedImageSampler_IsError) {
   const auto assembly = Preamble() + R"(
      OpEntryPoint Fragment %100 "main"
      OpExecutionMode %100 OriginUpperLeft
@@ -5634,14 +5643,15 @@ TEST_F(SpvParserTest, CombinedImageSampler_IsError) {
 
 INSTANTIATE_TEST_SUITE_P(
     ImageQueryLod_IsError,
-    SpvParserTest_ImageCoordsTest,
+    SpvParserHandleTest_ImageCoordsTest,
     ::testing::ValuesIn(std::vector<ImageCoordsCase>{
         {"%float 2D 0 0 0 1 Unknown",
          "%result = OpImageQueryLod %v2int %sampled_image %vf12",
          "WGSL does not support querying the level of detail of an image: ",
          {}}}));
 
-TEST_F(SpvParserTest, NeverGenerateConstDeclForHandle_UseVariableDirectly) {
+TEST_F(SpvParserHandleTest,
+       NeverGenerateConstDeclForHandle_UseVariableDirectly) {
   // An ad-hoc test to prove we never had the issue
   // feared in crbug.com/tint/265.
   // Never create a const-declaration for a pointer to
