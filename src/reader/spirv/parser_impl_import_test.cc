@@ -27,34 +27,43 @@ using ::testing::HasSubstr;
 using ::testing::Not;
 using ::testing::UnorderedElementsAre;
 
-TEST_F(SpvParserTest, Import_NoImport) {
+using SpvParserImportTest = SpvParserTest;
+
+TEST_F(SpvParserImportTest, Import_NoImport) {
   auto p = parser(test::Assemble("%1 = OpTypeVoid"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   const auto program_ast = p->program().to_str();
   EXPECT_THAT(program_ast, Not(HasSubstr("Import")));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
-TEST_F(SpvParserTest, Import_ImportGlslStd450) {
+TEST_F(SpvParserImportTest, Import_ImportGlslStd450) {
   auto p = parser(test::Assemble(R"(%1 = OpExtInstImport "GLSL.std.450")"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
   EXPECT_THAT(p->glsl_std_450_imports(), ElementsAre(1));
+
+  p->DeliberatelyInvalidSpirv();
 }
 
-TEST_F(SpvParserTest, Import_NonSemantic_IgnoredImport) {
+TEST_F(SpvParserImportTest, Import_NonSemantic_IgnoredImport) {
   auto p = parser(test::Assemble(
       R"(%40 = OpExtInstImport "NonSemantic.ClspvReflection.1")"));
   EXPECT_TRUE(p->BuildAndParseInternalModule());
   EXPECT_TRUE(p->error().empty());
+
+  p->DeliberatelyInvalidSpirv();
 }
 
-TEST_F(SpvParserTest, Import_NonSemantic_IgnoredExtInsts) {
+TEST_F(SpvParserImportTest, Import_NonSemantic_IgnoredExtInsts) {
   // This is the clspv-compiled output of this OpenCL C:
   //    kernel void foo(global int*A) { A=A; }
   // It emits NonSemantic.ClspvReflection.1 extended instructions.
   // But *tweaked*:
   //    - to remove gl_WorkgroupSize
+  //    - to add LocalSize execution mode
   //    - to move one of the ExtInsts into the globals-and-constants
   //      section
   //    - to move one of the ExtInsts into the function body.
@@ -65,6 +74,7 @@ TEST_F(SpvParserTest, Import_NonSemantic_IgnoredExtInsts) {
          %20 = OpExtInstImport "NonSemantic.ClspvReflection.1"
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %15 "foo"
+               OpExecutionMode %15 LocalSize 1 1 1
                OpSource OpenCL_C 120
          %21 = OpString "foo"
          %23 = OpString "A"
@@ -76,6 +86,7 @@ TEST_F(SpvParserTest, Import_NonSemantic_IgnoredExtInsts) {
                OpDecorate %7 SpecId 0
                OpDecorate %8 SpecId 1
                OpDecorate %9 SpecId 2
+       %void = OpTypeVoid
          %24 = OpExtInst %void %20 ArgumentInfo %23
        %uint = OpTypeInt 32 0
 %_runtimearr_uint = OpTypeRuntimeArray %uint
@@ -86,7 +97,6 @@ TEST_F(SpvParserTest, Import_NonSemantic_IgnoredExtInsts) {
           %7 = OpSpecConstant %uint 1
           %8 = OpSpecConstant %uint 1
           %9 = OpSpecConstant %uint 1
-       %void = OpTypeVoid
          %14 = OpTypeFunction %void
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
      %uint_0 = OpConstant %uint 0
