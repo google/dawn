@@ -1218,13 +1218,13 @@ class ProgramBuilder {
 
   /// @param name the variable name
   /// @param type the variable type
-  /// @param constructor optional constructor expression
+  /// @param constructor constructor expression
   /// @param decorations optional variable decorations
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Const(NAME&& name,
                        ast::Type* type,
-                       ast::Expression* constructor = nullptr,
+                       ast::Expression* constructor,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(Sym(std::forward<NAME>(name)),
@@ -1235,14 +1235,14 @@ class ProgramBuilder {
   /// @param source the variable source
   /// @param name the variable name
   /// @param type the variable type
-  /// @param constructor optional constructor expression
+  /// @param constructor constructor expression
   /// @param decorations optional variable decorations
   /// @returns a constant `ast::Variable` with the given name and type
   template <typename NAME>
   ast::Variable* Const(const Source& source,
                        NAME&& name,
                        ast::Type* type,
-                       ast::Expression* constructor = nullptr,
+                       ast::Expression* constructor,
                        ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
     return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
@@ -1320,13 +1320,40 @@ class ProgramBuilder {
     return var;
   }
 
-  /// @param args the arguments to pass to Const()
+  /// @param name the variable name
+  /// @param type the variable type
+  /// @param constructor constructor expression
+  /// @param decorations optional variable decorations
   /// @returns a const `ast::Variable` constructed by calling Var() with the
   /// arguments of `args`, which is automatically registered as a global
   /// variable with the ast::Module.
-  template <typename... ARGS>
-  ast::Variable* GlobalConst(ARGS&&... args) {
-    auto* var = Const(std::forward<ARGS>(args)...);
+  template <typename NAME>
+  ast::Variable* GlobalConst(NAME&& name,
+                             typ::Type type,
+                             ast::Expression* constructor,
+                             ast::DecorationList decorations = {}) {
+    auto* var = Const(std::forward<NAME>(name), type, constructor,
+                      std::move(decorations));
+    AST().AddGlobalVariable(var);
+    return var;
+  }
+
+  /// @param source the variable source
+  /// @param name the variable name
+  /// @param type the variable type
+  /// @param constructor constructor expression
+  /// @param decorations optional variable decorations
+  /// @returns a const `ast::Variable` constructed by calling Var() with the
+  /// arguments of `args`, which is automatically registered as a global
+  /// variable with the ast::Module.
+  template <typename NAME>
+  ast::Variable* GlobalConst(const Source& source,
+                             NAME&& name,
+                             typ::Type type,
+                             ast::Expression* constructor,
+                             ast::DecorationList decorations = {}) {
+    auto* var = Const(source, std::forward<NAME>(name), type, constructor,
+                      std::move(decorations));
     AST().AddGlobalVariable(var);
     return var;
   }
