@@ -27,24 +27,6 @@ namespace {
 
 using MultisampledTextureTest = TestHelper;
 
-TEST_F(MultisampledTextureTest, Is) {
-  F32 f32;
-  MultisampledTexture s(ast::TextureDimension::kCube, &f32);
-  Type* ty = &s;
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_TRUE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(MultisampledTextureTest, IsTexture) {
   F32 f32;
   MultisampledTexture s(ast::TextureDimension::kCube, &f32);

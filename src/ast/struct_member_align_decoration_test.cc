@@ -27,11 +27,6 @@ TEST_F(StructMemberAlignDecorationTest, Creation) {
   EXPECT_EQ(2u, d->align());
 }
 
-TEST_F(StructMemberAlignDecorationTest, Is) {
-  auto* d = create<StructMemberAlignDecoration>(2);
-  EXPECT_TRUE(d->Is<StructMemberAlignDecoration>());
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

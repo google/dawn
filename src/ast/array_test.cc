@@ -51,24 +51,6 @@ TEST_F(AstArrayTest, CreateRuntimeArray) {
   EXPECT_TRUE(arr->IsRuntimeArray());
 }
 
-TEST_F(AstArrayTest, Is) {
-  auto* i32 = create<I32>();
-  Type* ty = create<Array>(i32, 3, DecorationList{});
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Alias>());
-  EXPECT_TRUE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_FALSE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(AstArrayTest, TypeName) {
   auto* i32 = create<I32>();
   auto* arr = create<Array>(i32, 0, DecorationList{});

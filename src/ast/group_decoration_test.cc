@@ -26,14 +26,6 @@ TEST_F(GroupDecorationTest, Creation) {
   EXPECT_EQ(2u, d->value());
 }
 
-TEST_F(GroupDecorationTest, Is) {
-  Decoration* d = create<GroupDecoration>(2);
-  EXPECT_FALSE(d->Is<BindingDecoration>());
-  EXPECT_FALSE(d->Is<BuiltinDecoration>());
-  EXPECT_FALSE(d->Is<OverrideDecoration>());
-  EXPECT_FALSE(d->Is<LocationDecoration>());
-  EXPECT_TRUE(d->Is<GroupDecoration>());
-}
 
 TEST_F(GroupDecorationTest, ToStr) {
   auto* d = create<GroupDecoration>(2);

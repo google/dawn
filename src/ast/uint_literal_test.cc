@@ -26,14 +26,6 @@ TEST_F(UintLiteralTest, Value) {
   EXPECT_EQ(u->value(), 47u);
 }
 
-TEST_F(UintLiteralTest, Is) {
-  ast::Literal* l = create<UintLiteral>(42);
-  EXPECT_FALSE(l->Is<BoolLiteral>());
-  EXPECT_FALSE(l->Is<SintLiteral>());
-  EXPECT_FALSE(l->Is<FloatLiteral>());
-  EXPECT_TRUE(l->Is<UintLiteral>());
-}
-
 TEST_F(UintLiteralTest, ToStr) {
   auto* u = create<UintLiteral>(42u);
   EXPECT_EQ(str(u), "42u");

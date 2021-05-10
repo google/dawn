@@ -37,24 +37,6 @@ namespace {
 
 using AstSampledTextureTest = TestHelper;
 
-TEST_F(AstSampledTextureTest, Is) {
-  auto* f32 = create<F32>();
-  Type* ty = create<SampledTexture>(TextureDimension::kCube, f32);
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Alias>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_TRUE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(AstSampledTextureTest, IsTexture) {
   auto* f32 = create<F32>();
   Texture* ty = create<SampledTexture>(TextureDimension::kCube, f32);

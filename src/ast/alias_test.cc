@@ -40,23 +40,6 @@ TEST_F(AstAliasTest, Create) {
   EXPECT_EQ(a->type(), u32);
 }
 
-TEST_F(AstAliasTest, Is) {
-  Type* ty = create<Alias>(Sym("a"), create<I32>());
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_TRUE(ty->Is<Alias>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_FALSE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 // Check for linear-time evaluation of Alias::type_name().
 // If type_name() is non-linear, this test should noticeably stall.
 // See: crbug.com/1200936

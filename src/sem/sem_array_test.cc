@@ -46,24 +46,6 @@ TEST_F(ArrayTest, CreateRuntimeArray) {
   EXPECT_TRUE(arr->IsRuntimeSized());
 }
 
-TEST_F(ArrayTest, Is) {
-  I32 i32;
-
-  Type* ty = create<Array>(&i32, 2, 4, 8, 4, true);
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_TRUE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_FALSE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(ArrayTest, TypeName) {
   I32 i32;
   auto* arr = create<Array>(&i32, 2, 0, 4, 4, true);

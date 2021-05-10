@@ -27,11 +27,6 @@ TEST_F(AccessDecorationTest, Creation) {
   EXPECT_EQ(ast::AccessControl::kWriteOnly, d->value());
 }
 
-TEST_F(AccessDecorationTest, Is) {
-  auto* d = create<AccessDecoration>(ast::AccessControl::kReadWrite);
-  EXPECT_TRUE(d->Is<ast::AccessDecoration>());
-}
-
 TEST_F(AccessDecorationTest, ToStr) {
   auto* d = create<AccessDecoration>(ast::AccessControl::kReadOnly);
   EXPECT_EQ(str(d), R"(AccessDecoration{read_only}

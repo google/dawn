@@ -29,23 +29,6 @@ TEST_F(PointerTest, Creation) {
   EXPECT_EQ(p.storage_class(), ast::StorageClass::kStorage);
 }
 
-TEST_F(PointerTest, Is) {
-  I32 i32;
-  Pointer p{&i32, ast::StorageClass::kFunction};
-  Type* ty = &p;
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_TRUE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_FALSE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
 
 TEST_F(PointerTest, TypeName) {
   I32 i32;

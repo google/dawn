@@ -34,15 +34,6 @@ TEST_F(BoolLiteralTest, False) {
   ASSERT_TRUE(b->IsFalse());
 }
 
-TEST_F(BoolLiteralTest, Is) {
-  ast::Literal* l = create<BoolLiteral>(false);
-  EXPECT_TRUE(l->Is<BoolLiteral>());
-  EXPECT_FALSE(l->Is<SintLiteral>());
-  EXPECT_FALSE(l->Is<FloatLiteral>());
-  EXPECT_FALSE(l->Is<UintLiteral>());
-  EXPECT_FALSE(l->Is<IntLiteral>());
-}
-
 TEST_F(BoolLiteralTest, ToStr) {
   auto* t = create<BoolLiteral>(true);
   auto* f = create<BoolLiteral>(false);

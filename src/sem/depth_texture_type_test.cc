@@ -27,23 +27,6 @@ namespace {
 
 using DepthTextureTest = TestHelper;
 
-TEST_F(DepthTextureTest, Is) {
-  DepthTexture d(ast::TextureDimension::kCube);
-  Type* ty = &d;
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_TRUE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(DepthTextureTest, IsTexture) {
   DepthTexture d(ast::TextureDimension::kCube);
   Texture* ty = &d;

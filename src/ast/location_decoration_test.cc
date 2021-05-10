@@ -26,15 +26,6 @@ TEST_F(LocationDecorationTest, Creation) {
   EXPECT_EQ(2u, d->value());
 }
 
-TEST_F(LocationDecorationTest, Is) {
-  Decoration* d = create<LocationDecoration>(2);
-  EXPECT_FALSE(d->Is<BindingDecoration>());
-  EXPECT_FALSE(d->Is<BuiltinDecoration>());
-  EXPECT_FALSE(d->Is<OverrideDecoration>());
-  EXPECT_TRUE(d->Is<LocationDecoration>());
-  EXPECT_FALSE(d->Is<GroupDecoration>());
-}
-
 TEST_F(LocationDecorationTest, ToStr) {
   auto* d = create<LocationDecoration>(2);
   EXPECT_EQ(str(d), R"(LocationDecoration{2}

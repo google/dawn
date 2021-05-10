@@ -33,23 +33,6 @@ TEST_F(SamplerTest, Creation_ComparisonSampler) {
   EXPECT_TRUE(s.IsComparison());
 }
 
-TEST_F(SamplerTest, Is) {
-  Sampler s{ast::SamplerKind::kSampler};
-  Type* ty = &s;
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_TRUE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_FALSE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(SamplerTest, TypeName_Sampler) {
   Sampler s{ast::SamplerKind::kSampler};
   EXPECT_EQ(s.type_name(), "__sampler_sampler");

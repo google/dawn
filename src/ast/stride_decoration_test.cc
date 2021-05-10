@@ -25,10 +25,6 @@ TEST_F(StrideDecorationTest, Creation) {
   EXPECT_EQ(2u, d->stride());
 }
 
-TEST_F(StrideDecorationTest, Is) {
-  auto* d = create<StrideDecoration>(2);
-  EXPECT_TRUE(d->Is<StrideDecoration>());
-}
 
 TEST_F(StrideDecorationTest, Source) {
   auto* d = create<StrideDecoration>(

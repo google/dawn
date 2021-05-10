@@ -36,27 +36,6 @@ TEST_F(StructTest, Creation) {
   EXPECT_EQ(s->SizeNoPadding(), 16u);
 }
 
-TEST_F(StructTest, Is) {
-  auto name = Sym("S");
-  auto* impl =
-      create<ast::Struct>(name, ast::StructMemberList{}, ast::DecorationList{});
-  auto* s = create<sem::Struct>(impl, StructMemberList{}, 4 /* align */,
-                                4 /* size */, 4 /* size_no_padding */);
-  sem::Type* ty = s;
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_TRUE(ty->Is<Struct>());
-  EXPECT_FALSE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(StructTest, TypeName) {
   auto name = Sym("my_struct");
   auto* impl =

@@ -55,12 +55,6 @@ TEST_F(WorkgroupDecorationTest, Creation_3param) {
   EXPECT_EQ(z, 6u);
 }
 
-TEST_F(WorkgroupDecorationTest, Is) {
-  Decoration* d = create<WorkgroupDecoration>(2, 4, 6);
-  EXPECT_TRUE(d->Is<WorkgroupDecoration>());
-  EXPECT_FALSE(d->Is<StageDecoration>());
-}
-
 TEST_F(WorkgroupDecorationTest, ToStr) {
   auto* d = create<WorkgroupDecoration>(2, 4, 6);
   EXPECT_EQ(str(d), R"(WorkgroupDecoration{2 4 6}

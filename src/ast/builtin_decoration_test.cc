@@ -26,15 +26,6 @@ TEST_F(BuiltinDecorationTest, Creation) {
   EXPECT_EQ(Builtin::kFragDepth, d->value());
 }
 
-TEST_F(BuiltinDecorationTest, Is) {
-  Decoration* d = create<BuiltinDecoration>(Builtin::kFragDepth);
-  EXPECT_FALSE(d->Is<BindingDecoration>());
-  EXPECT_TRUE(d->Is<BuiltinDecoration>());
-  EXPECT_FALSE(d->Is<OverrideDecoration>());
-  EXPECT_FALSE(d->Is<LocationDecoration>());
-  EXPECT_FALSE(d->Is<GroupDecoration>());
-}
-
 TEST_F(BuiltinDecorationTest, ToStr) {
   auto* d = create<BuiltinDecoration>(Builtin::kFragDepth);
   EXPECT_EQ(str(d), R"(BuiltinDecoration{frag_depth}

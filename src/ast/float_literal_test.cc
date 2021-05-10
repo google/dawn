@@ -26,15 +26,6 @@ TEST_F(FloatLiteralTest, Value) {
   EXPECT_EQ(f->value(), 47.2f);
 }
 
-TEST_F(FloatLiteralTest, Is) {
-  ast::Literal* l = create<FloatLiteral>(42.f);
-  EXPECT_FALSE(l->Is<BoolLiteral>());
-  EXPECT_FALSE(l->Is<SintLiteral>());
-  EXPECT_FALSE(l->Is<IntLiteral>());
-  EXPECT_TRUE(l->Is<FloatLiteral>());
-  EXPECT_FALSE(l->Is<UintLiteral>());
-}
-
 TEST_F(FloatLiteralTest, ToStr) {
   auto* f = create<FloatLiteral>(42.1f);
   EXPECT_EQ(str(f), "42.099998");

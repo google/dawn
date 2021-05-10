@@ -37,23 +37,6 @@ namespace {
 
 using AstExternalTextureTest = TestHelper;
 
-TEST_F(AstExternalTextureTest, Is) {
-  Type* ty = create<ExternalTexture>();
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Alias>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_TRUE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(AstExternalTextureTest, IsTexture) {
   Texture* ty = create<ExternalTexture>();
   EXPECT_FALSE(ty->Is<DepthTexture>());

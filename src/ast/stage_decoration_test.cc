@@ -28,12 +28,6 @@ TEST_F(StageDecorationTest, Creation_1param) {
   EXPECT_EQ(d->value(), PipelineStage::kFragment);
 }
 
-TEST_F(StageDecorationTest, Is) {
-  Decoration* d = create<StageDecoration>(PipelineStage::kFragment);
-  EXPECT_FALSE(d->Is<WorkgroupDecoration>());
-  EXPECT_TRUE(d->Is<StageDecoration>());
-}
-
 TEST_F(StageDecorationTest, ToStr) {
   auto* d = create<StageDecoration>(PipelineStage::kFragment);
   EXPECT_EQ(str(d), R"(StageDecoration{fragment}

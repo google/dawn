@@ -27,11 +27,6 @@ TEST_F(StructMemberOffsetDecorationTest, Creation) {
   EXPECT_EQ(2u, d->size());
 }
 
-TEST_F(StructMemberOffsetDecorationTest, Is) {
-  auto* d = create<StructMemberSizeDecoration>(2);
-  EXPECT_TRUE(d->Is<StructMemberSizeDecoration>());
-}
-
 }  // namespace
 }  // namespace ast
 }  // namespace tint

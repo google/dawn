@@ -30,25 +30,6 @@ TEST_F(AccessControlTest, Create) {
   EXPECT_EQ(a.type(), &u32);
 }
 
-TEST_F(AccessControlTest, Is) {
-  I32 i32;
-
-  AccessControl at{ast::AccessControl::kReadOnly, &i32};
-  Type* ty = &at;
-  EXPECT_TRUE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_FALSE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(AccessControlTest, AccessRead) {
   I32 i32;
   AccessControl at{ast::AccessControl::kReadOnly, &i32};

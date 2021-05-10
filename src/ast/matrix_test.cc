@@ -41,24 +41,6 @@ TEST_F(AstMatrixTest, Creation) {
   EXPECT_EQ(m->columns(), 4u);
 }
 
-TEST_F(AstMatrixTest, Is) {
-  auto* i32 = create<I32>();
-  Type* ty = create<Matrix>(i32, 2, 3);
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Alias>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_TRUE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_FALSE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(AstMatrixTest, TypeName) {
   auto* i32 = create<I32>();
   auto* m = create<Matrix>(i32, 2, 3);

@@ -31,25 +31,6 @@ TEST_F(MatrixTest, Creation) {
   EXPECT_EQ(m.columns(), 4u);
 }
 
-TEST_F(MatrixTest, Is) {
-  I32 i32;
-  Vector c{&i32, 2};
-  Matrix m{&c, 4};
-  Type* ty = &m;
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_TRUE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_FALSE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
 TEST_F(MatrixTest, TypeName) {
   I32 i32;
   Vector c{&i32, 2};

@@ -26,38 +26,6 @@ namespace {
 
 using StorageTextureTest = TestHelper;
 
-TEST_F(StorageTextureTest, Is) {
-  auto* subtype =
-      StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
-  auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
-                                   ast::ImageFormat::kRgba32Float, subtype);
-  Type* ty = s;
-  EXPECT_FALSE(ty->Is<AccessControl>());
-  EXPECT_FALSE(ty->Is<Array>());
-  EXPECT_FALSE(ty->Is<Bool>());
-  EXPECT_FALSE(ty->Is<F32>());
-  EXPECT_FALSE(ty->Is<I32>());
-  EXPECT_FALSE(ty->Is<Matrix>());
-  EXPECT_FALSE(ty->Is<Pointer>());
-  EXPECT_FALSE(ty->Is<Sampler>());
-  EXPECT_FALSE(ty->Is<Struct>());
-  EXPECT_TRUE(ty->Is<Texture>());
-  EXPECT_FALSE(ty->Is<U32>());
-  EXPECT_FALSE(ty->Is<Vector>());
-}
-
-TEST_F(StorageTextureTest, IsTexture) {
-  auto* subtype =
-      StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
-  auto* s = create<StorageTexture>(ast::TextureDimension::k2dArray,
-                                   ast::ImageFormat::kRgba32Float, subtype);
-  Texture* ty = s;
-  EXPECT_FALSE(ty->Is<DepthTexture>());
-  EXPECT_FALSE(ty->Is<ExternalTexture>());
-  EXPECT_FALSE(ty->Is<SampledTexture>());
-  EXPECT_TRUE(ty->Is<StorageTexture>());
-}
-
 TEST_F(StorageTextureTest, Dim) {
   auto* subtype =
       StorageTexture::SubtypeFor(ast::ImageFormat::kRgba32Float, Types());
