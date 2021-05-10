@@ -28,7 +28,8 @@ std::string Preamble() {
   return R"(
   OpCapability Shader
   OpMemoryModel Logical Simple
-  OpEntryPoint Vertex %100 "main"
+  OpEntryPoint Fragment %100 "main"
+  OpExecutionMode %100 OriginUpperLeft
 
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
@@ -1539,7 +1540,9 @@ TEST_P(SpvBinaryDerivativeTest, Derivatives) {
   auto& intrinsic = std::get<0>(GetParam());
   auto& arg = std::get<1>(GetParam());
 
-  const auto assembly = Preamble() + R"(
+  const auto assembly = R"(
+     OpCapability DerivativeControl
+)" + Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %1 = OpCopyObject %)" +
