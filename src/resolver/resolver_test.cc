@@ -1458,6 +1458,27 @@ TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
   EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kFunction);
 }
 
+TEST_F(ResolverTest, StorageClass_SetForSampler) {
+  auto t = ty.sampler(ast::SamplerKind::kSampler);
+  auto* var = Global("var", t, ast::StorageClass::kNone);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  EXPECT_EQ(Sem().Get(var)->StorageClass(),
+            ast::StorageClass::kUniformConstant);
+}
+
+TEST_F(ResolverTest, StorageClass_SetForTexture) {
+  auto t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
+  auto ac = ty.access(ast::AccessControl::Access::kReadOnly, t);
+  auto* var = Global("var", ac, ast::StorageClass::kNone);
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  EXPECT_EQ(Sem().Get(var)->StorageClass(),
+            ast::StorageClass::kUniformConstant);
+}
+
 TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {
   auto* var = Const("var", ty.i32(), Construct(ty.i32()));
   auto* stmt = Decl(var);

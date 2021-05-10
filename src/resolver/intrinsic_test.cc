@@ -243,7 +243,10 @@ class ResolverIntrinsicTest_TextureOperation
   void add_call_param(std::string name,
                       typ::Type type,
                       ast::ExpressionList* call_params) {
-    Global(name, type, ast::StorageClass::kInput);
+    ast::StorageClass storage_class = type->UnwrapAll()->is_handle()
+                                          ? ast::StorageClass::kNone
+                                          : ast::StorageClass::kPrivate;
+    Global(name, type, storage_class);
     call_params->push_back(Expr(name));
   }
   typ::Type subtype(Texture type) {

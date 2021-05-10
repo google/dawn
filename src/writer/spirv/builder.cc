@@ -769,8 +769,8 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationBuiltIn),
-                  Operand::Int(ConvertBuiltin(builtin->value(),
-                                              var->declared_storage_class()))});
+                  Operand::Int(
+                      ConvertBuiltin(builtin->value(), sem->StorageClass()))});
     } else if (auto* location = deco->As<ast::LocationDecoration>()) {
       push_annot(spv::Op::OpDecorate,
                  {Operand::Int(var_id), Operand::Int(SpvDecorationLocation),
@@ -3243,6 +3243,8 @@ bool Builder::GenerateVectorType(const sem::Vector* vec,
 
 SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
   switch (klass) {
+    case ast::StorageClass::kInvalid:
+      return SpvStorageClassMax;
     case ast::StorageClass::kInput:
       return SpvStorageClassInput;
     case ast::StorageClass::kOutput:

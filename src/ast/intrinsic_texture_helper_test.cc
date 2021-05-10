@@ -158,24 +158,23 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
       return b->Global("texture",
                        b->ty.sampled_texture(texture_dimension,
                                              buildResultVectorComponentType(b)),
-                       ast::StorageClass::kUniformConstant, nullptr, decos);
+                       ast::StorageClass::kNone, nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kDepth:
       return b->Global("texture", b->ty.depth_texture(texture_dimension),
-                       ast::StorageClass::kUniformConstant, nullptr, decos);
+                       ast::StorageClass::kNone, nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kMultisampled:
       return b->Global(
           "texture",
           b->ty.multisampled_texture(texture_dimension,
                                      buildResultVectorComponentType(b)),
-          ast::StorageClass::kUniformConstant, nullptr, decos);
+          ast::StorageClass::kNone, nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kStorage: {
       auto st = b->ty.storage_texture(texture_dimension, image_format);
       auto ac = b->ty.access(access_control, st);
-      return b->Global("texture", ac, ast::StorageClass::kUniformConstant,
-                       nullptr, decos);
+      return b->Global("texture", ac, ast::StorageClass::kNone, nullptr, decos);
     }
   }
 
@@ -190,7 +189,7 @@ ast::Variable* TextureOverloadCase::buildSamplerVariable(
       b->create<ast::BindingDecoration>(1),
   };
   return b->Global("sampler", b->ty.sampler(sampler_kind),
-                   ast::StorageClass::kUniformConstant, nullptr, decos);
+                   ast::StorageClass::kNone, nullptr, decos);
 }
 
 std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {

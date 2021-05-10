@@ -1060,7 +1060,7 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
   }
 
   auto ast_storage_class = enum_converter_.ToStorageClass(storage_class);
-  if (ast_storage_class == ast::StorageClass::kNone) {
+  if (ast_storage_class == ast::StorageClass::kInvalid) {
     Fail() << "SPIR-V pointer type with ID " << type_id
            << " has invalid storage class "
            << static_cast<uint32_t>(storage_class);
@@ -1236,6 +1236,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
       continue;
     }
     switch (enum_converter_.ToStorageClass(spirv_storage_class)) {
+      case ast::StorageClass::kNone:
       case ast::StorageClass::kInput:
       case ast::StorageClass::kOutput:
       case ast::StorageClass::kUniform:

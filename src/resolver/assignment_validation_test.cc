@@ -244,19 +244,15 @@ TEST_F(ResolverAssignmentValidationTest, AssignFromPointer_Fail) {
     return ty.access(ast::AccessControl::kReadOnly, tex_type);
   };
 
-  auto* var_a = Var("a", make_type(), ast::StorageClass::kFunction);
-  auto* var_b = Var("b", make_type(), ast::StorageClass::kFunction);
+  auto* var_a = Global("a", make_type(), ast::StorageClass::kNone);
+  auto* var_b = Global("b", make_type(), ast::StorageClass::kNone);
 
-  auto* lhs = Expr("a");
-  auto* rhs = Expr("b");
-
-  auto* assign = Assign(Source{{12, 34}}, lhs, rhs);
-  WrapInFunction(Decl(var_a), Decl(var_b), assign);
+  WrapInFunction(Assign(Source{{12, 34}}, var_a, var_b));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error v-000x: invalid assignment: right-hand-side is not "
-            "storable: ptr<function, [[access(read)]] "
+            "storable: ptr<uniform_constant, [[access(read)]] "
             "texture_storage_1d<rgba8unorm>>");
 }
 

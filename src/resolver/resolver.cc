@@ -500,7 +500,7 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     return false;
   }
 
-  if (!ApplyStorageClassUsageToType(var->declared_storage_class(), info->type,
+  if (!ApplyStorageClassUsageToType(info->storage_class, info->type,
                                     var->source())) {
     diagnostics_.add_note("while instantiating variable " +
                               builder_->Symbols().NameFor(var->symbol()),
@@ -577,11 +577,12 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       break;
   }
 
-  return ValidateVariable(info->declaration);
+  return ValidateVariable(info);
 }
 
-bool Resolver::ValidateVariable(const ast::Variable* var) {
-  auto* type = variable_to_info_[var]->type;
+bool Resolver::ValidateVariable(const VariableInfo* info) {
+  auto* var = info->declaration;
+  auto* type = info->type;
   if (auto* r = type->As<sem::Array>()) {
     if (r->IsRuntimeSized()) {
       diagnostics_.add_error(
@@ -643,11 +644,23 @@ bool Resolver::ValidateVariable(const ast::Variable* var) {
     }
   }
 
+  if (type->UnwrapAll()->is_handle() &&
+      var->declared_storage_class() != ast::StorageClass::kNone) {
+    // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
+    // If the store type is a texture type or a sampler type, then the variable
+    // declaration must not have a storage class decoration. The storage class
+    // will always be handle.
+    diagnostics_.add_error("variables of type '" + info->type_name +
+                               "' must not have a storage class",
+                           var->source());
+    return false;
+  }
+
   return true;
 }
 
-bool Resolver::ValidateParameter(const ast::Variable* param) {
-  return ValidateVariable(param);
+bool Resolver::ValidateParameter(const VariableInfo* info) {
+  return ValidateVariable(info);
 }
 
 bool Resolver::ValidateFunction(const ast::Function* func,
@@ -662,7 +675,7 @@ bool Resolver::ValidateFunction(const ast::Function* func,
   }
 
   for (auto* param : func->params()) {
-    if (!ValidateParameter(param)) {
+    if (!ValidateParameter(variable_to_info_.at(param))) {
       return false;
     }
   }
@@ -2060,7 +2073,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   variable_stack_.set(var->symbol(), info);
   current_block_->decls.push_back(var);
 
-  if (!ValidateVariable(var)) {
+  if (!ValidateVariable(info)) {
     return false;
   }
 
@@ -2833,7 +2846,16 @@ Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,
     : declaration(decl),
       type(ctype),
       type_name(tn),
-      storage_class(decl->declared_storage_class()) {}
+      storage_class(decl->declared_storage_class()) {
+  if (storage_class == ast::StorageClass::kNone &&
+      type->UnwrapAll()->is_handle()) {
+    // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
+    // If the store type is a texture type or a sampler type, then the variable
+    // declaration must not have a storage class decoration. The storage class
+    // will always be handle.
+    storage_class = ast::StorageClass::kUniformConstant;
+  }
+}
 
 Resolver::VariableInfo::~VariableInfo() = default;
 

@@ -564,17 +564,6 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
   if (decl.errored)
     return Failure::kErrored;
 
-  if (decl->type && decl->type->UnwrapAll()->is_handle()) {
-    // handle types implicitly have the `UniformConstant` storage class.
-    if (explicit_sc.matched) {
-      return add_error(
-          explicit_sc.source,
-          decl->type->UnwrapAll()->FriendlyName(builder_.Symbols()) +
-              " variables must not have a storage class");
-    }
-    sc = ast::StorageClass::kUniformConstant;
-  }
-
   return VarDeclInfo{decl->source, decl->name, sc, decl->type};
 }
 

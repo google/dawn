@@ -375,6 +375,28 @@ TEST_F(ResolverValidationTest, StorageClass_NonFunctionClassError) {
             "error: function variable has a non-function storage class");
 }
 
+TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {
+  auto t = ty.sampler(ast::SamplerKind::kSampler);
+  Global(Source{{12, 34}}, "var", t, ast::StorageClass::kUniformConstant);
+
+  EXPECT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: variables of type 'sampler' must not have a storage class)");
+}
+
+TEST_F(ResolverValidationTest, StorageClass_TextureExplicitStorageClass) {
+  auto t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
+  Global(Source{{12, 34}}, "var", t, ast::StorageClass::kUniformConstant);
+
+  EXPECT_FALSE(r()->Resolve()) << r()->error();
+
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: variables of type 'texture_1d<f32>' must not have a storage class)");
+}
+
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
   Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
 

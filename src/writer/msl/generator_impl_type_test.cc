@@ -745,7 +745,7 @@ TEST_P(MslStorageTexturesTest, Emit) {
   auto ac = ty.access(params.ro ? ast::AccessControl::kReadOnly
                                 : ast::AccessControl::kWriteOnly,
                       s);
-  Global("test_var", ac, ast::StorageClass::kInput);
+  Global("test_var", ac, ast::StorageClass::kNone);
 
   GeneratorImpl& gen = Build();
 

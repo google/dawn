@@ -19,6 +19,10 @@ namespace ast {
 
 std::ostream& operator<<(std::ostream& out, StorageClass sc) {
   switch (sc) {
+    case StorageClass::kInvalid: {
+      out << "invalid";
+      break;
+    }
     case StorageClass::kNone: {
       out << "none";
       break;

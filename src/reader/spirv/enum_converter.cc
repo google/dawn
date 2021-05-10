@@ -49,7 +49,7 @@ ast::StorageClass EnumConverter::ToStorageClass(const SpvStorageClass sc) {
     case SpvStorageClassWorkgroup:
       return ast::StorageClass::kWorkgroup;
     case SpvStorageClassUniformConstant:
-      return ast::StorageClass::kUniformConstant;
+      return ast::StorageClass::kNone;
     case SpvStorageClassStorageBuffer:
       return ast::StorageClass::kStorage;
     case SpvStorageClassImage:
@@ -63,7 +63,7 @@ ast::StorageClass EnumConverter::ToStorageClass(const SpvStorageClass sc) {
   }
 
   Fail() << "unknown SPIR-V storage class: " << uint32_t(sc);
-  return ast::StorageClass::kNone;
+  return ast::StorageClass::kInvalid;
 }
 
 ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {

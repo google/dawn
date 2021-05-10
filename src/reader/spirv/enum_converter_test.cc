@@ -143,7 +143,7 @@ INSTANTIATE_TEST_SUITE_P(
         StorageClassCase{SpvStorageClassWorkgroup, true,
                          ast::StorageClass::kWorkgroup},
         StorageClassCase{SpvStorageClassUniformConstant, true,
-                         ast::StorageClass::kUniformConstant},
+                         ast::StorageClass::kNone},
         StorageClassCase{SpvStorageClassStorageBuffer, true,
                          ast::StorageClass::kStorage},
         StorageClassCase{SpvStorageClassImage, true, ast::StorageClass::kImage},
@@ -156,7 +156,7 @@ INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
                          SpvStorageClassTest,
                          testing::Values(StorageClassCase{
                              static_cast<SpvStorageClass>(9999), false,
-                             ast::StorageClass::kNone}));
+                             ast::StorageClass::kInvalid}));
 
 // Builtin
 

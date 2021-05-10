@@ -4005,11 +4005,13 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
                      << "pointer defined in function from unknown opcode: "
                      << inst.PrettyPrint();
           }
-          if (info->storage_class == ast::StorageClass::kUniformConstant) {
-            info->skip = SkipReason::kOpaqueObject;
-          }
         }
-        if (type->AsSampler() || type->AsImage() || type->AsSampledImage()) {
+        auto* unwrapped = type;
+        while (auto* ptr = unwrapped->AsPointer()) {
+          unwrapped = ptr->pointee_type();
+        }
+        if (unwrapped->AsSampler() || unwrapped->AsImage() ||
+            unwrapped->AsSampledImage()) {
           // Defer code generation until the instruction that actually acts on
           // the image.
           info->skip = SkipReason::kOpaqueObject;
@@ -4032,7 +4034,7 @@ ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
       return ptr->storage_class;
     }
   }
-  return ast::StorageClass::kNone;
+  return ast::StorageClass::kInvalid;
 }
 
 const Type* FunctionEmitter::RemapStorageClass(const Type* type,

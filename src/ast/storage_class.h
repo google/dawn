@@ -22,7 +22,8 @@ namespace ast {
 
 /// Storage class of a given pointer.
 enum class StorageClass {
-  kNone = -1,
+  kInvalid = -1,
+  kNone,
   kInput,
   kOutput,
   kUniform,

@@ -526,7 +526,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
 
   auto ac = ty.access(ast::AccessControl::kReadOnly, type);
 
-  auto* var_a = Global("a", ac, ast::StorageClass::kUniformConstant);
+  auto* var_a = Global("a", ac, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 
@@ -549,7 +549,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
 
   auto ac = ty.access(ast::AccessControl::kWriteOnly, type);
 
-  auto* var_a = Global("a", ac, ast::StorageClass::kUniformConstant);
+  auto* var_a = Global("a", ac, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 
@@ -573,12 +573,12 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
   auto type_a = ty.access(ast::AccessControl::kReadOnly,
                           ty.storage_texture(ast::TextureDimension::k2d,
                                              ast::ImageFormat::kR32Uint));
-  auto* var_a = Global("a", type_a, ast::StorageClass::kUniformConstant);
+  auto* var_a = Global("a", type_a, ast::StorageClass::kNone);
 
   auto type_b = ty.access(ast::AccessControl::kWriteOnly,
                           ty.storage_texture(ast::TextureDimension::k2d,
                                              ast::ImageFormat::kR32Uint));
-  auto* var_b = Global("b", type_b, ast::StorageClass::kUniformConstant);
+  auto* var_b = Global("b", type_b, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 

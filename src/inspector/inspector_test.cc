@@ -316,8 +316,7 @@ class InspectorHelper : public ProgramBuilder {
   /// @param group the binding/group to use for the storage buffer
   /// @param binding the binding number to use for the storage buffer
   void AddSampler(const std::string& name, uint32_t group, uint32_t binding) {
-    AddBinding(name, sampler_type(), ast::StorageClass::kUniformConstant, group,
-               binding);
+    AddBinding(name, sampler_type(), ast::StorageClass::kNone, group, binding);
   }
 
   /// Adds a comparison sampler variable to the program
@@ -327,8 +326,8 @@ class InspectorHelper : public ProgramBuilder {
   void AddComparisonSampler(const std::string& name,
                             uint32_t group,
                             uint32_t binding) {
-    AddBinding(name, comparison_sampler_type(),
-               ast::StorageClass::kUniformConstant, group, binding);
+    AddBinding(name, comparison_sampler_type(), ast::StorageClass::kNone, group,
+               binding);
   }
 
   /// Generates a SampledTexture appropriate for the params
@@ -366,7 +365,7 @@ class InspectorHelper : public ProgramBuilder {
                          ast::Type* type,
                          uint32_t group,
                          uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
+    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
   }
 
   /// Adds a multi-sampled texture variable to the program
@@ -378,7 +377,7 @@ class InspectorHelper : public ProgramBuilder {
                               ast::Type* type,
                               uint32_t group,
                               uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
+    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
   }
 
   void AddGlobalVariable(const std::string& name, ast::Type* type) {
@@ -394,7 +393,7 @@ class InspectorHelper : public ProgramBuilder {
                        ast::Type* type,
                        uint32_t group,
                        uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
+    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
   }
 
   /// Generates a function that references a specific sampler variable
@@ -566,7 +565,7 @@ class InspectorHelper : public ProgramBuilder {
                          typ::Type type,
                          uint32_t group,
                          uint32_t binding) {
-    AddBinding(name, type, ast::StorageClass::kUniformConstant, group, binding);
+    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
   }
 
   /// Generates a function that references a storage texture variable.

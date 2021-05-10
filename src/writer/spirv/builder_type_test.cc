@@ -816,7 +816,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d) {
                               ast::ImageFormat::kR32Float);
   auto ac = ty.access(ast::AccessControl::kReadOnly, s);
 
-  Global("test_var", ac, ast::StorageClass::kInput);
+  Global("test_var", ac, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 
@@ -832,7 +832,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
                               ast::ImageFormat::kR32Float);
   auto ac = ty.access(ast::AccessControl::kReadOnly, s);
 
-  Global("test_var", ac, ast::StorageClass::kInput);
+  Global("test_var", ac, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 
@@ -848,7 +848,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
                               ast::ImageFormat::kR32Float);
   auto ac = ty.access(ast::AccessControl::kReadOnly, s);
 
-  Global("test_var", ac, ast::StorageClass::kInput);
+  Global("test_var", ac, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 
@@ -864,7 +864,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
                               ast::ImageFormat::kR32Float);
   auto ac = ty.access(ast::AccessControl::kReadOnly, s);
 
-  Global("test_var", ac, ast::StorageClass::kInput);
+  Global("test_var", ac, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 
@@ -881,7 +881,7 @@ TEST_F(BuilderTest_Type,
                               ast::ImageFormat::kR32Float);
   auto ac = ty.access(ast::AccessControl::kReadOnly, s);
 
-  Global("test_var", ac, ast::StorageClass::kInput);
+  Global("test_var", ac, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 
@@ -898,7 +898,7 @@ TEST_F(BuilderTest_Type,
                               ast::ImageFormat::kR32Sint);
   auto ac = ty.access(ast::AccessControl::kReadOnly, s);
 
-  Global("test_var", ac, ast::StorageClass::kInput);
+  Global("test_var", ac, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 
@@ -915,7 +915,7 @@ TEST_F(BuilderTest_Type,
                               ast::ImageFormat::kR32Uint);
   auto ac = ty.access(ast::AccessControl::kReadOnly, s);
 
-  Global("test_var", ac, ast::StorageClass::kInput);
+  Global("test_var", ac, ast::StorageClass::kNone);
 
   spirv::Builder& b = Build();
 

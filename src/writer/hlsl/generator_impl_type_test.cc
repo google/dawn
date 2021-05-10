@@ -335,7 +335,7 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
   auto t = ty.depth_texture(params.dim);
 
-  Global("tex", t, ast::StorageClass::kUniformConstant, nullptr,
+  Global("tex", t, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
@@ -394,7 +394,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
   }
   auto t = ty.sampled_texture(params.dim, datatype);
 
-  Global("tex", t, ast::StorageClass::kUniformConstant, nullptr,
+  Global("tex", t, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),
@@ -536,7 +536,7 @@ TEST_P(HlslStorageTexturesTest, Emit) {
                                 : ast::AccessControl::kWriteOnly,
                       t);
 
-  Global("tex", ac, ast::StorageClass::kUniformConstant, nullptr,
+  Global("tex", ac, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(2),

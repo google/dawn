@@ -230,11 +230,11 @@ class Resolver {
   bool ValidateGlobalVariable(const VariableInfo* var);
   bool ValidateMatrixConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Matrix* matrix_type);
-  bool ValidateParameter(const ast::Variable* param);
+  bool ValidateParameter(const VariableInfo* info);
   bool ValidateReturn(const ast::ReturnStatement* ret);
   bool ValidateStructure(const sem::Struct* str);
   bool ValidateSwitch(const ast::SwitchStatement* s);
-  bool ValidateVariable(const ast::Variable* param);
+  bool ValidateVariable(const VariableInfo* info);
   bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Vector* vec_type);
 
