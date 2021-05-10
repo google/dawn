@@ -28,7 +28,7 @@ Output ExternalTextureTransform::Run(const Program* in, const DataMap&) {
   // Scan the AST nodes for external texture declarations.
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* var = node->As<ast::Variable>()) {
-      if (var->type()->Is<ast::ExternalTexture>()) {
+      if (Is<ast::ExternalTexture>(var->type())) {
         // Replace a single-plane external texture with a 2D, f32 sampled
         // texture.
         auto newType = ctx.dst->ty.sampled_texture(ast::TextureDimension::k2d,
