@@ -2046,6 +2046,21 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
       return nullptr;
     }
 
+    if (image_type->is_arrayed()) {
+      // Give a nicer error message here, where we have the offending variable
+      // in hand, rather than inside the enum converter.
+      switch (image_type->dim()) {
+        case SpvDim2D:
+        case SpvDimCube:
+          break;
+        default:
+          Fail() << "WGSL arrayed textures must be 2d_array or cube_array: "
+                    "invalid multisampled texture variable "
+                 << namer_.Name(var.result_id()) << ": " << var.PrettyPrint();
+          return nullptr;
+      }
+    }
+
     const ast::TextureDimension dim =
         enum_converter_.ToDim(image_type->dim(), image_type->is_arrayed());
     if (dim == ast::TextureDimension::kNone) {
@@ -2067,6 +2082,11 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
       if (image_type->depth() || usage.IsDepthTexture()) {
         ast_store_type = ty_.DepthTexture(dim);
       } else if (image_type->is_multisampled()) {
+        if (dim != ast::TextureDimension::k2d) {
+          Fail() << "WGSL multisampled textures must be 2d and non-arrayed: "
+                    "invalid multisampled texture variable "
+                 << namer_.Name(var.result_id()) << ": " << var.PrettyPrint();
+        }
         // Multisampled textures are never depth textures.
         ast_store_type =
             ty_.MultisampledTexture(dim, ast_sampled_component_type);

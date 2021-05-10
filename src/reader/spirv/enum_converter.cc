@@ -110,7 +110,7 @@ ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
       default:
         break;
     }
-    Fail() << "arrayed dimension must be 1D, 2D, or Cube. Got " << int(dim);
+    Fail() << "arrayed dimension must be 2D or Cube. Got " << int(dim);
     return ast::TextureDimension::kNone;
   }
   // Assume non-arrayed
