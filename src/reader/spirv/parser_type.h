@@ -45,26 +45,17 @@ class Type : public Castable<Type> {
   /// @returns the constructed ast::Type node for the given type
   virtual ast::Type* Build(ProgramBuilder& b) const = 0;
 
-  /// @returns the pointee type if this is a pointer, `this` otherwise
-  const Type* UnwrapPtrIfNeeded() const;
-
-  /// @returns the most deeply nested aliased type if this is an alias, `this`
+  /// @returns the inner most pointee type if this is a pointer, `this`
   /// otherwise
-  const Type* UnwrapAliasIfNeeded() const;
+  const Type* UnwrapPtr() const;
 
-  /// Removes all levels of aliasing and access control.
-  /// This is just enough to assist with WGSL translation
-  /// in that you want see through one level of pointer to get from an
-  /// identifier-like expression as an l-value to its corresponding r-value,
-  /// plus see through the wrappers on either side.
-  /// @returns the completely unaliased type.
-  const Type* UnwrapIfNeeded() const;
+  /// @returns the inner most aliased type if this is an alias, `this` otherwise
+  const Type* UnwrapAlias() const;
 
-  /// Returns the type found after:
-  /// - removing all layers of aliasing and access control if they exist, then
-  /// - removing the pointer, if it exists, then
-  /// - removing all further layers of aliasing or access control, if they exist
-  /// @returns the unwrapped type
+  /// @returns the type with all aliasing and access control removed
+  const Type* UnwrapAliasAndAccess() const;
+
+  /// @returns the type with all aliasing, access control and pointers removed
   const Type* UnwrapAll() const;
 
   /// @returns true if this type is a float scalar

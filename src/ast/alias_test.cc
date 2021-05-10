@@ -80,41 +80,6 @@ TEST_F(AstAliasTest, FriendlyName) {
   EXPECT_EQ(at->FriendlyName(Symbols()), "Particle");
 }
 
-TEST_F(AstAliasTest, UnwrapIfNeeded_Alias) {
-  auto* u32 = create<U32>();
-  auto* a = create<Alias>(Sym("a_type"), u32);
-  EXPECT_EQ(a->symbol(), Symbol(1, ID()));
-  EXPECT_EQ(a->type(), u32);
-  EXPECT_EQ(a->UnwrapIfNeeded(), u32);
-  EXPECT_EQ(u32->UnwrapIfNeeded(), u32);
-}
-
-TEST_F(AstAliasTest, UnwrapIfNeeded_AccessControl) {
-  auto* u32 = create<U32>();
-  auto* ac = create<AccessControl>(AccessControl::kReadOnly, u32);
-  EXPECT_EQ(ac->type(), u32);
-  EXPECT_EQ(ac->UnwrapIfNeeded(), u32);
-}
-
-TEST_F(AstAliasTest, UnwrapIfNeeded_MultiLevel) {
-  auto* u32 = create<U32>();
-  auto* a = create<Alias>(Sym("a_type"), u32);
-  auto* aa = create<Alias>(Sym("aa_type"), a);
-
-  EXPECT_EQ(aa->symbol(), Symbol(2, ID()));
-  EXPECT_EQ(aa->type(), a);
-  EXPECT_EQ(aa->UnwrapIfNeeded(), u32);
-}
-
-TEST_F(AstAliasTest, UnwrapIfNeeded_MultiLevel_AliasAccessControl) {
-  auto* u32 = create<U32>();
-  auto* a = create<Alias>(Sym("a_type"), u32);
-
-  auto* ac = create<AccessControl>(AccessControl::kReadWrite, a);
-  EXPECT_EQ(ac->type(), a);
-  EXPECT_EQ(ac->UnwrapIfNeeded(), u32);
-}
-
 TEST_F(AstAliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
   auto* u32 = create<U32>();
   auto* a = create<Alias>(Sym("a_type"), u32);
@@ -126,31 +91,6 @@ TEST_F(AstAliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
   EXPECT_EQ(aapaa->symbol(), Symbol(4, ID()));
   EXPECT_EQ(aapaa->type(), apaa);
   EXPECT_EQ(aapaa->UnwrapAll(), u32);
-}
-
-TEST_F(AstAliasTest, UnwrapAll_SecondConsecutivePointerBlocksUnrapping) {
-  auto* u32 = create<U32>();
-  auto* a = create<Alias>(Sym("a_type"), u32);
-  auto* aa = create<Alias>(Sym("aa_type"), a);
-
-  auto* paa = create<Pointer>(aa, StorageClass::kUniform);
-  auto* ppaa = create<Pointer>(paa, StorageClass::kUniform);
-  auto* appaa = create<Alias>(Sym("appaa_type"), ppaa);
-  EXPECT_EQ(appaa->UnwrapAll(), paa);
-}
-
-TEST_F(AstAliasTest, UnwrapAll_SecondNonConsecutivePointerBlocksUnrapping) {
-  auto* u32 = create<U32>();
-  auto* a = create<Alias>(Sym("a_type"), u32);
-  auto* aa = create<Alias>(Sym("aa_type"), a);
-  auto* paa = create<Pointer>(aa, StorageClass::kUniform);
-
-  auto* apaa = create<Alias>(Sym("apaa_type"), paa);
-  auto* aapaa = create<Alias>(Sym("aapaa_type"), apaa);
-  auto* paapaa = create<Pointer>(aapaa, StorageClass::kUniform);
-  auto* apaapaa = create<Alias>(Sym("apaapaa_type"), paapaa);
-
-  EXPECT_EQ(apaapaa->UnwrapAll(), paa);
 }
 
 TEST_F(AstAliasTest, UnwrapAll_AccessControlPointer) {
@@ -168,14 +108,6 @@ TEST_F(AstAliasTest, UnwrapAll_PointerAccessControl) {
 
   EXPECT_EQ(a->type(), p);
   EXPECT_EQ(a->UnwrapAll(), u32);
-}
-
-TEST_F(AstAliasTest, UnwrapAliasIfNeeded) {
-  auto* f32 = create<F32>();
-  auto* alias1 = create<Alias>(Sym("alias1"), f32);
-  auto* alias2 = create<Alias>(Sym("alias2"), alias1);
-  auto* alias3 = create<Alias>(Sym("alias3"), alias2);
-  EXPECT_EQ(alias3->UnwrapAliasIfNeeded(), f32);
 }
 
 }  // namespace

@@ -1472,7 +1472,7 @@ TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {
   }
 
   auto source = GetSourceForInst(inst);
-  auto* ast_type = original_ast_type->UnwrapIfNeeded();
+  auto* ast_type = original_ast_type->UnwrapAliasAndAccess();
 
   // TODO(dneto): Note: NullConstant for int, uint, float map to a regular 0.
   // So canonicalization should map that way too.
@@ -1548,7 +1548,7 @@ ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
   }
 
   auto* original_type = type;
-  type = type->UnwrapIfNeeded();
+  type = type->UnwrapAliasAndAccess();
 
   if (type->Is<Bool>()) {
     return create<ast::ScalarConstructorExpression>(

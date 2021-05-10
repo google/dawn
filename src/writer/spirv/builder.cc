@@ -627,7 +627,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
 
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
-  auto null_id = GenerateConstantNullIfNeeded(type->UnwrapPtrIfNeeded());
+  auto null_id = GenerateConstantNullIfNeeded(type->UnwrapPtr());
   if (null_id == 0) {
     return 0;
   }
@@ -953,7 +953,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       }
 
       info->source_id = GenerateLoadIfNeeded(expr_type, extract_id);
-      info->source_type = expr_type->UnwrapPtrIfNeeded();
+      info->source_type = expr_type->UnwrapPtr();
       info->access_chain_indices.clear();
     }
 
@@ -1130,7 +1130,7 @@ uint32_t Builder::GenerateLoadIfNeeded(const sem::Type* type, uint32_t id) {
     return id;
   }
 
-  auto type_id = GenerateTypeIfNeeded(type->UnwrapPtrIfNeeded());
+  auto type_id = GenerateTypeIfNeeded(type->UnwrapPtr());
   auto result = result_op();
   auto result_id = result.to_i();
   if (!push_function_inst(spv::Op::OpLoad,
@@ -1271,7 +1271,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   // Generate the zero initializer if there are no values provided.
   if (values.empty()) {
-    return GenerateConstantNullIfNeeded(result_type->UnwrapPtrIfNeeded());
+    return GenerateConstantNullIfNeeded(result_type->UnwrapPtr());
   }
 
   std::ostringstream out;
@@ -1326,7 +1326,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
       return 0;
     }
 
-    auto* value_type = TypeOf(e)->UnwrapPtrIfNeeded();
+    auto* value_type = TypeOf(e)->UnwrapPtr();
     // If the result and value types are the same we can just use the object.
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
@@ -1443,7 +1443,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
   }
   val_id = GenerateLoadIfNeeded(TypeOf(from_expr), val_id);
 
-  auto* from_type = TypeOf(from_expr)->UnwrapPtrIfNeeded();
+  auto* from_type = TypeOf(from_expr)->UnwrapPtr();
 
   spv::Op op = spv::Op::OpNop;
   if ((from_type->Is<sem::I32>() && to_type->Is<sem::F32>()) ||
@@ -2578,8 +2578,8 @@ uint32_t Builder::GenerateBitcastExpression(ast::BitcastExpression* expr) {
   val_id = GenerateLoadIfNeeded(TypeOf(expr->expr()), val_id);
 
   // Bitcast does not allow same types, just emit a CopyObject
-  auto* to_type = TypeOf(expr)->UnwrapPtrIfNeeded();
-  auto* from_type = TypeOf(expr->expr())->UnwrapPtrIfNeeded();
+  auto* to_type = TypeOf(expr)->UnwrapPtr();
+  auto* from_type = TypeOf(expr->expr())->UnwrapPtr();
   if (to_type->type_name() == from_type->type_name()) {
     if (!push_function_inst(
             spv::Op::OpCopyObject,
@@ -2931,7 +2931,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
   }
 
   if (auto* ac = type->As<sem::AccessControl>()) {
-    if (!ac->type()->UnwrapIfNeeded()->Is<sem::Struct>()) {
+    if (!ac->type()->UnwrapAccess()->Is<sem::Struct>()) {
       return GenerateTypeIfNeeded(ac->type());
     }
   }
@@ -2945,7 +2945,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
   auto id = result.to_i();
   if (auto* ac = type->As<sem::AccessControl>()) {
     // The non-struct case was handled above.
-    auto* subtype = ac->type()->UnwrapIfNeeded();
+    auto* subtype = ac->UnwrapAccess();
     if (!GenerateStructType(subtype->As<sem::Struct>(), ac->access_control(),
                             result)) {
       return 0;

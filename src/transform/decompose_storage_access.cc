@@ -746,7 +746,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
 
     auto* buf = access.var->Declaration();
     auto* offset = access.offset->Build(ctx);
-    auto* buf_ty = access.var->Type()->UnwrapPtrIfNeeded();
+    auto* buf_ty = access.var->Type()->UnwrapPtr();
     auto* el_ty = access.type->UnwrapAll();
     auto* insert_after = ConstructedTypeOf(access.var->Type());
     Symbol func = state.LoadFunc(ctx, insert_after, buf_ty, el_ty);
@@ -760,7 +760,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
   for (auto& store : state.stores) {
     auto* buf = store.target.var->Declaration();
     auto* offset = store.target.offset->Build(ctx);
-    auto* buf_ty = store.target.var->Type()->UnwrapPtrIfNeeded();
+    auto* buf_ty = store.target.var->Type()->UnwrapPtr();
     auto* el_ty = store.target.type->UnwrapAll();
     auto* value = store.assignment->rhs();
     auto* insert_after = ConstructedTypeOf(store.target.var->Type());

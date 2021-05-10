@@ -387,7 +387,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     auto* var = ruv.first;
     auto binding_info = ruv.second;
 
-    auto* unwrapped_type = var->Type()->UnwrapIfNeeded();
+    auto* unwrapped_type = var->Type()->UnwrapAccess();
     auto* str = unwrapped_type->As<sem::Struct>();
     if (str == nullptr) {
       continue;
@@ -509,7 +509,7 @@ std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->Type()->UnwrapIfNeeded()->As<sem::Texture>();
+    auto* texture_type = var->Type()->UnwrapAccess()->As<sem::Texture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
@@ -602,7 +602,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    auto* str = var->Type()->UnwrapIfNeeded()->As<sem::Struct>();
+    auto* str = var->Type()->UnwrapAccess()->As<sem::Struct>();
     if (!str) {
       continue;
     }
@@ -646,18 +646,15 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->Type()->UnwrapIfNeeded()->As<sem::Texture>();
+    auto* texture_type = var->Type()->UnwrapAccess()->As<sem::Texture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
     const sem::Type* base_type = nullptr;
     if (multisampled_only) {
-      base_type = texture_type->As<sem::MultisampledTexture>()
-                      ->type()
-                      ->UnwrapIfNeeded();
+      base_type = texture_type->As<sem::MultisampledTexture>()->type();
     } else {
-      base_type =
-          texture_type->As<sem::SampledTexture>()->type()->UnwrapIfNeeded();
+      base_type = texture_type->As<sem::SampledTexture>()->type();
     }
     entry.sampled_kind = BaseTypeToSampledKind(base_type);
 
@@ -697,12 +694,11 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type =
-        var->Type()->UnwrapIfNeeded()->As<sem::StorageTexture>();
+    auto* texture_type = var->Type()->UnwrapAccess()->As<sem::StorageTexture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
-    auto* base_type = texture_type->type()->UnwrapIfNeeded();
+    auto* base_type = texture_type->type();
     entry.sampled_kind = BaseTypeToSampledKind(base_type);
     entry.image_format = TypeImageFormatToResourceBindingImageFormat(
         texture_type->image_format());

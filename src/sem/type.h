@@ -45,19 +45,16 @@ class Type : public Castable<Type, Node> {
   /// declared in WGSL.
   virtual std::string FriendlyName(const SymbolTable& symbols) const = 0;
 
-  /// @returns the pointee type if this is a pointer, `this` otherwise
-  const Type* UnwrapPtrIfNeeded() const;
+  /// @returns the inner most pointee type if this is a pointer, `this`
+  /// otherwise
+  const Type* UnwrapPtr() const;
 
-  /// Removes all levels of access control.
-  /// This is just enough to assist with WGSL translation
-  /// in that you want see through one level of pointer to get from an
-  /// identifier-like expression as an l-value to its corresponding r-value,
-  /// plus see through the wrappers on either side.
-  /// @returns the completely unaliased type.
-  const Type* UnwrapIfNeeded() const;
+  /// @returns the inner most type if this is an access control, `this`
+  /// otherwise
+  const Type* UnwrapAccess() const;
 
   /// Returns the type found after removing all layers of access control and
-  /// pointer.
+  /// pointer
   /// @returns the unwrapped type
   const Type* UnwrapAll() const;
 

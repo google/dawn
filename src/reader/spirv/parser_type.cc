@@ -305,37 +305,50 @@ struct TypeManager::State {
       storage_textures_;
 };
 
-const Type* Type::UnwrapPtrIfNeeded() const {
-  if (auto* ptr = As<Pointer>()) {
-    return ptr->type;
+const Type* Type::UnwrapPtr() const {
+  const Type* type = this;
+  while (auto* ptr = type->As<Pointer>()) {
+    type = ptr->type;
   }
-  return this;
+  return type;
 }
 
-const Type* Type::UnwrapAliasIfNeeded() const {
-  const Type* unwrapped = this;
-  while (auto* ptr = unwrapped->As<Alias>()) {
-    unwrapped = ptr->type;
+const Type* Type::UnwrapAlias() const {
+  const Type* type = this;
+  while (auto* alias = type->As<Alias>()) {
+    type = alias->type;
   }
-  return unwrapped;
+  return type;
 }
 
-const Type* Type::UnwrapIfNeeded() const {
-  auto* where = this;
+const Type* Type::UnwrapAliasAndAccess() const {
+  auto* type = this;
   while (true) {
-    if (auto* alias = where->As<Alias>()) {
-      where = alias->type;
-    } else if (auto* access = where->As<AccessControl>()) {
-      where = access->type;
+    if (auto* alias = type->As<Alias>()) {
+      type = alias->type;
+    } else if (auto* access = type->As<AccessControl>()) {
+      type = access->type;
     } else {
       break;
     }
   }
-  return where;
+  return type;
 }
 
 const Type* Type::UnwrapAll() const {
-  return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
+  auto* type = this;
+  while (true) {
+    if (auto* alias = type->As<Alias>()) {
+      type = alias->type;
+    } else if (auto* access = type->As<AccessControl>()) {
+      type = access->type;
+    } else if (auto* ptr = type->As<Pointer>()) {
+      type = ptr->type;
+    } else {
+      break;
+    }
+  }
+  return type;
 }
 
 bool Type::IsFloatScalar() const {

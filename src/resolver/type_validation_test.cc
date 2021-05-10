@@ -521,7 +521,7 @@ TEST_P(CanonicalTest, All) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* got = TypeOf(expr)->UnwrapPtrIfNeeded();
+  auto* got = TypeOf(expr)->UnwrapPtr();
   auto* expected = params.create_sem_type(ty);
 
   EXPECT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"

@@ -22,9 +22,7 @@ namespace sem {
 Expression::Expression(ast::Expression* declaration,
                        const sem::Type* type,
                        Statement* statement)
-    : declaration_(declaration),
-      type_(type->UnwrapIfNeeded()),
-      statement_(statement) {
+    : declaration_(declaration), type_(type), statement_(statement) {
   TINT_ASSERT(type_);
 }
 

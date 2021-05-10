@@ -41,7 +41,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   uint32_t packed_size;
   const sem::Type* packed_el_sem_ty;
   auto* vector_sem = b->Sem().Get(vector);
-  auto* vector_ty = vector_sem->Type()->UnwrapPtrIfNeeded();
+  auto* vector_ty = vector_sem->Type()->UnwrapPtr();
   if (auto* vec = vector_ty->As<sem::Vector>()) {
     packed_size = vec->size() + 1;
     packed_el_sem_ty = vec->type();
@@ -72,7 +72,7 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   } else {
     packed.emplace_back(vector);
   }
-  if (packed_el_sem_ty != b->TypeOf(scalar)->UnwrapPtrIfNeeded()) {
+  if (packed_el_sem_ty != b->TypeOf(scalar)->UnwrapPtr()) {
     // Cast scalar to the vector element type
     auto* scalar_cast = b->Construct(packed_el_ty, scalar);
     b->Sem().Add(scalar_cast, b->create<sem::Expression>(

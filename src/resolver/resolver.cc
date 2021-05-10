@@ -174,7 +174,7 @@ bool Resolver::Resolve() {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Resolver::IsStorable(const sem::Type* type) {
-  type = type->UnwrapIfNeeded();
+  type = type->UnwrapAccess();
   if (type->is_scalar() || type->Is<sem::Vector>() || type->Is<sem::Matrix>()) {
     return true;
   }
@@ -194,7 +194,7 @@ bool Resolver::IsStorable(const sem::Type* type) {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
 bool Resolver::IsHostShareable(const sem::Type* type) {
-  type = type->UnwrapIfNeeded();
+  type = type->UnwrapAccess();
   if (type->IsAnyOf<sem::I32, sem::U32, sem::F32>()) {
     return true;
   }
@@ -224,9 +224,9 @@ bool Resolver::IsValidAssignment(const sem::Type* lhs, const sem::Type* rhs) {
   // This will need to be fixed after WGSL agrees the behavior of pointers /
   // references.
   // Check:
-  if (lhs->UnwrapIfNeeded() != rhs->UnwrapIfNeeded()) {
+  if (lhs->UnwrapAccess() != rhs->UnwrapAccess()) {
     // Try RHS dereference
-    if (lhs->UnwrapIfNeeded() != rhs->UnwrapAll()) {
+    if (lhs->UnwrapAccess() != rhs->UnwrapAll()) {
       return false;
     }
   }
@@ -1636,7 +1636,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
   }
 
   auto* res = TypeOf(expr->structure());
-  auto* data_type = res->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
+  auto* data_type = res->UnwrapAll();
 
   sem::Type* ret = nullptr;
   std::vector<uint32_t> swizzle;
@@ -1926,7 +1926,7 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
   if (expr->IsAnd() || expr->IsOr() || expr->IsXor() || expr->IsShiftLeft() ||
       expr->IsShiftRight() || expr->IsAdd() || expr->IsSubtract() ||
       expr->IsDivide() || expr->IsModulo()) {
-    SetType(expr, TypeOf(expr->lhs())->UnwrapPtrIfNeeded());
+    SetType(expr, TypeOf(expr->lhs())->UnwrapPtr());
     return true;
   }
   // Result type is a scalar or vector of boolean type
@@ -1999,7 +1999,7 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* expr) {
     return false;
   }
 
-  auto* result_type = TypeOf(expr->expr())->UnwrapPtrIfNeeded();
+  auto* result_type = TypeOf(expr->expr())->UnwrapPtr();
   SetType(expr, result_type);
   return true;
 }
@@ -2039,7 +2039,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     // If the variable has no type, infer it from the rhs
     if (type == nullptr) {
       type_name = TypeNameOf(ctor);
-      type = rhs_type->UnwrapPtrIfNeeded();
+      type = rhs_type->UnwrapPtr();
     }
 
     if (!IsValidAssignment(type, rhs_type)) {
@@ -2726,7 +2726,7 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
   }
 
   // lhs must be a pointer or a constant
-  auto* lhs_result_type = TypeOf(lhs)->UnwrapIfNeeded();
+  auto* lhs_result_type = TypeOf(lhs)->UnwrapAccess();
   if (!lhs_result_type->Is<sem::Pointer>()) {
     // In case lhs is a constant identifier, output a nicer message as it's
     // likely to be a common programmer error.
@@ -2768,7 +2768,7 @@ bool Resolver::Assignment(ast::AssignmentStatement* a) {
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
                                             sem::Type* ty,
                                             const Source& usage) {
-  ty = const_cast<sem::Type*>(ty->UnwrapIfNeeded());
+  ty = const_cast<sem::Type*>(ty->UnwrapAccess());
 
   if (auto* str = ty->As<sem::Struct>()) {
     if (str->StorageClassUsage().count(sc)) {

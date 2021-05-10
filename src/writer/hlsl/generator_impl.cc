@@ -1697,7 +1697,7 @@ bool GeneratorImpl::EmitEntryPointData(
       continue;  // Global already emitted
     }
 
-    auto* type = var->Type()->UnwrapIfNeeded();
+    auto* type = var->Type()->UnwrapAccess();
     if (auto* strct = type->As<sem::Struct>()) {
       out << "ConstantBuffer<"
           << builder_.Symbols().NameFor(strct->Declaration()->name()) << "> "

@@ -36,7 +36,7 @@ Type::Type(Type&&) = default;
 
 Type::~Type() = default;
 
-const Type* Type::UnwrapPtrIfNeeded() const {
+const Type* Type::UnwrapPtr() const {
   auto* type = this;
   while (auto* ptr = type->As<sem::Pointer>()) {
     type = ptr->type();
@@ -44,7 +44,7 @@ const Type* Type::UnwrapPtrIfNeeded() const {
   return type;
 }
 
-const Type* Type::UnwrapIfNeeded() const {
+const Type* Type::UnwrapAccess() const {
   auto* type = this;
   while (auto* access = type->As<sem::AccessControl>()) {
     type = access->type();
@@ -57,14 +57,13 @@ const Type* Type::UnwrapAll() const {
   while (true) {
     if (auto* ptr = type->As<sem::Pointer>()) {
       type = ptr->type();
-      continue;
-    }
-    if (auto* access = type->As<sem::AccessControl>()) {
+    } else if (auto* access = type->As<sem::AccessControl>()) {
       type = access->type();
-      continue;
+    } else {
+      break;
     }
-    return type;
   }
+  return type;
 }
 
 bool Type::is_scalar() const {

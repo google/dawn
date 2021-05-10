@@ -38,37 +38,20 @@ Type::Type(Type&&) = default;
 
 Type::~Type() = default;
 
-Type* Type::UnwrapPtrIfNeeded() {
-  if (auto* ptr = As<Pointer>()) {
-    return ptr->type();
-  }
-  return this;
-}
-
-Type* Type::UnwrapAliasIfNeeded() {
-  Type* unwrapped = this;
-  while (auto* ptr = unwrapped->As<Alias>()) {
-    unwrapped = ptr->type();
-  }
-  return unwrapped;
-}
-
-Type* Type::UnwrapIfNeeded() {
-  auto* where = this;
+Type* Type::UnwrapAll() {
+  auto* type = this;
   while (true) {
-    if (auto* alias = where->As<Alias>()) {
-      where = alias->type();
-    } else if (auto* access = where->As<AccessControl>()) {
-      where = access->type();
+    if (auto* alias = type->As<Alias>()) {
+      type = alias->type();
+    } else if (auto* access = type->As<AccessControl>()) {
+      type = access->type();
+    } else if (auto* ptr = type->As<Pointer>()) {
+      type = ptr->type();
     } else {
       break;
     }
   }
-  return where;
-}
-
-Type* Type::UnwrapAll() {
-  return UnwrapIfNeeded()->UnwrapPtrIfNeeded()->UnwrapIfNeeded();
+  return type;
 }
 
 bool Type::is_scalar() const {
