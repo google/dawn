@@ -1196,6 +1196,15 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
       if (!Expression(cond)) {
         return false;
       }
+
+      auto* else_cond_type = TypeOf(cond)->UnwrapAll();
+      if (else_cond_type != builder_->ty.bool_()) {
+        diagnostics_.add_error(
+            "else statement condition must be bool, got " +
+                else_cond_type->FriendlyName(builder_->Symbols()),
+            cond->source());
+        return false;
+      }
     }
     Mark(else_stmt->body());
     if (!BlockStatement(else_stmt->body())) {

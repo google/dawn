@@ -125,7 +125,7 @@ TEST_F(ResolverTest, Stmt_If) {
 
   auto* else_body = Block(Assign(else_lhs, else_rhs));
 
-  auto* else_cond = Expr(3);
+  auto* else_cond = Expr(true);
   auto* else_stmt = create<ast::ElseStatement>(else_cond, else_body);
 
   auto* lhs = Expr("v");

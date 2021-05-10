@@ -147,6 +147,20 @@ TEST_F(ResolverValidationTest, Stmt_If_NonBool) {
             "12:34 error: if statement condition must be bool, got f32");
 }
 
+TEST_F(ResolverValidationTest, Stmt_Else_NonBool) {
+  // else (1.23f) {}
+
+  WrapInFunction(If(Expr(true), Block(),
+                    Else(create<ast::ScalarConstructorExpression>(
+                             Source{{12, 34}}, Literal(1.23f)),
+                         Block())));
+
+  EXPECT_FALSE(r()->Resolve());
+
+  EXPECT_EQ(r()->error(),
+            "12:34 error: else statement condition must be bool, got f32");
+}
+
 TEST_F(ResolverValidationTest,
        Stmt_VariableDecl_MismatchedTypeScalarConstructor) {
   u32 unsigned_value = 2u;  // Type does not match variable type
