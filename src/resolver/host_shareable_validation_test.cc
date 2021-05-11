@@ -143,6 +143,7 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
+  WrapInFunction();
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
