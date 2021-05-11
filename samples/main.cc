@@ -82,7 +82,6 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   --transform <name list>   -- Runs transforms, name list is comma separated
                                Available transforms:
                                 bound_array_accessors
-                                emit_vertex_point_size
                                 first_index_offset
                                 renamer
   --parse-only              -- Stop after parsing the input
@@ -663,8 +662,6 @@ int main(int argc, const char** argv) {
 
     if (name == "bound_array_accessors") {
       transform_manager.Add<tint::transform::BoundArrayAccessors>();
-    } else if (name == "emit_vertex_point_size") {
-      transform_manager.Add<tint::transform::EmitVertexPointSize>();
     } else if (name == "first_index_offset") {
       transform_inputs.Add<tint::transform::FirstIndexOffset::BindingPoint>(0,
                                                                             0);
@@ -689,6 +686,7 @@ int main(int argc, const char** argv) {
     case Format::kSpirv:
     case Format::kSpvAsm:
       transform_manager.Add<tint::transform::Spirv>();
+      transform_inputs.Add<tint::transform::Spirv::Config>(true);
       break;
 #endif  // TINT_BUILD_SPV_WRITER
 #if TINT_BUILD_MSL_WRITER
