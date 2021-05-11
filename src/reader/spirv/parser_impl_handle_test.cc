@@ -1152,7 +1152,8 @@ using SpvParserHandleTest_DeclUnderspecifiedHandle =
 
 TEST_P(SpvParserHandleTest_DeclUnderspecifiedHandle, Variable) {
   const auto assembly = Preamble() + R"(
-     OpEntryPoint GLCompute %main "main"
+     OpEntryPoint Fragment %main "main"
+     OpExecutionMode %main OriginUpperLeft
      OpDecorate %10 DescriptorSet 0
      OpDecorate %10 Binding 0
 )" + GetParam().decorations +
