@@ -125,7 +125,6 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
   auto* i2 = Structure("I2", {
                                  Member(Source{{4, 1}}, "x2", ty.mat2x2<f32>()),
                                  Member(Source{{5, 1}}, "y2", i1),
-                                 Member(Source{{6, 1}}, "z2", ty.mat3x2<i32>()),
                              });
   auto* a2 = ty.alias("a2", i2);
   AST().AddConstructedType(a2);
