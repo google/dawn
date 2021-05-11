@@ -3622,6 +3622,9 @@ INSTANTIATE_TEST_SUITE_P(
         // SPIR-V requires a Sample image operand when operating on a
         // multisampled image.
 
+        // ImageFetch arrayed
+        // Not in WebGPU
+
         // ImageFetch non-arrayed
         {"%float 2D 0 0 1 1 Unknown",
          "%99 = OpImageFetch %v4float %im %vi12 Sample %i1",
@@ -3650,9 +3653,7 @@ INSTANTIATE_TEST_SUITE_P(
           }
         }
       }
-    })"}}  // ImageFetch arrayed
-                        // Not in WebGPU
-                        ));
+    })"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     ImageFetch_Multisampled_ConvertSampleOperand,
