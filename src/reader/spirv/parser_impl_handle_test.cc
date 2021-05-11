@@ -392,6 +392,9 @@ TEST_F(SpvParserHandleTest,
 
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(image->result_id(), 20u);
+
+  // Variable pointers is not allowed for WGSL. So don't dump it.
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserHandleTest,
@@ -429,6 +432,9 @@ TEST_F(SpvParserHandleTest,
 
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(image->result_id(), 20u);
+
+  // Variable pointers is not allowed for WGSL. So don't dump it.
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserHandleTest,
@@ -685,6 +691,9 @@ TEST_F(SpvParserHandleTest,
 
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(image->result_id(), 20u);
+
+  // Variable pointers is not allowed for WGSL. So don't dump it.
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserHandleTest,
@@ -720,6 +729,9 @@ TEST_F(SpvParserHandleTest,
 
   ASSERT_TRUE(image != nullptr);
   EXPECT_EQ(image->result_id(), 20u);
+
+  // Variable pointers is not allowed for WGSL. So don't dump it.
+  p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserHandleTest,
@@ -865,6 +877,7 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, Variable) {
                         CommonTypes() + R"(
      %si_ty = OpTypeSampledImage %f_texture_2d
      %coords = OpConstantNull %v2float
+     %coords3d = OpConstantNull %v3float ; needed for Proj variants
 
      %10 = OpVariable %ptr_sampler UniformConstant
      %20 = OpVariable %ptr_f_texture_2d UniformConstant
@@ -897,6 +910,7 @@ TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, FunctionParam) {
      %f_ty = OpTypeFunction %void %ptr_sampler %ptr_f_texture_2d
      %si_ty = OpTypeSampledImage %f_texture_2d
      %coords = OpConstantNull %v2float
+     %coords3d = OpConstantNull %v3float ; needed for Proj variants
      %component = OpConstant %uint 1
 
      %10 = OpVariable %ptr_sampler UniformConstant
@@ -937,16 +951,8 @@ INSTANTIATE_TEST_SUITE_P(
     SpvParserHandleTest_RegisterHandleUsage_SampledImage,
     ::testing::Values(
 
-        // OpImageGather
-        UsageImageAccessCase{"%result = OpImageGather "
-                             "%v4float %sampled_image %coords %uint_1",
-                             "Usage(Sampler( ))",
-                             "Usage(Texture( is_sampled ))"},
-        // OpImageDrefGather
-        UsageImageAccessCase{"%result = OpImageDrefGather "
-                             "%v4float %sampled_image %coords %depth",
-                             "Usage(Sampler( comparison ))",
-                             "Usage(Texture( is_sampled depth ))"},
+        // TODO(dneto): OpImageGather
+        // TODO(dneto): OpImageDrefGather
 
         // Sample the texture.
 
@@ -977,23 +983,23 @@ INSTANTIATE_TEST_SUITE_P(
 
         // OpImageSampleProjImplicitLod
         UsageImageAccessCase{"%result = OpImageSampleProjImplicitLod "
-                             "%v4float %sampled_image %coords",
+                             "%v4float %sampled_image %coords3d",
                              "Usage(Sampler( ))",
                              "Usage(Texture( is_sampled ))"},
         // OpImageSampleProjExplicitLod
-        UsageImageAccessCase{"%result = OpImageSampleProjExplicitLod "
-                             "%v4float %sampled_image %coords Lod %float_null",
-                             "Usage(Sampler( ))",
-                             "Usage(Texture( is_sampled ))"},
+        UsageImageAccessCase{
+            "%result = OpImageSampleProjExplicitLod "
+            "%v4float %sampled_image %coords3d Lod %float_null",
+            "Usage(Sampler( ))", "Usage(Texture( is_sampled ))"},
         // OpImageSampleProjDrefImplicitLod
         UsageImageAccessCase{"%result = OpImageSampleProjDrefImplicitLod "
-                             "%float %sampled_image %coords %depth",
+                             "%float %sampled_image %coords3d %depth",
                              "Usage(Sampler( comparison ))",
                              "Usage(Texture( is_sampled depth ))"},
         // OpImageSampleProjDrefExplicitLod
         UsageImageAccessCase{
             "%result = OpImageSampleProjDrefExplicitLod "
-            "%float %sampled_image %coords %depth Lod %float_null",
+            "%float %sampled_image %coords3d %depth Lod %float_null",
             "Usage(Sampler( comparison ))",
             "Usage(Texture( is_sampled depth ))"},
 
@@ -1101,7 +1107,7 @@ INSTANTIATE_TEST_SUITE_P(
         // OpImageFetch
         UsageRawImageCase{"f_texture_1d",
                           "%result = OpImageFetch "
-                          "%v4float %im %float_null",
+                          "%v4float %im %uint_0",
                           "Usage(Texture( is_sampled ))"},
 
         // Image queries
@@ -4285,8 +4291,12 @@ INSTANTIATE_TEST_SUITE_P(
         // There is no 3D array
 
         // Cube array
+        //
+        // Currently textureDimension on cube returns vec3 but maybe should
+        // return vec2
+        // https://github.com/gpuweb/gpuweb/issues/1345
         {"%float Cube 0 1 0 1 Unknown",
-         "%99 = OpImageQuerySizeLod %v4int %im %i1\n",
+         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
          R"(Variable{
     Decorations{
       GroupDecoration{2}
@@ -4300,10 +4310,10 @@ INSTANTIATE_TEST_SUITE_P(
       VariableConst{
         x_99
         none
-        __vec_4__i32
+        __vec_3__i32
         {
           TypeConstructor[not set]{
-            __vec_4__i32
+            __vec_3__i32
             Call[not set]{
               Identifier[not set]{textureDimensions}
               (
@@ -4361,8 +4371,12 @@ INSTANTIATE_TEST_SUITE_P(
     })"},
 
         // Depth Cube Array
+        //
+        // Currently textureDimension on cube returns vec3 but maybe should
+        // return vec2
+        // https://github.com/gpuweb/gpuweb/issues/1345
         {"%float Cube 1 1 0 1 Unknown",
-         "%99 = OpImageQuerySizeLod %v4int %im %i1\n",
+         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
          R"(Variable{
     Decorations{
       GroupDecoration{2}
@@ -4376,10 +4390,10 @@ INSTANTIATE_TEST_SUITE_P(
       VariableConst{
         x_99
         none
-        __vec_4__i32
+        __vec_3__i32
         {
           TypeConstructor[not set]{
-            __vec_4__i32
+            __vec_3__i32
             Call[not set]{
               Identifier[not set]{textureDimensions}
               (
