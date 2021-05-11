@@ -339,7 +339,8 @@ namespace dawn_native { namespace opengl {
                             GLuint framebuffer = 0;
                             gl.GenFramebuffers(1, &framebuffer);
                             gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
-                            if (GetArrayLayers() == 1) {
+                            if (GetArrayLayers() == 1 &&
+                                GetDimension() == wgpu::TextureDimension::e2D) {
                                 gl.FramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                                         GetGLTarget(), GetHandle(), level);
                             } else {
