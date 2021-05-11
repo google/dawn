@@ -963,10 +963,10 @@ class FunctionEmitter {
   bool EmitImageQuery(const spvtools::opt::Instruction& inst);
 
   /// Converts the given texel to match the type required for the storage
-  /// texture with the given type. This can generate a swizzle to retain
-  /// only the first few components of the texel vector, and maybe a bitcast
-  /// to convert signedness.  Returns an expression, or emits an error and
-  /// returns nullptr.
+  /// texture with the given type. In WGSL the texel value is always provided
+  /// as a 4-element vector, but the component type is determined by the
+  /// texel channel type. See "Texel Formats for Storage Textures" in the WGSL
+  /// spec. Returns an expression, or emits an error and returns nullptr.
   /// @param inst the image access instruction (used for diagnostics)
   /// @param texel the texel
   /// @param texture_type the type of the storage texture

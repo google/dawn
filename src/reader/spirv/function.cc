@@ -4924,75 +4924,62 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
     Fail();
     return nullptr;
   }
+
+  // The texel type is always a 4-element vector.
+  const uint32_t dest_count = 4u;
+  TINT_ASSERT(dest_type->Is<Vector>() &&
+              dest_type->As<Vector>()->size == dest_count);
+  TINT_ASSERT(dest_type->IsFloatVector() ||
+              dest_type->IsUnsignedIntegerVector() ||
+              dest_type->IsSignedIntegerVector());
+
   if (src_type == dest_type) {
     return texel.expr;
   }
 
-  const uint32_t dest_count =
-      dest_type->IsScalar() ? 1 : dest_type->As<Vector>()->size;
-  if (dest_count == 3) {
-    Fail() << "3-channel storage textures are not supported: "
+  // Component type must match floatness, or integral signedness.
+  if ((src_type->IsFloatScalarOrVector() != dest_type->IsFloatVector()) ||
+      (src_type->IsUnsignedIntegerVector() !=
+       dest_type->IsUnsignedIntegerVector()) ||
+      (src_type->IsSignedIntegerVector() !=
+       dest_type->IsSignedIntegerVector())) {
+    Fail() << "invalid texel type for storage texture write: component must be "
+              "float, signed integer, or unsigned integer "
+              "to match the texture channel type: "
            << inst.PrettyPrint();
     return nullptr;
   }
+
+  const auto required_count = parser_impl_.GetChannelCountForFormat(format);
+  TINT_ASSERT(0 < required_count && required_count <= 4);
+
   const uint32_t src_count =
       src_type->IsScalar() ? 1 : src_type->As<Vector>()->size;
-  if (src_count < dest_count) {
+  if (src_count < required_count) {
     Fail() << "texel has too few components for storage texture: " << src_count
-           << " provided but " << dest_count
+           << " provided but " << required_count
            << " required, in: " << inst.PrettyPrint();
     return nullptr;
   }
-  // If the texel has more components than necessary, then we will ignore the
-  // higher-numbered components.
-  auto* texel_prefix =
-      (src_count == dest_count)
-          ? texel.expr
-          : create<ast::MemberAccessorExpression>(Source{}, texel.expr,
-                                                  PrefixSwizzle(dest_count));
 
-  if (!(dest_type->IsFloatScalarOrVector() ||
-        dest_type->IsUnsignedScalarOrVector() ||
-        dest_type->IsSignedScalarOrVector())) {
-    Fail() << "invalid destination type for storage texture write: "
-           << dest_type->TypeInfo().name;
-    return nullptr;
-  }
-  if (!(src_type->IsFloatScalarOrVector() ||
-        src_type->IsUnsignedScalarOrVector() ||
-        src_type->IsSignedScalarOrVector())) {
-    Fail() << "invalid texel type for storage texture write: "
-           << inst.PrettyPrint();
-    return nullptr;
-  }
-  if (dest_type->IsFloatScalarOrVector() &&
-      !src_type->IsFloatScalarOrVector()) {
-    Fail() << "can only write float or float vector to a storage image with "
-              "floating texel format: "
-           << inst.PrettyPrint();
-    return nullptr;
-  }
-  if (!dest_type->IsFloatScalarOrVector() &&
-      src_type->IsFloatScalarOrVector()) {
-    Fail()
-        << "float or float vector can only be written to a storage image with "
-           "floating texel format: "
-        << inst.PrettyPrint();
-    return nullptr;
+  // It's valid for required_count < src_count. The extra components will
+  // be written out but the textureStore will ignore them.
+
+  if (src_count < dest_count) {
+    // Expand the texel to a 4 element vector.
+    auto* component_type =
+        texel.type->IsScalar() ? texel.type : texel.type->As<Vector>()->type;
+    texel.type = ty_.Vector(component_type, dest_count);
+    ast::ExpressionList exprs;
+    exprs.push_back(texel.expr);
+    for (auto i = src_count; i < dest_count; i++) {
+      exprs.push_back(parser_impl_.MakeNullExpression(component_type).expr);
+    }
+    texel.expr = create<ast::TypeConstructorExpression>(
+        Source{}, texel.type->Build(builder_), std::move(exprs));
   }
 
-  if (dest_type->IsFloatScalarOrVector()) {
-    return texel_prefix;
-  }
-  // The only remaining cases are signed/unsigned source, and signed/unsigned
-  // destination.
-  if (dest_type->IsUnsignedScalarOrVector() ==
-      src_type->IsUnsignedScalarOrVector()) {
-    return texel_prefix;
-  }
-  // We must do a bitcast conversion.
-  return create<ast::BitcastExpression>(Source{}, dest_type->Build(builder_),
-                                        texel_prefix);
+  return texel.expr;
 }
 
 TypedExpression FunctionEmitter::ToI32(TypedExpression value) {

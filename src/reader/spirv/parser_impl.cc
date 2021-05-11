@@ -2168,12 +2168,7 @@ const Type* ParserImpl::GetComponentTypeForFormat(ast::ImageFormat format) {
   return nullptr;
 }
 
-const Type* ParserImpl::GetTexelTypeForFormat(ast::ImageFormat format) {
-  auto* component_type = GetComponentTypeForFormat(format);
-  if (!component_type) {
-    return nullptr;
-  }
-
+unsigned ParserImpl::GetChannelCountForFormat(ast::ImageFormat format) {
   switch (format) {
     case ast::ImageFormat::kR16Float:
     case ast::ImageFormat::kR16Sint:
@@ -2186,7 +2181,7 @@ const Type* ParserImpl::GetTexelTypeForFormat(ast::ImageFormat format) {
     case ast::ImageFormat::kR8Uint:
     case ast::ImageFormat::kR8Unorm:
       // One channel
-      return component_type;
+      return 1;
 
     case ast::ImageFormat::kRg11B10Float:
     case ast::ImageFormat::kRg16Float:
@@ -2200,7 +2195,7 @@ const Type* ParserImpl::GetTexelTypeForFormat(ast::ImageFormat format) {
     case ast::ImageFormat::kRg8Uint:
     case ast::ImageFormat::kRg8Unorm:
       // Two channels
-      return ty_.Vector(component_type, 2);
+      return 2;
 
     case ast::ImageFormat::kBgra8Unorm:
     case ast::ImageFormat::kBgra8UnormSrgb:
@@ -2217,13 +2212,21 @@ const Type* ParserImpl::GetTexelTypeForFormat(ast::ImageFormat format) {
     case ast::ImageFormat::kRgba8Unorm:
     case ast::ImageFormat::kRgba8UnormSrgb:
       // Four channels
-      return ty_.Vector(component_type, 4);
+      return 4;
 
     default:
       break;
   }
-  Fail() << "unknown format: " << int(format);
-  return nullptr;
+  Fail() << "unknown format " << int(format);
+  return 0;
+}
+
+const Type* ParserImpl::GetTexelTypeForFormat(ast::ImageFormat format) {
+  const auto* component_type = GetComponentTypeForFormat(format);
+  if (!component_type) {
+    return nullptr;
+  }
+  return ty_.Vector(component_type, 4);
 }
 
 bool ParserImpl::RegisterHandleUsage() {
