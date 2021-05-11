@@ -108,6 +108,7 @@ std::string CommonBasicTypes() {
     %the_vu1234 = OpConstantComposite %v4uint %uint_1 %uint_2 %uint_3 %uint_4
 
     %the_vf12 = OpConstantComposite %v2float %float_1 %float_2
+    %the_vf21 = OpConstantComposite %v2float %float_2 %float_1
     %the_vf123 = OpConstantComposite %v3float %float_1 %float_2 %float_3
     %the_vf1234 = OpConstantComposite %v4float %float_1 %float_2 %float_3 %float_4
 
@@ -1271,6 +1272,7 @@ TEST_P(SpvParserHandleTest_SampledImageAccessTest, Variable) {
      OpExecutionMode %main OriginUpperLeft
      OpName %f1 "f1"
      OpName %vf12 "vf12"
+     OpName %vf21 "vf21"
      OpName %vf123 "vf123"
      OpName %vf1234 "vf1234"
      OpName %u1 "u1"
@@ -1316,6 +1318,7 @@ TEST_P(SpvParserHandleTest_SampledImageAccessTest, Variable) {
 
      %f1 = OpCopyObject %float %float_1
      %vf12 = OpCopyObject %v2float %the_vf12
+     %vf21 = OpCopyObject %v2float %the_vf21
      %vf123 = OpCopyObject %v3float %the_vf123
      %vf1234 = OpCopyObject %v4float %the_vf1234
 
@@ -2019,7 +2022,7 @@ INSTANTIATE_TEST_SUITE_P(
           })"}));
 
 INSTANTIATE_TEST_SUITE_P(
-    ImageSampleExplicitLod,
+    ImageSampleExplicitLod_UsingLod,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::Values(
 
@@ -2233,14 +2236,18 @@ INSTANTIATE_TEST_SUITE_P(
                 ScalarConstructor[not set]{4}
               }
             )
-          })"},
+          })"}));
+
+INSTANTIATE_TEST_SUITE_P(
+    ImageSampleExplicitLod_UsingGrad,
+    SpvParserHandleTest_SampledImageAccessTest,
+    ::testing::Values(
 
         // OpImageSampleExplicitLod - using Grad
-        ImageAccessCase{
-            "%float 2D 0 0 0 1 Unknown",
-            "%result = OpImageSampleExplicitLod "
-            "%v4float %sampled_image %coords12 Grad %float_7 %float_null",
-            R"(
+        ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords12 Grad %vf12 %vf21",
+                        R"(
   Variable{
     Decorations{
       GroupDecoration{0}
@@ -2259,24 +2266,23 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-            R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleGrad}
             (
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
               Identifier[not set]{coords12}
-              ScalarConstructor[not set]{7.000000}
-              ScalarConstructor[not set]{0.000000}
+              Identifier[not set]{vf12}
+              Identifier[not set]{vf21}
             )
           })"},
 
         // OpImageSampleExplicitLod arrayed - using Grad
-        ImageAccessCase{
-            "%float 2D 0 1 0 1 Unknown",
-            "%result = OpImageSampleExplicitLod "
-            "%v4float %sampled_image %coords123 Grad %float_7 %float_null",
-            R"(
+        ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
+                        "%result = OpImageSampleExplicitLod "
+                        "%v4float %sampled_image %coords123 Grad %vf12 %vf21",
+                        R"(
   Variable{
     Decorations{
       GroupDecoration{0}
@@ -2295,7 +2301,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d_array__f32
   })",
-            R"(
+                        R"(
           Call[not set]{
             Identifier[not set]{textureSampleGrad}
             (
@@ -2312,8 +2318,8 @@ INSTANTIATE_TEST_SUITE_P(
                   Identifier[not set]{z}
                 }
               }
-              ScalarConstructor[not set]{7.000000}
-              ScalarConstructor[not set]{0.000000}
+              Identifier[not set]{vf12}
+              Identifier[not set]{vf21}
             )
           })"},
 
@@ -2321,7 +2327,7 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords12 Grad|ConstOffset "
-                        "%float_7 %float_null %offsets2d",
+                        "%vf12 %vf21 %offsets2d",
                         R"(
   Variable{
     Decorations{
@@ -2348,8 +2354,8 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
               Identifier[not set]{coords12}
-              ScalarConstructor[not set]{7.000000}
-              ScalarConstructor[not set]{0.000000}
+              Identifier[not set]{vf12}
+              Identifier[not set]{vf21}
               TypeConstructor[not set]{
                 __vec_2__i32
                 ScalarConstructor[not set]{3}
@@ -2362,7 +2368,7 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float 2D 0 0 0 1 Unknown",
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords12 Grad|ConstOffset "
-                        "%float_7 %float_null %u_offsets2d",
+                        "%vf12 %vf21 %u_offsets2d",
                         R"(
   Variable{
     Decorations{
@@ -2389,8 +2395,8 @@ INSTANTIATE_TEST_SUITE_P(
               Identifier[not set]{x_20}
               Identifier[not set]{x_10}
               Identifier[not set]{coords12}
-              ScalarConstructor[not set]{7.000000}
-              ScalarConstructor[not set]{0.000000}
+              Identifier[not set]{vf12}
+              Identifier[not set]{vf21}
               TypeConstructor[not set]{
                 __vec_2__i32
                 TypeConstructor[not set]{
@@ -2406,7 +2412,7 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords123 Grad|ConstOffset "
-                        "%float_7 %float_null %offsets2d",
+                        "%vf12 %vf21 %offsets2d",
                         R"(
   Variable{
     Decorations{
@@ -2443,8 +2449,8 @@ INSTANTIATE_TEST_SUITE_P(
                   Identifier[not set]{z}
                 }
               }
-              ScalarConstructor[not set]{7.000000}
-              ScalarConstructor[not set]{0.000000}
+              Identifier[not set]{vf12}
+              Identifier[not set]{vf21}
               TypeConstructor[not set]{
                 __vec_2__i32
                 ScalarConstructor[not set]{3}
@@ -2458,7 +2464,7 @@ INSTANTIATE_TEST_SUITE_P(
         ImageAccessCase{"%float 2D 0 1 0 1 Unknown",
                         "%result = OpImageSampleExplicitLod "
                         "%v4float %sampled_image %coords123 Grad|ConstOffset "
-                        "%float_7 %float_null %u_offsets2d",
+                        "%vf12 %vf21 %u_offsets2d",
                         R"(
   Variable{
     Decorations{
@@ -2495,8 +2501,8 @@ INSTANTIATE_TEST_SUITE_P(
                   Identifier[not set]{z}
                 }
               }
-              ScalarConstructor[not set]{7.000000}
-              ScalarConstructor[not set]{0.000000}
+              Identifier[not set]{vf12}
+              Identifier[not set]{vf21}
               TypeConstructor[not set]{
                 __vec_2__i32
                 TypeConstructor[not set]{
@@ -2901,7 +2907,7 @@ TEST_F(SpvParserHandleTest, ImageWrite_TooFewSrcTexelComponents_1_vs_4) {
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(),
               Eq("texel has too few components for storage texture: 1 provided "
-                 "but 4 required, in: OpImageWrite %52 %3 %2"))
+                 "but 4 required, in: OpImageWrite %53 %3 %2"))
       << p->error();
 }
 
@@ -2967,7 +2973,7 @@ TEST_F(SpvParserHandleTest, ImageWrite_FloatDest_IntegralSrc_IsError) {
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(),
               Eq("can only write float or float vector to a storage image with "
-                 "floating texel format: OpImageWrite %52 %2 %13"))
+                 "floating texel format: OpImageWrite %53 %2 %13"))
       << p->error();
 }
 
@@ -3001,7 +3007,7 @@ TEST_F(SpvParserHandleTest, ImageWrite_IntegralDest_FloatSrc_IsError) {
   EXPECT_FALSE(p->BuildAndParseInternalModule());
   EXPECT_THAT(p->error(),
               Eq("float or float vector can only be written to a storage image "
-                 "with floating texel format: OpImageWrite %52 %2 %51"))
+                 "with floating texel format: OpImageWrite %53 %2 %52"))
       << p->error();
 }
 
@@ -5495,29 +5501,29 @@ INSTANTIATE_TEST_SUITE_P(
          "%result = OpImageSampleImplicitLod "
          // bad type for coordinate: not a number
          "%v4float %sampled_image %float_var",
-         "bad or unsupported coordinate type for image access: %71 = "
-         "OpImageSampleImplicitLod %42 %70 %1",
+         "bad or unsupported coordinate type for image access: %72 = "
+         "OpImageSampleImplicitLod %42 %71 %1",
          {}},
         {"%float 2D 0 0 0 1 Unknown",  // 2D
          "%result = OpImageSampleImplicitLod "
          // 1 component, but need 2
          "%v4float %sampled_image %f1",
          "image access required 2 coordinate components, but only 1 provided, "
-         "in: %71 = OpImageSampleImplicitLod %42 %70 %12",
+         "in: %72 = OpImageSampleImplicitLod %42 %71 %12",
          {}},
         {"%float 2D 0 1 0 1 Unknown",  // 2DArray
          "%result = OpImageSampleImplicitLod "
          // 2 component, but need 3
          "%v4float %sampled_image %vf12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %71 = OpImageSampleImplicitLod %42 %70 %13",
+         "in: %72 = OpImageSampleImplicitLod %42 %71 %13",
          {}},
         {"%float 3D 0 0 0 1 Unknown",  // 3D
          "%result = OpImageSampleImplicitLod "
          // 2 components, but need 3
          "%v4float %sampled_image %vf12",
          "image access required 3 coordinate components, but only 2 provided, "
-         "in: %71 = OpImageSampleImplicitLod %42 %70 %13",
+         "in: %72 = OpImageSampleImplicitLod %42 %71 %13",
          {}},
     }));
 
