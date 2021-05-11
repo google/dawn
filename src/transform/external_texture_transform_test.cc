@@ -22,7 +22,7 @@ namespace {
 
 using ExternalTextureTransformTest = TransformTest;
 
-TEST_F(ExternalTextureTransformTest, SinglePlane) {
+TEST_F(ExternalTextureTransformTest, SampleSinglePlane) {
   auto* src = R"(
 [[group(0), binding(0)]] var s : sampler;
 
@@ -42,6 +42,58 @@ fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
 [[stage(fragment)]]
 fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
   return textureSample(t, s, (coord.xy / vec2<f32>(4.0, 4.0)));
+}
+)";
+
+  auto got = Run<ExternalTextureTransform>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExternalTextureTransformTest, LoadSinglePlane) {
+  auto* src = R"(
+[[group(0), binding(0)]] var t : texture_external;
+
+[[stage(fragment)]]
+fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return textureLoad(t, vec2<i32>(1, 1));
+}
+)";
+
+  auto* expect = R"(
+[[group(0), binding(0)]] var t : texture_2d<f32>;
+
+[[stage(fragment)]]
+fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+  return textureLoad(t, vec2<i32>(1, 1), 0);
+}
+)";
+
+  auto got = Run<ExternalTextureTransform>(src);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(ExternalTextureTransformTest, DimensionsSinglePlane) {
+  auto* src = R"(
+[[group(0), binding(0)]] var t : texture_external;
+
+[[stage(fragment)]]
+fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+  var dim : vec2<i32>;
+  dim = textureDimensions(t);
+  return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+}
+)";
+
+  auto* expect = R"(
+[[group(0), binding(0)]] var t : texture_2d<f32>;
+
+[[stage(fragment)]]
+fn main([[builtin(position)]] coord : vec4<f32>) -> [[location(0)]] vec4<f32> {
+  var dim : vec2<i32>;
+  dim = textureDimensions(t);
+  return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
 )";
 
