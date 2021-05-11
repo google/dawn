@@ -203,6 +203,7 @@ namespace dawn_native {
         EntryPointMetadataTable mEntryPoints;
         std::vector<uint32_t> mSpirv;
         std::unique_ptr<tint::Program> mTintProgram;
+        std::unique_ptr<TintSource> mTintSource;  // Keep the tint::Source::File alive
 
         std::unique_ptr<OwnedCompilationMessages> mCompilationMessages;
     };

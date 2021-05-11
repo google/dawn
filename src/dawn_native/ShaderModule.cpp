@@ -1050,7 +1050,7 @@ namespace dawn_native {
     }
 
     // TintSource is a PIMPL container for a tint::Source::File, which needs to be kept alive for as
-    // long as tint diagnostics are inspected.
+    // long as tint diagnostics are inspected / printed.
     class TintSource {
       public:
         template <typename... ARGS>
@@ -1070,9 +1070,8 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Shader module descriptor missing chained descriptor");
         }
         // For now only a single SPIRV or WGSL subdescriptor is allowed.
-        DAWN_TRY(ValidateSingleSType(chainedDescriptor,
-            wgpu::SType::ShaderModuleSPIRVDescriptor,
-            wgpu::SType::ShaderModuleWGSLDescriptor));
+        DAWN_TRY(ValidateSingleSType(chainedDescriptor, wgpu::SType::ShaderModuleSPIRVDescriptor,
+                                     wgpu::SType::ShaderModuleWGSLDescriptor));
 
         OwnedCompilationMessages* outMessages = parseResult->compilationMessages.get();
 
@@ -1114,8 +1113,8 @@ namespace dawn_native {
                 spirv_cfg.emit_vertex_point_size = true;
                 transformInputs.Add<tint::transform::Spirv::Config>(spirv_cfg);
 
-                DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program,
-                                                       transformInputs, nullptr, outMessages));
+                DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, &program, transformInputs,
+                                                       nullptr, outMessages));
 
                 std::vector<uint32_t> spirv;
                 DAWN_TRY_ASSIGN(spirv, ModuleToSPIRV(&program));
@@ -1346,6 +1345,7 @@ namespace dawn_native {
 
     MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult) {
         mTintProgram = std::move(parseResult->tintProgram);
+        mTintSource = std::move(parseResult->tintSource);
         mSpirv = std::move(parseResult->spirv);
         mCompilationMessages = std::move(parseResult->compilationMessages);
 
