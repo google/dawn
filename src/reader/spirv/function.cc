@@ -4811,7 +4811,7 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
   if (!image) {
     return {};
   }
-  if (image->NumInOperands() < 1) {
+  if (inst.NumInOperands() < 1) {
     Fail() << "image access is missing a coordinate parameter: "
            << inst.PrettyPrint();
     return {};

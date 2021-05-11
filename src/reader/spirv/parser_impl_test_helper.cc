@@ -27,7 +27,7 @@ ParserImplWrapperForTest::ParserImplWrapperForTest(
     : impl_(input) {}
 
 ParserImplWrapperForTest::~ParserImplWrapperForTest() {
-  if (dump_successfully_converted_spirv_ && !deliberately_invalid_spirv_ &&
+  if (dump_successfully_converted_spirv_ && !skip_dumping_spirv_ &&
       !impl_.spv_binary().empty() && impl_.success()) {
     std::string disassembly = Disassemble(impl_.spv_binary());
     std::cout << "BEGIN ConvertedOk:\n"
