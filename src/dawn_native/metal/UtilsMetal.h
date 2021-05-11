@@ -38,6 +38,14 @@ namespace dawn_native { namespace metal {
 
         uint32_t count = 0;
         std::array<CopyInfo, kMaxTextureBufferCopyRegions> copies;
+
+        auto begin() const {
+            return copies.begin();
+        }
+
+        auto end() const {
+            return copies.begin() + count;
+        }
     };
 
     TextureBufferCopySplit ComputeTextureBufferCopySplit(const Texture* texture,

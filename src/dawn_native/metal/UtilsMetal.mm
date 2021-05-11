@@ -82,7 +82,7 @@ namespace dawn_native { namespace metal {
         const Extent3D clampedCopyExtent =
             texture->ClampToMipLevelVirtualSize(mipLevel, origin, copyExtent);
 
-        ASSERT(texture->GetDimension() == wgpu::TextureDimension::e2D);
+        ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
 
         // Check whether buffer size is big enough.
         bool needWorkaround =

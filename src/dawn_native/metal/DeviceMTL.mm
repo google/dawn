@@ -298,47 +298,13 @@ namespace dawn_native { namespace metal {
                                                 TextureCopy* dst,
                                                 const Extent3D& copySizePixels) {
         Texture* texture = ToBackend(dst->texture.Get());
-
-        // This function assumes data is perfectly aligned. Otherwise, it might be necessary
-        // to split copying to several stages: see ComputeTextureBufferCopySplit.
-        const TexelBlockInfo& blockInfo = texture->GetFormat().GetAspectInfo(dst->aspect).block;
-        ASSERT(dataLayout.rowsPerImage == copySizePixels.height / blockInfo.height);
-        ASSERT(dataLayout.bytesPerRow ==
-               copySizePixels.width / blockInfo.width * blockInfo.byteSize);
-
         EnsureDestinationTextureInitialized(GetPendingCommandContext(), texture, *dst,
                                             copySizePixels);
 
-        // Metal validation layer requires that if the texture's pixel format is a compressed
-        // format, the sourceSize must be a multiple of the pixel format's block size or be
-        // clamped to the edge of the texture if the block extends outside the bounds of a
-        // texture.
-        const Extent3D clampedSize =
-            texture->ClampToMipLevelVirtualSize(dst->mipLevel, dst->origin, copySizePixels);
-        const uint32_t copyBaseLayer = dst->origin.z;
-        const uint32_t copyLayerCount = copySizePixels.depthOrArrayLayers;
-        const uint64_t bytesPerImage = dataLayout.rowsPerImage * dataLayout.bytesPerRow;
-
-        MTLBlitOption blitOption = ComputeMTLBlitOption(texture->GetFormat(), dst->aspect);
-
-        uint64_t bufferOffset = dataLayout.offset;
-        for (uint32_t copyLayer = copyBaseLayer; copyLayer < copyBaseLayer + copyLayerCount;
-             ++copyLayer) {
-            [GetPendingCommandContext()->EnsureBlit()
-                     copyFromBuffer:ToBackend(source)->GetBufferHandle()
-                       sourceOffset:bufferOffset
-                  sourceBytesPerRow:dataLayout.bytesPerRow
-                sourceBytesPerImage:bytesPerImage
-                         sourceSize:MTLSizeMake(clampedSize.width, clampedSize.height, 1)
-                          toTexture:texture->GetMTLTexture()
-                   destinationSlice:copyLayer
-                   destinationLevel:dst->mipLevel
-                  destinationOrigin:MTLOriginMake(dst->origin.x, dst->origin.y, 0)
-                            options:blitOption];
-
-            bufferOffset += bytesPerImage;
-        }
-
+        RecordCopyBufferToTexture(GetPendingCommandContext(), ToBackend(source)->GetBufferHandle(),
+                                  source->GetSize(), dataLayout.offset, dataLayout.bytesPerRow,
+                                  dataLayout.rowsPerImage, texture, dst->mipLevel, dst->origin,
+                                  dst->aspect, copySizePixels);
         return {};
     }
 

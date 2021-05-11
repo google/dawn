@@ -28,6 +28,19 @@ namespace dawn_native { namespace metal {
 
     class CommandRecordingContext;
     class Device;
+    class Texture;
+
+    void RecordCopyBufferToTexture(CommandRecordingContext* commandContext,
+                                   id<MTLBuffer> mtlBuffer,
+                                   uint64_t bufferSize,
+                                   uint64_t offset,
+                                   uint32_t bytesPerRow,
+                                   uint32_t rowsPerImage,
+                                   Texture* texture,
+                                   uint32_t mipLevel,
+                                   const Origin3D& origin,
+                                   Aspect aspect,
+                                   const Extent3D& copySize);
 
     class CommandBuffer final : public CommandBufferBase {
       public:
