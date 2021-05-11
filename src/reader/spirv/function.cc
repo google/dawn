@@ -4755,9 +4755,17 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
       if (opcode == SpvOpImageQuerySizeLod) {
         dims_args.push_back(ToI32(MakeOperand(inst, 1)).expr);
       }
-      exprs.push_back(
-          create<ast::CallExpression>(Source{}, dims_ident, dims_args));
-      if (ast::IsTextureArray(texture_type->dims)) {
+      ast::Expression* dims_call =
+          create<ast::CallExpression>(Source{}, dims_ident, dims_args);
+      auto dims = texture_type->dims;
+      if ((dims == ast::TextureDimension::kCube) ||
+          (dims == ast::TextureDimension::kCubeArray)) {
+        // textureDimension returns a 3-element vector but SPIR-V expects 2.
+        dims_call = create<ast::MemberAccessorExpression>(Source{}, dims_call,
+                                                          PrefixSwizzle(2));
+      }
+      exprs.push_back(dims_call);
+      if (ast::IsTextureArray(dims)) {
         auto* layers_ident = create<ast::IdentifierExpression>(
             Source{}, builder_.Symbols().Register("textureNumLayers"));
         exprs.push_back(create<ast::CallExpression>(

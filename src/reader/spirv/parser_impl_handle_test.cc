@@ -1592,11 +1592,6 @@ TEST_P(SpvParserHandleTest_SampledImageAccessTest, Variable) {
       GetParam().spirv_image_access.find("ImageQuerySize") != std::string::npos;
   const bool is_1d =
       GetParam().spirv_image_type_details.find("1D") != std::string::npos;
-  const bool is_cube =
-      GetParam().spirv_image_type_details.find("Cube") != std::string::npos;
-  if (is_query_size && is_cube) {
-    p->SkipDumpingPending("crbug.com/tint/787");
-  }
   if (is_query_size && is_1d) {
     p->SkipDumpingPending("crbug.com/tint/788");
   }
@@ -4132,18 +4127,16 @@ INSTANTIATE_TEST_SUITE_P(
         // Not in WebGPU
     }));
 
-INSTANTIATE_TEST_SUITE_P(
-    ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
-    // ImageQuerySize requires storage image or multisampled
-    // For storage image, use another instruction to indicate whether it
-    // is readonly or writeonly.
-    SpvParserHandleTest_SampledImageAccessTest,
-    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
+                         // From VUID-StandaloneSpirv-OpImageQuerySizeLod-04659:
+                         //  ImageQuerySizeLod requires Sampled=1
+                         SpvParserHandleTest_SampledImageAccessTest,
+                         ::testing::ValuesIn(std::vector<ImageAccessCase>{
 
-        // 1D
-        {"%float 1D 0 0 0 1 Unknown",
-         "%99 = OpImageQuerySizeLod %int %im %i1\n",
-         R"(Variable{
+                             // 1D
+                             {"%float 1D 0 0 0 1 Unknown",
+                              "%99 = OpImageQuerySizeLod %int %im %i1\n",
+                              R"(Variable{
     Decorations{
       GroupDecoration{2}
       BindingDecoration{1}
@@ -4152,7 +4145,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_1d__f32
   })",
-         R"(VariableDeclStatement{
+                              R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
@@ -4172,10 +4165,10 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
 
-        // 2D
-        {"%float 2D 0 0 0 1 Unknown",
-         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-         R"(Variable{
+                             // 2D
+                             {"%float 2D 0 0 0 1 Unknown",
+                              "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+                              R"(Variable{
     Decorations{
       GroupDecoration{2}
       BindingDecoration{1}
@@ -4184,7 +4177,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_2d__f32
   })",
-         R"(VariableDeclStatement{
+                              R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
@@ -4204,10 +4197,10 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
 
-        // 3D
-        {"%float 3D 0 0 0 1 Unknown",
-         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"(Variable{
+                             // 3D
+                             {"%float 3D 0 0 0 1 Unknown",
+                              "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
+                              R"(Variable{
     Decorations{
       GroupDecoration{2}
       BindingDecoration{1}
@@ -4216,7 +4209,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_3d__f32
   })",
-         R"(VariableDeclStatement{
+                              R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
@@ -4236,10 +4229,10 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
 
-        // Cube
-        {"%float Cube 0 0 0 1 Unknown",
-         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"(Variable{
+                             // Cube
+                             {"%float Cube 0 0 0 1 Unknown",
+                              "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+                              R"(Variable{
     Decorations{
       GroupDecoration{2}
       BindingDecoration{1}
@@ -4248,30 +4241,33 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __sampled_texture_cube__f32
   })",
-         R"(VariableDeclStatement{
+                              R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
-        __vec_3__i32
+        __vec_2__i32
         {
           TypeConstructor[not set]{
-            __vec_3__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
+            __vec_2__i32
+            MemberAccessor[not set]{
+              Call[not set]{
+                Identifier[not set]{textureDimensions}
+                (
+                  Identifier[not set]{x_20}
+                  Identifier[not set]{i1}
+                )
+              }
+              Identifier[not set]{xy}
             }
           }
         }
       }
     })"},
 
-        // Depth 2D
-        {"%float 2D 1 0 0 1 Unknown",
-         "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
-         R"(Variable{
+                             // Depth 2D
+                             {"%float 2D 1 0 0 1 Unknown",
+                              "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+                              R"(Variable{
     Decorations{
       GroupDecoration{2}
       BindingDecoration{1}
@@ -4280,7 +4276,7 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __depth_texture_2d
   })",
-         R"(VariableDeclStatement{
+                              R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
@@ -4300,10 +4296,10 @@ INSTANTIATE_TEST_SUITE_P(
       }
     })"},
 
-        // Depth Cube
-        {"%float Cube 1 0 0 1 Unknown",
-         "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
-         R"(Variable{
+                             // Depth Cube
+                             {"%float Cube 1 0 0 1 Unknown",
+                              "%99 = OpImageQuerySizeLod %v2int %im %i1\n",
+                              R"(Variable{
     Decorations{
       GroupDecoration{2}
       BindingDecoration{1}
@@ -4312,20 +4308,23 @@ INSTANTIATE_TEST_SUITE_P(
     uniform_constant
     __depth_texture_cube
   })",
-         R"(VariableDeclStatement{
+                              R"(VariableDeclStatement{
       VariableConst{
         x_99
         none
-        __vec_3__i32
+        __vec_2__i32
         {
           TypeConstructor[not set]{
-            __vec_3__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
+            __vec_2__i32
+            MemberAccessor[not set]{
+              Call[not set]{
+                Identifier[not set]{textureDimensions}
+                (
+                  Identifier[not set]{x_20}
+                  Identifier[not set]{i1}
+                )
+              }
+              Identifier[not set]{xy}
             }
           }
         }
@@ -4406,12 +4405,15 @@ INSTANTIATE_TEST_SUITE_P(
         {
           TypeConstructor[not set]{
             __vec_3__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
+            MemberAccessor[not set]{
+              Call[not set]{
+                Identifier[not set]{textureDimensions}
+                (
+                  Identifier[not set]{x_20}
+                  Identifier[not set]{i1}
+                )
+              }
+              Identifier[not set]{xy}
             }
             Call[not set]{
               Identifier[not set]{textureNumLayers}
@@ -4486,12 +4488,15 @@ INSTANTIATE_TEST_SUITE_P(
         {
           TypeConstructor[not set]{
             __vec_3__i32
-            Call[not set]{
-              Identifier[not set]{textureDimensions}
-              (
-                Identifier[not set]{x_20}
-                Identifier[not set]{i1}
-              )
+            MemberAccessor[not set]{
+              Call[not set]{
+                Identifier[not set]{textureDimensions}
+                (
+                  Identifier[not set]{x_20}
+                  Identifier[not set]{i1}
+                )
+              }
+              Identifier[not set]{xy}
             }
             Call[not set]{
               Identifier[not set]{textureNumLayers}
