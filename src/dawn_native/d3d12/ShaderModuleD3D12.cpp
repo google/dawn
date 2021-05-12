@@ -258,8 +258,11 @@ namespace dawn_native { namespace d3d12 {
         transformManager.Add<tint::transform::Renamer>();
         transformManager.Add<tint::transform::Hlsl>();
 
+        // D3D12 registers like `t3` and `c3` have the same bindingOffset number in the
+        // remapping but should not be considered a collision because they have different types.
+        const bool mayCollide = true;
         transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
-                                                         std::move(accessControls));
+                                                         std::move(accessControls), mayCollide);
 
         tint::Program program;
         tint::transform::DataMap transformOutputs;

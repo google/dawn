@@ -172,7 +172,8 @@ namespace dawn_native { namespace vulkan {
 
         tint::transform::DataMap transformInputs;
         transformInputs.Add<BindingRemapper::Remappings>(std::move(bindingPoints),
-                                                         std::move(accessControls));
+                                                         std::move(accessControls),
+                                                         /* mayCollide */ false);
 
         tint::Program program;
         DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(), transformInputs,
