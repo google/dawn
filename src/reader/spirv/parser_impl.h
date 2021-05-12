@@ -176,6 +176,11 @@ class ParserImpl : Reader {
                                  const spvtools::opt::analysis::Type* type,
                                  const Type* ast_type);
 
+  /// Adds `type` as a constructed type if it hasn't been added yet.
+  /// @param name the type's unique name
+  /// @param type the type to add
+  void AddConstructedType(Symbol name, ast::NamedType* type);
+
   /// @returns the fail stream object
   FailStream& fail_stream() { return fail_stream_; }
   /// @returns the namer object
@@ -634,11 +639,6 @@ class ParserImpl : Reader {
   /// @returns true on success.
   bool ParseArrayDecorations(const spvtools::opt::analysis::Type* spv_type,
                              uint32_t* array_stride);
-
-  /// Adds `type` as a constructed type if it hasn't been added yet.
-  /// @param name the type's unique name
-  /// @param type the type to add
-  void AddConstructedType(Symbol name, ast::NamedType* type);
 
   /// Creates a new `ast::Node` owned by the ProgramBuilder.
   /// @param args the arguments to pass to the type constructor

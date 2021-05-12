@@ -52,6 +52,13 @@ std::string MainBody() {
 )";
 }
 
+std::string CommonCapabilities() {
+  return R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+)";
+}
+
 std::string CommonTypes() {
   return R"(
     %void = OpTypeVoid
@@ -3833,6 +3840,118 @@ TEST_F(SpvModuleScopeVarParserTest, OutputVarsConvertedToPrivate) {
     private
     __u32
   }
+)";
+  EXPECT_THAT(got, HasSubstr(expected)) << got;
+}
+
+TEST_F(SpvModuleScopeVarParserTest, EntryPointWrapping_IOLocations) {
+  const auto assembly = CommonCapabilities() + R"(
+     OpEntryPoint Vertex %main "main" %1 %2 %3 %4
+     OpDecorate %1 Location 0
+     OpDecorate %2 Location 0
+     OpDecorate %3 Location 30
+     OpDecorate %4 Location 40
+)" + CommonTypes() +
+                        R"(
+     %ptr_in_uint = OpTypePointer Input %uint
+     %ptr_out_uint = OpTypePointer Output %uint
+     %1 = OpVariable %ptr_in_uint Input
+     %2 = OpVariable %ptr_out_uint Output
+     %3 = OpVariable %ptr_in_uint Input
+     %4 = OpVariable %ptr_out_uint Output
+
+     %main = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+
+  // TODO(crbug.com/tint/508): Remove this when everything is converted
+  // to HLSL style pipeline IO.
+  p->SetHLSLStylePipelineIO();
+
+  ASSERT_TRUE(p->BuildAndParseInternalModule());
+  EXPECT_TRUE(p->error().empty());
+  const auto got = p->program().to_str();
+  const std::string expected =
+      R"(
+  Struct main_out {
+    StructMember{[[ LocationDecoration{0}
+ ]] x_2: __u32}
+    StructMember{[[ LocationDecoration{40}
+ ]] x_4: __u32}
+  }
+  Variable{
+    x_1
+    private
+    __u32
+  }
+  Variable{
+    x_2
+    private
+    __u32
+  }
+  Variable{
+    x_3
+    private
+    __u32
+  }
+  Variable{
+    x_4
+    private
+    __u32
+  }
+  Function main_1 -> __void
+  ()
+  {
+    Return{}
+  }
+  Function main -> __struct_main_out
+  StageDecoration{vertex}
+  (
+    VariableConst{
+      Decorations{
+        LocationDecoration{0}
+      }
+      x_1_param
+      none
+      __u32
+    }
+    VariableConst{
+      Decorations{
+        LocationDecoration{30}
+      }
+      x_3_param
+      none
+      __u32
+    }
+  )
+  {
+    Assignment{
+      Identifier[not set]{x_1}
+      Identifier[not set]{x_1_param}
+    }
+    Assignment{
+      Identifier[not set]{x_3}
+      Identifier[not set]{x_3_param}
+    }
+    Call[not set]{
+      Identifier[not set]{main_1}
+      (
+      )
+    }
+    Return{
+      {
+        TypeConstructor[not set]{
+          __struct_main_out
+          Identifier[not set]{x_2}
+          Identifier[not set]{x_4}
+        }
+      }
+    }
+  }
+}
 )";
   EXPECT_THAT(got, HasSubstr(expected)) << got;
 }

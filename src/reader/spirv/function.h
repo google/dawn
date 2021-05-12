@@ -423,6 +423,16 @@ class FunctionEmitter {
   /// @returns the parser implementation
   ParserImpl* parser() { return &parser_impl_; }
 
+  /// Emits the entry point as a wrapper around its implementation function.
+  /// @returns false if emission failed.
+  bool EmitEntryPointAsWrapper();
+
+  /// Create an ast::BlockStatement representing the body of the function.
+  /// This creates the statement stack, which is non-empty for the lifetime
+  /// of the function.
+  /// @returns the body of the function, or null on error
+  ast::BlockStatement* MakeFunctionBody();
+
   /// Emits the function body, populating the bottom entry of the statements
   /// stack.
   /// @returns false if emission failed.

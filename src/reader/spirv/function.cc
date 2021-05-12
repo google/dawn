@@ -855,36 +855,213 @@ bool FunctionEmitter::Emit() {
     return true;
   }
 
+  // The function declaration, corresponding to how it's written in SPIR-V,
+  // and without regard to whether it's an entry point.
   FunctionDeclaration decl;
   if (!ParseFunctionDeclaration(&decl)) {
     return false;
   }
 
+  bool make_body_function = true;
+  if (ep_info_) {
+    if (ep_info_->inner_name.empty()) {
+      // This is an entry point, and we don't want to emit it as a wrapper
+      // around its own body.  Emit it as one function.
+      decl.name = ep_info_->name;
+      decl.decorations.emplace_back(
+          create<ast::StageDecoration>(Source{}, ep_info_->stage));
+    } else if (ep_info_->owns_inner_implementation) {
+      // This is an entry point, and we want to emit it as a wrapper around
+      // an implementation function.
+      decl.name = ep_info_->inner_name;
+    } else {
+      // This is a second entry point that shares an inner implementation
+      // function.
+      make_body_function = false;
+    }
+  }
+
+  if (make_body_function) {
+    auto* body = MakeFunctionBody();
+    if (!body) {
+      return false;
+    }
+
+    builder_.AST().AddFunction(create<ast::Function>(
+        decl.source, builder_.Symbols().Register(decl.name),
+        std::move(decl.params), decl.return_type->Build(builder_), body,
+        std::move(decl.decorations), ast::DecorationList{}));
+  }
+
+  if (ep_info_ && !ep_info_->inner_name.empty()) {
+    return EmitEntryPointAsWrapper();
+  }
+
+  return success();
+}
+
+ast::BlockStatement* FunctionEmitter::MakeFunctionBody() {
+  TINT_ASSERT(statements_stack_.size() == 1);
+
   if (!EmitBody()) {
-    return false;
+    return nullptr;
   }
 
   // Set the body of the AST function node.
   if (statements_stack_.size() != 1) {
-    return Fail() << "internal error: statement-list stack should have 1 "
-                     "element but has "
-                  << statements_stack_.size();
+    Fail() << "internal error: statement-list stack should have 1 "
+              "element but has "
+           << statements_stack_.size();
+    return nullptr;
   }
 
   statements_stack_[0].Finalize(&builder_);
-
   auto& statements = statements_stack_[0].GetStatements();
   auto* body = create<ast::BlockStatement>(Source{}, statements);
-  builder_.AST().AddFunction(create<ast::Function>(
-      decl.source, builder_.Symbols().Register(decl.name),
-      std::move(decl.params), decl.return_type->Build(builder_), body,
-      std::move(decl.decorations), ast::DecorationList{}));
 
   // Maintain the invariant by repopulating the one and only element.
   statements_stack_.clear();
   PushNewStatementBlock(constructs_[0].get(), 0, nullptr);
 
-  return success();
+  return body;
+}
+
+bool FunctionEmitter::EmitEntryPointAsWrapper() {
+  Source source;
+
+  // The statements in the body.
+  ast::StatementList stmts;
+
+  FunctionDeclaration decl;
+  decl.source = source;
+  decl.name = ep_info_->name;
+  ast::Type* return_type = nullptr;  // Populated below.
+
+  // Pipeline inputs become parameters to the wrapper function, and
+  // their values are saved into the corresponding private variables that
+  // have already been created.
+  for (uint32_t var_id : ep_info_->inputs) {
+    const auto* var = def_use_mgr_->GetDef(var_id);
+    TINT_ASSERT(var != nullptr);
+    TINT_ASSERT(var->opcode() == SpvOpVariable);
+    auto* store_type = GetVariableStoreType(*var);
+    auto* forced_store_type = store_type;
+    ast::DecorationList param_decos;
+    if (!parser_impl_.ConvertDecorationsForVariable(var_id, &forced_store_type,
+                                                    &param_decos)) {
+      // This occurs, and is not an error, for the PointSize builtin.
+      if (!success()) {
+        // But exit early if an error was logged.
+        return false;
+      }
+      continue;
+    }
+
+    const auto var_name = namer_.GetName(var_id);
+    const auto var_sym = builder_.Symbols().Register(var_name);
+    const auto param_name = namer_.MakeDerivedName(var_name + "_param");
+    const auto param_sym = builder_.Symbols().Register(param_name);
+    auto* param = create<ast::Variable>(
+        source, param_sym, ast::StorageClass::kNone,
+        forced_store_type->Build(builder_), true /* is const */,
+        nullptr /* no constructor */, param_decos);
+    decl.params.push_back(param);
+
+    // Add a body statement to copy the parameter to the corresponding private
+    // variable.
+    ast::Expression* param_value =
+        create<ast::IdentifierExpression>(source, param_sym);
+    if (forced_store_type != store_type) {
+      // Insert a bitcast if needed.
+      const auto cast_name = namer_.MakeDerivedName(param_name + "_cast");
+      const auto cast_sym = builder_.Symbols().Register(cast_name);
+
+      param_value = create<ast::BitcastExpression>(
+          source, forced_store_type->Build(builder_), param_value);
+    }
+
+    stmts.push_back(create<ast::AssignmentStatement>(
+        source, create<ast::IdentifierExpression>(source, var_sym),
+        param_value));
+  }
+
+  // Call the inner function.  It has no parameters.
+  stmts.push_back(create<ast::CallStatement>(
+      source,
+      create<ast::CallExpression>(
+          source,
+          create<ast::IdentifierExpression>(
+              source, builder_.Symbols().Register(ep_info_->inner_name)),
+          ast::ExpressionList{})));
+
+  if (ep_info_->outputs.empty()) {
+    return_type = ty_.Void()->Build(builder_);
+  } else {
+    // Pipeline outputs are converted to a structure that is written
+    // to just before returning.
+
+    const auto return_struct_name =
+        namer_.MakeDerivedName(ep_info_->name + "_out");
+    const auto return_struct_sym =
+        builder_.Symbols().Register(return_struct_name);
+
+    // Define the structure.
+    ast::ExpressionList return_exprs;
+    std::vector<ast::StructMember*> return_members;
+    for (uint32_t var_id : ep_info_->outputs) {
+      const auto* var = def_use_mgr_->GetDef(var_id);
+      TINT_ASSERT(var != nullptr);
+      TINT_ASSERT(var->opcode() == SpvOpVariable);
+      const auto* store_type = GetVariableStoreType(*var);
+      const auto* forced_store_type = store_type;
+      ast::DecorationList out_decos;
+      if (!parser_impl_.ConvertDecorationsForVariable(
+              var_id, &forced_store_type, &out_decos)) {
+        // This occurs, and is not an error, for the PointSize builtin.
+        continue;
+      }
+
+      // TODO(dneto): flatten structs and arrays to vectors or scalars.
+      // The Per-vertex structure is already flattened.
+
+      // The member name is the same as the variable name, which is already
+      // unique across all module-scope declarations.
+      const auto var_name = namer_.GetName(var_id);
+      const auto var_sym = builder_.Symbols().Register(var_name);
+
+      // Form the member type.
+      // Reuse the var name for the member name. They can't clash.
+      ast::StructMember* return_member = create<ast::StructMember>(
+          Source{}, var_sym, forced_store_type->Build(builder_),
+          std::move(out_decos));
+      return_members.push_back(return_member);
+
+      // Save the expression.
+      return_exprs.push_back(
+          create<ast::IdentifierExpression>(source, var_sym));
+    }
+
+    // Create and register the result type.
+    return_type = create<ast::Struct>(
+        Source{}, return_struct_sym, return_members, ast::DecorationList{});
+    parser_impl_.AddConstructedType(return_struct_sym, return_type->As<ast::NamedType>());
+
+    // Add the return-value statement.
+    stmts.push_back(create<ast::ReturnStatement>(
+        source, create<ast::TypeConstructorExpression>(
+                    source, return_type, std::move(return_exprs))));
+  }
+
+  auto* body = create<ast::BlockStatement>(source, stmts);
+  ast::DecorationList fn_decos;
+  fn_decos.emplace_back(create<ast::StageDecoration>(source, ep_info_->stage));
+
+  builder_.AST().AddFunction(
+      create<ast::Function>(source, builder_.Symbols().Register(ep_info_->name),
+                            std::move(decl.params), return_type, body,
+                            std::move(fn_decos), ast::DecorationList{}));
+
+  return true;
 }
 
 bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
@@ -892,12 +1069,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
     return false;
   }
 
-  std::string name;
-  if (ep_info_ == nullptr) {
-    name = namer_.Name(function_.result_id());
-  } else {
-    name = ep_info_->name;
-  }
+  const std::string name = namer_.Name(function_.result_id());
 
   // Surprisingly, the "type id" on an OpFunction is the result type of the
   // function, not the type of the function.  This is the one exceptional case
@@ -932,15 +1104,10 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
   if (failed()) {
     return false;
   }
-  ast::DecorationList decos;
-  if (ep_info_ != nullptr) {
-    decos.emplace_back(create<ast::StageDecoration>(Source{}, ep_info_->stage));
-  }
-
   decl->name = name;
   decl->params = std::move(ast_params);
   decl->return_type = ret_ty;
-  decl->decorations = std::move(decos);
+  decl->decorations.clear();
 
   return success();
 }

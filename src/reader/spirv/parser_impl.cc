@@ -1365,8 +1365,12 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     sc = ast::StorageClass::kNone;
   }
 
-  if (!ConvertDecorationsForVariable(id, &type, &decorations)) {
-    return nullptr;
+  // In almost all cases, copy the decorations from SPIR-V to the variable.
+  // But avoid doing so when converting pipeline IO to private variables.
+  if (sc != ast::StorageClass::kPrivate) {
+    if (!ConvertDecorationsForVariable(id, &type, &decorations)) {
+      return nullptr;
+    }
   }
 
   std::string name = namer_.Name(id);
