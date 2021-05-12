@@ -1365,32 +1365,44 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     sc = ast::StorageClass::kNone;
   }
 
+  if (!ConvertDecorationsForVariable(id, &type, &decorations)) {
+    return nullptr;
+  }
+
+  std::string name = namer_.Name(id);
+  return create<ast::Variable>(Source{}, builder_.Symbols().Register(name), sc,
+                               type->Build(builder_), is_const, constructor,
+                               decorations);
+}
+
+bool ParserImpl::ConvertDecorationsForVariable(
+    uint32_t id,
+    const Type** type,
+    ast::DecorationList* decorations) {
   for (auto& deco : GetDecorationsFor(id)) {
     if (deco.empty()) {
-      Fail() << "malformed decoration on ID " << id << ": it is empty";
-      return nullptr;
+      return Fail() << "malformed decoration on ID " << id << ": it is empty";
     }
     if (deco[0] == SpvDecorationBuiltIn) {
       if (deco.size() == 1) {
-        Fail() << "malformed BuiltIn decoration on ID " << id
-               << ": has no operand";
-        return nullptr;
+        return Fail() << "malformed BuiltIn decoration on ID " << id
+                      << ": has no operand";
       }
       const auto spv_builtin = static_cast<SpvBuiltIn>(deco[1]);
       switch (spv_builtin) {
         case SpvBuiltInPointSize:
           special_builtins_[id] = spv_builtin;
-          return nullptr;
+          return false;  // This is not an error
         case SpvBuiltInSampleId:
         case SpvBuiltInVertexIndex:
         case SpvBuiltInInstanceIndex:
           // The SPIR-V variable is likely to be signed (because GLSL
           // requires signed), but WGSL requires unsigned.  Handle specially
           // so we always perform the conversion at load and store.
-          if (auto* forced_type = UnsignedTypeFor(type)) {
+          if (auto* forced_type = UnsignedTypeFor(*type)) {
             // Requires conversion and special handling in code generation.
             special_builtins_[id] = spv_builtin;
-            type = forced_type;
+            *type = forced_type;
           }
           break;
         case SpvBuiltInSampleMask: {
@@ -1404,7 +1416,7 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                       "SampleMask must be an array of 1 element.";
           }
           special_builtins_[id] = spv_builtin;
-          type = ty_.U32();
+          *type = ty_.U32();
           break;
         }
         default:
@@ -1412,43 +1424,38 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
       }
       auto ast_builtin = enum_converter_.ToBuiltin(spv_builtin);
       if (ast_builtin == ast::Builtin::kNone) {
-        return nullptr;
+        // A diagnostic has already been emitted.
+        return false;
       }
-      decorations.emplace_back(
+      decorations->emplace_back(
           create<ast::BuiltinDecoration>(Source{}, ast_builtin));
     }
     if (deco[0] == SpvDecorationLocation) {
       if (deco.size() != 2) {
-        Fail() << "malformed Location decoration on ID " << id
-               << ": requires one literal operand";
-        return nullptr;
+        return Fail() << "malformed Location decoration on ID " << id
+                      << ": requires one literal operand";
       }
-      decorations.emplace_back(
+      decorations->emplace_back(
           create<ast::LocationDecoration>(Source{}, deco[1]));
     }
     if (deco[0] == SpvDecorationDescriptorSet) {
       if (deco.size() == 1) {
-        Fail() << "malformed DescriptorSet decoration on ID " << id
-               << ": has no operand";
-        return nullptr;
+        return Fail() << "malformed DescriptorSet decoration on ID " << id
+                      << ": has no operand";
       }
-      decorations.emplace_back(create<ast::GroupDecoration>(Source{}, deco[1]));
+      decorations->emplace_back(
+          create<ast::GroupDecoration>(Source{}, deco[1]));
     }
     if (deco[0] == SpvDecorationBinding) {
       if (deco.size() == 1) {
-        Fail() << "malformed Binding decoration on ID " << id
-               << ": has no operand";
-        return nullptr;
+        return Fail() << "malformed Binding decoration on ID " << id
+                      << ": has no operand";
       }
-      decorations.emplace_back(
+      decorations->emplace_back(
           create<ast::BindingDecoration>(Source{}, deco[1]));
     }
   }
-
-  std::string name = namer_.Name(id);
-  return create<ast::Variable>(Source{}, builder_.Symbols().Register(name), sc,
-                               type->Build(builder_), is_const, constructor,
-                               decorations);
+  return success();
 }
 
 TypedExpression ParserImpl::MakeConstantExpression(uint32_t id) {

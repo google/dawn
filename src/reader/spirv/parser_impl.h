@@ -200,6 +200,21 @@ class ParserImpl : Reader {
   DecorationList GetDecorationsForMember(uint32_t id,
                                          uint32_t member_index) const;
 
+  /// Converts SPIR-V decorations for the variable with the given ID.
+  /// Registers the IDs of variables that require special handling by code
+  /// generation.  If the WGSL type differs from the store type for SPIR-V,
+  /// then the `type` parameter is updated.  Returns false on failure (with
+  /// a diagnostic), or when the variable should not be emitted, e.g. for a
+  /// PointSize builtin.
+  /// @param id the ID of the SPIR-V variable
+  /// @param type the WGSL store type for the variable, which should be
+  /// prepopulatd
+  /// @param ast_decos the decoration list to populate
+  /// @returns false when the variable should not be emitted as a variable
+  bool ConvertDecorationsForVariable(uint32_t id,
+                                     const Type** type,
+                                     ast::DecorationList* ast_decos);
+
   /// Converts a SPIR-V struct member decoration. If the decoration is
   /// recognized but deliberately dropped, then returns nullptr without a
   /// diagnostic. On failure, emits a diagnostic and returns nullptr.
