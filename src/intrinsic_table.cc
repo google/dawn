@@ -1214,7 +1214,6 @@ Impl::Impl() {
   Register(I::kTextureSample, f32,      {{t, tex_depth_cube},       {s, sampler}, {coords, vec3_f32},                                         }); // NOLINT
   Register(I::kTextureSample, f32,      {{t, tex_depth_cube_array}, {s, sampler}, {coords, vec3_f32}, {array_index, i32},                     }); // NOLINT
   Register(I::kTextureSample, vec4_f32, {{t, tex_external},         {s, sampler}, {coords, vec2_f32},                                         }); // NOLINT
-  Register(I::kTextureSample, vec4_f32, {{t, tex_external},         {s, sampler}, {coords, vec2_f32},                     {offset, vec2_i32}, }); // NOLINT
 
   Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_2d_f32},           {s, sampler}, {coords, vec2_f32},                     {bias, f32},                     }); // NOLINT
   Register(I::kTextureSampleBias, vec4_f32,    {{t, tex_2d_f32},           {s, sampler}, {coords, vec2_f32},                     {bias, f32}, {offset, vec2_i32}, }); // NOLINT
@@ -1255,6 +1254,7 @@ Impl::Impl() {
   Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_2d_array},  {s, sampler}, {coords, vec2_f32}, {array_index, i32}, {level, i32}, {offset, vec2_i32}, }); // NOLINT
   Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_cube},      {s, sampler}, {coords, vec3_f32},                     {level, i32},                     }); // NOLINT
   Register(I::kTextureSampleLevel, f32,          {{t, tex_depth_cube_array},{s, sampler}, {coords, vec3_f32}, {array_index, i32}, {level, i32},                     }); // NOLINT
+  Register(I::kTextureSampleLevel, vec4_f32,     {{t, tex_external},        {s, sampler}, {coords, vec2_f32},                                                       }); // NOLINT
 
   Register(I::kTextureStore, void_, {{t, tex_storage_wo_1d_FT},      {coords, i32},                          {value, vec4_T}, }); // NOLINT
   Register(I::kTextureStore, void_, {{t, tex_storage_wo_2d_FT},      {coords, vec2_i32},                     {value, vec4_T}, }); // NOLINT

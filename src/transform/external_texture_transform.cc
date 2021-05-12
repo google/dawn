@@ -35,40 +35,60 @@ Output ExternalTextureTransform::Run(const Program* in, const DataMap&) {
   // generation paths in the backends.
 
   // When replacing instances of texture_external with texture_2d<f32> we must
-  // also modify calls to the texture_external overload of textureLoad, which
-  // unlike its texture_2d<f32> overload does not require a level parameter.
-  // To do this we identify calls to textureLoad that use texture_external as
-  // the first parameter and add a parameter for the level (which is always 0).
+  // also modify calls to the texture_external overloads of textureLoad and
+  // textureSampleLevel, which unlike their texture_2d<f32> overloads do not
+  // require a level parameter. To do this we identify calls to textureLoad and
+  // textureSampleLevel that use texture_external as the first parameter and add
+  // a parameter for the level (which is always 0).
 
-  // Scan the AST nodes for calls to textureLoad.
+  // Scan the AST nodes for calls to textureLoad or textureSampleLevel.
   for (auto* node : ctx.src->ASTNodes().Objects()) {
     if (auto* call_expr = node->As<ast::CallExpression>()) {
       if (auto* intrinsic =
               sem.Get(call_expr)->Target()->As<sem::Intrinsic>()) {
-        if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad) {
-          // When a textureLoad has been identified, check if the first
-          // parameter is an external texture.
+        if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad ||
+            intrinsic->Type() == sem::IntrinsicType::kTextureSampleLevel) {
+          // When a textureLoad or textureSampleLevel has been identified, check
+          // if the first parameter is an external texture.
           if (auto* var =
                   sem.Get(call_expr->params()[0])->As<sem::VariableUser>()) {
             if (var->Variable()->Type()->Is<sem::ExternalTexture>()) {
-              if (call_expr->params().size() != 2) {
+              if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad &&
+                  call_expr->params().size() != 2) {
                 TINT_ICE(ctx.dst->Diagnostics())
-                    << "expected TextureLoad call with a texture_external to "
+                    << "expected textureLoad call with a texture_external to "
                        "have 2 parameters, found "
                     << call_expr->params().size() << " parameters";
               }
-              // Replace the textureLoad call with another that has the same
-              // parameters in addition to a signed integer literal for the
-              // level parameter.
+
+              if (intrinsic->Type() ==
+                      sem::IntrinsicType::kTextureSampleLevel &&
+                  call_expr->params().size() != 3) {
+                TINT_ICE(ctx.dst->Diagnostics())
+                    << "expected textureSampleLevel call with a "
+                       "texture_external to have 3 parameters, found "
+                    << call_expr->params().size() << " parameters";
+              }
+
+              // Replace the call with another that has the same parameters in
+              // addition to a level parameter (always zero for external
+              // textures).
               auto* exp = ctx.Clone(call_expr->func());
-
               auto* externalTextureParam = ctx.Clone(call_expr->params()[0]);
-              auto* coordsParam = ctx.Clone(call_expr->params()[1]);
-              // Level is always 0 for an external texture.
-              auto* levelParam = ctx.dst->Expr(0);
 
-              ast::ExpressionList params = {externalTextureParam, coordsParam,
-                                            levelParam};
+              ast::ExpressionList params;
+              if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad) {
+                auto* coordsParam = ctx.Clone(call_expr->params()[1]);
+                auto* levelParam = ctx.dst->Expr(0);
+                params = {externalTextureParam, coordsParam, levelParam};
+              } else if (intrinsic->Type() ==
+                         sem::IntrinsicType::kTextureSampleLevel) {
+                auto* samplerParam = ctx.Clone(call_expr->params()[1]);
+                auto* coordsParam = ctx.Clone(call_expr->params()[2]);
+                auto* levelParam = ctx.dst->Expr(0.0f);
+                params = {externalTextureParam, samplerParam, coordsParam,
+                          levelParam};
+              }
 
               auto* newCall = ctx.dst->create<ast::CallExpression>(exp, params);
               ctx.Replace(call_expr, newCall);
