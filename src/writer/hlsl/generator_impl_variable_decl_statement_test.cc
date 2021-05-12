@@ -26,7 +26,7 @@ using ::testing::HasSubstr;
 using HlslGeneratorImplTest_VariableDecl = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement) {
-  auto* var = Var("a", ty.f32(), ast::StorageClass::kFunction);
+  auto* var = Var("a", ty.f32());
   auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
@@ -52,7 +52,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
-  auto* var = Var("a", ty.array<f32, 5>(), ast::StorageClass::kFunction);
+  auto* var = Var("a", ty.array<f32, 5>());
 
   WrapInFunction(var, Expr("a"));
 
@@ -93,8 +93,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_ZeroVec) {
-  auto* var =
-      Var("a", ty.vec3<f32>(), ast::StorageClass::kFunction, vec3<f32>());
+  auto* var = Var("a", ty.vec3<f32>(), ast::StorageClass::kNone, vec3<f32>());
 
   auto* stmt = Decl(var);
   WrapInFunction(stmt);
@@ -109,7 +108,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl,
 TEST_F(HlslGeneratorImplTest_VariableDecl,
        Emit_VariableDeclStatement_Initializer_ZeroMat) {
   auto* var =
-      Var("a", ty.mat2x3<f32>(), ast::StorageClass::kFunction, mat2x3<f32>());
+      Var("a", ty.mat2x3<f32>(), ast::StorageClass::kNone, mat2x3<f32>());
 
   auto* stmt = Decl(var);
   WrapInFunction(stmt);

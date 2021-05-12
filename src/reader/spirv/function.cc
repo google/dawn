@@ -2022,7 +2022,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
               .expr;
     }
     auto* var = parser_impl_.MakeVariable(
-        inst.result_id(), ast::StorageClass::kFunction, var_store_type, false,
+        inst.result_id(), ast::StorageClass::kNone, var_store_type, false,
         constructor, ast::DecorationList{});
     auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
     AddStatement(var_decl_stmt);
@@ -2352,7 +2352,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
     // Declare the guard variable just before the "if", initialized to true.
     auto* guard_var =
         create<ast::Variable>(Source{}, builder_.Symbols().Register(guard_name),
-                              ast::StorageClass::kFunction, builder_.ty.bool_(),
+                              ast::StorageClass::kNone, builder_.ty.bool_(),
                               false, MakeTrue(Source{}), ast::DecorationList{});
     auto* guard_decl = create<ast::VariableDeclStatement>(Source{}, guard_var);
     AddStatement(guard_decl);
@@ -2900,8 +2900,8 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
     AddStatement(create<ast::VariableDeclStatement>(
         Source{},
-        parser_impl_.MakeVariable(id, ast::StorageClass::kFunction, ast_type,
-                                  false, nullptr, ast::DecorationList{})));
+        parser_impl_.MakeVariable(id, ast::StorageClass::kNone, ast_type, false,
+                                  nullptr, ast::DecorationList{})));
     // Save this as an already-named value.
     identifier_values_.insert(id);
   }
@@ -2913,7 +2913,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     TINT_ASSERT(!phi_var_name.empty());
     auto* var = create<ast::Variable>(
         Source{}, builder_.Symbols().Register(phi_var_name),
-        ast::StorageClass::kFunction,
+        ast::StorageClass::kNone,
         parser_impl_.ConvertType(def_inst->type_id())->Build(builder_), false,
         nullptr, ast::DecorationList{});
     AddStatement(create<ast::VariableDeclStatement>(Source{}, var));
@@ -5134,7 +5134,7 @@ bool FunctionEmitter::MakeVectorInsertDynamic(
   auto registered_temp_name = builder_.Symbols().Register(temp_name);
 
   auto* temp_var = create<ast::Variable>(
-      Source{}, registered_temp_name, ast::StorageClass::kFunction,
+      Source{}, registered_temp_name, ast::StorageClass::kNone,
       ast_type->Build(builder_), false, src_vector.expr, ast::DecorationList{});
   AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
 
@@ -5179,10 +5179,10 @@ bool FunctionEmitter::MakeCompositeInsert(
   auto temp_name = namer_.MakeDerivedName(result_name);
   auto registered_temp_name = builder_.Symbols().Register(temp_name);
 
-  auto* temp_var = create<ast::Variable>(
-      Source{}, registered_temp_name, ast::StorageClass::kFunction,
-      ast_type->Build(builder_), false, src_composite.expr,
-      ast::DecorationList{});
+  auto* temp_var =
+      create<ast::Variable>(Source{}, registered_temp_name,
+                            ast::StorageClass::kNone, ast_type->Build(builder_),
+                            false, src_composite.expr, ast::DecorationList{});
   AddStatement(create<ast::VariableDeclStatement>(Source{}, temp_var));
 
   TypedExpression seed_expr{ast_type, create<ast::IdentifierExpression>(

@@ -60,10 +60,10 @@ TEST_F(BuilderTest, Return_WithValue) {
 }
 
 TEST_F(BuilderTest, Return_WithValue_GeneratesLoad) {
-  auto* var = Global("param", ty.f32(), ast::StorageClass::kFunction);
+  auto* var = Var("param", ty.f32());
 
   auto* ret = Return(var);
-  Func("test", {}, ty.f32(), {ret}, {});
+  Func("test", {}, ty.f32(), {Decl(var), ret}, {});
 
   spirv::Builder& b = Build();
 

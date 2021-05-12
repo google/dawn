@@ -213,7 +213,7 @@ TEST_F(WgslGeneratorImplTest,
          });
 
   {
-    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
                     MemberAccessor("data", "d"));
 
     Func("a", ast::VariableList{}, ty.void_(),
@@ -227,7 +227,7 @@ TEST_F(WgslGeneratorImplTest,
   }
 
   {
-    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
                     MemberAccessor("data", "d"));
 
     Func("b", ast::VariableList{}, ty.void_(),

@@ -291,8 +291,7 @@ class InspectorHelper : public ProgramBuilder {
       std::tie(member_idx, member_type) = member;
       std::string member_name = StructMemberName(member_idx, member_type);
 
-      stmts.emplace_back(Decl(
-          Var("local" + member_name, member_type, ast::StorageClass::kNone)));
+      stmts.emplace_back(Decl(Var("local" + member_name, member_type)));
     }
 
     for (auto member : members) {
@@ -414,8 +413,7 @@ class InspectorHelper : public ProgramBuilder {
     std::string result_name = "sampler_result";
 
     ast::StatementList stmts;
-    stmts.emplace_back(Decl(Var("sampler_result", ty.vec(base_type, 4),
-                                ast::StorageClass::kFunction)));
+    stmts.emplace_back(Decl(Var("sampler_result", ty.vec(base_type, 4))));
 
     stmts.emplace_back(
         Assign("sampler_result",
@@ -446,8 +444,7 @@ class InspectorHelper : public ProgramBuilder {
 
     ast::StatementList stmts;
 
-    stmts.emplace_back(Decl(Var("sampler_result", ty.vec(base_type, 4),
-                                ast::StorageClass::kFunction)));
+    stmts.emplace_back(Decl(Var("sampler_result", ty.vec(base_type, 4))));
 
     stmts.emplace_back(
         Assign("sampler_result", Call("textureSample", texture_name,
@@ -479,8 +476,7 @@ class InspectorHelper : public ProgramBuilder {
 
     ast::StatementList stmts;
 
-    stmts.emplace_back(
-        Decl(Var("sampler_result", base_type, ast::StorageClass::kFunction)));
+    stmts.emplace_back(Decl(Var("sampler_result", base_type)));
     stmts.emplace_back(
         Assign("sampler_result", Call("textureSampleCompare", texture_name,
                                       sampler_name, coords_name, depth_name)));
@@ -581,8 +577,7 @@ class InspectorHelper : public ProgramBuilder {
       ast::DecorationList decorations) {
     ast::StatementList stmts;
 
-    stmts.emplace_back(
-        Decl(Var("dim", dim_type, ast::StorageClass::kFunction)));
+    stmts.emplace_back(Decl(Var("dim", dim_type)));
     stmts.emplace_back(Assign("dim", Call("textureDimensions", st_name)));
     stmts.emplace_back(Return());
 

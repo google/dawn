@@ -181,11 +181,11 @@ TEST_F(BuilderTest, Assign_StructMember) {
                                        Member("b", ty.f32()),
                                    });
 
-  auto* v = Global("ident", s, ast::StorageClass::kFunction);
+  auto* v = Var("ident", s);
 
   auto* assign = Assign(MemberAccessor("ident", "b"), Expr(4.f));
 
-  WrapInFunction(assign);
+  WrapInFunction(v, assign);
 
   spirv::Builder& b = Build();
 

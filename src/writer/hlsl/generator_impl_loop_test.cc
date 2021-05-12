@@ -137,10 +137,9 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
 
   Global("rhs", ty.f32(), ast::StorageClass::kPrivate);
 
-  auto* var = Var("lhs", ty.f32(), ast::StorageClass::kFunction, Expr(2.4f));
+  auto* var = Var("lhs", ty.f32(), ast::StorageClass::kNone, Expr(2.4f));
 
-  auto* body = Block(
-      Decl(var), Decl(Var("other", ty.f32(), ast::StorageClass::kFunction)));
+  auto* body = Block(Decl(var), Decl(Var("other", ty.f32())));
 
   auto* lhs = Expr("lhs");
   auto* rhs = Expr("rhs");

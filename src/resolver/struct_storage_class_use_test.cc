@@ -119,7 +119,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalArray) {
 TEST_F(ResolverStorageClassUseTest, StructReachableFromLocal) {
   auto* s = Structure("S", {Member("a", ty.f32())});
 
-  WrapInFunction(Var("g", s, ast::StorageClass::kFunction));
+  WrapInFunction(Var("g", s));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -133,7 +133,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalAlias) {
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* a = ty.alias("A", s);
   AST().AddConstructedType(a);
-  WrapInFunction(Var("g", a, ast::StorageClass::kFunction));
+  WrapInFunction(Var("g", a));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -146,7 +146,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalAlias) {
 TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalStruct) {
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* o = Structure("O", {Member("a", s)});
-  WrapInFunction(Var("g", o, ast::StorageClass::kFunction));
+  WrapInFunction(Var("g", o));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -159,7 +159,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalStruct) {
 TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* a = ty.array(s, 3);
-  WrapInFunction(Var("g", a, ast::StorageClass::kFunction));
+  WrapInFunction(Var("g", a));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -183,7 +183,7 @@ TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
              create<ast::BindingDecoration>(1),
              create<ast::GroupDecoration>(0),
          });
-  WrapInFunction(Var("g", s, ast::StorageClass::kFunction));
+  WrapInFunction(Var("g", s));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 

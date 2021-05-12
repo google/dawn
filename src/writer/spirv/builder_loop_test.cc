@@ -135,7 +135,7 @@ TEST_F(BuilderTest, Loop_WithBodyVariableAccessInContinuing) {
   //   }
   // }
 
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kFunction);
+  auto* var = Var("a", ty.i32());
   auto* var_decl = WrapInStatement(var);
   auto* body = Block(var_decl);
   auto* continuing = Block(Assign("a", 3));

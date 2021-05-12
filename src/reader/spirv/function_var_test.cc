@@ -107,21 +107,21 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_AnonymousVars) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_1
-    function
+    none
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     x_2
-    function
+    none
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     x_3
-    function
+    none
     __u32
   }
 }
@@ -146,21 +146,21 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_NamedVars) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
-    function
+    none
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     b
-    function
+    none
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     c
-    function
+    none
     __u32
   }
 }
@@ -185,21 +185,21 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MixedTypes) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
-    function
+    none
     __u32
   }
 }
 VariableDeclStatement{
   Variable{
     b
-    function
+    none
     __i32
   }
 }
 VariableDeclStatement{
   Variable{
     c
-    function
+    none
     __f32
   }
 }
@@ -226,7 +226,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarInitializers) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
-    function
+    none
     __bool
     {
       ScalarConstructor[not set]{true}
@@ -236,7 +236,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarInitializers) {
 VariableDeclStatement{
   Variable{
     b
-    function
+    none
     __bool
     {
       ScalarConstructor[not set]{false}
@@ -246,7 +246,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     c
-    function
+    none
     __i32
     {
       ScalarConstructor[not set]{-1}
@@ -256,7 +256,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     d
-    function
+    none
     __u32
     {
       ScalarConstructor[not set]{1u}
@@ -266,7 +266,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     e
-    function
+    none
     __f32
     {
       ScalarConstructor[not set]{1.500000}
@@ -300,7 +300,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarNullInitializers) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     a
-    function
+    none
     __bool
     {
       ScalarConstructor[not set]{false}
@@ -310,7 +310,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarNullInitializers) {
 VariableDeclStatement{
   Variable{
     b
-    function
+    none
     __i32
     {
       ScalarConstructor[not set]{0}
@@ -320,7 +320,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     c
-    function
+    none
     __u32
     {
       ScalarConstructor[not set]{0u}
@@ -330,7 +330,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     d
-    function
+    none
     __f32
     {
       ScalarConstructor[not set]{0.000000}
@@ -360,7 +360,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_VectorInitializer) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    function
+    none
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -399,7 +399,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MatrixInitializer) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    function
+    none
     __mat_2_3__f32
     {
       TypeConstructor[not set]{
@@ -446,7 +446,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    function
+    none
     __array__u32_2
     {
       TypeConstructor[not set]{
@@ -485,7 +485,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias) {
   const char* expect = R"(VariableDeclStatement{
   Variable{
     x_200
-    function
+    none
     __type_name_Arr
     {
       TypeConstructor[not set]{
@@ -520,7 +520,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Null) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    function
+    none
     __array__u32_2
     {
       TypeConstructor[not set]{
@@ -560,7 +560,7 @@ TEST_F(SpvParserFunctionVarTest,
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    function
+    none
     __type_name_Arr
     {
       TypeConstructor[not set]{
@@ -595,7 +595,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    function
+    none
     __type_name_S
     {
       TypeConstructor[not set]{
@@ -635,7 +635,7 @@ TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer_Null) {
               HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_200
-    function
+    none
     __type_name_S
     {
       TypeConstructor[not set]{
@@ -681,7 +681,7 @@ TEST_F(SpvParserFunctionVarTest,
       R"(VariableDeclStatement{
   Variable{
     x_25
-    function
+    none
     __u32
   }
 }
@@ -729,7 +729,7 @@ TEST_F(SpvParserFunctionVarTest,
   auto* expect = R"(VariableDeclStatement{
   Variable{
     x_25
-    function
+    none
     __u32
   }
 }
@@ -801,7 +801,7 @@ TEST_F(SpvParserFunctionVarTest,
   auto* expect = R"(VariableDeclStatement{
   Variable{
     x_25
-    function
+    none
     __u32
   }
 }
@@ -905,7 +905,7 @@ Loop{
   VariableDeclStatement{
     Variable{
       x_2
-      function
+      none
       __u32
     }
   }
@@ -1351,14 +1351,14 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_SingleBlockLoopIndex) {
   VariableDeclStatement{
     Variable{
       x_2_phi
-      function
+      none
       __u32
     }
   }
   VariableDeclStatement{
     Variable{
       x_3_phi
-      function
+      none
       __u32
     }
   }
@@ -1498,14 +1498,14 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_MultiBlockLoopIndex) {
   VariableDeclStatement{
     Variable{
       x_2_phi
-      function
+      none
       __u32
     }
   }
   VariableDeclStatement{
     Variable{
       x_3_phi
-      function
+      none
       __u32
     }
   }
@@ -1549,7 +1549,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_MultiBlockLoopIndex) {
     VariableDeclStatement{
       Variable{
         x_4
-        function
+        none
         __u32
       }
     }
@@ -1670,14 +1670,14 @@ Loop{
   VariableDeclStatement{
     Variable{
       x_2_phi
-      function
+      none
       __u32
     }
   }
   VariableDeclStatement{
     Variable{
       x_5_phi
-      function
+      none
       __u32
     }
   }
@@ -1693,7 +1693,7 @@ Loop{
     VariableDeclStatement{
       Variable{
         x_7
-        function
+        none
         __u32
       }
     }
@@ -1852,7 +1852,7 @@ Loop{
   VariableDeclStatement{
     Variable{
       x_2_phi
-      function
+      none
       __u32
     }
   }
@@ -1978,7 +1978,7 @@ Loop{
   VariableDeclStatement{
     Variable{
       x_2_phi
-      function
+      none
       __u32
     }
   }
@@ -2083,7 +2083,7 @@ TEST_F(SpvParserFunctionVarTest,
   auto* expect = R"(VariableDeclStatement{
   Variable{
     x_35_phi
-    function
+    none
     __u32
   }
 }
@@ -2173,7 +2173,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_UseInPhiCountsAsUse) {
   auto* expect = R"(VariableDeclStatement{
   Variable{
     x_101_phi
-    function
+    none
     __bool
   }
 }

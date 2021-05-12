@@ -5947,7 +5947,7 @@ TEST_F(SpvParserHandleTest,
   auto* expect = R"(VariableDeclStatement{
   Variable{
     var_1
-    function
+    none
     __vec_4__f32
   }
 }
@@ -6003,7 +6003,7 @@ Assignment{
 }
 Return{}
 )";
-  ASSERT_EQ(expect, got) << got;
+  ASSERT_EQ(expect, got);
 }
 
 }  // namespace

@@ -26,13 +26,13 @@ TEST_F(BuilderTest, ArrayAccessor) {
   // vec3<f32> ary;
   // ary[1]  -> ptr<f32>
 
-  auto* var = Global("ary", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("ary", ty.vec3<f32>());
 
   auto* ary = Expr("ary");
   auto* idx_expr = Expr(1);
 
   auto* expr = IndexAccessor(ary, idx_expr);
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -62,14 +62,14 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
   // idx : i32;
   // ary[idx]  -> ptr<f32>
 
-  auto* var = Global("ary", ty.vec3<f32>(), ast::StorageClass::kFunction);
-  auto* idx = Global("idx", ty.i32(), ast::StorageClass::kFunction);
+  auto* var = Var("ary", ty.vec3<f32>());
+  auto* idx = Var("idx", ty.i32());
 
   auto* ary = Expr("ary");
   auto* idx_expr = Expr("idx");
 
   auto* expr = IndexAccessor(ary, idx_expr);
-  WrapInFunction(expr);
+  WrapInFunction(var, idx, expr);
 
   spirv::Builder& b = Build();
 
@@ -102,12 +102,12 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
   // vec3<f32> ary;
   // ary[1 + 2]  -> ptr<f32>
 
-  auto* var = Global("ary", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("ary", ty.vec3<f32>());
 
   auto* ary = Expr("ary");
 
   auto* expr = IndexAccessor(ary, Add(1, 2));
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -140,10 +140,10 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
   // ary = array<vec3<f32>, 4>
   // ary[3][2];
 
-  auto* var = Global("ary", ary4, ast::StorageClass::kFunction);
+  auto* var = Var("ary", ary4);
 
   auto* expr = IndexAccessor(IndexAccessor("ary", 3), 2);
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -178,10 +178,10 @@ TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
   // var a : array<vec3<f32>, 4>;
   // a[2].xy;
 
-  auto* var = Global("ary", ary4, ast::StorageClass::kFunction);
+  auto* var = Var("ary", ary4);
 
   auto* expr = MemberAccessor(IndexAccessor("ary", 2), "xy");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -224,10 +224,10 @@ TEST_F(BuilderTest, MemberAccessor) {
                                        Member("b", ty.f32()),
                                    });
 
-  auto* var = Global("ident", s, ast::StorageClass::kFunction);
+  auto* var = Var("ident", s);
 
   auto* expr = MemberAccessor("ident", "b");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -270,9 +270,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested) {
 
   auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
-  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
+  auto* var = Var("ident", s_type);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "b");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -312,10 +312,10 @@ TEST_F(BuilderTest, MemberAccessor_NonPointer) {
                                        Member("b", ty.f32()),
                                    });
 
-  auto* var = GlobalConst("ident", s, Construct(s, 0.f, 0.f));
+  auto* var = Const("ident", s, Construct(s, 0.f, 0.f));
 
   auto* expr = MemberAccessor("ident", "b");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -352,10 +352,10 @@ TEST_F(BuilderTest, MemberAccessor_Nested_NonPointer) {
 
   auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
-  auto* var = GlobalConst("ident", s_type,
-                          Construct(s_type, Construct(inner_struct, 0.f, 0.f)));
+  auto* var = Const("ident", s_type,
+                    Construct(s_type, Construct(inner_struct, 0.f, 0.f)));
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "b");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -396,9 +396,9 @@ TEST_F(BuilderTest, MemberAccessor_Nested_WithAlias) {
   auto* alias = ty.alias("Inner", inner_struct);
   auto* s_type = Structure("Outer", {Member("inner", alias)});
 
-  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
+  auto* var = Var("ident", s_type);
   auto* expr = MemberAccessor(MemberAccessor("ident", "inner"), "a");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -441,10 +441,10 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_LHS) {
 
   auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
-  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
+  auto* var = Var("ident", s_type);
   auto* expr =
       Assign(MemberAccessor(MemberAccessor("ident", "inner"), "a"), Expr(2.0f));
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -490,12 +490,12 @@ TEST_F(BuilderTest, MemberAccessor_Nested_Assignment_RHS) {
 
   auto* s_type = Structure("my_struct", {Member("inner", inner_struct)});
 
-  auto* var = Global("ident", s_type, ast::StorageClass::kFunction);
-  auto* store = Global("store", ty.f32(), ast::StorageClass::kFunction);
+  auto* var = Var("ident", s_type);
+  auto* store = Var("store", ty.f32());
 
   auto* rhs = MemberAccessor(MemberAccessor("ident", "inner"), "a");
   auto* expr = Assign("store", rhs);
-  WrapInFunction(expr);
+  WrapInFunction(var, store, expr);
 
   spirv::Builder& b = Build();
 
@@ -529,10 +529,10 @@ OpStore %7 %13
 TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
   // ident.y
 
-  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("ident", ty.vec3<f32>());
 
   auto* expr = MemberAccessor("ident", "y");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -560,10 +560,10 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_Single) {
 TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
   // ident.yx
 
-  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("ident", ty.vec3<f32>());
 
   auto* expr = MemberAccessor("ident", "yx");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -590,10 +590,10 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_MultipleNames) {
 TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
   // ident.yxz.xz
 
-  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("ident", ty.vec3<f32>());
 
   auto* expr = MemberAccessor(MemberAccessor("ident", "yxz"), "xz");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -621,10 +621,10 @@ TEST_F(BuilderTest, MemberAccessor_Swizzle_of_Swizzle) {
 TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
   // ident.yxz.x
 
-  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("ident", ty.vec3<f32>());
 
   auto* expr = MemberAccessor(MemberAccessor("ident", "yxz"), "x");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -651,10 +651,10 @@ TEST_F(BuilderTest, MemberAccessor_Member_of_Swizzle) {
 TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
   // index.yxz[1]
 
-  auto* var = Global("ident", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("ident", ty.vec3<f32>());
 
   auto* expr = IndexAccessor(MemberAccessor("ident", "yxz"), 1);
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -700,7 +700,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
   auto* a_type = Structure("A", {Member("foo", b_ary_type)});
 
   auto* a_ary_type = ty.array(a_type, 2);
-  auto* var = Global("index", a_ary_type, ast::StorageClass::kFunction);
+  auto* var = Var("index", a_ary_type);
   auto* expr = MemberAccessor(
       MemberAccessor(
           MemberAccessor(
@@ -709,7 +709,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
               "bar"),
           "baz"),
       "yx");
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -755,12 +755,12 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   // pos[1]
 
   auto* var =
-      GlobalConst("pos", ty.array(ty.vec2<f32>(), 3),
-                  Construct(ty.array(ty.vec2<f32>(), 3), vec2<f32>(0.0f, 0.5f),
-                            vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)));
+      Const("pos", ty.array(ty.vec2<f32>(), 3),
+            Construct(ty.array(ty.vec2<f32>(), 3), vec2<f32>(0.0f, 0.5f),
+                      vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)));
 
   auto* expr = IndexAccessor("pos", 1u);
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -798,10 +798,10 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
   // let pos : vec2<f32> = vec2<f32>(0.0, 0.5);
   // pos[1]
 
-  auto* var = GlobalConst("pos", ty.vec2<f32>(), vec2<f32>(0.0f, 0.5f));
+  auto* var = Const("pos", ty.vec2<f32>(), vec2<f32>(0.0f, 0.5f));
 
   auto* expr = IndexAccessor("pos", 1u);
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -828,15 +828,11 @@ TEST_F(BuilderTest, Accessor_Const_Vec_Dynamic) {
   // idx : i32
   // pos[idx]
 
-  auto* var = GlobalConst("pos", ty.vec2<f32>(), vec2<f32>(0.0f, 0.5f));
-
-  auto* idx = Var("idx", ty.i32(), ast::StorageClass::kFunction);
+  auto* var = Const("pos", ty.vec2<f32>(), vec2<f32>(0.0f, 0.5f));
+  auto* idx = Var("idx", ty.i32());
   auto* expr = IndexAccessor("pos", idx);
 
-  ast::StatementList body;
-  body.push_back(WrapInStatement(idx));
-  body.push_back(WrapInStatement(expr));
-  WrapInFunction(body);
+  WrapInFunction(var, idx, expr);
 
   spirv::Builder& b = Build();
 
@@ -867,10 +863,10 @@ TEST_F(BuilderTest, Accessor_Array_NonPointer) {
   // let a : array<f32, 3>;
   // a[2]
 
-  auto* var = GlobalConst("a", ty.array<f32, 3>(),
-                          Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
+  auto* var = Const("a", ty.array<f32, 3>(),
+                    Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
   auto* expr = IndexAccessor("a", 2);
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -900,16 +896,13 @@ TEST_F(BuilderTest, Accessor_Array_NonPointer_Dynamic) {
   // idx : i32
   // a[idx]
 
-  auto* var = GlobalConst("a", ty.array<f32, 3>(),
-                          Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
+  auto* var = Const("a", ty.array<f32, 3>(),
+                    Construct(ty.array<f32, 3>(), 0.0f, 0.5f, 1.0f));
 
-  auto* idx = Var("idx", ty.i32(), ast::StorageClass::kFunction);
+  auto* idx = Var("idx", ty.i32());
   auto* expr = IndexAccessor("a", idx);
 
-  ast::StatementList body;
-  body.push_back(WrapInStatement(idx));
-  body.push_back(WrapInStatement(expr));
-  WrapInFunction(body);
+  WrapInFunction(var, idx, expr);
 
   spirv::Builder& b = Build();
 

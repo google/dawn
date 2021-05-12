@@ -22,7 +22,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Switch) {
-  auto* cond = Var("cond", ty.i32(), ast::StorageClass::kFunction);
+  auto* cond = Var("cond", ty.i32());
 
   auto* def_body = Block(create<ast::BreakStatement>());
   auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);

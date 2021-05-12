@@ -147,7 +147,7 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
                 HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_10
-    function
+    none
     __u32
   }
 }

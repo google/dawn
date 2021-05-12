@@ -87,11 +87,11 @@ TEST_P(BinaryArithSignedIntegerTest, Vector) {
 TEST_P(BinaryArithSignedIntegerTest, Scalar_Loads) {
   auto param = GetParam();
 
-  auto* var = Global("param", ty.i32(), ast::StorageClass::kFunction);
+  auto* var = Var("param", ty.i32());
   auto* expr =
       create<ast::BinaryExpression>(param.op, Expr("param"), Expr("param"));
 
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -482,12 +482,12 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
-  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("mat", ty.mat3x3<f32>());
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
                                              Expr("mat"), Expr(1.f));
 
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -510,12 +510,12 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
-  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("mat", ty.mat3x3<f32>());
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
                                              Expr(1.f), Expr("mat"));
 
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -538,13 +538,13 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
-  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("mat", ty.mat3x3<f32>());
   auto* rhs = vec3<f32>(1.f, 1.f, 1.f);
 
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), rhs);
 
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -568,13 +568,13 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
-  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("mat", ty.mat3x3<f32>());
   auto* lhs = vec3<f32>(1.f, 1.f, 1.f);
 
   auto* expr =
       create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, Expr("mat"));
 
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -598,12 +598,12 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix) {
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix) {
-  auto* var = Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("mat", ty.mat3x3<f32>());
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply,
                                              Expr("mat"), Expr("mat"));
 
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 
@@ -666,9 +666,9 @@ OpBranch %7
 
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
   auto* a_var =
-      Global("a", ty.bool_(), ast::StorageClass::kFunction, Expr(true));
+      Global("a", ty.bool_(), ast::StorageClass::kPrivate, Expr(true));
   auto* b_var =
-      Global("b", ty.bool_(), ast::StorageClass::kFunction, Expr(false));
+      Global("b", ty.bool_(), ast::StorageClass::kPrivate, Expr(false));
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,
                                              Expr("a"), Expr("b"));
@@ -686,10 +686,10 @@ TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 12u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %3 = OpConstantTrue %2
-%5 = OpTypePointer Function %2
-%4 = OpVariable %5 Function %3
+%5 = OpTypePointer Private %2
+%4 = OpVariable %5 Private %3
 %6 = OpConstantFalse %2
-%7 = OpVariable %5 Function %6
+%7 = OpVariable %5 Private %6
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%1 = OpLabel
@@ -825,9 +825,9 @@ OpBranch %7
 
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
   auto* a_var =
-      Global("a", ty.bool_(), ast::StorageClass::kFunction, Expr(true));
+      Global("a", ty.bool_(), ast::StorageClass::kPrivate, Expr(true));
   auto* b_var =
-      Global("b", ty.bool_(), ast::StorageClass::kFunction, Expr(false));
+      Global("b", ty.bool_(), ast::StorageClass::kPrivate, Expr(false));
 
   auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr,
                                              Expr("a"), Expr("b"));
@@ -845,10 +845,10 @@ TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
   EXPECT_EQ(b.GenerateBinaryExpression(expr), 12u) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %3 = OpConstantTrue %2
-%5 = OpTypePointer Function %2
-%4 = OpVariable %5 Function %3
+%5 = OpTypePointer Private %2
+%4 = OpVariable %5 Private %3
 %6 = OpConstantFalse %2
-%7 = OpVariable %5 Function %6
+%7 = OpVariable %5 Private %6
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(%1 = OpLabel

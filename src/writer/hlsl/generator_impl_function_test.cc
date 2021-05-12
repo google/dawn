@@ -323,7 +323,7 @@ TEST_F(HlslGeneratorImplTest_Function,
        });
 
   auto* var =
-      Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
+      Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1.0f));
 
   Func("frag_main", {}, ty.void_(),
        {
@@ -368,7 +368,7 @@ TEST_F(HlslGeneratorImplTest_Function,
              create<ast::GroupDecoration>(1),
          });
 
-  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
+  auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
                   MemberAccessor(MemberAccessor("uniforms", "coord"), "x"));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -416,7 +416,7 @@ TEST_F(HlslGeneratorImplTest_Function,
              create<ast::GroupDecoration>(1),
          });
 
-  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
+  auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
                   MemberAccessor("coord", "b"));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -462,7 +462,7 @@ TEST_F(HlslGeneratorImplTest_Function,
              create<ast::GroupDecoration>(1),
          });
 
-  auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
+  auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
                   MemberAccessor("coord", "b"));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
@@ -756,7 +756,7 @@ TEST_F(HlslGeneratorImplTest_Function,
        });
 
   auto* var =
-      Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
+      Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1.0f));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        {
@@ -807,7 +807,7 @@ TEST_F(HlslGeneratorImplTest_Function,
        });
 
   auto* var =
-      Var("v", ty.f32(), ast::StorageClass::kFunction, Call("sub_func", 1.0f));
+      Var("v", ty.f32(), ast::StorageClass::kNone, Call("sub_func", 1.0f));
 
   Func("frag_main", ast::VariableList{}, ty.void_(),
        {
@@ -993,7 +993,7 @@ TEST_F(HlslGeneratorImplTest_Function,
          });
 
   {
-    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
                     MemberAccessor("data", "d"));
 
     Func("a", ast::VariableList{}, ty.void_(),
@@ -1007,7 +1007,7 @@ TEST_F(HlslGeneratorImplTest_Function,
   }
 
   {
-    auto* var = Var("v", ty.f32(), ast::StorageClass::kFunction,
+    auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
                     MemberAccessor("data", "d"));
 
     Func("b", ast::VariableList{}, ty.void_(),

@@ -1609,7 +1609,7 @@ INSTANTIATE_TEST_SUITE_P(
                     IntrinsicData{"max", IntrinsicType::kMax}));
 
 TEST_F(ResolverIntrinsicTest, Determinant_2x2) {
-  Global("var", ty.mat2x2<f32>(), ast::StorageClass::kFunction);
+  Global("var", ty.mat2x2<f32>(), ast::StorageClass::kPrivate);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -1621,7 +1621,7 @@ TEST_F(ResolverIntrinsicTest, Determinant_2x2) {
 }
 
 TEST_F(ResolverIntrinsicTest, Determinant_3x3) {
-  Global("var", ty.mat3x3<f32>(), ast::StorageClass::kFunction);
+  Global("var", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -1633,7 +1633,7 @@ TEST_F(ResolverIntrinsicTest, Determinant_3x3) {
 }
 
 TEST_F(ResolverIntrinsicTest, Determinant_4x4) {
-  Global("var", ty.mat4x4<f32>(), ast::StorageClass::kFunction);
+  Global("var", ty.mat4x4<f32>(), ast::StorageClass::kPrivate);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -1645,7 +1645,7 @@ TEST_F(ResolverIntrinsicTest, Determinant_4x4) {
 }
 
 TEST_F(ResolverIntrinsicTest, Determinant_NotSquare) {
-  Global("var", ty.mat2x3<f32>(), ast::StorageClass::kFunction);
+  Global("var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -1654,13 +1654,13 @@ TEST_F(ResolverIntrinsicTest, Determinant_NotSquare) {
 
   EXPECT_EQ(
       r()->error(),
-      "error: no matching call to determinant(ptr<function, mat2x3<f32>>)\n\n"
+      "error: no matching call to determinant(ptr<private, mat2x3<f32>>)\n\n"
       "1 candidate function:\n"
       "  determinant(matNxN<f32>) -> f32\n");
 }
 
 TEST_F(ResolverIntrinsicTest, Determinant_NotMatrix) {
-  Global("var", ty.f32(), ast::StorageClass::kFunction);
+  Global("var", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* call = Call("determinant", "var");
   WrapInFunction(call);
@@ -1668,7 +1668,7 @@ TEST_F(ResolverIntrinsicTest, Determinant_NotMatrix) {
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "error: no matching call to determinant(ptr<function, f32>)\n\n"
+            "error: no matching call to determinant(ptr<private, f32>)\n\n"
             "1 candidate function:\n"
             "  determinant(matNxN<f32>) -> f32\n");
 }

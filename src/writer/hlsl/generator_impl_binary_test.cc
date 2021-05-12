@@ -44,8 +44,8 @@ TEST_P(HlslBinaryTest, Emit_f32) {
     return;
   }
 
-  Global("left", ty.f32(), ast::StorageClass::kFunction);
-  Global("right", ty.f32(), ast::StorageClass::kFunction);
+  Global("left", ty.f32(), ast::StorageClass::kPrivate);
+  Global("right", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* left = Expr("left");
   auto* right = Expr("right");
@@ -62,8 +62,8 @@ TEST_P(HlslBinaryTest, Emit_f32) {
 TEST_P(HlslBinaryTest, Emit_u32) {
   auto params = GetParam();
 
-  Global("left", ty.u32(), ast::StorageClass::kFunction);
-  Global("right", ty.u32(), ast::StorageClass::kFunction);
+  Global("left", ty.u32(), ast::StorageClass::kPrivate);
+  Global("right", ty.u32(), ast::StorageClass::kPrivate);
 
   auto* left = Expr("left");
   auto* right = Expr("right");
@@ -86,8 +86,8 @@ TEST_P(HlslBinaryTest, Emit_i32) {
     return;
   }
 
-  Global("left", ty.i32(), ast::StorageClass::kFunction);
-  Global("right", ty.i32(), ast::StorageClass::kFunction);
+  Global("left", ty.i32(), ast::StorageClass::kPrivate);
+  Global("right", ty.i32(), ast::StorageClass::kPrivate);
 
   auto* left = Expr("left");
   auto* right = Expr("right");
@@ -426,7 +426,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
   Global("c", ty.bool_(), ast::StorageClass::kPrivate);
   Global("d", ty.bool_(), ast::StorageClass::kPrivate);
 
-  auto* var = Var("a", ty.bool_(), ast::StorageClass::kFunction,
+  auto* var = Var("a", ty.bool_(), ast::StorageClass::kNone,
                   create<ast::BinaryExpression>(
                       ast::BinaryOp::kLogicalOr,
                       create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd,

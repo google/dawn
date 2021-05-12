@@ -22,7 +22,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, ArrayAccessor) {
-  auto* ary = Var("ary", ty.array<i32, 10>(), ast::StorageClass::kFunction);
+  auto* ary = Var("ary", ty.array<i32, 10>());
   auto* expr = IndexAccessor("ary", 5);
   WrapInFunction(ary, expr);
 

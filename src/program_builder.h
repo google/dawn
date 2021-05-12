@@ -1189,7 +1189,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Var(NAME&& name,
                      ast::Type* type,
-                     ast::StorageClass storage,
+                     ast::StorageClass storage = ast::StorageClass::kNone,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);
@@ -1208,7 +1208,7 @@ class ProgramBuilder {
   ast::Variable* Var(const Source& source,
                      NAME&& name,
                      ast::Type* type,
-                     ast::StorageClass storage,
+                     ast::StorageClass storage = ast::StorageClass::kNone,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
     type = ty.MaybeCreateTypename(type);

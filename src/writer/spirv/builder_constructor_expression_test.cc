@@ -113,10 +113,10 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_IdentifierExpression_Param) {
-  auto* var = Global("ident", ty.f32(), ast::StorageClass::kFunction);
+  auto* var = Var("ident", ty.f32());
 
   auto* t = vec2<f32>(1.0f, "ident");
-  WrapInFunction(t);
+  WrapInFunction(var, t);
 
   spirv::Builder& b = Build();
 

@@ -38,8 +38,8 @@ TEST_P(MslBinaryTest, Emit) {
                : static_cast<ast::Type*>(ty.u32());
   };
 
-  auto* left = Var("left", type(), ast::StorageClass::kFunction);
-  auto* right = Var("right", type(), ast::StorageClass::kFunction);
+  auto* left = Var("left", type());
+  auto* right = Var("right", type());
 
   auto* expr =
       create<ast::BinaryExpression>(params.op, Expr("left"), Expr("right"));

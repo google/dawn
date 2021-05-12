@@ -46,17 +46,18 @@ using f32 = ProgramBuilder::f32;
 TEST_F(ResolverTypeConstructorValidationTest, InferTypeTest_Simple) {
   // var a = 1;
   // var b = a;
-  auto sc = ast::StorageClass::kFunction;
-  auto* a = Var("a", nullptr, sc, Expr(1));
-  auto* b = Var("b", nullptr, sc, Expr("a"));
+  auto* a = Var("a", nullptr, ast::StorageClass::kNone, Expr(1));
+  auto* b = Var("b", nullptr, ast::StorageClass::kNone, Expr("a"));
   auto* a_ident = Expr("a");
   auto* b_ident = Expr("b");
 
   WrapInFunction(Decl(a), Decl(b), Assign(a_ident, "a"), Assign(b_ident, "b"));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
-  ASSERT_EQ(TypeOf(a_ident), ty.pointer(ty.i32(), sc));
-  ASSERT_EQ(TypeOf(b_ident), ty.pointer(ty.i32(), sc));
+  ASSERT_EQ(TypeOf(a_ident),
+            ty.pointer(ty.i32(), ast::StorageClass::kFunction));
+  ASSERT_EQ(TypeOf(b_ident),
+            ty.pointer(ty.i32(), ast::StorageClass::kFunction));
 }
 
 using InferTypeTest_FromConstructorExpression = ResolverTestWithParam<Params>;
@@ -70,8 +71,7 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
   auto* rhs_type = params.create_rhs_ast_type(ty);
   auto* constructor_expr = ConstructValueFilledWith(rhs_type, 0);
 
-  auto sc = ast::StorageClass::kFunction;
-  auto* a = Var("a", nullptr, sc, constructor_expr);
+  auto* a = Var("a", nullptr, ast::StorageClass::kNone, constructor_expr);
   // Self-assign 'a' to force the expression to be resolved so we can test its
   // type below
   auto* a_ident = Expr("a");
@@ -79,7 +79,9 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   auto* got = TypeOf(a_ident);
-  auto* expected = ty.pointer(params.create_rhs_sem_type(ty), sc).sem;
+  auto* expected =
+      ty.pointer(params.create_rhs_sem_type(ty), ast::StorageClass::kFunction)
+          .sem;
   ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                            << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -124,8 +126,7 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
   auto* arith_rhs_expr = ConstructValueFilledWith(ElementTypeOf(rhs_type), 3);
   auto* constructor_expr = Mul(arith_lhs_expr, arith_rhs_expr);
 
-  auto sc = ast::StorageClass::kFunction;
-  auto* a = Var("a", nullptr, sc, constructor_expr);
+  auto* a = Var("a", nullptr, ast::StorageClass::kNone, constructor_expr);
   // Self-assign 'a' to force the expression to be resolved so we can test its
   // type below
   auto* a_ident = Expr("a");
@@ -133,7 +134,9 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   auto* got = TypeOf(a_ident);
-  auto* expected = ty.pointer(params.create_rhs_sem_type(ty), sc).sem;
+  auto* expected =
+      ty.pointer(params.create_rhs_sem_type(ty), ast::StorageClass::kFunction)
+          .sem;
   ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                            << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -173,8 +176,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
        {Return(ConstructValueFilledWith(params.create_rhs_ast_type(ty), 0))},
        {});
 
-  auto sc = ast::StorageClass::kFunction;
-  auto* a = Var("a", nullptr, sc, Call(Expr("foo")));
+  auto* a = Var("a", nullptr, ast::StorageClass::kNone, Call(Expr("foo")));
   // Self-assign 'a' to force the expression to be resolved so we can test its
   // type below
   auto* a_ident = Expr("a");
@@ -182,7 +184,9 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   auto* got = TypeOf(a_ident);
-  auto* expected = ty.pointer(params.create_rhs_sem_type(ty), sc).sem;
+  auto* expected =
+      ty.pointer(params.create_rhs_sem_type(ty), ast::StorageClass::kFunction)
+          .sem;
   ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                            << "expected: " << FriendlyName(expected) << "\n";
 }

@@ -23,7 +23,8 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kInput);
+  auto* v = Var("var", ty.f32(), ast::StorageClass::kFunction);
+  WrapInFunction(v);
 
   spirv::Builder& b = Build();
 
@@ -44,8 +45,8 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 
 TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
-
-  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kOutput, init);
+  auto* v = Var("var", ty.vec3<f32>(), ast::StorageClass::kFunction, init);
+  WrapInFunction(v);
 
   spirv::Builder& b = Build();
 
@@ -74,7 +75,8 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
   auto* init = vec2<f32>(1.f, Add(3.f, 3.f));
 
-  auto* v = Global("var", ty.vec2<f32>(), ast::StorageClass::kFunction, init);
+  auto* v = Var("var", ty.vec2<f32>(), ast::StorageClass::kNone, init);
+  WrapInFunction(v);
 
   spirv::Builder& b = Build();
 
@@ -105,9 +107,10 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
   // var v : f32 = 1.0;
   // var v2 : f32 = v; // Should generate the load and store automatically.
 
-  auto* v = Global("v", ty.f32(), ast::StorageClass::kFunction, Expr(1.f));
+  auto* v = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(1.f));
 
-  auto* v2 = Global("v2", ty.f32(), ast::StorageClass::kFunction, Expr("v"));
+  auto* v2 = Var("v2", ty.f32(), ast::StorageClass::kNone, Expr("v"));
+  WrapInFunction(v, v2);
 
   spirv::Builder& b = Build();
 
@@ -139,9 +142,10 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
   // var v : f32 = 1.0;
   // let v2 : f32 = v; // Should generate the load
 
-  auto* v = Global("v", ty.f32(), ast::StorageClass::kFunction, Expr(1.f));
+  auto* v = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(1.f));
 
-  auto* v2 = Global("v2", ty.f32(), ast::StorageClass::kFunction, Expr("v"));
+  auto* v2 = Var("v2", ty.f32(), ast::StorageClass::kNone, Expr("v"));
+  WrapInFunction(v, v2);
 
   spirv::Builder& b = Build();
 

@@ -44,7 +44,7 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
-           Decl(Var("len", ty.u32(), ast::StorageClass::kFunction,
+           Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                     Call("arrayLength", MemberAccessor("sb", "arr")))),
        },
        ast::DecorationList{
@@ -74,7 +74,7 @@ void main() {
 TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
   auto* array_init = array<i32, 4>(1, 2, 3, 4);
   auto* array_index = IndexAccessor(array_init, 3);
-  auto* pos = Var("pos", ty.i32(), ast::StorageClass::kFunction, array_index);
+  auto* pos = Var("pos", ty.i32(), ast::StorageClass::kNone, array_index);
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -108,7 +108,7 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
   auto* struct_init = Construct(str, 1, vec3<f32>(2.f, 3.f, 4.f), 4);
   auto* struct_access = MemberAccessor(struct_init, "b");
   auto* pos =
-      Var("pos", ty.vec3<f32>(), ast::StorageClass::kFunction, struct_access);
+      Var("pos", ty.vec3<f32>(), ast::StorageClass::kNone, struct_access);
 
   Func("main", ast::VariableList{}, ty.void_(),
        ast::StatementList{

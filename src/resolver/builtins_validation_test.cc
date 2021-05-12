@@ -107,7 +107,7 @@ TEST_F(ResolverBuiltinsValidationTest, Determinant_Mat4x4) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Scalar) {
-  auto* a = Var("a", ty.i32(), ast::StorageClass::kFunction);
+  auto* a = Var("a", ty.i32());
   auto* builtin = Call("frexp", 1.0f, Expr("a"));
   WrapInFunction(Decl(a), builtin);
 
@@ -117,7 +117,7 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Scalar) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
-  auto* a = Var("a", ty.vec2<int>(), ast::StorageClass::kFunction);
+  auto* a = Var("a", ty.vec2<int>());
   auto* b = Const("b", ty.pointer(ty.vec2<i32>(), ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("frexp", vec2<f32>(1.0f, 1.0f), Expr("b"));
@@ -129,7 +129,7 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec2) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
-  auto* a = Var("a", ty.vec3<int>(), ast::StorageClass::kFunction);
+  auto* a = Var("a", ty.vec3<int>());
   auto* b = Const("b", ty.pointer(ty.vec3<i32>(), ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("frexp", vec3<f32>(1.0f, 1.0f, 1.0f), Expr("b"));
@@ -141,7 +141,7 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec3) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
-  auto* a = Var("a", ty.vec4<int>(), ast::StorageClass::kFunction);
+  auto* a = Var("a", ty.vec4<int>());
   auto* b = Const("b", ty.pointer(ty.vec4<i32>(), ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("frexp", vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));
@@ -153,7 +153,7 @@ TEST_F(ResolverBuiltinsValidationTest, Frexp_Vec4) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
-  auto* a = Var("a", ty.f32(), ast::StorageClass::kFunction);
+  auto* a = Var("a", ty.f32());
   auto* b =
       Const("b", ty.pointer<f32>(ast::StorageClass::kFunction), Expr("a"), {});
   auto* builtin = Call("modf", 1.0f, Expr("b"));
@@ -165,7 +165,7 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Scalar) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
-  auto* a = Var("a", ty.vec2<f32>(), ast::StorageClass::kFunction);
+  auto* a = Var("a", ty.vec2<f32>());
   auto* b = Const("b", ty.pointer(ty.vec2<f32>(), ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("modf", vec2<f32>(1.0f, 1.0f), Expr("b"));
@@ -177,7 +177,7 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec2) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
-  auto* a = Var("a", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* a = Var("a", ty.vec3<f32>());
   auto* b = Const("b", ty.pointer(ty.vec3<f32>(), ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("modf", vec3<f32>(1.0f, 1.0f, 1.0f), Expr("b"));
@@ -189,7 +189,7 @@ TEST_F(ResolverBuiltinsValidationTest, Modf_Vec3) {
 }
 
 TEST_F(ResolverBuiltinsValidationTest, Modf_Vec4) {
-  auto* a = Var("a", ty.vec4<f32>(), ast::StorageClass::kFunction);
+  auto* a = Var("a", ty.vec4<f32>());
   auto* b = Const("b", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction),
                   Expr("a"), {});
   auto* builtin = Call("modf", vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f), Expr("b"));

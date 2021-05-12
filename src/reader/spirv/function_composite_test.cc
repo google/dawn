@@ -581,7 +581,7 @@ TEST_F(SpvParserTest_CompositeInsert, Vector) {
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_1_1
-    function
+    none
     __vec_2__f32
     {
       TypeConstructor[not set]{
@@ -647,7 +647,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix) {
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_2_1
-    function
+    none
     __mat_2_3__f32
     {
       Identifier[not set]{x_1}
@@ -717,7 +717,7 @@ TEST_F(SpvParserTest_CompositeInsert, Matrix_Vector) {
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_2_1
-    function
+    none
     __mat_2_3__f32
     {
       Identifier[not set]{x_1}
@@ -767,7 +767,7 @@ TEST_F(SpvParserTest_CompositeInsert, Array) {
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_2_1
-    function
+    none
     __array__u32_5
     {
       Identifier[not set]{x_1}
@@ -834,7 +834,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct) {
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_35
-    function
+    none
     __type_name_S
   }
 }
@@ -851,7 +851,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     x_2_1
-    function
+    none
     __type_name_S
     {
       Identifier[not set]{x_1}
@@ -908,14 +908,14 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_DifferOnlyInMemberName) {
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_40
-    function
+    none
     __type_name_S_2
   }
 }
 VariableDeclStatement{
   Variable{
     x_41
-    function
+    none
     __type_name_S_2
   }
 }
@@ -932,7 +932,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     x_2_1
-    function
+    none
     __type_name_S_1
     {
       Identifier[not set]{x_1}
@@ -969,7 +969,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     x_4_1
-    function
+    none
     __type_name_S_2
     {
       Identifier[not set]{x_3}
@@ -997,7 +997,7 @@ VariableDeclStatement{
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_4_1
-    function
+    none
     __type_name_S_2
     {
       Identifier[not set]{x_3}
@@ -1065,7 +1065,7 @@ TEST_F(SpvParserTest_CompositeInsert, Struct_Array_Matrix_Vector) {
   EXPECT_THAT(body_str, HasSubstr(R"(VariableDeclStatement{
   Variable{
     x_37
-    function
+    none
     __type_name_S_1
   }
 }
@@ -1082,7 +1082,7 @@ VariableDeclStatement{
 VariableDeclStatement{
   Variable{
     x_2_1
-    function
+    none
     __type_name_S_1
     {
       Identifier[not set]{x_1}
@@ -1431,7 +1431,7 @@ TEST_F(SpvParserTest_VectorExtractDynamic, Sample) {
 VariableDeclStatement{
   Variable{
     x_10_1
-    function
+    none
     __vec_2__u32
     {
       Identifier[not set]{x_1}

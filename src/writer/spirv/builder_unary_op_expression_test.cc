@@ -72,11 +72,11 @@ TEST_F(BuilderTest, UnaryOp_Not) {
 }
 
 TEST_F(BuilderTest, UnaryOp_LoadRequired) {
-  auto* var = Global("param", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("param", ty.vec3<f32>());
 
   auto* expr =
       create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("param"));
-  WrapInFunction(expr);
+  WrapInFunction(var, expr);
 
   spirv::Builder& b = Build();
 

@@ -234,9 +234,8 @@ struct State {
     ast::StatementList stmts;
 
     // Declare the pulling position variable in the shader
-    stmts.emplace_back(
-        ctx.dst->Decl(ctx.dst->Var(GetPullingPositionName(), ctx.dst->ty.u32(),
-                                   ast::StorageClass::kFunction)));
+    stmts.emplace_back(ctx.dst->Decl(
+        ctx.dst->Var(GetPullingPositionName(), ctx.dst->ty.u32())));
 
     for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
       const VertexBufferLayoutDescriptor& buffer_layout = cfg.vertex_state[i];
@@ -396,8 +395,7 @@ struct State {
       // Create a function-scope variable to replace the parameter.
       auto func_var_sym = ctx.Clone(param->symbol());
       auto* func_var_type = ctx.Clone(param->type());
-      auto* func_var = ctx.dst->Var(func_var_sym, func_var_type,
-                                    ast::StorageClass::kFunction);
+      auto* func_var = ctx.dst->Var(func_var_sym, func_var_type);
       ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
                        ctx.dst->Decl(func_var));
       // Capture mapping from location to the new variable.
@@ -471,8 +469,7 @@ struct State {
     }
 
     // Create a function-scope variable to replace the parameter.
-    auto* func_var = ctx.dst->Var(param_sym, ctx.Clone(param->type()),
-                                  ast::StorageClass::kFunction);
+    auto* func_var = ctx.dst->Var(param_sym, ctx.Clone(param->type()));
     ctx.InsertBefore(func->body()->statements(), *func->body()->begin(),
                      ctx.dst->Decl(func_var));
 

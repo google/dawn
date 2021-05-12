@@ -7909,7 +7909,7 @@ TEST_F(SpvParserCFGTest, EmitBody_IfBreak_FromThen_ForwardWithinThen) {
 VariableDeclStatement{
   Variable{
     guard10
-    function
+    none
     __bool
     {
       ScalarConstructor[not set]{true}
@@ -8021,7 +8021,7 @@ TEST_F(SpvParserCFGTest, EmitBody_IfBreak_FromElse_ForwardWithinElse) {
 VariableDeclStatement{
   Variable{
     guard10
-    function
+    none
     __bool
     {
       ScalarConstructor[not set]{true}
@@ -8148,7 +8148,7 @@ TEST_F(SpvParserCFGTest,
 VariableDeclStatement{
   Variable{
     guard10
-    function
+    none
     __bool
     {
       ScalarConstructor[not set]{true}

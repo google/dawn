@@ -182,7 +182,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferLoad, Test) {
   });
 
   SetupFunction({
-      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+      Decl(Var("x", nullptr, ast::StorageClass::kNone,
                MemberAccessor("data", "b"))),
   });
 
@@ -256,7 +256,7 @@ TEST_P(HlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
   });
 
   SetupFunction({
-      Decl(Var("value", p.member_type(ty), ast::StorageClass::kFunction,
+      Decl(Var("value", p.member_type(ty), ast::StorageClass::kNone,
                Construct(p.member_type(ty)))),
       Assign(MemberAccessor("data", "b"), Expr("value")),
   });
@@ -387,7 +387,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   SetupFunction({
       Decl(
-          Var("x", nullptr, ast::StorageClass::kFunction,
+          Var("x", nullptr, ast::StorageClass::kNone,
               IndexAccessor(IndexAccessor(MemberAccessor("data", "a"), 2), 1))),
   });
 
@@ -423,7 +423,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+      Decl(Var("x", nullptr, ast::StorageClass::kNone,
                IndexAccessor(MemberAccessor("data", "a"), 2))),
   });
 
@@ -457,7 +457,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+      Decl(Var("x", nullptr, ast::StorageClass::kNone,
                IndexAccessor(MemberAccessor("data", "a"),
                              Sub(Add(2, Expr(4)), Expr(3))))),
   });
@@ -533,7 +533,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_MultiLevel) {
 
   SetupFunction({
       Decl(Var(
-          "x", nullptr, ast::StorageClass::kFunction,
+          "x", nullptr, ast::StorageClass::kNone,
           MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2), "b"))),
   });
 
@@ -578,7 +578,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+      Decl(Var("x", nullptr, ast::StorageClass::kNone,
                MemberAccessor(
                    MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2),
                                   "b"),
@@ -626,7 +626,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
   });
 
   SetupFunction({
-      Decl(Var("x", nullptr, ast::StorageClass::kFunction,
+      Decl(Var("x", nullptr, ast::StorageClass::kNone,
                MemberAccessor(
                    MemberAccessor(IndexAccessor(MemberAccessor("data", "c"), 2),
                                   "b"),
@@ -675,7 +675,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
 
   SetupFunction({
       Decl(Var(
-          "x", nullptr, ast::StorageClass::kFunction,
+          "x", nullptr, ast::StorageClass::kNone,
           IndexAccessor(MemberAccessor(
                             IndexAccessor(MemberAccessor("data", "c"), 2), "b"),
                         1))),
@@ -792,7 +792,7 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
-  auto* var = Var("my_vec", ty.vec4<f32>(), ast::StorageClass::kFunction,
+  auto* var = Var("my_vec", ty.vec4<f32>(), ast::StorageClass::kNone,
                   vec4<f32>(1.f, 2.f, 3.f, 4.f));
   auto* expr = MemberAccessor("my_vec", "xyz");
   WrapInFunction(var, expr);
@@ -805,7 +805,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_xyz) {
 }
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, Swizzle_gbr) {
-  auto* var = Var("my_vec", ty.vec4<f32>(), ast::StorageClass::kFunction,
+  auto* var = Var("my_vec", ty.vec4<f32>(), ast::StorageClass::kNone,
                   vec4<f32>(1.f, 2.f, 3.f, 4.f));
   auto* expr = MemberAccessor("my_vec", "gbr");
   WrapInFunction(var, expr);

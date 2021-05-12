@@ -23,7 +23,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
-  auto* var = Var("a", ty.f32(), ast::StorageClass::kFunction);
+  auto* var = Var("a", ty.f32());
 
   auto* stmt = Decl(var);
   WrapInFunction(stmt);
@@ -37,7 +37,7 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_InferredType) {
-  auto* var = Var("a", nullptr, ast::StorageClass::kFunction, Expr(123));
+  auto* var = Var("a", nullptr, ast::StorageClass::kNone, Expr(123));
 
   auto* stmt = Decl(var);
   WrapInFunction(stmt);

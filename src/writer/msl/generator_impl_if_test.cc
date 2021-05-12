@@ -22,7 +22,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_If) {
-  auto* cond = Var("cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* cond = Var("cond", ty.bool_());
   auto* i = If(cond, Block(Return()));
   WrapInFunction(cond, i);
 
@@ -38,8 +38,8 @@ TEST_F(MslGeneratorImplTest, Emit_If) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
-  auto* cond = Var("cond", ty.bool_(), ast::StorageClass::kFunction);
-  auto* else_cond = Var("else_cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* cond = Var("cond", ty.bool_());
+  auto* else_cond = Var("else_cond", ty.bool_());
   auto* i = If(cond, Block(Return()), Else(else_cond, Block(Return())));
   WrapInFunction(cond, else_cond, i);
 
@@ -57,7 +57,7 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElseIf) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
-  auto* cond = Var("cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* cond = Var("cond", ty.bool_());
   auto* i = If(cond, Block(Return()), Else(nullptr, Block(Return())));
   WrapInFunction(cond, i);
 
@@ -75,8 +75,8 @@ TEST_F(MslGeneratorImplTest, Emit_IfWithElse) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_IfWithMultiple) {
-  auto* cond = Var("cond", ty.bool_(), ast::StorageClass::kFunction);
-  auto* else_cond = Var("else_cond", ty.bool_(), ast::StorageClass::kFunction);
+  auto* cond = Var("cond", ty.bool_());
+  auto* else_cond = Var("else_cond", ty.bool_());
   auto* i = If(cond, Block(Return()), Else(else_cond, Block(Return())),
                Else(nullptr, Block(Return())));
   WrapInFunction(cond, else_cond, i);

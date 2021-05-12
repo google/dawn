@@ -222,7 +222,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionVarInitWithParam) {
   // }
 
   auto* bar = Param("bar", ty.f32());
-  auto* baz = Var("baz", ty.f32(), ast::StorageClass::kFunction, Expr("bar"));
+  auto* baz = Var("baz", ty.f32(), ast::StorageClass::kNone, Expr("bar"));
 
   Func("foo", ast::VariableList{bar}, ty.void_(), ast::StatementList{Decl(baz)},
        ast::DecorationList{});

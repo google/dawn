@@ -1261,7 +1261,7 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          testing::Values(IntrinsicData{"clamp", "UClamp"}));
 
 TEST_F(IntrinsicBuilderTest, Call_Modf) {
-  auto* out = Var("out", ty.vec2<f32>(), ast::StorageClass::kFunction);
+  auto* out = Var("out", ty.vec2<f32>());
   auto* expr = Call("modf", vec2<f32>(1.0f, 2.0f), "out");
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{
@@ -1305,7 +1305,7 @@ OpFunctionEnd
 }
 
 TEST_F(IntrinsicBuilderTest, Call_Frexp) {
-  auto* out = Var("out", ty.vec2<i32>(), ast::StorageClass::kFunction);
+  auto* out = Var("out", ty.vec2<i32>());
   auto* expr = Call("frexp", vec2<f32>(1.0f, 2.0f), "out");
   Func("a_func", ast::VariableList{}, ty.void_(),
        ast::StatementList{

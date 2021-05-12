@@ -46,7 +46,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
       Param("coord", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
   auto* loc1 = Param("loc1", ty.f32(), {Location(1u)});
   auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
-  auto* col = Var("col", ty.f32(), ast::StorageClass::kFunction, mul, {});
+  auto* col = Var("col", ty.f32(), ast::StorageClass::kNone, mul);
   Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),
        ast::StatementList{WrapInStatement(col)},
        ast::DecorationList{

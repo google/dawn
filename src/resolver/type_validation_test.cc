@@ -385,8 +385,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsGlobalVariable) {
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsLocalVariable) {
-  auto* v =
-      Var(Source{{56, 78}}, "g", ty.array<i32>(), ast::StorageClass::kFunction);
+  auto* v = Var(Source{{56, 78}}, "g", ty.array<i32>());
   WrapInFunction(v);
 
   ASSERT_FALSE(r()->Resolve());
@@ -515,7 +514,7 @@ TEST_P(CanonicalTest, All) {
 
   auto* type = params.create_ast_type(ty);
 
-  auto* var = Var("v", type, ast::StorageClass::kFunction);
+  auto* var = Var("v", type);
   auto* expr = Expr("v");
   WrapInFunction(var, expr);
 

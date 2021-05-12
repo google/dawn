@@ -1043,7 +1043,7 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
             R"(VariableDeclStatement{
   Variable{
     x_2
-    function
+    none
     __ptr_storage__u32
   }
 }

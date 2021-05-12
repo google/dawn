@@ -84,7 +84,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
-  auto* var = Var("a", ty.vec2<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("a", ty.vec2<f32>());
   auto* stmt = Decl(var);
   WrapInFunction(stmt);
 
@@ -97,7 +97,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
-  auto* var = Var("a", ty.mat3x2<f32>(), ast::StorageClass::kFunction);
+  auto* var = Var("a", ty.mat3x2<f32>());
 
   auto* stmt = Decl(var);
   WrapInFunction(stmt);
@@ -143,7 +143,7 @@ TEST_F(MslGeneratorImplTest,
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   auto* zero_vec = vec3<f32>();
 
-  auto* var = Var("a", ty.vec3<f32>(), ast::StorageClass::kFunction, zero_vec);
+  auto* var = Var("a", ty.vec3<f32>(), ast::StorageClass::kNone, zero_vec);
   auto* stmt = Decl(var);
   WrapInFunction(stmt);
 

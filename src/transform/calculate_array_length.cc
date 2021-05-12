@@ -181,9 +181,9 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
 
                 // Construct the variable that'll hold the result of
                 // RWByteAddressBuffer.GetDimensions()
-                auto* buffer_size_result = ctx.dst->Decl(ctx.dst->Var(
-                    ctx.dst->Sym(), ctx.dst->ty.u32(),
-                    ast::StorageClass::kFunction, ctx.dst->Expr(0u)));
+                auto* buffer_size_result = ctx.dst->Decl(
+                    ctx.dst->Var(ctx.dst->Sym(), ctx.dst->ty.u32(),
+                                 ast::StorageClass::kNone, ctx.dst->Expr(0u)));
 
                 // Call storage_buffer.GetDimensions(buffer_size_result)
                 auto* call_get_dims =

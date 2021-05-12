@@ -596,9 +596,9 @@ TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByEntryPoint) {
 
   Func("F", {}, ty.void_(),
        {
-           Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kFunction,
+           Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kNone,
                     Call("textureLoad", "A", vec2<i32>(1, 2), 0))),
-           Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kFunction,
+           Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
                     Call("textureLoad", "B", vec2<i32>(1, 2), 0))),
        },
        {Stage(ast::PipelineStage::kFragment)});
@@ -628,13 +628,13 @@ TEST_F(ResourceDecorationTest, BindingPointUsedTwiceByDifferentEntryPoints) {
 
   Func("F_A", {}, ty.void_(),
        {
-           Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kFunction,
+           Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kNone,
                     Call("textureLoad", "A", vec2<i32>(1, 2), 0))),
        },
        {Stage(ast::PipelineStage::kFragment)});
   Func("F_B", {}, ty.void_(),
        {
-           Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kFunction,
+           Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
                     Call("textureLoad", "B", vec2<i32>(1, 2), 0))),
        },
        {Stage(ast::PipelineStage::kFragment)});

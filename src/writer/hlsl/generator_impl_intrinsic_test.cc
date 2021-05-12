@@ -155,11 +155,11 @@ using HlslIntrinsicTest = TestParamHelper<IntrinsicData>;
 TEST_P(HlslIntrinsicTest, Emit) {
   auto param = GetParam();
 
-  Global("f2", ty.vec2<float>(), ast::StorageClass::kFunction);
-  Global("f3", ty.vec3<float>(), ast::StorageClass::kFunction);
-  Global("u2", ty.vec2<unsigned int>(), ast::StorageClass::kFunction);
-  Global("b2", ty.vec2<bool>(), ast::StorageClass::kFunction);
-  Global("m2x2", ty.mat2x2<float>(), ast::StorageClass::kFunction);
+  Global("f2", ty.vec2<float>(), ast::StorageClass::kPrivate);
+  Global("f3", ty.vec3<float>(), ast::StorageClass::kPrivate);
+  Global("u2", ty.vec2<unsigned int>(), ast::StorageClass::kPrivate);
+  Global("b2", ty.vec2<bool>(), ast::StorageClass::kPrivate);
+  Global("m2x2", ty.mat2x2<float>(), ast::StorageClass::kPrivate);
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
@@ -259,8 +259,8 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, DISABLED_Intrinsic_Select) {
 TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
   auto* call = Call("dot", "param1", "param2");
 
-  Global("param1", ty.vec3<f32>(), ast::StorageClass::kFunction);
-  Global("param2", ty.vec3<f32>(), ast::StorageClass::kFunction);
+  Global("param1", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+  Global("param2", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   WrapInFunction(call);
 

@@ -506,7 +506,7 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
   // if (a) {
   // }
 
-  auto* var = Global("a", ty.bool_(), ast::StorageClass::kFunction);
+  auto* var = Global("a", ty.bool_(), ast::StorageClass::kPrivate);
 
   auto* expr =
       create<ast::IfStatement>(Expr("a"), Block(), ast::ElseStatementList{});
@@ -519,16 +519,17 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
 
   EXPECT_TRUE(b.GenerateIfStatement(expr)) << b.error();
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeBool
-%2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%4 = OpLoad %3 %1
-OpSelectionMerge %5 None
-OpBranchConditional %4 %6 %5
+            R"(%5 = OpLoad %3 %1
+OpSelectionMerge %6 None
+OpBranchConditional %5 %7 %6
+%7 = OpLabel
+OpBranch %6
 %6 = OpLabel
-OpBranch %5
-%5 = OpLabel
 )");
 }
 
