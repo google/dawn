@@ -681,7 +681,6 @@ INSTANTIATE_TEST_SUITE_P(Samples,
                              {"InverseSqrt", "inverseSqrt"},
                              {"Log", "log"},
                              {"Log2", "log2"},
-                             {"Normalize", "normalize"},
                              {"Round", "round"},
                              {"RoundEven", "round"},
                              {"Sin", "sin"},
@@ -1079,6 +1078,121 @@ INSTANTIATE_TEST_SUITE_P(Samples,
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Uinting_UintingUintingUinting,
                          ::testing::Values(GlslStd450Case{"UClamp", "clamp"}));
+
+// Test Normalize.  WGSL does not have a scalar form of the normalize builtin.
+// So we have to test it separately, as it does not fit the patterns tested
+// above.
+
+TEST_F(SpvParserTest, Normalize_Scalar) {
+  // Scalar normalize always results in 1.0
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %float %glsl Normalize %f1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __f32
+    {
+      ScalarConstructor[not set]{1.000000}
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvParserTest, Normalize_Vector2) {
+  // Scalar normalize always results in 1.0
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2float %glsl Normalize %v2f1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_2__f32
+    {
+      Call[not set]{
+        Identifier[not set]{normalize}
+        (
+          Identifier[not set]{v2f1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvParserTest, Normalize_Vector3) {
+  // Scalar normalize always results in 1.0
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v3float %glsl Normalize %v3f1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_3__f32
+    {
+      Call[not set]{
+        Identifier[not set]{normalize}
+        (
+          Identifier[not set]{v3f1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
+
+TEST_F(SpvParserTest, Normalize_Vector4) {
+  // Scalar normalize always results in 1.0
+  const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v4float %glsl Normalize %v4f1
+     OpReturn
+     OpFunctionEnd
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  const auto body = ToString(p->builder(), fe.ast_body());
+  EXPECT_THAT(body, HasSubstr(R"(
+  VariableConst{
+    x_1
+    none
+    __vec_4__f32
+    {
+      Call[not set]{
+        Identifier[not set]{normalize}
+        (
+          Identifier[not set]{v4f1}
+        )
+      }
+    }
+  })"))
+      << body;
+}
 
 // Check that we convert signedness of operands and result type.
 // This is needed for each of the integer-based extended instructions.

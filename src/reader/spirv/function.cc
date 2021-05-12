@@ -3444,6 +3444,17 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
 TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
     const spvtools::opt::Instruction& inst) {
   const auto ext_opcode = inst.GetSingleWordInOperand(1);
+
+  auto* result_type = parser_impl_.ConvertType(inst.type_id());
+
+  if ((ext_opcode == GLSLstd450Normalize) && result_type->IsScalar()) {
+    // WGSL does not have scalar form of the normalize builtin.
+    // The answer would be 1 anyway, so return that directly.
+    return {ty_.F32(),
+            create<ast::ScalarConstructorExpression>(
+                Source{}, create<ast::FloatLiteral>(Source{}, 1.0f))};
+  }
+
   const auto name = GetGlslStd450FuncName(ext_opcode);
   if (name.empty()) {
     Fail() << "unhandled GLSL.std.450 instruction " << ext_opcode;
@@ -3462,9 +3473,8 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(
     }
     operands.emplace_back(operand.expr);
   }
-  auto* ast_type = parser_impl_.ConvertType(inst.type_id());
   auto* call = create<ast::CallExpression>(Source{}, func, std::move(operands));
-  TypedExpression call_expr{ast_type, call};
+  TypedExpression call_expr{result_type, call};
   return parser_impl_.RectifyForcedResultType(call_expr, inst,
                                               first_operand_type);
 }
