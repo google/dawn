@@ -59,6 +59,8 @@ ORIGINAL_SRC_DIR="$(pwd)"
 . /bin/using.sh # Declare the bash `using` function for configuring toolchains.
 
 using depot_tools
+using go-1.14.4      # Speeds up ./tools/lint
+using doxygen-1.8.18
 
 status "Cloning to clean source directory"
 # We do this so that the docker script can be tested in a local development
@@ -71,6 +73,9 @@ git clone ${ORIGINAL_SRC_DIR} .
 status "Fetching dependencies"
 cp standalone.gclient .gclient
 with_retry gclient sync
+
+status "Linting"
+./tools/lint
 
 status "Configuring build system"
 if [ "$BUILD_SYSTEM" == "cmake" ]; then
