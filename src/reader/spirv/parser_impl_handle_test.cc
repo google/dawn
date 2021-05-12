@@ -1270,7 +1270,7 @@ INSTANTIATE_TEST_SUITE_P(Samplers,
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   })"}));
 
@@ -1288,7 +1288,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampled_texture_1d__f32
   })"},
                              DeclUnderspecifiedHandleCase{R"(
@@ -1304,7 +1304,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __access_control_read_only__storage_texture_1d_rg32float
   })"},
                              DeclUnderspecifiedHandleCase{R"(
@@ -1320,7 +1320,7 @@ INSTANTIATE_TEST_SUITE_P(Images,
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_1d_rg32float
   })"}));
 
@@ -1453,7 +1453,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __multisampled_texture_2d__f32
   }
 )"},
@@ -1639,7 +1639,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -1648,7 +1648,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -1672,7 +1672,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -1681,7 +1681,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -1716,7 +1716,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -1725,7 +1725,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
             R"(
@@ -1755,7 +1755,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -1764,7 +1764,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
             R"(
@@ -1803,7 +1803,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -1812,7 +1812,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -1837,7 +1837,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -1846,7 +1846,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -1882,7 +1882,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -1891,7 +1891,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -1923,7 +1923,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -1932,7 +1932,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -1965,7 +1965,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -1974,7 +1974,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2026,7 +2026,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2035,7 +2035,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d
   }
   Variable{
@@ -2044,7 +2044,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_30
-    uniform_constant
+    none
     __sampler_comparison
   })",
                         R"(
@@ -2105,7 +2105,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_comparison
   }
   Variable{
@@ -2114,7 +2114,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d
   })",
                         R"(
@@ -2138,7 +2138,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_comparison
   }
   Variable{
@@ -2147,7 +2147,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d_array
   })",
                         R"(
@@ -2182,7 +2182,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_comparison
   }
   Variable{
@@ -2191,7 +2191,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d
   })",
             R"(
@@ -2221,7 +2221,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_comparison
   }
   Variable{
@@ -2230,7 +2230,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d_array
   })",
             R"(
@@ -2275,7 +2275,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2284,7 +2284,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2309,7 +2309,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2318,7 +2318,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2354,7 +2354,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2363,7 +2363,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2395,7 +2395,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2404,7 +2404,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2438,7 +2438,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2447,7 +2447,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2492,7 +2492,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2501,7 +2501,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2527,7 +2527,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2536,7 +2536,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2573,7 +2573,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2582,7 +2582,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2614,7 +2614,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2623,7 +2623,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                         R"(
@@ -2658,7 +2658,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2667,7 +2667,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2710,7 +2710,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2719,7 +2719,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
                         R"(
@@ -2773,7 +2773,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2782,7 +2782,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
          R"(
@@ -2806,7 +2806,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -2815,7 +2815,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d
   })",
          R"(
@@ -2918,7 +2918,7 @@ INSTANTIATE_TEST_SUITE_P(ImageWrite_OptionalParams,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32float
   })",
                               R"(Call[not set]{
@@ -2948,7 +2948,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_r32float
   })",
          R"(Call[not set]{
@@ -2974,7 +2974,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_r32float
   })",
          R"(Call[not set]{
@@ -2999,7 +2999,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_r32float
   })",
          R"(Call[not set]{
@@ -3023,7 +3023,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_r32float
   })",
          R"(Call[not set]{
@@ -3043,7 +3043,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rg32float
   })",
          R"(Call[not set]{
@@ -3068,7 +3068,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rg32float
   })",
          R"(Call[not set]{
@@ -3092,7 +3092,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rg32float
   })",
          R"(Call[not set]{
@@ -3113,7 +3113,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32float
   })",
          R"(Call[not set]{
@@ -3209,7 +3209,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32uint
   })",
          R"(Call[not set]{
@@ -3229,7 +3229,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32sint
   })",
          R"(Call[not set]{
@@ -3259,7 +3259,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32float
   })"},
         // Sampled type is float, texel is unsigned int
@@ -3274,7 +3274,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32float
   })"},
         // Sampled type is unsigned int, texel is float
@@ -3289,7 +3289,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32uint
   })"},
         // Sampled type is signed int, texel is float
@@ -3304,7 +3304,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32sint
   })"}}));
 
@@ -3326,7 +3326,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32uint
   })"},
         // Sampled type is signed int, texel is unsigned int
@@ -3341,7 +3341,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_rgba32sint
   })"}}));
 
@@ -3360,7 +3360,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_r32uint
   })",
          R"(Call[not set]{
@@ -3385,7 +3385,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_write_only__storage_texture_2d_r32sint
   })",
          R"(Call[not set]{
@@ -3414,7 +3414,7 @@ INSTANTIATE_TEST_SUITE_P(ImageRead_OptionalParams,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_read_only__storage_texture_2d_rgba32float
   })",
                               R"(VariableDeclStatement{
@@ -3447,7 +3447,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
@@ -3476,7 +3476,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
@@ -3505,7 +3505,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d
   })",
          R"(VariableDeclStatement{
@@ -3540,7 +3540,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d
   })",
          R"(VariableDeclStatement{
@@ -3583,7 +3583,7 @@ INSTANTIATE_TEST_SUITE_P(ImageFetch_Depth,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d
   })",
                               R"(VariableDeclStatement{
@@ -3629,7 +3629,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __multisampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
@@ -3662,7 +3662,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __multisampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
@@ -3712,7 +3712,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
@@ -3740,7 +3740,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__u32
   })",
          R"(VariableDeclStatement{
@@ -3773,7 +3773,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__i32
   })",
          R"(VariableDeclStatement{
@@ -3810,7 +3810,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_read_only__storage_texture_2d_rgba32float
   })",
          R"(VariableDeclStatement{
@@ -3837,7 +3837,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_read_only__storage_texture_2d_rgba32uint
   })",
          R"(VariableDeclStatement{
@@ -3870,7 +3870,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_read_only__storage_texture_2d_rgba32sint
   })",
          R"(VariableDeclStatement{
@@ -3911,7 +3911,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{0}
     }
     x_10
-    uniform_constant
+    none
     __sampler_sampler
   }
   Variable{
@@ -3920,7 +3920,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
@@ -3959,7 +3959,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_read_only__storage_texture_1d_rgba32float
   })",
          R"(VariableDeclStatement{
@@ -3991,7 +3991,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_read_only__storage_texture_2d_rgba32float
   })",
          R"(VariableDeclStatement{
@@ -4023,7 +4023,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_read_only__storage_texture_3d_rgba32float
   })",
          R"(VariableDeclStatement{
@@ -4053,7 +4053,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __multisampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
@@ -4094,7 +4094,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __access_control_read_only__storage_texture_2d_array_rgba32float
   })",
          R"(VariableDeclStatement{
@@ -4142,7 +4142,7 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_1d__f32
   })",
                               R"(VariableDeclStatement{
@@ -4174,7 +4174,7 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
                               R"(VariableDeclStatement{
@@ -4206,7 +4206,7 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_3d__f32
   })",
                               R"(VariableDeclStatement{
@@ -4238,7 +4238,7 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_cube__f32
   })",
                               R"(VariableDeclStatement{
@@ -4273,7 +4273,7 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d
   })",
                               R"(VariableDeclStatement{
@@ -4305,7 +4305,7 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_cube
   })",
                               R"(VariableDeclStatement{
@@ -4350,7 +4350,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
          R"(VariableDeclStatement{
@@ -4394,7 +4394,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_cube_array__f32
   })",
          R"(VariableDeclStatement{
@@ -4435,7 +4435,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d_array
   })",
          R"(VariableDeclStatement{
@@ -4477,7 +4477,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_cube_array
   })",
          R"(VariableDeclStatement{
@@ -4525,7 +4525,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_1d__f32
   })",
          R"(VariableDeclStatement{
@@ -4568,7 +4568,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_1d__f32
   })",
          R"(VariableDeclStatement{
@@ -4608,7 +4608,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
@@ -4635,7 +4635,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d_array__f32
   })",
          R"(VariableDeclStatement{
@@ -4662,7 +4662,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_3d__f32
   })",
          R"(VariableDeclStatement{
@@ -4689,7 +4689,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_cube__f32
   })",
          R"(VariableDeclStatement{
@@ -4716,7 +4716,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_cube_array__f32
   })",
          R"(VariableDeclStatement{
@@ -4743,7 +4743,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d
   })",
          R"(VariableDeclStatement{
@@ -4770,7 +4770,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_2d_array
   })",
          R"(VariableDeclStatement{
@@ -4797,7 +4797,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_cube
   })",
          R"(VariableDeclStatement{
@@ -4824,7 +4824,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __depth_texture_cube_array
   })",
          R"(VariableDeclStatement{
@@ -4856,7 +4856,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __sampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{
@@ -4890,7 +4890,7 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySamples_SignedResult,
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __multisampled_texture_2d__f32
   })",
                               R"(VariableDeclStatement{
@@ -4926,7 +4926,7 @@ INSTANTIATE_TEST_SUITE_P(
       BindingDecoration{1}
     }
     x_20
-    uniform_constant
+    none
     __multisampled_texture_2d__f32
   })",
          R"(VariableDeclStatement{

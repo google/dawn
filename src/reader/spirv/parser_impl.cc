@@ -1359,6 +1359,12 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     type = ty_.AccessControl(type, access);
   }
 
+  // Handle variables (textures and samplers) are always in the handle
+  // storage class, so we don't mention the storage class.
+  if (sc == ast::StorageClass::kUniformConstant) {
+    sc = ast::StorageClass::kNone;
+  }
+
   for (auto& deco : GetDecorationsFor(id)) {
     if (deco.empty()) {
       Fail() << "malformed decoration on ID " << id << ": it is empty";
