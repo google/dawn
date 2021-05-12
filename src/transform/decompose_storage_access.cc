@@ -22,6 +22,7 @@
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/call_statement.h"
+#include "src/ast/disable_validation_decoration.h"
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type_name.h"
 #include "src/program_builder.h"
@@ -435,7 +436,12 @@ struct DecomposeStorageAccess::State {
         auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
         func = ctx.dst->create<ast::Function>(
             ctx.dst->Sym(), params, el_ast_ty, nullptr,
-            ast::DecorationList{intrinsic}, ast::DecorationList{});
+            ast::DecorationList{
+                intrinsic,
+                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+                    ctx.dst->ID(), ast::DisabledValidation::kFunctionHasNoBody),
+            },
+            ast::DecorationList{});
       } else {
         ast::ExpressionList values;
         if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
@@ -502,7 +508,12 @@ struct DecomposeStorageAccess::State {
       if (auto* intrinsic = IntrinsicStoreFor(ctx.dst, el_ty)) {
         func = ctx.dst->create<ast::Function>(
             ctx.dst->Sym(), params, ctx.dst->ty.void_(), nullptr,
-            ast::DecorationList{intrinsic}, ast::DecorationList{});
+            ast::DecorationList{
+                intrinsic,
+                ctx.dst->ASTNodes().Create<ast::DisableValidationDecoration>(
+                    ctx.dst->ID(), ast::DisabledValidation::kFunctionHasNoBody),
+            },
+            ast::DecorationList{});
 
       } else {
         ast::StatementList body;

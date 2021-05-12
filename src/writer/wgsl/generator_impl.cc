@@ -289,24 +289,10 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
 }
 
 bool GeneratorImpl::EmitFunction(ast::Function* func) {
-  for (auto* deco : func->decorations()) {
+  if (func->decorations().size()) {
     make_indent();
-    out_ << "[[";
-    if (auto* workgroup = deco->As<ast::WorkgroupDecoration>()) {
-      uint32_t x = 0;
-      uint32_t y = 0;
-      uint32_t z = 0;
-      std::tie(x, y, z) = workgroup->values();
-      out_ << "workgroup_size(" << std::to_string(x) << ", "
-           << std::to_string(y) << ", " << std::to_string(z) << ")";
-    }
-    if (auto* stage = deco->As<ast::StageDecoration>()) {
-      out_ << "stage(" << stage->value() << ")";
-    }
-    if (auto* internal = deco->As<ast::InternalDecoration>()) {
-      out_ << "internal(" << internal->Name() << ")";
-    }
-    out_ << "]]" << std::endl;
+    EmitDecorations(func->decorations());
+    out_ << std::endl;
   }
 
   make_indent();
@@ -629,7 +615,16 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
     }
     first = false;
 
-    if (auto* binding = deco->As<ast::BindingDecoration>()) {
+    if (auto* workgroup = deco->As<ast::WorkgroupDecoration>()) {
+      uint32_t x = 0;
+      uint32_t y = 0;
+      uint32_t z = 0;
+      std::tie(x, y, z) = workgroup->values();
+      out_ << "workgroup_size(" << std::to_string(x) << ", "
+           << std::to_string(y) << ", " << std::to_string(z) << ")";
+    } else if (auto* stage = deco->As<ast::StageDecoration>()) {
+      out_ << "stage(" << stage->value() << ")";
+    } else if (auto* binding = deco->As<ast::BindingDecoration>()) {
       out_ << "binding(" << binding->value() << ")";
     } else if (auto* group = deco->As<ast::GroupDecoration>()) {
       out_ << "group(" << group->value() << ")";
@@ -643,6 +638,8 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
       out_ << "size(" << size->size() << ")";
     } else if (auto* align = deco->As<ast::StructMemberAlignDecoration>()) {
       out_ << "align(" << align->align() << ")";
+    } else if (auto* internal = deco->As<ast::InternalDecoration>()) {
+      out_ << "internal(" << internal->Name() << ")";
     } else {
       TINT_ICE(diagnostics_)
           << "Unsupported decoration '" << deco->TypeInfo().name << "'";

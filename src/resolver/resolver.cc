@@ -26,6 +26,7 @@
 #include "src/ast/call_statement.h"
 #include "src/ast/continue_statement.h"
 #include "src/ast/depth_texture.h"
+#include "src/ast/disable_validation_decoration.h"
 #include "src/ast/discard_statement.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/if_statement.h"
@@ -119,6 +120,21 @@ bool IsValidStorageTextureImageFormat(ast::ImageFormat format) {
     default:
       return false;
   }
+}
+
+/// @returns true if the decoration list contains a
+/// ast::DisableValidationDecoration with the validation mode equal to
+/// `validation`
+bool IsValidationDisabled(const ast::DecorationList& decorations,
+                          ast::DisabledValidation validation) {
+  for (auto* decoration : decorations) {
+    if (auto* dv = decoration->As<ast::DisableValidationDecoration>()) {
+      if (dv->Validation() == validation) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 }  // namespace
@@ -749,11 +765,12 @@ bool Resolver::ValidateFunction(const ast::Function* func,
             func->source());
         return false;
       }
-    } else if (!ast::HasDecoration<ast::InternalDecoration>(
-                   func->decorations())) {
+    } else if (!IsValidationDisabled(
+                   func->decorations(),
+                   ast::DisabledValidation::kFunctionHasNoBody)) {
       TINT_ICE(diagnostics_)
           << "Function " << builder_->Symbols().NameFor(func->symbol())
-          << " has no body and does not have the [[internal]] decoration";
+          << " has no body";
     }
 
     for (auto* deco : func->return_type_decorations()) {

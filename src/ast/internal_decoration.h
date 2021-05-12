@@ -25,7 +25,6 @@ namespace ast {
 /// A decoration used to indicate that a function is tint-internal.
 /// These decorations are not produced by generators, but instead are usually
 /// created by transforms for consumption by a particular backend.
-/// Functions annotated with this decoration will have relaxed validation.
 class InternalDecoration : public Castable<InternalDecoration, Decoration> {
  public:
   /// Constructor

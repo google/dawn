@@ -106,40 +106,40 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
-[[internal(intrinsic_load_i32)]]
+[[internal(intrinsic_load_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> i32
 
-[[internal(intrinsic_load_u32)]]
+[[internal(intrinsic_load_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_1(buffer : [[access(read_write)]] SB, offset : u32) -> u32
 
-[[internal(intrinsic_load_f32)]]
+[[internal(intrinsic_load_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_2(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
-[[internal(intrinsic_load_vec2_i32)]]
+[[internal(intrinsic_load_vec2_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_3(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<i32>
 
-[[internal(intrinsic_load_vec2_u32)]]
+[[internal(intrinsic_load_vec2_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_4(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<u32>
 
-[[internal(intrinsic_load_vec2_f32)]]
+[[internal(intrinsic_load_vec2_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_5(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<f32>
 
-[[internal(intrinsic_load_vec3_i32)]]
+[[internal(intrinsic_load_vec3_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_6(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<i32>
 
-[[internal(intrinsic_load_vec3_u32)]]
+[[internal(intrinsic_load_vec3_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_7(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<u32>
 
-[[internal(intrinsic_load_vec3_f32)]]
+[[internal(intrinsic_load_vec3_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_8(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<f32>
 
-[[internal(intrinsic_load_vec4_i32)]]
+[[internal(intrinsic_load_vec4_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_9(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<i32>
 
-[[internal(intrinsic_load_vec4_u32)]]
+[[internal(intrinsic_load_vec4_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_10(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<u32>
 
-[[internal(intrinsic_load_vec4_f32)]]
+[[internal(intrinsic_load_vec4_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_11(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<f32>
 
 fn tint_symbol_12(buffer : [[access(read_write)]] SB, offset : u32) -> mat2x2<f32> {
@@ -300,40 +300,40 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
-[[internal(intrinsic_store_i32)]]
+[[internal(intrinsic_store_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32, value : i32)
 
-[[internal(intrinsic_store_u32)]]
+[[internal(intrinsic_store_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_1(buffer : [[access(read_write)]] SB, offset : u32, value : u32)
 
-[[internal(intrinsic_store_f32)]]
+[[internal(intrinsic_store_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_2(buffer : [[access(read_write)]] SB, offset : u32, value : f32)
 
-[[internal(intrinsic_store_vec2_u32)]]
+[[internal(intrinsic_store_vec2_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_3(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<i32>)
 
-[[internal(intrinsic_store_vec2_f32)]]
+[[internal(intrinsic_store_vec2_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_4(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<u32>)
 
-[[internal(intrinsic_store_vec2_i32)]]
+[[internal(intrinsic_store_vec2_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_5(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<f32>)
 
-[[internal(intrinsic_store_vec3_u32)]]
+[[internal(intrinsic_store_vec3_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_6(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<i32>)
 
-[[internal(intrinsic_store_vec3_f32)]]
+[[internal(intrinsic_store_vec3_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_7(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<u32>)
 
-[[internal(intrinsic_store_vec3_i32)]]
+[[internal(intrinsic_store_vec3_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_8(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<f32>)
 
-[[internal(intrinsic_store_vec4_u32)]]
+[[internal(intrinsic_store_vec4_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_9(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<i32>)
 
-[[internal(intrinsic_store_vec4_f32)]]
+[[internal(intrinsic_store_vec4_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_10(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<u32>)
 
-[[internal(intrinsic_store_vec4_i32)]]
+[[internal(intrinsic_store_vec4_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_11(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<f32>)
 
 fn tint_symbol_12(buffer : [[access(read_write)]] SB, offset : u32, value : mat2x2<f32>) {
@@ -492,40 +492,40 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
-[[internal(intrinsic_load_i32)]]
+[[internal(intrinsic_load_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> i32
 
-[[internal(intrinsic_load_u32)]]
+[[internal(intrinsic_load_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_1(buffer : [[access(read_write)]] SB, offset : u32) -> u32
 
-[[internal(intrinsic_load_f32)]]
+[[internal(intrinsic_load_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_2(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
-[[internal(intrinsic_load_vec2_i32)]]
+[[internal(intrinsic_load_vec2_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_3(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<i32>
 
-[[internal(intrinsic_load_vec2_u32)]]
+[[internal(intrinsic_load_vec2_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_4(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<u32>
 
-[[internal(intrinsic_load_vec2_f32)]]
+[[internal(intrinsic_load_vec2_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_5(buffer : [[access(read_write)]] SB, offset : u32) -> vec2<f32>
 
-[[internal(intrinsic_load_vec3_i32)]]
+[[internal(intrinsic_load_vec3_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_6(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<i32>
 
-[[internal(intrinsic_load_vec3_u32)]]
+[[internal(intrinsic_load_vec3_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_7(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<u32>
 
-[[internal(intrinsic_load_vec3_f32)]]
+[[internal(intrinsic_load_vec3_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_8(buffer : [[access(read_write)]] SB, offset : u32) -> vec3<f32>
 
-[[internal(intrinsic_load_vec4_i32)]]
+[[internal(intrinsic_load_vec4_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_9(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<i32>
 
-[[internal(intrinsic_load_vec4_u32)]]
+[[internal(intrinsic_load_vec4_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_10(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<u32>
 
-[[internal(intrinsic_load_vec4_f32)]]
+[[internal(intrinsic_load_vec4_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_11(buffer : [[access(read_write)]] SB, offset : u32) -> vec4<f32>
 
 fn tint_symbol_12(buffer : [[access(read_write)]] SB, offset : u32) -> mat2x2<f32> {
@@ -648,40 +648,40 @@ struct SB {
   v : array<vec3<f32>, 2>;
 };
 
-[[internal(intrinsic_store_i32)]]
+[[internal(intrinsic_store_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32, value : i32)
 
-[[internal(intrinsic_store_u32)]]
+[[internal(intrinsic_store_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_1(buffer : [[access(read_write)]] SB, offset : u32, value : u32)
 
-[[internal(intrinsic_store_f32)]]
+[[internal(intrinsic_store_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_2(buffer : [[access(read_write)]] SB, offset : u32, value : f32)
 
-[[internal(intrinsic_store_vec2_u32)]]
+[[internal(intrinsic_store_vec2_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_3(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<i32>)
 
-[[internal(intrinsic_store_vec2_f32)]]
+[[internal(intrinsic_store_vec2_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_4(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<u32>)
 
-[[internal(intrinsic_store_vec2_i32)]]
+[[internal(intrinsic_store_vec2_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_5(buffer : [[access(read_write)]] SB, offset : u32, value : vec2<f32>)
 
-[[internal(intrinsic_store_vec3_u32)]]
+[[internal(intrinsic_store_vec3_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_6(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<i32>)
 
-[[internal(intrinsic_store_vec3_f32)]]
+[[internal(intrinsic_store_vec3_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_7(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<u32>)
 
-[[internal(intrinsic_store_vec3_i32)]]
+[[internal(intrinsic_store_vec3_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_8(buffer : [[access(read_write)]] SB, offset : u32, value : vec3<f32>)
 
-[[internal(intrinsic_store_vec4_u32)]]
+[[internal(intrinsic_store_vec4_u32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_9(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<i32>)
 
-[[internal(intrinsic_store_vec4_f32)]]
+[[internal(intrinsic_store_vec4_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_10(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<u32>)
 
-[[internal(intrinsic_store_vec4_i32)]]
+[[internal(intrinsic_store_vec4_i32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol_11(buffer : [[access(read_write)]] SB, offset : u32, value : vec4<f32>)
 
 fn tint_symbol_12(buffer : [[access(read_write)]] SB, offset : u32, value : mat2x2<f32>) {
@@ -837,7 +837,7 @@ struct SB {
   b : [[stride(256)]] array<S2>;
 };
 
-[[internal(intrinsic_load_f32)]]
+[[internal(intrinsic_load_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
 [[group(0), binding(0)]] var<storage> sb : [[access(read_write)]] SB;
@@ -905,7 +905,7 @@ struct SB {
   b : [[stride(256)]] array<S2>;
 };
 
-[[internal(intrinsic_load_f32)]]
+[[internal(intrinsic_load_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
 [[group(0), binding(0)]] var<storage> sb : [[access(read_write)]] SB;
@@ -992,7 +992,7 @@ struct SB {
   b : A2_Array;
 };
 
-[[internal(intrinsic_load_f32)]]
+[[internal(intrinsic_load_f32), internal(disable_validation__function_has_no_body)]]
 fn tint_symbol(buffer : [[access(read_write)]] SB, offset : u32) -> f32
 
 [[group(0), binding(0)]] var<storage> sb : [[access(read_write)]] SB;

@@ -80,6 +80,8 @@ set(TINT_LIB_SRCS
   ast/continue_statement.h
   ast/decoration.cc
   ast/decoration.h
+  ast/disable_validation_decoration.cc
+  ast/disable_validation_decoration.h
   ast/depth_texture.cc
   ast/depth_texture.h
   ast/discard_statement.cc

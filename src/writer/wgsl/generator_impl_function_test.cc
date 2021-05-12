@@ -130,8 +130,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitFunction(func));
-  EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
-  [[workgroup_size(2, 4, 6)]]
+  EXPECT_EQ(gen.result(), R"(  [[stage(fragment), workgroup_size(2, 4, 6)]]
   fn my_func() {
     discard;
     return;
