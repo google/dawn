@@ -241,6 +241,124 @@ fn f() {
   EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(BindingRemapperTest, BindingCollisionsSameEntryPoint) {
+  auto* src = R"(
+[[block]]
+struct S {
+  i : i32;
+};
+
+[[group(2), binding(1)]] var<storage> a : [[access(read)]] S;
+
+[[group(3), binding(2)]] var<storage> b : [[access(read)]] S;
+
+[[group(4), binding(3)]] var<storage> c : [[access(read)]] S;
+
+[[group(5), binding(4)]] var<storage> d : [[access(read)]] S;
+
+[[stage(compute)]]
+fn f() {
+  let x : i32 = (((a.i + b.i) + c.i) + d.i);
+}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct S {
+  i : i32;
+};
+
+[[internal(disable_validation__binding_point_collision), group(1), binding(1)]] var<storage> a : [[access(read)]] S;
+
+[[internal(disable_validation__binding_point_collision), group(1), binding(1)]] var<storage> b : [[access(read)]] S;
+
+[[internal(disable_validation__binding_point_collision), group(5), binding(4)]] var<storage> c : [[access(read)]] S;
+
+[[internal(disable_validation__binding_point_collision), group(5), binding(4)]] var<storage> d : [[access(read)]] S;
+
+[[stage(compute)]]
+fn f() {
+  let x : i32 = (((a.i + b.i) + c.i) + d.i);
+}
+)";
+
+  DataMap data;
+  data.Add<BindingRemapper::Remappings>(
+      BindingRemapper::BindingPoints{
+          {{2, 1}, {1, 1}},
+          {{3, 2}, {1, 1}},
+          {{4, 3}, {5, 4}},
+      },
+      BindingRemapper::AccessControls{}, true);
+  auto got = Run<BindingRemapper>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BindingRemapperTest, BindingCollisionsDifferentEntryPoints) {
+  auto* src = R"(
+[[block]]
+struct S {
+  i : i32;
+};
+
+[[group(2), binding(1)]] var<storage> a : [[access(read)]] S;
+
+[[group(3), binding(2)]] var<storage> b : [[access(read)]] S;
+
+[[group(4), binding(3)]] var<storage> c : [[access(read)]] S;
+
+[[group(5), binding(4)]] var<storage> d : [[access(read)]] S;
+
+[[stage(compute)]]
+fn f1() {
+  let x : i32 = (a.i + c.i);
+}
+
+[[stage(compute)]]
+fn f2() {
+  let x : i32 = (b.i + d.i);
+}
+)";
+
+  auto* expect = R"(
+[[block]]
+struct S {
+  i : i32;
+};
+
+[[group(1), binding(1)]] var<storage> a : [[access(read)]] S;
+
+[[group(1), binding(1)]] var<storage> b : [[access(read)]] S;
+
+[[group(5), binding(4)]] var<storage> c : [[access(read)]] S;
+
+[[group(5), binding(4)]] var<storage> d : [[access(read)]] S;
+
+[[stage(compute)]]
+fn f1() {
+  let x : i32 = (a.i + c.i);
+}
+
+[[stage(compute)]]
+fn f2() {
+  let x : i32 = (b.i + d.i);
+}
+)";
+
+  DataMap data;
+  data.Add<BindingRemapper::Remappings>(
+      BindingRemapper::BindingPoints{
+          {{2, 1}, {1, 1}},
+          {{3, 2}, {1, 1}},
+          {{4, 3}, {5, 4}},
+      },
+      BindingRemapper::AccessControls{}, true);
+  auto got = Run<BindingRemapper>(src, data);
+
+  EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(BindingRemapperTest, NoData) {
   auto* src = R"(
 [[block]]

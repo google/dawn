@@ -552,7 +552,8 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       if (!(deco->Is<ast::BindingDecoration>() ||
             deco->Is<ast::BuiltinDecoration>() ||
             deco->Is<ast::GroupDecoration>() ||
-            deco->Is<ast::LocationDecoration>())) {
+            deco->Is<ast::LocationDecoration>() ||
+            deco->Is<ast::InternalDecoration>())) {
         diagnostics_.add_error("decoration is not valid for variables",
                                deco->source());
         return false;
@@ -1030,7 +1031,13 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
     }
     auto bp = var_info->binding_point;
     auto res = binding_points.emplace(bp, var_info->declaration);
-    if (!res.second) {
+    if (!res.second &&
+        !IsValidationDisabled(
+            var_info->declaration->decorations(),
+            ast::DisabledValidation::kBindingPointCollision) &&
+        !IsValidationDisabled(
+            res.first->second->decorations(),
+            ast::DisabledValidation::kBindingPointCollision)) {
       // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
       // Bindings must not alias within a shader stage: two different
       // variables in the resource interface of a given shader must not have
