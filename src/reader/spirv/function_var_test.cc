@@ -35,10 +35,9 @@ std::string Names(std::vector<std::string> ids) {
   return outs.str();
 }
 
-std::string Preamble() {
-  return R"(
-    OpCapability Shader
-    OpMemoryModel Logical Simple
+std::string CommonTypes() {
+  return
+      R"(
 
     %void = OpTypeVoid
     %voidfn = OpTypeFunction %void
@@ -73,7 +72,24 @@ std::string Preamble() {
   )";
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_AnonymousVars) {
+// Returns the SPIR-V assembly for a vertex shader, optionally
+// with OpName decorations for certain SPIR-V IDs
+std::string PreambleNames(std::vector<std::string> ids) {
+  return R"(
+    OpCapability Shader
+    OpMemoryModel Logical Simple
+    OpEntryPoint Vertex %100 "main"
+)" + Names(ids) +
+         CommonTypes();
+}
+
+std::string Preamble() {
+  return PreambleNames({});
+}
+
+using SpvParserFunctionVarTest = SpvParserTest;
+
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_AnonymousVars) {
   auto p = parser(test::Assemble(Preamble() + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
@@ -112,8 +128,8 @@ VariableDeclStatement{
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_NamedVars) {
-  auto p = parser(test::Assemble(Names({"a", "b", "c"}) + Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_NamedVars) {
+  auto p = parser(test::Assemble(PreambleNames({"a", "b", "c"}) + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -151,8 +167,8 @@ VariableDeclStatement{
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_MixedTypes) {
-  auto p = parser(test::Assemble(Names({"a", "b", "c"}) + Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MixedTypes) {
+  auto p = parser(test::Assemble(PreambleNames({"a", "b", "c"}) + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_uint Function
@@ -190,9 +206,8 @@ VariableDeclStatement{
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_ScalarInitializers) {
-  auto p =
-      parser(test::Assemble(Names({"a", "b", "c", "d", "e"}) + Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarInitializers) {
+  auto p = parser(test::Assemble(PreambleNames({"a", "b", "c", "d", "e"}) + R"(
      %100 = OpFunction %void None %voidfn
      %entry = OpLabel
      %a = OpVariable %ptr_bool Function %true
@@ -261,8 +276,8 @@ VariableDeclStatement{
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_ScalarNullInitializers) {
-  auto p = parser(test::Assemble(Names({"a", "b", "c", "d"}) + Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ScalarNullInitializers) {
+  auto p = parser(test::Assemble(PreambleNames({"a", "b", "c", "d"}) + R"(
      %null_bool = OpConstantNull %bool
      %null_int = OpConstantNull %int
      %null_uint = OpConstantNull %uint
@@ -325,7 +340,7 @@ VariableDeclStatement{
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_VectorInitializer) {
   auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %v2float
      %two = OpConstant %float 2.0
@@ -359,7 +374,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_VectorInitializer) {
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_MatrixInitializer) {
   auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %m3v2float
      %two = OpConstant %float 2.0
@@ -411,7 +426,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_MatrixInitializer) {
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer) {
   auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
@@ -445,9 +460,13 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer) {
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias) {
-  auto p = parser(test::Assemble(
-      std::string("OpDecorate %arr2uint ArrayStride 16\n") + Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Alias) {
+  auto p = parser(test::Assemble(R"(
+     OpCapability Shader
+     OpMemoryModel Logical Simple
+     OpEntryPoint Vertex %100 "main"
+     OpDecorate %arr2uint ArrayStride 16
+)" + CommonTypes() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantComposite %arr2uint %uint_1 %two
@@ -481,7 +500,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias) {
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_ArrayInitializer_Null) {
   auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
@@ -515,9 +534,14 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Null) {
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
-  auto p = parser(test::Assemble(
-      std::string("OpDecorate %arr2uint ArrayStride 16\n") + Preamble() + R"(
+TEST_F(SpvParserFunctionVarTest,
+       EmitFunctionVariables_ArrayInitializer_Alias_Null) {
+  auto p = parser(test::Assemble(R"(
+     OpCapability Shader
+     OpMemoryModel Logical Simple
+     OpEntryPoint Vertex %100 "main"
+     OpDecorate %arr2uint ArrayStride 16
+)" + CommonTypes() + R"(
      %ptr = OpTypePointer Function %arr2uint
      %two = OpConstant %uint 2
      %const = OpConstantNull %arr2uint
@@ -550,7 +574,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_ArrayInitializer_Alias_Null) {
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer) {
   auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %strct
      %two = OpConstant %uint 2
@@ -590,7 +614,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer) {
 )"));
 }
 
-TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
+TEST_F(SpvParserFunctionVarTest, EmitFunctionVariables_StructInitializer_Null) {
   auto p = parser(test::Assemble(Preamble() + R"(
      %ptr = OpTypePointer Function %strct
      %two = OpConstant %uint 2
@@ -630,7 +654,7 @@ TEST_F(SpvParserTest, EmitFunctionVariables_StructInitializer_Null) {
 )"));
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserFunctionVarTest,
        EmitStatement_CombinatorialValue_Defer_UsedOnceSameConstruct) {
   auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
@@ -678,7 +702,8 @@ Return{}
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserTest, EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
+TEST_F(SpvParserFunctionVarTest,
+       EmitStatement_CombinatorialValue_Immediate_UsedTwice) {
   auto assembly = Preamble() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -739,7 +764,7 @@ Return{}
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserFunctionVarTest,
        EmitStatement_CombinatorialValue_Immediate_UsedOnceDifferentConstruct) {
   // Translation should not sink expensive operations into or out of control
   // flow. As a simple heuristic, don't move *any* combinatorial operation
@@ -816,7 +841,7 @@ Return{}
 }
 
 TEST_F(
-    SpvParserTest,
+    SpvParserFunctionVarTest,
     EmitStatement_CombinatorialNonPointer_DefConstruct_DoesNotEncloseAllUses) {
   // Compensate for the difference between dominance and scoping.
   // Exercise hoisting of the constant definition to before its natural
@@ -949,7 +974,7 @@ Return{}
 }
 
 TEST_F(
-    SpvParserTest,
+    SpvParserFunctionVarTest,
     EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockIf_InFunction) {
   // This is a hoisting case, where the definition is in the first block
   // of an if selection construct. In this case the definition should count
@@ -1026,7 +1051,7 @@ Return{}
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserFunctionVarTest,
        EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockIf_InIf) {
   // This is like the previous case, but the IfSelection is nested inside
   // another IfSelection.
@@ -1119,7 +1144,7 @@ Return{}
 }
 
 TEST_F(
-    SpvParserTest,
+    SpvParserFunctionVarTest,
     EmitStatement_CombinatorialNonPointer_Hoisting_DefFirstBlockSwitch_InIf) {
   // This is like the previous case, but the definition is in a SwitchSelection
   // inside another IfSelection.
@@ -1207,7 +1232,7 @@ Return{}
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserFunctionVarTest,
        EmitStatement_CombinatorialNonPointer_Hoisting_DefAndUseFirstBlockIf) {
   // In this test, both the defintion and the use are in the first block
   // of an IfSelection.  No hoisting occurs because hoisting is triggered
@@ -1277,7 +1302,7 @@ Return{}
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_SingleBlockLoopIndex) {
   auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
@@ -1302,8 +1327,11 @@ TEST_F(SpvParserTest, EmitStatement_Phi_SingleBlockLoopIndex) {
      %2 = OpPhi %uint %uint_0 %10 %4 %20  ; gets computed value
      %3 = OpPhi %uint %uint_1 %10 %3 %20  ; gets itself
      %4 = OpIAdd %uint %2 %uint_1
-     OpLoopMerge %89 %20 None
-     OpBranchConditional %102 %89 %20
+     OpLoopMerge %79 %20 None
+     OpBranchConditional %102 %79 %20
+
+     %79 = OpLabel
+     OpBranch %89
 
      %89 = OpLabel
      OpBranch %10
@@ -1418,7 +1446,7 @@ Return{}
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_MultiBlockLoopIndex) {
   auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
@@ -1442,14 +1470,17 @@ TEST_F(SpvParserTest, EmitStatement_Phi_MultiBlockLoopIndex) {
      %20 = OpLabel
      %2 = OpPhi %uint %uint_0 %10 %4 %30  ; gets computed value
      %3 = OpPhi %uint %uint_1 %10 %3 %30  ; gets itself
-     OpLoopMerge %89 %30 None
-     OpBranchConditional %102 %89 %30
+     OpLoopMerge %79 %30 None
+     OpBranchConditional %102 %79 %30
 
      %30 = OpLabel
      %4 = OpIAdd %uint %2 %uint_1
      OpBranch %20
 
-     %89 = OpLabel
+     %79 = OpLabel
+     OpBranch %89
+
+     %89 = OpLabel ; continue target for outer loop
      OpBranch %10
 
      %99 = OpLabel
@@ -1575,7 +1606,8 @@ Return{}
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
+TEST_F(SpvParserFunctionVarTest,
+       EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
   auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
@@ -1599,12 +1631,15 @@ TEST_F(SpvParserTest, EmitStatement_Phi_ValueFromLoopBodyAndContinuing) {
      %5 = OpPhi %uint %uint_1 %10 %7 %30
      %4 = OpIAdd %uint %2 %uint_1 ; define %4
      %6 = OpIAdd %uint %4 %uint_1 ; use %4
-     OpLoopMerge %89 %30 None
-     OpBranchConditional %101 %89 %30
+     OpLoopMerge %79 %30 None
+     OpBranchConditional %101 %79 %30
 
      %30 = OpLabel
      %7 = OpIAdd %uint %4 %6 ; use %4 again
      OpBranch %20
+
+     %79 = OpLabel
+     OpBranch %89
 
      %89 = OpLabel
      OpBranch %10
@@ -1743,7 +1778,7 @@ Return{}
   EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_FromElseAndThen) {
   auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
@@ -1765,13 +1800,16 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromElseAndThen) {
      OpBranchConditional %101 %99 %20
 
      %20 = OpLabel ; if seleciton
-     OpSelectionMerge %89 None
+     OpSelectionMerge %79 None
      OpBranchConditional %102 %30 %40
 
      %30 = OpLabel
      OpBranch %89
 
      %40 = OpLabel
+     OpBranch %89
+
+     %79 = OpLabel ; disconnected selection merge node
      OpBranch %89
 
      %89 = OpLabel
@@ -1844,6 +1882,7 @@ Loop{
         Identifier[not set]{x_2_phi}
         ScalarConstructor[not set]{1u}
       }
+      Continue{}
     }
   }
   continuing {
@@ -1868,7 +1907,7 @@ Return{}
   EXPECT_EQ(expect, got) << got;
 }
 
-TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
+TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_FromHeaderAndThen) {
   auto assembly = Preamble() + R"(
      %pty = OpTypePointer Private %uint
      %1 = OpVariable %pty Private
@@ -1890,11 +1929,14 @@ TEST_F(SpvParserTest, EmitStatement_Phi_FromHeaderAndThen) {
      OpBranchConditional %101 %99 %20
 
      %20 = OpLabel ; if seleciton
-     OpSelectionMerge %89 None
+     OpSelectionMerge %79 None
      OpBranchConditional %102 %30 %89
 
      %30 = OpLabel
      OpBranch %89
+
+     %79 = OpLabel ; disconnected selection merge node
+     OpUnreachable
 
      %89 = OpLabel
      %2 = OpPhi %uint %uint_0 %20 %uint_1 %30
@@ -1961,6 +2003,7 @@ Loop{
         Identifier[not set]{x_2_phi}
         ScalarConstructor[not set]{1u}
       }
+      Continue{}
     }
   }
   Else{
@@ -1968,6 +2011,7 @@ Loop{
       Continue{}
     }
   }
+  Return{}
   continuing {
     VariableDeclStatement{
       VariableConst{
@@ -1990,7 +2034,7 @@ Return{}
   EXPECT_EQ(expect, got) << got;
 }
 
-TEST_F(SpvParserTest,
+TEST_F(SpvParserFunctionVarTest,
        EmitStatement_Phi_InMerge_PredecessorsDominatdByNestedSwitchCase) {
   // This is the essence of the bug report from crbug.com/tint/495
   auto assembly = Preamble() + R"(
@@ -2091,7 +2135,7 @@ Return{}
   EXPECT_EQ(expect, got) << got << assembly;
 }
 
-TEST_F(SpvParserTest, EmitStatement_UseInPhiCountsAsUse) {
+TEST_F(SpvParserFunctionVarTest, EmitStatement_UseInPhiCountsAsUse) {
   // From crbug.com/215
   // If the only use of a combinatorially computed ID is as the value
   // in an OpPhi, then we still have to emit it.  The algorithm fix
