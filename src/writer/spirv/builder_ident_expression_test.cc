@@ -25,7 +25,7 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = GlobalConst("var", ty.f32(), init);
+  auto* v = GlobalConst("var", ty.vec3<f32>(), init);
 
   auto* expr = Expr("var");
   WrapInFunction(expr);

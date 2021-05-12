@@ -45,7 +45,7 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
   auto* init = vec3<f32>(1.f, 1.f, 3.f);
 
-  auto* v = Global("var", ty.f32(), ast::StorageClass::kOutput, init);
+  auto* v = Global("var", ty.vec3<f32>(), ast::StorageClass::kOutput, init);
 
   spirv::Builder& b = Build();
 
@@ -60,8 +60,8 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 %3 = OpConstant %2 1
 %4 = OpConstant %2 3
 %5 = OpConstantComposite %1 %3 %3 %4
-%7 = OpTypePointer Function %2
-%8 = OpConstantNull %2
+%7 = OpTypePointer Function %1
+%8 = OpConstantNull %1
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
             R"(%6 = OpVariable %7 Function %8

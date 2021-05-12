@@ -164,10 +164,8 @@ TEST_F(ResolverValidationTest, Stmt_Else_NonBool) {
 TEST_F(ResolverValidationTest,
        Stmt_VariableDecl_MismatchedTypeScalarConstructor) {
   u32 unsigned_value = 2u;  // Type does not match variable type
-  auto* var =
-      Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(unsigned_value));
-
-  auto* decl = Decl(Source{{{3, 3}, {3, 22}}}, var);
+  auto* decl = Decl(Var(Source{{3, 3}}, "my_var", ty.i32(),
+                        ast::StorageClass::kNone, Expr(unsigned_value)));
   WrapInFunction(decl);
 
   EXPECT_FALSE(r()->Resolve());
@@ -181,10 +179,8 @@ TEST_F(ResolverValidationTest,
   auto* my_int = ty.alias("MyInt", ty.i32());
   AST().AddConstructedType(my_int);
   u32 unsigned_value = 2u;  // Type does not match variable type
-  auto* var =
-      Var("my_var", my_int, ast::StorageClass::kNone, Expr(unsigned_value));
-
-  auto* decl = Decl(Source{{{3, 3}, {3, 22}}}, var);
+  auto* decl = Decl(Var(Source{{3, 3}}, "my_var", my_int,
+                        ast::StorageClass::kNone, Expr(unsigned_value)));
   WrapInFunction(decl);
 
   EXPECT_FALSE(r()->Resolve());

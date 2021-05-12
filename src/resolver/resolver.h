@@ -262,13 +262,11 @@ class Resolver {
 
   /// @returns the VariableInfo for the variable `var`, building it if it hasn't
   /// been constructed already. If an error is raised, nullptr is returned.
+  /// @note this method does not resolve the decorations as these are
+  /// context-dependent (global, local, parameter)
   /// @param var the variable to create or return the `VariableInfo` for
-  /// @param type optional type of `var` to use instead of `var->type()`.
-  /// @param type_name optional type name of `var` to use instead of
-  /// `var->type()->FriendlyName()`.
-  VariableInfo* Variable(ast::Variable* var,
-                         const sem::Type* type = nullptr,
-                         std::string type_name = "");
+  /// @param is_parameter true if the variable represents a parameter
+  VariableInfo* Variable(ast::Variable* var, bool is_parameter);
 
   /// Records the storage class usage for the given type, and any transient
   /// dependencies of the type. Validates that the type can be used for the

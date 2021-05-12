@@ -413,20 +413,57 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
   return s;
 }
 
-Resolver::VariableInfo* Resolver::Variable(
-    ast::Variable* var,
-    const sem::Type* type, /* = nullptr */
-    std::string type_name /* = "" */) {
-  auto it = variable_to_info_.find(var);
-  if (it != variable_to_info_.end()) {
-    return it->second;
+Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
+                                           bool is_parameter) {
+  if (variable_to_info_.count(var)) {
+    TINT_ICE(diagnostics_) << "Variable "
+                           << builder_->Symbols().NameFor(var->symbol())
+                           << " already resolved";
+    return nullptr;
   }
 
-  if (type == nullptr && var->type()) {
-    type = Type(var->type());
-    type_name = var->type()->FriendlyName(builder_->Symbols());
+  // If the variable has a declared type, resolve it.
+  std::string type_name;
+  const sem::Type* type = nullptr;
+  if (auto* ty = var->type()) {
+    type_name = ty->FriendlyName(builder_->Symbols());
+    type = Type(ty);
+    if (!type) {
+      return nullptr;
+    }
   }
-  if (type == nullptr) {
+
+  // Does the variable have a constructor?
+  if (auto* ctor = var->constructor()) {
+    Mark(var->constructor());
+    if (!Expression(var->constructor())) {
+      return nullptr;
+    }
+
+    // Fetch the constructor's type
+    auto* rhs_type = TypeOf(ctor);
+    if (!rhs_type) {
+      return nullptr;
+    }
+
+    // If the variable has no declared type, infer it from the RHS
+    if (type == nullptr) {
+      type_name = TypeNameOf(ctor);
+      type = rhs_type->UnwrapPtr();
+    }
+
+    if (!IsValidAssignment(type, rhs_type)) {
+      diagnostics_.add_error(
+          "variable of type '" + type_name +
+              "' cannot be initialized with a value of type '" +
+              TypeNameOf(ctor) + "'",
+          var->source());
+      return nullptr;
+    }
+  } else if (var->is_const() && !is_parameter &&
+             !ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
+    diagnostics_.add_error("let declarations must have initializers",
+                           var->source());
     return nullptr;
   }
 
@@ -446,7 +483,7 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     return false;
   }
 
-  auto* info = Variable(var);
+  auto* info = Variable(var, /* is_parameter */ false);
   if (!info) {
     return false;
   }
@@ -470,20 +507,6 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 
   if (auto bp = var->binding_point()) {
     info->binding_point = {bp.group->value(), bp.binding->value()};
-  }
-
-  if (var->has_constructor()) {
-    Mark(var->constructor());
-    if (!Expression(var->constructor())) {
-      return false;
-    }
-  } else {
-    if (var->is_const() &&
-        !ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
-      diagnostics_.add_error("let declarations must have initializers",
-                             var->source());
-      return false;
-    }
   }
 
   if (!ValidateGlobalVariable(info)) {
@@ -1020,7 +1043,7 @@ bool Resolver::Function(ast::Function* func) {
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
     Mark(param);
-    auto* param_info = Variable(param);
+    auto* param_info = Variable(param, /* is_parameter */ true);
     if (!param_info) {
       return false;
     }
@@ -2072,17 +2095,6 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   ast::Variable* var = stmt->variable();
   Mark(var);
 
-  // If the variable has a declared type, resolve it.
-  std::string type_name;
-  const sem::Type* type = nullptr;
-  if (auto* ast_ty = var->type()) {
-    type_name = ast_ty->FriendlyName(builder_->Symbols());
-    type = Type(ast_ty);
-    if (!type) {
-      return false;
-    }
-  }
-
   bool is_global = false;
   if (variable_stack_.get(var->symbol(), nullptr, &is_global)) {
     const char* error_code = is_global ? "v-0013" : "v-0014";
@@ -2093,33 +2105,9 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     return false;
   }
 
-  if (auto* ctor = stmt->variable()->constructor()) {
-    Mark(ctor);
-    if (!Expression(ctor)) {
-      return false;
-    }
-    auto* rhs_type = TypeOf(ctor);
-
-    // If the variable has no type, infer it from the rhs
-    if (type == nullptr) {
-      type_name = TypeNameOf(ctor);
-      type = rhs_type->UnwrapPtr();
-    }
-
-    if (!IsValidAssignment(type, rhs_type)) {
-      diagnostics_.add_error(
-          "variable of type '" + type_name +
-              "' cannot be initialized with a value of type '" +
-              TypeNameOf(ctor) + "'",
-          stmt->source());
-      return false;
-    }
-  } else {
-    if (stmt->variable()->is_const()) {
-      diagnostics_.add_error("let declarations must have initializers",
-                             var->source());
-      return false;
-    }
+  auto* info = Variable(var, /* is_parameter */ false);
+  if (!info) {
+    return false;
   }
 
   for (auto* deco : var->decorations()) {
@@ -2127,13 +2115,6 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     Mark(deco);
   }
 
-  auto* info = Variable(var, type, type_name);
-  if (!info) {
-    return false;
-  }
-  // TODO(bclayton): Remove this and fix tests. We're overriding the semantic
-  // type stored in info->type here with a possibly non-canonicalized type.
-  info->type = const_cast<sem::Type*>(type);
   variable_stack_.set(var->symbol(), info);
   current_block_->decls.push_back(var);
 
@@ -2212,8 +2193,7 @@ void Resolver::SetType(ast::Expression* expr,
     TINT_ASSERT(type.sem);
   }
   if (expr_info_.count(expr)) {
-    TINT_ICE(builder_->Diagnostics())
-        << "SetType() called twice for the same expression";
+    TINT_ICE(diagnostics_) << "SetType() called twice for the same expression";
   }
   expr_info_.emplace(expr, ExpressionInfo{type, type_name, current_statement_});
 }
@@ -2260,9 +2240,8 @@ void Resolver::CreateSemanticNodes() const {
       } else {
         auto* sem_user = sem_expr->As<sem::VariableUser>();
         if (!sem_user) {
-          TINT_ICE(builder_->Diagnostics())
-              << "expected sem::VariableUser, got "
-              << sem_expr->TypeInfo().name;
+          TINT_ICE(diagnostics_) << "expected sem::VariableUser, got "
+                                 << sem_expr->TypeInfo().name;
         }
         sem_var->AddUser(sem_user);
       }

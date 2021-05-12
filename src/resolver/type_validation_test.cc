@@ -90,8 +90,8 @@ TEST_F(ResolverTypeValidationTest, GlobalConstantWithStorageClass_Fail) {
   // const<in> global_var: f32;
   AST().AddGlobalVariable(
       create<ast::Variable>(Source{{12, 34}}, Symbols().Register("global_var"),
-                            ast::StorageClass::kInput, ty.f32(), true, nullptr,
-                            ast::DecorationList{}));
+                            ast::StorageClass::kInput, ty.f32(), true,
+                            Expr(1.23f), ast::DecorationList{}));
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
@@ -113,7 +113,7 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableUnique_Pass) {
   Global("global_var0", ty.f32(), ast::StorageClass::kPrivate, Expr(0.1f));
 
   Global(Source{{12, 34}}, "global_var1", ty.f32(), ast::StorageClass::kPrivate,
-         Expr(0));
+         Expr(1.0f));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
