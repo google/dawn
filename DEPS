@@ -9,7 +9,6 @@ vars = {
   'build_revision': 'c6c4a4c3ae890f2c020a087c90fb8c0b8be2816a',
   'buildtools_revision': 'e3db55b4639f2a331af6f3708ca1fbd22322aac3',
   'clang_revision': 'eb5ab41f3801e2085208204fd71a490573d72dfd',
-  'cpplint_revision': '305ac8725a166ed42e3f5dd3f80d6de2cf840ef1',
   'googletest_revision': '5c8ca58edfb304b2dd5e6061f83387470826dd87',
   'gpuweb_cts_revision': '177a4faf0a7ce6f8c64b42a715c634e363912a74',
   'spirv_headers_revision': 'dafead1765f6c1a5f9f8a76387dcb2abe4e54acd',
@@ -18,9 +17,6 @@ vars = {
 }
 
 deps = {
-  'third_party/cpplint': Var('chromium_git') + Var('github') +
-      '/google/styleguide.git@' + Var('cpplint_revision'),
-
   'third_party/gpuweb-cts': Var('chromium_git') + Var('github') +
       '/gpuweb/cts.git@' + Var('gpuweb_cts_revision'),
 

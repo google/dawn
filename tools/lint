@@ -18,20 +18,23 @@ ROOT_DIR="$( cd "${SCRIPT_DIR}/.." >/dev/null 2>&1 && pwd )"
 
 set -e  # fail on error
 
-FILTER="-runtime/references"
+if ! command -v cpplint.py &> /dev/null; then
+    echo "cpplint.py not found on PATH"
+    exit 1
+fi
 
+FILTER="-runtime/references"
 FILES="`find src -type f` `find samples -type f`"
 
-if command -v go &> /dev/null
-then
+if command -v go &> /dev/null; then
     # Go is installed. Run cpplint in parallel for speed wins
-    go run $SCRIPT_DIR/src/run-parallel/main.go   \
-         --only-print-failures                    \
-         ./third_party/cpplint/cpplint/cpplint.py \
-         --root=$ROOT_DIR                         \
-         --filter="$FILTER"                       \
+    go run $SCRIPT_DIR/src/run-parallel/main.go \
+         --only-print-failures                  \
+         cpplint.py                             \
+         --root=$ROOT_DIR                       \
+         --filter="$FILTER"                     \
          $ -- $FILES
 else
-    ./third_party/cpplint/cpplint/cpplint.py --root=$ROOT_DIR --filter="$FILTER" $FILES
+    cpplint.py --root=$ROOT_DIR --filter="$FILTER" $FILES
 fi
 
