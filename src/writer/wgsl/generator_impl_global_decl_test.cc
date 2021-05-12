@@ -124,7 +124,9 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
-  EXPECT_EQ(gen.result(), "  [[group(0), binding(0)]] var t : [[access(read)]] texture_1d<f32>;\n");
+  EXPECT_EQ(
+      gen.result(),
+      "  [[group(0), binding(0)]] var t : [[access(read)]] texture_1d<f32>;\n");
 }
 
 }  // namespace

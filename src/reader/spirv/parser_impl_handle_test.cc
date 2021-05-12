@@ -4132,7 +4132,6 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySizeLod_NonArrayed_SignedResult_SignedLevel,
                          //  ImageQuerySizeLod requires Sampled=1
                          SpvParserHandleTest_SampledImageAccessTest,
                          ::testing::ValuesIn(std::vector<ImageAccessCase>{
-
                              // 1D
                              {"%float 1D 0 0 0 1 Unknown",
                               "%99 = OpImageQuerySizeLod %int %im %i1\n",
