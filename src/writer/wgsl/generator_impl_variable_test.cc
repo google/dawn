@@ -59,10 +59,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   auto* v = Global("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
                    ast::DecorationList{
                        Builtin(ast::Builtin::kPosition),
-                       create<ast::BindingDecoration>(0),
-                       create<ast::GroupDecoration>(1),
                        Location(2),
-                       create<ast::OverrideDecoration>(42),
                    });
 
   GeneratorImpl& gen = Build();
@@ -70,7 +67,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated_Multiple) {
   ASSERT_TRUE(gen.EmitVariable(v)) << gen.error();
   EXPECT_EQ(
       gen.result(),
-      R"([[builtin(position), binding(0), group(1), location(2), override(42)]] var<private> a : f32;
+      R"([[builtin(position), location(2)]] var<private> a : f32;
 )");
 }
 

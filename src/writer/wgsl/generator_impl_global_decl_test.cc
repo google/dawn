@@ -101,27 +101,30 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
-  Global("s", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone);
+  Global("s", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone,
+         nullptr,
+         {create<ast::GroupDecoration>(0), create<ast::BindingDecoration>(0)});
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var s : sampler;\n");
+  EXPECT_EQ(gen.result(), "  [[group(0), binding(0)]] var s : sampler;\n");
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
   auto st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   Global("t", ty.access(ast::AccessControl::kReadOnly, st),
-         ast::StorageClass::kNone);
+         ast::StorageClass::kNone, nullptr,
+         {create<ast::GroupDecoration>(0), create<ast::BindingDecoration>(0)});
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
-  EXPECT_EQ(gen.result(), "  var t : [[access(read)]] texture_1d<f32>;\n");
+  EXPECT_EQ(gen.result(), "  [[group(0), binding(0)]] var t : [[access(read)]] texture_1d<f32>;\n");
 }
 
 }  // namespace

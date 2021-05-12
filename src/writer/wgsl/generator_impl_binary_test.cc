@@ -31,6 +31,17 @@ using WgslBinaryTest = TestParamHelper<BinaryData>;
 TEST_P(WgslBinaryTest, Emit) {
   auto params = GetParam();
 
+  auto op_ty = [&]() -> ast::Type* {
+    if (params.op == ast::BinaryOp::kLogicalAnd ||
+        params.op == ast::BinaryOp::kLogicalOr) {
+      return ty.bool_();
+    } else {
+      return ty.u32();
+    }
+  };
+
+  Global("left", op_ty(), ast::StorageClass::kPrivate);
+  Global("right", op_ty(), ast::StorageClass::kPrivate);
   auto* left = Expr("left");
   auto* right = Expr("right");
 
