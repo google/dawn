@@ -985,12 +985,6 @@ namespace dawn_native {
         return mQueue.Get();
     }
 
-    QueueBase* DeviceBase::APIGetDefaultQueue() {
-        EmitDeprecationWarning(
-            "Device::GetDefaultQueue is deprecated, use Device::GetQueue() instead");
-        return APIGetQueue();
-    }
-
     ExternalTextureBase* DeviceBase::APICreateExternalTexture(
         const ExternalTextureDescriptor* descriptor) {
         Ref<ExternalTextureBase> result = nullptr;
@@ -1305,12 +1299,10 @@ namespace dawn_native {
 
     ResultOrError<Ref<TextureBase>> DeviceBase::CreateTexture(const TextureDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
-        TextureDescriptor fixedDescriptor = *descriptor;
-        DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(this, &(fixedDescriptor.size)));
         if (IsValidationEnabled()) {
-            DAWN_TRY(ValidateTextureDescriptor(this, &fixedDescriptor));
+            DAWN_TRY(ValidateTextureDescriptor(this, descriptor));
         }
-        return CreateTextureImpl(&fixedDescriptor);
+        return CreateTextureImpl(descriptor);
     }
 
     ResultOrError<Ref<TextureViewBase>> DeviceBase::CreateTextureView(

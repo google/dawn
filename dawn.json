@@ -815,10 +815,6 @@
                 "returns": "queue"
             },
             {
-                "name": "get default queue",
-                "returns": "queue"
-            },
-            {
                 "name": "create external texture",
                 "returns": "external texture",
                 "args": [
@@ -935,8 +931,7 @@
         "members": [
             {"name": "width", "type": "uint32_t"},
             {"name": "height", "type": "uint32_t", "default": 1},
-            {"name": "depth or array layers", "type": "uint32_t", "default": 1},
-            {"name": "depth", "type": "uint32_t", "default": 1}
+            {"name": "depth or array layers", "type": "uint32_t", "default": 1}
         ]
     },
     "external texture": {
@@ -1387,15 +1382,6 @@
                 ]
             },
             {
-                "name": "set index buffer with format",
-                "args": [
-                    {"name": "buffer", "type": "buffer"},
-                    {"name": "format", "type": "index format"},
-                    {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "0"}
-                ]
-            },
-            {
                 "name": "finish",
                 "returns": "render bundle",
                 "args": [
@@ -1597,15 +1583,6 @@
             },
             {
                 "name": "set index buffer",
-                "args": [
-                    {"name": "buffer", "type": "buffer"},
-                    {"name": "format", "type": "index format"},
-                    {"name": "offset", "type": "uint64_t", "default": "0"},
-                    {"name": "size", "type": "uint64_t", "default": "0"}
-                ]
-            },
-            {
-                "name": "set index buffer with format",
                 "args": [
                     {"name": "buffer", "type": "buffer"},
                     {"name": "format", "type": "index format"},
@@ -2094,7 +2071,6 @@
             {"value": 2, "name": "copy dst"},
             {"value": 4, "name": "sampled"},
             {"value": 8, "name": "storage"},
-            {"value": 16, "name": "output attachment"},
             {"value": 16, "name": "render attachment"},
             {"value": 32, "name": "present"}
         ]

@@ -287,7 +287,7 @@ class CopyTextureForBrowserTests : public DawnTest {
         dstDescriptor.format = dstSpec.format;
         dstDescriptor.mipLevelCount = dstSpec.level + 1;
         dstDescriptor.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::Sampled |
-                              wgpu::TextureUsage::OutputAttachment | wgpu::TextureUsage::CopySrc;
+                              wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
         dstTexture = device.CreateTexture(&dstDescriptor);
 
         if (testSubRectCopy) {

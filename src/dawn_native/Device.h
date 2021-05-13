@@ -200,8 +200,6 @@ namespace dawn_native {
         // For Dawn Wire
         BufferBase* APICreateErrorBuffer();
 
-        // TODO(dawn:22): Remove once the deprecation period is finished.
-        QueueBase* APIGetDefaultQueue();
         QueueBase* APIGetQueue();
 
         void APIInjectError(wgpu::ErrorType type, const char* message);

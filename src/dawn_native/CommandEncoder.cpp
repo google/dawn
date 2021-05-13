@@ -653,14 +653,11 @@ namespace dawn_native {
                                                 const ImageCopyTexture* destination,
                                                 const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            Extent3D fixedCopySize = *copySize;
-            DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(GetDevice(), &fixedCopySize));
-
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateImageCopyBuffer(GetDevice(), *source));
                 DAWN_TRY(ValidateCanUseAs(source->buffer, wgpu::BufferUsage::CopySrc));
 
-                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, fixedCopySize));
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *copySize));
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
                 DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(destination->texture));
 
@@ -669,26 +666,26 @@ namespace dawn_native {
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
                 // checked in validating texture copy range.
-                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *destination, fixedCopySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *destination, *copySize));
             }
             const TexelBlockInfo& blockInfo =
                 destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
             TextureDataLayout srcLayout = FixUpDeprecatedTextureDataLayoutOptions(
-                GetDevice(), source->layout, blockInfo, fixedCopySize);
+                GetDevice(), source->layout, blockInfo, *copySize);
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateLinearTextureCopyOffset(srcLayout, blockInfo));
                 DAWN_TRY(ValidateLinearTextureData(srcLayout, source->buffer->GetSize(), blockInfo,
-                                                   fixedCopySize));
+                                                   *copySize));
 
                 mTopLevelBuffers.insert(source->buffer);
                 mTopLevelTextures.insert(destination->texture);
             }
 
-            ApplyDefaultTextureDataLayoutOptions(&srcLayout, blockInfo, fixedCopySize);
+            ApplyDefaultTextureDataLayoutOptions(&srcLayout, blockInfo, *copySize);
 
             // Skip noop copies.
-            if (fixedCopySize.width != 0 && fixedCopySize.height != 0 &&
-                fixedCopySize.depthOrArrayLayers != 0) {
+            if (copySize->width != 0 && copySize->height != 0 &&
+                copySize->depthOrArrayLayers != 0) {
                 // Record the copy command.
                 CopyBufferToTextureCmd* copy =
                     allocator->Allocate<CopyBufferToTextureCmd>(Command::CopyBufferToTexture);
@@ -701,7 +698,7 @@ namespace dawn_native {
                 copy->destination.mipLevel = destination->mipLevel;
                 copy->destination.aspect =
                     ConvertAspect(destination->texture->GetFormat(), destination->aspect);
-                copy->copySize = fixedCopySize;
+                copy->copySize = *copySize;
             }
 
             return {};
@@ -712,11 +709,8 @@ namespace dawn_native {
                                                 const ImageCopyBuffer* destination,
                                                 const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            Extent3D fixedCopySize = *copySize;
-            DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(GetDevice(), &fixedCopySize));
-
             if (GetDevice()->IsValidationEnabled()) {
-                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *source, fixedCopySize));
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *source, *copySize));
                 DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
                 DAWN_TRY(ValidateTextureSampleCountInBufferCopyCommands(source->texture));
                 DAWN_TRY(ValidateTextureDepthStencilToBufferCopyRestrictions(*source));
@@ -728,26 +722,26 @@ namespace dawn_native {
                 // because in the latter we divide copyExtent.width by blockWidth and
                 // copyExtent.height by blockHeight while the divisibility conditions are
                 // checked in validating texture copy range.
-                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *source, fixedCopySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *source, *copySize));
             }
             const TexelBlockInfo& blockInfo =
                 source->texture->GetFormat().GetAspectInfo(source->aspect).block;
             TextureDataLayout dstLayout = FixUpDeprecatedTextureDataLayoutOptions(
-                GetDevice(), destination->layout, blockInfo, fixedCopySize);
+                GetDevice(), destination->layout, blockInfo, *copySize);
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(ValidateLinearTextureCopyOffset(dstLayout, blockInfo));
                 DAWN_TRY(ValidateLinearTextureData(dstLayout, destination->buffer->GetSize(),
-                                                   blockInfo, fixedCopySize));
+                                                   blockInfo, *copySize));
 
                 mTopLevelTextures.insert(source->texture);
                 mTopLevelBuffers.insert(destination->buffer);
             }
 
-            ApplyDefaultTextureDataLayoutOptions(&dstLayout, blockInfo, fixedCopySize);
+            ApplyDefaultTextureDataLayoutOptions(&dstLayout, blockInfo, *copySize);
 
             // Skip noop copies.
-            if (fixedCopySize.width != 0 && fixedCopySize.height != 0 &&
-                fixedCopySize.depthOrArrayLayers != 0) {
+            if (copySize->width != 0 && copySize->height != 0 &&
+                copySize->depthOrArrayLayers != 0) {
                 // Record the copy command.
                 CopyTextureToBufferCmd* copy =
                     allocator->Allocate<CopyTextureToBufferCmd>(Command::CopyTextureToBuffer);
@@ -759,7 +753,7 @@ namespace dawn_native {
                 copy->destination.offset = dstLayout.offset;
                 copy->destination.bytesPerRow = dstLayout.bytesPerRow;
                 copy->destination.rowsPerImage = dstLayout.rowsPerImage;
-                copy->copySize = fixedCopySize;
+                copy->copySize = *copySize;
             }
 
             return {};
@@ -770,20 +764,18 @@ namespace dawn_native {
                                                  const ImageCopyTexture* destination,
                                                  const Extent3D* copySize) {
         mEncodingContext.TryEncode(this, [&](CommandAllocator* allocator) -> MaybeError {
-            Extent3D fixedCopySize = *copySize;
-            DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(GetDevice(), &fixedCopySize));
             if (GetDevice()->IsValidationEnabled()) {
                 DAWN_TRY(GetDevice()->ValidateObject(source->texture));
                 DAWN_TRY(GetDevice()->ValidateObject(destination->texture));
 
-                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *source, fixedCopySize));
-                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, fixedCopySize));
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *source, *copySize));
+                DAWN_TRY(ValidateImageCopyTexture(GetDevice(), *destination, *copySize));
 
                 DAWN_TRY(
-                    ValidateTextureToTextureCopyRestrictions(*source, *destination, fixedCopySize));
+                    ValidateTextureToTextureCopyRestrictions(*source, *destination, *copySize));
 
-                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *source, fixedCopySize));
-                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *destination, fixedCopySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *source, *copySize));
+                DAWN_TRY(ValidateTextureCopyRange(GetDevice(), *destination, *copySize));
 
                 DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc));
                 DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst));
@@ -793,8 +785,8 @@ namespace dawn_native {
             }
 
             // Skip noop copies.
-            if (fixedCopySize.width != 0 && fixedCopySize.height != 0 &&
-                fixedCopySize.depthOrArrayLayers != 0) {
+            if (copySize->width != 0 && copySize->height != 0 &&
+                copySize->depthOrArrayLayers != 0) {
                 CopyTextureToTextureCmd* copy =
                     allocator->Allocate<CopyTextureToTextureCmd>(Command::CopyTextureToTexture);
                 copy->source.texture = source->texture;
@@ -806,7 +798,7 @@ namespace dawn_native {
                 copy->destination.mipLevel = destination->mipLevel;
                 copy->destination.aspect =
                     ConvertAspect(destination->texture->GetFormat(), destination->aspect);
-                copy->copySize = fixedCopySize;
+                copy->copySize = *copySize;
             }
 
             return {};

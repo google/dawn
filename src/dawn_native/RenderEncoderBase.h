@@ -49,10 +49,6 @@ namespace dawn_native {
                                wgpu::IndexFormat format,
                                uint64_t offset,
                                uint64_t size);
-        void APISetIndexBufferWithFormat(BufferBase* buffer,
-                                         wgpu::IndexFormat format,
-                                         uint64_t offset,
-                                         uint64_t size);
 
         void APISetBindGroup(uint32_t groupIndex,
                              BindGroupBase* group,

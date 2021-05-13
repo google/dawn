@@ -203,16 +203,6 @@ namespace dawn_native {
         });
     }
 
-    void RenderEncoderBase::APISetIndexBufferWithFormat(BufferBase* buffer,
-                                                        wgpu::IndexFormat format,
-                                                        uint64_t offset,
-                                                        uint64_t size) {
-        GetDevice()->EmitDeprecationWarning(
-            "RenderEncoderBase::SetIndexBufferWithFormat is deprecated. Use "
-            "RenderEncoderBase::SetIndexBuffer instead.");
-        APISetIndexBuffer(buffer, format, offset, size);
-    }
-
     void RenderEncoderBase::APISetIndexBuffer(BufferBase* buffer,
                                               wgpu::IndexFormat format,
                                               uint64_t offset,

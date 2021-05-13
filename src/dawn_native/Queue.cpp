@@ -315,21 +315,17 @@ namespace dawn_native {
                                                size_t dataSize,
                                                const TextureDataLayout* dataLayout,
                                                const Extent3D* writeSize) {
-        Extent3D fixedWriteSize = *writeSize;
-        DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(GetDevice(), &fixedWriteSize));
+        DAWN_TRY(ValidateWriteTexture(destination, dataSize, dataLayout, writeSize));
 
-        DAWN_TRY(ValidateWriteTexture(destination, dataSize, dataLayout, &fixedWriteSize));
-
-        if (fixedWriteSize.width == 0 || fixedWriteSize.height == 0 ||
-            fixedWriteSize.depthOrArrayLayers == 0) {
+        if (writeSize->width == 0 || writeSize->height == 0 || writeSize->depthOrArrayLayers == 0) {
             return {};
         }
 
         const TexelBlockInfo& blockInfo =
             destination->texture->GetFormat().GetAspectInfo(destination->aspect).block;
         TextureDataLayout layout = *dataLayout;
-        ApplyDefaultTextureDataLayoutOptions(&layout, blockInfo, fixedWriteSize);
-        return WriteTextureImpl(*destination, data, layout, fixedWriteSize);
+        ApplyDefaultTextureDataLayoutOptions(&layout, blockInfo, *writeSize);
+        return WriteTextureImpl(*destination, data, layout, *writeSize);
     }
 
     MaybeError QueueBase::WriteTextureImpl(const ImageCopyTexture& destination,
@@ -389,14 +385,12 @@ namespace dawn_native {
         const ImageCopyTexture* destination,
         const Extent3D* copySize,
         const CopyTextureForBrowserOptions* options) {
-        Extent3D fixedCopySize = *copySize;
-        DAWN_TRY(FixUpDeprecatedGPUExtent3DDepth(GetDevice(), &fixedCopySize));
         if (GetDevice()->IsValidationEnabled()) {
-            DAWN_TRY(ValidateCopyTextureForBrowser(GetDevice(), source, destination, &fixedCopySize,
-                                                   options));
+            DAWN_TRY(
+                ValidateCopyTextureForBrowser(GetDevice(), source, destination, copySize, options));
         }
 
-        return DoCopyTextureForBrowser(GetDevice(), source, destination, &fixedCopySize, options);
+        return DoCopyTextureForBrowser(GetDevice(), source, destination, copySize, options);
     }
 
     MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,

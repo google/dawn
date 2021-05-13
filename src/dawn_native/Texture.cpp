@@ -248,26 +248,6 @@ namespace dawn_native {
 
     }  // anonymous namespace
 
-    MaybeError FixUpDeprecatedGPUExtent3DDepth(DeviceBase* device, Extent3D* extent) {
-        if (extent->depth != 1) {
-            // deprecated depth is assigned
-            if (extent->depthOrArrayLayers != 1) {
-                // both deprecated and updated API is used
-                return DAWN_VALIDATION_ERROR(
-                    "Deprecated GPUExtent3D.depth and updated GPUExtent3D.depthOrArrayLengths are "
-                    "both assigned.");
-            }
-
-            extent->depthOrArrayLayers = extent->depth;
-
-            device->EmitDeprecationWarning(
-                "GPUExtent3D.depth is deprecated. Please use GPUExtent3D.depthOrArrayLayers "
-                "instead.");
-        }
-
-        return {};
-    }
-
     MaybeError ValidateTextureDescriptor(const DeviceBase* device,
                                          const TextureDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {

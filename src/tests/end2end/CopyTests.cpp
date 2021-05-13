@@ -1699,7 +1699,7 @@ TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.format = kFormat;
     textureDescriptor.size = {kPixelsPerRow, 1, 1};
-    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::OutputAttachment;
+    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
     wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();

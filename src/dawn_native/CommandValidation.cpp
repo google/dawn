@@ -455,8 +455,8 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Source texture must have sampled usage");
         }
 
-        if (!(dst.texture->GetUsage() & wgpu::TextureUsage::OutputAttachment)) {
-            return DAWN_VALIDATION_ERROR("Dest texture must have outputAttachment usage");
+        if (!(dst.texture->GetUsage() & wgpu::TextureUsage::RenderAttachment)) {
+            return DAWN_VALIDATION_ERROR("Dest texture must have RenderAttachment usage");
         }
 
         return ValidateTextureToTextureCopyCommonRestrictions(src, dst, copySize);
