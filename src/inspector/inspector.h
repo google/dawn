@@ -151,6 +151,9 @@ class Inspector {
   /// @returns map of const_id to initial value
   std::map<uint32_t, Scalar> GetConstantIDs();
 
+  /// @returns map of module-constant name to pipeline constant ID
+  std::map<std::string, uint32_t> GetConstantNameToIdMap();
+
   /// @param entry_point name of the entry point to get information about.
   /// @returns vector of all of the resource bindings.
   std::vector<ResourceBinding> GetResourceBindings(

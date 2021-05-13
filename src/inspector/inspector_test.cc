@@ -21,6 +21,7 @@
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
+#include "src/sem/variable.h"
 #include "tint/tint.h"
 
 namespace tint {
@@ -137,22 +138,46 @@ class InspectorHelper : public ProgramBuilder {
     return Func(caller, ast::VariableList(), ty.void_(), stmts, decorations);
   }
 
-  /// Add a Constant ID to the global variables.
+  /// Add a pipeline constant to the global variables, with a specific ID.
   /// @param name name of the variable to add
   /// @param id id number for the constant id
   /// @param type type of the variable
   /// @param val value to initialize the variable with, if NULL no initializer
   ///            will be added.
+  /// @returns the constant that was created
   template <class T>
-  void AddConstantID(std::string name, uint32_t id, ast::Type* type, T* val) {
+  ast::Variable* AddConstantWithID(std::string name,
+                                   uint32_t id,
+                                   ast::Type* type,
+                                   T* val) {
     ast::Expression* constructor = nullptr;
     if (val) {
       constructor = Expr(*val);
     }
-    GlobalConst(name, type, constructor,
-                ast::DecorationList{
-                    create<ast::OverrideDecoration>(id),
-                });
+    return GlobalConst(name, type, constructor,
+                       ast::DecorationList{
+                           Override(id),
+                       });
+  }
+
+  /// Add a pipeline constant to the global variables, without a specific ID.
+  /// @param name name of the variable to add
+  /// @param type type of the variable
+  /// @param val value to initialize the variable with, if NULL no initializer
+  ///            will be added.
+  /// @returns the constant that was created
+  template <class T>
+  ast::Variable* AddConstantWithoutID(std::string name,
+                                      ast::Type* type,
+                                      T* val) {
+    ast::Expression* constructor = nullptr;
+    if (val) {
+      constructor = Expr(*val);
+    }
+    return GlobalConst(name, type, constructor,
+                       ast::DecorationList{
+                           Override(),
+                       });
   }
 
   /// @param vec Vector of StageVariable to be searched
@@ -604,7 +629,7 @@ class InspectorHelper : public ProgramBuilder {
     return ty.sampler(ast::SamplerKind::kComparisonSampler);
   }
 
- private:
+ protected:
   std::unique_ptr<Program> program_;
   std::unique_ptr<Inspector> inspector_;
 };
@@ -618,6 +643,8 @@ class InspectorGetRemappedNameForEntryPointTest : public InspectorHelper,
                                                   public testing::Test {};
 class InspectorGetConstantIDsTest : public InspectorHelper,
                                     public testing::Test {};
+class InspectorGetConstantNameToIdMapTest : public InspectorHelper,
+                                            public testing::Test {};
 class InspectorGetResourceBindingsTest : public InspectorHelper,
                                          public testing::Test {};
 class InspectorGetUniformBufferResourceBindingsTest : public InspectorHelper,
@@ -1484,9 +1511,9 @@ TEST_F(InspectorGetRemappedNameForEntryPointTest,
 TEST_F(InspectorGetConstantIDsTest, Bool) {
   bool val_true = true;
   bool val_false = false;
-  AddConstantID<bool>("foo", 1, ty.bool_(), nullptr);
-  AddConstantID<bool>("bar", 20, ty.bool_(), &val_true);
-  AddConstantID<bool>("baz", 300, ty.bool_(), &val_false);
+  AddConstantWithID<bool>("foo", 1, ty.bool_(), nullptr);
+  AddConstantWithID<bool>("bar", 20, ty.bool_(), &val_true);
+  AddConstantWithID<bool>("baz", 300, ty.bool_(), &val_false);
 
   Inspector& inspector = Build();
 
@@ -1507,8 +1534,8 @@ TEST_F(InspectorGetConstantIDsTest, Bool) {
 
 TEST_F(InspectorGetConstantIDsTest, U32) {
   uint32_t val = 42;
-  AddConstantID<uint32_t>("foo", 1, ty.u32(), nullptr);
-  AddConstantID<uint32_t>("bar", 20, ty.u32(), &val);
+  AddConstantWithID<uint32_t>("foo", 1, ty.u32(), nullptr);
+  AddConstantWithID<uint32_t>("bar", 20, ty.u32(), &val);
 
   Inspector& inspector = Build();
 
@@ -1526,9 +1553,9 @@ TEST_F(InspectorGetConstantIDsTest, U32) {
 TEST_F(InspectorGetConstantIDsTest, I32) {
   int32_t val_neg = -42;
   int32_t val_pos = 42;
-  AddConstantID<int32_t>("foo", 1, ty.i32(), nullptr);
-  AddConstantID<int32_t>("bar", 20, ty.i32(), &val_neg);
-  AddConstantID<int32_t>("baz", 300, ty.i32(), &val_pos);
+  AddConstantWithID<int32_t>("foo", 1, ty.i32(), nullptr);
+  AddConstantWithID<int32_t>("bar", 20, ty.i32(), &val_neg);
+  AddConstantWithID<int32_t>("baz", 300, ty.i32(), &val_pos);
 
   Inspector& inspector = Build();
 
@@ -1551,10 +1578,10 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
   float val_zero = 0.0f;
   float val_neg = -10.0f;
   float val_pos = 15.0f;
-  AddConstantID<float>("foo", 1, ty.f32(), nullptr);
-  AddConstantID<float>("bar", 20, ty.f32(), &val_zero);
-  AddConstantID<float>("baz", 300, ty.f32(), &val_neg);
-  AddConstantID<float>("x", 4000, ty.f32(), &val_pos);
+  AddConstantWithID<float>("foo", 1, ty.f32(), nullptr);
+  AddConstantWithID<float>("bar", 20, ty.f32(), &val_zero);
+  AddConstantWithID<float>("baz", 300, ty.f32(), &val_neg);
+  AddConstantWithID<float>("x", 4000, ty.f32(), &val_pos);
 
   Inspector& inspector = Build();
 
@@ -1575,6 +1602,41 @@ TEST_F(InspectorGetConstantIDsTest, Float) {
   ASSERT_TRUE(result.find(4000) != result.end());
   EXPECT_TRUE(result[4000].IsFloat());
   EXPECT_FLOAT_EQ(15.0, result[4000].AsFloat());
+}
+
+TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
+  AddConstantWithID<float>("v1", 1, ty.f32(), nullptr);
+  AddConstantWithID<float>("v20", 20, ty.f32(), nullptr);
+  AddConstantWithID<float>("v300", 300, ty.f32(), nullptr);
+  auto* a = AddConstantWithoutID<float>("a", ty.f32(), nullptr);
+  auto* b = AddConstantWithoutID<float>("b", ty.f32(), nullptr);
+  auto* c = AddConstantWithoutID<float>("c", ty.f32(), nullptr);
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetConstantNameToIdMap();
+  ASSERT_EQ(6u, result.size());
+
+  ASSERT_TRUE(result.count("v1"));
+  EXPECT_EQ(result["v1"], 1u);
+
+  ASSERT_TRUE(result.count("v20"));
+  EXPECT_EQ(result["v20"], 20u);
+
+  ASSERT_TRUE(result.count("v300"));
+  EXPECT_EQ(result["v300"], 300u);
+
+  ASSERT_TRUE(result.count("a"));
+  ASSERT_TRUE(program_->Sem().Get(a));
+  EXPECT_EQ(result["a"], program_->Sem().Get(a)->ConstantId());
+
+  ASSERT_TRUE(result.count("b"));
+  ASSERT_TRUE(program_->Sem().Get(b));
+  EXPECT_EQ(result["b"], program_->Sem().Get(b)->ConstantId());
+
+  ASSERT_TRUE(result.count("c"));
+  ASSERT_TRUE(program_->Sem().Get(c));
+  EXPECT_EQ(result["c"], program_->Sem().Get(c)->ConstantId());
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Empty) {
