@@ -137,7 +137,7 @@ TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(  [[override]] let a : f32;
 
   [[override(7)]] let b : f32;
