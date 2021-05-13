@@ -21,7 +21,12 @@ namespace tint {
 namespace ast {
 
 /// The unary op
-enum class UnaryOp { kNegation = 0, kNot };
+enum class UnaryOp {
+  kAddressOf,    // &EXPR
+  kDereference,  // *EXPR
+  kNegation,     // -EXPR
+  kNot,          // !EXPR
+};
 
 /// @param out the std::ostream to write to
 /// @param mod the UnaryOp

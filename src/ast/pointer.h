@@ -26,7 +26,7 @@ namespace ast {
 /// A pointer type.
 class Pointer : public Castable<Pointer, Type> {
  public:
-  /// Construtor
+  /// Constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this node
   /// @param subtype the pointee type

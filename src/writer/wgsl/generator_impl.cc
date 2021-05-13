@@ -706,6 +706,12 @@ bool GeneratorImpl::EmitBinary(ast::BinaryExpression* expr) {
 
 bool GeneratorImpl::EmitUnaryOp(ast::UnaryOpExpression* expr) {
   switch (expr->op()) {
+    case ast::UnaryOp::kDereference:
+      out_ << "*";
+      break;
+    case ast::UnaryOp::kAddressOf:
+      out_ << "&";
+      break;
     case ast::UnaryOp::kNot:
       out_ << "!";
       break;

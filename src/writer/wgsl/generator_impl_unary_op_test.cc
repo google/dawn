@@ -44,11 +44,13 @@ TEST_P(WgslUnaryOpTest, Emit) {
   ASSERT_TRUE(gen.EmitExpression(op)) << gen.error();
   EXPECT_EQ(gen.result(), std::string(params.name) + "(expr)");
 }
-INSTANTIATE_TEST_SUITE_P(WgslGeneratorImplTest,
-                         WgslUnaryOpTest,
-                         testing::Values(UnaryOpData{"!", ast::UnaryOp::kNot},
-                                         UnaryOpData{"-",
-                                                     ast::UnaryOp::kNegation}));
+INSTANTIATE_TEST_SUITE_P(
+    WgslGeneratorImplTest,
+    WgslUnaryOpTest,
+    testing::Values(UnaryOpData{"&", ast::UnaryOp::kAddressOf},
+                    UnaryOpData{"*", ast::UnaryOp::kDereference},
+                    UnaryOpData{"!", ast::UnaryOp::kNot},
+                    UnaryOpData{"-", ast::UnaryOp::kNegation}));
 
 }  // namespace
 }  // namespace wgsl

@@ -30,6 +30,7 @@ inline std::ostream& operator<<(std::ostream& out, UnaryOpData data) {
 using HlslUnaryOpTest = TestParamHelper<UnaryOpData>;
 TEST_P(HlslUnaryOpTest, Emit) {
   auto params = GetParam();
+  auto name = std::string(params.name);
 
   Global("expr", ty.i32(), ast::StorageClass::kPrivate);
 
@@ -39,13 +40,15 @@ TEST_P(HlslUnaryOpTest, Emit) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
-  EXPECT_EQ(result(), std::string(params.name) + "(expr)");
+  EXPECT_EQ(result(), name.empty() ? "expr" : name + "(expr)");
 }
-INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_UnaryOp,
-                         HlslUnaryOpTest,
-                         testing::Values(UnaryOpData{"!", ast::UnaryOp::kNot},
-                                         UnaryOpData{"-",
-                                                     ast::UnaryOp::kNegation}));
+INSTANTIATE_TEST_SUITE_P(
+    HlslGeneratorImplTest_UnaryOp,
+    HlslUnaryOpTest,
+    testing::Values(UnaryOpData{"", ast::UnaryOp::kAddressOf},
+                    UnaryOpData{"", ast::UnaryOp::kDereference},
+                    UnaryOpData{"!", ast::UnaryOp::kNot},
+                    UnaryOpData{"-", ast::UnaryOp::kNegation}));
 
 }  // namespace
 }  // namespace hlsl

@@ -19,6 +19,14 @@ namespace ast {
 
 std::ostream& operator<<(std::ostream& out, UnaryOp mod) {
   switch (mod) {
+    case UnaryOp::kAddressOf: {
+      out << "address-of";
+      break;
+    }
+    case UnaryOp::kDereference: {
+      out << "dereference";
+      break;
+    }
     case UnaryOp::kNegation: {
       out << "negation";
       break;
