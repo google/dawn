@@ -2257,8 +2257,9 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
     out_ << " " << program_->Symbols().NameFor(var->symbol());
   }
 
-  if (ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
-    out_ << " [[function_constant(" << var->constant_id() << ")]]";
+  auto* sem_var = program_->Sem().Get(var);
+  if (sem_var->IsPipelineConstant()) {
+    out_ << " [[function_constant(" << sem_var->ConstantId() << ")]]";
   } else if (var->constructor() != nullptr) {
     out_ << " = ";
     if (!EmitExpression(var->constructor())) {

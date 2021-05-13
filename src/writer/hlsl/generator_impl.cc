@@ -2689,8 +2689,8 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
   auto* sem = builder_.Sem().Get(var);
   auto* type = sem->Type();
 
-  if (ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
-    auto const_id = var->constant_id();
+  if (sem->IsPipelineConstant()) {
+    auto const_id = sem->ConstantId();
 
     out << "#ifndef WGSL_SPEC_CONSTANT_" << const_id << std::endl;
 

@@ -609,7 +609,10 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
     } else if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
       out_ << "builtin(" << builtin->value() << ")";
     } else if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
-      out_ << "override(" << override_deco->value() << ")";
+      out_ << "override";
+      if (override_deco->HasValue()) {
+        out_ << "(" << override_deco->value() << ")";
+      }
     } else if (auto* size = deco->As<ast::StructMemberSizeDecoration>()) {
       out_ << "size(" << size->size() << ")";
     } else if (auto* align = deco->As<ast::StructMemberAlignDecoration>()) {

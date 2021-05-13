@@ -129,6 +129,21 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
       "  [[group(0), binding(0)]] var t : [[access(read)]] texture_1d<f32>;\n");
 }
 
+TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
+  GlobalConst("a", ty.f32(), nullptr, {Override()});
+  GlobalConst("b", ty.f32(), nullptr, {Override(7u)});
+
+  GeneratorImpl& gen = Build();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  EXPECT_EQ(gen.result(), R"(  [[override]] let a : f32;
+
+  [[override(7)]] let b : f32;
+)");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace writer

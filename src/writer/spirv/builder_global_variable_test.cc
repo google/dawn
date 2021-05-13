@@ -311,6 +311,32 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
 )");
 }
 
+TEST_F(BuilderTest, GlobalVar_Override_NoId) {
+  auto* var_a = GlobalConst("a", ty.bool_(), Expr(true),
+                            ast::DecorationList{
+                                create<ast::OverrideDecoration>(0),
+                            });
+  auto* var_b = GlobalConst("b", ty.bool_(), Expr(false),
+                            ast::DecorationList{
+                                create<ast::OverrideDecoration>(),
+                            });
+
+  spirv::Builder& b = Build();
+
+  EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
+  EXPECT_TRUE(b.GenerateGlobalVariable(var_b)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %2 "a"
+OpName %3 "b"
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %2 SpecId 0
+OpDecorate %3 SpecId 1
+)");
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+%2 = OpSpecConstantTrue %1
+%3 = OpSpecConstantFalse %1
+)");
+}
+
 struct BuiltinData {
   ast::Builtin builtin;
   ast::StorageClass storage;

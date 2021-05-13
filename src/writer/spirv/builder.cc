@@ -1493,9 +1493,10 @@ uint32_t Builder::GenerateLiteralIfNeeded(ast::Variable* var,
                                           ast::Literal* lit) {
   ScalarConstant constant;
 
-  if (var && ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
+  auto* sem_var = builder_.Sem().Get(var);
+  if (sem_var && sem_var->IsPipelineConstant()) {
     constant.is_spec_op = true;
-    constant.constant_id = var->constant_id();
+    constant.constant_id = sem_var->ConstantId();
   }
 
   if (auto* l = lit->As<ast::BoolLiteral>()) {
