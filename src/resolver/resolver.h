@@ -347,6 +347,7 @@ class Resolver {
   std::unordered_map<const ast::Expression*, ExpressionInfo> expr_info_;
   std::unordered_map<Symbol, sem::Type*> named_types_;
   std::unordered_set<const ast::Node*> marked_;
+  std::unordered_map<uint32_t, const VariableInfo*> constant_ids_;
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;

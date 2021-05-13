@@ -519,6 +519,13 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 
   for (auto* deco : var->decorations()) {
     Mark(deco);
+
+    if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
+      // Track the constant IDs that are specified in the shader.
+      if (override_deco->HasValue()) {
+        constant_ids_.emplace(override_deco->value(), info);
+      }
+    }
   }
 
   if (auto bp = var->binding_point()) {
@@ -543,7 +550,30 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
 bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
   for (auto* deco : info->declaration->decorations()) {
     if (info->declaration->is_const()) {
-      if (!deco->Is<ast::OverrideDecoration>()) {
+      if (auto* override_deco = deco->As<ast::OverrideDecoration>()) {
+        if (override_deco->HasValue()) {
+          uint32_t id = override_deco->value();
+          auto itr = constant_ids_.find(id);
+          if (itr != constant_ids_.end() && itr->second != info) {
+            diagnostics_.add_error("pipeline constant IDs must be unique",
+                                   deco->source());
+            diagnostics_.add_note("a pipeline constant with an ID of " +
+                                      std::to_string(id) +
+                                      " was previously declared "
+                                      "here:",
+                                  ast::GetDecoration<ast::OverrideDecoration>(
+                                      itr->second->declaration->decorations())
+                                      ->source());
+            return false;
+          }
+          if (id > 65535) {
+            diagnostics_.add_error(
+                "pipeline constant IDs must be between 0 and 65535",
+                deco->source());
+            return false;
+          }
+        }
+      } else {
         diagnostics_.add_error("decoration is not valid for constants",
                                deco->source());
         return false;
@@ -2244,12 +2274,42 @@ void Resolver::CreateSemanticNodes() const {
     }
   }
 
+  // The next pipeline constant ID to try to allocate.
+  uint16_t next_constant_id = 0;
+
   // Create semantic nodes for all ast::Variables
   for (auto it : variable_to_info_) {
     auto* var = it.first;
     auto* info = it.second;
-    auto* sem_var =
-        builder_->create<sem::Variable>(var, info->type, info->storage_class);
+
+    sem::Variable* sem_var = nullptr;
+
+    if (auto* override_deco =
+            ast::GetDecoration<ast::OverrideDecoration>(var->decorations())) {
+      // Create a pipeline overridable constant.
+      uint16_t constant_id;
+      if (override_deco->HasValue()) {
+        constant_id = override_deco->value();
+      } else {
+        // No ID was specified, so allocate the next available ID.
+        constant_id = next_constant_id;
+        while (constant_ids_.count(constant_id)) {
+          if (constant_id == UINT16_MAX) {
+            TINT_ICE(builder_->Diagnostics())
+                << "no more pipeline constant IDs available";
+            return;
+          }
+          constant_id++;
+        }
+        next_constant_id = constant_id + 1;
+      }
+
+      sem_var = builder_->create<sem::Variable>(var, info->type, constant_id);
+    } else {
+      sem_var =
+          builder_->create<sem::Variable>(var, info->type, info->storage_class);
+    }
+
     std::vector<const sem::VariableUser*> users;
     for (auto* user : info->users) {
       // Create semantic node for the identifier expression if necessary

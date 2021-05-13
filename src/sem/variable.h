@@ -37,13 +37,21 @@ class VariableUser;
 /// Variable holds the semantic information for variables.
 class Variable : public Castable<Variable, Node> {
  public:
-  /// Constructor
+  /// Constructor for variables and non-overridable constants
   /// @param declaration the AST declaration node
   /// @param type the variable type
   /// @param storage_class the variable storage class
   Variable(const ast::Variable* declaration,
            const sem::Type* type,
            ast::StorageClass storage_class);
+
+  /// Constructor for overridable pipeline constants
+  /// @param declaration the AST declaration node
+  /// @param type the variable type
+  /// @param constant_id the pipeline constant ID
+  Variable(const ast::Variable* declaration,
+           const sem::Type* type,
+           uint16_t constant_id);
 
   /// Destructor
   ~Variable() override;
@@ -63,11 +71,19 @@ class Variable : public Castable<Variable, Node> {
   /// @param user the user to add
   void AddUser(const VariableUser* user) { users_.emplace_back(user); }
 
+  /// @returns true if this variable is an overridable pipeline constant
+  bool IsPipelineConstant() const { return is_pipeline_constant_; }
+
+  /// @returns the pipeline constant ID associated with the variable
+  uint32_t ConstantId() const { return constant_id_; }
+
  private:
   const ast::Variable* const declaration_;
   const sem::Type* const type_;
   ast::StorageClass const storage_class_;
   std::vector<const VariableUser*> users_;
+  const bool is_pipeline_constant_;
+  const uint16_t constant_id_ = 0;
 };
 
 /// VariableUser holds the semantic information for an identifier expression

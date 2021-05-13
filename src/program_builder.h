@@ -38,6 +38,7 @@
 #include "src/ast/member_accessor_expression.h"
 #include "src/ast/module.h"
 #include "src/ast/multisampled_texture.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/pointer.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/sampled_texture.h"
@@ -1785,6 +1786,32 @@ class ProgramBuilder {
   ast::LocationDecoration* Location(uint32_t location) {
     return create<ast::LocationDecoration>(source_, location);
   }
+
+  /// Creates an ast::OverrideDecoration with a specific constant ID
+  /// @param source the source information
+  /// @param id the id value
+  /// @returns the override decoration pointer
+  ast::OverrideDecoration* Override(const Source& source, uint32_t id) {
+    return create<ast::OverrideDecoration>(source, id);
+  }
+
+  /// Creates an ast::OverrideDecoration with a specific constant ID
+  /// @param id the optional id value
+  /// @returns the override decoration pointer
+  ast::OverrideDecoration* Override(uint32_t id) {
+    return Override(source_, id);
+  }
+
+  /// Creates an ast::OverrideDecoration without a constant ID
+  /// @param source the source information
+  /// @returns the override decoration pointer
+  ast::OverrideDecoration* Override(const Source& source) {
+    return create<ast::OverrideDecoration>(source);
+  }
+
+  /// Creates an ast::OverrideDecoration without a constant ID
+  /// @returns the override decoration pointer
+  ast::OverrideDecoration* Override() { return Override(source_); }
 
   /// Creates an ast::StageDecoration
   /// @param source the source information

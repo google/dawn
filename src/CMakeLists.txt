@@ -550,6 +550,7 @@ if(${TINT_BUILD_TESTS})
     resolver/intrinsic_test.cc
     resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc
+    resolver/pipeline_overridable_constant_test.cc
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h
     resolver/resolver_test.cc

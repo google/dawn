@@ -26,7 +26,19 @@ namespace sem {
 Variable::Variable(const ast::Variable* declaration,
                    const sem::Type* type,
                    ast::StorageClass storage_class)
-    : declaration_(declaration), type_(type), storage_class_(storage_class) {}
+    : declaration_(declaration),
+      type_(type),
+      storage_class_(storage_class),
+      is_pipeline_constant_(false) {}
+
+Variable::Variable(const ast::Variable* declaration,
+                   const sem::Type* type,
+                   uint16_t constant_id)
+    : declaration_(declaration),
+      type_(type),
+      storage_class_(ast::StorageClass::kNone),
+      is_pipeline_constant_(true),
+      constant_id_(constant_id) {}
 
 Variable::~Variable() = default;
 
