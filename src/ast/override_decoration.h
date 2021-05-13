@@ -23,12 +23,19 @@ namespace ast {
 /// An override decoration
 class OverrideDecoration : public Castable<OverrideDecoration, Decoration> {
  public:
-  /// constructor
+  /// Create an override decoration with no specified id.
+  /// @param program_id the identifier of the program that owns this node
+  /// @param source the source of this decoration
+  OverrideDecoration(ProgramID program_id, const Source& source);
+  /// Create an override decoration with a specific id value.
   /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
   /// @param val the override value
   OverrideDecoration(ProgramID program_id, const Source& source, uint32_t val);
   ~OverrideDecoration() override;
+
+  /// @returns true if an override id was specified
+  uint32_t HasValue() const { return has_value_; }
 
   /// @returns the override id value
   uint32_t value() const { return value_; }
@@ -48,6 +55,7 @@ class OverrideDecoration : public Castable<OverrideDecoration, Decoration> {
   OverrideDecoration* Clone(CloneContext* ctx) const override;
 
  private:
+  bool has_value_;
   uint32_t const value_;
 };
 

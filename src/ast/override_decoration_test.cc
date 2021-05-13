@@ -22,9 +22,15 @@ namespace {
 
 using OverrideDecorationTest = TestHelper;
 
-TEST_F(OverrideDecorationTest, Creation) {
+TEST_F(OverrideDecorationTest, Creation_WithValue) {
   auto* d = create<OverrideDecoration>(12);
+  EXPECT_TRUE(d->HasValue());
   EXPECT_EQ(12u, d->value());
+}
+
+TEST_F(OverrideDecorationTest, Creation_WithoutValue) {
+  auto* d = create<OverrideDecoration>();
+  EXPECT_FALSE(d->HasValue());
 }
 
 TEST_F(OverrideDecorationTest, ToStr) {

@@ -22,9 +22,13 @@ namespace tint {
 namespace ast {
 
 OverrideDecoration::OverrideDecoration(ProgramID program_id,
+                                       const Source& source)
+    : Base(program_id, source), has_value_(false), value_(0) {}
+
+OverrideDecoration::OverrideDecoration(ProgramID program_id,
                                        const Source& source,
                                        uint32_t val)
-    : Base(program_id, source), value_(val) {}
+    : Base(program_id, source), has_value_(true), value_(val) {}
 
 OverrideDecoration::~OverrideDecoration() = default;
 
@@ -32,13 +36,21 @@ void OverrideDecoration::to_str(const sem::Info&,
                                 std::ostream& out,
                                 size_t indent) const {
   make_indent(out, indent);
-  out << "OverrideDecoration{" << value_ << "}" << std::endl;
+  out << "OverrideDecoration";
+  if (has_value_) {
+    out << "{" << value_ << "}";
+  }
+  out << std::endl;
 }
 
 OverrideDecoration* OverrideDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  return ctx->dst->create<OverrideDecoration>(src, value_);
+  if (has_value_) {
+    return ctx->dst->create<OverrideDecoration>(src, value_);
+  } else {
+    return ctx->dst->create<OverrideDecoration>(src);
+  }
 }
 
 }  // namespace ast
