@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <limits>
 
+#include "src/ast/access_control.h"
 #include "src/ast/alias.h"
 #include "src/ast/array.h"
 #include "src/ast/bool.h"
@@ -37,6 +38,7 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/storage_texture.h"
 #include "src/ast/stride_decoration.h"
+#include "src/ast/struct_block_decoration.h"
 #include "src/ast/struct_member_align_decoration.h"
 #include "src/ast/struct_member_offset_decoration.h"
 #include "src/ast/struct_member_size_decoration.h"
@@ -47,22 +49,7 @@
 #include "src/ast/vector.h"
 #include "src/ast/void.h"
 #include "src/ast/workgroup_decoration.h"
-#include "src/sem/access_control_type.h"
-#include "src/sem/array.h"
-#include "src/sem/bool_type.h"
-#include "src/sem/depth_texture_type.h"
-#include "src/sem/f32_type.h"
-#include "src/sem/function.h"
-#include "src/sem/i32_type.h"
-#include "src/sem/matrix_type.h"
-#include "src/sem/multisampled_texture_type.h"
-#include "src/sem/pointer_type.h"
-#include "src/sem/sampled_texture_type.h"
 #include "src/sem/struct.h"
-#include "src/sem/u32_type.h"
-#include "src/sem/variable.h"
-#include "src/sem/vector_type.h"
-#include "src/sem/void_type.h"
 #include "src/utils/math.h"
 #include "src/writer/float_to_string.h"
 
@@ -75,7 +62,7 @@ GeneratorImpl::GeneratorImpl(const Program* program)
 
 GeneratorImpl::~GeneratorImpl() = default;
 
-bool GeneratorImpl::Generate(const ast::Function* entry) {
+bool GeneratorImpl::Generate() {
   // Generate global declarations in the order they appear in the module.
   for (auto* decl : program_->AST().GlobalDeclarations()) {
     if (auto* ty = decl->As<ast::Type>()) {
@@ -83,25 +70,10 @@ bool GeneratorImpl::Generate(const ast::Function* entry) {
         return false;
       }
     } else if (auto* func = decl->As<ast::Function>()) {
-      if (entry && func != entry) {
-        // Skip functions that are not reachable by the target entry point.
-        auto* sem = program_->Sem().Get(func);
-        if (!sem->HasAncestorEntryPoint(entry->symbol())) {
-          continue;
-        }
-      }
       if (!EmitFunction(func)) {
         return false;
       }
     } else if (auto* var = decl->As<ast::Variable>()) {
-      if (entry && !var->is_const()) {
-        // Skip variables that are not referenced by the target entry point.
-        auto& refs = program_->Sem().Get(entry)->ReferencedModuleVariables();
-        if (std::find(refs.begin(), refs.end(), program_->Sem().Get(var)) ==
-            refs.end()) {
-          continue;
-        }
-      }
       if (!EmitVariable(var)) {
         return false;
       }
@@ -291,7 +263,9 @@ bool GeneratorImpl::EmitIdentifier(ast::IdentifierExpression* expr) {
 bool GeneratorImpl::EmitFunction(ast::Function* func) {
   if (func->decorations().size()) {
     make_indent();
-    EmitDecorations(func->decorations());
+    if (!EmitDecorations(func->decorations())) {
+      return false;
+    }
     out_ << std::endl;
   }
 
@@ -501,10 +475,11 @@ bool GeneratorImpl::EmitType(const ast::Type* ty) {
 }
 
 bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
-  for (auto* deco : str->decorations()) {
-    out_ << "[[";
-    program_->to_str(deco, out_, 0);
-    out_ << "]]" << std::endl;
+  if (str->decorations().size()) {
+    if (!EmitDecorations(str->decorations())) {
+      return false;
+    }
+    out_ << std::endl;
   }
   out_ << "struct " << program_->Symbols().NameFor(str->name()) << " {"
        << std::endl;
@@ -521,14 +496,16 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
   increment_indent();
   uint32_t offset = 0;
   for (auto* mem : str->members()) {
-    auto* mem_sem = program_->Sem().Get(mem);
-
-    offset = utils::RoundUp(mem_sem->Align(), offset);
-    if (uint32_t padding = mem_sem->Offset() - offset) {
-      add_padding(padding);
-      offset += padding;
+    // TODO(crbug.com/tint/798) move the [[offset]] decoration handling to the
+    // transform::Wgsl sanitizer.
+    if (auto* mem_sem = program_->Sem().Get(mem)) {
+      offset = utils::RoundUp(mem_sem->Align(), offset);
+      if (uint32_t padding = mem_sem->Offset() - offset) {
+        add_padding(padding);
+        offset += padding;
+      }
+      offset += mem_sem->Size();
     }
-    offset += mem_sem->Size();
 
     // Offset decorations no longer exist in the WGSL spec, but are emitted
     // by the SPIR-V reader and are consumed by the Resolver(). These should not
@@ -564,8 +541,6 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
 }
 
 bool GeneratorImpl::EmitVariable(ast::Variable* var) {
-  auto* sem = program_->Sem().Get(var);
-
   make_indent();
 
   if (!var->decorations().empty()) {
@@ -579,10 +554,9 @@ bool GeneratorImpl::EmitVariable(ast::Variable* var) {
     out_ << "let";
   } else {
     out_ << "var";
-    if (sem->StorageClass() != ast::StorageClass::kNone &&
-        sem->StorageClass() != ast::StorageClass::kFunction &&
-        !sem->Type()->UnwrapAll()->is_handle()) {
-      out_ << "<" << sem->StorageClass() << ">";
+    auto sc = var->declared_storage_class();
+    if (sc != ast::StorageClass::kNone) {
+      out_ << "<" << sc << ">";
     }
   }
 
@@ -622,6 +596,8 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
       std::tie(x, y, z) = workgroup->values();
       out_ << "workgroup_size(" << std::to_string(x) << ", "
            << std::to_string(y) << ", " << std::to_string(z) << ")";
+    } else if (deco->Is<ast::StructBlockDecoration>()) {
+      out_ << "block";
     } else if (auto* stage = deco->As<ast::StageDecoration>()) {
       out_ << "stage(" << stage->value() << ")";
     } else if (auto* binding = deco->As<ast::BindingDecoration>()) {

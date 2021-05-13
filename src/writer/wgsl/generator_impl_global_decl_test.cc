@@ -35,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(  [[stage(compute)]]
   fn test_function() {
     var a : f32;
@@ -74,7 +74,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"(  var<private> a0 : f32;
 
   struct S0 {
@@ -109,7 +109,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), "  [[group(0), binding(0)]] var s : sampler;\n");
 }
 
@@ -123,7 +123,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(
       gen.result(),
       "  [[group(0), binding(0)]] var t : [[access(read)]] texture_1d<f32>;\n");

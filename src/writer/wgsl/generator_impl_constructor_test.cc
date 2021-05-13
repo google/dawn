@@ -29,7 +29,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Bool) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("false"));
 }
 
@@ -38,7 +38,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Int) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("-12345"));
 }
 
@@ -47,7 +47,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("56779u"));
 }
 
@@ -57,7 +57,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("1073741824.0"));
 }
 
@@ -66,7 +66,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("f32(-0.000012)"));
 }
 
@@ -75,7 +75,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("bool(true)"));
 }
 
@@ -84,7 +84,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Int) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("i32(-12345)"));
 }
 
@@ -93,7 +93,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Uint) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("u32(12345u)"));
 }
 
@@ -102,7 +102,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("vec3<f32>(1.0, 2.0, 3.0)"));
 }
 
@@ -112,7 +112,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("mat2x3<f32>(vec3<f32>(1.0, 2.0, 3.0), "
                                       "vec3<f32>(3.0, 4.0, 5.0))"));
 }
@@ -124,7 +124,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(),
               HasSubstr("array<vec3<f32>, 3>(vec3<f32>(1.0, 2.0, 3.0), "
                         "vec3<f32>(4.0, 5.0, 6.0), vec3<f32>(7.0, 8.0, 9.0))"));

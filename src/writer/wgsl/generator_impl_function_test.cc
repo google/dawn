@@ -242,7 +242,7 @@ TEST_F(WgslGeneratorImplTest,
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.Generate(nullptr)) << gen.error();
+  ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_EQ(gen.result(), R"([[block]]
 struct Data {
   d : f32;

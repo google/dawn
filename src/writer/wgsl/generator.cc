@@ -24,7 +24,7 @@ Generator::Generator(const Program* program)
 Generator::~Generator() = default;
 
 bool Generator::Generate() {
-  auto ret = impl_->Generate(nullptr);
+  auto ret = impl_->Generate();
   if (!ret) {
     error_ = impl_->error();
   }
