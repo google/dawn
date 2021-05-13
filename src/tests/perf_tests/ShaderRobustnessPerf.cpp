@@ -20,7 +20,7 @@
 namespace {
     constexpr uint32_t kTileSize = 64u;
 
-    constexpr char kMatMulFloat[] = R"(
+    const std::string& kMatMulFloatHeader = R"(
         [[block]] struct Uniforms {
             dimAOuter : u32;
             dimInner : u32;
@@ -65,11 +65,15 @@ namespace {
         let ColPerThread : u32 = 4u;
         let TileAOuter : u32 = 64u;
         let TileBOuter : u32 = 64u;
-        let TileInner : u32 = 64u;
+        let TileInner : u32 = 64u;)";
 
+    const std::string& kMatMulFloatSharedArray1D = R"(
         var<workgroup> mm_Asub : array<f32, 4096>;
-        var<workgroup> mm_Bsub : array<f32, 4096>;
-
+        var<workgroup> mm_Bsub : array<f32, 4096>;)";
+    const std::string& kMatMulFloatSharedArray2D = R"(
+        var<workgroup> mm_Asub : array<array<f32, 64>, 64>;
+        var<workgroup> mm_Bsub : array<array<f32, 64>, 64>;)";
+    const std::string& kMatMulFloatBodyPart1 = R"(
         [[stage(compute), workgroup_size(16, 16, 1)]]
         fn main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
                 [[builtin(global_invocation_id)]] global_id  : vec3<u32>) {
@@ -103,7 +107,8 @@ namespace {
                 for (var innerRow : u32 = 0u; innerRow < RowPerThread; innerRow = innerRow + 1u) {
                 for (var innerCol : u32 = 0u; innerCol < ColPerThreadA; innerCol = innerCol + 1u) {
                     let inputRow : u32 = tileRow + innerRow;
-                    let inputCol : u32 = tileColA + innerCol;
+                    let inputCol : u32 = tileColA + innerCol;)";
+    const std::string& kMatMulFloatBodyPart2Array1D = R"(
                     let index : u32 = inputRow * TileInner + inputCol;
                     mm_Asub[index] = mm_readA(globalRow + innerRow, t * TileInner + inputCol);
                 }
@@ -128,7 +133,32 @@ namespace {
                     }
 
                     for (var innerRow : u32 = 0u; innerRow < RowPerThread; innerRow = innerRow + 1u) {
-                        ACached = mm_Asub[(tileRow + innerRow) * TileInner + k];
+                        ACached = mm_Asub[(tileRow + innerRow) * TileInner + k];)";
+    const std::string& kMatMulFloatBodyPart2Array2D = R"(
+                    mm_Asub[inputRow][inputCol] = mm_readA(globalRow + innerRow, t * TileInner + inputCol);
+                }
+                }
+                // Load one tile of B into local memory.
+                for (var innerRow : u32 = 0u; innerRow < RowPerThreadB; innerRow = innerRow + 1u) {
+                for (var innerCol : u32 = 0u; innerCol < ColPerThread; innerCol = innerCol + 1u) {
+                    let inputRow : u32 = tileRowB + innerRow;
+                    let inputCol : u32 = tileCol + innerCol;
+
+                    mm_Bsub[innerCol][inputCol] = mm_readB(t * TileInner + inputRow, globalCol + innerCol);;
+                }
+                }
+
+                workgroupBarrier();
+
+                // Compute acc values for a single thread.
+                for (var k : u32 = 0u; k < TileInner; k = k + 1u) {
+                    for (var inner : u32 = 0u; inner < ColPerThread; inner = inner + 1u) {
+                        BCached[inner] = mm_Bsub[k][tileCol + inner];
+                    }
+
+                    for (var innerRow : u32 = 0u; innerRow < RowPerThread; innerRow = innerRow + 1u) {
+                        ACached = mm_Asub[tileRow + innerRow][k];)";
+    const std::string& kMatMulFloatBodyPart3 = R"(
                         for (var innerCol : u32 = 0u; innerCol < ColPerThread; innerCol = innerCol + 1u) {
                             let index : u32 = innerRow * ColPerThread + innerCol;
                             acc[index] = acc[index] + ACached * BCached[innerCol];
@@ -148,9 +178,16 @@ namespace {
             }
             }
         })";
+    const std::string& kMatMulFloatOneDimensionalSharedArray =
+        kMatMulFloatHeader + kMatMulFloatSharedArray1D + kMatMulFloatBodyPart1 +
+        kMatMulFloatBodyPart2Array1D + kMatMulFloatBodyPart3;
+
+    const std::string& kMatMulFloatTwoDimensionalSharedArray =
+        kMatMulFloatHeader + kMatMulFloatSharedArray2D + kMatMulFloatBodyPart1 +
+        kMatMulFloatBodyPart2Array2D + kMatMulFloatBodyPart3;
 
     // The vec4 version requires that dimInner and dimBOuter are divisible by 4.
-    constexpr char kMatMulVec4[] = R"(
+    const std::string& kMatMulVec4Header = R"(
         [[block]] struct Uniforms {
             dimAOuter : u32;
             dimInner : u32;
@@ -195,11 +232,14 @@ namespace {
         let ColPerThread : u32 = 4u;
         let TileAOuter : u32 = 64u;
         let TileBOuter : u32 = 64u;
-        let TileInner : u32 = 64u;
-
+        let TileInner : u32 = 64u;)";
+    const std::string& kMatMulVec4SharedArray1D = R"(
         var<workgroup> mm_Asub : array<vec4<f32>, 1024>;
-        var<workgroup> mm_Bsub : array<vec4<f32>, 1024>;
-
+        var<workgroup> mm_Bsub : array<vec4<f32>, 1024>;)";
+    const std::string& kMatMulVec4SharedArray2D = R"(
+        var<workgroup> mm_Asub : array<array<vec4<f32>, 16>, 64>;
+        var<workgroup> mm_Bsub : array<array<vec4<f32>, 16>, 64>;)";
+    const std::string& kMatMulVec4BodyPart1 = R"(
         [[stage(compute), workgroup_size(16, 16, 1)]]
         fn main([[builtin(local_invocation_id)]] local_id : vec3<u32>,
                 [[builtin(global_invocation_id)]] global_id  : vec3<u32>) {
@@ -231,7 +271,8 @@ namespace {
                 // Load one tile of A into local memory.
                 for (var innerRow : u32 = 0u; innerRow < RowPerThread; innerRow = innerRow + 1u) {
                     let inputRow : u32 = tileRow + innerRow;
-                    let inputCol : u32 = tileCol;
+                    let inputCol : u32 = tileCol;)";
+    const std::string& kMatMulVec4BodyPart2Array1D = R"(
                     let index : u32 = inputRow * TileInner / ColPerThread + inputCol;
                     mm_Asub[index] = mm_readA(globalRow + innerRow, globalColA);
                 }
@@ -255,7 +296,31 @@ namespace {
                     BCached[3] = mm_Bsub[(k * ColPerThread + 3u) * (TileBOuter / ColPerThread) + tileCol];
 
                     for (var i : u32 = 0u; i < RowPerThread; i = i + 1u) {
-                        ACached = mm_Asub[(tileRow + i) * (TileInner / ColPerThread) + k];
+                        ACached = mm_Asub[(tileRow + i) * (TileInner / ColPerThread) + k];)";
+    const std::string& kMatMulVec4BodyPart2Array2D = R"(
+                    mm_Asub[inputRow][inputCol] = mm_readA(globalRow + innerRow, globalColA);
+                }
+                globalColA = globalColA + TileInner / ColPerThread;
+
+                // Load one tile of B into local memory.
+                for (var innerRow : u32 = 0u; innerRow < RowPerThreadB; innerRow = innerRow + 1u) {
+                    let inputRow : u32 = tileRowB + innerRow;
+                    let inputCol : u32 = tileCol;
+                    mm_Bsub[inputRow][inputCol] = mm_readB(t * TileInner + inputRow, globalCol);;
+                }
+
+                workgroupBarrier();
+
+                // Compute acc values for a single thread.
+                for (var k : u32 = 0u; k < TileInner / ColPerThread; k = k + 1u) {
+                    BCached[0] = mm_Bsub[k * ColPerThread][tileCol];
+                    BCached[1] = mm_Bsub[k * ColPerThread + 1u][tileCol];
+                    BCached[2] = mm_Bsub[k * ColPerThread + 2u][tileCol];
+                    BCached[3] = mm_Bsub[k * ColPerThread + 3u][tileCol];
+
+                    for (var i : u32 = 0u; i < RowPerThread; i = i + 1u) {
+                        ACached = mm_Asub[tileRow + i][k];)";
+    const std::string& kMatMulVec4BodyPart3 = R"(
                         acc[i] = BCached[0] * ACached.x + acc[i];
                         acc[i] = BCached[1] * ACached.y + acc[i];
                         acc[i] = BCached[2] * ACached.z + acc[i];
@@ -272,11 +337,22 @@ namespace {
                          acc[innerRow]);
             }
         })";
+
+    const std::string& kMatMulVec4OneDimensionalSharedArray =
+        kMatMulVec4Header + kMatMulVec4SharedArray1D + kMatMulVec4BodyPart1 +
+        kMatMulVec4BodyPart2Array1D + kMatMulVec4BodyPart3;
+
+    const std::string& kMatMulVec4TwoDimensionalSharedArray =
+        kMatMulVec4Header + kMatMulVec4SharedArray2D + kMatMulVec4BodyPart1 +
+        kMatMulVec4BodyPart2Array2D + kMatMulVec4BodyPart3;
+
     constexpr unsigned int kNumIterations = 50;
 
     enum class MatMulMethod {
-        MatMulFloat,
-        MatMulVec4,
+        MatMulFloatOneDimSharedArray,
+        MatMulFloatTwoDimSharedArray,
+        MatMulVec4OneDimSharedArray,
+        MatMulVec4TwoDimSharedArray
     };
 
     struct ShaderRobustnessParams : AdapterTestParam {
@@ -301,11 +377,17 @@ namespace {
     std::ostream& operator<<(std::ostream& ostream, const ShaderRobustnessParams& param) {
         ostream << static_cast<const AdapterTestParam&>(param);
         switch (param.matmulMethod) {
-            case MatMulMethod::MatMulFloat:
-                ostream << "_MatMulFloat";
+            case MatMulMethod::MatMulFloatOneDimSharedArray:
+                ostream << "_MatMulFloatOneDimSharedArray";
                 break;
-            case MatMulMethod::MatMulVec4:
-                ostream << "_MatMulVec4";
+            case MatMulMethod::MatMulFloatTwoDimSharedArray:
+                ostream << "_MatMulFloatTwoDimSharedArray";
+                break;
+            case MatMulMethod::MatMulVec4OneDimSharedArray:
+                ostream << "_MatMulVec4OneDimSharedArray";
+                break;
+            case MatMulMethod::MatMulVec4TwoDimSharedArray:
+                ostream << "_MatMulVec4TwoDimSharedArray";
                 break;
         }
 
@@ -342,6 +424,10 @@ class ShaderRobustnessPerf : public DawnPerfTestWithParams<ShaderRobustnessParam
 
 void ShaderRobustnessPerf::SetUp() {
     DawnPerfTestWithParams<ShaderRobustnessParams>::SetUp();
+
+    // TODO(crbug.com/dawn/786): D3D12_Microsoft_Basic_Render_Driver_CPU
+    DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+
     const size_t dataASize = mDimAOuter * mDimInner;
     std::vector<float> dataA(dataASize);
     uint64_t byteASize = sizeof(float) * dataA.size();
@@ -367,13 +453,27 @@ void ShaderRobustnessPerf::SetUp() {
 
     wgpu::ShaderModule module;
     switch (GetParam().matmulMethod) {
-        case MatMulMethod::MatMulFloat: {
-            module = utils::CreateShaderModule(device, kMatMulFloat);
+        case MatMulMethod::MatMulFloatOneDimSharedArray: {
+            module =
+                utils::CreateShaderModule(device, kMatMulFloatOneDimensionalSharedArray.c_str());
             break;
         }
 
-        case MatMulMethod::MatMulVec4: {
-            module = utils::CreateShaderModule(device, kMatMulVec4);
+        case MatMulMethod::MatMulFloatTwoDimSharedArray: {
+            module =
+                utils::CreateShaderModule(device, kMatMulFloatTwoDimensionalSharedArray.c_str());
+            break;
+        }
+
+        case MatMulMethod::MatMulVec4OneDimSharedArray: {
+            module =
+                utils::CreateShaderModule(device, kMatMulVec4OneDimensionalSharedArray.c_str());
+            break;
+        }
+
+        case MatMulMethod::MatMulVec4TwoDimSharedArray: {
+            module =
+                utils::CreateShaderModule(device, kMatMulVec4TwoDimensionalSharedArray.c_str());
             break;
         }
     }
@@ -423,7 +523,10 @@ DAWN_INSTANTIATE_PERF_TEST_SUITE_P(ShaderRobustnessPerf,
                                     MetalBackend(), MetalBackend({"disable_robustness"}, {}),
                                     OpenGLBackend(), OpenGLBackend({"disable_robustness"}, {}),
                                     VulkanBackend(), VulkanBackend({"disable_robustness"}, {})},
-                                   {MatMulMethod::MatMulFloat, MatMulMethod::MatMulVec4},
+                                   {MatMulMethod::MatMulFloatOneDimSharedArray,
+                                    MatMulMethod::MatMulFloatTwoDimSharedArray,
+                                    MatMulMethod::MatMulVec4OneDimSharedArray,
+                                    MatMulMethod::MatMulVec4TwoDimSharedArray},
                                    {512},
                                    {512},
                                    {512});
