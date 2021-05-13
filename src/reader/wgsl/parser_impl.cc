@@ -2315,28 +2315,34 @@ Expect<ast::ExpressionList> ParserImpl::expect_argument_expression_list(
 //   : singular_expression
 //   | MINUS unary_expression
 //   | BANG unary_expression
+//   | STAR unary_expression
+//   | AND unary_expression
 Maybe<ast::Expression*> ParserImpl::unary_expression() {
   auto t = peek();
-  auto source = t.source();
-  if (t.IsMinus() || t.IsBang()) {
-    auto name = t.to_name();
 
-    next();  // Consume the peek
-
-    auto op = ast::UnaryOp::kNegation;
-    if (t.IsBang())
-      op = ast::UnaryOp::kNot;
-
-    auto expr = unary_expression();
-    if (expr.errored)
-      return Failure::kErrored;
-    if (!expr.matched)
-      return add_error(peek(),
-                       "unable to parse right side of " + name + " expression");
-
-    return create<ast::UnaryOpExpression>(source, op, expr.value);
+  ast::UnaryOp op;
+  if (match(Token::Type::kMinus)) {
+    op = ast::UnaryOp::kNegation;
+  } else if (match(Token::Type::kBang)) {
+    op = ast::UnaryOp::kNot;
+  } else if (match(Token::Type::kStar)) {
+    op = ast::UnaryOp::kDereference;
+  } else if (match(Token::Type::kAnd)) {
+    op = ast::UnaryOp::kAddressOf;
+  } else {
+    return singular_expression();
   }
-  return singular_expression();
+
+  auto expr = unary_expression();
+  if (expr.errored) {
+    return Failure::kErrored;
+  }
+  if (!expr.matched) {
+    return add_error(
+        peek(), "unable to parse right side of " + t.to_name() + " expression");
+  }
+
+  return create<ast::UnaryOpExpression>(t.source(), op, expr.value);
 }
 
 // multiplicative_expr

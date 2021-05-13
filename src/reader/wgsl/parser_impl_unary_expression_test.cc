@@ -61,6 +61,62 @@ TEST_F(ParserImplTest, UnaryExpression_Minus) {
   EXPECT_EQ(init->literal()->As<ast::SintLiteral>()->value(), 1);
 }
 
+TEST_F(ParserImplTest, UnaryExpression_AddressOf) {
+  auto p = parser("&x");
+  auto e = p->unary_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
+
+  auto* u = e->As<ast::UnaryOpExpression>();
+  EXPECT_EQ(u->op(), ast::UnaryOp::kAddressOf);
+  EXPECT_TRUE(u->expr()->Is<ast::IdentifierExpression>());
+}
+
+TEST_F(ParserImplTest, UnaryExpression_Dereference) {
+  auto p = parser("*x");
+  auto e = p->unary_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
+
+  auto* u = e->As<ast::UnaryOpExpression>();
+  EXPECT_EQ(u->op(), ast::UnaryOp::kDereference);
+  EXPECT_TRUE(u->expr()->Is<ast::IdentifierExpression>());
+}
+
+TEST_F(ParserImplTest, UnaryExpression_AddressOf_Precedence) {
+  auto p = parser("&x.y");
+  auto e = p->logical_or_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
+
+  auto* u = e->As<ast::UnaryOpExpression>();
+  EXPECT_EQ(u->op(), ast::UnaryOp::kAddressOf);
+  EXPECT_TRUE(u->expr()->Is<ast::MemberAccessorExpression>());
+}
+
+TEST_F(ParserImplTest, UnaryExpression_Dereference_Precedence) {
+  auto p = parser("*x.y");
+  auto e = p->logical_or_expression();
+  EXPECT_TRUE(e.matched);
+  EXPECT_FALSE(e.errored);
+  EXPECT_FALSE(p->has_error()) << p->error();
+  ASSERT_NE(e.value, nullptr);
+  ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
+
+  auto* u = e->As<ast::UnaryOpExpression>();
+  EXPECT_EQ(u->op(), ast::UnaryOp::kDereference);
+  EXPECT_TRUE(u->expr()->Is<ast::MemberAccessorExpression>());
+}
+
 TEST_F(ParserImplTest, UnaryExpression_Minus_InvalidRHS) {
   auto p = parser("-if(a) {}");
   auto e = p->unary_expression();
