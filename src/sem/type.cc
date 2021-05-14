@@ -14,7 +14,6 @@
 
 #include "src/sem/type.h"
 
-#include "src/sem/access_control_type.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/i32_type.h"
@@ -45,10 +44,8 @@ const Type* Type::UnwrapPtr() const {
 }
 
 const Type* Type::UnwrapAccess() const {
+  // TODO(amaiorano): Delete this function
   auto* type = this;
-  while (auto* access = type->As<sem::AccessControl>()) {
-    type = access->type();
-  }
   return type;
 }
 
@@ -57,8 +54,6 @@ const Type* Type::UnwrapAll() const {
   while (true) {
     if (auto* ptr = type->As<sem::Pointer>()) {
       type = ptr->type();
-    } else if (auto* access = type->As<sem::AccessControl>()) {
-      type = access->type();
     } else {
       break;
     }

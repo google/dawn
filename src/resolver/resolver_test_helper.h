@@ -255,13 +255,6 @@ sem::Type* sem_mat4x4(const ProgramBuilder::TypesBuilder& ty) {
   return ty.builder->create<sem::Matrix>(column_type, 4u);
 }
 
-template <create_sem_type_func_ptr create_type>
-sem::Type* sem_access(const ProgramBuilder::TypesBuilder& ty) {
-  auto* type = create_type(ty);
-  return ty.builder->create<sem::AccessControl>(ast::AccessControl::kReadOnly,
-                                                type);
-}
-
 }  // namespace resolver
 }  // namespace tint
 

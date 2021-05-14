@@ -17,7 +17,6 @@
 #include "gmock/gmock.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/struct.h"
 
 namespace tint {
@@ -70,7 +69,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferArray) {
   // var<storage> g : [[access(read)]] array<S, 3>;
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* a = ty.array(s, 3);
-  auto ac = ty.access(ast::AccessControl::kReadOnly, a);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, a);
   Global(Source{{56, 78}}, "g", ac, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -122,7 +121,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoBlockDecoration) {
   // struct S { x : i32 };
   // var<storage> g : [[access(read)]] S;
   auto* s = Structure(Source{{12, 34}}, "S", {Member("x", ty.i32())});
-  auto a = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -142,7 +141,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
   // var<storage> g : [[access(read)]] S;
   auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto a = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{56, 78}}, "g", a, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -161,7 +160,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Aliases) {
                       {create<ast::StructBlockDecoration>()});
   auto* a1 = ty.alias("a1", s);
   AST().AddConstructedType(a1);
-  auto ac = ty.access(ast::AccessControl::kReadOnly, a1);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, a1);
   auto* a2 = ty.alias("a2", ac);
   AST().AddConstructedType(a2);
   Global(Source{{56, 78}}, "g", a2, ast::StorageClass::kStorage, nullptr,
@@ -211,7 +210,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferArray) {
   // var<uniform> g : [[access(read)]] array<S, 3>;
   auto* s = Structure("S", {Member("a", ty.f32())});
   auto* a = ty.array(s, 3);
-  auto ac = ty.access(ast::AccessControl::kReadOnly, a);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, a);
   Global(Source{{56, 78}}, "g", ac, ast::StorageClass::kUniform, nullptr,
          {
              create<ast::BindingDecoration>(0),

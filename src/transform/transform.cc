@@ -103,10 +103,6 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
     }
     return ctx->dst->create<ast::Array>(el, a->Count(), std::move(decos));
   }
-  if (auto* ac = ty->As<sem::AccessControl>()) {
-    auto* el = CreateASTTypeFor(ctx, ac->type());
-    return ctx->dst->create<ast::AccessControl>(ac->access_control(), el);
-  }
   if (auto* s = ty->As<sem::Struct>()) {
     return ctx->dst->create<ast::TypeName>(
         ctx->Clone(s->Declaration()->name()));

@@ -25,7 +25,6 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/type_name.h"
 #include "src/reader/spirv/function.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"

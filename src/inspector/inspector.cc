@@ -23,7 +23,6 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/sint_literal.h"
 #include "src/ast/uint_literal.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/array.h"
 #include "src/sem/f32_type.h"
 #include "src/sem/function.h"
@@ -606,12 +605,11 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     auto* var = rsv.first;
     auto binding_info = rsv.second;
 
-    auto* ac_type = var->Type()->As<sem::AccessControl>();
-    if (ac_type == nullptr) {
+    if (var->AccessControl() == ast::AccessControl::kInvalid) {
       continue;
     }
 
-    if (read_only != ac_type->IsReadOnly()) {
+    if (read_only != (var->AccessControl() == ast::AccessControl::kReadOnly)) {
       continue;
     }
 
@@ -691,12 +689,10 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     auto* var = ref.first;
     auto binding_info = ref.second;
 
-    auto* ac_type = var->Type()->As<sem::AccessControl>();
-    if (ac_type == nullptr) {
-      continue;
-    }
+    auto* texture_type = var->Type()->As<sem::StorageTexture>();
 
-    if (read_only != ac_type->IsReadOnly()) {
+    if (read_only !=
+        (texture_type->access_control() == ast::AccessControl::kReadOnly)) {
       continue;
     }
 
@@ -707,7 +703,6 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->Type()->UnwrapAccess()->As<sem::StorageTexture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 

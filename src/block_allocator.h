@@ -153,7 +153,7 @@ class BlockAllocator {
         std::is_same<T, TYPE>::value || std::is_base_of<T, TYPE>::value,
         "TYPE does not derive from T");
     auto uptr = std::make_unique<TYPE>(std::forward<ARGS>(args)...);
-    auto ptr = uptr.get();
+    auto* ptr = uptr.get();
     objects_.emplace_back(std::move(uptr));
     return ptr;
   }

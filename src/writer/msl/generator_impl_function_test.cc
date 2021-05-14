@@ -15,7 +15,6 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/sem/access_control_type.h"
 #include "src/writer/msl/test_helper.h"
 
 namespace tint {
@@ -307,7 +306,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto ac = ty.access(ast::AccessControl::kReadWrite, s);
+  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
 
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(1)});
@@ -352,7 +351,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto ac = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
 
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(1)});
@@ -608,7 +607,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto ac = ty.access(ast::AccessControl::kReadWrite, s);
+  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
 
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(1)});
@@ -664,7 +663,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto ac = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
 
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(1)});
@@ -799,7 +798,7 @@ TEST_F(MslGeneratorImplTest,
   auto* s = Structure("Data", {Member("d", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
 
-  auto ac = ty.access(ast::AccessControl::kReadWrite, s);
+  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
 
   Global("data", ac, ast::StorageClass::kStorage, nullptr,
          {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(0)});

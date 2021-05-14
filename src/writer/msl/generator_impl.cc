@@ -30,7 +30,6 @@
 #include "src/ast/uint_literal.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/void.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/array.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/call.h"
@@ -1296,18 +1295,12 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
-    auto* ac = var->Type()->As<sem::AccessControl>();
-    if (ac == nullptr) {
-      diagnostics_.add_error(
-          "invalid type for storage buffer, expected access control");
-      return false;
-    }
-    if (ac->IsReadOnly()) {
+    if (var->AccessControl() == ast::AccessControl::kReadOnly) {
       out_ << "const ";
     }
 
     out_ << "device ";
-    if (!EmitType(ac->type(), "")) {
+    if (!EmitType(var->Type(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
@@ -1524,18 +1517,12 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     // auto* set = data.second.set;
 
-    auto* ac = var->Type()->As<sem::AccessControl>();
-    if (ac == nullptr) {
-      diagnostics_.add_error(
-          "invalid type for storage buffer, expected access control");
-      return false;
-    }
-    if (ac->IsReadOnly()) {
+    if (var->AccessControl() == ast::AccessControl::kReadOnly) {
       out_ << "const ";
     }
 
     out_ << "device ";
-    if (!EmitType(ac->type(), "")) {
+    if (!EmitType(var->Type(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol())
@@ -1892,20 +1879,6 @@ bool GeneratorImpl::EmitSwitch(ast::SwitchStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
-  std::string access_str = "";
-  if (auto* ac = type->As<sem::AccessControl>()) {
-    if (ac->access_control() == ast::AccessControl::kReadOnly) {
-      access_str = "read";
-    } else if (ac->access_control() == ast::AccessControl::kWriteOnly) {
-      access_str = "write";
-    } else {
-      diagnostics_.add_error("Invalid access control for storage texture");
-      return false;
-    }
-
-    type = ac->type();
-  }
-
   if (auto* ary = type->As<sem::Array>()) {
     const sem::Type* base_type = ary;
     std::vector<uint32_t> sizes;
@@ -1989,7 +1962,16 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
       if (!EmitType(storage->type(), "")) {
         return false;
       }
-      out_ << ", access::" << access_str;
+
+      std::string access_str;
+      if (storage->access_control() == ast::AccessControl::kReadOnly) {
+        out_ << ", access::read";
+      } else if (storage->access_control() == ast::AccessControl::kWriteOnly) {
+        out_ << ", access::write";
+      } else {
+        diagnostics_.add_error("Invalid access control for storage texture");
+        return false;
+      }
     } else if (auto* ms = tex->As<sem::MultisampledTexture>()) {
       if (!EmitType(ms->type(), "")) {
         return false;

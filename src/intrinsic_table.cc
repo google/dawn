@@ -20,7 +20,6 @@
 #include <utility>
 
 #include "src/program_builder.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
@@ -519,25 +518,25 @@ class StorageTextureBuilder : public Builder {
  public:
   explicit StorageTextureBuilder(
       ast::TextureDimension dimensions,
+      ast::AccessControl::Access access,
       OpenNumber texel_format,  // a.k.a "image format"
       OpenType channel_format)  // a.k.a "storage subtype"
       : dimensions_(dimensions),
+        access_(access),
         texel_format_(texel_format),
         channel_format_(channel_format) {}
 
   bool Match(MatchState& state, const sem::Type* ty) const override {
-    if (auto* ac = ty->As<sem::AccessControl>()) {
-      // If we have an storage texture argument that's got an access control
-      // type wrapped around it, accept it. Signatures that don't include an
-      // access control imply any access. Example:
-      //   textureDimensions(t : texture_storage_1d<F>) -> i32
-      ty = ac->type();
-    }
-
     if (auto* tex = ty->As<sem::StorageTexture>()) {
       if (MatchOpenNumber(state, texel_format_,
                           static_cast<uint32_t>(tex->image_format()))) {
         if (MatchOpenType(state, channel_format_, tex->type())) {
+          // AccessControl::kInvalid means match any
+          if (access_ != ast::AccessControl::kInvalid &&
+              access_ != tex->access_control()) {
+            return false;
+          }
+
           return tex->dim() == dimensions_;
         }
       }
@@ -550,17 +549,27 @@ class StorageTextureBuilder : public Builder {
         static_cast<ast::ImageFormat>(state.open_numbers.at(texel_format_));
     auto* channel_format = state.open_types.at(channel_format_);
     return state.ty_mgr.Get<sem::StorageTexture>(
-        dimensions_, texel_format, const_cast<sem::Type*>(channel_format));
+        dimensions_, texel_format, access_,
+        const_cast<sem::Type*>(channel_format));
   }
 
   std::string str() const override {
     std::stringstream ss;
-    ss << "texture_storage_" << dimensions_ << "<F>";
+
+    ss << "texture_storage_" << dimensions_ << "<F, ";
+    if (access_ == ast::AccessControl::Access::kInvalid) {
+      ss << "A";
+    } else {
+      ss << access_;
+    }
+    ss << ">";
+
     return ss.str();
   }
 
  private:
   ast::TextureDimension const dimensions_;
+  ast::AccessControl::Access const access_;
   OpenNumber const texel_format_;
   OpenType const channel_format_;
 };
@@ -609,38 +618,6 @@ class SamplerBuilder : public Builder {
 
  private:
   ast::SamplerKind const kind_;
-};
-
-/// AccessControlBuilder is a Matcher / Builder for AccessControl types
-class AccessControlBuilder : public Builder {
- public:
-  explicit AccessControlBuilder(ast::AccessControl::Access access_control,
-                                Builder* type)
-      : access_control_(access_control), type_(type) {}
-
-  bool Match(MatchState& state, const sem::Type* ty) const override {
-    if (auto* ac = ty->As<sem::AccessControl>()) {
-      if (ac->access_control() == access_control_) {
-        return type_->Match(state, ty);
-      }
-    }
-    return false;
-  }
-
-  sem::Type* Build(BuildState& state) const override {
-    auto* ty = type_->Build(state);
-    return state.ty_mgr.Get<sem::AccessControl>(access_control_, ty);
-  }
-
-  std::string str() const override {
-    std::stringstream ss;
-    ss << "[[access(" << access_control_ << ")]] " << type_->str();
-    return ss.str();
-  }
-
- private:
-  ast::AccessControl::Access const access_control_;
-  Builder* const type_;
 };
 
 /// Impl is the private implementation of the IntrinsicTable interface.
@@ -764,10 +741,11 @@ class Impl : public IntrinsicTable {
   /// @returns a Matcher / Builder that matches a storage texture of the given
   /// format with the given dimensions
   Builder* storage_texture(ast::TextureDimension dimensions,
+                           ast::AccessControl::Access access,
                            OpenNumber texel_format,
                            OpenType channel_format) {
     return matcher_allocator_.Create<StorageTextureBuilder>(
-        dimensions, texel_format, channel_format);
+        dimensions, access, texel_format, channel_format);
   }
 
   /// @returns a Matcher / Builder that matches an external texture
@@ -778,13 +756,6 @@ class Impl : public IntrinsicTable {
   /// @returns a Matcher / Builder that matches a sampler type
   Builder* sampler(ast::SamplerKind kind) {
     return matcher_allocator_.Create<SamplerBuilder>(kind);
-  }
-
-  /// @returns a Matcher / Builder that matches an access control type
-  Builder* access_control(ast::AccessControl::Access access_control,
-                          Builder* type) {
-    return matcher_allocator_.Create<AccessControlBuilder>(access_control,
-                                                           type);
   }
 
   /// Registers an overload with the given intrinsic type, return type Matcher /
@@ -1108,30 +1079,32 @@ Impl::Impl() {
   auto* tex_depth_cube = depth_texture(Dim::kCube);
   auto* tex_depth_cube_array = depth_texture(Dim::kCubeArray);
   auto* tex_external = external_texture();
-  auto* tex_storage_1d_FT =
-      storage_texture(Dim::k1d, OpenNumber::F, OpenType::T);
-  auto* tex_storage_2d_FT =
-      storage_texture(Dim::k2d, OpenNumber::F, OpenType::T);
-  auto* tex_storage_2d_array_FT =
-      storage_texture(Dim::k2dArray, OpenNumber::F, OpenType::T);
-  auto* tex_storage_3d_FT =
-      storage_texture(Dim::k3d, OpenNumber::F, OpenType::T);
-  auto* tex_storage_ro_1d_FT =
-      access_control(ast::AccessControl::kReadOnly, tex_storage_1d_FT);
-  auto* tex_storage_ro_2d_FT =
-      access_control(ast::AccessControl::kReadOnly, tex_storage_2d_FT);
-  auto* tex_storage_ro_2d_array_FT =
-      access_control(ast::AccessControl::kReadOnly, tex_storage_2d_array_FT);
-  auto* tex_storage_ro_3d_FT =
-      access_control(ast::AccessControl::kReadOnly, tex_storage_3d_FT);
-  auto* tex_storage_wo_1d_FT =
-      access_control(ast::AccessControl::kWriteOnly, tex_storage_1d_FT);
-  auto* tex_storage_wo_2d_FT =
-      access_control(ast::AccessControl::kWriteOnly, tex_storage_2d_FT);
+  auto* tex_storage_1d_FT = storage_texture(
+      Dim::k1d, ast::AccessControl::kInvalid, OpenNumber::F, OpenType::T);
+  auto* tex_storage_2d_FT = storage_texture(
+      Dim::k2d, ast::AccessControl::kInvalid, OpenNumber::F, OpenType::T);
+  auto* tex_storage_2d_array_FT = storage_texture(
+      Dim::k2dArray, ast::AccessControl::kInvalid, OpenNumber::F, OpenType::T);
+  auto* tex_storage_3d_FT = storage_texture(
+      Dim::k3d, ast::AccessControl::kInvalid, OpenNumber::F, OpenType::T);
+  auto* tex_storage_ro_1d_FT = storage_texture(
+      Dim::k1d, ast::AccessControl::kReadOnly, OpenNumber::F, OpenType::T);
+  auto* tex_storage_ro_2d_FT = storage_texture(
+      Dim::k2d, ast::AccessControl::kReadOnly, OpenNumber::F, OpenType::T);
+  auto* tex_storage_ro_2d_array_FT = storage_texture(
+      Dim::k2dArray, ast::AccessControl::kReadOnly, OpenNumber::F, OpenType::T);
+  auto* tex_storage_ro_3d_FT = storage_texture(
+      Dim::k3d, ast::AccessControl::kReadOnly, OpenNumber::F, OpenType::T);
+  auto* tex_storage_wo_1d_FT = storage_texture(
+      Dim::k1d, ast::AccessControl::kWriteOnly, OpenNumber::F, OpenType::T);
+  auto* tex_storage_wo_2d_FT = storage_texture(
+      Dim::k2d, ast::AccessControl::kWriteOnly, OpenNumber::F, OpenType::T);
   auto* tex_storage_wo_2d_array_FT =
-      access_control(ast::AccessControl::kWriteOnly, tex_storage_2d_array_FT);
-  auto* tex_storage_wo_3d_FT =
-      access_control(ast::AccessControl::kWriteOnly, tex_storage_3d_FT);
+      storage_texture(Dim::k2dArray, ast::AccessControl::kWriteOnly,
+                      OpenNumber::F, OpenType::T);
+  auto* tex_storage_wo_3d_FT = storage_texture(
+      Dim::k3d, ast::AccessControl::kWriteOnly, OpenNumber::F, OpenType::T);
+
   auto* sampler = this->sampler(ast::SamplerKind::kSampler);
   auto* sampler_comparison =
       this->sampler(ast::SamplerKind::kComparisonSampler);

@@ -26,7 +26,6 @@
 #include "src/ast/scalar_constructor_expression.h"
 #include "src/ast/type_name.h"
 #include "src/program_builder.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/array.h"
 #include "src/sem/call.h"
 #include "src/sem/member_accessor_expression.h"
@@ -338,10 +337,6 @@ const ast::NamedType* ConstructedTypeOf(const sem::Type* ty) {
       ty = ptr->type();
       continue;
     }
-    if (auto* access = ty->As<sem::AccessControl>()) {
-      ty = access->type();
-      continue;
-    }
     if (auto* str = ty->As<sem::Struct>()) {
       return str->Declaration();
     }
@@ -363,6 +358,17 @@ struct Store {
   ast::AssignmentStatement* assignment;  // The AST assignment statement
   StorageBufferAccess target;            // The target for the write
 };
+
+ast::Type* MaybeCreateASTAccessControl(CloneContext* ctx,
+                                       const sem::VariableUser* var_user,
+                                       ast::Type* ty) {
+  if (var_user &&
+      var_user->Variable()->AccessControl() != ast::AccessControl::kInvalid) {
+    return ctx->dst->create<ast::AccessControl>(
+        var_user->Variable()->AccessControl(), ty);
+  }
+  return ty;
+}
 
 }  // namespace
 
@@ -415,13 +421,17 @@ struct DecomposeStorageAccess::State {
   /// @param insert_after the user-declared type to insert the function after
   /// @param buf_ty the storage buffer type
   /// @param el_ty the storage buffer element type
+  /// @param var_user the variable user
   /// @return the name of the function that performs the load
   Symbol LoadFunc(CloneContext& ctx,
                   const ast::NamedType* insert_after,
                   const sem::Type* buf_ty,
-                  const sem::Type* el_ty) {
+                  const sem::Type* el_ty,
+                  const sem::VariableUser* var_user) {
     return utils::GetOrCreate(load_funcs, TypePair{buf_ty, el_ty}, [&] {
       auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
+      buf_ast_ty = MaybeCreateASTAccessControl(&ctx, var_user, buf_ast_ty);
+
       ast::VariableList params = {
           // Note: The buffer parameter requires the kStorage StorageClass in
           // order for HLSL to emit this as a ByteAddressBuffer.
@@ -446,7 +456,7 @@ struct DecomposeStorageAccess::State {
         ast::ExpressionList values;
         if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
           auto* vec_ty = mat_ty->ColumnType();
-          Symbol load = LoadFunc(ctx, insert_after, buf_ty, vec_ty);
+          Symbol load = LoadFunc(ctx, insert_after, buf_ty, vec_ty, var_user);
           for (uint32_t i = 0; i < mat_ty->columns(); i++) {
             auto* offset =
                 ctx.dst->Add("offset", i * MatrixColumnStride(mat_ty));
@@ -456,14 +466,14 @@ struct DecomposeStorageAccess::State {
           for (auto* member : str->Members()) {
             auto* offset = ctx.dst->Add("offset", member->Offset());
             Symbol load = LoadFunc(ctx, insert_after, buf_ty,
-                                   member->Type()->UnwrapAll());
+                                   member->Type()->UnwrapAll(), var_user);
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
         } else if (auto* arr = el_ty->As<sem::Array>()) {
           for (uint32_t i = 0; i < arr->Count(); i++) {
             auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
             Symbol load = LoadFunc(ctx, insert_after, buf_ty,
-                                   arr->ElemType()->UnwrapAll());
+                                   arr->ElemType()->UnwrapAll(), var_user);
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
         }
@@ -487,13 +497,16 @@ struct DecomposeStorageAccess::State {
   /// @param insert_after the user-declared type to insert the function after
   /// @param buf_ty the storage buffer type
   /// @param el_ty the storage buffer element type
+  /// @param var_user the variable user
   /// @return the name of the function that performs the store
   Symbol StoreFunc(CloneContext& ctx,
                    const ast::NamedType* insert_after,
                    const sem::Type* buf_ty,
-                   const sem::Type* el_ty) {
+                   const sem::Type* el_ty,
+                   const sem::VariableUser* var_user) {
     return utils::GetOrCreate(store_funcs, TypePair{buf_ty, el_ty}, [&] {
       auto* buf_ast_ty = CreateASTTypeFor(&ctx, buf_ty);
+      buf_ast_ty = MaybeCreateASTAccessControl(&ctx, var_user, buf_ast_ty);
       auto* el_ast_ty = CreateASTTypeFor(&ctx, el_ty);
       ast::VariableList params{
           // Note: The buffer parameter requires the kStorage StorageClass in
@@ -519,7 +532,7 @@ struct DecomposeStorageAccess::State {
         ast::StatementList body;
         if (auto* mat_ty = el_ty->As<sem::Matrix>()) {
           auto* vec_ty = mat_ty->ColumnType();
-          Symbol store = StoreFunc(ctx, insert_after, buf_ty, vec_ty);
+          Symbol store = StoreFunc(ctx, insert_after, buf_ty, vec_ty, var_user);
           for (uint32_t i = 0; i < mat_ty->columns(); i++) {
             auto* offset =
                 ctx.dst->Add("offset", i * MatrixColumnStride(mat_ty));
@@ -533,7 +546,7 @@ struct DecomposeStorageAccess::State {
             auto* access = ctx.dst->MemberAccessor(
                 "value", ctx.Clone(member->Declaration()->symbol()));
             Symbol store = StoreFunc(ctx, insert_after, buf_ty,
-                                     member->Type()->UnwrapAll());
+                                     member->Type()->UnwrapAll(), var_user);
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
@@ -542,7 +555,7 @@ struct DecomposeStorageAccess::State {
             auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
             auto* access = ctx.dst->IndexAccessor("value", ctx.dst->Expr(i));
             Symbol store = StoreFunc(ctx, insert_after, buf_ty,
-                                     arr->ElemType()->UnwrapAll());
+                                     arr->ElemType()->UnwrapAll(), var_user);
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
@@ -760,7 +773,8 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     auto* buf_ty = access.var->Type()->UnwrapPtr();
     auto* el_ty = access.type->UnwrapAll();
     auto* insert_after = ConstructedTypeOf(access.var->Type());
-    Symbol func = state.LoadFunc(ctx, insert_after, buf_ty, el_ty);
+    Symbol func = state.LoadFunc(ctx, insert_after, buf_ty, el_ty,
+                                 access.var->As<sem::VariableUser>());
 
     auto* load = ctx.dst->Call(func, ctx.Clone(buf), offset);
 
@@ -775,7 +789,8 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
     auto* el_ty = store.target.type->UnwrapAll();
     auto* value = store.assignment->rhs();
     auto* insert_after = ConstructedTypeOf(store.target.var->Type());
-    Symbol func = state.StoreFunc(ctx, insert_after, buf_ty, el_ty);
+    Symbol func = state.StoreFunc(ctx, insert_after, buf_ty, el_ty,
+                                  store.target.var->As<sem::VariableUser>());
 
     auto* call = ctx.dst->Call(func, ctx.Clone(buf), offset, ctx.Clone(value));
 

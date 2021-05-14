@@ -16,7 +16,6 @@
 
 #include "src/sem/test_helper.h"
 
-#include "src/sem/access_control_type.h"
 #include "src/sem/external_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"

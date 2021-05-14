@@ -19,7 +19,6 @@
 
 #include "src/ast/disable_validation_decoration.h"
 #include "src/program_builder.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/function.h"
 #include "src/sem/variable.h"
 
@@ -115,12 +114,7 @@ Output BindingRemapper::Run(const Program* in, const DataMap& datamap) {
       if (ac_it != remappings->access_controls.end()) {
         ast::AccessControl::Access ac = ac_it->second;
         auto* ty = in->Sem().Get(var)->Type();
-        ast::Type* inner_ty = nullptr;
-        if (auto* old_ac = ty->As<sem::AccessControl>()) {
-          inner_ty = CreateASTTypeFor(&ctx, old_ac->type());
-        } else {
-          inner_ty = CreateASTTypeFor(&ctx, ty);
-        }
+        ast::Type* inner_ty = CreateASTTypeFor(&ctx, ty);
         auto* new_ty = ctx.dst->create<ast::AccessControl>(ac, inner_ty);
         auto* new_var = ctx.dst->create<ast::Variable>(
             ctx.Clone(var->source()), ctx.Clone(var->symbol()),

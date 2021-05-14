@@ -46,7 +46,6 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/vector.h"
 #include "src/ast/workgroup_decoration.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/array.h"
 #include "src/sem/call.h"
 #include "src/sem/depth_texture_type.h"
@@ -341,12 +340,18 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return builder_->create<sem::F32>();
     }
     if (auto* t = ty->As<ast::Alias>()) {
+      auto added = name_to_ast_type_.emplace(t->name(), t->type()).second;
+      // TODO(crbug.com/tint/803): Remove this.
+      if (!added) {
+        return nullptr;
+      }
       return Type(t->type());
     }
     if (auto* t = ty->As<ast::AccessControl>()) {
+      ScopedAssignment<const ast::AccessControl*> sa(curent_access_control_, t);
+
       if (auto* el = Type(t->type())) {
-        return builder_->create<sem::AccessControl>(t->access_control(),
-                                                    const_cast<sem::Type*>(el));
+        return el;
       }
       return nullptr;
     }
@@ -400,8 +405,18 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::StorageTexture>()) {
       if (auto* el = Type(t->type())) {
+        auto ac = ast::AccessControl::kInvalid;
+        if (curent_access_control_) {
+          ac = curent_access_control_->access_control();
+        } else {
+          // TODO(amaiorano): move error about missing access control on storage
+          // textures here, instead of when variables declared. That way, we'd
+          // get the error on the alias line (for
+          // alias<accesscontrol<storagetexture>>).
+        }
+
         return builder_->create<sem::StorageTexture>(
-            t->dim(), t->image_format(), const_cast<sem::Type*>(el));
+            t->dim(), t->image_format(), ac, const_cast<sem::Type*>(el));
       }
       return nullptr;
     }
@@ -483,8 +498,30 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     return nullptr;
   }
 
-  auto* info =
-      variable_infos_.Create(var, const_cast<sem::Type*>(type), type_name);
+  // TODO(crbug.com/tint/802): Temporary while ast::AccessControl exits.
+  auto find_first_access_control =
+      [this](ast::Type* ty) -> ast::AccessControl* {
+    ast::AccessControl* ac = ty->As<ast::AccessControl>();
+    if (ac) {
+      return ac;
+    }
+    while (auto* tn = ty->As<ast::TypeName>()) {
+      ty = name_to_ast_type_[tn->name()];
+      ac = ty->As<ast::AccessControl>();
+      if (ac) {
+        return ac;
+      }
+    }
+    return nullptr;
+  };
+
+  auto access_control = ast::AccessControl::kInvalid;
+  if (auto* ac = find_first_access_control(var->type())) {
+    access_control = ac->access_control();
+  }
+
+  auto* info = variable_infos_.Create(var, const_cast<sem::Type*>(type),
+                                      type_name, access_control);
   variable_to_info_.emplace(var, info);
 
   return info;
@@ -630,8 +667,10 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       // Its store type must be a host-shareable structure type with block
       // attribute, satisfying the storage class constraints.
 
-      auto* access = info->type->As<sem::AccessControl>();
-      auto* str = access ? access->type()->As<sem::Struct>() : nullptr;
+      auto* str = info->access_control != ast::AccessControl::kInvalid
+                      ? info->type->As<sem::Struct>()
+                      : nullptr;
+
       if (!str) {
         diagnostics_.add_error(
             "variables declared in the <storage> storage class must be of an "
@@ -716,38 +755,36 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     }
   }
 
-  if (type->As<sem::StorageTexture>()) {
-    diagnostics_.add_error("Storage Textures must have access control.",
-                           var->source());
-    return false;
-  }
+  if (auto* storage_tex = type->As<sem::StorageTexture>()) {
+    if (storage_tex->access_control() == ast::AccessControl::kInvalid) {
+      diagnostics_.add_error("Storage Textures must have access control.",
+                             var->source());
+      return false;
+    }
 
-  if (auto* ac = type->As<sem::AccessControl>()) {
-    if (auto* r = ac->type()->As<sem::StorageTexture>()) {
-      if (ac->IsReadWrite()) {
-        diagnostics_.add_error(
-            "Storage Textures only support Read-Only and Write-Only access "
-            "control.",
-            var->source());
-        return false;
-      }
+    if (info->access_control == ast::AccessControl::kReadWrite) {
+      diagnostics_.add_error(
+          "Storage Textures only support Read-Only and Write-Only access "
+          "control.",
+          var->source());
+      return false;
+    }
 
-      if (!IsValidStorageTextureDimension(r->dim())) {
-        diagnostics_.add_error(
-            "Cube dimensions for storage textures are not "
-            "supported.",
-            var->source());
-        return false;
-      }
+    if (!IsValidStorageTextureDimension(storage_tex->dim())) {
+      diagnostics_.add_error(
+          "Cube dimensions for storage textures are not "
+          "supported.",
+          var->source());
+      return false;
+    }
 
-      if (!IsValidStorageTextureImageFormat(r->image_format())) {
-        diagnostics_.add_error(
-            "image format must be one of the texel formats specified for "
-            "storage textues in "
-            "https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
-            var->source());
-        return false;
-      }
+    if (!IsValidStorageTextureImageFormat(storage_tex->image_format())) {
+      diagnostics_.add_error(
+          "image format must be one of the texel formats specified for "
+          "storage textues in "
+          "https://gpuweb.github.io/gpuweb/wgsl/#texel-formats",
+          var->source());
+      return false;
     }
   }
 
@@ -2289,7 +2326,7 @@ void Resolver::CreateSemanticNodes() const {
       // Create a pipeline overridable constant.
       uint16_t constant_id;
       if (override_deco->HasValue()) {
-        constant_id = override_deco->value();
+        constant_id = static_cast<uint16_t>(override_deco->value());
       } else {
         // No ID was specified, so allocate the next available ID.
         constant_id = next_constant_id;
@@ -2306,8 +2343,8 @@ void Resolver::CreateSemanticNodes() const {
 
       sem_var = builder_->create<sem::Variable>(var, info->type, constant_id);
     } else {
-      sem_var =
-          builder_->create<sem::Variable>(var, info->type, info->storage_class);
+      sem_var = builder_->create<sem::Variable>(
+          var, info->type, info->storage_class, info->access_control);
     }
 
     std::vector<const sem::VariableUser*> users;
@@ -2969,11 +3006,13 @@ void Resolver::Mark(const ast::Node* node) {
 
 Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,
                                      sem::Type* ctype,
-                                     const std::string& tn)
+                                     const std::string& tn,
+                                     ast::AccessControl::Access ac)
     : declaration(decl),
       type(ctype),
       type_name(tn),
-      storage_class(decl->declared_storage_class()) {
+      storage_class(decl->declared_storage_class()),
+      access_control(ac) {
   if (storage_class == ast::StorageClass::kNone &&
       type->UnwrapAll()->is_handle()) {
     // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables

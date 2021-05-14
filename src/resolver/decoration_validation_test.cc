@@ -523,7 +523,7 @@ TEST_F(ResourceDecorationTest, UniformBufferMissingBinding) {
 TEST_F(ResourceDecorationTest, StorageBufferMissingBinding) {
   auto* s = Structure("S", {Member("x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto ac = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
   Global(Source{{12, 34}}, "G", ac, ast::StorageClass::kStorage);
 
   EXPECT_FALSE(r()->Resolve());

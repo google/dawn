@@ -16,7 +16,6 @@
 
 #include "gmock/gmock.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/sem/access_control_type.h"
 
 namespace tint {
 namespace resolver {
@@ -61,16 +60,6 @@ TEST_F(ResolverIsStorableTest, Matrix) {
 
 TEST_F(ResolverIsStorableTest, Pointer) {
   EXPECT_FALSE(r()->IsStorable(ty.pointer<i32>(ast::StorageClass::kPrivate)));
-}
-
-TEST_F(ResolverIsStorableTest, AccessControlVoid) {
-  EXPECT_FALSE(r()->IsStorable(
-      create<sem::AccessControl>(ast::AccessControl::kReadOnly, ty.void_())));
-}
-
-TEST_F(ResolverIsStorableTest, AccessControlI32) {
-  EXPECT_TRUE(r()->IsStorable(
-      create<sem::AccessControl>(ast::AccessControl::kReadOnly, ty.i32())));
 }
 
 TEST_F(ResolverIsStorableTest, ArraySizedOfStorable) {

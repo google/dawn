@@ -16,7 +16,6 @@
 
 #include "gmock/gmock.h"
 #include "src/program_builder.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
@@ -302,34 +301,39 @@ TEST_F(IntrinsicTableTest, MatchExternalTexture) {
 }
 
 TEST_F(IntrinsicTableTest, MatchROStorageTexture) {
-  auto tex = ty.storage_texture(ast::TextureDimension::k2d,
-                                ast::ImageFormat::kR16Float);
-  auto tex_ac = ty.access(ast::AccessControl::kReadOnly, tex);
+  auto* subtype =
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR16Float, Types());
+  auto* tex = create<sem::StorageTexture>(
+      ast::TextureDimension::k2d, ast::ImageFormat::kR16Float,
+      ast::AccessControl::kReadOnly, subtype);
+
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
-                              {tex_ac, ty.vec2<i32>()}, Source{});
+                              {tex, ty.vec2<i32>()}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.vec4<f32>());
   EXPECT_THAT(
       result.intrinsic->Parameters(),
-      ElementsAre(Parameter{tex_ac, Parameter::Usage::kTexture},
+      ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
                   Parameter{ty.vec2<i32>(), Parameter::Usage::kCoords}));
 }
 
 TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
-  auto tex = ty.storage_texture(ast::TextureDimension::k2d,
-                                ast::ImageFormat::kR16Float);
-  auto tex_ac = ty.access(ast::AccessControl::kWriteOnly, tex);
-  auto result =
-      table->Lookup(*this, IntrinsicType::kTextureStore,
-                    {tex_ac, ty.vec2<i32>(), ty.vec4<f32>()}, Source{});
+  auto* subtype =
+      sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR16Float, Types());
+  auto* tex = create<sem::StorageTexture>(
+      ast::TextureDimension::k2d, ast::ImageFormat::kR16Float,
+      ast::AccessControl::kWriteOnly, subtype);
+
+  auto result = table->Lookup(*this, IntrinsicType::kTextureStore,
+                              {tex, ty.vec2<i32>(), ty.vec4<f32>()}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureStore);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.void_());
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{tex_ac, Parameter::Usage::kTexture},
+              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
                           Parameter{ty.vec2<i32>(), Parameter::Usage::kCoords},
                           Parameter{ty.vec4<f32>(), Parameter::Usage::kValue}));
 }
@@ -440,10 +444,10 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
   textureDimensions(texture : texture_depth_2d_array) -> vec2<i32>
   textureDimensions(texture : texture_depth_cube) -> vec3<i32>
   textureDimensions(texture : texture_depth_cube_array) -> vec3<i32>
-  textureDimensions(texture : texture_storage_1d<F>) -> i32
-  textureDimensions(texture : texture_storage_2d<F>) -> vec2<i32>
-  textureDimensions(texture : texture_storage_2d_array<F>) -> vec2<i32>
-  textureDimensions(texture : texture_storage_3d<F>) -> vec3<i32>
+  textureDimensions(texture : texture_storage_1d<F, A>) -> i32
+  textureDimensions(texture : texture_storage_2d<F, A>) -> vec2<i32>
+  textureDimensions(texture : texture_storage_2d_array<F, A>) -> vec2<i32>
+  textureDimensions(texture : texture_storage_3d<F, A>) -> vec3<i32>
   textureDimensions(texture : texture_external) -> vec2<i32>
 )");
 }
@@ -478,10 +482,10 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
   textureDimensions(texture : texture_depth_2d_array) -> vec2<i32>
   textureDimensions(texture : texture_depth_cube) -> vec3<i32>
   textureDimensions(texture : texture_depth_cube_array) -> vec3<i32>
-  textureDimensions(texture : texture_storage_1d<F>) -> i32
-  textureDimensions(texture : texture_storage_2d<F>) -> vec2<i32>
-  textureDimensions(texture : texture_storage_2d_array<F>) -> vec2<i32>
-  textureDimensions(texture : texture_storage_3d<F>) -> vec3<i32>
+  textureDimensions(texture : texture_storage_1d<F, A>) -> i32
+  textureDimensions(texture : texture_storage_2d<F, A>) -> vec2<i32>
+  textureDimensions(texture : texture_storage_2d_array<F, A>) -> vec2<i32>
+  textureDimensions(texture : texture_storage_3d<F, A>) -> vec3<i32>
   textureDimensions(texture : texture_external) -> vec2<i32>
 )");
 }

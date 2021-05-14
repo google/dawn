@@ -408,7 +408,7 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                           Member("b", ty.i32()),
                       },
                       {create<ast::StructBlockDecoration>()});
-  auto ac = ty.access(ast::AccessControl::kReadOnly, A);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, A);
 
   auto* var = Global("b", ac, ast::StorageClass::kStorage, nullptr,
                      {
@@ -422,9 +422,8 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
-OpMemberDecorate %3 0 NonWritable
 OpMemberDecorate %3 1 Offset 4
-OpMemberDecorate %3 1 NonWritable
+OpDecorate %1 NonWritable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
@@ -451,7 +450,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
                       {create<ast::StructBlockDecoration>()});
   auto* B = ty.alias("B", A);
   AST().AddConstructedType(B);
-  auto ac = ty.access(ast::AccessControl::kReadOnly, B);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, B);
   auto* var = Global("b", ac, ast::StorageClass::kStorage, nullptr,
                      {
                          create<ast::BindingDecoration>(0),
@@ -464,7 +463,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
-OpMemberDecorate %3 0 NonWritable
+OpDecorate %1 NonWritable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
@@ -488,7 +487,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto ac = ty.access(ast::AccessControl::kReadOnly, A);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, A);
   auto* B = ty.alias("B", ac);
   AST().AddConstructedType(B);
   auto* var = Global("b", B, ast::StorageClass::kStorage, nullptr,
@@ -503,7 +502,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
   EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
-OpMemberDecorate %3 0 NonWritable
+OpDecorate %1 NonWritable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
@@ -527,8 +526,8 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
 
   auto* A = Structure("A", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto read = ty.access(ast::AccessControl::kReadOnly, A);
-  auto rw = ty.access(ast::AccessControl::kReadWrite, A);
+  auto* read = ty.access(ast::AccessControl::kReadOnly, A);
+  auto* rw = ty.access(ast::AccessControl::kReadWrite, A);
 
   auto* var_b = Global("b", read, ast::StorageClass::kStorage, nullptr,
                        {
@@ -549,28 +548,22 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
   EXPECT_EQ(DumpInstructions(b.annots()),
             R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
-OpMemberDecorate %3 0 NonWritable
+OpDecorate %1 NonWritable
 OpDecorate %1 DescriptorSet 0
 OpDecorate %1 Binding 0
-OpDecorate %7 Block
-OpMemberDecorate %7 0 Offset 0
 OpDecorate %5 DescriptorSet 1
 OpDecorate %5 Binding 0
 )");
   EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
 OpMemberName %3 0 "a"
 OpName %1 "b"
-OpName %7 "A"
-OpMemberName %7 0 "a"
 OpName %5 "c"
 )");
   EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
-%7 = OpTypeStruct %4
-%6 = OpTypePointer StorageBuffer %7
-%5 = OpVariable %6 StorageBuffer
+%5 = OpVariable %2 StorageBuffer
 )");
 }
 
@@ -580,7 +573,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
   auto type = ty.storage_texture(ast::TextureDimension::k2d,
                                  ast::ImageFormat::kR32Uint);
 
-  auto ac = ty.access(ast::AccessControl::kReadOnly, type);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, type);
 
   auto* var_a = Global("a", ac, ast::StorageClass::kNone, nullptr,
                        {
@@ -609,7 +602,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   auto type = ty.storage_texture(ast::TextureDimension::k2d,
                                  ast::ImageFormat::kR32Uint);
 
-  auto ac = ty.access(ast::AccessControl::kWriteOnly, type);
+  auto* ac = ty.access(ast::AccessControl::kWriteOnly, type);
 
   auto* var_a = Global("a", ac, ast::StorageClass::kNone, nullptr,
                        {
@@ -638,18 +631,18 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWithDifferentAccess) {
   // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
   // var<uniform_constant> b : [[access(write)]] texture_storage_2d<r32uint>;
 
-  auto type_a = ty.access(ast::AccessControl::kReadOnly,
-                          ty.storage_texture(ast::TextureDimension::k2d,
-                                             ast::ImageFormat::kR32Uint));
+  auto* type_a = ty.access(ast::AccessControl::kReadOnly,
+                           ty.storage_texture(ast::TextureDimension::k2d,
+                                              ast::ImageFormat::kR32Uint));
   auto* var_a = Global("a", type_a, ast::StorageClass::kNone, nullptr,
                        {
                            create<ast::BindingDecoration>(0),
                            create<ast::GroupDecoration>(0),
                        });
 
-  auto type_b = ty.access(ast::AccessControl::kWriteOnly,
-                          ty.storage_texture(ast::TextureDimension::k2d,
-                                             ast::ImageFormat::kR32Uint));
+  auto* type_b = ty.access(ast::AccessControl::kWriteOnly,
+                           ty.storage_texture(ast::TextureDimension::k2d,
+                                              ast::ImageFormat::kR32Uint));
   auto* var_b = Global("b", type_b, ast::StorageClass::kNone, nullptr,
                        {
                            create<ast::BindingDecoration>(1),

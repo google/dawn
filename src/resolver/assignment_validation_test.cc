@@ -16,7 +16,6 @@
 
 #include "gmock/gmock.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/storage_texture_type.h"
 
 namespace tint {
@@ -260,8 +259,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignFromPointer_Fail) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
             "12:34 error v-000x: invalid assignment: right-hand-side is not "
-            "storable: ptr<uniform_constant, [[access(read)]] "
-            "texture_storage_1d<rgba8unorm>>");
+            "storable: ptr<uniform_constant, texture_storage_1d<rgba8unorm, "
+            "read_only>>");
 }
 
 }  // namespace

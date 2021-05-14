@@ -728,34 +728,35 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   OperandList ops = {Operand::Int(type_id), result,
                      Operand::Int(ConvertStorageClass(sc))};
 
-  // Unwrap after emitting the access control as unwrap all removes access
-  // control types.
-  auto* type_no_ac = sem->Type()->UnwrapAll();
+  auto* type = sem->Type();
+
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
-  } else if (type_no_ac->Is<sem::Texture>()) {
-    if (auto* ac = sem->Type()->As<sem::AccessControl>()) {
-      switch (ac->access_control()) {
-        case ast::AccessControl::kWriteOnly:
-          push_annot(
-              spv::Op::OpDecorate,
-              {Operand::Int(var_id), Operand::Int(SpvDecorationNonReadable)});
-          break;
-        case ast::AccessControl::kReadOnly:
-          push_annot(
-              spv::Op::OpDecorate,
-              {Operand::Int(var_id), Operand::Int(SpvDecorationNonWritable)});
-          break;
-        case ast::AccessControl::kReadWrite:
-          break;
-      }
+  } else if (sem->AccessControl() != ast::AccessControl::kInvalid) {
+    // type is a sem::Struct or a sem::StorageTexture
+    switch (sem->AccessControl()) {
+      case ast::AccessControl::kInvalid:
+        TINT_ICE(builder_.Diagnostics()) << "missing access control";
+        break;
+      case ast::AccessControl::kWriteOnly:
+        push_annot(
+            spv::Op::OpDecorate,
+            {Operand::Int(var_id), Operand::Int(SpvDecorationNonReadable)});
+        break;
+      case ast::AccessControl::kReadOnly:
+        push_annot(
+            spv::Op::OpDecorate,
+            {Operand::Int(var_id), Operand::Int(SpvDecorationNonWritable)});
+        break;
+      case ast::AccessControl::kReadWrite:
+        break;
     }
-  } else if (!type_no_ac->Is<sem::Sampler>()) {
+  } else if (!type->Is<sem::Sampler>()) {
     // If we don't have a constructor and we're an Output or Private variable,
     // then WGSL requires that we zero-initialize.
     if (sem->StorageClass() == ast::StorageClass::kPrivate ||
         sem->StorageClass() == ast::StorageClass::kOutput) {
-      init_id = GenerateConstantNullIfNeeded(type_no_ac);
+      init_id = GenerateConstantNullIfNeeded(type);
       if (init_id == 0) {
         return 0;
       }
@@ -2931,12 +2932,6 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
     return 0;
   }
 
-  if (auto* ac = type->As<sem::AccessControl>()) {
-    if (!ac->type()->UnwrapAccess()->Is<sem::Struct>()) {
-      return GenerateTypeIfNeeded(ac->type());
-    }
-  }
-
   auto val = type_name_to_id_.find(type->type_name());
   if (val != type_name_to_id_.end()) {
     return val->second;
@@ -2944,14 +2939,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
 
   auto result = result_op();
   auto id = result.to_i();
-  if (auto* ac = type->As<sem::AccessControl>()) {
-    // The non-struct case was handled above.
-    auto* subtype = ac->UnwrapAccess();
-    if (!GenerateStructType(subtype->As<sem::Struct>(), ac->access_control(),
-                            result)) {
-      return 0;
-    }
-  } else if (auto* arr = type->As<sem::Array>()) {
+  if (auto* arr = type->As<sem::Array>()) {
     if (!GenerateArrayType(arr, result)) {
       return 0;
     }
@@ -2970,7 +2958,7 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
       return 0;
     }
   } else if (auto* str = type->As<sem::Struct>()) {
-    if (!GenerateStructType(str, ast::AccessControl::kReadWrite, result)) {
+    if (!GenerateStructType(str, result)) {
       return 0;
     }
   } else if (type->Is<sem::U32>()) {
@@ -2985,6 +2973,28 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
     if (!GenerateTextureType(tex, result)) {
       return 0;
     }
+
+    if (auto* st = tex->As<sem::StorageTexture>()) {
+      // Register all three access types of StorageTexture names. In SPIR-V, we
+      // must output a single type, while the variable is annotated with the
+      // access type. Doing this ensures we de-dupe.
+      type_name_to_id_[builder_
+                           .create<sem::StorageTexture>(
+                               st->dim(), st->image_format(),
+                               ast::AccessControl::kReadOnly, st->type())
+                           ->type_name()] = id;
+      type_name_to_id_[builder_
+                           .create<sem::StorageTexture>(
+                               st->dim(), st->image_format(),
+                               ast::AccessControl::kWriteOnly, st->type())
+                           ->type_name()] = id;
+      type_name_to_id_[builder_
+                           .create<sem::StorageTexture>(
+                               st->dim(), st->image_format(),
+                               ast::AccessControl::kReadWrite, st->type())
+                           ->type_name()] = id;
+    }
+
   } else if (type->Is<sem::Sampler>()) {
     push_type(spv::Op::OpTypeSampler, {result});
 
@@ -3139,7 +3149,6 @@ bool Builder::GeneratePointerType(const sem::Pointer* ptr,
 }
 
 bool Builder::GenerateStructType(const sem::Struct* struct_type,
-                                 ast::AccessControl::Access access_control,
                                  const Operand& result) {
   auto struct_id = result.to_i();
   auto* impl = struct_type->Declaration();
@@ -3163,19 +3172,6 @@ bool Builder::GenerateStructType(const sem::Struct* struct_type,
     auto mem_id = GenerateStructMember(struct_id, i, members[i]);
     if (mem_id == 0) {
       return false;
-    }
-
-    // We're attaching the access control to the members of the struct instead
-    // of to the variable. The reason we do this is that WGSL models the
-    // access as part of the type. If we attach to the variable, it's no
-    // longer part of the type in the SPIR-V backend, but part of the
-    // variable. This differs from the modeling and other backends. Attaching
-    // to the struct members means the access control stays part of the type
-    // where it logically makes the most sense.
-    if (access_control == ast::AccessControl::kReadOnly) {
-      push_annot(spv::Op::OpMemberDecorate,
-                 {Operand::Int(struct_id), Operand::Int(i),
-                  Operand::Int(SpvDecorationNonWritable)});
     }
 
     ops.push_back(Operand::Int(mem_id));

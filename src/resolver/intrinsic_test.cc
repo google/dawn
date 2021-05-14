@@ -30,7 +30,6 @@
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/call.h"
 #include "src/sem/function.h"
 #include "src/sem/member_accessor_expression.h"
@@ -241,7 +240,7 @@ class ResolverIntrinsicTest_TextureOperation
   }
 
   void add_call_param(std::string name,
-                      typ::Type type,
+                      const ast::Type* type,
                       ast::ExpressionList* call_params) {
     if (type->UnwrapAll()->is_handle()) {
       Global(name, type, ast::StorageClass::kNone, nullptr,
@@ -276,7 +275,8 @@ TEST_P(ResolverIntrinsicTest_StorageTextureOperation, TextureLoadRo) {
 
   auto coords_type = GetCoordsType(dim, ty.i32());
   auto texture_type = ty.storage_texture(dim, format);
-  auto ro_texture_type = ty.access(ast::AccessControl::kReadOnly, texture_type);
+  auto* ro_texture_type =
+      ty.access(ast::AccessControl::kReadOnly, texture_type);
 
   ast::ExpressionList call_params;
 
@@ -769,7 +769,7 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Vector) {
   auto* ary = ty.array<i32>();
   auto* str = Structure("S", {Member("x", ary)},
                         {create<ast::StructBlockDecoration>()});
-  auto ac = ty.access(ast::AccessControl::kReadOnly, str);
+  auto* ac = ty.access(ast::AccessControl::kReadOnly, str);
   Global("a", ac, ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),

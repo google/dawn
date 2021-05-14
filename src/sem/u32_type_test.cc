@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/sem/access_control_type.h"
 #include "src/sem/test_helper.h"
 #include "src/sem/texture_type.h"
 

@@ -37,7 +37,6 @@
 #include "src/ast/vector.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/reader/wgsl/lexer.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"

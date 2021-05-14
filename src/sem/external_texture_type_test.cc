@@ -14,7 +14,6 @@
 
 #include "src/sem/external_texture_type.h"
 
-#include "src/sem/access_control_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"

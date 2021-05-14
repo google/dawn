@@ -287,11 +287,13 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output stream
   /// @param type the type to generate
   /// @param storage_class the storage class of the variable
+  /// @param access_control the access control type of the variable
   /// @param name the name of the variable, only used for array emission
   /// @returns true if the type is emitted
   bool EmitType(std::ostream& out,
                 const sem::Type* type,
                 ast::StorageClass storage_class,
+                ast::AccessControl::Access access_control,
                 const std::string& name);
   /// Handles generating a structure declaration
   /// @param out the output stream

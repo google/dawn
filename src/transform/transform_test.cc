@@ -102,19 +102,6 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
                 ->stride(),
             32u);
 }
-TEST_F(CreateASTTypeForTest, AccessControl) {
-  auto* ac = create([](ProgramBuilder& b) {
-    auto* decl = b.Structure("S", {}, {});
-    auto* str =
-        b.create<sem::Struct>(decl, sem::StructMemberList{}, 4 /* align */,
-                              4 /* size */, 4 /* size_no_padding */);
-    return b.create<sem::AccessControl>(ast::AccessControl::kReadOnly, str);
-  });
-  ASSERT_TRUE(ac->Is<ast::AccessControl>());
-  EXPECT_EQ(ac->As<ast::AccessControl>()->access_control(),
-            ast::AccessControl::kReadOnly);
-  EXPECT_TRUE(ac->As<ast::AccessControl>()->type()->Is<ast::TypeName>());
-}
 
 TEST_F(CreateASTTypeForTest, Struct) {
   auto* str = create([](ProgramBuilder& b) {

@@ -81,7 +81,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
   for (auto* var : variables) {
     auto* sem = Sem().Get(var);
     ASSERT_NE(sem, nullptr);
-    constant_ids.push_back(sem->ConstantId());
+    constant_ids.push_back(static_cast<uint16_t>(sem->ConstantId()));
   }
   EXPECT_THAT(constant_ids, UnorderedElementsAre(0u, 3u, 2u, 4u, 5u, 1u));
 }

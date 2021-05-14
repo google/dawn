@@ -23,8 +23,12 @@ namespace sem {
 
 StorageTexture::StorageTexture(ast::TextureDimension dim,
                                ast::ImageFormat format,
+                               ast::AccessControl::Access access_control,
                                sem::Type* subtype)
-    : Base(dim), image_format_(format), subtype_(subtype) {}
+    : Base(dim),
+      image_format_(format),
+      access_control_(access_control),
+      subtype_(subtype) {}
 
 StorageTexture::StorageTexture(StorageTexture&&) = default;
 
@@ -32,13 +36,15 @@ StorageTexture::~StorageTexture() = default;
 
 std::string StorageTexture::type_name() const {
   std::ostringstream out;
-  out << "__storage_texture_" << dim() << "_" << image_format_;
+  out << "__storage_texture_" << dim() << "_" << image_format_ << "_"
+      << access_control_;
   return out.str();
 }
 
 std::string StorageTexture::FriendlyName(const SymbolTable&) const {
   std::ostringstream out;
-  out << "texture_storage_" << dim() << "<" << image_format_ << ">";
+  out << "texture_storage_" << dim() << "<" << image_format_ << ", "
+      << access_control_ << ">";
   return out.str();
 }
 

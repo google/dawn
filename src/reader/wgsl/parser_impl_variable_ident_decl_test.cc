@@ -14,7 +14,6 @@
 
 #include "src/ast/struct_block_decoration.h"
 #include "src/reader/wgsl/parser_impl_test_helper.h"
-#include "src/sem/access_control_type.h"
 
 namespace tint {
 namespace reader {

@@ -60,7 +60,6 @@
 #include "src/ast/void.h"
 #include "src/program.h"
 #include "src/program_id.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/array.h"
 #include "src/sem/bool_type.h"
 #include "src/sem/depth_texture_type.h"
@@ -704,13 +703,10 @@ class ProgramBuilder {
     /// @param access the access control
     /// @param type the inner type
     /// @returns the access control qualifier type
-    typ::AccessControl access(ast::AccessControl::Access access,
-                              typ::Type type) const {
-      type = MaybeCreateTypename(type);
-      return {type.ast ? builder->create<ast::AccessControl>(access, type)
-                       : nullptr,
-              type.sem ? builder->create<sem::AccessControl>(access, type)
-                       : nullptr};
+    ast::AccessControl* access(ast::AccessControl::Access access,
+                               const ast::Type* type) const {
+      type = MaybeCreateTypename(type).ast;
+      return type ? builder->create<ast::AccessControl>(access, type) : nullptr;
     }
 
     /// Creates an access control qualifier type
@@ -718,15 +714,12 @@ class ProgramBuilder {
     /// @param access the access control
     /// @param type the inner type
     /// @returns the access control qualifier type
-    typ::AccessControl access(const Source& source,
-                              ast::AccessControl::Access access,
-                              typ::Type type) const {
-      type = MaybeCreateTypename(type);
-      return {type.ast
-                  ? builder->create<ast::AccessControl>(source, access, type)
-                  : nullptr,
-              type.sem ? builder->create<sem::AccessControl>(access, type)
-                       : nullptr};
+    ast::AccessControl* access(const Source& source,
+                               ast::AccessControl::Access access,
+                               const ast::Type* type) const {
+      type = MaybeCreateTypename(type).ast;
+      return type ? builder->create<ast::AccessControl>(source, access, type)
+                  : nullptr;
     }
 
     /// @param type the type of the pointer
@@ -855,7 +848,8 @@ class ProgramBuilder {
       auto* sem_subtype =
           sem::StorageTexture::SubtypeFor(format, builder->Types());
       return {builder->create<ast::StorageTexture>(dims, format, ast_subtype),
-              builder->create<sem::StorageTexture>(dims, format, sem_subtype)};
+              builder->create<sem::StorageTexture>(
+                  dims, format, ast::AccessControl::kInvalid, sem_subtype)};
     }
 
     /// @param source the Source of the node
@@ -870,7 +864,8 @@ class ProgramBuilder {
           sem::StorageTexture::SubtypeFor(format, builder->Types());
       return {builder->create<ast::StorageTexture>(source, dims, format,
                                                    ast_subtype),
-              builder->create<sem::StorageTexture>(dims, format, sem_subtype)};
+              builder->create<sem::StorageTexture>(
+                  dims, format, ast::AccessControl::kInvalid, sem_subtype)};
     }
 
     /// @param source the Source of the node
@@ -1189,7 +1184,7 @@ class ProgramBuilder {
   /// @returns a `ast::Variable` with the given name, storage and type
   template <typename NAME>
   ast::Variable* Var(NAME&& name,
-                     ast::Type* type,
+                     const ast::Type* type,
                      ast::StorageClass storage = ast::StorageClass::kNone,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
@@ -1208,7 +1203,7 @@ class ProgramBuilder {
   template <typename NAME>
   ast::Variable* Var(const Source& source,
                      NAME&& name,
-                     ast::Type* type,
+                     const ast::Type* type,
                      ast::StorageClass storage = ast::StorageClass::kNone,
                      ast::Expression* constructor = nullptr,
                      ast::DecorationList decorations = {}) {
@@ -1290,7 +1285,7 @@ class ProgramBuilder {
   /// global variable with the ast::Module.
   template <typename NAME>
   ast::Variable* Global(NAME&& name,
-                        ast::Type* type,
+                        const ast::Type* type,
                         ast::StorageClass storage,
                         ast::Expression* constructor = nullptr,
                         ast::DecorationList decorations = {}) {

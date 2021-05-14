@@ -90,13 +90,15 @@ class Resolver {
   struct VariableInfo {
     VariableInfo(const ast::Variable* decl,
                  sem::Type* type,
-                 const std::string& type_name);
+                 const std::string& type_name,
+                 ast::AccessControl::Access ac);
     ~VariableInfo();
 
     ast::Variable const* const declaration;
     sem::Type* type;
     std::string const type_name;
     ast::StorageClass storage_class;
+    ast::AccessControl::Access const access_control;
     std::vector<ast::IdentifierExpression*> users;
     sem::BindingPoint binding_point;
   };
@@ -348,8 +350,11 @@ class Resolver {
   std::unordered_map<Symbol, sem::Type*> named_types_;
   std::unordered_set<const ast::Node*> marked_;
   std::unordered_map<uint32_t, const VariableInfo*> constant_ids_;
+  std::unordered_map<Symbol, ast::Type*> name_to_ast_type_;
+
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;
+  const ast::AccessControl* curent_access_control_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
 };

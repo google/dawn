@@ -34,7 +34,6 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/writer/spirv/function.h"
 #include "src/writer/spirv/scalar_constant.h"
@@ -446,11 +445,9 @@ class Builder {
   bool GeneratePointerType(const sem::Pointer* ptr, const Operand& result);
   /// Generates a vector type declaration
   /// @param struct_type the vector to generate
-  /// @param access_control the access controls to assign to the struct
   /// @param result the result operand
   /// @returns true if the vector was successfully generated
   bool GenerateStructType(const sem::Struct* struct_type,
-                          ast::AccessControl::Access access_control,
                           const Operand& result);
   /// Generates a struct member
   /// @param struct_id the id of the parent structure

@@ -15,7 +15,6 @@
 #include "gmock/gmock.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
-#include "src/sem/access_control_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
@@ -99,7 +98,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
     auto* s =
         b.Structure("Data", members, {b.create<ast::StructBlockDecoration>()});
 
-    auto ac_ty = b.ty.access(ast::AccessControl::kReadWrite, s);
+    auto* ac_ty = b.ty.access(ast::AccessControl::kReadWrite, s);
 
     b.Global("data", ac_ty, ast::StorageClass::kStorage, nullptr,
              ast::DecorationList{

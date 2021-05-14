@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "src/ast/struct_block_decoration.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
@@ -50,7 +49,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_Read) {
   auto* s = Structure("S", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
 
-  auto a = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();
@@ -63,7 +62,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_AccessControl_ReadWrite) {
   auto* s = Structure("S", {Member("a", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
 
-  auto a = ty.access(ast::AccessControl::kReadWrite, s);
+  auto* a = ty.access(ast::AccessControl::kReadWrite, s);
   AST().AddConstructedType(ty.alias("make_type_reachable", a));
 
   GeneratorImpl& gen = Build();
@@ -430,7 +429,7 @@ TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
   auto param = GetParam();
 
   auto t = ty.storage_texture(param.dim, param.fmt);
-  auto ac = ty.access(param.access, t);
+  auto* ac = ty.access(param.access, t);
 
   GeneratorImpl& gen = Build();
 

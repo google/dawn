@@ -16,7 +16,6 @@
 
 #include "gmock/gmock.h"
 #include "src/resolver/resolver_test_helper.h"
-#include "src/sem/access_control_type.h"
 
 namespace tint {
 namespace resolver {
@@ -77,16 +76,6 @@ TEST_F(ResolverIsHostShareable, Matrix) {
 TEST_F(ResolverIsHostShareable, Pointer) {
   EXPECT_FALSE(
       r()->IsHostShareable(ty.pointer<i32>(ast::StorageClass::kPrivate)));
-}
-
-TEST_F(ResolverIsHostShareable, AccessControlVoid) {
-  EXPECT_FALSE(r()->IsHostShareable(
-      ty.access(ast::AccessControl::kReadOnly, ty.void_())));
-}
-
-TEST_F(ResolverIsHostShareable, AccessControlI32) {
-  EXPECT_TRUE(
-      r()->IsHostShareable(ty.access(ast::AccessControl::kReadOnly, ty.i32())));
 }
 
 TEST_F(ResolverIsHostShareable, ArraySizedOfHostShareable) {

@@ -15,7 +15,6 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/variable_decl_statement.h"
-#include "src/sem/access_control_type.h"
 #include "src/writer/hlsl/test_helper.h"
 
 namespace tint {
@@ -34,7 +33,7 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
                           {
                               create<ast::StructBlockDecoration>(),
                           });
-  auto ac_ty = ty.access(ast::AccessControl::kReadOnly, sb_ty);
+  auto* ac_ty = ty.access(ast::AccessControl::kReadOnly, sb_ty);
 
   Global("sb", ac_ty, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{

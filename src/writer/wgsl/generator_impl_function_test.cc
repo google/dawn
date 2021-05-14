@@ -16,7 +16,6 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/workgroup_decoration.h"
-#include "src/sem/access_control_type.h"
 #include "src/writer/wgsl/test_helper.h"
 
 namespace tint {
@@ -204,7 +203,7 @@ TEST_F(WgslGeneratorImplTest,
   auto* s = Structure("Data", {Member("d", ty.f32())},
                       {create<ast::StructBlockDecoration>()});
 
-  auto ac = ty.access(ast::AccessControl::kReadWrite, s);
+  auto* ac = ty.access(ast::AccessControl::kReadWrite, s);
 
   Global("data", ac, ast::StorageClass::kStorage, nullptr,
          ast::DecorationList{

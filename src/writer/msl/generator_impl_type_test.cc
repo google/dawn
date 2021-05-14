@@ -15,7 +15,6 @@
 #include <array>
 
 #include "src/ast/struct_block_decoration.h"
-#include "src/sem/access_control_type.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
@@ -762,9 +761,9 @@ TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
   auto s = ty.storage_texture(params.dim, ast::ImageFormat::kR32Float);
-  auto ac = ty.access(params.ro ? ast::AccessControl::kReadOnly
-                                : ast::AccessControl::kWriteOnly,
-                      s);
+  auto* ac = ty.access(params.ro ? ast::AccessControl::kReadOnly
+                                 : ast::AccessControl::kWriteOnly,
+                       s);
   Global("test_var", ac, ast::StorageClass::kNone, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -773,7 +772,7 @@ TEST_P(MslStorageTexturesTest, Emit) {
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(ac, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(program->TypeOf(ac), "")) << gen.error();
   EXPECT_EQ(gen.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(
