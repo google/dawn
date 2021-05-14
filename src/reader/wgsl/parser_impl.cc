@@ -3101,13 +3101,20 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
 
   if (s == kOverrideDecoration) {
     const char* use = "override decoration";
-    return expect_paren_block(use, [&]() -> Result {
-      auto val = expect_positive_sint(use);
-      if (val.errored)
-        return Failure::kErrored;
 
-      return create<ast::OverrideDecoration>(t.source(), val.value);
-    });
+    if (peek().IsParenLeft()) {
+      // [[override(x)]]
+      return expect_paren_block(use, [&]() -> Result {
+        auto val = expect_positive_sint(use);
+        if (val.errored)
+          return Failure::kErrored;
+
+        return create<ast::OverrideDecoration>(t.source(), val.value);
+      });
+    } else {
+      // [[override]]
+      return create<ast::OverrideDecoration>(t.source());
+    }
   }
 
   return Failure::kNoMatch;
