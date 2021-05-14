@@ -501,14 +501,19 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
   // TODO(crbug.com/tint/802): Temporary while ast::AccessControl exits.
   auto find_first_access_control =
       [this](ast::Type* ty) -> ast::AccessControl* {
-    ast::AccessControl* ac = ty->As<ast::AccessControl>();
-    if (ac) {
+    if (ty == nullptr) {
+      return nullptr;
+    }
+    if (ast::AccessControl* ac = ty->As<ast::AccessControl>()) {
       return ac;
     }
     while (auto* tn = ty->As<ast::TypeName>()) {
-      ty = name_to_ast_type_[tn->name()];
-      ac = ty->As<ast::AccessControl>();
-      if (ac) {
+      auto it = name_to_ast_type_.find(tn->name());
+      if (it == name_to_ast_type_.end()) {
+        break;
+      }
+      ty = it->second;
+      if (auto* ac = ty->As<ast::AccessControl>()) {
         return ac;
       }
     }
