@@ -81,7 +81,7 @@ class Variable : public Castable<Variable, Node> {
   bool IsPipelineConstant() const { return is_pipeline_constant_; }
 
   /// @returns the pipeline constant ID associated with the variable
-  uint32_t ConstantId() const { return constant_id_; }
+  uint16_t ConstantId() const { return constant_id_; }
 
  private:
   const ast::Variable* const declaration_;
