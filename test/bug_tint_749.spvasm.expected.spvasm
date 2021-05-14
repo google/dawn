@@ -1,0 +1,5 @@
+SKIP:
+
+Validation Failure:
+    1:1: OpLoad Pointer <id> '51[%51]' is not a logical pointer.
+      %52 = OpLoad %int %51

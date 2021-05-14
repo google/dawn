@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"dawn.googlesource.com/tint/tools/src/match"
 )
@@ -92,12 +93,28 @@ func LoadConfig(path string) (Config, error) {
 	if err != nil {
 		return Config{}, err
 	}
-	d := json.NewDecoder(bytes.NewReader(cfgBody))
+	return ParseConfig(string(cfgBody))
+}
+
+// ParseConfig parses the config from a JSON string.
+func ParseConfig(config string) (Config, error) {
+	d := json.NewDecoder(strings.NewReader(config))
 	cfg := Config{}
 	if err := d.Decode(&cfg); err != nil {
 		return Config{}, err
 	}
 	return cfg, nil
+}
+
+// MustParseConfig parses the config from a JSON string, panicing if the config
+// does not parse
+func MustParseConfig(config string) Config {
+	d := json.NewDecoder(strings.NewReader(config))
+	cfg := Config{}
+	if err := d.Decode(&cfg); err != nil {
+		panic(fmt.Errorf("Failed to parse config: %w\nConfig:\n%v", err, config))
+	}
+	return cfg
 }
 
 // rule is a search path predicate.
