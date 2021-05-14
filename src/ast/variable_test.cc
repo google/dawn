@@ -169,15 +169,6 @@ TEST_F(VariableTest, BindingPointMissingBindingDecoration) {
   EXPECT_EQ(var->binding_point().binding, nullptr);
 }
 
-TEST_F(VariableTest, ConstantId) {
-  auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                  DecorationList{
-                      create<OverrideDecoration>(1200),
-                  });
-
-  EXPECT_EQ(var->constant_id(), 1200u);
-}
-
 TEST_F(VariableTest, Decorated_to_str) {
   auto* var = Var("my_var", ty.f32(), StorageClass::kFunction, Expr("expr"),
                   DecorationList{

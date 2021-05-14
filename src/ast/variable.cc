@@ -62,14 +62,6 @@ Variable::BindingPoint Variable::binding_point() const {
   return BindingPoint{group, binding};
 }
 
-uint32_t Variable::constant_id() const {
-  if (auto* cid = GetDecoration<OverrideDecoration>(decorations_)) {
-    return cid->value();
-  }
-  TINT_ASSERT(false);
-  return 0;
-}
-
 Variable* Variable::Clone(CloneContext* ctx) const {
   auto src = ctx->Clone(source());
   auto sym = ctx->Clone(symbol());
