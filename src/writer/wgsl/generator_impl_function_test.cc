@@ -74,6 +74,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
                         Return(),
                     },
                     ast::DecorationList{
+                        Stage(ast::PipelineStage::kCompute),
                         create<ast::WorkgroupDecoration>(2u, 4u, 6u),
                     });
 
@@ -82,7 +83,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitFunction(func));
-  EXPECT_EQ(gen.result(), R"(  [[workgroup_size(2, 4, 6)]]
+  EXPECT_EQ(gen.result(), R"(  [[stage(compute), workgroup_size(2, 4, 6)]]
   fn my_func() {
     discard;
     return;
@@ -106,30 +107,6 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
 
   ASSERT_TRUE(gen.EmitFunction(func));
   EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
-  fn my_func() {
-    discard;
-    return;
-  }
-)");
-}
-
-TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Multiple) {
-  auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::DiscardStatement>(),
-                        Return(),
-                    },
-                    ast::DecorationList{
-                        Stage(ast::PipelineStage::kFragment),
-                        create<ast::WorkgroupDecoration>(2u, 4u, 6u),
-                    });
-
-  GeneratorImpl& gen = Build();
-
-  gen.increment_indent();
-
-  ASSERT_TRUE(gen.EmitFunction(func));
-  EXPECT_EQ(gen.result(), R"(  [[stage(fragment), workgroup_size(2, 4, 6)]]
   fn my_func() {
     discard;
     return;

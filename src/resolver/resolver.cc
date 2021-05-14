@@ -823,6 +823,38 @@ bool Resolver::ValidateFunction(const ast::Function* func,
     return false;
   }
 
+  auto stage_deco_count = 0;
+  auto workgroup_deco_count = 0;
+  for (auto* deco : func->decorations()) {
+    if (deco->Is<ast::StageDecoration>()) {
+      stage_deco_count++;
+    } else if (deco->Is<ast::WorkgroupDecoration>()) {
+      workgroup_deco_count++;
+      if (func->pipeline_stage() != ast::PipelineStage::kCompute) {
+        diagnostics_.add_error(
+            "the workgroup_size attribute is only valid for compute stages",
+            deco->source());
+        return false;
+      }
+    } else if (!deco->Is<ast::InternalDecoration>()) {
+      diagnostics_.add_error("decoration is not valid for functions",
+                             deco->source());
+      return false;
+    }
+  }
+  if (stage_deco_count > 1) {
+    diagnostics_.add_error(
+        "v-0020", "only one stage decoration permitted per entry point",
+        func->source());
+    return false;
+  }
+  if (workgroup_deco_count > 1) {
+    diagnostics_.add_error(
+        "only one workgroup_size attribute permitted per entry point",
+        func->source());
+    return false;
+  }
+
   for (auto* param : func->params()) {
     if (!ValidateParameter(variable_to_info_.at(param))) {
       return false;
@@ -867,23 +899,6 @@ bool Resolver::ValidateFunction(const ast::Function* func,
 
 bool Resolver::ValidateEntryPoint(const ast::Function* func,
                                   const FunctionInfo* info) {
-  auto stage_deco_count = 0;
-  for (auto* deco : func->decorations()) {
-    if (deco->Is<ast::StageDecoration>()) {
-      stage_deco_count++;
-    } else if (!deco->Is<ast::WorkgroupDecoration>()) {
-      diagnostics_.add_error("decoration is not valid for functions",
-                             deco->source());
-      return false;
-    }
-  }
-  if (stage_deco_count > 1) {
-    diagnostics_.add_error(
-        "v-0020", "only one stage decoration permitted per entry point",
-        func->source());
-    return false;
-  }
-
   // Use a lambda to validate the entry point decorations for a type.
   // Persistent state is used to track which builtins and locations have already
   // been seen, in order to catch conflicts.
