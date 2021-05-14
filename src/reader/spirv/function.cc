@@ -3349,6 +3349,29 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
 
+    case SpvOpCopyMemory: {
+      // Generate an assignment.
+      // TODO(dneto): When supporting ptr-ref, the LHS pointer and RHS pointer
+      // map to reference types in WGSL.
+      auto lhs = MakeOperand(inst, 0);
+      auto rhs = MakeOperand(inst, 1);
+      // Ignore any potential memory operands. Currently they are all for
+      // concepts not in WGSL:
+      //   Volatile
+      //   Aligned
+      //   Nontemporal
+      //   MakePointerAvailable ; Vulkan memory model
+      //   MakePointerVisible   ; Vulkan memory model
+      //   NonPrivatePointer    ; Vulkan memory model
+
+      if (!success()) {
+        return false;
+      }
+      AddStatement(
+          create<ast::AssignmentStatement>(Source{}, lhs.expr, rhs.expr));
+      return success();
+    }
+
     case SpvOpCopyObject: {
       // Arguably, OpCopyObject is purely combinatorial. On the other hand,
       // it exists to make a new name for something. So we choose to make

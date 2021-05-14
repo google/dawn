@@ -292,6 +292,34 @@ TEST_F(SpvParserMemoryTest, EmitStatement_StoreToModuleScopeVar) {
 })"));
 }
 
+TEST_F(SpvParserMemoryTest,
+       EmitStatement_CopyMemory_Scalar_Workgroup_To_Private) {
+  auto p = parser(test::Assemble(Preamble() + R"(
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %ty = OpTypeInt 32 0
+     %val = OpConstant %ty 42
+     %ptr_wg_ty = OpTypePointer Workgroup %ty
+     %ptr_priv_ty = OpTypePointer Private %ty
+     %1 = OpVariable %ptr_wg_ty Workgroup
+     %2 = OpVariable %ptr_priv_ty Workgroup
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     OpCopyMemory %2 %1
+     OpReturn
+     OpFunctionEnd
+  )"));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody());
+  const auto got = ToString(p->builder(), fe.ast_body());
+  const auto* expected = R"(Assignment{
+  Identifier[not set]{x_2}
+  Identifier[not set]{x_1}
+})";
+  EXPECT_THAT(got, HasSubstr(expected));
+}
+
 TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_NoOperands) {
   auto err = test::AssembleFailure(Preamble() + R"(
      %void = OpTypeVoid
