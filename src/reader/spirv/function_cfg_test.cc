@@ -14759,6 +14759,52 @@ Return{}
   ASSERT_EQ(expect, got) << got;
 }
 
+TEST_F(SpvParserCFGTest,
+       EmitBody_ContinueFromSingleBlockLoopToOuterLoop_IsError) {
+  // crbug.com/tint/793
+  // This is invalid SPIR-V but the validator was only recently upgraded
+  // to catch it.
+  auto assembly = CommonTypes() + R"(
+  %100 = OpFunction %void None %voidfn
+  %5 = OpLabel
+  OpBranch %10
+
+  %10 = OpLabel ; outer loop header
+  OpLoopMerge %99 %89 None
+  OpBranchConditional %cond %99 %20
+
+  %20 = OpLabel ; inner loop single block loop
+  OpLoopMerge %79 %20 None
+
+  ; true -> continue to outer loop
+  ; false -> self-loop
+  ; The true branch is invalid because a "continue block", i.e. the block
+  ; containing the branch to the continue target, "is valid only for the
+  ; innermost loop it is nested inside of".
+  ; So it can't branch to the continue target of an outer loop.
+  OpBranchConditional %cond %89 %20
+
+  %79 = OpLabel ; merge for outer loop
+  OpUnreachable
+
+  %89 = OpLabel
+  OpBranch %10 ; backedge for outer loop
+
+  %99 = OpLabel ; merge for outer
+  OpReturn
+
+  OpFunctionEnd
+
+)";
+  auto p = parser(test::Assemble(assembly));
+  EXPECT_FALSE(p->Parse());
+  EXPECT_FALSE(p->success());
+  EXPECT_THAT(p->error(),
+              HasSubstr("block <ID> 20[%20] exits the continue headed by <ID> "
+                        "20[%20], but not via a structured exit"))
+      << p->error();
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader
