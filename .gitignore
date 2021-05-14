@@ -22,3 +22,4 @@ third_party/llvm-build
 third_party/spirv-headers
 third_party/spirv-tools
 tools/clang
+tools/bin

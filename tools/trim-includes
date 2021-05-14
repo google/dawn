@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# See https://clang.llvm.org/docs/SourceBasedCodeCoverage.html
-
 set -e # Fail on any error.
 
 if [ ! -x "$(which go)" ] ; then
@@ -24,11 +22,11 @@ fi
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd )"
 ROOT_DIR="$( cd "${SCRIPT_DIR}/.." >/dev/null 2>&1 && pwd )"
-BINARY="${SCRIPT_DIR}/bin/fix-tests"
+BINARY="${SCRIPT_DIR}/bin/trim-includes"
 
 # Rebuild the binary.
 # Note, go caches build artifacts, so this is quick for repeat calls
-pushd "${SCRIPT_DIR}/src/cmd/fix-tests" > /dev/null
+pushd "${SCRIPT_DIR}/src/cmd/trim-includes" > /dev/null
     go build -o "${BINARY}" main.go
 popd > /dev/null
 

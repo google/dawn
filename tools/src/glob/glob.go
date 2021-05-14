@@ -23,7 +23,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"dawn.googlesource.com/tint/tools/src/trim-includes/match"
+	"dawn.googlesource.com/tint/tools/src/match"
 )
 
 // Scan walks all files and subdirectories from root, returning those

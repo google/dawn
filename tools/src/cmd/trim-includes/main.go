@@ -35,7 +35,7 @@ import (
 	"sync"
 	"time"
 
-	"dawn.googlesource.com/tint/tools/src/trim-includes/glob"
+	"dawn.googlesource.com/tint/tools/src/glob"
 )
 
 var (
