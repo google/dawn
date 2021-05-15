@@ -19,6 +19,7 @@
 
 #include "src/ast/call_statement.h"
 #include "src/program_builder.h"
+#include "src/sem/block_statement.h"
 #include "src/sem/call.h"
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
@@ -155,12 +156,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
           }
 
           // Find the current statement block
-          auto* block = call->Stmt()->Block();
-          if (!block) {
-            TINT_ICE(ctx.dst->Diagnostics())
-                << "arrayLength() statement is outside a BlockStatement";
-            break;
-          }
+          auto* block = call->Stmt()->Block()->Declaration();
 
           // If the storage_buffer_expr is resolves to a variable (typically
           // true) then key the array_length from the variable. If not, key off

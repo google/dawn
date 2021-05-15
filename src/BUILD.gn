@@ -552,6 +552,7 @@ libtint_source_set("libtint_core_all_src") {
 libtint_source_set("libtint_sem_src") {
   sources = [
     "sem/array.cc",
+    "sem/block_statement.cc",
     "sem/call.cc",
     "sem/call_target.cc",
     "sem/expression.cc",

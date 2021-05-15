@@ -56,7 +56,7 @@ class TestHelper : public ProgramBuilder {
   /// if the statement is not owned by a BlockStatement.
   const ast::BlockStatement* BlockOf(ast::Statement* stmt) {
     auto* sem_stmt = Sem().Get(stmt);
-    return sem_stmt ? sem_stmt->Block() : nullptr;
+    return sem_stmt ? sem_stmt->Block()->Declaration() : nullptr;
   }
 
   /// Returns the BlockStatement that holds the given expression.
@@ -65,7 +65,7 @@ class TestHelper : public ProgramBuilder {
   /// expression is not indirectly owned by a BlockStatement.
   const ast::BlockStatement* BlockOf(ast::Expression* expr) {
     auto* sem_stmt = Sem().Get(expr)->Stmt();
-    return sem_stmt ? sem_stmt->Block() : nullptr;
+    return sem_stmt ? sem_stmt->Block()->Declaration() : nullptr;
   }
 
   /// Returns the semantic variable for the given identifier expression.

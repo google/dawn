@@ -145,13 +145,6 @@ Resolver::Resolver(ProgramBuilder* builder)
 
 Resolver::~Resolver() = default;
 
-Resolver::BlockInfo::BlockInfo(const ast::BlockStatement* b,
-                               Resolver::BlockInfo::Type ty,
-                               Resolver::BlockInfo* p)
-    : block(b), type(ty), parent(p) {}
-
-Resolver::BlockInfo::~BlockInfo() = default;
-
 void Resolver::set_referenced_from_function_if_needed(VariableInfo* var,
                                                       bool local) {
   if (current_function_ == nullptr) {
@@ -1230,7 +1223,18 @@ bool Resolver::Function(ast::Function* func) {
 
   if (func->body()) {
     Mark(func->body());
-    if (!BlockStatement(func->body())) {
+    if (current_statement_) {
+      TINT_ICE(diagnostics_)
+          << "Resolver::Function() called with a current statement";
+      return false;
+    }
+    sem::BlockStatement* sem_block = builder_->create<sem::BlockStatement>(
+        func->body(), nullptr, sem::BlockStatement::Type::kGeneric);
+    builder_->Sem().Add(func->body(), sem_block);
+    ScopedAssignment<sem::Statement*> sa_function_body(current_statement_,
+                                                       sem_block);
+    if (!BlockScope(func->body(),
+                    [&] { return Statements(func->body()->list()); })) {
       return false;
     }
   }
@@ -1256,11 +1260,6 @@ bool Resolver::Function(ast::Function* func) {
   return true;
 }
 
-bool Resolver::BlockStatement(const ast::BlockStatement* stmt) {
-  return BlockScope(stmt, BlockInfo::Type::kGeneric,
-                    [&] { return Statements(stmt->list()); });
-}
-
 bool Resolver::Statements(const ast::StatementList& stmts) {
   for (auto* stmt : stmts) {
     Mark(stmt);
@@ -1272,21 +1271,36 @@ bool Resolver::Statements(const ast::StatementList& stmts) {
 }
 
 bool Resolver::Statement(ast::Statement* stmt) {
-  auto* sem_statement =
-      builder_->create<sem::Statement>(stmt, current_block_->block);
+  sem::Statement* sem_statement;
+  if (stmt->As<ast::BlockStatement>()) {
+    sem_statement = builder_->create<sem::BlockStatement>(
+        stmt->As<ast::BlockStatement>(), current_statement_,
+        sem::BlockStatement::Type::kGeneric);
+  } else {
+    sem_statement = builder_->create<sem::Statement>(stmt, current_statement_);
+  }
   builder_->Sem().Add(stmt, sem_statement);
 
   ScopedAssignment<sem::Statement*> sa(current_statement_, sem_statement);
+
+  if (stmt->Is<ast::ElseStatement>()) {
+    TINT_ICE(diagnostics_)
+        << "Resolver::Statement() encountered an Else statement. Else "
+           "statements are embedded in If statements, so should never be "
+           "encountered as top-level statements";
+    return false;
+  }
 
   if (auto* a = stmt->As<ast::AssignmentStatement>()) {
     return Assignment(a);
   }
   if (auto* b = stmt->As<ast::BlockStatement>()) {
-    return BlockStatement(b);
+    return BlockScope(b, [&] { return Statements(b->list()); });
   }
   if (stmt->Is<ast::BreakStatement>()) {
-    if (!current_block_->FindFirstParent(BlockInfo::Type::kLoop) &&
-        !current_block_->FindFirstParent(BlockInfo::Type::kSwitchCase)) {
+    if (!current_block_->FindFirstParent(sem::BlockStatement::Type::kLoop) &&
+        !current_block_->FindFirstParent(
+            sem::BlockStatement::Type::kSwitchCase)) {
       diagnostics_.add_error("break statement must be in a loop or switch case",
                              stmt->source());
       return false;
@@ -1303,9 +1317,10 @@ bool Resolver::Statement(ast::Statement* stmt) {
   if (stmt->Is<ast::ContinueStatement>()) {
     // Set if we've hit the first continue statement in our parent loop
     if (auto* loop_block =
-            current_block_->FindFirstParent(BlockInfo::Type::kLoop)) {
-      if (loop_block->first_continue == size_t(~0)) {
-        loop_block->first_continue = loop_block->decls.size();
+            current_block_->FindFirstParent(sem::BlockStatement::Type::kLoop)) {
+      if (loop_block->FirstContinue() == size_t(~0)) {
+        const_cast<sem::BlockStatement*>(loop_block)
+            ->SetFirstContinue(loop_block->Decls().size());
       }
     } else {
       diagnostics_.add_error("continue statement must be in a loop",
@@ -1325,28 +1340,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
     return IfStatement(i);
   }
   if (auto* l = stmt->As<ast::LoopStatement>()) {
-    // We don't call DetermineBlockStatement on the body and continuing block as
-    // these would make their BlockInfo siblings as in the AST, but we want the
-    // body BlockInfo to parent the continuing BlockInfo for semantics and
-    // validation. Also, we need to set their types differently.
-    Mark(l->body());
-    return BlockScope(l->body(), BlockInfo::Type::kLoop, [&] {
-      if (!Statements(l->body()->list())) {
-        return false;
-      }
-
-      if (l->continuing()) {  // has_continuing() also checks for empty()
-        Mark(l->continuing());
-      }
-      if (l->has_continuing()) {
-        if (!BlockScope(l->continuing(), BlockInfo::Type::kLoopContinuing,
-                        [&] { return Statements(l->continuing()->list()); })) {
-          return false;
-        }
-      }
-
-      return true;
-    });
+    return LoopStatement(l);
   }
   if (auto* r = stmt->As<ast::ReturnStatement>()) {
     return Return(r);
@@ -1369,7 +1363,11 @@ bool Resolver::CaseStatement(ast::CaseStatement* stmt) {
   for (auto* sel : stmt->selectors()) {
     Mark(sel);
   }
-  return BlockScope(stmt->body(), BlockInfo::Type::kSwitchCase,
+  sem::BlockStatement* sem_block = builder_->create<sem::BlockStatement>(
+      stmt->body(), current_statement_, sem::BlockStatement::Type::kSwitchCase);
+  builder_->Sem().Add(stmt->body(), sem_block);
+  ScopedAssignment<sem::Statement*> sa(current_statement_, sem_block);
+  return BlockScope(stmt->body(),
                     [&] { return Statements(stmt->body()->list()); });
 }
 
@@ -1388,17 +1386,21 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
   }
 
   Mark(stmt->body());
-  if (!BlockStatement(stmt->body())) {
-    return false;
+  {
+    sem::BlockStatement* sem_block = builder_->create<sem::BlockStatement>(
+        stmt->body(), current_statement_, sem::BlockStatement::Type::kGeneric);
+    builder_->Sem().Add(stmt->body(), sem_block);
+    ScopedAssignment<sem::Statement*> sa(current_statement_, sem_block);
+    if (!BlockScope(stmt->body(),
+                    [&] { return Statements(stmt->body()->list()); })) {
+      return false;
+    }
   }
 
   for (auto* else_stmt : stmt->else_statements()) {
     Mark(else_stmt);
-    // Else statements are a bit unusual - they're owned by the if-statement,
-    // not a BlockStatement.
-    constexpr ast::BlockStatement* no_block_statement = nullptr;
     auto* sem_else_stmt =
-        builder_->create<sem::Statement>(else_stmt, no_block_statement);
+        builder_->create<sem::Statement>(else_stmt, current_statement_);
     builder_->Sem().Add(else_stmt, sem_else_stmt);
     ScopedAssignment<sem::Statement*> sa(current_statement_, sem_else_stmt);
     if (auto* cond = else_stmt->condition()) {
@@ -1417,11 +1419,54 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
       }
     }
     Mark(else_stmt->body());
-    if (!BlockStatement(else_stmt->body())) {
-      return false;
+    {
+      sem::BlockStatement* sem_block = builder_->create<sem::BlockStatement>(
+          else_stmt->body(), current_statement_,
+          sem::BlockStatement::Type::kGeneric);
+      builder_->Sem().Add(else_stmt->body(), sem_block);
+      ScopedAssignment<sem::Statement*> sa_else_body(current_statement_,
+                                                     sem_block);
+      if (!BlockScope(else_stmt->body(),
+                      [&] { return Statements(else_stmt->body()->list()); })) {
+        return false;
+      }
     }
   }
   return true;
+}
+
+bool Resolver::LoopStatement(ast::LoopStatement* stmt) {
+  // We don't call DetermineBlockStatement on the body and continuing block as
+  // these would make their BlockInfo siblings as in the AST, but we want the
+  // body BlockInfo to parent the continuing BlockInfo for semantics and
+  // validation. Also, we need to set their types differently.
+  Mark(stmt->body());
+
+  auto* sem_block_body = builder_->create<sem::BlockStatement>(
+      stmt->body(), current_statement_, sem::BlockStatement::Type::kLoop);
+  builder_->Sem().Add(stmt->body(), sem_block_body);
+  ScopedAssignment<sem::Statement*> body_sa(current_statement_, sem_block_body);
+  return BlockScope(stmt->body(), [&] {
+    if (!Statements(stmt->body()->list())) {
+      return false;
+    }
+    if (stmt->continuing()) {  // has_continuing() also checks for empty()
+      Mark(stmt->continuing());
+    }
+    if (stmt->has_continuing()) {
+      auto* sem_block_continuing = builder_->create<sem::BlockStatement>(
+          stmt->continuing(), current_statement_,
+          sem::BlockStatement::Type::kLoopContinuing);
+      builder_->Sem().Add(stmt->continuing(), sem_block_continuing);
+      ScopedAssignment<sem::Statement*> continuing_sa(current_statement_,
+                                                      sem_block_continuing);
+      if (!BlockScope(stmt->continuing(),
+                      [&] { return Statements(stmt->continuing()->list()); })) {
+        return false;
+      }
+    }
+    return true;
+  });
 }
 
 bool Resolver::Expressions(const ast::ExpressionList& list) {
@@ -1778,11 +1823,11 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
       // refer to a variable that is bypassed by a continue statement in the
       // loop's body block.
       if (auto* continuing_block = current_block_->FindFirstParent(
-              BlockInfo::Type::kLoopContinuing)) {
+              sem::BlockStatement::Type::kLoopContinuing)) {
         auto* loop_block =
-            continuing_block->FindFirstParent(BlockInfo::Type::kLoop);
-        if (loop_block->first_continue != size_t(~0)) {
-          auto& decls = loop_block->decls;
+            continuing_block->FindFirstParent(sem::BlockStatement::Type::kLoop);
+        if (loop_block->FirstContinue() != size_t(~0)) {
+          auto& decls = loop_block->Decls();
           // If our identifier is in loop_block->decls, make sure its index is
           // less than first_continue
           auto iter = std::find_if(
@@ -1791,7 +1836,7 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
           if (iter != decls.end()) {
             auto var_decl_index =
                 static_cast<size_t>(std::distance(decls.begin(), iter));
-            if (var_decl_index >= loop_block->first_continue) {
+            if (var_decl_index >= loop_block->FirstContinue()) {
               diagnostics_.add_error(
                   "continue statement bypasses declaration of '" +
                       builder_->Symbols().NameFor(symbol) +
@@ -2227,7 +2272,7 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   }
 
   variable_stack_.set(var->symbol(), info);
-  current_block_->decls.push_back(var);
+  current_block_->AddDecl(var);
 
   if (!ValidateVariable(info)) {
     return false;
@@ -2868,6 +2913,11 @@ bool Resolver::Switch(ast::SwitchStatement* s) {
   }
   for (auto* case_stmt : s->body()) {
     Mark(case_stmt);
+
+    sem::Statement* sem_statement =
+        builder_->create<sem::Statement>(case_stmt, current_statement_);
+    builder_->Sem().Add(case_stmt, sem_statement);
+    ScopedAssignment<sem::Statement*> sa(current_statement_, sem_statement);
     if (!CaseStatement(case_stmt)) {
       return false;
     }
@@ -2992,11 +3042,15 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
 }
 
 template <typename F>
-bool Resolver::BlockScope(const ast::BlockStatement* block,
-                          BlockInfo::Type type,
-                          F&& callback) {
-  BlockInfo block_info(block, type, current_block_);
-  ScopedAssignment<BlockInfo*> sa(current_block_, &block_info);
+bool Resolver::BlockScope(const ast::BlockStatement* block, F&& callback) {
+  auto* sem_block = builder_->Sem().Get<sem::BlockStatement>(block);
+  if (!sem_block) {
+    TINT_ICE(diagnostics_) << "Resolver::BlockScope() called on a block for "
+                              "which semantic information is not available";
+    return false;
+  }
+  ScopedAssignment<sem::BlockStatement*> sa(
+      current_block_, const_cast<sem::BlockStatement*>(sem_block));
   variable_stack_.push_scope();
   bool result = callback();
   variable_stack_.pop_scope();

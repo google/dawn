@@ -235,6 +235,8 @@ set(TINT_LIB_SRCS
   sem/array.cc
   sem/array.h
   sem/binding_point.h
+  sem/block_statement.cc
+  sem/block_statement.h
   sem/call_target.cc
   sem/call_target.h
   sem/call.cc

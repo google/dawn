@@ -15,7 +15,10 @@
 #include <algorithm>
 
 #include "src/ast/block_statement.h"
+#include "src/ast/loop_statement.h"
+#include "src/ast/statement.h"
 #include "src/debug.h"
+#include "src/sem/block_statement.h"
 #include "src/sem/statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Statement);
@@ -23,16 +26,43 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Statement);
 namespace tint {
 namespace sem {
 
-Statement::Statement(const ast::Statement* declaration,
-                     const ast::BlockStatement* block)
-    : declaration_(declaration), block_(block) {
+Statement::Statement(const ast::Statement* declaration, const Statement* parent)
+    : declaration_(declaration), parent_(parent) {
 #ifndef NDEBUG
-  if (block) {
-    auto& stmts = block->statements();
-    TINT_ASSERT(std::find(stmts.begin(), stmts.end(), declaration) !=
-                stmts.end());
+  if (parent_) {
+    auto* block = Block();
+    if (parent_ == block) {
+      // The parent of this statement is a block. We thus expect the statement
+      // to be an element of the block. There is one exception: a loop's
+      // continuing block has the loop's body as its parent, but the continuing
+      // block is not a statement in the body, so we rule out that case.
+      auto& stmts = block->Declaration()->statements();
+      if (std::find(stmts.begin(), stmts.end(), declaration) == stmts.end()) {
+        bool statement_is_continuing_for_loop = false;
+        if (parent_->parent_ != nullptr) {
+          if (auto* loop =
+                  parent_->parent_->Declaration()->As<ast::LoopStatement>()) {
+            if (loop->has_continuing() && Declaration() == loop->continuing()) {
+              statement_is_continuing_for_loop = true;
+            }
+          }
+        }
+        TINT_ASSERT(statement_is_continuing_for_loop);
+      }
+    }
   }
 #endif  //  NDEBUG
+}
+
+const BlockStatement* Statement::Block() const {
+  auto* stmt = parent_;
+  while (stmt != nullptr) {
+    if (auto* block_stmt = stmt->As<BlockStatement>()) {
+      return block_stmt;
+    }
+    stmt = stmt->parent_;
+  }
+  return nullptr;
 }
 
 }  // namespace sem

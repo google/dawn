@@ -21,6 +21,7 @@
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/program_builder.h"
+#include "src/sem/block_statement.h"
 #include "src/sem/function.h"
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
@@ -188,7 +189,7 @@ void Spirv::HandleEntryPointIOTypes(CloneContext& ctx) const {
       for (auto* ret : func->ReturnStatements()) {
         auto* ret_sem = ctx.src->Sem().Get(ret);
         auto* call = ctx.dst->Call(return_func_symbol, ctx.Clone(ret->value()));
-        ctx.InsertBefore(ret_sem->Block()->statements(), ret,
+        ctx.InsertBefore(ret_sem->Block()->Declaration()->statements(), ret,
                          ctx.dst->create<ast::CallStatement>(call));
         ctx.Replace(ret, ctx.dst->Return());
       }

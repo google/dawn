@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "src/program_builder.h"
+#include "src/sem/block_statement.h"
 #include "src/sem/function.h"
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
@@ -257,7 +258,8 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
             auto* ty = CreateASTTypeFor(&ctx, ret_type);
             auto* temp_var =
                 ctx.dst->Decl(ctx.dst->Const(temp, ty, new_ret_value()));
-            ctx.InsertBefore(ret_sem->Block()->statements(), ret, temp_var);
+            ctx.InsertBefore(ret_sem->Block()->Declaration()->statements(), ret,
+                             temp_var);
             new_ret_value = [&ctx, temp] { return ctx.dst->Expr(temp); };
           }
 

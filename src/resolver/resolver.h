@@ -25,6 +25,7 @@
 #include "src/program_builder.h"
 #include "src/scope_stack.h"
 #include "src/sem/binding_point.h"
+#include "src/sem/block_statement.h"
 #include "src/sem/struct.h"
 #include "src/utils/unique_vector.h"
 
@@ -40,6 +41,7 @@ class CaseStatement;
 class ConstructorExpression;
 class Function;
 class IdentifierExpression;
+class LoopStatement;
 class MemberAccessorExpression;
 class ReturnStatement;
 class SwitchStatement;
@@ -137,40 +139,6 @@ class Resolver {
     sem::Statement* statement;
   };
 
-  /// Structure holding semantic information about a block (i.e. scope), such as
-  /// parent block and variables declared in the block.
-  /// Used to validate variable scoping rules.
-  struct BlockInfo {
-    enum class Type { kGeneric, kLoop, kLoopContinuing, kSwitchCase };
-
-    BlockInfo(const ast::BlockStatement* block, Type type, BlockInfo* parent);
-    ~BlockInfo();
-
-    template <typename Pred>
-    BlockInfo* FindFirstParent(Pred&& pred) {
-      BlockInfo* curr = this;
-      while (curr && !pred(curr)) {
-        curr = curr->parent;
-      }
-      return curr;
-    }
-
-    BlockInfo* FindFirstParent(BlockInfo::Type ty) {
-      return FindFirstParent(
-          [ty](auto* block_info) { return block_info->type == ty; });
-    }
-
-    ast::BlockStatement const* const block;
-    Type const type;
-    BlockInfo* const parent;
-    std::vector<const ast::Variable*> decls;
-
-    // first_continue is set to the index of the first variable in decls
-    // declared after the first continue statement in a loop block, if any.
-    constexpr static size_t kNoContinue = size_t(~0);
-    size_t first_continue = kNoContinue;
-  };
-
   /// Resolves the program, without creating final the semantic nodes.
   /// @returns true on success, false on error
   bool ResolveInternal();
@@ -200,7 +168,6 @@ class Resolver {
   bool Assignment(ast::AssignmentStatement* a);
   bool Binary(ast::BinaryExpression*);
   bool Bitcast(ast::BitcastExpression*);
-  bool BlockStatement(const ast::BlockStatement*);
   bool Call(ast::CallExpression*);
   bool CaseStatement(ast::CaseStatement*);
   bool Constructor(ast::ConstructorExpression*);
@@ -211,6 +178,7 @@ class Resolver {
   bool Identifier(ast::IdentifierExpression*);
   bool IfStatement(ast::IfStatement*);
   bool IntrinsicCall(ast::CallExpression*, sem::IntrinsicType);
+  bool LoopStatement(ast::LoopStatement*);
   bool MemberAccessor(ast::MemberAccessorExpression*);
   bool Parameter(ast::Variable* param);
   bool Return(ast::ReturnStatement* ret);
@@ -317,13 +285,11 @@ class Resolver {
                typ::Type type,
                const std::string& type_name);
 
-  /// Constructs a new BlockInfo with the given type and with #current_block_ as
-  /// its parent, assigns this to #current_block_, and then calls `callback`.
-  /// The original #current_block_ is restored on exit.
+  /// Constructs a new semantic BlockStatement with the given type and with
+  /// #current_block_ as its parent, assigns this to #current_block_, and then
+  /// calls `callback`. The original #current_block_ is restored on exit.
   template <typename F>
-  bool BlockScope(const ast::BlockStatement* block,
-                  BlockInfo::Type type,
-                  F&& callback);
+  bool BlockScope(const ast::BlockStatement* block, F&& callback);
 
   /// Returns a human-readable string representation of the vector type name
   /// with the given parameters.
@@ -340,7 +306,7 @@ class Resolver {
   ProgramBuilder* const builder_;
   diag::List& diagnostics_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
-  BlockInfo* current_block_ = nullptr;
+  sem::BlockStatement* current_block_ = nullptr;
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
   std::unordered_map<const ast::Function*, FunctionInfo*> function_to_info_;

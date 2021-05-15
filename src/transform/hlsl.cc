@@ -19,6 +19,7 @@
 #include "src/ast/stage_decoration.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/program_builder.h"
+#include "src/sem/block_statement.h"
 #include "src/sem/expression.h"
 #include "src/sem/statement.h"
 #include "src/sem/variable.h"
@@ -113,8 +114,8 @@ void Hlsl::PromoteInitializersToConstVar(CloneContext& ctx) const {
         auto* dst_ident = ctx.dst->Expr(dst_symbol);
 
         // Insert the constant before the usage
-        ctx.InsertBefore(src_sem_stmt->Block()->statements(), src_stmt,
-                         dst_var_decl);
+        ctx.InsertBefore(src_sem_stmt->Block()->Declaration()->statements(),
+                         src_stmt, dst_var_decl);
         // Replace the inlined initializer with a reference to the constant
         ctx.Replace(src_init, dst_ident);
       }
