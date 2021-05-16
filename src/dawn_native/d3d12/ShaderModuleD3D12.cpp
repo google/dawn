@@ -314,11 +314,14 @@ namespace dawn_native { namespace d3d12 {
         options_glsl.force_zero_initialized_variables = true;
 
         spirv_cross::CompilerHLSL::Options options_hlsl;
-        if (GetDevice()->IsExtensionEnabled(Extension::ShaderFloat16)) {
+        if (GetDevice()->IsToggleEnabled(Toggle::UseDXC)) {
             options_hlsl.shader_model = ToBackend(GetDevice())->GetDeviceInfo().shaderModel;
-            options_hlsl.enable_16bit_types = true;
         } else {
             options_hlsl.shader_model = 51;
+        }
+
+        if (GetDevice()->IsExtensionEnabled(Extension::ShaderFloat16)) {
+            options_hlsl.enable_16bit_types = true;
         }
         // PointCoord and PointSize are not supported in HLSL
         // TODO (hao.x.li@intel.com): The point_coord_compat and point_size_compat are
