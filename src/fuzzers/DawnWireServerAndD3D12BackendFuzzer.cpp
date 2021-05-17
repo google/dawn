@@ -34,7 +34,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
 
                 if (properties.backendType == wgpu::BackendType::D3D12 &&
                     properties.adapterType == wgpu::AdapterType::CPU) {
-                    device = wgpu::Device::Acquire(adapter.CreateDevice());
+                    // Force usage of Tint to provide coverage of that code path until it becomes
+                    // the default.
+                    dawn_native::DeviceDescriptor desc;
+                    desc.forceEnabledToggles.push_back("use_tint_generator");
+
+                    device = wgpu::Device::Acquire(adapter.CreateDevice(&desc));
                     break;
                 }
             }
