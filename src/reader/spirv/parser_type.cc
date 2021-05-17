@@ -14,6 +14,7 @@
 
 #include "src/reader/spirv/parser_type.h"
 
+#include <string>
 #include <unordered_map>
 #include <utility>
 
@@ -28,6 +29,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::U32);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::F32);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::I32);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Pointer);
+TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Reference);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Vector);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Matrix);
 TINT_INSTANTIATE_TYPEINFO(tint::reader::spirv::Array);
@@ -49,6 +51,12 @@ namespace spirv {
 namespace {
 struct PointerHasher {
   size_t operator()(const Pointer& t) const {
+    return utils::Hash(t.type, t.storage_class);
+  }
+};
+
+struct ReferenceHasher {
+  size_t operator()(const Reference& t) const {
     return utils::Hash(t.type, t.storage_class);
   }
 };
@@ -97,6 +105,10 @@ struct StorageTextureHasher {
 }  // namespace
 
 static bool operator==(const Pointer& a, const Pointer& b) {
+  return a.type == b.type && a.storage_class == b.storage_class;
+}
+
+static bool operator==(const Reference& a, const Reference& b) {
   return a.type == b.type && a.storage_class == b.storage_class;
 }
 
@@ -155,6 +167,14 @@ Pointer::Pointer(const Pointer&) = default;
 
 ast::Type* Pointer::Build(ProgramBuilder& b) const {
   return b.ty.pointer(type->Build(b), storage_class);
+}
+
+Reference::Reference(const Type* t, ast::StorageClass s)
+    : type(t), storage_class(s) {}
+Reference::Reference(const Reference&) = default;
+
+ast::Type* Reference::Build(ProgramBuilder& b) const {
+  return type->Build(b);
 }
 
 Vector::Vector(const Type* t, uint32_t s) : type(t), size(s) {}
@@ -265,6 +285,9 @@ struct TypeManager::State {
   /// Map of Pointer to the returned Pointer type instance
   std::unordered_map<spirv::Pointer, const spirv::Pointer*, PointerHasher>
       pointers_;
+  /// Map of Reference to the returned Reference type instance
+  std::unordered_map<spirv::Reference, const spirv::Reference*, ReferenceHasher>
+      references_;
   /// Map of Vector to the returned Vector type instance
   std::unordered_map<spirv::Vector, const spirv::Vector*, VectorHasher>
       vectors_;
@@ -439,6 +462,13 @@ const spirv::Pointer* TypeManager::Pointer(const Type* el,
   });
 }
 
+const spirv::Reference* TypeManager::Reference(const Type* el,
+                                               ast::StorageClass sc) {
+  return utils::GetOrCreate(state->references_, spirv::Reference(el, sc), [&] {
+    return state->allocator_.Create<spirv::Reference>(el, sc);
+  });
+}
+
 const spirv::Vector* TypeManager::Vector(const Type* el, uint32_t size) {
   return utils::GetOrCreate(state->vectors_, spirv::Vector(el, size), [&] {
     return state->allocator_.Create<spirv::Vector>(el, size);
@@ -521,6 +551,105 @@ const spirv::StorageTexture* TypeManager::StorageTexture(
         return state->allocator_.Create<spirv::StorageTexture>(dims, fmt);
       });
 }
+
+// Debug String() methods for Type classes. Only enabled in debug builds.
+#ifndef NDEBUG
+std::string Void::String() const {
+  return "void";
+}
+
+std::string Bool::String() const {
+  return "bool";
+}
+
+std::string U32::String() const {
+  return "u32";
+}
+
+std::string F32::String() const {
+  return "f32";
+}
+
+std::string I32::String() const {
+  return "i32";
+}
+
+std::string Pointer::String() const {
+  std::stringstream ss;
+  ss << "ptr<" << std::string(ast::str(storage_class)) << ", "
+     << type->String() + ">";
+  return ss.str();
+}
+
+std::string Reference::String() const {
+  std::stringstream ss;
+  ss << "ref<" + std::string(ast::str(storage_class)) << ", " << type->String()
+     << ">";
+  return ss.str();
+}
+
+std::string Vector::String() const {
+  std::stringstream ss;
+  ss << "vec" << size << "<" << type->String() << ">";
+  return ss.str();
+}
+
+std::string Matrix::String() const {
+  std::stringstream ss;
+  ss << "mat" << columns << "x" << rows << "<" << type->String() << ">";
+  return ss.str();
+}
+
+std::string Array::String() const {
+  std::stringstream ss;
+  ss << "array<" << type->String() << ", " << size << ", " << stride << ">";
+  return ss.str();
+}
+
+std::string AccessControl::String() const {
+  std::stringstream ss;
+  ss << "[[access(" << access << ")]] " << type->String();
+  return ss.str();
+}
+
+std::string Sampler::String() const {
+  switch (kind) {
+    case ast::SamplerKind::kSampler:
+      return "sampler";
+    case ast::SamplerKind::kComparisonSampler:
+      return "sampler_comparison";
+  }
+  return "<unknown sampler>";
+}
+
+std::string DepthTexture::String() const {
+  std::stringstream ss;
+  ss << "depth_" << dims;
+  return ss.str();
+}
+
+std::string MultisampledTexture::String() const {
+  std::stringstream ss;
+  ss << "texture_multisampled_" << dims << "<" << type << ">";
+  return ss.str();
+}
+
+std::string SampledTexture::String() const {
+  std::stringstream ss;
+  ss << "texture_" << dims << "<" << type << ">";
+  return ss.str();
+}
+
+std::string StorageTexture::String() const {
+  std::stringstream ss;
+  ss << "texture_storage_" << dims << "<" << format << ">";
+  return ss.str();
+}
+
+std::string Named::String() const {
+  return name.to_str();
+}
+#endif  // NDEBUG
 
 }  // namespace spirv
 }  // namespace reader
