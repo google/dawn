@@ -19,6 +19,9 @@
 
 #include <dawn/webgpu_cpp.h>
 
+// TODO(dawn:695): Remove the dawncpp_headers CMake dependency when VertexFormatUtils is deleted,
+// assuming no other dependencies have been added in other project files.
+
 namespace dawn {
 
     static constexpr std::array<wgpu::VertexFormat, 30> kAllVertexFormats = {

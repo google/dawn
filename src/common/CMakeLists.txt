@@ -72,7 +72,7 @@ if (WIN32)
     )
 endif()
 
-target_link_libraries(dawn_common PRIVATE dawn_internal_config)
+target_link_libraries(dawn_common PUBLIC dawncpp_headers PRIVATE dawn_internal_config)
 
 # TODO Android Log support
 # TODO Vulkan headers support
