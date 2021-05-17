@@ -1673,7 +1673,7 @@ TypedExpression ParserImpl::RectifyOperandSignedness(
     // No conversion is required, assuming our tables are complete.
     return std::move(expr);
   }
-  if (!expr.expr) {
+  if (!expr) {
     Fail() << "internal error: RectifyOperandSignedness given a null expr\n";
     return {};
   }

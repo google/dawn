@@ -2662,7 +2662,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
   const auto selector_id = branch->GetSingleWordInOperand(0);
   // Generate the code for the selector.
   auto selector = MakeExpression(selector_id);
-  if (!selector.expr) {
+  if (!selector) {
     return false;
   }
   // First, push the statement block for the entire switch.
@@ -2800,7 +2800,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       return true;
     case SpvOpReturnValue: {
       auto value = MakeExpression(terminator.GetSingleWordInOperand(0));
-      if (!value.expr) {
+      if (!value) {
         return false;
       }
       AddStatement(create<ast::ReturnStatement>(Source{}, value.expr));
@@ -3114,7 +3114,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     for (auto assignment : block_info.phi_assignments) {
       const auto var_name = GetDefInfo(assignment.phi_id)->phi_var;
       auto expr = MakeExpression(assignment.value);
-      if (!expr.expr) {
+      if (!expr) {
         return false;
       }
       AddStatement(create<ast::AssignmentStatement>(
@@ -3132,7 +3132,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
 bool FunctionEmitter::EmitConstDefinition(
     const spvtools::opt::Instruction& inst,
     TypedExpression ast_expr) {
-  if (!ast_expr.expr) {
+  if (!ast_expr) {
     return false;
   }
   auto* ast_const = parser_impl_.MakeVariable(
@@ -3242,7 +3242,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       }
 
       TypedExpression rhs = MakeExpression(value_id);
-      if (!rhs.expr) {
+      if (!rhs) {
         return false;
       }
 
@@ -3279,7 +3279,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
 
       // Handle an ordinary store as an assignment.
       auto lhs = MakeExpression(ptr_id);
-      if (!lhs.expr) {
+      if (!lhs) {
         return false;
       }
 
@@ -3339,7 +3339,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
           break;
       }
       auto expr = MakeExpression(ptr_id);
-      if (!expr.expr) {
+      if (!expr) {
         return false;
       }
 
@@ -3383,7 +3383,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         return true;
       }
       auto expr = MakeExpression(value_id);
-      if (!expr.type || !expr.expr) {
+      if (!expr) {
         return false;
       }
       expr.type = RemapStorageClass(expr.type, result_id);
@@ -3456,7 +3456,7 @@ TypedExpression FunctionEmitter::MakeOperand(
     const spvtools::opt::Instruction& inst,
     uint32_t operand_index) {
   auto expr = this->MakeExpression(inst.GetSingleWordInOperand(operand_index));
-  if (!expr.expr) {
+  if (!expr) {
     return {};
   }
   return parser_impl_.RectifyOperandSignedness(inst, std::move(expr));
@@ -3790,7 +3790,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
   // walking down into composites.  The Tint AST represents this as
   // ever-deeper nested indexing expressions. Start off with an expression
   // for the base, and then bury that inside nested indexing expressions.
-  if (!current_expr.expr) {
+  if (!current_expr) {
     current_expr = MakeOperand(inst, 0);
   }
   const auto constants = constant_mgr_->GetOperandConstants(&inst);
@@ -4091,7 +4091,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
     const auto index = inst.GetSingleWordInOperand(i);
     if (index < vec0_len) {
       auto expr = MakeExpression(vec0_id);
-      if (!expr.expr) {
+      if (!expr) {
         return {};
       }
       values.emplace_back(create<ast::MemberAccessorExpression>(
@@ -4100,7 +4100,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(
       const auto sub_index = index - vec0_len;
       TINT_ASSERT(sub_index < kMaxVectorLen);
       auto expr = MakeExpression(vec1_id);
-      if (!expr.expr) {
+      if (!expr) {
         return {};
       }
       values.emplace_back(create<ast::MemberAccessorExpression>(
@@ -4424,7 +4424,7 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
   const auto opcode = inst.opcode();
   auto* requested_type = parser_impl_.ConvertType(inst.type_id());
   auto arg_expr = MakeOperand(inst, 0);
-  if (!arg_expr.expr || !arg_expr.type) {
+  if (!arg_expr) {
     return {};
   }
 
@@ -5039,7 +5039,7 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
 
   // The coordinates parameter is always in position 1.
   TypedExpression raw_coords(MakeOperand(inst, 1));
-  if (!raw_coords.type) {
+  if (!raw_coords) {
     return {};
   }
   const Texture* texture_type = GetImageType(*image);
@@ -5192,7 +5192,7 @@ ast::Expression* FunctionEmitter::ConvertTexelForStorage(
 }
 
 TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
-  if (!value.type || value.type->Is<I32>()) {
+  if (!value || value.type->Is<I32>()) {
     return value;
   }
   return {ty_.I32(),
@@ -5201,7 +5201,7 @@ TypedExpression FunctionEmitter::ToI32(TypedExpression value) {
 }
 
 TypedExpression FunctionEmitter::ToSignedIfUnsigned(TypedExpression value) {
-  if (!value.type || !value.type->IsUnsignedScalarOrVector()) {
+  if (!value || !value.type->IsUnsignedScalarOrVector()) {
     return value;
   }
   if (auto* vec_type = value.type->As<Vector>()) {
@@ -5237,7 +5237,7 @@ TypedExpression FunctionEmitter::MakeArrayLength(
   auto* member_ident = create<ast::IdentifierExpression>(
       Source{}, builder_.Symbols().Register(field_name));
   auto member_expr = MakeExpression(struct_ptr_id);
-  if (!member_expr.expr) {
+  if (!member_expr) {
     return {};
   }
   auto* member_access = create<ast::MemberAccessorExpression>(
@@ -5382,7 +5382,7 @@ bool FunctionEmitter::MakeCompositeInsert(
   // The left-hand side of the assignment *looks* like a decomposition.
   TypedExpression lhs =
       MakeCompositeValueDecomposition(inst, seed_expr, inst.type_id(), 2);
-  if (!lhs.expr) {
+  if (!lhs) {
     return false;
   }
 

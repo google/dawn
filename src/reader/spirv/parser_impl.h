@@ -67,14 +67,17 @@ struct TypedExpression {
   /// Copy constructor
   TypedExpression(const TypedExpression&);
 
-  /// Assignment operator
-  /// @returns this TypedExpression
-  TypedExpression& operator=(const TypedExpression&);
-
   /// Constructor
   /// @param type_in the type of the expression
   /// @param expr_in the expression
   TypedExpression(const Type* type_in, ast::Expression* expr_in);
+
+  /// Assignment operator
+  /// @returns this TypedExpression
+  TypedExpression& operator=(const TypedExpression&);
+
+  /// @returns true if both type and expr are not nullptr
+  operator bool() const { return type && expr; }
 
   /// The type
   Type const* type = nullptr;
