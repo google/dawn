@@ -2092,7 +2092,7 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, ast::Literal* lit) {
   return true;
 }
 
-bool GeneratorImpl::EmitZeroValue(std::ostream& out, sem::Type* type) {
+bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
   if (type->Is<sem::Bool>()) {
     out << "false";
   } else if (type->Is<sem::F32>()) {
@@ -2138,6 +2138,18 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, sem::Type* type) {
       }
       first = false;
       if (!EmitZeroValue(out, member->Type())) {
+        return false;
+      }
+    }
+    out << "}";
+  } else if (auto* arr = type->As<sem::Array>()) {
+    out << "{";
+    auto* elem = arr->ElemType();
+    for (size_t i = 0; i < arr->Count(); i++) {
+      if (i > 0) {
+        out << ", ";
+      }
+      if (!EmitZeroValue(out, elem)) {
         return false;
       }
     }
@@ -2626,6 +2638,9 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
                                  bool skip_constructor) {
   make_indent(out);
 
+  auto* sem = builder_.Sem().Get(var);
+  auto* type = sem->Type();
+
   // TODO(dsinclair): Handle variable decorations
   if (!var->decorations().empty()) {
     diagnostics_.add_error("Variable decorations are not handled yet");
@@ -2633,21 +2648,25 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   }
 
   std::ostringstream constructor_out;
-  if (!skip_constructor && var->constructor() != nullptr) {
+  if (!skip_constructor) {
     constructor_out << " = ";
 
-    std::ostringstream pre;
-    if (!EmitExpression(pre, constructor_out, var->constructor())) {
-      return false;
+    if (var->constructor()) {
+      std::ostringstream pre;
+      if (!EmitExpression(pre, constructor_out, var->constructor())) {
+        return false;
+      }
+      out << pre.str();
+    } else {
+      if (!EmitZeroValue(constructor_out, type)) {
+        return false;
+      }
     }
-    out << pre.str();
   }
 
   if (var->is_const()) {
     out << "const ";
   }
-  auto* sem = builder_.Sem().Get(var);
-  auto* type = sem->Type();
   if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(),
                 builder_.Symbols().NameFor(var->symbol()))) {
     return false;

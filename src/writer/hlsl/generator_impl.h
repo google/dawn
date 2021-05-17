@@ -315,7 +315,7 @@ class GeneratorImpl : public TextGenerator {
   /// @param out the output stream
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
-  bool EmitZeroValue(std::ostream& out, sem::Type* type);
+  bool EmitZeroValue(std::ostream& out, const sem::Type* type);
   /// Handles generating a variable
   /// @param out the output stream
   /// @param var the variable to generate
