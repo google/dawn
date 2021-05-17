@@ -33,13 +33,13 @@ namespace dawn_native { namespace d3d12 {
         }
     }  // namespace
 
-    Texture2DCopySplit ComputeTextureCopySplit(Origin3D origin,
-                                               Extent3D copySize,
-                                               const TexelBlockInfo& blockInfo,
-                                               uint64_t offset,
-                                               uint32_t bytesPerRow,
-                                               uint32_t rowsPerImage) {
-        Texture2DCopySplit copy;
+    TextureCopySubresource ComputeTextureCopySubresource(Origin3D origin,
+                                                         Extent3D copySize,
+                                                         const TexelBlockInfo& blockInfo,
+                                                         uint64_t offset,
+                                                         uint32_t bytesPerRow,
+                                                         uint32_t rowsPerImage) {
+        TextureCopySubresource copy;
 
         ASSERT(bytesPerRow % blockInfo.byteSize == 0);
 
@@ -215,7 +215,7 @@ namespace dawn_native { namespace d3d12 {
 
         const uint64_t bytesPerSlice = bytesPerRow * rowsPerImage;
 
-        // The function ComputeTextureCopySplit() decides how to split the copy based on:
+        // The function ComputeTextureCopySubresource() decides how to split the copy based on:
         // - the alignment of the buffer offset with D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT (512)
         // - the alignment of the buffer offset with D3D12_TEXTURE_DATA_PITCH_ALIGNMENT (256)
         // Each slice of a 2D array or 3D copy might need to be split, but because of the WebGPU
@@ -233,23 +233,23 @@ namespace dawn_native { namespace d3d12 {
             copyFirstLayerOrigin.z = 0;
         }
 
-        copies.copies2D[0] = ComputeTextureCopySplit(copyFirstLayerOrigin, copyOneLayerSize,
-                                                     blockInfo, offset, bytesPerRow, rowsPerImage);
+        copies.copySubresources[0] = ComputeTextureCopySubresource(
+            copyFirstLayerOrigin, copyOneLayerSize, blockInfo, offset, bytesPerRow, rowsPerImage);
 
-        // When the copy only refers one texture 2D array layer or a 3D texture, copies.copies2D[1]
-        // will never be used so we can safely early return here.
+        // When the copy only refers one texture 2D array layer or a 3D texture,
+        // copies.copySubresources[1] will never be used so we can safely early return here.
         if (copySize.depthOrArrayLayers == 1 || is3DTexture) {
             return copies;
         }
 
         if (bytesPerSlice % D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT == 0) {
-            copies.copies2D[1] = copies.copies2D[0];
-            copies.copies2D[1].offset += bytesPerSlice;
+            copies.copySubresources[1] = copies.copySubresources[0];
+            copies.copySubresources[1].offset += bytesPerSlice;
         } else {
             const uint64_t bufferOffsetNextLayer = offset + bytesPerSlice;
-            copies.copies2D[1] =
-                ComputeTextureCopySplit(copyFirstLayerOrigin, copyOneLayerSize, blockInfo,
-                                        bufferOffsetNextLayer, bytesPerRow, rowsPerImage);
+            copies.copySubresources[1] =
+                ComputeTextureCopySubresource(copyFirstLayerOrigin, copyOneLayerSize, blockInfo,
+                                              bufferOffsetNextLayer, bytesPerRow, rowsPerImage);
         }
 
         return copies;

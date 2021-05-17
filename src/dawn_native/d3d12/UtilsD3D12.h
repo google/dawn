@@ -45,7 +45,7 @@ namespace dawn_native { namespace d3d12 {
     bool IsTypeless(DXGI_FORMAT format);
 
     void RecordCopyBufferToTextureFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
-                                                       const Texture2DCopySplit& baseCopySplit,
+                                                       const TextureCopySubresource& baseCopySplit,
                                                        ID3D12Resource* bufferResource,
                                                        uint64_t baseOffset,
                                                        uint64_t bufferBytesPerRow,
@@ -65,7 +65,7 @@ namespace dawn_native { namespace d3d12 {
                                    Aspect aspect);
 
     void RecordCopyTextureToBufferFromTextureCopySplit(ID3D12GraphicsCommandList* commandList,
-                                                       const Texture2DCopySplit& baseCopySplit,
+                                                       const TextureCopySubresource& baseCopySplit,
                                                        Buffer* buffer,
                                                        uint64_t baseOffset,
                                                        uint64_t bufferBytesPerRow,
