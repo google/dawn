@@ -128,7 +128,7 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
   Global("str", s, ast::StorageClass::kPrivate);
 
   auto* expr = MemberAccessor("str", "mem");
-  WrapInFunction(expr);
+  WrapInFunction(Var("expr", ty.f32(), ast::StorageClass::kNone, expr));
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -141,7 +141,7 @@ Data str;
 
 [numthreads(1, 1, 1)]
 void test_function() {
-  float tint_symbol = str.mem;
+  float expr = str.mem;
   return;
 }
 

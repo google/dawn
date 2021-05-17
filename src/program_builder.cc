@@ -20,6 +20,7 @@
 #include "src/debug.h"
 #include "src/demangler.h"
 #include "src/sem/expression.h"
+#include "src/sem/variable.h"
 
 namespace tint {
 
@@ -87,6 +88,11 @@ void ProgramBuilder::AssertNotMoved() const {
 
 sem::Type* ProgramBuilder::TypeOf(const ast::Expression* expr) const {
   auto* sem = Sem().Get(expr);
+  return sem ? sem->Type() : nullptr;
+}
+
+sem::Type* ProgramBuilder::TypeOf(const ast::Variable* var) const {
+  auto* sem = Sem().Get(var);
   return sem ? sem->Type() : nullptr;
 }
 
@@ -162,8 +168,11 @@ ast::Statement* ProgramBuilder::WrapInStatement(ast::Literal* lit) {
 }
 
 ast::Statement* ProgramBuilder::WrapInStatement(ast::Expression* expr) {
+  if (auto* ce = expr->As<ast::CallExpression>()) {
+    return create<ast::CallStatement>(ce);
+  }
   // Create a temporary variable of inferred type from expr.
-  return Decl(Var(symbols_.New(), nullptr, ast::StorageClass::kFunction, expr));
+  return Decl(Const(symbols_.New(), nullptr, expr));
 }
 
 ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(ast::Variable* v) {

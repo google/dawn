@@ -55,6 +55,7 @@
 #include "src/ast/type_name.h"
 #include "src/ast/u32.h"
 #include "src/ast/uint_literal.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/vector.h"
 #include "src/ast/void.h"
@@ -920,10 +921,11 @@ class ProgramBuilder {
   /// @return nullptr
   ast::IdentifierExpression* Expr(std::nullptr_t) { return nullptr; }
 
-  /// @param name the identifier name
-  /// @return an ast::IdentifierExpression with the given name
-  ast::IdentifierExpression* Expr(const std::string& name) {
-    return create<ast::IdentifierExpression>(Symbols().Register(name));
+  /// @param source the source information
+  /// @param symbol the identifier symbol
+  /// @return an ast::IdentifierExpression with the given symbol
+  ast::IdentifierExpression* Expr(const Source& source, Symbol symbol) {
+    return create<ast::IdentifierExpression>(source, symbol);
   }
 
   /// @param symbol the identifier symbol
@@ -932,10 +934,31 @@ class ProgramBuilder {
     return create<ast::IdentifierExpression>(symbol);
   }
 
+  /// @param source the source information
+  /// @param variable the AST variable
+  /// @return an ast::IdentifierExpression with the variable's symbol
+  ast::IdentifierExpression* Expr(const Source& source,
+                                  ast::Variable* variable) {
+    return create<ast::IdentifierExpression>(source, variable->symbol());
+  }
+
   /// @param variable the AST variable
   /// @return an ast::IdentifierExpression with the variable's symbol
   ast::IdentifierExpression* Expr(ast::Variable* variable) {
     return create<ast::IdentifierExpression>(variable->symbol());
+  }
+
+  /// @param source the source information
+  /// @param name the identifier name
+  /// @return an ast::IdentifierExpression with the given name
+  ast::IdentifierExpression* Expr(const Source& source, const char* name) {
+    return create<ast::IdentifierExpression>(source, Symbols().Register(name));
+  }
+
+  /// @param name the identifier name
+  /// @return an ast::IdentifierExpression with the given name
+  ast::IdentifierExpression* Expr(const char* name) {
+    return create<ast::IdentifierExpression>(Symbols().Register(name));
   }
 
   /// @param source the source information
@@ -948,8 +971,15 @@ class ProgramBuilder {
 
   /// @param name the identifier name
   /// @return an ast::IdentifierExpression with the given name
-  ast::IdentifierExpression* Expr(const char* name) {
+  ast::IdentifierExpression* Expr(const std::string& name) {
     return create<ast::IdentifierExpression>(Symbols().Register(name));
+  }
+
+  /// @param source the source information
+  /// @param value the boolean value
+  /// @return a Scalar constructor for the given value
+  ast::ScalarConstructorExpression* Expr(const Source& source, bool value) {
+    return create<ast::ScalarConstructorExpression>(source, Literal(value));
   }
 
   /// @param value the boolean value
@@ -958,16 +988,37 @@ class ProgramBuilder {
     return create<ast::ScalarConstructorExpression>(Literal(value));
   }
 
+  /// @param source the source information
+  /// @param value the float value
+  /// @return a Scalar constructor for the given value
+  ast::ScalarConstructorExpression* Expr(const Source& source, f32 value) {
+    return create<ast::ScalarConstructorExpression>(source, Literal(value));
+  }
+
   /// @param value the float value
   /// @return a Scalar constructor for the given value
   ast::ScalarConstructorExpression* Expr(f32 value) {
     return create<ast::ScalarConstructorExpression>(Literal(value));
   }
 
+  /// @param source the source information
+  /// @param value the integer value
+  /// @return a Scalar constructor for the given value
+  ast::ScalarConstructorExpression* Expr(const Source& source, i32 value) {
+    return create<ast::ScalarConstructorExpression>(source, Literal(value));
+  }
+
   /// @param value the integer value
   /// @return a Scalar constructor for the given value
   ast::ScalarConstructorExpression* Expr(i32 value) {
     return create<ast::ScalarConstructorExpression>(Literal(value));
+  }
+
+  /// @param source the source information
+  /// @param value the unsigned int value
+  /// @return a Scalar constructor for the given value
+  ast::ScalarConstructorExpression* Expr(const Source& source, u32 value) {
+    return create<ast::ScalarConstructorExpression>(source, Literal(value));
   }
 
   /// @param value the unsigned int value
@@ -1352,6 +1403,40 @@ class ProgramBuilder {
                       std::move(decorations));
     AST().AddGlobalVariable(var);
     return var;
+  }
+
+  /// @param source the source information
+  /// @param expr the expression to take the address of
+  /// @return an ast::UnaryOpExpression that takes the address of `expr`
+  template <typename EXPR>
+  ast::UnaryOpExpression* AddressOf(const Source& source, EXPR&& expr) {
+    return create<ast::UnaryOpExpression>(source, ast::UnaryOp::kAddressOf,
+                                          Expr(std::forward<EXPR>(expr)));
+  }
+
+  /// @param expr the expression to take the address of
+  /// @return an ast::UnaryOpExpression that takes the address of `expr`
+  template <typename EXPR>
+  ast::UnaryOpExpression* AddressOf(EXPR&& expr) {
+    return create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf,
+                                          Expr(std::forward<EXPR>(expr)));
+  }
+
+  /// @param source the source information
+  /// @param expr the expression to perform an indirection on
+  /// @return an ast::UnaryOpExpression that dereferences the pointer `expr`
+  template <typename EXPR>
+  ast::UnaryOpExpression* Deref(const Source& source, EXPR&& expr) {
+    return create<ast::UnaryOpExpression>(source, ast::UnaryOp::kIndirection,
+                                          Expr(std::forward<EXPR>(expr)));
+  }
+
+  /// @param expr the expression to perform an indirection on
+  /// @return an ast::UnaryOpExpression that dereferences the pointer `expr`
+  template <typename EXPR>
+  ast::UnaryOpExpression* Deref(EXPR&& expr) {
+    return create<ast::UnaryOpExpression>(ast::UnaryOp::kIndirection,
+                                          Expr(std::forward<EXPR>(expr)));
   }
 
   /// @param func the function name
@@ -1844,6 +1929,14 @@ class ProgramBuilder {
   /// @return the resolved semantic type for the expression, or nullptr if the
   /// expression has no resolved type.
   sem::Type* TypeOf(const ast::Expression* expr) const;
+
+  /// Helper for returning the resolved semantic type of the variable `var`.
+  /// @note As the Resolver is run when the Program is built, this will only be
+  /// useful for the Resolver itself and tests that use their own Resolver.
+  /// @param var the AST variable
+  /// @return the resolved semantic type for the variable, or nullptr if the
+  /// variable has no resolved type.
+  sem::Type* TypeOf(const ast::Variable* var) const;
 
   /// Helper for returning the resolved semantic type of the AST type `type`.
   /// @note As the Resolver is run when the Program is built, this will only be
