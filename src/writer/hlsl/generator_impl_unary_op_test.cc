@@ -19,37 +19,57 @@ namespace writer {
 namespace hlsl {
 namespace {
 
-struct UnaryOpData {
-  const char* name;
-  ast::UnaryOp op;
-};
-inline std::ostream& operator<<(std::ostream& out, UnaryOpData data) {
-  out << data.op;
-  return out;
-}
-using HlslUnaryOpTest = TestParamHelper<UnaryOpData>;
-TEST_P(HlslUnaryOpTest, Emit) {
-  auto params = GetParam();
-  auto name = std::string(params.name);
+using HlslUnaryOpTest = TestHelper;
 
-  Global("expr", ty.i32(), ast::StorageClass::kPrivate);
-
-  auto* op = create<ast::UnaryOpExpression>(params.op, Expr("expr"));
+TEST_F(HlslUnaryOpTest, AddressOf) {
+  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  auto* op =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("expr"));
   WrapInFunction(op);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
-  EXPECT_EQ(result(), name.empty() ? "expr" : name + "(expr)");
+  EXPECT_EQ(result(), "expr");
 }
-INSTANTIATE_TEST_SUITE_P(
-    HlslGeneratorImplTest_UnaryOp,
-    HlslUnaryOpTest,
-    testing::Values(UnaryOpData{"", ast::UnaryOp::kAddressOf},
-                    UnaryOpData{"", ast::UnaryOp::kIndirection},
-                    UnaryOpData{"!", ast::UnaryOp::kNot},
-                    UnaryOpData{"-", ast::UnaryOp::kNegation}));
 
+TEST_F(HlslUnaryOpTest, Indirection) {
+  Global("G", ty.f32(), ast::StorageClass::kPrivate);
+  auto* p = Const(
+      "expr", nullptr,
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("G")));
+  auto* op =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kIndirection, Expr("expr"));
+  WrapInFunction(p, op);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
+  EXPECT_EQ(result(), "expr");
+}
+
+TEST_F(HlslUnaryOpTest, Not) {
+  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr("expr"));
+  WrapInFunction(op);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
+  EXPECT_EQ(result(), "!(expr)");
+}
+
+TEST_F(HlslUnaryOpTest, Negation) {
+  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  auto* op =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("expr"));
+  WrapInFunction(op);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitExpression(pre, out, op)) << gen.error();
+  EXPECT_EQ(result(), "-(expr)");
+}
 }  // namespace
 }  // namespace hlsl
 }  // namespace writer

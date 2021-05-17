@@ -19,34 +19,57 @@ namespace writer {
 namespace msl {
 namespace {
 
-struct UnaryOpData {
-  const char* name;
-  ast::UnaryOp op;
-};
-inline std::ostream& operator<<(std::ostream& out, UnaryOpData data) {
-  out << data.op;
-  return out;
-}
-using MslUnaryOpTest = TestParamHelper<UnaryOpData>;
-TEST_P(MslUnaryOpTest, Emit) {
-  auto params = GetParam();
-  Global("expr", ty.i32(), ast::StorageClass::kPrivate);
+using MslUnaryOpTest = TestHelper;
 
-  auto* op = create<ast::UnaryOpExpression>(params.op, Expr("expr"));
+TEST_F(MslUnaryOpTest, AddressOf) {
+  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  auto* op =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("expr"));
   WrapInFunction(op);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitExpression(op)) << gen.error();
-  EXPECT_EQ(gen.result(), std::string(params.name) + "(expr)");
+  EXPECT_EQ(gen.result(), "&(expr)");
 }
-INSTANTIATE_TEST_SUITE_P(
-    MslGeneratorImplTest,
-    MslUnaryOpTest,
-    testing::Values(UnaryOpData{"&", ast::UnaryOp::kAddressOf},
-                    UnaryOpData{"*", ast::UnaryOp::kIndirection},
-                    UnaryOpData{"!", ast::UnaryOp::kNot},
-                    UnaryOpData{"-", ast::UnaryOp::kNegation}));
+
+TEST_F(MslUnaryOpTest, Indirection) {
+  Global("G", ty.f32(), ast::StorageClass::kPrivate);
+  auto* p = Const(
+      "expr", nullptr,
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("G")));
+  auto* op =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kIndirection, Expr("expr"));
+  WrapInFunction(p, op);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitExpression(op)) << gen.error();
+  EXPECT_EQ(gen.result(), "*(expr)");
+}
+
+TEST_F(MslUnaryOpTest, Not) {
+  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr("expr"));
+  WrapInFunction(op);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitExpression(op)) << gen.error();
+  EXPECT_EQ(gen.result(), "!(expr)");
+}
+
+TEST_F(MslUnaryOpTest, Negation) {
+  Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+  auto* op =
+      create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("expr"));
+  WrapInFunction(op);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitExpression(op)) << gen.error();
+  EXPECT_EQ(gen.result(), "-(expr)");
+}
 
 }  // namespace
 }  // namespace msl
