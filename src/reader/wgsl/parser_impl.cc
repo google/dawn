@@ -2325,7 +2325,7 @@ Maybe<ast::Expression*> ParserImpl::unary_expression() {
   } else if (match(Token::Type::kBang)) {
     op = ast::UnaryOp::kNot;
   } else if (match(Token::Type::kStar)) {
-    op = ast::UnaryOp::kDereference;
+    op = ast::UnaryOp::kIndirection;
   } else if (match(Token::Type::kAnd)) {
     op = ast::UnaryOp::kAddressOf;
   } else {

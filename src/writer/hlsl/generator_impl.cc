@@ -2599,7 +2599,7 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& pre,
                                 std::ostream& out,
                                 ast::UnaryOpExpression* expr) {
   switch (expr->op()) {
-    case ast::UnaryOp::kDereference:
+    case ast::UnaryOp::kIndirection:
     case ast::UnaryOp::kAddressOf:
       // TODO(crbug.com/tint/183) - support pointers
       return EmitExpression(pre, out, expr->expr());

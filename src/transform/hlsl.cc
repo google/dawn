@@ -129,7 +129,7 @@ void Hlsl::AddEmptyEntryPoint(CloneContext& ctx) const {
       return;
     }
   }
-  ctx.dst->Func(ctx.dst->Symbols().New("tint_unused_entry_point"), {},
+  ctx.dst->Func(ctx.dst->Symbols().New("unused_entry_point"), {},
                 ctx.dst->ty.void_(), {},
                 {ctx.dst->Stage(ast::PipelineStage::kCompute)});
 }

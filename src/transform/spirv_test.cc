@@ -693,7 +693,7 @@ TEST_F(SpirvTest, AddEmptyEntryPoint) {
 
   auto* expect = R"(
 [[stage(compute)]]
-fn _tint_unused_entry_point() {
+fn unused_entry_point() {
 }
 )";
 

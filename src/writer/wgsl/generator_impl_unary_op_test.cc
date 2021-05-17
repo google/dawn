@@ -48,7 +48,7 @@ INSTANTIATE_TEST_SUITE_P(
     WgslGeneratorImplTest,
     WgslUnaryOpTest,
     testing::Values(UnaryOpData{"&", ast::UnaryOp::kAddressOf},
-                    UnaryOpData{"*", ast::UnaryOp::kDereference},
+                    UnaryOpData{"*", ast::UnaryOp::kIndirection},
                     UnaryOpData{"!", ast::UnaryOp::kNot},
                     UnaryOpData{"-", ast::UnaryOp::kNegation}));
 

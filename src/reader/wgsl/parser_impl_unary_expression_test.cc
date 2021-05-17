@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dereference) {
   ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
   auto* u = e->As<ast::UnaryOpExpression>();
-  EXPECT_EQ(u->op(), ast::UnaryOp::kDereference);
+  EXPECT_EQ(u->op(), ast::UnaryOp::kIndirection);
   EXPECT_TRUE(u->expr()->Is<ast::IdentifierExpression>());
 }
 
@@ -113,7 +113,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dereference_Precedence) {
   ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
   auto* u = e->As<ast::UnaryOpExpression>();
-  EXPECT_EQ(u->op(), ast::UnaryOp::kDereference);
+  EXPECT_EQ(u->op(), ast::UnaryOp::kIndirection);
   EXPECT_TRUE(u->expr()->Is<ast::MemberAccessorExpression>());
 }
 

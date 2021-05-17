@@ -23,8 +23,8 @@ std::ostream& operator<<(std::ostream& out, UnaryOp mod) {
       out << "address-of";
       break;
     }
-    case UnaryOp::kDereference: {
-      out << "dereference";
+    case UnaryOp::kIndirection: {
+      out << "indirection";
       break;
     }
     case UnaryOp::kNegation: {

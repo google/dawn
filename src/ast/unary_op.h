@@ -23,7 +23,7 @@ namespace ast {
 /// The unary op
 enum class UnaryOp {
   kAddressOf,    // &EXPR
-  kDereference,  // *EXPR
+  kIndirection,  // *EXPR
   kNegation,     // -EXPR
   kNot,          // !EXPR
 };

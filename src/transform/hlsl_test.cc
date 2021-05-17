@@ -282,7 +282,7 @@ TEST_F(HlslTest, AddEmptyEntryPoint) {
 
   auto* expect = R"(
 [[stage(compute)]]
-fn tint_unused_entry_point() {
+fn unused_entry_point() {
 }
 )";
 

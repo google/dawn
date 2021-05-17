@@ -285,7 +285,7 @@ void Spirv::AddEmptyEntryPoint(CloneContext& ctx) const {
       return;
     }
   }
-  ctx.dst->Func("_tint_unused_entry_point", {}, ctx.dst->ty.void_(), {},
+  ctx.dst->Func(ctx.dst->Sym("unused_entry_point"), {}, ctx.dst->ty.void_(), {},
                 {ctx.dst->Stage(ast::PipelineStage::kCompute)});
 }
 
