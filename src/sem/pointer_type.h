@@ -35,9 +35,9 @@ class Pointer : public Castable<Pointer, Type> {
   ~Pointer() override;
 
   /// @returns the pointee type
-  const Type* type() const { return subtype_; }
+  const Type* StoreType() const { return subtype_; }
   /// @returns the storage class of the pointer
-  ast::StorageClass storage_class() const { return storage_class_; }
+  ast::StorageClass StorageClass() const { return storage_class_; }
 
   /// @returns the name for this type
   std::string type_name() const override;

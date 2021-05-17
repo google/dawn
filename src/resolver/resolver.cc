@@ -1542,7 +1542,7 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
 
   // If we're extracting from a pointer, we return a pointer.
   if (auto* ptr = res->As<sem::Pointer>()) {
-    ret = builder_->create<sem::Pointer>(ret, ptr->storage_class());
+    ret = builder_->create<sem::Pointer>(ret, ptr->StorageClass());
   } else if (auto* arr = parent_type->As<sem::Array>()) {
     if (!arr->ElemType()->is_scalar()) {
       // If we extract a non-scalar from an array then we also get a pointer. We
@@ -1906,7 +1906,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
 
     // If we're extracting from a pointer, we return a pointer.
     if (auto* ptr = res->As<sem::Pointer>()) {
-      ret = builder_->create<sem::Pointer>(ret, ptr->storage_class());
+      ret = builder_->create<sem::Pointer>(ret, ptr->StorageClass());
     }
 
     builder_->Sem().Add(expr, builder_->create<sem::StructMemberAccess>(
@@ -1969,7 +1969,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
       ret = vec->type();
       // If we're extracting from a pointer, we return a pointer.
       if (auto* ptr = res->As<sem::Pointer>()) {
-        ret = builder_->create<sem::Pointer>(ret, ptr->storage_class());
+        ret = builder_->create<sem::Pointer>(ret, ptr->StorageClass());
       }
     } else {
       // The vector will have a number of components equal to the length of

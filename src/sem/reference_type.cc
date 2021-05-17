@@ -22,7 +22,9 @@ namespace tint {
 namespace sem {
 
 Reference::Reference(const Type* subtype, ast::StorageClass storage_class)
-    : subtype_(subtype), storage_class_(storage_class) {}
+    : subtype_(subtype), storage_class_(storage_class) {
+  TINT_ASSERT(!subtype->Is<Reference>());
+}
 
 std::string Reference::type_name() const {
   std::ostringstream out;

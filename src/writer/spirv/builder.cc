@@ -3131,12 +3131,12 @@ bool Builder::GenerateMatrixType(const sem::Matrix* mat,
 
 bool Builder::GeneratePointerType(const sem::Pointer* ptr,
                                   const Operand& result) {
-  auto pointee_id = GenerateTypeIfNeeded(ptr->type());
+  auto pointee_id = GenerateTypeIfNeeded(ptr->StoreType());
   if (pointee_id == 0) {
     return false;
   }
 
-  auto stg_class = ConvertStorageClass(ptr->storage_class());
+  auto stg_class = ConvertStorageClass(ptr->StorageClass());
   if (stg_class == SpvStorageClassMax) {
     error_ = "invalid storage class for pointer";
     return false;

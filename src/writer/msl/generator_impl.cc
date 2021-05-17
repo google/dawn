@@ -1912,7 +1912,7 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
     out_ << mat->columns() << "x" << mat->rows();
   } else if (auto* ptr = type->As<sem::Pointer>()) {
     // TODO(dsinclair): Storage class?
-    if (!EmitType(ptr->type(), "")) {
+    if (!EmitType(ptr->StoreType(), "")) {
       return false;
     }
     out_ << "*";

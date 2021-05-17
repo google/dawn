@@ -334,7 +334,7 @@ void InsertGlobal(CloneContext& ctx,
 const ast::NamedType* ConstructedTypeOf(const sem::Type* ty) {
   while (true) {
     if (auto* ptr = ty->As<sem::Pointer>()) {
-      ty = ptr->type();
+      ty = ptr->StoreType();
       continue;
     }
     if (auto* str = ty->As<sem::Struct>()) {

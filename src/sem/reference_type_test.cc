@@ -23,8 +23,8 @@ using ReferenceTest = TestHelper;
 
 TEST_F(ReferenceTest, Creation) {
   auto* r = create<Reference>(create<I32>(), ast::StorageClass::kStorage);
-  EXPECT_TRUE(r->type()->Is<sem::I32>());
-  EXPECT_EQ(r->storage_class(), ast::StorageClass::kStorage);
+  EXPECT_TRUE(r->StoreType()->Is<sem::I32>());
+  EXPECT_EQ(r->StorageClass(), ast::StorageClass::kStorage);
 }
 
 TEST_F(ReferenceTest, TypeName) {

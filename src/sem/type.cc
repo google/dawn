@@ -38,7 +38,7 @@ Type::~Type() = default;
 const Type* Type::UnwrapPtr() const {
   auto* type = this;
   while (auto* ptr = type->As<sem::Pointer>()) {
-    type = ptr->type();
+    type = ptr->StoreType();
   }
   return type;
 }
@@ -53,7 +53,7 @@ const Type* Type::UnwrapAll() const {
   auto* type = this;
   while (true) {
     if (auto* ptr = type->As<sem::Pointer>()) {
-      type = ptr->type();
+      type = ptr->StoreType();
     } else {
       break;
     }

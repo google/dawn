@@ -370,7 +370,7 @@ class PtrBuilder : public Builder {
 
   bool Match(MatchState& state, const sem::Type* ty) const override {
     if (auto* ptr = ty->As<sem::Pointer>()) {
-      return element_builder_->Match(state, ptr->type());
+      return element_builder_->Match(state, ptr->StoreType());
     }
     return false;
   }
@@ -1396,7 +1396,7 @@ sem::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
       if (!parameters[i].matcher->ExpectsPointer()) {
         // Argument is a pointer, but the matcher isn't expecting one.
         // Perform an implicit dereference.
-        arg_ty = ptr->type();
+        arg_ty = ptr->StoreType();
       }
     }
     if (parameters[i].matcher->Match(matcher_state, arg_ty)) {

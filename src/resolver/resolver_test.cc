@@ -400,7 +400,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Array) {
   ASSERT_TRUE(TypeOf(acc)->Is<sem::Pointer>());
 
   auto* ptr = TypeOf(acc)->As<sem::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<sem::F32>());
+  EXPECT_TRUE(ptr->StoreType()->Is<sem::F32>());
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Alias_Array) {
@@ -418,7 +418,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Alias_Array) {
   ASSERT_TRUE(TypeOf(acc)->Is<sem::Pointer>());
 
   auto* ptr = TypeOf(acc)->As<sem::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<sem::F32>());
+  EXPECT_TRUE(ptr->StoreType()->Is<sem::F32>());
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Array_Constant) {
@@ -445,8 +445,8 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix) {
   ASSERT_TRUE(TypeOf(acc)->Is<sem::Pointer>());
 
   auto* ptr = TypeOf(acc)->As<sem::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<sem::Vector>());
-  EXPECT_EQ(ptr->type()->As<sem::Vector>()->size(), 3u);
+  ASSERT_TRUE(ptr->StoreType()->Is<sem::Vector>());
+  EXPECT_EQ(ptr->StoreType()->As<sem::Vector>()->size(), 3u);
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
@@ -461,7 +461,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Matrix_BothDimensions) {
   ASSERT_TRUE(TypeOf(acc)->Is<sem::Pointer>());
 
   auto* ptr = TypeOf(acc)->As<sem::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<sem::F32>());
+  EXPECT_TRUE(ptr->StoreType()->Is<sem::F32>());
 }
 
 TEST_F(ResolverTest, Expr_ArrayAccessor_Vector) {
@@ -476,7 +476,7 @@ TEST_F(ResolverTest, Expr_ArrayAccessor_Vector) {
   ASSERT_TRUE(TypeOf(acc)->Is<sem::Pointer>());
 
   auto* ptr = TypeOf(acc)->As<sem::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<sem::F32>());
+  EXPECT_TRUE(ptr->StoreType()->Is<sem::F32>());
 }
 
 TEST_F(ResolverTest, Expr_Bitcast) {
@@ -610,7 +610,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
 
   ASSERT_NE(TypeOf(ident), nullptr);
   EXPECT_TRUE(TypeOf(ident)->Is<sem::Pointer>());
-  EXPECT_TRUE(TypeOf(ident)->As<sem::Pointer>()->type()->Is<sem::F32>());
+  EXPECT_TRUE(TypeOf(ident)->As<sem::Pointer>()->StoreType()->Is<sem::F32>());
   EXPECT_TRUE(CheckVarUsers(my_var, {ident}));
   ASSERT_NE(VarOf(ident), nullptr);
   EXPECT_EQ(VarOf(ident)->Declaration(), my_var);
@@ -675,11 +675,13 @@ TEST_F(ResolverTest, Expr_Identifier_FunctionVariable) {
 
   ASSERT_NE(TypeOf(my_var_a), nullptr);
   EXPECT_TRUE(TypeOf(my_var_a)->Is<sem::Pointer>());
-  EXPECT_TRUE(TypeOf(my_var_a)->As<sem::Pointer>()->type()->Is<sem::F32>());
+  EXPECT_TRUE(
+      TypeOf(my_var_a)->As<sem::Pointer>()->StoreType()->Is<sem::F32>());
   EXPECT_EQ(StmtOf(my_var_a), assign);
   ASSERT_NE(TypeOf(my_var_b), nullptr);
   EXPECT_TRUE(TypeOf(my_var_b)->Is<sem::Pointer>());
-  EXPECT_TRUE(TypeOf(my_var_b)->As<sem::Pointer>()->type()->Is<sem::F32>());
+  EXPECT_TRUE(
+      TypeOf(my_var_b)->As<sem::Pointer>()->StoreType()->Is<sem::F32>());
   EXPECT_EQ(StmtOf(my_var_b), assign);
   EXPECT_TRUE(CheckVarUsers(var, {my_var_a, my_var_b}));
   ASSERT_NE(VarOf(my_var_a), nullptr);
@@ -704,11 +706,13 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
 
   ASSERT_NE(TypeOf(my_var_a), nullptr);
   EXPECT_TRUE(TypeOf(my_var_a)->Is<sem::Pointer>());
-  EXPECT_TRUE(TypeOf(my_var_a)->As<sem::Pointer>()->type()->Is<sem::F32>());
+  EXPECT_TRUE(
+      TypeOf(my_var_a)->As<sem::Pointer>()->StoreType()->Is<sem::F32>());
   EXPECT_EQ(StmtOf(my_var_a), assign);
   ASSERT_NE(TypeOf(my_var_b), nullptr);
   EXPECT_TRUE(TypeOf(my_var_b)->Is<sem::Pointer>());
-  EXPECT_TRUE(TypeOf(my_var_b)->As<sem::Pointer>()->type()->Is<sem::F32>());
+  EXPECT_TRUE(
+      TypeOf(my_var_b)->As<sem::Pointer>()->StoreType()->Is<sem::F32>());
   EXPECT_EQ(StmtOf(my_var_b), assign);
 }
 
@@ -894,7 +898,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
   ASSERT_TRUE(TypeOf(mem)->Is<sem::Pointer>());
 
   auto* ptr = TypeOf(mem)->As<sem::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<sem::F32>());
+  EXPECT_TRUE(ptr->StoreType()->Is<sem::F32>());
   auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
   ASSERT_NE(sma, nullptr);
   EXPECT_EQ(sma->Member()->Type(), ty.f32());
@@ -919,7 +923,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
   ASSERT_TRUE(TypeOf(mem)->Is<sem::Pointer>());
 
   auto* ptr = TypeOf(mem)->As<sem::Pointer>();
-  EXPECT_TRUE(ptr->type()->Is<sem::F32>());
+  EXPECT_TRUE(ptr->StoreType()->Is<sem::F32>());
   auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
   ASSERT_NE(sma, nullptr);
   EXPECT_EQ(sma->Member()->Type(), ty.f32());
@@ -955,7 +959,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
   ASSERT_TRUE(TypeOf(mem)->Is<sem::Pointer>());
 
   auto* ptr = TypeOf(mem)->As<sem::Pointer>();
-  ASSERT_TRUE(ptr->type()->Is<sem::F32>());
+  ASSERT_TRUE(ptr->StoreType()->Is<sem::F32>());
   ASSERT_TRUE(Sem().Get(mem)->Is<sem::Swizzle>());
   EXPECT_THAT(Sem().Get(mem)->As<sem::Swizzle>()->Indices(), ElementsAre(2));
 }
