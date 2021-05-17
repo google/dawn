@@ -86,8 +86,12 @@ namespace utils {
                 return CreateNullBinding(window, device);
 #endif
 
-#if defined(DAWN_ENABLE_BACKEND_OPENGL)
+#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
             case wgpu::BackendType::OpenGL:
+                return CreateOpenGLBinding(window, device);
+#endif
+
+#if defined(DAWN_ENABLE_BACKEND_OPENGLES)
             case wgpu::BackendType::OpenGLES:
                 return CreateOpenGLBinding(window, device);
 #endif

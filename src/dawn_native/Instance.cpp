@@ -150,10 +150,12 @@ namespace dawn_native {
         Register(vulkan::Connect(this, true), wgpu::BackendType::Vulkan);
 #    endif  // defined(DAWN_ENABLE_SWIFTSHADER)
 #endif      // defined(DAWN_ENABLE_BACKEND_VULKAN)
-#if defined(DAWN_ENABLE_BACKEND_OPENGL)
+#if defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
         Register(opengl::Connect(this, wgpu::BackendType::OpenGL), wgpu::BackendType::OpenGL);
+#endif  // defined(DAWN_ENABLE_BACKEND_DESKTOP_GL)
+#if defined(DAWN_ENABLE_BACKEND_OPENGLES)
         Register(opengl::Connect(this, wgpu::BackendType::OpenGLES), wgpu::BackendType::OpenGLES);
-#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
+#endif  // defined(DAWN_ENABLE_BACKEND_OPENGLES)
 #if defined(DAWN_ENABLE_BACKEND_NULL)
         Register(null::Connect(this), wgpu::BackendType::Null);
 #endif  // defined(DAWN_ENABLE_BACKEND_NULL)

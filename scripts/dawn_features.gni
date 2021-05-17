@@ -62,7 +62,11 @@ declare_args() {
 
   # Enables the compilation of Dawn's OpenGL backend
   # (best effort, non-conformant)
-  dawn_enable_opengl = is_linux && !is_chromeos
+  dawn_enable_desktop_gl = is_linux && !is_chromeos
+
+  # Enables the compilation of Dawn's OpenGLES backend
+  # (WebGPU/Compat subset)
+  dawn_enable_opengles = (is_linux && !is_chromeos) || is_win
 
   # Enables the compilation of Dawn's Vulkan backend
   # Disables vulkan when compiling for UWP, since UWP only supports d3d
@@ -97,3 +101,6 @@ declare_args() {
 # UWP only supports CoreWindow for windowing
 dawn_supports_glfw_for_windowing =
     (is_win && !dawn_is_winuwp) || (is_linux && !is_chromeos) || is_mac
+
+# Much of the backend code is shared, so define a convenience var.
+dawn_enable_opengl = dawn_enable_opengles || dawn_enable_desktop_gl
