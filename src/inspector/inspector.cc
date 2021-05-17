@@ -381,7 +381,8 @@ std::vector<ResourceBinding> Inspector::GetResourceBindings(
   AppendResourceBindings(
       &result, GetWriteOnlyStorageTextureResourceBindings(entry_point));
   AppendResourceBindings(&result, GetDepthTextureResourceBindings(entry_point));
-
+  AppendResourceBindings(&result,
+                         GetExternalTextureResourceBindings(entry_point));
   return result;
 }
 
@@ -528,6 +529,33 @@ std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
     result.push_back(entry);
   }
 
+  return result;
+}
+
+std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
+    const std::string& entry_point) {
+  auto* func = FindEntryPointByName(entry_point);
+  if (!func) {
+    return {};
+  }
+
+  std::vector<ResourceBinding> result;
+  auto* func_sem = program_->Sem().Get(func);
+  for (auto& ref : func_sem->ReferencedExternalTextureVariables()) {
+    auto* var = ref.first;
+    auto binding_info = ref.second;
+
+    ResourceBinding entry;
+    entry.resource_type = ResourceBinding::ResourceType::kExternalTexture;
+    entry.bind_group = binding_info.group->value();
+    entry.binding = binding_info.binding->value();
+
+    auto* texture_type = var->Type()->UnwrapAccess()->As<sem::Texture>();
+    entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
+        texture_type->dim());
+
+    result.push_back(entry);
+  }
   return result;
 }
 

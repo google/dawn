@@ -869,6 +869,12 @@ class ProgramBuilder {
                   dims, format, ast::AccessControl::kInvalid, sem_subtype)};
     }
 
+    /// @returns the external texture
+    typ::ExternalTexture external_texture() const {
+      return {builder->create<ast::ExternalTexture>(),
+              builder->create<sem::ExternalTexture>()};
+    }
+
     /// @param source the Source of the node
     /// @returns the external texture
     typ::ExternalTexture external_texture(const Source& source) const {

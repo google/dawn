@@ -16,6 +16,7 @@
 
 #include "src/ast/function.h"
 #include "src/sem/depth_texture_type.h"
+#include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
@@ -158,6 +159,24 @@ Function::VariableBindings Function::ReferencedDepthTextureVariables() const {
     auto* unwrapped_type = var->Type()->UnwrapAccess();
     auto* storage_texture = unwrapped_type->As<sem::DepthTexture>();
     if (storage_texture == nullptr) {
+      continue;
+    }
+
+    if (auto binding_point = var->Declaration()->binding_point()) {
+      ret.push_back({var, binding_point});
+    }
+  }
+  return ret;
+}
+
+Function::VariableBindings Function::ReferencedExternalTextureVariables()
+    const {
+  VariableBindings ret;
+
+  for (auto* var : ReferencedModuleVariables()) {
+    auto* unwrapped_type = var->Type()->UnwrapAccess();
+    auto* external_texture = unwrapped_type->As<sem::ExternalTexture>();
+    if (external_texture == nullptr) {
       continue;
     }
 

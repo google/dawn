@@ -19,6 +19,7 @@
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/workgroup_decoration.h"
 #include "src/sem/depth_texture_type.h"
+#include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/variable.h"
@@ -380,6 +381,12 @@ class InspectorHelper : public ProgramBuilder {
     return ty.multisampled_texture(dim, type);
   }
 
+  /// Generates an ExternalTexture appropriate for the params
+  /// @returns the generated ExternalTexture
+  typ::ExternalTexture MakeExternalTextureType() {
+    return ty.external_texture();
+  }
+
   /// Adds a sampled texture variable to the program
   /// @param name the name of the variable
   /// @param type the type to use
@@ -417,6 +424,18 @@ class InspectorHelper : public ProgramBuilder {
                        ast::Type* type,
                        uint32_t group,
                        uint32_t binding) {
+    AddBinding(name, type, ast::StorageClass::kNone, group, binding);
+  }
+
+  /// Adds an external texture variable to the program
+  /// @param name the name of the variable
+  /// @param type the type to use
+  /// @param group the binding/group to use for the external texture
+  /// @param binding the binding number to use for the external texture
+  void AddExternalTexture(const std::string& name,
+                          ast::Type* type,
+                          uint32_t group,
+                          uint32_t binding) {
     AddBinding(name, type, ast::StorageClass::kNone, group, binding);
   }
 
@@ -696,6 +715,9 @@ typedef std::tuple<bool, DimensionParams, ImageFormatParams>
 class InspectorGetStorageTextureResourceBindingsTestWithParam
     : public InspectorHelper,
       public testing::TestWithParam<GetStorageTextureTestParams> {};
+
+class InspectorGetExternalTextureResourceBindingsTest : public InspectorHelper,
+                                                        public testing::Test {};
 
 TEST_F(InspectorGetEntryPointTest, NoFunctions) {
   Inspector& inspector = Build();
@@ -2935,6 +2957,30 @@ INSTANTIATE_TEST_SUITE_P(
         GetDepthTextureTestParams{
             ast::TextureDimension::kCubeArray,
             inspector::ResourceBinding::TextureDimension::kCubeArray}));
+
+TEST_F(InspectorGetExternalTextureResourceBindingsTest, Simple) {
+  auto external_texture_type = MakeExternalTextureType();
+  AddExternalTexture("et", external_texture_type, 0, 0);
+
+  Func("ep", ast::VariableList(), ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(Call("textureDimensions", "et")),
+       },
+       ast::DecorationList{
+           Stage(ast::PipelineStage::kFragment),
+       });
+
+  Inspector& inspector = Build();
+
+  auto result = inspector.GetExternalTextureResourceBindings("ep");
+  ASSERT_FALSE(inspector.has_error()) << inspector.error();
+  EXPECT_EQ(ResourceBinding::ResourceType::kExternalTexture,
+            result[0].resource_type);
+
+  ASSERT_EQ(1u, result.size());
+  EXPECT_EQ(0u, result[0].bind_group);
+  EXPECT_EQ(0u, result[0].binding);
+}
 
 }  // namespace
 }  // namespace inspector

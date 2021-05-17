@@ -337,6 +337,8 @@ std::string ResourceTypeToString(
       return "WriteOnlyStorageTexture";
     case tint::inspector::ResourceBinding::ResourceType::kDepthTexture:
       return "DepthTexture";
+    case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
+      return "ExternalTexture";
   }
 
   return "Unknown";

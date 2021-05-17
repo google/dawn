@@ -135,8 +135,13 @@ class Function : public Castable<Function, CallTarget> {
 
   /// Retrieves any referenced depth texture variables. Note, the variables
   /// must be decorated with both binding and group decorations.
-  /// @returns the referenced storage textures
+  /// @returns the referenced depth textures
   VariableBindings ReferencedDepthTextureVariables() const;
+
+  /// Retrieves any referenced external texture variables. Note, the variables
+  /// must be decorated with both binding and group decorations.
+  /// @returns the referenced external textures
+  VariableBindings ReferencedExternalTextureVariables() const;
 
   /// Checks if the given entry point is an ancestor
   /// @param sym the entry point symbol
