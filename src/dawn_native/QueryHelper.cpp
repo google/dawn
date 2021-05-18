@@ -28,9 +28,10 @@ namespace dawn_native {
     namespace {
 
         // Assert the offsets in dawn_native::TimestampParams are same with the ones in the shader
-        static_assert(offsetof(dawn_native::TimestampParams, count) == 0, "");
-        static_assert(offsetof(dawn_native::TimestampParams, offset) == 4, "");
-        static_assert(offsetof(dawn_native::TimestampParams, period) == 8, "");
+        static_assert(offsetof(dawn_native::TimestampParams, first) == 0, "");
+        static_assert(offsetof(dawn_native::TimestampParams, count) == 4, "");
+        static_assert(offsetof(dawn_native::TimestampParams, offset) == 8, "");
+        static_assert(offsetof(dawn_native::TimestampParams, period) == 12, "");
 
         static const char sConvertTimestampsToNanoseconds[] = R"(
             struct Timestamp {
@@ -47,6 +48,7 @@ namespace dawn_native {
             };
 
             [[block]] struct TimestampParams {
+                first  : u32;
                 count  : u32;
                 offset : u32;
                 period : f32;
@@ -70,7 +72,7 @@ namespace dawn_native {
                 var timestamp : Timestamp = timestamps.t[index];
 
                 // Return 0 for the unavailable value.
-                if (availability.v[index] == 0u) {
+                if (availability.v[GlobalInvocationID.x + params.first] == 0u) {
                     timestamps.t[index].low = 0u;
                     timestamps.t[index].high = 0u;
                     return;

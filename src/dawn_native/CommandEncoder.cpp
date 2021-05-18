@@ -424,6 +424,7 @@ namespace dawn_native {
 
         MaybeError EncodeTimestampsToNanosecondsConversion(CommandEncoder* encoder,
                                                            QuerySetBase* querySet,
+                                                           uint32_t firstQuery,
                                                            uint32_t queryCount,
                                                            BufferBase* destination,
                                                            uint64_t destinationOffset) {
@@ -447,7 +448,8 @@ namespace dawn_native {
                                                      availability.size() * sizeof(uint32_t)));
 
             // Timestamp params uniform buffer
-            TimestampParams params = {queryCount, static_cast<uint32_t>(destinationOffset),
+            TimestampParams params = {firstQuery, queryCount,
+                                      static_cast<uint32_t>(destinationOffset),
                                       device->GetTimestampPeriodInNS()};
 
             BufferDescriptor parmsDesc = {};
@@ -882,8 +884,8 @@ namespace dawn_native {
 
             // Encode internal compute pipeline for timestamp query
             if (querySet->GetQueryType() == wgpu::QueryType::Timestamp) {
-                DAWN_TRY(EncodeTimestampsToNanosecondsConversion(this, querySet, queryCount, destination,
-                                                        destinationOffset));
+                DAWN_TRY(EncodeTimestampsToNanosecondsConversion(
+                    this, querySet, firstQuery, queryCount, destination, destinationOffset));
             }
 
             return {};

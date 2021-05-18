@@ -125,12 +125,13 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
         wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
     wgpu::Buffer timestampsBuffer = device.CreateBuffer(&timestampsDesc);
 
-    auto PrepareExpectedResults = [&](uint32_t offset) -> std::vector<uint64_t> {
+    auto PrepareExpectedResults = [&](uint32_t first, uint32_t count,
+                                      uint32_t offset) -> std::vector<uint64_t> {
         ASSERT(offset % sizeof(uint64_t) == 0);
         std::vector<uint64_t> expected;
         for (size_t i = 0; i < kTimestampCount; i++) {
-            // The data before offset remains as it is
-            if (i < offset / sizeof(uint64_t)) {
+            // The data out of the rang [first, first + count] remains as it is
+            if (i < first || i >= first + count) {
                 expected.push_back(timestamps[i]);
                 continue;
             }
@@ -149,7 +150,9 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
     };
 
     // Convert timestamps in timestamps buffer with offset 0
+    // Test for ResolveQuerySet(querySet, 0, kTimestampCount, timestampsBuffer, 0)
     {
+        constexpr uint32_t kFirst = 0u;
         constexpr uint32_t kOffset = 0u;
 
         // Write orignal timestamps to timestamps buffer
@@ -157,7 +160,7 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
                           kTimestampCount * sizeof(uint64_t));
 
         // The params uniform buffer
-        dawn_native::TimestampParams params = {kTimestampCount, kOffset, kPeriod};
+        dawn_native::TimestampParams params = {kFirst, kTimestampCount, kOffset, kPeriod};
         wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
                                                                 wgpu::BufferUsage::Uniform);
 
@@ -168,13 +171,15 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
         queue.Submit(1, &commands);
 
         // Expected results: Timestamp * period
-        std::vector<uint64_t> expected = PrepareExpectedResults(kOffset);
+        std::vector<uint64_t> expected = PrepareExpectedResults(0, kTimestampCount, kOffset);
         EXPECT_BUFFER(timestampsBuffer, 0, kTimestampCount * sizeof(uint64_t),
                       new InternalShaderExpectation(expected.data(), kTimestampCount));
     }
 
     // Convert timestamps in timestamps buffer with offset 8
+    // Test for ResolveQuerySet(querySet, 1, kTimestampCount - 1, timestampsBuffer, 8)
     {
+        constexpr uint32_t kFirst = 1u;
         constexpr uint32_t kOffset = 8u;
 
         // Write orignal timestamps to timestamps buffer
@@ -182,7 +187,7 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
                           kTimestampCount * sizeof(uint64_t));
 
         // The params uniform buffer
-        dawn_native::TimestampParams params = {kTimestampCount, kOffset, kPeriod};
+        dawn_native::TimestampParams params = {kFirst, kTimestampCount - kFirst, kOffset, kPeriod};
         wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
                                                                 wgpu::BufferUsage::Uniform);
 
@@ -193,7 +198,36 @@ TEST_P(QueryInternalShaderTests, TimestampComputeShader) {
         queue.Submit(1, &commands);
 
         // Expected results: Timestamp * period
-        std::vector<uint64_t> expected = PrepareExpectedResults(kOffset);
+        std::vector<uint64_t> expected =
+            PrepareExpectedResults(kFirst, kTimestampCount - kFirst, kOffset);
+        EXPECT_BUFFER(timestampsBuffer, 0, kTimestampCount * sizeof(uint64_t),
+                      new InternalShaderExpectation(expected.data(), kTimestampCount));
+    }
+
+    // Convert partial timestamps in timestamps buffer with offset 8
+    // Test for ResolveQuerySet(querySet, 1, 3, timestampsBuffer, 8)
+    {
+        constexpr uint32_t kFirst = 1u;
+        constexpr uint32_t kCount = 3u;
+        constexpr uint32_t kOffset = 8u;
+
+        // Write orignal timestamps to timestamps buffer
+        queue.WriteBuffer(timestampsBuffer, 0, timestamps.data(),
+                          kTimestampCount * sizeof(uint64_t));
+
+        // The params uniform buffer
+        dawn_native::TimestampParams params = {kFirst, kCount, kOffset, kPeriod};
+        wgpu::Buffer paramsBuffer = utils::CreateBufferFromData(device, &params, sizeof(params),
+                                                                wgpu::BufferUsage::Uniform);
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        EncodeConvertTimestampsToNanoseconds(encoder, timestampsBuffer, availabilityBuffer,
+                                             paramsBuffer);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        // Expected results: Timestamp * period
+        std::vector<uint64_t> expected = PrepareExpectedResults(kFirst, kCount, kOffset);
         EXPECT_BUFFER(timestampsBuffer, 0, kTimestampCount * sizeof(uint64_t),
                       new InternalShaderExpectation(expected.data(), kTimestampCount));
     }
