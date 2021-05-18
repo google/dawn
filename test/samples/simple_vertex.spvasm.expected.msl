@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_out {
+  float4 gl_Position [[position]];
+};
+
+vertex tint_symbol_out tint_symbol() {
+  tint_symbol_out _tint_out = {};
+  _tint_out.gl_Position = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  return _tint_out;
+}
+

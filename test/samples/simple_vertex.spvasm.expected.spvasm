@@ -1,0 +1,32 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 16
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %tint_pointsize %gl_Position
+               OpName %tint_pointsize "tint_pointsize"
+               OpName %gl_Position "gl_Position"
+               OpName %main "main"
+               OpDecorate %tint_pointsize BuiltIn PointSize
+               OpDecorate %gl_Position BuiltIn Position
+      %float = OpTypeFloat 32
+%_ptr_Output_float = OpTypePointer Output %float
+          %4 = OpConstantNull %float
+%tint_pointsize = OpVariable %_ptr_Output_float Output %4
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %8 = OpConstantNull %v4float
+%gl_Position = OpVariable %_ptr_Output_v4float Output %8
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+    %float_0 = OpConstant %float 0
+         %15 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+       %main = OpFunction %void None %9
+         %12 = OpLabel
+               OpStore %tint_pointsize %float_1
+               OpStore %gl_Position %15
+               OpReturn
+               OpFunctionEnd

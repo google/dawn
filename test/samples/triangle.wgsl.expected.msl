@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_1 {
+  int VertexIndex [[vertex_id]];
+};
+struct tint_symbol_2 {
+  float4 value [[position]];
+};
+struct tint_symbol_3 {
+  float4 value [[color(0)]];
+};
+
+constant float2 pos[3] = {float2(0.0f, 0.5f), float2(-0.5f, -0.5f), float2(0.5f, -0.5f)};
+vertex tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol [[stage_in]]) {
+  const int VertexIndex = tint_symbol.VertexIndex;
+  return {float4(pos[VertexIndex], 0.0f, 1.0f)};
+}
+
+fragment tint_symbol_3 frag_main() {
+  return {float4(1.0f, 0.0f, 0.0f, 1.0f)};
+}
+

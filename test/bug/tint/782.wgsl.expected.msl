@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+void foo() {
+  int tint_symbol[2] = {0};
+  int implict[2] = {0};
+  implict = tint_symbol;
+}
+

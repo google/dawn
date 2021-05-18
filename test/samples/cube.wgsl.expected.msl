@@ -1,0 +1,42 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Uniforms {
+  /* 0x0000 */ float4x4 modelViewProjectionMatrix;
+};
+struct VertexInput {
+  float4 cur_position;
+  float4 color;
+};
+struct VertexOutput {
+  float4 vtxFragColor;
+  float4 Position;
+};
+struct tint_symbol_1 {
+  float4 cur_position [[attribute(0)]];
+  float4 color [[attribute(1)]];
+};
+struct tint_symbol_2 {
+  float4 vtxFragColor [[user(locn0)]];
+  float4 Position [[position]];
+};
+struct tint_symbol_4 {
+  float4 fragColor [[user(locn0)]];
+};
+struct tint_symbol_5 {
+  float4 value [[color(0)]];
+};
+
+vertex tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol [[stage_in]], constant Uniforms& uniforms [[buffer(0)]]) {
+  const VertexInput input = {tint_symbol.cur_position, tint_symbol.color};
+  VertexOutput output = {};
+  output.Position = (uniforms.modelViewProjectionMatrix * input.cur_position);
+  output.vtxFragColor = input.color;
+  return {output.vtxFragColor, output.Position};
+}
+
+fragment tint_symbol_5 frag_main(tint_symbol_4 tint_symbol_3 [[stage_in]]) {
+  const float4 fragColor = tint_symbol_3.fragColor;
+  return {fragColor};
+}
+
