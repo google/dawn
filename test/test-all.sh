@@ -23,7 +23,7 @@ function usage() {
     echo "injects the <tint>/tools directory as the second command line argument"
     echo
     echo "Usage of <tint>/tools/test-runner:"
-    SCRIPT_DIR/../tools/test-runner --help
+    "${SCRIPT_DIR}/../tools/test-runner" --help
 }
 
 TINT="$1"
