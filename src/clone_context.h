@@ -249,16 +249,15 @@ class CloneContext {
     if (list_transform_it != list_transforms_.end()) {
       const auto& transforms = list_transform_it->second;
       for (auto& el : v) {
-        if (transforms.remove_.count(el)) {
-          continue;
-        }
         auto insert_before_it = transforms.insert_before_.find(el);
         if (insert_before_it != transforms.insert_before_.end()) {
           for (auto insert : insert_before_it->second) {
             out.emplace_back(CheckedCast<T>(insert));
           }
         }
-        out.emplace_back(Clone(el));
+        if (transforms.remove_.count(el) == 0) {
+          out.emplace_back(Clone(el));
+        }
         auto insert_after_it = transforms.insert_after_.find(el);
         if (insert_after_it != transforms.insert_after_.end()) {
           for (auto insert : insert_after_it->second) {
