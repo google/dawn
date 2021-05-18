@@ -52,12 +52,6 @@ const Type* Type::UnwrapRef() const {
   return type;
 }
 
-const Type* Type::UnwrapAccess() const {
-  // TODO(amaiorano): Delete this function
-  auto* type = this;
-  return type;
-}
-
 bool Type::is_scalar() const {
   return IsAnyOf<F32, U32, I32, Bool>();
 }

@@ -52,9 +52,6 @@ class Type : public Castable<Type, Node> {
   /// @returns the inner type if this is a reference, `this` otherwise
   const Type* UnwrapRef() const;
 
-  /// @returns the inner most type if this is an access control, `this`
-  /// otherwise
-  const Type* UnwrapAccess() const;
 
   /// @returns true if this type is a scalar
   bool is_scalar() const;

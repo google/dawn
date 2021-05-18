@@ -183,7 +183,6 @@ bool Resolver::Resolve() {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#storable-types
 bool Resolver::IsStorable(const sem::Type* type) {
-  type = type->UnwrapAccess();
   if (type->is_scalar() || type->Is<sem::Vector>() || type->Is<sem::Matrix>()) {
     return true;
   }
@@ -203,7 +202,6 @@ bool Resolver::IsStorable(const sem::Type* type) {
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable-types
 bool Resolver::IsHostShareable(const sem::Type* type) {
-  type = type->UnwrapAccess();
   if (type->IsAnyOf<sem::I32, sem::U32, sem::F32>()) {
     return true;
   }
@@ -555,7 +553,7 @@ bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
   }
 
   // Value type has to match storage type
-  if (storage_type->UnwrapAccess() != value_type->UnwrapAccess()) {
+  if (storage_type != value_type) {
     std::string decl = var->is_const() ? "let" : "var";
     diagnostics_.add_error("cannot initialize " + decl + " of type '" +
                                type_name + "' with value of type '" +
@@ -3018,13 +3016,12 @@ bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
     return false;
   }
 
-  auto* storage_type_with_access = lhs_ref->StoreType();
+  auto* storage_type = lhs_ref->StoreType();
 
   // TODO(crbug.com/tint/809): The originating variable of the left-hand side
   // must not have an access(read) access attribute.
   // https://gpuweb.github.io/gpuweb/wgsl/#assignment
 
-  auto* storage_type = storage_type_with_access->UnwrapAccess();
   auto* value_type = rhs_type->UnwrapRef();  // Implicit load of RHS
 
   // RHS needs to be of a storable type
