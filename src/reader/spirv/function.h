@@ -1127,6 +1127,16 @@ class FunctionEmitter {
   /// @returns a boolean false expression.
   ast::Expression* MakeFalse(const Source&) const;
 
+  /// @param expr the expression to take the address of
+  /// @returns a TypedExpression that is the address-of `expr` (`&expr`)
+  /// @note `expr` must be a reference type
+  TypedExpression AddressOf(TypedExpression expr);
+
+  /// @param expr the expression to dereference
+  /// @returns a TypedExpression that is the dereference-of `expr` (`*expr`)
+  /// @note `expr` must be a pointer type
+  TypedExpression Dereference(TypedExpression expr);
+
   /// Creates a new `ast::Node` owned by the ProgramBuilder.
   /// @param args the arguments to pass to the type constructor
   /// @returns the node pointer
@@ -1136,6 +1146,7 @@ class FunctionEmitter {
   }
 
   using StatementsStack = std::vector<StatementBlock>;
+  using PtrAs = ParserImpl::PtrAs;
 
   ParserImpl& parser_impl_;
   TypeManager& ty_;
@@ -1160,8 +1171,9 @@ class FunctionEmitter {
   // lifetime of the EmitFunctionBodyStatements method.
   StatementsStack statements_stack_;
 
-  // The set of IDs that have already had an identifier name generated for it.
-  std::unordered_set<uint32_t> identifier_values_;
+  // The map of IDs that have already had an identifier name generated for it,
+  // to their Type.
+  std::unordered_map<uint32_t, const Type*> identifier_types_;
   // Mapping from SPIR-V ID that is used at most once, to its AST expression.
   std::unordered_map<uint32_t, TypedExpression> singly_used_values_;
 

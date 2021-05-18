@@ -2413,7 +2413,10 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
         none
         __ptr_in__u32
         {
-          Identifier[not set]{x_1}
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
         }
       }
     }
@@ -2423,7 +2426,10 @@ TEST_F(SpvModuleScopeVarParserTest, SampleId_U32_Load_CopyObject) {
         none
         __u32
         {
-          Identifier[not set]{x_11}
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_11}
+          }
         }
       }
     })"))
@@ -3295,7 +3301,10 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
         none
         __ptr_in__u32
         {
-          Identifier[not set]{x_1}
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
         }
       }
     }
@@ -3305,7 +3314,10 @@ TEST_F(SpvModuleScopeVarParserTest, VertexIndex_U32_Load_CopyObject) {
         none
         __u32
         {
-          Identifier[not set]{x_11}
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_11}
+          }
         }
       }
     })"))
@@ -3614,7 +3626,10 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
         none
         __ptr_in__u32
         {
-          Identifier[not set]{x_1}
+          UnaryOp[not set]{
+            address-of
+            Identifier[not set]{x_1}
+          }
         }
       }
     }
@@ -3624,7 +3639,10 @@ TEST_F(SpvModuleScopeVarParserTest, InstanceIndex_U32_Load_CopyObject) {
         none
         __u32
         {
-          Identifier[not set]{x_11}
+          UnaryOp[not set]{
+            indirection
+            Identifier[not set]{x_11}
+          }
         }
       }
     })"))

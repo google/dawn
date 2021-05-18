@@ -19,6 +19,7 @@
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
+#include "src/sem/reference_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
 
@@ -345,10 +346,11 @@ TEST_F(IntrinsicTableTest, MismatchTexture) {
   ASSERT_THAT(result.diagnostics.str(), HasSubstr("no matching call"));
 }
 
-TEST_F(IntrinsicTableTest, MatchAutoPointerDereference) {
-  auto result =
-      table->Lookup(*this, IntrinsicType::kCos,
-                    {ty.pointer<f32>(ast::StorageClass::kNone)}, Source{});
+TEST_F(IntrinsicTableTest, ImplicitLoadOnReference) {
+  auto result = table->Lookup(
+      *this, IntrinsicType::kCos,
+      {create<sem::Reference>(create<sem::F32>(), ast::StorageClass::kNone)},
+      Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kCos);

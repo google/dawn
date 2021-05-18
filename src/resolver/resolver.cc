@@ -53,6 +53,7 @@
 #include "src/sem/member_accessor_expression.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/pointer_type.h"
+#include "src/sem/reference_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/sampler_type.h"
 #include "src/sem/statement.h"
@@ -224,22 +225,6 @@ bool Resolver::IsHostShareable(const sem::Type* type) {
     return true;
   }
   return false;
-}
-
-bool Resolver::IsValidAssignment(const sem::Type* lhs, const sem::Type* rhs) {
-  // TODO(crbug.com/tint/659): This is a rough approximation, and is missing
-  // checks for writability of pointer storage class, access control, etc.
-  // This will need to be fixed after WGSL agrees the behavior of pointers /
-  // references.
-  // Check:
-  if (lhs->UnwrapAccess() != rhs->UnwrapAccess()) {
-    // Try RHS dereference
-    if (lhs->UnwrapAccess() != rhs->UnwrapAll()) {
-      return false;
-    }
-  }
-
-  return true;
 }
 
 bool Resolver::ResolveInternal() {
@@ -438,7 +423,7 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
 }
 
 Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
-                                           bool is_parameter) {
+                                           VariableKind kind) {
   if (variable_to_info_.count(var)) {
     TINT_ICE(diagnostics_) << "Variable "
                            << builder_->Symbols().NameFor(var->symbol())
@@ -446,16 +431,20 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     return nullptr;
   }
 
-  // If the variable has a declared type, resolve it.
   std::string type_name;
-  const sem::Type* type = nullptr;
+  const sem::Type* storage_type = nullptr;
+
+  // If the variable has a declared type, resolve it.
   if (auto* ty = var->type()) {
     type_name = ty->FriendlyName(builder_->Symbols());
-    type = Type(ty);
-    if (!type) {
+    storage_type = Type(ty);
+    if (!storage_type) {
       return nullptr;
     }
   }
+
+  std::string rhs_type_name;
+  const sem::Type* rhs_type = nullptr;
 
   // Does the variable have a constructor?
   if (auto* ctor = var->constructor()) {
@@ -465,29 +454,54 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     }
 
     // Fetch the constructor's type
-    auto* rhs_type = TypeOf(ctor);
+    rhs_type_name = TypeNameOf(ctor);
+    rhs_type = TypeOf(ctor);
     if (!rhs_type) {
       return nullptr;
     }
 
     // If the variable has no declared type, infer it from the RHS
-    if (type == nullptr) {
-      type_name = TypeNameOf(ctor);
-      type = rhs_type->UnwrapPtr();
+    if (!storage_type) {
+      type_name = rhs_type_name;
+      storage_type = rhs_type->UnwrapRef();  // Implicit load of RHS
     }
-
-    if (!IsValidAssignment(type, rhs_type)) {
-      diagnostics_.add_error(
-          "variable of type '" + type_name +
-              "' cannot be initialized with a value of type '" +
-              TypeNameOf(ctor) + "'",
-          var->source());
-      return nullptr;
-    }
-  } else if (var->is_const() && !is_parameter &&
+  } else if (var->is_const() && kind != VariableKind::kParameter &&
              !ast::HasDecoration<ast::OverrideDecoration>(var->decorations())) {
     diagnostics_.add_error("let declarations must have initializers",
                            var->source());
+    return nullptr;
+  }
+
+  if (!storage_type) {
+    TINT_ICE(diagnostics_)
+        << "failed to determine storage type for variable '" +
+               builder_->Symbols().NameFor(var->symbol()) + "'\n"
+        << "Source: " << var->source();
+    return nullptr;
+  }
+
+  auto storage_class = var->declared_storage_class();
+  if (storage_class == ast::StorageClass::kNone) {
+    if (storage_type->UnwrapRef()->is_handle()) {
+      // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
+      // If the store type is a texture type or a sampler type, then the
+      // variable declaration must not have a storage class decoration. The
+      // storage class will always be handle.
+      storage_class = ast::StorageClass::kUniformConstant;
+    } else if (kind == VariableKind::kLocal && !var->is_const()) {
+      storage_class = ast::StorageClass::kFunction;
+    }
+  }
+
+  auto* type = storage_type;
+  if (!var->is_const()) {
+    // Variable declaration. Unlike `let`, `var` has storage.
+    // Variables are always of a reference type to the declared storage type.
+    type = builder_->create<sem::Reference>(storage_type, storage_class);
+  }
+
+  if (rhs_type && !ValidateVariableConstructor(var, storage_type, type_name,
+                                               rhs_type, rhs_type_name)) {
     return nullptr;
   }
 
@@ -519,10 +533,37 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
   }
 
   auto* info = variable_infos_.Create(var, const_cast<sem::Type*>(type),
-                                      type_name, access_control);
+                                      type_name, storage_class, access_control);
   variable_to_info_.emplace(var, info);
 
   return info;
+}
+
+bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
+                                           const sem::Type* storage_type,
+                                           const std::string& type_name,
+                                           const sem::Type* rhs_type,
+                                           const std::string& rhs_type_name) {
+  auto* value_type = rhs_type->UnwrapRef();  // Implicit load of RHS
+
+  // RHS needs to be of a storable type
+  if (!var->is_const() && !IsStorable(value_type)) {
+    diagnostics_.add_error(
+        "'" + rhs_type_name + "' is not storable for assignment",
+        var->constructor()->source());
+    return false;
+  }
+
+  // Value type has to match storage type
+  if (storage_type->UnwrapAccess() != value_type->UnwrapAccess()) {
+    std::string decl = var->is_const() ? "let" : "var";
+    diagnostics_.add_error("cannot initialize " + decl + " of type '" +
+                               type_name + "' with value of type '" +
+                               rhs_type_name + "'",
+                           var->source());
+    return false;
+  }
+  return true;
 }
 
 bool Resolver::GlobalVariable(ast::Variable* var) {
@@ -534,7 +575,7 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     return false;
   }
 
-  auto* info = Variable(var, /* is_parameter */ false);
+  auto* info = Variable(var, VariableKind::kGlobal);
   if (!info) {
     return false;
   }
@@ -571,8 +612,9 @@ bool Resolver::GlobalVariable(ast::Variable* var) {
     return false;
   }
 
-  if (!ApplyStorageClassUsageToType(info->storage_class, info->type,
-                                    var->source())) {
+  if (!ApplyStorageClassUsageToType(
+          info->storage_class, const_cast<sem::Type*>(info->type->UnwrapRef()),
+          var->source())) {
     diagnostics_.add_note("while instantiating variable " +
                               builder_->Symbols().NameFor(var->symbol()),
                           var->source());
@@ -636,7 +678,8 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       // attributes.
       if (!binding_point) {
         diagnostics_.add_error(
-            "resource variables require [[group]] and [[binding]] decorations",
+            "resource variables require [[group]] and [[binding]] "
+            "decorations",
             info->declaration->source());
         return false;
       }
@@ -666,7 +709,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       // attribute, satisfying the storage class constraints.
 
       auto* str = info->access_control != ast::AccessControl::kInvalid
-                      ? info->type->As<sem::Struct>()
+                      ? info->type->UnwrapRef()->As<sem::Struct>()
                       : nullptr;
 
       if (!str) {
@@ -695,7 +738,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       // A variable in the uniform storage class is a uniform buffer variable.
       // Its store type must be a host-shareable structure type with block
       // attribute, satisfying the storage class constraints.
-      auto* str = info->type->As<sem::Struct>();
+      auto* str = info->type->UnwrapRef()->As<sem::Struct>();
       if (!str) {
         diagnostics_.add_error(
             "variables declared in the <uniform> storage class must be of a "
@@ -726,8 +769,8 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
 
 bool Resolver::ValidateVariable(const VariableInfo* info) {
   auto* var = info->declaration;
-  auto* type = info->type;
-  if (auto* r = type->As<sem::Array>()) {
+  auto* storage_type = info->type->UnwrapRef();
+  if (auto* r = storage_type->As<sem::Array>()) {
     if (r->IsRuntimeSized()) {
       diagnostics_.add_error(
           "v-0015",
@@ -737,15 +780,14 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     }
   }
 
-  if (auto* r = type->As<sem::MultisampledTexture>()) {
+  if (auto* r = storage_type->As<sem::MultisampledTexture>()) {
     if (r->dim() != ast::TextureDimension::k2d) {
       diagnostics_.add_error("Only 2d multisampled textures are supported",
                              var->source());
       return false;
     }
 
-    auto* data_type = r->type()->UnwrapAll();
-    if (!data_type->is_numeric_scalar()) {
+    if (!r->type()->UnwrapRef()->is_numeric_scalar()) {
       diagnostics_.add_error(
           "texture_multisampled_2d<type>: type must be f32, i32 or u32",
           var->source());
@@ -753,7 +795,7 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     }
   }
 
-  if (auto* storage_tex = type->As<sem::StorageTexture>()) {
+  if (auto* storage_tex = info->type->UnwrapRef()->As<sem::StorageTexture>()) {
     if (storage_tex->access_control() == ast::AccessControl::kInvalid) {
       diagnostics_.add_error("Storage Textures must have access control.",
                              var->source());
@@ -786,12 +828,12 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
     }
   }
 
-  if (type->UnwrapAll()->is_handle() &&
+  if (storage_type->is_handle() &&
       var->declared_storage_class() != ast::StorageClass::kNone) {
     // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
-    // If the store type is a texture type or a sampler type, then the variable
-    // declaration must not have a storage class decoration. The storage class
-    // will always be handle.
+    // If the store type is a texture type or a sampler type, then the
+    // variable declaration must not have a storage class decoration. The
+    // storage class will always be handle.
     diagnostics_.add_error("variables of type '" + info->type_name +
                                "' must not have a storage class",
                            var->source());
@@ -893,10 +935,10 @@ bool Resolver::ValidateFunction(const ast::Function* func,
 bool Resolver::ValidateEntryPoint(const ast::Function* func,
                                   const FunctionInfo* info) {
   // Use a lambda to validate the entry point decorations for a type.
-  // Persistent state is used to track which builtins and locations have already
-  // been seen, in order to catch conflicts.
-  // TODO(jrprice): This state could be stored in FunctionInfo instead, and then
-  // passed to sem::Function since it would be useful there too.
+  // Persistent state is used to track which builtins and locations have
+  // already been seen, in order to catch conflicts.
+  // TODO(jrprice): This state could be stored in FunctionInfo instead, and
+  // then passed to sem::Function since it would be useful there too.
   std::unordered_set<ast::Builtin> builtins;
   std::unordered_set<uint32_t> locations;
   enum class ParamOrRetType {
@@ -1147,7 +1189,7 @@ bool Resolver::Function(ast::Function* func) {
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
     Mark(param);
-    auto* param_info = Variable(param, /* is_parameter */ true);
+    auto* param_info = Variable(param, VariableKind::kParameter);
     if (!param_info) {
       return false;
     }
@@ -1377,7 +1419,7 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
     return false;
   }
 
-  auto* cond_type = TypeOf(stmt->condition())->UnwrapAll();
+  auto* cond_type = TypeOf(stmt->condition())->UnwrapRef();
   if (cond_type != builder_->ty.bool_()) {
     diagnostics_.add_error("if statement condition must be bool, got " +
                                cond_type->FriendlyName(builder_->Symbols()),
@@ -1409,7 +1451,7 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
         return false;
       }
 
-      auto* else_cond_type = TypeOf(cond)->UnwrapAll();
+      auto* else_cond_type = TypeOf(cond)->UnwrapRef();
       if (else_cond_type != builder_->ty.bool_()) {
         diagnostics_.add_error(
             "else statement condition must be bool, got " +
@@ -1525,7 +1567,7 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
   }
 
   auto* res = TypeOf(expr->array());
-  auto* parent_type = res->UnwrapAll();
+  auto* parent_type = res->UnwrapRef();
   const sem::Type* ret = nullptr;
   if (auto* arr = parent_type->As<sem::Array>()) {
     ret = arr->ElemType();
@@ -1540,15 +1582,9 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
     return false;
   }
 
-  // If we're extracting from a pointer, we return a pointer.
-  if (auto* ptr = res->As<sem::Pointer>()) {
-    ret = builder_->create<sem::Pointer>(ret, ptr->StorageClass());
-  } else if (auto* arr = parent_type->As<sem::Array>()) {
-    if (!arr->ElemType()->is_scalar()) {
-      // If we extract a non-scalar from an array then we also get a pointer. We
-      // will generate a Function storage class variable to store this into.
-      ret = builder_->create<sem::Pointer>(ret, ast::StorageClass::kFunction);
-    }
+  // If we're extracting from a reference, we return a reference.
+  if (auto* ref = res->As<sem::Reference>()) {
+    ret = builder_->create<sem::Reference>(ret, ref->StorageClass());
   }
   SetType(expr, ret);
 
@@ -1569,9 +1605,9 @@ bool Resolver::Call(ast::CallExpression* call) {
     return false;
   }
 
-  // The expression has to be an identifier as you can't store function pointers
-  // but, if it isn't we'll just use the normal result determination to be on
-  // the safe side.
+  // The expression has to be an identifier as you can't store function
+  // pointers but, if it isn't we'll just use the normal result determination
+  // to be on the safe side.
   Mark(call->func());
   auto* ident = call->func()->As<ast::IdentifierExpression>();
   if (!ident) {
@@ -1605,7 +1641,8 @@ bool Resolver::Call(ast::CallExpression* call) {
       auto* callee_func = callee_func_it->second;
 
       // Note: Requires called functions to be resolved first.
-      // This is currently guaranteed as functions must be declared before use.
+      // This is currently guaranteed as functions must be declared before
+      // use.
       current_function_->transitive_calls.add(callee_func);
       for (auto* transitive_call : callee_func->transitive_calls) {
         current_function_->transitive_calls.add(transitive_call);
@@ -1692,10 +1729,10 @@ bool Resolver::ValidateVectorConstructor(
     const ast::TypeConstructorExpression* ctor,
     const sem::Vector* vec_type) {
   auto& values = ctor->values();
-  auto* elem_type = vec_type->type()->UnwrapAll();
+  auto* elem_type = vec_type->type();
   size_t value_cardinality_sum = 0;
   for (auto* value : values) {
-    auto* value_type = TypeOf(value)->UnwrapAll();
+    auto* value_type = TypeOf(value)->UnwrapRef();
     if (value_type->is_scalar()) {
       if (elem_type != value_type) {
         diagnostics_.add_error(
@@ -1709,7 +1746,7 @@ bool Resolver::ValidateVectorConstructor(
 
       value_cardinality_sum++;
     } else if (auto* value_vec = value_type->As<sem::Vector>()) {
-      auto* value_elem_type = value_vec->type()->UnwrapAll();
+      auto* value_elem_type = value_vec->type();
       // A mismatch of vector type parameter T is only an error if multiple
       // arguments are present. A single argument constructor constitutes a
       // type conversion expression.
@@ -1766,7 +1803,7 @@ bool Resolver::ValidateMatrixConstructor(
     return true;
   }
 
-  auto* elem_type = matrix_type->type()->UnwrapAll();
+  auto* elem_type = matrix_type->type();
   if (matrix_type->columns() != values.size()) {
     const Source& values_start = values[0]->source();
     const Source& values_end = values[values.size() - 1]->source();
@@ -1780,11 +1817,11 @@ bool Resolver::ValidateMatrixConstructor(
   }
 
   for (auto* value : values) {
-    auto* value_type = TypeOf(value)->UnwrapAll();
+    auto* value_type = TypeOf(value)->UnwrapRef();
     auto* value_vec = value_type->As<sem::Vector>();
 
     if (!value_vec || value_vec->size() != matrix_type->rows() ||
-        elem_type != value_vec->type()->UnwrapAll()) {
+        elem_type != value_vec->type()) {
       diagnostics_.add_error("expected argument type '" +
                                  VectorPretty(matrix_type->rows(), elem_type) +
                                  "' in '" + TypeNameOf(ctor) +
@@ -1802,26 +1839,15 @@ bool Resolver::Identifier(ast::IdentifierExpression* expr) {
   auto symbol = expr->symbol();
   VariableInfo* var;
   if (variable_stack_.get(symbol, &var)) {
-    // A constant is the type, but a variable is always a pointer so synthesize
-    // the pointer around the variable type.
-    if (var->declaration->is_const()) {
-      SetType(expr, var->type, var->type_name);
-    } else if (var->type->Is<sem::Pointer>()) {
-      SetType(expr, var->type, var->type_name);
-    } else {
-      SetType(expr,
-              builder_->create<sem::Pointer>(const_cast<sem::Type*>(var->type),
-                                             var->storage_class),
-              var->type_name);
-    }
+    SetType(expr, var->type, var->type_name);
 
     var->users.push_back(expr);
     set_referenced_from_function_if_needed(var, true);
 
     if (current_block_) {
-      // If identifier is part of a loop continuing block, make sure it doesn't
-      // refer to a variable that is bypassed by a continue statement in the
-      // loop's body block.
+      // If identifier is part of a loop continuing block, make sure it
+      // doesn't refer to a variable that is bypassed by a continue statement
+      // in the loop's body block.
       if (auto* continuing_block = current_block_->FindFirstParent(
               sem::BlockStatement::Type::kLoopContinuing)) {
         auto* loop_block =
@@ -1878,13 +1904,13 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     return false;
   }
 
-  auto* res = TypeOf(expr->structure());
-  auto* data_type = res->UnwrapAll();
+  auto* structure = TypeOf(expr->structure());
+  auto* storage_type = structure->UnwrapRef();
 
   sem::Type* ret = nullptr;
   std::vector<uint32_t> swizzle;
 
-  if (auto* str = data_type->As<sem::Struct>()) {
+  if (auto* str = storage_type->As<sem::Struct>()) {
     Mark(expr->member());
     auto symbol = expr->member()->symbol();
 
@@ -1904,14 +1930,14 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
       return false;
     }
 
-    // If we're extracting from a pointer, we return a pointer.
-    if (auto* ptr = res->As<sem::Pointer>()) {
-      ret = builder_->create<sem::Pointer>(ret, ptr->StorageClass());
+    // If we're extracting from a reference, we return a reference.
+    if (auto* ref = structure->As<sem::Reference>()) {
+      ret = builder_->create<sem::Reference>(ret, ref->StorageClass());
     }
 
     builder_->Sem().Add(expr, builder_->create<sem::StructMemberAccess>(
                                   expr, ret, current_statement_, member));
-  } else if (auto* vec = data_type->As<sem::Vector>()) {
+  } else if (auto* vec = storage_type->As<sem::Vector>()) {
     Mark(expr->member());
     std::string s = builder_->Symbols().NameFor(expr->member()->symbol());
     auto size = s.size();
@@ -1967,9 +1993,9 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
     if (size == 1) {
       // A single element swizzle is just the type of the vector.
       ret = vec->type();
-      // If we're extracting from a pointer, we return a pointer.
-      if (auto* ptr = res->As<sem::Pointer>()) {
-        ret = builder_->create<sem::Pointer>(ret, ptr->StorageClass());
+      // If we're extracting from a reference, we return a reference.
+      if (auto* ref = structure->As<sem::Reference>()) {
+        ret = builder_->create<sem::Reference>(ret, ref->StorageClass());
       }
     } else {
       // The vector will have a number of components equal to the length of
@@ -1983,7 +2009,7 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
   } else {
     diagnostics_.add_error(
         "invalid use of member accessor on a non-vector/non-struct " +
-            data_type->type_name(),
+            TypeNameOf(expr->structure()),
         expr->source());
     return false;
   }
@@ -2001,8 +2027,8 @@ bool Resolver::ValidateBinary(ast::BinaryExpression* expr) {
   using Matrix = sem::Matrix;
   using Vector = sem::Vector;
 
-  auto* lhs_type = const_cast<sem::Type*>(TypeOf(expr->lhs())->UnwrapAll());
-  auto* rhs_type = const_cast<sem::Type*>(TypeOf(expr->rhs())->UnwrapAll());
+  auto* lhs_type = const_cast<sem::Type*>(TypeOf(expr->lhs())->UnwrapRef());
+  auto* rhs_type = const_cast<sem::Type*>(TypeOf(expr->rhs())->UnwrapRef());
 
   auto* lhs_vec = lhs_type->As<Vector>();
   auto* lhs_vec_elem_type = lhs_vec ? lhs_vec->type() : nullptr;
@@ -2169,7 +2195,7 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
   if (expr->IsAnd() || expr->IsOr() || expr->IsXor() || expr->IsShiftLeft() ||
       expr->IsShiftRight() || expr->IsAdd() || expr->IsSubtract() ||
       expr->IsDivide() || expr->IsModulo()) {
-    SetType(expr, TypeOf(expr->lhs())->UnwrapPtr());
+    SetType(expr, TypeOf(expr->lhs())->UnwrapRef());
     return true;
   }
   // Result type is a scalar or vector of boolean type
@@ -2177,7 +2203,7 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
       expr->IsNotEqual() || expr->IsLessThan() || expr->IsGreaterThan() ||
       expr->IsLessThanEqual() || expr->IsGreaterThanEqual()) {
     auto* bool_type = builder_->create<sem::Bool>();
-    auto* param_type = TypeOf(expr->lhs())->UnwrapAll();
+    auto* param_type = TypeOf(expr->lhs())->UnwrapRef();
     sem::Type* result_type = bool_type;
     if (auto* vec = param_type->As<sem::Vector>()) {
       result_type = builder_->create<sem::Vector>(bool_type, vec->size());
@@ -2186,8 +2212,8 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
     return true;
   }
   if (expr->IsMultiply()) {
-    auto* lhs_type = TypeOf(expr->lhs())->UnwrapAll();
-    auto* rhs_type = TypeOf(expr->rhs())->UnwrapAll();
+    auto* lhs_type = TypeOf(expr->lhs())->UnwrapRef();
+    auto* rhs_type = TypeOf(expr->rhs())->UnwrapRef();
 
     // Note, the ordering here matters. The later checks depend on the prior
     // checks having been done.
@@ -2234,16 +2260,55 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
   return false;
 }
 
-bool Resolver::UnaryOp(ast::UnaryOpExpression* expr) {
-  Mark(expr->expr());
+bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
+  Mark(unary->expr());
 
-  // Result type matches the parameter type.
-  if (!Expression(expr->expr())) {
+  // Resolve the inner expression
+  if (!Expression(unary->expr())) {
     return false;
   }
 
-  auto* result_type = TypeOf(expr->expr())->UnwrapPtr();
-  SetType(expr, result_type);
+  auto* expr_type = TypeOf(unary->expr());
+  if (!expr_type) {
+    return false;
+  }
+
+  std::string type_name;
+  const sem::Type* type = nullptr;
+
+  switch (unary->op()) {
+    case ast::UnaryOp::kNegation:
+    case ast::UnaryOp::kNot:
+      // Result type matches the deref'd inner type.
+      type_name = TypeNameOf(unary->expr());
+      type = expr_type->UnwrapRef();
+      break;
+
+    case ast::UnaryOp::kAddressOf:
+      if (auto* ref = expr_type->As<sem::Reference>()) {
+        type = builder_->create<sem::Pointer>(ref->StoreType(),
+                                              ref->StorageClass());
+      } else {
+        diagnostics_.add_error("cannot take the address of expression",
+                               unary->expr()->source());
+        return false;
+      }
+      break;
+
+    case ast::UnaryOp::kIndirection:
+      if (auto* ptr = expr_type->As<sem::Pointer>()) {
+        type = builder_->create<sem::Reference>(ptr->StoreType(),
+                                                ptr->StorageClass());
+      } else {
+        diagnostics_.add_error("cannot dereference expression of type '" +
+                                   TypeNameOf(unary->expr()) + "'",
+                               unary->expr()->source());
+        return false;
+      }
+      break;
+  }
+
+  SetType(unary, type);
   return true;
 }
 
@@ -2257,11 +2322,11 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     diagnostics_.add_error(error_code,
                            "redeclared identifier '" +
                                builder_->Symbols().NameFor(var->symbol()) + "'",
-                           stmt->source());
+                           var->source());
     return false;
   }
 
-  auto* info = Variable(var, /* is_parameter */ false);
+  auto* info = Variable(var, VariableKind::kLocal);
   if (!info) {
     return false;
   }
@@ -2357,8 +2422,8 @@ void Resolver::SetType(ast::Expression* expr,
 void Resolver::CreateSemanticNodes() const {
   auto& sem = builder_->Sem();
 
-  // Collate all the 'ancestor_entry_points' - this is a map of function symbol
-  // to all the entry points that transitively call the function.
+  // Collate all the 'ancestor_entry_points' - this is a map of function
+  // symbol to all the entry points that transitively call the function.
   std::unordered_map<Symbol, std::vector<Symbol>> ancestor_entry_points;
   for (auto* func : builder_->AST().Functions()) {
     auto it = function_to_info_.find(func);
@@ -2641,7 +2706,7 @@ bool Resolver::ValidateArrayStrideDecoration(const ast::StrideDecoration* deco,
 
 bool Resolver::ValidateStructure(const sem::Struct* str) {
   for (auto* member : str->Members()) {
-    if (auto* r = member->Type()->UnwrapAll()->As<sem::Array>()) {
+    if (auto* r = member->Type()->As<sem::Array>()) {
       if (r->IsRuntimeSized()) {
         if (member != str->Members().back()) {
           diagnostics_.add_error(
@@ -2738,8 +2803,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     for (auto* deco : member->decorations()) {
       Mark(deco);
       if (auto* o = deco->As<ast::StructMemberOffsetDecoration>()) {
-        // Offset decorations are not part of the WGSL spec, but are emitted by
-        // the SPIR-V reader.
+        // Offset decorations are not part of the WGSL spec, but are emitted
+        // by the SPIR-V reader.
         if (o->offset() < struct_size) {
           diagnostics_.add_error("offsets must be in ascending order",
                                  o->source());
@@ -2805,10 +2870,10 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
   auto* func_type = current_function_->return_type;
 
-  auto* ret_type = ret->has_value() ? TypeOf(ret->value())->UnwrapAll()
+  auto* ret_type = ret->has_value() ? TypeOf(ret->value())->UnwrapRef()
                                     : builder_->ty.void_();
 
-  if (func_type->UnwrapAll() != ret_type) {
+  if (func_type->UnwrapRef() != ret_type) {
     diagnostics_.add_error("v-000y",
                            "return statement type must match its function "
                            "return type, returned '" +
@@ -2828,8 +2893,8 @@ bool Resolver::Return(ast::ReturnStatement* ret) {
   if (auto* value = ret->value()) {
     Mark(value);
 
-    // Validate after processing the return value expression so that its type is
-    // available for validation
+    // Validate after processing the return value expression so that its type
+    // is available for validation
     return Expression(value) && ValidateReturn(ret);
   }
 
@@ -2837,7 +2902,7 @@ bool Resolver::Return(ast::ReturnStatement* ret) {
 }
 
 bool Resolver::ValidateSwitch(const ast::SwitchStatement* s) {
-  auto* cond_type = TypeOf(s->condition())->UnwrapAll();
+  auto* cond_type = TypeOf(s->condition())->UnwrapRef();
   if (!cond_type->is_integer_scalar()) {
     diagnostics_.add_error("v-0025",
                            "switch statement selector expression must be of a "
@@ -2928,67 +2993,6 @@ bool Resolver::Switch(ast::SwitchStatement* s) {
   return true;
 }
 
-bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
-  auto* lhs = a->lhs();
-  auto* rhs = a->rhs();
-
-  // TODO(crbug.com/tint/659): This logic needs updating once pointers are
-  // pinned down in the WGSL spec.
-  auto* lhs_type = TypeOf(lhs)->UnwrapAll();
-  auto* rhs_type = TypeOf(rhs);
-  if (!IsValidAssignment(lhs_type, rhs_type)) {
-    diagnostics_.add_error("invalid assignment: cannot assign value of type '" +
-                               rhs_type->FriendlyName(builder_->Symbols()) +
-                               "' to a variable of type '" +
-                               lhs_type->FriendlyName(builder_->Symbols()) +
-                               "'",
-                           a->source());
-    return false;
-  }
-
-  // Pointers are not storable in WGSL, but the right-hand side must be
-  // storable. The raw right-hand side might be a pointer value which must be
-  // loaded (dereferenced) to provide the value to be stored.
-  auto* rhs_result_type = TypeOf(rhs)->UnwrapAll();
-  if (!IsStorable(rhs_result_type)) {
-    diagnostics_.add_error(
-        "v-000x",
-        "invalid assignment: right-hand-side is not storable: " +
-            TypeOf(rhs)->FriendlyName(builder_->Symbols()),
-        a->source());
-    return false;
-  }
-
-  // lhs must be a pointer or a constant
-  auto* lhs_result_type = TypeOf(lhs)->UnwrapAccess();
-  if (!lhs_result_type->Is<sem::Pointer>()) {
-    // In case lhs is a constant identifier, output a nicer message as it's
-    // likely to be a common programmer error.
-    if (auto* ident = lhs->As<ast::IdentifierExpression>()) {
-      VariableInfo* var;
-      if (variable_stack_.get(ident->symbol(), &var) &&
-          var->declaration->is_const()) {
-        diagnostics_.add_error(
-            "v-0021",
-            "cannot re-assign a constant: '" +
-                builder_->Symbols().NameFor(ident->symbol()) + "'",
-            a->source());
-        return false;
-      }
-    }
-
-    // Issue a generic error.
-    diagnostics_.add_error(
-        "v-000x",
-        "invalid assignment: left-hand-side does not reference storage: " +
-            TypeOf(lhs)->FriendlyName(builder_->Symbols()),
-        a->source());
-    return false;
-  }
-
-  return true;
-}
-
 bool Resolver::Assignment(ast::AssignmentStatement* a) {
   Mark(a->lhs());
   Mark(a->rhs());
@@ -2999,10 +3003,52 @@ bool Resolver::Assignment(ast::AssignmentStatement* a) {
   return ValidateAssignment(a);
 }
 
+bool Resolver::ValidateAssignment(const ast::AssignmentStatement* a) {
+  // https://gpuweb.github.io/gpuweb/wgsl/#assignment-statement
+  auto const* lhs_type = TypeOf(a->lhs());
+  auto const* rhs_type = TypeOf(a->rhs());
+
+  auto* lhs_ref = lhs_type->As<sem::Reference>();
+  if (!lhs_ref) {
+    // LHS is not a reference, so it has no storage.
+    diagnostics_.add_error(
+        "cannot assign to value of type '" + TypeNameOf(a->lhs()) + "'",
+        a->lhs()->source());
+
+    return false;
+  }
+
+  auto* storage_type_with_access = lhs_ref->StoreType();
+
+  // TODO(crbug.com/tint/809): The originating variable of the left-hand side
+  // must not have an access(read) access attribute.
+  // https://gpuweb.github.io/gpuweb/wgsl/#assignment
+
+  auto* storage_type = storage_type_with_access->UnwrapAccess();
+  auto* value_type = rhs_type->UnwrapRef();  // Implicit load of RHS
+
+  // RHS needs to be of a storable type
+  if (!IsStorable(value_type)) {
+    diagnostics_.add_error("'" + TypeNameOf(a->rhs()) + "' is not storable",
+                           a->rhs()->source());
+    return false;
+  }
+
+  // Value type has to match storage type
+  if (storage_type != value_type) {
+    diagnostics_.add_error("cannot assign '" + TypeNameOf(a->rhs()) + "' to '" +
+                               TypeNameOf(a->lhs()) + "'",
+                           a->source());
+    return false;
+  }
+
+  return true;
+}
+
 bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
                                             sem::Type* ty,
                                             const Source& usage) {
-  ty = const_cast<sem::Type*>(ty->UnwrapAccess());
+  ty = const_cast<sem::Type*>(ty->UnwrapRef());
 
   if (auto* str = ty->As<sem::Struct>()) {
     if (str->StorageClassUsage().count(sc)) {
@@ -3079,23 +3125,15 @@ void Resolver::Mark(const ast::Node* node) {
 }
 
 Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,
-                                     sem::Type* ctype,
+                                     sem::Type* ty,
                                      const std::string& tn,
+                                     ast::StorageClass sc,
                                      ast::AccessControl::Access ac)
     : declaration(decl),
-      type(ctype),
+      type(ty),
       type_name(tn),
-      storage_class(decl->declared_storage_class()),
-      access_control(ac) {
-  if (storage_class == ast::StorageClass::kNone &&
-      type->UnwrapAll()->is_handle()) {
-    // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
-    // If the store type is a texture type or a sampler type, then the variable
-    // declaration must not have a storage class decoration. The storage class
-    // will always be handle.
-    storage_class = ast::StorageClass::kUniformConstant;
-  }
-}
+      storage_class(sc),
+      access_control(ac) {}
 
 Resolver::VariableInfo::~VariableInfo() = default;
 

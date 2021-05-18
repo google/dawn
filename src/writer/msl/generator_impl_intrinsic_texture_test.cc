@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/call_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/writer/msl/test_helper.h"
 
@@ -259,7 +260,14 @@ TEST_P(MslGeneratorIntrinsicTextureTest, Call) {
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
-  WrapInFunction(call);
+
+  Func("main", ast::VariableList{}, ty.void_(),
+       ast::StatementList{
+           create<ast::CallStatement>(call),
+       },
+       ast::DecorationList{
+           Stage(ast::PipelineStage::kFragment),
+       });
 
   GeneratorImpl& gen = Build();
 

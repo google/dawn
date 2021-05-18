@@ -17,6 +17,7 @@
 #include <algorithm>
 
 #include "src/program_builder.h"
+#include "src/sem/reference_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
 
@@ -106,6 +107,9 @@ ast::Type* Transform::CreateASTTypeFor(CloneContext* ctx, const sem::Type* ty) {
   if (auto* s = ty->As<sem::Struct>()) {
     return ctx->dst->create<ast::TypeName>(
         ctx->Clone(s->Declaration()->name()));
+  }
+  if (auto* s = ty->As<sem::Reference>()) {
+    return CreateASTTypeFor(ctx, s->StoreType());
   }
   TINT_UNREACHABLE(ctx->dst->Diagnostics())
       << "Unhandled type: " << ty->TypeInfo().name;

@@ -1019,18 +1019,24 @@ TEST_F(SpvParserMemoryTest,
     none
     __ptr_storage__u32
     {
-      ArrayAccessor[not set]{
-        MemberAccessor[not set]{
-          Identifier[not set]{myvar}
-          Identifier[not set]{field1}
+      UnaryOp[not set]{
+        address-of
+        ArrayAccessor[not set]{
+          MemberAccessor[not set]{
+            Identifier[not set]{myvar}
+            Identifier[not set]{field1}
+          }
+          ScalarConstructor[not set]{1u}
         }
-        ScalarConstructor[not set]{1u}
       }
     }
   }
 }
 Assignment{
-  Identifier[not set]{x_2}
+  UnaryOp[not set]{
+    indirection
+    Identifier[not set]{x_2}
+  }
   ScalarConstructor[not set]{0u}
 })")) << p->error();
 }
@@ -1082,12 +1088,15 @@ If{
   {
     Assignment{
       Identifier[not set]{x_2}
-      ArrayAccessor[not set]{
-        MemberAccessor[not set]{
-          Identifier[not set]{myvar}
-          Identifier[not set]{field1}
+      UnaryOp[not set]{
+        address-of
+        ArrayAccessor[not set]{
+          MemberAccessor[not set]{
+            Identifier[not set]{myvar}
+            Identifier[not set]{field1}
+          }
+          ScalarConstructor[not set]{1u}
         }
-        ScalarConstructor[not set]{1u}
       }
     }
   }

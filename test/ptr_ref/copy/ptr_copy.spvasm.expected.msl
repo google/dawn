@@ -1,0 +1,10 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol() {
+  uint x_10 = 0u;
+  uint* const x_1 = &(x_10);
+  uint* const x_2 = x_1;
+  return;
+}
+

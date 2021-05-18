@@ -28,7 +28,7 @@ struct tint_symbol_5 {
 };
 
 vertex tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol [[stage_in]], constant Uniforms& uniforms [[buffer(0)]]) {
-  const VertexInput input = {tint_symbol.cur_position, tint_symbol.color};
+  VertexInput const input = {tint_symbol.cur_position, tint_symbol.color};
   VertexOutput output = {};
   output.Position = (uniforms.modelViewProjectionMatrix * input.cur_position);
   output.vtxFragColor = input.color;
@@ -36,7 +36,7 @@ vertex tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol [[stage_in]], constant U
 }
 
 fragment tint_symbol_5 frag_main(tint_symbol_4 tint_symbol_3 [[stage_in]]) {
-  const float4 fragColor = tint_symbol_3.fragColor;
+  float4 const fragColor = tint_symbol_3.fragColor;
   return {fragColor};
 }
 

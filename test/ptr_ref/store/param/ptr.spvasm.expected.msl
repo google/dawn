@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void func(int value, int* pointer) {
+  *(pointer) = value;
+  return;
+}
+
+kernel void tint_symbol() {
+  int i = 0;
+  i = 123;
+  func(123, &(i));
+  return;
+}
+

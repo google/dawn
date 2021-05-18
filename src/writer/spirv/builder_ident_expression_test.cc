@@ -90,7 +90,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
-  auto* v = Var("var", ty.f32(), ast::StorageClass::kNone);
+  auto* v = Var("var", ty.f32(), ast::StorageClass::kFunction);
   auto* expr = Expr("var");
   WrapInFunction(v, expr);
 

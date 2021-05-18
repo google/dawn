@@ -19,6 +19,7 @@
 #include "src/sem/i32_type.h"
 #include "src/sem/matrix_type.h"
 #include "src/sem/pointer_type.h"
+#include "src/sem/reference_type.h"
 #include "src/sem/sampler_type.h"
 #include "src/sem/texture_type.h"
 #include "src/sem/u32_type.h"
@@ -43,21 +44,17 @@ const Type* Type::UnwrapPtr() const {
   return type;
 }
 
-const Type* Type::UnwrapAccess() const {
-  // TODO(amaiorano): Delete this function
+const Type* Type::UnwrapRef() const {
   auto* type = this;
+  if (auto* ref = type->As<sem::Reference>()) {
+    type = ref->StoreType();
+  }
   return type;
 }
 
-const Type* Type::UnwrapAll() const {
+const Type* Type::UnwrapAccess() const {
+  // TODO(amaiorano): Delete this function
   auto* type = this;
-  while (true) {
-    if (auto* ptr = type->As<sem::Pointer>()) {
-      type = ptr->StoreType();
-    } else {
-      break;
-    }
-  }
   return type;
 }
 

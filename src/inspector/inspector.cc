@@ -227,7 +227,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
       stage_variable.name = name;
 
       stage_variable.component_type = ComponentType::kUnknown;
-      auto* type = var->Type()->UnwrapAll();
+      auto* type = var->Type()->UnwrapRef();
       if (type->is_float_scalar_or_vector() || type->is_float_matrix()) {
         stage_variable.component_type = ComponentType::kFloat;
       } else if (type->is_unsigned_scalar_or_vector()) {
@@ -400,7 +400,7 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
     auto* var = ruv.first;
     auto binding_info = ruv.second;
 
-    auto* unwrapped_type = var->Type()->UnwrapAccess();
+    auto* unwrapped_type = var->Type()->UnwrapRef();
     auto* str = unwrapped_type->As<sem::Struct>();
     if (str == nullptr) {
       continue;
@@ -522,7 +522,7 @@ std::vector<ResourceBinding> Inspector::GetDepthTextureResourceBindings(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->Type()->UnwrapAccess()->As<sem::Texture>();
+    auto* texture_type = var->Type()->UnwrapRef()->As<sem::Texture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
@@ -550,7 +550,7 @@ std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->Type()->UnwrapAccess()->As<sem::Texture>();
+    auto* texture_type = var->Type()->UnwrapRef()->As<sem::Texture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
@@ -584,7 +584,7 @@ void Inspector::AddEntryPointInOutVariables(
     return;
   }
 
-  auto* unwrapped_type = type->UnwrapAll();
+  auto* unwrapped_type = type->UnwrapRef();
 
   if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {
     // Recurse into members.
@@ -641,7 +641,7 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
       continue;
     }
 
-    auto* str = var->Type()->UnwrapAccess()->As<sem::Struct>();
+    auto* str = var->Type()->UnwrapRef()->As<sem::Struct>();
     if (!str) {
       continue;
     }
@@ -685,7 +685,7 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
     entry.bind_group = binding_info.group->value();
     entry.binding = binding_info.binding->value();
 
-    auto* texture_type = var->Type()->UnwrapAccess()->As<sem::Texture>();
+    auto* texture_type = var->Type()->UnwrapRef()->As<sem::Texture>();
     entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(
         texture_type->dim());
 
@@ -717,7 +717,7 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
     auto* var = ref.first;
     auto binding_info = ref.second;
 
-    auto* texture_type = var->Type()->As<sem::StorageTexture>();
+    auto* texture_type = var->Type()->UnwrapRef()->As<sem::StorageTexture>();
 
     if (read_only !=
         (texture_type->access_control() == ast::AccessControl::kReadOnly)) {

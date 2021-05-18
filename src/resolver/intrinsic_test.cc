@@ -182,7 +182,7 @@ TEST_P(ResolverIntrinsicTest_FloatMethod, TooManyParams) {
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(), "error: no matching call to " + name +
-                              "(ptr<in, f32>, f32)\n\n"
+                              "(f32, f32)\n\n"
                               "2 candidate functions:\n  " +
                               name + "(f32) -> bool\n  " + name +
                               "(vecN<f32>) -> vecN<bool>\n");
@@ -435,9 +435,8 @@ TEST_F(ResolverIntrinsicTest, Dot_Error_VectorInt) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(
-      r()->error(),
-      R"(error: no matching call to dot(ptr<in, vec4<i32>>, ptr<in, vec4<i32>>)
+  EXPECT_EQ(r()->error(),
+            R"(error: no matching call to dot(vec4<i32>, vec4<i32>)
 
 1 candidate function:
   dot(vecN<f32>, vecN<f32>) -> f32
@@ -793,7 +792,7 @@ TEST_F(ResolverIntrinsicDataTest, ArrayLength_Error_ArraySized) {
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "error: no matching call to arrayLength(ptr<in, array<i32, 4>>)\n\n"
+            "error: no matching call to arrayLength(array<i32, 4>)\n\n"
             "1 candidate function:\n"
             "  arrayLength(array<T>) -> u32\n");
 }
@@ -823,7 +822,7 @@ TEST_F(ResolverIntrinsicDataTest, Normalize_Error_NoParams) {
 
 TEST_F(ResolverIntrinsicDataTest, FrexpScalar) {
   Global("exp", ty.i32(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("frexp", 1.0f, "exp");
+  auto* call = Call("frexp", 1.0f, AddressOf("exp"));
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -834,7 +833,7 @@ TEST_F(ResolverIntrinsicDataTest, FrexpScalar) {
 
 TEST_F(ResolverIntrinsicDataTest, FrexpVector) {
   Global("exp", ty.vec3<i32>(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("frexp", vec3<f32>(1.0f, 2.0f, 3.0f), "exp");
+  auto* call = Call("frexp", vec3<f32>(1.0f, 2.0f, 3.0f), AddressOf("exp"));
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -846,7 +845,7 @@ TEST_F(ResolverIntrinsicDataTest, FrexpVector) {
 
 TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
   Global("exp", ty.i32(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("frexp", 1, "exp");
+  auto* call = Call("frexp", 1, AddressOf("exp"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
@@ -861,7 +860,7 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_FirstParamInt) {
 
 TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamFloatPtr) {
   Global("exp", ty.f32(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("frexp", 1.0f, "exp");
+  auto* call = Call("frexp", 1.0f, AddressOf("exp"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
@@ -890,23 +889,24 @@ TEST_F(ResolverIntrinsicDataTest, Frexp_Error_SecondParamNotAPointer) {
 
 TEST_F(ResolverIntrinsicDataTest, Frexp_Error_VectorSizesDontMatch) {
   Global("exp", ty.vec4<i32>(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("frexp", vec2<f32>(1.0f, 2.0f), "exp");
+  auto* call = Call("frexp", vec2<f32>(1.0f, 2.0f), AddressOf("exp"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "error: no matching call to frexp(vec2<f32>, ptr<workgroup, "
-            "vec4<i32>>)\n\n"
-            "2 candidate functions:\n"
-            "  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32\n"
-            "  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  "
-            "where: T is i32 or u32\n");
+  EXPECT_EQ(
+      r()->error(),
+      R"(error: no matching call to frexp(vec2<f32>, ptr<workgroup, vec4<i32>>)
+
+2 candidate functions:
+  frexp(f32, ptr<T>) -> f32  where: T is i32 or u32
+  frexp(vecN<f32>, ptr<vecN<T>>) -> vecN<f32>  where: T is i32 or u32
+)");
 }
 
 TEST_F(ResolverIntrinsicDataTest, ModfScalar) {
   Global("whole", ty.f32(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("modf", 1.0f, "whole");
+  auto* call = Call("modf", 1.0f, AddressOf("whole"));
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -917,7 +917,7 @@ TEST_F(ResolverIntrinsicDataTest, ModfScalar) {
 
 TEST_F(ResolverIntrinsicDataTest, ModfVector) {
   Global("whole", ty.vec3<f32>(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("modf", vec3<f32>(1.0f, 2.0f, 3.0f), "whole");
+  auto* call = Call("modf", vec3<f32>(1.0f, 2.0f, 3.0f), AddressOf("whole"));
   WrapInFunction(call);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -929,7 +929,7 @@ TEST_F(ResolverIntrinsicDataTest, ModfVector) {
 
 TEST_F(ResolverIntrinsicDataTest, Modf_Error_FirstParamInt) {
   Global("whole", ty.f32(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("modf", 1, "whole");
+  auto* call = Call("modf", 1, AddressOf("whole"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
@@ -943,7 +943,7 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_FirstParamInt) {
 
 TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamIntPtr) {
   Global("whole", ty.i32(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("modf", 1.0f, "whole");
+  auto* call = Call("modf", 1.0f, AddressOf("whole"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
@@ -970,17 +970,19 @@ TEST_F(ResolverIntrinsicDataTest, Modf_Error_SecondParamNotAPointer) {
 
 TEST_F(ResolverIntrinsicDataTest, Modf_Error_VectorSizesDontMatch) {
   Global("whole", ty.vec4<f32>(), ast::StorageClass::kWorkgroup);
-  auto* call = Call("modf", vec2<f32>(1.0f, 2.0f), "whole");
+  auto* call = Call("modf", vec2<f32>(1.0f, 2.0f), AddressOf("whole"));
   WrapInFunction(call);
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(r()->error(),
-            "error: no matching call to modf(vec2<f32>, ptr<workgroup, "
-            "vec4<f32>>)\n\n"
-            "2 candidate functions:\n"
-            "  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>\n"
-            "  modf(f32, ptr<f32>) -> f32\n");
+  EXPECT_EQ(
+      r()->error(),
+      R"(error: no matching call to modf(vec2<f32>, ptr<workgroup, vec4<f32>>)
+
+2 candidate functions:
+  modf(vecN<f32>, ptr<vecN<f32>>) -> vecN<f32>
+  modf(f32, ptr<f32>) -> f32
+)");
 }
 
 using ResolverIntrinsicTest_SingleParam_FloatOrInt =
@@ -1652,11 +1654,10 @@ TEST_F(ResolverIntrinsicTest, Determinant_NotSquare) {
 
   EXPECT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(
-      r()->error(),
-      "error: no matching call to determinant(ptr<private, mat2x3<f32>>)\n\n"
-      "1 candidate function:\n"
-      "  determinant(matNxN<f32>) -> f32\n");
+  EXPECT_EQ(r()->error(),
+            "error: no matching call to determinant(mat2x3<f32>)\n\n"
+            "1 candidate function:\n"
+            "  determinant(matNxN<f32>) -> f32\n");
 }
 
 TEST_F(ResolverIntrinsicTest, Determinant_NotMatrix) {
@@ -1668,7 +1669,7 @@ TEST_F(ResolverIntrinsicTest, Determinant_NotMatrix) {
   EXPECT_FALSE(r()->Resolve());
 
   EXPECT_EQ(r()->error(),
-            "error: no matching call to determinant(ptr<private, f32>)\n\n"
+            "error: no matching call to determinant(f32)\n\n"
             "1 candidate function:\n"
             "  determinant(matNxN<f32>) -> f32\n");
 }

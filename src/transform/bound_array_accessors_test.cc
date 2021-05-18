@@ -29,7 +29,7 @@ var<private> a : array<f32, 3>;
 let c : u32 = 1u;
 
 fn f() {
-  let b : ptr<private, f32> = a[c];
+  let b : f32 = a[c];
 }
 )";
 
@@ -39,7 +39,7 @@ var<private> a : array<f32, 3>;
 let c : u32 = 1u;
 
 fn f() {
-  let b : ptr<private, f32> = a[min(u32(c), 2u)];
+  let b : f32 = a[min(u32(c), 2u)];
 }
 )";
 

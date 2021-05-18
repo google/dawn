@@ -766,7 +766,7 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
 
   b.push_function(Function{});
   ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateAccessorExpression(expr), 18u) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 19u) << b.error();
 
   EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
 %2 = OpTypeVector %3 2
@@ -791,6 +791,57 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
             R"(OpStore %14 %12
 %18 = OpAccessChain %17 %14 %16
+%19 = OpLoad %2 %18
+)");
+}
+
+TEST_F(BuilderTest, Accessor_Array_Of_Array_Of_f32) {
+  // let pos : array<array<f32, 2>, 3> = array<vec2<f32, 2>, 3>(
+  //   array<f32, 2>(0.0, 0.5),
+  //   array<f32, 2>(-0.5, -0.5),
+  //   array<f32, 2>(0.5, -0.5));
+  // pos[2][1]
+
+  auto* var =
+      Const("pos", ty.array(ty.vec2<f32>(), 3),
+            Construct(ty.array(ty.vec2<f32>(), 3), vec2<f32>(0.0f, 0.5f),
+                      vec2<f32>(-0.5f, -0.5f), vec2<f32>(0.5f, -0.5f)));
+
+  auto* expr = IndexAccessor(IndexAccessor("pos", 2u), 1u);
+  WrapInFunction(var, expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+  EXPECT_EQ(b.GenerateAccessorExpression(expr), 21u) << b.error();
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypeVector %3 2
+%4 = OpTypeInt 32 0
+%5 = OpConstant %4 3
+%1 = OpTypeArray %2 %5
+%6 = OpConstant %3 0
+%7 = OpConstant %3 0.5
+%8 = OpConstantComposite %2 %6 %7
+%9 = OpConstant %3 -0.5
+%10 = OpConstantComposite %2 %9 %9
+%11 = OpConstantComposite %2 %7 %9
+%12 = OpConstantComposite %1 %8 %10 %11
+%13 = OpTypePointer Function %1
+%15 = OpConstantNull %1
+%16 = OpConstant %4 2
+%17 = OpConstant %4 1
+%19 = OpTypePointer Function %3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%14 = OpVariable %13 Function %15
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %14 %12
+%18 = OpCompositeExtract %3 %14 1
+%20 = OpAccessChain %19 %18 %16
+%21 = OpLoad %3 %20
 )");
 }
 

@@ -142,7 +142,7 @@ Output CalculateArrayLength::Run(const Program* in, const DataMap&) {
           auto* storage_buffer_expr = accessor->structure();
           auto* storage_buffer_sem = sem.Get(storage_buffer_expr);
           auto* storage_buffer_type =
-              storage_buffer_sem->Type()->UnwrapAll()->As<sem::Struct>();
+              storage_buffer_sem->Type()->UnwrapRef()->As<sem::Struct>();
 
           // Generate BufferSizeIntrinsic for this storage type if we haven't
           // already

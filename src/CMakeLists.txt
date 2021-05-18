@@ -550,6 +550,8 @@ if(${TINT_BUILD_TESTS})
     resolver/intrinsic_test.cc
     resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc
+    resolver/ptr_ref_test.cc
+    resolver/ptr_ref_validation_test.cc
     resolver/pipeline_overridable_constant_test.cc
     resolver/resolver_test_helper.cc
     resolver/resolver_test_helper.h
@@ -561,6 +563,8 @@ if(${TINT_BUILD_TESTS})
     resolver/type_constructor_validation_test.cc
     resolver/type_validation_test.cc
     resolver/validation_test.cc
+    resolver/var_let_test.cc
+    resolver/var_let_validation_test.cc
     scope_stack_test.cc
     sem/intrinsic_test.cc
     symbol_table_test.cc

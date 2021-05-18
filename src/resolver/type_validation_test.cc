@@ -49,27 +49,6 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
   ASSERT_NE(TypeOf(rhs), nullptr);
 }
 
-TEST_F(ResolverTypeValidationTest, FunctionConstantNoConstructor_Fail) {
-  // {
-  // let a :i32;
-  // }
-  auto* var = Const(Source{{12, 34}}, "a", ty.i32(), nullptr);
-  WrapInFunction(var);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: let declarations must have initializers");
-}
-
-TEST_F(ResolverTypeValidationTest, GlobalConstantNoConstructor_Fail) {
-  // let a :i32;
-  GlobalConst(Source{{12, 34}}, "a", ty.i32(), nullptr);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error: let declarations must have initializers");
-}
-
 TEST_F(ResolverTypeValidationTest, GlobalConstantNoConstructor_Pass) {
   // [[override(0)]] let a :i32;
   GlobalConst(Source{{12, 34}}, "a", ty.i32(), nullptr,
@@ -117,19 +96,6 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableUnique_Pass) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverTypeValidationTest, GlobalVariableNotUnique_Fail) {
-  // var global_var : f32 = 0.1;
-  // var global_var : i32 = 0;
-  Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(0.1f));
-
-  Global(Source{{12, 34}}, "global_var", ty.i32(), ast::StorageClass::kPrivate,
-         Expr(0));
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error v-0011: redeclared global identifier 'global_var'");
-}
-
 TEST_F(ResolverTypeValidationTest,
        GlobalVariableFunctionVariableNotUnique_Pass) {
   // fn my_func() {
@@ -144,48 +110,6 @@ TEST_F(ResolverTypeValidationTest,
   Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(ResolverTypeValidationTest,
-       GlobalVariableFunctionVariableNotUnique_Fail) {
-  // var a: f32 = 2.1;
-  // fn my_func() {
-  //   var a: f32 = 2.0;
-  //   return 0;
-  // }
-
-  Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1f));
-
-  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
-
-  Func("my_func", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           Decl(Source{{12, 34}}, var),
-       },
-       ast::DecorationList{});
-
-  EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(r()->error(), "12:34 error v-0013: redeclared identifier 'a'");
-}
-
-TEST_F(ResolverTypeValidationTest, RedeclaredIdentifier_Fail) {
-  // fn my_func()() {
-  //  var a :i32 = 2;
-  //  var a :f21 = 2.0;
-  // }
-  auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
-
-  auto* var_a_float = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(0.1f));
-
-  Func("my_func", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
-           Decl(var),
-           Decl(Source{{12, 34}}, var_a_float),
-       },
-       ast::DecorationList{});
-
-  EXPECT_FALSE(r()->Resolve()) << r()->error();
-  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'a'");
 }
 
 TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScope_Pass) {
@@ -209,31 +133,6 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScope_Pass) {
   EXPECT_TRUE(r()->Resolve());
 }
 
-TEST_F(ResolverTypeValidationTest,
-       DISABLED_RedeclaredIdentifierInnerScope_False) {
-  // TODO(sarahM0): remove DISABLED after implementing ValidateIfStatement
-  // and it should just work
-  // {
-  // var a : f32 = 3.14;
-  // if (true) { var a : f32 = 2.0; }
-  // }
-  auto* var_a_float = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(3.1f));
-
-  auto* var = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2.0f));
-
-  auto* cond = Expr(true);
-  auto* body = Block(Decl(Source{{12, 34}}, var));
-
-  auto* outer_body =
-      Block(Decl(var_a_float),
-            create<ast::IfStatement>(cond, body, ast::ElseStatementList{}));
-
-  WrapInFunction(outer_body);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'a'");
-}
-
 TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Pass) {
   // {
   //  { var a : f32; }
@@ -248,23 +147,6 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Pass) {
   WrapInFunction(outer_body);
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
-}
-
-TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierInnerScopeBlock_Fail) {
-  // {
-  //  var a : f32;
-  //  { var a : f32; }
-  // }
-  auto* var_inner = Var("a", ty.f32(), ast::StorageClass::kNone);
-  auto* inner = Block(Decl(Source{{12, 34}}, var_inner));
-
-  auto* var_outer = Var("a", ty.f32(), ast::StorageClass::kNone);
-  auto* outer_body = Block(Decl(var_outer), inner);
-
-  WrapInFunction(outer_body);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(), "12:34 error v-0014: redeclared identifier 'a'");
 }
 
 TEST_F(ResolverTypeValidationTest,
@@ -519,7 +401,7 @@ TEST_P(CanonicalTest, All) {
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-  auto* got = TypeOf(expr)->UnwrapPtr();
+  auto* got = TypeOf(expr)->UnwrapRef();
   auto* expected = params.create_sem_type(ty);
 
   EXPECT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"

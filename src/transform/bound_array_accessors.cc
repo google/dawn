@@ -41,7 +41,7 @@ ast::ArrayAccessorExpression* BoundArrayAccessors::Transform(
     CloneContext* ctx) {
   auto& diags = ctx->dst->Diagnostics();
 
-  auto* ret_type = ctx->src->Sem().Get(expr->array())->Type()->UnwrapAll();
+  auto* ret_type = ctx->src->Sem().Get(expr->array())->Type()->UnwrapRef();
   if (!ret_type->Is<sem::Array>() && !ret_type->Is<sem::Matrix>() &&
       !ret_type->Is<sem::Vector>()) {
     return nullptr;

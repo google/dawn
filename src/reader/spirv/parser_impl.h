@@ -153,6 +153,14 @@ class ParserImpl : Reader {
     return glsl_std_450_imports_;
   }
 
+  /// Desired handling of SPIR-V pointers by ConvertType()
+  enum class PtrAs {
+    // SPIR-V pointer is converted to a spirv::Pointer
+    Ptr,
+    // SPIR-V pointer is converted to a spirv::Reference
+    Ref
+  };
+
   /// Converts a SPIR-V type to a Tint type, and saves it for fast lookup.
   /// If the type is only used for builtins, then register that specially,
   /// and return null.  If the type is a sampler, image, or sampled image, then
@@ -161,8 +169,11 @@ class ParserImpl : Reader {
   /// On failure, logs an error and returns null.  This should only be called
   /// after the internal representation of the module has been built.
   /// @param type_id the SPIR-V ID of a type.
+  /// @param ptr_as if the SPIR-V type is a pointer and ptr_as is equal to
+  /// PtrAs::Ref then a Reference will be returned, otherwise a Pointer will be
+  /// returned for a SPIR-V pointer
   /// @returns a Tint type, or nullptr
-  const Type* ConvertType(uint32_t type_id);
+  const Type* ConvertType(uint32_t type_id, PtrAs ptr_as = PtrAs::Ptr);
 
   /// Emits an alias type declaration for the given type, if necessary, and
   /// also updates the mapping of the SPIR-V type ID to the alias type.
@@ -339,7 +350,7 @@ class ParserImpl : Reader {
   /// decorations, unless it's an ignorable builtin variable.
   /// @param id the SPIR-V result ID
   /// @param sc the storage class, which cannot be ast::StorageClass::kNone
-  /// @param type the type
+  /// @param storage_type the storage type of the variable
   /// @param is_const if true, the variable is const
   /// @param constructor the variable constructor
   /// @param decorations the variable decorations
@@ -347,7 +358,7 @@ class ParserImpl : Reader {
   /// in the error case
   ast::Variable* MakeVariable(uint32_t id,
                               ast::StorageClass sc,
-                              const Type* type,
+                              const Type* storage_type,
                               bool is_const,
                               ast::Expression* constructor,
                               ast::DecorationList decorations);
@@ -616,12 +627,15 @@ class ParserImpl : Reader {
   /// @param struct_ty the Tint type
   const Type* ConvertType(uint32_t type_id,
                           const spvtools::opt::analysis::Struct* struct_ty);
-  /// Converts a specific SPIR-V type to a Tint type. Pointer case
+  /// Converts a specific SPIR-V type to a Tint type. Pointer / Reference case
   /// The pointer to gl_PerVertex maps to nullptr, and instead is recorded
   /// in member #builtin_position_.
   /// @param type_id the SPIR-V ID for the type.
+  /// @param ptr_as if PtrAs::Ref then a Reference will be returned, otherwise
+  /// Pointer
   /// @param ptr_ty the Tint type
   const Type* ConvertType(uint32_t type_id,
+                          PtrAs ptr_as,
                           const spvtools::opt::analysis::Pointer* ptr_ty);
 
   /// If `type` is a signed integral, or vector of signed integral,

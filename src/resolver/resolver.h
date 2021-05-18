@@ -79,13 +79,6 @@ class Resolver {
   /// @returns true if the given type is host-shareable
   bool IsHostShareable(const sem::Type* type);
 
-  /// @param lhs the assignment store type (non-pointer)
-  /// @param rhs the assignment source type (non-pointer or pointer with
-  /// auto-deref)
-  /// @returns true an expression of type `rhs` can be assigned to a variable,
-  /// structure member or array element of type `lhs`
-  static bool IsValidAssignment(const sem::Type* lhs, const sem::Type* rhs);
-
  private:
   /// Structure holding semantic information about a variable.
   /// Used to build the sem::Variable nodes at the end of resolving.
@@ -93,6 +86,7 @@ class Resolver {
     VariableInfo(const ast::Variable* decl,
                  sem::Type* type,
                  const std::string& type_name,
+                 ast::StorageClass storage_class,
                  ast::AccessControl::Access ac);
     ~VariableInfo();
 
@@ -138,6 +132,43 @@ class Resolver {
     FunctionInfo* function;
     sem::Statement* statement;
   };
+
+  /// Structure holding semantic information about a block (i.e. scope), such as
+  /// parent block and variables declared in the block.
+  /// Used to validate variable scoping rules.
+  struct BlockInfo {
+    enum class Type { kGeneric, kLoop, kLoopContinuing, kSwitchCase };
+
+    BlockInfo(const ast::BlockStatement* block, Type type, BlockInfo* parent);
+    ~BlockInfo();
+
+    template <typename Pred>
+    BlockInfo* FindFirstParent(Pred&& pred) {
+      BlockInfo* curr = this;
+      while (curr && !pred(curr)) {
+        curr = curr->parent;
+      }
+      return curr;
+    }
+
+    BlockInfo* FindFirstParent(BlockInfo::Type ty) {
+      return FindFirstParent(
+          [ty](auto* block_info) { return block_info->type == ty; });
+    }
+
+    ast::BlockStatement const* const block;
+    Type const type;
+    BlockInfo* const parent;
+    std::vector<const ast::Variable*> decls;
+
+    // first_continue is set to the index of the first variable in decls
+    // declared after the first continue statement in a loop block, if any.
+    constexpr static size_t kNoContinue = size_t(~0);
+    size_t first_continue = kNoContinue;
+  };
+
+  /// Describes the context in which a variable is declared
+  enum class VariableKind { kParameter, kLocal, kGlobal };
 
   /// Resolves the program, without creating final the semantic nodes.
   /// @returns true on success, false on error
@@ -207,6 +238,11 @@ class Resolver {
   bool ValidateStructure(const sem::Struct* str);
   bool ValidateSwitch(const ast::SwitchStatement* s);
   bool ValidateVariable(const VariableInfo* info);
+  bool ValidateVariableConstructor(const ast::Variable* var,
+                                   const sem::Type* storage_type,
+                                   const std::string& type_name,
+                                   const sem::Type* rhs_type,
+                                   const std::string& rhs_type_name);
   bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Vector* vec_type);
 
@@ -235,8 +271,8 @@ class Resolver {
   /// @note this method does not resolve the decorations as these are
   /// context-dependent (global, local, parameter)
   /// @param var the variable to create or return the `VariableInfo` for
-  /// @param is_parameter true if the variable represents a parameter
-  VariableInfo* Variable(ast::Variable* var, bool is_parameter);
+  /// @param kind what kind of variable we are declaring
+  VariableInfo* Variable(ast::Variable* var, VariableKind kind);
 
   /// Records the storage class usage for the given type, and any transient
   /// dependencies of the type. Validates that the type can be used for the

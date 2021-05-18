@@ -31,39 +31,13 @@ TEST_F(ResolverAssignmentValidationTest, AssignIncompatibleTypes) {
   // }
 
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
-  auto* lhs = Expr("a");
-  auto* rhs = Expr(2.3f);
 
-  auto* assign = Assign(Source{{12, 34}}, lhs, rhs);
+  auto* assign = Assign(Source{{12, 34}}, "a", 2.3f);
   WrapInFunction(var, assign);
 
   ASSERT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: invalid assignment: cannot assign value of type 'f32' to a variable of type 'i32')");
-}
-
-TEST_F(ResolverAssignmentValidationTest,
-       AssignThroughPointerWrongeStoreType_Fail) {
-  // var a : f32;
-  // let b : ptr<function,f32> = a;
-  // b = 2;
-  const auto priv = ast::StorageClass::kFunction;
-  auto* var_a = Var("a", ty.f32(), priv);
-  auto* var_b = Const("b", ty.pointer<float>(priv), Expr("a"), {});
-
-  auto* lhs = Expr("a");
-  auto* rhs = Expr(2);
-
-  auto* assign = Assign(Source{{12, 34}}, lhs, rhs);
-  WrapInFunction(var_a, var_b, assign);
-
-  ASSERT_FALSE(r()->Resolve());
-
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: invalid assignment: cannot assign value of type 'i32' to a variable of type 'f32')");
+  EXPECT_EQ(r()->error(), "12:34 error: cannot assign 'f32' to 'i32'");
 }
 
 TEST_F(ResolverAssignmentValidationTest,
@@ -73,11 +47,7 @@ TEST_F(ResolverAssignmentValidationTest,
   //  a = 2
   // }
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
-  auto* lhs = Expr("a");
-  auto* rhs = Expr(2);
-
-  auto* body = Block(Decl(var), Assign(Source{{12, 34}}, lhs, rhs));
-  WrapInFunction(body);
+  WrapInFunction(var, Assign("a", 2));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -90,17 +60,11 @@ TEST_F(ResolverAssignmentValidationTest,
   // }
 
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
-  auto* lhs = Expr("a");
-  auto* rhs = Expr(2.3f);
-
-  auto* block = Block(Decl(var), Assign(Source{{12, 34}}, lhs, rhs));
-  WrapInFunction(block);
+  WrapInFunction(var, Assign(Source{{12, 34}}, "a", 2.3f));
 
   ASSERT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: invalid assignment: cannot assign value of type 'f32' to a variable of type 'i32')");
+  EXPECT_EQ(r()->error(), "12:34 error: cannot assign 'f32' to 'i32'");
 }
 
 TEST_F(ResolverAssignmentValidationTest,
@@ -113,20 +77,13 @@ TEST_F(ResolverAssignmentValidationTest,
   // }
 
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
-  auto* lhs = Expr("a");
-  auto* rhs = Expr(2.3f);
-
-  auto* inner_block = Block(Decl(var), Assign(Source{{12, 34}}, lhs, rhs));
-
+  auto* inner_block = Block(Decl(var), Assign(Source{{12, 34}}, "a", 2.3f));
   auto* outer_block = Block(inner_block);
-
   WrapInFunction(outer_block);
 
   ASSERT_FALSE(r()->Resolve());
 
-  EXPECT_EQ(
-      r()->error(),
-      R"(12:34 error: invalid assignment: cannot assign value of type 'f32' to a variable of type 'i32')");
+  EXPECT_EQ(r()->error(), "12:34 error: cannot assign 'f32' to 'i32'");
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignToScalar_Fail) {
@@ -134,28 +91,17 @@ TEST_F(ResolverAssignmentValidationTest, AssignToScalar_Fail) {
   // 1 = my_var;
 
   auto* var = Var("my_var", ty.i32(), ast::StorageClass::kNone, Expr(2));
-  auto* lhs = Expr(1);
-  auto* rhs = Expr("my_var");
-
-  auto* assign = Assign(Source{{12, 34}}, lhs, rhs);
-  WrapInFunction(Decl(var), assign);
+  WrapInFunction(var, Assign(Expr(Source{{12, 34}}, 1), "my_var"));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error v-000x: invalid assignment: left-hand-side does not "
-            "reference storage: i32");
+  EXPECT_EQ(r()->error(), "12:34 error: cannot assign to value of type 'i32'");
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignCompatibleTypes_Pass) {
-  // var a :i32 = 2;
+  // var a : i32 = 2;
   // a = 2
   auto* var = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
-
-  auto* lhs = Expr("a");
-  auto* rhs = Expr(2);
-
-  auto* assign = Assign(Source{Source::Location{12, 34}}, lhs, rhs);
-  WrapInFunction(Decl(var), assign);
+  WrapInFunction(var, Assign(Source{{12, 34}}, "a", 2));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -163,17 +109,12 @@ TEST_F(ResolverAssignmentValidationTest, AssignCompatibleTypes_Pass) {
 TEST_F(ResolverAssignmentValidationTest,
        AssignCompatibleTypesThroughAlias_Pass) {
   // alias myint = i32;
-  // var a :myint = 2;
+  // var a : myint = 2;
   // a = 2
   auto* myint = ty.alias("myint", ty.i32());
   AST().AddConstructedType(myint);
   auto* var = Var("a", myint, ast::StorageClass::kNone, Expr(2));
-
-  auto* lhs = Expr("a");
-  auto* rhs = Expr(2);
-
-  auto* assign = Assign(Source{Source::Location{12, 34}}, lhs, rhs);
-  WrapInFunction(Decl(var), assign);
+  WrapInFunction(var, Assign(Source{{12, 34}}, "a", 2));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -185,29 +126,19 @@ TEST_F(ResolverAssignmentValidationTest,
   // a = b;
   auto* var_a = Var("a", ty.i32(), ast::StorageClass::kNone, Expr(2));
   auto* var_b = Var("b", ty.i32(), ast::StorageClass::kNone, Expr(3));
-
-  auto* lhs = Expr("a");
-  auto* rhs = Expr("b");
-
-  auto* assign = Assign(Source{Source::Location{12, 34}}, lhs, rhs);
-  WrapInFunction(Decl(var_a), Decl(var_b), assign);
+  WrapInFunction(var_a, var_b, Assign(Source{{12, 34}}, "a", "b"));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAssignmentValidationTest, AssignThroughPointer_Pass) {
-  // var a :i32;
-  // let b : ptr<function,i32> = a;
-  // b = 2;
+  // var a : i32;
+  // let b : ptr<function,i32> = &a;
+  // *b = 2;
   const auto func = ast::StorageClass::kFunction;
   auto* var_a = Var("a", ty.i32(), func, Expr(2), {});
-  auto* var_b = Const("b", ty.pointer<int>(func), Expr("a"), {});
-
-  auto* lhs = Expr("b");
-  auto* rhs = Expr(2);
-
-  auto* assign = Assign(Source{Source::Location{12, 34}}, lhs, rhs);
-  WrapInFunction(Decl(var_a), Decl(var_b), assign);
+  auto* var_b = Const("b", ty.pointer<int>(func), AddressOf(Expr("a")), {});
+  WrapInFunction(var_a, var_b, Assign(Source{{12, 34}}, Deref("b"), 2));
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -218,21 +149,13 @@ TEST_F(ResolverAssignmentValidationTest, AssignToConstant_Fail) {
   //  a = 2
   // }
   auto* var = Const("a", ty.i32(), Expr(2));
-
-  auto* lhs = Expr("a");
-  auto* rhs = Expr(2);
-
-  auto* body =
-      Block(Decl(var), Assign(Source{Source::Location{12, 34}}, lhs, rhs));
-
-  WrapInFunction(body);
+  WrapInFunction(var, Assign(Expr(Source{{12, 34}}, "a"), 2));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error v-0021: cannot re-assign a constant: 'a'");
+  EXPECT_EQ(r()->error(), "12:34 error: cannot assign to value of type 'i32'");
 }
 
-TEST_F(ResolverAssignmentValidationTest, AssignFromPointer_Fail) {
+TEST_F(ResolverAssignmentValidationTest, AssignNonStorable_Fail) {
   // var a : [[access(read)]] texture_storage_1d<rgba8unorm>;
   // var b : [[access(read)]] texture_storage_1d<rgba8unorm>;
   // a = b;
@@ -243,24 +166,23 @@ TEST_F(ResolverAssignmentValidationTest, AssignFromPointer_Fail) {
     return ty.access(ast::AccessControl::kReadOnly, tex_type);
   };
 
-  auto* var_a = Global("a", make_type(), ast::StorageClass::kNone, nullptr,
-                       {
-                           create<ast::BindingDecoration>(0),
-                           create<ast::GroupDecoration>(0),
-                       });
-  auto* var_b = Global("b", make_type(), ast::StorageClass::kNone, nullptr,
-                       {
-                           create<ast::BindingDecoration>(1),
-                           create<ast::GroupDecoration>(0),
-                       });
+  Global("a", make_type(), ast::StorageClass::kNone, nullptr,
+         {
+             create<ast::BindingDecoration>(0),
+             create<ast::GroupDecoration>(0),
+         });
+  Global("b", make_type(), ast::StorageClass::kNone, nullptr,
+         {
+             create<ast::BindingDecoration>(1),
+             create<ast::GroupDecoration>(0),
+         });
 
-  WrapInFunction(Assign(Source{{12, 34}}, var_a, var_b));
+  WrapInFunction(Assign("a", Expr(Source{{12, 34}}, "b")));
 
   EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(r()->error(),
-            "12:34 error v-000x: invalid assignment: right-hand-side is not "
-            "storable: ptr<uniform_constant, texture_storage_1d<rgba8unorm, "
-            "read_only>>");
+  EXPECT_EQ(
+      r()->error(),
+      R"(12:34 error: '[[access(read)]] texture_storage_1d<rgba8unorm>' is not storable)");
 }
 
 }  // namespace

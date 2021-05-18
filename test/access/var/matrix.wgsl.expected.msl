@@ -3,8 +3,8 @@
 using namespace metal;
 kernel void tint_symbol() {
   float3x3 m = 0.0f;
-  const float3 v = m[1];
-  const float f = v[1];
+  float3 const v = m[1];
+  float const f = v[1];
   return;
 }
 

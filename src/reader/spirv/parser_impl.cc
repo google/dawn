@@ -24,6 +24,7 @@
 #include "src/ast/override_decoration.h"
 #include "src/ast/struct_block_decoration.h"
 #include "src/ast/type_name.h"
+#include "src/ast/unary_op_expression.h"
 #include "src/reader/spirv/function.h"
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
@@ -304,7 +305,7 @@ Program ParserImpl::program() {
   return tint::Program(std::move(builder_));
 }
 
-const Type* ParserImpl::ConvertType(uint32_t type_id) {
+const Type* ParserImpl::ConvertType(uint32_t type_id, PtrAs ptr_as) {
   if (!success_) {
     return nullptr;
   }
@@ -349,7 +350,7 @@ const Type* ParserImpl::ConvertType(uint32_t type_id) {
       return maybe_generate_alias(ConvertType(type_id, spirv_type->AsStruct()));
     case spvtools::opt::analysis::Type::kPointer:
       return maybe_generate_alias(
-          ConvertType(type_id, spirv_type->AsPointer()));
+          ConvertType(type_id, ptr_as, spirv_type->AsPointer()));
     case spvtools::opt::analysis::Type::kFunction:
       // Tint doesn't have a Function type.
       // We need to convert the result type and parameter types.
@@ -1041,6 +1042,7 @@ void ParserImpl::AddConstructedType(Symbol name, ast::NamedType* type) {
 }
 
 const Type* ParserImpl::ConvertType(uint32_t type_id,
+                                    PtrAs ptr_as,
                                     const spvtools::opt::analysis::Pointer*) {
   const auto* inst = def_use_mgr_->GetDef(type_id);
   const auto pointee_type_id = inst->GetSingleWordInOperand(1);
@@ -1051,7 +1053,7 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
     builtin_position_.storage_class = storage_class;
     return nullptr;
   }
-  auto* ast_elem_ty = ConvertType(pointee_type_id);
+  auto* ast_elem_ty = ConvertType(pointee_type_id, PtrAs::Ptr);
   if (ast_elem_ty == nullptr) {
     Fail() << "SPIR-V pointer type with ID " << type_id
            << " has invalid pointee type " << pointee_type_id;
@@ -1079,8 +1081,14 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
       ast_storage_class = ast::StorageClass::kPrivate;
     }
   }
-
-  return ty_.Pointer(ast_elem_ty, ast_storage_class);
+  switch (ptr_as) {
+    case PtrAs::Ref:
+      return ty_.Reference(ast_elem_ty, ast_storage_class);
+    case PtrAs::Ptr:
+      return ty_.Pointer(ast_elem_ty, ast_storage_class);
+  }
+  Fail() << "invalid value for ptr_as: " << static_cast<int>(ptr_as);
+  return nullptr;
 }
 
 bool ParserImpl::RegisterTypes() {
@@ -1094,7 +1102,7 @@ bool ParserImpl::RegisterTypes() {
     }
     ConvertType(type_or_const.result_id());
   }
-  // Manufacture a type for the gl_Position varible if we have to.
+  // Manufacture a type for the gl_Position variable if we have to.
   if ((builtin_position_.struct_type_id != 0) &&
       (builtin_position_.position_member_pointer_type_id == 0)) {
     builtin_position_.position_member_pointer_type_id =
@@ -1337,25 +1345,25 @@ const spvtools::opt::analysis::IntConstant* ParserImpl::GetArraySize(
 
 ast::Variable* ParserImpl::MakeVariable(uint32_t id,
                                         ast::StorageClass sc,
-                                        const Type* type,
+                                        const Type* storage_type,
                                         bool is_const,
                                         ast::Expression* constructor,
                                         ast::DecorationList decorations) {
-  if (type == nullptr) {
+  if (storage_type == nullptr) {
     Fail() << "internal error: can't make ast::Variable for null type";
     return nullptr;
   }
 
   if (sc == ast::StorageClass::kStorage) {
     bool read_only = false;
-    if (auto* tn = type->As<Named>()) {
+    if (auto* tn = storage_type->As<Named>()) {
       read_only = read_only_struct_types_.count(tn->name) > 0;
     }
 
     // Apply the access(read) or access(read_write) modifier.
     auto access = read_only ? ast::AccessControl::kReadOnly
                             : ast::AccessControl::kReadWrite;
-    type = ty_.AccessControl(type, access);
+    storage_type = ty_.AccessControl(storage_type, access);
   }
 
   // Handle variables (textures and samplers) are always in the handle
@@ -1367,15 +1375,20 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
   // In almost all cases, copy the decorations from SPIR-V to the variable.
   // But avoid doing so when converting pipeline IO to private variables.
   if (sc != ast::StorageClass::kPrivate) {
-    if (!ConvertDecorationsForVariable(id, &type, &decorations)) {
+    if (!ConvertDecorationsForVariable(id, &storage_type, &decorations)) {
       return nullptr;
     }
   }
 
   std::string name = namer_.Name(id);
+
+  // Note: we're constructing the variable here with the *storage* type,
+  // regardless of whether this is a `let` or `var` declaration.
+  // `var` declarations will have a resolved type of ref<storage>, but at the
+  // AST level both `var` and `let` are declared with the same type.
   return create<ast::Variable>(Source{}, builder_.Symbols().Register(name), sc,
-                               type->Build(builder_), is_const, constructor,
-                               decorations);
+                               storage_type->Build(builder_), is_const,
+                               constructor, decorations);
 }
 
 bool ParserImpl::ConvertDecorationsForVariable(

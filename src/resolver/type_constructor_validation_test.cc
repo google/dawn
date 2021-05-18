@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "src/resolver/resolver_test_helper.h"
+#include "src/sem/reference_type.h"
 
 namespace tint {
 namespace resolver {
@@ -51,13 +52,19 @@ TEST_F(ResolverTypeConstructorValidationTest, InferTypeTest_Simple) {
   auto* a_ident = Expr("a");
   auto* b_ident = Expr("b");
 
-  WrapInFunction(Decl(a), Decl(b), Assign(a_ident, "a"), Assign(b_ident, "b"));
+  WrapInFunction(a, b, Assign(a_ident, "a"), Assign(b_ident, "b"));
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
-  ASSERT_EQ(TypeOf(a_ident),
-            ty.pointer(ty.i32(), ast::StorageClass::kFunction));
-  ASSERT_EQ(TypeOf(b_ident),
-            ty.pointer(ty.i32(), ast::StorageClass::kFunction));
+  ASSERT_TRUE(TypeOf(a_ident)->Is<sem::Reference>());
+  EXPECT_TRUE(
+      TypeOf(a_ident)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
+  EXPECT_EQ(TypeOf(a_ident)->As<sem::Reference>()->StorageClass(),
+            ast::StorageClass::kFunction);
+  ASSERT_TRUE(TypeOf(b_ident)->Is<sem::Reference>());
+  EXPECT_TRUE(
+      TypeOf(b_ident)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
+  EXPECT_EQ(TypeOf(b_ident)->As<sem::Reference>()->StorageClass(),
+            ast::StorageClass::kFunction);
 }
 
 using InferTypeTest_FromConstructorExpression = ResolverTestWithParam<Params>;
@@ -79,9 +86,8 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   auto* got = TypeOf(a_ident);
-  auto* expected =
-      ty.pointer(params.create_rhs_sem_type(ty), ast::StorageClass::kFunction)
-          .sem;
+  auto* expected = create<sem::Reference>(params.create_rhs_sem_type(ty),
+                                          ast::StorageClass::kFunction);
   ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                            << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -134,9 +140,8 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   auto* got = TypeOf(a_ident);
-  auto* expected =
-      ty.pointer(params.create_rhs_sem_type(ty), ast::StorageClass::kFunction)
-          .sem;
+  auto* expected = create<sem::Reference>(params.create_rhs_sem_type(ty),
+                                          ast::StorageClass::kFunction);
   ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                            << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -184,9 +189,8 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
   auto* got = TypeOf(a_ident);
-  auto* expected =
-      ty.pointer(params.create_rhs_sem_type(ty), ast::StorageClass::kFunction)
-          .sem;
+  auto* expected = create<sem::Reference>(params.create_rhs_sem_type(ty),
+                                          ast::StorageClass::kFunction);
   ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                            << "expected: " << FriendlyName(expected) << "\n";
 }

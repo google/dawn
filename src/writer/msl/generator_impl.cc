@@ -41,6 +41,7 @@
 #include "src/sem/member_accessor_expression.h"
 #include "src/sem/multisampled_texture_type.h"
 #include "src/sem/pointer_type.h"
+#include "src/sem/reference_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/sem/struct.h"
@@ -177,7 +178,7 @@ bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
 
 bool GeneratorImpl::EmitBitcast(ast::BitcastExpression* expr) {
   out_ << "as_type<";
-  if (!EmitType(TypeOf(expr), "")) {
+  if (!EmitType(TypeOf(expr)->UnwrapRef(), "")) {
     return false;
   }
 
@@ -484,7 +485,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
     return false;
   }
 
-  auto* texture_type = TypeOf(texture)->UnwrapAll()->As<sem::Texture>();
+  auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
 
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kTextureDimensions: {
@@ -530,7 +531,7 @@ bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
         get_dim(dims[0]);
         out_ << ")";
       } else {
-        EmitType(TypeOf(expr), "");
+        EmitType(TypeOf(expr)->UnwrapRef(), "");
         out_ << "(";
         for (size_t i = 0; i < dims.size(); i++) {
           if (i > 0) {
@@ -880,7 +881,7 @@ bool GeneratorImpl::EmitContinue(ast::ContinueStatement*) {
 }
 
 bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
-  auto* type = TypeOf(expr);
+  auto* type = TypeOf(expr)->UnwrapRef();
 
   if (type->IsAnyOf<sem::Array, sem::Struct>()) {
     out_ << "{";
@@ -1016,7 +1017,7 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
       uint32_t loc = data.second;
 
       make_indent();
-      if (!EmitType(program_->Sem().Get(var)->Type(),
+      if (!EmitType(program_->Sem().Get(var)->Type()->UnwrapRef(),
                     program_->Symbols().NameFor(var->symbol()))) {
         return false;
       }
@@ -1053,7 +1054,7 @@ bool GeneratorImpl::EmitEntryPointData(ast::Function* func) {
       auto* deco = data.second;
 
       make_indent();
-      if (!EmitType(program_->Sem().Get(var)->Type(),
+      if (!EmitType(program_->Sem().Get(var)->Type()->UnwrapRef(),
                     program_->Symbols().NameFor(var->symbol()))) {
         return false;
       }
@@ -1267,7 +1268,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     first = false;
 
     out_ << "thread ";
-    if (!EmitType(var->Type(), "")) {
+    if (!EmitType(var->Type()->UnwrapRef(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
@@ -1282,7 +1283,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
 
     out_ << "constant ";
     // TODO(dsinclair): Can arrays be uniform? If so, fix this ...
-    if (!EmitType(var->Type(), "")) {
+    if (!EmitType(var->Type()->UnwrapRef(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
@@ -1300,7 +1301,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
 
     out_ << "device ";
-    if (!EmitType(var->Type(), "")) {
+    if (!EmitType(var->Type()->UnwrapRef(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol());
@@ -1414,7 +1415,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     }
     first = false;
 
-    auto* type = program_->Sem().Get(var)->Type();
+    auto* type = program_->Sem().Get(var)->Type()->UnwrapRef();
 
     if (!EmitType(type, "")) {
       return false;
@@ -1462,7 +1463,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
 
     auto* builtin = data.second;
 
-    if (!EmitType(var->Type(), "")) {
+    if (!EmitType(var->Type()->UnwrapRef(), "")) {
       return false;
     }
 
@@ -1497,7 +1498,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     out_ << "constant ";
     // TODO(dsinclair): Can you have a uniform array? If so, this needs to be
     // updated to handle arrays property.
-    if (!EmitType(var->Type(), "")) {
+    if (!EmitType(var->Type()->UnwrapRef(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol())
@@ -1522,7 +1523,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     }
 
     out_ << "device ";
-    if (!EmitType(var->Type(), "")) {
+    if (!EmitType(var->Type()->UnwrapRef(), "")) {
       return false;
     }
     out_ << "& " << program_->Symbols().NameFor(var->Declaration()->symbol())
@@ -1659,7 +1660,8 @@ bool GeneratorImpl::EmitLoop(ast::LoopStatement* stmt) {
           return false;
         }
       } else {
-        if (!EmitZeroValue(program_->Sem().Get(var)->Type())) {
+        auto* type = program_->Sem().Get(var)->Type()->UnwrapRef();
+        if (!EmitZeroValue(type)) {
           return false;
         }
       }
@@ -2186,13 +2188,14 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
     diagnostics_.add_error("Variable decorations are not handled yet");
     return false;
   }
-  if (decl->is_const()) {
-    out_ << "const ";
-  }
-  if (!EmitType(var->Type(), program_->Symbols().NameFor(decl->symbol()))) {
+  auto* type = var->Type()->UnwrapRef();
+  if (!EmitType(type, program_->Symbols().NameFor(decl->symbol()))) {
     return false;
   }
-  if (!var->Type()->Is<sem::Array>()) {
+  if (decl->is_const()) {
+    out_ << " const";
+  }
+  if (!type->Is<sem::Array>()) {
     out_ << " " << program_->Symbols().NameFor(decl->symbol());
   }
 
@@ -2206,7 +2209,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
                var->StorageClass() == ast::StorageClass::kFunction ||
                var->StorageClass() == ast::StorageClass::kNone ||
                var->StorageClass() == ast::StorageClass::kOutput) {
-      if (!EmitZeroValue(var->Type())) {
+      if (!EmitZeroValue(type)) {
         return false;
       }
     }
@@ -2231,7 +2234,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
   }
 
   out_ << "constant ";
-  auto* type = program_->Sem().Get(var)->Type();
+  auto* type = program_->Sem().Get(var)->Type()->UnwrapRef();
   if (!EmitType(type, program_->Symbols().NameFor(var->symbol()))) {
     return false;
   }
@@ -2265,7 +2268,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
     // 2.2.3 Packed Vector Types
     auto num_els = vec->size();
-    auto* el_ty = vec->type()->UnwrapAll();
+    auto* el_ty = vec->type();
     if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
       return SizeAndAlign{num_els * 4, 4};
     }
@@ -2276,7 +2279,7 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(
     // 2.3 Matrix Data Types
     auto cols = mat->columns();
     auto rows = mat->rows();
-    auto* el_ty = mat->type()->UnwrapAll();
+    auto* el_ty = mat->type();
     if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
       static constexpr SizeAndAlign table[] = {
           /* float2x2 */ {16, 8},

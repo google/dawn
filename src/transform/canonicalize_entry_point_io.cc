@@ -115,7 +115,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
           // Pull out all struct members and build initializer list.
           std::vector<Symbol> member_names;
           for (auto* member : str->Members()) {
-            if (member->Type()->UnwrapAll()->Is<sem::Struct>()) {
+            if (member->Type()->Is<sem::Struct>()) {
               TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
             }
 
@@ -205,7 +205,7 @@ Output CanonicalizeEntryPointIO::Run(const Program* in, const DataMap&) {
       if (auto* str = ret_type->As<sem::Struct>()) {
         // Rebuild struct with only the entry point IO attributes.
         for (auto* member : str->Members()) {
-          if (member->Type()->UnwrapAll()->Is<sem::Struct>()) {
+          if (member->Type()->Is<sem::Struct>()) {
             TINT_ICE(ctx.dst->Diagnostics()) << "nested pipeline IO struct";
           }
 

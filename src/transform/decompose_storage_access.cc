@@ -29,6 +29,7 @@
 #include "src/sem/array.h"
 #include "src/sem/call.h"
 #include "src/sem/member_accessor_expression.h"
+#include "src/sem/reference_type.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
 #include "src/utils/get_or_create.h"
@@ -56,7 +57,7 @@ struct OffsetExpr : Offset {
   explicit OffsetExpr(ast::Expression* e) : expr(e) {}
 
   ast::Expression* Build(CloneContext& ctx) override {
-    auto* type = ctx.src->Sem().Get(expr)->Type()->UnwrapAll();
+    auto* type = ctx.src->Sem().Get(expr)->Type()->UnwrapRef();
     auto* res = ctx.Clone(expr);
     if (!type->Is<sem::U32>()) {
       res = ctx.dst->Construct<ProgramBuilder::u32>(res);
@@ -333,8 +334,8 @@ void InsertGlobal(CloneContext& ctx,
 /// @returns the unwrapped, user-declared constructed type of ty.
 const ast::NamedType* ConstructedTypeOf(const sem::Type* ty) {
   while (true) {
-    if (auto* ptr = ty->As<sem::Pointer>()) {
-      ty = ptr->StoreType();
+    if (auto* ref = ty->As<sem::Reference>()) {
+      ty = ref->StoreType();
       continue;
     }
     if (auto* str = ty->As<sem::Struct>()) {
@@ -466,14 +467,14 @@ struct DecomposeStorageAccess::State {
           for (auto* member : str->Members()) {
             auto* offset = ctx.dst->Add("offset", member->Offset());
             Symbol load = LoadFunc(ctx, insert_after, buf_ty,
-                                   member->Type()->UnwrapAll(), var_user);
+                                   member->Type()->UnwrapRef(), var_user);
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
         } else if (auto* arr = el_ty->As<sem::Array>()) {
           for (uint32_t i = 0; i < arr->Count(); i++) {
             auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
             Symbol load = LoadFunc(ctx, insert_after, buf_ty,
-                                   arr->ElemType()->UnwrapAll(), var_user);
+                                   arr->ElemType()->UnwrapRef(), var_user);
             values.emplace_back(ctx.dst->Call(load, "buffer", offset));
           }
         }
@@ -546,7 +547,7 @@ struct DecomposeStorageAccess::State {
             auto* access = ctx.dst->MemberAccessor(
                 "value", ctx.Clone(member->Declaration()->symbol()));
             Symbol store = StoreFunc(ctx, insert_after, buf_ty,
-                                     member->Type()->UnwrapAll(), var_user);
+                                     member->Type()->UnwrapRef(), var_user);
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
@@ -555,7 +556,7 @@ struct DecomposeStorageAccess::State {
             auto* offset = ctx.dst->Add("offset", arr->Stride() * i);
             auto* access = ctx.dst->IndexAccessor("value", ctx.dst->Expr(i));
             Symbol store = StoreFunc(ctx, insert_after, buf_ty,
-                                     arr->ElemType()->UnwrapAll(), var_user);
+                                     arr->ElemType()->UnwrapRef(), var_user);
             auto* call = ctx.dst->Call(store, "buffer", offset, access);
             body.emplace_back(ctx.dst->create<ast::CallStatement>(call));
           }
@@ -661,7 +662,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
           state.AddAccess(ident, {
                                      var,
                                      ToOffset(0u),
-                                     var->Type()->UnwrapAll(),
+                                     var->Type()->UnwrapRef(),
                                  });
         }
       }
@@ -681,7 +682,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
                 accessor, {
                               access.var,
                               Add(std::move(access.offset), std::move(offset)),
-                              vec_ty->type()->UnwrapAll(),
+                              vec_ty->type()->UnwrapRef(),
                           });
           }
         }
@@ -694,7 +695,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
                           {
                               access.var,
                               Add(std::move(access.offset), std::move(offset)),
-                              member->Type()->UnwrapAll(),
+                              member->Type()->UnwrapRef(),
                           });
         }
       }
@@ -710,7 +711,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
                           {
                               access.var,
                               Add(std::move(access.offset), std::move(offset)),
-                              arr->ElemType()->UnwrapAll(),
+                              arr->ElemType()->UnwrapRef(),
                           });
           continue;
         }
@@ -720,7 +721,7 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
                           {
                               access.var,
                               Add(std::move(access.offset), std::move(offset)),
-                              vec_ty->type()->UnwrapAll(),
+                              vec_ty->type()->UnwrapRef(),
                           });
           continue;
         }
@@ -770,8 +771,8 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
 
     auto* buf = access.var->Declaration();
     auto* offset = access.offset->Build(ctx);
-    auto* buf_ty = access.var->Type()->UnwrapPtr();
-    auto* el_ty = access.type->UnwrapAll();
+    auto* buf_ty = access.var->Type()->UnwrapRef();
+    auto* el_ty = access.type->UnwrapRef();
     auto* insert_after = ConstructedTypeOf(access.var->Type());
     Symbol func = state.LoadFunc(ctx, insert_after, buf_ty, el_ty,
                                  access.var->As<sem::VariableUser>());
@@ -785,8 +786,8 @@ Output DecomposeStorageAccess::Run(const Program* in, const DataMap&) {
   for (auto& store : state.stores) {
     auto* buf = store.target.var->Declaration();
     auto* offset = store.target.offset->Build(ctx);
-    auto* buf_ty = store.target.var->Type()->UnwrapPtr();
-    auto* el_ty = store.target.type->UnwrapAll();
+    auto* buf_ty = store.target.var->Type()->UnwrapRef();
+    auto* el_ty = store.target.type->UnwrapRef();
     auto* value = store.assignment->rhs();
     auto* insert_after = ConstructedTypeOf(store.target.var->Type());
     Symbol func = state.StoreFunc(ctx, insert_after, buf_ty, el_ty,

@@ -28,9 +28,11 @@
 #include "src/sem/intrinsic.h"
 #include "src/sem/member_accessor_expression.h"
 #include "src/sem/multisampled_texture_type.h"
+#include "src/sem/reference_type.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
+#include "src/utils/get_or_create.h"
 #include "src/writer/append_vector.h"
 
 namespace tint {
@@ -357,7 +359,7 @@ bool Builder::GenerateAssignStatement(ast::AssignmentStatement* assign) {
     return false;
   }
 
-  // If the thing we're assigning is a pointer then we must load it first.
+  // If the thing we're assigning is a reference then we must load it first.
   auto* type = TypeOf(assign->rhs());
   rhs_id = GenerateLoadIfNeeded(type, rhs_id);
 
@@ -598,7 +600,9 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
       return false;
     }
     auto* type = TypeOf(var->constructor());
-    init_id = GenerateLoadIfNeeded(type, init_id);
+    if (type->Is<sem::Reference>()) {
+      init_id = GenerateLoadIfNeeded(type, init_id);
+    }
   }
 
   if (var->is_const()) {
@@ -615,8 +619,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
   auto var_id = result.to_i();
   auto sc = ast::StorageClass::kFunction;
   auto* type = builder_.Sem().Get(var)->Type();
-  sem::Pointer pt(type, sc);
-  auto type_id = GenerateTypeIfNeeded(&pt);
+  auto type_id = GenerateTypeIfNeeded(type);
   if (type_id == 0) {
     return false;
   }
@@ -627,7 +630,7 @@ bool Builder::GenerateFunctionVariable(ast::Variable* var) {
 
   // TODO(dsinclair) We could detect if the constructor is fully const and emit
   // an initializer value for the variable instead of doing the OpLoad.
-  auto null_id = GenerateConstantNullIfNeeded(type->UnwrapPtr());
+  auto null_id = GenerateConstantNullIfNeeded(type->UnwrapRef());
   if (null_id == 0) {
     return 0;
   }
@@ -654,6 +657,7 @@ bool Builder::GenerateStore(uint32_t to, uint32_t from) {
 
 bool Builder::GenerateGlobalVariable(ast::Variable* var) {
   auto* sem = builder_.Sem().Get(var);
+  auto* type = sem->Type()->UnwrapRef();
 
   uint32_t init_id = 0;
   if (var->has_constructor()) {
@@ -679,16 +683,16 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
       }
 
       // SPIR-V requires specialization constants to have initializers.
-      if (sem->Type()->Is<sem::F32>()) {
+      if (type->Is<sem::F32>()) {
         ast::FloatLiteral l(ProgramID(), Source{}, 0.0f);
         init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (sem->Type()->Is<sem::U32>()) {
+      } else if (type->Is<sem::U32>()) {
         ast::UintLiteral l(ProgramID(), Source{}, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (sem->Type()->Is<sem::I32>()) {
+      } else if (type->Is<sem::I32>()) {
         ast::SintLiteral l(ProgramID(), Source{}, 0);
         init_id = GenerateLiteralIfNeeded(var, &l);
-      } else if (sem->Type()->Is<sem::Bool>()) {
+      } else if (type->Is<sem::Bool>()) {
         ast::BoolLiteral l(ProgramID(), Source{}, false);
         init_id = GenerateLiteralIfNeeded(var, &l);
       } else {
@@ -715,8 +719,7 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
                 ? ast::StorageClass::kPrivate
                 : sem->StorageClass();
 
-  sem::Pointer pt(sem->Type(), sc);
-  auto type_id = GenerateTypeIfNeeded(&pt);
+  auto type_id = GenerateTypeIfNeeded(sem->Type());
   if (type_id == 0) {
     return false;
   }
@@ -727,8 +730,6 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
 
   OperandList ops = {Operand::Int(type_id), result,
                      Operand::Int(ConvertStorageClass(sc))};
-
-  auto* type = sem->Type();
 
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
@@ -806,8 +807,10 @@ bool Builder::GenerateArrayAccessor(ast::ArrayAccessorExpression* expr,
   auto* type = TypeOf(expr->idx_expr());
   idx_id = GenerateLoadIfNeeded(type, idx_id);
 
-  // If the source is a pointer, we access chain into it.
-  if (info->source_type->Is<sem::Pointer>()) {
+  // If the source is a reference, we access chain into it.
+  // In the future, pointers may support access-chaining.
+  // See https://github.com/gpuweb/gpuweb/pull/1580
+  if (info->source_type->Is<sem::Reference>()) {
     info->access_chain_indices.push_back(idx_id);
     info->source_type = TypeOf(expr);
     return true;
@@ -870,7 +873,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
   if (auto* access = expr_sem->As<sem::StructMemberAccess>()) {
     uint32_t idx = access->Member()->Index();
 
-    if (info->source_type->Is<sem::Pointer>()) {
+    if (info->source_type->Is<sem::Reference>()) {
       auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(idx));
       if (idx_id == 0) {
         return 0;
@@ -903,7 +906,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
     // Single element swizzle is either an access chain or a composite extract
     auto& indices = swizzle->Indices();
     if (indices.size() == 1) {
-      if (info->source_type->Is<sem::Pointer>()) {
+      if (info->source_type->Is<sem::Reference>()) {
         auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(indices[0]));
         if (idx_id == 0) {
           return 0;
@@ -954,7 +957,7 @@ bool Builder::GenerateMemberAccessor(ast::MemberAccessorExpression* expr,
       }
 
       info->source_id = GenerateLoadIfNeeded(expr_type, extract_id);
-      info->source_type = expr_type->UnwrapPtr();
+      info->source_type = expr_type->UnwrapRef();
       info->access_chain_indices.clear();
     }
 
@@ -1022,25 +1025,31 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   // If our initial access is into a non-pointer array, and either has a
   // non-scalar element type or the accessor uses a non-literal index, then we
   // need to load that array into a variable in order to access chain into it.
-  // TODO(jrprice): The non-scalar part shouldn't be necessary, but is tied to
-  // how the Resolver currently determines the type of these expression. This
-  // should be fixed when proper support for ptr/ref types is implemented.
-  if (auto* array = accessors[0]->As<ast::ArrayAccessorExpression>()) {
-    auto* ary_res_type = TypeOf(array->array())->As<sem::Array>();
-    if (ary_res_type &&
-        (!ary_res_type->ElemType()->is_scalar() ||
-         !array->idx_expr()->Is<ast::ScalarConstructorExpression>())) {
-      // Wrap the source type in a pointer to function storage.
-      auto ptr =
-          builder_.ty.pointer(ary_res_type, ast::StorageClass::kFunction);
-      auto result_type_id = GenerateTypeIfNeeded(ptr);
+
+  // TODO(bclayton): The requirement for scalar element types is because of
+  // arrays-of-arrays - this logic only considers whether the root index is
+  // compile-time-constant, and not whether there are any dynamic, inner-array
+  // indexing being performed. Instead of trying to do complex hoisting in this
+  // writer, move this hoisting into the transform::Spirv sanitizer.
+
+  bool needs_load = false;  // Was the expression hoist to a temporary variable?
+  if (auto* access = accessors[0]->As<ast::ArrayAccessorExpression>()) {
+    auto* array = TypeOf(access->array())->As<sem::Array>();
+    bool trivial_indexing =
+        array && array->ElemType()->is_scalar() &&
+        access->idx_expr()->Is<ast::ScalarConstructorExpression>();
+    if (array && !trivial_indexing) {
+      // Wrap the source type in a reference to function storage.
+      auto* ref =
+          builder_.create<sem::Reference>(array, ast::StorageClass::kFunction);
+      auto result_type_id = GenerateTypeIfNeeded(ref);
       if (result_type_id == 0) {
         return 0;
       }
 
       auto ary_result = result_op();
 
-      auto init = GenerateConstantNullIfNeeded(ary_res_type);
+      auto init = GenerateConstantNullIfNeeded(array);
 
       // If we're access chaining into an array then we must be in a function
       push_function_var(
@@ -1054,7 +1063,8 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
       }
 
       info.source_id = ary_result.to_i();
-      info.source_type = ptr;
+      info.source_type = ref;
+      needs_load = true;
     }
   }
 
@@ -1076,17 +1086,12 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   }
 
   if (!info.access_chain_indices.empty()) {
-    bool needs_load = false;
-    auto* ptr = TypeOf(expr);
-    if (!ptr->Is<sem::Pointer>()) {
-      // We are performing an access chain but the final result is not a
-      // pointer, so we need to perform a load to get it. This happens when we
-      // have to copy the source expression into a function variable.
-      ptr = builder_.ty.pointer(ptr, ast::StorageClass::kFunction);
-      needs_load = true;
+    auto* type = TypeOf(expr);
+    if (needs_load) {
+      type =
+          builder_.create<sem::Reference>(type, ast::StorageClass::kFunction);
     }
-
-    auto result_type_id = GenerateTypeIfNeeded(ptr);
+    auto result_type_id = GenerateTypeIfNeeded(type);
     if (result_type_id == 0) {
       return 0;
     }
@@ -1107,7 +1112,7 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 
     // Load from the access chain result if required.
     if (needs_load) {
-      info.source_id = GenerateLoadIfNeeded(ptr, result_id);
+      info.source_id = GenerateLoadIfNeeded(type, result_id);
     }
   }
 
@@ -1127,16 +1132,18 @@ uint32_t Builder::GenerateIdentifierExpression(
 }
 
 uint32_t Builder::GenerateLoadIfNeeded(const sem::Type* type, uint32_t id) {
-  if (!type->Is<sem::Pointer>()) {
+  if (auto* ref = type->As<sem::Reference>()) {
+    type = ref->StoreType();
+  } else {
     return id;
   }
 
-  auto type_id = GenerateTypeIfNeeded(type->UnwrapPtr());
+  auto type_id = GenerateTypeIfNeeded(type);
   auto result = result_op();
   auto result_id = result.to_i();
   if (!push_function_inst(spv::Op::OpLoad,
                           {Operand::Int(type_id), result, Operand::Int(id)})) {
-    return false;
+    return 0;
   }
   return result_id;
 }
@@ -1149,25 +1156,31 @@ uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
   if (val_id == 0) {
     return 0;
   }
+
+  spv::Op op = spv::Op::OpNop;
+  switch (expr->op()) {
+    case ast::UnaryOp::kNegation:
+      if (TypeOf(expr)->is_float_scalar_or_vector()) {
+        op = spv::Op::OpFNegate;
+      } else {
+        op = spv::Op::OpSNegate;
+      }
+      break;
+    case ast::UnaryOp::kNot:
+      op = spv::Op::OpLogicalNot;
+      break;
+    case ast::UnaryOp::kAddressOf:
+    case ast::UnaryOp::kIndirection:
+      // Address-of converts a reference to a pointer, and dereference converts
+      // a pointer to a reference. These are the same thing in SPIR-V, so this
+      // is a no-op.
+      return val_id;
+  }
+
   val_id = GenerateLoadIfNeeded(TypeOf(expr->expr()), val_id);
 
   auto type_id = GenerateTypeIfNeeded(TypeOf(expr));
   if (type_id == 0) {
-    return 0;
-  }
-
-  spv::Op op = spv::Op::OpNop;
-  if (expr->op() == ast::UnaryOp::kNegation) {
-    if (TypeOf(expr)->is_float_scalar_or_vector()) {
-      op = spv::Op::OpFNegate;
-    } else {
-      op = spv::Op::OpSNegate;
-    }
-  } else if (expr->op() == ast::UnaryOp::kNot) {
-    op = spv::Op::OpLogicalNot;
-  }
-  if (op == spv::Op::OpNop) {
-    error_ = "invalid unary op type";
     return 0;
   }
 
@@ -1218,7 +1231,7 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
   }
 
   auto* tc = constructor->As<ast::TypeConstructorExpression>();
-  auto* result_type = TypeOf(tc)->UnwrapAll();
+  auto* result_type = TypeOf(tc)->UnwrapRef();
   for (size_t i = 0; i < tc->values().size(); ++i) {
     auto* e = tc->values()[i];
 
@@ -1246,17 +1259,17 @@ bool Builder::is_constructor_const(ast::Expression* expr, bool is_global_init) {
       continue;
     }
 
-    const sem::Type* subtype = result_type->UnwrapAll();
+    const sem::Type* subtype = result_type->UnwrapRef();
     if (auto* vec = subtype->As<sem::Vector>()) {
-      subtype = vec->type()->UnwrapAll();
+      subtype = vec->type();
     } else if (auto* mat = subtype->As<sem::Matrix>()) {
-      subtype = mat->type()->UnwrapAll();
+      subtype = mat->type();
     } else if (auto* arr = subtype->As<sem::Array>()) {
-      subtype = arr->ElemType()->UnwrapAll();
+      subtype = arr->ElemType();
     } else if (auto* str = subtype->As<sem::Struct>()) {
-      subtype = str->Members()[i]->Type()->UnwrapAll();
+      subtype = str->Members()[i]->Type();
     }
-    if (subtype != TypeOf(sc)->UnwrapAll()) {
+    if (subtype != TypeOf(sc)->UnwrapRef()) {
       return false;
     }
   }
@@ -1272,13 +1285,13 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   // Generate the zero initializer if there are no values provided.
   if (values.empty()) {
-    return GenerateConstantNullIfNeeded(result_type->UnwrapPtr());
+    return GenerateConstantNullIfNeeded(result_type->UnwrapRef());
   }
 
   std::ostringstream out;
   out << "__const_" << init->type()->FriendlyName(builder_.Symbols()) << "_";
 
-  result_type = result_type->UnwrapAll();
+  result_type = result_type->UnwrapRef();
   bool constructor_is_const = is_constructor_const(init, is_global_init);
   if (has_error()) {
     return 0;
@@ -1288,7 +1301,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
 
   if (auto* res_vec = result_type->As<sem::Vector>()) {
     if (res_vec->type()->is_scalar()) {
-      auto* value_type = TypeOf(values[0])->UnwrapAll();
+      auto* value_type = TypeOf(values[0])->UnwrapRef();
       if (auto* val_vec = value_type->As<sem::Vector>()) {
         if (val_vec->type()->is_scalar()) {
           can_cast_or_copy = res_vec->size() == val_vec->size();
@@ -1327,7 +1340,7 @@ uint32_t Builder::GenerateTypeConstructorExpression(
       return 0;
     }
 
-    auto* value_type = TypeOf(e)->UnwrapPtr();
+    auto* value_type = TypeOf(e)->UnwrapRef();
     // If the result and value types are the same we can just use the object.
     // If the result is not a vector then we should have validated that the
     // value type is a correctly sized vector so we can just use it directly.
@@ -1444,7 +1457,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
   }
   val_id = GenerateLoadIfNeeded(TypeOf(from_expr), val_id);
 
-  auto* from_type = TypeOf(from_expr)->UnwrapPtr();
+  auto* from_type = TypeOf(from_expr)->UnwrapRef();
 
   spv::Op op = spv::Op::OpNop;
   if ((from_type->Is<sem::I32>() && to_type->Is<sem::F32>()) ||
@@ -1728,8 +1741,8 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
 
   // Handle int and float and the vectors of those types. Other types
   // should have been rejected by validation.
-  auto* lhs_type = TypeOf(expr->lhs())->UnwrapAll();
-  auto* rhs_type = TypeOf(expr->rhs())->UnwrapAll();
+  auto* lhs_type = TypeOf(expr->lhs())->UnwrapRef();
+  auto* rhs_type = TypeOf(expr->rhs())->UnwrapRef();
   bool lhs_is_float_or_vec = lhs_type->is_float_scalar_or_vector();
   bool lhs_is_unsigned = lhs_type->is_unsigned_scalar_or_vector();
 
@@ -1904,13 +1917,18 @@ uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
   }
   ops.push_back(Operand::Int(func_id));
 
-  for (auto* param : expr->params()) {
-    auto id = GenerateExpression(param);
+  size_t arg_idx = 0;
+  for (auto* arg : expr->params()) {
+    auto id = GenerateExpression(arg);
     if (id == 0) {
       return 0;
     }
-    id = GenerateLoadIfNeeded(TypeOf(param), id);
+    id = GenerateLoadIfNeeded(TypeOf(arg), id);
+    if (id == 0) {
+      return 0;
+    }
     ops.push_back(Operand::Int(id));
+    arg_idx++;
   }
 
   if (!push_function_inst(spv::Op::OpFunctionCall, std::move(ops))) {
@@ -1982,7 +2000,7 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       }
       params.push_back(Operand::Int(struct_id));
 
-      auto* type = TypeOf(accessor->structure())->UnwrapAll();
+      auto* type = TypeOf(accessor->structure())->UnwrapRef();
       if (!type->Is<sem::Struct>()) {
         error_ =
             "invalid type (" + type->type_name() + ") for runtime array length";
@@ -2134,7 +2152,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
     TINT_ICE(builder_.Diagnostics()) << "missing texture argument";
   }
 
-  auto* texture_type = TypeOf(texture)->UnwrapAll()->As<sem::Texture>();
+  auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
 
   auto op = spv::Op::OpNop;
 
@@ -2580,8 +2598,8 @@ uint32_t Builder::GenerateBitcastExpression(ast::BitcastExpression* expr) {
   val_id = GenerateLoadIfNeeded(TypeOf(expr->expr()), val_id);
 
   // Bitcast does not allow same types, just emit a CopyObject
-  auto* to_type = TypeOf(expr)->UnwrapPtr();
-  auto* from_type = TypeOf(expr->expr())->UnwrapPtr();
+  auto* to_type = TypeOf(expr)->UnwrapRef();
+  auto* from_type = TypeOf(expr->expr())->UnwrapRef();
   if (to_type->type_name() == from_type->type_name()) {
     if (!push_function_inst(
             spv::Op::OpCopyObject,
@@ -2932,84 +2950,97 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
     return 0;
   }
 
-  auto val = type_name_to_id_.find(type->type_name());
-  if (val != type_name_to_id_.end()) {
-    return val->second;
-  }
-
-  auto result = result_op();
-  auto id = result.to_i();
-  if (auto* arr = type->As<sem::Array>()) {
-    if (!GenerateArrayType(arr, result)) {
-      return 0;
-    }
-  } else if (type->Is<sem::Bool>()) {
-    push_type(spv::Op::OpTypeBool, {result});
-  } else if (type->Is<sem::F32>()) {
-    push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});
-  } else if (type->Is<sem::I32>()) {
-    push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(1)});
-  } else if (auto* mat = type->As<sem::Matrix>()) {
-    if (!GenerateMatrixType(mat, result)) {
-      return 0;
-    }
-  } else if (auto* ptr = type->As<sem::Pointer>()) {
-    if (!GeneratePointerType(ptr, result)) {
-      return 0;
-    }
-  } else if (auto* str = type->As<sem::Struct>()) {
-    if (!GenerateStructType(str, result)) {
-      return 0;
-    }
-  } else if (type->Is<sem::U32>()) {
-    push_type(spv::Op::OpTypeInt, {result, Operand::Int(32), Operand::Int(0)});
-  } else if (auto* vec = type->As<sem::Vector>()) {
-    if (!GenerateVectorType(vec, result)) {
-      return 0;
-    }
-  } else if (type->Is<sem::Void>()) {
-    push_type(spv::Op::OpTypeVoid, {result});
-  } else if (auto* tex = type->As<sem::Texture>()) {
-    if (!GenerateTextureType(tex, result)) {
-      return 0;
-    }
-
-    if (auto* st = tex->As<sem::StorageTexture>()) {
-      // Register all three access types of StorageTexture names. In SPIR-V, we
-      // must output a single type, while the variable is annotated with the
-      // access type. Doing this ensures we de-dupe.
-      type_name_to_id_[builder_
-                           .create<sem::StorageTexture>(
-                               st->dim(), st->image_format(),
-                               ast::AccessControl::kReadOnly, st->type())
-                           ->type_name()] = id;
-      type_name_to_id_[builder_
-                           .create<sem::StorageTexture>(
-                               st->dim(), st->image_format(),
-                               ast::AccessControl::kWriteOnly, st->type())
-                           ->type_name()] = id;
-      type_name_to_id_[builder_
-                           .create<sem::StorageTexture>(
-                               st->dim(), st->image_format(),
-                               ast::AccessControl::kReadWrite, st->type())
-                           ->type_name()] = id;
-    }
-
-  } else if (type->Is<sem::Sampler>()) {
-    push_type(spv::Op::OpTypeSampler, {result});
-
-    // Register both of the sampler type names. In SPIR-V they're the same
-    // sampler type, so we need to match that when we do the dedup check.
-    type_name_to_id_["__sampler_sampler"] = id;
-    type_name_to_id_["__sampler_comparison"] = id;
-
+  // Pointers and References both map to a SPIR-V pointer type.
+  // Transform a Reference to a Pointer to prevent these having duplicated
+  // definitions in the generated SPIR-V. Note that nested references are not
+  // legal, so only considering the top-level type is fine.
+  std::string type_name;
+  if (auto* ref = type->As<sem::Reference>()) {
+    type_name = sem::Pointer(ref->StoreType(), ref->StorageClass()).type_name();
   } else {
-    error_ = "unable to convert type: " + type->type_name();
-    return 0;
+    type_name = type->type_name();
   }
 
-  type_name_to_id_[type->type_name()] = id;
-  return id;
+  return utils::GetOrCreate(type_name_to_id_, type_name, [&]() -> uint32_t {
+    auto result = result_op();
+    auto id = result.to_i();
+    if (auto* arr = type->As<sem::Array>()) {
+      if (!GenerateArrayType(arr, result)) {
+        return 0;
+      }
+    } else if (type->Is<sem::Bool>()) {
+      push_type(spv::Op::OpTypeBool, {result});
+    } else if (type->Is<sem::F32>()) {
+      push_type(spv::Op::OpTypeFloat, {result, Operand::Int(32)});
+    } else if (type->Is<sem::I32>()) {
+      push_type(spv::Op::OpTypeInt,
+                {result, Operand::Int(32), Operand::Int(1)});
+    } else if (auto* mat = type->As<sem::Matrix>()) {
+      if (!GenerateMatrixType(mat, result)) {
+        return 0;
+      }
+    } else if (auto* ptr = type->As<sem::Pointer>()) {
+      if (!GeneratePointerType(ptr, result)) {
+        return 0;
+      }
+    } else if (auto* ref = type->As<sem::Reference>()) {
+      if (!GenerateReferenceType(ref, result)) {
+        return 0;
+      }
+    } else if (auto* str = type->As<sem::Struct>()) {
+      if (!GenerateStructType(str, result)) {
+        return 0;
+      }
+    } else if (type->Is<sem::U32>()) {
+      push_type(spv::Op::OpTypeInt,
+                {result, Operand::Int(32), Operand::Int(0)});
+    } else if (auto* vec = type->As<sem::Vector>()) {
+      if (!GenerateVectorType(vec, result)) {
+        return 0;
+      }
+    } else if (type->Is<sem::Void>()) {
+      push_type(spv::Op::OpTypeVoid, {result});
+    } else if (auto* tex = type->As<sem::Texture>()) {
+      if (!GenerateTextureType(tex, result)) {
+        return 0;
+      }
+
+      if (auto* st = tex->As<sem::StorageTexture>()) {
+        // Register all three access types of StorageTexture names. In SPIR-V,
+        // we must output a single type, while the variable is annotated with
+        // the access type. Doing this ensures we de-dupe.
+        type_name_to_id_[builder_
+                             .create<sem::StorageTexture>(
+                                 st->dim(), st->image_format(),
+                                 ast::AccessControl::kReadOnly, st->type())
+                             ->type_name()] = id;
+        type_name_to_id_[builder_
+                             .create<sem::StorageTexture>(
+                                 st->dim(), st->image_format(),
+                                 ast::AccessControl::kWriteOnly, st->type())
+                             ->type_name()] = id;
+        type_name_to_id_[builder_
+                             .create<sem::StorageTexture>(
+                                 st->dim(), st->image_format(),
+                                 ast::AccessControl::kReadWrite, st->type())
+                             ->type_name()] = id;
+      }
+
+    } else if (type->Is<sem::Sampler>()) {
+      push_type(spv::Op::OpTypeSampler, {result});
+
+      // Register both of the sampler type names. In SPIR-V they're the same
+      // sampler type, so we need to match that when we do the dedup check.
+      type_name_to_id_["__sampler_sampler"] = id;
+      type_name_to_id_["__sampler_comparison"] = id;
+
+    } else {
+      error_ = "unable to convert type: " + type->type_name();
+      return 0;
+    }
+
+    return id;
+  });
 }
 
 // TODO(tommek): Cover multisampled textures here when they're included in AST
@@ -3131,8 +3162,8 @@ bool Builder::GenerateMatrixType(const sem::Matrix* mat,
 
 bool Builder::GeneratePointerType(const sem::Pointer* ptr,
                                   const Operand& result) {
-  auto pointee_id = GenerateTypeIfNeeded(ptr->StoreType());
-  if (pointee_id == 0) {
+  auto subtype_id = GenerateTypeIfNeeded(ptr->StoreType());
+  if (subtype_id == 0) {
     return false;
   }
 
@@ -3143,7 +3174,26 @@ bool Builder::GeneratePointerType(const sem::Pointer* ptr,
   }
 
   push_type(spv::Op::OpTypePointer,
-            {result, Operand::Int(stg_class), Operand::Int(pointee_id)});
+            {result, Operand::Int(stg_class), Operand::Int(subtype_id)});
+
+  return true;
+}
+
+bool Builder::GenerateReferenceType(const sem::Reference* ref,
+                                    const Operand& result) {
+  auto subtype_id = GenerateTypeIfNeeded(ref->StoreType());
+  if (subtype_id == 0) {
+    return false;
+  }
+
+  auto stg_class = ConvertStorageClass(ref->StorageClass());
+  if (stg_class == SpvStorageClassMax) {
+    error_ = "invalid storage class for reference";
+    return false;
+  }
+
+  push_type(spv::Op::OpTypePointer,
+            {result, Operand::Int(stg_class), Operand::Int(subtype_id)});
 
   return true;
 }

@@ -52,7 +52,10 @@ Output ExternalTextureTransform::Run(const Program* in, const DataMap&) {
           // if the first parameter is an external texture.
           if (auto* var =
                   sem.Get(call_expr->params()[0])->As<sem::VariableUser>()) {
-            if (var->Variable()->Type()->Is<sem::ExternalTexture>()) {
+            if (var->Variable()
+                    ->Type()
+                    ->UnwrapRef()
+                    ->Is<sem::ExternalTexture>()) {
               if (intrinsic->Type() == sem::IntrinsicType::kTextureLoad &&
                   call_expr->params().size() != 2) {
                 TINT_ICE(ctx.dst->Diagnostics())

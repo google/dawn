@@ -317,8 +317,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
     return true;
   }
 
-  auto* lhs_type = TypeOf(expr->lhs())->UnwrapAll();
-  auto* rhs_type = TypeOf(expr->rhs())->UnwrapAll();
+  auto* lhs_type = TypeOf(expr->lhs())->UnwrapRef();
+  auto* rhs_type = TypeOf(expr->rhs())->UnwrapRef();
   // Multiplying by a matrix requires the use of `mul` in order to get the
   // type of multiply we desire.
   if (expr->op() == ast::BinaryOp::kMultiply &&
@@ -854,7 +854,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
     return false;
   }
 
-  auto* texture_type = TypeOf(texture)->UnwrapAll()->As<sem::Texture>();
+  auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
 
   switch (intrinsic->Type()) {
     case sem::IntrinsicType::kTextureDimensions:
@@ -1300,7 +1300,7 @@ bool GeneratorImpl::EmitScalarConstructor(
 bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
                                         std::ostream& out,
                                         ast::TypeConstructorExpression* expr) {
-  auto* type = TypeOf(expr);
+  auto* type = TypeOf(expr)->UnwrapRef();
 
   // If the type constructor is empty then we need to construct with the zero
   // value for all components.
@@ -1699,7 +1699,7 @@ bool GeneratorImpl::EmitEntryPointData(
       continue;  // Global already emitted
     }
 
-    auto* type = var->Type()->UnwrapAccess();
+    auto* type = var->Type()->UnwrapRef();
     if (auto* strct = type->As<sem::Struct>()) {
       out << "ConstantBuffer<"
           << builder_.Symbols().NameFor(strct->Declaration()->name()) << "> "
@@ -1748,8 +1748,9 @@ bool GeneratorImpl::EmitEntryPointData(
       return false;
     }
 
-    if (!EmitType(out, var->Type(), ast::StorageClass::kStorage,
-                  var->AccessControl(), "")) {
+    auto* type = var->Type()->UnwrapRef();
+    if (!EmitType(out, type, ast::StorageClass::kStorage, var->AccessControl(),
+                  "")) {
       return false;
     }
 
@@ -1781,7 +1782,7 @@ bool GeneratorImpl::EmitEntryPointData(
       auto* var = data.first;
       auto* deco = data.second;
       auto* sem = builder_.Sem().Get(var);
-      auto* type = sem->Type();
+      auto* type = sem->Type()->UnwrapRef();
 
       make_indent(out);
       if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(),
@@ -1832,7 +1833,7 @@ bool GeneratorImpl::EmitEntryPointData(
       auto* var = data.first;
       auto* deco = data.second;
       auto* sem = builder_.Sem().Get(var);
-      auto* type = sem->Type();
+      auto* type = sem->Type()->UnwrapRef();
 
       make_indent(out);
       if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(),
@@ -1877,7 +1878,7 @@ bool GeneratorImpl::EmitEntryPointData(
     for (auto* var : func_sem->ReferencedModuleVariables()) {
       auto* decl = var->Declaration();
 
-      auto* unwrapped_type = var->Type()->UnwrapAll();
+      auto* unwrapped_type = var->Type()->UnwrapRef();
       if (!emitted_globals.emplace(decl->symbol()).second) {
         continue;  // Global already emitted
       }
@@ -1903,11 +1904,12 @@ bool GeneratorImpl::EmitEntryPointData(
       }
 
       auto name = builder_.Symbols().NameFor(decl->symbol());
-      if (!EmitType(out, var->Type(), var->StorageClass(), var->AccessControl(),
+      auto* type = var->Type()->UnwrapRef();
+      if (!EmitType(out, type, var->StorageClass(), var->AccessControl(),
                     name)) {
         return false;
       }
-      if (!var->Type()->Is<sem::Array>()) {
+      if (!type->Is<sem::Array>()) {
         out << " " << name;
       }
 
@@ -2230,7 +2232,8 @@ bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
         if (var->constructor() != nullptr) {
           out << constructor_out.str();
         } else {
-          if (!EmitZeroValue(out, builder_.Sem().Get(var)->Type())) {
+          auto* type = builder_.Sem().Get(var)->Type()->UnwrapRef();
+          if (!EmitZeroValue(out, type)) {
             return false;
           }
         }
@@ -2639,7 +2642,7 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   make_indent(out);
 
   auto* sem = builder_.Sem().Get(var);
-  auto* type = sem->Type();
+  auto* type = sem->Type()->UnwrapRef();
 
   // TODO(dsinclair): Handle variable decorations
   if (!var->decorations().empty()) {

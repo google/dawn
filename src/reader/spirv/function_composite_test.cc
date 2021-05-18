@@ -923,7 +923,7 @@ VariableDeclStatement{
   VariableConst{
     x_1
     none
-    __type_name_S_1
+    __type_name_S_2
     {
       Identifier[not set]{x_40}
     }
@@ -1178,7 +1178,10 @@ TEST_F(SpvParserTest_CopyObject, Pointer) {
     none
     __ptr_function__u32
     {
-      Identifier[not set]{x_10}
+      UnaryOp[not set]{
+        address-of
+        Identifier[not set]{x_10}
+      }
     }
   }
 }

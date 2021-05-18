@@ -139,7 +139,7 @@ Function::VariableBindings Function::ReferencedStorageTextureVariables() const {
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Type()->UnwrapAccess();
+    auto* unwrapped_type = var->Type()->UnwrapRef();
     auto* storage_texture = unwrapped_type->As<sem::StorageTexture>();
     if (storage_texture == nullptr) {
       continue;
@@ -156,7 +156,7 @@ Function::VariableBindings Function::ReferencedDepthTextureVariables() const {
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Type()->UnwrapAccess();
+    auto* unwrapped_type = var->Type()->UnwrapRef();
     auto* storage_texture = unwrapped_type->As<sem::DepthTexture>();
     if (storage_texture == nullptr) {
       continue;
@@ -174,7 +174,7 @@ Function::VariableBindings Function::ReferencedExternalTextureVariables()
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Type()->UnwrapAccess();
+    auto* unwrapped_type = var->Type()->UnwrapRef();
     auto* external_texture = unwrapped_type->As<sem::ExternalTexture>();
     if (external_texture == nullptr) {
       continue;
@@ -201,7 +201,7 @@ Function::VariableBindings Function::ReferencedSamplerVariablesImpl(
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Type()->UnwrapAccess();
+    auto* unwrapped_type = var->Type()->UnwrapRef();
     auto* sampler = unwrapped_type->As<sem::Sampler>();
     if (sampler == nullptr || sampler->kind() != kind) {
       continue;
@@ -219,7 +219,7 @@ Function::VariableBindings Function::ReferencedSampledTextureVariablesImpl(
   VariableBindings ret;
 
   for (auto* var : ReferencedModuleVariables()) {
-    auto* unwrapped_type = var->Type()->UnwrapAccess();
+    auto* unwrapped_type = var->Type()->UnwrapRef();
     auto* texture = unwrapped_type->As<sem::Texture>();
     if (texture == nullptr) {
       continue;

@@ -113,7 +113,7 @@ Output BindingRemapper::Run(const Program* in, const DataMap& datamap) {
       auto ac_it = remappings->access_controls.find(from);
       if (ac_it != remappings->access_controls.end()) {
         ast::AccessControl::Access ac = ac_it->second;
-        auto* ty = in->Sem().Get(var)->Type();
+        auto* ty = in->Sem().Get(var)->Type()->UnwrapRef();
         ast::Type* inner_ty = CreateASTTypeFor(&ctx, ty);
         auto* new_ty = ctx.dst->create<ast::AccessControl>(ac, inner_ty);
         auto* new_var = ctx.dst->create<ast::Variable>(

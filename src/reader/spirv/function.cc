@@ -1088,15 +1088,15 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
   ast::VariableList ast_params;
   function_.ForEachParam(
       [this, &ast_params](const spvtools::opt::Instruction* param) {
-        auto* ast_type = parser_impl_.ConvertType(param->type_id());
-        if (ast_type != nullptr) {
+        auto* type = parser_impl_.ConvertType(param->type_id());
+        if (type != nullptr) {
           auto* ast_param = parser_impl_.MakeVariable(
-              param->result_id(), ast::StorageClass::kNone, ast_type, true,
-              nullptr, ast::DecorationList{});
+              param->result_id(), ast::StorageClass::kNone, type, true, nullptr,
+              ast::DecorationList{});
           // Parameters are treated as const declarations.
           ast_params.emplace_back(ast_param);
           // The value is accessible by name.
-          identifier_values_.insert(param->result_id());
+          identifier_types_.emplace(param->result_id(), type);
         } else {
           // We've already logged an error and emitted a diagnostic. Do nothing
           // here.
@@ -2194,8 +2194,8 @@ bool FunctionEmitter::EmitFunctionVariables() {
         constructor, ast::DecorationList{});
     auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
     AddStatement(var_decl_stmt);
-    // Save this as an already-named value.
-    identifier_values_.insert(inst.result_id());
+    auto* var_type = ty_.Reference(var_store_type, ast::StorageClass::kNone);
+    identifier_types_.emplace(inst.result_id(), var_type);
   }
   return success();
 }
@@ -2246,7 +2246,15 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
                              create<ast::IdentifierExpression>(
                                  Source{}, builder_.Symbols().Register(name))};
   }
-  if (identifier_values_.count(id) || parser_impl_.IsScalarSpecConstant(id)) {
+  auto type_it = identifier_types_.find(id);
+  if (type_it != identifier_types_.end()) {
+    auto name = namer_.Name(id);
+    auto* type = type_it->second;
+    return TypedExpression{type,
+                           create<ast::IdentifierExpression>(
+                               Source{}, builder_.Symbols().Register(name))};
+  }
+  if (parser_impl_.IsScalarSpecConstant(id)) {
     auto name = namer_.Name(id);
     return TypedExpression{
         parser_impl_.ConvertType(def_use_mgr_->GetDef(id)->type_id()),
@@ -2271,9 +2279,10 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
     case SpvOpVariable: {
       // This occurs for module-scope variables.
       auto name = namer_.Name(inst->result_id());
-      return TypedExpression{parser_impl_.ConvertType(inst->type_id()),
-                             create<ast::IdentifierExpression>(
-                                 Source{}, builder_.Symbols().Register(name))};
+      return TypedExpression{
+          parser_impl_.ConvertType(inst->type_id(), PtrAs::Ref),
+          create<ast::IdentifierExpression>(Source{},
+                                            builder_.Symbols().Register(name))};
     }
     case SpvOpUndef:
       // Substitute a null value for undef.
@@ -2624,7 +2633,7 @@ bool FunctionEmitter::EmitIfStart(const BlockInfo& block_info) {
         // just like in the original SPIR-V.
         PushTrueGuard(construct->end_id);
       } else {
-        // Add a flow guard around the blocks in the premege area.
+        // Add a flow guard around the blocks in the premerge area.
         PushGuard(guard_name, construct->end_id);
       }
     }
@@ -2836,7 +2845,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
       const auto true_dest = terminator.GetSingleWordInOperand(1);
       const auto false_dest = terminator.GetSingleWordInOperand(2);
       if (true_dest == false_dest) {
-        // This is like an uncondtional branch.
+        // This is like an unconditional branch.
         AddStatement(MakeBranch(block_info, *GetBlockInfo(true_dest)));
         return true;
       }
@@ -3064,14 +3073,14 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
   for (auto id : sorted_by_index(block_info.hoisted_ids)) {
     const auto* def_inst = def_use_mgr_->GetDef(id);
     TINT_ASSERT(def_inst);
-    auto* ast_type =
+    auto* storage_type =
         RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
     AddStatement(create<ast::VariableDeclStatement>(
         Source{},
-        parser_impl_.MakeVariable(id, ast::StorageClass::kNone, ast_type, false,
-                                  nullptr, ast::DecorationList{})));
-    // Save this as an already-named value.
-    identifier_values_.insert(id);
+        parser_impl_.MakeVariable(id, ast::StorageClass::kNone, storage_type,
+                                  false, nullptr, ast::DecorationList{})));
+    auto* type = ty_.Reference(storage_type, ast::StorageClass::kNone);
+    identifier_types_.emplace(id, type);
   }
   // Emit declarations of phi state variables, in index order.
   for (auto id : sorted_by_index(block_info.phis_needing_state_vars)) {
@@ -3131,25 +3140,29 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
 
 bool FunctionEmitter::EmitConstDefinition(
     const spvtools::opt::Instruction& inst,
-    TypedExpression ast_expr) {
-  if (!ast_expr) {
+    TypedExpression expr) {
+  if (!expr) {
     return false;
   }
+  if (expr.type->Is<Reference>()) {
+    // `let` declarations cannot hold references, so we need to take the address
+    // of the RHS, and make the `let` be a pointer.
+    expr = AddressOf(expr);
+  }
   auto* ast_const = parser_impl_.MakeVariable(
-      inst.result_id(), ast::StorageClass::kNone, ast_expr.type, true,
-      ast_expr.expr, ast::DecorationList{});
+      inst.result_id(), ast::StorageClass::kNone, expr.type, true, expr.expr,
+      ast::DecorationList{});
   if (!ast_const) {
     return false;
   }
   AddStatement(create<ast::VariableDeclStatement>(Source{}, ast_const));
-  // Save this as an already-named value.
-  identifier_values_.insert(inst.result_id());
+  identifier_types_.emplace(inst.result_id(), expr.type);
   return success();
 }
 
 bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
     const spvtools::opt::Instruction& inst,
-    TypedExpression ast_expr) {
+    TypedExpression expr) {
   const auto result_id = inst.result_id();
   const auto* def_info = GetDefInfo(result_id);
   if (def_info && def_info->requires_hoisted_def) {
@@ -3159,10 +3172,10 @@ bool FunctionEmitter::EmitConstDefOrWriteToHoistedVar(
         Source{},
         create<ast::IdentifierExpression>(Source{},
                                           builder_.Symbols().Register(name)),
-        ast_expr.expr));
+        expr.expr));
     return true;
   }
-  return EmitConstDefinition(inst, ast_expr);
+  return EmitConstDefinition(inst, expr);
 }
 
 bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
@@ -3283,6 +3296,12 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         return false;
       }
 
+      if (lhs.type->Is<Pointer>()) {
+        // LHS of an assignment must be a reference type.
+        // Convert the LHS to a reference by dereferencing it.
+        lhs = Dereference(lhs);
+      }
+
       AddStatement(
           create<ast::AssignmentStatement>(Source{}, lhs.expr, rhs.expr));
       return success();
@@ -3343,16 +3362,21 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         return false;
       }
 
-      // The load result type is the pointee type of its operand.
-      TINT_ASSERT(expr.type->Is<Pointer>());
-      expr.type = expr.type->As<Pointer>()->type;
+      // The load result type is the storage type of its operand.
+      if (expr.type->Is<Pointer>()) {
+        expr = Dereference(expr);
+      } else if (auto* ref = expr.type->As<Reference>()) {
+        expr.type = ref->type;
+      } else {
+        Fail() << "OpLoad expression is not a pointer or reference";
+        return false;
+      }
+
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
     }
 
     case SpvOpCopyMemory: {
       // Generate an assignment.
-      // TODO(dneto): When supporting ptr-ref, the LHS pointer and RHS pointer
-      // map to reference types in WGSL.
       auto lhs = MakeOperand(inst, 0);
       auto rhs = MakeOperand(inst, 1);
       // Ignore any potential memory operands. Currently they are all for
@@ -3367,6 +3391,15 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       if (!success()) {
         return false;
       }
+
+      // LHS and RHS pointers must be reference types in WGSL.
+      if (lhs.type->Is<Pointer>()) {
+        lhs = Dereference(lhs);
+      }
+      if (rhs.type->Is<Pointer>()) {
+        rhs = Dereference(rhs);
+      }
+
       AddStatement(
           create<ast::AssignmentStatement>(Source{}, lhs.expr, rhs.expr));
       return success();
@@ -3385,6 +3418,11 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       auto expr = MakeExpression(value_id);
       if (!expr) {
         return false;
+      }
+      if (expr.type->Is<Reference>()) {
+        // If the source is a reference, then we need to take the address of the
+        // expression.
+        expr = AddressOf(expr);
       }
       expr.type = RemapStorageClass(expr.type, result_id);
       return EmitConstDefOrWriteToHoistedVar(inst, expr);
@@ -3782,7 +3820,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(
       auto name = namer_.Name(base_id);
       current_expr.expr = create<ast::IdentifierExpression>(
           Source{}, builder_.Symbols().Register(name));
-      current_expr.type = parser_impl_.ConvertType(ptr_ty_id);
+      current_expr.type = parser_impl_.ConvertType(ptr_ty_id, PtrAs::Ref);
     }
   }
 
@@ -3898,10 +3936,9 @@ TypedExpression FunctionEmitter::MakeAccessChain(
     }
     const auto pointer_type_id =
         type_mgr_->FindPointerToType(pointee_type_id, storage_class);
-    auto* ast_pointer_type = parser_impl_.ConvertType(pointer_type_id);
-    TINT_ASSERT(ast_pointer_type);
-    TINT_ASSERT(ast_pointer_type->Is<Pointer>());
-    current_expr = TypedExpression{ast_pointer_type, next_expr};
+    auto* type = parser_impl_.ConvertType(pointer_type_id, PtrAs::Ref);
+    TINT_ASSERT(type && type->Is<Reference>());
+    current_expr = TypedExpression{type, next_expr};
   }
   return current_expr;
 }
@@ -3932,7 +3969,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
   // A SPIR-V composite extract is a single instruction with multiple
   // literal indices walking down into composites.
   // A SPIR-V composite insert is similar but also tells you what component
-  // to inject. This function is respnosible for the the walking-into part
+  // to inject. This function is responsible for the the walking-into part
   // of composite-insert.
   //
   // The Tint AST represents this as ever-deeper nested indexing expressions.
@@ -4476,15 +4513,24 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
   auto* function = create<ast::IdentifierExpression>(
       Source{}, builder_.Symbols().Register(name));
 
-  ast::ExpressionList params;
+  ast::ExpressionList args;
   for (uint32_t iarg = 1; iarg < inst.NumInOperands(); ++iarg) {
-    params.emplace_back(MakeOperand(inst, iarg).expr);
+    auto expr = MakeOperand(inst, iarg);
+    if (!expr) {
+      return false;
+    }
+    if (expr.type->Is<Reference>()) {
+      // Functions cannot use references as parameters, so we need to pass by
+      // pointer.
+      expr = AddressOf(expr);
+    }
+    args.emplace_back(expr.expr);
   }
   if (failed()) {
     return false;
   }
   auto* call_expr =
-      create<ast::CallExpression>(Source{}, function, std::move(params));
+      create<ast::CallExpression>(Source{}, function, std::move(args));
   auto* result_type = parser_impl_.ConvertType(inst.type_id());
   if (!result_type) {
     return Fail() << "internal error: no mapped type result of call: "
@@ -5392,6 +5438,32 @@ bool FunctionEmitter::MakeCompositeInsert(
   return EmitConstDefinition(
       inst,
       {ast_type, create<ast::IdentifierExpression>(registered_temp_name)});
+}
+
+TypedExpression FunctionEmitter::AddressOf(TypedExpression expr) {
+  auto* ref = expr.type->As<Reference>();
+  if (!ref) {
+    Fail() << "AddressOf() called on non-reference type";
+    return {};
+  }
+  return {
+      ty_.Pointer(ref->type, ref->storage_class),
+      create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kAddressOf,
+                                     expr.expr),
+  };
+}
+
+TypedExpression FunctionEmitter::Dereference(TypedExpression expr) {
+  auto* ptr = expr.type->As<Pointer>();
+  if (!ptr) {
+    Fail() << "Dereference() called on non-pointer type";
+    return {};
+  }
+  return {
+      ptr->type,
+      create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kIndirection,
+                                     expr.expr),
+  };
 }
 
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;

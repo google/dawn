@@ -1305,7 +1305,7 @@ std::string CallSignature(ProgramBuilder& builder,
         ss << ", ";
       }
       first = false;
-      ss << arg->FriendlyName(builder.Symbols());
+      ss << arg->UnwrapRef()->FriendlyName(builder.Symbols());
     }
   }
   ss << ")";
@@ -1391,14 +1391,7 @@ sem::Intrinsic* Impl::Overload::Match(ProgramBuilder& builder,
       return nullptr;
     }
 
-    auto* arg_ty = args[i];
-    if (auto* ptr = arg_ty->As<sem::Pointer>()) {
-      if (!parameters[i].matcher->ExpectsPointer()) {
-        // Argument is a pointer, but the matcher isn't expecting one.
-        // Perform an implicit dereference.
-        arg_ty = ptr->StoreType();
-      }
-    }
+    auto* arg_ty = args[i]->UnwrapRef();
     if (parameters[i].matcher->Match(matcher_state, arg_ty)) {
       // A correct parameter match is scored higher than number of parameters to
       // arguments.

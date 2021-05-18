@@ -43,6 +43,7 @@ namespace tint {
 // Forward declarations
 namespace sem {
 class Call;
+class Reference;
 }  // namespace sem
 
 namespace writer {
@@ -66,7 +67,7 @@ class Builder {
     /// result_type of the current source defined above.
     const sem::Type* source_type;
     /// A list of access chain indices to emit. Note, we _only_ have access
-    /// chain indices if the source is pointer.
+    /// chain indices if the source is reference.
     std::vector<uint32_t> access_chain_indices;
   };
 
@@ -411,7 +412,7 @@ class Builder {
   /// Geneates an OpLoad
   /// @param type the type to load
   /// @param id the variable id to load
-  /// @returns the ID of the loaded value or `id` if type is not a pointer
+  /// @returns the ID of the loaded value or `id` if type is not a reference
   uint32_t GenerateLoadIfNeeded(const sem::Type* type, uint32_t id);
   /// Generates an OpStore. Emits an error and returns false if we're
   /// currently outside a function.
@@ -443,6 +444,11 @@ class Builder {
   /// @param result the result operand
   /// @returns true if the pointer was successfully generated
   bool GeneratePointerType(const sem::Pointer* ptr, const Operand& result);
+  /// Generates a reference type declaration
+  /// @param ref the reference type to generate
+  /// @param result the result operand
+  /// @returns true if the reference was successfully generated
+  bool GenerateReferenceType(const sem::Reference* ref, const Operand& result);
   /// Generates a vector type declaration
   /// @param struct_type the vector to generate
   /// @param result the result operand

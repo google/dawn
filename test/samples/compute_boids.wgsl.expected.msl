@@ -33,9 +33,9 @@ struct tint_symbol_5 {
 };
 
 vertex tint_symbol_2 vert_main(tint_symbol_1 tint_symbol [[stage_in]]) {
-  const float2 a_particlePos = tint_symbol.a_particlePos;
-  const float2 a_particleVel = tint_symbol.a_particleVel;
-  const float2 a_pos = tint_symbol.a_pos;
+  float2 const a_particlePos = tint_symbol.a_particlePos;
+  float2 const a_particleVel = tint_symbol.a_particleVel;
+  float2 const a_pos = tint_symbol.a_pos;
   float angle = -(  atan2(a_particleVel.x, a_particleVel.y));
   float2 pos = float2(((a_pos.x *   cos(angle)) - (a_pos.y *   sin(angle))), ((a_pos.x *   sin(angle)) + (a_pos.y *   cos(angle))));
   return {float4((pos + a_particlePos), 0.0f, 1.0f)};
@@ -46,7 +46,7 @@ fragment tint_symbol_3 frag_main() {
 }
 
 kernel void comp_main(tint_symbol_5 tint_symbol_4 [[stage_in]], constant SimParams& params [[buffer(0)]], device Particles& particlesA [[buffer(1)]], device Particles& particlesB [[buffer(2)]]) {
-  const uint3 gl_GlobalInvocationID = tint_symbol_4.gl_GlobalInvocationID;
+  uint3 const gl_GlobalInvocationID = tint_symbol_4.gl_GlobalInvocationID;
   uint index = gl_GlobalInvocationID.x;
   if ((index >= 5u)) {
     return;

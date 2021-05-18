@@ -160,34 +160,6 @@ TEST_F(ResolverValidationTest, Stmt_Else_NonBool) {
             "12:34 error: else statement condition must be bool, got f32");
 }
 
-TEST_F(ResolverValidationTest,
-       Stmt_VariableDecl_MismatchedTypeScalarConstructor) {
-  u32 unsigned_value = 2u;  // Type does not match variable type
-  auto* decl = Decl(Var(Source{{3, 3}}, "my_var", ty.i32(),
-                        ast::StorageClass::kNone, Expr(unsigned_value)));
-  WrapInFunction(decl);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(3:3 error: variable of type 'i32' cannot be initialized with a value of type 'u32')");
-}
-
-TEST_F(ResolverValidationTest,
-       Stmt_VariableDecl_MismatchedTypeScalarConstructor_Alias) {
-  auto* my_int = ty.alias("MyInt", ty.i32());
-  AST().AddConstructedType(my_int);
-  u32 unsigned_value = 2u;  // Type does not match variable type
-  auto* decl = Decl(Var(Source{{3, 3}}, "my_var", my_int,
-                        ast::StorageClass::kNone, Expr(unsigned_value)));
-  WrapInFunction(decl);
-
-  EXPECT_FALSE(r()->Resolve());
-  EXPECT_EQ(
-      r()->error(),
-      R"(3:3 error: variable of type 'MyInt' cannot be initialized with a value of type 'u32')");
-}
-
 TEST_F(ResolverValidationTest, Expr_Error_Unknown) {
   auto* e = create<FakeExpr>(Source{Source::Location{2, 30}});
   WrapInFunction(e);
