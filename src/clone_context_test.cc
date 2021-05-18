@@ -397,6 +397,39 @@ TYPED_TEST(CloneContextNodeTest, CloneWithReplace) {
   EXPECT_EQ(cloned_root->c->name, cloned.Symbols().Get("c"));
 }
 
+TYPED_TEST(CloneContextNodeTest, CloneWithRemove) {
+  using Node = typename TestFixture::Node;
+  constexpr bool is_unique = TestFixture::is_unique;
+
+  Allocator a;
+
+  ProgramBuilder builder;
+  auto* original_root = a.Create<Node>(builder.Symbols().Register("root"));
+  original_root->a = a.Create<Node>(builder.Symbols().Register("a"));
+  original_root->b = a.Create<Node>(builder.Symbols().Register("b"));
+  original_root->c = a.Create<Node>(builder.Symbols().Register("c"));
+  original_root->vec = {original_root->a, original_root->b, original_root->c};
+  Program original(std::move(builder));
+
+  ProgramBuilder cloned;
+  auto* cloned_root = CloneContext(&cloned, &original)
+                          .Remove(original_root->vec, original_root->b)
+                          .Clone(original_root);
+
+  EXPECT_EQ(cloned_root->vec.size(), 2u);
+  if (is_unique) {
+    EXPECT_NE(cloned_root->vec[0], cloned_root->a);
+    EXPECT_NE(cloned_root->vec[1], cloned_root->c);
+  } else {
+    EXPECT_EQ(cloned_root->vec[0], cloned_root->a);
+    EXPECT_EQ(cloned_root->vec[1], cloned_root->c);
+  }
+
+  EXPECT_EQ(cloned_root->name, cloned.Symbols().Get("root"));
+  EXPECT_EQ(cloned_root->vec[0]->name, cloned.Symbols().Get("a"));
+  EXPECT_EQ(cloned_root->vec[1]->name, cloned.Symbols().Get("c"));
+}
+
 TYPED_TEST(CloneContextNodeTest, CloneWithInsertBefore) {
   using Node = typename TestFixture::Node;
   constexpr bool is_unique = TestFixture::is_unique;
@@ -691,7 +724,7 @@ TEST_F(CloneContextTest, ProgramIDs) {
   EXPECT_EQ(cloned->program_id, dst.ID());
 }
 
-TEST_F(CloneContextTest, ProgramIDs_ObjectNotOwnedBySrc) {
+TEST_F(CloneContextTest, ProgramIDs_Clone_ObjectNotOwnedBySrc) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder dst;
@@ -703,7 +736,7 @@ TEST_F(CloneContextTest, ProgramIDs_ObjectNotOwnedBySrc) {
       R"(internal compiler error: TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a))");
 }
 
-TEST_F(CloneContextTest, ProgramIDs_ObjectNotOwnedByDst) {
+TEST_F(CloneContextTest, ProgramIDs_Clone_ObjectNotOwnedByDst) {
   EXPECT_FATAL_FAILURE(
       {
         ProgramBuilder dst;

@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <functional>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -248,6 +249,9 @@ class CloneContext {
     if (list_transform_it != list_transforms_.end()) {
       const auto& transforms = list_transform_it->second;
       for (auto& el : v) {
+        if (transforms.remove_.count(el)) {
+          continue;
+        }
         auto insert_before_it = transforms.insert_before_.find(el);
         if (insert_before_it != transforms.insert_before_.end()) {
           for (auto insert : insert_before_it->second) {
@@ -369,7 +373,27 @@ class CloneContext {
   /// @returns this CloneContext so calls can be chained
   template <typename WHAT, typename WITH>
   CloneContext& Replace(WHAT* what, WITH* with) {
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, what);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, with);
     cloned_[what] = with;
+    return *this;
+  }
+
+  /// Removes `object` from the cloned copy of `vector`.
+  /// @param vector the vector in #src
+  /// @param object a pointer to the object in #src that will be omitted from
+  /// the cloned vector.
+  /// @returns this CloneContext so calls can be chained
+  template <typename T, typename OBJECT>
+  CloneContext& Remove(const std::vector<T>& vector, OBJECT* object) {
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, object);
+    if (std::find(vector.begin(), vector.end(), object) == vector.end()) {
+      TINT_ICE(Diagnostics())
+          << "CloneContext::Remove() vector does not contain object";
+      return *this;
+    }
+
+    list_transforms_[&vector].remove_.emplace(object);
     return *this;
   }
 
@@ -383,6 +407,8 @@ class CloneContext {
   CloneContext& InsertBefore(const std::vector<T>& vector,
                              const BEFORE* before,
                              OBJECT* object) {
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, before);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, object);
     if (std::find(vector.begin(), vector.end(), before) == vector.end()) {
       TINT_ICE(Diagnostics())
           << "CloneContext::InsertBefore() vector does not contain before";
@@ -405,6 +431,8 @@ class CloneContext {
   CloneContext& InsertAfter(const std::vector<T>& vector,
                             const AFTER* after,
                             OBJECT* object) {
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, after);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, object);
     if (std::find(vector.begin(), vector.end(), after) == vector.end()) {
       TINT_ICE(Diagnostics())
           << "CloneContext::InsertAfter() vector does not contain after";
@@ -453,7 +481,10 @@ class CloneContext {
     if (TO* cast = As<TO>(obj)) {
       return cast;
     }
-    TINT_ICE(Diagnostics()) << "Cloned object was not of the expected type";
+    TINT_ICE(Diagnostics())
+        << "Cloned object was not of the expected type\n"
+        << "got:      " << (obj ? obj->TypeInfo().name : "<null>") << "\n"
+        << "expected: " << TypeInfo::Of<TO>().name;
     return nullptr;
   }
 
@@ -469,6 +500,9 @@ class CloneContext {
     ListTransforms();
     /// Destructor
     ~ListTransforms();
+
+    /// A map of object in #src to omit when cloned into #dst.
+    std::unordered_set<const Cloneable*> remove_;
 
     /// A map of object in #src to the list of cloned objects in #dst.
     /// Clone(const std::vector<T*>& v) will use this to insert the map-value
