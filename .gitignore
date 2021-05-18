@@ -6,7 +6,7 @@
 .vscode/*
 !.vscode/tasks.json
 .idea
-build
+/build*/
 buildtools
 cmake-build-*/
 coverage.summary
