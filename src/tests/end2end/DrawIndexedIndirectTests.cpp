@@ -99,6 +99,9 @@ class DrawIndexedIndirectTest : public DawnTest {
 
 // The most basic DrawIndexed triangle draw.
 TEST_P(DrawIndexedIndirectTest, Uint32) {
+    // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
+    DAWN_SKIP_TEST_IF(IsANGLE() && IsWindows());
+
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 
@@ -144,6 +147,9 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
 }
 
 TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
+    // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
+    DAWN_SKIP_TEST_IF(IsANGLE() && IsWindows());
+
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 
