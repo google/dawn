@@ -62,6 +62,14 @@ namespace dawn_native { namespace opengl {
         textureCopy.origin = destination.origin;
         textureCopy.aspect =
             SelectFormatAspects(destination.texture->GetFormat(), destination.aspect);
+
+        SubresourceRange range = GetSubresourcesAffectedByCopy(textureCopy, writeSizePixel);
+        if (IsCompleteSubresourceCopiedTo(destination.texture, writeSizePixel,
+                                          destination.mipLevel)) {
+            destination.texture->SetIsSubresourceContentInitialized(true, range);
+        } else {
+            ToBackend(destination.texture)->EnsureSubresourceContentInitialized(range);
+        }
         DoTexSubImage(ToBackend(GetDevice())->gl, textureCopy, data, dataLayout, writeSizePixel);
         return {};
     }

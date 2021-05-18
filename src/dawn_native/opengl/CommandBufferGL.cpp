@@ -617,6 +617,13 @@ namespace dawn_native { namespace opengl {
                     ASSERT(dst.aspect == Aspect::Color);
 
                     buffer->EnsureDataInitialized();
+                    SubresourceRange range = GetSubresourcesAffectedByCopy(dst, copy->copySize);
+                    if (IsCompleteSubresourceCopiedTo(dst.texture.Get(), copy->copySize,
+                                                      dst.mipLevel)) {
+                        dst.texture->SetIsSubresourceContentInitialized(true, range);
+                    } else {
+                        ToBackend(dst.texture)->EnsureSubresourceContentInitialized(range);
+                    }
 
                     gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer->GetHandle());
 
@@ -1274,12 +1281,6 @@ namespace dawn_native { namespace opengl {
                        const Extent3D& copySize) {
         Texture* texture = ToBackend(destination.texture.Get());
         ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);
-        SubresourceRange range = GetSubresourcesAffectedByCopy(destination, copySize);
-        if (IsCompleteSubresourceCopiedTo(texture, copySize, destination.mipLevel)) {
-            texture->SetIsSubresourceContentInitialized(true, range);
-        } else {
-            texture->EnsureSubresourceContentInitialized(range);
-        }
 
         const GLFormat& format = texture->GetGLFormat();
         GLenum target = texture->GetGLTarget();

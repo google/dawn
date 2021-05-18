@@ -989,6 +989,8 @@ TEST_P(CopyTests_T2B, Texture3DFull) {
 
 // Test that copying a range of texture 3D depths in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture3DSubRegion) {
+    DAWN_SKIP_TEST_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
+
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -1458,6 +1460,8 @@ TEST_P(CopyTests_B2T, Texture3DFull) {
 
 // Test that copying a range of texture 3D Depths in one texture-to-buffer-copy works.
 TEST_P(CopyTests_B2T, Texture3DSubRegion) {
+    DAWN_SKIP_TEST_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
+
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
     constexpr uint32_t kDepth = 6u;
@@ -1834,6 +1838,7 @@ TEST_P(CopyTests_T2T, Texture2DArrayTo3DFull) {
 // Test that copying subregion of a 3D texture in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DSubRegion) {
     DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_SKIP_TEST_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -1865,6 +1870,7 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArraySubRegion) {
 // works.
 TEST_P(CopyTests_T2T, Texture2DArrayTo3DSubRegion) {
     DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_SKIP_TEST_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
