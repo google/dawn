@@ -32,13 +32,16 @@ TEST_F(ParserImplTest, Decoration_Workgroup) {
   ASSERT_NE(func_deco, nullptr);
   ASSERT_TRUE(func_deco->Is<ast::WorkgroupDecoration>());
 
-  uint32_t x = 0;
-  uint32_t y = 0;
-  uint32_t z = 0;
-  std::tie(x, y, z) = func_deco->As<ast::WorkgroupDecoration>()->values();
-  EXPECT_EQ(x, 4u);
-  EXPECT_EQ(y, 1u);
-  EXPECT_EQ(z, 1u);
+  auto values = func_deco->As<ast::WorkgroupDecoration>()->values();
+
+  ASSERT_NE(values[0], nullptr);
+  auto* x_scalar = values[0]->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(x_scalar, nullptr);
+  ASSERT_TRUE(x_scalar->literal()->Is<ast::IntLiteral>());
+  EXPECT_EQ(x_scalar->literal()->As<ast::IntLiteral>()->value_as_u32(), 4u);
+
+  EXPECT_EQ(values[1], nullptr);
+  EXPECT_EQ(values[2], nullptr);
 }
 
 TEST_F(ParserImplTest, Decoration_Workgroup_2Param) {
@@ -52,13 +55,21 @@ TEST_F(ParserImplTest, Decoration_Workgroup_2Param) {
   ASSERT_NE(func_deco, nullptr) << p->error();
   ASSERT_TRUE(func_deco->Is<ast::WorkgroupDecoration>());
 
-  uint32_t x = 0;
-  uint32_t y = 0;
-  uint32_t z = 0;
-  std::tie(x, y, z) = func_deco->As<ast::WorkgroupDecoration>()->values();
-  EXPECT_EQ(x, 4u);
-  EXPECT_EQ(y, 5u);
-  EXPECT_EQ(z, 1u);
+  auto values = func_deco->As<ast::WorkgroupDecoration>()->values();
+
+  ASSERT_NE(values[0], nullptr);
+  auto* x_scalar = values[0]->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(x_scalar, nullptr);
+  ASSERT_TRUE(x_scalar->literal()->Is<ast::IntLiteral>());
+  EXPECT_EQ(x_scalar->literal()->As<ast::IntLiteral>()->value_as_u32(), 4u);
+
+  ASSERT_NE(values[1], nullptr);
+  auto* y_scalar = values[1]->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(y_scalar, nullptr);
+  ASSERT_TRUE(y_scalar->literal()->Is<ast::IntLiteral>());
+  EXPECT_EQ(y_scalar->literal()->As<ast::IntLiteral>()->value_as_u32(), 5u);
+
+  EXPECT_EQ(values[2], nullptr);
 }
 
 TEST_F(ParserImplTest, Decoration_Workgroup_3Param) {
@@ -72,13 +83,52 @@ TEST_F(ParserImplTest, Decoration_Workgroup_3Param) {
   ASSERT_NE(func_deco, nullptr);
   ASSERT_TRUE(func_deco->Is<ast::WorkgroupDecoration>());
 
-  uint32_t x = 0;
-  uint32_t y = 0;
-  uint32_t z = 0;
-  std::tie(x, y, z) = func_deco->As<ast::WorkgroupDecoration>()->values();
-  EXPECT_EQ(x, 4u);
-  EXPECT_EQ(y, 5u);
-  EXPECT_EQ(z, 6u);
+  auto values = func_deco->As<ast::WorkgroupDecoration>()->values();
+
+  ASSERT_NE(values[0], nullptr);
+  auto* x_scalar = values[0]->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(x_scalar, nullptr);
+  ASSERT_TRUE(x_scalar->literal()->Is<ast::IntLiteral>());
+  EXPECT_EQ(x_scalar->literal()->As<ast::IntLiteral>()->value_as_u32(), 4u);
+
+  ASSERT_NE(values[1], nullptr);
+  auto* y_scalar = values[1]->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(y_scalar, nullptr);
+  ASSERT_TRUE(y_scalar->literal()->Is<ast::IntLiteral>());
+  EXPECT_EQ(y_scalar->literal()->As<ast::IntLiteral>()->value_as_u32(), 5u);
+
+  ASSERT_NE(values[2], nullptr);
+  auto* z_scalar = values[2]->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(z_scalar, nullptr);
+  ASSERT_TRUE(z_scalar->literal()->Is<ast::IntLiteral>());
+  EXPECT_EQ(z_scalar->literal()->As<ast::IntLiteral>()->value_as_u32(), 6u);
+}
+
+TEST_F(ParserImplTest, Decoration_Workgroup_WithIdent) {
+  auto p = parser("workgroup_size(4, height)");
+  auto deco = p->decoration();
+  EXPECT_TRUE(deco.matched);
+  EXPECT_FALSE(deco.errored);
+  ASSERT_NE(deco.value, nullptr) << p->error();
+  ASSERT_FALSE(p->has_error());
+  auto* func_deco = deco.value->As<ast::Decoration>();
+  ASSERT_NE(func_deco, nullptr);
+  ASSERT_TRUE(func_deco->Is<ast::WorkgroupDecoration>());
+
+  auto values = func_deco->As<ast::WorkgroupDecoration>()->values();
+
+  ASSERT_NE(values[0], nullptr);
+  auto* x_scalar = values[0]->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(x_scalar, nullptr);
+  ASSERT_TRUE(x_scalar->literal()->Is<ast::IntLiteral>());
+  EXPECT_EQ(x_scalar->literal()->As<ast::IntLiteral>()->value_as_u32(), 4u);
+
+  ASSERT_NE(values[1], nullptr);
+  auto* y_ident = values[1]->As<ast::IdentifierExpression>();
+  ASSERT_NE(y_ident, nullptr);
+  EXPECT_EQ(p->builder().Symbols().NameFor(y_ident->symbol()), "height");
+
+  ASSERT_EQ(values[2], nullptr);
 }
 
 TEST_F(ParserImplTest, Decoration_Workgroup_TooManyValues) {
@@ -89,39 +139,6 @@ TEST_F(ParserImplTest, Decoration_Workgroup_TooManyValues) {
   EXPECT_EQ(deco.value, nullptr);
   EXPECT_TRUE(p->has_error());
   EXPECT_EQ(p->error(), "1:23: expected ')' for workgroup_size decoration");
-}
-
-TEST_F(ParserImplTest, Decoration_Workgroup_Invalid_X_Value) {
-  auto p = parser("workgroup_size(-2, 5, 6)");
-  auto deco = p->decoration();
-  EXPECT_FALSE(deco.matched);
-  EXPECT_TRUE(deco.errored);
-  EXPECT_EQ(deco.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(),
-            "1:16: workgroup_size x parameter must be greater than 0");
-}
-
-TEST_F(ParserImplTest, Decoration_Workgroup_Invalid_Y_Value) {
-  auto p = parser("workgroup_size(4, 0, 6)");
-  auto deco = p->decoration();
-  EXPECT_FALSE(deco.matched);
-  EXPECT_TRUE(deco.errored);
-  EXPECT_EQ(deco.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(),
-            "1:19: workgroup_size y parameter must be greater than 0");
-}
-
-TEST_F(ParserImplTest, Decoration_Workgroup_Invalid_Z_Value) {
-  auto p = parser("workgroup_size(4, 5, -3)");
-  auto deco = p->decoration();
-  EXPECT_FALSE(deco.matched);
-  EXPECT_TRUE(deco.errored);
-  EXPECT_EQ(deco.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(p->error(),
-            "1:22: workgroup_size z parameter must be greater than 0");
 }
 
 TEST_F(ParserImplTest, Decoration_Workgroup_MissingLeftParam) {
@@ -151,9 +168,7 @@ TEST_F(ParserImplTest, Decoration_Workgroup_MissingValues) {
   EXPECT_TRUE(deco.errored);
   EXPECT_EQ(deco.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      "1:16: expected signed integer literal for workgroup_size x parameter");
+  EXPECT_EQ(p->error(), "1:16: expected workgroup_size x parameter");
 }
 
 TEST_F(ParserImplTest, Decoration_Workgroup_Missing_X_Value) {
@@ -163,9 +178,7 @@ TEST_F(ParserImplTest, Decoration_Workgroup_Missing_X_Value) {
   EXPECT_TRUE(deco.errored);
   EXPECT_EQ(deco.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      "1:16: expected signed integer literal for workgroup_size x parameter");
+  EXPECT_EQ(p->error(), "1:16: expected workgroup_size x parameter");
 }
 
 TEST_F(ParserImplTest, Decoration_Workgroup_Missing_Y_Comma) {
@@ -185,9 +198,7 @@ TEST_F(ParserImplTest, Decoration_Workgroup_Missing_Y_Value) {
   EXPECT_TRUE(deco.errored);
   EXPECT_EQ(deco.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      "1:19: expected signed integer literal for workgroup_size y parameter");
+  EXPECT_EQ(p->error(), "1:19: expected workgroup_size y parameter");
 }
 
 TEST_F(ParserImplTest, Decoration_Workgroup_Missing_Z_Comma) {
@@ -207,45 +218,7 @@ TEST_F(ParserImplTest, Decoration_Workgroup_Missing_Z_Value) {
   EXPECT_TRUE(deco.errored);
   EXPECT_EQ(deco.value, nullptr);
   EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      "1:22: expected signed integer literal for workgroup_size z parameter");
-}
-
-TEST_F(ParserImplTest, Decoration_Workgroup_Missing_X_Invalid) {
-  auto p = parser("workgroup_size(nan)");
-  auto deco = p->decoration();
-  EXPECT_FALSE(deco.matched);
-  EXPECT_TRUE(deco.errored);
-  EXPECT_EQ(deco.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      "1:16: expected signed integer literal for workgroup_size x parameter");
-}
-
-TEST_F(ParserImplTest, Decoration_Workgroup_Missing_Y_Invalid) {
-  auto p = parser("workgroup_size(2, nan)");
-  auto deco = p->decoration();
-  EXPECT_FALSE(deco.matched);
-  EXPECT_TRUE(deco.errored);
-  EXPECT_EQ(deco.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      "1:19: expected signed integer literal for workgroup_size y parameter");
-}
-
-TEST_F(ParserImplTest, Decoration_Workgroup_Missing_Z_Invalid) {
-  auto p = parser("workgroup_size(2, 3, nan)");
-  auto deco = p->decoration();
-  EXPECT_FALSE(deco.matched);
-  EXPECT_TRUE(deco.errored);
-  EXPECT_EQ(deco.value, nullptr);
-  EXPECT_TRUE(p->has_error());
-  EXPECT_EQ(
-      p->error(),
-      "1:22: expected signed integer literal for workgroup_size z parameter");
+  EXPECT_EQ(p->error(), "1:22: expected workgroup_size z parameter");
 }
 
 TEST_F(ParserImplTest, Decoration_Stage) {

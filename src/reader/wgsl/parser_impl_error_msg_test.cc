@@ -325,74 +325,23 @@ TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeMissingRParen) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXInvalid) {
-  EXPECT("[[workgroup_size(x)]] fn f() {}",
-         "test.wgsl:1:18 error: expected signed integer literal for "
-         "workgroup_size x parameter\n"
-         "[[workgroup_size(x)]] fn f() {}\n"
-         "                 ^\n");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXNegative) {
-  EXPECT("[[workgroup_size(-1)]] fn f() {}",
-         "test.wgsl:1:18 error: workgroup_size x parameter must be greater "
-         "than 0\n"
-         "[[workgroup_size(-1)]] fn f() {}\n"
-         "                 ^^\n");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeXZero) {
-  EXPECT("[[workgroup_size(0)]] fn f() {}",
-         "test.wgsl:1:18 error: workgroup_size x parameter must be greater "
-         "than 0\n"
-         "[[workgroup_size(0)]] fn f() {}\n"
+  EXPECT("[[workgroup_size(@)]] fn f() {}",
+         "test.wgsl:1:18 error: expected workgroup_size x parameter\n"
+         "[[workgroup_size(@)]] fn f() {}\n"
          "                 ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYInvalid) {
-  EXPECT("[[workgroup_size(1, x)]] fn f() {}",
-         "test.wgsl:1:21 error: expected signed integer literal for "
-         "workgroup_size y parameter\n"
-         "[[workgroup_size(1, x)]] fn f() {}\n"
-         "                    ^\n");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYNegative) {
-  EXPECT("[[workgroup_size(1, -1)]] fn f() {}",
-         "test.wgsl:1:21 error: workgroup_size y parameter must be greater "
-         "than 0\n"
-         "[[workgroup_size(1, -1)]] fn f() {}\n"
-         "                    ^^\n");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeYZero) {
-  EXPECT("[[workgroup_size(1, 0)]] fn f() {}",
-         "test.wgsl:1:21 error: workgroup_size y parameter must be greater "
-         "than 0\n"
-         "[[workgroup_size(1, 0)]] fn f() {}\n"
+  EXPECT("[[workgroup_size(1, @)]] fn f() {}",
+         "test.wgsl:1:21 error: expected workgroup_size y parameter\n"
+         "[[workgroup_size(1, @)]] fn f() {}\n"
          "                    ^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZInvalid) {
-  EXPECT("[[workgroup_size(1, 2, x)]] fn f() {}",
-         "test.wgsl:1:24 error: expected signed integer literal for "
-         "workgroup_size z parameter\n"
-         "[[workgroup_size(1, 2, x)]] fn f() {}\n"
-         "                       ^\n");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZNegative) {
-  EXPECT("[[workgroup_size(1, 2, -1)]] fn f() {}",
-         "test.wgsl:1:24 error: workgroup_size z parameter must be greater "
-         "than 0\n"
-         "[[workgroup_size(1, 2, -1)]] fn f() {}\n"
-         "                       ^^\n");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclDecoWorkgroupSizeZZero) {
-  EXPECT("[[workgroup_size(1, 2, 0)]] fn f() {}",
-         "test.wgsl:1:24 error: workgroup_size z parameter must be greater "
-         "than 0\n"
-         "[[workgroup_size(1, 2, 0)]] fn f() {}\n"
+  EXPECT("[[workgroup_size(1, 2, @)]] fn f() {}",
+         "test.wgsl:1:24 error: expected workgroup_size z parameter\n"
+         "[[workgroup_size(1, 2, @)]] fn f() {}\n"
          "                       ^\n");
 }
 

@@ -69,13 +69,10 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::DiscardStatement>(),
-                        Return(),
-                    },
+                    ast::StatementList{Return()},
                     ast::DecorationList{
                         Stage(ast::PipelineStage::kCompute),
-                        create<ast::WorkgroupDecoration>(2u, 4u, 6u),
+                        WorkgroupSize(2, 4, 6),
                     });
 
   GeneratorImpl& gen = Build();
@@ -85,20 +82,19 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_WorkgroupSize) {
   ASSERT_TRUE(gen.EmitFunction(func));
   EXPECT_EQ(gen.result(), R"(  [[stage(compute), workgroup_size(2, 4, 6)]]
   fn my_func() {
-    discard;
     return;
   }
 )");
 }
 
-TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
+TEST_F(WgslGeneratorImplTest,
+       Emit_Function_WithDecoration_WorkgroupSize_WithIdent) {
+  GlobalConst("height", ty.i32(), Expr(2));
   auto* func = Func("my_func", ast::VariableList{}, ty.void_(),
-                    ast::StatementList{
-                        create<ast::DiscardStatement>(),
-                        Return(),
-                    },
+                    ast::StatementList{Return()},
                     ast::DecorationList{
-                        Stage(ast::PipelineStage::kFragment),
+                        Stage(ast::PipelineStage::kCompute),
+                        WorkgroupSize(2, "height"),
                     });
 
   GeneratorImpl& gen = Build();
@@ -106,9 +102,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithDecoration_Stage) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitFunction(func));
-  EXPECT_EQ(gen.result(), R"(  [[stage(fragment)]]
+  EXPECT_EQ(gen.result(), R"(  [[stage(compute), workgroup_size(2, height)]]
   fn my_func() {
-    discard;
     return;
   }
 )");

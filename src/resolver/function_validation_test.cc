@@ -244,5 +244,127 @@ TEST_F(ResolverFunctionValidationTest, FunctionConstInitWithParam) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
+  // [[stage(compute), workgroup_size(64.0)]
+  // fn main() {}
+
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(create<ast::ScalarConstructorExpression>(
+            Source{Source::Location{12, 34}}, Literal(64.f)))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameter must be a literal i32 or an "
+            "i32 module-scope constant");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Negative) {
+  // [[stage(compute), workgroup_size(-2)]
+  // fn main() {}
+
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(create<ast::ScalarConstructorExpression>(
+            Source{Source::Location{12, 34}}, Literal(-2)))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: workgroup_size parameter must be a positive i32 value");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Zero) {
+  // [[stage(compute), workgroup_size(0)]
+  // fn main() {}
+
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(create<ast::ScalarConstructorExpression>(
+            Source{Source::Location{12, 34}}, Literal(0)))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: workgroup_size parameter must be a positive i32 value");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
+  // let x = 64.0;
+  // [[stage(compute), workgroup_size(x)]
+  // fn main() {}
+  GlobalConst("x", ty.f32(), Expr(64.f));
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr(Source{Source::Location{12, 34}}, "x"))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameter must be a literal i32 or an "
+            "i32 module-scope constant");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Negative) {
+  // let x = -2;
+  // [[stage(compute), workgroup_size(x)]
+  // fn main() {}
+  GlobalConst("x", ty.i32(), Expr(-2));
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr(Source{Source::Location{12, 34}}, "x"))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: workgroup_size parameter must be a positive i32 value");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Zero) {
+  // let x = 0;
+  // [[stage(compute), workgroup_size(x)]
+  // fn main() {}
+  GlobalConst("x", ty.i32(), Expr(0));
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr(Source{Source::Location{12, 34}}, "x"))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: workgroup_size parameter must be a positive i32 value");
+}
+
+TEST_F(ResolverFunctionValidationTest,
+       WorkgroupSize_Const_NestedZeroValueConstructor) {
+  // let x = i32(i32(i32()));
+  // [[stage(compute), workgroup_size(x)]
+  // fn main() {}
+  GlobalConst("x", ty.i32(),
+              Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32()))));
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr(Source{Source::Location{12, 34}}, "x"))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(
+      r()->error(),
+      "12:34 error: workgroup_size parameter must be a positive i32 value");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
+  // var<private> x = 0;
+  // [[stage(compute), workgroup_size(x)]
+  // fn main() {}
+  Global("x", ty.i32(), ast::StorageClass::kPrivate, Expr(64));
+  Func("main", {}, ty.void_(), {},
+       {Stage(ast::PipelineStage::kCompute),
+        WorkgroupSize(Expr(Source{Source::Location{12, 34}}, "x"))});
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: workgroup_size parameter must be a literal i32 or an "
+            "i32 module-scope constant");
+}
+
 }  // namespace
 }  // namespace tint

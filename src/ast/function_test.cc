@@ -107,7 +107,7 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_Deco) {
         ProgramBuilder b2;
         b1.Func("func", VariableList{}, b1.ty.void_(), StatementList{},
                 DecorationList{
-                    b2.create<WorkgroupDecoration>(2, 4, 6),
+                    b2.WorkgroupSize(2, 4, 6),
                 });
       },
       "internal compiler error");
@@ -121,7 +121,7 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_ReturnDeco) {
         b1.Func("func", VariableList{}, b1.ty.void_(), StatementList{},
                 DecorationList{},
                 DecorationList{
-                    b2.create<WorkgroupDecoration>(2, 4, 6),
+                    b2.WorkgroupSize(2, 4, 6),
                 });
       },
       "internal compiler error");
@@ -159,10 +159,14 @@ TEST_F(FunctionTest, ToStr_WithDecoration) {
                  StatementList{
                      create<DiscardStatement>(),
                  },
-                 DecorationList{create<WorkgroupDecoration>(2, 4, 6)});
+                 DecorationList{WorkgroupSize(2, 4, 6)});
 
   EXPECT_EQ(str(f), R"(Function func -> __void
-WorkgroupDecoration{2 4 6}
+WorkgroupDecoration{
+  ScalarConstructor[not set]{2}
+  ScalarConstructor[not set]{4}
+  ScalarConstructor[not set]{6}
+}
 ()
 {
   Discard{}

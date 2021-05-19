@@ -21,7 +21,7 @@ namespace wgsl {
 namespace {
 
 TEST_F(ParserImplTest, DecorationList_Parses) {
-  auto p = parser("[[workgroup_size(2), workgroup_size(3, 4, 5)]]");
+  auto p = parser("[[workgroup_size(2), stage(compute)]]");
   auto decos = p->decoration_list();
   EXPECT_FALSE(p->has_error()) << p->error();
   EXPECT_FALSE(decos.errored);
@@ -33,18 +33,17 @@ TEST_F(ParserImplTest, DecorationList_Parses) {
   ASSERT_NE(deco_0, nullptr);
   ASSERT_NE(deco_1, nullptr);
 
-  uint32_t x = 0;
-  uint32_t y = 0;
-  uint32_t z = 0;
   ASSERT_TRUE(deco_0->Is<ast::WorkgroupDecoration>());
-  std::tie(x, y, z) = deco_0->As<ast::WorkgroupDecoration>()->values();
-  EXPECT_EQ(x, 2u);
+  ast::Expression* x = deco_0->As<ast::WorkgroupDecoration>()->values()[0];
+  ASSERT_NE(x, nullptr);
+  auto* x_scalar = x->As<ast::ScalarConstructorExpression>();
+  ASSERT_NE(x_scalar, nullptr);
+  ASSERT_TRUE(x_scalar->literal()->Is<ast::IntLiteral>());
+  EXPECT_EQ(x_scalar->literal()->As<ast::IntLiteral>()->value_as_u32(), 2u);
 
-  ASSERT_TRUE(deco_1->Is<ast::WorkgroupDecoration>());
-  std::tie(x, y, z) = deco_1->As<ast::WorkgroupDecoration>()->values();
-  EXPECT_EQ(x, 3u);
-  EXPECT_EQ(y, 4u);
-  EXPECT_EQ(z, 5u);
+  ASSERT_TRUE(deco_1->Is<ast::StageDecoration>());
+  EXPECT_EQ(deco_1->As<ast::StageDecoration>()->value(),
+            ast::PipelineStage::kCompute);
 }
 
 TEST_F(ParserImplTest, DecorationList_Empty) {
@@ -85,14 +84,12 @@ TEST_F(ParserImplTest, DecorationList_MissingComma) {
 }
 
 TEST_F(ParserImplTest, DecorationList_BadDecoration) {
-  auto p = parser("[[workgroup_size()]]");
+  auto p = parser("[[stage()]]");
   auto decos = p->decoration_list();
   EXPECT_TRUE(p->has_error());
   EXPECT_TRUE(decos.errored);
   EXPECT_FALSE(decos.matched);
-  EXPECT_EQ(
-      p->error(),
-      "1:18: expected signed integer literal for workgroup_size x parameter");
+  EXPECT_EQ(p->error(), "1:9: invalid value for stage decoration");
 }
 
 TEST_F(ParserImplTest, DecorationList_MissingRightAttr) {

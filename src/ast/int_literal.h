@@ -25,6 +25,9 @@ class IntLiteral : public Castable<IntLiteral, Literal> {
  public:
   ~IntLiteral() override;
 
+  /// @returns the literal value as an i32
+  int32_t value_as_i32() const { return static_cast<int32_t>(value_); }
+
   /// @returns the literal value as a u32
   uint32_t value_as_u32() const { return value_; }
 

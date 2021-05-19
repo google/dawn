@@ -15,12 +15,15 @@
 #ifndef SRC_AST_WORKGROUP_DECORATION_H_
 #define SRC_AST_WORKGROUP_DECORATION_H_
 
-#include <tuple>
+#include <array>
 
 #include "src/ast/decoration.h"
 
 namespace tint {
 namespace ast {
+
+// Forward declaration
+class Expression;
 
 /// A workgroup decoration
 class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
@@ -28,34 +31,19 @@ class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
   /// constructor
   /// @param program_id the identifier of the program that owns this node
   /// @param source the source of this decoration
-  /// @param x the workgroup x dimension size
-  WorkgroupDecoration(ProgramID program_id, const Source& source, uint32_t x);
-  /// constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
-  /// @param x the workgroup x dimension size
-  /// @param y the workgroup x dimension size
+  /// @param x the workgroup x dimension expression
+  /// @param y the optional workgroup y dimension expression
+  /// @param z the optional workgroup z dimension expression
   WorkgroupDecoration(ProgramID program_id,
                       const Source& source,
-                      uint32_t x,
-                      uint32_t y);
-  /// constructor
-  /// @param program_id the identifier of the program that owns this node
-  /// @param source the source of this decoration
-  /// @param x the workgroup x dimension size
-  /// @param y the workgroup x dimension size
-  /// @param z the workgroup x dimension size
-  WorkgroupDecoration(ProgramID program_id,
-                      const Source& source,
-                      uint32_t x,
-                      uint32_t y,
-                      uint32_t z);
+                      ast::Expression* x,
+                      ast::Expression* y = nullptr,
+                      ast::Expression* z = nullptr);
+
   ~WorkgroupDecoration() override;
 
   /// @returns the workgroup dimensions
-  std::tuple<uint32_t, uint32_t, uint32_t> values() const {
-    return {x_, y_, z_};
-  }
+  std::array<ast::Expression*, 3> values() const { return {x_, y_, z_}; }
 
   /// Outputs the decoration to the given stream
   /// @param sem the semantic info for the program
@@ -72,9 +60,9 @@ class WorkgroupDecoration : public Castable<WorkgroupDecoration, Decoration> {
   WorkgroupDecoration* Clone(CloneContext* ctx) const override;
 
  private:
-  uint32_t const x_;
-  uint32_t const y_;
-  uint32_t const z_;
+  ast::Expression* x_ = nullptr;
+  ast::Expression* y_ = nullptr;
+  ast::Expression* z_ = nullptr;
 };
 
 }  // namespace ast

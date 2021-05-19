@@ -3010,26 +3010,35 @@ Maybe<ast::Decoration*> ParserImpl::decoration() {
 
   if (s == kWorkgroupSizeDecoration) {
     return expect_paren_block("workgroup_size decoration", [&]() -> Result {
-      uint32_t x;
-      uint32_t y = 1;
-      uint32_t z = 1;
+      ast::Expression* x = nullptr;
+      ast::Expression* y = nullptr;
+      ast::Expression* z = nullptr;
 
-      auto val = expect_nonzero_positive_sint("workgroup_size x parameter");
-      if (val.errored)
+      auto expr = primary_expression();
+      if (expr.errored) {
         return Failure::kErrored;
-      x = val.value;
+      } else if (!expr.matched) {
+        return add_error(peek(), "expected workgroup_size x parameter");
+      }
+      x = std::move(expr.value);
 
       if (match(Token::Type::kComma)) {
-        val = expect_nonzero_positive_sint("workgroup_size y parameter");
-        if (val.errored)
+        expr = primary_expression();
+        if (expr.errored) {
           return Failure::kErrored;
-        y = val.value;
+        } else if (!expr.matched) {
+          return add_error(peek(), "expected workgroup_size y parameter");
+        }
+        y = std::move(expr.value);
 
         if (match(Token::Type::kComma)) {
-          val = expect_nonzero_positive_sint("workgroup_size z parameter");
-          if (val.errored)
+          expr = primary_expression();
+          if (expr.errored) {
             return Failure::kErrored;
-          z = val.value;
+          } else if (!expr.matched) {
+            return add_error(peek(), "expected workgroup_size z parameter");
+          }
+          z = std::move(expr.value);
         }
       }
 

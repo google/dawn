@@ -1295,10 +1295,79 @@ bool Resolver::Function(ast::Function* func) {
 
   if (auto* workgroup =
           ast::GetDecoration<ast::WorkgroupDecoration>(func->decorations())) {
-    // TODO(crbug.com/tint/713): Handle non-literals.
-    info->workgroup_size[0].value = std::get<0>(workgroup->values());
-    info->workgroup_size[1].value = std::get<1>(workgroup->values());
-    info->workgroup_size[2].value = std::get<2>(workgroup->values());
+    auto values = workgroup->values();
+    for (int i = 0; i < 3; i++) {
+      // Each argument to this decoration can either be a literal, an
+      // identifier for a module-scope constants, or nullptr if not specified.
+
+      if (!values[i]) {
+        // Not specified, just use the default.
+        continue;
+      }
+
+      Mark(values[i]);
+
+      int32_t value = 0;
+      if (auto* ident = values[i]->As<ast::IdentifierExpression>()) {
+        // We have an identifier of a module-scope constant.
+        if (!Identifier(ident)) {
+          return false;
+        }
+
+        VariableInfo* var;
+        if (!variable_stack_.get(ident->symbol(), &var) ||
+            !(var->declaration->is_const() && var->type->Is<sem::I32>())) {
+          diagnostics_.add_error(
+              "workgroup_size parameter must be a literal i32 or an i32 "
+              "module-scope constant",
+              values[i]->source());
+          return false;
+        }
+
+        // Capture the constant if an [[override]] attribute is present.
+        if (ast::HasDecoration<ast::OverrideDecoration>(
+                var->declaration->decorations())) {
+          info->workgroup_size[i].overridable_const = var->declaration;
+        }
+
+        auto* constructor = var->declaration->constructor();
+        if (constructor) {
+          // Resolve the constructor expression to use as the default value.
+          if (!GetScalarConstExprValue(constructor, &value)) {
+            return false;
+          }
+        } else {
+          // No constructor means this value must be overriden by the user.
+          info->workgroup_size[i].value = 0;
+          continue;
+        }
+      } else if (auto* scalar =
+                     values[i]->As<ast::ScalarConstructorExpression>()) {
+        // We have a literal.
+        Mark(scalar->literal());
+
+        if (!scalar->literal()->Is<ast::IntLiteral>()) {
+          diagnostics_.add_error(
+              "workgroup_size parameter must be a literal i32 or an i32 "
+              "module-scope constant",
+              values[i]->source());
+          return false;
+        }
+
+        if (!GetScalarConstExprValue(scalar, &value)) {
+          return false;
+        }
+      }
+
+      // Validate and set the default value for this dimension.
+      if (value < 1) {
+        diagnostics_.add_error(
+            "workgroup_size parameter must be a positive i32 value",
+            values[i]->source());
+        return false;
+      }
+      info->workgroup_size[i].value = value;
+    }
   }
 
   if (!ValidateFunction(func, info)) {
@@ -3096,6 +3165,40 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
   }
 
   return true;
+}
+
+template <typename T>
+bool Resolver::GetScalarConstExprValue(ast::Expression* expr, T* result) {
+  if (auto* type_constructor = expr->As<ast::TypeConstructorExpression>()) {
+    if (type_constructor->values().size() == 0) {
+      // Zero-valued constructor.
+      *result = static_cast<T>(0);
+      return true;
+    } else if (type_constructor->values().size() == 1) {
+      // Recurse into the constructor argument expression.
+      return GetScalarConstExprValue(type_constructor->values()[0], result);
+    } else {
+      TINT_ICE(diagnostics_) << "malformed scalar type constructor";
+    }
+  } else if (auto* scalar = expr->As<ast::ScalarConstructorExpression>()) {
+    // Cast literal to result type.
+    if (auto* int_lit = scalar->literal()->As<ast::IntLiteral>()) {
+      *result = static_cast<T>(int_lit->value_as_u32());
+      return true;
+    } else if (auto* float_lit = scalar->literal()->As<ast::FloatLiteral>()) {
+      *result = static_cast<T>(float_lit->value());
+      return true;
+    } else if (auto* bool_lit = scalar->literal()->As<ast::BoolLiteral>()) {
+      *result = static_cast<T>(bool_lit->IsTrue());
+      return true;
+    } else {
+      TINT_ICE(diagnostics_) << "unhandled scalar constructor";
+    }
+  } else {
+    TINT_ICE(diagnostics_) << "unhandled constant expression";
+  }
+
+  return false;
 }
 
 template <typename F>

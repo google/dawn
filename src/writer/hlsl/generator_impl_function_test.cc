@@ -926,7 +926,7 @@ TEST_F(HlslGeneratorImplTest_Function,
        },
        {
            Stage(ast::PipelineStage::kCompute),
-           create<ast::WorkgroupDecoration>(2u, 4u, 6u),
+           WorkgroupSize(2, 4, 6),
        });
 
   GeneratorImpl& gen = Build();

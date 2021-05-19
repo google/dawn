@@ -828,10 +828,8 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
-  MakeEmptyBodyFunction("foo", ast::DecorationList{
-                                   Stage(ast::PipelineStage::kCompute),
-                                   create<ast::WorkgroupDecoration>(8u, 2u, 1u),
-                               });
+  MakeEmptyBodyFunction(
+      "foo", {Stage(ast::PipelineStage::kCompute), WorkgroupSize(8, 2, 1)});
 
   Inspector& inspector = Build();
 

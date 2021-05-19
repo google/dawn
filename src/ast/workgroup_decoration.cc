@@ -23,36 +23,36 @@ namespace ast {
 
 WorkgroupDecoration::WorkgroupDecoration(ProgramID program_id,
                                          const Source& source,
-                                         uint32_t x)
-    : WorkgroupDecoration(program_id, source, x, 1, 1) {}
-
-WorkgroupDecoration::WorkgroupDecoration(ProgramID program_id,
-                                         const Source& source,
-                                         uint32_t x,
-                                         uint32_t y)
-    : WorkgroupDecoration(program_id, source, x, y, 1) {}
-
-WorkgroupDecoration::WorkgroupDecoration(ProgramID program_id,
-                                         const Source& source,
-                                         uint32_t x,
-                                         uint32_t y,
-                                         uint32_t z)
+                                         ast::Expression* x,
+                                         ast::Expression* y,
+                                         ast::Expression* z)
     : Base(program_id, source), x_(x), y_(y), z_(z) {}
 
 WorkgroupDecoration::~WorkgroupDecoration() = default;
 
-void WorkgroupDecoration::to_str(const sem::Info&,
+void WorkgroupDecoration::to_str(const sem::Info& sem,
                                  std::ostream& out,
                                  size_t indent) const {
   make_indent(out, indent);
-  out << "WorkgroupDecoration{" << x_ << " " << y_ << " " << z_ << "}"
-      << std::endl;
+  out << "WorkgroupDecoration{" << std::endl;
+  x_->to_str(sem, out, indent + 2);
+  if (y_) {
+    y_->to_str(sem, out, indent + 2);
+    if (z_) {
+      z_->to_str(sem, out, indent + 2);
+    }
+  }
+  make_indent(out, indent);
+  out << "}" << std::endl;
 }
 
 WorkgroupDecoration* WorkgroupDecoration::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
-  return ctx->dst->create<WorkgroupDecoration>(src, x_, y_, z_);
+  auto* x = ctx->Clone(x_);
+  auto* y = ctx->Clone(y_);
+  auto* z = ctx->Clone(z_);
+  return ctx->dst->create<WorkgroupDecoration>(src, x, y, z);
 }
 
 }  // namespace ast

@@ -200,7 +200,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize) {
   auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                     ast::DecorationList{
-                        create<ast::WorkgroupDecoration>(2u, 4u, 6u),
+                        WorkgroupSize(2, 4, 6),
                         Stage(ast::PipelineStage::kCompute),
                     });
 

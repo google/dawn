@@ -59,6 +59,7 @@
 #include "src/ast/variable_decl_statement.h"
 #include "src/ast/vector.h"
 #include "src/ast/void.h"
+#include "src/ast/workgroup_decoration.h"
 #include "src/program.h"
 #include "src/program_id.h"
 #include "src/sem/array.h"
@@ -1912,6 +1913,36 @@ class ProgramBuilder {
   /// @returns the stage decoration pointer
   ast::StageDecoration* Stage(ast::PipelineStage stage) {
     return create<ast::StageDecoration>(source_, stage);
+  }
+
+  /// Creates an ast::WorkgroupDecoration
+  /// @param x the x dimension expression
+  /// @returns the workgroup decoration pointer
+  template <typename EXPR_X>
+  ast::WorkgroupDecoration* WorkgroupSize(EXPR_X&& x) {
+    return WorkgroupSize(std::forward<EXPR_X>(x), nullptr, nullptr);
+  }
+
+  /// Creates an ast::WorkgroupDecoration
+  /// @param x the x dimension expression
+  /// @param y the y dimension expression
+  /// @returns the workgroup decoration pointer
+  template <typename EXPR_X, typename EXPR_Y>
+  ast::WorkgroupDecoration* WorkgroupSize(EXPR_X&& x, EXPR_Y&& y) {
+    return WorkgroupSize(std::forward<EXPR_X>(x), std::forward<EXPR_Y>(y),
+                         nullptr);
+  }
+
+  /// Creates an ast::WorkgroupDecoration
+  /// @param x the x dimension expression
+  /// @param y the y dimension expression
+  /// @param z the z dimension expression
+  /// @returns the workgroup decoration pointer
+  template <typename EXPR_X, typename EXPR_Y, typename EXPR_Z>
+  ast::WorkgroupDecoration* WorkgroupSize(EXPR_X&& x, EXPR_Y&& y, EXPR_Z&& z) {
+    return create<ast::WorkgroupDecoration>(
+        source_, Expr(std::forward<EXPR_X>(x)), Expr(std::forward<EXPR_Y>(y)),
+        Expr(std::forward<EXPR_Z>(z)));
   }
 
   /// Sets the current builder source to `src`

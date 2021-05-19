@@ -601,12 +601,28 @@ bool GeneratorImpl::EmitDecorations(const ast::DecorationList& decos) {
     first = false;
 
     if (auto* workgroup = deco->As<ast::WorkgroupDecoration>()) {
-      uint32_t x = 0;
-      uint32_t y = 0;
-      uint32_t z = 0;
-      std::tie(x, y, z) = workgroup->values();
-      out_ << "workgroup_size(" << std::to_string(x) << ", "
-           << std::to_string(y) << ", " << std::to_string(z) << ")";
+      auto values = workgroup->values();
+      out_ << "workgroup_size(";
+      for (int i = 0; i < 3; i++) {
+        if (values[i]) {
+          if (i > 0) {
+            out_ << ", ";
+          }
+          if (auto* ident = values[i]->As<ast::IdentifierExpression>()) {
+            if (!EmitIdentifier(ident)) {
+              return false;
+            }
+          } else if (auto* scalar =
+                         values[i]->As<ast::ScalarConstructorExpression>()) {
+            if (!EmitScalarConstructor(scalar)) {
+              return false;
+            }
+          } else {
+            TINT_ICE(diagnostics_) << "Unsupported workgroup_size expression";
+          }
+        }
+      }
+      out_ << ")";
     } else if (deco->Is<ast::StructBlockDecoration>()) {
       out_ << "block";
     } else if (auto* stage = deco->As<ast::StageDecoration>()) {

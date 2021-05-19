@@ -26,6 +26,7 @@
 #include "src/ast/if_statement.h"
 #include "src/ast/intrinsic_texture_helper_test.h"
 #include "src/ast/loop_statement.h"
+#include "src/ast/override_decoration.h"
 #include "src/ast/return_statement.h"
 #include "src/ast/stage_decoration.h"
 #include "src/ast/struct_block_decoration.h"
@@ -889,6 +890,8 @@ TEST_F(ResolverTest, Function_ReturnStatements) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
+  // [[stage(compute)]]
+  // fn main() {}
   auto* func = Func("main", ast::VariableList{}, ty.void_(), {}, {});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -905,9 +908,11 @@ TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
-  auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
-                    {Stage(ast::PipelineStage::kCompute),
-                     create<ast::WorkgroupDecoration>(8, 2, 3)});
+  // [[stage(compute), workgroup_size(8, 2, 3)]]
+  // fn main() {}
+  auto* func =
+      Func("main", ast::VariableList{}, ty.void_(), {},
+           {Stage(ast::PipelineStage::kCompute), WorkgroupSize(8, 2, 3)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -919,6 +924,134 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
   EXPECT_EQ(func_sem->workgroup_size()[2].value, 3u);
   EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
   EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
+}
+
+TEST_F(ResolverTest, Function_WorkgroupSize_Consts) {
+  // let width = 16;
+  // let height = 8;
+  // let depth = 2;
+  // [[stage(compute), workgroup_size(width, height, depth)]]
+  // fn main() {}
+  GlobalConst("width", ty.i32(), Expr(16));
+  GlobalConst("height", ty.i32(), Expr(8));
+  GlobalConst("depth", ty.i32(), Expr(2));
+  auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
+                    {Stage(ast::PipelineStage::kCompute),
+                     WorkgroupSize("width", "height", "depth")});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->workgroup_size()[0].value, 16u);
+  EXPECT_EQ(func_sem->workgroup_size()[1].value, 8u);
+  EXPECT_EQ(func_sem->workgroup_size()[2].value, 2u);
+  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
+}
+
+TEST_F(ResolverTest, Function_WorkgroupSize_Consts_NestedInitializer) {
+  // let width = i32(i32(i32(8)));
+  // let height = i32(i32(i32(4)));
+  // [[stage(compute), workgroup_size(width, height)]]
+  // fn main() {}
+  GlobalConst("width", ty.i32(),
+              Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 8))));
+  GlobalConst("height", ty.i32(),
+              Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 4))));
+  auto* func = Func(
+      "main", ast::VariableList{}, ty.void_(), {},
+      {Stage(ast::PipelineStage::kCompute), WorkgroupSize("width", "height")});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->workgroup_size()[0].value, 8u);
+  EXPECT_EQ(func_sem->workgroup_size()[1].value, 4u);
+  EXPECT_EQ(func_sem->workgroup_size()[2].value, 1u);
+  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
+}
+
+TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
+  // [[override(0)]] let width = 16;
+  // [[override(1)]] let height = 8;
+  // [[override(2)]] let depth = 2;
+  // [[stage(compute), workgroup_size(width, height, depth)]]
+  // fn main() {}
+  auto* width = GlobalConst("width", ty.i32(), Expr(16), {Override(0)});
+  auto* height = GlobalConst("height", ty.i32(), Expr(8), {Override(1)});
+  auto* depth = GlobalConst("depth", ty.i32(), Expr(2), {Override(2)});
+  auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
+                    {Stage(ast::PipelineStage::kCompute),
+                     WorkgroupSize("width", "height", "depth")});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->workgroup_size()[0].value, 16u);
+  EXPECT_EQ(func_sem->workgroup_size()[1].value, 8u);
+  EXPECT_EQ(func_sem->workgroup_size()[2].value, 2u);
+  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, width);
+  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, height);
+  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, depth);
+}
+
+TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
+  // [[override(0)]] let width : i32;
+  // [[override(1)]] let height : i32;
+  // [[override(2)]] let depth : i32;
+  // [[stage(compute), workgroup_size(width, height, depth)]]
+  // fn main() {}
+  auto* width = GlobalConst("width", ty.i32(), nullptr, {Override(0)});
+  auto* height = GlobalConst("height", ty.i32(), nullptr, {Override(1)});
+  auto* depth = GlobalConst("depth", ty.i32(), nullptr, {Override(2)});
+  auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
+                    {Stage(ast::PipelineStage::kCompute),
+                     WorkgroupSize("width", "height", "depth")});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->workgroup_size()[0].value, 0u);
+  EXPECT_EQ(func_sem->workgroup_size()[1].value, 0u);
+  EXPECT_EQ(func_sem->workgroup_size()[2].value, 0u);
+  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, width);
+  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, height);
+  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, depth);
+}
+
+TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
+  // [[override(1)]] let height = 2;
+  // let depth = 3;
+  // [[stage(compute), workgroup_size(8, height, depth)]]
+  // fn main() {}
+  auto* height = GlobalConst("height", ty.i32(), Expr(2), {Override(0)});
+  GlobalConst("depth", ty.i32(), Expr(3));
+  auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
+                    {Stage(ast::PipelineStage::kCompute),
+                     WorkgroupSize(8, "height", "depth")});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->workgroup_size()[0].value, 8u);
+  EXPECT_EQ(func_sem->workgroup_size()[1].value, 2u);
+  EXPECT_EQ(func_sem->workgroup_size()[2].value, 3u);
+  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, height);
   EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
 }
 
