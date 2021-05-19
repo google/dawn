@@ -17,35 +17,47 @@
 #include "src/ast/block_statement.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BlockStatement);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::LoopBlockStatement);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::LoopContinuingBlockStatement);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::SwitchCaseBlockStatement);
 
 namespace tint {
 namespace sem {
 
 BlockStatement::BlockStatement(const ast::BlockStatement* declaration,
-                               const Statement* parent,
-                               Type type)
-    : Base(declaration, parent), type_(type) {}
+                               const Statement* parent)
+    : Base(declaration, parent) {}
 
 BlockStatement::~BlockStatement() = default;
-
-const BlockStatement* BlockStatement::FindFirstParent(
-    BlockStatement::Type ty) const {
-  return FindFirstParent(
-      [ty](auto* block_info) { return block_info->type_ == ty; });
-}
 
 const ast::BlockStatement* BlockStatement::Declaration() const {
   return Base::Declaration()->As<ast::BlockStatement>();
 }
 
-void BlockStatement::SetFirstContinue(size_t first_continue) {
-  TINT_ASSERT(type_ == Type::kLoop);
-  first_continue_ = first_continue;
-}
-
 void BlockStatement::AddDecl(ast::Variable* var) {
   decls_.push_back(var);
 }
+
+LoopBlockStatement::LoopBlockStatement(const ast::BlockStatement* declaration,
+                                       const Statement* parent)
+    : Base(declaration, parent) {}
+LoopBlockStatement::~LoopBlockStatement() = default;
+
+void LoopBlockStatement::SetFirstContinue(size_t first_continue) {
+  first_continue_ = first_continue;
+}
+
+LoopContinuingBlockStatement::LoopContinuingBlockStatement(
+    const ast::BlockStatement* declaration,
+    const Statement* parent)
+    : Base(declaration, parent) {}
+LoopContinuingBlockStatement::~LoopContinuingBlockStatement() = default;
+
+SwitchCaseBlockStatement::SwitchCaseBlockStatement(
+    const ast::BlockStatement* declaration,
+    const Statement* parent)
+    : Base(declaration, parent) {}
+SwitchCaseBlockStatement::~SwitchCaseBlockStatement() = default;
 
 }  // namespace sem
 }  // namespace tint
