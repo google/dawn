@@ -30,7 +30,7 @@ TEST_F(ResolverIsStorableTest, Void) {
 TEST_F(ResolverIsStorableTest, Scalar) {
   EXPECT_TRUE(r()->IsStorable(ty.bool_()));
   EXPECT_TRUE(r()->IsStorable(ty.i32()));
-  EXPECT_TRUE(r()->IsStorable(ty.u32()));
+  EXPECT_TRUE(r()->IsStorable(create<sem::U32>()));
   EXPECT_TRUE(r()->IsStorable(ty.f32()));
 }
 
@@ -38,9 +38,9 @@ TEST_F(ResolverIsStorableTest, Vector) {
   EXPECT_TRUE(r()->IsStorable(ty.vec2<i32>()));
   EXPECT_TRUE(r()->IsStorable(ty.vec3<i32>()));
   EXPECT_TRUE(r()->IsStorable(ty.vec4<i32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec2<u32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec3<u32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec4<u32>()));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::U32>(), 2)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::U32>(), 3)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::U32>(), 4)));
   EXPECT_TRUE(r()->IsStorable(ty.vec2<f32>()));
   EXPECT_TRUE(r()->IsStorable(ty.vec3<f32>()));
   EXPECT_TRUE(r()->IsStorable(ty.vec4<f32>()));

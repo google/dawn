@@ -53,13 +53,14 @@ TEST_F(IntrinsicTableTest, MismatchF32) {
 }
 
 TEST_F(IntrinsicTableTest, MatchU32) {
-  auto result = table->Lookup(*this, IntrinsicType::kUnpack2x16Float,
-                              {ty.u32()}, Source{});
+  auto* u32 = create<sem::U32>();
+  auto result =
+      table->Lookup(*this, IntrinsicType::kUnpack2x16Float, {u32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kUnpack2x16Float);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.vec2<f32>());
-  EXPECT_THAT(result.intrinsic->Parameters(), ElementsAre(Parameter{ty.u32()}));
+  EXPECT_THAT(result.intrinsic->Parameters(), ElementsAre(Parameter{u32}));
 }
 
 TEST_F(IntrinsicTableTest, MismatchU32) {
@@ -102,13 +103,14 @@ TEST_F(IntrinsicTableTest, MatchIU32AsI32) {
 }
 
 TEST_F(IntrinsicTableTest, MatchIU32AsU32) {
+  auto* u32 = create<sem::U32>();
   auto result =
-      table->Lookup(*this, IntrinsicType::kCountOneBits, {ty.u32()}, Source{});
+      table->Lookup(*this, IntrinsicType::kCountOneBits, {u32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kCountOneBits);
-  EXPECT_THAT(result.intrinsic->ReturnType(), ty.u32());
-  EXPECT_THAT(result.intrinsic->Parameters(), ElementsAre(Parameter{ty.u32()}));
+  EXPECT_THAT(result.intrinsic->ReturnType(), u32);
+  EXPECT_THAT(result.intrinsic->Parameters(), ElementsAre(Parameter{u32}));
 }
 
 TEST_F(IntrinsicTableTest, MismatchIU32) {
@@ -131,15 +133,15 @@ TEST_F(IntrinsicTableTest, MatchFIU32AsI32) {
 }
 
 TEST_F(IntrinsicTableTest, MatchFIU32AsU32) {
-  auto result = table->Lookup(*this, IntrinsicType::kClamp,
-                              {ty.u32(), ty.u32(), ty.u32()}, Source{});
+  auto* u32 = create<sem::U32>();
+  auto result =
+      table->Lookup(*this, IntrinsicType::kClamp, {u32, u32, u32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kClamp);
-  EXPECT_THAT(result.intrinsic->ReturnType(), ty.u32());
+  EXPECT_THAT(result.intrinsic->ReturnType(), u32);
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{ty.u32()}, Parameter{ty.u32()},
-                          Parameter{ty.u32()}));
+              ElementsAre(Parameter{u32}, Parameter{u32}, Parameter{u32}));
 }
 
 TEST_F(IntrinsicTableTest, MatchFIU32AsF32) {
@@ -208,7 +210,7 @@ TEST_F(IntrinsicTableTest, MatchArray) {
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kArrayLength);
-  EXPECT_THAT(result.intrinsic->ReturnType(), ty.u32());
+  EXPECT_TRUE(result.intrinsic->ReturnType()->Is<sem::U32>());
   ASSERT_EQ(result.intrinsic->Parameters().size(), 1u);
   EXPECT_TRUE(result.intrinsic->Parameters()[0].type->Is<sem::Array>());
 }
@@ -371,8 +373,9 @@ TEST_F(IntrinsicTableTest, MatchOpenType) {
 }
 
 TEST_F(IntrinsicTableTest, MismatchOpenType) {
+  auto* u32 = create<sem::U32>();
   auto result = table->Lookup(*this, IntrinsicType::kClamp,
-                              {ty.f32(), ty.u32(), ty.f32()}, Source{});
+                              {ty.f32(), u32, ty.f32()}, Source{});
   ASSERT_EQ(result.intrinsic, nullptr);
   ASSERT_THAT(result.diagnostics.str(), HasSubstr("no matching call"));
 }
@@ -391,9 +394,9 @@ TEST_F(IntrinsicTableTest, MatchOpenSizeVector) {
 }
 
 TEST_F(IntrinsicTableTest, MismatchOpenSizeVector) {
-  auto result =
-      table->Lookup(*this, IntrinsicType::kClamp,
-                    {ty.vec2<f32>(), ty.vec2<u32>(), ty.vec2<f32>()}, Source{});
+  auto* u32 = create<sem::U32>();
+  auto result = table->Lookup(*this, IntrinsicType::kClamp,
+                              {ty.vec2<f32>(), u32, ty.vec2<f32>()}, Source{});
   ASSERT_EQ(result.intrinsic, nullptr);
   ASSERT_THAT(result.diagnostics.str(), HasSubstr("no matching call"));
 }

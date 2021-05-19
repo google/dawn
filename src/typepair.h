@@ -252,9 +252,10 @@ using SampledTexture = TypePair<ast::SampledTexture, sem::SampledTexture>;
 using StorageTexture = TypePair<ast::StorageTexture, sem::StorageTexture>;
 using Struct = TypePair<ast::Struct, sem::Struct>;
 using Texture = TypePair<ast::Texture, sem::Texture>;
-using U32 = TypePair<ast::U32, sem::U32>;
 using Vector = TypePair<ast::Vector, sem::Vector>;
 using Void = TypePair<ast::Void, sem::Void>;
+
+using U32 = Ptr<ast::U32>;
 
 // Helpers
 

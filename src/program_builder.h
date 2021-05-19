@@ -388,14 +388,12 @@ class ProgramBuilder {
     }
 
     /// @returns a u32 type
-    typ::U32 u32() const {
-      return {builder->create<ast::U32>(), builder->create<sem::U32>()};
-    }
+    typ::U32 u32() const { return builder->create<ast::U32>(); }
 
     /// @param source the Source of the node
     /// @returns a u32 type
     typ::U32 u32(const Source& source) const {
-      return {builder->create<ast::U32>(source), builder->create<sem::U32>()};
+      return builder->create<ast::U32>(source);
     }
 
     /// @returns a void type

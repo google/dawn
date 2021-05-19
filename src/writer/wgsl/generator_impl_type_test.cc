@@ -276,7 +276,6 @@ struct S {
 
 TEST_F(WgslGeneratorImplTest, EmitType_U32) {
   auto u32 = ty.u32();
-  AST().AddConstructedType(ty.alias("make_type_reachable", u32));
 
   GeneratorImpl& gen = Build();
 

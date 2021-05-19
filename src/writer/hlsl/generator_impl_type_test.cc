@@ -282,7 +282,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Struct_WithDecoration) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
-  auto u32 = ty.u32();
+  auto* u32 = create<sem::U32>();
 
   GeneratorImpl& gen = Build();
 

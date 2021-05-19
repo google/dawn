@@ -761,7 +761,7 @@ TEST_F(ResolverTest, Function_Parameters) {
   EXPECT_EQ(func_sem->Parameters().size(), 3u);
   EXPECT_EQ(func_sem->Parameters()[0]->Type(), ty.f32());
   EXPECT_EQ(func_sem->Parameters()[1]->Type(), ty.i32());
-  EXPECT_EQ(func_sem->Parameters()[2]->Type(), ty.u32());
+  EXPECT_TRUE(func_sem->Parameters()[2]->Type()->Is<sem::U32>());
   EXPECT_EQ(func_sem->Parameters()[0]->Declaration(), param_a);
   EXPECT_EQ(func_sem->Parameters()[1]->Declaration(), param_b);
   EXPECT_EQ(func_sem->Parameters()[2]->Declaration(), param_c);
