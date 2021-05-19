@@ -935,7 +935,14 @@ bool GeneratorImpl::EmitZeroValue(typ::Type type) {
   } else if (auto* vec = type->As<sem::Vector>()) {
     return EmitZeroValue(vec->type());
   } else if (auto* mat = type->As<sem::Matrix>()) {
-    return EmitZeroValue(mat->type());
+    if (!EmitType(mat, "")) {
+      return false;
+    }
+    out_ << "(";
+    if (!EmitZeroValue(mat->type())) {
+      return false;
+    }
+    out_ << ")";
   } else if (auto* arr = type->As<sem::Array>()) {
     out_ << "{";
     if (!EmitZeroValue(arr->ElemType())) {

@@ -131,6 +131,15 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
           "float2x3(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f))"));
 }
 
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Empty) {
+  WrapInFunction(mat4x4<f32>());
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("float4x4(0.0f)"));
+}
+
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
   WrapInFunction(
       Construct(ty.array(ty.vec3<f32>(), 3), vec3<f32>(1.0f, 2.0f, 3.0f),

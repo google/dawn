@@ -107,7 +107,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float3x2 a = 0.0f;\n");
+  EXPECT_EQ(gen.result(), "  float3x2 a = float3x2(0.0f);\n");
 }
 
 // TODO(crbug.com/tint/726): module-scope private and workgroup variables not
