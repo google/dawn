@@ -1,4 +1,4 @@
-int I;
+static int I;
 
 [numthreads(1, 1, 1)]
 void main() {

@@ -1,1 +1,1 @@
-SKIP: TINT_UNIMPLEMENTED crbug.com/tint/726: module-scope private and workgroup variables not yet implemented
+SKIP: crbug.com/tint/818: [HLSL] Loop emission broken for `let` function declarations

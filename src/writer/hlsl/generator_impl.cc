@@ -1893,8 +1893,10 @@ bool GeneratorImpl::EmitEntryPointData(
       }
 
       switch (var->StorageClass()) {
-        case ast::StorageClass::kPrivate:
         case ast::StorageClass::kUniformConstant:
+          break;
+        case ast::StorageClass::kPrivate:
+          out << "static ";
           break;
         case ast::StorageClass::kWorkgroup:
           out << "groupshared ";
