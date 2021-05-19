@@ -26,7 +26,6 @@
 #include "src/sem/statement.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
-#include "src/transform/duplicate_storage_structs.h"
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/manager.h"
 
@@ -41,7 +40,6 @@ Spirv::~Spirv() = default;
 Output Spirv::Run(const Program* in, const DataMap& data) {
   Manager manager;
   manager.Add<ExternalTextureTransform>();
-  manager.Add<DuplicateStorageStructs>();
   auto transformedInput = manager.Run(in, data);
 
   auto* cfg = data.Get<Config>();

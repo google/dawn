@@ -273,8 +273,6 @@ set(TINT_LIB_SRCS
   transform/canonicalize_entry_point_io.h
   transform/decompose_storage_access.cc
   transform/decompose_storage_access.h
-  transform/duplicate_storage_structs.cc
-  transform/duplicate_storage_structs.h
   transform/external_texture_transform.cc
   transform/external_texture_transform.h
   transform/first_index_offset.cc
@@ -802,7 +800,6 @@ if(${TINT_BUILD_TESTS})
       transform/calculate_array_length_test.cc
       transform/canonicalize_entry_point_io_test.cc
       transform/decompose_storage_access_test.cc
-      transform/duplicate_storage_structs_test.cc
       transform/external_texture_transform_test.cc
       transform/first_index_offset_test.cc
       transform/renamer_test.cc
