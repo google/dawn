@@ -52,6 +52,10 @@ namespace dawn_native { namespace d3d12 {
         return mD3d12Device;
     }
 
+    const gpu_info::D3DDriverVersion& Adapter::GetDriverVersion() const {
+        return mDriverVersion;
+    }
+
     MaybeError Adapter::Initialize() {
         // D3D12 cannot check for feature support without a device.
         // Create the device to populate the adapter properties then reuse it when needed for actual
@@ -88,10 +92,10 @@ namespace dawn_native { namespace d3d12 {
 
             std::ostringstream o;
             o << "D3D12 driver version ";
-            o << ((encodedVersion >> 48) & 0xFFFF) << ".";
-            o << ((encodedVersion >> 32) & 0xFFFF) << ".";
-            o << ((encodedVersion >> 16) & 0xFFFF) << ".";
-            o << (encodedVersion & 0xFFFF);
+            for (size_t i = 0; i < mDriverVersion.size(); ++i) {
+                mDriverVersion[i] = (encodedVersion >> (48 - 16 * i)) & 0xFFFF;
+                o << mDriverVersion[i] << ".";
+            }
             mDriverDescription = o.str();
         }
 

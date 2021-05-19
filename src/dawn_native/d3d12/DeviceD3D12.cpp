@@ -548,14 +548,17 @@ namespace dawn_native { namespace d3d12 {
 
         // Currently this workaround is only needed on Intel Gen9 and Gen9.5 GPUs.
         // See http://crbug.com/1161355 for more information.
-        // TODO(jiawei.shao@intel.com): disable this workaround on the newer drivers when the driver
-        // bug is fixed.
         if (gpu_info::IsIntel(pciInfo.vendorId) &&
             (gpu_info::IsSkylake(pciInfo.deviceId) || gpu_info::IsKabylake(pciInfo.deviceId) ||
              gpu_info::IsCoffeelake(pciInfo.deviceId))) {
-            SetToggle(
-                Toggle::UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
-                true);
+            constexpr gpu_info::D3DDriverVersion kFirstDriverVersionWithFix = {27, 20, 100, 9466};
+            if (gpu_info::CompareD3DDriverVersion(pciInfo.vendorId,
+                                                  ToBackend(GetAdapter())->GetDriverVersion(),
+                                                  kFirstDriverVersionWithFix) < 0) {
+                SetToggle(
+                    Toggle::UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
+                    true);
+            }
         }
     }
 

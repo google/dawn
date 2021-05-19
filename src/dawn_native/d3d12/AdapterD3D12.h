@@ -17,6 +17,7 @@
 
 #include "dawn_native/Adapter.h"
 
+#include "common/GPUInfo.h"
 #include "dawn_native/d3d12/D3D12Info.h"
 #include "dawn_native/d3d12/d3d12_platform.h"
 
@@ -33,6 +34,7 @@ namespace dawn_native { namespace d3d12 {
         IDXGIAdapter3* GetHardwareAdapter() const;
         Backend* GetBackend() const;
         ComPtr<ID3D12Device> GetDevice() const;
+        const gpu_info::D3DDriverVersion& GetDriverVersion() const;
 
         MaybeError Initialize();
 
@@ -46,6 +48,7 @@ namespace dawn_native { namespace d3d12 {
 
         ComPtr<IDXGIAdapter3> mHardwareAdapter;
         ComPtr<ID3D12Device> mD3d12Device;
+        gpu_info::D3DDriverVersion mDriverVersion;
 
         Backend* mBackend;
         D3D12DeviceInfo mDeviceInfo = {};
