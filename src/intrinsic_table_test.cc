@@ -47,7 +47,8 @@ TEST_F(IntrinsicTableTest, MatchF32) {
 }
 
 TEST_F(IntrinsicTableTest, MismatchF32) {
-  auto result = table->Lookup(*this, IntrinsicType::kCos, {ty.i32()}, Source{});
+  auto* i32 = create<sem::I32>();
+  auto result = table->Lookup(*this, IntrinsicType::kCos, {i32}, Source{});
   ASSERT_EQ(result.intrinsic, nullptr);
   ASSERT_THAT(result.diagnostics.str(), HasSubstr("no matching call"));
 }
@@ -71,17 +72,18 @@ TEST_F(IntrinsicTableTest, MismatchU32) {
 }
 
 TEST_F(IntrinsicTableTest, MatchI32) {
+  auto* i32 = create<sem::I32>();
   auto tex = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
-                              {tex, ty.i32(), ty.i32()}, Source{});
+                              {tex, i32, i32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.vec4<f32>());
   EXPECT_THAT(result.intrinsic->Parameters(),
               ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{ty.i32(), Parameter::Usage::kCoords},
-                          Parameter{ty.i32(), Parameter::Usage::kLevel}));
+                          Parameter{i32, Parameter::Usage::kCoords},
+                          Parameter{i32, Parameter::Usage::kLevel}));
 }
 
 TEST_F(IntrinsicTableTest, MismatchI32) {
@@ -93,13 +95,14 @@ TEST_F(IntrinsicTableTest, MismatchI32) {
 }
 
 TEST_F(IntrinsicTableTest, MatchIU32AsI32) {
+  auto* i32 = create<sem::I32>();
   auto result =
-      table->Lookup(*this, IntrinsicType::kCountOneBits, {ty.i32()}, Source{});
+      table->Lookup(*this, IntrinsicType::kCountOneBits, {i32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kCountOneBits);
-  EXPECT_THAT(result.intrinsic->ReturnType(), ty.i32());
-  EXPECT_THAT(result.intrinsic->Parameters(), ElementsAre(Parameter{ty.i32()}));
+  EXPECT_THAT(result.intrinsic->ReturnType(), i32);
+  EXPECT_THAT(result.intrinsic->Parameters(), ElementsAre(Parameter{i32}));
 }
 
 TEST_F(IntrinsicTableTest, MatchIU32AsU32) {
@@ -121,15 +124,15 @@ TEST_F(IntrinsicTableTest, MismatchIU32) {
 }
 
 TEST_F(IntrinsicTableTest, MatchFIU32AsI32) {
-  auto result = table->Lookup(*this, IntrinsicType::kClamp,
-                              {ty.i32(), ty.i32(), ty.i32()}, Source{});
+  auto* i32 = create<sem::I32>();
+  auto result =
+      table->Lookup(*this, IntrinsicType::kClamp, {i32, i32, i32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kClamp);
-  EXPECT_THAT(result.intrinsic->ReturnType(), ty.i32());
+  EXPECT_THAT(result.intrinsic->ReturnType(), i32);
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{ty.i32()}, Parameter{ty.i32()},
-                          Parameter{ty.i32()}));
+              ElementsAre(Parameter{i32}, Parameter{i32}, Parameter{i32}));
 }
 
 TEST_F(IntrinsicTableTest, MatchFIU32AsU32) {
@@ -247,63 +250,72 @@ TEST_F(IntrinsicTableTest, MismatchSampler) {
 }
 
 TEST_F(IntrinsicTableTest, MatchSampledTexture) {
+  auto* i32 = create<sem::I32>();
+  auto* vec2_i32 = create<sem::Vector>(i32, 2);
   auto tex = ty.sampled_texture(ast::TextureDimension::k2d, ty.f32());
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
-                              {tex, ty.vec2<i32>(), ty.i32()}, Source{});
+                              {tex, vec2_i32, i32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.vec4<f32>());
   EXPECT_THAT(result.intrinsic->Parameters(),
               ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{ty.vec2<i32>(), Parameter::Usage::kCoords},
-                          Parameter{ty.i32(), Parameter::Usage::kLevel}));
+                          Parameter{vec2_i32, Parameter::Usage::kCoords},
+                          Parameter{i32, Parameter::Usage::kLevel}));
 }
 
 TEST_F(IntrinsicTableTest, MatchMultisampledTexture) {
+  auto* i32 = create<sem::I32>();
+  auto* vec2_i32 = create<sem::Vector>(i32, 2);
   auto* tex =
       create<sem::MultisampledTexture>(ast::TextureDimension::k2d, ty.f32());
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
-                              {tex, ty.vec2<i32>(), ty.i32()}, Source{});
+                              {tex, vec2_i32, i32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.vec4<f32>());
   EXPECT_THAT(result.intrinsic->Parameters(),
               ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{ty.vec2<i32>(), Parameter::Usage::kCoords},
-                          Parameter{ty.i32(), Parameter::Usage::kSampleIndex}));
+                          Parameter{vec2_i32, Parameter::Usage::kCoords},
+                          Parameter{i32, Parameter::Usage::kSampleIndex}));
 }
 
 TEST_F(IntrinsicTableTest, MatchDepthTexture) {
+  auto* i32 = create<sem::I32>();
+  auto* vec2_i32 = create<sem::Vector>(i32, 2);
   auto tex = ty.depth_texture(ast::TextureDimension::k2d);
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
-                              {tex, ty.vec2<i32>(), ty.i32()}, Source{});
+                              {tex, vec2_i32, i32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.f32());
   EXPECT_THAT(result.intrinsic->Parameters(),
               ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{ty.vec2<i32>(), Parameter::Usage::kCoords},
-                          Parameter{ty.i32(), Parameter::Usage::kLevel}));
+                          Parameter{vec2_i32, Parameter::Usage::kCoords},
+                          Parameter{i32, Parameter::Usage::kLevel}));
 }
 
 TEST_F(IntrinsicTableTest, MatchExternalTexture) {
+  auto* i32 = create<sem::I32>();
+  auto* vec2_i32 = create<sem::Vector>(i32, 2);
   auto* tex = create<sem::ExternalTexture>();
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
-                              {tex, ty.vec2<i32>()}, Source{});
+                              {tex, vec2_i32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.vec4<f32>());
-  EXPECT_THAT(
-      result.intrinsic->Parameters(),
-      ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                  Parameter{ty.vec2<i32>(), Parameter::Usage::kCoords}));
+  EXPECT_THAT(result.intrinsic->Parameters(),
+              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
+                          Parameter{vec2_i32, Parameter::Usage::kCoords}));
 }
 
 TEST_F(IntrinsicTableTest, MatchROStorageTexture) {
+  auto* i32 = create<sem::I32>();
+  auto* vec2_i32 = create<sem::Vector>(i32, 2);
   auto* subtype =
       sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR16Float, Types());
   auto* tex = create<sem::StorageTexture>(
@@ -311,18 +323,19 @@ TEST_F(IntrinsicTableTest, MatchROStorageTexture) {
       ast::AccessControl::kReadOnly, subtype);
 
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
-                              {tex, ty.vec2<i32>()}, Source{});
+                              {tex, vec2_i32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.vec4<f32>());
-  EXPECT_THAT(
-      result.intrinsic->Parameters(),
-      ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                  Parameter{ty.vec2<i32>(), Parameter::Usage::kCoords}));
+  EXPECT_THAT(result.intrinsic->Parameters(),
+              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
+                          Parameter{vec2_i32, Parameter::Usage::kCoords}));
 }
 
 TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
+  auto* i32 = create<sem::I32>();
+  auto* vec2_i32 = create<sem::Vector>(i32, 2);
   auto* subtype =
       sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR16Float, Types());
   auto* tex = create<sem::StorageTexture>(
@@ -330,20 +343,22 @@ TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
       ast::AccessControl::kWriteOnly, subtype);
 
   auto result = table->Lookup(*this, IntrinsicType::kTextureStore,
-                              {tex, ty.vec2<i32>(), ty.vec4<f32>()}, Source{});
+                              {tex, vec2_i32, ty.vec4<f32>()}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureStore);
   EXPECT_THAT(result.intrinsic->ReturnType(), ty.void_());
   EXPECT_THAT(result.intrinsic->Parameters(),
               ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{ty.vec2<i32>(), Parameter::Usage::kCoords},
+                          Parameter{vec2_i32, Parameter::Usage::kCoords},
                           Parameter{ty.vec4<f32>(), Parameter::Usage::kValue}));
 }
 
 TEST_F(IntrinsicTableTest, MismatchTexture) {
+  auto* i32 = create<sem::I32>();
+  auto* vec2_i32 = create<sem::Vector>(i32, 2);
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
-                              {ty.f32(), ty.vec2<i32>()}, Source{});
+                              {ty.f32(), vec2_i32}, Source{});
   ASSERT_EQ(result.intrinsic, nullptr);
   ASSERT_THAT(result.diagnostics.str(), HasSubstr("no matching call"));
 }

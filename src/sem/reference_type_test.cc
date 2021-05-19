@@ -33,12 +33,12 @@ TEST_F(ReferenceTest, TypeName) {
 }
 
 TEST_F(ReferenceTest, FriendlyNameWithStorageClass) {
-  auto* r = create<Reference>(ty.i32(), ast::StorageClass::kWorkgroup);
+  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kWorkgroup);
   EXPECT_EQ(r->FriendlyName(Symbols()), "ref<workgroup, i32>");
 }
 
 TEST_F(ReferenceTest, FriendlyNameWithoutStorageClass) {
-  auto* r = create<Reference>(ty.i32(), ast::StorageClass::kNone);
+  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kNone);
   EXPECT_EQ(r->FriendlyName(Symbols()), "ref<i32>");
 }
 

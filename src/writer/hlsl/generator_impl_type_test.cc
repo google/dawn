@@ -128,7 +128,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
-  auto i32 = ty.i32();
+  auto* i32 = create<sem::I32>();
 
   GeneratorImpl& gen = Build();
 

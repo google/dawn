@@ -567,7 +567,6 @@ class InspectorHelper : public ProgramBuilder {
     return nullptr;
   }
 
-
   /// Generates appropriate types for a Read-Only StorageTexture
   /// @param dim the texture dimension of the storage texture
   /// @param format the image format of the storage texture
@@ -2801,7 +2800,7 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
   auto st_type = MakeStorageTextureTypes(dim, format, read_only);
   AddStorageTexture("st_var", st_type, 0, 0);
 
-  typ::Type dim_type = nullptr;
+  ast::Type* dim_type = nullptr;
   switch (dim) {
     case ast::TextureDimension::k1d:
       dim_type = ty.i32();

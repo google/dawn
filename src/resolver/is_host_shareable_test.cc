@@ -32,15 +32,15 @@ TEST_F(ResolverIsHostShareable, Bool) {
 }
 
 TEST_F(ResolverIsHostShareable, NumericScalar) {
-  EXPECT_TRUE(r()->IsHostShareable(ty.i32()));
+  EXPECT_TRUE(r()->IsHostShareable(create<sem::I32>()));
   EXPECT_TRUE(r()->IsHostShareable(create<sem::U32>()));
   EXPECT_TRUE(r()->IsHostShareable(ty.f32()));
 }
 
 TEST_F(ResolverIsHostShareable, NumericVector) {
-  EXPECT_TRUE(r()->IsHostShareable(ty.vec2<i32>()));
-  EXPECT_TRUE(r()->IsHostShareable(ty.vec3<i32>()));
-  EXPECT_TRUE(r()->IsHostShareable(ty.vec4<i32>()));
+  EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<sem::I32>(), 2)));
+  EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<sem::I32>(), 3)));
+  EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<sem::I32>(), 4)));
   EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<sem::U32>(), 2)));
   EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<sem::U32>(), 3)));
   EXPECT_TRUE(r()->IsHostShareable(create<sem::Vector>(create<sem::U32>(), 4)));

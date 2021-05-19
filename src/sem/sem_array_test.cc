@@ -52,22 +52,22 @@ TEST_F(ArrayTest, TypeName) {
 }
 
 TEST_F(ArrayTest, FriendlyNameRuntimeSized) {
-  auto* arr = create<Array>(ty.i32(), 0, 0, 4, 4, true);
+  auto* arr = create<Array>(create<I32>(), 0, 0, 4, 4, true);
   EXPECT_EQ(arr->FriendlyName(Symbols()), "array<i32>");
 }
 
 TEST_F(ArrayTest, FriendlyNameStaticSized) {
-  auto* arr = create<Array>(ty.i32(), 5, 4, 20, 4, true);
+  auto* arr = create<Array>(create<I32>(), 5, 4, 20, 4, true);
   EXPECT_EQ(arr->FriendlyName(Symbols()), "array<i32, 5>");
 }
 
 TEST_F(ArrayTest, FriendlyNameRuntimeSizedNonImplicitStride) {
-  auto* arr = create<Array>(ty.i32(), 0, 0, 4, 4, false);
+  auto* arr = create<Array>(create<I32>(), 0, 0, 4, 4, false);
   EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(4)]] array<i32>");
 }
 
 TEST_F(ArrayTest, FriendlyNameStaticSizedNonImplicitStride) {
-  auto* arr = create<Array>(ty.i32(), 5, 4, 20, 4, false);
+  auto* arr = create<Array>(create<I32>(), 5, 4, 20, 4, false);
   EXPECT_EQ(arr->FriendlyName(Symbols()), "[[stride(4)]] array<i32, 5>");
 }
 

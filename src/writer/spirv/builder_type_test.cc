@@ -140,7 +140,7 @@ TEST_F(BuilderTest_Type, GenerateBool) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
   auto bool_ = ty.bool_();
-  auto i32 = ty.i32();
+  auto* i32 = create<sem::I32>();
 
   spirv::Builder& b = Build();
 
@@ -168,7 +168,7 @@ TEST_F(BuilderTest_Type, GenerateF32) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
   auto f32 = ty.f32();
-  auto i32 = ty.i32();
+  auto* i32 = create<sem::I32>();
 
   spirv::Builder& b = Build();
 
@@ -181,7 +181,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
 }
 
 TEST_F(BuilderTest_Type, GenerateI32) {
-  auto i32 = ty.i32();
+  auto* i32 = create<sem::I32>();
 
   spirv::Builder& b = Build();
 
@@ -196,7 +196,7 @@ TEST_F(BuilderTest_Type, GenerateI32) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
   auto f32 = ty.f32();
-  auto i32 = ty.i32();
+  auto* i32 = create<sem::I32>();
 
   spirv::Builder& b = Build();
 
@@ -225,8 +225,9 @@ TEST_F(BuilderTest_Type, GenerateMatrix) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
-  auto mat = ty.mat4x3<i32>();
-  auto i32 = ty.i32();
+  auto* i32 = create<sem::I32>();
+  auto* col = create<sem::Vector>(i32, 4);
+  auto* mat = create<sem::Matrix>(col, 3);
 
   spirv::Builder& b = Build();
 
@@ -239,11 +240,12 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
 }
 
 TEST_F(BuilderTest_Type, GeneratePtr) {
-  sem::Pointer ptr(ty.i32(), ast::StorageClass::kOutput);
+  auto* i32 = create<sem::I32>();
+  auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOutput);
 
   spirv::Builder& b = Build();
 
-  auto id = b.GenerateTypeIfNeeded(&ptr);
+  auto id = b.GenerateTypeIfNeeded(ptr);
   ASSERT_FALSE(b.has_error()) << b.error();
   EXPECT_EQ(1u, id);
 
@@ -253,12 +255,13 @@ TEST_F(BuilderTest_Type, GeneratePtr) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
-  sem::Pointer ptr(ty.i32(), ast::StorageClass::kOutput);
+  auto* i32 = create<sem::I32>();
+  auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOutput);
 
   spirv::Builder& b = Build();
 
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
-  EXPECT_EQ(b.GenerateTypeIfNeeded(&ptr), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ptr), 1u);
+  EXPECT_EQ(b.GenerateTypeIfNeeded(ptr), 1u);
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_Empty) {
@@ -520,8 +523,8 @@ TEST_F(BuilderTest_Type, GenerateVector) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVector) {
-  auto vec = ty.vec3<i32>();
-  auto i32 = ty.i32();
+  auto* i32 = create<sem::I32>();
+  auto* vec = create<sem::Vector>(i32, 3);
 
   spirv::Builder& b = Build();
 
@@ -549,7 +552,7 @@ TEST_F(BuilderTest_Type, GenerateVoid) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedVoid) {
   auto* void_ = create<sem::Void>();
-  auto i32 = ty.i32();
+  auto* i32 = create<sem::I32>();
 
   spirv::Builder& b = Build();
 
@@ -656,7 +659,7 @@ TEST_F(BuilderTest_Type, DepthTexture_Generate_CubeArray) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_i32) {
-  auto i32 = ty.i32();
+  auto* i32 = create<sem::I32>();
   auto* ms = create<sem::MultisampledTexture>(ast::TextureDimension::k2d, i32);
 
   spirv::Builder& b = Build();
@@ -697,7 +700,8 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_f32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_i32) {
-  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k1d, ty.i32());
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k1d,
+                                        create<sem::I32>());
 
   spirv::Builder& b = Build();
 

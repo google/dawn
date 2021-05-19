@@ -377,14 +377,12 @@ class ProgramBuilder {
     }
 
     /// @returns a i32 type
-    typ::I32 i32() const {
-      return {builder->create<ast::I32>(), builder->create<sem::I32>()};
-    }
+    typ::I32 i32() const { return {builder->create<ast::I32>()}; }
 
     /// @param source the Source of the node
     /// @returns a i32 type
     typ::I32 i32(const Source& source) const {
-      return {builder->create<ast::I32>(source), builder->create<sem::I32>()};
+      return {builder->create<ast::I32>(source)};
     }
 
     /// @returns a u32 type

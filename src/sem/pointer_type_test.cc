@@ -33,12 +33,12 @@ TEST_F(PointerTest, TypeName) {
 }
 
 TEST_F(PointerTest, FriendlyNameWithStorageClass) {
-  auto* r = create<Pointer>(ty.i32(), ast::StorageClass::kWorkgroup);
+  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kWorkgroup);
   EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<workgroup, i32>");
 }
 
 TEST_F(PointerTest, FriendlyNameWithoutStorageClass) {
-  auto* r = create<Pointer>(ty.i32(), ast::StorageClass::kNone);
+  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kNone);
   EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<i32>");
 }
 
