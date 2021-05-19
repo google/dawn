@@ -444,19 +444,63 @@ bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
         {Operand::Int(id), Operand::Int(SpvExecutionModeOriginUpperLeft)});
   } else if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
     auto& wgsize = func_sem->workgroup_size();
+
+    // Check if the workgroup_size uses pipeline-overridable constants.
     if (wgsize[0].overridable_const || wgsize[1].overridable_const ||
         wgsize[2].overridable_const) {
-      // TODO(crbug.com/tint/713): Handle overridable constants.
-      TINT_UNIMPLEMENTED(builder_.Diagnostics())
-          << "pipeline-overridable workgroup sizes are not implemented";
+      if (has_overridable_workgroup_size_) {
+        // Only one stage can have a pipeline-overridable workgroup size.
+        // TODO(crbug.com/tint/810): Use LocalSizeId to handle this scenario.
+        TINT_ICE(builder_.Diagnostics())
+            << "multiple stages using pipeline-overridable workgroup sizes";
+      }
+      has_overridable_workgroup_size_ = true;
+
+      sem::U32 u32;
+      sem::Vector vec3_u32(&u32, 3);
+      uint32_t vec3_u32_type_id = GenerateTypeIfNeeded(&vec3_u32);
+      if (vec3_u32_type_id == 0) {
+        return 0;
+      }
+
+      OperandList wgsize_ops;
+      auto wgsize_result = result_op();
+      wgsize_ops.push_back(Operand::Int(vec3_u32_type_id));
+      wgsize_ops.push_back(wgsize_result);
+
+      // Generate OpConstant instructions for each dimension.
+      for (int i = 0; i < 3; i++) {
+        auto constant = ScalarConstant::U32(wgsize[i].value);
+        if (wgsize[i].overridable_const) {
+          // Make the constant specializable.
+          auto* sem_const = builder_.Sem().Get(wgsize[i].overridable_const);
+          if (!sem_const->IsPipelineConstant()) {
+            TINT_ICE(builder_.Diagnostics())
+                << "expected a pipeline-overridable constant";
+          }
+          constant.is_spec_op = true;
+          constant.constant_id = sem_const->ConstantId();
+        }
+
+        auto result = GenerateConstantIfNeeded(constant);
+        wgsize_ops.push_back(Operand::Int(result));
+      }
+
+      // Generate the WorkgroupSize builtin.
+      push_type(spv::Op::OpSpecConstantComposite, wgsize_ops);
+      push_annot(spv::Op::OpDecorate,
+                 {wgsize_result, Operand::Int(SpvDecorationBuiltIn),
+                  Operand::Int(SpvBuiltInWorkgroupSize)});
+    } else {
+      // Not overridable, so just use OpExecutionMode LocalSize.
+      uint32_t x = wgsize[0].value;
+      uint32_t y = wgsize[1].value;
+      uint32_t z = wgsize[2].value;
+      push_execution_mode(
+          spv::Op::OpExecutionMode,
+          {Operand::Int(id), Operand::Int(SpvExecutionModeLocalSize),
+           Operand::Int(x), Operand::Int(y), Operand::Int(z)});
     }
-    uint32_t x = wgsize[0].value;
-    uint32_t y = wgsize[1].value;
-    uint32_t z = wgsize[2].value;
-    push_execution_mode(
-        spv::Op::OpExecutionMode,
-        {Operand::Int(id), Operand::Int(SpvExecutionModeLocalSize),
-         Operand::Int(x), Operand::Int(y), Operand::Int(z)});
   }
 
   for (auto builtin : func_sem->ReferencedBuiltinVariables()) {

@@ -533,6 +533,7 @@ class Builder {
   std::vector<uint32_t> merge_stack_;
   std::vector<uint32_t> continue_stack_;
   std::unordered_set<uint32_t> capability_set_;
+  bool has_overridable_workgroup_size_ = false;
 };
 
 }  // namespace spirv

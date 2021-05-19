@@ -197,7 +197,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
 )");
 }
 
-TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize) {
+TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Literals) {
   auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
                     ast::DecorationList{
                         WorkgroupSize(2, 4, 6),
@@ -209,6 +209,81 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize) {
   ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
   EXPECT_EQ(DumpInstructions(b.execution_modes()),
             R"(OpExecutionMode %3 LocalSize 2 4 6
+)");
+}
+
+TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
+  GlobalConst("width", ty.i32(), Construct(ty.i32(), 2));
+  GlobalConst("height", ty.i32(), Construct(ty.i32(), 3));
+  GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4));
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{
+                        WorkgroupSize("width", "height", "depth"),
+                        Stage(ast::PipelineStage::kCompute),
+                    });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.execution_modes()),
+            R"(OpExecutionMode %3 LocalSize 2 3 4
+)");
+}
+
+TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
+  GlobalConst("width", ty.i32(), Construct(ty.i32(), 2), {Override(7u)});
+  GlobalConst("height", ty.i32(), Construct(ty.i32(), 3), {Override(8u)});
+  GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4), {Override(9u)});
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{
+                        WorkgroupSize("width", "height", "depth"),
+                        Stage(ast::PipelineStage::kCompute),
+                    });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.execution_modes()), "");
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%2 = OpTypeInt 32 0
+%1 = OpTypeVector %2 3
+%4 = OpSpecConstant %2 2
+%5 = OpSpecConstant %2 3
+%6 = OpSpecConstant %2 4
+%3 = OpSpecConstantComposite %1 %4 %5 %6
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()),
+            R"(OpDecorate %4 SpecId 7
+OpDecorate %5 SpecId 8
+OpDecorate %6 SpecId 9
+OpDecorate %3 BuiltIn WorkgroupSize
+)");
+}
+
+TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
+  GlobalConst("height", ty.i32(), Construct(ty.i32(), 2), {Override(7u)});
+  GlobalConst("depth", ty.i32(), Construct(ty.i32(), 3));
+  auto* func = Func("main", {}, ty.void_(), ast::StatementList{},
+                    ast::DecorationList{
+                        WorkgroupSize(4, "height", "depth"),
+                        Stage(ast::PipelineStage::kCompute),
+                    });
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
+  EXPECT_EQ(DumpInstructions(b.execution_modes()), "");
+  EXPECT_EQ(DumpInstructions(b.types()),
+            R"(%2 = OpTypeInt 32 0
+%1 = OpTypeVector %2 3
+%4 = OpConstant %2 4
+%5 = OpSpecConstant %2 2
+%6 = OpConstant %2 3
+%3 = OpSpecConstantComposite %1 %4 %5 %6
+)");
+  EXPECT_EQ(DumpInstructions(b.annots()),
+            R"(OpDecorate %5 SpecId 7
+OpDecorate %3 BuiltIn WorkgroupSize
 )");
 }
 
