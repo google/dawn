@@ -14,7 +14,6 @@
 
 #include "tests/perf_tests/DawnPerfTest.h"
 
-#include "tests/ParamGenerator.h"
 #include "utils/WGPUHelpers.h"
 
 namespace {
@@ -355,46 +354,28 @@ namespace {
         MatMulVec4TwoDimSharedArray
     };
 
-    struct ShaderRobustnessParams : AdapterTestParam {
-        ShaderRobustnessParams(const AdapterTestParam& param,
-                               MatMulMethod matmulMethod,
-                               uint32_t dimAOuter,
-                               uint32_t dimInner,
-                               uint32_t dimBOuter)
-            : AdapterTestParam(param),
-              matmulMethod(matmulMethod),
-              dimAOuter(dimAOuter),
-              dimInner(dimInner),
-              dimBOuter(dimBOuter) {
-        }
-
-        MatMulMethod matmulMethod;
-        uint32_t dimAOuter;
-        uint32_t dimInner;
-        uint32_t dimBOuter;
-    };
-
-    std::ostream& operator<<(std::ostream& ostream, const ShaderRobustnessParams& param) {
-        ostream << static_cast<const AdapterTestParam&>(param);
-        switch (param.matmulMethod) {
+    std::ostream& operator<<(std::ostream& ostream, const MatMulMethod& matMulMethod) {
+        switch (matMulMethod) {
             case MatMulMethod::MatMulFloatOneDimSharedArray:
-                ostream << "_MatMulFloatOneDimSharedArray";
+                ostream << "MatMulFloatOneDimSharedArray";
                 break;
             case MatMulMethod::MatMulFloatTwoDimSharedArray:
-                ostream << "_MatMulFloatTwoDimSharedArray";
+                ostream << "MatMulFloatTwoDimSharedArray";
                 break;
             case MatMulMethod::MatMulVec4OneDimSharedArray:
-                ostream << "_MatMulVec4OneDimSharedArray";
+                ostream << "MatMulVec4OneDimSharedArray";
                 break;
             case MatMulMethod::MatMulVec4TwoDimSharedArray:
-                ostream << "_MatMulVec4TwoDimSharedArray";
+                ostream << "MatMulVec4TwoDimSharedArray";
                 break;
         }
-
-        ostream << "_" << param.dimAOuter << "_" << param.dimInner << "_" << param.dimBOuter;
-
         return ostream;
     }
+
+    using DimAOuter = uint32_t;
+    using DimInner = uint32_t;
+    using DimBOuter = uint32_t;
+    DAWN_TEST_PARAM_STRUCT(ShaderRobustnessParams, MatMulMethod, DimAOuter, DimInner, DimBOuter)
 
 }  // namespace
 
@@ -404,9 +385,9 @@ class ShaderRobustnessPerf : public DawnPerfTestWithParams<ShaderRobustnessParam
   public:
     ShaderRobustnessPerf()
         : DawnPerfTestWithParams(kNumIterations, 1),
-          mDimAOuter(GetParam().dimAOuter),
-          mDimInner(GetParam().dimInner),
-          mDimBOuter(GetParam().dimBOuter) {
+          mDimAOuter(GetParam().mDimAOuter),
+          mDimInner(GetParam().mDimInner),
+          mDimBOuter(GetParam().mDimBOuter) {
     }
     ~ShaderRobustnessPerf() override = default;
 
@@ -452,7 +433,7 @@ void ShaderRobustnessPerf::SetUp() {
         device, uniformData, sizeof(uniformData), wgpu::BufferUsage::Uniform);
 
     wgpu::ShaderModule module;
-    switch (GetParam().matmulMethod) {
+    switch (GetParam().mMatMulMethod) {
         case MatMulMethod::MatMulFloatOneDimSharedArray: {
             module =
                 utils::CreateShaderModule(device, kMatMulFloatOneDimensionalSharedArray.c_str());
@@ -515,18 +496,18 @@ TEST_P(ShaderRobustnessPerf, Run) {
     RunTest();
 }
 
-DAWN_INSTANTIATE_PERF_TEST_SUITE_P(ShaderRobustnessPerf,
-                                   // TODO: Remove "use_tint_generator" once the following bug is
-                                   // fixed https://bugs.chromium.org/p/tint/issues/detail?id=744.
-                                   {D3D12Backend({}, {"use_tint_generator"}),
-                                    D3D12Backend({"disable_robustness"}, {"use_tint_generator"}),
-                                    MetalBackend(), MetalBackend({"disable_robustness"}, {}),
-                                    OpenGLBackend(), OpenGLBackend({"disable_robustness"}, {}),
-                                    VulkanBackend(), VulkanBackend({"disable_robustness"}, {})},
-                                   {MatMulMethod::MatMulFloatOneDimSharedArray,
-                                    MatMulMethod::MatMulFloatTwoDimSharedArray,
-                                    MatMulMethod::MatMulVec4OneDimSharedArray,
-                                    MatMulMethod::MatMulVec4TwoDimSharedArray},
-                                   {512},
-                                   {512},
-                                   {512});
+DAWN_INSTANTIATE_TEST_P(ShaderRobustnessPerf,
+                        // TODO: Remove "use_tint_generator" once the following bug is
+                        // fixed https://bugs.chromium.org/p/tint/issues/detail?id=744.
+                        {D3D12Backend({}, {"use_tint_generator"}),
+                         D3D12Backend({"disable_robustness"}, {"use_tint_generator"}),
+                         MetalBackend(), MetalBackend({"disable_robustness"}, {}), OpenGLBackend(),
+                         OpenGLBackend({"disable_robustness"}, {}), VulkanBackend(),
+                         VulkanBackend({"disable_robustness"}, {})},
+                        {MatMulMethod::MatMulFloatOneDimSharedArray,
+                         MatMulMethod::MatMulFloatTwoDimSharedArray,
+                         MatMulMethod::MatMulVec4OneDimSharedArray,
+                         MatMulMethod::MatMulVec4TwoDimSharedArray},
+                        {512u},
+                        {512u},
+                        {512u});

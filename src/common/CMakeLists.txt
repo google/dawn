@@ -36,6 +36,7 @@ target_sources(dawn_common PRIVATE
     "NonCopyable.h"
     "PlacementAllocated.h"
     "Platform.h"
+    "Preprocessor.h"
     "RefBase.h"
     "RefCounted.cpp"
     "RefCounted.h"

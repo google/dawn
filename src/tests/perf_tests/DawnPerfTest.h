@@ -120,10 +120,4 @@ class DawnPerfTestWithParams : public DawnTestWithParams<Params>, public DawnPer
 
 using DawnPerfTest = DawnPerfTestWithParams<>;
 
-#define DAWN_INSTANTIATE_PERF_TEST_SUITE_P(testName, ...)                                      \
-    INSTANTIATE_TEST_SUITE_P(                                                                  \
-        , testName, ::testing::ValuesIn(MakeParamGenerator<testName::ParamType>(__VA_ARGS__)), \
-        testing::PrintToStringParamName());                                                    \
-    GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
-
 #endif  // TESTS_PERFTESTS_DAWNPERFTEST_H_

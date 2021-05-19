@@ -107,6 +107,15 @@ class ParamGenerator {
     ParamTuple mParams;
 };
 
+struct BackendTestConfig;
+struct AdapterTestParam;
+
+namespace detail {
+    std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
+        const BackendTestConfig* params,
+        size_t numParams);
+}
+
 template <typename Param, typename... Params>
 auto MakeParamGenerator(std::vector<BackendTestConfig>&& first,
                         std::initializer_list<Params>&&... params) {

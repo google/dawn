@@ -284,6 +284,7 @@ source_set("dawn_end2end_tests_sources") {
   sources = [
     "DawnTest.h",
     "MockCallback.h",
+    "ParamGenerator.h",
     "ToggleParser.cpp",
     "ToggleParser.h",
     "end2end/BasicTests.cpp",
@@ -412,6 +413,7 @@ source_set("dawn_white_box_tests_sources") {
 
   sources = [
     "DawnTest.h",
+    "ParamGenerator.h",
     "ToggleParser.h",
   ]
 

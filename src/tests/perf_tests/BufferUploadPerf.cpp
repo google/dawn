@@ -14,7 +14,6 @@
 
 #include "tests/perf_tests/DawnPerfTest.h"
 
-#include "tests/ParamGenerator.h"
 #include "utils/WGPUHelpers.h"
 
 namespace {
@@ -148,10 +147,9 @@ TEST_P(BufferUploadPerf, Run) {
     RunTest();
 }
 
-DAWN_INSTANTIATE_PERF_TEST_SUITE_P(BufferUploadPerf,
-                                   {D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                                    VulkanBackend()},
-                                   {UploadMethod::WriteBuffer, UploadMethod::MappedAtCreation},
-                                   {UploadSize::BufferSize_1KB, UploadSize::BufferSize_64KB,
-                                    UploadSize::BufferSize_1MB, UploadSize::BufferSize_4MB,
-                                    UploadSize::BufferSize_16MB});
+DAWN_INSTANTIATE_TEST_P(BufferUploadPerf,
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend()},
+                        {UploadMethod::WriteBuffer, UploadMethod::MappedAtCreation},
+                        {UploadSize::BufferSize_1KB, UploadSize::BufferSize_64KB,
+                         UploadSize::BufferSize_1MB, UploadSize::BufferSize_4MB,
+                         UploadSize::BufferSize_16MB});

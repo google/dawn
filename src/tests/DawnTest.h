@@ -16,9 +16,11 @@
 #define TESTS_DAWNTEST_H_
 
 #include "common/Log.h"
+#include "common/Preprocessor.h"
 #include "dawn/dawn_proc_table.h"
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
+#include "tests/ParamGenerator.h"
 #include "tests/ToggleParser.h"
 
 #include <dawn_platform/DawnPlatform.h>
@@ -505,10 +507,6 @@ DawnTestWithParams<Params>::DawnTestWithParams() : DawnTestBase(this->GetParam()
 
 using DawnTest = DawnTestWithParams<>;
 
-// Helpers to get the first element of a __VA_ARGS__ without triggering empty __VA_ARGS__ warnings.
-#define DAWN_INTERNAL_PP_GET_HEAD(firstParam, ...) firstParam
-#define DAWN_PP_GET_HEAD(...) DAWN_INTERNAL_PP_GET_HEAD(__VA_ARGS__, dummyArg)
-
 // Instantiate the test once for each backend provided after the first argument. Use it like this:
 //     DAWN_INSTANTIATE_TEST(MyTestFixture, MetalBackend, OpenGLBackend)
 #define DAWN_INSTANTIATE_TEST(testName, ...)                                            \
@@ -519,6 +517,61 @@ using DawnTest = DawnTestWithParams<>;
             testName##params, sizeof(testName##params) / sizeof(testName##params[0]))), \
         testing::PrintToStringParamName());                                             \
     GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
+
+// Instantiate the test once for each backend provided in the first param list.
+// The test will be parameterized over the following param lists.
+// Use it like this:
+//     DAWN_INSTANTIATE_TEST_P(MyTestFixture, {MetalBackend, OpenGLBackend}, {A, B, C}, {1, 2, 3})
+// MyTestFixture must extend DawnTestWithParam<Param> where Param is a struct that extends
+// AdapterTestParam, and whose constructor looks like:
+//     Param(AdapterTestParam, ABorC, 12or3, ..., otherParams... )
+//     You must also teach GTest how to print this struct.
+//     https://github.com/google/googletest/blob/master/docs/advanced.md#teaching-googletest-how-to-print-your-values
+// Macro DAWN_TEST_PARAM_STRUCT can help generate this struct.
+#define DAWN_INSTANTIATE_TEST_P(testName, ...)                                                 \
+    INSTANTIATE_TEST_SUITE_P(                                                                  \
+        , testName, ::testing::ValuesIn(MakeParamGenerator<testName::ParamType>(__VA_ARGS__)), \
+        testing::PrintToStringParamName());                                                    \
+    GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
+
+// Implementation for DAWN_TEST_PARAM_STRUCT to declare/print struct fields.
+#define DAWN_TEST_PARAM_STRUCT_DECL_STRUCT_FIELD(Type) Type DAWN_PP_CONCATENATE(m, Type);
+#define DAWN_TEST_PARAM_STRUCT_PRINT_STRUCT_FIELD(Type) \
+    o << "__" << #Type << "_" << param.DAWN_PP_CONCATENATE(m, Type);
+
+// Usage: DAWN_TEST_PARAM_STRUCT(Foo, TypeA, TypeB, ...)
+// Generate a test param struct called Foo which extends AdapterTestParam and generated
+// struct _Dawn_Foo. _Dawn_Foo has members of types TypeA, TypeB, etc. which are named mTypeA,
+// mTypeB, etc. in the order they are placed in the macro argument list. Struct Foo should be
+// constructed with an AdapterTestParam as the first argument, followed by a list of values
+// to initialize the base _Dawn_Foo struct.
+// It is recommended to use alias declarations so that stringified types are more readable.
+// Example:
+//   using MyParam = unsigned int;
+//   DAWN_TEST_PARAM_STRUCT(FooParams, MyParam)
+#define DAWN_TEST_PARAM_STRUCT(StructName, ...)                                                    \
+    struct DAWN_PP_CONCATENATE(_Dawn_, StructName) {                                               \
+        DAWN_PP_EXPAND(DAWN_PP_EXPAND(DAWN_PP_FOR_EACH)(DAWN_TEST_PARAM_STRUCT_DECL_STRUCT_FIELD,  \
+                                                        __VA_ARGS__))                              \
+    };                                                                                             \
+    std::ostream& operator<<(std::ostream& o,                                                      \
+                             const DAWN_PP_CONCATENATE(_Dawn_, StructName) & param) {              \
+        DAWN_PP_EXPAND(DAWN_PP_EXPAND(DAWN_PP_FOR_EACH)(DAWN_TEST_PARAM_STRUCT_PRINT_STRUCT_FIELD, \
+                                                        __VA_ARGS__))                              \
+        return o;                                                                                  \
+    }                                                                                              \
+    struct StructName : AdapterTestParam, DAWN_PP_CONCATENATE(_Dawn_, StructName) {                \
+        template <typename... Args>                                                                \
+        StructName(const AdapterTestParam& param, Args&&... args)                                  \
+            : AdapterTestParam(param),                                                             \
+              DAWN_PP_CONCATENATE(_Dawn_, StructName){std::forward<Args>(args)...} {               \
+        }                                                                                          \
+    };                                                                                             \
+    std::ostream& operator<<(std::ostream& o, const StructName& param) {                           \
+        o << static_cast<const AdapterTestParam&>(param);                                          \
+        o << "_" << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName)&>(param);            \
+        return o;                                                                                  \
+    }
 
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST

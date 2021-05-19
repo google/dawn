@@ -17,7 +17,6 @@
 #include "common/Assert.h"
 #include "common/Constants.h"
 #include "common/Math.h"
-#include "tests/ParamGenerator.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -607,7 +606,7 @@ TEST_P(DrawCallPerf, Run) {
     RunTest();
 }
 
-DAWN_INSTANTIATE_PERF_TEST_SUITE_P(
+DAWN_INSTANTIATE_TEST_P(
     DrawCallPerf,
     {D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend(),
      VulkanBackend({"skip_validation"})},

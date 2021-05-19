@@ -14,7 +14,6 @@
 
 #include "tests/perf_tests/DawnPerfTest.h"
 
-#include "tests/ParamGenerator.h"
 #include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/WGPUHelpers.h"
 
@@ -146,8 +145,7 @@ TEST_P(SubresourceTrackingPerf, Run) {
     RunTest();
 }
 
-DAWN_INSTANTIATE_PERF_TEST_SUITE_P(SubresourceTrackingPerf,
-                                   {D3D12Backend(), MetalBackend(), OpenGLBackend(),
-                                    VulkanBackend()},
-                                   {1, 4, 16, 256},
-                                   {2, 3, 8});
+DAWN_INSTANTIATE_TEST_P(SubresourceTrackingPerf,
+                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), VulkanBackend()},
+                        {1, 4, 16, 256},
+                        {2, 3, 8});
