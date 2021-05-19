@@ -239,6 +239,11 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
             continue;
         }
 
+        if (strcmp("--run-suppressed-tests", argv[i]) == 0) {
+            mRunSuppressedTests = true;
+            continue;
+        }
+
         constexpr const char kEnableBackendValidationSwitch[] = "--enable-backend-validation";
         argLen = sizeof(kEnableBackendValidationSwitch) - 1;
         if (strncmp(argv[i], kEnableBackendValidationSwitch, argLen) == 0) {
@@ -366,7 +371,9 @@ void DawnTestEnvironment::ParseArgs(int argc, char** argv) {
                    "null, opengl, opengles, vulkan\n"
                    "  --exclusive-device-type-preference: Comma-delimited list of preferred device "
                    "types. For each backend, tests will run only on adapters that match the first "
-                   "available device type\n";
+                   "available device type\n"
+                   "  --run-suppressed-tests: Run all the tests that will be skipped by the macro "
+                   "DAWN_SUPPRESS_TEST_IF()\n";
             continue;
         }
 
@@ -548,6 +555,9 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(
            "UseWire: "
         << (mUseWire ? "true" : "false")
         << "\n"
+           "Run suppressed tests: "
+        << (mRunSuppressedTests ? "true" : "false")
+        << "\n"
            "BackendValidation: ";
 
     switch (mBackendValidationLevel) {
@@ -624,6 +634,10 @@ void DawnTestEnvironment::TearDown() {
 
 bool DawnTestEnvironment::UsesWire() const {
     return mUseWire;
+}
+
+bool DawnTestEnvironment::RunSuppressedTests() const {
+    return mRunSuppressedTests;
 }
 
 dawn_native::BackendValidationLevel DawnTestEnvironment::GetBackendValidationLevel() const {
@@ -777,6 +791,10 @@ bool DawnTestBase::UsesWire() const {
 
 bool DawnTestBase::IsBackendValidationEnabled() const {
     return gTestEnv->GetBackendValidationLevel() != dawn_native::BackendValidationLevel::Disabled;
+}
+
+bool DawnTestBase::RunSuppressedTests() const {
+    return gTestEnv->RunSuppressedTests();
 }
 
 bool DawnTestBase::IsAsan() const {

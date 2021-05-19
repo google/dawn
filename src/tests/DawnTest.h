@@ -214,6 +214,8 @@ class DawnTestEnvironment : public testing::Environment {
     const std::vector<std::string>& GetEnabledToggles() const;
     const std::vector<std::string>& GetDisabledToggles() const;
 
+    bool RunSuppressedTests() const;
+
   protected:
     std::unique_ptr<dawn_native::Instance> mInstance;
 
@@ -232,6 +234,7 @@ class DawnTestEnvironment : public testing::Environment {
     bool mHasBackendTypeFilter = false;
     wgpu::BackendType mBackendTypeFilter;
     std::string mWireTraceDir;
+    bool mRunSuppressedTests = false;
 
     ToggleParser mToggleParser;
 
@@ -276,6 +279,7 @@ class DawnTestBase {
 
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;
+    bool RunSuppressedTests() const;
 
     bool IsAsan() const;
 
@@ -438,15 +442,29 @@ class DawnTestBase {
     std::unique_ptr<dawn_platform::Platform> mTestPlatform;
 };
 
-// Skip a test when the given condition is satisfied.
-#define DAWN_SKIP_TEST_IF(condition)                            \
-    do {                                                        \
-        if (condition) {                                        \
-            dawn::InfoLog() << "Test skipped: " #condition "."; \
-            GTEST_SKIP();                                       \
-            return;                                             \
-        }                                                       \
+#define DAWN_SKIP_TEST_IF_BASE(condition, type, reason)   \
+    do {                                                  \
+        if (condition) {                                  \
+            dawn::InfoLog() << "Test " type ": " #reason; \
+            GTEST_SKIP();                                 \
+            return;                                       \
+        }                                                 \
     } while (0)
+
+// Skip a test when the given condition is satisfied.
+// TODO(jiawei.shao@intel.com): Replace this macro with DAWN_TEST_UNSUPPORTED_IF or
+// DAWN_SUPPRESS_TEST_IF.
+#define DAWN_SKIP_TEST_IF(condition) DAWN_SKIP_TEST_IF_BASE(condition, "skipped", condition)
+
+// Skip a test which requires an extension or a toggle to be present / not present or some WIP
+// features.
+#define DAWN_TEST_UNSUPPORTED_IF(condition) \
+    DAWN_SKIP_TEST_IF_BASE(condition, "unsupported", condition)
+
+// Skip a test when the test failing on a specific HW / backend / OS combination. We can disable
+// this macro with the command line parameter "--run-suppressed-tests".
+#define DAWN_SUPPRESS_TEST_IF(condition) \
+    DAWN_SKIP_TEST_IF_BASE(!RunSuppressedTests() && condition, "suppressed", condition)
 
 #define EXPECT_DEPRECATION_WARNING(statement)                                    \
     do {                                                                         \
@@ -504,7 +522,6 @@ using DawnTest = DawnTestWithParams<>;
 
 namespace detail {
     // Helper functions used for DAWN_INSTANTIATE_TEST
-    bool IsBackendAvailable(wgpu::BackendType type);
     std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(
         const BackendTestConfig* params,
         size_t numParams);
