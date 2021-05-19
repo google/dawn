@@ -27,6 +27,7 @@
 #include "src/transform/canonicalize_entry_point_io.h"
 #include "src/transform/decompose_storage_access.h"
 #include "src/transform/external_texture_transform.h"
+#include "src/transform/inline_pointer_lets.h"
 #include "src/transform/manager.h"
 
 namespace tint {
@@ -41,6 +42,7 @@ Output Hlsl::Run(const Program* in, const DataMap& data) {
   manager.Add<DecomposeStorageAccess>();
   manager.Add<CalculateArrayLength>();
   manager.Add<ExternalTextureTransform>();
+  manager.Add<InlinePointerLets>();
   auto out = manager.Run(in, data);
   if (!out.program.IsValid()) {
     return out;

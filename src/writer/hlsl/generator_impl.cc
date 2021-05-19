@@ -1625,7 +1625,16 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
     }
     first = false;
 
-    auto* type = v->Type();
+    auto const* type = v->Type();
+
+    if (auto* ptr = type->As<sem::Pointer>()) {
+      // Transform pointer parameters in to `inout` parameters.
+      // The WGSL spec is highly restrictive in what can be passed in pointer
+      // parameters, which allows for this transformation. See:
+      // https://gpuweb.github.io/gpuweb/wgsl/#function-restriction
+      out << "inout ";
+      type = ptr->StoreType();
+    }
 
     // Note: WGSL only allows for StorageClass::kNone on parameters, however the
     // sanitizer transforms generates load / store functions for storage
@@ -2458,9 +2467,9 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-per-component-math#matrix-ordering
     out << mat->columns() << "x" << mat->rows();
   } else if (type->Is<sem::Pointer>()) {
-    // TODO(dsinclair): What do we do with pointers in HLSL?
-    // https://bugs.chromium.org/p/tint/issues/detail?id=183
-    diagnostics_.add_error("pointers not supported in HLSL");
+    TINT_ICE(diagnostics_)
+        << "Attempting to emit pointer type. These should have been removed "
+           "with the InlinePointerLets transform";
     return false;
   } else if (auto* sampler = type->As<sem::Sampler>()) {
     out << "Sampler";
@@ -2634,7 +2643,6 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& pre,
   switch (expr->op()) {
     case ast::UnaryOp::kIndirection:
     case ast::UnaryOp::kAddressOf:
-      // TODO(crbug.com/tint/183) - support pointers
       return EmitExpression(pre, out, expr->expr());
     case ast::UnaryOp::kNot:
       out << "!";

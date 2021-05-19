@@ -36,17 +36,17 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
   auto* ac_ty = ty.access(ast::AccessControl::kReadOnly, sb_ty);
 
   Global("sb", ac_ty, ast::StorageClass::kStorage, nullptr,
-         ast::DecorationList{
+         {
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(1),
          });
 
   Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
+       {
            Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                     Call("arrayLength", MemberAccessor("sb", "arr")))),
        },
-       ast::DecorationList{
+       {
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -76,10 +76,10 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
   auto* pos = Var("pos", ty.i32(), ast::StorageClass::kNone, array_index);
 
   Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
+       {
            Decl(pos),
        },
-       ast::DecorationList{
+       {
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -110,10 +110,10 @@ TEST_F(HlslSanitizerTest, PromoteStructInitializerToConstVar) {
       Var("pos", ty.vec3<f32>(), ast::StorageClass::kNone, struct_access);
 
   Func("main", ast::VariableList{}, ty.void_(),
-       ast::StatementList{
+       {
            Decl(pos),
        },
-       ast::DecorationList{
+       {
            Stage(ast::PipelineStage::kFragment),
        });
 
@@ -137,6 +137,134 @@ void main() {
 )";
   EXPECT_EQ(expect, got);
 }
+
+TEST_F(HlslSanitizerTest, InlinePtrLetsBasic) {
+  // var v : i32;
+  // let p : ptr<function, i32> = &v;
+  // let x : i32 = *p;
+  auto* v = Var("v", ty.i32());
+  auto* p =
+      Const("p", ty.pointer<i32>(ast::StorageClass::kFunction), AddressOf(v));
+  auto* x = Var("x", ty.i32(), ast::StorageClass::kNone, Deref(p));
+
+  Func("main", ast::VariableList{}, ty.void_(),
+       {
+           Decl(v),
+           Decl(p),
+           Decl(x),
+       },
+       {
+           Stage(ast::PipelineStage::kFragment),
+       });
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+
+  auto got = result();
+  auto* expect = R"(void main() {
+  int v = 0;
+  int x = v;
+  return;
+}
+
+)";
+  EXPECT_EQ(expect, got);
+}
+
+TEST_F(HlslSanitizerTest, InlinePtrLetsComplexChain) {
+  // var m : mat4x4<f32>;
+  // let mp : ptr<function, mat4x4<f32>> = &m;
+  // let vp : ptr<function, vec4<f32>> = &(*mp)[2];
+  // let fp : ptr<function, f32> = &(*vp)[1];
+  // let f : f32 = *fp;
+  auto* m = Var("m", ty.mat4x4<f32>());
+  auto* mp =
+      Const("mp", ty.pointer(ty.mat4x4<f32>(), ast::StorageClass::kFunction),
+            AddressOf(m));
+  auto* vp =
+      Const("vp", ty.pointer(ty.vec4<f32>(), ast::StorageClass::kFunction),
+            AddressOf(IndexAccessor(Deref(mp), 2)));
+  auto* fp = Const("fp", ty.pointer<f32>(ast::StorageClass::kFunction),
+                   AddressOf(IndexAccessor(Deref(vp), 1)));
+  auto* f = Var("f", ty.f32(), ast::StorageClass::kNone, Deref(fp));
+
+  Func("main", ast::VariableList{}, ty.void_(),
+       {
+           Decl(m),
+           Decl(mp),
+           Decl(vp),
+           Decl(fp),
+           Decl(f),
+       },
+       {
+           Stage(ast::PipelineStage::kFragment),
+       });
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+
+  auto got = result();
+  auto* expect = R"(void main() {
+  float4x4 m = float4x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  float f = m[2][1];
+  return;
+}
+
+)";
+  EXPECT_EQ(expect, got);
+}
+
+TEST_F(HlslSanitizerTest, InlineParam) {
+  // fn x(p : ptr<function, i32>) -> i32 {
+  //   return *p;
+  // }
+  //
+  // [[stage(fragment)]]
+  // fn main() {
+  //   var v : i32;
+  //   let p : ptr<function, i32> = &v;
+  //   var r : i32 = x(p);
+  // }
+
+  Func("x", {Param("p", ty.pointer<i32>(ast::StorageClass::kFunction))},
+       ty.i32(), {Return(Deref("p"))});
+
+  auto* v = Var("v", ty.i32());
+  auto* p = Const("p", ty.pointer(ty.i32(), ast::StorageClass::kFunction),
+                  AddressOf(v));
+  auto* r = Var("r", ty.i32(), ast::StorageClass::kNone, Call("x", p));
+
+  Func("main", ast::VariableList{}, ty.void_(),
+       {
+           Decl(v),
+           Decl(p),
+           Decl(r),
+       },
+       {
+           Stage(ast::PipelineStage::kFragment),
+       });
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+
+  auto got = result();
+  auto* expect = R"(int x(inout int p) {
+  return p;
+}
+
+void main() {
+  int v = 0;
+  int r = x(v);
+  return;
+}
+
+)";
+  EXPECT_EQ(expect, got);
+}
+
 }  // namespace
 }  // namespace hlsl
 }  // namespace writer

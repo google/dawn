@@ -513,6 +513,8 @@ libtint_source_set("libtint_core_all_src") {
     "transform/external_texture_transform.h",
     "transform/first_index_offset.cc",
     "transform/first_index_offset.h",
+    "transform/inline_pointer_lets.cc",
+    "transform/inline_pointer_lets.h",
     "transform/manager.cc",
     "transform/manager.h",
     "transform/renamer.cc",

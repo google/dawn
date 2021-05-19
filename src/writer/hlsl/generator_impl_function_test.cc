@@ -100,6 +100,25 @@ TEST_F(HlslGeneratorImplTest_Function,
   Validate();
 }
 
+TEST_F(HlslGeneratorImplTest_Function, PtrParameter) {
+  // fn f(foo : ptr<function, f32>) -> f32 {
+  //   return *foo;
+  // }
+  Func("f", {Param("foo", ty.pointer<f32>(ast::StorageClass::kFunction))},
+       ty.f32(), {Return(Deref("foo"))});
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_THAT(result(), HasSubstr(R"(float f(inout float foo) {
+  return foo;
+}
+
+)"));
+
+  Validate();
+}
+
 TEST_F(HlslGeneratorImplTest_Function,
        Emit_Decoration_EntryPoint_WithInOutVars) {
   // fn frag_main([[location(0)]] foo : f32) -> [[location(1)]] f32 {

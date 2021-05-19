@@ -277,6 +277,8 @@ set(TINT_LIB_SRCS
   transform/external_texture_transform.h
   transform/first_index_offset.cc
   transform/first_index_offset.h
+  transform/inline_pointer_lets.cc
+  transform/inline_pointer_lets.h
   transform/manager.cc
   transform/manager.h
   transform/renamer.cc
@@ -804,6 +806,7 @@ if(${TINT_BUILD_TESTS})
       transform/decompose_storage_access_test.cc
       transform/external_texture_transform_test.cc
       transform/first_index_offset_test.cc
+      transform/inline_pointer_lets_test.cc
       transform/renamer_test.cc
       transform/single_entry_point.cc
       transform/test_helper.h
