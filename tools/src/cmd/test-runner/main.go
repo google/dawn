@@ -324,6 +324,10 @@ func run() error {
 	fmt.Println()
 	fmt.Println()
 
+	if numFail > 0 {
+		os.Exit(1)
+	}
+
 	return nil
 }
 
