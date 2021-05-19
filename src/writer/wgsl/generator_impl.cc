@@ -155,8 +155,19 @@ bool GeneratorImpl::EmitArrayAccessor(ast::ArrayAccessorExpression* expr) {
 }
 
 bool GeneratorImpl::EmitMemberAccessor(ast::MemberAccessorExpression* expr) {
+  bool paren_lhs =
+      !expr->structure()
+           ->IsAnyOf<ast::ArrayAccessorExpression, ast::CallExpression,
+                     ast::IdentifierExpression, ast::MemberAccessorExpression,
+                     ast::TypeConstructorExpression>();
+  if (paren_lhs) {
+    out_ << "(";
+  }
   if (!EmitExpression(expr->structure())) {
     return false;
+  }
+  if (paren_lhs) {
+    out_ << ")";
   }
 
   out_ << ".";

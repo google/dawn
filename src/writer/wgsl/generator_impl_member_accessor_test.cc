@@ -34,6 +34,20 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
   EXPECT_EQ(gen.result(), "str.mem");
 }
 
+TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor_OfDref) {
+  auto* s = Structure("Data", {Member("mem", ty.f32())});
+  Global("str", s, ast::StorageClass::kPrivate);
+
+  auto* p = Const("p", nullptr, AddressOf("str"));
+  auto* expr = MemberAccessor(Deref("p"), "mem");
+  WrapInFunction(p, expr);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "(*(p)).mem");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace writer
