@@ -1986,7 +1986,7 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
         break;
       }
       case ast::intrinsic::test::TextureKind::kDepth: {
-        EXPECT_EQ(TypeOf(call), ty.f32());
+        EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
         break;
       }
     }

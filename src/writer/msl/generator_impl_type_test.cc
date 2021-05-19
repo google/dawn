@@ -132,7 +132,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Bool) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_F32) {
-  auto f32 = ty.f32();
+  auto* f32 = create<sem::F32>();
 
   GeneratorImpl& gen = Build();
 
@@ -150,7 +150,9 @@ TEST_F(MslGeneratorImplTest, EmitType_I32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
-  auto mat2x3 = ty.mat2x3<f32>();
+  auto* f32 = create<sem::F32>();
+  auto* vec3 = create<sem::Vector>(f32, 3);
+  auto* mat2x3 = create<sem::Matrix>(vec3, 2);
 
   GeneratorImpl& gen = Build();
 
@@ -160,11 +162,12 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
 
 // TODO(dsinclair): How to annotate as workgroup?
 TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Pointer) {
-  sem::Pointer p(ty.f32(), ast::StorageClass::kWorkgroup);
+  auto* f32 = create<sem::F32>();
+  auto* p = create<sem::Pointer>(f32, ast::StorageClass::kWorkgroup);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(&p, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(p, "")) << gen.error();
   EXPECT_EQ(gen.result(), "float*");
 }
 
@@ -634,7 +637,8 @@ TEST_F(MslGeneratorImplTest, EmitType_U32) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Vector) {
-  auto vec3 = ty.vec3<f32>();
+  auto* f32 = create<sem::F32>();
+  auto* vec3 = create<sem::Vector>(f32, 3);
 
   GeneratorImpl& gen = Build();
 
@@ -713,11 +717,12 @@ using MslSampledtexturesTest = TestParamHelper<MslTextureData>;
 TEST_P(MslSampledtexturesTest, Emit) {
   auto params = GetParam();
 
-  sem::SampledTexture s(params.dim, ty.f32());
+  auto* f32 = create<sem::F32>();
+  auto* s = create<sem::SampledTexture>(params.dim, f32);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(&s, "")) << gen.error();
+  ASSERT_TRUE(gen.EmitType(s, "")) << gen.error();
   EXPECT_EQ(gen.result(), params.result);
 }
 INSTANTIATE_TEST_SUITE_P(

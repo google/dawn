@@ -759,7 +759,7 @@ TEST_F(ResolverTest, Function_Parameters) {
   auto* func_sem = Sem().Get(func);
   ASSERT_NE(func_sem, nullptr);
   EXPECT_EQ(func_sem->Parameters().size(), 3u);
-  EXPECT_EQ(func_sem->Parameters()[0]->Type(), ty.f32());
+  EXPECT_TRUE(func_sem->Parameters()[0]->Type()->Is<sem::F32>());
   EXPECT_TRUE(func_sem->Parameters()[1]->Type()->Is<sem::I32>());
   EXPECT_TRUE(func_sem->Parameters()[2]->Type()->Is<sem::U32>());
   EXPECT_EQ(func_sem->Parameters()[0]->Declaration(), param_a);
@@ -1072,7 +1072,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
   EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
   auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
   ASSERT_NE(sma, nullptr);
-  EXPECT_EQ(sma->Member()->Type(), ty.f32());
+  EXPECT_TRUE(sma->Member()->Type()->Is<sem::F32>());
   EXPECT_EQ(sma->Member()->Index(), 1u);
   EXPECT_EQ(sma->Member()->Declaration()->symbol(),
             Symbols().Get("second_member"));
@@ -1097,7 +1097,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
   EXPECT_TRUE(ref->StoreType()->Is<sem::F32>());
   auto* sma = Sem().Get(mem)->As<sem::StructMemberAccess>();
   ASSERT_NE(sma, nullptr);
-  EXPECT_EQ(sma->Member()->Type(), ty.f32());
+  EXPECT_TRUE(sma->Member()->Type()->Is<sem::F32>());
   EXPECT_EQ(sma->Member()->Index(), 1u);
 }
 
@@ -1515,20 +1515,20 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
   uint32_t mat_rows = std::get<2>(GetParam());
   uint32_t mat_cols = std::get<3>(GetParam());
 
-  typ::Type lhs_type;
-  typ::Type rhs_type;
-  typ::Type result_type;
+  ast::Type* lhs_type;
+  ast::Type* rhs_type;
+  sem::Type* result_type;
   bool is_valid_expr;
 
   if (vec_by_mat) {
     lhs_type = ty.vec<f32>(vec_size);
     rhs_type = ty.mat<f32>(mat_cols, mat_rows);
-    result_type = ty.vec<f32>(mat_cols);
+    result_type = create<sem::Vector>(create<sem::F32>(), mat_cols);
     is_valid_expr = vec_size == mat_rows;
   } else {
     lhs_type = ty.mat<f32>(mat_cols, mat_rows);
     rhs_type = ty.vec<f32>(vec_size);
-    result_type = ty.vec<f32>(mat_rows);
+    result_type = create<sem::Vector>(create<sem::F32>(), mat_rows);
     is_valid_expr = vec_size == mat_cols;
   }
 
@@ -1568,7 +1568,10 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
 
   auto lhs_type = ty.mat<f32>(lhs_mat_cols, lhs_mat_rows);
   auto rhs_type = ty.mat<f32>(rhs_mat_cols, rhs_mat_rows);
-  auto result_type = ty.mat<f32>(rhs_mat_cols, lhs_mat_rows);
+
+  auto* f32 = create<sem::F32>();
+  auto* col = create<sem::Vector>(f32, lhs_mat_rows);
+  auto* result_type = create<sem::Matrix>(col, rhs_mat_cols);
 
   Global("lhs", lhs_type, ast::StorageClass::kInput);
   Global("rhs", rhs_type, ast::StorageClass::kInput);

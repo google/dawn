@@ -56,7 +56,8 @@ TEST_F(MultisampledTextureTest, TypeName) {
 }
 
 TEST_F(MultisampledTextureTest, FriendlyName) {
-  MultisampledTexture s(ast::TextureDimension::k3d, ty.f32());
+  F32 f32;
+  MultisampledTexture s(ast::TextureDimension::k3d, &f32);
   EXPECT_EQ(s.FriendlyName(Symbols()), "texture_multisampled_3d<f32>");
 }
 

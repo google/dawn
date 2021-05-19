@@ -366,14 +366,12 @@ class ProgramBuilder {
     }
 
     /// @returns a f32 type
-    typ::F32 f32() const {
-      return {builder->create<ast::F32>(), builder->create<sem::F32>()};
-    }
+    typ::F32 f32() const { return {builder->create<ast::F32>()}; }
 
     /// @param source the Source of the node
     /// @returns a f32 type
     typ::F32 f32(const Source& source) const {
-      return {builder->create<ast::F32>(source), builder->create<sem::F32>()};
+      return {builder->create<ast::F32>(source)};
     }
 
     /// @returns a i32 type

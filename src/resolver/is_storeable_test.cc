@@ -31,7 +31,7 @@ TEST_F(ResolverIsStorableTest, Scalar) {
   EXPECT_TRUE(r()->IsStorable(ty.bool_()));
   EXPECT_TRUE(r()->IsStorable(create<sem::I32>()));
   EXPECT_TRUE(r()->IsStorable(create<sem::U32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.f32()));
+  EXPECT_TRUE(r()->IsStorable(create<sem::F32>()));
 }
 
 TEST_F(ResolverIsStorableTest, Vector) {
@@ -41,25 +41,30 @@ TEST_F(ResolverIsStorableTest, Vector) {
   EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::U32>(), 2)));
   EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::U32>(), 3)));
   EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::U32>(), 4)));
-  EXPECT_TRUE(r()->IsStorable(ty.vec2<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec3<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.vec4<f32>()));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::F32>(), 2)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::F32>(), 3)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Vector>(create<sem::F32>(), 4)));
 }
 
 TEST_F(ResolverIsStorableTest, Matrix) {
-  EXPECT_TRUE(r()->IsStorable(ty.mat2x2<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat2x3<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat2x4<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat3x2<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat3x3<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat3x4<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat4x2<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat4x3<f32>()));
-  EXPECT_TRUE(r()->IsStorable(ty.mat4x4<f32>()));
+  auto* vec2 = create<sem::Vector>(create<sem::F32>(), 2);
+  auto* vec3 = create<sem::Vector>(create<sem::F32>(), 3);
+  auto* vec4 = create<sem::Vector>(create<sem::F32>(), 4);
+  EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec2, 2)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec2, 3)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec2, 4)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec3, 2)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec3, 3)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec3, 4)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec4, 2)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec4, 3)));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Matrix>(vec4, 4)));
 }
 
 TEST_F(ResolverIsStorableTest, Pointer) {
-  EXPECT_FALSE(r()->IsStorable(ty.pointer<i32>(ast::StorageClass::kPrivate)));
+  auto* ptr =
+      create<sem::Pointer>(create<sem::I32>(), ast::StorageClass::kPrivate);
+  EXPECT_FALSE(r()->IsStorable(ptr));
 }
 
 TEST_F(ResolverIsStorableTest, ArraySizedOfStorable) {
@@ -82,10 +87,9 @@ TEST_F(ResolverIsStorableTest, Struct_AllMembersStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_SomeMembersNonStorable) {
-  auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
   Structure("S", {
                      Member("a", ty.i32()),
-                     Member("b", ptr_ty),
+                     Member("b", ty.pointer<i32>(ast::StorageClass::kPrivate)),
                  });
 
   EXPECT_FALSE(r()->Resolve());
@@ -108,11 +112,12 @@ TEST_F(ResolverIsStorableTest, Struct_NestedStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_NestedNonStorable) {
-  auto ptr_ty = ty.pointer<i32>(ast::StorageClass::kPrivate);
-  auto* non_storable = Structure("nonstorable", {
-                                                    Member("a", ty.i32()),
-                                                    Member("b", ptr_ty),
-                                                });
+  auto* non_storable =
+      Structure("nonstorable",
+                {
+                    Member("a", ty.i32()),
+                    Member("b", ty.pointer<i32>(ast::StorageClass::kPrivate)),
+                });
   Structure("S", {
                      Member("a", ty.i32()),
                      Member("b", non_storable),

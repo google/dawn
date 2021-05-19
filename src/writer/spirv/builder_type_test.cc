@@ -153,7 +153,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
 }
 
 TEST_F(BuilderTest_Type, GenerateF32) {
-  auto f32 = ty.f32();
+  auto* f32 = create<sem::F32>();
 
   spirv::Builder& b = Build();
 
@@ -167,7 +167,7 @@ TEST_F(BuilderTest_Type, GenerateF32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
-  auto f32 = ty.f32();
+  auto* f32 = create<sem::F32>();
   auto* i32 = create<sem::I32>();
 
   spirv::Builder& b = Build();
@@ -195,7 +195,7 @@ TEST_F(BuilderTest_Type, GenerateI32) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
-  auto f32 = ty.f32();
+  auto* f32 = create<sem::F32>();
   auto* i32 = create<sem::I32>();
 
   spirv::Builder& b = Build();
@@ -209,7 +209,9 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedI32) {
 }
 
 TEST_F(BuilderTest_Type, GenerateMatrix) {
-  auto mat2x3 = ty.mat2x3<f32>();
+  auto* f32 = create<sem::F32>();
+  auto* vec3 = create<sem::Vector>(f32, 3);
+  auto* mat2x3 = create<sem::Matrix>(vec3, 2);
 
   spirv::Builder& b = Build();
 
@@ -495,7 +497,7 @@ TEST_F(BuilderTest_Type, GenerateU32) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedU32) {
   auto* u32 = create<sem::U32>();
-  auto f32 = ty.f32();
+  auto* f32 = create<sem::F32>();
 
   spirv::Builder& b = Build();
 
@@ -686,7 +688,7 @@ TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_u32) {
 }
 
 TEST_F(BuilderTest_Type, MultisampledTexture_Generate_2d_f32) {
-  auto f32 = ty.f32();
+  auto* f32 = create<sem::F32>();
   auto* ms = create<sem::MultisampledTexture>(ast::TextureDimension::k2d, f32);
 
   spirv::Builder& b = Build();
@@ -736,7 +738,8 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_u32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
-  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k1d, ty.f32());
+  auto* f32 = create<sem::F32>();
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k1d, f32);
 
   spirv::Builder& b = Build();
 
@@ -753,7 +756,8 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_1d_f32) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_2d) {
-  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k2d, ty.f32());
+  auto* f32 = create<sem::F32>();
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k2d, f32);
 
   spirv::Builder& b = Build();
 
@@ -766,8 +770,8 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_2d) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_2d_array) {
-  auto* s =
-      create<sem::SampledTexture>(ast::TextureDimension::k2dArray, ty.f32());
+  auto* f32 = create<sem::F32>();
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k2dArray, f32);
 
   spirv::Builder& b = Build();
 
@@ -780,7 +784,8 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_2d_array) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_3d) {
-  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k3d, ty.f32());
+  auto* f32 = create<sem::F32>();
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::k3d, f32);
 
   spirv::Builder& b = Build();
 
@@ -793,7 +798,8 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_3d) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_Cube) {
-  auto* s = create<sem::SampledTexture>(ast::TextureDimension::kCube, ty.f32());
+  auto* f32 = create<sem::F32>();
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::kCube, f32);
 
   spirv::Builder& b = Build();
 
@@ -807,8 +813,8 @@ TEST_F(BuilderTest_Type, SampledTexture_Generate_Cube) {
 }
 
 TEST_F(BuilderTest_Type, SampledTexture_Generate_CubeArray) {
-  auto* s =
-      create<sem::SampledTexture>(ast::TextureDimension::kCubeArray, ty.f32());
+  auto* f32 = create<sem::F32>();
+  auto* s = create<sem::SampledTexture>(ast::TextureDimension::kCubeArray, f32);
 
   spirv::Builder& b = Build();
 

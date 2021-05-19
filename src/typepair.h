@@ -241,7 +241,6 @@ using Array = TypePair<ast::Array, sem::Array>;
 using Bool = TypePair<ast::Bool, sem::Bool>;
 using DepthTexture = TypePair<ast::DepthTexture, sem::DepthTexture>;
 using ExternalTexture = TypePair<ast::ExternalTexture, sem::ExternalTexture>;
-using F32 = TypePair<ast::F32, sem::F32>;
 using Matrix = TypePair<ast::Matrix, sem::Matrix>;
 using MultisampledTexture =
     TypePair<ast::MultisampledTexture, sem::MultisampledTexture>;
@@ -256,6 +255,7 @@ using Void = TypePair<ast::Void, sem::Void>;
 
 using U32 = Ptr<ast::U32>;
 using I32 = Ptr<ast::I32>;
+using F32 = Ptr<ast::F32>;
 
 // Helpers
 

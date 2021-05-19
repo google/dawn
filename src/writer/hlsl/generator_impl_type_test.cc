@@ -117,7 +117,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
-  auto f32 = ty.f32();
+  auto* f32 = create<sem::F32>();
 
   GeneratorImpl& gen = Build();
 
@@ -139,7 +139,9 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
-  auto mat2x3 = ty.mat2x3<f32>();
+  auto* f32 = create<sem::F32>();
+  auto* vec3 = create<sem::Vector>(f32, 3);
+  auto* mat2x3 = create<sem::Matrix>(vec3, 2);
 
   GeneratorImpl& gen = Build();
 
@@ -151,11 +153,12 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
 
 // TODO(dsinclair): How to annotate as workgroup?
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
-  sem::Pointer p(ty.f32(), ast::StorageClass::kWorkgroup);
+  auto* f32 = create<sem::F32>();
+  auto* p = create<sem::Pointer>(f32, ast::StorageClass::kWorkgroup);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, &p, ast::StorageClass::kNone,
+  ASSERT_TRUE(gen.EmitType(out, p, ast::StorageClass::kNone,
                            ast::AccessControl::kInvalid, ""))
       << gen.error();
   EXPECT_EQ(result(), "float*");
@@ -293,7 +296,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_U32) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
-  auto vec3 = ty.vec3<f32>();
+  auto* f32 = create<sem::F32>();
+  auto* vec3 = create<sem::Vector>(f32, 3);
 
   GeneratorImpl& gen = Build();
 
@@ -522,11 +526,12 @@ INSTANTIATE_TEST_SUITE_P(
         }));
 
 TEST_F(HlslGeneratorImplTest_Type, EmitMultisampledTexture) {
-  sem::MultisampledTexture s(ast::TextureDimension::k2d, ty.f32());
+  auto* f32 = create<sem::F32>();
+  auto* s = create<sem::MultisampledTexture>(ast::TextureDimension::k2d, f32);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, &s, ast::StorageClass::kNone,
+  ASSERT_TRUE(gen.EmitType(out, s, ast::StorageClass::kNone,
                            ast::AccessControl::kInvalid, ""))
       << gen.error();
   EXPECT_EQ(result(), "Texture2DMS<float4>");

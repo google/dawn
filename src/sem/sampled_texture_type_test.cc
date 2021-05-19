@@ -25,7 +25,6 @@ namespace {
 
 using SampledTextureTest = TestHelper;
 
-
 TEST_F(SampledTextureTest, IsTexture) {
   F32 f32;
   SampledTexture s(ast::TextureDimension::kCube, &f32);
@@ -55,7 +54,8 @@ TEST_F(SampledTextureTest, TypeName) {
 }
 
 TEST_F(SampledTextureTest, FriendlyName) {
-  SampledTexture s(ast::TextureDimension::k3d, ty.f32());
+  F32 f32;
+  SampledTexture s(ast::TextureDimension::k3d, &f32);
   EXPECT_EQ(s.FriendlyName(Symbols()), "texture_3d<f32>");
 }
 
