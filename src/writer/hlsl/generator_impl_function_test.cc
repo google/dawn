@@ -919,11 +919,8 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Decoration_EntryPoint_Compute_WithWorkgroup) {
-  Func("main", ast::VariableList{}, ty.void_(),
-       {
-           Return(),
-       },
+       Emit_Decoration_EntryPoint_Compute_WithWorkgroup_Literal) {
+  Func("main", ast::VariableList{}, ty.void_(), {},
        {
            Stage(ast::PipelineStage::kCompute),
            WorkgroupSize(2, 4, 6),
@@ -933,6 +930,69 @@ TEST_F(HlslGeneratorImplTest_Function,
 
   ASSERT_TRUE(gen.Generate(out)) << gen.error();
   EXPECT_EQ(result(), R"([numthreads(2, 4, 6)]
+void main() {
+  return;
+}
+
+)");
+
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_Decoration_EntryPoint_Compute_WithWorkgroup_Const) {
+  GlobalConst("width", ty.i32(), Construct(ty.i32(), 2));
+  GlobalConst("height", ty.i32(), Construct(ty.i32(), 3));
+  GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4));
+  Func("main", ast::VariableList{}, ty.void_(), {},
+       {
+           Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize("width", "height", "depth"),
+       });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_EQ(result(), R"(static const int width = int(2);
+static const int height = int(3);
+static const int depth = int(4);
+[numthreads(2, 3, 4)]
+void main() {
+  return;
+}
+
+)");
+
+  Validate();
+}
+
+TEST_F(HlslGeneratorImplTest_Function,
+       Emit_Decoration_EntryPoint_Compute_WithWorkgroup_OverridableConst) {
+  GlobalConst("width", ty.i32(), Construct(ty.i32(), 2), {Override(7u)});
+  GlobalConst("height", ty.i32(), Construct(ty.i32(), 3), {Override(8u)});
+  GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4), {Override(9u)});
+  Func("main", ast::VariableList{}, ty.void_(), {},
+       {
+           Stage(ast::PipelineStage::kCompute),
+           WorkgroupSize("width", "height", "depth"),
+       });
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate(out)) << gen.error();
+  EXPECT_EQ(result(), R"(#ifndef WGSL_SPEC_CONSTANT_7
+#define WGSL_SPEC_CONSTANT_7 int(2)
+#endif
+static const int width = WGSL_SPEC_CONSTANT_7;
+#ifndef WGSL_SPEC_CONSTANT_8
+#define WGSL_SPEC_CONSTANT_8 int(3)
+#endif
+static const int height = WGSL_SPEC_CONSTANT_8;
+#ifndef WGSL_SPEC_CONSTANT_9
+#define WGSL_SPEC_CONSTANT_9 int(4)
+#endif
+static const int depth = WGSL_SPEC_CONSTANT_9;
+[numthreads(WGSL_SPEC_CONSTANT_7, WGSL_SPEC_CONSTANT_8, WGSL_SPEC_CONSTANT_9)]
 void main() {
   return;
 }

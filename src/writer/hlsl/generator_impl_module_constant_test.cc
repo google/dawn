@@ -45,7 +45,6 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
 #define WGSL_SPEC_CONSTANT_23 3.0f
 #endif
 static const float pos = WGSL_SPEC_CONSTANT_23;
-#undef WGSL_SPEC_CONSTANT_23
 )");
 }
 
@@ -62,7 +61,6 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
 #error spec constant required for constant id 23
 #endif
 static const float pos = WGSL_SPEC_CONSTANT_23;
-#undef WGSL_SPEC_CONSTANT_23
 )");
 }
 
@@ -84,12 +82,10 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoId) {
 #define WGSL_SPEC_CONSTANT_0 3.0f
 #endif
 static const float a = WGSL_SPEC_CONSTANT_0;
-#undef WGSL_SPEC_CONSTANT_0
 #ifndef WGSL_SPEC_CONSTANT_1
 #define WGSL_SPEC_CONSTANT_1 2.0f
 #endif
 static const float b = WGSL_SPEC_CONSTANT_1;
-#undef WGSL_SPEC_CONSTANT_1
 )");
 }
 

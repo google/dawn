@@ -47,6 +47,7 @@ const char kOutStructNameSuffix[] = "out";
 const char kTintStructInVarPrefix[] = "tint_in";
 const char kTintStructOutVarPrefix[] = "tint_out";
 const char kTempNamePrefix[] = "tint_tmp";
+const char kSpecConstantPrefix[] = "WGSL_SPEC_CONSTANT_";
 
 bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
   if (stmts->empty()) {
@@ -1994,18 +1995,26 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   auto* func_sem = builder_.Sem().Get(func);
 
   if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
+    // Emit the workgroup_size attribute.
     auto wgsize = func_sem->workgroup_size();
-    if (wgsize[0].overridable_const || wgsize[1].overridable_const ||
-        wgsize[2].overridable_const) {
-      // TODO(crbug.com/tint/713): Handle overridable constants.
-      TINT_UNIMPLEMENTED(builder_.Diagnostics())
-          << "pipeline-overridable workgroup sizes are not implemented";
+    out << "[numthreads(";
+    for (int i = 0; i < 3; i++) {
+      if (i > 0) {
+        out << ", ";
+      }
+
+      if (wgsize[i].overridable_const) {
+        auto* sem_const = builder_.Sem().Get(wgsize[i].overridable_const);
+        if (!sem_const->IsPipelineConstant()) {
+          TINT_ICE(builder_.Diagnostics())
+              << "expected a pipeline-overridable constant";
+        }
+        out << kSpecConstantPrefix << sem_const->ConstantId();
+      } else {
+        out << std::to_string(wgsize[i].value);
+      }
     }
-    uint32_t x = wgsize[0].value;
-    uint32_t y = wgsize[1].value;
-    uint32_t z = wgsize[2].value;
-    out << "[numthreads(" << std::to_string(x) << ", " << std::to_string(y)
-        << ", " << std::to_string(z) << ")]" << std::endl;
+    out << ")]" << std::endl;
     make_indent(out);
   }
 
@@ -2721,10 +2730,10 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
   if (sem->IsPipelineConstant()) {
     auto const_id = sem->ConstantId();
 
-    out << "#ifndef WGSL_SPEC_CONSTANT_" << const_id << std::endl;
+    out << "#ifndef " << kSpecConstantPrefix << const_id << std::endl;
 
     if (var->constructor() != nullptr) {
-      out << "#define WGSL_SPEC_CONSTANT_" << const_id << " "
+      out << "#define " << kSpecConstantPrefix << const_id << " "
           << constructor_out.str() << std::endl;
     } else {
       out << "#error spec constant required for constant id " << const_id
@@ -2736,9 +2745,8 @@ bool GeneratorImpl::EmitProgramConstVariable(std::ostream& out,
                   builder_.Symbols().NameFor(var->symbol()))) {
       return false;
     }
-    out << " " << builder_.Symbols().NameFor(var->symbol())
-        << " = WGSL_SPEC_CONSTANT_" << const_id << ";" << std::endl;
-    out << "#undef WGSL_SPEC_CONSTANT_" << const_id << std::endl;
+    out << " " << builder_.Symbols().NameFor(var->symbol()) << " = "
+        << kSpecConstantPrefix << const_id << ";" << std::endl;
   } else {
     out << "static const ";
     if (!EmitType(out, type, sem->StorageClass(), sem->AccessControl(),
