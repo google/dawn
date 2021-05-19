@@ -30,17 +30,17 @@ struct Allocator {
   BlockAllocator<Cloneable> alloc;
 };
 
-struct UniqueNode : public Castable<UniqueNode, Cloneable> {
-  UniqueNode(Allocator* alloc, Symbol n) : allocator(alloc), name(n) {}
+struct Node : public Castable<Node, Cloneable> {
+  Node(Allocator* alloc, Symbol n) : allocator(alloc), name(n) {}
   Allocator* const allocator;
   Symbol name;
-  UniqueNode* a = nullptr;
-  UniqueNode* b = nullptr;
-  UniqueNode* c = nullptr;
-  std::vector<UniqueNode*> vec;
+  Node* a = nullptr;
+  Node* b = nullptr;
+  Node* c = nullptr;
+  std::vector<Node*> vec;
 
-  UniqueNode* Clone(CloneContext* ctx) const override {
-    auto* out = allocator->Create<UniqueNode>(ctx->Clone(name));
+  Node* Clone(CloneContext* ctx) const override {
+    auto* out = allocator->Create<Node>(ctx->Clone(name));
     out->a = ctx->Clone(a);
     out->b = ctx->Clone(b);
     out->c = ctx->Clone(c);
@@ -49,43 +49,12 @@ struct UniqueNode : public Castable<UniqueNode, Cloneable> {
   }
 };
 
-struct UniqueReplaceable : public Castable<UniqueReplaceable, UniqueNode> {
-  UniqueReplaceable(Allocator* alloc, Symbol n) : Base(alloc, n) {}
+struct Replaceable : public Castable<Replaceable, Node> {
+  Replaceable(Allocator* alloc, Symbol n) : Base(alloc, n) {}
 };
 
-struct UniqueReplacement
-    : public Castable<UniqueReplacement, UniqueReplaceable> {
-  UniqueReplacement(Allocator* alloc, Symbol n) : Base(alloc, n) {}
-};
-
-struct ShareableNode : public Castable<ShareableNode, ShareableCloneable> {
-  ShareableNode(Allocator* alloc, Symbol n) : allocator(alloc), name(n) {}
-
-  Allocator* const allocator;
-  Symbol name;
-  ShareableNode* a = nullptr;
-  ShareableNode* b = nullptr;
-  ShareableNode* c = nullptr;
-  std::vector<ShareableNode*> vec;
-
-  ShareableNode* Clone(CloneContext* ctx) const override {
-    auto* out = allocator->Create<ShareableNode>(ctx->Clone(name));
-    out->a = ctx->Clone(a);
-    out->b = ctx->Clone(b);
-    out->c = ctx->Clone(c);
-    out->vec = ctx->Clone(vec);
-    return out;
-  }
-};
-
-struct ShareableReplaceable
-    : public Castable<ShareableReplaceable, ShareableNode> {
-  ShareableReplaceable(Allocator* alloc, Symbol n) : Base(alloc, n) {}
-};
-
-struct ShareableReplacement
-    : public Castable<ShareableReplacement, ShareableReplaceable> {
-  ShareableReplacement(Allocator* alloc, Symbol n) : Base(alloc, n) {}
+struct Replacement : public Castable<Replacement, Replaceable> {
+  Replacement(Allocator* alloc, Symbol n) : Base(alloc, n) {}
 };
 
 struct NotANode : public Castable<NotANode, Cloneable> {
@@ -114,32 +83,9 @@ ProgramID ProgramIDOf(const ProgramNode* node) {
   return node->program_id;
 }
 
-struct UniqueTypes {
-  using Node = UniqueNode;
-  using Replaceable = UniqueReplaceable;
-  using Replacement = UniqueReplacement;
-};
-struct ShareableTypes {
-  using Node = ShareableNode;
-  using Replaceable = ShareableReplaceable;
-  using Replacement = ShareableReplacement;
-};
+using CloneContextNodeTest = ::testing::Test;
 
-template <typename T>
-struct CloneContextNodeTest : public ::testing::Test {
-  using Node = typename T::Node;
-  using Replaceable = typename T::Replaceable;
-  using Replacement = typename T::Replacement;
-  static constexpr bool is_unique = std::is_same<Node, UniqueNode>::value;
-};
-
-using CloneContextTestNodeTypes = ::testing::Types<UniqueTypes, ShareableTypes>;
-TYPED_TEST_SUITE(CloneContextNodeTest, CloneContextTestNodeTypes, /**/);
-
-TYPED_TEST(CloneContextNodeTest, Clone) {
-  using Node = typename TestFixture::Node;
-  constexpr bool is_unique = TestFixture::is_unique;
-
+TEST_F(CloneContextNodeTest, Clone) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -188,23 +134,14 @@ TYPED_TEST(CloneContextNodeTest, Clone) {
   EXPECT_EQ(cloned_root->b->name, cloned.Symbols().Get("b"));
   EXPECT_EQ(cloned_root->b->b->name, cloned.Symbols().Get("b->b"));
 
-  if (is_unique) {
-    EXPECT_NE(cloned_root->b->a, cloned_root->a);  // De-aliased
-    EXPECT_NE(cloned_root->c, cloned_root->b);     // De-aliased
-  } else {
-    EXPECT_EQ(cloned_root->b->a, cloned_root->a);  // Aliased
-    EXPECT_EQ(cloned_root->c, cloned_root->b);     // Aliased
-  }
+  EXPECT_NE(cloned_root->b->a, cloned_root->a);  // De-aliased
+  EXPECT_NE(cloned_root->c, cloned_root->b);     // De-aliased
+
   EXPECT_EQ(cloned_root->b->a->name, cloned_root->a->name);
   EXPECT_EQ(cloned_root->c->name, cloned_root->b->name);
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_Cloneable) {
-  using Node = typename TestFixture::Node;
-  using Replaceable = typename TestFixture::Replaceable;
-  using Replacement = typename TestFixture::Replacement;
-  constexpr bool is_unique = TestFixture::is_unique;
-
+TEST_F(CloneContextNodeTest, CloneWithReplaceAll_Cloneable) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -284,13 +221,9 @@ TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_Cloneable) {
   EXPECT_EQ(cloned_root->b->b->name,
             cloned.Symbols().Get("replacement-child:b"));
 
-  if (is_unique) {
-    EXPECT_NE(cloned_root->b->c, cloned_root->a);  // De-aliased
-    EXPECT_NE(cloned_root->c, cloned_root->b);     // De-aliased
-  } else {
-    EXPECT_EQ(cloned_root->b->c, cloned_root->a);  // Aliased
-    EXPECT_EQ(cloned_root->c, cloned_root->b);     // Aliased
-  }
+  EXPECT_NE(cloned_root->b->c, cloned_root->a);  // De-aliased
+  EXPECT_NE(cloned_root->c, cloned_root->b);     // De-aliased
+
   EXPECT_EQ(cloned_root->b->c->name, cloned_root->a->name);
   EXPECT_EQ(cloned_root->c->name, cloned_root->b->name);
 
@@ -301,9 +234,7 @@ TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_Cloneable) {
   EXPECT_FALSE(Is<Replacement>(cloned_root->b->b));
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_Symbols) {
-  using Node = typename TestFixture::Node;
-
+TEST_F(CloneContextNodeTest, CloneWithReplaceAll_Symbols) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -342,10 +273,7 @@ TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_Symbols) {
   EXPECT_EQ(cloned_root->b->b->name, cloned.Symbols().Get("transformed<b->b>"));
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithoutTransform) {
-  using Node = typename TestFixture::Node;
-  using Replacement = typename TestFixture::Replacement;
-
+TEST_F(CloneContextNodeTest, CloneWithoutTransform) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -363,9 +291,7 @@ TYPED_TEST(CloneContextNodeTest, CloneWithoutTransform) {
   EXPECT_EQ(cloned_node->name, cloned.Symbols().Get("root"));
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithReplace) {
-  using Node = typename TestFixture::Node;
-
+TEST_F(CloneContextNodeTest, CloneWithReplace) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -397,10 +323,7 @@ TYPED_TEST(CloneContextNodeTest, CloneWithReplace) {
   EXPECT_EQ(cloned_root->c->name, cloned.Symbols().Get("c"));
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithRemove) {
-  using Node = typename TestFixture::Node;
-  constexpr bool is_unique = TestFixture::is_unique;
-
+TEST_F(CloneContextNodeTest, CloneWithRemove) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -417,23 +340,16 @@ TYPED_TEST(CloneContextNodeTest, CloneWithRemove) {
                           .Clone(original_root);
 
   EXPECT_EQ(cloned_root->vec.size(), 2u);
-  if (is_unique) {
-    EXPECT_NE(cloned_root->vec[0], cloned_root->a);
-    EXPECT_NE(cloned_root->vec[1], cloned_root->c);
-  } else {
-    EXPECT_EQ(cloned_root->vec[0], cloned_root->a);
-    EXPECT_EQ(cloned_root->vec[1], cloned_root->c);
-  }
+
+  EXPECT_NE(cloned_root->vec[0], cloned_root->a);
+  EXPECT_NE(cloned_root->vec[1], cloned_root->c);
 
   EXPECT_EQ(cloned_root->name, cloned.Symbols().Get("root"));
   EXPECT_EQ(cloned_root->vec[0]->name, cloned.Symbols().Get("a"));
   EXPECT_EQ(cloned_root->vec[1]->name, cloned.Symbols().Get("c"));
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithInsertBefore) {
-  using Node = typename TestFixture::Node;
-  constexpr bool is_unique = TestFixture::is_unique;
-
+TEST_F(CloneContextNodeTest, CloneWithInsertBefore) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -453,15 +369,10 @@ TYPED_TEST(CloneContextNodeTest, CloneWithInsertBefore) {
           .Clone(original_root);
 
   EXPECT_EQ(cloned_root->vec.size(), 4u);
-  if (is_unique) {
-    EXPECT_NE(cloned_root->vec[0], cloned_root->a);
-    EXPECT_NE(cloned_root->vec[2], cloned_root->b);
-    EXPECT_NE(cloned_root->vec[3], cloned_root->c);
-  } else {
-    EXPECT_EQ(cloned_root->vec[0], cloned_root->a);
-    EXPECT_EQ(cloned_root->vec[2], cloned_root->b);
-    EXPECT_EQ(cloned_root->vec[3], cloned_root->c);
-  }
+
+  EXPECT_NE(cloned_root->vec[0], cloned_root->a);
+  EXPECT_NE(cloned_root->vec[2], cloned_root->b);
+  EXPECT_NE(cloned_root->vec[3], cloned_root->c);
 
   EXPECT_EQ(cloned_root->name, cloned.Symbols().Get("root"));
   EXPECT_EQ(cloned_root->vec[0]->name, cloned.Symbols().Get("a"));
@@ -470,10 +381,7 @@ TYPED_TEST(CloneContextNodeTest, CloneWithInsertBefore) {
   EXPECT_EQ(cloned_root->vec[3]->name, cloned.Symbols().Get("c"));
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithInsertAfter) {
-  using Node = typename TestFixture::Node;
-  constexpr bool is_unique = TestFixture::is_unique;
-
+TEST_F(CloneContextNodeTest, CloneWithInsertAfter) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -493,15 +401,10 @@ TYPED_TEST(CloneContextNodeTest, CloneWithInsertAfter) {
           .Clone(original_root);
 
   EXPECT_EQ(cloned_root->vec.size(), 4u);
-  if (is_unique) {
-    EXPECT_NE(cloned_root->vec[0], cloned_root->a);
-    EXPECT_NE(cloned_root->vec[1], cloned_root->b);
-    EXPECT_NE(cloned_root->vec[3], cloned_root->c);
-  } else {
-    EXPECT_EQ(cloned_root->vec[0], cloned_root->a);
-    EXPECT_EQ(cloned_root->vec[1], cloned_root->b);
-    EXPECT_EQ(cloned_root->vec[3], cloned_root->c);
-  }
+
+  EXPECT_NE(cloned_root->vec[0], cloned_root->a);
+  EXPECT_NE(cloned_root->vec[1], cloned_root->b);
+  EXPECT_NE(cloned_root->vec[3], cloned_root->c);
 
   EXPECT_EQ(cloned_root->name, cloned.Symbols().Get("root"));
   EXPECT_EQ(cloned_root->vec[0]->name, cloned.Symbols().Get("a"));
@@ -510,10 +413,7 @@ TYPED_TEST(CloneContextNodeTest, CloneWithInsertAfter) {
   EXPECT_EQ(cloned_root->vec[3]->name, cloned.Symbols().Get("c"));
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithInsertBeforeAndAfterRemoved) {
-  using Node = typename TestFixture::Node;
-  constexpr bool is_unique = TestFixture::is_unique;
-
+TEST_F(CloneContextNodeTest, CloneWithInsertBeforeAndAfterRemoved) {
   Allocator a;
 
   ProgramBuilder builder;
@@ -538,13 +438,9 @@ TYPED_TEST(CloneContextNodeTest, CloneWithInsertBeforeAndAfterRemoved) {
           .Clone(original_root);
 
   EXPECT_EQ(cloned_root->vec.size(), 4u);
-  if (is_unique) {
-    EXPECT_NE(cloned_root->vec[0], cloned_root->a);
-    EXPECT_NE(cloned_root->vec[3], cloned_root->c);
-  } else {
-    EXPECT_EQ(cloned_root->vec[0], cloned_root->a);
-    EXPECT_EQ(cloned_root->vec[3], cloned_root->c);
-  }
+
+  EXPECT_NE(cloned_root->vec[0], cloned_root->a);
+  EXPECT_NE(cloned_root->vec[3], cloned_root->c);
 
   EXPECT_EQ(cloned_root->name, cloned.Symbols().Get("root"));
   EXPECT_EQ(cloned_root->vec[0]->name, cloned.Symbols().Get("a"));
@@ -554,10 +450,7 @@ TYPED_TEST(CloneContextNodeTest, CloneWithInsertBeforeAndAfterRemoved) {
   EXPECT_EQ(cloned_root->vec[3]->name, cloned.Symbols().Get("c"));
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneIntoSameBuilder) {
-  using Node = typename TestFixture::Node;
-  constexpr bool is_unique = TestFixture::is_unique;
-
+TEST_F(CloneContextNodeTest, CloneIntoSameBuilder) {
   ProgramBuilder builder;
   CloneContext ctx(&builder);
   Allocator allocator;
@@ -566,19 +459,15 @@ TYPED_TEST(CloneContextNodeTest, CloneIntoSameBuilder) {
   auto* cloned_b = ctx.Clone(original);
   EXPECT_NE(original, cloned_a);
   EXPECT_NE(original, cloned_b);
-  if (is_unique) {
-    EXPECT_NE(cloned_a, cloned_b);
-  } else {
-    EXPECT_EQ(cloned_a, cloned_b);
-  }
+
+  EXPECT_NE(cloned_a, cloned_b);
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_SameTypeTwice) {
-  std::string node_name = TypeInfo::Of<typename TestFixture::Node>().name;
+TEST_F(CloneContextNodeTest, CloneWithReplaceAll_SameTypeTwice) {
+  std::string node_name = TypeInfo::Of<Node>().name;
 
   EXPECT_FATAL_FAILURE(
       {
-        using Node = typename TestFixture::Node;
         ProgramBuilder cloned;
         Program original;
         CloneContext ctx(&cloned, &original);
@@ -590,16 +479,12 @@ TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_SameTypeTwice) {
           node_name);
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_BaseThenDerived) {
-  std::string node_name = TypeInfo::Of<typename TestFixture::Node>().name;
-  std::string replaceable_name =
-      TypeInfo::Of<typename TestFixture::Replaceable>().name;
+TEST_F(CloneContextNodeTest, CloneWithReplaceAll_BaseThenDerived) {
+  std::string node_name = TypeInfo::Of<Node>().name;
+  std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
 
   EXPECT_FATAL_FAILURE(
       {
-        using Node = typename TestFixture::Node;
-        using Replaceable = typename TestFixture::Replaceable;
-
         ProgramBuilder cloned;
         Program original;
         CloneContext ctx(&cloned, &original);
@@ -611,15 +496,12 @@ TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_BaseThenDerived) {
           node_name);
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_DerivedThenBase) {
-  std::string node_name = TypeInfo::Of<typename TestFixture::Node>().name;
-  std::string replaceable_name =
-      TypeInfo::Of<typename TestFixture::Replaceable>().name;
+TEST_F(CloneContextNodeTest, CloneWithReplaceAll_DerivedThenBase) {
+  std::string node_name = TypeInfo::Of<Node>().name;
+  std::string replaceable_name = TypeInfo::Of<Replaceable>().name;
 
   EXPECT_FATAL_FAILURE(
       {
-        using Node = typename TestFixture::Node;
-        using Replaceable = typename TestFixture::Replaceable;
         ProgramBuilder cloned;
         Program original;
         CloneContext ctx(&cloned, &original);
@@ -631,10 +513,9 @@ TYPED_TEST(CloneContextNodeTest, CloneWithReplaceAll_DerivedThenBase) {
           replaceable_name);
 }
 
-TYPED_TEST(CloneContextNodeTest, CloneWithReplace_WithNotANode) {
+TEST_F(CloneContextNodeTest, CloneWithReplace_WithNotANode) {
   EXPECT_FATAL_FAILURE(
       {
-        using Node = typename TestFixture::Node;
         Allocator allocator;
         ProgramBuilder builder;
         auto* original_root =
@@ -794,12 +675,9 @@ TEST_F(CloneContextTest, ProgramIDs_Clone_ObjectNotOwnedByDst) {
 
 }  // namespace
 
-TINT_INSTANTIATE_TYPEINFO(UniqueNode);
-TINT_INSTANTIATE_TYPEINFO(UniqueReplaceable);
-TINT_INSTANTIATE_TYPEINFO(UniqueReplacement);
-TINT_INSTANTIATE_TYPEINFO(ShareableNode);
-TINT_INSTANTIATE_TYPEINFO(ShareableReplaceable);
-TINT_INSTANTIATE_TYPEINFO(ShareableReplacement);
+TINT_INSTANTIATE_TYPEINFO(Node);
+TINT_INSTANTIATE_TYPEINFO(Replaceable);
+TINT_INSTANTIATE_TYPEINFO(Replacement);
 TINT_INSTANTIATE_TYPEINFO(NotANode);
 TINT_INSTANTIATE_TYPEINFO(ProgramNode);
 

@@ -20,7 +20,6 @@
 #include "src/utils/get_or_create.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::Cloneable);
-TINT_INSTANTIATE_TYPEINFO(tint::ShareableCloneable);
 
 namespace tint {
 

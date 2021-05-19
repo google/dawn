@@ -56,12 +56,7 @@ inline ProgramID ProgramIDOf(const Cloneable*) {
   return ProgramID();
 }
 
-/// ShareableCloneable is the base class for Cloneable objects which will only
-/// be cloned once when CloneContext::Clone() is called with the same object
-/// pointer.
-class ShareableCloneable : public Castable<ShareableCloneable, Cloneable> {};
-
-/// CloneContext holds the state used while cloning AST nodes and types.
+/// CloneContext holds the state used while cloning AST nodes.
 class CloneContext {
   /// ParamTypeIsPtrOf<F, T>::value is true iff the first parameter of
   /// F is a pointer of (or derives from) type T.
@@ -114,10 +109,9 @@ class CloneContext {
       TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, a);
     }
 
-    // Have we cloned this object already, or was Replace() called for this
-    // object?
-    auto it = cloned_.find(a);
-    if (it != cloned_.end()) {
+    // Was Replace() called for this object?
+    auto it = replacements_.find(a);
+    if (it != replacements_.end()) {
       return CheckedCast<T>(it->second);
     }
 
@@ -137,13 +131,6 @@ class CloneContext {
       // No transform for this type, or the transform returned nullptr.
       // Clone with T::Clone().
       cloned = a->Clone(this);
-    }
-
-    // Does the type derive from ShareableCloneable?
-    if (Is<ShareableCloneable, kDontErrorOnImpossibleCast>(a)) {
-      // Yes. Record this clone mapping so that future calls to Clone()
-      // return the same cloned object.
-      cloned_.emplace(a, cloned);
     }
 
     auto* out = CheckedCast<T>(cloned);
@@ -179,15 +166,15 @@ class CloneContext {
 
     // Have we seen this object before? If so, return the previously cloned
     // version instead of making yet another copy.
-    auto it = cloned_.find(a);
-    if (it != cloned_.end()) {
+    auto it = replacements_.find(a);
+    if (it != replacements_.end()) {
       return CheckedCast<T>(it->second);
     }
 
     // First time clone and no replacer transforms matched.
     // Clone with T::Clone().
     auto* c = a->Clone(this);
-    cloned_.emplace(a, c);
+    replacements_.emplace(a, c);
     return CheckedCast<T>(c);
   }
 
@@ -374,7 +361,7 @@ class CloneContext {
   CloneContext& Replace(WHAT* what, WITH* with) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(src, what);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, with);
-    cloned_[what] = with;
+    replacements_[what] = with;
     return *this;
   }
 
@@ -514,8 +501,8 @@ class CloneContext {
     std::unordered_map<const Cloneable*, CloneableList> insert_after_;
   };
 
-  /// A map of object in #src to their cloned equivalent in #dst
-  std::unordered_map<const Cloneable*, Cloneable*> cloned_;
+  /// A map of object in #src to their replacement in #dst
+  std::unordered_map<const Cloneable*, Cloneable*> replacements_;
 
   /// A map of symbol in #src to their cloned equivalent in #dst
   std::unordered_map<Symbol, Symbol> cloned_symbols_;
