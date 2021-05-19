@@ -32,6 +32,7 @@
 #include "src/ast/switch_statement.h"
 #include "src/ast/unary_op_expression.h"
 #include "src/ast/variable_decl_statement.h"
+#include "src/ast/workgroup_decoration.h"
 #include "src/resolver/resolver_test_helper.h"
 #include "src/sem/call.h"
 #include "src/sem/function.h"
@@ -885,6 +886,40 @@ TEST_F(ResolverTest, Function_ReturnStatements) {
   EXPECT_EQ(func_sem->ReturnStatements()[0], ret_1);
   EXPECT_EQ(func_sem->ReturnStatements()[1], ret_foo);
   EXPECT_TRUE(func_sem->ReturnType()->Is<sem::F32>());
+}
+
+TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
+  auto* func = Func("main", ast::VariableList{}, ty.void_(), {}, {});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->workgroup_size()[0].value, 1u);
+  EXPECT_EQ(func_sem->workgroup_size()[1].value, 1u);
+  EXPECT_EQ(func_sem->workgroup_size()[2].value, 1u);
+  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
+}
+
+TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
+  auto* func = Func("main", ast::VariableList{}, ty.void_(), {},
+                    {Stage(ast::PipelineStage::kCompute),
+                     create<ast::WorkgroupDecoration>(8, 2, 3)});
+
+  EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+  auto* func_sem = Sem().Get(func);
+  ASSERT_NE(func_sem, nullptr);
+
+  EXPECT_EQ(func_sem->workgroup_size()[0].value, 8u);
+  EXPECT_EQ(func_sem->workgroup_size()[1].value, 2u);
+  EXPECT_EQ(func_sem->workgroup_size()[2].value, 3u);
+  EXPECT_EQ(func_sem->workgroup_size()[0].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[1].overridable_const, nullptr);
+  EXPECT_EQ(func_sem->workgroup_size()[2].overridable_const, nullptr);
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {

@@ -435,23 +435,30 @@ bool Builder::GenerateEntryPoint(ast::Function* func, uint32_t id) {
 }
 
 bool Builder::GenerateExecutionModes(ast::Function* func, uint32_t id) {
+  auto* func_sem = builder_.Sem().Get(func);
+
   // WGSL fragment shader origin is upper left
   if (func->pipeline_stage() == ast::PipelineStage::kFragment) {
     push_execution_mode(
         spv::Op::OpExecutionMode,
         {Operand::Int(id), Operand::Int(SpvExecutionModeOriginUpperLeft)});
   } else if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-    uint32_t x = 0;
-    uint32_t y = 0;
-    uint32_t z = 0;
-    std::tie(x, y, z) = func->workgroup_size();
+    auto& wgsize = func_sem->workgroup_size();
+    if (wgsize[0].overridable_const || wgsize[1].overridable_const ||
+        wgsize[2].overridable_const) {
+      // TODO(crbug.com/tint/713): Handle overridable constants.
+      TINT_UNIMPLEMENTED(builder_.Diagnostics())
+          << "pipeline-overridable workgroup sizes are not implemented";
+    }
+    uint32_t x = wgsize[0].value;
+    uint32_t y = wgsize[1].value;
+    uint32_t z = wgsize[2].value;
     push_execution_mode(
         spv::Op::OpExecutionMode,
         {Operand::Int(id), Operand::Int(SpvExecutionModeLocalSize),
          Operand::Int(x), Operand::Int(y), Operand::Int(z)});
   }
 
-  auto* func_sem = builder_.Sem().Get(func);
   for (auto builtin : func_sem->ReferencedBuiltinVariables()) {
     if (builtin.second->value() == ast::Builtin::kFragDepth) {
       push_execution_mode(

@@ -1287,6 +1287,20 @@ bool Resolver::Function(ast::Function* func) {
     Mark(deco);
   }
 
+  // Set work-group size defaults.
+  for (int i = 0; i < 3; i++) {
+    info->workgroup_size[i].value = 1;
+    info->workgroup_size[i].overridable_const = nullptr;
+  }
+
+  if (auto* workgroup =
+          ast::GetDecoration<ast::WorkgroupDecoration>(func->decorations())) {
+    // TODO(crbug.com/tint/713): Handle non-literals.
+    info->workgroup_size[0].value = std::get<0>(workgroup->values());
+    info->workgroup_size[1].value = std::get<1>(workgroup->values());
+    info->workgroup_size[2].value = std::get<2>(workgroup->values());
+  }
+
   if (!ValidateFunction(func, info)) {
     return false;
   }
@@ -2517,7 +2531,7 @@ void Resolver::CreateSemanticNodes() const {
         info->declaration, const_cast<sem::Type*>(info->return_type),
         remap_vars(info->parameters), remap_vars(info->referenced_module_vars),
         remap_vars(info->local_referenced_module_vars), info->return_statements,
-        ancestor_entry_points[func->symbol()]);
+        ancestor_entry_points[func->symbol()], info->workgroup_size);
     func_info_to_sem_func.emplace(info, sem_func);
     sem.Add(func, sem_func);
   }

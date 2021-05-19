@@ -1989,12 +1989,19 @@ bool GeneratorImpl::EmitEntryPointFunction(std::ostream& out,
   make_indent(out);
 
   current_ep_sym_ = func->symbol();
+  auto* func_sem = builder_.Sem().Get(func);
 
   if (func->pipeline_stage() == ast::PipelineStage::kCompute) {
-    uint32_t x = 0;
-    uint32_t y = 0;
-    uint32_t z = 0;
-    std::tie(x, y, z) = func->workgroup_size();
+    auto wgsize = func_sem->workgroup_size();
+    if (wgsize[0].overridable_const || wgsize[1].overridable_const ||
+        wgsize[2].overridable_const) {
+      // TODO(crbug.com/tint/713): Handle overridable constants.
+      TINT_UNIMPLEMENTED(builder_.Diagnostics())
+          << "pipeline-overridable workgroup sizes are not implemented";
+    }
+    uint32_t x = wgsize[0].value;
+    uint32_t y = wgsize[1].value;
+    uint32_t z = wgsize[2].value;
     out << "[numthreads(" << std::to_string(x) << ", " << std::to_string(y)
         << ", " << std::to_string(z) << ")]" << std::endl;
     make_indent(out);

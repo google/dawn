@@ -58,13 +58,6 @@ Function::Function(Function&&) = default;
 
 Function::~Function() = default;
 
-std::tuple<uint32_t, uint32_t, uint32_t> Function::workgroup_size() const {
-  if (auto* workgroup = GetDecoration<WorkgroupDecoration>(decorations_)) {
-    return workgroup->values();
-  }
-  return {1, 1, 1};
-}
-
 PipelineStage Function::pipeline_stage() const {
   if (auto* stage = GetDecoration<StageDecoration>(decorations_)) {
     return stage->value();

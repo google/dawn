@@ -26,6 +26,7 @@
 #include "src/scope_stack.h"
 #include "src/sem/binding_point.h"
 #include "src/sem/block_statement.h"
+#include "src/sem/function.h"
 #include "src/sem/struct.h"
 #include "src/utils/unique_vector.h"
 
@@ -112,6 +113,7 @@ class Resolver {
     std::vector<const ast::ReturnStatement*> return_statements;
     sem::Type* return_type = nullptr;
     std::string return_type_name;
+    std::array<sem::WorkgroupDimension, 3> workgroup_size;
 
     // List of transitive calls this function makes
     UniqueVector<FunctionInfo*> transitive_calls;

@@ -225,31 +225,6 @@ TEST_F(FunctionTest, GetLastStatement_nullptr) {
   EXPECT_EQ(f->get_last_statement(), nullptr);
 }
 
-TEST_F(FunctionTest, WorkgroupSize_NoneSet) {
-  auto* f = Func("func", VariableList{}, ty.void_(), StatementList{},
-                 DecorationList{});
-  uint32_t x = 0;
-  uint32_t y = 0;
-  uint32_t z = 0;
-  std::tie(x, y, z) = f->workgroup_size();
-  EXPECT_EQ(x, 1u);
-  EXPECT_EQ(y, 1u);
-  EXPECT_EQ(z, 1u);
-}
-
-TEST_F(FunctionTest, WorkgroupSize) {
-  auto* f = Func("func", VariableList{}, ty.void_(), StatementList{},
-                 DecorationList{create<WorkgroupDecoration>(2u, 4u, 6u)});
-
-  uint32_t x = 0;
-  uint32_t y = 0;
-  uint32_t z = 0;
-  std::tie(x, y, z) = f->workgroup_size();
-  EXPECT_EQ(x, 2u);
-  EXPECT_EQ(y, 4u);
-  EXPECT_EQ(z, 6u);
-}
-
 using FunctionListTest = TestHelper;
 
 TEST_F(FunctionListTest, FindSymbol) {

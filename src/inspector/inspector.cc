@@ -198,8 +198,16 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     entry_point.name = program_->Symbols().NameFor(func->symbol());
     entry_point.remapped_name = program_->Symbols().NameFor(func->symbol());
     entry_point.stage = func->pipeline_stage();
-    std::tie(entry_point.workgroup_size_x, entry_point.workgroup_size_y,
-             entry_point.workgroup_size_z) = func->workgroup_size();
+
+    auto wgsize = sem->workgroup_size();
+    entry_point.workgroup_size_x = wgsize[0].value;
+    entry_point.workgroup_size_y = wgsize[1].value;
+    entry_point.workgroup_size_z = wgsize[2].value;
+    if (wgsize[0].overridable_const || wgsize[1].overridable_const ||
+        wgsize[2].overridable_const) {
+      // TODO(crbug.com/tint/713): Handle overridable constants.
+      TINT_ASSERT(false);
+    }
 
     for (auto* param : sem->Parameters()) {
       AddEntryPointInOutVariables(

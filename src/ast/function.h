@@ -66,10 +66,6 @@ class Function : public Castable<Function, Node> {
   /// @returns the decorations attached to this function
   const DecorationList& decorations() const { return decorations_; }
 
-  /// @returns the workgroup size {x, y, z} for the function. {1, 1, 1} will be
-  /// return if no workgroup size was set.
-  std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() const;
-
   /// @returns the functions pipeline stage or None if not set
   PipelineStage pipeline_stage() const;
 

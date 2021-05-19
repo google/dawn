@@ -15,6 +15,7 @@
 #ifndef SRC_SEM_FUNCTION_H_
 #define SRC_SEM_FUNCTION_H_
 
+#include <array>
 #include <utility>
 #include <vector>
 
@@ -37,6 +38,16 @@ namespace sem {
 
 class Variable;
 
+/// WorkgroupDimension describes the size of a single dimension of an entry
+/// point's workgroup size.
+struct WorkgroupDimension {
+  /// The size of this dimension.
+  uint32_t value;
+  /// A pipeline-overridable constant that overrides the size, or nullptr if
+  /// this dimension is not overridable.
+  const ast::Variable* overridable_const = nullptr;
+};
+
 /// Function holds the semantic information for function nodes.
 class Function : public Castable<Function, CallTarget> {
  public:
@@ -53,13 +64,15 @@ class Function : public Castable<Function, CallTarget> {
   /// @param return_statements the function return statements
   /// variables
   /// @param ancestor_entry_points the ancestor entry points
+  /// @param workgroup_size the workgroup size
   Function(ast::Function* declaration,
            Type* return_type,
            std::vector<const Variable*> parameters,
            std::vector<const Variable*> referenced_module_vars,
            std::vector<const Variable*> local_referenced_module_vars,
            std::vector<const ast::ReturnStatement*> return_statements,
-           std::vector<Symbol> ancestor_entry_points);
+           std::vector<Symbol> ancestor_entry_points,
+           std::array<WorkgroupDimension, 3> workgroup_size);
 
   /// Destructor
   ~Function() override;
@@ -148,6 +161,11 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns true if `sym` is an ancestor entry point of this function
   bool HasAncestorEntryPoint(Symbol sym) const;
 
+  /// @returns the workgroup size {x, y, z} for the function.
+  const std::array<WorkgroupDimension, 3>& workgroup_size() const {
+    return workgroup_size_;
+  }
+
  private:
   VariableBindings ReferencedSamplerVariablesImpl(ast::SamplerKind kind) const;
   VariableBindings ReferencedSampledTextureVariablesImpl(
@@ -159,6 +177,7 @@ class Function : public Castable<Function, CallTarget> {
   std::vector<const Variable*> const local_referenced_module_vars_;
   std::vector<const ast::ReturnStatement*> const return_statements_;
   std::vector<Symbol> const ancestor_entry_points_;
+  std::array<WorkgroupDimension, 3> workgroup_size_;
 };
 
 }  // namespace sem
