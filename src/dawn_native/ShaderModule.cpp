@@ -193,6 +193,10 @@ namespace dawn_native {
                 case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
                     return BindingInfoType::StorageTexture;
+
+                default:
+                    UNREACHABLE();
+                    return BindingInfoType::Buffer;
             }
         }
 
