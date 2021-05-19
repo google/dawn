@@ -54,6 +54,7 @@ namespace dawn_native {
             return mBindingInfo[bindingIndex];
         }
         const BindingMap& GetBindingMap() const;
+        bool HasBinding(BindingNumber bindingNumber) const;
         BindingIndex GetBindingIndex(BindingNumber bindingNumber) const;
 
         // Functions necessary for the unordered_set<BGLBase*>-based cache.

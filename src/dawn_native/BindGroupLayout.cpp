@@ -542,6 +542,10 @@ namespace dawn_native {
         return mBindingMap;
     }
 
+    bool BindGroupLayoutBase::HasBinding(BindingNumber bindingNumber) const {
+        return mBindingMap.count(bindingNumber) != 0;
+    }
+
     BindingIndex BindGroupLayoutBase::GetBindingIndex(BindingNumber bindingNumber) const {
         ASSERT(!IsError());
         const auto& it = mBindingMap.find(bindingNumber);

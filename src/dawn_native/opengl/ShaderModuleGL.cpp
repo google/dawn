@@ -179,38 +179,41 @@ namespace dawn_native { namespace opengl {
         // Change binding names to be "dawn_binding_<group>_<binding>".
         // Also unsets the SPIRV "Binding" decoration as it outputs "layout(binding=)" which
         // isn't supported on OSX's OpenGL.
-        for (BindGroupIndex group(0); group < kMaxBindGroupsTyped; ++group) {
+        const PipelineLayout::BindingIndexInfo& indices = layout->GetBindingIndexInfo();
+
+        // Modify the decoration of variables so that SPIRV-Cross outputs only
+        //  layout(binding=<index>) for interface variables.
+        //
+        // When the use_tint_generator toggle is on, Tint is used for the reflection of bindings
+        // for the implicit pipeline layout and pipeline/layout validation, but bindingInfo is set
+        // to mGLEntryPoints which is the SPIRV-Cross reflection. Tint reflects bindings used more
+        // precisely than SPIRV-Cross so some bindings in bindingInfo might not exist in the layout
+        // and querying the layout for them would cause an ASSERT. That's why we defensively check
+        // that bindings are in the layout before modifying them. This slight hack is ok because in
+        // the long term we will use Tint to produce GLSL.
+        for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
             for (const auto& it : bindingInfo[group]) {
+                const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(group);
                 BindingNumber bindingNumber = it.first;
                 const auto& info = it.second;
 
-                uint32_t resourceId;
-                switch (info.bindingType) {
-                    // When the resource is a uniform or shader storage block, we should change the
-                    // block name instead of the instance name.
-                    case BindingInfoType::Buffer:
-                        resourceId = info.base_type_id;
-                        break;
-                    default:
-                        resourceId = info.id;
-                        break;
+                if (!bgl->HasBinding(bindingNumber)) {
+                    continue;
                 }
 
-                compiler.set_name(resourceId, GetBindingName(group, bindingNumber));
+                // Remove the name of the base type. This works around an issue where if the SPIRV
+                // has two uniform/storage interface variables that point to the same base type,
+                // then SPIRV-Cross would emit two bindings with type names that conflict:
+                //
+                //   layout(binding=0) uniform Buf {...} binding0;
+                //   layout(binding=1) uniform Buf {...} binding1;
+                compiler.set_name(info.base_type_id, "");
+
+                BindingIndex bindingIndex = bgl->GetBindingIndex(bindingNumber);
+
                 compiler.unset_decoration(info.id, spv::DecorationDescriptorSet);
-                // OpenGL ES has no glShaderStorageBlockBinding call, so we adjust the SSBO binding
-                // decoration here instead.
-                if (version.IsES() && info.bindingType == BindingInfoType::Buffer &&
-                    (info.buffer.type == wgpu::BufferBindingType::Storage ||
-                     info.buffer.type == wgpu::BufferBindingType::ReadOnlyStorage)) {
-                    const auto& indices = layout->GetBindingIndexInfo();
-                    BindingIndex bindingIndex =
-                        layout->GetBindGroupLayout(group)->GetBindingIndex(bindingNumber);
-                    compiler.set_decoration(info.id, spv::DecorationBinding,
-                                            indices[group][bindingIndex]);
-                } else {
-                    compiler.unset_decoration(info.id, spv::DecorationBinding);
-                }
+                compiler.set_decoration(info.id, spv::DecorationBinding,
+                                        indices[group][bindingIndex]);
             }
         }
 
