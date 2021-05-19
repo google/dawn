@@ -978,7 +978,7 @@ TEST_P(CopyTests_T2B, Texture2DArrayRegionWithOffsetEvenRowsPerImage) {
 TEST_P(CopyTests_T2B, Texture3DFull) {
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
-    constexpr uint32_t kDepth = 6u;
+    constexpr uint32_t kDepth = 6;
 
     TextureSpec textureSpec;
     textureSpec.textureSize = {kWidth, kHeight, kDepth};
@@ -993,7 +993,7 @@ TEST_P(CopyTests_T2B, Texture3DSubRegion) {
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
-    constexpr uint32_t kDepth = 6u;
+    constexpr uint32_t kDepth = 6;
     constexpr uint32_t kBaseDepth = 2u;
     constexpr uint32_t kCopyDepth = 3u;
 
@@ -1003,6 +1003,118 @@ TEST_P(CopyTests_T2B, Texture3DSubRegion) {
 
     DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kCopyDepth),
            {kWidth, kHeight, kCopyDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_T2B, Texture3DNoSplitRowDataWithEmptyFirstRow) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 2;
+    constexpr uint32_t kHeight = 4;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The tests below are designed to test TextureCopySplitter for 3D textures on D3D12.
+    // Base: no split for a row + no empty first row
+    bufferSpec.offset = 60;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+
+    // This test will cover: no split for a row + empty first row
+    bufferSpec.offset = 260;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_T2B, Texture3DSplitRowDataWithoutEmptyFirstRow) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 259;
+    constexpr uint32_t kHeight = 127;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The test below is designed to test TextureCopySplitter for 3D textures on D3D12.
+    // This test will cover: split for a row + no empty first row for both split regions
+    bufferSpec.offset = 260;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_T2B, Texture3DSplitRowDataWithEmptyFirstRow) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 39;
+    constexpr uint32_t kHeight = 4;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The tests below are designed to test TextureCopySplitter for 3D textures on D3D12.
+    // This test will cover: split for a row + empty first row for the head block
+    bufferSpec.offset = 400;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+
+    // This test will cover: split for a row + empty first row for the tail block
+    bufferSpec.offset = 160;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_T2B, Texture3DCopyHeightIsOneCopyWidthIsTiny) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 2;
+    constexpr uint32_t kHeight = 1;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The tests below are designed to test TextureCopySplitter for 3D textures on D3D12.
+    // Base: no split for a row, no empty row, and copy height is 1
+    bufferSpec.offset = 60;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+
+    // This test will cover: no split for a row + empty first row, and copy height is 1
+    bufferSpec.offset = 260;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_T2B, Texture3DCopyHeightIsOneCopyWidthIsSmall) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 39;
+    constexpr uint32_t kHeight = 1;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The tests below are designed to test TextureCopySplitter for 3D textures on D3D12.
+    // This test will cover: split for a row + empty first row for the head block, and copy height
+    // is 1
+    bufferSpec.offset = 400;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+
+    // This test will cover: split for a row + empty first row for the tail block, and copy height
+    // is 1
+    bufferSpec.offset = 160;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
 }
 
 // TODO(yunchao.he@intel.com): add T2B tests for 3D textures, like RowPitch,
@@ -1449,7 +1561,7 @@ TEST_P(CopyTests_B2T, Texture2DArrayRegionWithOffsetEvenRowsPerImage) {
 TEST_P(CopyTests_B2T, Texture3DFull) {
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
-    constexpr uint32_t kDepth = 6u;
+    constexpr uint32_t kDepth = 6;
 
     TextureSpec textureSpec;
     textureSpec.textureSize = {kWidth, kHeight, kDepth};
@@ -1464,7 +1576,7 @@ TEST_P(CopyTests_B2T, Texture3DSubRegion) {
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
-    constexpr uint32_t kDepth = 6u;
+    constexpr uint32_t kDepth = 6;
     constexpr uint32_t kBaseDepth = 2u;
     constexpr uint32_t kCopyDepth = 3u;
 
@@ -1474,6 +1586,118 @@ TEST_P(CopyTests_B2T, Texture3DSubRegion) {
 
     DoTest(textureSpec, MinimumBufferSpec(kWidth, kHeight, kCopyDepth),
            {kWidth, kHeight, kCopyDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_B2T, Texture3DNoSplitRowDataWithEmptyFirstRow) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 2;
+    constexpr uint32_t kHeight = 4;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The tests below are designed to test TextureCopySplitter for 3D textures on D3D12.
+    // Base: no split for a row + no empty first row
+    bufferSpec.offset = 60;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+
+    // This test will cover: no split for a row + empty first row
+    bufferSpec.offset = 260;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_B2T, Texture3DSplitRowDataWithoutEmptyFirstRow) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 259;
+    constexpr uint32_t kHeight = 127;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The test below is designed to test TextureCopySplitter for 3D textures on D3D12.
+    // This test will cover: split for a row + no empty first row for both split regions
+    bufferSpec.offset = 260;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_B2T, Texture3DSplitRowDataWithEmptyFirstRow) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 39;
+    constexpr uint32_t kHeight = 4;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The tests below are designed to test TextureCopySplitter for 3D textures on D3D12.
+    // This test will cover: split for a row + empty first row for the head block
+    bufferSpec.offset = 400;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+
+    // This test will cover: split for a row + empty first row for the tail block
+    bufferSpec.offset = 160;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_B2T, Texture3DCopyHeightIsOneCopyWidthIsTiny) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 2;
+    constexpr uint32_t kHeight = 1;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The tests below are designed to test TextureCopySplitter for 3D textures on D3D12.
+    // Base: no split for a row, no empty row, and copy height is 1
+    bufferSpec.offset = 60;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+
+    // This test will cover: no split for a row + empty first row, and copy height is 1
+    bufferSpec.offset = 260;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+}
+
+TEST_P(CopyTests_B2T, Texture3DCopyHeightIsOneCopyWidthIsSmall) {
+    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+
+    constexpr uint32_t kWidth = 39;
+    constexpr uint32_t kHeight = 1;
+    constexpr uint32_t kDepth = 3;
+
+    TextureSpec textureSpec;
+    textureSpec.textureSize = {kWidth, kHeight, kDepth};
+    BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight, kDepth);
+
+    // The tests below are designed to test TextureCopySplitter for 3D textures on D3D12.
+    // This test will cover: split for a row + empty first row for the head block, and copy height
+    // is 1
+    bufferSpec.offset = 400;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
+
+    // This test will cover: split for a row + empty first row for the tail block, and copy height
+    // is 1
+    bufferSpec.offset = 160;
+    bufferSpec.size += bufferSpec.offset;
+    DoTest(textureSpec, bufferSpec, {kWidth, kHeight, kDepth}, wgpu::TextureDimension::e3D);
 }
 
 // TODO(yunchao.he@intel.com): add more tests like RowPitch, RowsPerImage, buffer offset, partial
