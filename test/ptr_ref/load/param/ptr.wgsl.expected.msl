@@ -1,7 +1,7 @@
 #include <metal_stdlib>
 
 using namespace metal;
-int func(int value, int* pointer) {
+int func(int value, thread int* pointer) {
   return (value + *(pointer));
 }
 

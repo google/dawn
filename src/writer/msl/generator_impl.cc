@@ -1913,7 +1913,23 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
     }
     out_ << mat->columns() << "x" << mat->rows();
   } else if (auto* ptr = type->As<sem::Pointer>()) {
-    // TODO(dsinclair): Storage class?
+    switch (ptr->StorageClass()) {
+      case ast::StorageClass::kFunction:
+      case ast::StorageClass::kPrivate:
+        out_ << "thread ";
+        break;
+      case ast::StorageClass::kWorkgroup:
+        out_ << "threadgroup ";
+        break;
+      case ast::StorageClass::kStorage:
+        out_ << "device ";
+        break;
+      case ast::StorageClass::kUniform:
+        out_ << "constant ";
+        break;
+      default:
+        TINT_ICE(diagnostics_) << "unhandled storage class for pointer";
+    }
     if (!EmitType(ptr->StoreType(), "")) {
       return false;
     }

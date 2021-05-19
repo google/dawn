@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  /* 0x0000 */ int a;
+};
+
+kernel void tint_symbol(device S& v [[buffer(0)]]) {
+  device int* const p = &(v.a);
+  int const use = (*(p) + 1);
+  return;
+}
+
