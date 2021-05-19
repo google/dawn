@@ -326,6 +326,7 @@ set(TINT_LIB_SRCS
   utils/get_or_create.h
   utils/hash.h
   utils/math.h
+  utils/scoped_assignment.h
   utils/unique_vector.h
   writer/append_vector.cc
   writer/append_vector.h
@@ -595,6 +596,7 @@ if(${TINT_BUILD_TESTS})
     utils/get_or_create_test.cc
     utils/hash_test.cc
     utils/math_test.cc
+    utils/scoped_assignment_test.cc
     utils/tmpfile_${TINT_OS_CC_SUFFIX}.cc
     utils/tmpfile_test.cc
     utils/tmpfile.h

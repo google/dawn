@@ -527,6 +527,7 @@ libtint_source_set("libtint_core_all_src") {
     "utils/get_or_create.h",
     "utils/hash.h",
     "utils/math.h",
+    "utils/scoped_assignment.h",
     "utils/unique_vector.h",
     "writer/append_vector.cc",
     "writer/append_vector.h",

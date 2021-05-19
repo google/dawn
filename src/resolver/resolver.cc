@@ -62,29 +62,13 @@
 #include "src/sem/variable.h"
 #include "src/utils/get_or_create.h"
 #include "src/utils/math.h"
+#include "src/utils/scoped_assignment.h"
 
 namespace tint {
 namespace resolver {
 namespace {
 
 using IntrinsicType = tint::sem::IntrinsicType;
-
-// Helper class that temporarily assigns a value to a reference for the scope of
-// the object. Once the ScopedAssignment is destructed, the original value is
-// restored.
-template <typename T>
-class ScopedAssignment {
- public:
-  ScopedAssignment(T& ref, T val) : ref_(ref) {
-    old_value_ = ref;
-    ref = val;
-  }
-  ~ScopedAssignment() { ref_ = old_value_; }
-
- private:
-  T& ref_;
-  T old_value_;
-};
 
 bool IsValidStorageTextureDimension(ast::TextureDimension dim) {
   switch (dim) {
@@ -324,8 +308,7 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return Type(t->type());
     }
     if (auto* t = ty->As<ast::AccessControl>()) {
-      ScopedAssignment<const ast::AccessControl*> sa(curent_access_control_, t);
-
+      TINT_SCOPED_ASSIGNMENT(curent_access_control_, t);
       if (auto* el = Type(t->type())) {
         return el;
       }
@@ -1182,7 +1165,7 @@ bool Resolver::ValidateEntryPoint(const ast::Function* func,
 bool Resolver::Function(ast::Function* func) {
   auto* info = function_infos_.Create<FunctionInfo>(func);
 
-  ScopedAssignment<FunctionInfo*> sa(current_function_, info);
+  TINT_SCOPED_ASSIGNMENT(current_function_, info);
 
   variable_stack_.push_scope();
   for (auto* param : func->params()) {
@@ -1271,8 +1254,7 @@ bool Resolver::Function(ast::Function* func) {
     sem::BlockStatement* sem_block = builder_->create<sem::BlockStatement>(
         func->body(), nullptr, sem::BlockStatement::Type::kGeneric);
     builder_->Sem().Add(func->body(), sem_block);
-    ScopedAssignment<sem::Statement*> sa_function_body(current_statement_,
-                                                       sem_block);
+    TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block);
     if (!BlockScope(func->body(),
                     [&] { return Statements(func->body()->list()); })) {
       return false;
@@ -1404,7 +1386,7 @@ bool Resolver::Statement(ast::Statement* stmt) {
   }
   builder_->Sem().Add(stmt, sem_statement);
 
-  ScopedAssignment<sem::Statement*> sa(current_statement_, sem_statement);
+  TINT_SCOPED_ASSIGNMENT(current_statement_, sem_statement);
 
   if (stmt->Is<ast::ElseStatement>()) {
     TINT_ICE(diagnostics_)
@@ -1489,7 +1471,7 @@ bool Resolver::CaseStatement(ast::CaseStatement* stmt) {
   sem::BlockStatement* sem_block = builder_->create<sem::BlockStatement>(
       stmt->body(), current_statement_, sem::BlockStatement::Type::kSwitchCase);
   builder_->Sem().Add(stmt->body(), sem_block);
-  ScopedAssignment<sem::Statement*> sa(current_statement_, sem_block);
+  TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block);
   return BlockScope(stmt->body(),
                     [&] { return Statements(stmt->body()->list()); });
 }
@@ -1513,7 +1495,7 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
     sem::BlockStatement* sem_block = builder_->create<sem::BlockStatement>(
         stmt->body(), current_statement_, sem::BlockStatement::Type::kGeneric);
     builder_->Sem().Add(stmt->body(), sem_block);
-    ScopedAssignment<sem::Statement*> sa(current_statement_, sem_block);
+    TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block);
     if (!BlockScope(stmt->body(),
                     [&] { return Statements(stmt->body()->list()); })) {
       return false;
@@ -1525,7 +1507,7 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
     auto* sem_else_stmt =
         builder_->create<sem::Statement>(else_stmt, current_statement_);
     builder_->Sem().Add(else_stmt, sem_else_stmt);
-    ScopedAssignment<sem::Statement*> sa(current_statement_, sem_else_stmt);
+    TINT_SCOPED_ASSIGNMENT(current_statement_, sem_else_stmt);
     if (auto* cond = else_stmt->condition()) {
       Mark(cond);
       if (!Expression(cond)) {
@@ -1547,8 +1529,7 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
           else_stmt->body(), current_statement_,
           sem::BlockStatement::Type::kGeneric);
       builder_->Sem().Add(else_stmt->body(), sem_block);
-      ScopedAssignment<sem::Statement*> sa_else_body(current_statement_,
-                                                     sem_block);
+      TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block);
       if (!BlockScope(else_stmt->body(),
                       [&] { return Statements(else_stmt->body()->list()); })) {
         return false;
@@ -1568,7 +1549,7 @@ bool Resolver::LoopStatement(ast::LoopStatement* stmt) {
   auto* sem_block_body = builder_->create<sem::BlockStatement>(
       stmt->body(), current_statement_, sem::BlockStatement::Type::kLoop);
   builder_->Sem().Add(stmt->body(), sem_block_body);
-  ScopedAssignment<sem::Statement*> body_sa(current_statement_, sem_block_body);
+  TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block_body);
   return BlockScope(stmt->body(), [&] {
     if (!Statements(stmt->body()->list())) {
       return false;
@@ -1581,8 +1562,7 @@ bool Resolver::LoopStatement(ast::LoopStatement* stmt) {
           stmt->continuing(), current_statement_,
           sem::BlockStatement::Type::kLoopContinuing);
       builder_->Sem().Add(stmt->continuing(), sem_block_continuing);
-      ScopedAssignment<sem::Statement*> continuing_sa(current_statement_,
-                                                      sem_block_continuing);
+      TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block_continuing);
       if (!BlockScope(stmt->continuing(),
                       [&] { return Statements(stmt->continuing()->list()); })) {
         return false;
@@ -3063,7 +3043,7 @@ bool Resolver::Switch(ast::SwitchStatement* s) {
     sem::Statement* sem_statement =
         builder_->create<sem::Statement>(case_stmt, current_statement_);
     builder_->Sem().Add(case_stmt, sem_statement);
-    ScopedAssignment<sem::Statement*> sa(current_statement_, sem_statement);
+    TINT_SCOPED_ASSIGNMENT(current_statement_, sem_statement);
     if (!CaseStatement(case_stmt)) {
       return false;
     }
@@ -3209,8 +3189,8 @@ bool Resolver::BlockScope(const ast::BlockStatement* block, F&& callback) {
                               "which semantic information is not available";
     return false;
   }
-  ScopedAssignment<sem::BlockStatement*> sa(
-      current_block_, const_cast<sem::BlockStatement*>(sem_block));
+  TINT_SCOPED_ASSIGNMENT(current_block_,
+                         const_cast<sem::BlockStatement*>(sem_block));
   variable_stack_.push_scope();
   bool result = callback();
   variable_stack_.pop_scope();
