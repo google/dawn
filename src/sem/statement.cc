@@ -65,5 +65,14 @@ const BlockStatement* Statement::Block() const {
   return nullptr;
 }
 
+const ast::Function* Statement::Function() const {
+  if (auto* block = Block()) {
+    if (auto* fbs = block->FindFirstParent<FunctionBlockStatement>()) {
+      return fbs->Function();
+    }
+  }
+  return nullptr;
+}
+
 }  // namespace sem
 }  // namespace tint

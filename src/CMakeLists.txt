@@ -545,6 +545,7 @@ if(${TINT_BUILD_TESTS})
     intrinsic_table_test.cc
     program_test.cc
     resolver/assignment_validation_test.cc
+    resolver/block_test.cc
     resolver/builtins_validation_test.cc
     resolver/control_block_validation_test.cc
     resolver/decoration_validation_test.cc

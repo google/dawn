@@ -19,14 +19,16 @@
 
 #include "src/sem/statement.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 namespace ast {
 class BlockStatement;
+class Function;
 class Variable;
 }  // namespace ast
+}  // namespace tint
 
+namespace tint {
 namespace sem {
 
 /// Holds semantic information about a block, such as parent block and variables
@@ -82,6 +84,24 @@ class BlockStatement : public Castable<BlockStatement, Statement> {
 
  private:
   std::vector<const ast::Variable*> decls_;
+};
+
+/// The root block statement for a function
+class FunctionBlockStatement
+    : public Castable<FunctionBlockStatement, BlockStatement> {
+ public:
+  /// Constructor
+  /// @param function the owning function
+  explicit FunctionBlockStatement(const ast::Function* function);
+
+  /// Destructor
+  ~FunctionBlockStatement() override;
+
+  /// @returns the function owning this block
+  const ast::Function* Function() const { return function_; }
+
+ private:
+  ast::Function const* const function_;
 };
 
 /// Holds semantic information about a loop block

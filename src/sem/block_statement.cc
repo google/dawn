@@ -15,8 +15,11 @@
 #include "src/sem/block_statement.h"
 
 #include "src/ast/block_statement.h"
+#include "src/ast/function.h"
+#include "src/sem/function.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::BlockStatement);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::FunctionBlockStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::LoopBlockStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::LoopContinuingBlockStatement);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::SwitchCaseBlockStatement);
@@ -37,6 +40,11 @@ const ast::BlockStatement* BlockStatement::Declaration() const {
 void BlockStatement::AddDecl(ast::Variable* var) {
   decls_.push_back(var);
 }
+
+FunctionBlockStatement::FunctionBlockStatement(const ast::Function* function)
+    : Base(function->body(), nullptr), function_(function) {}
+
+FunctionBlockStatement::~FunctionBlockStatement() = default;
 
 LoopBlockStatement::LoopBlockStatement(const ast::BlockStatement* declaration,
                                        const Statement* parent)

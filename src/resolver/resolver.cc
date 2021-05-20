@@ -1228,8 +1228,7 @@ bool Resolver::Function(ast::Function* func) {
           << "Resolver::Function() called with a current statement";
       return false;
     }
-    auto* sem_block =
-        builder_->create<sem::BlockStatement>(func->body(), nullptr);
+    auto* sem_block = builder_->create<sem::FunctionBlockStatement>(func);
     builder_->Sem().Add(func->body(), sem_block);
     TINT_SCOPED_ASSIGNMENT(current_statement_, sem_block);
     if (!BlockScope(func->body(),

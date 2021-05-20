@@ -17,16 +17,19 @@
 
 #include "src/sem/node.h"
 
-namespace tint {
-
 // Forward declarations
+namespace tint {
 namespace ast {
+class Function;
 class Statement;
 }  // namespace ast
-
 namespace sem {
-
 class BlockStatement;
+}  // namespace sem
+}  // namespace tint
+
+namespace tint {
+namespace sem {
 
 /// Statement holds the semantic information for a statement.
 class Statement : public Castable<Statement, Node> {
@@ -44,6 +47,9 @@ class Statement : public Castable<Statement, Node> {
 
   /// @return the closest enclosing block for this statement
   const BlockStatement* Block() const;
+
+  /// @returns the function that owns this statement
+  const ast::Function* Function() const;
 
  private:
   ast::Statement const* const declaration_;
