@@ -1314,8 +1314,8 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     if (!EmitType(type, program_->Symbols().NameFor(v->symbol()))) {
       return false;
     }
-    // Array name is output as part of the type
-    if (!type->Is<sem::Array>()) {
+    // Parameter name is output as part of the type for arrays and pointers.
+    if (!type->Is<sem::Array>() && !type->Is<sem::Pointer>()) {
       out_ << " " << program_->Symbols().NameFor(v->symbol());
     }
   }
@@ -1926,10 +1926,17 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
       default:
         TINT_ICE(diagnostics_) << "unhandled storage class for pointer";
     }
-    if (!EmitType(ptr->StoreType(), "")) {
-      return false;
+    if (ptr->StoreType()->Is<sem::Array>()) {
+      std::string inner = "(*" + name + ")";
+      if (!EmitType(ptr->StoreType(), inner)) {
+        return false;
+      }
+    } else {
+      if (!EmitType(ptr->StoreType(), "")) {
+        return false;
+      }
+      out_ << "* " << name;
     }
-    out_ << "*";
   } else if (type->Is<sem::Sampler>()) {
     out_ << "sampler";
   } else if (auto* str = type->As<sem::Struct>()) {
@@ -2201,14 +2208,17 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
     return false;
   }
   auto* type = var->Type()->UnwrapRef();
-  if (!EmitType(type, program_->Symbols().NameFor(decl->symbol()))) {
+
+  std::string name = program_->Symbols().NameFor(decl->symbol());
+  if (decl->is_const()) {
+    name = "const " + name;
+  }
+  if (!EmitType(type, name)) {
     return false;
   }
-  if (decl->is_const()) {
-    out_ << " const";
-  }
-  if (!type->Is<sem::Array>()) {
-    out_ << " " << program_->Symbols().NameFor(decl->symbol());
+  // Variable name is output as part of the type for arrays and pointers.
+  if (!type->Is<sem::Array>() && !type->Is<sem::Pointer>()) {
+    out_ << " " << name;
   }
 
   if (!skip_constructor) {

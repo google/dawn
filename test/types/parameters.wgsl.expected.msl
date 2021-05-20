@@ -1,0 +1,13 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+};
+
+void foo(bool param_bool, int param_i32, uint param_u32, float param_f32, int2 param_v2i32, uint3 param_v3u32, float4 param_v4f32, float2x3 param_m2x3, float param_arr[4], S param_struct, thread float* param_ptr_f32, thread float4* param_ptr_vec, thread float (*param_ptr_arr)[4]) {
+}
+
+kernel void tint_symbol() {
+  return;
+}
+

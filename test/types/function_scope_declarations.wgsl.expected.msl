@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+};
+
+kernel void tint_symbol() {
+  bool bool_var = bool();
+  bool const bool_let = bool();
+  int i32_var = int();
+  int const i32_let = int();
+  uint u32_var = uint();
+  uint const u32_let = uint();
+  float f32_var = float();
+  float const f32_let = float();
+  int2 v2i32_var = int2();
+  int2 const v2i32_let = int2();
+  uint3 v3u32_var = uint3();
+  uint3 const v3u32_let = uint3();
+  float4 v4f32_var = float4();
+  float4 const v4f32_let = float4();
+  float2x3 m2x3_var = float2x3();
+  float3x4 const m3x4_let = float3x4();
+  float arr_var[4] = {};
+  float const arr_let[4] = {};
+  S struct_var = {};
+  S const struct_let = {};
+  thread float* const ptr_f32 = &(f32_var);
+  thread float4* const ptr_vec = &(v4f32_var);
+  thread float (*const ptr_arr)[4] = &(arr_var);
+  return;
+}
+

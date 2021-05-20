@@ -1,0 +1,82 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 49
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %bool_var "bool_var"
+               OpName %bool_let "bool_let"
+               OpName %i32_var "i32_var"
+               OpName %i32_let "i32_let"
+               OpName %u32_var "u32_var"
+               OpName %u32_let "u32_let"
+               OpName %f32_var "f32_var"
+               OpName %f32_let "f32_let"
+               OpName %v2i32_var "v2i32_var"
+               OpName %v2i32_let "v2i32_let"
+               OpName %v3u32_var "v3u32_var"
+               OpName %v3u32_let "v3u32_let"
+               OpName %v4f32_var "v4f32_var"
+               OpName %v4f32_let "v4f32_let"
+               OpName %m2x3_var "m2x3_var"
+               OpName %m3x4_let "m3x4_let"
+               OpName %arr_var "arr_var"
+               OpName %arr_let "arr_let"
+               OpName %S "S"
+               OpName %struct_var "struct_var"
+               OpName %struct_let "struct_let"
+               OpName %main "main"
+               OpDecorate %_arr_float_uint_4 ArrayStride 4
+       %bool = OpTypeBool
+   %bool_let = OpConstantNull %bool
+%_ptr_Private_bool = OpTypePointer Private %bool
+   %bool_var = OpVariable %_ptr_Private_bool Private %bool_let
+        %int = OpTypeInt 32 1
+    %i32_let = OpConstantNull %int
+%_ptr_Private_int = OpTypePointer Private %int
+    %i32_var = OpVariable %_ptr_Private_int Private %i32_let
+       %uint = OpTypeInt 32 0
+    %u32_let = OpConstantNull %uint
+%_ptr_Private_uint = OpTypePointer Private %uint
+    %u32_var = OpVariable %_ptr_Private_uint Private %u32_let
+      %float = OpTypeFloat 32
+    %f32_let = OpConstantNull %float
+%_ptr_Private_float = OpTypePointer Private %float
+    %f32_var = OpVariable %_ptr_Private_float Private %f32_let
+      %v2int = OpTypeVector %int 2
+  %v2i32_let = OpConstantNull %v2int
+%_ptr_Private_v2int = OpTypePointer Private %v2int
+  %v2i32_var = OpVariable %_ptr_Private_v2int Private %v2i32_let
+     %v3uint = OpTypeVector %uint 3
+  %v3u32_let = OpConstantNull %v3uint
+%_ptr_Private_v3uint = OpTypePointer Private %v3uint
+  %v3u32_var = OpVariable %_ptr_Private_v3uint Private %v3u32_let
+    %v4float = OpTypeVector %float 4
+  %v4f32_let = OpConstantNull %v4float
+%_ptr_Private_v4float = OpTypePointer Private %v4float
+  %v4f32_var = OpVariable %_ptr_Private_v4float Private %v4f32_let
+    %v3float = OpTypeVector %float 3
+%mat2v3float = OpTypeMatrix %v3float 2
+         %31 = OpConstantNull %mat2v3float
+%_ptr_Private_mat2v3float = OpTypePointer Private %mat2v3float
+   %m2x3_var = OpVariable %_ptr_Private_mat2v3float Private %31
+%mat3v4float = OpTypeMatrix %v4float 3
+   %m3x4_let = OpConstantNull %mat3v4float
+     %uint_4 = OpConstant %uint 4
+%_arr_float_uint_4 = OpTypeArray %float %uint_4
+    %arr_let = OpConstantNull %_arr_float_uint_4
+%_ptr_Private__arr_float_uint_4 = OpTypePointer Private %_arr_float_uint_4
+    %arr_var = OpVariable %_ptr_Private__arr_float_uint_4 Private %arr_let
+          %S = OpTypeStruct
+ %struct_let = OpConstantNull %S
+%_ptr_Private_S = OpTypePointer Private %S
+ %struct_var = OpVariable %_ptr_Private_S Private %struct_let
+       %void = OpTypeVoid
+         %45 = OpTypeFunction %void
+       %main = OpFunction %void None %45
+         %48 = OpLabel
+               OpReturn
+               OpFunctionEnd
