@@ -212,28 +212,12 @@ bool Resolver::IsHostShareable(const sem::Type* type) {
 bool Resolver::ResolveInternal() {
   Mark(&builder_->AST());
 
-  auto register_named_type = [this](Symbol name, sem::Type* type,
-                                    const Source& source) {
-    auto added = named_types_.emplace(name, type).second;
-    if (!added) {
-      diagnostics_.add_error("type with the name '" +
-                                 builder_->Symbols().NameFor(name) +
-                                 "' was already declared",
-                             source);
-      return false;
-    }
-    return true;
-  };
-
   // Process everything else in the order they appear in the module. This is
   // necessary for validation of use-before-declaration.
   for (auto* decl : builder_->AST().GlobalDeclarations()) {
     if (auto* ty = decl->As<ast::NamedType>()) {
-      auto* sem_ty = Type(ty);
-      if (sem_ty == nullptr) {
-        return false;
-      }
-      if (!register_named_type(ty->name(), sem_ty, ty->source())) {
+      Mark(ty);
+      if (!NamedType(ty)) {
         return false;
       }
     } else if (auto* func = decl->As<ast::Function>()) {
@@ -299,14 +283,6 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     if (ty->Is<ast::F32>()) {
       return builder_->create<sem::F32>();
     }
-    if (auto* t = ty->As<ast::Alias>()) {
-      auto added = name_to_ast_type_.emplace(t->name(), t->type()).second;
-      // TODO(crbug.com/tint/803): Remove this.
-      if (!added) {
-        return nullptr;
-      }
-      return Type(t->type());
-    }
     if (auto* t = ty->As<ast::AccessControl>()) {
       TINT_SCOPED_ASSIGNMENT(curent_access_control_, t);
       if (auto* el = Type(t->type())) {
@@ -338,9 +314,6 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
                                               t->storage_class());
       }
       return nullptr;
-    }
-    if (auto* t = ty->As<ast::Struct>()) {
-      return Structure(t);
     }
     if (auto* t = ty->As<ast::Sampler>()) {
       return builder_->create<sem::Sampler>(t->kind());
@@ -383,14 +356,14 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return builder_->create<sem::ExternalTexture>();
     }
     if (auto* t = ty->As<ast::TypeName>()) {
-      auto it = named_types_.find(t->name());
-      if (it == named_types_.end()) {
+      auto it = named_type_info_.find(t->name());
+      if (it == named_type_info_.end()) {
         diagnostics_.add_error(
             "unknown type '" + builder_->Symbols().NameFor(t->name()) + "'",
             t->source());
         return nullptr;
       }
-      return it->second;
+      return it->second.sem;
     }
     TINT_UNREACHABLE(diagnostics_)
         << "Unhandled ast::Type: " << ty->TypeInfo().name;
@@ -488,19 +461,23 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
 
   // TODO(crbug.com/tint/802): Temporary while ast::AccessControl exits.
   auto find_first_access_control =
-      [this](ast::Type* ty) -> ast::AccessControl* {
+      [this](const ast::Type* ty) -> const ast::AccessControl* {
     if (ty == nullptr) {
       return nullptr;
     }
-    if (ast::AccessControl* ac = ty->As<ast::AccessControl>()) {
+    if (const ast::AccessControl* ac = ty->As<ast::AccessControl>()) {
       return ac;
     }
     while (auto* tn = ty->As<ast::TypeName>()) {
-      auto it = name_to_ast_type_.find(tn->name());
-      if (it == name_to_ast_type_.end()) {
+      auto it = named_type_info_.find(tn->name());
+      if (it == named_type_info_.end()) {
         break;
       }
-      ty = it->second;
+      auto* alias = it->second.ast->As<ast::Alias>();
+      if (!alias) {
+        break;
+      }
+      ty = alias->type();
       if (auto* ac = ty->As<ast::AccessControl>()) {
         return ac;
       }
@@ -2422,6 +2399,47 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
     return false;
   }
 
+  return true;
+}
+
+sem::Type* Resolver::NamedType(const ast::NamedType* named_type) {
+  sem::Type* result = nullptr;
+  if (auto* alias = named_type->As<ast::Alias>()) {
+    result = Type(alias->type());
+  } else if (auto* str = named_type->As<ast::Struct>()) {
+    result = Structure(str);
+  } else {
+    TINT_UNREACHABLE(diagnostics_) << "Unhandled NamedType";
+  }
+
+  if (!result) {
+    return nullptr;
+  }
+
+  named_type_info_.emplace(named_type->name(),
+                           NamedTypeInfo{named_type, result});
+
+  if (!ValidateNamedType(named_type)) {
+    return nullptr;
+  }
+
+  builder_->Sem().Add(named_type, result);
+  return result;
+}
+
+bool Resolver::ValidateNamedType(const ast::NamedType* named_type) const {
+  auto iter = named_type_info_.find(named_type->name());
+  if (iter == named_type_info_.end()) {
+    TINT_ICE(diagnostics_) << "ValidateNamedType called() before NamedType()";
+  }
+  if (iter->second.ast != named_type) {
+    diagnostics_.add_error("type with the name '" +
+                               builder_->Symbols().NameFor(named_type->name()) +
+                               "' was already declared",
+                           named_type->source());
+    diagnostics_.add_note("first declared here", iter->second.ast->source());
+    return false;
+  }
   return true;
 }
 

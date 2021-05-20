@@ -169,6 +169,12 @@ class Resolver {
     size_t first_continue = kNoContinue;
   };
 
+  // Structure holding information for a NamedType
+  struct NamedTypeInfo {
+    ast::NamedType const* const ast;
+    sem::Type* const sem;
+  };
+
   /// Describes the context in which a variable is declared
   enum class VariableKind { kParameter, kLocal, kGlobal };
 
@@ -247,12 +253,17 @@ class Resolver {
                                    const std::string& rhs_type_name);
   bool ValidateVectorConstructor(const ast::TypeConstructorExpression* ctor,
                                  const sem::Vector* vec_type);
+  bool ValidateNamedType(const ast::NamedType* named_type) const;
 
   /// @returns the sem::Type for the ast::Type `ty`, building it if it
   /// hasn't been constructed already. If an error is raised, nullptr is
   /// returned.
   /// @param ty the ast::Type
   sem::Type* Type(const ast::Type* ty);
+
+  /// @param named_type the named type to resolve
+  /// @returns the resolved semantic type
+  sem::Type* NamedType(const ast::NamedType* named_type);
 
   /// Builds and returns the semantic information for the array `arr`.
   /// This method does not mark the ast::Array node, nor attach the generated
@@ -358,10 +369,10 @@ class Resolver {
   std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;
   std::unordered_map<const ast::Expression*, ExpressionInfo> expr_info_;
-  std::unordered_map<Symbol, sem::Type*> named_types_;
+  std::unordered_map<Symbol, NamedTypeInfo> named_type_info_;
+
   std::unordered_set<const ast::Node*> marked_;
   std::unordered_map<uint32_t, const VariableInfo*> constant_ids_;
-  std::unordered_map<Symbol, ast::Type*> name_to_ast_type_;
 
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;

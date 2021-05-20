@@ -277,6 +277,19 @@ TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
   EXPECT_TRUE(TypeOf(init)->Is<sem::I32>());
 }
 
+TEST_F(ResolverTest, Stmt_VariableDecl_AliasRedeclared) {
+  auto* my_int1 = ty.alias(Source{{12, 34}}, "MyInt", ty.i32());
+  auto* my_int2 = ty.alias(Source{{56, 78}}, "MyInt", ty.i32());
+  AST().AddConstructedType(my_int1);
+  AST().AddConstructedType(my_int2);
+  WrapInFunction();
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "56:78 error: type with the name 'MyInt' was already declared\n"
+            "12:34 note: first declared here");
+}
+
 TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScope) {
   auto* init = Expr(2);
   Global("my_var", ty.i32(), ast::StorageClass::kInput, init);
