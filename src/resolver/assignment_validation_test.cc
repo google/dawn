@@ -161,8 +161,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonStorable_Fail) {
   // a = b;
 
   auto make_type = [&] {
-    auto tex_type = ty.storage_texture(ast::TextureDimension::k1d,
-                                       ast::ImageFormat::kRgba8Unorm);
+    auto* tex_type = ty.storage_texture(ast::TextureDimension::k1d,
+                                        ast::ImageFormat::kRgba8Unorm);
     return ty.access(ast::AccessControl::kReadOnly, tex_type);
   };
 

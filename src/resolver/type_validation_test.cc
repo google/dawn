@@ -513,7 +513,7 @@ TEST_P(StorageTextureDimensionTest, All) {
   // var a : [[access(read)]] texture_storage_*<ru32int>;
   auto& params = GetParam();
 
-  auto st = ty.storage_texture(params.dim, ast::ImageFormat::kR32Uint);
+  auto* st = ty.storage_texture(params.dim, ast::ImageFormat::kR32Uint);
   auto* ac = ty.access(ast::AccessControl::kReadOnly, st);
 
   Global("a", ac, ast::StorageClass::kNone, nullptr,
@@ -586,7 +586,7 @@ TEST_P(StorageTextureFormatTest, All) {
   // [[group(0), binding(3)]]
   // var d : [[access(read)]] texture_storage_3d<*>;
 
-  auto st_a = ty.storage_texture(ast::TextureDimension::k1d, params.format);
+  auto* st_a = ty.storage_texture(ast::TextureDimension::k1d, params.format);
   auto* ac_a = ty.access(ast::AccessControl::kReadOnly, st_a);
   Global("a", ac_a, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
@@ -594,7 +594,7 @@ TEST_P(StorageTextureFormatTest, All) {
              create<ast::GroupDecoration>(0),
          });
 
-  auto st_b = ty.storage_texture(ast::TextureDimension::k2d, params.format);
+  auto* st_b = ty.storage_texture(ast::TextureDimension::k2d, params.format);
   auto* ac_b = ty.access(ast::AccessControl::kReadOnly, st_b);
   Global("b", ac_b, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
@@ -602,7 +602,7 @@ TEST_P(StorageTextureFormatTest, All) {
              create<ast::GroupDecoration>(1),
          });
 
-  auto st_c =
+  auto* st_c =
       ty.storage_texture(ast::TextureDimension::k2dArray, params.format);
   auto* ac_c = ty.access(ast::AccessControl::kReadOnly, st_c);
   Global("c", ac_c, ast::StorageClass::kNone, nullptr,
@@ -611,7 +611,7 @@ TEST_P(StorageTextureFormatTest, All) {
              create<ast::GroupDecoration>(2),
          });
 
-  auto st_d = ty.storage_texture(ast::TextureDimension::k3d, params.format);
+  auto* st_d = ty.storage_texture(ast::TextureDimension::k3d, params.format);
   auto* ac_d = ty.access(ast::AccessControl::kReadOnly, st_d);
   Global("d", ac_d, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
@@ -635,8 +635,8 @@ TEST_F(StorageTextureAccessControlTest, MissingAccessControl_Fail) {
   // [[group(0), binding(0)]]
   // var a : texture_storage_1d<ru32int>;
 
-  auto st = ty.storage_texture(ast::TextureDimension::k1d,
-                               ast::ImageFormat::kR32Uint);
+  auto* st = ty.storage_texture(ast::TextureDimension::k1d,
+                                ast::ImageFormat::kR32Uint);
 
   Global("a", st, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
@@ -651,8 +651,8 @@ TEST_F(StorageTextureAccessControlTest, RWAccessControl_Fail) {
   // [[group(0), binding(0)]]
   // var a : [[access(readwrite)]] texture_storage_1d<ru32int>;
 
-  auto st = ty.storage_texture(ast::TextureDimension::k1d,
-                               ast::ImageFormat::kR32Uint);
+  auto* st = ty.storage_texture(ast::TextureDimension::k1d,
+                                ast::ImageFormat::kR32Uint);
 
   Global("a", st, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
@@ -667,8 +667,8 @@ TEST_F(StorageTextureAccessControlTest, ReadOnlyAccessControl_Pass) {
   // [[group(0), binding(0)]]
   // var a : [[access(read)]] texture_storage_1d<ru32int>;
 
-  auto st = ty.storage_texture(ast::TextureDimension::k1d,
-                               ast::ImageFormat::kR32Uint);
+  auto* st = ty.storage_texture(ast::TextureDimension::k1d,
+                                ast::ImageFormat::kR32Uint);
   auto* ac = ty.access(ast::AccessControl::kReadOnly, st);
 
   Global("a", ac, ast::StorageClass::kNone, nullptr,
@@ -684,8 +684,8 @@ TEST_F(StorageTextureAccessControlTest, WriteOnlyAccessControl_Pass) {
   // [[group(0), binding(0)]]
   // var a : [[access(write)]] texture_storage_1d<ru32int>;
 
-  auto st = ty.storage_texture(ast::TextureDimension::k1d,
-                               ast::ImageFormat::kR32Uint);
+  auto* st = ty.storage_texture(ast::TextureDimension::k1d,
+                                ast::ImageFormat::kR32Uint);
   auto* ac = ty.access(ast::AccessControl::kWriteOnly, st);
 
   Global("a", ac, ast::StorageClass::kNone, nullptr,

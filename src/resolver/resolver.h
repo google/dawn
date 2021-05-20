@@ -122,7 +122,7 @@ class Resolver {
   /// Structure holding semantic information about an expression.
   /// Used to build the sem::Expression nodes at the end of resolving.
   struct ExpressionInfo {
-    sem::Type* type;
+    sem::Type const* type;
     std::string const type_name;  // Declared type name
     sem::Statement* statement;
   };
@@ -318,11 +318,17 @@ class Resolver {
   /// @param lit the literal
   sem::Type* TypeOf(const ast::Literal* lit);
 
+  /// Creates a sem::Expression node with the pre-resolved AST type `type`, and
+  /// assigns this semantic node to the expression `expr`.
+  /// @param expr the expression
+  /// @param type the AST type
+  void SetType(ast::Expression* expr, const ast::Type* type);
+
   /// Creates a sem::Expression node with the resolved type `type`, and
   /// assigns this semantic node to the expression `expr`.
   /// @param expr the expression
   /// @param type the resolved type
-  void SetType(ast::Expression* expr, typ::Type type);
+  void SetType(ast::Expression* expr, const sem::Type* type);
 
   /// Creates a sem::Expression node with the resolved type `type`, the declared
   /// type name `type_name` and assigns this semantic node to the expression
@@ -331,7 +337,7 @@ class Resolver {
   /// @param type the resolved type
   /// @param type_name the declared type name
   void SetType(ast::Expression* expr,
-               typ::Type type,
+               const sem::Type* type,
                const std::string& type_name);
 
   /// Resolve the value of a scalar const_expr.

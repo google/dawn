@@ -108,8 +108,8 @@ Output ExternalTextureTransform::Run(const Program* in, const DataMap&) {
       if (Is<ast::ExternalTexture>(var->type())) {
         // Replace a single-plane external texture with a 2D, f32 sampled
         // texture.
-        auto newType = ctx.dst->ty.sampled_texture(ast::TextureDimension::k2d,
-                                                   ctx.dst->ty.f32());
+        auto* newType = ctx.dst->ty.sampled_texture(ast::TextureDimension::k2d,
+                                                    ctx.dst->ty.f32());
         auto clonedSrc = ctx.Clone(var->source());
         auto clonedSym = ctx.Clone(var->symbol());
         auto* clonedConstructor = ctx.Clone(var->constructor());

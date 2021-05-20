@@ -113,7 +113,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
-  auto st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
+  auto* st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   Global("t", ty.access(ast::AccessControl::kReadOnly, st),
          ast::StorageClass::kNone, nullptr,
          {create<ast::GroupDecoration>(0), create<ast::BindingDecoration>(0)});

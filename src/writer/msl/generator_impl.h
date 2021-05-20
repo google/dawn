@@ -227,7 +227,7 @@ class GeneratorImpl : public TextGenerator {
   /// Emits the zero value for the given type
   /// @param type the type to emit the value for
   /// @returns true if the zero value was successfully emitted.
-  bool EmitZeroValue(typ::Type type);
+  bool EmitZeroValue(const sem::Type* type);
 
   /// Determines if the function needs the input struct passed to it.
   /// @param func the function to check

@@ -99,9 +99,15 @@ class TestHelper : public ProgramBuilder {
   /// @param type a type
   /// @returns the name for `type` that closely resembles how it would be
   /// declared in WGSL.
-  std::string FriendlyName(typ::Type type) {
-    return type.ast ? type.ast->FriendlyName(Symbols())
-                    : type.sem->FriendlyName(Symbols());
+  std::string FriendlyName(const ast::Type* type) {
+    return type->FriendlyName(Symbols());
+  }
+
+  /// @param type a type
+  /// @returns the name for `type` that closely resembles how it would be
+  /// declared in WGSL.
+  std::string FriendlyName(const sem::Type* type) {
+    return type->FriendlyName(Symbols());
   }
 
  private:

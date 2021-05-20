@@ -222,7 +222,7 @@ class ResolverIntrinsicTest_TextureOperation
   /// @param dim dimensionality of the texture being sampled
   /// @param scalar the scalar type
   /// @returns a pointer to a type appropriate for the coord param
-  typ::Type GetCoordsType(ast::TextureDimension dim, typ::Type scalar) {
+  ast::Type* GetCoordsType(ast::TextureDimension dim, ast::Type* scalar) {
     switch (dim) {
       case ast::TextureDimension::k1d:
         return scalar;
@@ -255,7 +255,7 @@ class ResolverIntrinsicTest_TextureOperation
 
     call_params->push_back(Expr(name));
   }
-  typ::Type subtype(Texture type) {
+  ast::Type* subtype(Texture type) {
     if (type == Texture::kF32) {
       return ty.f32();
     }
@@ -273,8 +273,8 @@ TEST_P(ResolverIntrinsicTest_StorageTextureOperation, TextureLoadRo) {
   auto type = GetParam().type;
   auto format = GetParam().format;
 
-  auto coords_type = GetCoordsType(dim, ty.i32());
-  auto texture_type = ty.storage_texture(dim, format);
+  auto* coords_type = GetCoordsType(dim, ty.i32());
+  auto* texture_type = ty.storage_texture(dim, format);
   auto* ro_texture_type =
       ty.access(ast::AccessControl::kReadOnly, texture_type);
 
@@ -339,9 +339,9 @@ TEST_P(ResolverIntrinsicTest_SampledTextureOperation, TextureLoadSampled) {
   auto dim = GetParam().dim;
   auto type = GetParam().type;
 
-  auto s = subtype(type);
-  auto coords_type = GetCoordsType(dim, ty.i32());
-  auto texture_type = ty.sampled_texture(dim, s);
+  auto* s = subtype(type);
+  auto* coords_type = GetCoordsType(dim, ty.i32());
+  auto* texture_type = ty.sampled_texture(dim, s);
 
   ast::ExpressionList call_params;
 

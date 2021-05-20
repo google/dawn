@@ -25,9 +25,11 @@
 namespace tint {
 namespace ast {
 
+// Forward declarations
 class BindingDecoration;
 class GroupDecoration;
 class LocationDecoration;
+class Type;
 
 /// A Variable statement.
 ///

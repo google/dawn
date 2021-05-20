@@ -2446,7 +2446,7 @@ bool Resolver::ValidateNamedType(const ast::NamedType* named_type) const {
 sem::Type* Resolver::TypeOf(const ast::Expression* expr) {
   auto it = expr_info_.find(expr);
   if (it != expr_info_.end()) {
-    return it->second.type;
+    return const_cast<sem::Type*>(it->second.type);
   }
   return nullptr;
 }
@@ -2477,19 +2477,17 @@ sem::Type* Resolver::TypeOf(const ast::Literal* lit) {
   return nullptr;
 }
 
-void Resolver::SetType(ast::Expression* expr, typ::Type type) {
-  SetType(expr, type,
-          type.sem ? type.sem->FriendlyName(builder_->Symbols())
-                   : type.ast->FriendlyName(builder_->Symbols()));
+void Resolver::SetType(ast::Expression* expr, const ast::Type* type) {
+  SetType(expr, Type(type), type->FriendlyName(builder_->Symbols()));
+}
+
+void Resolver::SetType(ast::Expression* expr, const sem::Type* type) {
+  SetType(expr, type, type->FriendlyName(builder_->Symbols()));
 }
 
 void Resolver::SetType(ast::Expression* expr,
-                       typ::Type type,
+                       const sem::Type* type,
                        const std::string& type_name) {
-  if (!type.sem) {
-    type.sem = Type(type.ast);
-    TINT_ASSERT(type.sem);
-  }
   if (expr_info_.count(expr)) {
     TINT_ICE(diagnostics_) << "SetType() called twice for the same expression";
   }

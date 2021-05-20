@@ -22,6 +22,9 @@
 namespace tint {
 namespace ast {
 
+// Forward declaration
+class Type;
+
 /// A type specific constructor
 class TypeConstructorExpression
     : public Castable<TypeConstructorExpression, ConstructorExpression> {

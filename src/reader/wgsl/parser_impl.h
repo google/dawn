@@ -27,7 +27,6 @@
 #include "src/reader/wgsl/parser_impl_detail.h"
 #include "src/reader/wgsl/token.h"
 #include "src/sem/storage_texture_type.h"
-#include "src/typepair.h"
 
 namespace tint {
 namespace ast {

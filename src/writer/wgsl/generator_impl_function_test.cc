@@ -110,7 +110,7 @@ TEST_F(WgslGeneratorImplTest,
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
-  auto vec4 = ty.vec4<f32>();
+  auto* vec4 = ty.vec4<f32>();
   auto* coord = Param("coord", vec4, {Builtin(ast::Builtin::kPosition)});
   auto* loc1 = Param("loc1", ty.f32(), {Location(1u)});
   auto* func = Func("frag_main", ast::VariableList{coord, loc1}, ty.void_(),

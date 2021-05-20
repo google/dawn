@@ -1579,8 +1579,8 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
   uint32_t rhs_mat_rows = std::get<2>(GetParam());
   uint32_t rhs_mat_cols = std::get<3>(GetParam());
 
-  auto lhs_type = ty.mat<f32>(lhs_mat_cols, lhs_mat_rows);
-  auto rhs_type = ty.mat<f32>(rhs_mat_cols, rhs_mat_rows);
+  auto* lhs_type = ty.mat<f32>(lhs_mat_cols, lhs_mat_rows);
+  auto* rhs_type = ty.mat<f32>(rhs_mat_cols, rhs_mat_rows);
 
   auto* f32 = create<sem::F32>();
   auto* col = create<sem::Vector>(f32, lhs_mat_rows);
@@ -1650,7 +1650,7 @@ TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
 }
 
 TEST_F(ResolverTest, StorageClass_SetForSampler) {
-  auto t = ty.sampler(ast::SamplerKind::kSampler);
+  auto* t = ty.sampler(ast::SamplerKind::kSampler);
   auto* var = Global("var", t, ast::StorageClass::kNone, nullptr,
                      {
                          create<ast::BindingDecoration>(0),
@@ -1664,7 +1664,7 @@ TEST_F(ResolverTest, StorageClass_SetForSampler) {
 }
 
 TEST_F(ResolverTest, StorageClass_SetForTexture) {
-  auto t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
+  auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
   auto* ac = ty.access(ast::AccessControl::kReadOnly, t);
   auto* var = Global("var", ac, ast::StorageClass::kNone, nullptr,
                      {

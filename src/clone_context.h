@@ -26,7 +26,6 @@
 #include "src/debug.h"
 #include "src/symbol.h"
 #include "src/traits.h"
-#include "src/typepair.h"
 
 namespace tint {
 
@@ -176,14 +175,6 @@ class CloneContext {
     auto* c = a->Clone(this);
     replacements_.emplace(a, c);
     return CheckedCast<T>(c);
-  }
-
-  /// Clones the AST node of the type pair
-  /// @param tp the type pair to clone
-  /// @return the cloned AST node wrapped in a type pair
-  template <typename AST, typename SEM>
-  typ::TypePair<AST, SEM> Clone(const typ::TypePair<AST, SEM>& tp) {
-    return Clone(const_cast<ast::Type*>(tp.ast));
   }
 
   /// Clones the Source `s` into #dst

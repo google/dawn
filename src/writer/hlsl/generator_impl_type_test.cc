@@ -352,7 +352,7 @@ using HlslDepthTexturesTest = TestParamHelper<HlslDepthTextureData>;
 TEST_P(HlslDepthTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto t = ty.depth_texture(params.dim);
+  auto* t = ty.depth_texture(params.dim);
 
   Global("tex", t, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
@@ -399,7 +399,7 @@ using HlslSampledTexturesTest = TestParamHelper<HlslSampledTextureData>;
 TEST_P(HlslSampledTexturesTest, Emit) {
   auto params = GetParam();
 
-  typ::Type datatype;
+  ast::Type* datatype = nullptr;
   switch (params.datatype) {
     case TextureDataType::F32:
       datatype = ty.f32();
@@ -411,7 +411,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
       datatype = ty.i32();
       break;
   }
-  auto t = ty.sampled_texture(params.dim, datatype);
+  auto* t = ty.sampled_texture(params.dim, datatype);
 
   Global("tex", t, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
@@ -552,7 +552,7 @@ using HlslStorageTexturesTest = TestParamHelper<HlslStorageTextureData>;
 TEST_P(HlslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto t = ty.storage_texture(params.dim, params.imgfmt);
+  auto* t = ty.storage_texture(params.dim, params.imgfmt);
   auto* ac = ty.access(params.ro ? ast::AccessControl::kReadOnly
                                  : ast::AccessControl::kWriteOnly,
                        t);

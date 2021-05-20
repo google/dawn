@@ -20,6 +20,9 @@
 namespace tint {
 namespace ast {
 
+// Forward declaration
+class Type;
+
 /// A bitcast expression
 class BitcastExpression : public Castable<BitcastExpression, Expression> {
  public:

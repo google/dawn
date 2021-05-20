@@ -920,10 +920,7 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
   return true;
 }
 
-bool GeneratorImpl::EmitZeroValue(typ::Type type) {
-  if (!type.sem) {
-    type.sem = program_->Sem().Get(type.ast);
-  }
+bool GeneratorImpl::EmitZeroValue(const sem::Type* type) {
   if (type->Is<sem::Bool>()) {
     out_ << "false";
   } else if (type->Is<sem::F32>()) {

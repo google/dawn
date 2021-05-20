@@ -28,7 +28,6 @@
 #include "src/ast/location_decoration.h"
 #include "src/ast/pipeline_stage.h"
 #include "src/ast/variable.h"
-#include "src/typepair.h"
 
 namespace tint {
 namespace ast {

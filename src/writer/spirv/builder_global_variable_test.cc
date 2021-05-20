@@ -570,8 +570,8 @@ OpName %5 "c"
 TEST_F(BuilderTest, GlobalVar_TextureStorageReadOnly) {
   // var<uniform_constant> a : [[access(read)]] texture_storage_2d<r32uint>;
 
-  auto type = ty.storage_texture(ast::TextureDimension::k2d,
-                                 ast::ImageFormat::kR32Uint);
+  auto* type = ty.storage_texture(ast::TextureDimension::k2d,
+                                  ast::ImageFormat::kR32Uint);
 
   auto* ac = ty.access(ast::AccessControl::kReadOnly, type);
 
@@ -599,8 +599,8 @@ OpDecorate %1 DescriptorSet 0
 TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
   // var<uniform_constant> a : [[access(write)]] texture_storage_2d<r32uint>;
 
-  auto type = ty.storage_texture(ast::TextureDimension::k2d,
-                                 ast::ImageFormat::kR32Uint);
+  auto* type = ty.storage_texture(ast::TextureDimension::k2d,
+                                  ast::ImageFormat::kR32Uint);
 
   auto* ac = ty.access(ast::AccessControl::kWriteOnly, type);
 

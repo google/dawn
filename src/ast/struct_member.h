@@ -19,10 +19,12 @@
 #include <vector>
 
 #include "src/ast/decoration.h"
-#include "src/typepair.h"
 
 namespace tint {
 namespace ast {
+
+// Forward declaration
+class Type;
 
 /// A struct member statement.
 class StructMember : public Castable<StructMember, Node> {

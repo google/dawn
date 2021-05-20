@@ -171,7 +171,7 @@ ast::Variable* TextureOverloadCase::buildTextureVariable(
           ast::StorageClass::kNone, nullptr, decos);
 
     case ast::intrinsic::test::TextureKind::kStorage: {
-      auto st = b->ty.storage_texture(texture_dimension, image_format);
+      auto* st = b->ty.storage_texture(texture_dimension, image_format);
       auto* ac = b->ty.access(access_control, st);
       return b->Global("texture", ac, ast::StorageClass::kNone, nullptr, decos);
     }

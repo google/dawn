@@ -765,7 +765,7 @@ using MslStorageTexturesTest = TestParamHelper<MslStorageTextureData>;
 TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
-  auto s = ty.storage_texture(params.dim, ast::ImageFormat::kR32Float);
+  auto* s = ty.storage_texture(params.dim, ast::ImageFormat::kR32Float);
   auto* ac = ty.access(params.ro ? ast::AccessControl::kReadOnly
                                  : ast::AccessControl::kWriteOnly,
                        s);

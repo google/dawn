@@ -262,7 +262,6 @@ set(TINT_LIB_SRCS
   symbol.cc
   symbol.h
   traits.h
-  typepair.h
   transform/binding_remapper.cc
   transform/binding_remapper.h
   transform/bound_array_accessors.cc
