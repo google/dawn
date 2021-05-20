@@ -239,7 +239,6 @@ using Type = TypePair<ast::Type, sem::Type>;
 
 using Matrix = TypePair<ast::Matrix, sem::Matrix>;
 using Pointer = TypePair<ast::Pointer, sem::Pointer>;
-using Sampler = TypePair<ast::Sampler, sem::Sampler>;
 using Struct = TypePair<ast::Struct, sem::Struct>;
 using Vector = TypePair<ast::Vector, sem::Vector>;
 
@@ -254,6 +253,7 @@ using MultisampledTexture = Ptr<ast::MultisampledTexture>;
 using SampledTexture = Ptr<ast::SampledTexture>;
 using StorageTexture = Ptr<ast::StorageTexture>;
 using Texture = Ptr<ast::Texture>;
+using Sampler = Ptr<ast::Sampler>;
 
 // Helpers
 

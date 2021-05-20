@@ -751,16 +751,14 @@ class ProgramBuilder {
     /// @param kind the kind of sampler
     /// @returns the sampler
     typ::Sampler sampler(ast::SamplerKind kind) const {
-      return {builder->create<ast::Sampler>(kind),
-              builder->create<sem::Sampler>(kind)};
+      return {builder->create<ast::Sampler>(kind)};
     }
 
     /// @param source the Source of the node
     /// @param kind the kind of sampler
     /// @returns the sampler
     typ::Sampler sampler(const Source& source, ast::SamplerKind kind) const {
-      return {builder->create<ast::Sampler>(source, kind),
-              builder->create<sem::Sampler>(kind)};
+      return {builder->create<ast::Sampler>(source, kind)};
     }
 
     /// @param dims the dimensionality of the texture

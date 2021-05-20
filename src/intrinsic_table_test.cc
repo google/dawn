@@ -242,7 +242,7 @@ TEST_F(IntrinsicTableTest, MatchSampler) {
   auto* vec2_f32 = create<sem::Vector>(f32, 2);
   auto* vec4_f32 = create<sem::Vector>(f32, 4);
   auto* tex = create<sem::SampledTexture>(ast::TextureDimension::k2d, f32);
-  auto sampler = ty.sampler(ast::SamplerKind::kSampler);
+  auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
   auto result = table->Lookup(*this, IntrinsicType::kTextureSample,
                               {tex, sampler, vec2_f32}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);

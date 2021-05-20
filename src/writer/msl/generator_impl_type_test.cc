@@ -656,7 +656,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Void) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Sampler) {
-  auto sampler = ty.sampler(ast::SamplerKind::kSampler);
+  auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
 
   GeneratorImpl& gen = Build();
 
@@ -665,7 +665,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Sampler) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_SamplerComparison) {
-  auto sampler = ty.sampler(ast::SamplerKind::kComparisonSampler);
+  auto* sampler = create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
 
   GeneratorImpl& gen = Build();
 
