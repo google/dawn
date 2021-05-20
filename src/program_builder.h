@@ -355,30 +355,30 @@ class ProgramBuilder {
     }
 
     /// @returns a boolean type
-    typ::Bool bool_() const { return {builder->create<ast::Bool>()}; }
+    typ::Bool bool_() const { return builder->create<ast::Bool>(); }
 
     /// @param source the Source of the node
     /// @returns a boolean type
     typ::Bool bool_(const Source& source) const {
-      return {builder->create<ast::Bool>(source)};
+      return builder->create<ast::Bool>(source);
     }
 
     /// @returns a f32 type
-    typ::F32 f32() const { return {builder->create<ast::F32>()}; }
+    typ::F32 f32() const { return builder->create<ast::F32>(); }
 
     /// @param source the Source of the node
     /// @returns a f32 type
     typ::F32 f32(const Source& source) const {
-      return {builder->create<ast::F32>(source)};
+      return builder->create<ast::F32>(source);
     }
 
     /// @returns a i32 type
-    typ::I32 i32() const { return {builder->create<ast::I32>()}; }
+    typ::I32 i32() const { return builder->create<ast::I32>(); }
 
     /// @param source the Source of the node
     /// @returns a i32 type
     typ::I32 i32(const Source& source) const {
-      return {builder->create<ast::I32>(source)};
+      return builder->create<ast::I32>(source);
     }
 
     /// @returns a u32 type
@@ -391,42 +391,42 @@ class ProgramBuilder {
     }
 
     /// @returns a void type
-    typ::Void void_() const { return {builder->create<ast::Void>()}; }
+    typ::Void void_() const { return builder->create<ast::Void>(); }
 
     /// @param source the Source of the node
     /// @returns a void type
     typ::Void void_(const Source& source) const {
-      return {builder->create<ast::Void>(source)};
+      return builder->create<ast::Void>(source);
     }
 
     /// @param type vector subtype
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
-    typ::Vector vec(typ::Type type, uint32_t n) const {
+    typ::Vector vec(ast::Type* type, uint32_t n) const {
       type = MaybeCreateTypename(type);
-      return {builder->create<ast::Vector>(type, n)};
+      return builder->create<ast::Vector>(type, n);
     }
 
     /// @param source the Source of the node
     /// @param type vector subtype
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
-    typ::Vector vec(const Source& source, typ::Type type, uint32_t n) const {
+    typ::Vector vec(const Source& source, ast::Type* type, uint32_t n) const {
       type = MaybeCreateTypename(type);
-      return {builder->create<ast::Vector>(source, type, n)};
+      return builder->create<ast::Vector>(source, type, n);
     }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 2-element vector of `type`.
-    typ::Vector vec2(typ::Type type) const { return vec(type, 2u); }
+    typ::Vector vec2(ast::Type* type) const { return vec(type, 2u); }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 3-element vector of `type`.
-    typ::Vector vec3(typ::Type type) const { return vec(type, 3u); }
+    typ::Vector vec3(ast::Type* type) const { return vec(type, 3u); }
 
     /// @param type vector subtype
     /// @return the tint AST type for a 4-element vector of `type`.
-    typ::Vector vec4(typ::Type type) const { return vec(type, 4u); }
+    typ::Vector vec4(ast::Type* type) const { return vec(type, 4u); }
 
     /// @param n vector width in elements
     /// @return the tint AST type for a `n`-element vector of `type`.
@@ -457,9 +457,9 @@ class ProgramBuilder {
     /// @param columns number of columns for the matrix
     /// @param rows number of rows for the matrix
     /// @return the tint AST type for a matrix of `type`
-    typ::Matrix mat(typ::Type type, uint32_t columns, uint32_t rows) const {
+    typ::Matrix mat(ast::Type* type, uint32_t columns, uint32_t rows) const {
       type = MaybeCreateTypename(type);
-      return {builder->create<ast::Matrix>(type, rows, columns)};
+      return builder->create<ast::Matrix>(type, rows, columns);
     }
 
     /// @param source the Source of the node
@@ -471,44 +471,44 @@ class ProgramBuilder {
                     typ::Type type,
                     uint32_t columns,
                     uint32_t rows) const {
-      return {builder->create<ast::Matrix>(source, type, rows, columns)};
+      return builder->create<ast::Matrix>(source, type, rows, columns);
     }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x3 matrix of `type`.
-    typ::Matrix mat2x2(typ::Type type) const { return mat(type, 2u, 2u); }
+    typ::Matrix mat2x2(ast::Type* type) const { return mat(type, 2u, 2u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x3 matrix of `type`.
-    typ::Matrix mat2x3(typ::Type type) const { return mat(type, 2u, 3u); }
+    typ::Matrix mat2x3(ast::Type* type) const { return mat(type, 2u, 3u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 2x4 matrix of `type`.
-    typ::Matrix mat2x4(typ::Type type) const { return mat(type, 2u, 4u); }
+    typ::Matrix mat2x4(ast::Type* type) const { return mat(type, 2u, 4u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x2 matrix of `type`.
-    typ::Matrix mat3x2(typ::Type type) const { return mat(type, 3u, 2u); }
+    typ::Matrix mat3x2(ast::Type* type) const { return mat(type, 3u, 2u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x3 matrix of `type`.
-    typ::Matrix mat3x3(typ::Type type) const { return mat(type, 3u, 3u); }
+    typ::Matrix mat3x3(ast::Type* type) const { return mat(type, 3u, 3u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 3x4 matrix of `type`.
-    typ::Matrix mat3x4(typ::Type type) const { return mat(type, 3u, 4u); }
+    typ::Matrix mat3x4(ast::Type* type) const { return mat(type, 3u, 4u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x2 matrix of `type`.
-    typ::Matrix mat4x2(typ::Type type) const { return mat(type, 4u, 2u); }
+    typ::Matrix mat4x2(ast::Type* type) const { return mat(type, 4u, 2u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x3 matrix of `type`.
-    typ::Matrix mat4x3(typ::Type type) const { return mat(type, 4u, 3u); }
+    typ::Matrix mat4x3(ast::Type* type) const { return mat(type, 4u, 3u); }
 
     /// @param type matrix subtype
     /// @return the tint AST type for a 4x4 matrix of `type`.
-    typ::Matrix mat4x4(typ::Type type) const { return mat(type, 4u, 4u); }
+    typ::Matrix mat4x4(ast::Type* type) const { return mat(type, 4u, 4u); }
 
     /// @param columns number of columns for the matrix
     /// @param rows number of rows for the matrix
@@ -576,7 +576,7 @@ class ProgramBuilder {
     /// @param n the array size. 0 represents a runtime-array
     /// @param decos the optional decorations for the array
     /// @return the tint AST type for a array of size `n` of type `T`
-    ast::Array* array(typ::Type subtype,
+    ast::Array* array(ast::Type* subtype,
                       uint32_t n = 0,
                       ast::DecorationList decos = {}) const {
       subtype = MaybeCreateTypename(subtype);
@@ -589,7 +589,7 @@ class ProgramBuilder {
     /// @param decos the optional decorations for the array
     /// @return the tint AST type for a array of size `n` of type `T`
     ast::Array* array(const Source& source,
-                      typ::Type subtype,
+                      ast::Type* subtype,
                       uint32_t n = 0,
                       ast::DecorationList decos = {}) const {
       subtype = MaybeCreateTypename(subtype);
@@ -600,7 +600,7 @@ class ProgramBuilder {
     /// @param n the array size. 0 represents a runtime-array
     /// @param stride the array stride. 0 represents implicit stride
     /// @return the tint AST type for a array of size `n` of type `T`
-    ast::Array* array(typ::Type subtype, uint32_t n, uint32_t stride) const {
+    ast::Array* array(ast::Type* subtype, uint32_t n, uint32_t stride) const {
       subtype = MaybeCreateTypename(subtype);
       ast::DecorationList decos;
       if (stride) {
@@ -615,7 +615,7 @@ class ProgramBuilder {
     /// @param stride the array stride. 0 represents implicit stride
     /// @return the tint AST type for a array of size `n` of type `T`
     ast::Array* array(const Source& source,
-                      typ::Type subtype,
+                      ast::Type* subtype,
                       uint32_t n,
                       uint32_t stride) const {
       subtype = MaybeCreateTypename(subtype);
@@ -687,7 +687,7 @@ class ProgramBuilder {
     /// @returns the access control qualifier type
     ast::AccessControl* access(ast::AccessControl::Access access,
                                const ast::Type* type) const {
-      type = MaybeCreateTypename(type).ast;
+      type = MaybeCreateTypename(type);
       return type ? builder->create<ast::AccessControl>(access, type) : nullptr;
     }
 
@@ -699,7 +699,7 @@ class ProgramBuilder {
     ast::AccessControl* access(const Source& source,
                                ast::AccessControl::Access access,
                                const ast::Type* type) const {
-      type = MaybeCreateTypename(type).ast;
+      type = MaybeCreateTypename(type);
       return type ? builder->create<ast::AccessControl>(source, access, type)
                   : nullptr;
     }
@@ -707,10 +707,10 @@ class ProgramBuilder {
     /// @param type the type of the pointer
     /// @param storage_class the storage class of the pointer
     /// @return the pointer to `type` with the given ast::StorageClass
-    typ::Pointer pointer(typ::Type type,
+    typ::Pointer pointer(ast::Type* type,
                          ast::StorageClass storage_class) const {
       type = MaybeCreateTypename(type);
-      return {builder->create<ast::Pointer>(type, storage_class)};
+      return builder->create<ast::Pointer>(type, storage_class);
     }
 
     /// @param source the Source of the node
@@ -721,7 +721,7 @@ class ProgramBuilder {
                          typ::Type type,
                          ast::StorageClass storage_class) const {
       type = MaybeCreateTypename(type);
-      return {builder->create<ast::Pointer>(source, type, storage_class)};
+      return builder->create<ast::Pointer>(source, type, storage_class);
     }
 
     /// @param storage_class the storage class of the pointer
@@ -734,20 +734,20 @@ class ProgramBuilder {
     /// @param kind the kind of sampler
     /// @returns the sampler
     typ::Sampler sampler(ast::SamplerKind kind) const {
-      return {builder->create<ast::Sampler>(kind)};
+      return builder->create<ast::Sampler>(kind);
     }
 
     /// @param source the Source of the node
     /// @param kind the kind of sampler
     /// @returns the sampler
     typ::Sampler sampler(const Source& source, ast::SamplerKind kind) const {
-      return {builder->create<ast::Sampler>(source, kind)};
+      return builder->create<ast::Sampler>(source, kind);
     }
 
     /// @param dims the dimensionality of the texture
     /// @returns the depth texture
     typ::DepthTexture depth_texture(ast::TextureDimension dims) const {
-      return {builder->create<ast::DepthTexture>(dims)};
+      return builder->create<ast::DepthTexture>(dims);
     }
 
     /// @param source the Source of the node
@@ -755,15 +755,15 @@ class ProgramBuilder {
     /// @returns the depth texture
     typ::DepthTexture depth_texture(const Source& source,
                                     ast::TextureDimension dims) const {
-      return {builder->create<ast::DepthTexture>(source, dims)};
+      return builder->create<ast::DepthTexture>(source, dims);
     }
 
     /// @param dims the dimensionality of the texture
     /// @param subtype the texture subtype.
     /// @returns the sampled texture
     typ::SampledTexture sampled_texture(ast::TextureDimension dims,
-                                        typ::Type subtype) const {
-      return {builder->create<ast::SampledTexture>(dims, subtype)};
+                                        ast::Type* subtype) const {
+      return builder->create<ast::SampledTexture>(dims, subtype);
     }
 
     /// @param source the Source of the node
@@ -772,16 +772,16 @@ class ProgramBuilder {
     /// @returns the sampled texture
     typ::SampledTexture sampled_texture(const Source& source,
                                         ast::TextureDimension dims,
-                                        typ::Type subtype) const {
-      return {builder->create<ast::SampledTexture>(source, dims, subtype)};
+                                        ast::Type* subtype) const {
+      return builder->create<ast::SampledTexture>(source, dims, subtype);
     }
 
     /// @param dims the dimensionality of the texture
     /// @param subtype the texture subtype.
     /// @returns the multisampled texture
     typ::MultisampledTexture multisampled_texture(ast::TextureDimension dims,
-                                                  typ::Type subtype) const {
-      return {builder->create<ast::MultisampledTexture>(dims, subtype)};
+                                                  ast::Type* subtype) const {
+      return builder->create<ast::MultisampledTexture>(dims, subtype);
     }
 
     /// @param source the Source of the node
@@ -790,8 +790,8 @@ class ProgramBuilder {
     /// @returns the multisampled texture
     typ::MultisampledTexture multisampled_texture(const Source& source,
                                                   ast::TextureDimension dims,
-                                                  typ::Type subtype) const {
-      return {builder->create<ast::MultisampledTexture>(source, dims, subtype)};
+                                                  ast::Type* subtype) const {
+      return builder->create<ast::MultisampledTexture>(source, dims, subtype);
     }
 
     /// @param dims the dimensionality of the texture
@@ -800,7 +800,7 @@ class ProgramBuilder {
     typ::StorageTexture storage_texture(ast::TextureDimension dims,
                                         ast::ImageFormat format) const {
       auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
-      return {builder->create<ast::StorageTexture>(dims, format, subtype)};
+      return builder->create<ast::StorageTexture>(dims, format, subtype);
     }
 
     /// @param source the Source of the node
@@ -811,26 +811,33 @@ class ProgramBuilder {
                                         ast::TextureDimension dims,
                                         ast::ImageFormat format) const {
       auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
-      return {
-          builder->create<ast::StorageTexture>(source, dims, format, subtype)};
+      return builder->create<ast::StorageTexture>(source, dims, format,
+                                                  subtype);
     }
 
     /// @returns the external texture
     typ::ExternalTexture external_texture() const {
-      return {builder->create<ast::ExternalTexture>()};
+      return builder->create<ast::ExternalTexture>();
     }
 
     /// @param source the Source of the node
     /// @returns the external texture
     typ::ExternalTexture external_texture(const Source& source) const {
-      return {builder->create<ast::ExternalTexture>(source)};
+      return builder->create<ast::ExternalTexture>(source);
     }
+
+    /// [DEPRECATED]: TODO(crbug.com/tint/745): Migrate to const AST pointers.
+    /// If ty is a ast::Struct or ast::Alias, the returned type is an
+    /// ast::TypeName of the given type's name, otherwise  type is returned.
+    /// @param type the type
+    /// @return either type or a pointer to a new ast::TypeName
+    ast::Type* MaybeCreateTypename(ast::Type* type) const;
 
     /// If ty is a ast::Struct or ast::Alias, the returned type is an
     /// ast::TypeName of the given type's name, otherwise  type is returned.
     /// @param type the type
     /// @return either type or a pointer to a new ast::TypeName
-    typ::Type MaybeCreateTypename(typ::Type type) const;
+    const ast::Type* MaybeCreateTypename(const ast::Type* type) const;
 
     /// The ProgramBuilder
     ProgramBuilder* const builder;

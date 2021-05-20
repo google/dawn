@@ -153,10 +153,18 @@ ast::ConstructorExpression* ProgramBuilder::ConstructValueFilledWith(
   return nullptr;
 }
 
-typ::Type ProgramBuilder::TypesBuilder::MaybeCreateTypename(
-    typ::Type type) const {
-  if (auto* nt = As<ast::NamedType>(type.ast)) {
-    return {type_name(nt->name()), type.sem};
+ast::Type* ProgramBuilder::TypesBuilder::MaybeCreateTypename(
+    ast::Type* type) const {
+  if (auto* nt = As<ast::NamedType>(type)) {
+    return type_name(nt->name());
+  }
+  return type;
+}
+
+const ast::Type* ProgramBuilder::TypesBuilder::MaybeCreateTypename(
+    const ast::Type* type) const {
+  if (auto* nt = As<ast::NamedType>(type)) {
+    return type_name(nt->name());
   }
   return type;
 }
