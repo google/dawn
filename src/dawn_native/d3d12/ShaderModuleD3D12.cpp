@@ -82,11 +82,11 @@ namespace dawn_native { namespace d3d12 {
             if (enable16BitTypes) {
                 // enable-16bit-types are only allowed in -HV 2018 (default)
                 arguments.push_back(L"/enable-16bit-types");
-            } else {
-                // Enable FXC backward compatibility by setting the language version to 2016
-                arguments.push_back(L"-HV");
-                arguments.push_back(L"2016");
             }
+
+            arguments.push_back(L"-HV");
+            arguments.push_back(L"2018");
+
             return arguments;
         }
 
