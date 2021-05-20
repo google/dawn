@@ -647,7 +647,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Vector) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Void) {
-  auto void_ = ty.void_();
+  auto* void_ = create<sem::Void>();
 
   GeneratorImpl& gen = Build();
 

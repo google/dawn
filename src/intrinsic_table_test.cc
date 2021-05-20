@@ -373,7 +373,7 @@ TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureStore);
-  EXPECT_THAT(result.intrinsic->ReturnType(), ty.void_());
+  EXPECT_TRUE(result.intrinsic->ReturnType()->Is<sem::Void>());
   EXPECT_THAT(result.intrinsic->Parameters(),
               ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
                           Parameter{vec2_i32, Parameter::Usage::kCoords},

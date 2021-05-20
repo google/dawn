@@ -2948,7 +2948,7 @@ bool Resolver::ValidateReturn(const ast::ReturnStatement* ret) {
   auto* func_type = current_function_->return_type;
 
   auto* ret_type = ret->has_value() ? TypeOf(ret->value())->UnwrapRef()
-                                    : builder_->ty.void_();
+                                    : builder_->create<sem::Void>();
 
   if (func_type->UnwrapRef() != ret_type) {
     diagnostics_.add_error("v-000y",

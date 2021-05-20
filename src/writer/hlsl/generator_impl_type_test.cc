@@ -308,7 +308,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Vector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
-  auto void_ = ty.void_();
+  auto* void_ = create<sem::Void>();
 
   GeneratorImpl& gen = Build();
 
@@ -319,22 +319,22 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Void) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitSampler) {
-  sem::Sampler sampler(ast::SamplerKind::kSampler);
+  auto* sampler = create<sem::Sampler>(ast::SamplerKind::kSampler);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, &sampler, ast::StorageClass::kNone,
+  ASSERT_TRUE(gen.EmitType(out, sampler, ast::StorageClass::kNone,
                            ast::AccessControl::kInvalid, ""))
       << gen.error();
   EXPECT_EQ(result(), "SamplerState");
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitSamplerComparison) {
-  sem::Sampler sampler(ast::SamplerKind::kComparisonSampler);
+  auto* sampler = create<sem::Sampler>(ast::SamplerKind::kComparisonSampler);
 
   GeneratorImpl& gen = Build();
 
-  ASSERT_TRUE(gen.EmitType(out, &sampler, ast::StorageClass::kNone,
+  ASSERT_TRUE(gen.EmitType(out, sampler, ast::StorageClass::kNone,
                            ast::AccessControl::kInvalid, ""))
       << gen.error();
   EXPECT_EQ(result(), "SamplerComparisonState");

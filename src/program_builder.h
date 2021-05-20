@@ -391,14 +391,12 @@ class ProgramBuilder {
     }
 
     /// @returns a void type
-    typ::Void void_() const {
-      return {builder->create<ast::Void>(), builder->create<sem::Void>()};
-    }
+    typ::Void void_() const { return {builder->create<ast::Void>()}; }
 
     /// @param source the Source of the node
     /// @returns a void type
     typ::Void void_(const Source& source) const {
-      return {builder->create<ast::Void>(source), builder->create<sem::Void>()};
+      return {builder->create<ast::Void>(source)};
     }
 
     /// @param type vector subtype

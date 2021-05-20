@@ -24,7 +24,7 @@ namespace {
 using ResolverIsHostShareable = ResolverTest;
 
 TEST_F(ResolverIsHostShareable, Void) {
-  EXPECT_FALSE(r()->IsHostShareable(ty.void_()));
+  EXPECT_FALSE(r()->IsHostShareable(create<sem::Void>()));
 }
 
 TEST_F(ResolverIsHostShareable, Bool) {

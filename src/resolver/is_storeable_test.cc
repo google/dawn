@@ -24,7 +24,7 @@ namespace {
 using ResolverIsStorableTest = ResolverTest;
 
 TEST_F(ResolverIsStorableTest, Void) {
-  EXPECT_FALSE(r()->IsStorable(ty.void_()));
+  EXPECT_FALSE(r()->IsStorable(create<sem::Void>()));
 }
 
 TEST_F(ResolverIsStorableTest, Scalar) {

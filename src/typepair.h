@@ -250,12 +250,12 @@ using StorageTexture = TypePair<ast::StorageTexture, sem::StorageTexture>;
 using Struct = TypePair<ast::Struct, sem::Struct>;
 using Texture = TypePair<ast::Texture, sem::Texture>;
 using Vector = TypePair<ast::Vector, sem::Vector>;
-using Void = TypePair<ast::Void, sem::Void>;
 
 using Bool = Ptr<ast::Bool>;
 using U32 = Ptr<ast::U32>;
 using I32 = Ptr<ast::I32>;
 using F32 = Ptr<ast::F32>;
+using Void = Ptr<ast::Void>;
 
 // Helpers
 

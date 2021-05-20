@@ -1964,7 +1964,7 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
   } else if (std::string(param.function) == "textureNumSamples") {
     EXPECT_TRUE(TypeOf(call)->Is<sem::I32>());
   } else if (std::string(param.function) == "textureStore") {
-    EXPECT_EQ(TypeOf(call), ty.void_());
+    EXPECT_TRUE(TypeOf(call)->Is<sem::Void>());
   } else {
     switch (param.texture_kind) {
       case ast::intrinsic::test::TextureKind::kRegular:
