@@ -112,7 +112,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("float3(0.0f)"));
+  EXPECT_THAT(gen.result(), HasSubstr("float3()"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
@@ -137,7 +137,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Empty) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("float4x4(0.0f)"));
+  EXPECT_THAT(gen.result(), HasSubstr("float4x4()"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
@@ -155,10 +155,10 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
   auto* str = Structure("S", {
-                                Member("a", ty.i32()),
-                                Member("b", ty.f32()),
-                                Member("c", ty.vec3<i32>()),
-                            });
+                                 Member("a", ty.i32()),
+                                 Member("b", ty.f32()),
+                                 Member("c", ty.vec3<i32>()),
+                             });
 
   WrapInFunction(Construct(str, 1, 2.0f, vec3<i32>(3, 4, 5)));
 
@@ -166,6 +166,18 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
   EXPECT_THAT(gen.result(), HasSubstr("{1, 2.0f, int3(3, 4, 5)}"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct_Empty) {
+  auto* str = Structure("S", {});
+
+  WrapInFunction(Construct(str));
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(), HasSubstr("{}"));
+  EXPECT_THAT(gen.result(), Not(HasSubstr("{{}}")));
 }
 
 }  // namespace

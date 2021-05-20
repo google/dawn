@@ -892,23 +892,15 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     out_ << "(";
   }
 
-  // If the type constructor is empty then we need to construct with the zero
-  // value for all components.
-  if (expr->values().empty()) {
-    if (!EmitZeroValue(type)) {
-      return false;
+  bool first = true;
+  for (auto* e : expr->values()) {
+    if (!first) {
+      out_ << ", ";
     }
-  } else {
-    bool first = true;
-    for (auto* e : expr->values()) {
-      if (!first) {
-        out_ << ", ";
-      }
-      first = false;
+    first = false;
 
-      if (!EmitExpression(e)) {
-        return false;
-      }
+    if (!EmitExpression(e)) {
+      return false;
     }
   }
 

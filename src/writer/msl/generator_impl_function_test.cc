@@ -214,7 +214,7 @@ struct tint_symbol_3 {
 };
 
 vertex tint_symbol vert_main() {
-  Interface const tint_symbol_1 = {0.5f, 0.25f, float4(0.0f)};
+  Interface const tint_symbol_1 = {0.5f, 0.25f, float4()};
   return {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
 }
 

@@ -48,7 +48,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), "  float const a = float(0.0f);\n");
+  EXPECT_EQ(gen.result(), "  float const a = float();\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
@@ -150,7 +150,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-  EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);
+  EXPECT_EQ(gen.result(), R"(float3 a = float3();
 )");
 }
 
