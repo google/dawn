@@ -710,10 +710,7 @@ class ProgramBuilder {
     typ::Pointer pointer(typ::Type type,
                          ast::StorageClass storage_class) const {
       type = MaybeCreateTypename(type);
-      return {type.ast ? builder->create<ast::Pointer>(type, storage_class)
-                       : nullptr,
-              type.sem ? builder->create<sem::Pointer>(type, storage_class)
-                       : nullptr};
+      return {builder->create<ast::Pointer>(type, storage_class)};
     }
 
     /// @param source the Source of the node
@@ -724,11 +721,7 @@ class ProgramBuilder {
                          typ::Type type,
                          ast::StorageClass storage_class) const {
       type = MaybeCreateTypename(type);
-      return {type.ast
-                  ? builder->create<ast::Pointer>(source, type, storage_class)
-                  : nullptr,
-              type.sem ? builder->create<sem::Pointer>(type, storage_class)
-                       : nullptr};
+      return {builder->create<ast::Pointer>(source, type, storage_class)};
     }
 
     /// @param storage_class the storage class of the pointer

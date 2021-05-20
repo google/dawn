@@ -62,7 +62,7 @@ class InspectorHelper : public ProgramBuilder {
   /// Generates a struct that contains user-defined IO members
   /// @param name the name of the generated struct
   /// @param inout_vars tuples of {name, loc} that will be the struct members
-  typ::Struct MakeInOutStruct(
+  ast::Struct* MakeInOutStruct(
       std::string name,
       std::vector<std::tuple<std::string, uint32_t>> inout_vars) {
     ast::StructMemberList members;
@@ -1005,7 +1005,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, InOutStruct) {
-  auto interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
+  auto* interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
   Func("foo", {Param("param", interface)}, interface, {Return("param")},
        {Stage(ast::PipelineStage::kFragment)});
   Inspector& inspector = Build();
@@ -1037,7 +1037,7 @@ TEST_F(InspectorGetEntryPointTest, InOutStruct) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutSharedStruct) {
-  auto interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
+  auto* interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
   Func("foo", {}, interface, {Return(Construct(interface))},
        {Stage(ast::PipelineStage::kFragment)});
   Func("bar", {Param("param", interface)}, ty.void_(), {},
@@ -1075,8 +1075,8 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutSharedStruct) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
-  auto struct_a = MakeInOutStruct("struct_a", {{"a", 0u}, {"b", 1u}});
-  auto struct_b = MakeInOutStruct("struct_b", {{"a", 2u}});
+  auto* struct_a = MakeInOutStruct("struct_a", {{"a", 0u}, {"b", 1u}});
+  auto* struct_b = MakeInOutStruct("struct_b", {{"a", 2u}});
   Func("foo",
        {Param("param_a", struct_a), Param("param_b", struct_b),
         Param("param_c", ty.f32(), {Location(3u)}),
@@ -1659,7 +1659,7 @@ TEST_F(InspectorGetResourceBindingsTest, Empty) {
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Simple) {
-  typ::Struct ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32()});
+  ast::Struct* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32()});
   AddUniformBuffer("ub_var", ub_struct_type, 0, 0);
   MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
 
@@ -1766,7 +1766,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
-  typ::Struct foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  ast::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
@@ -1784,7 +1784,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
-  typ::Struct foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+  ast::Struct* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
   MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
@@ -1809,7 +1809,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
-  typ::Struct foo_struct_type =
+  ast::Struct* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.i32(), ty.u32(), ty.f32()});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
@@ -1836,7 +1836,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
-  typ::Struct foo_struct_type =
+  ast::Struct* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.vec3<f32>()});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 
@@ -1863,7 +1863,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
-  typ::Struct ub_struct_type =
+  ast::Struct* ub_struct_type =
       MakeUniformBufferType("ub_type", {ty.i32(), ty.u32(), ty.f32()});
   AddUniformBuffer("ub_foo", ub_struct_type, 0, 0);
   AddUniformBuffer("ub_bar", ub_struct_type, 0, 1);
@@ -1921,7 +1921,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
   // TODO(bclayton) - This is not a legal structure layout for uniform buffer
   // usage. Once crbug.com/tint/628 is implemented, this will fail validation
   // and will need to be fixed.
-  typ::Struct foo_struct_type =
+  ast::Struct* foo_struct_type =
       MakeUniformBufferType("foo_type", {ty.i32(), ty.array<u32, 4>()});
   AddUniformBuffer("foo_ub", foo_struct_type, 0, 0);
 

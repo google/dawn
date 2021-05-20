@@ -237,8 +237,6 @@ bool operator!=(std::nullptr_t, const TypePair<AST, SEM>& rhs) {
 
 using Type = TypePair<ast::Type, sem::Type>;
 
-using Pointer = TypePair<ast::Pointer, sem::Pointer>;
-using Struct = TypePair<ast::Struct, sem::Struct>;
 
 using Bool = Ptr<ast::Bool>;
 using U32 = Ptr<ast::U32>;
@@ -254,6 +252,8 @@ using Texture = Ptr<ast::Texture>;
 using Sampler = Ptr<ast::Sampler>;
 using Matrix = Ptr<ast::Matrix>;
 using Vector = Ptr<ast::Vector>;
+using Pointer = Ptr<ast::Pointer>;
+using Struct = Ptr<ast::Struct>;
 
 // Helpers
 
