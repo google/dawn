@@ -404,8 +404,7 @@ class ProgramBuilder {
     /// @return the tint AST type for a `n`-element vector of `type`.
     typ::Vector vec(typ::Type type, uint32_t n) const {
       type = MaybeCreateTypename(type);
-      return {type.ast ? builder->create<ast::Vector>(type, n) : nullptr,
-              type.sem ? builder->create<sem::Vector>(type, n) : nullptr};
+      return {builder->create<ast::Vector>(type, n)};
     }
 
     /// @param source the Source of the node
@@ -414,9 +413,7 @@ class ProgramBuilder {
     /// @return the tint AST type for a `n`-element vector of `type`.
     typ::Vector vec(const Source& source, typ::Type type, uint32_t n) const {
       type = MaybeCreateTypename(type);
-      return {
-          type.ast ? builder->create<ast::Vector>(source, type, n) : nullptr,
-          type.sem ? builder->create<sem::Vector>(type, n) : nullptr};
+      return {builder->create<ast::Vector>(source, type, n)};
     }
 
     /// @param type vector subtype
@@ -462,10 +459,7 @@ class ProgramBuilder {
     /// @return the tint AST type for a matrix of `type`
     typ::Matrix mat(typ::Type type, uint32_t columns, uint32_t rows) const {
       type = MaybeCreateTypename(type);
-      return {type.ast ? builder->create<ast::Matrix>(type, rows, columns)
-                       : nullptr,
-              type.sem ? builder->create<sem::Matrix>(vec(type, rows), columns)
-                       : nullptr};
+      return {builder->create<ast::Matrix>(type, rows, columns)};
     }
 
     /// @param source the Source of the node
@@ -477,11 +471,7 @@ class ProgramBuilder {
                     typ::Type type,
                     uint32_t columns,
                     uint32_t rows) const {
-      return {type.ast
-                  ? builder->create<ast::Matrix>(source, type, rows, columns)
-                  : nullptr,
-              type.sem ? builder->create<sem::Matrix>(vec(type, rows), columns)
-                       : nullptr};
+      return {builder->create<ast::Matrix>(source, type, rows, columns)};
     }
 
     /// @param type matrix subtype
