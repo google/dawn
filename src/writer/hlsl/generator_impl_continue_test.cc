@@ -22,15 +22,18 @@ namespace {
 using HlslGeneratorImplTest_Continue = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Continue, Emit_Continue) {
-  auto* c = create<ast::ContinueStatement>();
-  WrapInFunction(Loop(Block(c)));
+  auto* loop = Loop(Block(create<ast::ContinueStatement>()));
+  WrapInFunction(loop);
 
   GeneratorImpl& gen = Build();
 
   gen.increment_indent();
 
-  ASSERT_TRUE(gen.EmitStatement(out, c)) << gen.error();
-  EXPECT_EQ(result(), "  continue;\n");
+  ASSERT_TRUE(gen.EmitStatement(out, loop)) << gen.error();
+  EXPECT_EQ(result(), R"(  while (true) {
+    continue;
+  }
+)");
 }
 
 }  // namespace

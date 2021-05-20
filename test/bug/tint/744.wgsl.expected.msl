@@ -1,0 +1,47 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Uniforms {
+  /* 0x0000 */ packed_uint2 aShape;
+  /* 0x0008 */ packed_uint2 bShape;
+  /* 0x0010 */ packed_uint2 outShape;
+};
+struct Matrix {
+  /* 0x0000 */ uint numbers[1];
+};
+struct tint_symbol_2 {
+  uint3 global_id [[thread_position_in_grid]];
+};
+
+kernel void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]], constant Uniforms& uniforms [[buffer(3)]], const device Matrix& firstMatrix [[buffer(0)]], const device Matrix& secondMatrix [[buffer(1)]], device Matrix& resultMatrix [[buffer(2)]]) {
+  uint3 const global_id = tint_symbol_1.global_id;
+  uint2 const resultCell = uint2(global_id.y, global_id.x);
+  uint const dimInner = uniforms.aShape.y;
+  uint const dimOutter = uniforms.outShape.y;
+  uint result = 0u;
+  {
+    uint i = 0u;
+    {
+      bool tint_msl_is_first_1 = true;
+      uint const a;
+      uint const b;
+      for(;;) {
+        if (!tint_msl_is_first_1) {
+          i = (i + 1u);
+        }
+        tint_msl_is_first_1 = false;
+
+        if (!((i < dimInner))) {
+          break;
+        }
+        a = (i + (resultCell.x * dimInner));
+        b = (resultCell.y + (i * dimOutter));
+        result = (result + (firstMatrix.numbers[a] * secondMatrix.numbers[b]));
+      }
+    }
+  }
+  uint const index = (resultCell.y + (resultCell.x * dimOutter));
+  resultMatrix.numbers[index] = result;
+  return;
+}
+

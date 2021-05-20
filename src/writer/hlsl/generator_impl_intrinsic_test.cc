@@ -268,7 +268,7 @@ TEST_F(HlslGeneratorImplTest_Intrinsic, Intrinsic_Call) {
 
   gen.increment_indent();
   ASSERT_TRUE(gen.EmitExpression(pre, out, call)) << gen.error();
-  EXPECT_EQ(result(), "  dot(param1, param2)");
+  EXPECT_EQ(result(), "dot(param1, param2)");
 }
 
 TEST_F(HlslGeneratorImplTest_Intrinsic, Pack4x8Snorm) {

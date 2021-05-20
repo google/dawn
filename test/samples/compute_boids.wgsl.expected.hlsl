@@ -31,8 +31,8 @@ tint_symbol_2 vert_main(tint_symbol_1 tint_symbol) {
   const float2 a_particlePos = tint_symbol.a_particlePos;
   const float2 a_particleVel = tint_symbol.a_particleVel;
   const float2 a_pos = tint_symbol.a_pos;
-  float angle = -(  atan2(a_particleVel.x, a_particleVel.y));
-  float2 pos = float2(((a_pos.x *   cos(angle)) - (a_pos.y *   sin(angle))), ((a_pos.x *   sin(angle)) + (a_pos.y *   cos(angle))));
+  float angle = -(atan2(a_particleVel.x, a_particleVel.y));
+  float2 pos = float2(((a_pos.x * cos(angle)) - (a_pos.y * sin(angle))), ((a_pos.x * sin(angle)) + (a_pos.y * cos(angle))));
   const tint_symbol_2 tint_symbol_8 = {float4((pos + a_particlePos), 0.0f, 1.0f)};
   return tint_symbol_8;
 }
@@ -60,33 +60,31 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
   float2 vel = float2(0.0f, 0.0f);
   {
     uint i = 0u;
-    {
-      bool tint_hlsl_is_first_1 = true;
-      for(;;) {
-        if (!tint_hlsl_is_first_1) {
+    while (true) {
+      if (!((i < 5u))) {
+        break;
+      }
+      if ((i == index)) {
+        {
           i = (i + 1u);
         }
-        tint_hlsl_is_first_1 = false;
-
-        if (!((i < 5u))) {
-          break;
-        }
-        if ((i == index)) {
-          continue;
-        }
-        pos = asfloat(particlesA.Load2((16u * i))).xy;
-        vel = asfloat(particlesA.Load2(((16u * i) + 8u))).xy;
-        if ((        distance(pos, vPos) < params.rule1Distance)) {
-          cMass = (cMass + pos);
-          cMassCount = (cMassCount + 1);
-        }
-        if ((        distance(pos, vPos) < params.rule2Distance)) {
-          colVel = (colVel - (pos - vPos));
-        }
-        if ((        distance(pos, vPos) < params.rule3Distance)) {
-          cVel = (cVel + vel);
-          cVelCount = (cVelCount + 1);
-        }
+        continue;
+      }
+      pos = asfloat(particlesA.Load2((16u * i))).xy;
+      vel = asfloat(particlesA.Load2(((16u * i) + 8u))).xy;
+      if ((distance(pos, vPos) < params.rule1Distance)) {
+        cMass = (cMass + pos);
+        cMassCount = (cMassCount + 1);
+      }
+      if ((distance(pos, vPos) < params.rule2Distance)) {
+        colVel = (colVel - (pos - vPos));
+      }
+      if ((distance(pos, vPos) < params.rule3Distance)) {
+        cVel = (cVel + vel);
+        cVelCount = (cVelCount + 1);
+      }
+      {
+        i = (i + 1u);
       }
     }
   }
@@ -97,7 +95,7 @@ void comp_main(tint_symbol_5 tint_symbol_4) {
     cVel = (cVel / float2(float(cVelCount), float(cVelCount)));
   }
   vVel = (((vVel + (cMass * params.rule1Scale)) + (colVel * params.rule2Scale)) + (cVel * params.rule3Scale));
-  vVel = (  normalize(vVel) *   clamp(  length(vVel), 0.0f, 0.100000001f));
+  vVel = (normalize(vVel) * clamp(length(vVel), 0.0f, 0.100000001f));
   vPos = (vPos + (vVel * params.deltaT));
   if ((vPos.x < -1.0f)) {
     vPos.x = 1.0f;

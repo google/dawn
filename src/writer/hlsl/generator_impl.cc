@@ -34,6 +34,7 @@
 #include "src/sem/variable.h"
 #include "src/transform/calculate_array_length.h"
 #include "src/transform/decompose_storage_access.h"
+#include "src/utils/scoped_assignment.h"
 #include "src/writer/append_vector.h"
 #include "src/writer/float_to_string.h"
 
@@ -422,20 +423,14 @@ bool GeneratorImpl::EmitBinary(std::ostream& pre,
 
 bool GeneratorImpl::EmitBlock(std::ostream& out,
                               const ast::BlockStatement* stmt) {
-  out << "{" << std::endl;
-  increment_indent();
-
-  for (auto* s : *stmt) {
-    if (!EmitStatement(out, s)) {
-      return false;
+  return EmitBlockBraces(out, [&] {
+    for (auto* s : *stmt) {
+      if (!EmitStatement(out, s)) {
+        return false;
+      }
     }
-  }
-
-  decrement_indent();
-  make_indent(out);
-  out << "}";
-
-  return true;
+    return true;
+  });
 }
 
 bool GeneratorImpl::EmitBlockAndNewline(std::ostream& out,
@@ -614,7 +609,6 @@ bool GeneratorImpl::EmitCall(std::ostream& pre,
       return false;
     }
 
-    make_indent(out);
     out << name << "(";
 
     bool first = true;
@@ -1338,6 +1332,9 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
 }
 
 bool GeneratorImpl::EmitContinue(std::ostream& out, ast::ContinueStatement*) {
+  if (!emit_continuing_(out)) {
+    return false;
+  }
   make_indent(out);
   out << "continue;" << std::endl;
   return true;
@@ -2192,100 +2189,30 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
 }
 
 bool GeneratorImpl::EmitLoop(std::ostream& out, ast::LoopStatement* stmt) {
-  loop_emission_counter_++;
+  make_indent(out);
 
-  std::string guard = generate_name("tint_hlsl_is_first_" +
-                                    std::to_string(loop_emission_counter_));
+  auto emit_continuing = [this, stmt](std::ostream& o) {
+    if (stmt->has_continuing()) {
+      make_indent(o);
+      if (!EmitBlock(o, stmt->continuing())) {
+        return false;
+      }
+      o << std::endl;
+    }
+    return true;
+  };
 
-  if (stmt->has_continuing()) {
-    make_indent(out);
-
-    // Continuing variables get their own scope.
-    out << "{" << std::endl;
-    increment_indent();
-
-    make_indent(out);
-    out << "bool " << guard << " = true;" << std::endl;
-
-    // A continuing block may use variables declared in the method body. As a
-    // first pass, if we have a continuing, we pull all declarations outside
-    // the for loop into the continuing scope. Then, the variable declarations
-    // will be turned into assignments.
-    for (auto* s : *stmt->body()) {
-      if (auto* v = s->As<ast::VariableDeclStatement>()) {
-        if (!EmitVariable(out, v->variable(), true)) {
-          return false;
-        }
+  TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
+  bool ok = EmitBlockBraces(out, "while (true)", [&] {
+    for (auto* s : stmt->body()->statements()) {
+      if (!EmitStatement(out, s)) {
+        return false;
       }
     }
-  }
-
-  make_indent(out);
-  out << "for(;;) {" << std::endl;
-  increment_indent();
-
-  if (stmt->has_continuing()) {
-    make_indent(out);
-    out << "if (!" << guard << ") ";
-
-    if (!EmitBlockAndNewline(out, stmt->continuing())) {
-      return false;
-    }
-
-    make_indent(out);
-    out << guard << " = false;" << std::endl;
-    out << std::endl;
-  }
-
-  for (auto* s : *(stmt->body())) {
-    // If we have a continuing block we've already emitted the variable
-    // declaration before the loop, so treat it as an assignment.
-    if (auto* decl = s->As<ast::VariableDeclStatement>()) {
-      if (stmt->has_continuing()) {
-        make_indent(out);
-
-        auto* var = decl->variable();
-
-        std::ostringstream pre;
-        std::ostringstream constructor_out;
-        if (var->constructor() != nullptr) {
-          if (!EmitExpression(pre, constructor_out, var->constructor())) {
-            return false;
-          }
-        }
-        out << pre.str();
-
-        out << builder_.Symbols().NameFor(var->symbol()) << " = ";
-        if (var->constructor() != nullptr) {
-          out << constructor_out.str();
-        } else {
-          auto* type = builder_.Sem().Get(var)->Type()->UnwrapRef();
-          if (!EmitZeroValue(out, type)) {
-            return false;
-          }
-        }
-        out << ";" << std::endl;
-        continue;
-      }
-    }
-
-    if (!EmitStatement(out, s)) {
-      return false;
-    }
-  }
-
-  decrement_indent();
-  make_indent(out);
-  out << "}" << std::endl;
-
-  // Close the scope for any continuing variables.
-  if (stmt->has_continuing()) {
-    decrement_indent();
-    make_indent(out);
-    out << "}" << std::endl;
-  }
-
-  return true;
+    return emit_continuing(out);
+  });
+  out << std::endl;
+  return ok;
 }
 
 bool GeneratorImpl::EmitMemberAccessor(std::ostream& pre,
@@ -2379,7 +2306,7 @@ bool GeneratorImpl::EmitStatement(std::ostream& out, ast::Statement* stmt) {
     return EmitSwitch(out, s);
   }
   if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
-    return EmitVariable(out, v->variable(), false);
+    return EmitVariable(out, v->variable());
   }
 
   diagnostics_.add_error("unknown statement type: " + builder_.str(stmt));
@@ -2662,9 +2589,7 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& pre,
   return true;
 }
 
-bool GeneratorImpl::EmitVariable(std::ostream& out,
-                                 ast::Variable* var,
-                                 bool skip_constructor) {
+bool GeneratorImpl::EmitVariable(std::ostream& out, ast::Variable* var) {
   make_indent(out);
 
   auto* sem = builder_.Sem().Get(var);
@@ -2677,19 +2602,17 @@ bool GeneratorImpl::EmitVariable(std::ostream& out,
   }
 
   std::ostringstream constructor_out;
-  if (!skip_constructor) {
-    constructor_out << " = ";
+  constructor_out << " = ";
 
-    if (var->constructor()) {
-      std::ostringstream pre;
-      if (!EmitExpression(pre, constructor_out, var->constructor())) {
-        return false;
-      }
-      out << pre.str();
-    } else {
-      if (!EmitZeroValue(constructor_out, type)) {
-        return false;
-      }
+  if (var->constructor()) {
+    std::ostringstream pre;
+    if (!EmitExpression(pre, constructor_out, var->constructor())) {
+      return false;
+    }
+    out << pre.str();
+  } else {
+    if (!EmitZeroValue(constructor_out, type)) {
+      return false;
     }
   }
 
@@ -2787,6 +2710,23 @@ std::string GeneratorImpl::get_buffer_name(ast::Expression* expr) {
     }
   }
   return "";
+}
+
+template <typename F>
+bool GeneratorImpl::EmitBlockBraces(std::ostream& out,
+                                    const std::string& prefix,
+                                    F&& cb) {
+  out << prefix << (prefix.empty() ? "{" : " {") << std::endl;
+  increment_indent();
+
+  if (!cb()) {
+    return false;
+  }
+
+  decrement_indent();
+  make_indent(out);
+  out << "}";
+  return true;
 }
 
 }  // namespace hlsl

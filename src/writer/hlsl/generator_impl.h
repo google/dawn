@@ -18,6 +18,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
 #include "src/ast/assignment_statement.h"
 #include "src/ast/bitcast_expression.h"
@@ -319,11 +320,8 @@ class GeneratorImpl : public TextGenerator {
   /// Handles generating a variable
   /// @param out the output stream
   /// @param var the variable to generate
-  /// @param skip_constructor set true if the constructor should be skipped
   /// @returns true if the variable was emitted
-  bool EmitVariable(std::ostream& out,
-                    ast::Variable* var,
-                    bool skip_constructor);
+  bool EmitVariable(std::ostream& out, ast::Variable* var);
   /// Handles generating a program scope constant variable
   /// @param out the output stream
   /// @param var the variable to emit
@@ -387,10 +385,31 @@ class GeneratorImpl : public TextGenerator {
     return builder_.TypeOf(type);
   }
 
+  /// Emits `prefix`, followed by an opening brace `{`, then calls `cb` to emit
+  /// the block body, then finally emits the closing brace `}`.
+  /// @param out the output stream
+  /// @param prefix the string to emit before the opening brace
+  /// @param cb a function or function-like object with the signature `bool()`
+  /// that emits the block body.
+  /// @returns the return value of `cb`.
+  template <typename F>
+  bool EmitBlockBraces(std::ostream& out, const std::string& prefix, F&& cb);
+
+  /// Emits an opening brace `{`, then calls `cb` to emit the block body, then
+  /// finally emits the closing brace `}`.
+  /// @param out the output stream
+  /// @param cb a function or function-like object with the signature `bool()`
+  /// that emits the block body.
+  /// @returns the return value of `cb`.
+  template <typename F>
+  bool EmitBlockBraces(std::ostream& out, F&& cb) {
+    return EmitBlockBraces(out, "", std::forward<F>(cb));
+  }
+
   ProgramBuilder builder_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
-  uint32_t loop_emission_counter_ = 0;
+  std::function<bool(std::ostream& out)> emit_continuing_;
   ScopeStack<const sem::Variable*> global_variables_;
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_out_data_;

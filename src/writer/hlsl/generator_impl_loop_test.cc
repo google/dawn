@@ -34,7 +34,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_Loop) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, l)) << gen.error();
-  EXPECT_EQ(result(), R"(  for(;;) {
+  EXPECT_EQ(result(), R"(  while (true) {
     discard;
   }
 )");
@@ -52,15 +52,10 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithContinuing) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, l)) << gen.error();
-  EXPECT_EQ(result(), R"(  {
-    bool tint_hlsl_is_first_1 = true;
-    for(;;) {
-      if (!tint_hlsl_is_first_1) {
-        return;
-      }
-      tint_hlsl_is_first_1 = false;
-
-      discard;
+  EXPECT_EQ(result(), R"(  while (true) {
+    discard;
+    {
+      return;
     }
   }
 )");
@@ -89,25 +84,15 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopNestedWithContinuing) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, outer)) << gen.error();
-  EXPECT_EQ(result(), R"(  {
-    bool tint_hlsl_is_first_1 = true;
-    for(;;) {
-      if (!tint_hlsl_is_first_1) {
-        lhs = rhs;
-      }
-      tint_hlsl_is_first_1 = false;
-
+  EXPECT_EQ(result(), R"(  while (true) {
+    while (true) {
+      discard;
       {
-        bool tint_hlsl_is_first_2 = true;
-        for(;;) {
-          if (!tint_hlsl_is_first_2) {
-            return;
-          }
-          tint_hlsl_is_first_2 = false;
-
-          discard;
-        }
+        return;
       }
+    }
+    {
+      lhs = rhs;
     }
   }
 )");
@@ -153,18 +138,11 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_LoopWithVarUsedInContinuing) {
   gen.increment_indent();
 
   ASSERT_TRUE(gen.EmitStatement(out, outer)) << gen.error();
-  EXPECT_EQ(result(), R"(  {
-    bool tint_hlsl_is_first_1 = true;
-    float lhs;
-    float other;
-    for(;;) {
-      if (!tint_hlsl_is_first_1) {
-        lhs = rhs;
-      }
-      tint_hlsl_is_first_1 = false;
-
-      lhs = 2.400000095f;
-      other = 0.0f;
+  EXPECT_EQ(result(), R"(  while (true) {
+    float lhs = 2.400000095f;
+    float other = 0.0f;
+    {
+      lhs = rhs;
     }
   }
 )");
