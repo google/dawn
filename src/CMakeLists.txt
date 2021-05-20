@@ -287,6 +287,8 @@ set(TINT_LIB_SRCS
   transform/single_entry_point.h
   transform/transform.cc
   transform/transform.h
+  transform/var_for_dynamic_index.cc
+  transform/var_for_dynamic_index.h
   transform/vertex_pulling.cc
   transform/vertex_pulling.h
   sem/bool_type.cc
@@ -810,6 +812,7 @@ if(${TINT_BUILD_TESTS})
       transform/renamer_test.cc
       transform/single_entry_point.cc
       transform/test_helper.h
+      transform/var_for_dynamic_index_test.cc
       transform/vertex_pulling_test.cc
     )
   endif()

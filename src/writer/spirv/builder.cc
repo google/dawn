@@ -1073,53 +1073,17 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
   }
   info.source_type = TypeOf(source);
 
-  // If our initial access is into a non-pointer array, and either has a
-  // non-scalar element type or the accessor uses a non-literal index, then we
-  // need to load that array into a variable in order to access chain into it.
-
-  // TODO(bclayton): The requirement for scalar element types is because of
-  // arrays-of-arrays - this logic only considers whether the root index is
-  // compile-time-constant, and not whether there are any dynamic, inner-array
-  // indexing being performed. Instead of trying to do complex hoisting in this
-  // writer, move this hoisting into the transform::Spirv sanitizer.
-
-  bool needs_load = false;  // Was the expression hoist to a temporary variable?
   if (auto* access = accessors[0]->As<ast::ArrayAccessorExpression>()) {
     auto* array = TypeOf(access->array())->As<sem::Array>();
-    bool trivial_indexing =
-        array && array->ElemType()->is_scalar() &&
-        access->idx_expr()->Is<ast::ScalarConstructorExpression>();
-    if (array && !trivial_indexing) {
-      // Wrap the source type in a reference to function storage.
-      auto* ref =
-          builder_.create<sem::Reference>(array, ast::StorageClass::kFunction);
-      auto result_type_id = GenerateTypeIfNeeded(ref);
-      if (result_type_id == 0) {
-        return 0;
-      }
-
-      auto ary_result = result_op();
-
-      auto init = GenerateConstantNullIfNeeded(array);
-
-      // If we're access chaining into an array then we must be in a function
-      push_function_var(
-          {Operand::Int(result_type_id), ary_result,
-           Operand::Int(ConvertStorageClass(ast::StorageClass::kFunction)),
-           Operand::Int(init)});
-
-      if (!push_function_inst(spv::Op::OpStore,
-                              {ary_result, Operand::Int(info.source_id)})) {
-        return false;
-      }
-
-      info.source_id = ary_result.to_i();
-      info.source_type = ref;
-      needs_load = true;
+    bool literal_index =
+        array && access->idx_expr()->Is<ast::ScalarConstructorExpression>();
+    if (array && !literal_index) {
+      TINT_ICE(builder_.Diagnostics())
+          << "Dynamic index on array value should have been promoted to "
+             "storage with the VarForDynamicIndex transform";
     }
   }
 
-  std::vector<uint32_t> access_chain_indices;
   for (auto* accessor : accessors) {
     if (auto* array = accessor->As<ast::ArrayAccessorExpression>()) {
       if (!GenerateArrayAccessor(array, &info)) {
@@ -1138,10 +1102,6 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
 
   if (!info.access_chain_indices.empty()) {
     auto* type = TypeOf(expr);
-    if (needs_load) {
-      type =
-          builder_.create<sem::Reference>(type, ast::StorageClass::kFunction);
-    }
     auto result_type_id = GenerateTypeIfNeeded(type);
     if (result_type_id == 0) {
       return 0;
@@ -1160,11 +1120,6 @@ uint32_t Builder::GenerateAccessorExpression(ast::Expression* expr) {
       return false;
     }
     info.source_id = result_id;
-
-    // Load from the access chain result if required.
-    if (needs_load) {
-      info.source_id = GenerateLoadIfNeeded(type, result_id);
-    }
   }
 
   return info.source_id;

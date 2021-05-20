@@ -1,0 +1,111 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 70
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %main "main" %tint_pointsize %tint_symbol_1 %tint_symbol_3 %tint_symbol_4
+               OpName %tint_pointsize "tint_pointsize"
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_4 "tint_symbol_4"
+               OpName %Output "Output"
+               OpMemberName %Output 0 "Position"
+               OpMemberName %Output 1 "color"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %main "main"
+               OpName %var_for_array "var_for_array"
+               OpName %output "output"
+               OpName %var_for_array_1 "var_for_array_1"
+               OpDecorate %tint_pointsize BuiltIn PointSize
+               OpDecorate %tint_symbol BuiltIn VertexIndex
+               OpDecorate %tint_symbol_1 BuiltIn InstanceIndex
+               OpDecorate %tint_symbol_3 BuiltIn Position
+               OpDecorate %tint_symbol_4 Location 0
+               OpMemberDecorate %Output 0 Offset 0
+               OpMemberDecorate %Output 1 Offset 16
+               OpDecorate %_arr_v2float_uint_4 ArrayStride 8
+               OpDecorate %_arr_v4float_uint_4 ArrayStride 16
+      %float = OpTypeFloat 32
+%_ptr_Output_float = OpTypePointer Output %float
+          %4 = OpConstantNull %float
+%tint_pointsize = OpVariable %_ptr_Output_float Output %4
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol = OpVariable %_ptr_Input_uint Input
+%tint_symbol_1 = OpVariable %_ptr_Input_uint Input
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+         %12 = OpConstantNull %v4float
+%tint_symbol_3 = OpVariable %_ptr_Output_v4float Output %12
+%tint_symbol_4 = OpVariable %_ptr_Output_v4float Output %12
+       %void = OpTypeVoid
+     %Output = OpTypeStruct %v4float %v4float
+         %14 = OpTypeFunction %void %Output
+         %22 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+    %v2float = OpTypeVector %float 2
+     %uint_4 = OpConstant %uint 4
+%_arr_v2float_uint_4 = OpTypeArray %v2float %uint_4
+%float_0_200000003 = OpConstant %float 0.200000003
+         %30 = OpConstantComposite %v2float %float_0_200000003 %float_0_200000003
+%float_0_300000012 = OpConstant %float 0.300000012
+         %32 = OpConstantComposite %v2float %float_0_300000012 %float_0_300000012
+%float_n0_100000001 = OpConstant %float -0.100000001
+         %34 = OpConstantComposite %v2float %float_n0_100000001 %float_n0_100000001
+%float_1_10000002 = OpConstant %float 1.10000002
+         %36 = OpConstantComposite %v2float %float_1_10000002 %float_1_10000002
+         %37 = OpConstantComposite %_arr_v2float_uint_4 %30 %32 %34 %36
+%_ptr_Function__arr_v2float_uint_4 = OpTypePointer Function %_arr_v2float_uint_4
+         %40 = OpConstantNull %_arr_v2float_uint_4
+     %uint_0 = OpConstant %uint 0
+%_ptr_Function_float = OpTypePointer Function %float
+%_ptr_Function_Output = OpTypePointer Function %Output
+         %48 = OpConstantNull %Output
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+  %float_0_5 = OpConstant %float 0.5
+%_arr_v4float_uint_4 = OpTypeArray %v4float %uint_4
+    %float_0 = OpConstant %float 0
+         %55 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+         %56 = OpConstantComposite %v4float %float_0 %float_1 %float_0 %float_1
+         %57 = OpConstantComposite %v4float %float_0 %float_0 %float_1 %float_1
+         %58 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %59 = OpConstantComposite %_arr_v4float_uint_4 %55 %56 %57 %58
+%_ptr_Function__arr_v4float_uint_4 = OpTypePointer Function %_arr_v4float_uint_4
+         %62 = OpConstantNull %_arr_v4float_uint_4
+     %uint_1 = OpConstant %uint 1
+%tint_symbol_5 = OpFunction %void None %14
+%tint_symbol_2 = OpFunctionParameter %Output
+         %19 = OpLabel
+         %20 = OpCompositeExtract %v4float %tint_symbol_2 0
+               OpStore %tint_symbol_3 %20
+         %21 = OpCompositeExtract %v4float %tint_symbol_2 1
+               OpStore %tint_symbol_4 %21
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %22
+         %24 = OpLabel
+%var_for_array = OpVariable %_ptr_Function__arr_v2float_uint_4 Function %40
+     %output = OpVariable %_ptr_Function_Output Function %48
+%var_for_array_1 = OpVariable %_ptr_Function__arr_v4float_uint_4 Function %62
+               OpStore %tint_pointsize %float_1
+               OpStore %var_for_array %37
+         %41 = OpLoad %uint %tint_symbol_1
+         %44 = OpAccessChain %_ptr_Function_float %var_for_array %41 %uint_0
+         %45 = OpLoad %float %44
+         %50 = OpAccessChain %_ptr_Function_v4float %output %uint_0
+         %52 = OpCompositeConstruct %v4float %float_0_5 %float_0_5 %45 %float_1
+               OpStore %50 %52
+               OpStore %var_for_array_1 %59
+         %64 = OpAccessChain %_ptr_Function_v4float %output %uint_1
+         %65 = OpLoad %uint %tint_symbol_1
+         %66 = OpAccessChain %_ptr_Function_v4float %var_for_array_1 %65
+         %67 = OpLoad %v4float %66
+               OpStore %64 %67
+         %69 = OpLoad %Output %output
+         %68 = OpFunctionCall %void %tint_symbol_5 %69
+               OpReturn
+               OpFunctionEnd

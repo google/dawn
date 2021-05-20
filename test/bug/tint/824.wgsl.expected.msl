@@ -1,0 +1,28 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Output {
+  float4 Position;
+  float4 color;
+};
+struct tint_symbol_2 {
+  uint VertexIndex [[vertex_id]];
+  uint InstanceIndex [[instance_id]];
+};
+struct tint_symbol_3 {
+  float4 color [[user(locn0)]];
+  float4 Position [[position]];
+};
+
+vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  uint const VertexIndex = tint_symbol_1.VertexIndex;
+  uint const InstanceIndex = tint_symbol_1.InstanceIndex;
+  float2 zv[4] const = {float2(0.200000003f, 0.200000003f), float2(0.300000012f, 0.300000012f), float2(-0.100000001f, -0.100000001f), float2(1.100000024f, 1.100000024f)};
+  float const z = zv[InstanceIndex].x;
+  Output output = {};
+  output.Position = float4(0.5f, 0.5f, z, 1.0f);
+  float4 colors[4] const = {float4(1.0f, 0.0f, 0.0f, 1.0f), float4(0.0f, 1.0f, 0.0f, 1.0f), float4(0.0f, 0.0f, 1.0f, 1.0f), float4(1.0f, 1.0f, 1.0f, 1.0f)};
+  output.color = colors[InstanceIndex];
+  return {output.color, output.Position};
+}
+

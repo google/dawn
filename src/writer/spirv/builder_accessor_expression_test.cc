@@ -762,37 +762,32 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   auto* expr = IndexAccessor("pos", 1u);
   WrapInFunction(var, expr);
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateAccessorExpression(expr), 19u) << b.error();
+  ASSERT_TRUE(b.Build());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypeVector %3 2
-%4 = OpTypeInt 32 0
-%5 = OpConstant %4 3
-%1 = OpTypeArray %2 %5
-%6 = OpConstant %3 0
-%7 = OpConstant %3 0.5
-%8 = OpConstantComposite %2 %6 %7
-%9 = OpConstant %3 -0.5
-%10 = OpConstantComposite %2 %9 %9
-%11 = OpConstantComposite %2 %7 %9
-%12 = OpConstantComposite %1 %8 %10 %11
-%13 = OpTypePointer Function %1
-%15 = OpConstantNull %1
-%16 = OpConstant %4 1
-%17 = OpTypePointer Function %2
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%8 = OpTypeInt 32 0
+%9 = OpConstant %8 3
+%5 = OpTypeArray %6 %9
+%10 = OpConstant %7 0
+%11 = OpConstant %7 0.5
+%12 = OpConstantComposite %6 %10 %11
+%13 = OpConstant %7 -0.5
+%14 = OpConstantComposite %6 %13 %13
+%15 = OpConstantComposite %6 %11 %13
+%16 = OpConstantComposite %5 %12 %14 %15
+%17 = OpConstant %8 1
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%14 = OpVariable %13 Function %15
-)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpStore %14 %12
-%18 = OpAccessChain %17 %14 %16
-%19 = OpLoad %2 %18
+            R"(%18 = OpCompositeExtract %6 %16 1
 )");
+
+  Validate(b);
 }
 
 TEST_F(BuilderTest, Accessor_Array_Of_Array_Of_f32) {
@@ -810,39 +805,34 @@ TEST_F(BuilderTest, Accessor_Array_Of_Array_Of_f32) {
   auto* expr = IndexAccessor(IndexAccessor("pos", 2u), 1u);
   WrapInFunction(var, expr);
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateAccessorExpression(expr), 21u) << b.error();
+  ASSERT_TRUE(b.Build());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
-%2 = OpTypeVector %3 2
-%4 = OpTypeInt 32 0
-%5 = OpConstant %4 3
-%1 = OpTypeArray %2 %5
-%6 = OpConstant %3 0
-%7 = OpConstant %3 0.5
-%8 = OpConstantComposite %2 %6 %7
-%9 = OpConstant %3 -0.5
-%10 = OpConstantComposite %2 %9 %9
-%11 = OpConstantComposite %2 %7 %9
-%12 = OpConstantComposite %1 %8 %10 %11
-%13 = OpTypePointer Function %1
-%15 = OpConstantNull %1
-%16 = OpConstant %4 2
-%17 = OpConstant %4 1
-%19 = OpTypePointer Function %3
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%8 = OpTypeInt 32 0
+%9 = OpConstant %8 3
+%5 = OpTypeArray %6 %9
+%10 = OpConstant %7 0
+%11 = OpConstant %7 0.5
+%12 = OpConstantComposite %6 %10 %11
+%13 = OpConstant %7 -0.5
+%14 = OpConstantComposite %6 %13 %13
+%15 = OpConstantComposite %6 %11 %13
+%16 = OpConstantComposite %5 %12 %14 %15
+%17 = OpConstant %8 2
+%19 = OpConstant %8 1
 )");
-  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%14 = OpVariable %13 Function %15
-)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpStore %14 %12
-%18 = OpCompositeExtract %3 %14 1
-%20 = OpAccessChain %19 %18 %16
-%21 = OpLoad %3 %20
+            R"(%18 = OpCompositeExtract %6 %16 2
+%20 = OpCompositeExtract %7 %18 1
 )");
+
+  Validate(b);
 }
 
 TEST_F(BuilderTest, Accessor_Const_Vec) {
@@ -919,27 +909,29 @@ TEST_F(BuilderTest, Accessor_Array_NonPointer) {
   auto* expr = IndexAccessor("a", 2);
   WrapInFunction(var, expr);
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  EXPECT_EQ(b.GenerateAccessorExpression(expr), 11u) << b.error();
+  ASSERT_TRUE(b.Build());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%3 = OpTypeInt 32 0
-%4 = OpConstant %3 3
-%1 = OpTypeArray %2 %4
-%5 = OpConstant %2 0
-%6 = OpConstant %2 0.5
-%7 = OpConstant %2 1
-%8 = OpConstantComposite %1 %5 %6 %7
-%9 = OpTypeInt 32 1
-%10 = OpConstant %9 2
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%7 = OpTypeInt 32 0
+%8 = OpConstant %7 3
+%5 = OpTypeArray %6 %8
+%9 = OpConstant %6 0
+%10 = OpConstant %6 0.5
+%11 = OpConstant %6 1
+%12 = OpConstantComposite %5 %9 %10 %11
+%13 = OpTypeInt 32 1
+%14 = OpConstant %13 2
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), "");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(%11 = OpCompositeExtract %2 %8 2
+            R"(%15 = OpCompositeExtract %6 %12 2
 )");
+
+  Validate(b);
 }
 
 TEST_F(BuilderTest, Accessor_Array_NonPointer_Dynamic) {
@@ -955,38 +947,39 @@ TEST_F(BuilderTest, Accessor_Array_NonPointer_Dynamic) {
 
   WrapInFunction(var, idx, expr);
 
-  spirv::Builder& b = Build();
+  spirv::Builder& b = SanitizeAndBuild();
 
-  b.push_function(Function{});
-  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-  ASSERT_TRUE(b.GenerateFunctionVariable(idx)) << b.error();
-  EXPECT_EQ(b.GenerateAccessorExpression(expr), 19u) << b.error();
+  ASSERT_TRUE(b.Build());
 
-  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%3 = OpTypeInt 32 0
-%4 = OpConstant %3 3
-%1 = OpTypeArray %2 %4
-%5 = OpConstant %2 0
-%6 = OpConstant %2 0.5
-%7 = OpConstant %2 1
-%8 = OpConstantComposite %1 %5 %6 %7
-%11 = OpTypeInt 32 1
-%10 = OpTypePointer Function %11
-%12 = OpConstantNull %11
-%13 = OpTypePointer Function %1
-%15 = OpConstantNull %1
-%17 = OpTypePointer Function %2
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%7 = OpTypeInt 32 0
+%8 = OpConstant %7 3
+%5 = OpTypeArray %6 %8
+%9 = OpConstant %6 0
+%10 = OpConstant %6 0.5
+%11 = OpConstant %6 1
+%12 = OpConstantComposite %5 %9 %10 %11
+%15 = OpTypeInt 32 1
+%14 = OpTypePointer Function %15
+%16 = OpConstantNull %15
+%18 = OpTypePointer Function %5
+%19 = OpConstantNull %5
+%21 = OpTypePointer Function %6
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
-            R"(%9 = OpVariable %10 Function %12
-%14 = OpVariable %13 Function %15
+            R"(%13 = OpVariable %14 Function %16
+%17 = OpVariable %18 Function %19
 )");
   EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-            R"(OpStore %14 %8
-%16 = OpLoad %11 %9
-%18 = OpAccessChain %17 %14 %16
-%19 = OpLoad %2 %18
+            R"(OpStore %17 %12
+%20 = OpLoad %15 %13
+%22 = OpAccessChain %21 %17 %20
+%23 = OpLoad %6 %22
 )");
+
+  Validate(b);
 }
 
 }  // namespace
