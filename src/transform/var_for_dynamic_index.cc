@@ -37,7 +37,7 @@ Output VarForDynamicIndex::Run(const Program* in, const DataMap&) {
     if (auto* access_expr = node->As<ast::ArrayAccessorExpression>()) {
       // Found an array accessor expression
       auto* index_expr = access_expr->idx_expr();
-      auto* array_expr = access_expr->array();
+      auto* indexed_expr = access_expr->array();
 
       if (index_expr->Is<ast::ScalarConstructorExpression>()) {
         // Index expression is a literal value. As this isn't a dynamic index,
@@ -45,20 +45,20 @@ Output VarForDynamicIndex::Run(const Program* in, const DataMap&) {
         continue;
       }
 
-      auto* array = ctx.src->Sem().Get(array_expr);
-      if (!array->Type()->Is<sem::Array>()) {
-        // This transform currently only cares about arrays.
+      auto* indexed = ctx.src->Sem().Get(indexed_expr);
+      if (!indexed->Type()->IsAnyOf<sem::Array, sem::Matrix>()) {
+        // This transform currently only cares about array and matrices.
         continue;
       }
 
-      auto* stmt = array->Stmt();   // Statement that owns the expression
-      auto* block = stmt->Block();  // Block that owns the statement
+      auto* stmt = indexed->Stmt();  // Statement that owns the expression
+      auto* block = stmt->Block();   // Block that owns the statement
 
       // Construct a `var` declaration to hold the value in memory.
-      auto* ty = CreateASTTypeFor(&ctx, array->Type());
-      auto var_name = ctx.dst->Symbols().New("var_for_array");
+      auto* ty = CreateASTTypeFor(&ctx, indexed->Type());
+      auto var_name = ctx.dst->Symbols().New("var_for_index");
       auto* var_decl = ctx.dst->Decl(ctx.dst->Var(
-          var_name, ty, ast::StorageClass::kNone, ctx.Clone(array_expr)));
+          var_name, ty, ast::StorageClass::kNone, ctx.Clone(indexed_expr)));
 
       // Insert the `var` declaration before the statement that performs the
       // indexing. Note that for indexing chains, AST node ordering guarantees
@@ -67,7 +67,7 @@ Output VarForDynamicIndex::Run(const Program* in, const DataMap&) {
                        var_decl);
 
       // Replace the original index expression with the new `var`.
-      ctx.Replace(array_expr, ctx.dst->Expr(var_name));
+      ctx.Replace(indexed_expr, ctx.dst->Expr(var_name));
     }
   }
 

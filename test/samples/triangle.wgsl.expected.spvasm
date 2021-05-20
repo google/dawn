@@ -16,7 +16,7 @@
                OpName %tint_symbol_3 "tint_symbol_3"
                OpName %tint_symbol_1 "tint_symbol_1"
                OpName %vtx_main "vtx_main"
-               OpName %var_for_array "var_for_array"
+               OpName %var_for_index "var_for_index"
                OpName %tint_symbol_6 "tint_symbol_6"
                OpName %tint_symbol_4 "tint_symbol_4"
                OpName %frag_main "frag_main"
@@ -64,11 +64,11 @@
                OpFunctionEnd
    %vtx_main = OpFunction %void None %29
          %31 = OpLabel
-%var_for_array = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %35
+%var_for_index = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %35
                OpStore %tint_pointsize %float_1
-               OpStore %var_for_array %pos
+               OpStore %var_for_index %pos
          %37 = OpLoad %int %tint_symbol
-         %39 = OpAccessChain %_ptr_Function_v2float %var_for_array %37
+         %39 = OpAccessChain %_ptr_Function_v2float %var_for_index %37
          %40 = OpLoad %v2float %39
          %41 = OpCompositeExtract %float %40 0
          %42 = OpCompositeExtract %float %40 1

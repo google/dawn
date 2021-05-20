@@ -44,8 +44,8 @@ fn f() {
 fn f() {
   var i : i32;
   let p : array<i32, 4> = array<i32, 4>(1, 2, 3, 4);
-  var var_for_array : array<i32, 4> = p;
-  let x : i32 = var_for_array[i];
+  var var_for_index : array<i32, 4> = p;
+  let x : i32 = var_for_index[i];
 }
 )";
 
@@ -67,7 +67,7 @@ fn f() {
   // TODO(bclayton): Optimize this case:
   // This output is not as efficient as it could be.
   // We only actually need to hoist the inner-most array to a `var`
-  // (`var_for_array`), as later indexing operations will be working with
+  // (`var_for_index`), as later indexing operations will be working with
   // references, not values.
 
   auto* expect = R"(
@@ -75,9 +75,9 @@ fn f() {
   var i : i32;
   var j : i32;
   let p : array<array<i32, 2>, 2> = array<array<i32, 2>, 2>(array<i32, 2>(1, 2), array<i32, 2>(3, 4));
-  var var_for_array : array<array<i32, 2>, 2> = p;
-  var var_for_array_1 : array<i32, 2> = var_for_array[i];
-  let x : i32 = var_for_array_1[j];
+  var var_for_index : array<array<i32, 2>, 2> = p;
+  var var_for_index_1 : array<i32, 2> = var_for_index[i];
+  let x : i32 = var_for_index_1[j];
 }
 )";
 

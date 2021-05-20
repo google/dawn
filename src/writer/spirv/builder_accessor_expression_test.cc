@@ -22,9 +22,9 @@ namespace {
 
 using BuilderTest = TestHelper;
 
-TEST_F(BuilderTest, ArrayAccessor) {
-  // vec3<f32> ary;
-  // ary[1]  -> ptr<f32>
+TEST_F(BuilderTest, ArrayAccessor_VectorRef_Literal) {
+  // var ary : vec3<f32>;
+  // ary[1]  -> ref<f32>
 
   auto* var = Var("ary", ty.vec3<f32>());
 
@@ -57,10 +57,10 @@ TEST_F(BuilderTest, ArrayAccessor) {
 )");
 }
 
-TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
-  // ary : vec3<f32>;
-  // idx : i32;
-  // ary[idx]  -> ptr<f32>
+TEST_F(BuilderTest, ArrayAccessor_VectorRef_Dynamic) {
+  // var ary : vec3<f32>;
+  // var idx : i32;
+  // ary[idx]  -> ref<f32>
 
   auto* var = Var("ary", ty.vec3<f32>());
   auto* idx = Var("idx", ty.i32());
@@ -98,9 +98,9 @@ TEST_F(BuilderTest, Accessor_Array_LoadIndex) {
 )");
 }
 
-TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
-  // vec3<f32> ary;
-  // ary[1 + 2]  -> ptr<f32>
+TEST_F(BuilderTest, ArrayAccessor_VectorRef_Dynamic2) {
+  // var ary : vec3<f32>;
+  // ary[1 + 2]  -> ref<f32>
 
   auto* var = Var("ary", ty.vec3<f32>());
 
@@ -134,10 +134,10 @@ TEST_F(BuilderTest, ArrayAccessor_Dynamic) {
 )");
 }
 
-TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
+TEST_F(BuilderTest, ArrayAccessor_ArrayRef_MultiLevel) {
   auto* ary4 = ty.array(ty.vec3<f32>(), 4);
 
-  // ary = array<vec3<f32>, 4>
+  // var ary : array<vec3<f32>, 4>
   // ary[3][2];
 
   auto* var = Var("ary", ary4);
@@ -172,7 +172,7 @@ TEST_F(BuilderTest, ArrayAccessor_MultiLevel) {
 )");
 }
 
-TEST_F(BuilderTest, Accessor_ArrayWithSwizzle) {
+TEST_F(BuilderTest, ArrayAccessor_ArrayRef_ArrayWithSwizzle) {
   auto* ary4 = ty.array(ty.vec3<f32>(), 4);
 
   // var a : array<vec3<f32>, 4>;
@@ -680,7 +680,7 @@ TEST_F(BuilderTest, MemberAccessor_Array_of_Swizzle) {
 )");
 }
 
-TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
+TEST_F(BuilderTest, ArrayAccessor_Mixed_ArrayAndMember) {
   // type C = struct {
   //   baz : vec3<f32>
   // }
@@ -747,7 +747,7 @@ TEST_F(BuilderTest, Accessor_Mixed_ArrayAndMember) {
 )");
 }
 
-TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
+TEST_F(BuilderTest, ArrayAccessor_Of_Vec) {
   // let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
   //   vec2<f32>(0.0, 0.5),
   //   vec2<f32>(-0.5, -0.5),
@@ -790,7 +790,7 @@ TEST_F(BuilderTest, Accessor_Array_Of_Vec) {
   Validate(b);
 }
 
-TEST_F(BuilderTest, Accessor_Array_Of_Array_Of_f32) {
+TEST_F(BuilderTest, ArrayAccessor_Of_Array_Of_f32) {
   // let pos : array<array<f32, 2>, 3> = array<vec2<f32, 2>, 3>(
   //   array<f32, 2>(0.0, 0.5),
   //   array<f32, 2>(-0.5, -0.5),
@@ -835,7 +835,7 @@ TEST_F(BuilderTest, Accessor_Array_Of_Array_Of_f32) {
   Validate(b);
 }
 
-TEST_F(BuilderTest, Accessor_Const_Vec) {
+TEST_F(BuilderTest, ArrayAccessor_Vec_Literal) {
   // let pos : vec2<f32> = vec2<f32>(0.0, 0.5);
   // pos[1]
 
@@ -864,7 +864,7 @@ TEST_F(BuilderTest, Accessor_Const_Vec) {
 )");
 }
 
-TEST_F(BuilderTest, Accessor_Const_Vec_Dynamic) {
+TEST_F(BuilderTest, ArrayAccessor_Vec_Dynamic) {
   // let pos : vec2<f32> = vec2<f32>(0.0, 0.5);
   // idx : i32
   // pos[idx]
@@ -900,7 +900,7 @@ TEST_F(BuilderTest, Accessor_Const_Vec_Dynamic) {
 )");
 }
 
-TEST_F(BuilderTest, Accessor_Array_NonPointer) {
+TEST_F(BuilderTest, ArrayAccessor_Array_Literal) {
   // let a : array<f32, 3>;
   // a[2]
 
@@ -934,7 +934,7 @@ TEST_F(BuilderTest, Accessor_Array_NonPointer) {
   Validate(b);
 }
 
-TEST_F(BuilderTest, Accessor_Array_NonPointer_Dynamic) {
+TEST_F(BuilderTest, ArrayAccessor_Array_Dynamic) {
   // let a : array<f32, 3>;
   // idx : i32
   // a[idx]
@@ -977,6 +977,58 @@ TEST_F(BuilderTest, Accessor_Array_NonPointer_Dynamic) {
 %20 = OpLoad %15 %13
 %22 = OpAccessChain %21 %17 %20
 %23 = OpLoad %6 %22
+)");
+
+  Validate(b);
+}
+
+TEST_F(BuilderTest, ArrayAccessor_Matrix_Dynamic) {
+  // let a : mat2x2<f32>(vec2<f32>(1., 2.), vec2<f32>(3., 4.));
+  // idx : i32
+  // a[idx]
+
+  auto* var =
+      Const("a", ty.mat2x2<f32>(),
+            Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1.f, 2.f),
+                      Construct(ty.vec2<f32>(), 3.f, 4.f)));
+
+  auto* idx = Var("idx", ty.i32());
+  auto* expr = IndexAccessor("a", idx);
+
+  WrapInFunction(var, idx, expr);
+
+  spirv::Builder& b = SanitizeAndBuild();
+
+  ASSERT_TRUE(b.Build());
+
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 2
+%5 = OpTypeMatrix %6 2
+%8 = OpConstant %7 1
+%9 = OpConstant %7 2
+%10 = OpConstantComposite %6 %8 %9
+%11 = OpConstant %7 3
+%12 = OpConstant %7 4
+%13 = OpConstantComposite %6 %11 %12
+%14 = OpConstantComposite %5 %10 %13
+%17 = OpTypeInt 32 1
+%16 = OpTypePointer Function %17
+%18 = OpConstantNull %17
+%20 = OpTypePointer Function %5
+%21 = OpConstantNull %5
+%23 = OpTypePointer Function %6
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+            R"(%15 = OpVariable %16 Function %18
+%19 = OpVariable %20 Function %21
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(OpStore %19 %14
+%22 = OpLoad %17 %15
+%24 = OpAccessChain %23 %19 %22
+%25 = OpLoad %6 %24
 )");
 
   Validate(b);

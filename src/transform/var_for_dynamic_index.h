@@ -23,10 +23,10 @@
 namespace tint {
 namespace transform {
 
-/// A transform that extracts array values that are dynamically indexed to a
-/// temporary `var` local before performing the index. This transform is used by
-/// the SPIR-V writer for dynamically indexing arrays, as there is no SPIR-V
-/// instruction that can dynamically index a non-pointer composite.
+/// A transform that extracts array and matrix values that are dynamically
+/// indexed to a temporary `var` local before performing the index. This
+/// transform is used by the SPIR-V writer as there is no SPIR-V instruction
+/// that can dynamically index a non-pointer composite.
 class VarForDynamicIndex : public Transform {
  public:
   /// Constructor
