@@ -123,7 +123,7 @@ TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Bool) {
-  auto bool_ = ty.bool_();
+  auto* bool_ = create<sem::Bool>();
 
   GeneratorImpl& gen = Build();
 

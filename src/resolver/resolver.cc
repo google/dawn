@@ -1458,7 +1458,7 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
   }
 
   auto* cond_type = TypeOf(stmt->condition())->UnwrapRef();
-  if (cond_type != builder_->ty.bool_()) {
+  if (!cond_type->Is<sem::Bool>()) {
     diagnostics_.add_error("if statement condition must be bool, got " +
                                cond_type->FriendlyName(builder_->Symbols()),
                            stmt->condition()->source());
@@ -1490,7 +1490,7 @@ bool Resolver::IfStatement(ast::IfStatement* stmt) {
       }
 
       auto* else_cond_type = TypeOf(cond)->UnwrapRef();
-      if (else_cond_type != builder_->ty.bool_()) {
+      if (!else_cond_type->Is<sem::Bool>()) {
         diagnostics_.add_error(
             "else statement condition must be bool, got " +
                 else_cond_type->FriendlyName(builder_->Symbols()),

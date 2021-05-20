@@ -106,7 +106,7 @@ TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_RuntimeArray) {
 }
 
 TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
-  auto bool_ = ty.bool_();
+  auto* bool_ = create<sem::Bool>();
 
   GeneratorImpl& gen = Build();
 

@@ -125,7 +125,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedArray) {
 }
 
 TEST_F(BuilderTest_Type, GenerateBool) {
-  auto bool_ = ty.bool_();
+  auto* bool_ = create<sem::Bool>();
 
   spirv::Builder& b = Build();
 
@@ -139,7 +139,7 @@ TEST_F(BuilderTest_Type, GenerateBool) {
 }
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedBool) {
-  auto bool_ = ty.bool_();
+  auto* bool_ = create<sem::Bool>();
   auto* i32 = create<sem::I32>();
 
   spirv::Builder& b = Build();

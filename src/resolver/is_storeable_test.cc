@@ -28,7 +28,7 @@ TEST_F(ResolverIsStorableTest, Void) {
 }
 
 TEST_F(ResolverIsStorableTest, Scalar) {
-  EXPECT_TRUE(r()->IsStorable(ty.bool_()));
+  EXPECT_TRUE(r()->IsStorable(create<sem::Bool>()));
   EXPECT_TRUE(r()->IsStorable(create<sem::I32>()));
   EXPECT_TRUE(r()->IsStorable(create<sem::U32>()));
   EXPECT_TRUE(r()->IsStorable(create<sem::F32>()));

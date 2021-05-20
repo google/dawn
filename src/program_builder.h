@@ -355,14 +355,12 @@ class ProgramBuilder {
     }
 
     /// @returns a boolean type
-    typ::Bool bool_() const {
-      return {builder->create<ast::Bool>(), builder->create<sem::Bool>()};
-    }
+    typ::Bool bool_() const { return {builder->create<ast::Bool>()}; }
 
     /// @param source the Source of the node
     /// @returns a boolean type
     typ::Bool bool_(const Source& source) const {
-      return {builder->create<ast::Bool>(source), builder->create<sem::Bool>()};
+      return {builder->create<ast::Bool>(source)};
     }
 
     /// @returns a f32 type

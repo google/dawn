@@ -28,7 +28,7 @@ TEST_F(ResolverIsHostShareable, Void) {
 }
 
 TEST_F(ResolverIsHostShareable, Bool) {
-  EXPECT_FALSE(r()->IsHostShareable(ty.bool_()));
+  EXPECT_FALSE(r()->IsHostShareable(create<sem::Bool>()));
 }
 
 TEST_F(ResolverIsHostShareable, NumericScalar) {
@@ -50,15 +50,24 @@ TEST_F(ResolverIsHostShareable, NumericVector) {
 }
 
 TEST_F(ResolverIsHostShareable, BoolVector) {
-  EXPECT_FALSE(r()->IsHostShareable(ty.vec2<bool>()));
-  EXPECT_FALSE(r()->IsHostShareable(ty.vec3<bool>()));
-  EXPECT_FALSE(r()->IsHostShareable(ty.vec4<bool>()));
-  EXPECT_FALSE(r()->IsHostShareable(ty.vec2<bool>()));
-  EXPECT_FALSE(r()->IsHostShareable(ty.vec3<bool>()));
-  EXPECT_FALSE(r()->IsHostShareable(ty.vec4<bool>()));
-  EXPECT_FALSE(r()->IsHostShareable(ty.vec2<bool>()));
-  EXPECT_FALSE(r()->IsHostShareable(ty.vec3<bool>()));
-  EXPECT_FALSE(r()->IsHostShareable(ty.vec4<bool>()));
+  EXPECT_FALSE(
+      r()->IsHostShareable(create<sem::Vector>(create<sem::Bool>(), 2)));
+  EXPECT_FALSE(
+      r()->IsHostShareable(create<sem::Vector>(create<sem::Bool>(), 3)));
+  EXPECT_FALSE(
+      r()->IsHostShareable(create<sem::Vector>(create<sem::Bool>(), 4)));
+  EXPECT_FALSE(
+      r()->IsHostShareable(create<sem::Vector>(create<sem::Bool>(), 2)));
+  EXPECT_FALSE(
+      r()->IsHostShareable(create<sem::Vector>(create<sem::Bool>(), 3)));
+  EXPECT_FALSE(
+      r()->IsHostShareable(create<sem::Vector>(create<sem::Bool>(), 4)));
+  EXPECT_FALSE(
+      r()->IsHostShareable(create<sem::Vector>(create<sem::Bool>(), 2)));
+  EXPECT_FALSE(
+      r()->IsHostShareable(create<sem::Vector>(create<sem::Bool>(), 3)));
+  EXPECT_FALSE(
+      r()->IsHostShareable(create<sem::Vector>(create<sem::Bool>(), 4)));
 }
 
 TEST_F(ResolverIsHostShareable, Matrix) {

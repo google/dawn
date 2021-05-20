@@ -168,23 +168,24 @@ TEST_F(IntrinsicTableTest, MatchFIU32AsF32) {
 }
 
 TEST_F(IntrinsicTableTest, MismatchFIU32) {
+  auto* bool_ = create<sem::Bool>();
   auto result = table->Lookup(*this, IntrinsicType::kClamp,
-                              {ty.bool_(), ty.bool_(), ty.bool_()}, Source{});
+                              {bool_, bool_, bool_}, Source{});
   ASSERT_EQ(result.intrinsic, nullptr);
   ASSERT_THAT(result.diagnostics.str(), HasSubstr("no matching call"));
 }
 
 TEST_F(IntrinsicTableTest, MatchBool) {
   auto* f32 = create<sem::F32>();
-  auto result = table->Lookup(*this, IntrinsicType::kSelect,
-                              {f32, f32, ty.bool_()}, Source{});
+  auto* bool_ = create<sem::Bool>();
+  auto result =
+      table->Lookup(*this, IntrinsicType::kSelect, {f32, f32, bool_}, Source{});
   ASSERT_NE(result.intrinsic, nullptr);
   ASSERT_EQ(result.diagnostics.str(), "");
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kSelect);
   EXPECT_THAT(result.intrinsic->ReturnType(), f32);
-  EXPECT_THAT(
-      result.intrinsic->Parameters(),
-      ElementsAre(Parameter{f32}, Parameter{f32}, Parameter{ty.bool_()}));
+  EXPECT_THAT(result.intrinsic->Parameters(),
+              ElementsAre(Parameter{f32}, Parameter{f32}, Parameter{bool_}));
 }
 
 TEST_F(IntrinsicTableTest, MismatchBool) {
@@ -472,8 +473,9 @@ TEST_F(IntrinsicTableTest, MismatchOpenSizeMatrix) {
 TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
   // None of the arguments match, so expect the overloads with 2 parameters to
   // come first
+  auto* bool_ = create<sem::Bool>();
   auto result = table->Lookup(*this, IntrinsicType::kTextureDimensions,
-                              {ty.bool_(), ty.bool_()}, Source{});
+                              {bool_, bool_}, Source{});
   ASSERT_EQ(result.diagnostics.str(),
             R"(error: no matching call to textureDimensions(bool, bool)
 
@@ -509,8 +511,9 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
 
 TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
   auto tex = ty.depth_texture(ast::TextureDimension::k2d);
+  auto* bool_ = create<sem::Bool>();
   auto result = table->Lookup(*this, IntrinsicType::kTextureDimensions,
-                              {tex, ty.bool_()}, Source{});
+                              {tex, bool_}, Source{});
   ASSERT_EQ(
       result.diagnostics.str(),
       R"(error: no matching call to textureDimensions(texture_depth_2d, bool)

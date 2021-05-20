@@ -238,7 +238,6 @@ bool operator!=(std::nullptr_t, const TypePair<AST, SEM>& rhs) {
 using Type = TypePair<ast::Type, sem::Type>;
 
 using Array = TypePair<ast::Array, sem::Array>;
-using Bool = TypePair<ast::Bool, sem::Bool>;
 using DepthTexture = TypePair<ast::DepthTexture, sem::DepthTexture>;
 using ExternalTexture = TypePair<ast::ExternalTexture, sem::ExternalTexture>;
 using Matrix = TypePair<ast::Matrix, sem::Matrix>;
@@ -253,6 +252,7 @@ using Texture = TypePair<ast::Texture, sem::Texture>;
 using Vector = TypePair<ast::Vector, sem::Vector>;
 using Void = TypePair<ast::Void, sem::Void>;
 
+using Bool = Ptr<ast::Bool>;
 using U32 = Ptr<ast::U32>;
 using I32 = Ptr<ast::I32>;
 using F32 = Ptr<ast::F32>;
