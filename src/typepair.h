@@ -237,18 +237,10 @@ bool operator!=(std::nullptr_t, const TypePair<AST, SEM>& rhs) {
 
 using Type = TypePair<ast::Type, sem::Type>;
 
-using Array = TypePair<ast::Array, sem::Array>;
-using DepthTexture = TypePair<ast::DepthTexture, sem::DepthTexture>;
-using ExternalTexture = TypePair<ast::ExternalTexture, sem::ExternalTexture>;
 using Matrix = TypePair<ast::Matrix, sem::Matrix>;
-using MultisampledTexture =
-    TypePair<ast::MultisampledTexture, sem::MultisampledTexture>;
 using Pointer = TypePair<ast::Pointer, sem::Pointer>;
 using Sampler = TypePair<ast::Sampler, sem::Sampler>;
-using SampledTexture = TypePair<ast::SampledTexture, sem::SampledTexture>;
-using StorageTexture = TypePair<ast::StorageTexture, sem::StorageTexture>;
 using Struct = TypePair<ast::Struct, sem::Struct>;
-using Texture = TypePair<ast::Texture, sem::Texture>;
 using Vector = TypePair<ast::Vector, sem::Vector>;
 
 using Bool = Ptr<ast::Bool>;
@@ -256,6 +248,12 @@ using U32 = Ptr<ast::U32>;
 using I32 = Ptr<ast::I32>;
 using F32 = Ptr<ast::F32>;
 using Void = Ptr<ast::Void>;
+using DepthTexture = Ptr<ast::DepthTexture>;
+using ExternalTexture = Ptr<ast::ExternalTexture>;
+using MultisampledTexture = Ptr<ast::MultisampledTexture>;
+using SampledTexture = Ptr<ast::SampledTexture>;
+using StorageTexture = Ptr<ast::StorageTexture>;
+using Texture = Ptr<ast::Texture>;
 
 // Helpers
 

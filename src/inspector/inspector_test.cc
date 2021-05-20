@@ -572,14 +572,14 @@ class InspectorHelper : public ProgramBuilder {
   /// @param format the image format of the storage texture
   /// @param read_only should the access type be read only, otherwise write only
   /// @returns the storage texture type, subtype & access control type
-  typ::Type MakeStorageTextureTypes(ast::TextureDimension dim,
-                                    ast::ImageFormat format,
-                                    bool read_only) {
+  ast::Type* MakeStorageTextureTypes(ast::TextureDimension dim,
+                                     ast::ImageFormat format,
+                                     bool read_only) {
     auto ac = read_only ? ast::AccessControl::kReadOnly
                         : ast::AccessControl::kWriteOnly;
     auto tex = ty.storage_texture(dim, format);
 
-    return {ty.access(ac, tex.ast), tex.sem};
+    return ty.access(ac, tex);
   }
 
   /// Adds a storage texture variable to the program
@@ -1688,13 +1688,13 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
   MakeComparisonSamplerReferenceBodyFunction(
       "cs_func", "cs_texture", "cs_var", "cs_coords", "cs_depth", ty.f32(), {});
 
-  auto st_type = MakeStorageTextureTypes(ast::TextureDimension::k2d,
-                                         ast::ImageFormat::kR32Uint, false);
+  auto* st_type = MakeStorageTextureTypes(ast::TextureDimension::k2d,
+                                          ast::ImageFormat::kR32Uint, false);
   AddStorageTexture("st_var", st_type, 4, 0);
   MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<i32>(), {});
 
-  auto rost_type = MakeStorageTextureTypes(ast::TextureDimension::k2d,
-                                           ast::ImageFormat::kR32Uint, true);
+  auto* rost_type = MakeStorageTextureTypes(ast::TextureDimension::k2d,
+                                            ast::ImageFormat::kR32Uint, true);
   AddStorageTexture("rost_var", rost_type, 4, 1);
   MakeStorageTextureBodyFunction("rost_func", "rost_var", ty.vec2<i32>(), {});
 
@@ -2797,7 +2797,7 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
   ResourceBinding::SampledKind expected_kind;
   std::tie(format, expected_format, expected_kind) = format_params;
 
-  auto st_type = MakeStorageTextureTypes(dim, format, read_only);
+  auto* st_type = MakeStorageTextureTypes(dim, format, read_only);
   AddStorageTexture("st_var", st_type, 0, 0);
 
   ast::Type* dim_type = nullptr;

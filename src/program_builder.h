@@ -766,8 +766,7 @@ class ProgramBuilder {
     /// @param dims the dimensionality of the texture
     /// @returns the depth texture
     typ::DepthTexture depth_texture(ast::TextureDimension dims) const {
-      return {builder->create<ast::DepthTexture>(dims),
-              builder->create<sem::DepthTexture>(dims)};
+      return {builder->create<ast::DepthTexture>(dims)};
     }
 
     /// @param source the Source of the node
@@ -775,8 +774,7 @@ class ProgramBuilder {
     /// @returns the depth texture
     typ::DepthTexture depth_texture(const Source& source,
                                     ast::TextureDimension dims) const {
-      return {builder->create<ast::DepthTexture>(source, dims),
-              builder->create<sem::DepthTexture>(dims)};
+      return {builder->create<ast::DepthTexture>(source, dims)};
     }
 
     /// @param dims the dimensionality of the texture
@@ -784,10 +782,7 @@ class ProgramBuilder {
     /// @returns the sampled texture
     typ::SampledTexture sampled_texture(ast::TextureDimension dims,
                                         typ::Type subtype) const {
-      return {subtype.ast ? builder->create<ast::SampledTexture>(dims, subtype)
-                          : nullptr,
-              subtype.sem ? builder->create<sem::SampledTexture>(dims, subtype)
-                          : nullptr};
+      return {builder->create<ast::SampledTexture>(dims, subtype)};
     }
 
     /// @param source the Source of the node
@@ -797,11 +792,7 @@ class ProgramBuilder {
     typ::SampledTexture sampled_texture(const Source& source,
                                         ast::TextureDimension dims,
                                         typ::Type subtype) const {
-      return {subtype.ast
-                  ? builder->create<ast::SampledTexture>(source, dims, subtype)
-                  : nullptr,
-              subtype.sem ? builder->create<sem::SampledTexture>(dims, subtype)
-                          : nullptr};
+      return {builder->create<ast::SampledTexture>(source, dims, subtype)};
     }
 
     /// @param dims the dimensionality of the texture
@@ -809,11 +800,7 @@ class ProgramBuilder {
     /// @returns the multisampled texture
     typ::MultisampledTexture multisampled_texture(ast::TextureDimension dims,
                                                   typ::Type subtype) const {
-      return {
-          subtype.ast ? builder->create<ast::MultisampledTexture>(dims, subtype)
-                      : nullptr,
-          subtype.sem ? builder->create<sem::MultisampledTexture>(dims, subtype)
-                      : nullptr};
+      return {builder->create<ast::MultisampledTexture>(dims, subtype)};
     }
 
     /// @param source the Source of the node
@@ -823,12 +810,7 @@ class ProgramBuilder {
     typ::MultisampledTexture multisampled_texture(const Source& source,
                                                   ast::TextureDimension dims,
                                                   typ::Type subtype) const {
-      return {
-          subtype.ast
-              ? builder->create<ast::MultisampledTexture>(source, dims, subtype)
-              : nullptr,
-          subtype.sem ? builder->create<sem::MultisampledTexture>(dims, subtype)
-                      : nullptr};
+      return {builder->create<ast::MultisampledTexture>(source, dims, subtype)};
     }
 
     /// @param dims the dimensionality of the texture
@@ -836,12 +818,8 @@ class ProgramBuilder {
     /// @returns the storage texture
     typ::StorageTexture storage_texture(ast::TextureDimension dims,
                                         ast::ImageFormat format) const {
-      auto* ast_subtype = ast::StorageTexture::SubtypeFor(format, *builder);
-      auto* sem_subtype =
-          sem::StorageTexture::SubtypeFor(format, builder->Types());
-      return {builder->create<ast::StorageTexture>(dims, format, ast_subtype),
-              builder->create<sem::StorageTexture>(
-                  dims, format, ast::AccessControl::kInvalid, sem_subtype)};
+      auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
+      return {builder->create<ast::StorageTexture>(dims, format, subtype)};
     }
 
     /// @param source the Source of the node
@@ -851,26 +829,20 @@ class ProgramBuilder {
     typ::StorageTexture storage_texture(const Source& source,
                                         ast::TextureDimension dims,
                                         ast::ImageFormat format) const {
-      auto* ast_subtype = ast::StorageTexture::SubtypeFor(format, *builder);
-      auto* sem_subtype =
-          sem::StorageTexture::SubtypeFor(format, builder->Types());
-      return {builder->create<ast::StorageTexture>(source, dims, format,
-                                                   ast_subtype),
-              builder->create<sem::StorageTexture>(
-                  dims, format, ast::AccessControl::kInvalid, sem_subtype)};
+      auto* subtype = ast::StorageTexture::SubtypeFor(format, *builder);
+      return {
+          builder->create<ast::StorageTexture>(source, dims, format, subtype)};
     }
 
     /// @returns the external texture
     typ::ExternalTexture external_texture() const {
-      return {builder->create<ast::ExternalTexture>(),
-              builder->create<sem::ExternalTexture>()};
+      return {builder->create<ast::ExternalTexture>()};
     }
 
     /// @param source the Source of the node
     /// @returns the external texture
     typ::ExternalTexture external_texture(const Source& source) const {
-      return {builder->create<ast::ExternalTexture>(source),
-              builder->create<sem::ExternalTexture>()};
+      return {builder->create<ast::ExternalTexture>(source)};
     }
 
     /// If ty is a ast::Struct or ast::Alias, the returned type is an
