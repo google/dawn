@@ -221,7 +221,7 @@ namespace dawn_native {
                 target.format = dstFormat;
 
                 // Create RenderPipeline.
-                RenderPipelineDescriptor2 renderPipelineDesc = {};
+                RenderPipelineDescriptor renderPipelineDesc = {};
 
                 // Generate the layout based on shader modules.
                 renderPipelineDesc.layout = nullptr;

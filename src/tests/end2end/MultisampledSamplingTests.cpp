@@ -51,7 +51,7 @@ class MultisampledSamplingTest : public DawnTest {
         DawnTest::SetUp();
 
         {
-            utils::ComboRenderPipelineDescriptor2 desc;
+            utils::ComboRenderPipelineDescriptor desc;
 
             desc.vertex.module = utils::CreateShaderModule(device, R"(
                 [[stage(vertex)]]
@@ -87,7 +87,7 @@ class MultisampledSamplingTest : public DawnTest {
 
             desc.primitive.topology = wgpu::PrimitiveTopology::TriangleStrip;
 
-            drawPipeline = device.CreateRenderPipeline2(&desc);
+            drawPipeline = device.CreateRenderPipeline(&desc);
         }
         {
             wgpu::ComputePipelineDescriptor desc = {};

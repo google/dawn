@@ -66,7 +66,7 @@ class DepthStencilCopyTests : public DawnTest {
         return device.CreateTexture(&texDescriptor);
     }
 
-    void PopulatePipelineDescriptorWriteDepth(utils::ComboRenderPipelineDescriptor2* desc,
+    void PopulatePipelineDescriptorWriteDepth(utils::ComboRenderPipelineDescriptor* desc,
                                               wgpu::TextureFormat format,
                                               float regionDepth) {
         desc->vertex.module = mVertexModule;
@@ -96,11 +96,11 @@ class DepthStencilCopyTests : public DawnTest {
         utils::ComboRenderPassDescriptor renderPassDesc({}, texture.CreateView(&viewDesc));
         renderPassDesc.cDepthStencilAttachmentInfo.clearDepth = clearDepth;
 
-        utils::ComboRenderPipelineDescriptor2 renderPipelineDesc;
+        utils::ComboRenderPipelineDescriptor renderPipelineDesc;
         PopulatePipelineDescriptorWriteDepth(&renderPipelineDesc, wgpu::TextureFormat::Depth32Float,
                                              regionDepth);
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&renderPipelineDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         wgpu::RenderPassEncoder pass = commandEncoder.BeginRenderPass(&renderPassDesc);
         pass.SetPipeline(pipeline);
@@ -128,12 +128,12 @@ class DepthStencilCopyTests : public DawnTest {
         renderPassDesc.cDepthStencilAttachmentInfo.clearDepth = clearDepth;
         renderPassDesc.cDepthStencilAttachmentInfo.clearStencil = clearStencil;
 
-        utils::ComboRenderPipelineDescriptor2 renderPipelineDesc;
+        utils::ComboRenderPipelineDescriptor renderPipelineDesc;
         PopulatePipelineDescriptorWriteDepth(&renderPipelineDesc,
                                              wgpu::TextureFormat::Depth24PlusStencil8, regionDepth);
         renderPipelineDesc.cDepthStencil.stencilFront.passOp = wgpu::StencilOperation::Replace;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&renderPipelineDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
 
         // Draw the quad (two triangles)
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -233,7 +233,7 @@ class DepthStencilCopyTests : public DawnTest {
         commandEncoder.CopyBufferToTexture(&bufferCopy, &textureCopy, &depthDataDesc.size);
 
         // Pipeline for a full screen quad.
-        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
             [[stage(vertex)]]
@@ -283,7 +283,7 @@ class DepthStencilCopyTests : public DawnTest {
         passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
         passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Load;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
         // Bind the depth data texture.
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -642,7 +642,7 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
         wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
         // Create a render pipline which decrements the stencil value for passing fragments.
         // A quad is drawn in the bottom left.
-        utils::ComboRenderPipelineDescriptor2 renderPipelineDesc;
+        utils::ComboRenderPipelineDescriptor renderPipelineDesc;
         renderPipelineDesc.vertex.module = mVertexModule;
         renderPipelineDesc.cFragment.module = utils::CreateShaderModule(device, R"(
             [[stage(fragment)]] fn main() {
@@ -652,7 +652,7 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
         depthStencil->stencilFront.passOp = wgpu::StencilOperation::DecrementClamp;
         renderPipelineDesc.cFragment.targetCount = 0;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&renderPipelineDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&renderPipelineDesc);
 
         // Create a render pass which loads the stencil. We want to load the values we
         // copied in. Also load the canary depth values so they're not lost.

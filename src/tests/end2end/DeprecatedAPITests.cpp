@@ -230,40 +230,40 @@ class BlendFactorDeprecationTests : public DeprecationTests {
                 }
             )");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         descriptor.cTargets[0].blend = &descriptor.cBlends[0];
 
         descriptor.cBlends[0].color.srcFactor = blendFactor;
         if (deprecated) {
-            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline2(&descriptor));
+            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
         } else {
-            device.CreateRenderPipeline2(&descriptor);
+            device.CreateRenderPipeline(&descriptor);
         }
         descriptor.cBlends[0].color.srcFactor = wgpu::BlendFactor::One;
 
         descriptor.cBlends[0].color.dstFactor = blendFactor;
         if (deprecated) {
-            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline2(&descriptor));
+            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
         } else {
-            device.CreateRenderPipeline2(&descriptor);
+            device.CreateRenderPipeline(&descriptor);
         }
         descriptor.cBlends[0].color.dstFactor = wgpu::BlendFactor::Zero;
 
         descriptor.cBlends[0].alpha.srcFactor = blendFactor;
         if (deprecated) {
-            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline2(&descriptor));
+            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
         } else {
-            device.CreateRenderPipeline2(&descriptor);
+            device.CreateRenderPipeline(&descriptor);
         }
         descriptor.cBlends[0].alpha.srcFactor = wgpu::BlendFactor::One;
 
         descriptor.cBlends[0].alpha.dstFactor = blendFactor;
         if (deprecated) {
-            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline2(&descriptor));
+            EXPECT_DEPRECATION_WARNING(device.CreateRenderPipeline(&descriptor));
         } else {
-            device.CreateRenderPipeline2(&descriptor);
+            device.CreateRenderPipeline(&descriptor);
         }
         descriptor.cBlends[0].alpha.dstFactor = wgpu::BlendFactor::Zero;
     }

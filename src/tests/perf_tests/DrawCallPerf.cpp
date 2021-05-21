@@ -347,7 +347,7 @@ void DrawCallPerf::SetUp() {
     }
 
     // Setup the base render pipeline descriptor.
-    utils::ComboRenderPipelineDescriptor2 renderPipelineDesc;
+    utils::ComboRenderPipelineDescriptor renderPipelineDesc;
     renderPipelineDesc.vertex.bufferCount = 1;
     renderPipelineDesc.cBuffers[0].arrayStride = 4 * sizeof(float);
     renderPipelineDesc.cBuffers[0].attributeCount = 1;
@@ -369,7 +369,7 @@ void DrawCallPerf::SetUp() {
     renderPipelineDesc.layout = pipelineLayout;
     renderPipelineDesc.vertex.module = vsModule;
     renderPipelineDesc.cFragment.module = fsModule;
-    mPipelines[0] = device.CreateRenderPipeline2(&renderPipelineDesc);
+    mPipelines[0] = device.CreateRenderPipeline(&renderPipelineDesc);
 
     // If the test is using a dynamic pipeline, create the second pipeline.
     if (GetParam().pipelineType == Pipeline::Dynamic) {
@@ -396,7 +396,7 @@ void DrawCallPerf::SetUp() {
         // Create the pipeline.
         renderPipelineDesc.layout = pipelineLayout;
         renderPipelineDesc.cFragment.module = fsModule;
-        mPipelines[1] = device.CreateRenderPipeline2(&renderPipelineDesc);
+        mPipelines[1] = device.CreateRenderPipeline(&renderPipelineDesc);
 
         // Create the buffer and bind group to bind to the constant bind group layout slot.
         constexpr float kConstantData[] = {0.01, 0.02, 0.03};

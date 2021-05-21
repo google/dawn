@@ -290,7 +290,7 @@ class DepthStencilStateTest : public DawnTest {
 
             // Create a pipeline for the triangles with the test spec's depth stencil state
 
-            utils::ComboRenderPipelineDescriptor2 descriptor;
+            utils::ComboRenderPipelineDescriptor descriptor;
             descriptor.vertex.module = vsModule;
             descriptor.cFragment.module = fsModule;
             wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
@@ -298,7 +298,7 @@ class DepthStencilStateTest : public DawnTest {
             depthStencil->format = wgpu::TextureFormat::Depth24PlusStencil8;
             descriptor.primitive.frontFace = test.frontFace;
 
-            wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
+            wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
             // Create a bind group for the data
             wgpu::BindGroup bindGroup = utils::MakeBindGroup(
@@ -732,12 +732,12 @@ TEST_P(DepthStencilStateTest, CreatePipelineWithAllFormats) {
     };
 
     for (wgpu::TextureFormat depthStencilFormat : kDepthStencilFormats) {
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         descriptor.EnableDepthStencil(depthStencilFormat);
 
-        device.CreateRenderPipeline2(&descriptor);
+        device.CreateRenderPipeline(&descriptor);
     }
 }
 

@@ -213,7 +213,7 @@ class BufferZeroInitTest : public DawnTest {
             })");
 
         ASSERT(vertexBufferCount <= 1u);
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
@@ -222,7 +222,7 @@ class BufferZeroInitTest : public DawnTest {
         descriptor.cBuffers[0].attributeCount = 1;
         descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
         descriptor.cTargets[0].format = kColorAttachmentFormat;
-        return device.CreateRenderPipeline2(&descriptor);
+        return device.CreateRenderPipeline(&descriptor);
     }
 
     void ExpectLazyClearSubmitAndCheckOutputs(wgpu::CommandEncoder encoder,

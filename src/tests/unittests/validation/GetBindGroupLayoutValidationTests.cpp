@@ -27,12 +27,12 @@ class GetBindGroupLayoutTests : public ValidationTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, shader);
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.layout = nullptr;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
 
-        return device.CreateRenderPipeline2(&descriptor);
+        return device.CreateRenderPipeline(&descriptor);
     }
 };
 
@@ -73,12 +73,12 @@ TEST_F(GetBindGroupLayoutTests, SameObject) {
             var pos_s : mat4x4<f32> = storage3.pos;
         })");
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
+    utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
     // The same value is returned for the same index.
     EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), pipeline.GetBindGroupLayout(0).Get());
@@ -491,12 +491,12 @@ TEST_F(GetBindGroupLayoutTests, DuplicateBinding) {
             var pos : vec4<f32> = uniforms.pos;
         })");
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
+    utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
 
-    device.CreateRenderPipeline2(&descriptor);
+    device.CreateRenderPipeline(&descriptor);
 }
 
 // Test that minBufferSize is set on the BGL and that the max of the min buffer sizes is used.
@@ -563,14 +563,14 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
     binding.buffer.minBindingSize = 64;
     wgpu::BindGroupLayout bgl64 = device.CreateBindGroupLayout(&desc);
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
+    utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
 
     // Check with both stages using 4 bytes.
     {
         descriptor.vertex.module = vsModule4;
         descriptor.cFragment.module = fsModule4;
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
         EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), bgl4.Get());
     }
 
@@ -578,7 +578,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
     {
         descriptor.vertex.module = vsModule64;
         descriptor.cFragment.module = fsModule4;
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
         EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), bgl64.Get());
     }
 
@@ -586,7 +586,7 @@ TEST_F(GetBindGroupLayoutTests, MinBufferSize) {
     {
         descriptor.vertex.module = vsModule4;
         descriptor.cFragment.module = fsModule64;
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
         EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), bgl64.Get());
     }
 }
@@ -629,14 +629,14 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     desc.entryCount = 1;
     desc.entries = &binding;
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
+    utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
 
     // Check with only the vertex shader using the sampler
     {
         descriptor.vertex.module = vsModuleSampler;
         descriptor.cFragment.module = fsModuleNoSampler;
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         binding.visibility = wgpu::ShaderStage::Vertex;
         EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), device.CreateBindGroupLayout(&desc).Get());
@@ -646,7 +646,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     {
         descriptor.vertex.module = vsModuleNoSampler;
         descriptor.cFragment.module = fsModuleSampler;
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         binding.visibility = wgpu::ShaderStage::Fragment;
         EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), device.CreateBindGroupLayout(&desc).Get());
@@ -656,7 +656,7 @@ TEST_F(GetBindGroupLayoutTests, StageAggregation) {
     {
         descriptor.vertex.module = vsModuleSampler;
         descriptor.cFragment.module = fsModuleSampler;
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         binding.visibility = wgpu::ShaderStage::Fragment | wgpu::ShaderStage::Vertex;
         EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), device.CreateBindGroupLayout(&desc).Get());
@@ -686,12 +686,12 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingType) {
             var pos : vec4<f32> = ssbo.pos;
         })");
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
+    utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
 
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
 // Test it is invalid to have conflicting binding texture multisampling in the shaders.
@@ -711,12 +711,12 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureMultisampling) {
             textureDimensions(myTexture);
         })");
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
+    utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
 
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
 // Test it is invalid to have conflicting binding texture dimension in the shaders.
@@ -736,12 +736,12 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingViewDimension) {
             textureDimensions(myTexture);
         })");
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
+    utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
 
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
 // Test it is invalid to have conflicting binding texture component type in the shaders.
@@ -761,12 +761,12 @@ TEST_F(GetBindGroupLayoutTests, ConflictingBindingTextureComponentType) {
             textureDimensions(myTexture);
         })");
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
+    utils::ComboRenderPipelineDescriptor descriptor;
     descriptor.layout = nullptr;
     descriptor.vertex.module = vsModule;
     descriptor.cFragment.module = fsModule;
 
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
 // Test it is an error to query an out of range bind group layout.
@@ -853,12 +853,12 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
         [[stage(fragment)]] fn main() {
         })");
 
-    utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+    utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.layout = pipelineLayout;
     pipelineDesc.vertex.module = vsModule;
     pipelineDesc.cFragment.module = fsModule;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDesc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
 
     EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), bindGroupLayout.Get());
 

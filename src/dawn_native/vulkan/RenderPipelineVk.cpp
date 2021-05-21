@@ -330,13 +330,13 @@ namespace dawn_native { namespace vulkan {
     // static
     ResultOrError<Ref<RenderPipeline>> RenderPipeline::Create(
         Device* device,
-        const RenderPipelineDescriptor2* descriptor) {
+        const RenderPipelineDescriptor* descriptor) {
         Ref<RenderPipeline> pipeline = AcquireRef(new RenderPipeline(device, descriptor));
         DAWN_TRY(pipeline->Initialize(descriptor));
         return pipeline;
     }
 
-    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor2* descriptor) {
+    MaybeError RenderPipeline::Initialize(const RenderPipelineDescriptor* descriptor) {
         Device* device = ToBackend(GetDevice());
 
         VkPipelineShaderStageCreateInfo shaderStages[2];

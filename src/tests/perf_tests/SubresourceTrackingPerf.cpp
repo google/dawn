@@ -68,7 +68,7 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
         uploadTexDesc.usage = wgpu::TextureUsage::CopySrc;
         mUploadTexture = device.CreateTexture(&uploadTexDesc);
 
-        utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+        utils::ComboRenderPipelineDescriptor pipelineDesc;
         pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
             [[stage(vertex)]] fn main() -> [[builtin(position)]] vec4<f32> {
                 return vec4<f32>(1.0, 0.0, 0.0, 1.0);
@@ -81,7 +81,7 @@ class SubresourceTrackingPerf : public DawnPerfTestWithParams<SubresourceTrackin
                 return vec4<f32>(1.0, 0.0, 0.0, 1.0);
             }
         )");
-        mPipeline = device.CreateRenderPipeline2(&pipelineDesc);
+        mPipeline = device.CreateRenderPipeline(&pipelineDesc);
     }
 
   private:

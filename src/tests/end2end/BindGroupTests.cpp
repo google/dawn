@@ -98,7 +98,7 @@ class BindGroupTests : public DawnTest {
 
         wgpu::PipelineLayout pipelineLayout = MakeBasicPipelineLayout(bindGroupLayouts);
 
-        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.layout = pipelineLayout;
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
@@ -114,7 +114,7 @@ class BindGroupTests : public DawnTest {
 
         pipelineDescriptor.cTargets[0].blend = &blend;
 
-        return device.CreateRenderPipeline2(&pipelineDescriptor);
+        return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 };
 
@@ -184,12 +184,12 @@ TEST_P(BindGroupTests, ReusedUBO) {
             return fragmentUbo.color;
         })");
 
-    utils::ComboRenderPipelineDescriptor2 textureDescriptor;
+    utils::ComboRenderPipelineDescriptor textureDescriptor;
     textureDescriptor.vertex.module = vsModule;
     textureDescriptor.cFragment.module = fsModule;
     textureDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&textureDescriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
 
     struct Data {
         float transform[8];
@@ -260,12 +260,12 @@ TEST_P(BindGroupTests, UBOSamplerAndTexture) {
             return textureSample(tex, samp, FragCoord.xy);
         })");
 
-    utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
     pipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
     constexpr float transform[] = {1.f, 0.f, 0.f, 1.f};
     wgpu::Buffer buffer = utils::CreateBufferFromData(device, &transform, sizeof(transform),
@@ -382,12 +382,12 @@ TEST_P(BindGroupTests, MultipleBindLayouts) {
             return fragmentUbo1.color + fragmentUbo2.color;
         })");
 
-    utils::ComboRenderPipelineDescriptor2 textureDescriptor;
+    utils::ComboRenderPipelineDescriptor textureDescriptor;
     textureDescriptor.vertex.module = vsModule;
     textureDescriptor.cFragment.module = fsModule;
     textureDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&textureDescriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
 
     struct Data {
         float transform[4];
@@ -970,12 +970,12 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
             return ubo1.color + 2.0 * ubo2.color + 4.0 * ubo3.color;
         })");
 
-    utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.cFragment.module = fsModule;
     pipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
     wgpu::Buffer black =
         utils::CreateBufferFromData(device, wgpu::BufferUsage::Uniform, {0.f, 0.f, 0.f, 0.f});
@@ -1086,7 +1086,7 @@ TEST_P(BindGroupTests, EmptyLayout) {
 // This is a regression test for crbug.com/dawn/410 which tests that it can successfully compile and
 // execute the shader.
 TEST_P(BindGroupTests, ReadonlyStorage) {
-    utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
     pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
         [[stage(vertex)]]
@@ -1118,7 +1118,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
 
     pipelineDescriptor.layout = utils::MakeBasicPipelineLayout(device, &bgl);
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);

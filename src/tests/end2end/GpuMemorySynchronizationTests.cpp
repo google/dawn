@@ -72,13 +72,13 @@ class GpuMemorySyncTests : public DawnTest {
                 return vec4<f32>(f32(data.i) / 255.0, 0.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor2 rpDesc;
+        utils::ComboRenderPipelineDescriptor rpDesc;
         rpDesc.vertex.module = vsModule;
         rpDesc.cFragment.module = fsModule;
         rpDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
         rpDesc.cTargets[0].format = colorFormat;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 
         wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buffer}});
@@ -347,13 +347,13 @@ class StorageToUniformSyncTests : public DawnTest {
                 return vec4<f32>(contents.color, 0.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor2 rpDesc;
+        utils::ComboRenderPipelineDescriptor rpDesc;
         rpDesc.vertex.module = vsModule;
         rpDesc.cFragment.module = fsModule;
         rpDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
         rpDesc.cTargets[0].format = colorFormat;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 
         wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, mBuffer}});
@@ -589,7 +589,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = vsModule;
     rpDesc.cFragment.module = fsModule;
     rpDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
@@ -599,7 +599,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
     rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     rpDesc.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&rpDesc);
+    wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
 
     wgpu::BindGroup bindGroup1 = utils::MakeBindGroup(device, rp.GetBindGroupLayout(0),
                                                       {{0, uniformBuffer}, {1, storageBuffer}});
@@ -704,7 +704,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
-    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = vsModule;
     rpDesc.cFragment.module = fsModule;
     rpDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
@@ -714,7 +714,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     rpDesc.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&rpDesc);
+    wgpu::RenderPipeline rp = device.CreateRenderPipeline(&rpDesc);
 
     wgpu::BindGroup bindGroup1 =
         utils::MakeBindGroup(device, rp.GetBindGroupLayout(0),

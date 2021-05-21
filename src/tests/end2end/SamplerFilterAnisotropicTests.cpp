@@ -76,7 +76,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
                 return textureSample(texture0, sampler0, input.uv);
             })");
 
-        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
         pipelineDescriptor.cBuffers[0].attributeCount = 2;
@@ -88,7 +88,7 @@ class SamplerFilterAnisotropicTest : public DawnTest {
         pipelineDescriptor.cBuffers[0].arrayStride = 6 * sizeof(float);
         pipelineDescriptor.cTargets[0].format = mRenderPass.colorFormat;
 
-        mPipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
+        mPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
         mBindGroupLayout = mPipeline.GetBindGroupLayout(0);
 
         InitTexture();

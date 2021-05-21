@@ -362,7 +362,7 @@ class VertexFormatTest : public DawnTest {
             strideBytes += (4 - strideBytes % 4);
         }
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         descriptor.vertex.bufferCount = 1;
@@ -371,7 +371,7 @@ class VertexFormatTest : public DawnTest {
         descriptor.cAttributes[0].format = format;
         descriptor.cTargets[0].format = renderPass.colorFormat;
 
-        return device.CreateRenderPipeline2(&descriptor);
+        return device.CreateRenderPipeline(&descriptor);
     }
 
     template <typename VertexType, typename ExpectedType>

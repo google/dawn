@@ -170,12 +170,12 @@ class TextureViewSamplingTest : public DawnTest {
     void Verify(const wgpu::TextureView& textureView, const char* fragmentShader, int expected) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader);
 
-        utils::ComboRenderPipelineDescriptor2 textureDescriptor;
+        utils::ComboRenderPipelineDescriptor textureDescriptor;
         textureDescriptor.vertex.module = mVSModule;
         textureDescriptor.cFragment.module = fsModule;
         textureDescriptor.cTargets[0].format = mRenderPass.colorFormat;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&textureDescriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&textureDescriptor);
 
         wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
                                                          {{0, mSampler}, {1, textureView}});
@@ -503,12 +503,12 @@ class TextureViewRenderingTest : public DawnTest {
         wgpu::ShaderModule oneColorFsModule =
             utils::CreateShaderModule(device, oneColorFragmentShader);
 
-        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = oneColorFsModule;
         pipelineDescriptor.cTargets[0].format = kDefaultFormat;
 
-        wgpu::RenderPipeline oneColorPipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
+        wgpu::RenderPipeline oneColorPipeline = device.CreateRenderPipeline(&pipelineDescriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {

@@ -37,15 +37,15 @@ TEST_F(WireExtensionTests, ChainedStruct) {
     clientExt.chain.next = nullptr;
     clientExt.clampDepth = true;
 
-    WGPURenderPipelineDescriptor2 renderPipelineDesc = {};
+    WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt.chain;
 
-    wgpuDeviceCreateRenderPipeline2(device, &renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline2(apiDevice, NotNull()))
+    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke([&](Unused,
-                             const WGPURenderPipelineDescriptor2* serverDesc) -> WGPURenderPipeline {
+                             const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
             const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(
                 serverDesc->primitive.nextInChain);
             EXPECT_EQ(ext->chain.sType, clientExt.chain.sType);
@@ -75,15 +75,15 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
     clientExt1.chain.next = &clientExt2.chain;
     clientExt1.clampDepth = true;
 
-    WGPURenderPipelineDescriptor2 renderPipelineDesc = {};
+    WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt1.chain;
 
-    wgpuDeviceCreateRenderPipeline2(device, &renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline2(apiDevice, NotNull()))
+    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke([&](Unused,
-                             const WGPURenderPipelineDescriptor2* serverDesc) -> WGPURenderPipeline {
+                             const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
             const auto* ext1 = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(
                 serverDesc->primitive.nextInChain);
             EXPECT_EQ(ext1->chain.sType, clientExt1.chain.sType);
@@ -104,10 +104,10 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
     clientExt2.chain.next = &clientExt1.chain;
     clientExt1.chain.next = nullptr;
 
-    wgpuDeviceCreateRenderPipeline2(device, &renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline2(apiDevice, NotNull()))
+    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke([&](Unused,
-                             const WGPURenderPipelineDescriptor2* serverDesc) -> WGPURenderPipeline {
+                             const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
             const auto* ext2 = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(
                 serverDesc->primitive.nextInChain);
             EXPECT_EQ(ext2->chain.sType, clientExt2.chain.sType);
@@ -136,19 +136,19 @@ TEST_F(WireExtensionTests, InvalidSType) {
     clientExt.chain.sType = WGPUSType_Invalid;
     clientExt.chain.next = nullptr;
 
-    WGPURenderPipelineDescriptor2 renderPipelineDesc = {};
+    WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt.chain;
 
-    wgpuDeviceCreateRenderPipeline2(device, &renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline2(apiDevice, NotNull()))
-        .WillOnce(Invoke([&](Unused,
-                             const WGPURenderPipelineDescriptor2* serverDesc) -> WGPURenderPipeline {
-            EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType_Invalid);
-            EXPECT_EQ(serverDesc->primitive.nextInChain->next, nullptr);
-            return api.GetNewRenderPipeline();
-        }));
+    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
+        .WillOnce(Invoke(
+            [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
+                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType_Invalid);
+                EXPECT_EQ(serverDesc->primitive.nextInChain->next, nullptr);
+                return api.GetNewRenderPipeline();
+            }));
     FlushClient();
 }
 
@@ -164,19 +164,19 @@ TEST_F(WireExtensionTests, UnknownSType) {
     clientExt.chain.sType = static_cast<WGPUSType>(-1);
     clientExt.chain.next = nullptr;
 
-    WGPURenderPipelineDescriptor2 renderPipelineDesc = {};
+    WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt.chain;
 
-    wgpuDeviceCreateRenderPipeline2(device, &renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline2(apiDevice, NotNull()))
-        .WillOnce(Invoke([&](Unused,
-                             const WGPURenderPipelineDescriptor2* serverDesc) -> WGPURenderPipeline {
-            EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType_Invalid);
-            EXPECT_EQ(serverDesc->primitive.nextInChain->next, nullptr);
-            return api.GetNewRenderPipeline();
-        }));
+    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
+        .WillOnce(Invoke(
+            [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
+                EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType_Invalid);
+                EXPECT_EQ(serverDesc->primitive.nextInChain->next, nullptr);
+                return api.GetNewRenderPipeline();
+            }));
     FlushClient();
 }
 
@@ -198,15 +198,15 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     clientExt1.chain.next = &clientExt2.chain;
     clientExt1.clampDepth = true;
 
-    WGPURenderPipelineDescriptor2 renderPipelineDesc = {};
+    WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
     renderPipelineDesc.vertex.entryPoint = "main";
     renderPipelineDesc.primitive.nextInChain = &clientExt1.chain;
 
-    wgpuDeviceCreateRenderPipeline2(device, &renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline2(apiDevice, NotNull()))
+    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke([&](Unused,
-                             const WGPURenderPipelineDescriptor2* serverDesc) -> WGPURenderPipeline {
+                             const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
             const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(
                 serverDesc->primitive.nextInChain);
             EXPECT_EQ(ext->chain.sType, clientExt1.chain.sType);
@@ -223,10 +223,10 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     clientExt2.chain.next = &clientExt1.chain;
     clientExt1.chain.next = nullptr;
 
-    wgpuDeviceCreateRenderPipeline2(device, &renderPipelineDesc);
-    EXPECT_CALL(api, DeviceCreateRenderPipeline2(apiDevice, NotNull()))
+    wgpuDeviceCreateRenderPipeline(device, &renderPipelineDesc);
+    EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke([&](Unused,
-                             const WGPURenderPipelineDescriptor2* serverDesc) -> WGPURenderPipeline {
+                             const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
             EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType_Invalid);
 
             const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(

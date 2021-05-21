@@ -145,7 +145,7 @@ struct FragInputs {
 
     constexpr uint32_t kComponentsPerVertex = 4;
 
-    utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+    utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.vertex.module = utils::CreateShaderModule(device, vertexShader.c_str());
     pipelineDesc.cFragment.module = utils::CreateShaderModule(device, fragmentShader.c_str());
     pipelineDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
@@ -155,7 +155,7 @@ struct FragInputs {
     pipelineDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
     pipelineDesc.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDesc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
 
     std::vector<float> vertexData(firstVertex * kComponentsPerVertex);
     vertexData.insert(vertexData.end(), {0, 0, 0, 1});

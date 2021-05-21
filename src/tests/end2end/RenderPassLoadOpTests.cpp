@@ -33,12 +33,12 @@ class DrawQuad {
     }
 
     void Draw(wgpu::RenderPassEncoder* pass) {
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.layout = pipelineLayout;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
 
-        auto renderPipeline = device.CreateRenderPipeline2(&descriptor);
+        auto renderPipeline = device.CreateRenderPipeline(&descriptor);
 
         pass->SetPipeline(renderPipeline);
         pass->Draw(6, 1, 0, 0);

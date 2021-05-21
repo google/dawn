@@ -551,7 +551,7 @@ namespace dawn_native {
     }
 
     ResultOrError<Ref<RenderPipelineBase>> DeviceBase::GetOrCreateRenderPipeline(
-        const RenderPipelineDescriptor2* descriptor) {
+        const RenderPipelineDescriptor* descriptor) {
         RenderPipelineBase blueprint(this, descriptor);
 
         const size_t blueprintHash = blueprint.ComputeContentHash();
@@ -669,12 +669,6 @@ namespace dawn_native {
     }
 
     Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
-        const RenderPipelineDescriptor2* descriptor) {
-        AttachmentStateBlueprint blueprint(descriptor);
-        return GetOrCreateAttachmentState(&blueprint);
-    }
-
-    Ref<AttachmentState> DeviceBase::GetOrCreateAttachmentState(
         const RenderPassDescriptor* descriptor) {
         AttachmentStateBlueprint blueprint(descriptor);
         return GetOrCreateAttachmentState(&blueprint);
@@ -759,7 +753,7 @@ namespace dawn_native {
         }
         return result.Detach();
     }
-    void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor2* descriptor,
+    void DeviceBase::APICreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
                                                   WGPUCreateRenderPipelineAsyncCallback callback,
                                                   void* userdata) {
         ResultOrError<Ref<RenderPipelineBase>> maybeResult =
@@ -787,111 +781,18 @@ namespace dawn_native {
     }
     RenderPipelineBase* DeviceBase::APICreateRenderPipeline(
         const RenderPipelineDescriptor* descriptor) {
-        // TODO: Enable this warning once the tests have been converted to either use the new
-        // format or expect the deprecation warning.
-        EmitDeprecationWarning(
-            "The format of RenderPipelineDescriptor has changed, and will soon require the "
-            "new structure. Please begin using CreateRenderPipeline2() instead.");
-
-        // Convert descriptor to the new format it before proceeding.
-        RenderPipelineDescriptor2 normalizedDescriptor;
-
-        normalizedDescriptor.label = descriptor->label;
-        normalizedDescriptor.layout = descriptor->layout;
-
-        normalizedDescriptor.vertex.module = descriptor->vertexStage.module;
-        normalizedDescriptor.vertex.entryPoint = descriptor->vertexStage.entryPoint;
-
-        normalizedDescriptor.primitive.topology = descriptor->primitiveTopology;
-
-        normalizedDescriptor.multisample.count = descriptor->sampleCount;
-        normalizedDescriptor.multisample.mask = descriptor->sampleMask;
-        normalizedDescriptor.multisample.alphaToCoverageEnabled =
-            descriptor->alphaToCoverageEnabled;
-
-        if (descriptor->vertexState) {
-            const VertexStateDescriptor* vertexState = descriptor->vertexState;
-            normalizedDescriptor.primitive.stripIndexFormat = vertexState->indexFormat;
-            normalizedDescriptor.vertex.bufferCount = vertexState->vertexBufferCount;
-            normalizedDescriptor.vertex.buffers = vertexState->vertexBuffers;
-        } else {
-            normalizedDescriptor.vertex.bufferCount = 0;
-            normalizedDescriptor.vertex.buffers = nullptr;
-        }
-
-        DepthStencilState depthStencil;
-        if (descriptor->depthStencilState) {
-            const DepthStencilStateDescriptor* depthStencilState = descriptor->depthStencilState;
-            normalizedDescriptor.depthStencil = &depthStencil;
-
-            depthStencil.format = depthStencilState->format;
-            depthStencil.depthWriteEnabled = depthStencilState->depthWriteEnabled;
-            depthStencil.depthCompare = depthStencilState->depthCompare;
-            depthStencil.stencilFront = depthStencilState->stencilFront;
-            depthStencil.stencilBack = depthStencilState->stencilBack;
-            depthStencil.stencilReadMask = depthStencilState->stencilReadMask;
-            depthStencil.stencilWriteMask = depthStencilState->stencilWriteMask;
-        }
-
-        if (descriptor->rasterizationState) {
-            const RasterizationStateDescriptor* rasterizationState = descriptor->rasterizationState;
-            normalizedDescriptor.primitive.frontFace = rasterizationState->frontFace;
-            normalizedDescriptor.primitive.cullMode = rasterizationState->cullMode;
-            depthStencil.depthBias = rasterizationState->depthBias;
-            depthStencil.depthBiasSlopeScale = rasterizationState->depthBiasSlopeScale;
-            depthStencil.depthBiasClamp = rasterizationState->depthBiasClamp;
-        }
-
-        FragmentState fragment;
-        std::vector<ColorTargetState> targets;
-        std::vector<BlendState> blendStates;
-        if (descriptor->fragmentStage) {
-            const ProgrammableStageDescriptor* fragmentStage = descriptor->fragmentStage;
-            normalizedDescriptor.fragment = &fragment;
-
-            fragment.module = fragmentStage->module;
-            fragment.entryPoint = fragmentStage->entryPoint;
-
-            targets.resize(descriptor->colorStateCount);
-            blendStates.resize(descriptor->colorStateCount);
-
-            for (uint32_t i = 0; i < descriptor->colorStateCount; ++i) {
-                const ColorStateDescriptor& colorState = descriptor->colorStates[i];
-                ColorTargetState& target = targets[i];
-                target.format = colorState.format;
-                target.writeMask = colorState.writeMask;
-
-                if (BlendEnabled(&colorState)) {
-                    BlendState* blend = &blendStates[i];
-                    target.blend = blend;
-
-                    blend->color.srcFactor = colorState.colorBlend.srcFactor;
-                    blend->color.dstFactor = colorState.colorBlend.dstFactor;
-                    blend->color.operation = colorState.colorBlend.operation;
-
-                    blend->alpha.srcFactor = colorState.alphaBlend.srcFactor;
-                    blend->alpha.dstFactor = colorState.alphaBlend.dstFactor;
-                    blend->alpha.operation = colorState.alphaBlend.operation;
-                }
-            }
-
-            fragment.targetCount = descriptor->colorStateCount;
-            fragment.targets = targets.data();
-        }
-
-        Ref<RenderPipelineBase> result;
-        if (ConsumedError(CreateRenderPipeline(&normalizedDescriptor), &result)) {
-            return RenderPipelineBase::MakeError(this);
-        }
-        return result.Detach();
-    }
-    RenderPipelineBase* DeviceBase::APICreateRenderPipeline2(
-        const RenderPipelineDescriptor2* descriptor) {
         Ref<RenderPipelineBase> result;
         if (ConsumedError(CreateRenderPipeline(descriptor), &result)) {
             return RenderPipelineBase::MakeError(this);
         }
         return result.Detach();
+    }
+    RenderPipelineBase* DeviceBase::APICreateRenderPipeline2(
+        const RenderPipelineDescriptor* descriptor) {
+        EmitDeprecationWarning(
+            "CreateRenderPipeline2() has been deprecated. Please begin using "
+            "CreateRenderPipeline() instead.");
+        return APICreateRenderPipeline(descriptor);
     }
     ShaderModuleBase* DeviceBase::APICreateShaderModule(const ShaderModuleDescriptor* descriptor) {
         Ref<ShaderModuleBase> result;
@@ -1212,14 +1113,14 @@ namespace dawn_native {
     }
 
     ResultOrError<Ref<RenderPipelineBase>> DeviceBase::CreateRenderPipeline(
-        const RenderPipelineDescriptor2* descriptor) {
+        const RenderPipelineDescriptor* descriptor) {
         DAWN_TRY(ValidateIsAlive());
         if (IsValidationEnabled()) {
             DAWN_TRY(ValidateRenderPipelineDescriptor(this, descriptor));
         }
 
         if (descriptor->layout == nullptr) {
-            RenderPipelineDescriptor2 descriptorWithDefaultLayout = *descriptor;
+            RenderPipelineDescriptor descriptorWithDefaultLayout = *descriptor;
 
             // Ref will keep the pipeline layout alive until the end of the function where
             // the pipeline will take another reference.

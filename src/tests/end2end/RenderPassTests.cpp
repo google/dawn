@@ -42,13 +42,13 @@ class RenderPassTest : public DawnTest {
                 return vec4<f32>(0.0, 0.0, 1.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = mVSModule;
         descriptor.cFragment.module = fsModule;
         descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cTargets[0].format = kFormat;
 
-        pipeline = device.CreateRenderPipeline2(&descriptor);
+        pipeline = device.CreateRenderPipeline(&descriptor);
     }
 
     wgpu::Texture CreateDefault2DTexture() {
@@ -140,14 +140,14 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
             [[stage(fragment)]] fn main() {
             })");
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = mVSModule;
         descriptor.cFragment.module = fsModule;
         descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cTargets[0].format = kFormat;
 
         wgpu::RenderPipeline pipelineWithNoFragmentOutput =
-            device.CreateRenderPipeline2(&descriptor);
+            device.CreateRenderPipeline(&descriptor);
 
         pass.SetPipeline(pipelineWithNoFragmentOutput);
         pass.Draw(3);

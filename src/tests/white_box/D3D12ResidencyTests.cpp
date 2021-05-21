@@ -334,7 +334,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
     // unknown file: error: SEH exception with code 0x87d thrown in the test body.
     DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP() && IsBackendValidationEnabled());
 
-    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
 
     // Fill in a view heap with "view only" bindgroups (1x view per group) by creating a
     // view bindgroup each draw. After HEAP_SIZE + 1 draws, the heaps must switch over.
@@ -360,7 +360,7 @@ TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
                 return colorBuffer.color;
             })");
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
     constexpr uint32_t kSize = 512;
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kSize, kSize);
 

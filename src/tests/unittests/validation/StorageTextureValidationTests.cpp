@@ -127,11 +127,11 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
                 return textureLoad(image0, vec2<i32>(i32(VertexIndex), 0));
             })");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.layout = nullptr;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = mDefaultFSModule;
-        device.CreateRenderPipeline2(&descriptor);
+        device.CreateRenderPipeline(&descriptor);
     }
 
     // Read-only storage textures can be declared in a fragment shader.
@@ -144,11 +144,11 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
                 return textureLoad(image0, vec2<i32>(FragCoord.xy));
             })");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.layout = nullptr;
         descriptor.vertex.module = mDefaultVSModule;
         descriptor.cFragment.module = fsModule;
-        device.CreateRenderPipeline2(&descriptor);
+        device.CreateRenderPipeline(&descriptor);
     }
 
     // Write-only storage textures cannot be declared in a vertex shader.
@@ -159,11 +159,11 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
                 textureStore(image0, vec2<i32>(i32(vertex_index), 0), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.layout = nullptr;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = mDefaultFSModule;
-        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+        ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
     }
 
     // Write-only storage textures can be declared in a fragment shader.
@@ -174,11 +174,11 @@ TEST_F(StorageTextureValidationTests, RenderPipeline) {
                 textureStore(image0, vec2<i32>(position.xy), vec4<f32>(1.0, 0.0, 0.0, 1.0));
             })");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.layout = nullptr;
         descriptor.vertex.module = mDefaultVSModule;
         descriptor.cFragment.module = fsModule;
-        device.CreateRenderPipeline2(&descriptor);
+        device.CreateRenderPipeline(&descriptor);
     }
 }
 

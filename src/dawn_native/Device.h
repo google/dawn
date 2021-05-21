@@ -120,7 +120,7 @@ namespace dawn_native {
         void UncachePipelineLayout(PipelineLayoutBase* obj);
 
         ResultOrError<Ref<RenderPipelineBase>> GetOrCreateRenderPipeline(
-            const RenderPipelineDescriptor2* descriptor);
+            const RenderPipelineDescriptor* descriptor);
         void UncacheRenderPipeline(RenderPipelineBase* obj);
 
         ResultOrError<Ref<SamplerBase>> GetOrCreateSampler(const SamplerDescriptor* descriptor);
@@ -135,8 +135,6 @@ namespace dawn_native {
         Ref<AttachmentState> GetOrCreateAttachmentState(
             const RenderBundleEncoderDescriptor* descriptor);
         Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPipelineDescriptor* descriptor);
-        Ref<AttachmentState> GetOrCreateAttachmentState(
-            const RenderPipelineDescriptor2* descriptor);
         Ref<AttachmentState> GetOrCreateAttachmentState(const RenderPassDescriptor* descriptor);
         void UncacheAttachmentState(AttachmentState* obj);
 
@@ -159,7 +157,7 @@ namespace dawn_native {
         ResultOrError<Ref<RenderBundleEncoder>> CreateRenderBundleEncoder(
             const RenderBundleEncoderDescriptor* descriptor);
         ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipeline(
-            const RenderPipelineDescriptor2* descriptor);
+            const RenderPipelineDescriptor* descriptor);
         ResultOrError<Ref<SamplerBase>> CreateSampler(const SamplerDescriptor* descriptor);
         ResultOrError<Ref<ShaderModuleBase>> CreateShaderModule(
             const ShaderModuleDescriptor* descriptor,
@@ -182,13 +180,13 @@ namespace dawn_native {
         void APICreateComputePipelineAsync(const ComputePipelineDescriptor* descriptor,
                                            WGPUCreateComputePipelineAsyncCallback callback,
                                            void* userdata);
-        void APICreateRenderPipelineAsync(const RenderPipelineDescriptor2* descriptor,
+        void APICreateRenderPipelineAsync(const RenderPipelineDescriptor* descriptor,
                                           WGPUCreateRenderPipelineAsyncCallback callback,
                                           void* userdata);
         RenderBundleEncoder* APICreateRenderBundleEncoder(
             const RenderBundleEncoderDescriptor* descriptor);
         RenderPipelineBase* APICreateRenderPipeline(const RenderPipelineDescriptor* descriptor);
-        RenderPipelineBase* APICreateRenderPipeline2(const RenderPipelineDescriptor2* descriptor);
+        RenderPipelineBase* APICreateRenderPipeline2(const RenderPipelineDescriptor* descriptor);
         ExternalTextureBase* APICreateExternalTexture(const ExternalTextureDescriptor* descriptor);
         SamplerBase* APICreateSampler(const SamplerDescriptor* descriptor);
         ShaderModuleBase* APICreateShaderModule(const ShaderModuleDescriptor* descriptor);
@@ -304,7 +302,7 @@ namespace dawn_native {
         virtual ResultOrError<Ref<QuerySetBase>> CreateQuerySetImpl(
             const QuerySetDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<RenderPipelineBase>> CreateRenderPipelineImpl(
-            const RenderPipelineDescriptor2* descriptor) = 0;
+            const RenderPipelineDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<SamplerBase>> CreateSamplerImpl(
             const SamplerDescriptor* descriptor) = 0;
         virtual ResultOrError<Ref<ShaderModuleBase>> CreateShaderModuleImpl(

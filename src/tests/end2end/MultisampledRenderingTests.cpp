@@ -218,7 +218,7 @@ class MultisampledRenderingTest : public DawnTest {
                                                      uint32_t sampleMask = 0xFFFFFFFF,
                                                      bool alphaToCoverageEnabled = false,
                                                      bool flipTriangle = false) {
-        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
         // Draw a bottom-right triangle. In standard 4xMSAA pattern, for the pixels on diagonal,
         // only two of the samples will be touched.
@@ -269,7 +269,7 @@ class MultisampledRenderingTest : public DawnTest {
             pipelineDescriptor.cTargets[i].format = kColorFormat;
         }
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&pipelineDescriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
         return pipeline;
     }
 

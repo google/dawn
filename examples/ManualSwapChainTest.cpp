@@ -311,7 +311,7 @@ int main(int argc, const char* argv[]) {
     queue = device.GetQueue();
 
     // The hacky pipeline to render a triangle.
-    utils::ComboRenderPipelineDescriptor2 pipelineDesc;
+    utils::ComboRenderPipelineDescriptor pipelineDesc;
     pipelineDesc.vertex.module = utils::CreateShaderModule(device, R"(
         let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
             vec2<f32>( 0.0,  0.5),
@@ -328,7 +328,7 @@ int main(int argc, const char* argv[]) {
         })");
     // BGRA shouldn't be hardcoded. Consider having a map[format -> pipeline].
     pipelineDesc.cTargets[0].format = wgpu::TextureFormat::BGRA8Unorm;
-    trianglePipeline = device.CreateRenderPipeline2(&pipelineDesc);
+    trianglePipeline = device.CreateRenderPipeline(&pipelineDesc);
 
     // Craete the first window, since the example exits when there are no windows.
     AddWindow();

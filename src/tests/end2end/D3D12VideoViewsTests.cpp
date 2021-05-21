@@ -293,7 +293,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
     viewDesc.aspect = wgpu::TextureAspect::Plane0Only;
     wgpu::TextureView textureView = wgpuTexture.CreateView(&viewDesc);
 
-    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
@@ -311,7 +311,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYtoR) {
     renderPipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
     renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     wgpu::Sampler sampler = device.CreateSampler();
 
@@ -344,7 +344,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
     viewDesc.aspect = wgpu::TextureAspect::Plane1Only;
     wgpu::TextureView textureView = wgpuTexture.CreateView(&viewDesc);
 
-    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
@@ -363,7 +363,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
     renderPipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
     renderPipelineDescriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     wgpu::Sampler sampler = device.CreateSampler();
 
@@ -404,7 +404,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
     chromaViewDesc.aspect = wgpu::TextureAspect::Plane1Only;
     wgpu::TextureView chromaTextureView = wgpuTexture.CreateView(&chromaViewDesc);
 
-    utils::ComboRenderPipelineDescriptor2 renderPipelineDescriptor;
+    utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
     renderPipelineDescriptor.vertex.module = GetTestVertexShaderModule();
 
     renderPipelineDescriptor.cFragment.module = utils::CreateShaderModule(device, R"(
@@ -424,7 +424,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
         device, kYUVImageDataWidthInTexels, kYUVImageDataHeightInTexels);
     renderPipelineDescriptor.cTargets[0].format = renderPass.colorFormat;
 
-    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&renderPipelineDescriptor);
+    wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&renderPipelineDescriptor);
 
     wgpu::Sampler sampler = device.CreateSampler();
 

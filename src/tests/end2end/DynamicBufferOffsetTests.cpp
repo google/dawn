@@ -152,7 +152,7 @@ class DynamicBufferOffsetTests : public DawnTest {
 
         wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fs.str().c_str());
 
-        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
         pipelineDescriptor.vertex.module = vsModule;
         pipelineDescriptor.cFragment.module = fsModule;
         pipelineDescriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
@@ -166,7 +166,7 @@ class DynamicBufferOffsetTests : public DawnTest {
         pipelineLayoutDescriptor.bindGroupLayouts = mBindGroupLayouts;
         pipelineDescriptor.layout = device.CreatePipelineLayout(&pipelineLayoutDescriptor);
 
-        return device.CreateRenderPipeline2(&pipelineDescriptor);
+        return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
     wgpu::ComputePipeline CreateComputePipeline(bool isInheritedPipeline = false) {

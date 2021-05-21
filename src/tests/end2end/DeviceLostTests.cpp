@@ -177,8 +177,8 @@ TEST_P(DeviceLostTest, CreateComputePipelineFails) {
 TEST_P(DeviceLostTest, CreateRenderPipelineFails) {
     SetCallbackAndLoseForTesting();
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline2(&descriptor));
+    utils::ComboRenderPipelineDescriptor descriptor;
+    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
 // Tests that CreateSampler fails when device is lost

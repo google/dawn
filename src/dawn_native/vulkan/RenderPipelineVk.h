@@ -28,14 +28,14 @@ namespace dawn_native { namespace vulkan {
       public:
         static ResultOrError<Ref<RenderPipeline>> Create(
             Device* device,
-            const RenderPipelineDescriptor2* descriptor);
+            const RenderPipelineDescriptor* descriptor);
 
         VkPipeline GetHandle() const;
 
       private:
         ~RenderPipeline() override;
         using RenderPipelineBase::RenderPipelineBase;
-        MaybeError Initialize(const RenderPipelineDescriptor2* descriptor);
+        MaybeError Initialize(const RenderPipelineDescriptor* descriptor);
 
         struct PipelineVertexInputStateCreateInfoTemporaryAllocations {
             std::array<VkVertexInputBindingDescription, kMaxVertexBuffers> bindings;

@@ -32,14 +32,14 @@ class IndexBufferValidationTest : public ValidationTest {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         descriptor.primitive.topology = primitiveTopology;
         descriptor.primitive.stripIndexFormat = format;
         descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
-        return device.CreateRenderPipeline2(&descriptor);
+        return device.CreateRenderPipeline(&descriptor);
     }
 };
 

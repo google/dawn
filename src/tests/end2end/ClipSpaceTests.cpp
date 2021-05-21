@@ -20,7 +20,7 @@
 class ClipSpaceTest : public DawnTest {
   protected:
     wgpu::RenderPipeline CreatePipelineForTest() {
-        utils::ComboRenderPipelineDescriptor2 pipelineDescriptor;
+        utils::ComboRenderPipelineDescriptor pipelineDescriptor;
 
         // Draw two triangles:
         // 1. The depth value of the top-left one is >= 0.5
@@ -47,7 +47,7 @@ class ClipSpaceTest : public DawnTest {
         wgpu::DepthStencilState* depthStencil = pipelineDescriptor.EnableDepthStencil();
         depthStencil->depthCompare = wgpu::CompareFunction::LessEqual;
 
-        return device.CreateRenderPipeline2(&pipelineDescriptor);
+        return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
     wgpu::Texture Create2DTextureForTest(wgpu::TextureFormat format) {

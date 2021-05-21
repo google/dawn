@@ -56,7 +56,7 @@ void init() {
     WGPUShaderModule fsModule = utils::CreateShaderModule(device, fs).Release();
 
     {
-        WGPURenderPipelineDescriptor2 descriptor = {};
+        WGPURenderPipelineDescriptor descriptor = {};
 
         // Fragment state
         WGPUBlendState blend = {};
@@ -97,7 +97,7 @@ void init() {
         descriptor.primitive.topology = WGPUPrimitiveTopology_TriangleList;
         descriptor.primitive.stripIndexFormat = WGPUIndexFormat_Undefined;
 
-        pipeline = wgpuDeviceCreateRenderPipeline2(device, &descriptor);
+        pipeline = wgpuDeviceCreateRenderPipeline(device, &descriptor);
     }
 
     wgpuShaderModuleRelease(vsModule);

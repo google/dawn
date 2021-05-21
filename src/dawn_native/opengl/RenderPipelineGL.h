@@ -29,7 +29,7 @@ namespace dawn_native { namespace opengl {
 
     class RenderPipeline final : public RenderPipelineBase, public PipelineGL {
       public:
-        RenderPipeline(Device* device, const RenderPipelineDescriptor2* descriptor);
+        RenderPipeline(Device* device, const RenderPipelineDescriptor* descriptor);
 
         GLenum GetGLPrimitiveTopology() const;
         ityp::bitset<VertexAttributeLocation, kMaxVertexAttributes> GetAttributesUsingVertexBuffer(

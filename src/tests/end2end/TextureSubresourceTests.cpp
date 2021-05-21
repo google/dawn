@@ -65,13 +65,13 @@ class TextureSubresourceTest : public DawnTest {
                 return vec4<f32>(1.0, 0.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
         descriptor.cTargets[0].format = kFormat;
 
-        wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline rp = device.CreateRenderPipeline(&descriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -109,7 +109,7 @@ class TextureSubresourceTest : public DawnTest {
                 return textureSample(tex, samp, FragCoord.xy / vec2<f32>(4.0, 4.0));
             })");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
         descriptor.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
@@ -117,7 +117,7 @@ class TextureSubresourceTest : public DawnTest {
 
         wgpu::Sampler sampler = device.CreateSampler();
 
-        wgpu::RenderPipeline rp = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline rp = device.CreateRenderPipeline(&descriptor);
         wgpu::BindGroupLayout bgl = rp.GetBindGroupLayout(0);
         wgpu::BindGroup bindGroup =
             utils::MakeBindGroup(device, bgl, {{0, sampler}, {1, samplerView}});

@@ -157,7 +157,7 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncSuccess) {
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
 
-    WGPURenderPipelineDescriptor2 pipelineDescriptor{};
+    WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.vertex.entryPoint = "main";
 
@@ -190,7 +190,7 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncError) {
     WGPUShaderModule apiVsModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
 
-    WGPURenderPipelineDescriptor2 pipelineDescriptor{};
+    WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.vertex.entryPoint = "main";
 
@@ -228,7 +228,7 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncThenDisconnect) {
     fragment.module = vsModule;
     fragment.entryPoint = "main";
 
-    WGPURenderPipelineDescriptor2 pipelineDescriptor{};
+    WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.vertex.entryPoint = "main";
     pipelineDescriptor.fragment = &fragment;
@@ -289,7 +289,7 @@ TEST_F(WireCreatePipelineAsyncTest, CreateRenderPipelineAsyncAfterDisconnect) {
     fragment.module = vsModule;
     fragment.entryPoint = "main";
 
-    WGPURenderPipelineDescriptor2 pipelineDescriptor{};
+    WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = vsModule;
     pipelineDescriptor.vertex.entryPoint = "main";
     pipelineDescriptor.fragment = &fragment;
@@ -335,7 +335,7 @@ TEST_F(WireCreatePipelineAsyncTest, DeviceDeletedBeforeCallback) {
     WGPUShaderModule apiModule = api.GetNewShaderModule();
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiModule));
 
-    WGPURenderPipelineDescriptor2 pipelineDescriptor{};
+    WGPURenderPipelineDescriptor pipelineDescriptor{};
     pipelineDescriptor.vertex.module = module;
     pipelineDescriptor.vertex.entryPoint = "main";
 

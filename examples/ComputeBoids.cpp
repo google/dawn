@@ -121,7 +121,7 @@ void initRender() {
 
     depthStencilView = CreateDefaultDepthStencilView(device);
 
-    utils::ComboRenderPipelineDescriptor2 descriptor;
+    utils::ComboRenderPipelineDescriptor descriptor;
 
     descriptor.vertex.module = vsModule;
     descriptor.vertex.bufferCount = 2;
@@ -143,7 +143,7 @@ void initRender() {
     descriptor.EnableDepthStencil(wgpu::TextureFormat::Depth24PlusStencil8);
     descriptor.cTargets[0].format = GetPreferredSwapChainTextureFormat();
 
-    renderPipeline = device.CreateRenderPipeline2(&descriptor);
+    renderPipeline = device.CreateRenderPipeline(&descriptor);
 }
 
 void initSim() {

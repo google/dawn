@@ -183,7 +183,7 @@ class PrimitiveTopologyTest : public DawnTest {
     // locations
     void DoTest(wgpu::PrimitiveTopology primitiveTopology,
                 const std::vector<LocationSpec>& locationSpecs) {
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
 
@@ -199,7 +199,7 @@ class PrimitiveTopologyTest : public DawnTest {
         descriptor.cAttributes[0].format = wgpu::VertexFormat::Float32x4;
         descriptor.cTargets[0].format = renderPass.colorFormat;
 
-        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {

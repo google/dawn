@@ -116,10 +116,10 @@ fn main([[builtin(position)]] fragCoord : vec4<f32>) -> [[location(0)]] vec4<f32
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
 
-    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = vsModule;
     rpDesc.cFragment.module = fsModule;
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
 // Tests that a vertex shader using struct function parameters and return values for shader stage
@@ -152,7 +152,7 @@ fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
 
-    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = vsModule;
     rpDesc.cFragment.module = fsModule;
     rpDesc.vertex.bufferCount = 1;
@@ -162,7 +162,7 @@ fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
     rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x3;
     rpDesc.cAttributes[1].shaderLocation = 1;
     rpDesc.cAttributes[1].format = wgpu::VertexFormat::Float32x4;
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
 // Tests that shaders using struct function parameters and return values for shader stage I/O
@@ -200,7 +200,7 @@ fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
 
-    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = vsModule;
     rpDesc.cFragment.module = fsModule;
     rpDesc.vertex.bufferCount = 1;
@@ -210,7 +210,7 @@ fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
     rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x3;
     rpDesc.cAttributes[1].shaderLocation = 1;
     rpDesc.cAttributes[1].format = wgpu::VertexFormat::Float32x4;
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
 // Tests that shaders I/O structs that us compatible locations but are not sorted by hand can link.
@@ -247,7 +247,7 @@ fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
 })";
     wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, fragmentShader.c_str());
 
-    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = vsModule;
     rpDesc.cFragment.module = fsModule;
     rpDesc.vertex.bufferCount = 1;
@@ -257,7 +257,7 @@ fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
     rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x3;
     rpDesc.cAttributes[1].shaderLocation = 1;
     rpDesc.cAttributes[1].format = wgpu::VertexFormat::Float32x4;
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
 // Tests that shaders I/O structs can be shared between vertex and fragment shaders.
@@ -290,7 +290,7 @@ fn fragmentMain(input : VertexOut) -> [[location(0)]] vec4<f32> {
 })";
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
 
-    utils::ComboRenderPipelineDescriptor2 rpDesc;
+    utils::ComboRenderPipelineDescriptor rpDesc;
     rpDesc.vertex.module = shaderModule;
     rpDesc.vertex.entryPoint = "vertexMain";
     rpDesc.cFragment.module = shaderModule;
@@ -302,7 +302,7 @@ fn fragmentMain(input : VertexOut) -> [[location(0)]] vec4<f32> {
     rpDesc.cAttributes[0].format = wgpu::VertexFormat::Float32x3;
     rpDesc.cAttributes[1].shaderLocation = 1;
     rpDesc.cAttributes[1].format = wgpu::VertexFormat::Float32x4;
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&rpDesc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&rpDesc);
 }
 
 DAWN_INSTANTIATE_TEST(ShaderTests,

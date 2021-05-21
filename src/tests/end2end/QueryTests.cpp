@@ -95,11 +95,11 @@ class OcclusionQueryTests : public QueryTests {
                 return vec4<f32>(0.0, 1.0, 0.0, 1.0);
             })");
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
 
-        pipeline = device.CreateRenderPipeline2(&descriptor);
+        pipeline = device.CreateRenderPipeline(&descriptor);
     }
 
     struct ScissorRect {
@@ -129,7 +129,7 @@ class OcclusionQueryTests : public QueryTests {
                                                 OcclusionExpectation::Result expected) {
         constexpr uint32_t kQueryCount = 1;
 
-        utils::ComboRenderPipelineDescriptor2 descriptor;
+        utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
 
@@ -143,7 +143,7 @@ class OcclusionQueryTests : public QueryTests {
         depthStencil->stencilBack.compare =
             stencilTestEnabled ? wgpu::CompareFunction::Never : wgpu::CompareFunction::Always;
 
-        wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline2(&descriptor);
+        wgpu::RenderPipeline renderPipeline = device.CreateRenderPipeline(&descriptor);
 
         wgpu::Texture renderTarget = CreateRenderTexture(wgpu::TextureFormat::RGBA8Unorm);
         wgpu::TextureView renderTargetView = renderTarget.CreateView();

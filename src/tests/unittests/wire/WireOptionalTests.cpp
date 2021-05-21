@@ -71,38 +71,26 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiVsModule));
 
     // Create the color state descriptor
-    WGPUBlendDescriptor blendDescriptor = {};
-    blendDescriptor.operation = WGPUBlendOperation_Add;
-    blendDescriptor.srcFactor = WGPUBlendFactor_One;
-    blendDescriptor.dstFactor = WGPUBlendFactor_One;
-    WGPUColorStateDescriptor colorStateDescriptor = {};
-    colorStateDescriptor.format = WGPUTextureFormat_RGBA8Unorm;
-    colorStateDescriptor.alphaBlend = blendDescriptor;
-    colorStateDescriptor.colorBlend = blendDescriptor;
-    colorStateDescriptor.writeMask = WGPUColorWriteMask_All;
-
-    // Create the input state
-    WGPUVertexStateDescriptor vertexState = {};
-    vertexState.indexFormat = WGPUIndexFormat_Uint32;
-    vertexState.vertexBufferCount = 0;
-    vertexState.vertexBuffers = nullptr;
-
-    // Create the rasterization state
-    WGPURasterizationStateDescriptor rasterizationState = {};
-    rasterizationState.frontFace = WGPUFrontFace_CCW;
-    rasterizationState.cullMode = WGPUCullMode_None;
-    rasterizationState.depthBias = 0;
-    rasterizationState.depthBiasSlopeScale = 0.0;
-    rasterizationState.depthBiasClamp = 0.0;
+    WGPUBlendComponent blendComponent = {};
+    blendComponent.operation = WGPUBlendOperation_Add;
+    blendComponent.srcFactor = WGPUBlendFactor_One;
+    blendComponent.dstFactor = WGPUBlendFactor_One;
+    WGPUBlendState blendState = {};
+    blendState.alpha = blendComponent;
+    blendState.color = blendComponent;
+    WGPUColorTargetState colorTargetState = {};
+    colorTargetState.format = WGPUTextureFormat_RGBA8Unorm;
+    colorTargetState.blend = &blendState;
+    colorTargetState.writeMask = WGPUColorWriteMask_All;
 
     // Create the depth-stencil state
-    WGPUStencilStateFaceDescriptor stencilFace = {};
+    WGPUStencilFaceState stencilFace = {};
     stencilFace.compare = WGPUCompareFunction_Always;
     stencilFace.failOp = WGPUStencilOperation_Keep;
     stencilFace.depthFailOp = WGPUStencilOperation_Keep;
     stencilFace.passOp = WGPUStencilOperation_Keep;
 
-    WGPUDepthStencilStateDescriptor depthStencilState = {};
+    WGPUDepthStencilState depthStencilState = {};
     depthStencilState.format = WGPUTextureFormat_Depth24PlusStencil8;
     depthStencilState.depthWriteEnabled = false;
     depthStencilState.depthCompare = WGPUCompareFunction_Always;
@@ -110,6 +98,9 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     depthStencilState.stencilFront = stencilFace;
     depthStencilState.stencilReadMask = 0xff;
     depthStencilState.stencilWriteMask = 0xff;
+    depthStencilState.depthBias = 0;
+    depthStencilState.depthBiasSlopeScale = 0.0;
+    depthStencilState.depthBiasClamp = 0.0;
 
     // Create the pipeline layout
     WGPUPipelineLayoutDescriptor layoutDescriptor = {};
@@ -122,27 +113,28 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
     // Create pipeline
     WGPURenderPipelineDescriptor pipelineDescriptor = {};
 
-    pipelineDescriptor.vertexStage.module = vsModule;
-    pipelineDescriptor.vertexStage.entryPoint = "main";
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.vertex.entryPoint = "main";
+    pipelineDescriptor.vertex.bufferCount = 0;
+    pipelineDescriptor.vertex.buffers = nullptr;
 
-    WGPUProgrammableStageDescriptor fragmentStage = {};
-    fragmentStage.module = vsModule;
-    fragmentStage.entryPoint = "main";
-    pipelineDescriptor.fragmentStage = &fragmentStage;
+    WGPUFragmentState fragment = {};
+    fragment.module = vsModule;
+    fragment.entryPoint = "main";
+    fragment.targetCount = 1;
+    fragment.targets = &colorTargetState;
+    pipelineDescriptor.fragment = &fragment;
 
-    pipelineDescriptor.colorStateCount = 1;
-    pipelineDescriptor.colorStates = &colorStateDescriptor;
-
-    pipelineDescriptor.sampleCount = 1;
-    pipelineDescriptor.sampleMask = 0xFFFFFFFF;
-    pipelineDescriptor.alphaToCoverageEnabled = false;
+    pipelineDescriptor.multisample.count = 1;
+    pipelineDescriptor.multisample.mask = 0xFFFFFFFF;
+    pipelineDescriptor.multisample.alphaToCoverageEnabled = false;
     pipelineDescriptor.layout = layout;
-    pipelineDescriptor.vertexState = &vertexState;
-    pipelineDescriptor.primitiveTopology = WGPUPrimitiveTopology_TriangleList;
-    pipelineDescriptor.rasterizationState = &rasterizationState;
+    pipelineDescriptor.primitive.topology = WGPUPrimitiveTopology_TriangleList;
+    pipelineDescriptor.primitive.frontFace = WGPUFrontFace_CCW;
+    pipelineDescriptor.primitive.cullMode = WGPUCullMode_None;
 
-    // First case: depthStencilState is not null.
-    pipelineDescriptor.depthStencilState = &depthStencilState;
+    // First case: depthStencil is not null.
+    pipelineDescriptor.depthStencil = &depthStencilState;
     wgpuDeviceCreateRenderPipeline(device, &pipelineDescriptor);
 
     WGPURenderPipeline apiDummyPipeline = api.GetNewRenderPipeline();
@@ -150,35 +142,35 @@ TEST_F(WireOptionalTests, OptionalStructPointer) {
         api,
         DeviceCreateRenderPipeline(
             apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
-                return desc->depthStencilState != nullptr &&
-                       desc->depthStencilState->nextInChain == nullptr &&
-                       desc->depthStencilState->depthWriteEnabled == false &&
-                       desc->depthStencilState->depthCompare == WGPUCompareFunction_Always &&
-                       desc->depthStencilState->stencilBack.compare == WGPUCompareFunction_Always &&
-                       desc->depthStencilState->stencilBack.failOp == WGPUStencilOperation_Keep &&
-                       desc->depthStencilState->stencilBack.depthFailOp ==
-                           WGPUStencilOperation_Keep &&
-                       desc->depthStencilState->stencilBack.passOp == WGPUStencilOperation_Keep &&
-                       desc->depthStencilState->stencilFront.compare ==
-                           WGPUCompareFunction_Always &&
-                       desc->depthStencilState->stencilFront.failOp == WGPUStencilOperation_Keep &&
-                       desc->depthStencilState->stencilFront.depthFailOp ==
-                           WGPUStencilOperation_Keep &&
-                       desc->depthStencilState->stencilFront.passOp == WGPUStencilOperation_Keep &&
-                       desc->depthStencilState->stencilReadMask == 0xff &&
-                       desc->depthStencilState->stencilWriteMask == 0xff;
+                return desc->depthStencil != nullptr &&
+                       desc->depthStencil->nextInChain == nullptr &&
+                       desc->depthStencil->depthWriteEnabled == false &&
+                       desc->depthStencil->depthCompare == WGPUCompareFunction_Always &&
+                       desc->depthStencil->stencilBack.compare == WGPUCompareFunction_Always &&
+                       desc->depthStencil->stencilBack.failOp == WGPUStencilOperation_Keep &&
+                       desc->depthStencil->stencilBack.depthFailOp == WGPUStencilOperation_Keep &&
+                       desc->depthStencil->stencilBack.passOp == WGPUStencilOperation_Keep &&
+                       desc->depthStencil->stencilFront.compare == WGPUCompareFunction_Always &&
+                       desc->depthStencil->stencilFront.failOp == WGPUStencilOperation_Keep &&
+                       desc->depthStencil->stencilFront.depthFailOp == WGPUStencilOperation_Keep &&
+                       desc->depthStencil->stencilFront.passOp == WGPUStencilOperation_Keep &&
+                       desc->depthStencil->stencilReadMask == 0xff &&
+                       desc->depthStencil->stencilWriteMask == 0xff &&
+                       desc->depthStencil->depthBias == 0 &&
+                       desc->depthStencil->depthBiasSlopeScale == 0.0 &&
+                       desc->depthStencil->depthBiasClamp == 0.0;
             })))
         .WillOnce(Return(apiDummyPipeline));
 
     FlushClient();
 
-    // Second case: depthStencilState is null.
-    pipelineDescriptor.depthStencilState = nullptr;
+    // Second case: depthStencil is null.
+    pipelineDescriptor.depthStencil = nullptr;
     wgpuDeviceCreateRenderPipeline(device, &pipelineDescriptor);
     EXPECT_CALL(api,
                 DeviceCreateRenderPipeline(
                     apiDevice, MatchesLambda([](const WGPURenderPipelineDescriptor* desc) -> bool {
-                        return desc->depthStencilState == nullptr;
+                        return desc->depthStencil == nullptr;
                     })))
         .WillOnce(Return(apiDummyPipeline));
 

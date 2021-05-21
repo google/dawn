@@ -34,14 +34,14 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
     )");
 
     // Create a point pipeline from the module.
-    utils::ComboRenderPipelineDescriptor2 desc;
+    utils::ComboRenderPipelineDescriptor desc;
     desc.vertex.module = module;
     desc.vertex.entryPoint = "vertex_main";
     desc.cFragment.module = module;
     desc.cFragment.entryPoint = "fragment_main";
     desc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
     desc.primitive.topology = wgpu::PrimitiveTopology::PointList;
-    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline2(&desc);
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
 
     // Render the point and check that it was rendered.
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);

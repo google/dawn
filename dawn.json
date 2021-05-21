@@ -256,16 +256,6 @@
             {"value": 4, "name": "max"}
         ]
     },
-    "color state descriptor": {
-        "category": "structure",
-        "extensible": true,
-        "members": [
-            {"name": "format", "type": "texture format"},
-            {"name": "alpha blend", "type": "blend component"},
-            {"name": "color blend", "type": "blend component"},
-            {"name": "write mask", "type": "color write mask", "default": "all"}
-        ]
-    },
     "bool": {
         "category": "native"
     },
@@ -755,7 +745,7 @@
                 "name": "create render pipeline async",
                 "returns": "void",
                 "args": [
-                    {"name": "descriptor", "type": "render pipeline descriptor 2", "annotation": "const*"},
+                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"},
                     {"name": "callback", "type": "create render pipeline async callback"},
                     {"name": "userdata", "type": "void", "annotation": "*"}
                 ]
@@ -778,7 +768,7 @@
                 "name": "create render pipeline 2",
                 "returns": "render pipeline",
                 "args": [
-                    {"name": "descriptor", "type": "render pipeline descriptor 2", "annotation": "const*"}
+                    {"name": "descriptor", "type": "render pipeline descriptor", "annotation": "const*"}
                 ]
             },
             {
@@ -882,19 +872,6 @@
             {"name": "timestamp query", "type": "bool", "default": "false"},
             {"name": "multi planar formats", "type": "bool", "default": "false"},
             {"name": "depth clamping", "type": "bool", "default": "false"}
-        ]
-    },
-    "depth stencil state descriptor": {
-        "category": "structure",
-        "extensible": true,
-        "members": [
-            {"name": "format", "type": "texture format"},
-            {"name": "depth write enabled", "type": "bool", "default": "false"},
-            {"name": "depth compare", "type": "compare function", "default": "always"},
-            {"name": "stencil front", "type": "stencil face state"},
-            {"name": "stencil back", "type": "stencil face state"},
-            {"name": "stencil read mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
-            {"name": "stencil write mask", "type": "uint32_t", "default": "0xFFFFFFFF"}
         ]
     },
     "double": {
@@ -1037,15 +1014,6 @@
     "vertex buffer layout descriptor": {
         "category": "typedef",
         "type": "vertex buffer layout"
-    },
-    "vertex state descriptor": {
-        "category": "structure",
-        "extensible": true,
-        "members": [
-            {"name": "index format", "type": "index format", "default": "undefined"},
-            {"name": "vertex buffer count", "type": "uint32_t", "default": 0},
-            {"name": "vertex buffers", "type": "vertex buffer layout", "annotation": "const*", "length": "vertex buffer count"}
-        ]
     },
     "input step mode": {
         "category": "enum",
@@ -1222,18 +1190,6 @@
             {"value": 1, "name": "error"},
             {"value": 2, "name": "unknown"},
             {"value": 3, "name": "device lost"}
-        ]
-    },
-
-    "rasterization state descriptor": {
-        "category": "structure",
-        "extensible": true,
-        "members": [
-            {"name": "front face", "type": "front face", "default": "CCW"},
-            {"name": "cull mode", "type": "cull mode", "default": "none"},
-            {"name": "depth bias", "type": "int32_t", "default": "0"},
-            {"name": "depth bias slope scale", "type": "float", "default": "0.0f"},
-            {"name": "depth bias clamp", "type": "float", "default": "0.0f"}
         ]
     },
 
@@ -1660,32 +1616,16 @@
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "layout", "type": "pipeline layout", "optional": true},
-            {"name": "vertex stage", "type": "programmable stage descriptor"},
-            {"name": "fragment stage", "type": "programmable stage descriptor", "annotation": "const*", "optional": true},
-            {"name": "vertex state", "type": "vertex state descriptor", "annotation": "const*", "optional": true},
-            {"name": "primitive topology", "type": "primitive topology"},
-            {"name": "rasterization state", "type": "rasterization state descriptor", "annotation": "const*", "optional": true},
-            {"name": "sample count", "type": "uint32_t", "default": "1"},
-            {"name": "depth stencil state", "type": "depth stencil state descriptor", "annotation": "const*", "optional": true},
-            {"name": "color state count", "type": "uint32_t"},
-            {"name": "color states", "type": "color state descriptor", "annotation": "const*", "length": "color state count"},
-            {"name": "sample mask", "type": "uint32_t", "default": "0xFFFFFFFF"},
-            {"name": "alpha to coverage enabled", "type": "bool", "default": "false"}
-        ]
-    },
-
-    "render pipeline descriptor 2": {
-        "category": "structure",
-        "extensible": true,
-        "members": [
-            {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
-            {"name": "layout", "type": "pipeline layout", "optional": true},
             {"name": "vertex", "type": "vertex state"},
             {"name": "primitive", "type": "primitive state"},
             {"name": "depth stencil", "type": "depth stencil state", "annotation": "const*", "optional": true},
             {"name": "multisample", "type": "multisample state"},
             {"name": "fragment", "type": "fragment state", "annotation": "const*", "optional": true}
         ]
+    },
+    "render pipeline descriptor 2": {
+        "category": "typedef",
+        "type": "render pipeline descriptor"
     },
 
     "sampler": {

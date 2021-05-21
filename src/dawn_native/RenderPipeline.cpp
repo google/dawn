@@ -316,7 +316,7 @@ namespace dawn_native {
     }
 
     MaybeError ValidateRenderPipelineDescriptor(DeviceBase* device,
-                                                const RenderPipelineDescriptor2* descriptor) {
+                                                const RenderPipelineDescriptor* descriptor) {
         if (descriptor->nextInChain != nullptr) {
             return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
         }
@@ -350,7 +350,7 @@ namespace dawn_native {
         return {};
     }
 
-    std::vector<StageAndDescriptor> GetStages(const RenderPipelineDescriptor2* descriptor) {
+    std::vector<StageAndDescriptor> GetStages(const RenderPipelineDescriptor* descriptor) {
         std::vector<StageAndDescriptor> stages;
         stages.push_back(
             {SingleShaderStage::Vertex, descriptor->vertex.module, descriptor->vertex.entryPoint});
@@ -372,19 +372,10 @@ namespace dawn_native {
                mDepthStencil->stencilFront.passOp != wgpu::StencilOperation::Keep;
     }
 
-    bool BlendEnabled(const ColorStateDescriptor* mColorState) {
-        return mColorState->alphaBlend.operation != wgpu::BlendOperation::Add ||
-               mColorState->alphaBlend.srcFactor != wgpu::BlendFactor::One ||
-               mColorState->alphaBlend.dstFactor != wgpu::BlendFactor::Zero ||
-               mColorState->colorBlend.operation != wgpu::BlendOperation::Add ||
-               mColorState->colorBlend.srcFactor != wgpu::BlendFactor::One ||
-               mColorState->colorBlend.dstFactor != wgpu::BlendFactor::Zero;
-    }
-
     // RenderPipelineBase
 
     RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
-                                           const RenderPipelineDescriptor2* descriptor)
+                                           const RenderPipelineDescriptor* descriptor)
         : PipelineBase(device,
                        descriptor->layout,
                        {{SingleShaderStage::Vertex, descriptor->vertex.module,

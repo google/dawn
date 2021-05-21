@@ -287,12 +287,12 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                 }
             )");
 
-            utils::ComboRenderPipelineDescriptor2 descriptor;
+            utils::ComboRenderPipelineDescriptor descriptor;
             descriptor.vertex.module = vs;
             descriptor.cFragment.module = fs;
             descriptor.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
 
-            pipeline = device.CreateRenderPipeline2(&descriptor);
+            pipeline = device.CreateRenderPipeline(&descriptor);
         }
 
         // The bindgroup containing the texture view for the ioSurface as well as the sampler.
