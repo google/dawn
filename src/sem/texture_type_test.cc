@@ -14,33 +14,32 @@
 
 #include "src/sem/texture_type.h"
 
+#include "src/sem/sampled_texture_type.h"
 #include "src/sem/test_helper.h"
 
 namespace tint {
 namespace sem {
 namespace {
 
-using TextureTypeTest = TestHelper;
+using TextureTypeDimTest = TestParamHelper<ast::TextureDimension>;
 
-TEST_F(TextureTypeTest, IsTextureArray) {
-  EXPECT_EQ(false, IsTextureArray(ast::TextureDimension::kNone));
-  EXPECT_EQ(false, IsTextureArray(ast::TextureDimension::k1d));
-  EXPECT_EQ(false, IsTextureArray(ast::TextureDimension::k2d));
-  EXPECT_EQ(true, IsTextureArray(ast::TextureDimension::k2dArray));
-  EXPECT_EQ(false, IsTextureArray(ast::TextureDimension::k3d));
-  EXPECT_EQ(false, IsTextureArray(ast::TextureDimension::kCube));
-  EXPECT_EQ(true, IsTextureArray(ast::TextureDimension::kCubeArray));
+TEST_P(TextureTypeDimTest, DimMustMatch) {
+  // Check that the dim() query returns the right dimensionality.
+  F32 f32;
+  // TextureType is an abstract class, so use concrete class
+  // SampledTexture in its stead.
+  SampledTexture st(GetParam(), &f32);
+  EXPECT_EQ(st.dim(), GetParam());
 }
 
-TEST_F(TextureTypeTest, NumCoordinateAxes) {
-  EXPECT_EQ(0, NumCoordinateAxes(ast::TextureDimension::kNone));
-  EXPECT_EQ(1, NumCoordinateAxes(ast::TextureDimension::k1d));
-  EXPECT_EQ(2, NumCoordinateAxes(ast::TextureDimension::k2d));
-  EXPECT_EQ(2, NumCoordinateAxes(ast::TextureDimension::k2dArray));
-  EXPECT_EQ(3, NumCoordinateAxes(ast::TextureDimension::k3d));
-  EXPECT_EQ(3, NumCoordinateAxes(ast::TextureDimension::kCube));
-  EXPECT_EQ(3, NumCoordinateAxes(ast::TextureDimension::kCubeArray));
-}
+INSTANTIATE_TEST_SUITE_P(Dimensions,
+                         TextureTypeDimTest,
+                         ::testing::Values(ast::TextureDimension::k1d,
+                                           ast::TextureDimension::k2d,
+                                           ast::TextureDimension::k2dArray,
+                                           ast::TextureDimension::k3d,
+                                           ast::TextureDimension::kCube,
+                                           ast::TextureDimension::kCubeArray));
 
 }  // namespace
 }  // namespace sem
