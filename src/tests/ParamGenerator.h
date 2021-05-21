@@ -46,7 +46,10 @@ class ParamGenerator {
   public:
     using value_type = ParamStruct;
 
-    ParamGenerator(std::vector<Params>... params) : mParams(params...) {
+    ParamGenerator(std::vector<Params>... params) : mParams(params...), mIsEmpty(false) {
+        for (bool isEmpty : {params.empty()...}) {
+            mIsEmpty |= isEmpty;
+        }
     }
 
     class Iterator : public std::iterator<std::forward_iterator_tag, ParamStruct, size_t> {
@@ -94,6 +97,9 @@ class ParamGenerator {
     };
 
     Iterator begin() const {
+        if (mIsEmpty) {
+            return end();
+        }
         return Iterator(mParams, {});
     }
 
@@ -105,6 +111,7 @@ class ParamGenerator {
 
   private:
     ParamTuple mParams;
+    bool mIsEmpty;
 };
 
 struct BackendTestConfig;
