@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -68,10 +69,12 @@ optional flags:`)
 
 func run() error {
 	var formatList, filter string
+	numCPU := runtime.NumCPU()
 	generateExpected := false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
+	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
 	flag.Usage = showUsage
 	flag.Parse()
 
@@ -144,82 +147,41 @@ func run() error {
 		}
 	}
 
-	// Structures to hold the results of the tests
-	type statusCode string
-	const (
-		fail statusCode = "FAIL"
-		pass statusCode = "PASS"
-		skip statusCode = "SKIP"
-	)
-	type status struct {
-		code statusCode
-		err  error
-	}
-	type result map[outputFormat]status
-	results := make([]result, len(files))
+	results := make([]map[outputFormat]*status, len(files))
+	jobs := make(chan job, 256)
 
-	// In parallel...
+	// Spawn numCPU job runners...
 	wg := sync.WaitGroup{}
-	wg.Add(len(files))
-	for i, file := range files { // For each test file...
-		i, file := i, filepath.Join(dir, file)
+	wg.Add(numCPU)
+	for cpu := 0; cpu < numCPU; cpu++ {
 		go func() {
 			defer wg.Done()
-			r := result{}
-			for _, format := range formats { // For each output format...
-
-				// Is there an expected output?
-				expected := loadExpectedFile(file, format)
-				if strings.HasPrefix(expected, "SKIP") { // Special SKIP token
-					r[format] = status{code: skip}
-					continue
-				}
-
-				// Invoke the compiler...
-				var err error
-				if ok, out := invoke(exe, file, "--format", string(format), "--dawn-validation"); ok {
-					if generateExpected {
-						// If --generate-expected was passed, write out the output
-						err = saveExpectedFile(file, format, out)
-					} else if expected != "" && expected != out {
-						// Expected output did not match
-						dmp := diffmatchpatch.New()
-						diff := dmp.DiffPrettyText(dmp.DiffMain(expected, out, true))
-						err = fmt.Errorf(`Output was not as expected
-
---------------------------------------------------------------------------------
--- Expected:                                                                  --
---------------------------------------------------------------------------------
-%s
-
---------------------------------------------------------------------------------
--- Got:                                                                       --
---------------------------------------------------------------------------------
-%s
-
---------------------------------------------------------------------------------
--- Diff:                                                                      --
---------------------------------------------------------------------------------
-%s`,
-							expected, out, diff)
-					}
-				} else {
-					// Compiler returned a non-zero exit code
-					err = fmt.Errorf("%s", out)
-				}
-
-				if err != nil {
-					r[format] = status{code: fail, err: err}
-				} else {
-					r[format] = status{code: pass}
-				}
+			for job := range jobs {
+				job.run(exe, generateExpected)
 			}
-			results[i] = r
 		}()
 	}
+
+	// Issue the jobs...
+	for i, file := range files { // For each test file...
+		file := filepath.Join(dir, file)
+		fileResults := map[outputFormat]*status{}
+		for _, format := range formats { // For each output format...
+			result := &status{}
+			jobs <- job{
+				file:   file,
+				format: format,
+				result: result,
+			}
+			fileResults[format] = result
+		}
+		results[i] = fileResults
+	}
+
+	// Wait for the jobs to all finish...
+	close(jobs)
 	wg.Wait()
 
-	// At this point all the tests have been run
 	// Time to print the outputs
 
 	// Start by printing the error message for any file x format combinations
@@ -329,6 +291,74 @@ func run() error {
 	}
 
 	return nil
+}
+
+// Structures to hold the results of the tests
+type statusCode string
+
+const (
+	fail statusCode = "FAIL"
+	pass statusCode = "PASS"
+	skip statusCode = "SKIP"
+)
+
+type status struct {
+	code statusCode
+	err  error
+}
+
+type job struct {
+	file   string
+	format outputFormat
+	result *status
+}
+
+func (j job) run(exe string, generateExpected bool) {
+	// Is there an expected output?
+	expected := loadExpectedFile(j.file, j.format)
+	if strings.HasPrefix(expected, "SKIP") { // Special SKIP token
+		*j.result = status{code: skip}
+		return
+	}
+
+	// Invoke the compiler...
+	var err error
+	if ok, out := invoke(exe, j.file, "--format", string(j.format), "--dawn-validation"); ok {
+		if generateExpected {
+			// If --generate-expected was passed, write out the output
+			err = saveExpectedFile(j.file, j.format, out)
+		} else if expected != "" && expected != out {
+			// Expected output did not match
+			dmp := diffmatchpatch.New()
+			diff := dmp.DiffPrettyText(dmp.DiffMain(expected, out, true))
+			err = fmt.Errorf(`Output was not as expected
+
+--------------------------------------------------------------------------------
+-- Expected:                                                                  --
+--------------------------------------------------------------------------------
+%s
+
+--------------------------------------------------------------------------------
+-- Got:                                                                       --
+--------------------------------------------------------------------------------
+%s
+
+--------------------------------------------------------------------------------
+-- Diff:                                                                      --
+--------------------------------------------------------------------------------
+%s`,
+				expected, out, diff)
+		}
+	} else {
+		// Compiler returned a non-zero exit code
+		err = fmt.Errorf("%s", out)
+	}
+
+	if err != nil {
+		*j.result = status{code: fail, err: err}
+	} else {
+		*j.result = status{code: pass}
+	}
 }
 
 // loadExpectedFile loads the expected output file for the test file at 'path'
