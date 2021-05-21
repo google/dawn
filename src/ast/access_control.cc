@@ -37,9 +37,6 @@ AccessControl::~AccessControl() = default;
 std::string AccessControl::type_name() const {
   std::string name = "__access_control_";
   switch (access_) {
-    case ast::AccessControl::kInvalid:
-      name += "invalid";
-      break;
     case ast::AccessControl::kReadOnly:
       name += "read_only";
       break;
@@ -57,9 +54,6 @@ std::string AccessControl::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   out << "[[access(";
   switch (access_) {
-    case ast::AccessControl::kInvalid:
-      out << "invalid";
-      break;
     case ast::AccessControl::kReadOnly:
       out << "read";
       break;
@@ -83,10 +77,6 @@ AccessControl* AccessControl::Clone(CloneContext* ctx) const {
 
 std::ostream& operator<<(std::ostream& out, AccessControl::Access access) {
   switch (access) {
-    case ast::AccessControl::kInvalid: {
-      out << "invalid";
-      break;
-    }
     case ast::AccessControl::kReadOnly: {
       out << "read_only";
       break;

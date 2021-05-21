@@ -28,9 +28,6 @@ class AccessControl : public Castable<AccessControl, Type> {
  public:
   /// The access control settings
   enum Access {
-    /// Invalid
-    // TODO(crbug.com/tint/805): Remove this.
-    kInvalid = -1,
     /// Read only
     kReadOnly,
     /// Write only

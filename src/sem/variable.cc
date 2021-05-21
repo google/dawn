@@ -39,7 +39,7 @@ Variable::Variable(const ast::Variable* declaration,
     : declaration_(declaration),
       type_(type),
       storage_class_(ast::StorageClass::kNone),
-      access_control_(ast::AccessControl::kInvalid),
+      access_control_(ast::AccessControl::kReadWrite),
       is_pipeline_constant_(true),
       constant_id_(constant_id) {}
 

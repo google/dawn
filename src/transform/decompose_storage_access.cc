@@ -364,7 +364,7 @@ ast::Type* MaybeCreateASTAccessControl(CloneContext* ctx,
                                        const sem::VariableUser* var_user,
                                        ast::Type* ty) {
   if (var_user &&
-      var_user->Variable()->AccessControl() != ast::AccessControl::kInvalid) {
+      var_user->Variable()->StorageClass() == ast::StorageClass::kStorage) {
     return ctx->dst->create<ast::AccessControl>(
         var_user->Variable()->AccessControl(), ty);
   }

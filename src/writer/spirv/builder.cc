@@ -784,35 +784,35 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
 
   if (var->has_constructor()) {
     ops.push_back(Operand::Int(init_id));
-  } else if (sem->AccessControl() != ast::AccessControl::kInvalid) {
-    // type is a sem::Struct or a sem::StorageTexture
-    switch (sem->AccessControl()) {
-      case ast::AccessControl::kInvalid:
-        TINT_ICE(builder_.Diagnostics()) << "missing access control";
-        break;
-      case ast::AccessControl::kWriteOnly:
-        push_annot(
-            spv::Op::OpDecorate,
-            {Operand::Int(var_id), Operand::Int(SpvDecorationNonReadable)});
-        break;
-      case ast::AccessControl::kReadOnly:
-        push_annot(
-            spv::Op::OpDecorate,
-            {Operand::Int(var_id), Operand::Int(SpvDecorationNonWritable)});
-        break;
-      case ast::AccessControl::kReadWrite:
-        break;
-    }
-  } else if (!type->Is<sem::Sampler>()) {
-    // If we don't have a constructor and we're an Output or Private variable,
-    // then WGSL requires that we zero-initialize.
-    if (sem->StorageClass() == ast::StorageClass::kPrivate ||
-        sem->StorageClass() == ast::StorageClass::kOutput) {
-      init_id = GenerateConstantNullIfNeeded(type);
-      if (init_id == 0) {
-        return 0;
+  } else {
+    if (type->Is<sem::StorageTexture>() || type->Is<sem::Struct>()) {
+      // type is a sem::Struct or a sem::StorageTexture
+      switch (sem->AccessControl()) {
+        case ast::AccessControl::kWriteOnly:
+          push_annot(
+              spv::Op::OpDecorate,
+              {Operand::Int(var_id), Operand::Int(SpvDecorationNonReadable)});
+          break;
+        case ast::AccessControl::kReadOnly:
+          push_annot(
+              spv::Op::OpDecorate,
+              {Operand::Int(var_id), Operand::Int(SpvDecorationNonWritable)});
+          break;
+        case ast::AccessControl::kReadWrite:
+          break;
       }
-      ops.push_back(Operand::Int(init_id));
+    }
+    if (!type->Is<sem::Sampler>()) {
+      // If we don't have a constructor and we're an Output or Private
+      // variable, then WGSL requires that we zero-initialize.
+      if (sem->StorageClass() == ast::StorageClass::kPrivate ||
+          sem->StorageClass() == ast::StorageClass::kOutput) {
+        init_id = GenerateConstantNullIfNeeded(type);
+        if (init_id == 0) {
+          return 0;
+        }
+        ops.push_back(Operand::Int(init_id));
+      }
     }
   }
 

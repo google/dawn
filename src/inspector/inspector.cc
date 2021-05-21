@@ -641,10 +641,6 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
     auto* var = rsv.first;
     auto binding_info = rsv.second;
 
-    if (var->AccessControl() == ast::AccessControl::kInvalid) {
-      continue;
-    }
-
     if (read_only != (var->AccessControl() == ast::AccessControl::kReadOnly)) {
       continue;
     }

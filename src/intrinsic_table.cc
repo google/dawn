@@ -40,7 +40,8 @@ enum class OpenType {
 enum class OpenNumber {
   N,  // Typically used for vecN
   M,  // Typically used for matNxM
-  F,  // Typically used for texture_storage_2d<F>
+  F,  // Typically used F in for texture_storage_2d<F, A>
+  A,  // Typically used for A in texture_storage_2d<F, A>
 };
 
 /// @return a string of the OpenType symbol `ty`
@@ -64,6 +65,8 @@ const char* str(OpenNumber num) {
       return "M";
     case OpenNumber::F:
       return "F";
+    case OpenNumber::A:
+      return "A";
   }
   return "";
 }
@@ -516,13 +519,23 @@ class DepthTextureBuilder : public Builder {
 /// the given texel and channel formats.
 class StorageTextureBuilder : public Builder {
  public:
-  explicit StorageTextureBuilder(
-      ast::TextureDimension dimensions,
-      ast::AccessControl::Access access,
-      OpenNumber texel_format,  // a.k.a "image format"
-      OpenType channel_format)  // a.k.a "storage subtype"
+  StorageTextureBuilder(ast::TextureDimension dimensions,
+                        ast::AccessControl::Access access,
+                        OpenNumber texel_format,  // a.k.a "image format"
+                        OpenType channel_format)  // a.k.a "storage subtype"
       : dimensions_(dimensions),
         access_(access),
+        access_is_open_num_(false),
+        texel_format_(texel_format),
+        channel_format_(channel_format) {}
+
+  StorageTextureBuilder(ast::TextureDimension dimensions,
+                        OpenNumber access,
+                        OpenNumber texel_format,  // a.k.a "image format"
+                        OpenType channel_format)  // a.k.a "storage subtype"
+      : dimensions_(dimensions),
+        access_(access),
+        access_is_open_num_(true),
         texel_format_(texel_format),
         channel_format_(channel_format) {}
 
@@ -531,10 +544,16 @@ class StorageTextureBuilder : public Builder {
       if (MatchOpenNumber(state, texel_format_,
                           static_cast<uint32_t>(tex->image_format()))) {
         if (MatchOpenType(state, channel_format_, tex->type())) {
-          // AccessControl::kInvalid means match any
-          if (access_ != ast::AccessControl::kInvalid &&
-              access_ != tex->access_control()) {
-            return false;
+          if (access_is_open_num_) {
+            if (!MatchOpenNumber(
+                    state, access_.open_num,
+                    static_cast<uint32_t>(tex->access_control()))) {
+              return false;
+            }
+          } else {
+            if (access_.enum_val != tex->access_control()) {
+              return false;
+            }
           }
 
           return tex->dim() == dimensions_;
@@ -547,9 +566,13 @@ class StorageTextureBuilder : public Builder {
   sem::Type* Build(BuildState& state) const override {
     auto texel_format =
         static_cast<ast::ImageFormat>(state.open_numbers.at(texel_format_));
+    auto access = access_is_open_num_
+                      ? static_cast<ast::AccessControl::Access>(
+                            state.open_numbers.at(access_.open_num))
+                      : access_.enum_val;
     auto* channel_format = state.open_types.at(channel_format_);
     return state.ty_mgr.Get<sem::StorageTexture>(
-        dimensions_, texel_format, access_,
+        dimensions_, texel_format, access,
         const_cast<sem::Type*>(channel_format));
   }
 
@@ -557,10 +580,10 @@ class StorageTextureBuilder : public Builder {
     std::stringstream ss;
 
     ss << "texture_storage_" << dimensions_ << "<F, ";
-    if (access_ == ast::AccessControl::Access::kInvalid) {
+    if (access_is_open_num_) {
       ss << "A";
     } else {
-      ss << access_;
+      ss << access_.enum_val;
     }
     ss << ">";
 
@@ -569,7 +592,14 @@ class StorageTextureBuilder : public Builder {
 
  private:
   ast::TextureDimension const dimensions_;
-  ast::AccessControl::Access const access_;
+  union Access {
+    Access(OpenNumber in) : open_num(in) {}
+    Access(ast::AccessControl::Access in) : enum_val(in) {}
+
+    OpenNumber const open_num;
+    ast::AccessControl::Access const enum_val;
+  } access_;
+  bool access_is_open_num_;
   OpenNumber const texel_format_;
   OpenType const channel_format_;
 };
@@ -742,6 +772,14 @@ class Impl : public IntrinsicTable {
   /// format with the given dimensions
   Builder* storage_texture(ast::TextureDimension dimensions,
                            ast::AccessControl::Access access,
+                           OpenNumber texel_format,
+                           OpenType channel_format) {
+    return matcher_allocator_.Create<StorageTextureBuilder>(
+        dimensions, access, texel_format, channel_format);
+  }
+
+  Builder* storage_texture(ast::TextureDimension dimensions,
+                           OpenNumber access,
                            OpenNumber texel_format,
                            OpenType channel_format) {
     return matcher_allocator_.Create<StorageTextureBuilder>(
@@ -1079,14 +1117,14 @@ Impl::Impl() {
   auto* tex_depth_cube = depth_texture(Dim::kCube);
   auto* tex_depth_cube_array = depth_texture(Dim::kCubeArray);
   auto* tex_external = external_texture();
-  auto* tex_storage_1d_FT = storage_texture(
-      Dim::k1d, ast::AccessControl::kInvalid, OpenNumber::F, OpenType::T);
-  auto* tex_storage_2d_FT = storage_texture(
-      Dim::k2d, ast::AccessControl::kInvalid, OpenNumber::F, OpenType::T);
-  auto* tex_storage_2d_array_FT = storage_texture(
-      Dim::k2dArray, ast::AccessControl::kInvalid, OpenNumber::F, OpenType::T);
-  auto* tex_storage_3d_FT = storage_texture(
-      Dim::k3d, ast::AccessControl::kInvalid, OpenNumber::F, OpenType::T);
+  auto* tex_storage_1d_FT =
+      storage_texture(Dim::k1d, OpenNumber::A, OpenNumber::F, OpenType::T);
+  auto* tex_storage_2d_FT =
+      storage_texture(Dim::k2d, OpenNumber::A, OpenNumber::F, OpenType::T);
+  auto* tex_storage_2d_array_FT =
+      storage_texture(Dim::k2dArray, OpenNumber::A, OpenNumber::F, OpenType::T);
+  auto* tex_storage_3d_FT =
+      storage_texture(Dim::k3d, OpenNumber::A, OpenNumber::F, OpenType::T);
   auto* tex_storage_ro_1d_FT = storage_texture(
       Dim::k1d, ast::AccessControl::kReadOnly, OpenNumber::F, OpenType::T);
   auto* tex_storage_ro_2d_FT = storage_texture(

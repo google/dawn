@@ -88,14 +88,14 @@ class Resolver {
                  sem::Type* type,
                  const std::string& type_name,
                  ast::StorageClass storage_class,
-                 ast::AccessControl::Access ac);
+                 const ast::AccessControl* ac);
     ~VariableInfo();
 
     ast::Variable const* const declaration;
     sem::Type* type;
     std::string const type_name;
     ast::StorageClass storage_class;
-    ast::AccessControl::Access const access_control;
+    ast::AccessControl const* const access_control;
     std::vector<ast::IdentifierExpression*> users;
     sem::BindingPoint binding_point;
   };
@@ -382,7 +382,7 @@ class Resolver {
 
   FunctionInfo* current_function_ = nullptr;
   sem::Statement* current_statement_ = nullptr;
-  const ast::AccessControl* curent_access_control_ = nullptr;
+  const ast::AccessControl* current_access_control_ = nullptr;
   BlockAllocator<VariableInfo> variable_infos_;
   BlockAllocator<FunctionInfo> function_infos_;
 };

@@ -430,7 +430,7 @@ static constexpr DimensionParams dimension_cases[] = {
 using MultisampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(MultisampledTextureDimensionTest, All) {
   auto& params = GetParam();
-  Global("a", ty.multisampled_texture(params.dim, ty.i32()),
+  Global(Source{{12, 34}}, "a", ty.multisampled_texture(params.dim, ty.i32()),
          ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -441,6 +441,8 @@ TEST_P(MultisampledTextureDimensionTest, All) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
     EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: only 2d multisampled textures are supported");
   }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
@@ -473,7 +475,7 @@ using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {
   auto& params = GetParam();
   Global(
-      "a",
+      Source{{12, 34}}, "a",
       ty.multisampled_texture(ast::TextureDimension::k2d, params.type_func(ty)),
       ast::StorageClass::kNone, nullptr,
       ast::DecorationList{
@@ -485,6 +487,9 @@ TEST_P(MultisampledTextureTypeTest, All) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
     EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: texture_multisampled_2d<type>: type must be f32, "
+              "i32 or u32");
   }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
@@ -516,7 +521,7 @@ TEST_P(StorageTextureDimensionTest, All) {
   auto* st = ty.storage_texture(params.dim, ast::ImageFormat::kR32Uint);
   auto* ac = ty.access(ast::AccessControl::kReadOnly, st);
 
-  Global("a", ac, ast::StorageClass::kNone, nullptr,
+  Global(Source{{12, 34}}, "a", ac, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -526,6 +531,9 @@ TEST_P(StorageTextureDimensionTest, All) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
     EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        "12:34 error: cube dimensions for storage textures are not supported");
   }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
@@ -588,7 +596,7 @@ TEST_P(StorageTextureFormatTest, All) {
 
   auto* st_a = ty.storage_texture(ast::TextureDimension::k1d, params.format);
   auto* ac_a = ty.access(ast::AccessControl::kReadOnly, st_a);
-  Global("a", ac_a, ast::StorageClass::kNone, nullptr,
+  Global(Source{{12, 34}}, "a", ac_a, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
@@ -623,6 +631,10 @@ TEST_P(StorageTextureFormatTest, All) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
   } else {
     EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: image format must be one of the texel formats "
+              "specified for storage textues in "
+              "https://gpuweb.github.io/gpuweb/wgsl/#texel-formats");
   }
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
@@ -635,7 +647,7 @@ TEST_F(StorageTextureAccessControlTest, MissingAccessControl_Fail) {
   // [[group(0), binding(0)]]
   // var a : texture_storage_1d<ru32int>;
 
-  auto* st = ty.storage_texture(ast::TextureDimension::k1d,
+  auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
                                 ast::ImageFormat::kR32Uint);
 
   Global("a", st, ast::StorageClass::kNone, nullptr,
@@ -645,6 +657,8 @@ TEST_F(StorageTextureAccessControlTest, MissingAccessControl_Fail) {
          });
 
   EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: storage textures must have access control");
 }
 
 TEST_F(StorageTextureAccessControlTest, RWAccessControl_Fail) {
@@ -653,14 +667,18 @@ TEST_F(StorageTextureAccessControlTest, RWAccessControl_Fail) {
 
   auto* st = ty.storage_texture(ast::TextureDimension::k1d,
                                 ast::ImageFormat::kR32Uint);
+  auto* ac = ty.access(ast::AccessControl::kReadWrite, st);
 
-  Global("a", st, ast::StorageClass::kNone, nullptr,
+  Global(Source{{12, 34}}, "a", ac, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
              create<ast::GroupDecoration>(0),
          });
 
   EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: storage textures only support read-only and "
+            "write-only access");
 }
 
 TEST_F(StorageTextureAccessControlTest, ReadOnlyAccessControl_Pass) {

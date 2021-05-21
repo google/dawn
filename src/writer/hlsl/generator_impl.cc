@@ -249,7 +249,7 @@ bool GeneratorImpl::EmitBitcast(std::ostream& pre,
 
   out << "as";
   if (!EmitType(out, type, ast::StorageClass::kNone,
-                ast::AccessControl::kInvalid, "")) {
+                ast::AccessControl::kReadWrite, "")) {
     return false;
   }
   out << "(";
@@ -1309,7 +1309,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& pre,
     out << "{";
   } else {
     if (!EmitType(out, type, ast::StorageClass::kNone,
-                  ast::AccessControl::kInvalid, "")) {
+                  ast::AccessControl::kReadWrite, "")) {
       return false;
     }
     out << "(";
@@ -1571,7 +1571,7 @@ bool GeneratorImpl::EmitFunctionInternal(std::ostream& out,
   auto* func = builder_.Sem().Get(func_ast);
 
   if (!EmitType(out, func->ReturnType(), ast::StorageClass::kNone,
-                ast::AccessControl::kInvalid, "")) {
+                ast::AccessControl::kReadWrite, "")) {
     return false;
   }
 
@@ -1748,11 +1748,6 @@ bool GeneratorImpl::EmitEntryPointData(
 
     if (!emitted_globals.emplace(decl->symbol()).second) {
       continue;  // Global already emitted
-    }
-
-    if (var->AccessControl() == ast::AccessControl::kInvalid) {
-      diagnostics_.add_error("access control type required for storage buffer");
-      return false;
     }
 
     auto* type = var->Type()->UnwrapRef();
@@ -2129,7 +2124,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
     out << "0u";
   } else if (auto* vec = type->As<sem::Vector>()) {
     if (!EmitType(out, type, ast::StorageClass::kNone,
-                  ast::AccessControl::kInvalid, "")) {
+                  ast::AccessControl::kReadWrite, "")) {
       return false;
     }
     ScopedParen sp(out);
@@ -2143,7 +2138,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
     }
   } else if (auto* mat = type->As<sem::Matrix>()) {
     if (!EmitType(out, type, ast::StorageClass::kNone,
-                  ast::AccessControl::kInvalid, "")) {
+                  ast::AccessControl::kReadWrite, "")) {
       return false;
     }
     ScopedParen sp(out);
@@ -2515,7 +2510,7 @@ bool GeneratorImpl::EmitStructType(std::ostream& out,
 
     auto mem_name = builder_.Symbols().NameFor(mem->Declaration()->symbol());
     if (!EmitType(out, mem->Type(), ast::StorageClass::kNone,
-                  ast::AccessControl::kInvalid, mem_name)) {
+                  ast::AccessControl::kReadWrite, mem_name)) {
       return false;
     }
     // Array member name will be output with the type

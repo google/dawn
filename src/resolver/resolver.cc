@@ -284,7 +284,7 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
       return builder_->create<sem::F32>();
     }
     if (auto* t = ty->As<ast::AccessControl>()) {
-      TINT_SCOPED_ASSIGNMENT(curent_access_control_, t);
+      TINT_SCOPED_ASSIGNMENT(current_access_control_, t);
       if (auto* el = Type(t->type())) {
         return el;
       }
@@ -337,18 +337,15 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::StorageTexture>()) {
       if (auto* el = Type(t->type())) {
-        auto ac = ast::AccessControl::kInvalid;
-        if (curent_access_control_) {
-          ac = curent_access_control_->access_control();
-        } else {
-          // TODO(amaiorano): move error about missing access control on storage
-          // textures here, instead of when variables declared. That way, we'd
-          // get the error on the alias line (for
-          // alias<accesscontrol<storagetexture>>).
+        if (!current_access_control_) {
+          diagnostics_.add_error("storage textures must have access control",
+                                 t->source());
+          return nullptr;
         }
-
         return builder_->create<sem::StorageTexture>(
-            t->dim(), t->image_format(), ac, const_cast<sem::Type*>(el));
+            t->dim(), t->image_format(),
+            current_access_control_->access_control(),
+            const_cast<sem::Type*>(el));
       }
       return nullptr;
     }
@@ -485,11 +482,7 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     return nullptr;
   };
 
-  auto access_control = ast::AccessControl::kInvalid;
-  if (auto* ac = find_first_access_control(var->type())) {
-    access_control = ac->access_control();
-  }
-
+  auto* access_control = find_first_access_control(var->type());
   auto* info = variable_infos_.Create(var, const_cast<sem::Type*>(type),
                                       type_name, storage_class, access_control);
   variable_to_info_.emplace(var, info);
@@ -666,7 +659,7 @@ bool Resolver::ValidateGlobalVariable(const VariableInfo* info) {
       // Its store type must be a host-shareable structure type with block
       // attribute, satisfying the storage class constraints.
 
-      auto* str = info->access_control != ast::AccessControl::kInvalid
+      auto* str = info->access_control
                       ? info->type->UnwrapRef()->As<sem::Struct>()
                       : nullptr;
 
@@ -740,7 +733,7 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
 
   if (auto* r = storage_type->As<sem::MultisampledTexture>()) {
     if (r->dim() != ast::TextureDimension::k2d) {
-      diagnostics_.add_error("Only 2d multisampled textures are supported",
+      diagnostics_.add_error("only 2d multisampled textures are supported",
                              var->source());
       return false;
     }
@@ -754,24 +747,18 @@ bool Resolver::ValidateVariable(const VariableInfo* info) {
   }
 
   if (auto* storage_tex = info->type->UnwrapRef()->As<sem::StorageTexture>()) {
-    if (storage_tex->access_control() == ast::AccessControl::kInvalid) {
-      diagnostics_.add_error("Storage Textures must have access control.",
-                             var->source());
-      return false;
-    }
-
-    if (info->access_control == ast::AccessControl::kReadWrite) {
+    if (info->access_control->access_control() ==
+        ast::AccessControl::kReadWrite) {
       diagnostics_.add_error(
-          "Storage Textures only support Read-Only and Write-Only access "
-          "control.",
+          "storage textures only support read-only and write-only access",
           var->source());
       return false;
     }
 
     if (!IsValidStorageTextureDimension(storage_tex->dim())) {
       diagnostics_.add_error(
-          "Cube dimensions for storage textures are not "
-          "supported.",
+          "cube dimensions for storage textures are not "
+          "supported",
           var->source());
       return false;
     }
@@ -2548,7 +2535,9 @@ void Resolver::CreateSemanticNodes() const {
       sem_var = builder_->create<sem::Variable>(var, info->type, constant_id);
     } else {
       sem_var = builder_->create<sem::Variable>(
-          var, info->type, info->storage_class, info->access_control);
+          var, info->type, info->storage_class,
+          info->access_control ? info->access_control->access_control()
+                               : ast::AccessControl::kReadWrite);
     }
 
     std::vector<const sem::VariableUser*> users;
@@ -3235,7 +3224,7 @@ Resolver::VariableInfo::VariableInfo(const ast::Variable* decl,
                                      sem::Type* ty,
                                      const std::string& tn,
                                      ast::StorageClass sc,
-                                     ast::AccessControl::Access ac)
+                                     const ast::AccessControl* ac)
     : declaration(decl),
       type(ty),
       type_name(tn),
