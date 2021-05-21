@@ -552,6 +552,18 @@ std::string Disassemble(const std::vector<uint32_t>& data) {
 }
 #endif  // TINT_BUILD_SPV_WRITER
 
+/// PrintWGSL writes the WGSL of the program to the provided ostream, if the
+/// WGSL writer is enabled, otherwise it does nothing.
+/// @param out the output stream to write the WGSL to
+/// @param program the program
+void PrintWGSL(std::ostream& out, const tint::Program& program) {
+#if TINT_BUILD_WGSL_WRITER
+  tint::writer::wgsl::Generator writer(&program);
+  writer.Generate();
+  out << std::endl << writer.result() << std::endl;
+#endif
+}
+
 }  // namespace
 
 int main(int argc, const char** argv) {
@@ -717,6 +729,7 @@ int main(int argc, const char** argv) {
 
   auto out = transform_manager.Run(program.get(), std::move(transform_inputs));
   if (!out.program.IsValid()) {
+    PrintWGSL(std::cerr, out.program);
     diag_formatter.format(out.program.Diagnostics(), diag_printer.get());
     return 1;
   }
@@ -789,6 +802,7 @@ int main(int argc, const char** argv) {
   }
 
   if (!writer->Generate()) {
+    PrintWGSL(std::cerr, out.program);
     std::cerr << "Failed to generate: " << writer->error() << std::endl;
     return 1;
   }
