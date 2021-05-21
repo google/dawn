@@ -989,7 +989,7 @@ TEST_P(CopyTests_T2B, Texture3DFull) {
 
 // Test that copying a range of texture 3D depths in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture3DSubRegion) {
-    DAWN_SKIP_TEST_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
+    DAWN_TEST_UNSUPPORTED_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -1006,7 +1006,7 @@ TEST_P(CopyTests_T2B, Texture3DSubRegion) {
 }
 
 TEST_P(CopyTests_T2B, Texture3DNoSplitRowDataWithEmptyFirstRow) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 2;
     constexpr uint32_t kHeight = 4;
@@ -1029,7 +1029,7 @@ TEST_P(CopyTests_T2B, Texture3DNoSplitRowDataWithEmptyFirstRow) {
 }
 
 TEST_P(CopyTests_T2B, Texture3DSplitRowDataWithoutEmptyFirstRow) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
@@ -1047,7 +1047,7 @@ TEST_P(CopyTests_T2B, Texture3DSplitRowDataWithoutEmptyFirstRow) {
 }
 
 TEST_P(CopyTests_T2B, Texture3DSplitRowDataWithEmptyFirstRow) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 39;
     constexpr uint32_t kHeight = 4;
@@ -1070,7 +1070,7 @@ TEST_P(CopyTests_T2B, Texture3DSplitRowDataWithEmptyFirstRow) {
 }
 
 TEST_P(CopyTests_T2B, Texture3DCopyHeightIsOneCopyWidthIsTiny) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 2;
     constexpr uint32_t kHeight = 1;
@@ -1093,7 +1093,7 @@ TEST_P(CopyTests_T2B, Texture3DCopyHeightIsOneCopyWidthIsTiny) {
 }
 
 TEST_P(CopyTests_T2B, Texture3DCopyHeightIsOneCopyWidthIsSmall) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 39;
     constexpr uint32_t kHeight = 1;
@@ -1572,7 +1572,7 @@ TEST_P(CopyTests_B2T, Texture3DFull) {
 
 // Test that copying a range of texture 3D Depths in one texture-to-buffer-copy works.
 TEST_P(CopyTests_B2T, Texture3DSubRegion) {
-    DAWN_SKIP_TEST_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
+    DAWN_TEST_UNSUPPORTED_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -1589,7 +1589,7 @@ TEST_P(CopyTests_B2T, Texture3DSubRegion) {
 }
 
 TEST_P(CopyTests_B2T, Texture3DNoSplitRowDataWithEmptyFirstRow) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 2;
     constexpr uint32_t kHeight = 4;
@@ -1612,7 +1612,7 @@ TEST_P(CopyTests_B2T, Texture3DNoSplitRowDataWithEmptyFirstRow) {
 }
 
 TEST_P(CopyTests_B2T, Texture3DSplitRowDataWithoutEmptyFirstRow) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 259;
     constexpr uint32_t kHeight = 127;
@@ -1630,7 +1630,7 @@ TEST_P(CopyTests_B2T, Texture3DSplitRowDataWithoutEmptyFirstRow) {
 }
 
 TEST_P(CopyTests_B2T, Texture3DSplitRowDataWithEmptyFirstRow) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 39;
     constexpr uint32_t kHeight = 4;
@@ -1653,7 +1653,7 @@ TEST_P(CopyTests_B2T, Texture3DSplitRowDataWithEmptyFirstRow) {
 }
 
 TEST_P(CopyTests_B2T, Texture3DCopyHeightIsOneCopyWidthIsTiny) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 2;
     constexpr uint32_t kHeight = 1;
@@ -1676,7 +1676,7 @@ TEST_P(CopyTests_B2T, Texture3DCopyHeightIsOneCopyWidthIsTiny) {
 }
 
 TEST_P(CopyTests_B2T, Texture3DCopyHeightIsOneCopyWidthIsSmall) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 39;
     constexpr uint32_t kHeight = 1;
@@ -1919,7 +1919,7 @@ TEST_P(CopyTests_T2T, MultipleMipSrcSingleMipDst) {
 TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
     // Currently this test fails on many D3D12 drivers. See https://crbug.com/dawn/727 for more
     // details.
-    DAWN_SKIP_TEST_IF(IsD3D12());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12());
 
     constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::Depth32Float;
     constexpr uint32_t kPixelsPerRow = 4u;
@@ -1969,7 +1969,7 @@ TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
     // This test can pass on the Windows Intel Vulkan driver version 27.20.100.9168.
     // TODO(jiawei.shao@intel.com): enable this test on Intel Vulkan drivers after the upgrade of
     // try bots.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsWindows() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsWindows() && IsIntel());
 
     constexpr std::array<wgpu::TextureFormat, 11> kFormats = {
         {wgpu::TextureFormat::RG8Sint, wgpu::TextureFormat::RG8Uint, wgpu::TextureFormat::RG8Snorm,
@@ -2031,7 +2031,7 @@ TEST_P(CopyTests_T2T, Texture3DFull) {
 
 // Test that copying whole 3D texture to a 2D array in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DTo2DArrayFull) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -2046,7 +2046,7 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArrayFull) {
 
 // Test that copying whole 2D array to a 3D texture in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture2DArrayTo3DFull) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -2061,8 +2061,8 @@ TEST_P(CopyTests_T2T, Texture2DArrayTo3DFull) {
 
 // Test that copying subregion of a 3D texture in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DSubRegion) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
-    DAWN_SKIP_TEST_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -2077,7 +2077,7 @@ TEST_P(CopyTests_T2T, Texture3DSubRegion) {
 
 // Test that copying subregion of a 3D texture to a 2D array in one texture-to-texture-copy works.
 TEST_P(CopyTests_T2T, Texture3DTo2DArraySubRegion) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;
@@ -2093,8 +2093,8 @@ TEST_P(CopyTests_T2T, Texture3DTo2DArraySubRegion) {
 // Test that copying subregion of a 2D array to a 3D texture to in one texture-to-texture-copy
 // works.
 TEST_P(CopyTests_T2T, Texture2DArrayTo3DSubRegion) {
-    DAWN_SKIP_TEST_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
-    DAWN_SKIP_TEST_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());  // TODO(crbug.com/dawn/547): Implement on D3D12.
+    DAWN_TEST_UNSUPPORTED_IF(IsANGLE());  // TODO(crbug.com/angleproject/5967)
 
     constexpr uint32_t kWidth = 256;
     constexpr uint32_t kHeight = 128;

@@ -957,7 +957,7 @@ TEST_P(BufferZeroInitTest, Copy2DTextureToBuffer) {
 // the first use of the buffer and the texture is a 2D array texture.
 TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     constexpr wgpu::Extent3D kTextureSize = {64u, 4u, 3u};
 
@@ -989,7 +989,7 @@ TEST_P(BufferZeroInitTest, Copy2DArrayTextureToBuffer) {
 // uniform buffer.
 TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
     // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
@@ -1028,7 +1028,7 @@ TEST_P(BufferZeroInitTest, BoundAsUniformBuffer) {
 // read-only storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
     // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
     constexpr uint32_t kBoundBufferSize = 16u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
@@ -1067,7 +1067,7 @@ TEST_P(BufferZeroInitTest, BoundAsReadonlyStorageBuffer) {
 // storage buffer.
 TEST_P(BufferZeroInitTest, BoundAsStorageBuffer) {
     // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
     constexpr uint32_t kBoundBufferSize = 32u;
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
@@ -1178,7 +1178,7 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDrawIndexedIndirect) {
 // DispatchIndirect.
 TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
     // TODO(crbug.com/dawn/661): Diagnose and fix this backend validation failure on GLES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
     // Bind the whole buffer as an indirect buffer.
     {
@@ -1196,14 +1196,14 @@ TEST_P(BufferZeroInitTest, IndirectBufferForDispatchIndirect) {
 // Test the buffer will be lazily initialized correctly when its first use is in resolveQuerySet
 TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     // Timestamp query is not supported on OpenGL
-    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
 
     // TODO(hao.x.li@intel.com): Crash occurs if we only call WriteTimestamp in a command encoder
     // without any copy commands on Metal on AMD GPU. See https://crbug.com/dawn/545.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsAMD());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
 
     // Skip if timestamp extension is not supported on device
-    DAWN_SKIP_TEST_IF(!SupportsExtensions({"timestamp_query"}));
+    DAWN_TEST_UNSUPPORTED_IF(!SupportsExtensions({"timestamp_query"}));
 
     constexpr uint64_t kBufferSize = 16u;
     constexpr wgpu::BufferUsage kBufferUsage =

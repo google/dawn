@@ -140,11 +140,11 @@ class DepthBiasTests : public DawnTest {
 // Test adding positive bias to output
 TEST_P(DepthBiasTests, PositiveBiasOnFloat) {
     // NVIDIA GPUs under Vulkan seem to be using a different scale than everyone else.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
     // OpenGL uses a different scale than the other APIs
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // Draw quad flat on z = 0.25 with 0.25 bias
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::Flat,
@@ -163,8 +163,8 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloat) {
 // Test adding positive bias to output with a clamp
 TEST_P(DepthBiasTests, PositiveBiasOnFloatWithClamp) {
     // Clamping support in OpenGL is spotty
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // Draw quad flat on z = 0.25 with 0.25 bias clamped at 0.125.
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::Flat,
@@ -183,10 +183,10 @@ TEST_P(DepthBiasTests, PositiveBiasOnFloatWithClamp) {
 // Test adding negative bias to output
 TEST_P(DepthBiasTests, NegativeBiasOnFloat) {
     // NVIDIA GPUs seems to be using a different scale than everyone else
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
     // OpenGL uses a different scale than the other APIs
-    DAWN_SKIP_TEST_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
 
     // Draw quad flat on z = 0.25 with -0.25 bias, depth clear of 0.125
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0.125, QuadAngle::Flat,
@@ -205,8 +205,8 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloat) {
 // Test adding negative bias to output with a clamp
 TEST_P(DepthBiasTests, NegativeBiasOnFloatWithClamp) {
     // Clamping support in OpenGL is spotty
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // Draw quad flat on z = 0.25 with -0.25 bias clamped at -0.125.
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0, QuadAngle::Flat,
@@ -225,7 +225,7 @@ TEST_P(DepthBiasTests, NegativeBiasOnFloatWithClamp) {
 // Test adding positive infinite slope bias to output
 TEST_P(DepthBiasTests, PositiveInfinitySlopeBiasOnFloat) {
     // NVIDIA GPUs do not clamp values to 1 when using Inf slope bias.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
     // Draw quad with z from 0 to 0.5 with inf slope bias
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0.125, QuadAngle::TiltedX, 0,
@@ -244,7 +244,7 @@ TEST_P(DepthBiasTests, PositiveInfinitySlopeBiasOnFloat) {
 // Test adding positive infinite slope bias to output
 TEST_P(DepthBiasTests, NegativeInfinityBiasOnFloat) {
     // NVIDIA GPUs do not clamp values to 0 when using -Inf slope bias.
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
     // Draw quad with z from 0 to 0.5 with -inf slope bias
     RunDepthBiasTest(wgpu::TextureFormat::Depth32Float, 0.125, QuadAngle::TiltedX, 0,
@@ -324,8 +324,8 @@ TEST_P(DepthBiasTests, PositiveBiasOn24bit) {
 // Test adding positive bias to output with a clamp
 TEST_P(DepthBiasTests, PositiveBiasOn24bitWithClamp) {
     // Clamping support in OpenGL is spotty
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // Draw quad flat on z = 0.25 with 0.25 bias clamped at 0.125.
     RunDepthBiasTest(wgpu::TextureFormat::Depth24PlusStencil8, 0.4f, QuadAngle::Flat,

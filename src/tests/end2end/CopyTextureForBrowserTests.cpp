@@ -459,7 +459,7 @@ TEST_P(CopyTextureForBrowserTests, VerifyFlipYInSlimTexture) {
 TEST_P(CopyTextureForBrowserTests, FromRGBA8UnormCopy) {
     // Skip OpenGLES backend because it fails on using RGBA8Unorm as
     // source texture format.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
 
     for (wgpu::TextureFormat dstFormat : kDstTextureFormat) {
         TextureSpec srcTextureSpec = {};  // default format is RGBA8Unorm
@@ -476,7 +476,7 @@ TEST_P(CopyTextureForBrowserTests, FromRGBA8UnormCopy) {
 TEST_P(CopyTextureForBrowserTests, FromBGRA8UnormCopy) {
     // Skip OpenGLES backend because it fails on using BGRA8Unorm as
     // source texture format.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
 
     for (wgpu::TextureFormat dstFormat : kDstTextureFormat) {
         TextureSpec srcTextureSpec;
@@ -495,7 +495,7 @@ TEST_P(CopyTextureForBrowserTests, FromBGRA8UnormCopy) {
 // in dst texture should be red and other part should remain green.
 TEST_P(CopyTextureForBrowserTests, CopySubRect) {
     // Tests skip due to crbug.com/dawn/592.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     for (wgpu::Origin3D srcOrigin : kOrigins) {
         for (wgpu::Origin3D dstOrigin : kOrigins) {

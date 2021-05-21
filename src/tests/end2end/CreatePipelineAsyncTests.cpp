@@ -106,7 +106,7 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateComputePipelineAsync) {
 // CreateComputePipelineAsync() any error won't be forwarded to the error scope / unhandled error
 // callback.
 TEST_P(CreatePipelineAsyncTest, CreateComputePipelineFailed) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.computeStage.module = utils::CreateShaderModule(device, R"(
@@ -209,7 +209,7 @@ TEST_P(CreatePipelineAsyncTest, BasicUseOfCreateRenderPipelineAsync) {
 // CreateRenderPipelineAsync() any error won't be forwarded to the error scope / unhandled error
 // callback.
 TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineFailed) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     constexpr wgpu::TextureFormat kRenderAttachmentFormat = wgpu::TextureFormat::Depth32Float;
 

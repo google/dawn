@@ -43,7 +43,7 @@ namespace {
 }  // anonymous namespace
 
 TEST_P(ExternalTextureTests, CreateExternalTextureSuccess) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
     wgpu::Texture texture = Create2DTexture(device, kWidth, kHeight, kFormat, kSampledUsage);
 

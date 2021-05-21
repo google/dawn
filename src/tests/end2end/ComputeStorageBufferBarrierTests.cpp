@@ -351,7 +351,7 @@ TEST_P(ComputeStorageBufferBarrierTests, UniformToStorageAddPingPongInOnePass) {
 TEST_P(ComputeStorageBufferBarrierTests, IndirectBufferCorrectBarrier) {
     // For some reason SPIRV-Cross crashes when translating the step3 shader to HLSL. Suppress the
     // failure since we'll remove SPIRV-Cross at some point.
-    DAWN_SKIP_TEST_IF(IsD3D12() && !HasToggleEnabled("use_tint_generator"));
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && !HasToggleEnabled("use_tint_generator"));
 
     wgpu::ComputePipelineDescriptor step2PipelineDesc;
     step2PipelineDesc.computeStage.entryPoint = "main";

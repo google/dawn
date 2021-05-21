@@ -432,9 +432,9 @@ class CompressedTextureBCFormatTest : public DawnTest {
 // Test copying into the whole BC texture with 2x2 blocks and sampling from it.
 TEST_P(CompressedTextureBCFormatTest, Basic) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -449,7 +449,7 @@ TEST_P(CompressedTextureBCFormatTest, Basic) {
 
 // Test copying into a sub-region of a texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -469,12 +469,12 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubRegion) {
 // Test copying into the non-zero layer of a 2D array texture with BC formats works correctly.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // This test uses glTextureView() which is not supported in OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -494,12 +494,12 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoNonZeroArrayLayer) {
 // Test copying into a non-zero mipmap level of a texture with BC texture formats.
 TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // This test uses glTextureView() which is not supported in OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -533,17 +533,17 @@ TEST_P(CompressedTextureBCFormatTest, CopyBufferIntoNonZeroMipmapLevel) {
 // Test texture-to-texture whole-size copies with BC formats.
 TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipmapLevel) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // This test uses glTextureView() which is not supported in OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // TODO(cwallez@chromium.org): This consistently fails on with the 12th pixel being opaque black
     // instead of opaque red on Win10 FYI Release (NVIDIA GeForce GTX 1660). See
     // https://bugs.chromium.org/p/chromium/issues/detail?id=981393
-    DAWN_SKIP_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
 
     CopyConfig config;
     config.textureDescriptor.size = {60, 60, 1};
@@ -589,11 +589,11 @@ TEST_P(CompressedTextureBCFormatTest, CopyWholeTextureSubResourceIntoNonZeroMipm
 // Test BC format texture-to-texture partial copies where the physical size of the destination
 // subresource is different from its virtual size.
 TEST_P(CompressedTextureBCFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     CopyConfig srcConfig;
     srcConfig.textureDescriptor.size = {60, 60, 1};
@@ -649,11 +649,11 @@ TEST_P(CompressedTextureBCFormatTest, CopyIntoSubresourceWithPhysicalSizeNotEqua
 // Test BC format texture-to-texture partial copies where the physical size of the source
 // subresource is different from its virtual size.
 TEST_P(CompressedTextureBCFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     CopyConfig srcConfig;
     srcConfig.textureDescriptor.size = {60, 60, 1};
@@ -705,11 +705,11 @@ TEST_P(CompressedTextureBCFormatTest, CopyFromSubresourceWithPhysicalSizeNotEqua
 // Test recording two BC format texture-to-texture partial copies where the physical size of the
 // source subresource is different from its virtual size into one command buffer.
 TEST_P(CompressedTextureBCFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVirtualSize) {
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     constexpr uint32_t kTotalCopyCount = 2;
     std::array<CopyConfig, kTotalCopyCount> srcConfigs;
@@ -785,11 +785,11 @@ TEST_P(CompressedTextureBCFormatTest, MultipleCopiesWithPhysicalSizeNotEqualToVi
 // Vulkan backend: test BC format texture-to-texture partial copies with multiple array layers
 // where the physical size of the source subresource is different from its virtual size.
 TEST_P(CompressedTextureBCFormatTest, CopyWithMultipleLayerAndPhysicalSizeNotEqualToVirtualSize) {
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // TODO(jiawei.shao@intel.com): add workaround on the T2T copies where Extent3D fits in one
     // subresource and does not fit in another one on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     constexpr uint32_t kArrayLayerCount = 5;
 
@@ -858,9 +858,9 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithMultipleLayerAndPhysicalSizeNotEqu
 // extent exactly fit the RowPitch.
 TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -887,9 +887,9 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetAndExtentFitRowPitch) {
 // ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -918,9 +918,9 @@ TEST_P(CompressedTextureBCFormatTest, BufferOffsetExceedsSlicePitch) {
 // extent exceed the RowPitch. On D3D12 backend two copies are required for this case.
 TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitch) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -947,7 +947,7 @@ TEST_P(CompressedTextureBCFormatTest, CopyWithBufferOffsetAndExtentExceedRowPitc
 // bytesPerRow. On D3D12 backend the texelOffset.z will be greater than 0 after calcuting the
 // texelOffset in the function ComputeTexelOffsets().
 TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -975,9 +975,9 @@ TEST_P(CompressedTextureBCFormatTest, RowPitchEqualToSlicePitch) {
 // for BC formats, on Metal backend we will use two copies to implement such copy.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -996,12 +996,12 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeight) {
 // copyExtent.depthOrArrayLayers) and copyExtent needs to be clamped.
 TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // This test uses glTextureView() which is not supported in OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -1038,12 +1038,12 @@ TEST_P(CompressedTextureBCFormatTest, LargeImageHeightAndClampedCopyExtent) {
 // BC formats.
 TEST_P(CompressedTextureBCFormatTest, CopyWhole2DArrayTexture) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // This test uses glTextureView() which is not supported in OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     constexpr uint32_t kArrayLayerCount = 3;
 
@@ -1064,12 +1064,12 @@ TEST_P(CompressedTextureBCFormatTest, CopyWhole2DArrayTexture) {
 // Test copying a multiple 2D texture array layers in one copy command works with BC formats.
 TEST_P(CompressedTextureBCFormatTest, CopyMultiple2DArrayLayers) {
     // TODO(jiawei.shao@intel.com): find out why this test fails on Windows Intel OpenGL drivers.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsWindows());
 
-    DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+    DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
 
     // This test uses glTextureView() which is not supported in OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     constexpr uint32_t kArrayLayerCount = 3;
 
@@ -1094,8 +1094,8 @@ TEST_P(CompressedTextureBCFormatTest, CopyMultiple2DArrayLayers) {
 // is unaligned doesn't throw validation errors.
 TEST_P(CompressedTextureBCFormatTest, UnalignedDynamicUploader) {
     // CopyT2B for compressed texture formats is unimplemented on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     utils::UnalignDynamicUploader(device);
 
@@ -1133,7 +1133,7 @@ class CompressedTextureWriteTextureTest : public CompressedTextureBCFormatTest {
   protected:
     void SetUp() override {
         CompressedTextureBCFormatTest::SetUp();
-        DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+        DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
     }
 
     // Write the compressed texture data into the destination texture as is specified in copyConfig.
@@ -1185,7 +1185,7 @@ TEST_P(CompressedTextureWriteTextureTest, Basic) {
 // Test writing to multiple 2D texture array layers with BC formats.
 TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     CopyConfig config;
     config.textureDescriptor.usage = kDefaultBCFormatTextureUsage;
@@ -1207,7 +1207,7 @@ TEST_P(CompressedTextureWriteTextureTest, WriteMultiple2DArrayLayers) {
 TEST_P(CompressedTextureWriteTextureTest,
        WriteIntoSubresourceWithPhysicalSizeNotEqualToVirtualSize) {
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // Texture virtual size at mipLevel 2 will be {15, 15, 1} while the physical
     // size will be {16, 16, 1}.

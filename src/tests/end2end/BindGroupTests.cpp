@@ -932,7 +932,7 @@ TEST_P(BindGroupTests, DynamicBindingNoneVisibility) {
 // Test that bind group bindings may have unbounded and arbitrary binding numbers
 TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
     // TODO(crbug.com/dawn/736): Test output is wrong with D3D12 + WARP.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, kRTSize, kRTSize);
 
@@ -1142,7 +1142,7 @@ TEST_P(BindGroupTests, ReadonlyStorage) {
 // used correctly. The test loads a different value from each binding, and writes 1 to a storage
 // buffer if all values are correct.
 TEST_P(BindGroupTests, ReallyLargeBindGroup) {
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
     std::ostringstream interface;
     std::ostringstream body;
     uint32_t binding = 0;

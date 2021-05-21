@@ -330,7 +330,7 @@ TEST_P(DepthStencilCopyTests, FromDepthAspect) {
 TEST_P(DepthStencilCopyTests, FromStencilAspect) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms are unable to read
     // stencil.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_depth_stencil_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
@@ -355,10 +355,10 @@ TEST_P(DepthStencilCopyTests, FromStencilAspect) {
 TEST_P(DepthStencilCopyTests, FromNonZeroMipStencilAspect) {
     // TODO(enga): Figure out why this fails on MacOS Intel Iris.
     // It passes on AMD Radeon Pro and Intel HD Graphics 630.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_depth_stencil_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
     wgpu::Texture depthStencilTexture = CreateDepthStencilTexture(
         9, 9, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc, 2);
@@ -400,10 +400,10 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
     // It passes on AMD Radeon Pro and Intel HD Graphics 630.
     // Maybe has to do with the RenderAttachment usage. Notably, a later test
     // T2TBothAspectsThenCopyNonRenderableStencil does not use RenderAttachment and works correctly.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_depth_stencil_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
@@ -427,7 +427,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
 // this test has different behavior on some platforms than T2TBothAspectsThenCopyStencil.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableStencil) {
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_depth_stencil_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
@@ -453,10 +453,10 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableNonZeroMipStenc
     // It passes on AMD Radeon Pro and Intel HD Graphics 630.
     // Maybe has to do with the non-zero mip. Notably, a previous test
     // T2TBothAspectsThenCopyNonRenderableStencil works correctly.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_depth_stencil_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
         0.1f, 0.3f, 1u, 3u, 9, 9, wgpu::TextureUsage::CopySrc, 1);
@@ -508,7 +508,7 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonZeroMipDepth) {
 // Test copying both aspects in a T2T copy, then copying stencil, then copying depth
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencilThenDepth) {
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_depth_stencil_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
@@ -544,11 +544,11 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepthThenStencil) {
     // It seems like the depth readback copy mutates the stencil because the previous
     // test T2TBothAspectsThenCopyStencil passes.
     // T2TBothAspectsThenCopyStencilThenDepth which checks stencil first also passes.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms are unable to read
     // stencil.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_depth_stencil_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
@@ -580,12 +580,12 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepthThenStencil) {
 // Test copying to the stencil-aspect of a buffer
 TEST_P(DepthStencilCopyTests, ToStencilAspect) {
     // Copies to a single aspect are unsupported on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // TODO(enga): Figure out why this fails on MacOS Intel Iris.
     // It passes on AMD Radeon Pro and Intel HD Graphics 630.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     // Create a stencil texture
     constexpr uint32_t kWidth = 4;

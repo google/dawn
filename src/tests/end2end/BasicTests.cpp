@@ -20,14 +20,14 @@ class BasicTests : public DawnTest {};
 
 // Test adapter filter by vendor id.
 TEST_P(BasicTests, VendorIdFilter) {
-    DAWN_SKIP_TEST_IF(!HasVendorIdFilter());
+    DAWN_TEST_UNSUPPORTED_IF(!HasVendorIdFilter());
 
     ASSERT_EQ(GetAdapterProperties().vendorID, GetVendorIdFilter());
 }
 
 // Test adapter filter by backend type.
 TEST_P(BasicTests, BackendType) {
-    DAWN_SKIP_TEST_IF(!HasBackendTypeFilter());
+    DAWN_TEST_UNSUPPORTED_IF(!HasBackendTypeFilter());
 
     ASSERT_EQ(GetAdapterProperties().backendType, GetBackendTypeFilter());
 }

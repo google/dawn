@@ -32,7 +32,7 @@ class ColorStateTest : public DawnTest {
 
         // TODO(crbug.com/dawn/489): D3D12_Microsoft_Basic_Render_Driver_CPU
         // produces invalid results for these tests.
-        DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+        DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
         vsModule = utils::CreateShaderModule(device, R"(
                 [[stage(vertex)]]
@@ -760,7 +760,7 @@ TEST_P(ColorStateTest, ColorWriteMaskBlendingDisabled) {
 
 // Test that independent color states on render targets works
 TEST_P(ColorStateTest, IndependentColorState) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_indexed_draw_buffers"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_indexed_draw_buffers"));
 
     std::array<wgpu::Texture, 4> renderTargets;
     std::array<wgpu::TextureView, 4> renderTargetViews;

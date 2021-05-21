@@ -30,8 +30,8 @@ namespace {
       protected:
         void SetUp() override {
             DawnTest::SetUp();
-            DAWN_SKIP_TEST_IF(UsesWire());
-            DAWN_SKIP_TEST_IF(!IsMultiPlanarFormatsSupported());
+            DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+            DAWN_TEST_UNSUPPORTED_IF(!IsMultiPlanarFormatsSupported());
 
             // Create the D3D11 device/contexts that will be used in subsequent tests
             ComPtr<ID3D12Device> d3d12Device = dawn_native::d3d12::GetD3D12Device(device.Get());
@@ -389,7 +389,7 @@ TEST_P(D3D12VideoViewsTests, NV12SampleUVtoRG) {
 TEST_P(D3D12VideoViewsTests, NV12SampleYUVtoRGB) {
     // TODO(https://crbug.com/dawn/733): Figure out why Nvidia bot occasionally fails testing all
     // four corners.
-    DAWN_SKIP_TEST_IF(IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsNvidia());
 
     wgpu::Texture wgpuTexture;
     CreateVideoTextureForTest(wgpu::TextureFormat::R8BG8Biplanar420Unorm,

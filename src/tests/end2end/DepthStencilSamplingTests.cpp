@@ -552,7 +552,7 @@ TEST_P(DepthStencilSamplingTest, SampleDepth) {
 // Test that sampling a stencil texture with a render/compute pipeline works
 TEST_P(DepthStencilSamplingTest, SampleStencil) {
     // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
     for (wgpu::TextureFormat format : kStencilFormats) {
         DoSamplingTest(TestAspect::Stencil, CreateSamplingRenderPipeline({TestAspect::Stencil}, 0),
                        format, kStencilValues);
@@ -566,12 +566,12 @@ TEST_P(DepthStencilSamplingTest, SampleStencil) {
 // respectively
 TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
     // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
     // TODO(enga): In Metal, color textures' unspecified default components values
     // are (0, 0, 0, 1). Depth/stencil textures are undefined! Figure out what
     // to do here.
     // See Section 6.10 of the Metal Shading Language Specification
-    DAWN_SKIP_TEST_IF(IsMetal());
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
 
     float expectedDepth[4] = {0, 0, 0, 1};
     uint8_t expectedStencil[4] = {0, 0, 0, 1};
@@ -598,7 +598,7 @@ TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
 // Test sampling both depth and stencil with a render/compute pipeline works.
 TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
     // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
     wgpu::SamplerDescriptor samplerDesc;
     wgpu::Sampler sampler = device.CreateSampler(&samplerDesc);
 
@@ -706,7 +706,7 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
 // Test that sampling in a render pipeline with all of the compare functions works.
 TEST_P(DepthStencilSamplingTest, CompareFunctionsRender) {
     // Initialization via renderPass loadOp doesn't work on Mac Intel.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     wgpu::RenderPipeline pipeline = CreateComparisonRenderPipeline();
 
@@ -724,7 +724,7 @@ TEST_P(DepthStencilSamplingTest, CompareFunctionsRender) {
 // Test that sampling in a render pipeline with all of the compare functions works.
 TEST_P(DepthStencilSamplingTest, CompareFunctionsCompute) {
     // Initialization via renderPass loadOp doesn't work on Mac Intel.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     wgpu::ComputePipeline pipeline = CreateComparisonComputePipeline();
 

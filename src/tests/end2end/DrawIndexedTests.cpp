@@ -178,7 +178,7 @@ TEST_P(DrawIndexedTest, ZeroSizedIndexBuffer) {
 
 // Test the parameter 'baseVertex' of DrawIndexed() works.
 TEST_P(DrawIndexedTest, BaseVertex) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_base_vertex"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_base_vertex"));
     RGBA8 filled(0, 255, 0, 255);
     RGBA8 notFilled(0, 0, 0, 0);
 

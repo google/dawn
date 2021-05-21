@@ -649,7 +649,7 @@ TEST_P(BufferMappedAtCreationTests, ZeroSizedMappableBuffer) {
 
 // Test that creating a zero-sized error buffer mapped. (it is a different code path)
 TEST_P(BufferMappedAtCreationTests, ZeroSizedErrorBuffer) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 0;
@@ -708,9 +708,9 @@ TEST_P(BufferTests, ZeroSizedBuffer) {
 // Test that creating a very large buffers fails gracefully.
 TEST_P(BufferTests, CreateBufferOOM) {
     // TODO(http://crbug.com/dawn/749): Missing support.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
-    DAWN_SKIP_TEST_IF(IsAsan());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsAsan());
 
     wgpu::BufferDescriptor descriptor;
     descriptor.usage = wgpu::BufferUsage::CopyDst;
@@ -726,9 +726,9 @@ TEST_P(BufferTests, CreateBufferOOM) {
 // Test that a very large buffer mappedAtCreation fails gracefully.
 TEST_P(BufferTests, BufferMappedAtCreationOOM) {
     // TODO(http://crbug.com/dawn/749): Missing support.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
-    DAWN_SKIP_TEST_IF(IsAsan());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsAsan());
 
     // Test non-mappable buffer
     {
@@ -772,9 +772,9 @@ TEST_P(BufferTests, BufferMappedAtCreationOOM) {
 // Test that mapping an OOM buffer fails gracefully
 TEST_P(BufferTests, CreateBufferOOMMapAsync) {
     // TODO(http://crbug.com/dawn/749): Missing support.
-    DAWN_SKIP_TEST_IF(IsOpenGL());
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
-    DAWN_SKIP_TEST_IF(IsAsan());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsAsan());
 
     auto RunTest = [this](const wgpu::BufferDescriptor& descriptor) {
         wgpu::Buffer buffer;
