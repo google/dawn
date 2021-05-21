@@ -851,6 +851,11 @@ class FunctionEmitter {
   /// @returns the value itself, or converted to signed integral
   TypedExpression ToSignedIfUnsigned(TypedExpression value);
 
+  /// Returns true if the given SPIR-V id represents a constant float 0.
+  bool IsFloatZero(uint32_t value_id);
+  /// Returns true if the given SPIR-V id represents a constant float 1.
+  bool IsFloatOne(uint32_t value_id);
+
  private:
   /// FunctionDeclaration contains the parsed information for a function header.
   struct FunctionDeclaration {

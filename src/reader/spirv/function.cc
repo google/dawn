@@ -3262,15 +3262,9 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
       // Handle exceptional cases
       switch (GetSkipReason(ptr_id)) {
         case SkipReason::kPointSizeBuiltinPointer:
-          if (const auto* c = constant_mgr_->FindDeclaredConstant(value_id)) {
-            // If we're writing a constant 1.0, then skip the write.  That's all
-            // that WebGPU handles.
-            auto* ct = c->type();
-            if (ct->AsFloat() && (ct->AsFloat()->width() == 32) &&
-                (c->GetFloat() == 1.0f)) {
-              // Don't store to PointSize
-              return true;
-            }
+          if (IsFloatOne(value_id)) {
+            // Don't store to PointSize
+            return true;
           }
           return Fail() << "cannot store a value other than constant 1.0 to "
                            "PointSize builtin: "
@@ -4843,13 +4837,26 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     if (use_level_of_detail_suffix) {
       builtin_name += "Level";
     }
-    TypedExpression lod = MakeOperand(inst, arg_index);
-    // When sampling from a depth texture, the Lod operand must be an I32.
-    if (texture_type->Is<DepthTexture>()) {
-      // Convert it to a signed integer type.
-      lod = ToI32(lod);
+    if (is_dref_sample) {
+      // Metal only supports Lod = 0 for comparison sampling without
+      // derivatives.
+      if (!IsFloatZero(inst.GetSingleWordInOperand(arg_index))) {
+        return Fail() << "WGSL comparison sampling without derivatives "
+                         "requires level-of-detail 0.0"
+                      << inst.PrettyPrint();
+      }
+      // Don't generate the Lod argument.
+    } else {
+      // Generate the Lod argument.
+      TypedExpression lod = MakeOperand(inst, arg_index);
+      // When sampling from a depth texture, the Lod operand must be an I32.
+      if (texture_type->Is<DepthTexture>()) {
+        // Convert it to a signed integer type.
+        lod = ToI32(lod);
+      }
+      params.push_back(lod.expr);
     }
-    params.push_back(lod.expr);
+
     image_operands_mask ^= SpvImageOperandsLodMask;
     arg_index++;
   } else if ((opcode == SpvOpImageFetch) &&
@@ -5464,6 +5471,28 @@ TypedExpression FunctionEmitter::Dereference(TypedExpression expr) {
       create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kIndirection,
                                      expr.expr),
   };
+}
+
+bool FunctionEmitter::IsFloatZero(uint32_t value_id) {
+  if (const auto* c = constant_mgr_->FindDeclaredConstant(value_id)) {
+    if (const auto* float_const = c->AsFloatConstant()) {
+      return 0.0f == float_const->GetFloatValue();
+    }
+    if (c->AsNullConstant()) {
+      // Valid SPIR-V requires it to be a float value anyway.
+      return true;
+    }
+  }
+  return false;
+}
+
+bool FunctionEmitter::IsFloatOne(uint32_t value_id) {
+  if (const auto* c = constant_mgr_->FindDeclaredConstant(value_id)) {
+    if (const auto* float_const = c->AsFloatConstant()) {
+      return 1.0f == float_const->GetFloatValue();
+    }
+  }
+  return false;
 }
 
 FunctionEmitter::FunctionDeclaration::FunctionDeclaration() = default;
