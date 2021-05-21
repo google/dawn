@@ -37,26 +37,6 @@ namespace dawn {
         wgpu::VertexFormat::Sint32x2,  wgpu::VertexFormat::Sint32x3,  wgpu::VertexFormat::Sint32x4,
     };
 
-    static constexpr std::array<wgpu::VertexFormat, 30> kAllDeprecatedVertexFormats = {
-        wgpu::VertexFormat::UChar2,      wgpu::VertexFormat::UChar4,
-        wgpu::VertexFormat::Char2,       wgpu::VertexFormat::Char4,
-        wgpu::VertexFormat::UChar2Norm,  wgpu::VertexFormat::UChar4Norm,
-        wgpu::VertexFormat::Char2Norm,   wgpu::VertexFormat::Char4Norm,
-        wgpu::VertexFormat::UShort2,     wgpu::VertexFormat::UShort4,
-        wgpu::VertexFormat::UShort2Norm, wgpu::VertexFormat::UShort4Norm,
-        wgpu::VertexFormat::Short2,      wgpu::VertexFormat::Short4,
-        wgpu::VertexFormat::Short2Norm,  wgpu::VertexFormat::Short4Norm,
-        wgpu::VertexFormat::Half2,       wgpu::VertexFormat::Half4,
-        wgpu::VertexFormat::Float,       wgpu::VertexFormat::Float2,
-        wgpu::VertexFormat::Float3,      wgpu::VertexFormat::Float4,
-        wgpu::VertexFormat::UInt,        wgpu::VertexFormat::UInt2,
-        wgpu::VertexFormat::UInt3,       wgpu::VertexFormat::UInt4,
-        wgpu::VertexFormat::Int,         wgpu::VertexFormat::Int2,
-        wgpu::VertexFormat::Int3,        wgpu::VertexFormat::Int4,
-    };
-
-    bool IsDeprecatedVertexFormat(wgpu::VertexFormat format);
-    wgpu::VertexFormat NormalizeVertexFormat(wgpu::VertexFormat format);
     uint32_t VertexFormatNumComponents(wgpu::VertexFormat format);
     size_t VertexFormatComponentSize(wgpu::VertexFormat format);
     size_t VertexFormatSize(wgpu::VertexFormat format);

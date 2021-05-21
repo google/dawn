@@ -34,11 +34,6 @@ namespace dawn_native {
                                            std::bitset<kMaxVertexAttributes>* attributesSetMask) {
             DAWN_TRY(ValidateVertexFormat(attribute->format));
 
-            if (dawn::IsDeprecatedVertexFormat(attribute->format)) {
-                device->EmitDeprecationWarning(
-                    "Vertex formats have changed and the old types will be removed soon.");
-            }
-
             if (attribute->shaderLocation >= kMaxVertexAttributes) {
                 return DAWN_VALIDATION_ERROR("Setting attribute out of bounds");
             }
@@ -417,9 +412,7 @@ namespace dawn_native {
                 mAttributeInfos[location].shaderLocation = location;
                 mAttributeInfos[location].vertexBufferSlot = typedSlot;
                 mAttributeInfos[location].offset = buffers[slot].attributes[i].offset;
-
-                mAttributeInfos[location].format =
-                    dawn::NormalizeVertexFormat(buffers[slot].attributes[i].format);
+                mAttributeInfos[location].format = buffers[slot].attributes[i].format;
             }
         }
 

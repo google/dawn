@@ -51,7 +51,6 @@ namespace dawn_native {
         }
 
         tint::transform::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {
-            format = dawn::NormalizeVertexFormat(format);
             switch (format) {
                 case wgpu::VertexFormat::Uint8x2:
                     return tint::transform::VertexFormat::kVec2U8;
@@ -115,39 +114,6 @@ namespace dawn_native {
                     return tint::transform::VertexFormat::kVec4I32;
 
                 case wgpu::VertexFormat::Undefined:
-                    break;
-
-                // Deprecated formats (should be unreachable after NormalizeVertexFormat call)
-                case wgpu::VertexFormat::UChar2:
-                case wgpu::VertexFormat::UChar4:
-                case wgpu::VertexFormat::Char2:
-                case wgpu::VertexFormat::Char4:
-                case wgpu::VertexFormat::UChar2Norm:
-                case wgpu::VertexFormat::UChar4Norm:
-                case wgpu::VertexFormat::Char2Norm:
-                case wgpu::VertexFormat::Char4Norm:
-                case wgpu::VertexFormat::UShort2:
-                case wgpu::VertexFormat::UShort4:
-                case wgpu::VertexFormat::UShort2Norm:
-                case wgpu::VertexFormat::UShort4Norm:
-                case wgpu::VertexFormat::Short2:
-                case wgpu::VertexFormat::Short4:
-                case wgpu::VertexFormat::Short2Norm:
-                case wgpu::VertexFormat::Short4Norm:
-                case wgpu::VertexFormat::Half2:
-                case wgpu::VertexFormat::Half4:
-                case wgpu::VertexFormat::Float:
-                case wgpu::VertexFormat::Float2:
-                case wgpu::VertexFormat::Float3:
-                case wgpu::VertexFormat::Float4:
-                case wgpu::VertexFormat::UInt:
-                case wgpu::VertexFormat::UInt2:
-                case wgpu::VertexFormat::UInt3:
-                case wgpu::VertexFormat::UInt4:
-                case wgpu::VertexFormat::Int:
-                case wgpu::VertexFormat::Int2:
-                case wgpu::VertexFormat::Int3:
-                case wgpu::VertexFormat::Int4:
                     break;
             }
             UNREACHABLE();

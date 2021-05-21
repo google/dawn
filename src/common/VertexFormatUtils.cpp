@@ -18,33 +18,7 @@
 
 namespace dawn {
 
-    namespace {
-
-        static constexpr wgpu::VertexFormat kFirstDeprecatedVertexFormat =
-            wgpu::VertexFormat::UChar2;
-        static constexpr uint32_t kFirstDeprecatedVertexFormatValue =
-            static_cast<uint32_t>(kFirstDeprecatedVertexFormat);
-
-    }  // namespace
-
-    bool IsDeprecatedVertexFormat(wgpu::VertexFormat format) {
-        return format >= kFirstDeprecatedVertexFormat;
-    }
-
-    wgpu::VertexFormat NormalizeVertexFormat(wgpu::VertexFormat format) {
-        // If the specified format is from the deprecated range return the corresponding
-        // non-deprecated format.
-        if (format >= kFirstDeprecatedVertexFormat) {
-            uint32_t formatValue = static_cast<uint32_t>(format);
-            // Need to add one to account for the "undefined" enum with value 0
-            return static_cast<wgpu::VertexFormat>(
-                (formatValue - kFirstDeprecatedVertexFormatValue) + 1);
-        }
-        return format;
-    }
-
     uint32_t VertexFormatNumComponents(wgpu::VertexFormat format) {
-        format = NormalizeVertexFormat(format);
         switch (format) {
             case wgpu::VertexFormat::Uint8x4:
             case wgpu::VertexFormat::Sint8x4:
@@ -83,45 +57,11 @@ namespace dawn {
 
             case wgpu::VertexFormat::Undefined:
                 break;
-
-            // Deprecated formats (should be unreachable after NormalizeVertexFormat call)
-            case wgpu::VertexFormat::UChar2:
-            case wgpu::VertexFormat::UChar4:
-            case wgpu::VertexFormat::Char2:
-            case wgpu::VertexFormat::Char4:
-            case wgpu::VertexFormat::UChar2Norm:
-            case wgpu::VertexFormat::UChar4Norm:
-            case wgpu::VertexFormat::Char2Norm:
-            case wgpu::VertexFormat::Char4Norm:
-            case wgpu::VertexFormat::UShort2:
-            case wgpu::VertexFormat::UShort4:
-            case wgpu::VertexFormat::UShort2Norm:
-            case wgpu::VertexFormat::UShort4Norm:
-            case wgpu::VertexFormat::Short2:
-            case wgpu::VertexFormat::Short4:
-            case wgpu::VertexFormat::Short2Norm:
-            case wgpu::VertexFormat::Short4Norm:
-            case wgpu::VertexFormat::Half2:
-            case wgpu::VertexFormat::Half4:
-            case wgpu::VertexFormat::Float:
-            case wgpu::VertexFormat::Float2:
-            case wgpu::VertexFormat::Float3:
-            case wgpu::VertexFormat::Float4:
-            case wgpu::VertexFormat::UInt:
-            case wgpu::VertexFormat::UInt2:
-            case wgpu::VertexFormat::UInt3:
-            case wgpu::VertexFormat::UInt4:
-            case wgpu::VertexFormat::Int:
-            case wgpu::VertexFormat::Int2:
-            case wgpu::VertexFormat::Int3:
-            case wgpu::VertexFormat::Int4:
-                break;
         }
         UNREACHABLE();
     }
 
     size_t VertexFormatComponentSize(wgpu::VertexFormat format) {
-        format = NormalizeVertexFormat(format);
         switch (format) {
             case wgpu::VertexFormat::Uint8x2:
             case wgpu::VertexFormat::Uint8x4:
@@ -160,39 +100,6 @@ namespace dawn {
 
             case wgpu::VertexFormat::Undefined:
                 break;
-
-            // Deprecated formats (should be unreachable after NormalizeVertexFormat call)
-            case wgpu::VertexFormat::UChar2:
-            case wgpu::VertexFormat::UChar4:
-            case wgpu::VertexFormat::Char2:
-            case wgpu::VertexFormat::Char4:
-            case wgpu::VertexFormat::UChar2Norm:
-            case wgpu::VertexFormat::UChar4Norm:
-            case wgpu::VertexFormat::Char2Norm:
-            case wgpu::VertexFormat::Char4Norm:
-            case wgpu::VertexFormat::UShort2:
-            case wgpu::VertexFormat::UShort4:
-            case wgpu::VertexFormat::UShort2Norm:
-            case wgpu::VertexFormat::UShort4Norm:
-            case wgpu::VertexFormat::Short2:
-            case wgpu::VertexFormat::Short4:
-            case wgpu::VertexFormat::Short2Norm:
-            case wgpu::VertexFormat::Short4Norm:
-            case wgpu::VertexFormat::Half2:
-            case wgpu::VertexFormat::Half4:
-            case wgpu::VertexFormat::Float:
-            case wgpu::VertexFormat::Float2:
-            case wgpu::VertexFormat::Float3:
-            case wgpu::VertexFormat::Float4:
-            case wgpu::VertexFormat::UInt:
-            case wgpu::VertexFormat::UInt2:
-            case wgpu::VertexFormat::UInt3:
-            case wgpu::VertexFormat::UInt4:
-            case wgpu::VertexFormat::Int:
-            case wgpu::VertexFormat::Int2:
-            case wgpu::VertexFormat::Int3:
-            case wgpu::VertexFormat::Int4:
-                break;
         }
         UNREACHABLE();
     }
@@ -202,7 +109,6 @@ namespace dawn {
     }
 
     const char* GetWGSLVertexFormatType(wgpu::VertexFormat format) {
-        format = NormalizeVertexFormat(format);
         switch (format) {
             case wgpu::VertexFormat::Float32:
                 return "f32";
@@ -248,39 +154,6 @@ namespace dawn {
                 return "vec4<i32>";
 
             case wgpu::VertexFormat::Undefined:
-                break;
-
-            // Deprecated formats (should be unreachable after NormalizeVertexFormat call)
-            case wgpu::VertexFormat::UChar2:
-            case wgpu::VertexFormat::UChar4:
-            case wgpu::VertexFormat::Char2:
-            case wgpu::VertexFormat::Char4:
-            case wgpu::VertexFormat::UChar2Norm:
-            case wgpu::VertexFormat::UChar4Norm:
-            case wgpu::VertexFormat::Char2Norm:
-            case wgpu::VertexFormat::Char4Norm:
-            case wgpu::VertexFormat::UShort2:
-            case wgpu::VertexFormat::UShort4:
-            case wgpu::VertexFormat::UShort2Norm:
-            case wgpu::VertexFormat::UShort4Norm:
-            case wgpu::VertexFormat::Short2:
-            case wgpu::VertexFormat::Short4:
-            case wgpu::VertexFormat::Short2Norm:
-            case wgpu::VertexFormat::Short4Norm:
-            case wgpu::VertexFormat::Half2:
-            case wgpu::VertexFormat::Half4:
-            case wgpu::VertexFormat::Float:
-            case wgpu::VertexFormat::Float2:
-            case wgpu::VertexFormat::Float3:
-            case wgpu::VertexFormat::Float4:
-            case wgpu::VertexFormat::UInt:
-            case wgpu::VertexFormat::UInt2:
-            case wgpu::VertexFormat::UInt3:
-            case wgpu::VertexFormat::UInt4:
-            case wgpu::VertexFormat::Int:
-            case wgpu::VertexFormat::Int2:
-            case wgpu::VertexFormat::Int3:
-            case wgpu::VertexFormat::Int4:
                 break;
         }
         UNREACHABLE();
