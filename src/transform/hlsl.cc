@@ -29,6 +29,7 @@
 #include "src/transform/external_texture_transform.h"
 #include "src/transform/inline_pointer_lets.h"
 #include "src/transform/manager.h"
+#include "src/transform/simplify.h"
 
 namespace tint {
 namespace transform {
@@ -39,10 +40,16 @@ Hlsl::~Hlsl() = default;
 Output Hlsl::Run(const Program* in, const DataMap& data) {
   Manager manager;
   manager.Add<CanonicalizeEntryPointIO>();
+  manager.Add<InlinePointerLets>();
+  // Simplify cleans up messy `*(&(expr))` expressions from InlinePointerLets.
+  manager.Add<Simplify>();
+  // DecomposeStorageAccess must come after InlinePointerLets as we cannot take
+  // the address of calls to DecomposeStorageAccess::Intrinsic. Must also come
+  // after Simplify, as we need to fold away the address-of and defers of
+  // `*(&(intrinsic_load()))` expressions.
   manager.Add<DecomposeStorageAccess>();
   manager.Add<CalculateArrayLength>();
   manager.Add<ExternalTextureTransform>();
-  manager.Add<InlinePointerLets>();
   auto out = manager.Run(in, data);
   if (!out.program.IsValid()) {
     return out;

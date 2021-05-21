@@ -282,6 +282,8 @@ set(TINT_LIB_SRCS
   transform/manager.h
   transform/renamer.cc
   transform/renamer.h
+  transform/simplify.cc
+  transform/simplify.h
   transform/single_entry_point.cc
   transform/single_entry_point.h
   transform/transform.cc
@@ -810,7 +812,8 @@ if(${TINT_BUILD_TESTS})
       transform/first_index_offset_test.cc
       transform/inline_pointer_lets_test.cc
       transform/renamer_test.cc
-      transform/single_entry_point.cc
+      transform/simplify_test.cc
+      transform/single_entry_point_test.cc
       transform/test_helper.h
       transform/var_for_dynamic_index_test.cc
       transform/vertex_pulling_test.cc

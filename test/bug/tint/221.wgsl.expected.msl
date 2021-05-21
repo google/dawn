@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct Buf {
+  /* 0x0000 */ uint count;
+  /* 0x0004 */ uint data[50];
+};
+
+kernel void tint_symbol(const device Buf& b [[buffer(0)]]) {
+  uint i = 0u;
+  {
+    bool tint_msl_is_first_1 = true;
+    device uint* const p;
+    for(;;) {
+      if (!tint_msl_is_first_1) {
+        *(p) = (*(p) * 2u);
+        i = (i + 1u);
+      }
+      tint_msl_is_first_1 = false;
+
+      if ((i >= b.count)) {
+        break;
+      }
+      p = &(b.data[i]);
+      if (((i % 2u) == 0u)) {
+        continue;
+      }
+      *(p) = 0u;
+    }
+  }
+  return;
+}
+
