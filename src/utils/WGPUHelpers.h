@@ -127,16 +127,6 @@ namespace utils {
             wgpu::TextureFormat format,
             wgpu::TextureViewDimension viewDimension = wgpu::TextureViewDimension::e2D);
 
-        // Backwards compat support for the deprecated path
-        BindingLayoutEntryInitializationHelper(
-            uint32_t entryBinding,
-            wgpu::ShaderStage entryVisibility,
-            wgpu::BindingType entryType,
-            bool bufferHasDynamicOffset = false,
-            uint64_t bufferMinBindingSize = 0,
-            wgpu::TextureViewDimension textureViewDimension = wgpu::TextureViewDimension::Undefined,
-            wgpu::TextureComponentType textureComponent = wgpu::TextureComponentType::Float,
-            wgpu::TextureFormat storageFormat = wgpu::TextureFormat::Undefined);
         BindingLayoutEntryInitializationHelper(const wgpu::BindGroupLayoutEntry& entry);
     };
 

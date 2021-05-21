@@ -297,25 +297,6 @@ namespace utils {
     }
 
     BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
-        uint32_t entryBinding,
-        wgpu::ShaderStage entryVisibility,
-        wgpu::BindingType entryType,
-        bool bufferHasDynamicOffset,
-        uint64_t bufferMinBindingSize,
-        wgpu::TextureViewDimension textureViewDimension,
-        wgpu::TextureComponentType textureComponent,
-        wgpu::TextureFormat storageFormat) {
-        binding = entryBinding;
-        visibility = entryVisibility;
-        type = entryType;
-        hasDynamicOffset = bufferHasDynamicOffset;
-        minBufferBindingSize = bufferMinBindingSize;
-        viewDimension = textureViewDimension;
-        textureComponentType = textureComponent;
-        storageTextureFormat = storageFormat;
-    }
-
-    BindingLayoutEntryInitializationHelper::BindingLayoutEntryInitializationHelper(
         const wgpu::BindGroupLayoutEntry& entry)
         : wgpu::BindGroupLayoutEntry(entry) {
     }

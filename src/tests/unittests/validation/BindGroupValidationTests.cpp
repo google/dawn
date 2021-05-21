@@ -736,75 +736,45 @@ TEST_F(BindGroupLayoutValidationTest, BindGroupLayoutVisibilityNoneExpectsBindGr
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, buffer}}));
 }
 
+#define BGLEntryType(...) \
+    utils::BindingLayoutEntryInitializationHelper(0, wgpu::ShaderStage::Compute, __VA_ARGS__)
+
 TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
     struct TestInfo {
         uint32_t maxCount;
-        wgpu::BindingType bindingType;
-        wgpu::BindingType otherBindingType;
+        wgpu::BindGroupLayoutEntry entry;
+        wgpu::BindGroupLayoutEntry otherEntry;
     };
 
-    constexpr TestInfo kTestInfos[] = {
-        {kMaxSampledTexturesPerShaderStage, wgpu::BindingType::SampledTexture,
-         wgpu::BindingType::UniformBuffer},
-        {kMaxSamplersPerShaderStage, wgpu::BindingType::Sampler, wgpu::BindingType::UniformBuffer},
-        {kMaxSamplersPerShaderStage, wgpu::BindingType::ComparisonSampler,
-         wgpu::BindingType::UniformBuffer},
-        {kMaxStorageBuffersPerShaderStage, wgpu::BindingType::StorageBuffer,
-         wgpu::BindingType::UniformBuffer},
-        {kMaxStorageTexturesPerShaderStage, wgpu::BindingType::ReadonlyStorageTexture,
-         wgpu::BindingType::UniformBuffer},
-        {kMaxStorageTexturesPerShaderStage, wgpu::BindingType::WriteonlyStorageTexture,
-         wgpu::BindingType::UniformBuffer},
-        {kMaxUniformBuffersPerShaderStage, wgpu::BindingType::UniformBuffer,
-         wgpu::BindingType::SampledTexture},
+    std::array<TestInfo, 7> kTestInfos = {
+        TestInfo{kMaxSampledTexturesPerShaderStage, BGLEntryType(wgpu::TextureSampleType::Float),
+                 BGLEntryType(wgpu::BufferBindingType::Uniform)},
+        TestInfo{kMaxSamplersPerShaderStage, BGLEntryType(wgpu::SamplerBindingType::Filtering),
+                 BGLEntryType(wgpu::BufferBindingType::Uniform)},
+        TestInfo{kMaxSamplersPerShaderStage, BGLEntryType(wgpu::SamplerBindingType::Comparison),
+                 BGLEntryType(wgpu::BufferBindingType::Uniform)},
+        TestInfo{kMaxStorageBuffersPerShaderStage, BGLEntryType(wgpu::BufferBindingType::Storage),
+                 BGLEntryType(wgpu::BufferBindingType::Uniform)},
+        TestInfo{
+            kMaxStorageTexturesPerShaderStage,
+            BGLEntryType(wgpu::StorageTextureAccess::ReadOnly, wgpu::TextureFormat::RGBA8Unorm),
+            BGLEntryType(wgpu::BufferBindingType::Uniform)},
+        TestInfo{
+            kMaxStorageTexturesPerShaderStage,
+            BGLEntryType(wgpu::StorageTextureAccess::WriteOnly, wgpu::TextureFormat::RGBA8Unorm),
+            BGLEntryType(wgpu::BufferBindingType::Uniform)},
+        TestInfo{kMaxUniformBuffersPerShaderStage, BGLEntryType(wgpu::BufferBindingType::Uniform),
+                 BGLEntryType(wgpu::TextureSampleType::Float)},
     };
 
     for (TestInfo info : kTestInfos) {
         wgpu::BindGroupLayout bgl[2];
         std::vector<utils::BindingLayoutEntryInitializationHelper> maxBindings;
 
-        auto PopulateEntry = [](utils::BindingLayoutEntryInitializationHelper entry) {
-            switch (entry.type) {
-                case wgpu::BindingType::UniformBuffer:
-                    entry.buffer.type = wgpu::BufferBindingType::Uniform;
-                    break;
-                case wgpu::BindingType::StorageBuffer:
-                    entry.buffer.type = wgpu::BufferBindingType::Storage;
-                    break;
-                case wgpu::BindingType::ReadonlyStorageBuffer:
-                    entry.buffer.type = wgpu::BufferBindingType::ReadOnlyStorage;
-                    break;
-
-                case wgpu::BindingType::Sampler:
-                    entry.sampler.type = wgpu::SamplerBindingType::Filtering;
-                    break;
-                case wgpu::BindingType::ComparisonSampler:
-                    entry.sampler.type = wgpu::SamplerBindingType::Comparison;
-                    break;
-
-                case wgpu::BindingType::SampledTexture:
-                    entry.texture.sampleType = wgpu::TextureSampleType::Float;
-                    break;
-
-                case wgpu::BindingType::ReadonlyStorageTexture:
-                    entry.storageTexture.access = wgpu::StorageTextureAccess::ReadOnly;
-                    entry.storageTexture.format = wgpu::TextureFormat::RGBA8Unorm;
-                    break;
-                case wgpu::BindingType::WriteonlyStorageTexture:
-                    entry.storageTexture.access = wgpu::StorageTextureAccess::WriteOnly;
-                    entry.storageTexture.format = wgpu::TextureFormat::RGBA8Unorm;
-                    break;
-                default:
-                    return entry;
-            }
-
-            entry.type = wgpu::BindingType::Undefined;
-
-            return entry;
-        };
-
         for (uint32_t i = 0; i < info.maxCount; ++i) {
-            maxBindings.push_back(PopulateEntry({i, wgpu::ShaderStage::Compute, info.bindingType}));
+            wgpu::BindGroupLayoutEntry entry = info.entry;
+            entry.binding = i;
+            maxBindings.push_back(entry);
         }
 
         // Creating with the maxes works.
@@ -813,24 +783,28 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
         // Adding an extra binding of a different type works.
         {
             std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
-            bindings.push_back(
-                PopulateEntry({info.maxCount, wgpu::ShaderStage::Compute, info.otherBindingType}));
+            wgpu::BindGroupLayoutEntry entry = info.otherEntry;
+            entry.binding = info.maxCount;
+            bindings.push_back(entry);
             MakeBindGroupLayout(bindings.data(), bindings.size());
         }
 
         // Adding an extra binding of the maxed type in a different stage works
         {
             std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
-            bindings.push_back(
-                PopulateEntry({info.maxCount, wgpu::ShaderStage::Fragment, info.bindingType}));
+            wgpu::BindGroupLayoutEntry entry = info.entry;
+            entry.binding = info.maxCount;
+            entry.visibility = wgpu::ShaderStage::Fragment;
+            bindings.push_back(entry);
             MakeBindGroupLayout(bindings.data(), bindings.size());
         }
 
         // Adding an extra binding of the maxed type and stage exceeds the per stage limit.
         {
             std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
-            bindings.push_back(
-                PopulateEntry({info.maxCount, wgpu::ShaderStage::Compute, info.bindingType}));
+            wgpu::BindGroupLayoutEntry entry = info.entry;
+            entry.binding = info.maxCount;
+            bindings.push_back(entry);
             ASSERT_DEVICE_ERROR(MakeBindGroupLayout(bindings.data(), bindings.size()));
         }
 
@@ -838,18 +812,19 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
         TestCreatePipelineLayout(bgl, 1, true);
 
         // Adding an extra binding of a different type in a different BGL works
-        bgl[1] = utils::MakeBindGroupLayout(
-            device, {PopulateEntry({0, wgpu::ShaderStage::Compute, info.otherBindingType})});
+        bgl[1] = utils::MakeBindGroupLayout(device, {info.otherEntry});
         TestCreatePipelineLayout(bgl, 2, true);
 
-        // Adding an extra binding of the maxed type in a different stage works
-        bgl[1] = utils::MakeBindGroupLayout(
-            device, {PopulateEntry({0, wgpu::ShaderStage::Fragment, info.bindingType})});
-        TestCreatePipelineLayout(bgl, 2, true);
+        {
+            // Adding an extra binding of the maxed type in a different stage works
+            wgpu::BindGroupLayoutEntry entry = info.entry;
+            entry.visibility = wgpu::ShaderStage::Fragment;
+            bgl[1] = utils::MakeBindGroupLayout(device, {entry});
+            TestCreatePipelineLayout(bgl, 2, true);
+        }
 
         // Adding an extra binding of the maxed type in a different BGL exceeds the per stage limit.
-        bgl[1] = utils::MakeBindGroupLayout(
-            device, {PopulateEntry({0, wgpu::ShaderStage::Compute, info.bindingType})});
+        bgl[1] = utils::MakeBindGroupLayout(device, {info.entry});
         TestCreatePipelineLayout(bgl, 2, false);
     }
 }

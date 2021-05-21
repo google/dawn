@@ -302,39 +302,21 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
         {nullptr,
          0,
          WGPUShaderStage_Vertex,
-         WGPUBindingType_Sampler,
-         false,
-         0,
-         WGPUTextureViewDimension_2D,
-         WGPUTextureComponentType_Float,
-         WGPUTextureFormat_RGBA8Unorm,
          {},
-         {},
+         {nullptr, WGPUSamplerBindingType_Filtering},
          {},
          {}},
         {nullptr,
          1,
          WGPUShaderStage_Vertex,
-         WGPUBindingType_SampledTexture,
-         false,
-         0,
-         WGPUTextureViewDimension_2D,
-         WGPUTextureComponentType_Float,
-         WGPUTextureFormat_RGBA8Unorm,
          {},
          {},
-         {},
+         {nullptr, WGPUTextureSampleType_Float, WGPUTextureViewDimension_2D, false},
          {}},
         {nullptr,
          2,
          static_cast<WGPUShaderStage>(WGPUShaderStage_Vertex | WGPUShaderStage_Fragment),
-         WGPUBindingType_UniformBuffer,
-         false,
-         0,
-         WGPUTextureViewDimension_2D,
-         WGPUTextureComponentType_Float,
-         WGPUTextureFormat_RGBA8Unorm,
-         {},
+         {nullptr, WGPUBufferBindingType_Uniform, false, 0},
          {},
          {},
          {}},
@@ -353,7 +335,8 @@ TEST_F(WireArgumentTests, StructureOfStructureArrayArgument) {
                     const auto& a = desc->entries[i];
                     const auto& b = entries[i];
                     if (a.binding != b.binding || a.visibility != b.visibility ||
-                        a.type != b.type) {
+                        a.buffer.type != b.buffer.type || a.sampler.type != b.sampler.type ||
+                        a.texture.sampleType != b.texture.sampleType) {
                         return false;
                     }
                 }

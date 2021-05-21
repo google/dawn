@@ -567,25 +567,6 @@ TEST_F(StorageTextureValidationTests, BindGroupLayoutViewDimensionMatchesShaderD
     }
 }
 
-// Verify that in a bind group layout binding neither read-only nor write-only storage textures
-// are allowed to have dynamic offsets.
-// TODO(dawn:527): No longer be applicable after changes to BindGroupLayoutEntry are complete.
-TEST_F(StorageTextureValidationTests, StorageTextureCannotHaveDynamicOffsets) {
-    const std::array<wgpu::BindingType, 2> kSupportedStorageTextureBindingTypes = {
-        wgpu::BindingType::ReadonlyStorageTexture, wgpu::BindingType::WriteonlyStorageTexture};
-    for (wgpu::BindingType storageBindingType : kSupportedStorageTextureBindingTypes) {
-        wgpu::BindGroupLayoutEntry bindGroupLayoutBinding;
-        bindGroupLayoutBinding.binding = 0;
-        bindGroupLayoutBinding.visibility = wgpu::ShaderStage::Compute;
-        bindGroupLayoutBinding.type = storageBindingType;
-        bindGroupLayoutBinding.storageTextureFormat = wgpu::TextureFormat::R32Float;
-
-        bindGroupLayoutBinding.hasDynamicOffset = true;
-        ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(
-            utils::MakeBindGroupLayout(device, {bindGroupLayoutBinding})));
-    }
-}
-
 // Verify that only a texture view can be used as a read-only or write-only storage texture in a
 // bind group.
 TEST_F(StorageTextureValidationTests, StorageTextureBindingTypeInBindGroup) {

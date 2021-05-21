@@ -23,6 +23,7 @@
 
 namespace utils {
 
+    // Primarily used by tests to easily set up the vertex buffer state portion of a RenderPipeline.
     class ComboVertexStateDescriptor {
       public:
         ComboVertexStateDescriptor();
@@ -37,7 +38,6 @@ namespace utils {
         std::array<wgpu::VertexAttributeDescriptor, kMaxVertexAttributes> cAttributes;
     };
 
-    // For creating the new style of render pipeline descriptors
     class ComboRenderPipelineDescriptor : public wgpu::RenderPipelineDescriptor {
       public:
         ComboRenderPipelineDescriptor();
