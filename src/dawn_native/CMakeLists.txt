@@ -96,8 +96,6 @@ target_sources(dawn_native PRIVATE
     "ExternalTexture.h"
     "ObjectContentHasher.cpp"
     "ObjectContentHasher.h"
-    "Fence.cpp"
-    "Fence.h"
     "Format.cpp"
     "Format.h"
     "Forward.h"

@@ -59,11 +59,6 @@
             { "name": "object type", "type": "ObjectType" },
             { "name": "object id", "type": "ObjectId" }
         ],
-        "fence on completion": [
-            { "name": "fence id", "type": "ObjectId" },
-            { "name": "value", "type": "uint64_t" },
-            { "name": "request serial", "type": "uint64_t" }
-        ],
         "queue on submitted work done": [
             { "name": "queue id", "type": "ObjectId" },
             { "name": "signal value", "type": "uint64_t" },
@@ -124,15 +119,6 @@
             { "name": "type", "type": "error type" },
             { "name": "message", "type": "char", "annotation": "const*", "length": "strlen" }
         ],
-        "fence on completion callback": [
-            { "name": "fence", "type": "ObjectHandle", "handle_type": "fence" },
-            { "name": "request serial", "type": "uint64_t" },
-            { "name": "status", "type": "fence completion status" }
-        ],
-        "fence update completed value": [
-            { "name": "fence", "type": "ObjectHandle", "handle_type": "fence" },
-            { "name": "value", "type": "uint64_t" }
-        ],
         "queue work done callback": [
             { "name": "queue", "type": "ObjectHandle", "handle_type": "queue" },
             { "name": "request serial", "type": "uint64_t" },
@@ -162,8 +148,6 @@
             "DevicePopErrorScope",
             "DeviceSetDeviceLostCallback",
             "DeviceSetUncapturedErrorCallback",
-            "FenceGetCompletedValue",
-            "FenceOnCompletion",
             "ShaderModuleGetCompilationInfo",
             "QueueOnSubmittedWorkDone",
             "QueueWriteBuffer",
@@ -176,13 +160,11 @@
             "DeviceGetDefaultQueue",
             "DeviceGetQueue",
             "DeviceInjectError",
-            "DevicePushErrorScope",
-            "QueueCreateFence"
+            "DevicePushErrorScope"
         ],
         "client_special_objects": [
             "Buffer",
             "Device",
-            "Fence",
             "Queue",
             "ShaderModule"
         ],
@@ -194,7 +176,6 @@
             "QueueSignal"
         ],
         "server_reverse_lookup_objects": [
-            "Fence"
         ]
     }
 }

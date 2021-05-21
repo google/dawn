@@ -70,26 +70,6 @@ namespace dawn_wire { namespace client {
                                           readInitialDataInfo);
     }
 
-    bool Client::DoFenceUpdateCompletedValue(Fence* fence, uint64_t value) {
-        // The fence might have been deleted or recreated so this isn't an error.
-        if (fence == nullptr) {
-            return true;
-        }
-
-        fence->OnUpdateCompletedValueCallback(value);
-        return true;
-    }
-
-    bool Client::DoFenceOnCompletionCallback(Fence* fence,
-                                             uint64_t requestSerial,
-                                             WGPUFenceCompletionStatus status) {
-        // The fence might have been deleted or recreated so this isn't an error.
-        if (fence == nullptr) {
-            return true;
-        }
-        return fence->OnCompletionCallback(requestSerial, status);
-    }
-
     bool Client::DoQueueWorkDoneCallback(Queue* queue,
                                          uint64_t requestSerial,
                                          WGPUQueueWorkDoneStatus status) {

@@ -60,20 +60,6 @@ namespace dawn_wire { namespace client {
         client->SerializeCommand(cmd);
     }
 
-    WGPUFence Queue::CreateFence(WGPUFenceDescriptor const* descriptor) {
-        auto* allocation = client->FenceAllocator().New(client);
-
-        QueueCreateFenceCmd cmd;
-        cmd.self = ToAPI(this);
-        cmd.result = ObjectHandle{allocation->object->id, allocation->generation};
-        cmd.descriptor = descriptor;
-        client->SerializeCommand(cmd);
-
-        Fence* fence = allocation->object.get();
-        fence->Initialize(descriptor);
-        return ToAPI(fence);
-    }
-
     void Queue::WriteBuffer(WGPUBuffer cBuffer,
                             uint64_t bufferOffset,
                             const void* data,

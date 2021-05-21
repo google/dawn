@@ -17,29 +17,6 @@
 
 namespace dawn_wire { namespace server {
 
-    bool Server::DoQueueSignal(WGPUQueue cSelf, WGPUFence cFence, uint64_t signalValue) {
-        if (cFence == nullptr) {
-            return false;
-        }
-        mProcs.queueSignal(cSelf, cFence, signalValue);
-
-        ObjectId fenceId = FenceObjectIdTable().Get(cFence);
-        ASSERT(fenceId != 0);
-        auto* fence = FenceObjects().Get(fenceId);
-        ASSERT(fence != nullptr);
-
-        auto userdata = MakeUserdata<FenceCompletionUserdata>();
-        userdata->fence = ObjectHandle{fenceId, fence->generation};
-        userdata->value = signalValue;
-
-        mProcs.fenceOnCompletion(
-            cFence, signalValue,
-            ForwardToServer<decltype(&Server::OnFenceCompletedValueUpdated)>::Func<
-                &Server::OnFenceCompletedValueUpdated>(),
-            userdata.release());
-        return true;
-    }
-
     void Server::OnQueueWorkDone(WGPUQueueWorkDoneStatus status, QueueWorkDoneUserdata* data) {
         ReturnQueueWorkDoneCallbackCmd cmd;
         cmd.queue = data->queue;

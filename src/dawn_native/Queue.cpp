@@ -23,7 +23,6 @@
 #include "dawn_native/CopyTextureForBrowserHelper.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/DynamicUploader.h"
-#include "dawn_native/Fence.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
@@ -184,19 +183,6 @@ namespace dawn_native {
         }
     }
 
-    void QueueBase::APISignal(Fence* fence, uint64_t apiSignalValue) {
-        FenceAPISerial signalValue(apiSignalValue);
-
-        DeviceBase* device = GetDevice();
-        if (device->ConsumedError(ValidateSignal(fence, signalValue))) {
-            return;
-        }
-        ASSERT(!IsError());
-
-        fence->SetSignaledValue(signalValue);
-        fence->UpdateFenceOnComplete(fence, signalValue);
-    }
-
     void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
                                            WGPUQueueWorkDoneCallback callback,
                                            void* userdata) {
@@ -244,22 +230,6 @@ namespace dawn_native {
             task->HandleDeviceLoss();
         }
         mTasksInFlight.Clear();
-    }
-
-    Fence* QueueBase::APICreateFence(const FenceDescriptor* descriptor) {
-        // TODO(chromium:1177476): Remove once the deprecation period is finished.
-        GetDevice()->EmitDeprecationWarning(
-            "Fences are deprecated, use Queue::OnSubmittedWorkDone instead.");
-
-        if (GetDevice()->ConsumedError(ValidateCreateFence(descriptor))) {
-            return Fence::MakeError(GetDevice());
-        }
-
-        if (descriptor == nullptr) {
-            FenceDescriptor defaultDescriptor = {};
-            return new Fence(this, &defaultDescriptor);
-        }
-        return new Fence(this, descriptor);
     }
 
     void QueueBase::APIWriteBuffer(BufferBase* buffer,
@@ -437,21 +407,6 @@ namespace dawn_native {
         return {};
     }
 
-    MaybeError QueueBase::ValidateSignal(const Fence* fence, FenceAPISerial signalValue) const {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
-        DAWN_TRY(GetDevice()->ValidateObject(fence));
-
-        if (fence->GetQueue() != this) {
-            return DAWN_VALIDATION_ERROR(
-                "Fence must be signaled on the queue on which it was created.");
-        }
-        if (signalValue <= fence->GetSignaledValue()) {
-            return DAWN_VALIDATION_ERROR("Signal value less than or equal to fence signaled value");
-        }
-        return {};
-    }
-
     MaybeError QueueBase::ValidateOnSubmittedWorkDone(uint64_t signalValue,
                                                       WGPUQueueWorkDoneStatus* status) const {
         *status = WGPUQueueWorkDoneStatus_DeviceLost;
@@ -462,16 +417,6 @@ namespace dawn_native {
 
         if (signalValue != 0) {
             return DAWN_VALIDATION_ERROR("SignalValue must currently be 0.");
-        }
-
-        return {};
-    }
-
-    MaybeError QueueBase::ValidateCreateFence(const FenceDescriptor* descriptor) const {
-        DAWN_TRY(GetDevice()->ValidateIsAlive());
-        DAWN_TRY(GetDevice()->ValidateObject(this));
-        if (descriptor != nullptr) {
-            DAWN_TRY(ValidateFenceDescriptor(descriptor));
         }
 
         return {};

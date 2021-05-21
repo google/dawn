@@ -30,7 +30,6 @@
 #include "dawn_native/ErrorData.h"
 #include "dawn_native/ErrorScope.h"
 #include "dawn_native/ExternalTexture.h"
-#include "dawn_native/Fence.h"
 #include "dawn_native/Instance.h"
 #include "dawn_native/InternalPipelineStore.h"
 #include "dawn_native/PersistentCache.h"

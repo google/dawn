@@ -38,8 +38,6 @@ namespace dawn_native {
 
         // Dawn API
         void APISubmit(uint32_t commandCount, CommandBufferBase* const* commands);
-        void APISignal(Fence* fence, uint64_t signalValue);
-        Fence* APICreateFence(const FenceDescriptor* descriptor);
         void APIOnSubmittedWorkDone(uint64_t signalValue,
                                     WGPUQueueWorkDoneCallback callback,
                                     void* userdata);
@@ -92,10 +90,8 @@ namespace dawn_native {
                                             const Extent3D& writeSize);
 
         MaybeError ValidateSubmit(uint32_t commandCount, CommandBufferBase* const* commands) const;
-        MaybeError ValidateSignal(const Fence* fence, FenceAPISerial signalValue) const;
         MaybeError ValidateOnSubmittedWorkDone(uint64_t signalValue,
                                                WGPUQueueWorkDoneStatus* status) const;
-        MaybeError ValidateCreateFence(const FenceDescriptor* descriptor) const;
         MaybeError ValidateWriteBuffer(const BufferBase* buffer,
                                        uint64_t bufferOffset,
                                        size_t size) const;

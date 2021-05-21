@@ -35,23 +35,6 @@ static void ToMockDeviceLostCallback(const char* message, void* userdata) {
     self->StartExpectDeviceError();
 }
 
-class MockFenceOnCompletionCallback {
-  public:
-    MOCK_METHOD(void, Call, (WGPUFenceCompletionStatus status, void* userdata));
-};
-
-static std::unique_ptr<MockFenceOnCompletionCallback> mockFenceOnCompletionCallback;
-static void ToMockFenceOnCompletionFails(WGPUFenceCompletionStatus status, void* userdata) {
-    EXPECT_EQ(WGPUFenceCompletionStatus_DeviceLost, status);
-    mockFenceOnCompletionCallback->Call(status, userdata);
-    mockFenceOnCompletionCallback = nullptr;
-}
-static void ToMockFenceOnCompletionSucceeds(WGPUFenceCompletionStatus status, void* userdata) {
-    EXPECT_EQ(WGPUFenceCompletionStatus_Success, status);
-    mockFenceOnCompletionCallback->Call(status, userdata);
-    mockFenceOnCompletionCallback = nullptr;
-}
-
 class MockQueueWorkDoneCallback {
   public:
     MOCK_METHOD(void, Call, (WGPUQueueWorkDoneStatus status, void* userdata));
@@ -70,13 +53,11 @@ class DeviceLostTest : public DawnTest {
         DawnTest::SetUp();
         DAWN_SKIP_TEST_IF(UsesWire());
         mockDeviceLostCallback = std::make_unique<MockDeviceLostCallback>();
-        mockFenceOnCompletionCallback = std::make_unique<MockFenceOnCompletionCallback>();
         mockQueueWorkDoneCallback = std::make_unique<MockQueueWorkDoneCallback>();
     }
 
     void TearDown() override {
         mockDeviceLostCallback = nullptr;
-        mockFenceOnCompletionCallback = nullptr;
         mockQueueWorkDoneCallback = nullptr;
         DawnTest::TearDown();
     }
@@ -416,67 +397,6 @@ TEST_P(DeviceLostTest, CommandEncoderFinishFails) {
     ASSERT_DEVICE_ERROR(encoder.Finish());
 }
 
-// Test that CreateFenceFails when device is lost
-TEST_P(DeviceLostTest, CreateFenceFails) {
-    SetCallbackAndLoseForTesting();
-
-    EXPECT_DEPRECATION_WARNING(ASSERT_DEVICE_ERROR(queue.CreateFence()));
-}
-
-// Test that queue signal fails when device is lost
-TEST_P(DeviceLostTest, QueueSignalFenceFails) {
-    wgpu::Fence fence;
-    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
-
-    SetCallbackAndLoseForTesting();
-
-    ASSERT_DEVICE_ERROR(queue.Signal(fence, 3));
-
-    // callback should have device lost status
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, nullptr))
-        .Times(1);
-    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionFails, nullptr));
-
-    // completed value should not have changed from initial value
-    EXPECT_EQ(fence.GetCompletedValue(), 0u);
-}
-
-// Test that Fence On Completion fails after device is lost
-TEST_P(DeviceLostTest, FenceOnCompletionFails) {
-    wgpu::Fence fence;
-    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
-
-    queue.Signal(fence, 2);
-
-    SetCallbackAndLoseForTesting();
-    // callback should have device lost status
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, nullptr))
-        .Times(1);
-    ASSERT_DEVICE_ERROR(fence.OnCompletion(2u, ToMockFenceOnCompletionFails, nullptr));
-    ASSERT_DEVICE_ERROR(device.Tick());
-
-    // completed value is the last value signaled (all previous GPU operations are as if completed)
-    EXPECT_EQ(fence.GetCompletedValue(), 2u);
-}
-
-// Test that Fence::OnCompletion callbacks with device lost status when device is lost after calling
-// OnCompletion
-TEST_P(DeviceLostTest, FenceOnCompletionBeforeLossFails) {
-    wgpu::Fence fence;
-    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
-
-    queue.Signal(fence, 2);
-
-    // callback should have device lost status
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_DeviceLost, nullptr))
-        .Times(1);
-    fence.OnCompletion(2u, ToMockFenceOnCompletionFails, nullptr);
-    SetCallbackAndLoseForTesting();
-    ASSERT_DEVICE_ERROR(device.Tick());
-
-    EXPECT_EQ(fence.GetCompletedValue(), 2u);
-}
-
 // Test that QueueOnSubmittedWorkDone fails after device is lost.
 TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneFails) {
     SetCallbackAndLoseForTesting();
@@ -497,36 +417,6 @@ TEST_P(DeviceLostTest, QueueOnSubmittedWorkDoneBeforeLossFails) {
 
     SetCallbackAndLoseForTesting();
     ASSERT_DEVICE_ERROR(device.Tick());
-}
-
-// Regression test for the Null backend not properly setting the completedSerial when
-// WaitForIdleForDestruction is called, causing the fence signaling to not be retired and an
-// ASSERT to fire.
-TEST_P(DeviceLostTest, AfterSubmitAndSerial) {
-    queue.Submit(0, nullptr);
-
-    wgpu::Fence fence;
-    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
-
-    queue.Signal(fence, 1);
-    SetCallbackAndLoseForTesting();
-}
-
-// Test that when you Signal, then Tick, then device lost, the fence completed value would be 2
-TEST_P(DeviceLostTest, FenceSignalTickOnCompletion) {
-    wgpu::Fence fence;
-    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
-
-    queue.Signal(fence, 2);
-    WaitForAllOperations();
-
-    // callback should have device lost status
-    EXPECT_CALL(*mockFenceOnCompletionCallback, Call(WGPUFenceCompletionStatus_Success, nullptr))
-        .Times(1);
-    fence.OnCompletion(2u, ToMockFenceOnCompletionSucceeds, nullptr);
-    SetCallbackAndLoseForTesting();
-
-    EXPECT_EQ(fence.GetCompletedValue(), 2u);
 }
 
 // Test that LostForTesting can only be called on one time

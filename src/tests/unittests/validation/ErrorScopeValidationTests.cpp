@@ -31,11 +31,22 @@ static void ToMockDevicePopErrorScopeCallback(WGPUErrorType type,
     mockDevicePopErrorScopeCallback->Call(type, message, userdata);
 }
 
+class MockQueueWorkDoneCallback {
+  public:
+    MOCK_METHOD(void, Call, (WGPUQueueWorkDoneStatus status, void* userdata));
+};
+
+static std::unique_ptr<MockQueueWorkDoneCallback> mockQueueWorkDoneCallback;
+static void ToMockQueueWorkDone(WGPUQueueWorkDoneStatus status, void* userdata) {
+    mockQueueWorkDoneCallback->Call(status, userdata);
+}
+
 class ErrorScopeValidationTest : public ValidationTest {
   private:
     void SetUp() override {
         ValidationTest::SetUp();
         mockDevicePopErrorScopeCallback = std::make_unique<MockDevicePopErrorScopeCallback>();
+        mockQueueWorkDoneCallback = std::make_unique<MockQueueWorkDoneCallback>();
     }
 
     void TearDown() override {
@@ -43,6 +54,7 @@ class ErrorScopeValidationTest : public ValidationTest {
 
         // Delete mocks so that expectations are checked
         mockDevicePopErrorScopeCallback = nullptr;
+        mockQueueWorkDoneCallback = nullptr;
     }
 };
 
@@ -141,31 +153,6 @@ TEST_F(ErrorScopeValidationTest, PushPopBalanced) {
     }
 }
 
-// Test that error scopes call their callbacks before an enclosed Queue::Submit
-// completes
-TEST_F(ErrorScopeValidationTest, EnclosedQueueSubmit) {
-    wgpu::Queue queue = device.GetQueue();
-
-    device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
-
-    queue.Submit(0, nullptr);
-    wgpu::Fence fence;
-    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
-    queue.Signal(fence, 1);
-
-    testing::Sequence seq;
-
-    MockCallback<WGPUFenceOnCompletionCallback> fenceCallback;
-    fence.OnCompletion(1, fenceCallback.Callback(), fenceCallback.MakeUserdata(this));
-
-    MockCallback<WGPUErrorCallback> errorScopeCallback;
-    EXPECT_CALL(errorScopeCallback, Call(WGPUErrorType_NoError, _, this + 1)).InSequence(seq);
-    device.PopErrorScope(errorScopeCallback.Callback(), errorScopeCallback.MakeUserdata(this + 1));
-
-    EXPECT_CALL(fenceCallback, Call(WGPUFenceCompletionStatus_Success, this)).InSequence(seq);
-    WaitForAllOperations(device);
-}
-
 // Test that parent error scopes also call their callbacks before an enclosed Queue::Submit
 // completes
 TEST_F(ErrorScopeValidationTest, EnclosedQueueSubmitNested) {
@@ -175,14 +162,9 @@ TEST_F(ErrorScopeValidationTest, EnclosedQueueSubmitNested) {
     device.PushErrorScope(wgpu::ErrorFilter::OutOfMemory);
 
     queue.Submit(0, nullptr);
-    wgpu::Fence fence;
-    EXPECT_DEPRECATION_WARNING(fence = queue.CreateFence());
-    queue.Signal(fence, 1);
+    queue.OnSubmittedWorkDone(0u, ToMockQueueWorkDone, this);
 
     testing::Sequence seq;
-
-    MockCallback<WGPUFenceOnCompletionCallback> fenceCallback;
-    fence.OnCompletion(1, fenceCallback.Callback(), fenceCallback.MakeUserdata(this));
 
     MockCallback<WGPUErrorCallback> errorScopeCallback2;
     EXPECT_CALL(errorScopeCallback2, Call(WGPUErrorType_NoError, _, this + 1)).InSequence(seq);
@@ -194,7 +176,8 @@ TEST_F(ErrorScopeValidationTest, EnclosedQueueSubmitNested) {
     device.PopErrorScope(errorScopeCallback1.Callback(),
                          errorScopeCallback1.MakeUserdata(this + 2));
 
-    EXPECT_CALL(fenceCallback, Call(WGPUFenceCompletionStatus_Success, this)).InSequence(seq);
+    EXPECT_CALL(*mockQueueWorkDoneCallback, Call(WGPUQueueWorkDoneStatus_Success, this))
+        .InSequence(seq);
     WaitForAllOperations(device);
 }
 
