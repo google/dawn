@@ -1653,6 +1653,8 @@ bool Resolver::Call(ast::CallExpression* call) {
       }
       auto* callee_func = callee_func_it->second;
 
+      callee_func->callsites.push_back(call);
+
       // Note: Requires called functions to be resolved first.
       // This is currently guaranteed as functions must be declared before
       // use.
@@ -2574,7 +2576,8 @@ void Resolver::CreateSemanticNodes() const {
         info->declaration, const_cast<sem::Type*>(info->return_type),
         remap_vars(info->parameters), remap_vars(info->referenced_module_vars),
         remap_vars(info->local_referenced_module_vars), info->return_statements,
-        ancestor_entry_points[func->symbol()], info->workgroup_size);
+        info->callsites, ancestor_entry_points[func->symbol()],
+        info->workgroup_size);
     func_info_to_sem_func.emplace(info, sem_func);
     sem.Add(func, sem_func);
   }

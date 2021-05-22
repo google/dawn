@@ -111,6 +111,7 @@ class Resolver {
     UniqueVector<VariableInfo*> referenced_module_vars;
     UniqueVector<VariableInfo*> local_referenced_module_vars;
     std::vector<const ast::ReturnStatement*> return_statements;
+    std::vector<const ast::CallExpression*> callsites;
     sem::Type* return_type = nullptr;
     std::string return_type_name;
     std::array<sem::WorkgroupDimension, 3> workgroup_size;

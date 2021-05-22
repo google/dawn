@@ -28,6 +28,7 @@ namespace tint {
 namespace ast {
 class BindingDecoration;
 class BuiltinDecoration;
+class CallExpression;
 class Function;
 class GroupDecoration;
 class LocationDecoration;
@@ -62,7 +63,7 @@ class Function : public Castable<Function, CallTarget> {
   /// @param referenced_module_vars the referenced module variables
   /// @param local_referenced_module_vars the locally referenced module
   /// @param return_statements the function return statements
-  /// variables
+  /// @param callsites the callsites of the function
   /// @param ancestor_entry_points the ancestor entry points
   /// @param workgroup_size the workgroup size
   Function(ast::Function* declaration,
@@ -71,6 +72,7 @@ class Function : public Castable<Function, CallTarget> {
            std::vector<const Variable*> referenced_module_vars,
            std::vector<const Variable*> local_referenced_module_vars,
            std::vector<const ast::ReturnStatement*> return_statements,
+           std::vector<const ast::CallExpression*> callsites,
            std::vector<Symbol> ancestor_entry_points,
            std::array<WorkgroupDimension, 3> workgroup_size);
 
@@ -96,6 +98,10 @@ class Function : public Castable<Function, CallTarget> {
   /// @returns the return statements
   const std::vector<const ast::ReturnStatement*> ReturnStatements() const {
     return return_statements_;
+  }
+  /// @returns the list of callsites of this function
+  std::vector<const ast::CallExpression*> CallSites() const {
+    return callsites_;
   }
   /// @returns the ancestor entry points
   const std::vector<Symbol>& AncestorEntryPoints() const {
@@ -176,6 +182,7 @@ class Function : public Castable<Function, CallTarget> {
   std::vector<const Variable*> const referenced_module_vars_;
   std::vector<const Variable*> const local_referenced_module_vars_;
   std::vector<const ast::ReturnStatement*> const return_statements_;
+  std::vector<const ast::CallExpression*> const callsites_;
   std::vector<Symbol> const ancestor_entry_points_;
   std::array<WorkgroupDimension, 3> workgroup_size_;
 };
