@@ -770,7 +770,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-  void my_func(float a[5]) {
+  void my_func(float const a[5]) {
     return;
   }
 

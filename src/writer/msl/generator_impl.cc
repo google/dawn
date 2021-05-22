@@ -1311,7 +1311,9 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
 
     auto* type = program_->Sem().Get(v)->Type();
 
-    if (!EmitType(type, program_->Symbols().NameFor(v->symbol()))) {
+    std::string param_name =
+        "const " + program_->Symbols().NameFor(v->symbol());
+    if (!EmitType(type, param_name)) {
       return false;
     }
     // Parameter name is output as part of the type for arrays and pointers.
