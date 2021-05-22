@@ -20,6 +20,9 @@
 namespace tint {
 namespace ast {
 
+// Forward declarations.
+class IdentifierExpression;
+
 /// A call expression
 class CallExpression : public Castable<CallExpression, Expression> {
  public:
@@ -30,14 +33,14 @@ class CallExpression : public Castable<CallExpression, Expression> {
   /// @param params the parameters
   CallExpression(ProgramID program_id,
                  const Source& source,
-                 Expression* func,
+                 IdentifierExpression* func,
                  ExpressionList params);
   /// Move constructor
   CallExpression(CallExpression&&);
   ~CallExpression() override;
 
   /// @returns the func
-  Expression* func() const { return func_; }
+  IdentifierExpression* func() const { return func_; }
   /// @returns the parameters
   const ExpressionList& params() const { return params_; }
 
@@ -58,7 +61,7 @@ class CallExpression : public Castable<CallExpression, Expression> {
  private:
   CallExpression(const CallExpression&) = delete;
 
-  Expression* const func_;
+  IdentifierExpression* const func_;
   ExpressionList const params_;
 };
 

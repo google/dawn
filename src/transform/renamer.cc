@@ -871,7 +871,7 @@ Output Renamer::Run(const Program* in, const DataMap&) {
         continue;
       }
       if (sem->Target()->Is<sem::Intrinsic>()) {
-        preserve.emplace(call->func()->As<ast::IdentifierExpression>());
+        preserve.emplace(call->func());
       }
     }
   }

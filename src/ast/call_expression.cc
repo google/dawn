@@ -23,7 +23,7 @@ namespace ast {
 
 CallExpression::CallExpression(ProgramID program_id,
                                const Source& source,
-                               Expression* func,
+                               IdentifierExpression* func,
                                ExpressionList params)
     : Base(program_id, source), func_(func), params_(params) {
   TINT_ASSERT(func_);

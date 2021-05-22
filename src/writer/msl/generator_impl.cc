@@ -319,13 +319,7 @@ std::string GeneratorImpl::current_ep_var_name(VarType type) {
 }
 
 bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
-  auto* ident = expr->func()->As<ast::IdentifierExpression>();
-
-  if (ident == nullptr) {
-    diagnostics_.add_error("invalid function name");
-    return 0;
-  }
-
+  auto* ident = expr->func();
   auto* call = program_->Sem().Get(expr);
   if (auto* intrinsic = call->Target()->As<sem::Intrinsic>()) {
     if (intrinsic->IsTexture()) {

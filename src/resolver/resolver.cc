@@ -1626,16 +1626,8 @@ bool Resolver::Call(ast::CallExpression* call) {
     return false;
   }
 
-  // The expression has to be an identifier as you can't store function
-  // pointers but, if it isn't we'll just use the normal result determination
-  // to be on the safe side.
   Mark(call->func());
-  auto* ident = call->func()->As<ast::IdentifierExpression>();
-  if (!ident) {
-    diagnostics_.add_error("call target is not an identifier", call->source());
-    return false;
-  }
-
+  auto* ident = call->func();
   auto name = builder_->Symbols().NameFor(ident->symbol());
 
   auto intrinsic_type = sem::ParseIntrinsicType(name);

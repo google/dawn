@@ -1892,13 +1892,7 @@ bool Builder::GenerateBlockStatementWithoutScoping(
 }
 
 uint32_t Builder::GenerateCallExpression(ast::CallExpression* expr) {
-  auto* ident = expr->func()->As<ast::IdentifierExpression>();
-
-  if (ident == nullptr) {
-    error_ = "invalid function name";
-    return 0;
-  }
-
+  auto* ident = expr->func();
   auto* call = builder_.Sem().Get(expr);
   auto* target = call->Target();
   if (auto* intrinsic = target->As<sem::Intrinsic>()) {

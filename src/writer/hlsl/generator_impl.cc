@@ -461,13 +461,8 @@ bool GeneratorImpl::EmitBreak(std::ostream& out, ast::BreakStatement*) {
 bool GeneratorImpl::EmitCall(std::ostream& pre,
                              std::ostream& out,
                              ast::CallExpression* expr) {
-  auto* ident = expr->func()->As<ast::IdentifierExpression>();
-  if (ident == nullptr) {
-    diagnostics_.add_error("invalid function name");
-    return 0;
-  }
-
   const auto& params = expr->params();
+  auto* ident = expr->func();
   auto* call = builder_.Sem().Get(expr);
   auto* target = call->Target();
 

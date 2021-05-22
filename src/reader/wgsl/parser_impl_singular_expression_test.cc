@@ -100,9 +100,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_Empty) {
   ASSERT_TRUE(e->Is<ast::CallExpression>());
   auto* c = e->As<ast::CallExpression>();
 
-  ASSERT_TRUE(c->func()->Is<ast::IdentifierExpression>());
-  auto* func = c->func()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(func->symbol(), p->builder().Symbols().Get("a"));
+  EXPECT_EQ(c->func()->symbol(), p->builder().Symbols().Get("a"));
 
   EXPECT_EQ(c->params().size(), 0u);
 }
@@ -118,9 +116,7 @@ TEST_F(ParserImplTest, SingularExpression_Call_WithArgs) {
   ASSERT_TRUE(e->Is<ast::CallExpression>());
   auto* c = e->As<ast::CallExpression>();
 
-  ASSERT_TRUE(c->func()->Is<ast::IdentifierExpression>());
-  auto* func = c->func()->As<ast::IdentifierExpression>();
-  EXPECT_EQ(func->symbol(), p->builder().Symbols().Get("test"));
+  EXPECT_EQ(c->func()->symbol(), p->builder().Symbols().Get("test"));
 
   EXPECT_EQ(c->params().size(), 3u);
   EXPECT_TRUE(c->params()[0]->Is<ast::ConstructorExpression>());
