@@ -40,7 +40,7 @@ namespace dawn_native {
             };
             [[binding(0), group(0)]] var<uniform> uniforms : Uniforms;
 
-            const texcoord : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
+            let texcoord : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
                 vec2<f32>(-0.5, 0.0),
                 vec2<f32>( 1.5, 0.0),
                 vec2<f32>( 0.5, 2.0));
