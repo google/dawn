@@ -497,11 +497,8 @@ TEST_P(ShaderRobustnessPerf, Run) {
 }
 
 DAWN_INSTANTIATE_TEST_P(ShaderRobustnessPerf,
-                        // TODO: Remove "use_tint_generator" once the following bug is
-                        // fixed https://bugs.chromium.org/p/tint/issues/detail?id=744.
-                        {D3D12Backend({}, {"use_tint_generator"}),
-                         D3D12Backend({"disable_robustness"}, {"use_tint_generator"}),
-                         MetalBackend(), MetalBackend({"disable_robustness"}, {}), OpenGLBackend(),
+                        {D3D12Backend(), D3D12Backend({"disable_robustness"}, {}), MetalBackend(),
+                         MetalBackend({"disable_robustness"}, {}), OpenGLBackend(),
                          OpenGLBackend({"disable_robustness"}, {}), VulkanBackend(),
                          VulkanBackend({"disable_robustness"}, {})},
                         {MatMulMethod::MatMulFloatOneDimSharedArray,
