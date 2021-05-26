@@ -226,6 +226,9 @@ class CloneContext {
     auto list_transform_it = list_transforms_.find(&v);
     if (list_transform_it != list_transforms_.end()) {
       const auto& transforms = list_transform_it->second;
+      for (auto* o : transforms.insert_front_) {
+        out.emplace_back(CheckedCast<T>(o));
+      }
       for (auto& el : v) {
         auto insert_before_it = transforms.insert_before_.find(el);
         if (insert_before_it != transforms.insert_before_.end()) {
@@ -374,6 +377,20 @@ class CloneContext {
     return *this;
   }
 
+  /// Inserts `object` before any other objects of `vector`, when it is cloned.
+  /// @param vector the vector in #src
+  /// @param object a pointer to the object in #dst that will be inserted at the
+  /// front of the vector
+  /// @returns this CloneContext so calls can be chained
+  template <typename T, typename OBJECT>
+  CloneContext& InsertFront(const std::vector<T>& vector, OBJECT* object) {
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, object);
+    auto& transforms = list_transforms_[&vector];
+    auto& list = transforms.insert_front_;
+    list.emplace_back(object);
+    return *this;
+  }
+
   /// Inserts `object` before `before` whenever `vector` is cloned.
   /// @param vector the vector in #src
   /// @param before a pointer to the object in #src
@@ -480,6 +497,10 @@ class CloneContext {
 
     /// A map of object in #src to omit when cloned into #dst.
     std::unordered_set<const Cloneable*> remove_;
+
+    /// A list of objects in #dst to insert before any others when the vector is
+    /// cloned.
+    CloneableList insert_front_;
 
     /// A map of object in #src to the list of cloned objects in #dst.
     /// Clone(const std::vector<T*>& v) will use this to insert the map-value
