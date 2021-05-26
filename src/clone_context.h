@@ -246,6 +246,9 @@ class CloneContext {
           }
         }
       }
+      for (auto* o : transforms.insert_back_) {
+        out.emplace_back(CheckedCast<T>(o));
+      }
     } else {
       for (auto& el : v) {
         out.emplace_back(Clone(el));
@@ -391,6 +394,20 @@ class CloneContext {
     return *this;
   }
 
+  /// Inserts `object` after any other objects of `vector`, when it is cloned.
+  /// @param vector the vector in #src
+  /// @param object a pointer to the object in #dst that will be inserted at the
+  /// end of the vector
+  /// @returns this CloneContext so calls can be chained
+  template <typename T, typename OBJECT>
+  CloneContext& InsertBack(const std::vector<T>& vector, OBJECT* object) {
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(dst, object);
+    auto& transforms = list_transforms_[&vector];
+    auto& list = transforms.insert_back_;
+    list.emplace_back(object);
+    return *this;
+  }
+
   /// Inserts `object` before `before` whenever `vector` is cloned.
   /// @param vector the vector in #src
   /// @param before a pointer to the object in #src
@@ -501,6 +518,10 @@ class CloneContext {
     /// A list of objects in #dst to insert before any others when the vector is
     /// cloned.
     CloneableList insert_front_;
+
+    /// A list of objects in #dst to insert befor after any others when the
+    /// vector is cloned.
+    CloneableList insert_back_;
 
     /// A map of object in #src to the list of cloned objects in #dst.
     /// Clone(const std::vector<T*>& v) will use this to insert the map-value
