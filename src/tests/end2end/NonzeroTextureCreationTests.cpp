@@ -59,7 +59,8 @@ TEST_P(NonzeroTextureCreationTests, TextureCreationClears) {
 TEST_P(NonzeroTextureCreationTests, Texture3DCreationClears) {
     // TODO(crbug.com/dawn/547): 3D texture copies not fully implemented on D3D12.
     // TODO(crbug.com/angleproject/5967): This texture readback hits an assert in ANGLE.
-    DAWN_SKIP_TEST_IF(IsANGLE() || IsD3D12());
+    DAWN_TEST_UNSUPPORTED_IF(IsD3D12());
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());
 
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e3D;
@@ -79,7 +80,7 @@ TEST_P(NonzeroTextureCreationTests, Texture3DCreationClears) {
 // Test that a depth texture clears 0xFF because toggle is enabled.
 TEST_P(NonzeroTextureCreationTests, Depth32TextureCreationDepthClears) {
     // Copies from depth textures not fully supported on the OpenGL backend right now.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;
@@ -162,7 +163,7 @@ TEST_P(NonzeroTextureCreationTests, MipMapClears) {
 TEST_P(NonzeroTextureCreationTests, NonrenderableTextureFormat) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
     // from Snorm textures.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_snorm_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_snorm_read"));
 
     wgpu::TextureDescriptor descriptor;
     descriptor.dimension = wgpu::TextureDimension::e2D;

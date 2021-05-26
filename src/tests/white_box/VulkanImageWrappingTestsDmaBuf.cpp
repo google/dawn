@@ -35,7 +35,7 @@ namespace dawn_native { namespace vulkan {
         class VulkanImageWrappingTestBase : public DawnTest {
           public:
             void SetUp() override {
-                DAWN_SKIP_TEST_IF(UsesWire());
+                DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
                 gbmDevice = CreateGbmDevice();
                 deviceVk = reinterpret_cast<dawn_native::vulkan::Device*>(device.Get());

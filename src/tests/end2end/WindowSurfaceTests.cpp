@@ -48,7 +48,7 @@ class WindowSurfaceInstanceTests : public testing::Test {
         glfwSetErrorCallback([](int code, const char* message) {
             dawn::ErrorLog() << "GLFW error " << code << " " << message;
         });
-        DAWN_SKIP_TEST_IF(!glfwInit());
+        DAWN_TEST_UNSUPPORTED_IF(!glfwInit());
 
         dawnProcSetProcs(&dawn_native::GetProcs());
 

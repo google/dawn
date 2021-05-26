@@ -267,7 +267,7 @@ TEST_P(VertexStateTest, Basic) {
 // Test a stride of 0 works
 TEST_P(VertexStateTest, ZeroStride) {
     // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
-    DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsOpenGL());
 
     utils::ComboVertexStateDescriptor vertexState;
     MakeVertexState({{0, InputStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}}, &vertexState);
@@ -286,7 +286,7 @@ TEST_P(VertexStateTest, ZeroStride) {
 // Test attributes defaults to (0, 0, 0, 1) if the input state doesn't have all components
 TEST_P(VertexStateTest, AttributeExpanding) {
     // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
-    DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsOpenGL());
 
     // R32F case
     {
@@ -326,7 +326,7 @@ TEST_P(VertexStateTest, AttributeExpanding) {
 // Test a stride larger than the attributes
 TEST_P(VertexStateTest, StrideLargerThanAttributes) {
     // This test was failing only on AMD but the OpenGL backend doesn't gather PCI info yet.
-    DAWN_SKIP_TEST_IF(IsLinux() && IsOpenGL());
+    DAWN_SUPPRESS_TEST_IF(IsLinux() && IsOpenGL());
 
     utils::ComboVertexStateDescriptor vertexState;
     MakeVertexState({{8 * sizeof(float), InputStepMode::Vertex, {{0, 0, VertexFormat::Float32x4}}}},

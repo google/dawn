@@ -35,7 +35,7 @@ class TextureZeroInitTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_SKIP_TEST_IF(UsesWire());
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     }
     wgpu::TextureDescriptor CreateTextureDescriptor(uint32_t mipLevelCount,
                                                     uint32_t arrayLayerCount,
@@ -587,7 +587,7 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
 // Test that clear state is tracked independently for depth/stencil textures.
 TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
     // TODO(enga): Figure out why this fails on Metal Intel.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
@@ -746,10 +746,10 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
 // Lazy clear of the stencil aspect via copy should not touch depth.
 TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
     // TODO(crbug.com/dawn/439): Implement stencil copies on other platforms
-    DAWN_SKIP_TEST_IF(!(IsMetal() || IsVulkan() || IsD3D12()));
+    DAWN_SUPPRESS_TEST_IF(!(IsMetal() || IsVulkan() || IsD3D12()));
 
     // TODO(enga): Figure out why this fails on Metal Intel.
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
@@ -895,7 +895,7 @@ TEST_P(TextureZeroInitTest, RenderPassSampledTextureClear) {
 // subresource is correctly cleared.
 TEST_P(TextureZeroInitTest, TextureBothSampledAndAttachmentClear) {
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // Create a 2D array texture, layer 0 will be used as attachment, layer 1 as sampled.
     wgpu::TextureDescriptor texDesc;
@@ -1015,7 +1015,7 @@ TEST_P(TextureZeroInitTest, ComputePassSampledTextureClear) {
 TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
     // from Snorm textures.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_snorm_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_snorm_read"));
 
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
@@ -1048,7 +1048,7 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClear) {
 TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
     // from Snorm textures.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_snorm_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_snorm_read"));
 
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
@@ -1084,7 +1084,7 @@ TEST_P(TextureZeroInitTest, NonRenderableTextureClearUnalignedSize) {
 TEST_P(TextureZeroInitTest, NonRenderableTextureClearWithMultiArrayLayers) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
     // from Snorm textures.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_snorm_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_snorm_read"));
 
     wgpu::TextureDescriptor descriptor =
         CreateTextureDescriptor(1, 2, wgpu::TextureUsage::CopySrc, kNonrenderableColorFormat);
@@ -1337,7 +1337,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedMip) {
 // the uninitialized layer does not clear the initialized layer.
 TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::TextureDescriptor sampleTextureDescriptor = CreateTextureDescriptor(
         1, 2,
@@ -1421,7 +1421,7 @@ TEST_P(TextureZeroInitTest, PreservesInitializedArrayLayer) {
 TEST_P(TextureZeroInitTest, CopyTextureToBufferNonRenderableUnaligned) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
     // from Snorm textures.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_snorm_read"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_snorm_read"));
 
     wgpu::TextureDescriptor descriptor;
     descriptor.size.width = kUnalignedSize;
@@ -1702,8 +1702,8 @@ class CompressedTextureZeroInitTest : public TextureZeroInitTest {
     void SetUp() override {
         DawnTest::SetUp();
 
-        DAWN_SKIP_TEST_IF(UsesWire());
-        DAWN_SKIP_TEST_IF(!IsBCFormatSupported());
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+        DAWN_TEST_UNSUPPORTED_IF(!IsBCFormatSupported());
     }
 
     std::vector<const char*> GetRequiredExtensions() override {
@@ -1846,7 +1846,7 @@ TEST_P(CompressedTextureZeroInitTest, FullMipCopy) {
 // Test that 1 lazy clear count happens when we copy to half the texture
 TEST_P(CompressedTextureZeroInitTest, HalfCopyBufferToTexture) {
     // TODO(crbug.com/dawn/643): diagnose and fix this failure on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
@@ -1866,7 +1866,7 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyBufferToTexture) {
 // (with physical size different from the virtual mip size)
 TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroMipLevel) {
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
@@ -1891,7 +1891,7 @@ TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroMipLevel) {
 // (with physical size different from the virtual mip size)
 TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroMipLevel) {
     // TODO(crbug.com/dawn/643): diagnose and fix this failure on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
@@ -1915,7 +1915,7 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroMipLevel) {
 // Test that 0 lazy clear count happens when we copy buffer to nonzero array layer
 TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroArrayLayer) {
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
@@ -1935,7 +1935,7 @@ TEST_P(CompressedTextureZeroInitTest, FullCopyToNonZeroArrayLayer) {
 // Test that 1 lazy clear count happens when we copy buffer to half texture to a nonzero array layer
 TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroArrayLayer) {
     // TODO(crbug.com/dawn/643): diagnose and fix this failure on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     wgpu::TextureDescriptor textureDescriptor;
     textureDescriptor.usage =
@@ -1955,7 +1955,7 @@ TEST_P(CompressedTextureZeroInitTest, HalfCopyToNonZeroArrayLayer) {
 // full copy texture to texture, 0 lazy clears are needed
 TEST_P(CompressedTextureZeroInitTest, FullCopyTextureToTextureMipLevel) {
     // TODO(crbug.com/dawn/593): This test uses glTextureView() which is not supported on OpenGL ES.
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
     // create srcTexture and fill it with data
     wgpu::TextureDescriptor srcDescriptor = CreateTextureDescriptor(
@@ -2002,7 +2002,7 @@ TEST_P(CompressedTextureZeroInitTest, FullCopyTextureToTextureMipLevel) {
 // half copy texture to texture, lazy clears are needed for noncopied half
 TEST_P(CompressedTextureZeroInitTest, HalfCopyTextureToTextureMipLevel) {
     // TODO(crbug.com/dawn/643): diagnose and fix this failure on OpenGL.
-    DAWN_SKIP_TEST_IF(IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
 
     // create srcTexture with data
     wgpu::TextureDescriptor srcDescriptor = CreateTextureDescriptor(

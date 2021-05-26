@@ -74,7 +74,7 @@ TEST_P(NonzeroBufferCreationTests, BufferCreationWithMappedAtCreation) {
     // are done in the Dawn wire and we don't plan to get it work with the toggle
     // "nonzero_clear_resources_on_creation_for_testing" (we will have more tests on it in the
     // BufferZeroInitTests.
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
     constexpr uint32_t kSize = 32u;
 

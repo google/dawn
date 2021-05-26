@@ -453,11 +453,6 @@ class DawnTestBase {
         }                                                 \
     } while (0)
 
-// Skip a test when the given condition is satisfied.
-// TODO(jiawei.shao@intel.com): Replace this macro with DAWN_TEST_UNSUPPORTED_IF or
-// DAWN_SUPPRESS_TEST_IF.
-#define DAWN_SKIP_TEST_IF(condition) DAWN_SKIP_TEST_IF_BASE(condition, "skipped", condition)
-
 // Skip a test which requires an extension or a toggle to be present / not present or some WIP
 // features.
 #define DAWN_TEST_UNSUPPORTED_IF(condition) \

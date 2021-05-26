@@ -24,7 +24,7 @@ class MultisampledRenderingTest : public DawnTest {
         DawnTest::SetUp();
 
         // TODO(crbug.com/dawn/738): Test output is wrong with D3D12 + WARP.
-        DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+        DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
         InitTexturesForTest();
     }
@@ -419,7 +419,7 @@ TEST_P(MultisampledRenderingTest, ResolveInAnotherRenderPass) {
 // Test doing MSAA resolve into multiple resolve targets works correctly.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargets) {
     // TODO(dawn:462): Investigate backend validation failure.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsNvidia() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia() && IsBackendValidationEnabled());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -497,7 +497,7 @@ TEST_P(MultisampledRenderingTest, ResolveOneMultisampledTextureTwice) {
 // Test using a layer of a 2D texture as resolve target works correctly.
 TEST_P(MultisampledRenderingTest, ResolveIntoOneMipmapLevelOf2DTexture) {
     // TODO(dawn:462): Investigate backend validation failure.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     constexpr uint32_t kBaseMipLevel = 2;
 
@@ -535,7 +535,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoOneMipmapLevelOf2DTexture) {
 // Test using a level or a layer of a 2D array texture as resolve target works correctly.
 TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
     // TODO(dawn:462): Investigate backend validation failure.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -756,15 +756,15 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndSampleMas
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOutputMask) {
     // TODO(github.com/KhronosGroup/SPIRV-Cross/issues/1626): SPIRV-Cross produces bad GLSL for
     // unsigned SampleMask builtins
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") && (IsOpenGL() || IsOpenGLES()));
+    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("use_tint_generator") && (IsOpenGL() || IsOpenGLES()));
 
     // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
     // supported on some platforms.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_sample_variables"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
 
     // TODO(cwallez@chromium.org): Fails on Metal / D3D12 because SPIRV-Cross produces bad shaders
     // for the SPIR-V outputted by Tint. Reenable once we use Tint's MSL / HLSL generators.
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsMetal());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() || IsMetal());
 
     constexpr bool kTestDepth = false;
     wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
@@ -818,15 +818,15 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOutputMask) {
     // TODO(github.com/KhronosGroup/SPIRV-Cross/issues/1626): SPIRV-Cross produces bad GLSL for
     // unsigned SampleMask builtins
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("use_tint_generator") && (IsOpenGL() || IsOpenGLES()));
+    DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("use_tint_generator") && (IsOpenGL() || IsOpenGLES()));
 
     // TODO(crbug.com/dawn/673): Work around or enforce via validation that sample variables are not
     // supported on some platforms.
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("disable_sample_variables"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
 
     // TODO(cwallez@chromium.org): Fails on Metal / D3D12 because SPIRV-Cross produces bad shaders
     // for the SPIR-V outputted by Tint. Reenable once we use Tint's MSL / HLSL generators.
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsMetal());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() || IsMetal());
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -986,7 +986,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
 TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCoverage) {
     // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
     // algorithm.
-    DAWN_SKIP_TEST_IF(IsSwiftshader() || IsANGLE());
+    DAWN_SUPPRESS_TEST_IF(IsSwiftshader() || IsANGLE());
 
     constexpr bool kTestDepth = true;
     constexpr uint32_t kSampleMask = 0xFFFFFFFF;
@@ -1047,12 +1047,12 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCo
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSampleMask) {
     // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
     // algorithm.
-    DAWN_SKIP_TEST_IF(IsSwiftshader() || IsANGLE());
+    DAWN_SUPPRESS_TEST_IF(IsSwiftshader() || IsANGLE());
 
     // TODO(dawn:491): This doesn't work on Metal, because we're using both the shader-output
     // mask (emulting the sampleMask from RenderPipeline) and alpha-to-coverage at the same
     // time. See the issue: https://github.com/gpuweb/gpuweb/issues/959.
-    DAWN_SKIP_TEST_IF(IsMetal());
+    DAWN_SUPPRESS_TEST_IF(IsMetal());
 
     constexpr bool kTestDepth = false;
     constexpr float kMSAACoverage = 0.50f;
@@ -1092,7 +1092,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
 TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndRasterizationMask) {
     // This test fails because Swiftshader is off-by-one with its ((a+b)/2 + (c+d)/2)/2 fast resolve
     // algorithm.
-    DAWN_SKIP_TEST_IF(IsSwiftshader() || IsANGLE());
+    DAWN_SUPPRESS_TEST_IF(IsSwiftshader() || IsANGLE());
 
     constexpr bool kTestDepth = false;
     constexpr float kMSAACoverage = 0.50f;

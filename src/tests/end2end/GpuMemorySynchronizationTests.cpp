@@ -230,7 +230,7 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
 TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
     // TODO(crbug.com/dawn/646): diagnose and fix this OpenGL ES backend validation failure.
     // "GL_INVALID_OPERATION error generated. Image variable update is not allowed."
-    DAWN_SKIP_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsBackendValidationEnabled());
 
     // Create a storage + sampled texture of one texel initialized to 1
     wgpu::TextureDescriptor texDesc;
@@ -631,7 +631,7 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
     // TODO(crbug.com/dawn/646): diagnose and fix this OpenGL ES failure.
     // "Push constant block cannot be expressed as neither std430 nor std140. ES-targets do not
     // support GL_ARB_enhanced_layouts."
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
 
     // Create pipeline, bind group, and a complex buffer for compute pass.
     wgpu::ShaderModule csModule = utils::CreateShaderModule(device, R"(

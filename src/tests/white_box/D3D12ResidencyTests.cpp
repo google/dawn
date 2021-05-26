@@ -38,7 +38,7 @@ class D3D12ResidencyTestBase : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_SKIP_TEST_IF(UsesWire());
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
         // Restrict Dawn's budget to create an artificial budget.
         dawn_native::d3d12::Device* d3dDevice =
@@ -114,7 +114,7 @@ class D3D12DescriptorResidencyTests : public D3D12ResidencyTestBase {};
 // Check that resources existing on suballocated heaps are made resident and evicted correctly.
 TEST_P(D3D12ResourceResidencyTests, OvercommitSmallResources) {
     // TODO(http://crbug.com/dawn/416): Tests fails on Intel HD 630 bot.
-    DAWN_SKIP_TEST_IF(IsIntel() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsIntel() && IsBackendValidationEnabled());
 
     // Create suballocated buffers to fill half the budget.
     std::vector<wgpu::Buffer> bufferSet1 = AllocateBuffers(
@@ -332,7 +332,7 @@ TEST_P(D3D12ResourceResidencyTests, SetExternalReservation) {
 TEST_P(D3D12DescriptorResidencyTests, SwitchedViewHeapResidency) {
     // TODO(crbug.com/dawn/739):
     // unknown file: error: SEH exception with code 0x87d thrown in the test body.
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP() && IsBackendValidationEnabled());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP() && IsBackendValidationEnabled());
 
     utils::ComboRenderPipelineDescriptor renderPipelineDescriptor;
 

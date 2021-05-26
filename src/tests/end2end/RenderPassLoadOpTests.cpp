@@ -242,7 +242,7 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearOnIntegerFormats) {
 TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsToLargeValues) {
     // TODO(http://crbug.com/dawn/537): Implemement a workaround to enable clearing integer formats
     // to large values on D3D12.
-    DAWN_SKIP_TEST_IF(IsD3D12());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12());
 
     constexpr double kUint32MaxDouble = 4294967295.0;
     constexpr uint32_t kUint32Max = static_cast<uint32_t>(kUint32MaxDouble);

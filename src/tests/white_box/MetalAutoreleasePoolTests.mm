@@ -22,7 +22,7 @@ class MetalAutoreleasePoolTests : public DawnTest {
   private:
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_SKIP_TEST_IF(UsesWire());
+        DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
         mMtlDevice = reinterpret_cast<Device*>(device.Get());
     }

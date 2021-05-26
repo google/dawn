@@ -775,7 +775,7 @@ fn main([[location(0)]] color : vec4<f32>) -> [[location(0)]] vec4<f32> {
 TEST_P(StorageTextureTests, ReadonlyStorageTextureInFragmentShader) {
     // TODO(crbug.com/dawn/672): Investigate why this test fails on Linux
     // NVidia OpenGLES drivers.
-    DAWN_SKIP_TEST_IF(IsNvidia() && IsLinux() && IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsNvidia() && IsLinux() && IsOpenGLES());
 
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
@@ -843,7 +843,7 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInComputeShader) {
 // texture in one dispatch are supported in compute shader.
 TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInComputeShader) {
     // TODO(crbug.com/dawn/636): diagnose and fix this failure on OpenGL ES
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
 
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
@@ -882,7 +882,7 @@ TEST_P(StorageTextureTests, ReadWriteDifferentStorageTextureInOneDispatchInCompu
 TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
     // TODO(crbug.com/dawn/672): Investigate why this test fails on Linux
     // NVidia OpenGLES drivers.
-    DAWN_SKIP_TEST_IF(IsNvidia() && IsLinux() && IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsNvidia() && IsLinux() && IsOpenGLES());
 
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
@@ -973,7 +973,7 @@ TEST_P(StorageTextureTests, Writeonly2DArrayStorageTexture) {
 // texture and a write-only storage texture are synchronized in one pass.
 TEST_P(StorageTextureTests, ReadonlyAndWriteonlyStorageTexturePingPong) {
     // TODO(crbug.com/dawn/636): diagnose and fix this failure on OpenGL ES
-    DAWN_SKIP_TEST_IF(IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
 
     constexpr wgpu::TextureFormat kTextureFormat = wgpu::TextureFormat::R32Uint;
     wgpu::Texture storageTexture1 = CreateTexture(

@@ -407,7 +407,7 @@ void ShaderRobustnessPerf::SetUp() {
     DawnPerfTestWithParams<ShaderRobustnessParams>::SetUp();
 
     // TODO(crbug.com/dawn/786): D3D12_Microsoft_Basic_Render_Driver_CPU
-    DAWN_SKIP_TEST_IF(IsD3D12() && IsWARP());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsWARP());
 
     const size_t dataASize = mDimAOuter * mDimInner;
     std::vector<float> dataA(dataASize);

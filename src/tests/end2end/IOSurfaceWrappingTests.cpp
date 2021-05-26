@@ -133,14 +133,14 @@ class IOSurfaceValidationTests : public IOSurfaceTestBase {
 
 // Test a successful wrapping of an IOSurface in a texture
 TEST_P(IOSurfaceValidationTests, Success) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     wgpu::Texture texture = WrapIOSurface(&descriptor, defaultIOSurface.get(), 0);
     ASSERT_NE(texture.Get(), nullptr);
 }
 
 // Test an error occurs if the texture descriptor is invalid
 TEST_P(IOSurfaceValidationTests, InvalidTextureDescriptor) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
     wgpu::ChainedStruct chainedDescriptor;
     descriptor.nextInChain = &chainedDescriptor;
@@ -152,7 +152,7 @@ TEST_P(IOSurfaceValidationTests, InvalidTextureDescriptor) {
 
 // Test an error occurs if the plane is too large
 TEST_P(IOSurfaceValidationTests, PlaneTooLarge) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 1));
     ASSERT_EQ(texture.Get(), nullptr);
@@ -161,7 +161,7 @@ TEST_P(IOSurfaceValidationTests, PlaneTooLarge) {
 // Test an error occurs if the descriptor dimension isn't 2D
 // TODO(cwallez@chromium.org): Reenable when 1D or 3D textures are implemented
 TEST_P(IOSurfaceValidationTests, DISABLED_InvalidTextureDimension) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     descriptor.dimension = wgpu::TextureDimension::e2D;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
@@ -171,7 +171,7 @@ TEST_P(IOSurfaceValidationTests, DISABLED_InvalidTextureDimension) {
 
 // Test an error occurs if the descriptor mip level count isn't 1
 TEST_P(IOSurfaceValidationTests, InvalidMipLevelCount) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     descriptor.mipLevelCount = 2;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
@@ -181,7 +181,7 @@ TEST_P(IOSurfaceValidationTests, InvalidMipLevelCount) {
 
 // Test an error occurs if the descriptor depth isn't 1
 TEST_P(IOSurfaceValidationTests, InvalidDepth) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     descriptor.size.depthOrArrayLayers = 2;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
@@ -191,7 +191,7 @@ TEST_P(IOSurfaceValidationTests, InvalidDepth) {
 
 // Test an error occurs if the descriptor sample count isn't 1
 TEST_P(IOSurfaceValidationTests, InvalidSampleCount) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     descriptor.sampleCount = 4;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
@@ -201,7 +201,7 @@ TEST_P(IOSurfaceValidationTests, InvalidSampleCount) {
 
 // Test an error occurs if the descriptor width doesn't match the surface's
 TEST_P(IOSurfaceValidationTests, InvalidWidth) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     descriptor.size.width = 11;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
@@ -211,7 +211,7 @@ TEST_P(IOSurfaceValidationTests, InvalidWidth) {
 
 // Test an error occurs if the descriptor height doesn't match the surface's
 TEST_P(IOSurfaceValidationTests, InvalidHeight) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     descriptor.size.height = 11;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
@@ -221,7 +221,7 @@ TEST_P(IOSurfaceValidationTests, InvalidHeight) {
 
 // Test an error occurs if the descriptor format isn't compatible with the IOSurface's
 TEST_P(IOSurfaceValidationTests, InvalidFormat) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     descriptor.format = wgpu::TextureFormat::R8Unorm;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
@@ -373,7 +373,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
 
 // Test sampling from a R8 IOSurface
 TEST_P(IOSurfaceUsageTests, SampleFromR8IOSurface) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface =
         CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_OneComponent8, 1);
 
@@ -384,7 +384,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromR8IOSurface) {
 
 // Test clearing a R8 IOSurface
 TEST_P(IOSurfaceUsageTests, ClearR8IOSurface) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface =
         CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_OneComponent8, 1);
 
@@ -394,7 +394,7 @@ TEST_P(IOSurfaceUsageTests, ClearR8IOSurface) {
 
 // Test sampling from a RG8 IOSurface
 TEST_P(IOSurfaceUsageTests, SampleFromRG8IOSurface) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface =
         CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_TwoComponent8, 2);
 
@@ -405,7 +405,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromRG8IOSurface) {
 
 // Test clearing a RG8 IOSurface
 TEST_P(IOSurfaceUsageTests, ClearRG8IOSurface) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface =
         CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_TwoComponent8, 2);
 
@@ -415,7 +415,7 @@ TEST_P(IOSurfaceUsageTests, ClearRG8IOSurface) {
 
 // Test sampling from a BGRA8 IOSurface
 TEST_P(IOSurfaceUsageTests, SampleFromBGRA8IOSurface) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32BGRA, 4);
 
     uint32_t data = 0x01020304;  // Stored as (A, R, G, B)
@@ -425,7 +425,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromBGRA8IOSurface) {
 
 // Test clearing a BGRA8 IOSurface
 TEST_P(IOSurfaceUsageTests, ClearBGRA8IOSurface) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32BGRA, 4);
 
     uint32_t data = 0x04010203;
@@ -434,7 +434,7 @@ TEST_P(IOSurfaceUsageTests, ClearBGRA8IOSurface) {
 
 // Test sampling from an RGBA8 IOSurface
 TEST_P(IOSurfaceUsageTests, SampleFromRGBA8IOSurface) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32RGBA, 4);
 
     uint32_t data = 0x01020304;  // Stored as (A, B, G, R)
@@ -444,7 +444,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromRGBA8IOSurface) {
 
 // Test clearing an RGBA8 IOSurface
 TEST_P(IOSurfaceUsageTests, ClearRGBA8IOSurface) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32RGBA, 4);
 
     uint32_t data = 0x04030201;
@@ -453,7 +453,7 @@ TEST_P(IOSurfaceUsageTests, ClearRGBA8IOSurface) {
 
 // Test that texture with color is cleared when isInitialized = false
 TEST_P(IOSurfaceUsageTests, UninitializedTextureIsCleared) {
-    DAWN_SKIP_TEST_IF(UsesWire());
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
     ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32RGBA, 4);
     uint32_t data = 0x04030201;

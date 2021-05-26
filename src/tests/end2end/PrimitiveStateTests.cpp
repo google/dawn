@@ -24,7 +24,7 @@ class DepthClampingTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_SKIP_TEST_IF(!SupportsExtensions({"depth_clamping"}));
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsExtensions({"depth_clamping"}));
 
         wgpu::TextureDescriptor renderTargetDescriptor;
         renderTargetDescriptor.size = {kRTSize, kRTSize};

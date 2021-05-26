@@ -204,7 +204,7 @@ class TextureViewSamplingTest : public DawnTest {
                            uint32_t textureViewBaseLayer,
                            uint32_t textureViewBaseMipLevel) {
         // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
-        DAWN_SKIP_TEST_IF(IsOpenGLES());
+        DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
         ASSERT(textureViewBaseLayer < textureArrayLayers);
         ASSERT(textureViewBaseMipLevel < textureMipLevels);
 
@@ -237,7 +237,7 @@ class TextureViewSamplingTest : public DawnTest {
                                 uint32_t textureViewBaseLayer,
                                 uint32_t textureViewBaseMipLevel) {
         // TODO(crbug.com/dawn/593): This test requires glTextureView, which is unsupported on GLES.
-        DAWN_SKIP_TEST_IF(IsOpenGLES());
+        DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
         ASSERT(textureViewBaseLayer < textureArrayLayers);
         ASSERT(textureViewBaseMipLevel < textureMipLevels);
 
@@ -318,7 +318,7 @@ class TextureViewSamplingTest : public DawnTest {
                             bool isCubeMapArray) {
         // TODO(crbug.com/dawn/600): In OpenGL ES, cube map textures cannot be treated as arrays
         // of 2D textures. Find a workaround.
-        DAWN_SKIP_TEST_IF(IsOpenGLES());
+        DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
         constexpr uint32_t kMipLevels = 1u;
         initTexture(textureArrayLayers, kMipLevels);
 
@@ -355,7 +355,7 @@ class TextureViewSamplingTest : public DawnTest {
 // Test drawing a rect with a 2D array texture.
 TEST_P(TextureViewSamplingTest, Default2DArrayTexture) {
     // TODO(cwallez@chromium.org) understand what the issue is
-    DAWN_SKIP_TEST_IF(IsVulkan() && IsNvidia());
+    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
 
     constexpr uint32_t kLayers = 3;
     constexpr uint32_t kMipLevels = 1;
@@ -387,7 +387,7 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOn2DArrayTexture) {
 
 // Test sampling from a 2D array texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOn2DArrayTexture) {
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
     Texture2DArrayViewTest(6, 1, 2, 0);
 }
 
@@ -403,7 +403,7 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DArrayTexture) {
 
 // Test sampling from a 2D array texture view created on a mipmap level of a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOnOneLevelOf2DArrayTexture) {
-    DAWN_SKIP_TEST_IF(IsMetal() && IsIntel());
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
     Texture2DArrayViewTest(6, 6, 2, 4);
 }
 
@@ -435,7 +435,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapArrayOnWholeTexture) {
 TEST_P(TextureViewSamplingTest, TextureCubeMapArrayViewOnPartOfTexture) {
     // Test failing on the GPU FYI Mac Pro (AMD), see
     // https://bugs.chromium.org/p/dawn/issues/detail?id=58
-    DAWN_SKIP_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
 
     TextureCubeMapTest(20, 3, 12, true);
 }
@@ -445,7 +445,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapArrayViewOnPartOfTexture) {
 TEST_P(TextureViewSamplingTest, TextureCubeMapArrayViewCoveringLastLayer) {
     // Test failing on the GPU FYI Mac Pro (AMD), see
     // https://bugs.chromium.org/p/dawn/issues/detail?id=58
-    DAWN_SKIP_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
 
     constexpr uint32_t kTotalLayers = 20;
     constexpr uint32_t kBaseLayer = 8;
@@ -456,7 +456,7 @@ TEST_P(TextureViewSamplingTest, TextureCubeMapArrayViewCoveringLastLayer) {
 TEST_P(TextureViewSamplingTest, TextureCubeMapArrayViewSingleCubeMap) {
     // Test failing on the GPU FYI Mac Pro (AMD), see
     // https://bugs.chromium.org/p/dawn/issues/detail?id=58
-    DAWN_SKIP_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
+    DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsMetal() && IsAMD());
 
     TextureCubeMapTest(20, 7, 6, true);
 }

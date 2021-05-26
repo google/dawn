@@ -87,7 +87,7 @@ TEST_P(ShaderTests, ComputeLog2) {
 }
 
 TEST_P(ShaderTests, BadWGSL) {
-    DAWN_SKIP_TEST_IF(HasToggleEnabled("skip_validation"));
+    DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("skip_validation"));
 
     std::string shader = R"(
 I am an invalid shader and should never pass validation!
@@ -263,7 +263,7 @@ fn main(input : FragmentIn) -> [[location(0)]] vec4<f32> {
 // Tests that shaders I/O structs can be shared between vertex and fragment shaders.
 TEST_P(ShaderTests, WGSLSharedStructIO) {
     // TODO(tint:714): Not yet implemeneted in tint yet, but intended to work.
-    DAWN_SKIP_TEST_IF(IsD3D12() || IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() || IsVulkan() || IsMetal() || IsOpenGL() || IsOpenGLES());
 
     std::string shader = R"(
 struct VertexIn {
