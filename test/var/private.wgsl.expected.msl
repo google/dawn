@@ -1,0 +1,57 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void uses_a(thread int* const tint_symbol) {
+  *(tint_symbol) = (*(tint_symbol) + 1);
+}
+
+void uses_b(thread int* const tint_symbol_1) {
+  *(tint_symbol_1) = (*(tint_symbol_1) * 2);
+}
+
+void uses_a_and_b(thread int* const tint_symbol_2, thread int* const tint_symbol_3) {
+  *(tint_symbol_2) = *(tint_symbol_3);
+}
+
+void no_uses() {
+}
+
+void outer(thread int* const tint_symbol_4, thread int* const tint_symbol_5) {
+  *(tint_symbol_4) = 0;
+  uses_a(tint_symbol_4);
+  uses_a_and_b(tint_symbol_5, tint_symbol_4);
+  uses_b(tint_symbol_5);
+  no_uses();
+}
+
+kernel void main1() {
+  thread int tint_symbol_7 = 0;
+  thread int* const tint_symbol_6 = &(tint_symbol_7);
+  *(tint_symbol_6) = 42;
+  uses_a(tint_symbol_6);
+  return;
+}
+
+kernel void main2() {
+  thread int tint_symbol_9 = 0;
+  thread int* const tint_symbol_8 = &(tint_symbol_9);
+  *(tint_symbol_8) = 7;
+  uses_b(tint_symbol_8);
+  return;
+}
+
+kernel void main3() {
+  thread int tint_symbol_11 = 0;
+  thread int* const tint_symbol_10 = &(tint_symbol_11);
+  thread int tint_symbol_13 = 0;
+  thread int* const tint_symbol_12 = &(tint_symbol_13);
+  outer(tint_symbol_10, tint_symbol_12);
+  no_uses();
+  return;
+}
+
+kernel void main4() {
+  no_uses();
+  return;
+}
+

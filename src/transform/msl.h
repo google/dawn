@@ -34,6 +34,12 @@ class Msl : public Transform {
   /// @param data optional extra transform-specific input data
   /// @returns the transformation result
   Output Run(const Program* program, const DataMap& data = {}) override;
+
+ private:
+  /// Pushes module-scope variables with private or workgroup storage classes
+  /// into the entry point function, and passes them as function parameters to
+  /// any functions that need them.
+  void HandlePrivateAndWorkgroupVariables(CloneContext& ctx) const;
 };
 
 }  // namespace transform

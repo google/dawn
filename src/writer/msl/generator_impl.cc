@@ -22,6 +22,7 @@
 #include "src/ast/alias.h"
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_statement.h"
+#include "src/ast/disable_validation_decoration.h"
 #include "src/ast/fallthrough_statement.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/module.h"
@@ -107,9 +108,10 @@ bool GeneratorImpl::Generate() {
       switch (sem->StorageClass()) {
         case ast::StorageClass::kPrivate:
         case ast::StorageClass::kWorkgroup:
-          TINT_UNIMPLEMENTED(diagnostics_)
-              << "crbug.com/tint/726: module-scope private and workgroup "
-                 "variables not yet implemented";
+          // These are pushed into the entry point by the sanitizer.
+          TINT_ICE(diagnostics_)
+              << "module-scope variables in the private/workgroup storage "
+                 "class should have been handled by the MSL sanitizer";
           break;
         default:
           break;  // Handled by another code path
@@ -2198,11 +2200,28 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
 
   auto* decl = var->Declaration();
 
-  // TODO(dsinclair): Handle variable decorations
-  if (!decl->decorations().empty()) {
-    diagnostics_.add_error("Variable decorations are not handled yet");
-    return false;
+  for (auto* deco : decl->decorations()) {
+    if (!deco->Is<ast::InternalDecoration>()) {
+      TINT_ICE(diagnostics_) << "unexpected variable decoration";
+      return false;
+    }
   }
+
+  switch (var->StorageClass()) {
+    case ast::StorageClass::kFunction:
+    case ast::StorageClass::kNone:
+      break;
+    case ast::StorageClass::kPrivate:
+      out_ << "thread ";
+      break;
+    case ast::StorageClass::kWorkgroup:
+      out_ << "threadgroup ";
+      break;
+    default:
+      TINT_ICE(diagnostics_) << "unhandled variable storage class";
+      return false;
+  }
+
   auto* type = var->Type()->UnwrapRef();
 
   std::string name = program_->Symbols().NameFor(decl->symbol());
@@ -2225,6 +2244,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var,
       }
     } else if (var->StorageClass() == ast::StorageClass::kPrivate ||
                var->StorageClass() == ast::StorageClass::kFunction ||
+               var->StorageClass() == ast::StorageClass::kWorkgroup ||
                var->StorageClass() == ast::StorageClass::kNone ||
                var->StorageClass() == ast::StorageClass::kOutput) {
       if (!EmitZeroValue(type)) {

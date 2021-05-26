@@ -2360,7 +2360,10 @@ bool Resolver::VariableDeclStatement(const ast::VariableDeclStatement* stmt) {
   }
 
   if (!var->is_const()) {
-    if (info->storage_class != ast::StorageClass::kFunction) {
+    if (info->storage_class != ast::StorageClass::kFunction &&
+        !IsValidationDisabled(
+            var->decorations(),
+            ast::DisabledValidation::kFunctionVarStorageClass)) {
       if (info->storage_class != ast::StorageClass::kNone) {
         diagnostics_.add_error(
             "function variable has a non-function storage class",

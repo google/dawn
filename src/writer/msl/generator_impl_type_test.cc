@@ -160,15 +160,14 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
   EXPECT_EQ(gen.result(), "float2x3");
 }
 
-// TODO(dsinclair): How to annotate as workgroup?
-TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Pointer) {
+TEST_F(MslGeneratorImplTest, EmitType_Pointer) {
   auto* f32 = create<sem::F32>();
   auto* p = create<sem::Pointer>(f32, ast::StorageClass::kWorkgroup);
 
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.EmitType(p, "")) << gen.error();
-  EXPECT_EQ(gen.result(), "float*");
+  EXPECT_EQ(gen.result(), "threadgroup float* ");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Struct) {

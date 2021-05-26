@@ -110,34 +110,44 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
   EXPECT_EQ(gen.result(), "  float3x2 a = float3x2(0.0f);\n");
 }
 
-// TODO(crbug.com/tint/726): module-scope private and workgroup variables not
-// yet implemented
-TEST_F(MslGeneratorImplTest, DISABLED_Emit_VariableDeclStatement_Private) {
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
   Global("a", ty.f32(), ast::StorageClass::kPrivate);
 
   WrapInFunction(Expr("a"));
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   gen.increment_indent();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("  float a = 0.0f;\n"));
+  EXPECT_THAT(gen.result(), HasSubstr("thread float tint_symbol_2 = 0.0f;\n"));
 }
 
-// TODO(crbug.com/tint/726): module-scope private and workgroup variables not
-// yet implemented
-TEST_F(MslGeneratorImplTest,
-       DISABLED_Emit_VariableDeclStatement_Initializer_Private) {
-  Global("initializer", ty.f32(), ast::StorageClass::kInput);
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
+  GlobalConst("initializer", ty.f32(), Expr(0.f));
   Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
 
   WrapInFunction(Expr("a"));
 
-  GeneratorImpl& gen = Build();
+  GeneratorImpl& gen = SanitizeAndBuild();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("float a = initializer;\n"));
+  EXPECT_THAT(gen.result(),
+              HasSubstr("thread float tint_symbol_2 = initializer;\n"));
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {
+  Global("a", ty.f32(), ast::StorageClass::kWorkgroup);
+
+  WrapInFunction(Expr("a"));
+
+  GeneratorImpl& gen = SanitizeAndBuild();
+
+  gen.increment_indent();
+
+  ASSERT_TRUE(gen.Generate()) << gen.error();
+  EXPECT_THAT(gen.result(),
+              HasSubstr("threadgroup float tint_symbol_2 = 0.0f;\n"));
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
