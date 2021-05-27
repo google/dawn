@@ -31,6 +31,8 @@ target_sources(dawn_native PRIVATE
     ${DAWN_NATIVE_UTILS_GEN_SOURCES}
     "Adapter.cpp"
     "Adapter.h"
+    "AsyncTask.cpp"
+    "AsyncTask.h"
     "AttachmentState.cpp"
     "AttachmentState.h"
     "BackendConnection.cpp"

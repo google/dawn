@@ -165,6 +165,8 @@ source_set("dawn_native_sources") {
   sources += [
     "Adapter.cpp",
     "Adapter.h",
+    "AsyncTask.cpp",
+    "AsyncTask.h",
     "AttachmentState.cpp",
     "AttachmentState.h",
     "BackendConnection.cpp",

@@ -18,11 +18,15 @@
 #include "common/NonCopyable.h"
 #include "dawn_platform/DawnPlatform.h"
 
-class AsyncWorkerThreadPool : public dawn_platform::WorkerTaskPool, public NonCopyable {
-  public:
-    std::unique_ptr<dawn_platform::WaitableEvent> PostWorkerTask(
-        dawn_platform::PostWorkerTaskCallback callback,
-        void* userdata) override;
-};
+namespace dawn_platform {
+
+    class AsyncWorkerThreadPool : public dawn_platform::WorkerTaskPool, public NonCopyable {
+      public:
+        std::unique_ptr<dawn_platform::WaitableEvent> PostWorkerTask(
+            dawn_platform::PostWorkerTaskCallback callback,
+            void* userdata) override;
+    };
+
+}  // namespace dawn_platform
 
 #endif

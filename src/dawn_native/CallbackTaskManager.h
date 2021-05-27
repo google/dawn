@@ -21,8 +21,6 @@
 
 namespace dawn_native {
 
-    class CallbackTaskManager;
-
     struct CallbackTask {
       public:
         virtual ~CallbackTask() = default;

@@ -14,40 +14,84 @@
 
 #include "dawn_platform/WorkerThread.h"
 
-#include <future>
+#include <condition_variable>
+#include <functional>
+#include <thread>
 
 #include "common/Assert.h"
 
 namespace {
 
-    class AsyncWaitableEvent final : public dawn_platform::WaitableEvent {
+    class AsyncWaitableEventImpl {
       public:
-        explicit AsyncWaitableEvent(std::function<void()> func) {
-            mFuture = std::async(std::launch::async, func);
+        AsyncWaitableEventImpl() : mIsComplete(false) {
         }
-        void Wait() override {
-            ASSERT(mFuture.valid());
-            mFuture.wait();
+
+        void Wait() {
+            std::unique_lock<std::mutex> lock(mMutex);
+            mCondition.wait(lock, [this] { return mIsComplete; });
         }
-        bool IsComplete() override {
-            ASSERT(mFuture.valid());
-            return mFuture.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+
+        bool IsComplete() {
+            std::lock_guard<std::mutex> lock(mMutex);
+            return mIsComplete;
+        }
+
+        void MarkAsComplete() {
+            {
+                std::lock_guard<std::mutex> lock(mMutex);
+                mIsComplete = true;
+            }
+            mCondition.notify_all();
         }
 
       private:
-        // It is safe not to call Wait() in the destructor of AsyncWaitableEvent because since
-        // C++14 the destructor of std::future will always be blocked until its state becomes
-        // std::future_status::ready when it was created by a call of std::async and it is the
-        // last reference to the shared state.
-        // See https://en.cppreference.com/w/cpp/thread/future/~future for more details.
-        std::future<void> mFuture;
+        std::mutex mMutex;
+        std::condition_variable mCondition;
+        bool mIsComplete;
+    };
+
+    class AsyncWaitableEvent final : public dawn_platform::WaitableEvent {
+      public:
+        explicit AsyncWaitableEvent()
+            : mWaitableEventImpl(std::make_shared<AsyncWaitableEventImpl>()) {
+        }
+
+        void Wait() override {
+            mWaitableEventImpl->Wait();
+        }
+
+        bool IsComplete() override {
+            return mWaitableEventImpl->IsComplete();
+        }
+
+        std::shared_ptr<AsyncWaitableEventImpl> GetWaitableEventImpl() const {
+            return mWaitableEventImpl;
+        }
+
+      private:
+        std::shared_ptr<AsyncWaitableEventImpl> mWaitableEventImpl;
     };
 
 }  // anonymous namespace
 
-std::unique_ptr<dawn_platform::WaitableEvent> AsyncWorkerThreadPool::PostWorkerTask(
-    dawn_platform::PostWorkerTaskCallback callback,
-    void* userdata) {
-    std::function<void()> doTask = [callback, userdata]() { callback(userdata); };
-    return std::make_unique<AsyncWaitableEvent>(doTask);
-}
+namespace dawn_platform {
+
+    std::unique_ptr<dawn_platform::WaitableEvent> AsyncWorkerThreadPool::PostWorkerTask(
+        dawn_platform::PostWorkerTaskCallback callback,
+        void* userdata) {
+        std::unique_ptr<AsyncWaitableEvent> waitableEvent = std::make_unique<AsyncWaitableEvent>();
+
+        std::function<void()> doTask =
+            [callback, userdata, waitableEventImpl = waitableEvent->GetWaitableEventImpl()]() {
+                callback(userdata);
+                waitableEventImpl->MarkAsComplete();
+            };
+
+        std::thread thread(doTask);
+        thread.detach();
+
+        return waitableEvent;
+    }
+
+}  // namespace dawn_platform
