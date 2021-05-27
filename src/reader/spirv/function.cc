@@ -3510,6 +3510,9 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     auto arg0 = MakeOperand(inst, 0);
     auto arg1 = parser_impl_.RectifySecondOperandSignedness(
         inst, arg0.type, MakeOperand(inst, 1));
+    if (!arg0 || !arg1) {
+      return {};
+    }
     auto* binary_expr = create<ast::BinaryExpression>(Source{}, binary_op,
                                                       arg0.expr, arg1.expr);
     TypedExpression result{ast_type, binary_expr};
