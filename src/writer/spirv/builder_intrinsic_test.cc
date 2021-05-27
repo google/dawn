@@ -128,6 +128,62 @@ INSTANTIATE_TEST_SUITE_P(IntrinsicBuilderTest,
                          testing::Values(IntrinsicData{"isNan", "OpIsNan"},
                                          IntrinsicData{"isInf", "OpIsInf"}));
 
+TEST_F(IntrinsicBuilderTest, IsFinite_Scalar) {
+  auto* var = Global("v", ty.f32(), ast::StorageClass::kPrivate);
+
+  auto* expr = Call("isFinite", "v");
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(expr), 5u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 32
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%6 = OpTypeBool
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%7 = OpLoad %3 %1
+%8 = OpIsInf %6 %7
+%9 = OpIsNan %6 %7
+%10 = OpLogicalOr %6 %8 %9
+%5 = OpLogicalNot %6 %10
+)");
+}
+
+TEST_F(IntrinsicBuilderTest, IsFinite_Vector) {
+  auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+
+  auto* expr = Call("isFinite", "v");
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(expr), 6u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%8 = OpTypeBool
+%7 = OpTypeVector %8 3
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            R"(%9 = OpLoad %3 %1
+%10 = OpIsInf %7 %9
+%11 = OpIsNan %7 %9
+%12 = OpLogicalOr %7 %10 %11
+%6 = OpLogicalNot %7 %12
+)");
+}
+
 using IntrinsicIntTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
   auto param = GetParam();

@@ -1971,6 +1971,22 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
     return result_id;
   }
 
+  // Generates the SPIR-V ID for the expression for the indexed call parameter,
+  // and loads it if necessary. Returns 0 on error.
+  auto get_param_as_value_id = [&](size_t i) -> uint32_t {
+    auto* arg = call->params()[i];
+    auto& param = intrinsic->Parameters()[i];
+    auto val_id = GenerateExpression(arg);
+    if (val_id == 0) {
+      return 0;
+    }
+
+    if (!param.type->Is<sem::Pointer>()) {
+      val_id = GenerateLoadIfNeeded(TypeOf(arg), val_id);
+    }
+    return val_id;
+  };
+
   OperandList params = {Operand::Int(result_type_id), result};
 
   spv::Op op = spv::Op::OpNop;
@@ -2054,6 +2070,32 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
     case IntrinsicType::kIsNan:
       op = spv::Op::OpIsNan;
       break;
+    case IntrinsicType::kIsFinite: {
+      // Implemented as:   not(IsInf or IsNan)
+      auto val_id = get_param_as_value_id(0);
+      if (!val_id) {
+        return 0;
+      }
+      auto inf_result = result_op();
+      auto nan_result = result_op();
+      auto or_result = result_op();
+      if (push_function_inst(spv::Op::OpIsInf,
+                             {Operand::Int(result_type_id), inf_result,
+                              Operand::Int(val_id)}) &&
+          push_function_inst(spv::Op::OpIsNan,
+                             {Operand::Int(result_type_id), nan_result,
+                              Operand::Int(val_id)}) &&
+          push_function_inst(spv::Op::OpLogicalOr,
+                             {Operand::Int(result_type_id), or_result,
+                              Operand::Int(inf_result.to_i()),
+                              Operand::Int(nan_result.to_i())}) &&
+          push_function_inst(spv::Op::OpLogicalNot,
+                             {Operand::Int(result_type_id), result,
+                              Operand::Int(or_result.to_i())})) {
+        return result_id;
+      }
+      return 0;
+    }
     case IntrinsicType::kReverseBits:
       op = spv::Op::OpBitReverse;
       break;
@@ -2090,18 +2132,11 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
   }
 
   for (size_t i = 0; i < call->params().size(); i++) {
-    auto* arg = call->params()[i];
-    auto& param = intrinsic->Parameters()[i];
-    auto val_id = GenerateExpression(arg);
-    if (val_id == 0) {
-      return false;
+    if (auto val_id = get_param_as_value_id(i)) {
+      params.emplace_back(Operand::Int(val_id));
+    } else {
+      return 0;
     }
-
-    if (!param.type->Is<sem::Pointer>()) {
-      val_id = GenerateLoadIfNeeded(TypeOf(arg), val_id);
-    }
-
-    params.emplace_back(Operand::Int(val_id));
   }
 
   if (!push_function_inst(op, params)) {
