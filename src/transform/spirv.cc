@@ -230,9 +230,7 @@ void Spirv::HandleSampleMaskBuiltins(CloneContext& ctx) const {
   for (auto* var : ctx.src->AST().GlobalVariables()) {
     for (auto* deco : var->decorations()) {
       if (auto* builtin = deco->As<ast::BuiltinDecoration>()) {
-        if (builtin->value() != ast::Builtin::kSampleMask &&
-            builtin->value() != ast::Builtin::kSampleMaskIn &&
-            builtin->value() != ast::Builtin::kSampleMaskOut) {
+        if (builtin->value() != ast::Builtin::kSampleMask) {
           continue;
         }
 

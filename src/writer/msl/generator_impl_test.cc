@@ -65,7 +65,6 @@ INSTANTIATE_TEST_SUITE_P(
                     MslBuiltinData{ast::Builtin::kVertexIndex, "vertex_id"},
                     MslBuiltinData{ast::Builtin::kInstanceIndex, "instance_id"},
                     MslBuiltinData{ast::Builtin::kFrontFacing, "front_facing"},
-                    MslBuiltinData{ast::Builtin::kFragCoord, "position"},
                     MslBuiltinData{ast::Builtin::kFragDepth, "depth(any)"},
                     MslBuiltinData{ast::Builtin::kLocalInvocationId,
                                    "thread_position_in_threadgroup"},
@@ -76,10 +75,7 @@ INSTANTIATE_TEST_SUITE_P(
                     MslBuiltinData{ast::Builtin::kWorkgroupId,
                                    "threadgroup_position_in_grid"},
                     MslBuiltinData{ast::Builtin::kSampleIndex, "sample_id"},
-                    MslBuiltinData{ast::Builtin::kSampleMask, "sample_mask"},
-                    MslBuiltinData{ast::Builtin::kSampleMaskIn, "sample_mask"},
-                    MslBuiltinData{ast::Builtin::kSampleMaskOut,
-                                   "sample_mask"}));
+                    MslBuiltinData{ast::Builtin::kSampleMask, "sample_mask"}));
 
 }  // namespace
 }  // namespace msl

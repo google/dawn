@@ -66,7 +66,6 @@ INSTANTIATE_TEST_SUITE_P(
         WgslBuiltinData{ast::Builtin::kVertexIndex, "vertex_index"},
         WgslBuiltinData{ast::Builtin::kInstanceIndex, "instance_index"},
         WgslBuiltinData{ast::Builtin::kFrontFacing, "front_facing"},
-        WgslBuiltinData{ast::Builtin::kFragCoord, "frag_coord"},
         WgslBuiltinData{ast::Builtin::kFragDepth, "frag_depth"},
         WgslBuiltinData{ast::Builtin::kLocalInvocationId,
                         "local_invocation_id"},
@@ -75,9 +74,7 @@ INSTANTIATE_TEST_SUITE_P(
         WgslBuiltinData{ast::Builtin::kGlobalInvocationId,
                         "global_invocation_id"},
         WgslBuiltinData{ast::Builtin::kWorkgroupId, "workgroup_id"},
-        WgslBuiltinData{ast::Builtin::kSampleIndex, "sample_index"},
-        WgslBuiltinData{ast::Builtin::kSampleMaskIn, "sample_mask_in"},
-        WgslBuiltinData{ast::Builtin::kSampleMaskOut, "sample_mask_out"}));
+        WgslBuiltinData{ast::Builtin::kSampleIndex, "sample_index"}));
 
 }  // namespace
 }  // namespace wgsl

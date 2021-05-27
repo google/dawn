@@ -76,7 +76,6 @@ INSTANTIATE_TEST_SUITE_P(
         HlslBuiltinData{ast::Builtin::kVertexIndex, "SV_VertexID"},
         HlslBuiltinData{ast::Builtin::kInstanceIndex, "SV_InstanceID"},
         HlslBuiltinData{ast::Builtin::kFrontFacing, "SV_IsFrontFace"},
-        HlslBuiltinData{ast::Builtin::kFragCoord, "SV_Position"},
         HlslBuiltinData{ast::Builtin::kFragDepth, "SV_Depth"},
         HlslBuiltinData{ast::Builtin::kLocalInvocationId, "SV_GroupThreadID"},
         HlslBuiltinData{ast::Builtin::kLocalInvocationIndex, "SV_GroupIndex"},
@@ -84,9 +83,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "SV_DispatchThreadID"},
         HlslBuiltinData{ast::Builtin::kWorkgroupId, "SV_GroupID"},
         HlslBuiltinData{ast::Builtin::kSampleIndex, "SV_SampleIndex"},
-        HlslBuiltinData{ast::Builtin::kSampleMask, "SV_Coverage"},
-        HlslBuiltinData{ast::Builtin::kSampleMaskIn, "SV_Coverage"},
-        HlslBuiltinData{ast::Builtin::kSampleMaskOut, "SV_Coverage"}));
+        HlslBuiltinData{ast::Builtin::kSampleMask, "SV_Coverage"}));
 
 }  // namespace
 }  // namespace hlsl

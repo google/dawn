@@ -193,19 +193,6 @@ TEST_F(ParserImplTest, VariableStmt_Let_InvalidConstructor) {
   EXPECT_EQ(p->error(), "1:15: missing constructor for let declaration");
 }
 
-TEST_F(ParserImplTest, VariableStmt_Const) {
-  auto p = parser("const a : i32 = 1");
-  auto e = p->variable_stmt();
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_EQ(
-      p->builder().Diagnostics().str(),
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: use 'let' instead of 'const'
-const a : i32 = 1
-^^^^^
-)");
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

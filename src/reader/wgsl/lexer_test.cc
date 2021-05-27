@@ -423,7 +423,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"bool", Token::Type::kBool},
         TokenData{"break", Token::Type::kBreak},
         TokenData{"case", Token::Type::kCase},
-        TokenData{"const", Token::Type::kConst},
         TokenData{"continue", Token::Type::kContinue},
         TokenData{"continuing", Token::Type::kContinuing},
         TokenData{"default", Token::Type::kDefault},
@@ -523,7 +522,6 @@ INSTANTIATE_TEST_SUITE_P(
         TokenData{"vec2", Token::Type::kVec2},
         TokenData{"vec3", Token::Type::kVec3},
         TokenData{"vec4", Token::Type::kVec4},
-        TokenData{"void", Token::Type::kVoid},
         TokenData{"workgroup", Token::Type::kWorkgroup}));
 
 using KeywordTest_Reserved = testing::TestWithParam<const char*>;
@@ -540,6 +538,7 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                          KeywordTest_Reserved,
                          testing::Values("asm",
                                          "bf16",
+                                         "const",
                                          "do",
                                          "enum",
                                          "f16",
@@ -554,7 +553,8 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          "u16",
                                          "u64",
                                          "unless",
-                                         "regardless"));
+                                         "regardless",
+                                         "void"));
 
 }  // namespace
 }  // namespace wgsl

@@ -373,8 +373,6 @@ INSTANTIATE_TEST_SUITE_P(
                     SpvBuiltInInstanceIndex},
         BuiltinData{ast::Builtin::kFrontFacing, ast::StorageClass::kInput,
                     SpvBuiltInFrontFacing},
-        BuiltinData{ast::Builtin::kFragCoord, ast::StorageClass::kInput,
-                    SpvBuiltInFragCoord},
         BuiltinData{ast::Builtin::kFragDepth, ast::StorageClass::kOutput,
                     SpvBuiltInFragDepth},
         BuiltinData{ast::Builtin::kLocalInvocationId, ast::StorageClass::kInput,
@@ -390,10 +388,6 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{ast::Builtin::kSampleMask, ast::StorageClass::kInput,
                     SpvBuiltInSampleMask},
         BuiltinData{ast::Builtin::kSampleMask, ast::StorageClass::kOutput,
-                    SpvBuiltInSampleMask},
-        BuiltinData{ast::Builtin::kSampleMaskIn, ast::StorageClass::kInput,
-                    SpvBuiltInSampleMask},
-        BuiltinData{ast::Builtin::kSampleMaskOut, ast::StorageClass::kOutput,
                     SpvBuiltInSampleMask}));
 
 TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {

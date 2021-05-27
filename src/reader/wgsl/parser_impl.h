@@ -458,9 +458,6 @@ class ParserImpl {
   /// @param use a description of what was being parsed if an error was raised
   /// @returns returns the image format or kNone if none matched.
   Expect<ast::ImageFormat> expect_image_storage_type(const std::string& use);
-  /// Parses a `function_type_decl` grammar element
-  /// @returns the parsed type or nullptr otherwise
-  Maybe<ast::Type*> function_type_decl();
   /// Parses a `function_header` grammar element
   /// @returns the parsed function header
   Maybe<FunctionHeader> function_header();

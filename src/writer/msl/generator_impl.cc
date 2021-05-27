@@ -1341,8 +1341,6 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "instance_id";
     case ast::Builtin::kFrontFacing:
       return "front_facing";
-    case ast::Builtin::kFragCoord:
-      return "position";
     case ast::Builtin::kFragDepth:
       return "depth(any)";
     case ast::Builtin::kLocalInvocationId:
@@ -1356,10 +1354,6 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
     case ast::Builtin::kSampleIndex:
       return "sample_id";
     case ast::Builtin::kSampleMask:
-      return "sample_mask";
-    case ast::Builtin::kSampleMaskIn:
-      return "sample_mask";
-    case ast::Builtin::kSampleMaskOut:
       return "sample_mask";
     default:
       break;

@@ -367,10 +367,10 @@ TEST_F(ParserImplErrorTest, FunctionDeclMissingRParen) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclMissingArrow) {
-  EXPECT("fn f() void {}",
+  EXPECT("fn f() f32 {}",
          "test.wgsl:1:8 error: expected '{'\n"
-         "fn f() void {}\n"
-         "       ^^^^\n");
+         "fn f() f32 {}\n"
+         "       ^^^\n");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclInvalidReturnType) {

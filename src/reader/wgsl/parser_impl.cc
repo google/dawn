@@ -83,9 +83,6 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   if (str == "front_facing") {
     return ast::Builtin::kFrontFacing;
   }
-  if (str == "frag_coord") {
-    return ast::Builtin::kFragCoord;
-  }
   if (str == "frag_depth") {
     return ast::Builtin::kFragDepth;
   }
@@ -106,12 +103,6 @@ ast::Builtin ident_to_builtin(const std::string& str) {
   }
   if (str == "sample_mask") {
     return ast::Builtin::kSampleMask;
-  }
-  if (str == "sample_mask_in") {
-    return ast::Builtin::kSampleMaskIn;
-  }
-  if (str == "sample_mask_out") {
-    return ast::Builtin::kSampleMaskOut;
   }
   return ast::Builtin::kNone;
 }
@@ -500,13 +491,7 @@ Maybe<ast::Variable*> ParserImpl::global_variable_decl(
 Maybe<ast::Variable*> ParserImpl::global_constant_decl(
     ast::DecorationList& decos) {
   if (!match(Token::Type::kLet)) {
-    Source source;
-    if (match(Token::Type::kConst, &source)) {
-      // crbug.com/tint/699: 'const' renamed to 'let'
-      deprecated(source, "use 'let' instead of 'const'");
-    } else {
-      return Failure::kNoMatch;
-    }
+    return Failure::kNoMatch;
   }
 
   const char* use = "let declaration";
@@ -1327,19 +1312,11 @@ Maybe<ast::Function*> ParserImpl::function_decl(ast::DecorationList& decos) {
       header->return_type, body.value, decos, header->return_type_decorations);
 }
 
-// function_type_decl
-//   : type_decl
-//   | VOID
-Maybe<ast::Type*> ParserImpl::function_type_decl() {
-  Source source;
-  if (match(Token::Type::kVoid, &source))
-    return builder_.ty.void_(source);
-
-  return type_decl();
-}
-
 // function_header
-//   : FN IDENT PAREN_LEFT param_list PAREN_RIGHT ARROW function_type_decl
+//   : FN IDENT PAREN_LEFT param_list PAREN_RIGHT return_type_decl_optional
+// return_type_decl_optional
+//   :
+//   | ARROW attribute_list* type_decl
 Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
   Source source;
   if (!match(Token::Type::kFn, &source)) {
@@ -1377,7 +1354,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
 
     auto tok = peek();
 
-    auto type = function_type_decl();
+    auto type = type_decl();
     if (type.errored) {
       errored = true;
     } else if (!type.matched) {
@@ -1385,13 +1362,6 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
     } else {
       return_type = type.value;
     }
-
-    if (Is<ast::Void>(return_type)) {
-      // crbug.com/tint/677: void has been removed from the language
-      deprecated(tok.source(),
-                 "omit '-> void' for functions that do not return a value");
-    }
-
   } else {
     return_type = builder_.ty.void_();
   }
@@ -1488,16 +1458,6 @@ Expect<ast::Builtin> ParserImpl::expect_builtin() {
   ast::Builtin builtin = ident_to_builtin(ident.value);
   if (builtin == ast::Builtin::kNone)
     return add_error(ident.source, "invalid value for builtin decoration");
-
-  if (builtin == ast::Builtin::kFragCoord) {
-    deprecated(ident.source, "use 'position' instead of 'frag_coord'");
-  }
-  if (builtin == ast::Builtin::kSampleMaskIn) {
-    deprecated(ident.source, "use 'sample_mask' instead of 'sample_mask_in'");
-  }
-  if (builtin == ast::Builtin::kSampleMaskOut) {
-    deprecated(ident.source, "use 'sample_mask' instead of 'sample_mask_out'");
-  }
 
   return {builtin, ident.source};
 }
@@ -1695,17 +1655,7 @@ Maybe<ast::ReturnStatement*> ParserImpl::return_stmt() {
 //   | variable_decl EQUAL logical_or_expression
 //   | CONST variable_ident_decl EQUAL logical_or_expression
 Maybe<ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
-  bool is_const = match(Token::Type::kLet);
-  if (!is_const) {
-    Source source;
-    if (match(Token::Type::kConst, &source)) {
-      // crbug.com/tint/699: 'const' renamed to 'let'
-      deprecated(source, "use 'let' instead of 'const'");
-      is_const = true;
-    }
-  }
-
-  if (is_const) {
+  if (match(Token::Type::kLet)) {
     auto decl = expect_variable_ident_decl("let declaration");
     if (decl.errored)
       return Failure::kErrored;

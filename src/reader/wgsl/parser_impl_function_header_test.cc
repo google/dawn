@@ -124,19 +124,6 @@ TEST_F(ParserImplTest, FunctionHeader_MissingReturnType) {
   EXPECT_EQ(p->error(), "1:13: unable to determine function return type");
 }
 
-TEST_F(ParserImplTest, FunctionHeader_ArrowVoid) {
-  auto p = parser("fn main() -> void");
-  auto f = p->function_header();
-  EXPECT_TRUE(f.matched);
-  EXPECT_FALSE(f.errored);
-  EXPECT_EQ(
-      p->builder().Diagnostics().str(),
-      R"(test.wgsl:1:14 warning: use of deprecated language feature: omit '-> void' for functions that do not return a value
-fn main() -> void
-             ^^^^
-)");
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

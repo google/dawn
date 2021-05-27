@@ -478,8 +478,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kBreak, source, "break"};
   if (str == "case")
     return {Token::Type::kCase, source, "case"};
-  if (str == "const")
-    return {Token::Type::kConst, source, "const"};
   if (str == "continue")
     return {Token::Type::kContinue, source, "continue"};
   if (str == "continuing")
@@ -686,8 +684,6 @@ Token Lexer::check_keyword(const Source& source, const std::string& str) {
     return {Token::Type::kVec3, source, "vec3"};
   if (str == "vec4")
     return {Token::Type::kVec4, source, "vec4"};
-  if (str == "void")
-    return {Token::Type::kVoid, source, "void"};
   if (str == "workgroup")
     return {Token::Type::kWorkgroup, source, "workgroup"};
   return {};
@@ -698,6 +694,8 @@ Token Lexer::check_reserved(const Source& source, const std::string& str) {
     return {Token::Type::kReservedKeyword, source, "asm"};
   if (str == "bf16")
     return {Token::Type::kReservedKeyword, source, "bf16"};
+  if (str == "const")
+    return {Token::Type::kReservedKeyword, source, "const"};
   if (str == "do")
     return {Token::Type::kReservedKeyword, source, "do"};
   if (str == "enum")
@@ -728,6 +726,8 @@ Token Lexer::check_reserved(const Source& source, const std::string& str) {
     return {Token::Type::kReservedKeyword, source, "u64"};
   if (str == "unless")
     return {Token::Type::kReservedKeyword, source, "unless"};
+  if (str == "void")
+    return {Token::Type::kReservedKeyword, source, "void"};
   return {};
 }
 

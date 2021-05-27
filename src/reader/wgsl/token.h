@@ -123,8 +123,6 @@ class Token {
     kBreak,
     /// A 'case'
     kCase,
-    /// A 'const'
-    kConst,
     /// A 'continue'
     kContinue,
     /// A 'continuing'
@@ -317,8 +315,6 @@ class Token {
     kVec3,
     /// A 'vec4'
     kVec4,
-    /// A 'void'
-    kVoid,
     /// A 'workgroup'
     kWorkgroup,
   };
@@ -464,8 +460,6 @@ class Token {
   bool IsCase() const { return type_ == Type::kCase; }
   /// @returns true if token is a 'sampler_comparison'
   bool IsComparisonSampler() const { return type_ == Type::kComparisonSampler; }
-  /// @returns true if token is a 'const'
-  bool IsConst() const { return type_ == Type::kConst; }
   /// @returns true if token is a 'continue'
   bool IsContinue() const { return type_ == Type::kContinue; }
   /// @returns true if token is a 'continuing'
@@ -676,8 +670,6 @@ class Token {
   bool IsVec3() const { return type_ == Type::kVec3; }
   /// @returns true if token is a 'vec4'
   bool IsVec4() const { return type_ == Type::kVec4; }
-  /// @returns true if token is a 'void'
-  bool IsVoid() const { return type_ == Type::kVoid; }
   /// @returns true if token is a 'workgroup'
   bool IsWorkgroup() const { return type_ == Type::kWorkgroup; }
 

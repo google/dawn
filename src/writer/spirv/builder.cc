@@ -3369,8 +3369,6 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin,
       return SpvBuiltInInstanceIndex;
     case ast::Builtin::kFrontFacing:
       return SpvBuiltInFrontFacing;
-    case ast::Builtin::kFragCoord:
-      return SpvBuiltInFragCoord;
     case ast::Builtin::kFragDepth:
       return SpvBuiltInFragDepth;
     case ast::Builtin::kLocalInvocationId:
@@ -3387,10 +3385,6 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin,
       push_capability(SpvCapabilitySampleRateShading);
       return SpvBuiltInSampleId;
     case ast::Builtin::kSampleMask:
-      return SpvBuiltInSampleMask;
-    case ast::Builtin::kSampleMaskIn:
-      return SpvBuiltInSampleMask;
-    case ast::Builtin::kSampleMaskOut:
       return SpvBuiltInSampleMask;
     case ast::Builtin::kNone:
       break;

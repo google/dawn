@@ -1957,8 +1957,6 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
       return "SV_InstanceID";
     case ast::Builtin::kFrontFacing:
       return "SV_IsFrontFace";
-    case ast::Builtin::kFragCoord:
-      return "SV_Position";
     case ast::Builtin::kFragDepth:
       return "SV_Depth";
     case ast::Builtin::kLocalInvocationId:
@@ -1972,10 +1970,6 @@ std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
     case ast::Builtin::kSampleIndex:
       return "SV_SampleIndex";
     case ast::Builtin::kSampleMask:
-      return "SV_Coverage";
-    case ast::Builtin::kSampleMaskIn:
-      return "SV_Coverage";
-    case ast::Builtin::kSampleMaskOut:
       return "SV_Coverage";
     default:
       break;

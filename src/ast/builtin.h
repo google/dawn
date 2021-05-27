@@ -27,7 +27,6 @@ enum class Builtin {
   kVertexIndex,
   kInstanceIndex,
   kFrontFacing,
-  kFragCoord,  // TODO(crbug.com/tint/714): Remove this
   kFragDepth,
   kLocalInvocationId,
   kLocalInvocationIndex,
@@ -35,8 +34,6 @@ enum class Builtin {
   kWorkgroupId,
   kSampleIndex,
   kSampleMask,
-  kSampleMaskIn,   // TODO(crbug.com/tint/715): Remove this
-  kSampleMaskOut,  // TODO(crbug.com/tint/715): Remove this
 
   // Below are not currently WGSL builtins, but are included in this enum as
   // they are used by certain backends.

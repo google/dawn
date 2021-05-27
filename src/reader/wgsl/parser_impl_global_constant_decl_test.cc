@@ -181,23 +181,6 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_InvalidId) {
   EXPECT_EQ(p->error(), "1:12: override decoration must be positive");
 }
 
-TEST_F(ParserImplTest, GlobalConstantDec_Const) {
-  auto p = parser("const a : i32 = 1");
-  auto decos = p->decoration_list();
-  EXPECT_FALSE(decos.errored);
-  EXPECT_FALSE(decos.matched);
-
-  auto e = p->global_constant_decl(decos.value);
-  EXPECT_TRUE(e.matched);
-  EXPECT_FALSE(e.errored);
-  EXPECT_EQ(
-      p->builder().Diagnostics().str(),
-      R"(test.wgsl:1:1 warning: use of deprecated language feature: use 'let' instead of 'const'
-const a : i32 = 1
-^^^^^
-)");
-}
-
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader
