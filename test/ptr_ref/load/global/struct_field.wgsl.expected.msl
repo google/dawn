@@ -1,1 +1,14 @@
-SKIP: crbug.com/tint/831
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  int i;
+};
+
+kernel void tint_symbol() {
+  thread S tint_symbol_2 = {};
+  thread S* const tint_symbol_1 = &(tint_symbol_2);
+  int const i = (*(tint_symbol_1)).i;
+  return;
+}
+
