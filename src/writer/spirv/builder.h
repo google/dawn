@@ -473,6 +473,13 @@ class Builder {
   /// @returns true if the vector was successfully generated
   bool GenerateVectorType(const sem::Vector* vec, const Operand& result);
 
+  /// Generates instructions to splat `scalar_id` into a vector of type
+  /// `vec_type`
+  /// @param scalar_id scalar to splat
+  /// @param vec_type type of vector
+  /// @returns id of the new vector
+  uint32_t GenerateSplat(uint32_t scalar_id, const sem::Type* vec_type);
+
   /// Converts AST image format to SPIR-V and pushes an appropriate capability.
   /// @param format AST image format type
   /// @returns SPIR-V image format type

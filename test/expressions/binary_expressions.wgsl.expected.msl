@@ -1,0 +1,75 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_1 {
+  float4 value [[color(0)]];
+};
+
+void vector_scalar_f32() {
+  float3 v = 0.0f;
+  float s = 0.0f;
+  float3 r = 0.0f;
+  r = (v + s);
+  r = (v - s);
+  r = (v * s);
+  r = (v / s);
+}
+
+void vector_scalar_i32() {
+  int3 v = 0;
+  int s = 0;
+  int3 r = 0;
+  r = (v + s);
+  r = (v - s);
+  r = (v * s);
+  r = (v / s);
+  r = (v % s);
+}
+
+void vector_scalar_u32() {
+  uint3 v = 0u;
+  uint s = 0u;
+  uint3 r = 0u;
+  r = (v + s);
+  r = (v - s);
+  r = (v * s);
+  r = (v / s);
+  r = (v % s);
+}
+
+void scalar_vector_f32() {
+  float3 v = 0.0f;
+  float s = 0.0f;
+  float3 r = 0.0f;
+  r = (s + v);
+  r = (s - v);
+  r = (s * v);
+  r = (s / v);
+}
+
+void scalar_vector_i32() {
+  int3 v = 0;
+  int s = 0;
+  int3 r = 0;
+  r = (s + v);
+  r = (s - v);
+  r = (s * v);
+  r = (s / v);
+  r = (s % v);
+}
+
+void scalar_vector_u32() {
+  uint3 v = 0u;
+  uint s = 0u;
+  uint3 r = 0u;
+  r = (s + v);
+  r = (s - v);
+  r = (s * v);
+  r = (s / v);
+  r = (s % v);
+}
+
+fragment tint_symbol_1 tint_symbol() {
+  return {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+}
+

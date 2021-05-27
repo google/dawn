@@ -1,0 +1,282 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 200
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol_1
+               OpExecutionMode %main OriginUpperLeft
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %vector_scalar_f32 "vector_scalar_f32"
+               OpName %v "v"
+               OpName %s "s"
+               OpName %r "r"
+               OpName %vector_scalar_i32 "vector_scalar_i32"
+               OpName %v_0 "v"
+               OpName %s_0 "s"
+               OpName %r_0 "r"
+               OpName %vector_scalar_u32 "vector_scalar_u32"
+               OpName %v_1 "v"
+               OpName %s_1 "s"
+               OpName %r_1 "r"
+               OpName %scalar_vector_f32 "scalar_vector_f32"
+               OpName %v_2 "v"
+               OpName %s_2 "s"
+               OpName %r_2 "r"
+               OpName %scalar_vector_i32 "scalar_vector_i32"
+               OpName %v_3 "v"
+               OpName %s_3 "s"
+               OpName %r_3 "r"
+               OpName %scalar_vector_u32 "scalar_vector_u32"
+               OpName %v_4 "v"
+               OpName %s_4 "s"
+               OpName %r_4 "r"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol "tint_symbol"
+               OpName %main "main"
+               OpDecorate %tint_symbol_1 Location 0
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+%tint_symbol_1 = OpVariable %_ptr_Output_v4float Output %5
+       %void = OpTypeVoid
+          %6 = OpTypeFunction %void
+    %v3float = OpTypeVector %float 3
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+         %13 = OpConstantNull %v3float
+%_ptr_Function_float = OpTypePointer Function %float
+         %16 = OpConstantNull %float
+        %int = OpTypeInt 32 1
+      %v3int = OpTypeVector %int 3
+%_ptr_Function_v3int = OpTypePointer Function %v3int
+         %42 = OpConstantNull %v3int
+%_ptr_Function_int = OpTypePointer Function %int
+         %45 = OpConstantNull %int
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Function_v3uint = OpTypePointer Function %v3uint
+         %78 = OpConstantNull %v3uint
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %81 = OpConstantNull %uint
+        %191 = OpTypeFunction %void %v4float
+    %float_0 = OpConstant %float 0
+        %199 = OpConstantComposite %v4float %float_0 %float_0 %float_0 %float_0
+%vector_scalar_f32 = OpFunction %void None %6
+          %9 = OpLabel
+          %v = OpVariable %_ptr_Function_v3float Function %13
+          %s = OpVariable %_ptr_Function_float Function %16
+          %r = OpVariable %_ptr_Function_v3float Function %13
+         %21 = OpVariable %_ptr_Function_v3float Function %13
+         %26 = OpVariable %_ptr_Function_v3float Function %13
+         %34 = OpVariable %_ptr_Function_v3float Function %13
+         %18 = OpLoad %v3float %v
+         %19 = OpLoad %float %s
+         %22 = OpCompositeConstruct %v3float %19 %19 %19
+         %20 = OpFAdd %v3float %18 %22
+               OpStore %r %20
+         %23 = OpLoad %v3float %v
+         %24 = OpLoad %float %s
+         %27 = OpCompositeConstruct %v3float %24 %24 %24
+         %25 = OpFSub %v3float %23 %27
+               OpStore %r %25
+         %28 = OpLoad %v3float %v
+         %29 = OpLoad %float %s
+         %30 = OpVectorTimesScalar %v3float %28 %29
+               OpStore %r %30
+         %31 = OpLoad %v3float %v
+         %32 = OpLoad %float %s
+         %35 = OpCompositeConstruct %v3float %32 %32 %32
+         %33 = OpFDiv %v3float %31 %35
+               OpStore %r %33
+               OpReturn
+               OpFunctionEnd
+%vector_scalar_i32 = OpFunction %void None %6
+         %37 = OpLabel
+        %v_0 = OpVariable %_ptr_Function_v3int Function %42
+        %s_0 = OpVariable %_ptr_Function_int Function %45
+        %r_0 = OpVariable %_ptr_Function_v3int Function %42
+         %50 = OpVariable %_ptr_Function_v3int Function %42
+         %55 = OpVariable %_ptr_Function_v3int Function %42
+         %60 = OpVariable %_ptr_Function_v3int Function %42
+         %65 = OpVariable %_ptr_Function_v3int Function %42
+         %70 = OpVariable %_ptr_Function_v3int Function %42
+         %47 = OpLoad %v3int %v_0
+         %48 = OpLoad %int %s_0
+         %51 = OpCompositeConstruct %v3int %48 %48 %48
+         %49 = OpIAdd %v3int %47 %51
+               OpStore %r_0 %49
+         %52 = OpLoad %v3int %v_0
+         %53 = OpLoad %int %s_0
+         %56 = OpCompositeConstruct %v3int %53 %53 %53
+         %54 = OpISub %v3int %52 %56
+               OpStore %r_0 %54
+         %57 = OpLoad %v3int %v_0
+         %58 = OpLoad %int %s_0
+         %61 = OpCompositeConstruct %v3int %58 %58 %58
+         %59 = OpIMul %v3int %57 %61
+               OpStore %r_0 %59
+         %62 = OpLoad %v3int %v_0
+         %63 = OpLoad %int %s_0
+         %66 = OpCompositeConstruct %v3int %63 %63 %63
+         %64 = OpSDiv %v3int %62 %66
+               OpStore %r_0 %64
+         %67 = OpLoad %v3int %v_0
+         %68 = OpLoad %int %s_0
+         %71 = OpCompositeConstruct %v3int %68 %68 %68
+         %69 = OpSMod %v3int %67 %71
+               OpStore %r_0 %69
+               OpReturn
+               OpFunctionEnd
+%vector_scalar_u32 = OpFunction %void None %6
+         %73 = OpLabel
+        %v_1 = OpVariable %_ptr_Function_v3uint Function %78
+        %s_1 = OpVariable %_ptr_Function_uint Function %81
+        %r_1 = OpVariable %_ptr_Function_v3uint Function %78
+         %86 = OpVariable %_ptr_Function_v3uint Function %78
+         %91 = OpVariable %_ptr_Function_v3uint Function %78
+         %96 = OpVariable %_ptr_Function_v3uint Function %78
+        %101 = OpVariable %_ptr_Function_v3uint Function %78
+        %106 = OpVariable %_ptr_Function_v3uint Function %78
+         %83 = OpLoad %v3uint %v_1
+         %84 = OpLoad %uint %s_1
+         %87 = OpCompositeConstruct %v3uint %84 %84 %84
+         %85 = OpIAdd %v3uint %83 %87
+               OpStore %r_1 %85
+         %88 = OpLoad %v3uint %v_1
+         %89 = OpLoad %uint %s_1
+         %92 = OpCompositeConstruct %v3uint %89 %89 %89
+         %90 = OpISub %v3uint %88 %92
+               OpStore %r_1 %90
+         %93 = OpLoad %v3uint %v_1
+         %94 = OpLoad %uint %s_1
+         %97 = OpCompositeConstruct %v3uint %94 %94 %94
+         %95 = OpIMul %v3uint %93 %97
+               OpStore %r_1 %95
+         %98 = OpLoad %v3uint %v_1
+         %99 = OpLoad %uint %s_1
+        %102 = OpCompositeConstruct %v3uint %99 %99 %99
+        %100 = OpUDiv %v3uint %98 %102
+               OpStore %r_1 %100
+        %103 = OpLoad %v3uint %v_1
+        %104 = OpLoad %uint %s_1
+        %107 = OpCompositeConstruct %v3uint %104 %104 %104
+        %105 = OpUMod %v3uint %103 %107
+               OpStore %r_1 %105
+               OpReturn
+               OpFunctionEnd
+%scalar_vector_f32 = OpFunction %void None %6
+        %109 = OpLabel
+        %v_2 = OpVariable %_ptr_Function_v3float Function %13
+        %s_2 = OpVariable %_ptr_Function_float Function %16
+        %r_2 = OpVariable %_ptr_Function_v3float Function %13
+        %116 = OpVariable %_ptr_Function_v3float Function %13
+        %121 = OpVariable %_ptr_Function_v3float Function %13
+        %129 = OpVariable %_ptr_Function_v3float Function %13
+        %113 = OpLoad %float %s_2
+        %114 = OpLoad %v3float %v_2
+        %117 = OpCompositeConstruct %v3float %113 %113 %113
+        %115 = OpFAdd %v3float %117 %114
+               OpStore %r_2 %115
+        %118 = OpLoad %float %s_2
+        %119 = OpLoad %v3float %v_2
+        %122 = OpCompositeConstruct %v3float %118 %118 %118
+        %120 = OpFSub %v3float %122 %119
+               OpStore %r_2 %120
+        %123 = OpLoad %float %s_2
+        %124 = OpLoad %v3float %v_2
+        %125 = OpVectorTimesScalar %v3float %124 %123
+               OpStore %r_2 %125
+        %126 = OpLoad %float %s_2
+        %127 = OpLoad %v3float %v_2
+        %130 = OpCompositeConstruct %v3float %126 %126 %126
+        %128 = OpFDiv %v3float %130 %127
+               OpStore %r_2 %128
+               OpReturn
+               OpFunctionEnd
+%scalar_vector_i32 = OpFunction %void None %6
+        %132 = OpLabel
+        %v_3 = OpVariable %_ptr_Function_v3int Function %42
+        %s_3 = OpVariable %_ptr_Function_int Function %45
+        %r_3 = OpVariable %_ptr_Function_v3int Function %42
+        %139 = OpVariable %_ptr_Function_v3int Function %42
+        %144 = OpVariable %_ptr_Function_v3int Function %42
+        %149 = OpVariable %_ptr_Function_v3int Function %42
+        %154 = OpVariable %_ptr_Function_v3int Function %42
+        %159 = OpVariable %_ptr_Function_v3int Function %42
+        %136 = OpLoad %int %s_3
+        %137 = OpLoad %v3int %v_3
+        %140 = OpCompositeConstruct %v3int %136 %136 %136
+        %138 = OpIAdd %v3int %140 %137
+               OpStore %r_3 %138
+        %141 = OpLoad %int %s_3
+        %142 = OpLoad %v3int %v_3
+        %145 = OpCompositeConstruct %v3int %141 %141 %141
+        %143 = OpISub %v3int %145 %142
+               OpStore %r_3 %143
+        %146 = OpLoad %int %s_3
+        %147 = OpLoad %v3int %v_3
+        %150 = OpCompositeConstruct %v3int %146 %146 %146
+        %148 = OpIMul %v3int %150 %147
+               OpStore %r_3 %148
+        %151 = OpLoad %int %s_3
+        %152 = OpLoad %v3int %v_3
+        %155 = OpCompositeConstruct %v3int %151 %151 %151
+        %153 = OpSDiv %v3int %155 %152
+               OpStore %r_3 %153
+        %156 = OpLoad %int %s_3
+        %157 = OpLoad %v3int %v_3
+        %160 = OpCompositeConstruct %v3int %156 %156 %156
+        %158 = OpSMod %v3int %160 %157
+               OpStore %r_3 %158
+               OpReturn
+               OpFunctionEnd
+%scalar_vector_u32 = OpFunction %void None %6
+        %162 = OpLabel
+        %v_4 = OpVariable %_ptr_Function_v3uint Function %78
+        %s_4 = OpVariable %_ptr_Function_uint Function %81
+        %r_4 = OpVariable %_ptr_Function_v3uint Function %78
+        %169 = OpVariable %_ptr_Function_v3uint Function %78
+        %174 = OpVariable %_ptr_Function_v3uint Function %78
+        %179 = OpVariable %_ptr_Function_v3uint Function %78
+        %184 = OpVariable %_ptr_Function_v3uint Function %78
+        %189 = OpVariable %_ptr_Function_v3uint Function %78
+        %166 = OpLoad %uint %s_4
+        %167 = OpLoad %v3uint %v_4
+        %170 = OpCompositeConstruct %v3uint %166 %166 %166
+        %168 = OpIAdd %v3uint %170 %167
+               OpStore %r_4 %168
+        %171 = OpLoad %uint %s_4
+        %172 = OpLoad %v3uint %v_4
+        %175 = OpCompositeConstruct %v3uint %171 %171 %171
+        %173 = OpISub %v3uint %175 %172
+               OpStore %r_4 %173
+        %176 = OpLoad %uint %s_4
+        %177 = OpLoad %v3uint %v_4
+        %180 = OpCompositeConstruct %v3uint %176 %176 %176
+        %178 = OpIMul %v3uint %180 %177
+               OpStore %r_4 %178
+        %181 = OpLoad %uint %s_4
+        %182 = OpLoad %v3uint %v_4
+        %185 = OpCompositeConstruct %v3uint %181 %181 %181
+        %183 = OpUDiv %v3uint %185 %182
+               OpStore %r_4 %183
+        %186 = OpLoad %uint %s_4
+        %187 = OpLoad %v3uint %v_4
+        %190 = OpCompositeConstruct %v3uint %186 %186 %186
+        %188 = OpUMod %v3uint %190 %187
+               OpStore %r_4 %188
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_2 = OpFunction %void None %191
+%tint_symbol = OpFunctionParameter %v4float
+        %194 = OpLabel
+               OpStore %tint_symbol_1 %tint_symbol
+               OpReturn
+               OpFunctionEnd
+       %main = OpFunction %void None %6
+        %196 = OpLabel
+        %197 = OpFunctionCall %void %tint_symbol_2 %199
+               OpReturn
+               OpFunctionEnd

@@ -1298,16 +1298,52 @@ static constexpr Params all_valid_cases[] = {
     Params{Op::kDivide, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
     Params{Op::kModulo, ast_vec3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
 
-    // Binary arithmetic expressions with mixed scalar, vector, and matrix
-    // operands
-    Params{Op::kMultiply, ast_vec3<f32>, ast_f32, sem_vec3<sem_f32>},
-    Params{Op::kMultiply, ast_f32, ast_vec3<f32>, sem_vec3<sem_f32>},
+    // Binary arithmetic expressions with mixed scalar and vector operands
+    Params{Op::kAdd, ast_vec3<i32>, ast_i32, sem_vec3<sem_i32>},
+    Params{Op::kSubtract, ast_vec3<i32>, ast_i32, sem_vec3<sem_i32>},
+    Params{Op::kMultiply, ast_vec3<i32>, ast_i32, sem_vec3<sem_i32>},
+    Params{Op::kDivide, ast_vec3<i32>, ast_i32, sem_vec3<sem_i32>},
+    Params{Op::kModulo, ast_vec3<i32>, ast_i32, sem_vec3<sem_i32>},
 
+    Params{Op::kAdd, ast_i32, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kSubtract, ast_i32, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kMultiply, ast_i32, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kDivide, ast_i32, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kModulo, ast_i32, ast_vec3<i32>, sem_vec3<sem_i32>},
+
+    Params{Op::kAdd, ast_vec3<u32>, ast_u32, sem_vec3<sem_u32>},
+    Params{Op::kSubtract, ast_vec3<u32>, ast_u32, sem_vec3<sem_u32>},
+    Params{Op::kMultiply, ast_vec3<u32>, ast_u32, sem_vec3<sem_u32>},
+    Params{Op::kDivide, ast_vec3<u32>, ast_u32, sem_vec3<sem_u32>},
+    Params{Op::kModulo, ast_vec3<u32>, ast_u32, sem_vec3<sem_u32>},
+
+    Params{Op::kAdd, ast_u32, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kSubtract, ast_u32, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kMultiply, ast_u32, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kDivide, ast_u32, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kModulo, ast_u32, ast_vec3<u32>, sem_vec3<sem_u32>},
+
+    Params{Op::kAdd, ast_vec3<f32>, ast_f32, sem_vec3<sem_f32>},
+    Params{Op::kSubtract, ast_vec3<f32>, ast_f32, sem_vec3<sem_f32>},
+    Params{Op::kMultiply, ast_vec3<f32>, ast_f32, sem_vec3<sem_f32>},
+    Params{Op::kDivide, ast_vec3<f32>, ast_f32, sem_vec3<sem_f32>},
+    // NOTE: no kModulo for ast_vec3<f32>, ast_f32
+    // Params{Op::kModulo, ast_vec3<f32>, ast_f32, sem_vec3<sem_f32>},
+
+    Params{Op::kAdd, ast_f32, ast_vec3<f32>, sem_vec3<sem_f32>},
+    Params{Op::kSubtract, ast_f32, ast_vec3<f32>, sem_vec3<sem_f32>},
+    Params{Op::kMultiply, ast_f32, ast_vec3<f32>, sem_vec3<sem_f32>},
+    Params{Op::kDivide, ast_f32, ast_vec3<f32>, sem_vec3<sem_f32>},
+    // NOTE: no kModulo for ast_f32, ast_vec3<f32>
+    // Params{Op::kModulo, ast_f32, ast_vec3<f32>, sem_vec3<sem_f32>},
+
+    // Matrix arithmetic
     Params{Op::kMultiply, ast_mat3x3<f32>, ast_f32, sem_mat3x3<sem_f32>},
     Params{Op::kMultiply, ast_f32, ast_mat3x3<f32>, sem_mat3x3<sem_f32>},
 
     Params{Op::kMultiply, ast_vec3<f32>, ast_mat3x3<f32>, sem_vec3<sem_f32>},
     Params{Op::kMultiply, ast_mat3x3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
+    // TODO(amaiorano): add mat+mat and mat-mat
     Params{Op::kMultiply, ast_mat3x3<f32>, ast_mat3x3<f32>,
            sem_mat3x3<sem_f32>},
 

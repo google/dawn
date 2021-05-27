@@ -2097,23 +2097,35 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
       SetType(expr, lhs_type);
       return true;
     }
+
+    // Binary arithmetic expressions with mixed scalar and vector operands
+    if (lhs_vec_elem_type && (lhs_vec_elem_type == rhs_type)) {
+      if (expr->IsModulo()) {
+        if (rhs_type->is_integer_scalar()) {
+          SetType(expr, lhs_type);
+          return true;
+        }
+      } else if (rhs_type->is_numeric_scalar()) {
+        SetType(expr, lhs_type);
+        return true;
+      }
+    }
+    if (rhs_vec_elem_type && (rhs_vec_elem_type == lhs_type)) {
+      if (expr->IsModulo()) {
+        if (lhs_type->is_integer_scalar()) {
+          SetType(expr, rhs_type);
+          return true;
+        }
+      } else if (lhs_type->is_numeric_scalar()) {
+        SetType(expr, rhs_type);
+        return true;
+      }
+    }
   }
 
-  // Binary arithmetic expressions with mixed scalar, vector, and matrix
-  // operands
+  // Matrix arithmetic
+  // TODO(amaiorano): matrix-matrix addition and subtraction
   if (expr->IsMultiply()) {
-    // Multiplication of a vector and a scalar
-    if (lhs_type->Is<F32>() && rhs_vec_elem_type &&
-        rhs_vec_elem_type->Is<F32>()) {
-      SetType(expr, rhs_type);
-      return true;
-    }
-    if (lhs_vec_elem_type && lhs_vec_elem_type->Is<F32>() &&
-        rhs_type->Is<F32>()) {
-      SetType(expr, lhs_type);
-      return true;
-    }
-
     auto* lhs_mat = lhs_type->As<Matrix>();
     auto* lhs_mat_elem_type = lhs_mat ? lhs_mat->type() : nullptr;
     auto* rhs_mat = rhs_type->As<Matrix>();

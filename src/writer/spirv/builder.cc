@@ -1719,6 +1719,31 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(
   return result_id;
 }
 
+uint32_t Builder::GenerateSplat(uint32_t scalar_id, const sem::Type* vec_type) {
+  // Create a new vector to splat scalar into
+  auto splat_vector = result_op();
+  auto* splat_vector_type =
+      builder_.create<sem::Pointer>(vec_type, ast::StorageClass::kFunction);
+  push_function_var(
+      {Operand::Int(GenerateTypeIfNeeded(splat_vector_type)), splat_vector,
+       Operand::Int(ConvertStorageClass(ast::StorageClass::kFunction)),
+       Operand::Int(GenerateConstantNullIfNeeded(vec_type))});
+
+  // Splat scalar into vector
+  auto splat_result = result_op();
+  OperandList ops;
+  ops.push_back(Operand::Int(GenerateTypeIfNeeded(vec_type)));
+  ops.push_back(splat_result);
+  for (size_t i = 0; i < vec_type->As<sem::Vector>()->size(); ++i) {
+    ops.push_back(Operand::Int(scalar_id));
+  }
+  if (!push_function_inst(spv::Op::OpCompositeConstruct, ops)) {
+    return 0;
+  }
+
+  return splat_result.to_i();
+}
+
 uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   // There is special logic for short circuiting operators.
   if (expr->IsLogicalAnd() || expr->IsLogicalOr()) {
@@ -1749,6 +1774,33 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   // should have been rejected by validation.
   auto* lhs_type = TypeOf(expr->lhs())->UnwrapRef();
   auto* rhs_type = TypeOf(expr->rhs())->UnwrapRef();
+
+  // For vector-scalar arithmetic operations, splat scalar into a vector. We
+  // skip this for multiply as we can use OpVectorTimesScalar.
+  const bool is_float_scalar_vector_multiply =
+      expr->IsMultiply() &&
+      ((lhs_type->is_float_scalar() && rhs_type->is_float_vector()) ||
+       (lhs_type->is_float_vector() && rhs_type->is_float_scalar()));
+
+  if (expr->IsArithmetic() && !is_float_scalar_vector_multiply) {
+    if (lhs_type->Is<sem::Vector>() && rhs_type->is_numeric_scalar()) {
+      uint32_t splat_vector_id = GenerateSplat(rhs_id, lhs_type);
+      if (splat_vector_id == 0) {
+        return 0;
+      }
+      rhs_id = splat_vector_id;
+      rhs_type = lhs_type;
+
+    } else if (lhs_type->is_numeric_scalar() && rhs_type->Is<sem::Vector>()) {
+      uint32_t splat_vector_id = GenerateSplat(lhs_id, rhs_type);
+      if (splat_vector_id == 0) {
+        return 0;
+      }
+      lhs_id = splat_vector_id;
+      lhs_type = rhs_type;
+    }
+  }
+
   bool lhs_is_float_or_vec = lhs_type->is_float_scalar_or_vector();
   bool lhs_is_unsigned = lhs_type->is_unsigned_scalar_or_vector();
 
