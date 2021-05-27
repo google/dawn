@@ -1,3 +1,5 @@
+SKIP: crbug.com/tint/816
+
 #include <metal_stdlib>
 
 using namespace metal;

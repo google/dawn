@@ -1,3 +1,5 @@
+SKIP: crbug.com/tint/833 loop emission is broken
+
 #include <metal_stdlib>
 
 using namespace metal;
