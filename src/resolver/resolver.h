@@ -236,7 +236,6 @@ class Resolver {
                                      uint32_t el_align,
                                      const Source& source);
   bool ValidateAssignment(const ast::AssignmentStatement* a);
-  bool ValidateBinary(ast::BinaryExpression* expr);
   bool ValidateEntryPoint(const ast::Function* func, const FunctionInfo* info);
   bool ValidateFunction(const ast::Function* func, const FunctionInfo* info);
   bool ValidateGlobalVariable(const VariableInfo* var);
