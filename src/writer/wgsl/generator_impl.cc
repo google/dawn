@@ -253,7 +253,7 @@ bool GeneratorImpl::EmitLiteral(ast::Literal* lit) {
   if (auto* bl = lit->As<ast::BoolLiteral>()) {
     out_ << (bl->IsTrue() ? "true" : "false");
   } else if (auto* fl = lit->As<ast::FloatLiteral>()) {
-    out_ << FloatToString(fl->value());
+    out_ << FloatToBitPreservingString(fl->value());
   } else if (auto* sl = lit->As<ast::SintLiteral>()) {
     out_ << sl->value();
   } else if (auto* ul = lit->As<ast::UintLiteral>()) {

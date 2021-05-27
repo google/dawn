@@ -28,6 +28,11 @@ namespace writer {
 /// @return the float f formatted to a string
 std::string FloatToString(float f);
 
+/// Converts the float `f` to a string, using hex float notation for infinities,
+/// NaNs, or subnormal numbers. Otherwise behaves as FloatToString.
+/// @return the float f formatted to a string
+std::string FloatToBitPreservingString(float f);
+
 }  // namespace writer
 }  // namespace tint
 
