@@ -18,7 +18,7 @@ import (
 	"strings"
 	"testing"
 
-	match "."
+	"dawn.googlesource.com/tint/tools/src/match"
 )
 
 func TestMatch(t *testing.T) {
