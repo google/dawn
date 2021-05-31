@@ -250,6 +250,61 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{ast::BinaryOp::kMultiply, "OpFMul"},
                     BinaryData{ast::BinaryOp::kSubtract, "OpFSub"}));
 
+using BinaryCompareBoolTest = TestParamHelper<BinaryData>;
+TEST_P(BinaryCompareBoolTest, Scalar) {
+  auto param = GetParam();
+
+  auto* lhs = Expr(true);
+  auto* rhs = Expr(false);
+
+  auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
+
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  EXPECT_EQ(b.GenerateBinaryExpression(expr), 4u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
+%2 = OpConstantTrue %1
+%3 = OpConstantFalse %1
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%4 = " + param.name + " %1 %2 %3\n");
+}
+
+TEST_P(BinaryCompareBoolTest, Vector) {
+  auto param = GetParam();
+
+  auto* lhs = vec3<bool>(false, true, false);
+  auto* rhs = vec3<bool>(true, false, true);
+
+  auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
+
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+
+  b.push_function(Function{});
+
+  EXPECT_EQ(b.GenerateBinaryExpression(expr), 7u) << b.error();
+  EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
+%1 = OpTypeVector %2 3
+%3 = OpConstantFalse %2
+%4 = OpConstantTrue %2
+%5 = OpConstantComposite %1 %3 %4 %3
+%6 = OpConstantComposite %1 %4 %3 %4
+)");
+  EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+            "%7 = " + param.name + " %1 %5 %6\n");
+}
+INSTANTIATE_TEST_SUITE_P(
+    BuilderTest,
+    BinaryCompareBoolTest,
+    testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpLogicalEqual"},
+                    BinaryData{ast::BinaryOp::kNotEqual, "OpLogicalNotEqual"}));
+
 using BinaryCompareUnsignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {
   auto param = GetParam();

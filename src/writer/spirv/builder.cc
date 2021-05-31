@@ -1885,6 +1885,8 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   }
 
   bool lhs_is_float_or_vec = lhs_type->is_float_scalar_or_vector();
+  bool lhs_is_bool_or_vec = lhs_type->is_bool_scalar_or_vector();
+  bool lhs_is_integer_or_vec = lhs_type->is_integer_scalar_or_vector();
   bool lhs_is_unsigned = lhs_type->is_unsigned_scalar_or_vector();
 
   spv::Op op = spv::Op::OpNop;
@@ -1901,7 +1903,16 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
       op = spv::Op::OpSDiv;
     }
   } else if (expr->IsEqual()) {
-    op = lhs_is_float_or_vec ? spv::Op::OpFOrdEqual : spv::Op::OpIEqual;
+    if (lhs_is_float_or_vec) {
+      op = spv::Op::OpFOrdEqual;
+    } else if (lhs_is_bool_or_vec) {
+      op = spv::Op::OpLogicalEqual;
+    } else if (lhs_is_integer_or_vec) {
+      op = spv::Op::OpIEqual;
+    } else {
+      error_ = "invalid equal expression";
+      return 0;
+    }
   } else if (expr->IsGreaterThan()) {
     if (lhs_is_float_or_vec) {
       op = spv::Op::OpFOrdGreaterThan;
@@ -1983,7 +1994,16 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
       return 0;
     }
   } else if (expr->IsNotEqual()) {
-    op = lhs_is_float_or_vec ? spv::Op::OpFOrdNotEqual : spv::Op::OpINotEqual;
+    if (lhs_is_float_or_vec) {
+      op = spv::Op::OpFOrdNotEqual;
+    } else if (lhs_is_bool_or_vec) {
+      op = spv::Op::OpLogicalNotEqual;
+    } else if (lhs_is_integer_or_vec) {
+      op = spv::Op::OpINotEqual;
+    } else {
+      error_ = "invalid not-equal expression";
+      return 0;
+    }
   } else if (expr->IsOr()) {
     op = spv::Op::OpBitwiseOr;
   } else if (expr->IsShiftLeft()) {
