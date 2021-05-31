@@ -30,20 +30,15 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
 
+	"dawn.googlesource.com/tint/tools/src/fileutils"
 	"dawn.googlesource.com/tint/tools/src/glob"
 )
 
 var (
-	// Directory to this .go file
-	toolRoot = getToolRoot()
-	// Root directory of the Tint project
-	projectRoot = getProjectRoot(toolRoot)
-
 	// Path to the build script to run after each attempting to remove each
 	// #include
 	buildScript = ""
@@ -104,7 +99,7 @@ func run() error {
 	}
 
 	fmt.Println("Scanning for files...")
-	paths, err := glob.Scan(projectRoot, cfg)
+	paths, err := glob.Scan(fileutils.ProjectRoot(), cfg)
 	if err != nil {
 		return err
 	}
@@ -235,7 +230,7 @@ func (f *file) format() error {
 
 // Runs git add on the file
 func (f *file) stage() error {
-	err := exec.Command("git", "-C", projectRoot, "add", f.path).Run()
+	err := exec.Command("git", "-C", fileutils.ProjectRoot(), "add", f.path).Run()
 	if err != nil {
 		return fmt.Errorf("Couldn't stage file '%v': %w", f.path, err)
 	}
@@ -250,7 +245,7 @@ func loadFiles(paths []string) ([]file, error) {
 	files := make([]file, len(paths))
 	errs := make([]error, len(paths))
 	for i, path := range paths {
-		i, path := i, filepath.Join(projectRoot, path)
+		i, path := i, filepath.Join(fileutils.ProjectRoot(), path)
 		go func() {
 			defer wg.Done()
 			body, err := ioutil.ReadFile(path)
@@ -270,26 +265,4 @@ func loadFiles(paths []string) ([]file, error) {
 		}
 	}
 	return files, nil
-}
-
-// Returns the path to the directory holding this .go file
-func getToolRoot() string {
-	_, filename, _, ok := runtime.Caller(0)
-	if !ok {
-		panic("No caller information")
-	}
-	mainPath, err := filepath.Abs(filename)
-	if err != nil {
-		panic(err)
-	}
-	return filepath.Dir(mainPath)
-}
-
-// Returns the path to the project root
-func getProjectRoot(toolRoot string) string {
-	root, err := filepath.Abs(filepath.Join(toolRoot, "../.."))
-	if err != nil {
-		panic(err)
-	}
-	return root
 }

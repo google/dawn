@@ -17,6 +17,8 @@ package fileutils
 
 import (
 	"os"
+	"path/filepath"
+	"runtime"
 )
 
 // IsExe returns true if the file at path is an executable
@@ -26,4 +28,28 @@ func IsExe(path string) bool {
 		return false
 	}
 	return s.Mode()&0100 != 0
+}
+
+// GoSourcePath returns the absolute path to the .go file that calls the
+// function
+func GoSourcePath() string {
+	_, filename, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("No caller information")
+	}
+	path, err := filepath.Abs(filename)
+	if err != nil {
+		panic(err)
+	}
+	return path
+}
+
+// ProjectRoot returns the path to the tint project root
+func ProjectRoot() string {
+	toolRoot := filepath.Dir(GoSourcePath())
+	root, err := filepath.Abs(filepath.Join(toolRoot, "../../.."))
+	if err != nil {
+		panic(err)
+	}
+	return root
 }
