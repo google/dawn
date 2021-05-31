@@ -306,8 +306,8 @@ class Builder {
   /// @param stmt the statement to generate
   /// @returns true on success
   bool GenerateIfStatement(ast::IfStatement* stmt);
-  /// Generates an import instruction for the "GLSL.std.450" extended instruction
-  /// set, if one doesn't exist yet, and returns the import ID.
+  /// Generates an import instruction for the "GLSL.std.450" extended
+  /// instruction set, if one doesn't exist yet, and returns the import ID.
   /// @returns the import ID, or 0 on error.
   uint32_t GetGLSLstd450Import();
   /// Generates a constructor expression
