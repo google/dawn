@@ -482,6 +482,17 @@ class Builder {
   /// @returns id of the new vector
   uint32_t GenerateSplat(uint32_t scalar_id, const sem::Type* vec_type);
 
+  /// Generates instructions to add or subtract two matrices
+  /// @param lhs_id id of multiplicand
+  /// @param rhs_id id of multiplier
+  /// @param type type of both matrices and of result
+  /// @param op one of `spv::Op::OpFAdd` or `spv::Op::OpFSub`
+  /// @returns id of the result matrix
+  uint32_t GenerateMatrixAddOrSub(uint32_t lhs_id,
+                                  uint32_t rhs_id,
+                                  const sem::Matrix* type,
+                                  spv::Op op);
+
   /// Converts AST image format to SPIR-V and pushes an appropriate capability.
   /// @param format AST image format type
   /// @returns SPIR-V image format type

@@ -177,6 +177,26 @@ ast::Type* ast_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
 }
 
 template <typename T>
+ast::Type* ast_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat2x3<T>();
+}
+
+template <create_ast_type_func_ptr create_type>
+ast::Type* ast_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat2x3(create_type(ty));
+}
+
+template <typename T>
+ast::Type* ast_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat3x2<T>();
+}
+
+template <create_ast_type_func_ptr create_type>
+ast::Type* ast_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
+  return ty.mat3x2(create_type(ty));
+}
+
+template <typename T>
 ast::Type* ast_mat3x3(const ProgramBuilder::TypesBuilder& ty) {
   return ty.mat3x3<T>();
 }
@@ -247,6 +267,18 @@ template <create_sem_type_func_ptr create_type>
 sem::Type* sem_mat2x2(const ProgramBuilder::TypesBuilder& ty) {
   auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 2u);
   return ty.builder->create<sem::Matrix>(column_type, 2u);
+}
+
+template <create_sem_type_func_ptr create_type>
+sem::Type* sem_mat2x3(const ProgramBuilder::TypesBuilder& ty) {
+  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 3u);
+  return ty.builder->create<sem::Matrix>(column_type, 2u);
+}
+
+template <create_sem_type_func_ptr create_type>
+sem::Type* sem_mat3x2(const ProgramBuilder::TypesBuilder& ty) {
+  auto* column_type = ty.builder->create<sem::Vector>(create_type(ty), 2u);
+  return ty.builder->create<sem::Matrix>(column_type, 3u);
 }
 
 template <create_sem_type_func_ptr create_type>

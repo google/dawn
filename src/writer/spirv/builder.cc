@@ -1748,6 +1748,67 @@ uint32_t Builder::GenerateSplat(uint32_t scalar_id, const sem::Type* vec_type) {
   return splat_result.to_i();
 }
 
+uint32_t Builder::GenerateMatrixAddOrSub(uint32_t lhs_id,
+                                         uint32_t rhs_id,
+                                         const sem::Matrix* type,
+                                         spv::Op op) {
+  // Example addition of two matrices:
+  // %31 = OpLoad %mat3v4float %m34
+  // %32 = OpLoad %mat3v4float %m34
+  // %33 = OpCompositeExtract %v4float %31 0
+  // %34 = OpCompositeExtract %v4float %32 0
+  // %35 = OpFAdd %v4float %33 %34
+  // %36 = OpCompositeExtract %v4float %31 1
+  // %37 = OpCompositeExtract %v4float %32 1
+  // %38 = OpFAdd %v4float %36 %37
+  // %39 = OpCompositeExtract %v4float %31 2
+  // %40 = OpCompositeExtract %v4float %32 2
+  // %41 = OpFAdd %v4float %39 %40
+  // %42 = OpCompositeConstruct %mat3v4float %35 %38 %41
+
+  auto* column_type = builder_.create<sem::Vector>(type->type(), type->rows());
+  auto column_type_id = GenerateTypeIfNeeded(column_type);
+
+  OperandList ops;
+
+  for (uint32_t i = 0; i < type->columns(); ++i) {
+    // Extract column `i` from lhs mat
+    auto lhs_column_id = result_op();
+    if (!push_function_inst(spv::Op::OpCompositeExtract,
+                            {Operand::Int(column_type_id), lhs_column_id,
+                             Operand::Int(lhs_id), Operand::Int(i)})) {
+      return 0;
+    }
+
+    // Extract column `i` from rhs mat
+    auto rhs_column_id = result_op();
+    if (!push_function_inst(spv::Op::OpCompositeExtract,
+                            {Operand::Int(column_type_id), rhs_column_id,
+                             Operand::Int(rhs_id), Operand::Int(i)})) {
+      return 0;
+    }
+
+    // Add or subtract the two columns
+    auto result = result_op();
+    if (!push_function_inst(op, {Operand::Int(column_type_id), result,
+                                 lhs_column_id, rhs_column_id})) {
+      return 0;
+    }
+
+    ops.push_back(result);
+  }
+
+  // Create the result matrix from the added/subtracted column vectors
+  auto result_mat_id = result_op();
+  ops.insert(ops.begin(), result_mat_id);
+  ops.insert(ops.begin(), Operand::Int(GenerateTypeIfNeeded(type)));
+  if (!push_function_inst(spv::Op::OpCompositeConstruct, ops)) {
+    return 0;
+  }
+
+  return result_mat_id.to_i();
+}
+
 uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   // There is special logic for short circuiting operators.
   if (expr->IsLogicalAnd() || expr->IsLogicalOr()) {
@@ -1778,6 +1839,24 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
   // should have been rejected by validation.
   auto* lhs_type = TypeOf(expr->lhs())->UnwrapRef();
   auto* rhs_type = TypeOf(expr->rhs())->UnwrapRef();
+
+  // Handle matrix-matrix addition and subtraction
+  if ((expr->IsAdd() || expr->IsSubtract()) && lhs_type->is_float_matrix() &&
+      rhs_type->is_float_matrix()) {
+    auto* lhs_mat = lhs_type->As<sem::Matrix>();
+    auto* rhs_mat = rhs_type->As<sem::Matrix>();
+
+    // This should already have been validated by resolver
+    if (lhs_mat->rows() != rhs_mat->rows() ||
+        lhs_mat->columns() != rhs_mat->columns()) {
+      error_ = "matrices must have same dimensionality for add or subtract";
+      return 0;
+    }
+
+    return GenerateMatrixAddOrSub(
+        lhs_id, rhs_id, lhs_mat,
+        expr->IsAdd() ? spv::Op::OpFAdd : spv::Op::OpFSub);
+  }
 
   // For vector-scalar arithmetic operations, splat scalar into a vector. We
   // skip this for multiply as we can use OpVectorTimesScalar.

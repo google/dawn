@@ -64,6 +64,19 @@ fn scalar_vector_u32() {
     r = s % v;
 }
 
+fn matrix_matrix_f32() {
+    var m34 : mat3x4<f32>;
+    var m43 : mat4x3<f32>;
+    var m33 : mat3x3<f32>;
+    var m44 : mat4x4<f32>;
+
+    m34 = m34 + m34;
+    m34 = m34 - m34;
+
+    m33 = m43 * m34;
+    m44 = m34 * m43;
+}
+
 [[stage(fragment)]]
 fn main() -> [[location(0)]] vec4<f32> {
     return vec4<f32>(0.0,0.0,0.0,0.0);

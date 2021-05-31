@@ -2124,13 +2124,20 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
   }
 
   // Matrix arithmetic
-  // TODO(amaiorano): matrix-matrix addition and subtraction
+  auto* lhs_mat = lhs_type->As<Matrix>();
+  auto* lhs_mat_elem_type = lhs_mat ? lhs_mat->type() : nullptr;
+  auto* rhs_mat = rhs_type->As<Matrix>();
+  auto* rhs_mat_elem_type = rhs_mat ? rhs_mat->type() : nullptr;
+  // Addition and subtraction of float matrices
+  if ((expr->IsAdd() || expr->IsSubtract()) && lhs_mat_elem_type &&
+      lhs_mat_elem_type->Is<F32>() && rhs_mat_elem_type &&
+      rhs_mat_elem_type->Is<F32>() &&
+      (lhs_mat->columns() == rhs_mat->columns()) &&
+      (lhs_mat->rows() == rhs_mat->rows())) {
+    SetType(expr, rhs_type);
+    return true;
+  }
   if (expr->IsMultiply()) {
-    auto* lhs_mat = lhs_type->As<Matrix>();
-    auto* lhs_mat_elem_type = lhs_mat ? lhs_mat->type() : nullptr;
-    auto* rhs_mat = rhs_type->As<Matrix>();
-    auto* rhs_mat_elem_type = rhs_mat ? rhs_mat->type() : nullptr;
-
     // Multiplication of a matrix and a scalar
     if (lhs_type->Is<F32>() && rhs_mat_elem_type &&
         rhs_mat_elem_type->Is<F32>()) {

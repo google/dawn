@@ -863,8 +863,10 @@ OpBranch %9
 )");
 }
 
+namespace BinaryArithVectorScalar {
+
 enum class Type { f32, i32, u32 };
-ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type) {
+static ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type) {
   switch (type) {
     case Type::f32:
       return builder->vec3<ProgramBuilder::f32>(1.f, 1.f, 1.f);
@@ -875,7 +877,7 @@ ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type) {
   }
   return nullptr;
 }
-ast::Expression* MakeScalarExpr(ProgramBuilder* builder, Type type) {
+static ast::Expression* MakeScalarExpr(ProgramBuilder* builder, Type type) {
   switch (type) {
     case Type::f32:
       return builder->Expr(1.f);
@@ -886,7 +888,7 @@ ast::Expression* MakeScalarExpr(ProgramBuilder* builder, Type type) {
   }
   return nullptr;
 }
-std::string OpTypeDecl(Type type) {
+static std::string OpTypeDecl(Type type) {
   switch (type) {
     case Type::f32:
       return "OpTypeFloat 32";
@@ -904,8 +906,8 @@ struct Param {
   std::string name;
 };
 
-using MixedBinaryArithTest = TestParamHelper<Param>;
-TEST_P(MixedBinaryArithTest, VectorScalar) {
+using BinaryArithVectorScalarTest = TestParamHelper<Param>;
+TEST_P(BinaryArithVectorScalarTest, VectorScalar) {
   auto& param = GetParam();
 
   ast::Expression* lhs = MakeVectorExpr(this, param.type);
@@ -943,7 +945,7 @@ OpFunctionEnd
 
   Validate(b);
 }
-TEST_P(MixedBinaryArithTest, ScalarVector) {
+TEST_P(BinaryArithVectorScalarTest, ScalarVector) {
   auto& param = GetParam();
 
   ast::Expression* lhs = MakeScalarExpr(this, param.type);
@@ -983,7 +985,7 @@ OpFunctionEnd
 }
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
-    MixedBinaryArithTest,
+    BinaryArithVectorScalarTest,
     testing::Values(Param{Type::f32, ast::BinaryOp::kAdd, "OpFAdd"},
                     Param{Type::f32, ast::BinaryOp::kDivide, "OpFDiv"},
                     // NOTE: Modulo not allowed on mixed float scalar-vector
@@ -1005,8 +1007,8 @@ INSTANTIATE_TEST_SUITE_P(
                     Param{Type::u32, ast::BinaryOp::kMultiply, "OpIMul"},
                     Param{Type::u32, ast::BinaryOp::kSubtract, "OpISub"}));
 
-using MixedBinaryArithMultiplyTest = TestParamHelper<Param>;
-TEST_P(MixedBinaryArithMultiplyTest, VectorScalar) {
+using BinaryArithVectorScalarMultiplyTest = TestParamHelper<Param>;
+TEST_P(BinaryArithVectorScalarMultiplyTest, VectorScalar) {
   auto& param = GetParam();
 
   ast::Expression* lhs = MakeVectorExpr(this, param.type);
@@ -1040,7 +1042,7 @@ OpFunctionEnd
 
   Validate(b);
 }
-TEST_P(MixedBinaryArithMultiplyTest, ScalarVector) {
+TEST_P(BinaryArithVectorScalarMultiplyTest, ScalarVector) {
   auto& param = GetParam();
 
   ast::Expression* lhs = MakeScalarExpr(this, param.type);
@@ -1075,9 +1077,112 @@ OpFunctionEnd
   Validate(b);
 }
 INSTANTIATE_TEST_SUITE_P(BuilderTest,
-                         MixedBinaryArithMultiplyTest,
+                         BinaryArithVectorScalarMultiplyTest,
                          testing::Values(Param{
                              Type::f32, ast::BinaryOp::kMultiply, "OpFMul"}));
+
+}  // namespace BinaryArithVectorScalar
+
+namespace BinaryArithMatrixMatrix {
+
+struct Param {
+  ast::BinaryOp op;
+  std::string name;
+};
+
+using BinaryArithMatrixMatrix = TestParamHelper<Param>;
+TEST_P(BinaryArithMatrixMatrix, AddOrSubtract) {
+  auto& param = GetParam();
+
+  ast::Expression* lhs = mat3x4<f32>();
+  ast::Expression* rhs = mat3x4<f32>();
+
+  auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
+
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 4
+%5 = OpTypeMatrix %6 3
+%8 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%10 = OpCompositeExtract %6 %8 0
+%11 = OpCompositeExtract %6 %8 0
+%12 = )" + param.name + R"( %6 %10 %11
+%13 = OpCompositeExtract %6 %8 1
+%14 = OpCompositeExtract %6 %8 1
+%15 = )" + param.name + R"( %6 %13 %14
+%16 = OpCompositeExtract %6 %8 2
+%17 = OpCompositeExtract %6 %8 2
+%18 = )" + param.name + R"( %6 %16 %17
+%19 = OpCompositeConstruct %5 %12 %15 %18
+OpReturn
+OpFunctionEnd
+)");
+
+  Validate(b);
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    BuilderTest,
+    BinaryArithMatrixMatrix,
+    testing::Values(Param{ast::BinaryOp::kAdd, "OpFAdd"},
+                    Param{ast::BinaryOp::kSubtract, "OpFSub"}));
+
+using BinaryArithMatrixMatrixMultiply = TestParamHelper<Param>;
+TEST_P(BinaryArithMatrixMatrixMultiply, Multiply) {
+  auto& param = GetParam();
+
+  ast::Expression* lhs = mat3x4<f32>();
+  ast::Expression* rhs = mat4x3<f32>();
+
+  auto* expr = create<ast::BinaryExpression>(param.op, lhs, rhs);
+
+  WrapInFunction(expr);
+
+  spirv::Builder& b = Build();
+  ASSERT_TRUE(b.Build()) << b.error();
+
+  EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint GLCompute %3 "test_function"
+OpExecutionMode %3 LocalSize 1 1 1
+OpName %3 "test_function"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%7 = OpTypeFloat 32
+%6 = OpTypeVector %7 4
+%5 = OpTypeMatrix %6 3
+%8 = OpConstantNull %5
+%10 = OpTypeVector %7 3
+%9 = OpTypeMatrix %10 4
+%11 = OpConstantNull %9
+%13 = OpTypeMatrix %6 4
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%12 = OpMatrixTimesMatrix %13 %8 %11
+OpReturn
+OpFunctionEnd
+)");
+
+  Validate(b);
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    BuilderTest,
+    BinaryArithMatrixMatrixMultiply,
+    testing::Values(Param{ast::BinaryOp::kMultiply, "OpFMul"}));
+
+}  // namespace BinaryArithMatrixMatrix
 
 }  // namespace
 }  // namespace spirv

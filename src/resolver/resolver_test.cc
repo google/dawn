@@ -1238,9 +1238,12 @@ static constexpr ast::BinaryOp all_ops[] = {
 };
 
 static constexpr create_ast_type_func_ptr all_create_type_funcs[] = {
-    ast_bool,        ast_u32,         ast_i32,        ast_f32,
-    ast_vec3<bool>,  ast_vec3<i32>,   ast_vec3<u32>,  ast_vec3<f32>,
-    ast_mat3x3<i32>, ast_mat3x3<u32>, ast_mat3x3<f32>};
+    ast_bool,        ast_u32,         ast_i32,         ast_f32,
+    ast_vec3<bool>,  ast_vec3<i32>,   ast_vec3<u32>,   ast_vec3<f32>,
+    ast_mat3x3<i32>, ast_mat3x3<u32>, ast_mat3x3<f32>,  //
+    ast_mat2x3<i32>, ast_mat2x3<u32>, ast_mat2x3<f32>,  //
+    ast_mat3x2<i32>, ast_mat3x2<u32>, ast_mat3x2<f32>   //
+};
 
 // A list of all valid test cases for 'lhs op rhs', except that for vecN and
 // matNxN, we only test N=3.
@@ -1338,13 +1341,42 @@ static constexpr Params all_valid_cases[] = {
     // Params{Op::kModulo, ast_f32, ast_vec3<f32>, sem_vec3<sem_f32>},
 
     // Matrix arithmetic
+    Params{Op::kMultiply, ast_mat2x3<f32>, ast_f32, sem_mat2x3<sem_f32>},
+    Params{Op::kMultiply, ast_mat3x2<f32>, ast_f32, sem_mat3x2<sem_f32>},
     Params{Op::kMultiply, ast_mat3x3<f32>, ast_f32, sem_mat3x3<sem_f32>},
+
+    Params{Op::kMultiply, ast_f32, ast_mat2x3<f32>, sem_mat2x3<sem_f32>},
+    Params{Op::kMultiply, ast_f32, ast_mat3x2<f32>, sem_mat3x2<sem_f32>},
     Params{Op::kMultiply, ast_f32, ast_mat3x3<f32>, sem_mat3x3<sem_f32>},
 
+    Params{Op::kMultiply, ast_vec3<f32>, ast_mat2x3<f32>, sem_vec2<sem_f32>},
+    Params{Op::kMultiply, ast_vec2<f32>, ast_mat3x2<f32>, sem_vec3<sem_f32>},
     Params{Op::kMultiply, ast_vec3<f32>, ast_mat3x3<f32>, sem_vec3<sem_f32>},
+
+    Params{Op::kMultiply, ast_mat3x2<f32>, ast_vec3<f32>, sem_vec2<sem_f32>},
+    Params{Op::kMultiply, ast_mat2x3<f32>, ast_vec2<f32>, sem_vec3<sem_f32>},
     Params{Op::kMultiply, ast_mat3x3<f32>, ast_vec3<f32>, sem_vec3<sem_f32>},
-    // TODO(amaiorano): add mat+mat and mat-mat
+
+    Params{Op::kMultiply, ast_mat2x3<f32>, ast_mat3x2<f32>,
+           sem_mat3x3<sem_f32>},
+    Params{Op::kMultiply, ast_mat3x2<f32>, ast_mat2x3<f32>,
+           sem_mat2x2<sem_f32>},
+    Params{Op::kMultiply, ast_mat3x2<f32>, ast_mat3x3<f32>,
+           sem_mat3x2<sem_f32>},
     Params{Op::kMultiply, ast_mat3x3<f32>, ast_mat3x3<f32>,
+           sem_mat3x3<sem_f32>},
+    Params{Op::kMultiply, ast_mat3x3<f32>, ast_mat2x3<f32>,
+           sem_mat2x3<sem_f32>},
+
+    Params{Op::kAdd, ast_mat2x3<f32>, ast_mat2x3<f32>, sem_mat2x3<sem_f32>},
+    Params{Op::kAdd, ast_mat3x2<f32>, ast_mat3x2<f32>, sem_mat3x2<sem_f32>},
+    Params{Op::kAdd, ast_mat3x3<f32>, ast_mat3x3<f32>, sem_mat3x3<sem_f32>},
+
+    Params{Op::kSubtract, ast_mat2x3<f32>, ast_mat2x3<f32>,
+           sem_mat2x3<sem_f32>},
+    Params{Op::kSubtract, ast_mat3x2<f32>, ast_mat3x2<f32>,
+           sem_mat3x2<sem_f32>},
+    Params{Op::kSubtract, ast_mat3x3<f32>, ast_mat3x3<f32>,
            sem_mat3x3<sem_f32>},
 
     // Comparison expressions
