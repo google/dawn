@@ -78,7 +78,7 @@ TEST_F(AstAliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
 
 TEST_F(AstAliasTest, UnwrapAll_AccessControlPointer) {
   auto* u32 = create<U32>();
-  auto* a = create<AccessControl>(AccessControl::kReadOnly, u32);
+  auto* a = create<AccessControl>(AccessControl::kRead, u32);
   auto* pa = create<Pointer>(a, StorageClass::kUniform);
   EXPECT_EQ(pa->type(), a);
   EXPECT_EQ(pa->UnwrapAll(), u32);
@@ -87,7 +87,7 @@ TEST_F(AstAliasTest, UnwrapAll_AccessControlPointer) {
 TEST_F(AstAliasTest, UnwrapAll_PointerAccessControl) {
   auto* u32 = create<U32>();
   auto* p = create<Pointer>(u32, StorageClass::kUniform);
-  auto* a = create<AccessControl>(AccessControl::kReadOnly, p);
+  auto* a = create<AccessControl>(AccessControl::kRead, p);
 
   EXPECT_EQ(a->type(), p);
   EXPECT_EQ(a->UnwrapAll(), u32);

@@ -214,8 +214,7 @@ struct State {
             ctx.dst->create<ast::StructBlockDecoration>(),
         });
     for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
-      auto* access =
-          ctx.dst->ty.access(ast::AccessControl::kReadOnly, struct_type);
+      auto* access = ctx.dst->ty.access(ast::AccessControl::kRead, struct_type);
       // The decorated variable with struct type
       ctx.dst->Global(
           GetVertexBufferName(i), access, ast::StorageClass::kStorage, nullptr,

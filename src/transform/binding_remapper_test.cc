@@ -128,9 +128,9 @@ fn f() {
   data.Add<BindingRemapper::Remappings>(
       BindingRemapper::BindingPoints{},
       BindingRemapper::AccessControls{
-          {{2, 1}, ast::AccessControl::kWriteOnly},  // Modify access control
+          {{2, 1}, ast::AccessControl::kWrite},  // Modify access control
           // Keep [[group(3), binding(2)]] as is
-          {{4, 3}, ast::AccessControl::kReadOnly},  // Add access control
+          {{4, 3}, ast::AccessControl::kRead},  // Add access control
       });
   auto got = Run<BindingRemapper>(src, data);
 
@@ -188,9 +188,9 @@ fn f() {
   data.Add<BindingRemapper::Remappings>(
       BindingRemapper::BindingPoints{},
       BindingRemapper::AccessControls{
-          {{2, 1}, ast::AccessControl::kWriteOnly},  // Modify access control
+          {{2, 1}, ast::AccessControl::kWrite},  // Modify access control
           // Keep [[group(3), binding(2)]] as is
-          {{4, 3}, ast::AccessControl::kReadOnly},  // Add access control
+          {{4, 3}, ast::AccessControl::kRead},  // Add access control
       });
   auto got = Run<BindingRemapper>(src, data);
 
@@ -233,8 +233,8 @@ fn f() {
           {{3, 2}, {6, 7}},
       },
       BindingRemapper::AccessControls{
-          {{2, 1}, ast::AccessControl::kWriteOnly},
-          {{3, 2}, ast::AccessControl::kWriteOnly},
+          {{2, 1}, ast::AccessControl::kWrite},
+          {{3, 2}, ast::AccessControl::kWrite},
       });
   auto got = Run<BindingRemapper>(src, data);
 

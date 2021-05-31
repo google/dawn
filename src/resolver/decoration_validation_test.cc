@@ -69,8 +69,8 @@ static ast::DecorationList createDecorations(const Source& source,
                                              DecorationKind kind) {
   switch (kind) {
     case DecorationKind::kAccess:
-      return {builder.create<ast::AccessDecoration>(
-          source, ast::AccessControl::kReadOnly)};
+      return {builder.create<ast::AccessDecoration>(source,
+                                                    ast::AccessControl::kRead)};
     case DecorationKind::kAlign:
       return {builder.create<ast::StructMemberAlignDecoration>(source, 4u)};
     case DecorationKind::kBinding:
@@ -523,7 +523,7 @@ TEST_F(ResourceDecorationTest, UniformBufferMissingBinding) {
 TEST_F(ResourceDecorationTest, StorageBufferMissingBinding) {
   auto* s = Structure("S", {Member("x", ty.i32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* ac = ty.access(ast::AccessControl::kRead, s);
   Global(Source{{12, 34}}, "G", ac, ast::StorageClass::kStorage);
 
   EXPECT_FALSE(r()->Resolve());

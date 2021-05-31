@@ -43,7 +43,7 @@ TEST_F(AstAccessControlTest, Create) {
 
 TEST_F(AstAccessControlTest, AccessRead) {
   auto* i32 = create<I32>();
-  auto* ac = create<AccessControl>(AccessControl::kReadOnly, i32);
+  auto* ac = create<AccessControl>(AccessControl::kRead, i32);
   EXPECT_TRUE(ac->IsReadOnly());
   EXPECT_FALSE(ac->IsWriteOnly());
   EXPECT_FALSE(ac->IsReadWrite());
@@ -53,7 +53,7 @@ TEST_F(AstAccessControlTest, AccessRead) {
 
 TEST_F(AstAccessControlTest, AccessWrite) {
   auto* i32 = create<I32>();
-  auto* ac = create<AccessControl>(AccessControl::kWriteOnly, i32);
+  auto* ac = create<AccessControl>(AccessControl::kWrite, i32);
   EXPECT_FALSE(ac->IsReadOnly());
   EXPECT_TRUE(ac->IsWriteOnly());
   EXPECT_FALSE(ac->IsReadWrite());
@@ -73,13 +73,13 @@ TEST_F(AstAccessControlTest, AccessReadWrite) {
 
 TEST_F(AstAccessControlTest, FriendlyNameReadOnly) {
   auto* i32 = create<I32>();
-  auto* ac = create<AccessControl>(AccessControl::kReadOnly, i32);
+  auto* ac = create<AccessControl>(AccessControl::kRead, i32);
   EXPECT_EQ(ac->FriendlyName(Symbols()), "[[access(read)]] i32");
 }
 
 TEST_F(AstAccessControlTest, FriendlyNameWriteOnly) {
   auto* i32 = create<I32>();
-  auto* ac = create<AccessControl>(AccessControl::kWriteOnly, i32);
+  auto* ac = create<AccessControl>(AccessControl::kWrite, i32);
   EXPECT_EQ(ac->FriendlyName(Symbols()), "[[access(write)]] i32");
 }
 

@@ -1753,8 +1753,7 @@ bool GeneratorImpl::EmitEntryPointData(
 
     out << " " << builder_.Symbols().NameFor(decl->symbol())
         << RegisterAndSpace(
-               var->AccessControl() == ast::AccessControl::kReadOnly ? 't'
-                                                                     : 'u',
+               var->AccessControl() == ast::AccessControl::kRead ? 't' : 'u',
                binding_point)
         << ";" << std::endl;
     emitted_storagebuffer = true;
@@ -1917,7 +1916,7 @@ bool GeneratorImpl::EmitEntryPointData(
       if (unwrapped_type->Is<sem::Texture>()) {
         register_space = "t";
         if (auto* storage_tex = unwrapped_type->As<sem::StorageTexture>()) {
-          if (storage_tex->access_control() != ast::AccessControl::kReadOnly) {
+          if (storage_tex->access_control() != ast::AccessControl::kRead) {
             register_space = "u";
           }
         }
@@ -2330,7 +2329,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                              ast::AccessControl::Access access_control,
                              const std::string& name) {
   if (storage_class == ast::StorageClass::kStorage) {
-    if (access_control != ast::AccessControl::kReadOnly) {
+    if (access_control != ast::AccessControl::kRead) {
       out << "RW";
     }
     out << "ByteAddressBuffer";
@@ -2396,7 +2395,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     auto* sampled = tex->As<sem::SampledTexture>();
 
     if (storage) {
-      if (access_control != ast::AccessControl::kReadOnly) {
+      if (access_control != ast::AccessControl::kRead) {
         out << "RW";
       }
     }

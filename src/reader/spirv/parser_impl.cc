@@ -1361,8 +1361,8 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
     }
 
     // Apply the access(read) or access(read_write) modifier.
-    auto access = read_only ? ast::AccessControl::kReadOnly
-                            : ast::AccessControl::kReadWrite;
+    auto access =
+        read_only ? ast::AccessControl::kRead : ast::AccessControl::kReadWrite;
     storage_type = ty_.AccessControl(storage_type, access);
   }
 
@@ -2124,8 +2124,8 @@ const Pointer* ParserImpl::GetTypeForHandleVar(
       }
     } else {
       const auto access = usage.IsStorageReadTexture()
-                              ? ast::AccessControl::kReadOnly
-                              : ast::AccessControl::kWriteOnly;
+                              ? ast::AccessControl::kRead
+                              : ast::AccessControl::kWrite;
       const auto format = enum_converter_.ToImageFormat(image_type->format());
       if (format == ast::ImageFormat::kNone) {
         return nullptr;

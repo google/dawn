@@ -909,9 +909,9 @@ Expect<ast::AccessControl::Access> ParserImpl::expect_access_type() {
     return Failure::kErrored;
 
   if (ident.value == kReadAccessControl)
-    return {ast::AccessControl::kReadOnly, ident.source};
+    return {ast::AccessControl::kRead, ident.source};
   if (ident.value == kWriteAccessControl)
-    return {ast::AccessControl::kWriteOnly, ident.source};
+    return {ast::AccessControl::kWrite, ident.source};
   if (ident.value == kReadWriteAccessControl)
     return {ast::AccessControl::kReadWrite, ident.source};
 

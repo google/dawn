@@ -351,7 +351,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* ac = ty.access(ast::AccessControl::kRead, s);
 
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(1)});
@@ -663,7 +663,7 @@ TEST_F(MslGeneratorImplTest,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* ac = ty.access(ast::AccessControl::kRead, s);
 
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {create<ast::BindingDecoration>(0), create<ast::GroupDecoration>(1)});

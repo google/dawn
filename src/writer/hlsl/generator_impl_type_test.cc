@@ -553,9 +553,8 @@ TEST_P(HlslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
   auto* t = ty.storage_texture(params.dim, params.imgfmt);
-  auto* ac = ty.access(params.ro ? ast::AccessControl::kReadOnly
-                                 : ast::AccessControl::kWriteOnly,
-                       t);
+  auto* ac = ty.access(
+      params.ro ? ast::AccessControl::kRead : ast::AccessControl::kWrite, t);
 
   Global("tex", ac, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{

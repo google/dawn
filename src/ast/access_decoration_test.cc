@@ -23,12 +23,12 @@ namespace {
 using AccessDecorationTest = TestHelper;
 
 TEST_F(AccessDecorationTest, Creation) {
-  auto* d = create<AccessDecoration>(ast::AccessControl::kWriteOnly);
-  EXPECT_EQ(ast::AccessControl::kWriteOnly, d->value());
+  auto* d = create<AccessDecoration>(ast::AccessControl::kWrite);
+  EXPECT_EQ(ast::AccessControl::kWrite, d->value());
 }
 
 TEST_F(AccessDecorationTest, ToStr) {
-  auto* d = create<AccessDecoration>(ast::AccessControl::kReadOnly);
+  auto* d = create<AccessDecoration>(ast::AccessControl::kRead);
   EXPECT_EQ(str(d), R"(AccessDecoration{read_only}
 )");
 }

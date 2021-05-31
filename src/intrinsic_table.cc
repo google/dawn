@@ -1126,22 +1126,21 @@ Impl::Impl() {
   auto* tex_storage_3d_FT =
       storage_texture(Dim::k3d, OpenNumber::A, OpenNumber::F, OpenType::T);
   auto* tex_storage_ro_1d_FT = storage_texture(
-      Dim::k1d, ast::AccessControl::kReadOnly, OpenNumber::F, OpenType::T);
+      Dim::k1d, ast::AccessControl::kRead, OpenNumber::F, OpenType::T);
   auto* tex_storage_ro_2d_FT = storage_texture(
-      Dim::k2d, ast::AccessControl::kReadOnly, OpenNumber::F, OpenType::T);
+      Dim::k2d, ast::AccessControl::kRead, OpenNumber::F, OpenType::T);
   auto* tex_storage_ro_2d_array_FT = storage_texture(
-      Dim::k2dArray, ast::AccessControl::kReadOnly, OpenNumber::F, OpenType::T);
+      Dim::k2dArray, ast::AccessControl::kRead, OpenNumber::F, OpenType::T);
   auto* tex_storage_ro_3d_FT = storage_texture(
-      Dim::k3d, ast::AccessControl::kReadOnly, OpenNumber::F, OpenType::T);
+      Dim::k3d, ast::AccessControl::kRead, OpenNumber::F, OpenType::T);
   auto* tex_storage_wo_1d_FT = storage_texture(
-      Dim::k1d, ast::AccessControl::kWriteOnly, OpenNumber::F, OpenType::T);
+      Dim::k1d, ast::AccessControl::kWrite, OpenNumber::F, OpenType::T);
   auto* tex_storage_wo_2d_FT = storage_texture(
-      Dim::k2d, ast::AccessControl::kWriteOnly, OpenNumber::F, OpenType::T);
-  auto* tex_storage_wo_2d_array_FT =
-      storage_texture(Dim::k2dArray, ast::AccessControl::kWriteOnly,
-                      OpenNumber::F, OpenType::T);
+      Dim::k2d, ast::AccessControl::kWrite, OpenNumber::F, OpenType::T);
+  auto* tex_storage_wo_2d_array_FT = storage_texture(
+      Dim::k2dArray, ast::AccessControl::kWrite, OpenNumber::F, OpenType::T);
   auto* tex_storage_wo_3d_FT = storage_texture(
-      Dim::k3d, ast::AccessControl::kWriteOnly, OpenNumber::F, OpenType::T);
+      Dim::k3d, ast::AccessControl::kWrite, OpenNumber::F, OpenType::T);
 
   auto* sampler = this->sampler(ast::SamplerKind::kSampler);
   auto* sampler_comparison =

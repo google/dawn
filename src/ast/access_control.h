@@ -29,9 +29,9 @@ class AccessControl : public Castable<AccessControl, Type> {
   /// The access control settings
   enum Access {
     /// Read only
-    kReadOnly,
+    kRead,
     /// Write only
-    kWriteOnly,
+    kWrite,
     /// Read write
     kReadWrite
   };
@@ -50,9 +50,9 @@ class AccessControl : public Castable<AccessControl, Type> {
   ~AccessControl() override;
 
   /// @returns true if the access control is read only
-  bool IsReadOnly() const { return access_ == Access::kReadOnly; }
+  bool IsReadOnly() const { return access_ == Access::kRead; }
   /// @returns true if the access control is write only
-  bool IsWriteOnly() const { return access_ == Access::kWriteOnly; }
+  bool IsWriteOnly() const { return access_ == Access::kWrite; }
   /// @returns true if the access control is read/write
   bool IsReadWrite() const { return access_ == Access::kReadWrite; }
 

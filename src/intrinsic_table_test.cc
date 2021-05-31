@@ -342,9 +342,9 @@ TEST_F(IntrinsicTableTest, MatchROStorageTexture) {
   auto* vec4_f32 = create<sem::Vector>(f32, 4);
   auto* subtype =
       sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR16Float, Types());
-  auto* tex = create<sem::StorageTexture>(
-      ast::TextureDimension::k2d, ast::ImageFormat::kR16Float,
-      ast::AccessControl::kReadOnly, subtype);
+  auto* tex = create<sem::StorageTexture>(ast::TextureDimension::k2d,
+                                          ast::ImageFormat::kR16Float,
+                                          ast::AccessControl::kRead, subtype);
 
   auto result = table->Lookup(*this, IntrinsicType::kTextureLoad,
                               {tex, vec2_i32}, Source{});
@@ -364,9 +364,9 @@ TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
   auto* vec4_f32 = create<sem::Vector>(f32, 4);
   auto* subtype =
       sem::StorageTexture::SubtypeFor(ast::ImageFormat::kR16Float, Types());
-  auto* tex = create<sem::StorageTexture>(
-      ast::TextureDimension::k2d, ast::ImageFormat::kR16Float,
-      ast::AccessControl::kWriteOnly, subtype);
+  auto* tex = create<sem::StorageTexture>(ast::TextureDimension::k2d,
+                                          ast::ImageFormat::kR16Float,
+                                          ast::AccessControl::kWrite, subtype);
 
   auto result = table->Lookup(*this, IntrinsicType::kTextureStore,
                               {tex, vec2_i32, vec4_f32}, Source{});

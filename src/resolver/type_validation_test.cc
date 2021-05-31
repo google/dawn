@@ -519,7 +519,7 @@ TEST_P(StorageTextureDimensionTest, All) {
   auto& params = GetParam();
 
   auto* st = ty.storage_texture(params.dim, ast::ImageFormat::kR32Uint);
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, st);
+  auto* ac = ty.access(ast::AccessControl::kRead, st);
 
   Global(Source{{12, 34}}, "a", ac, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
@@ -595,7 +595,7 @@ TEST_P(StorageTextureFormatTest, All) {
   // var d : [[access(read)]] texture_storage_3d<*>;
 
   auto* st_a = ty.storage_texture(ast::TextureDimension::k1d, params.format);
-  auto* ac_a = ty.access(ast::AccessControl::kReadOnly, st_a);
+  auto* ac_a = ty.access(ast::AccessControl::kRead, st_a);
   Global(Source{{12, 34}}, "a", ac_a, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -603,7 +603,7 @@ TEST_P(StorageTextureFormatTest, All) {
          });
 
   auto* st_b = ty.storage_texture(ast::TextureDimension::k2d, params.format);
-  auto* ac_b = ty.access(ast::AccessControl::kReadOnly, st_b);
+  auto* ac_b = ty.access(ast::AccessControl::kRead, st_b);
   Global("b", ac_b, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -612,7 +612,7 @@ TEST_P(StorageTextureFormatTest, All) {
 
   auto* st_c =
       ty.storage_texture(ast::TextureDimension::k2dArray, params.format);
-  auto* ac_c = ty.access(ast::AccessControl::kReadOnly, st_c);
+  auto* ac_c = ty.access(ast::AccessControl::kRead, st_c);
   Global("c", ac_c, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -620,7 +620,7 @@ TEST_P(StorageTextureFormatTest, All) {
          });
 
   auto* st_d = ty.storage_texture(ast::TextureDimension::k3d, params.format);
-  auto* ac_d = ty.access(ast::AccessControl::kReadOnly, st_d);
+  auto* ac_d = ty.access(ast::AccessControl::kRead, st_d);
   Global("d", ac_d, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
              create<ast::BindingDecoration>(0),
@@ -687,7 +687,7 @@ TEST_F(StorageTextureAccessControlTest, ReadOnlyAccessControl_Pass) {
 
   auto* st = ty.storage_texture(ast::TextureDimension::k1d,
                                 ast::ImageFormat::kR32Uint);
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, st);
+  auto* ac = ty.access(ast::AccessControl::kRead, st);
 
   Global("a", ac, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{
@@ -704,7 +704,7 @@ TEST_F(StorageTextureAccessControlTest, WriteOnlyAccessControl_Pass) {
 
   auto* st = ty.storage_texture(ast::TextureDimension::k1d,
                                 ast::ImageFormat::kR32Uint);
-  auto* ac = ty.access(ast::AccessControl::kWriteOnly, st);
+  auto* ac = ty.access(ast::AccessControl::kWrite, st);
 
   Global("a", ac, ast::StorageClass::kNone, nullptr,
          ast::DecorationList{

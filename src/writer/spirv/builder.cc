@@ -788,12 +788,12 @@ bool Builder::GenerateGlobalVariable(ast::Variable* var) {
     if (type->Is<sem::StorageTexture>() || type->Is<sem::Struct>()) {
       // type is a sem::Struct or a sem::StorageTexture
       switch (sem->AccessControl()) {
-        case ast::AccessControl::kWriteOnly:
+        case ast::AccessControl::kWrite:
           push_annot(
               spv::Op::OpDecorate,
               {Operand::Int(var_id), Operand::Int(SpvDecorationNonReadable)});
           break;
-        case ast::AccessControl::kReadOnly:
+        case ast::AccessControl::kRead:
           push_annot(
               spv::Op::OpDecorate,
               {Operand::Int(var_id), Operand::Int(SpvDecorationNonWritable)});
@@ -3175,12 +3175,12 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
         type_name_to_id_[builder_
                              .create<sem::StorageTexture>(
                                  st->dim(), st->image_format(),
-                                 ast::AccessControl::kReadOnly, st->type())
+                                 ast::AccessControl::kRead, st->type())
                              ->type_name()] = id;
         type_name_to_id_[builder_
                              .create<sem::StorageTexture>(
                                  st->dim(), st->image_format(),
-                                 ast::AccessControl::kWriteOnly, st->type())
+                                 ast::AccessControl::kWrite, st->type())
                              ->type_name()] = id;
         type_name_to_id_[builder_
                              .create<sem::StorageTexture>(

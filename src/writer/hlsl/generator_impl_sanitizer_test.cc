@@ -33,7 +33,7 @@ TEST_F(HlslSanitizerTest, ArrayLength) {
                           {
                               create<ast::StructBlockDecoration>(),
                           });
-  auto* ac_ty = ty.access(ast::AccessControl::kReadOnly, sb_ty);
+  auto* ac_ty = ty.access(ast::AccessControl::kRead, sb_ty);
 
   Global("sb", ac_ty, ast::StorageClass::kStorage, nullptr,
          {

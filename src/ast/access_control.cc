@@ -37,10 +37,10 @@ AccessControl::~AccessControl() = default;
 std::string AccessControl::type_name() const {
   std::string name = "__access_control_";
   switch (access_) {
-    case ast::AccessControl::kReadOnly:
+    case ast::AccessControl::kRead:
       name += "read_only";
       break;
-    case ast::AccessControl::kWriteOnly:
+    case ast::AccessControl::kWrite:
       name += "write_only";
       break;
     case ast::AccessControl::kReadWrite:
@@ -54,10 +54,10 @@ std::string AccessControl::FriendlyName(const SymbolTable& symbols) const {
   std::ostringstream out;
   out << "[[access(";
   switch (access_) {
-    case ast::AccessControl::kReadOnly:
+    case ast::AccessControl::kRead:
       out << "read";
       break;
-    case ast::AccessControl::kWriteOnly:
+    case ast::AccessControl::kWrite:
       out << "write";
       break;
     case ast::AccessControl::kReadWrite:
@@ -77,7 +77,7 @@ AccessControl* AccessControl::Clone(CloneContext* ctx) const {
 
 std::ostream& operator<<(std::ostream& out, AccessControl::Access access) {
   switch (access) {
-    case ast::AccessControl::kReadOnly: {
+    case ast::AccessControl::kRead: {
       out << "read_only";
       break;
     }
@@ -85,7 +85,7 @@ std::ostream& operator<<(std::ostream& out, AccessControl::Access access) {
       out << "read_write";
       break;
     }
-    case ast::AccessControl::kWriteOnly: {
+    case ast::AccessControl::kWrite: {
       out << "write_only";
       break;
     }

@@ -472,7 +472,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* ac = ty.access(ast::AccessControl::kRead, s);
 
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {
@@ -518,7 +518,7 @@ TEST_F(HlslGeneratorImplTest_Function,
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  auto* ac = ty.access(ast::AccessControl::kWriteOnly, s);
+  auto* ac = ty.access(ast::AccessControl::kWrite, s);
 
   Global("coord", ac, ast::StorageClass::kStorage, nullptr,
          {

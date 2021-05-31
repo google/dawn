@@ -229,7 +229,7 @@ ast::Type* ast_alias(const ProgramBuilder::TypesBuilder& ty) {
 template <create_ast_type_func_ptr create_type>
 ast::Type* ast_access(const ProgramBuilder::TypesBuilder& ty) {
   auto* type = create_type(ty);
-  return ty.access(ast::AccessControl::kReadOnly, type);
+  return ty.access(ast::AccessControl::kRead, type);
 }
 
 inline sem::Type* sem_bool(const ProgramBuilder::TypesBuilder& ty) {

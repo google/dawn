@@ -256,7 +256,7 @@ class InspectorHelper : public ProgramBuilder {
       std::vector<ast::Type*> member_types) {
     MakeStructType(name, member_types, true);
     return [this, name] {
-      return ty.access(ast::AccessControl::kReadOnly, ty.type_name(name));
+      return ty.access(ast::AccessControl::kRead, ty.type_name(name));
     };
   }
 
@@ -575,8 +575,8 @@ class InspectorHelper : public ProgramBuilder {
   ast::Type* MakeStorageTextureTypes(ast::TextureDimension dim,
                                      ast::ImageFormat format,
                                      bool read_only) {
-    auto ac = read_only ? ast::AccessControl::kReadOnly
-                        : ast::AccessControl::kWriteOnly;
+    auto ac =
+        read_only ? ast::AccessControl::kRead : ast::AccessControl::kWrite;
     auto* tex = ty.storage_texture(dim, format);
 
     return ty.access(ac, tex);

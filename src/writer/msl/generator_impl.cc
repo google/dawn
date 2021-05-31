@@ -1288,7 +1288,7 @@ bool GeneratorImpl::EmitFunctionInternal(ast::Function* func,
     }
     first = false;
 
-    if (var->AccessControl() == ast::AccessControl::kReadOnly) {
+    if (var->AccessControl() == ast::AccessControl::kRead) {
       out_ << "const ";
     }
 
@@ -1506,7 +1506,7 @@ bool GeneratorImpl::EmitEntryPointFunction(ast::Function* func) {
     auto* binding = data.second.binding;
     // auto* set = data.second.set;
 
-    if (var->AccessControl() == ast::AccessControl::kReadOnly) {
+    if (var->AccessControl() == ast::AccessControl::kRead) {
       out_ << "const ";
     }
 
@@ -1988,9 +1988,9 @@ bool GeneratorImpl::EmitType(const sem::Type* type, const std::string& name) {
       }
 
       std::string access_str;
-      if (storage->access_control() == ast::AccessControl::kReadOnly) {
+      if (storage->access_control() == ast::AccessControl::kRead) {
         out_ << ", access::read";
-      } else if (storage->access_control() == ast::AccessControl::kWriteOnly) {
+      } else if (storage->access_control() == ast::AccessControl::kWrite) {
         out_ << ", access::write";
       } else {
         diagnostics_.add_error("Invalid access control for storage texture");

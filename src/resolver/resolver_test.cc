@@ -784,7 +784,7 @@ TEST_F(ResolverTest, Function_Parameters) {
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
   auto* s = Structure("S", {Member("m", ty.u32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* a = ty.access(ast::AccessControl::kRead, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
@@ -823,7 +823,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
   auto* s = Structure("S", {Member("m", ty.u32())},
                       {create<ast::StructBlockDecoration>()});
-  auto* a = ty.access(ast::AccessControl::kReadOnly, s);
+  auto* a = ty.access(ast::AccessControl::kRead, s);
 
   auto* in_var = Global("in_var", ty.f32(), ast::StorageClass::kInput);
   auto* out_var = Global("out_var", ty.f32(), ast::StorageClass::kOutput);
@@ -1752,7 +1752,7 @@ TEST_F(ResolverTest, StorageClass_SetForSampler) {
 
 TEST_F(ResolverTest, StorageClass_SetForTexture) {
   auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-  auto* ac = ty.access(ast::AccessControl::kReadOnly, t);
+  auto* ac = ty.access(ast::AccessControl::kRead, t);
   auto* var = Global("var", ac, ast::StorageClass::kNone, nullptr,
                      {
                          create<ast::BindingDecoration>(0),

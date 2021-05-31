@@ -232,7 +232,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
                 },
                 {create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+  Global("G", ty.access(ast::AccessControl::kRead, s),
          ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -342,7 +342,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+  Global("G", ty.access(ast::AccessControl::kRead, s),
          ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -437,7 +437,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                 },
                 ast::DecorationList{create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+  Global("G", ty.access(ast::AccessControl::kRead, s),
          ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -544,7 +544,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
       },
       {create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+  Global("G", ty.access(ast::AccessControl::kRead, s),
          ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -610,7 +610,7 @@ TEST_F(MslGeneratorImplTest, DISABLED_EmitType_Struct_WithDecoration) {
                       },
                       {create<ast::StructBlockDecoration>()});
 
-  Global("G", ty.access(ast::AccessControl::kReadOnly, s),
+  Global("G", ty.access(ast::AccessControl::kRead, s),
          ast::StorageClass::kStorage, nullptr,
          {
              create<ast::BindingDecoration>(0),
@@ -765,9 +765,8 @@ TEST_P(MslStorageTexturesTest, Emit) {
   auto params = GetParam();
 
   auto* s = ty.storage_texture(params.dim, ast::ImageFormat::kR32Float);
-  auto* ac = ty.access(params.ro ? ast::AccessControl::kReadOnly
-                                 : ast::AccessControl::kWriteOnly,
-                       s);
+  auto* ac = ty.access(
+      params.ro ? ast::AccessControl::kRead : ast::AccessControl::kWrite, s);
   Global("test_var", ac, ast::StorageClass::kNone, nullptr,
          {
              create<ast::BindingDecoration>(0),
