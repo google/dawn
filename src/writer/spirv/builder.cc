@@ -1198,18 +1198,22 @@ uint32_t Builder::GenerateUnaryOpExpression(ast::UnaryOpExpression* expr) {
   return result_id;
 }
 
-void Builder::GenerateGLSLstd450Import() {
-  if (import_name_to_id_.find(kGLSLstd450) != import_name_to_id_.end()) {
-    return;
+uint32_t Builder::GetGLSLstd450Import() {
+  auto where = import_name_to_id_.find(kGLSLstd450);
+  if (where != import_name_to_id_.end()) {
+    return where->second;
   }
 
+  // It doesn't exist yet. Generate it.
   auto result = result_op();
   auto id = result.to_i();
 
   push_ext_import(spv::Op::OpExtInstImport,
                   {result, Operand::String(kGLSLstd450)});
 
+  // Remember it for later.
   import_name_to_id_[kGLSLstd450] = id;
+  return id;
 }
 
 uint32_t Builder::GenerateConstructorExpression(
@@ -2155,14 +2159,7 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
       op = spv::Op::OpSelect;
       break;
     default: {
-      GenerateGLSLstd450Import();
-
-      auto set_iter = import_name_to_id_.find(kGLSLstd450);
-      if (set_iter == import_name_to_id_.end()) {
-        error_ = std::string("unknown import ") + kGLSLstd450;
-        return 0;
-      }
-      auto set_id = set_iter->second;
+      auto set_id = GetGLSLstd450Import();
       auto inst_id = intrinsic_to_glsl_method(intrinsic);
       if (inst_id == 0) {
         error_ = "unknown method " + std::string(intrinsic->str());
