@@ -79,6 +79,12 @@ Pushing commits is done with `git push origin HEAD:refs/for/main`. Which means
 push to `origin` (i.e. Gerrit) the currently checkout out commit to the
 `refs/for/main` magic branch that creates or updates CLs.
 
+In the terminal you will see a URL where code review for this CL will happen.
+CLs start in the "Work In Progress" state. To start the code review proper,
+click on "Start Review", add reviewers and click "Send and start review". If
+you are unsure which reviewers to use, pick one of the reviewers in the
+[OWNERS file](../OWNERS) who will review or triage the CL.
+
 When code review asks for changes in the commits, you can amend them any way
 you want (small fixup commit and `git rebase -i` are crowd favorites) and run
 the same `git push origin HEAD:refs/for/main` command.
@@ -87,9 +93,9 @@ the same `git push origin HEAD:refs/for/main` command.
 
 We usually like to have commits associated with issues in [Dawn's issue tracker](https://bugs.chromium.org/p/dawn/issues/list)
 so that commits for the issue can all be found on the same page. This is done
-by adding a `Bug: dawn:<issue number>` tag in the commit message. It is also
-possible to reference Chromium or Tint issues with `Bug: tint:<issue number>` or
-`Bug: chromium:<issue number>`.
+by adding a `Bug: dawn:<issue number>` tag at the end of the commit message. It
+is also possible to reference Chromium or Tint issues with
+`Bug: tint:<issue number>` or `Bug: chromium:<issue number>`.
 
 Some small fixes (like typo fixes, or some one-off maintenance) don't need a
 tracking issue. When that's the case, it's good practice to call it out by
