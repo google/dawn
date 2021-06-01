@@ -176,10 +176,15 @@ namespace dawn_native {
               "GPUs which have a driver bug in the execution of CopyTextureRegion() when we copy "
               "with the formats whose texel block sizes are less than 4 bytes from a greater mip "
               "level to a smaller mip level on D3D12 backends.",
-              "https://crbug.com/1161355"}}
+              "https://crbug.com/1161355"}},
+            {Toggle::EmitHLSLDebugSymbols,
+             {"emit_hlsl_debug_symbols",
+              "Sets the D3DCOMPILE_SKIP_OPTIMIZATION and D3DCOMPILE_DEBUG compilation flags when "
+              "compiling HLSL code. Enables better shader debugging with external graphics "
+              "debugging tools.",
+              "https://crbug.com/dawn/776"}}
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
-
     }  // anonymous namespace
 
     void TogglesSet::Set(Toggle toggle, bool enabled) {

@@ -51,6 +51,7 @@ namespace dawn_native {
         UseTintGenerator,
         FlushBeforeClientWaitSync,
         UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
+        EmitHLSLDebugSymbols,
 
         EnumCount,
         InvalidEnum = EnumCount,

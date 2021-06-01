@@ -35,10 +35,11 @@ namespace dawn_native { namespace d3d12 {
     MaybeError ComputePipeline::Initialize(const ComputePipelineDescriptor* descriptor) {
         Device* device = ToBackend(GetDevice());
         uint32_t compileFlags = 0;
-#if defined(_DEBUG)
-        // Enable better shader debugging with the graphics debugging tools.
-        compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-#endif
+
+        if (device->IsToggleEnabled(Toggle::EmitHLSLDebugSymbols)) {
+            compileFlags |= D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+        }
+
         // SPRIV-cross does matrix multiplication expecting row major matrices
         compileFlags |= D3DCOMPILE_PACK_MATRIX_ROW_MAJOR;
 
