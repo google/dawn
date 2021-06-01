@@ -2234,6 +2234,84 @@ Return{}
   EXPECT_EQ(expect, got);
 }
 
+TEST_F(SpvParserFunctionVarTest,
+       EmitStatement_Phi_ValueFromBlockNotInBlockOrderIgnored) {
+  // From crbug.com/tint/804
+  const auto assembly = Preamble() + R"(
+     %float_42 = OpConstant %float 42.0
+     %cond = OpUndef %bool
+
+     %100 = OpFunction %void None %voidfn
+     %10 = OpLabel
+     OpBranch %30
+
+     ; unreachable
+     %20 = OpLabel
+     %499 = OpFAdd %float %float_42 %float_42
+     %500 = OpFAdd %float %499 %float_42
+     OpBranch %25
+
+     %25 = OpLabel
+     OpBranch %80
+
+
+     %30 = OpLabel
+     OpLoopMerge %90 %80 None
+     OpBranchConditional %cond %90 %40
+
+     %40 = OpLabel
+     OpBranch %90
+
+     %80 = OpLabel ; unreachable continue target
+                ; but "dominated" by %20 and %25
+     %81 = OpPhi %float %500 %25
+     OpBranch %30 ; backedge
+
+     %90 = OpLabel
+     OpReturn
+     OpFunctionEnd
+)";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+
+  const auto* expected = R"(Loop{
+  If{
+    (
+      ScalarConstructor[not set]{false}
+    )
+    {
+      Break{}
+    }
+  }
+  Break{}
+  continuing {
+    VariableDeclStatement{
+      Variable{
+        x_81_phi_1
+        none
+        __f32
+      }
+    }
+    VariableDeclStatement{
+      VariableConst{
+        x_81
+        none
+        __f32
+        {
+          Identifier[not set]{x_81_phi_1}
+        }
+      }
+    }
+  }
+}
+Return{}
+)";
+  const auto got = ToString(p->builder(), fe.ast_body());
+  EXPECT_EQ(got, expected);
+}
+
 }  // namespace
 }  // namespace spirv
 }  // namespace reader

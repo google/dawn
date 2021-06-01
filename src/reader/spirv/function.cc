@@ -4362,7 +4362,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
           auto* pred_block_info = GetBlockInfo(pred_block_id);
           // The predecessor might not be in the block order at all, so we
           // need this guard.
-          if (pred_block_info) {
+          if (IsInBlockOrder(pred_block_info)) {
             // Record the assignment that needs to occur at the end
             // of the predecessor block.
             pred_block_info->phi_assignments.push_back({phi_id, value_id});

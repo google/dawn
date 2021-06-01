@@ -766,6 +766,13 @@ class FunctionEmitter {
     return where->second.get();
   }
 
+  /// Is the block, represented by info, in the structured block order?
+  /// @param info the block
+  /// @returns true if the block is in the structured block order.
+  bool IsInBlockOrder(const BlockInfo* info) const {
+    return info && info->pos != kInvalidBlockPos;
+  }
+
   /// Gets the local definition info for a result ID.
   /// @param id the SPIR-V ID of local definition.
   /// @returns the definition info for the given ID, if it exists, or nullptr
