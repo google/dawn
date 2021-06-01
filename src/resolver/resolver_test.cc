@@ -1115,7 +1115,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
-  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
+  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kInput);
 
   auto* mem = MemberAccessor("my_vec", "xzyw");
   WrapInFunction(mem);

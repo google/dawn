@@ -1983,6 +1983,12 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
               expr->member()->source().Begin() + swizzle.size());
           return false;
       }
+
+      if (swizzle.back() >= vec->size()) {
+        diagnostics_.add_error("invalid vector swizzle member",
+                               expr->member()->source());
+        return false;
+      }
     }
 
     if (size < 1 || size > 4) {

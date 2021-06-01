@@ -389,7 +389,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
-  Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kInput);
+  Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kInput);
 
   auto* ident = create<ast::IdentifierExpression>(
       Source{{Source::Location{3, 3}, Source::Location{3, 7}}},
@@ -415,6 +415,18 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(), "3:3 error: invalid vector swizzle size");
+}
+
+TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadIndex) {
+  Global("my_vec", ty.vec2<f32>(), ast::StorageClass::kInput);
+
+  auto* ident = create<ast::IdentifierExpression>(Source{{3, 3}},
+                                                  Symbols().Register("z"));
+  auto* mem = MemberAccessor("my_vec", ident);
+  WrapInFunction(mem);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(), "3:3 error: invalid vector swizzle member");
 }
 
 TEST_F(ResolverValidationTest,
