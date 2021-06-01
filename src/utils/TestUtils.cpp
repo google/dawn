@@ -26,7 +26,9 @@ namespace utils {
 
     uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width) {
         const uint32_t bytesPerBlock = utils::GetTexelBlockSizeInBytes(format);
-        return Align(bytesPerBlock * width, kTextureBytesPerRowAlignment);
+        const uint32_t blockWidth = utils::GetTextureFormatBlockWidth(format);
+        ASSERT(width % blockWidth == 0);
+        return Align(bytesPerBlock * (width / blockWidth), kTextureBytesPerRowAlignment);
     }
 
     TextureDataCopyLayout GetTextureDataCopyLayoutForTexture2DAtLevel(

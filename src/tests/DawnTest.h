@@ -39,6 +39,13 @@
 #define EXPECT_BUFFER(buffer, offset, size, expectation) \
     AddBufferExpectation(__FILE__, __LINE__, buffer, offset, size, expectation)
 
+#define EXPECT_BUFFER_U8_EQ(expected, buffer, offset) \
+    EXPECT_BUFFER(buffer, offset, sizeof(uint8_t), new ::detail::ExpectEq<uint8_t>(expected))
+
+#define EXPECT_BUFFER_U8_RANGE_EQ(expected, buffer, offset, count) \
+    EXPECT_BUFFER(buffer, offset, sizeof(uint8_t) * (count),       \
+                  new ::detail::ExpectEq<uint8_t>(expected, count))
+
 #define EXPECT_BUFFER_U16_EQ(expected, buffer, offset) \
     EXPECT_BUFFER(buffer, offset, sizeof(uint16_t), new ::detail::ExpectEq<uint16_t>(expected))
 
@@ -174,6 +181,7 @@ namespace utils {
 
 namespace detail {
     class Expectation;
+    class CustomTextureExpectation;
 
     template <typename T>
     class ExpectEq;
@@ -359,6 +367,22 @@ class DawnTestBase {
                                               uint32_t bytesPerRow = 0) {
         return AddTextureExpectationImpl(file, line, new detail::ExpectEq<T>(expectedData), texture,
                                          origin, {1, 1}, level, aspect, sizeof(T), bytesPerRow);
+    }
+
+    template <typename E,
+              typename = typename std::enable_if<
+                  std::is_base_of<detail::CustomTextureExpectation, E>::value>::type>
+    std::ostringstream& AddTextureExpectation(const char* file,
+                                              int line,
+                                              E* expectation,
+                                              const wgpu::Texture& texture,
+                                              wgpu::Origin3D origin,
+                                              wgpu::Extent3D extent,
+                                              uint32_t level = 0,
+                                              wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
+                                              uint32_t bytesPerRow = 0) {
+        return AddTextureExpectationImpl(file, line, expectation, texture, origin, extent, level,
+                                         aspect, expectation->DataSize(), bytesPerRow);
     }
 
     template <typename T>
@@ -634,6 +658,13 @@ namespace detail {
     // each counterparts. It doesn't matter which value is higher or lower. Essentially color =
     // lerp(color0, color1, t) where t is [0,1]. But I don't want to be too strict here.
     extern template class ExpectBetweenColors<RGBA8>;
+
+    class CustomTextureExpectation : public Expectation {
+      public:
+        virtual ~CustomTextureExpectation() = default;
+        virtual uint32_t DataSize() = 0;
+    };
+
 }  // namespace detail
 
 #endif  // TESTS_DAWNTEST_H_

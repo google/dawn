@@ -1072,7 +1072,7 @@ namespace dawn_native { namespace vulkan {
             device->fn.CmdCopyBufferToImage(
                 recordingContext->commandBuffer,
                 ToBackend(uploadHandle.stagingBuffer)->GetBufferHandle(), GetHandle(),
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, regions.data());
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, regions.size(), regions.data());
         } else {
             for (uint32_t level = range.baseMipLevel; level < range.baseMipLevel + range.levelCount;
                  ++level) {
