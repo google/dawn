@@ -12,39 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TRANSFORM_HLSL_H_
-#define SRC_TRANSFORM_HLSL_H_
+#ifndef SRC_TRANSFORM_PROMOTE_INITIALIZERS_TO_CONST_VAR_H_
+#define SRC_TRANSFORM_PROMOTE_INITIALIZERS_TO_CONST_VAR_H_
 
 #include "src/transform/transform.h"
 
 namespace tint {
-
-// Forward declarations
-class CloneContext;
-
 namespace transform {
 
-/// Hlsl is a transform used to sanitize a Program for use with the Hlsl writer.
-/// Passing a non-sanitized Program to the Hlsl writer will result in undefined
-/// behavior.
-class Hlsl : public Transform {
+/// A transform that hoists the array and structure initializers to a constant
+/// variable, declared just before the statement of usage. See
+/// crbug.com/tint/406 for more details.
+class PromoteInitializersToConstVar : public Transform {
  public:
   /// Constructor
-  Hlsl();
-  ~Hlsl() override;
+  PromoteInitializersToConstVar();
+
+  /// Destructor
+  ~PromoteInitializersToConstVar() override;
 
   /// Runs the transform on `program`, returning the transformation result.
   /// @param program the source program to transform
-  /// @param data optional extra transform-specific data
+  /// @param data optional extra transform-specific input data
   /// @returns the transformation result
   Output Run(const Program* program, const DataMap& data = {}) override;
-
- private:
-  /// Add an empty shader entry point if none exist in the module.
-  void AddEmptyEntryPoint(CloneContext& ctx) const;
 };
 
 }  // namespace transform
 }  // namespace tint
 
-#endif  // SRC_TRANSFORM_HLSL_H_
+#endif  // SRC_TRANSFORM_PROMOTE_INITIALIZERS_TO_CONST_VAR_H_

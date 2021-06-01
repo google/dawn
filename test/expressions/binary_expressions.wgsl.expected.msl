@@ -81,6 +81,7 @@ void matrix_matrix_f32() {
 }
 
 fragment tint_symbol_1 tint_symbol() {
-  return {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  tint_symbol_1 const tint_symbol_2 = {float4(0.0f, 0.0f, 0.0f, 0.0f)};
+  return tint_symbol_2;
 }
 

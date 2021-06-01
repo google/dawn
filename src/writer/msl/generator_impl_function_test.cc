@@ -113,7 +113,8 @@ struct tint_symbol_2 {
 
 fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
   float const foo = tint_symbol.foo;
-  return {foo};
+  tint_symbol_2 const tint_symbol_3 = {foo};
+  return tint_symbol_3;
 }
 
 )");
@@ -147,7 +148,8 @@ struct tint_symbol_2 {
 
 fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
   float4 const coord = tint_symbol.coord;
-  return {coord.x};
+  tint_symbol_2 const tint_symbol_3 = {coord.x};
+  return tint_symbol_3;
 }
 
 )");
@@ -215,7 +217,8 @@ struct tint_symbol_3 {
 
 vertex tint_symbol vert_main() {
   Interface const tint_symbol_1 = {0.5f, 0.25f, float4()};
-  return {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
+  tint_symbol const tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
+  return tint_symbol_4;
 }
 
 fragment void frag_main(tint_symbol_3 tint_symbol_2 [[stage_in]]) {
@@ -279,17 +282,20 @@ struct tint_symbol_2 {
 };
 
 VertexOutput foo(float x) {
-  return {float4(x, x, x, 1.0f)};
+  VertexOutput const tint_symbol_4 = {float4(x, x, x, 1.0f)};
+  return tint_symbol_4;
 }
 
 vertex tint_symbol vert_main1() {
   VertexOutput const tint_symbol_1 = {foo(0.5f)};
-  return {tint_symbol_1.pos};
+  tint_symbol const tint_symbol_5 = {tint_symbol_1.pos};
+  return tint_symbol_5;
 }
 
 vertex tint_symbol_2 vert_main2() {
   VertexOutput const tint_symbol_3 = {foo(0.25f)};
-  return {tint_symbol_3.pos};
+  tint_symbol_2 const tint_symbol_6 = {tint_symbol_3.pos};
+  return tint_symbol_6;
 }
 
 )");
