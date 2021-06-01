@@ -4475,6 +4475,7 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
   if (!arg_expr) {
     return {};
   }
+  arg_expr.type = arg_expr.type->UnwrapRef();
 
   const Type* expr_type = nullptr;
   if ((opcode == SpvOpConvertSToF) || (opcode == SpvOpConvertUToF)) {
@@ -4482,21 +4483,24 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
       expr_type = requested_type;
     } else {
       Fail() << "operand for conversion to floating point must be integral "
-                "scalar or vector";
+                "scalar or vector: "
+             << inst.PrettyPrint();
     }
   } else if (inst.opcode() == SpvOpConvertFToU) {
     if (arg_expr.type->IsFloatScalarOrVector()) {
       expr_type = parser_impl_.GetUnsignedIntMatchingShape(arg_expr.type);
     } else {
       Fail() << "operand for conversion to unsigned integer must be floating "
-                "point scalar or vector";
+                "point scalar or vector: "
+             << inst.PrettyPrint();
     }
   } else if (inst.opcode() == SpvOpConvertFToS) {
     if (arg_expr.type->IsFloatScalarOrVector()) {
       expr_type = parser_impl_.GetSignedIntMatchingShape(arg_expr.type);
     } else {
       Fail() << "operand for conversion to signed integer must be floating "
-                "point scalar or vector";
+                "point scalar or vector: "
+             << inst.PrettyPrint();
     }
   }
   if (expr_type == nullptr) {
@@ -4506,16 +4510,17 @@ TypedExpression FunctionEmitter::MakeNumericConversion(
 
   ast::ExpressionList params;
   params.push_back(arg_expr.expr);
-  TypedExpression result{
-      expr_type, create<ast::TypeConstructorExpression>(
-                     Source{}, expr_type->Build(builder_), std::move(params))};
+  TypedExpression result{expr_type,
+                         create<ast::TypeConstructorExpression>(
+                             GetSourceForInst(inst), expr_type->Build(builder_),
+                             std::move(params))};
 
   if (requested_type == expr_type) {
     return result;
   }
-  return {requested_type,
-          create<ast::BitcastExpression>(
-              Source{}, requested_type->Build(builder_), result.expr)};
+  return {requested_type, create<ast::BitcastExpression>(
+                              GetSourceForInst(inst),
+                              requested_type->Build(builder_), result.expr)};
 }
 
 bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {

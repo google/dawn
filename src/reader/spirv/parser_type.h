@@ -49,6 +49,10 @@ class Type : public Castable<Type> {
   /// @returns the inner most store type if this is a pointer, `this` otherwise
   const Type* UnwrapPtr() const;
 
+  /// @returns the inner most store type if this is a reference, `this`
+  /// otherwise
+  const Type* UnwrapRef() const;
+
   /// @returns the inner most aliased type if this is an alias, `this` otherwise
   const Type* UnwrapAlias() const;
 

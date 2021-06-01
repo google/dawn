@@ -343,8 +343,9 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_BadArgType) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(), Eq("operand for conversion to floating point must be "
-                             "integral scalar or vector"));
+  EXPECT_THAT(p->error(),
+              HasSubstr("operand for conversion to floating point must be "
+                        "integral scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_BadArgType) {
@@ -359,9 +360,10 @@ TEST_F(SpvUnaryConversionTest, ConvertUToF_Vector_BadArgType) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              Eq("operand for conversion to floating point must be integral "
-                 "scalar or vector"));
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("operand for conversion to floating point must be integral "
+                "scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertUToF_Scalar_FromSigned) {
@@ -484,9 +486,10 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_BadArgType) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              Eq("operand for conversion to signed integer must be floating "
-                 "point scalar or vector"));
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("operand for conversion to signed integer must be floating "
+                "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_BadArgType) {
@@ -501,9 +504,10 @@ TEST_F(SpvUnaryConversionTest, ConvertFToS_Vector_BadArgType) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              Eq("operand for conversion to signed integer must be floating "
-                 "point scalar or vector"));
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("operand for conversion to signed integer must be floating "
+                "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToS_Scalar_ToSigned) {
@@ -626,9 +630,10 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_BadArgType) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              Eq("operand for conversion to unsigned integer must be floating "
-                 "point scalar or vector"));
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("operand for conversion to unsigned integer must be floating "
+                "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_BadArgType) {
@@ -643,9 +648,10 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_BadArgType) {
   ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
   auto fe = p->function_emitter(100);
   EXPECT_FALSE(fe.EmitBody());
-  EXPECT_THAT(p->error(),
-              Eq("operand for conversion to unsigned integer must be floating "
-                 "point scalar or vector"));
+  EXPECT_THAT(
+      p->error(),
+      HasSubstr("operand for conversion to unsigned integer must be floating "
+                "point scalar or vector"));
 }
 
 TEST_F(SpvUnaryConversionTest, ConvertFToU_Scalar_ToSigned_IsError) {
@@ -730,6 +736,56 @@ TEST_F(SpvUnaryConversionTest, ConvertFToU_Vector_ToUnsigned) {
       }
     }
   })"));
+}
+
+TEST_F(SpvUnaryConversionTest, ConvertFToU_HoistedValue) {
+  // From crbug.com/tint/804
+  const auto assembly = Preamble() + R"(
+
+%100 = OpFunction %void None %voidfn
+%10 = OpLabel
+OpBranch %30
+
+%30 = OpLabel
+OpLoopMerge %90 %80 None
+OpBranchConditional %true %90 %40
+
+%40 = OpLabel
+OpSelectionMerge %50 None
+OpBranchConditional %true %45 %50
+
+%45 = OpLabel
+; This value is hoisted
+%600 = OpCopyObject %float %float_50
+OpBranch %50
+
+%50 = OpLabel
+OpBranch %90
+
+%80 = OpLabel ; unreachable continue target
+%82 = OpConvertFToU %uint %600
+OpBranch %30 ; backedge
+
+%90 = OpLabel
+OpReturn
+OpFunctionEnd
+
+  )";
+  auto p = parser(test::Assemble(assembly));
+  ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+  auto fe = p->function_emitter(100);
+  EXPECT_TRUE(fe.EmitBody()) << p->error();
+  EXPECT_THAT(ToString(p->builder(), fe.ast_body()), HasSubstr(R"(VariableConst{
+        x_82
+        none
+        __u32
+        {
+          TypeConstructor[not set]{
+            __u32
+            Identifier[not set]{x_600}
+          }
+        }
+      })"));
 }
 
 // TODO(dneto): OpSConvert // only if multiple widths

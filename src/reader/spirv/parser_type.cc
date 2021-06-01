@@ -336,6 +336,14 @@ const Type* Type::UnwrapPtr() const {
   return type;
 }
 
+const Type* Type::UnwrapRef() const {
+  const Type* type = this;
+  while (auto* ptr = type->As<Reference>()) {
+    type = ptr->type;
+  }
+  return type;
+}
+
 const Type* Type::UnwrapAlias() const {
   const Type* type = this;
   while (auto* alias = type->As<Alias>()) {
