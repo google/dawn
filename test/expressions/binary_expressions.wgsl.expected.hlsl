@@ -2,6 +2,32 @@ struct tint_symbol {
   float4 value : SV_Target0;
 };
 
+void bitwise_i32() {
+  int s1 = 0;
+  int s2 = 0;
+  int3 v1 = int3(0, 0, 0);
+  int3 v2 = int3(0, 0, 0);
+  s1 = (s1 | s2);
+  s1 = (s1 & s2);
+  s1 = (s1 ^ s2);
+  v1 = (v1 | v2);
+  v1 = (v1 & v2);
+  v1 = (v1 ^ v2);
+}
+
+void bitwise_u32() {
+  uint s1 = 0u;
+  uint s2 = 0u;
+  uint3 v1 = uint3(0u, 0u, 0u);
+  uint3 v2 = uint3(0u, 0u, 0u);
+  s1 = (s1 | s2);
+  s1 = (s1 & s2);
+  s1 = (s1 ^ s2);
+  v1 = (v1 | v2);
+  v1 = (v1 & v2);
+  v1 = (v1 ^ v2);
+}
+
 void vector_scalar_f32() {
   float3 v = float3(0.0f, 0.0f, 0.0f);
   float s = 0.0f;

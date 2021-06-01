@@ -2221,7 +2221,7 @@ bool Resolver::Binary(ast::BinaryExpression* expr) {
 
   // Binary bitwise operations
   if (expr->IsBitwise()) {
-    if (matching_types && lhs_type->IsAnyOf<I32, U32>()) {
+    if (matching_types && lhs_type->is_integer_scalar_or_vector()) {
       SetType(expr, lhs_type);
       return true;
     }

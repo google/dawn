@@ -1438,9 +1438,6 @@ static constexpr Params all_valid_cases[] = {
     Params{Op::kGreaterThanEqual, ast_vec3<f32>, ast_vec3<f32>,
            sem_vec3<sem_bool>},
 
-    // Bit expressions
-    // https://gpuweb.github.io/gpuweb/wgsl.html#bit-expr
-
     // Binary bitwise operations
     Params{Op::kOr, ast_i32, ast_i32, sem_i32},
     Params{Op::kAnd, ast_i32, ast_i32, sem_i32},
@@ -1449,6 +1446,14 @@ static constexpr Params all_valid_cases[] = {
     Params{Op::kOr, ast_u32, ast_u32, sem_u32},
     Params{Op::kAnd, ast_u32, ast_u32, sem_u32},
     Params{Op::kXor, ast_u32, ast_u32, sem_u32},
+
+    Params{Op::kOr, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kAnd, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_i32>},
+    Params{Op::kXor, ast_vec3<i32>, ast_vec3<i32>, sem_vec3<sem_i32>},
+
+    Params{Op::kOr, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kAnd, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>},
+    Params{Op::kXor, ast_vec3<u32>, ast_vec3<u32>, sem_vec3<sem_u32>},
 
     // Bit shift expressions
     Params{Op::kShiftLeft, ast_i32, ast_u32, sem_i32},

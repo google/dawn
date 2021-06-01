@@ -1,3 +1,33 @@
+fn bitwise_i32() {
+    var s1 : i32;
+    var s2 : i32;
+    var v1 : vec3<i32>;
+    var v2 : vec3<i32>;
+
+    s1 = s1 | s2;
+    s1 = s1 & s2;
+    s1 = s1 ^ s2;
+
+    v1 = v1 | v2;
+    v1 = v1 & v2;
+    v1 = v1 ^ v2;
+}
+
+fn bitwise_u32() {
+    var s1 : u32;
+    var s2 : u32;
+    var v1 : vec3<u32>;
+    var v2 : vec3<u32>;
+
+    s1 = s1 | s2;
+    s1 = s1 & s2;
+    s1 = s1 ^ s2;
+
+    v1 = v1 | v2;
+    v1 = v1 & v2;
+    v1 = v1 ^ v2;
+}
+
 fn vector_scalar_f32() {
     var v : vec3<f32>;
     var s : f32;
