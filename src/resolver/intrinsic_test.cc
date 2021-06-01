@@ -468,8 +468,8 @@ TEST_F(ResolverIntrinsicTest, Select_Error_NoParams) {
             R"(error: no matching call to select()
 
 2 candidate functions:
-  select(T, T, bool) -> T  where: T is scalar
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is scalar
+  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
 )");
 }
 
@@ -483,8 +483,8 @@ TEST_F(ResolverIntrinsicTest, Select_Error_SelectorInt) {
             R"(error: no matching call to select(i32, i32, i32)
 
 2 candidate functions:
-  select(T, T, bool) -> T  where: T is scalar
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is scalar
+  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
 )");
 }
 
@@ -500,8 +500,8 @@ TEST_F(ResolverIntrinsicTest, Select_Error_Matrix) {
             R"(error: no matching call to select(mat2x2<f32>, mat2x2<f32>, bool)
 
 2 candidate functions:
-  select(T, T, bool) -> T  where: T is scalar
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is scalar
+  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
 )");
 }
 
@@ -515,8 +515,8 @@ TEST_F(ResolverIntrinsicTest, Select_Error_MismatchTypes) {
             R"(error: no matching call to select(f32, vec2<f32>, bool)
 
 2 candidate functions:
-  select(T, T, bool) -> T  where: T is scalar
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is scalar
+  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
 )");
 }
 
@@ -531,8 +531,8 @@ TEST_F(ResolverIntrinsicTest, Select_Error_MismatchVectorSize) {
             R"(error: no matching call to select(vec2<f32>, vec3<f32>, bool)
 
 2 candidate functions:
-  select(T, T, bool) -> T  where: T is scalar
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is scalar
+  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
 )");
 }
 

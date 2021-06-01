@@ -221,6 +221,7 @@ set(TINT_LIB_SRCS
   inspector/scalar.h
   intrinsic_table.cc
   intrinsic_table.h
+  intrinsic_table.inl
   program_builder.cc
   program_builder.h
   program_id.cc

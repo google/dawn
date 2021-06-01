@@ -127,7 +127,7 @@ type Parameter struct {
 // Format implements the fmt.Formatter interface
 func (p Parameter) Format(w fmt.State, verb rune) {
 	if p.Name != "" {
-		fmt.Fprintf(w, "%v ", p.Name)
+		fmt.Fprintf(w, "%v: ", p.Name)
 	}
 	p.Type.Format(w, verb)
 }

@@ -126,7 +126,7 @@ bool IsValidationDisabled(const ast::DecorationList& decorations,
 Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
-      intrinsic_table_(IntrinsicTable::Create()) {}
+      intrinsic_table_(IntrinsicTable::Create(*builder)) {}
 
 Resolver::~Resolver() = default;
 
@@ -1694,17 +1694,15 @@ bool Resolver::IntrinsicCall(ast::CallExpression* call,
     arg_tys.emplace_back(TypeOf(expr));
   }
 
-  auto result = intrinsic_table_->Lookup(*builder_, intrinsic_type, arg_tys,
-                                         call->source());
-  if (!result.intrinsic) {
-    // Intrinsic lookup failed.
-    diagnostics_.add(result.diagnostics);
+  auto* result =
+      intrinsic_table_->Lookup(intrinsic_type, arg_tys, call->source());
+  if (!result) {
     return false;
   }
 
-  builder_->Sem().Add(call, builder_->create<sem::Call>(call, result.intrinsic,
-                                                        current_statement_));
-  SetType(call, result.intrinsic->ReturnType());
+  builder_->Sem().Add(
+      call, builder_->create<sem::Call>(call, result, current_statement_));
+  SetType(call, result->ReturnType());
   return true;
 }
 

@@ -32,6 +32,8 @@ import (
 	"dawn.googlesource.com/tint/tools/src/glob"
 )
 
+const defProjectRelPath = "src/intrinsics.def"
+
 func main() {
 	if err := run(); err != nil {
 		fmt.Println(err)
@@ -58,7 +60,7 @@ optional flags:`)
 func run() error {
 	// Load the intrinsics definition file
 	projectRoot := fileutils.ProjectRoot()
-	defPath := filepath.Join(projectRoot, "src/intrinsics.def")
+	defPath := filepath.Join(projectRoot, defProjectRelPath)
 
 	defSource, err := ioutil.ReadFile(defPath)
 	if err != nil {
@@ -66,7 +68,7 @@ func run() error {
 	}
 
 	// Parse the definition file to produce an AST
-	ast, err := parser.Parse(string(defSource), defPath)
+	ast, err := parser.Parse(string(defSource), defProjectRelPath)
 	if err != nil {
 		return err
 	}

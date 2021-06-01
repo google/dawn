@@ -26,7 +26,10 @@ import (
 )
 
 type generator struct {
-	s *sem.Sem
+	s      *sem.Sem
+	cached struct {
+		intrinsicTable *IntrinsicTable // lazily built by intrinsicTable()
+	}
 }
 
 // Generate executes the template tmpl using the provided semantic
@@ -52,6 +55,7 @@ func (g *generator) generate(tmpl string, w io.Writer) error {
 			"IsTemplateEnumParam":   is(&sem.TemplateEnumParam{}),
 			"IsFirstIn":             isFirstIn,
 			"IsLastIn":              isLastIn,
+			"IntrinsicTable":        g.intrinsicTable,
 		}).
 		Option("missingkey=error").
 		Parse(tmpl)
@@ -61,6 +65,19 @@ func (g *generator) generate(tmpl string, w io.Writer) error {
 	return t.Execute(w, map[string]interface{}{
 		"Sem": g.s,
 	})
+}
+
+// intrinsicTable lazily calls and returns the result of buildIntrinsicTable(),
+// caching the result for repeated calls.
+func (g *generator) intrinsicTable() (*IntrinsicTable, error) {
+	if g.cached.intrinsicTable == nil {
+		var err error
+		g.cached.intrinsicTable, err = buildIntrinsicTable(g.s)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return g.cached.intrinsicTable, nil
 }
 
 // Map is a simple generic key-value map, which can be used in the template

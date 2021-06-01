@@ -436,6 +436,7 @@ libtint_source_set("libtint_core_all_src") {
     "inspector/scalar.h",
     "intrinsic_table.cc",
     "intrinsic_table.h",
+    "intrinsic_table.inl",
     "program.cc",
     "program.h",
     "program_builder.cc",

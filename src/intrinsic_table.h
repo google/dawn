@@ -29,30 +29,23 @@ class ProgramBuilder;
 /// IntrinsicTable is a lookup table of all the WGSL intrinsic functions
 class IntrinsicTable {
  public:
+  /// @param builder the program builder
   /// @return a pointer to a newly created IntrinsicTable
-  static std::unique_ptr<IntrinsicTable> Create();
+  static std::unique_ptr<IntrinsicTable> Create(ProgramBuilder& builder);
 
   /// Destructor
   virtual ~IntrinsicTable();
 
-  /// Result is returned by Lookup
-  struct Result {
-    /// The intrinsic, if the lookup succeeded, otherwise nullptr
-    sem::Intrinsic* intrinsic;
-    /// Diagnostic messages
-    diag::List diagnostics;
-  };
-
-  /// Lookup looks for the intrinsic overload with the given signature.
-  /// @param builder the program builder
+  /// Lookup looks for the intrinsic overload with the given signature, raising
+  /// an error diagnostic if the intrinsic was not found.
   /// @param type the intrinsic type
   /// @param args the argument types passed to the intrinsic function
   /// @param source the source of the intrinsic call
   /// @return the semantic intrinsic if found, otherwise nullptr
-  virtual Result Lookup(ProgramBuilder& builder,
-                        sem::IntrinsicType type,
-                        const std::vector<const sem::Type*>& args,
-                        const Source& source) const = 0;
+  virtual const sem::Intrinsic* Lookup(
+      sem::IntrinsicType type,
+      const std::vector<const sem::Type*>& args,
+      const Source& source) const = 0;
 };
 
 }  // namespace tint
