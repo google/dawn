@@ -70,7 +70,7 @@ fn f() {
   auto* expect = R"(
 fn f() {
   var m : mat4x4<f32>;
-  let f : f32 = *(&(*(&(*(&(m))[2]))[1]));
+  let f : f32 = *(&((*(&((*(&(m)))[2])))[1]));
 }
 )";
 
@@ -220,7 +220,7 @@ fn f() {
   let j : i32 = 1;
   let p_save = i;
   let q_save = j;
-  *(&(*(&(arr[p_save]))[q_save])) = 12;
+  *(&((*(&(arr[p_save])))[q_save])) = 12;
 }
 )";
 

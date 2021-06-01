@@ -32,6 +32,19 @@ TEST_F(WgslGeneratorImplTest, ArrayAccessor) {
   EXPECT_EQ(gen.result(), "ary[5]");
 }
 
+TEST_F(WgslGeneratorImplTest, ArrayAccessor_OfDref) {
+  Global("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
+
+  auto* p = Const("p", nullptr, AddressOf("ary"));
+  auto* expr = IndexAccessor(Deref("p"), 5);
+  WrapInFunction(p, expr);
+
+  GeneratorImpl& gen = Build();
+
+  ASSERT_TRUE(gen.EmitExpression(expr)) << gen.error();
+  EXPECT_EQ(gen.result(), "(*(p))[5]");
+}
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace writer
