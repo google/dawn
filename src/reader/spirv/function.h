@@ -70,6 +70,8 @@ enum class EdgeKind {
   kForward
 };
 
+enum : uint32_t { kInvalidBlockPos = ~(0u) };
+
 /// Bookkeeping info for a basic block.
 struct BlockInfo {
   /// Constructor
@@ -84,7 +86,8 @@ struct BlockInfo {
   uint32_t id = 0;
 
   /// The position of this block in the reverse structured post-order.
-  uint32_t pos = 0;
+  /// If the block is not in that order, then this remains the invalid value.
+  uint32_t pos = kInvalidBlockPos;
 
   /// If this block is a header, then this is the ID of the merge block.
   uint32_t merge_for_header = 0;

@@ -1321,6 +1321,9 @@ void FunctionEmitter::ComputeBlockOrderAndPositions() {
   for (uint32_t i = 0; i < block_order_.size(); ++i) {
     GetBlockInfo(block_order_[i])->pos = i;
   }
+  // The invalid block position is not the position of any block that is in the
+  // order.
+  assert(block_order_.size() <= kInvalidBlockPos);
 }
 
 bool FunctionEmitter::VerifyHeaderContinueMergeOrder() {
@@ -2293,6 +2296,17 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
 
     default:
       break;
+  }
+  if (const spvtools::opt::BasicBlock* const bb =
+          ir_context_.get_instr_block(id)) {
+    if (auto* block = GetBlockInfo(bb->id())) {
+      if (block->pos == kInvalidBlockPos) {
+        // The value came from a block not in the block order.
+        // Substitute a null value.
+        return parser_impl_.MakeNullExpression(
+            parser_impl_.ConvertType(inst->type_id()));
+      }
+    }
   }
   Fail() << "unhandled expression for ID " << id << "\n" << inst->PrettyPrint();
   return {};
