@@ -19,6 +19,7 @@
 #include "common/Preprocessor.h"
 #include "dawn/dawn_proc_table.h"
 #include "dawn/webgpu_cpp.h"
+#include "dawn/webgpu_cpp_print.h"
 #include "dawn_native/DawnNative.h"
 #include "tests/ParamGenerator.h"
 #include "tests/ToggleParser.h"
@@ -301,6 +302,18 @@ class DawnTestBase {
 
     virtual std::unique_ptr<dawn_platform::Platform> CreateTestPlatform();
 
+    struct PrintToStringParamName {
+        PrintToStringParamName(const char* test);
+        std::string SanitizeParamName(std::string paramName, size_t index) const;
+
+        template <class ParamType>
+        std::string operator()(const ::testing::TestParamInfo<ParamType>& info) const {
+            return SanitizeParamName(::testing::PrintToStringParamName()(info), info.index);
+        }
+
+        std::string mTest;
+    };
+
   protected:
     wgpu::Device device;
     wgpu::Queue queue;
@@ -510,7 +523,7 @@ using DawnTest = DawnTestWithParams<>;
         , testName,                                                                     \
         testing::ValuesIn(::detail::GetAvailableAdapterTestParamsForBackends(           \
             testName##params, sizeof(testName##params) / sizeof(testName##params[0]))), \
-        testing::PrintToStringParamName());                                             \
+        DawnTestBase::PrintToStringParamName(#testName));                               \
     GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
 
 // Instantiate the test once for each backend provided in the first param list.
@@ -526,13 +539,13 @@ using DawnTest = DawnTestWithParams<>;
 #define DAWN_INSTANTIATE_TEST_P(testName, ...)                                                 \
     INSTANTIATE_TEST_SUITE_P(                                                                  \
         , testName, ::testing::ValuesIn(MakeParamGenerator<testName::ParamType>(__VA_ARGS__)), \
-        testing::PrintToStringParamName());                                                    \
+        DawnTestBase::PrintToStringParamName(#testName));                                      \
     GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(testName)
 
 // Implementation for DAWN_TEST_PARAM_STRUCT to declare/print struct fields.
 #define DAWN_TEST_PARAM_STRUCT_DECL_STRUCT_FIELD(Type) Type DAWN_PP_CONCATENATE(m, Type);
 #define DAWN_TEST_PARAM_STRUCT_PRINT_STRUCT_FIELD(Type) \
-    o << "__" << #Type << "_" << param.DAWN_PP_CONCATENATE(m, Type);
+    o << "; " << #Type << "=" << param.DAWN_PP_CONCATENATE(m, Type);
 
 // Usage: DAWN_TEST_PARAM_STRUCT(Foo, TypeA, TypeB, ...)
 // Generate a test param struct called Foo which extends AdapterTestParam and generated
@@ -564,7 +577,7 @@ using DawnTest = DawnTestWithParams<>;
     };                                                                                             \
     std::ostream& operator<<(std::ostream& o, const StructName& param) {                           \
         o << static_cast<const AdapterTestParam&>(param);                                          \
-        o << "_" << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName)&>(param);            \
+        o << "; " << static_cast<const DAWN_PP_CONCATENATE(_Dawn_, StructName)&>(param);           \
         return o;                                                                                  \
     }
 

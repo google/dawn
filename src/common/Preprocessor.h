@@ -61,11 +61,10 @@
 
 // Implementation for DAWN_PP_FOR_EACH.
 // Creates a call to DAWN_PP_FOR_EACH_X where X is 1, 2, ..., etc.
-#define DAWN_PP_FOR_EACH_(N, func, x, ...) \
-    DAWN_PP_CONCATENATE(DAWN_PP_FOR_EACH_, N)(func, x, __VA_ARGS__)
+#define DAWN_PP_FOR_EACH_(N, func, ...) DAWN_PP_CONCATENATE(DAWN_PP_FOR_EACH_, N)(func, __VA_ARGS__)
 
 // DAWN_PP_FOR_EACH: Apply |func| to each argument in |x| and __VA_ARGS__
-#define DAWN_PP_FOR_EACH(func, x, ...) \
-    DAWN_PP_FOR_EACH_(DAWN_PP_FOR_EACH_NARG(x, __VA_ARGS__), func, x, __VA_ARGS__)
+#define DAWN_PP_FOR_EACH(func, ...) \
+    DAWN_PP_FOR_EACH_(DAWN_PP_FOR_EACH_NARG(__VA_ARGS__), func, __VA_ARGS__)
 
 #endif  // COMMON_PREPROCESSOR_H_

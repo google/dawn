@@ -167,33 +167,54 @@ AdapterTestParam::AdapterTestParam(const BackendTestConfig& config,
 }
 
 std::ostream& operator<<(std::ostream& os, const AdapterTestParam& param) {
-    // Sanitize the adapter name for GoogleTest
-    std::string sanitizedName =
-        std::regex_replace(param.adapterProperties.adapterName, std::regex("[^a-zA-Z0-9]+"), "_");
-
-    // Strip trailing underscores, if any.
-    if (sanitizedName.back() == '_') {
-        sanitizedName.back() = '\0';
-    }
-
-    os << ParamName(param.adapterProperties.backendType) << "_" << sanitizedName.c_str();
+    os << ParamName(param.adapterProperties.backendType) << " "
+       << param.adapterProperties.adapterName;
 
     // In a Windows Remote Desktop session there are two adapters named "Microsoft Basic Render
     // Driver" with different adapter types. We must differentiate them to avoid any tests using the
     // same name.
     if (param.adapterProperties.deviceID == 0x008C) {
         std::string adapterType = AdapterTypeName(param.adapterProperties.adapterType);
-        std::replace(adapterType.begin(), adapterType.end(), ' ', '_');
-        os << "_" << adapterType;
+        os << " " << adapterType;
     }
 
     for (const char* forceEnabledWorkaround : param.forceEnabledWorkarounds) {
-        os << "__e_" << forceEnabledWorkaround;
+        os << "; e:" << forceEnabledWorkaround;
     }
     for (const char* forceDisabledWorkaround : param.forceDisabledWorkarounds) {
-        os << "__d_" << forceDisabledWorkaround;
+        os << "; d:" << forceDisabledWorkaround;
     }
     return os;
+}
+
+DawnTestBase::PrintToStringParamName::PrintToStringParamName(const char* test) : mTest(test) {
+}
+
+std::string DawnTestBase::PrintToStringParamName::SanitizeParamName(std::string paramName,
+                                                                    size_t index) const {
+    // Sanitize the adapter name for GoogleTest
+    std::string sanitizedName = std::regex_replace(paramName, std::regex("[^a-zA-Z0-9]+"), "_");
+
+    // Strip trailing underscores, if any.
+    while (sanitizedName.back() == '_') {
+        sanitizedName.resize(sanitizedName.length() - 1);
+    }
+
+    // We don't know the the test name at this point, but the format usually looks like
+    // this.
+    std::string prefix = mTest + ".TheTestNameUsuallyGoesHere/";
+    std::string testFormat = prefix + sanitizedName;
+    if (testFormat.length() > 220) {
+        // The bots don't support test names longer than 256. Shorten the name and append a unique
+        // index if we're close. The failure log will still print the full param name.
+        std::string suffix = std::string("__") + std::to_string(index);
+        size_t targetLength = sanitizedName.length();
+        targetLength -= testFormat.length() - 220;
+        targetLength -= suffix.length();
+        sanitizedName.resize(targetLength);
+        sanitizedName = sanitizedName + suffix;
+    }
+    return sanitizedName;
 }
 
 // Implementation of DawnTestEnvironment
