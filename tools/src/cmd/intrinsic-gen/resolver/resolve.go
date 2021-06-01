@@ -16,6 +16,7 @@ package resolver
 
 import (
 	"fmt"
+	"sort"
 
 	"dawn.googlesource.com/tint/tools/src/cmd/intrinsic-gen/ast"
 	"dawn.googlesource.com/tint/tools/src/cmd/intrinsic-gen/sem"
@@ -64,6 +65,9 @@ func Resolve(a *ast.AST) (*sem.Sem, error) {
 			return nil, err
 		}
 	}
+
+	// Calculate the unique parameter names
+	r.s.UniqueParameterNames = r.calculateUniqueParameterNames()
 
 	return r.s, nil
 }
@@ -442,6 +446,25 @@ func (r *resolver) lookupNamed(s *scope, a ast.TemplatedName) (sem.Named, error)
 		}
 	}
 	return ty, nil
+}
+
+// calculateUniqueParameterNames() iterates over all the parameters of all
+// overloads, calculating the list of unique parameter names
+func (r *resolver) calculateUniqueParameterNames() []string {
+	set := map[string]struct{}{"": {}}
+	names := []string{}
+	for _, f := range r.s.Functions {
+		for _, o := range f.Overloads {
+			for _, p := range o.Parameters {
+				if _, dup := set[p.Name]; !dup {
+					set[p.Name] = struct{}{}
+					names = append(names, p.Name)
+				}
+			}
+		}
+	}
+	sort.Strings(names)
+	return names
 }
 
 // describe() returns a string describing a sem.Named

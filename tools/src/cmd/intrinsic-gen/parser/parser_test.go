@@ -96,7 +96,7 @@ func TestParser(t *testing.T) {
 				},
 			}},
 		}},
-		{"fn F(a T)", ast.AST{
+		{"fn F(a: T)", ast.AST{
 			Functions: []ast.FunctionDecl{{
 				Name: "F",
 				Parameters: ast.Parameters{
@@ -128,7 +128,7 @@ func TestParser(t *testing.T) {
 				},
 			}},
 		}},
-		{"fn F<T>(a X, b Y<T>)", ast.AST{
+		{"fn F<T>(a: X, b: Y<T>)", ast.AST{
 			Functions: []ast.FunctionDecl{{
 				Name: "F",
 				TemplateParams: ast.TemplateParams{

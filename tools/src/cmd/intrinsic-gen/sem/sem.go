@@ -29,6 +29,8 @@ type Sem struct {
 	MaxOpenTypes int
 	// Maximum number of open-numbers used across all intrinsics
 	MaxOpenNumbers int
+	// The alphabetically sorted list of unique parameter names
+	UniqueParameterNames []string
 }
 
 // New returns a new Sem
