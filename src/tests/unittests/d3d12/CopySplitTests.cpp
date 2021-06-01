@@ -56,8 +56,11 @@ namespace {
 
     // Check that the offset is aligned
     void ValidateOffset(const TextureCopySubresource& copySplit) {
-        ASSERT_TRUE(Align(copySplit.offset, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT) ==
-                    copySplit.offset);
+        for (uint32_t i = 0; i < copySplit.count; ++i) {
+            ASSERT_TRUE(
+                Align(copySplit.copies[i].alignedOffset, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT) ==
+                copySplit.copies[i].alignedOffset);
+        }
     }
 
     bool RangesOverlap(uint32_t minA, uint32_t maxA, uint32_t minB, uint32_t maxB) {
@@ -142,7 +145,7 @@ namespace {
             uint32_t slicePitchInTexels =
                 bytesPerRowInTexels * (bufferSpec.rowsPerImage / textureSpec.blockHeight);
             uint32_t absoluteTexelOffset =
-                copySplit.offset / textureSpec.texelBlockSizeInBytes * texelsPerBlock +
+                copy.alignedOffset / textureSpec.texelBlockSizeInBytes * texelsPerBlock +
                 copy.bufferOffset.x / textureSpec.blockWidth * texelsPerBlock +
                 copy.bufferOffset.y / textureSpec.blockHeight * bytesPerRowInTexels;
 
@@ -302,7 +305,7 @@ class CopySplitTest : public testing::Test {
         blockInfo.width = textureSpec.blockWidth;
         blockInfo.height = textureSpec.blockHeight;
         blockInfo.byteSize = textureSpec.texelBlockSizeInBytes;
-        TextureCopySubresource copySplit = ComputeTextureCopySubresource(
+        TextureCopySubresource copySplit = Compute2DTextureCopySubresource(
             {textureSpec.x, textureSpec.y, textureSpec.z},
             {textureSpec.width, textureSpec.height, textureSpec.depth}, blockInfo,
             bufferSpec.offset, bufferSpec.bytesPerRow, bufferSpec.rowsPerImage);
