@@ -402,6 +402,13 @@ class DawnTestBase {
             level, aspect, sizeof(T), bytesPerRow);
     }
 
+    std::ostringstream& ExpectSampledDepthData(wgpu::Texture depthTexture,
+                                               uint32_t width,
+                                               uint32_t height,
+                                               uint32_t arrayLayer,
+                                               uint32_t mipLevel,
+                                               const std::vector<float>& expected);
+
     void WaitABit();
     void FlushWire();
     void WaitForAllOperations();

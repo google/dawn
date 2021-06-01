@@ -23,6 +23,7 @@
 #include "dawn/dawn_proc.h"
 #include "dawn_wire/WireClient.h"
 #include "dawn_wire/WireServer.h"
+#include "utils/ComboRenderPipelineDescriptor.h"
 #include "utils/PlatformDebugLogger.h"
 #include "utils/SystemUtils.h"
 #include "utils/TerribleCommandBuffer.h"
@@ -1083,6 +1084,69 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
     mDeferredExpectations.push_back(std::move(deferred));
     mDeferredExpectations.back().message = std::make_unique<std::ostringstream>();
     return *(mDeferredExpectations.back().message.get());
+}
+
+std::ostringstream& DawnTestBase::ExpectSampledDepthData(wgpu::Texture texture,
+                                                         uint32_t width,
+                                                         uint32_t height,
+                                                         uint32_t arrayLayer,
+                                                         uint32_t mipLevel,
+                                                         const std::vector<float>& expected) {
+    std::ostringstream shaderSource;
+    shaderSource << "let width : u32 = " << width << "u;\n";
+    shaderSource << R"(
+        [[block]] struct Result {
+            values : array<f32>;
+        };
+
+        [[group(0), binding(0)]] var tex : texture_depth_2d;
+        [[group(0), binding(1)]] var<storage> result : [[access(read_write)]] Result;
+
+        [[stage(compute)]] fn main(
+            [[builtin(global_invocation_id)]] GlobalInvocationId : vec3<u32>
+        ) {
+            result.values[GlobalInvocationId.y * width + GlobalInvocationId.x] = textureLoad(
+                tex, vec2<i32>(i32(GlobalInvocationId.x), i32(GlobalInvocationId.y)), 0);
+        }
+    )";
+
+    wgpu::ShaderModule csModule = utils::CreateShaderModule(device, shaderSource.str().c_str());
+
+    wgpu::ComputePipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.computeStage.module = csModule;
+    pipelineDescriptor.computeStage.entryPoint = "main";
+
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDescriptor);
+
+    // Create and initialize the slot buffer so that it won't unexpectedly affect the count of
+    // resources lazily cleared.
+    const std::vector<float> initialBufferData(width * height, 0.f);
+    wgpu::Buffer readbackBuffer = utils::CreateBufferFromData(
+        device, initialBufferData.data(), sizeof(float) * width * height,
+        wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::Storage);
+
+    wgpu::TextureViewDescriptor viewDesc = {};
+    viewDesc.aspect = wgpu::TextureAspect::DepthOnly;
+    viewDesc.dimension = wgpu::TextureViewDimension::e2D;
+    viewDesc.baseMipLevel = mipLevel;
+    viewDesc.mipLevelCount = 1;
+    viewDesc.baseArrayLayer = arrayLayer;
+    viewDesc.arrayLayerCount = 1;
+
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
+                             {{0, texture.CreateView(&viewDesc)}, {1, readbackBuffer}});
+
+    wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = commandEncoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bindGroup);
+    pass.Dispatch(width, height);
+    pass.EndPass();
+    wgpu::CommandBuffer commands = commandEncoder.Finish();
+    queue.Submit(1, &commands);
+
+    return EXPECT_BUFFER_FLOAT_RANGE_EQ(expected.data(), readbackBuffer, 0, expected.size());
 }
 
 void DawnTestBase::WaitABit() {
