@@ -185,15 +185,15 @@ uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
       return GLSLstd450Modf;
     case IntrinsicType::kNormalize:
       return GLSLstd450Normalize;
-    case IntrinsicType::kPack4x8Snorm:
+    case IntrinsicType::kPack4x8snorm:
       return GLSLstd450PackSnorm4x8;
-    case IntrinsicType::kPack4x8Unorm:
+    case IntrinsicType::kPack4x8unorm:
       return GLSLstd450PackUnorm4x8;
-    case IntrinsicType::kPack2x16Snorm:
+    case IntrinsicType::kPack2x16snorm:
       return GLSLstd450PackSnorm2x16;
-    case IntrinsicType::kPack2x16Unorm:
+    case IntrinsicType::kPack2x16unorm:
       return GLSLstd450PackUnorm2x16;
-    case IntrinsicType::kPack2x16Float:
+    case IntrinsicType::kPack2x16float:
       return GLSLstd450PackHalf2x16;
     case IntrinsicType::kPow:
       return GLSLstd450Pow;
@@ -219,15 +219,15 @@ uint32_t intrinsic_to_glsl_method(const sem::Intrinsic* intrinsic) {
       return GLSLstd450Tanh;
     case IntrinsicType::kTrunc:
       return GLSLstd450Trunc;
-    case IntrinsicType::kUnpack4x8Snorm:
+    case IntrinsicType::kUnpack4x8snorm:
       return GLSLstd450UnpackSnorm4x8;
-    case IntrinsicType::kUnpack4x8Unorm:
+    case IntrinsicType::kUnpack4x8unorm:
       return GLSLstd450UnpackUnorm4x8;
-    case IntrinsicType::kUnpack2x16Snorm:
+    case IntrinsicType::kUnpack2x16snorm:
       return GLSLstd450UnpackSnorm2x16;
-    case IntrinsicType::kUnpack2x16Unorm:
+    case IntrinsicType::kUnpack2x16unorm:
       return GLSLstd450UnpackUnorm2x16;
-    case IntrinsicType::kUnpack2x16Float:
+    case IntrinsicType::kUnpack2x16float:
       return GLSLstd450UnpackHalf2x16;
     default:
       break;

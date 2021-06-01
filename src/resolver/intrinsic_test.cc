@@ -581,8 +581,8 @@ using ResolverIntrinsicTest_DataPacking = ResolverTestWithParam<IntrinsicData>;
 TEST_P(ResolverIntrinsicTest_DataPacking, InferType) {
   auto param = GetParam();
 
-  bool pack4 = param.intrinsic == IntrinsicType::kPack4x8Snorm ||
-               param.intrinsic == IntrinsicType::kPack4x8Unorm;
+  bool pack4 = param.intrinsic == IntrinsicType::kPack4x8snorm ||
+               param.intrinsic == IntrinsicType::kPack4x8unorm;
 
   auto* call = pack4 ? Call(param.name, vec4<f32>(1.f, 2.f, 3.f, 4.f))
                      : Call(param.name, vec2<f32>(1.f, 2.f));
@@ -596,8 +596,8 @@ TEST_P(ResolverIntrinsicTest_DataPacking, InferType) {
 TEST_P(ResolverIntrinsicTest_DataPacking, Error_IncorrectParamType) {
   auto param = GetParam();
 
-  bool pack4 = param.intrinsic == IntrinsicType::kPack4x8Snorm ||
-               param.intrinsic == IntrinsicType::kPack4x8Unorm;
+  bool pack4 = param.intrinsic == IntrinsicType::kPack4x8snorm ||
+               param.intrinsic == IntrinsicType::kPack4x8unorm;
 
   auto* call = pack4 ? Call(param.name, vec4<i32>(1, 2, 3, 4))
                      : Call(param.name, vec2<i32>(1, 2));
@@ -624,8 +624,8 @@ TEST_P(ResolverIntrinsicTest_DataPacking, Error_NoParams) {
 TEST_P(ResolverIntrinsicTest_DataPacking, Error_TooManyParams) {
   auto param = GetParam();
 
-  bool pack4 = param.intrinsic == IntrinsicType::kPack4x8Snorm ||
-               param.intrinsic == IntrinsicType::kPack4x8Unorm;
+  bool pack4 = param.intrinsic == IntrinsicType::kPack4x8snorm ||
+               param.intrinsic == IntrinsicType::kPack4x8unorm;
 
   auto* call = pack4 ? Call(param.name, vec4<f32>(1.f, 2.f, 3.f, 4.f), 1.0f)
                      : Call(param.name, vec2<f32>(1.f, 2.f), 1.0f);
@@ -641,19 +641,19 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverIntrinsicTest_DataPacking,
     testing::Values(
-        IntrinsicData{"pack4x8snorm", IntrinsicType::kPack4x8Snorm},
-        IntrinsicData{"pack4x8unorm", IntrinsicType::kPack4x8Unorm},
-        IntrinsicData{"pack2x16snorm", IntrinsicType::kPack2x16Snorm},
-        IntrinsicData{"pack2x16unorm", IntrinsicType::kPack2x16Unorm},
-        IntrinsicData{"pack2x16float", IntrinsicType::kPack2x16Float}));
+        IntrinsicData{"pack4x8snorm", IntrinsicType::kPack4x8snorm},
+        IntrinsicData{"pack4x8unorm", IntrinsicType::kPack4x8unorm},
+        IntrinsicData{"pack2x16snorm", IntrinsicType::kPack2x16snorm},
+        IntrinsicData{"pack2x16unorm", IntrinsicType::kPack2x16unorm},
+        IntrinsicData{"pack2x16float", IntrinsicType::kPack2x16float}));
 
 using ResolverIntrinsicTest_DataUnpacking =
     ResolverTestWithParam<IntrinsicData>;
 TEST_P(ResolverIntrinsicTest_DataUnpacking, InferType) {
   auto param = GetParam();
 
-  bool pack4 = param.intrinsic == IntrinsicType::kUnpack4x8Snorm ||
-               param.intrinsic == IntrinsicType::kUnpack4x8Unorm;
+  bool pack4 = param.intrinsic == IntrinsicType::kUnpack4x8snorm ||
+               param.intrinsic == IntrinsicType::kUnpack4x8unorm;
 
   auto* call = Call(param.name, 1u);
   WrapInFunction(call);
@@ -672,11 +672,11 @@ INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverIntrinsicTest_DataUnpacking,
     testing::Values(
-        IntrinsicData{"unpack4x8snorm", IntrinsicType::kUnpack4x8Snorm},
-        IntrinsicData{"unpack4x8unorm", IntrinsicType::kUnpack4x8Unorm},
-        IntrinsicData{"unpack2x16snorm", IntrinsicType::kUnpack2x16Snorm},
-        IntrinsicData{"unpack2x16unorm", IntrinsicType::kUnpack2x16Unorm},
-        IntrinsicData{"unpack2x16float", IntrinsicType::kUnpack2x16Float}));
+        IntrinsicData{"unpack4x8snorm", IntrinsicType::kUnpack4x8snorm},
+        IntrinsicData{"unpack4x8unorm", IntrinsicType::kUnpack4x8unorm},
+        IntrinsicData{"unpack2x16snorm", IntrinsicType::kUnpack2x16snorm},
+        IntrinsicData{"unpack2x16unorm", IntrinsicType::kUnpack2x16unorm},
+        IntrinsicData{"unpack2x16float", IntrinsicType::kUnpack2x16float}));
 
 using ResolverIntrinsicTest_SingleParam = ResolverTestWithParam<IntrinsicData>;
 TEST_P(ResolverIntrinsicTest_SingleParam, Scalar) {

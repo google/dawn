@@ -327,10 +327,10 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
     if (intrinsic->IsTexture()) {
       return EmitTextureCall(expr, intrinsic);
     }
-    if (intrinsic->Type() == sem::IntrinsicType::kPack2x16Float ||
-        intrinsic->Type() == sem::IntrinsicType::kUnpack2x16Float) {
+    if (intrinsic->Type() == sem::IntrinsicType::kPack2x16float ||
+        intrinsic->Type() == sem::IntrinsicType::kUnpack2x16float) {
       make_indent();
-      if (intrinsic->Type() == sem::IntrinsicType::kPack2x16Float) {
+      if (intrinsic->Type() == sem::IntrinsicType::kPack2x16float) {
         out_ << "as_type<uint>(half2(";
       } else {
         out_ << "float2(as_type<half2>(";
@@ -775,16 +775,16 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kFaceForward:
       out += "faceforward";
       break;
-    case sem::IntrinsicType::kPack4x8Snorm:
+    case sem::IntrinsicType::kPack4x8snorm:
       out += "pack_float_to_snorm4x8";
       break;
-    case sem::IntrinsicType::kPack4x8Unorm:
+    case sem::IntrinsicType::kPack4x8unorm:
       out += "pack_float_to_unorm4x8";
       break;
-    case sem::IntrinsicType::kPack2x16Snorm:
+    case sem::IntrinsicType::kPack2x16snorm:
       out += "pack_float_to_snorm2x16";
       break;
-    case sem::IntrinsicType::kPack2x16Unorm:
+    case sem::IntrinsicType::kPack2x16unorm:
       out += "pack_float_to_unorm2x16";
       break;
     case sem::IntrinsicType::kReverseBits:
@@ -799,16 +799,16 @@ std::string GeneratorImpl::generate_builtin_name(
     case sem::IntrinsicType::kInverseSqrt:
       out += "rsqrt";
       break;
-    case sem::IntrinsicType::kUnpack4x8Snorm:
+    case sem::IntrinsicType::kUnpack4x8snorm:
       out += "unpack_snorm4x8_to_float";
       break;
-    case sem::IntrinsicType::kUnpack4x8Unorm:
+    case sem::IntrinsicType::kUnpack4x8unorm:
       out += "unpack_unorm4x8_to_float";
       break;
-    case sem::IntrinsicType::kUnpack2x16Snorm:
+    case sem::IntrinsicType::kUnpack2x16snorm:
       out += "unpack_snorm2x16_to_float";
       break;
-    case sem::IntrinsicType::kUnpack2x16Unorm:
+    case sem::IntrinsicType::kUnpack2x16unorm:
       out += "unpack_unorm2x16_to_float";
       break;
     default:

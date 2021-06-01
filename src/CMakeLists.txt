@@ -246,6 +246,8 @@ set(TINT_LIB_SRCS
   sem/function.cc
   sem/info.cc
   sem/info.h
+  sem/intrinsic_type.cc
+  sem/intrinsic_type.h
   sem/intrinsic.cc
   sem/intrinsic.h
   sem/member_accessor_expression.cc

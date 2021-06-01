@@ -1056,11 +1056,11 @@ Impl::Impl() {
   Register(I::kModf,            f32,         {f32, ptr_f32}                                           ); // NOLINT
   Register(I::kModf,            vecN_f32,    {vecN_f32, ptr_vecN_f32}                                 ); // NOLINT
   Register(I::kNormalize,       vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kPack2x16Float,   u32,         {vec2_f32}                                               ); // NOLINT
-  Register(I::kPack2x16Snorm,   u32,         {vec2_f32}                                               ); // NOLINT
-  Register(I::kPack2x16Unorm,   u32,         {vec2_f32}                                               ); // NOLINT
-  Register(I::kPack4x8Snorm,    u32,         {vec4_f32}                                               ); // NOLINT
-  Register(I::kPack4x8Unorm,    u32,         {vec4_f32}                                               ); // NOLINT
+  Register(I::kPack2x16float,   u32,         {vec2_f32}                                               ); // NOLINT
+  Register(I::kPack2x16snorm,   u32,         {vec2_f32}                                               ); // NOLINT
+  Register(I::kPack2x16unorm,   u32,         {vec2_f32}                                               ); // NOLINT
+  Register(I::kPack4x8snorm,    u32,         {vec4_f32}                                               ); // NOLINT
+  Register(I::kPack4x8unorm,    u32,         {vec4_f32}                                               ); // NOLINT
   Register(I::kPow,             f32,         {f32, f32}                                               ); // NOLINT
   Register(I::kPow,             vecN_f32,    {vecN_f32, vecN_f32}                                     ); // NOLINT
   Register(I::kReflect,         f32,         {f32, f32}                                               ); // NOLINT
@@ -1090,11 +1090,11 @@ Impl::Impl() {
   Register(I::kTanh,            vecN_f32,    {vecN_f32}                                               ); // NOLINT
   Register(I::kTrunc,           f32,         {f32}                                                    ); // NOLINT
   Register(I::kTrunc,           vecN_f32,    {vecN_f32}                                               ); // NOLINT
-  Register(I::kUnpack2x16Float, vec2_f32,    {u32}                                                    ); // NOLINT
-  Register(I::kUnpack2x16Snorm, vec2_f32,    {u32}                                                    ); // NOLINT
-  Register(I::kUnpack2x16Unorm, vec2_f32,    {u32}                                                    ); // NOLINT
-  Register(I::kUnpack4x8Snorm,  vec4_f32,    {u32}                                                    ); // NOLINT
-  Register(I::kUnpack4x8Unorm,  vec4_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kUnpack2x16float, vec2_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kUnpack2x16snorm, vec2_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kUnpack2x16unorm, vec2_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kUnpack4x8snorm,  vec4_f32,    {u32}                                                    ); // NOLINT
+  Register(I::kUnpack4x8unorm,  vec4_f32,    {u32}                                                    ); // NOLINT
   Register(I::kWorkgroupBarrier,void_,       {}                                                       ); // NOLINT
   // clang-format on
 

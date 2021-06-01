@@ -689,21 +689,21 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
   uint32_t dims = 2;
   bool is_signed = false;
   uint32_t scale = 65535;
-  if (intrinsic->Type() == sem::IntrinsicType::kPack4x8Snorm ||
-      intrinsic->Type() == sem::IntrinsicType::kPack4x8Unorm) {
+  if (intrinsic->Type() == sem::IntrinsicType::kPack4x8snorm ||
+      intrinsic->Type() == sem::IntrinsicType::kPack4x8unorm) {
     dims = 4;
     scale = 255;
   }
-  if (intrinsic->Type() == sem::IntrinsicType::kPack4x8Snorm ||
-      intrinsic->Type() == sem::IntrinsicType::kPack2x16Snorm) {
+  if (intrinsic->Type() == sem::IntrinsicType::kPack4x8snorm ||
+      intrinsic->Type() == sem::IntrinsicType::kPack2x16snorm) {
     is_signed = true;
     scale = (scale - 1) / 2;
   }
   switch (intrinsic->Type()) {
-    case sem::IntrinsicType::kPack4x8Snorm:
-    case sem::IntrinsicType::kPack4x8Unorm:
-    case sem::IntrinsicType::kPack2x16Snorm:
-    case sem::IntrinsicType::kPack2x16Unorm:
+    case sem::IntrinsicType::kPack4x8snorm:
+    case sem::IntrinsicType::kPack4x8unorm:
+    case sem::IntrinsicType::kPack2x16snorm:
+    case sem::IntrinsicType::kPack2x16unorm:
       pre << (is_signed ? "" : "u") << "int" << dims << " " << tmp_name << " = "
           << (is_signed ? "" : "u") << "int" << dims << "(round(clamp("
           << expr_out.str() << ", " << (is_signed ? "-1.0" : "0.0")
@@ -722,7 +722,7 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& pre,
       }
       out << ")";
       break;
-    case sem::IntrinsicType::kPack2x16Float:
+    case sem::IntrinsicType::kPack2x16float:
       pre << "uint2 " << tmp_name << " = f32tof16(" << expr_out.str() << ");\n";
       out << "(" << tmp_name << ".x | " << tmp_name << ".y << 16)";
       break;
@@ -748,19 +748,19 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& pre,
   uint32_t dims = 2;
   bool is_signed = false;
   uint32_t scale = 65535;
-  if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8Snorm ||
-      intrinsic->Type() == sem::IntrinsicType::kUnpack4x8Unorm) {
+  if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8snorm ||
+      intrinsic->Type() == sem::IntrinsicType::kUnpack4x8unorm) {
     dims = 4;
     scale = 255;
   }
-  if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8Snorm ||
-      intrinsic->Type() == sem::IntrinsicType::kUnpack2x16Snorm) {
+  if (intrinsic->Type() == sem::IntrinsicType::kUnpack4x8snorm ||
+      intrinsic->Type() == sem::IntrinsicType::kUnpack2x16snorm) {
     is_signed = true;
     scale = (scale - 1) / 2;
   }
   switch (intrinsic->Type()) {
-    case sem::IntrinsicType::kUnpack4x8Snorm:
-    case sem::IntrinsicType::kUnpack2x16Snorm: {
+    case sem::IntrinsicType::kUnpack4x8snorm:
+    case sem::IntrinsicType::kUnpack2x16snorm: {
       auto tmp_name2 = generate_name(kTempNamePrefix);
       pre << "int " << tmp_name2 << " = int(" << expr_out.str() << ");\n";
       // Perform sign extension on the converted values.
@@ -776,8 +776,8 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& pre,
           << ".0, " << (is_signed ? "-1.0" : "0.0") << ", 1.0)";
       break;
     }
-    case sem::IntrinsicType::kUnpack4x8Unorm:
-    case sem::IntrinsicType::kUnpack2x16Unorm: {
+    case sem::IntrinsicType::kUnpack4x8unorm:
+    case sem::IntrinsicType::kUnpack2x16unorm: {
       auto tmp_name2 = generate_name(kTempNamePrefix);
       pre << "uint " << tmp_name2 << " = " << expr_out.str() << ";\n";
       pre << "uint" << dims << " " << tmp_name << " = uint" << dims << "(";
@@ -792,7 +792,7 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& pre,
       out << "float" << dims << "(" << tmp_name << ") / " << scale << ".0";
       break;
     }
-    case sem::IntrinsicType::kUnpack2x16Float:
+    case sem::IntrinsicType::kUnpack2x16float:
       pre << "uint " << tmp_name << " = " << expr_out.str() << ";\n";
       out << "f16tof32(uint2(" << tmp_name << " & 0xffff, " << tmp_name
           << " >> 16))";

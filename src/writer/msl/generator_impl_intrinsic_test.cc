@@ -143,16 +143,16 @@ ast::CallExpression* GenerateCall(IntrinsicType intrinsic,
       return builder->Call(str.str(), "f2", "f2", "b2");
     case IntrinsicType::kDeterminant:
       return builder->Call(str.str(), "m2x2");
-    case IntrinsicType::kPack2x16Snorm:
-    case IntrinsicType::kPack2x16Unorm:
+    case IntrinsicType::kPack2x16snorm:
+    case IntrinsicType::kPack2x16unorm:
       return builder->Call(str.str(), "f2");
-    case IntrinsicType::kPack4x8Snorm:
-    case IntrinsicType::kPack4x8Unorm:
+    case IntrinsicType::kPack4x8snorm:
+    case IntrinsicType::kPack4x8unorm:
       return builder->Call(str.str(), "f4");
-    case IntrinsicType::kUnpack4x8Snorm:
-    case IntrinsicType::kUnpack4x8Unorm:
-    case IntrinsicType::kUnpack2x16Snorm:
-    case IntrinsicType::kUnpack2x16Unorm:
+    case IntrinsicType::kUnpack4x8snorm:
+    case IntrinsicType::kUnpack4x8unorm:
+    case IntrinsicType::kUnpack2x16snorm:
+    case IntrinsicType::kUnpack2x16unorm:
       return builder->Call(str.str(), "u1");
     case IntrinsicType::kWorkgroupBarrier:
       return builder->Call(str.str());
@@ -243,13 +243,13 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{IntrinsicType::kMin, ParamType::kF32, "fmin"},
         IntrinsicData{IntrinsicType::kMin, ParamType::kU32, "min"},
         IntrinsicData{IntrinsicType::kNormalize, ParamType::kF32, "normalize"},
-        IntrinsicData{IntrinsicType::kPack4x8Snorm, ParamType::kF32,
+        IntrinsicData{IntrinsicType::kPack4x8snorm, ParamType::kF32,
                       "pack_float_to_snorm4x8"},
-        IntrinsicData{IntrinsicType::kPack4x8Unorm, ParamType::kF32,
+        IntrinsicData{IntrinsicType::kPack4x8unorm, ParamType::kF32,
                       "pack_float_to_unorm4x8"},
-        IntrinsicData{IntrinsicType::kPack2x16Snorm, ParamType::kF32,
+        IntrinsicData{IntrinsicType::kPack2x16snorm, ParamType::kF32,
                       "pack_float_to_snorm2x16"},
-        IntrinsicData{IntrinsicType::kPack2x16Unorm, ParamType::kF32,
+        IntrinsicData{IntrinsicType::kPack2x16unorm, ParamType::kF32,
                       "pack_float_to_unorm2x16"},
         IntrinsicData{IntrinsicType::kPow, ParamType::kF32, "pow"},
         IntrinsicData{IntrinsicType::kReflect, ParamType::kF32, "reflect"},
@@ -267,13 +267,13 @@ INSTANTIATE_TEST_SUITE_P(
         IntrinsicData{IntrinsicType::kTan, ParamType::kF32, "tan"},
         IntrinsicData{IntrinsicType::kTanh, ParamType::kF32, "tanh"},
         IntrinsicData{IntrinsicType::kTrunc, ParamType::kF32, "trunc"},
-        IntrinsicData{IntrinsicType::kUnpack4x8Snorm, ParamType::kU32,
+        IntrinsicData{IntrinsicType::kUnpack4x8snorm, ParamType::kU32,
                       "unpack_snorm4x8_to_float"},
-        IntrinsicData{IntrinsicType::kUnpack4x8Unorm, ParamType::kU32,
+        IntrinsicData{IntrinsicType::kUnpack4x8unorm, ParamType::kU32,
                       "unpack_unorm4x8_to_float"},
-        IntrinsicData{IntrinsicType::kUnpack2x16Snorm, ParamType::kU32,
+        IntrinsicData{IntrinsicType::kUnpack2x16snorm, ParamType::kU32,
                       "unpack_snorm2x16_to_float"},
-        IntrinsicData{IntrinsicType::kUnpack2x16Unorm, ParamType::kU32,
+        IntrinsicData{IntrinsicType::kUnpack2x16unorm, ParamType::kU32,
                       "unpack_unorm2x16_to_float"}));
 
 TEST_F(MslGeneratorImplTest, Intrinsic_Call) {

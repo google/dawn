@@ -463,6 +463,8 @@ libtint_source_set("libtint_core_all_src") {
     "sem/i32_type.cc",
     "sem/i32_type.h",
     "sem/info.h",
+    "sem/intrinsic_type.cc",
+    "sem/intrinsic_type.h",
     "sem/intrinsic.h",
     "sem/matrix_type.cc",
     "sem/matrix_type.h",

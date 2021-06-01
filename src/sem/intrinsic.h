@@ -18,108 +18,10 @@
 #include <string>
 
 #include "src/sem/call_target.h"
+#include "src/sem/intrinsic_type.h"
 
 namespace tint {
 namespace sem {
-
-enum class IntrinsicType {
-  kNone = -1,
-
-  kAbs,
-  kAcos,
-  kAll,
-  kAny,
-  kArrayLength,
-  kAsin,
-  kAtan,
-  kAtan2,
-  kCeil,
-  kClamp,
-  kCos,
-  kCosh,
-  kCountOneBits,
-  kCross,
-  kDeterminant,
-  kDistance,
-  kDot,
-  kDpdx,
-  kDpdxCoarse,
-  kDpdxFine,
-  kDpdy,
-  kDpdyCoarse,
-  kDpdyFine,
-  kExp,
-  kExp2,
-  kFaceForward,
-  kFloor,
-  kFma,
-  kFract,
-  kFrexp,
-  kFwidth,
-  kFwidthCoarse,
-  kFwidthFine,
-  kInverseSqrt,
-  kIsFinite,
-  kIsInf,
-  kIsNan,
-  kIsNormal,
-  kLdexp,
-  kLength,
-  kLog,
-  kLog2,
-  kMax,
-  kMin,
-  kMix,
-  kModf,
-  kNormalize,
-  kPack2x16Float,
-  kPack2x16Snorm,
-  kPack2x16Unorm,
-  kPack4x8Snorm,
-  kPack4x8Unorm,
-  kPow,
-  kReflect,
-  kReverseBits,
-  kRound,
-  kSelect,
-  kSign,
-  kSin,
-  kSinh,
-  kSmoothStep,
-  kSqrt,
-  kStep,
-  kStorageBarrier,
-  kTan,
-  kTanh,
-  kTextureDimensions,
-  kTextureLoad,
-  kTextureNumLayers,
-  kTextureNumLevels,
-  kTextureNumSamples,
-  kTextureSample,
-  kTextureSampleBias,
-  kTextureSampleCompare,
-  kTextureSampleGrad,
-  kTextureSampleLevel,
-  kTextureStore,
-  kTrunc,
-  kUnpack2x16Float,
-  kUnpack2x16Snorm,
-  kUnpack2x16Unorm,
-  kUnpack4x8Snorm,
-  kUnpack4x8Unorm,
-  kWorkgroupBarrier,
-};
-
-/// Matches the IntrisicType by name
-/// @param name the intrinsic name to parse
-/// @returns the parsed IntrinsicType, or IntrinsicType::kNone if `name` did not
-/// match any intrinsic.
-IntrinsicType ParseIntrinsicType(const std::string& name);
-
-/// @returns the name of the intrinsic function type. The spelling, including
-/// case, matches the name in the WGSL spec.
-const char* str(IntrinsicType i);
 
 /// Determines if the given `i` is a coarse derivative
 /// @param i the intrinsic type
