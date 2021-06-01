@@ -1,0 +1,32 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/intrinsic-gen to generate parameter_usage.h
+
+See:
+* tools/cmd/intrinsic-gen/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+#ifndef SRC_SEM_PARAMETER_USAGE_H_
+#define SRC_SEM_PARAMETER_USAGE_H_
+
+namespace tint {
+namespace sem {
+
+/// ParameterUsage is extra metadata for identifying a parameter based on its
+/// overload position
+enum class ParameterUsage {
+  kNone = -1,
+{{- range .Sem.UniqueParameterNames  }}
+  k{{PascalCase .}},
+{{- end  }}
+};
+
+/// @returns a string representation of the given parameter usage.
+const char* str(ParameterUsage usage);
+
+}  // namespace sem
+}  // namespace tint
+
+#endif  // SRC_SEM_PARAMETER_USAGE_H_

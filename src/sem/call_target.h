@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "src/sem/node.h"
+#include "src/sem/parameter_usage.h"
 #include "src/sem/sampler_type.h"
 
 namespace tint {
@@ -28,28 +29,10 @@ class Type;
 
 /// Parameter describes a single parameter of a call target
 struct Parameter {
-  /// Usage is extra metadata for identifying a parameter based on its overload
-  /// position
-  enum class Usage {
-    kNone,
-    kArrayIndex,
-    kBias,
-    kCoords,
-    kDepthRef,
-    kDdx,
-    kDdy,
-    kLevel,
-    kOffset,
-    kSampler,
-    kSampleIndex,
-    kTexture,
-    kValue,
-  };
-
   /// Parameter type
   sem::Type* const type;
   /// Parameter usage
-  Usage const usage = Usage::kNone;
+  ParameterUsage const usage = ParameterUsage::kNone;
 };
 
 std::ostream& operator<<(std::ostream& out, Parameter parameter);
@@ -59,9 +42,6 @@ static inline bool operator==(const Parameter& a, const Parameter& b) {
   return a.type == b.type && a.usage == b.usage;
 }
 
-/// @returns a string representation of the given parameter usage.
-const char* str(Parameter::Usage usage);
-
 /// ParameterList is a list of Parameter
 using ParameterList = std::vector<Parameter>;
 
@@ -69,7 +49,7 @@ using ParameterList = std::vector<Parameter>;
 /// @param usage the parameter usage to find
 /// @returns the index of the parameter with the given usage, or -1 if no
 /// parameter with the given usage exists.
-int IndexOf(const ParameterList& parameters, Parameter::Usage usage);
+int IndexOf(const ParameterList& parameters, ParameterUsage usage);
 
 /// CallTarget is the base for callable functions
 class CallTarget : public Castable<CallTarget, Node> {

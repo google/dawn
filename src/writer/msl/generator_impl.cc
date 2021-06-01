@@ -464,7 +464,7 @@ bool GeneratorImpl::EmitCall(ast::CallExpression* expr) {
 
 bool GeneratorImpl::EmitTextureCall(ast::CallExpression* expr,
                                     const sem::Intrinsic* intrinsic) {
-  using Usage = sem::Parameter::Usage;
+  using Usage = sem::ParameterUsage;
 
   auto parameters = intrinsic->Parameters();
   auto arguments = expr->params();

@@ -33,7 +33,7 @@ ParameterList GetParameters(const std::vector<const Variable*>& params) {
   ParameterList parameters;
   parameters.reserve(params.size());
   for (auto* param : params) {
-    parameters.emplace_back(Parameter{param->Type(), Parameter::Usage::kNone});
+    parameters.emplace_back(Parameter{param->Type(), ParameterUsage::kNone});
   }
   return parameters;
 }

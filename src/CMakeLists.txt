@@ -251,6 +251,8 @@ set(TINT_LIB_SRCS
   sem/intrinsic.cc
   sem/intrinsic.h
   sem/member_accessor_expression.cc
+  sem/parameter_usage.cc
+  sem/parameter_usage.h
   sem/node.cc
   sem/node.h
   sem/statement.cc

@@ -827,7 +827,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& pre,
                                     std::ostream& out,
                                     ast::CallExpression* expr,
                                     const sem::Intrinsic* intrinsic) {
-  using Usage = sem::Parameter::Usage;
+  using Usage = sem::ParameterUsage;
 
   auto parameters = intrinsic->Parameters();
   auto arguments = expr->params();

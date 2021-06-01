@@ -665,10 +665,10 @@ class Impl : public IntrinsicTable {
     Parameter(
         Builder* m)  // NOLINT - implicit constructor required for Register()
         : matcher(m) {}
-    Parameter(sem::Parameter::Usage u, Builder* m) : matcher(m), usage(u) {}
+    Parameter(sem::ParameterUsage u, Builder* m) : matcher(m), usage(u) {}
 
     Builder* const matcher;
-    sem::Parameter::Usage const usage = sem::Parameter::Usage::kNone;
+    sem::ParameterUsage const usage = sem::ParameterUsage::kNone;
   };
 
   /// A single overload definition.
@@ -1145,18 +1145,18 @@ Impl::Impl() {
   auto* sampler = this->sampler(ast::SamplerKind::kSampler);
   auto* sampler_comparison =
       this->sampler(ast::SamplerKind::kComparisonSampler);
-  auto t = sem::Parameter::Usage::kTexture;
-  auto s = sem::Parameter::Usage::kSampler;
-  auto coords = sem::Parameter::Usage::kCoords;
-  auto array_index = sem::Parameter::Usage::kArrayIndex;
-  auto ddx = sem::Parameter::Usage::kDdx;
-  auto ddy = sem::Parameter::Usage::kDdy;
-  auto depth_ref = sem::Parameter::Usage::kDepthRef;
-  auto bias = sem::Parameter::Usage::kBias;
-  auto level = sem::Parameter::Usage::kLevel;
-  auto offset = sem::Parameter::Usage::kOffset;
-  auto value = sem::Parameter::Usage::kValue;
-  auto sample_index = sem::Parameter::Usage::kSampleIndex;
+  auto t = sem::ParameterUsage::kTexture;
+  auto s = sem::ParameterUsage::kSampler;
+  auto coords = sem::ParameterUsage::kCoords;
+  auto array_index = sem::ParameterUsage::kArrayIndex;
+  auto ddx = sem::ParameterUsage::kDdx;
+  auto ddy = sem::ParameterUsage::kDdy;
+  auto depth_ref = sem::ParameterUsage::kDepthRef;
+  auto bias = sem::ParameterUsage::kBias;
+  auto level = sem::ParameterUsage::kLevel;
+  auto offset = sem::ParameterUsage::kOffset;
+  auto value = sem::ParameterUsage::kValue;
+  auto sample_index = sem::ParameterUsage::kSampleIndex;
 
   // clang-format off
 
@@ -1302,7 +1302,7 @@ std::string str(const Impl::Overload& overload) {
         ss << ", ";
       }
       first = false;
-      if (param.usage != sem::Parameter::Usage::kNone) {
+      if (param.usage != sem::ParameterUsage::kNone) {
         ss << sem::str(param.usage) << " : ";
       }
       ss << param.matcher->str();

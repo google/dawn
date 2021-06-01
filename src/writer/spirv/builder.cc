@@ -2298,7 +2298,7 @@ bool Builder::GenerateTextureIntrinsic(ast::CallExpression* call,
                                        const sem::Intrinsic* intrinsic,
                                        Operand result_type,
                                        Operand result_id) {
-  using Usage = sem::Parameter::Usage;
+  using Usage = sem::ParameterUsage;
 
   auto parameters = intrinsic->Parameters();
   auto arguments = call->params();

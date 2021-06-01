@@ -31,6 +31,7 @@ using ::testing::HasSubstr;
 
 using IntrinsicType = sem::IntrinsicType;
 using Parameter = sem::Parameter;
+using ParameterUsage = sem::ParameterUsage;
 
 class IntrinsicTableTest : public testing::Test, public ProgramBuilder {
  public:
@@ -87,9 +88,9 @@ TEST_F(IntrinsicTableTest, MatchI32) {
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), vec4_f32);
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{i32, Parameter::Usage::kCoords},
-                          Parameter{i32, Parameter::Usage::kLevel}));
+              ElementsAre(Parameter{tex, ParameterUsage::kTexture},
+                          Parameter{i32, ParameterUsage::kCoords},
+                          Parameter{i32, ParameterUsage::kLevel}));
 }
 
 TEST_F(IntrinsicTableTest, MismatchI32) {
@@ -250,9 +251,9 @@ TEST_F(IntrinsicTableTest, MatchSampler) {
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureSample);
   EXPECT_THAT(result.intrinsic->ReturnType(), vec4_f32);
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{sampler, Parameter::Usage::kSampler},
-                          Parameter{vec2_f32, Parameter::Usage::kCoords}));
+              ElementsAre(Parameter{tex, ParameterUsage::kTexture},
+                          Parameter{sampler, ParameterUsage::kSampler},
+                          Parameter{vec2_f32, ParameterUsage::kCoords}));
 }
 
 TEST_F(IntrinsicTableTest, MismatchSampler) {
@@ -278,9 +279,9 @@ TEST_F(IntrinsicTableTest, MatchSampledTexture) {
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), vec4_f32);
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{vec2_i32, Parameter::Usage::kCoords},
-                          Parameter{i32, Parameter::Usage::kLevel}));
+              ElementsAre(Parameter{tex, ParameterUsage::kTexture},
+                          Parameter{vec2_i32, ParameterUsage::kCoords},
+                          Parameter{i32, ParameterUsage::kLevel}));
 }
 
 TEST_F(IntrinsicTableTest, MatchMultisampledTexture) {
@@ -296,9 +297,9 @@ TEST_F(IntrinsicTableTest, MatchMultisampledTexture) {
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), vec4_f32);
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{vec2_i32, Parameter::Usage::kCoords},
-                          Parameter{i32, Parameter::Usage::kSampleIndex}));
+              ElementsAre(Parameter{tex, ParameterUsage::kTexture},
+                          Parameter{vec2_i32, ParameterUsage::kCoords},
+                          Parameter{i32, ParameterUsage::kSampleIndex}));
 }
 
 TEST_F(IntrinsicTableTest, MatchDepthTexture) {
@@ -313,9 +314,9 @@ TEST_F(IntrinsicTableTest, MatchDepthTexture) {
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), f32);
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{vec2_i32, Parameter::Usage::kCoords},
-                          Parameter{i32, Parameter::Usage::kLevel}));
+              ElementsAre(Parameter{tex, ParameterUsage::kTexture},
+                          Parameter{vec2_i32, ParameterUsage::kCoords},
+                          Parameter{i32, ParameterUsage::kLevel}));
 }
 
 TEST_F(IntrinsicTableTest, MatchExternalTexture) {
@@ -331,8 +332,8 @@ TEST_F(IntrinsicTableTest, MatchExternalTexture) {
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), vec4_f32);
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{vec2_i32, Parameter::Usage::kCoords}));
+              ElementsAre(Parameter{tex, ParameterUsage::kTexture},
+                          Parameter{vec2_i32, ParameterUsage::kCoords}));
 }
 
 TEST_F(IntrinsicTableTest, MatchROStorageTexture) {
@@ -353,8 +354,8 @@ TEST_F(IntrinsicTableTest, MatchROStorageTexture) {
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureLoad);
   EXPECT_THAT(result.intrinsic->ReturnType(), vec4_f32);
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{vec2_i32, Parameter::Usage::kCoords}));
+              ElementsAre(Parameter{tex, ParameterUsage::kTexture},
+                          Parameter{vec2_i32, ParameterUsage::kCoords}));
 }
 
 TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
@@ -375,9 +376,9 @@ TEST_F(IntrinsicTableTest, MatchWOStorageTexture) {
   EXPECT_THAT(result.intrinsic->Type(), IntrinsicType::kTextureStore);
   EXPECT_TRUE(result.intrinsic->ReturnType()->Is<sem::Void>());
   EXPECT_THAT(result.intrinsic->Parameters(),
-              ElementsAre(Parameter{tex, Parameter::Usage::kTexture},
-                          Parameter{vec2_i32, Parameter::Usage::kCoords},
-                          Parameter{vec4_f32, Parameter::Usage::kValue}));
+              ElementsAre(Parameter{tex, ParameterUsage::kTexture},
+                          Parameter{vec2_i32, ParameterUsage::kCoords},
+                          Parameter{vec4_f32, ParameterUsage::kValue}));
 }
 
 TEST_F(IntrinsicTableTest, MismatchTexture) {

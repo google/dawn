@@ -1,0 +1,29 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/intrinsic-gen to generate parameter_usage.cc
+
+See:
+* tools/cmd/intrinsic-gen/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+#include "src/sem/parameter_usage.h"
+
+namespace tint {
+namespace sem {
+
+const char* str(ParameterUsage usage) {
+  switch (usage) {
+    case ParameterUsage::kNone:
+      return "none";
+{{- range .Sem.UniqueParameterNames  }}
+    case ParameterUsage::k{{PascalCase .}}:
+      return "{{.}}";
+{{- end  }}
+  }
+  return "<unknown>";
+}
+
+}  // namespace sem
+}  // namespace tint
