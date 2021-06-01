@@ -15,6 +15,8 @@
 #include "dawn_native/BindGroupLayout.h"
 
 #include "common/BitSetIterator.h"
+
+#include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/ObjectContentHasher.h"
 #include "dawn_native/PerStage.h"
@@ -147,10 +149,16 @@ namespace dawn_native {
                 }
             }
 
+            const ExternalTextureBindingLayout* externalTextureBindingLayout = nullptr;
+            FindInChain(entry.nextInChain, &externalTextureBindingLayout);
+            if (externalTextureBindingLayout != nullptr) {
+                bindingMemberCount++;
+            }
+
             if (bindingMemberCount != 1) {
                 return DAWN_VALIDATION_ERROR(
-                    "Exactly one of buffer, sampler, texture, or storageTexture must be set for "
-                    "each BindGroupLayoutEntry");
+                    "Exactly one of buffer, sampler, texture, storageTexture, or externalTexture "
+                    "must be set for each BindGroupLayoutEntry");
             }
 
             if (!IsSubset(entry.visibility, allowedStages)) {
@@ -190,6 +198,8 @@ namespace dawn_native {
                     return a.storageTexture.access != b.storageTexture.access ||
                            a.storageTexture.viewDimension != b.storageTexture.viewDimension ||
                            a.storageTexture.format != b.storageTexture.format;
+                case BindingInfoType::ExternalTexture:
+                    return false;
             }
         }
 
@@ -228,6 +238,12 @@ namespace dawn_native {
 
                 if (binding.storageTexture.viewDimension == wgpu::TextureViewDimension::Undefined) {
                     bindingInfo.storageTexture.viewDimension = wgpu::TextureViewDimension::e2D;
+                }
+            } else {
+                const ExternalTextureBindingLayout* externalTextureBindingLayout = nullptr;
+                FindInChain(binding.nextInChain, &externalTextureBindingLayout);
+                if (externalTextureBindingLayout != nullptr) {
+                    bindingInfo.bindingType = BindingInfoType::ExternalTexture;
                 }
             }
 
@@ -308,6 +324,8 @@ namespace dawn_native {
                     if (aInfo.storageTexture.format != bInfo.storageTexture.format) {
                         return aInfo.storageTexture.format < bInfo.storageTexture.format;
                     }
+                    break;
+                case BindingInfoType::ExternalTexture:
                     break;
             }
             return false;

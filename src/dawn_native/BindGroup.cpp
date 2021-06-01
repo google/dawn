@@ -19,7 +19,9 @@
 #include "common/ityp_bitset.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
+#include "dawn_native/ChainUtils_autogen.h"
 #include "dawn_native/Device.h"
+#include "dawn_native/ExternalTexture.h"
 #include "dawn_native/Sampler.h"
 #include "dawn_native/Texture.h"
 
@@ -33,7 +35,7 @@ namespace dawn_native {
                                          const BindGroupEntry& entry,
                                          const BindingInfo& bindingInfo) {
             if (entry.buffer == nullptr || entry.sampler != nullptr ||
-                entry.textureView != nullptr) {
+                entry.textureView != nullptr || entry.nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("Expected buffer binding");
             }
             DAWN_TRY(device->ValidateObject(entry.buffer));
@@ -111,7 +113,7 @@ namespace dawn_native {
                                           const BindGroupEntry& entry,
                                           const BindingInfo& bindingInfo) {
             if (entry.textureView == nullptr || entry.sampler != nullptr ||
-                entry.buffer != nullptr) {
+                entry.buffer != nullptr || entry.nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("Expected texture binding");
             }
             DAWN_TRY(device->ValidateObject(entry.textureView));
@@ -176,7 +178,7 @@ namespace dawn_native {
                                           const BindGroupEntry& entry,
                                           const BindingInfo& bindingInfo) {
             if (entry.sampler == nullptr || entry.textureView != nullptr ||
-                entry.buffer != nullptr) {
+                entry.buffer != nullptr || entry.nextInChain != nullptr) {
                 return DAWN_VALIDATION_ERROR("Expected sampler binding");
             }
             DAWN_TRY(device->ValidateObject(entry.sampler));
@@ -199,6 +201,25 @@ namespace dawn_native {
                     UNREACHABLE();
                     break;
             }
+
+            return {};
+        }
+
+        MaybeError ValidateExternalTextureBinding(const DeviceBase* device,
+                                                  const BindGroupEntry& entry,
+                                                  const BindingInfo& bindingInfo) {
+            const ExternalTextureBindingEntry* externalTextureBindingEntry = nullptr;
+            FindInChain(entry.nextInChain, &externalTextureBindingEntry);
+
+            if (entry.sampler != nullptr || entry.textureView != nullptr ||
+                entry.buffer != nullptr || externalTextureBindingEntry == nullptr) {
+                return DAWN_VALIDATION_ERROR("Expected external texture binding");
+            }
+
+            DAWN_TRY(ValidateSingleSType(externalTextureBindingEntry->nextInChain,
+                                         wgpu::SType::ExternalTextureBindingEntry));
+
+            DAWN_TRY(device->ValidateObject(externalTextureBindingEntry->externalTexture));
 
             return {};
         }
@@ -249,6 +270,9 @@ namespace dawn_native {
                     break;
                 case BindingInfoType::Sampler:
                     DAWN_TRY(ValidateSamplerBinding(device, entry, bindingInfo));
+                    break;
+                case BindingInfoType::ExternalTexture:
+                    DAWN_TRY(ValidateExternalTextureBinding(device, entry, bindingInfo));
                     break;
             }
         }
@@ -307,6 +331,14 @@ namespace dawn_native {
             if (entry.sampler != nullptr) {
                 ASSERT(mBindingData.bindings[bindingIndex] == nullptr);
                 mBindingData.bindings[bindingIndex] = entry.sampler;
+                continue;
+            }
+
+            const ExternalTextureBindingEntry* externalTextureBindingEntry = nullptr;
+            FindInChain(entry.nextInChain, &externalTextureBindingEntry);
+            if (externalTextureBindingEntry != nullptr) {
+                ASSERT(mBindingData.bindings[bindingIndex] == nullptr);
+                mBindingData.bindings[bindingIndex] = externalTextureBindingEntry->externalTexture;
                 continue;
             }
         }
@@ -386,6 +418,14 @@ namespace dawn_native {
                mLayout->GetBindingInfo(bindingIndex).bindingType ==
                    BindingInfoType::StorageTexture);
         return static_cast<TextureViewBase*>(mBindingData.bindings[bindingIndex].Get());
+    }
+
+    ExternalTextureBase* BindGroupBase::GetBindingAsExternalTexture(BindingIndex bindingIndex) {
+        ASSERT(!IsError());
+        ASSERT(bindingIndex < mLayout->GetBindingCount());
+        ASSERT(mLayout->GetBindingInfo(bindingIndex).bindingType ==
+               BindingInfoType::ExternalTexture);
+        return static_cast<ExternalTextureBase*>(mBindingData.bindings[bindingIndex].Get());
     }
 
 }  // namespace dawn_native

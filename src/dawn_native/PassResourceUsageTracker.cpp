@@ -17,6 +17,7 @@
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/Buffer.h"
 #include "dawn_native/EnumMaskIterator.h"
+#include "dawn_native/ExternalTexture.h"
 #include "dawn_native/Format.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/Texture.h"
@@ -109,6 +110,23 @@ namespace dawn_native {
                     break;
                 }
 
+                case BindingInfoType::ExternalTexture: {
+                    ExternalTextureBase* externalTexture =
+                        group->GetBindingAsExternalTexture(bindingIndex);
+
+                    const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& textureViews =
+                        externalTexture->GetTextureViews();
+
+                    // Only single-plane formats are supported right now, so assert only one
+                    // view exists.
+                    ASSERT(textureViews[1].Get() == nullptr);
+                    ASSERT(textureViews[2].Get() == nullptr);
+
+                    mExternalTextureUsages.insert(externalTexture);
+                    TextureViewUsedAs(textureViews[0].Get(), wgpu::TextureUsage::Sampled);
+                    break;
+                }
+
                 case BindingInfoType::Sampler:
                     break;
             }
@@ -132,8 +150,13 @@ namespace dawn_native {
             result.textureUsages.push_back(std::move(it.second));
         }
 
+        for (auto& it : mExternalTextureUsages) {
+            result.externalTextures.push_back(it);
+        }
+
         mBufferUsages.clear();
         mTextureUsages.clear();
+        mExternalTextureUsages.clear();
 
         return result;
     }
@@ -159,6 +182,22 @@ namespace dawn_native {
                 case BindingInfoType::Texture: {
                     mUsage.referencedTextures.insert(
                         group->GetBindingAsTextureView(index)->GetTexture());
+                    break;
+                }
+
+                case BindingInfoType::ExternalTexture: {
+                    ExternalTextureBase* externalTexture =
+                        group->GetBindingAsExternalTexture(index);
+                    const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& textureViews =
+                        externalTexture->GetTextureViews();
+
+                    // Only single-plane formats are supported right now, so assert only one
+                    // view exists.
+                    ASSERT(textureViews[1].Get() == nullptr);
+                    ASSERT(textureViews[2].Get() == nullptr);
+
+                    mUsage.referencedExternalTextures.insert(externalTexture);
+                    mUsage.referencedTextures.insert(textureViews[0].Get()->GetTexture());
                     break;
                 }
 

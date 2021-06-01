@@ -147,6 +147,15 @@ namespace dawn_native {
                 case BindingInfoType::StorageTexture:
                     entry.storageTexture = shaderBinding.storageTexture;
                     break;
+                case BindingInfoType::ExternalTexture:
+                    // TODO(dawn:728) On backend configurations that use SPIRV-Cross to reflect
+                    // shader info - the shader must have been already transformed prior to
+                    // reflecting the shader. During transformation, all instances of
+                    // texture_external are changed to texture_2d<f32>. This means that when
+                    // extracting shader info, external textures will be seen as sampled 2d
+                    // textures. In the future when Dawn no longer uses SPIRV-Cross, we should
+                    // handle external textures here.
+                    break;
             }
             return entry;
         };

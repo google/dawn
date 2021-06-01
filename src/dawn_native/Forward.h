@@ -30,6 +30,7 @@ namespace dawn_native {
     class CommandBufferBase;
     class CommandEncoder;
     class ComputePassEncoder;
+    class ExternalTextureBase;
     class Fence;
     class InstanceBase;
     class PipelineBase;

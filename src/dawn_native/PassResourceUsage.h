@@ -44,6 +44,8 @@ namespace dawn_native {
 
         std::vector<TextureBase*> textures;
         std::vector<TextureSubresourceUsage> textureUsages;
+
+        std::vector<ExternalTextureBase*> externalTextures;
     };
 
     // Contains all the resource usage data for a compute pass.
@@ -64,6 +66,7 @@ namespace dawn_native {
         // All the resources referenced by this compute pass for validation in Queue::Submit.
         std::set<BufferBase*> referencedBuffers;
         std::set<TextureBase*> referencedTextures;
+        std::set<ExternalTextureBase*> referencedExternalTextures;
     };
 
     // Contains all the resource usage data for a render pass.

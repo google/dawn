@@ -58,6 +58,7 @@ namespace dawn_native { namespace opengl {
                         break;
 
                     case BindingInfoType::Texture:
+                    case BindingInfoType::ExternalTexture:
                         mIndexInfo[group][bindingIndex] = sampledTextureIndex;
                         sampledTextureIndex++;
                         break;

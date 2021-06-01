@@ -25,6 +25,7 @@ namespace dawn_native {
 
     class BindGroupBase;
     class BufferBase;
+    class ExternalTextureBase;
     class QuerySetBase;
     class TextureBase;
 
@@ -46,6 +47,7 @@ namespace dawn_native {
       private:
         std::map<BufferBase*, wgpu::BufferUsage> mBufferUsages;
         std::map<TextureBase*, TextureSubresourceUsage> mTextureUsages;
+        std::set<ExternalTextureBase*> mExternalTextureUsages;
     };
 
     // Helper class to build ComputePassResourceUsages

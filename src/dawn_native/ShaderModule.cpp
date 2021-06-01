@@ -159,6 +159,8 @@ namespace dawn_native {
                 case tint::inspector::ResourceBinding::ResourceType::kReadOnlyStorageTexture:
                 case tint::inspector::ResourceBinding::ResourceType::kWriteOnlyStorageTexture:
                     return BindingInfoType::StorageTexture;
+                case tint::inspector::ResourceBinding::ResourceType::kExternalTexture:
+                    return BindingInfoType::ExternalTexture;
 
                 default:
                     UNREACHABLE();
@@ -503,9 +505,19 @@ namespace dawn_native {
                 const BindingInfo& layoutInfo = layout->GetBindingInfo(bindingIndex);
 
                 if (layoutInfo.bindingType != shaderInfo.bindingType) {
-                    return DAWN_VALIDATION_ERROR(
-                        "The binding type of the bind group layout entry conflicts " +
-                        GetShaderDeclarationString(group, bindingNumber));
+                    // TODO(dawn:728) On backend configurations that use SPIRV-Cross to reflect
+                    // shader info - the shader must have been already transformed prior to
+                    // reflecting the shader. During transformation, all instances of
+                    // texture_external are changed to texture_2d<f32>. This means that when
+                    // extracting shader info, external textures will be seen as sampled 2d
+                    // textures. In the future when Dawn no longer uses SPIRV-Cross, the
+                    // if-statement below should be removed.
+                    if (layoutInfo.bindingType != BindingInfoType::ExternalTexture ||
+                        shaderInfo.bindingType != BindingInfoType::Texture) {
+                        return DAWN_VALIDATION_ERROR(
+                            "The binding type of the bind group layout entry conflicts " +
+                            GetShaderDeclarationString(group, bindingNumber));
+                    }
                 }
 
                 if ((layoutInfo.visibility & StageBit(entryPoint.stage)) == 0) {
@@ -564,6 +576,17 @@ namespace dawn_native {
                                 "is different from " +
                                 GetShaderDeclarationString(group, bindingNumber));
                         }
+                        break;
+                    }
+
+                    case BindingInfoType::ExternalTexture: {
+                        // TODO(dawn:728) On backend configurations that use SPIRV-Cross to reflect
+                        // shader info - the shader must have been already transformed prior to
+                        // reflecting the shader. During transformation, all instances of
+                        // texture_external are changed to texture_2d<f32>. This means that when
+                        // extracting shader info, external textures will be seen as sampled 2d
+                        // textures. In the future when Dawn no longer uses SPIRV-Cross, we should
+                        // handle external textures here.
                         break;
                     }
 
@@ -755,6 +778,11 @@ namespace dawn_native {
                         }
                         case BindingInfoType::Sampler: {
                             info->sampler.type = wgpu::SamplerBindingType::Filtering;
+                            break;
+                        }
+                        case BindingInfoType::ExternalTexture: {
+                            return DAWN_VALIDATION_ERROR("External textures are not supported.");
+                            break;
                         }
                     }
                 }
@@ -993,6 +1021,8 @@ namespace dawn_native {
                             info->storageTexture.viewDimension =
                                 TintTextureDimensionToTextureViewDimension(resource.dim);
 
+                            break;
+                        case BindingInfoType::ExternalTexture:
                             break;
                         default:
                             return DAWN_VALIDATION_ERROR("Unknown binding type in Shader");

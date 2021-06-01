@@ -53,9 +53,14 @@ class BindGroupValidationTest : public ValidationTest {
         }
         { mSampler = device.CreateSampler(); }
         {
-            mSampledTexture =
-                CreateTexture(wgpu::TextureUsage::Sampled, wgpu::TextureFormat::RGBA8Unorm, 1);
+            mSampledTexture = CreateTexture(wgpu::TextureUsage::Sampled, kDefaultTextureFormat, 1);
             mSampledTextureView = mSampledTexture.CreateView();
+
+            wgpu::ExternalTextureDescriptor externalTextureDesc;
+            externalTextureDesc.format = kDefaultTextureFormat;
+            externalTextureDesc.plane0 = mSampledTextureView;
+            mExternalTexture = device.CreateExternalTexture(&externalTextureDesc);
+            mExternalTextureBindingEntry.externalTexture = mExternalTexture;
         }
     }
 
@@ -65,6 +70,12 @@ class BindGroupValidationTest : public ValidationTest {
     wgpu::Sampler mSampler;
     wgpu::Texture mSampledTexture;
     wgpu::TextureView mSampledTextureView;
+    wgpu::ExternalTextureBindingEntry mExternalTextureBindingEntry;
+
+    static constexpr wgpu::TextureFormat kDefaultTextureFormat = wgpu::TextureFormat::RGBA8Unorm;
+
+  private:
+    wgpu::ExternalTexture mExternalTexture;
 };
 
 // Test the validation of BindGroupDescriptor::nextInChain
@@ -159,6 +170,11 @@ TEST_F(BindGroupValidationTest, SamplerBindingType) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
     binding.buffer = nullptr;
 
+    // Setting the external texture view as well is an error
+    binding.nextInChain = &mExternalTextureBindingEntry;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    binding.nextInChain = nullptr;
+
     // Setting the sampler to an error sampler is an error.
     {
         wgpu::SamplerDescriptor samplerDesc;
@@ -208,10 +224,15 @@ TEST_F(BindGroupValidationTest, TextureBindingType) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
     binding.buffer = nullptr;
 
+    // Setting the external texture view as well is an error
+    binding.nextInChain = &mExternalTextureBindingEntry;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    binding.nextInChain = nullptr;
+
     // Setting the texture view to an error texture view is an error.
     {
         wgpu::TextureViewDescriptor viewDesc;
-        viewDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+        viewDesc.format = kDefaultTextureFormat;
         viewDesc.dimension = wgpu::TextureViewDimension::e2D;
         viewDesc.baseMipLevel = 0;
         viewDesc.mipLevelCount = 0;
@@ -262,6 +283,11 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
     ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
     binding.sampler = nullptr;
 
+    // Setting the external texture view as well is an error
+    binding.nextInChain = &mExternalTextureBindingEntry;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    binding.nextInChain = nullptr;
+
     // Setting the buffer to an error buffer is an error.
     {
         wgpu::BufferDescriptor bufferDesc;
@@ -274,6 +300,91 @@ TEST_F(BindGroupValidationTest, BufferBindingType) {
         binding.buffer = errorBuffer;
         ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
         binding.buffer = nullptr;
+    }
+}
+
+// Check that an external texture binding must contain exactly an external texture
+TEST_F(BindGroupValidationTest, ExternalTextureBindingType) {
+    // Create an external texture
+    wgpu::Texture texture = CreateTexture(wgpu::TextureUsage::Sampled, kDefaultTextureFormat, 1);
+    wgpu::ExternalTextureDescriptor externalDesc;
+    externalDesc.plane0 = texture.CreateView();
+    externalDesc.format = kDefaultTextureFormat;
+    wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+
+    // Create a bind group layout for a single external texture
+    wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+
+    wgpu::BindGroupEntry binding;
+    binding.binding = 0;
+    binding.sampler = nullptr;
+    binding.textureView = nullptr;
+    binding.buffer = nullptr;
+    binding.offset = 0;
+    binding.size = 0;
+
+    wgpu::BindGroupDescriptor descriptor;
+    descriptor.layout = layout;
+    descriptor.entryCount = 1;
+    descriptor.entries = &binding;
+
+    // Not setting anything fails
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+
+    // Control case: setting just the external texture works
+    wgpu::ExternalTextureBindingEntry externalBindingEntry;
+    externalBindingEntry.externalTexture = externalTexture;
+    binding.nextInChain = &externalBindingEntry;
+    device.CreateBindGroup(&descriptor);
+
+    // Setting the texture view as well is an error
+    binding.textureView = mSampledTextureView;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    binding.textureView = nullptr;
+
+    // Setting the sampler as well is an error
+    binding.sampler = mSampler;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    binding.sampler = nullptr;
+
+    // Setting the buffer as well is an error
+    binding.buffer = mUBO;
+    ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    binding.buffer = nullptr;
+
+    // Setting the external texture to an error external texture is an error.
+    {
+        wgpu::ExternalTextureDescriptor errorExternalDesciptor;
+        errorExternalDesciptor.plane0 = texture.CreateView();
+        errorExternalDesciptor.format = wgpu::TextureFormat::R8Uint;
+
+        wgpu::ExternalTexture errorExternalTexture;
+        ASSERT_DEVICE_ERROR(errorExternalTexture =
+                                device.CreateExternalTexture(&errorExternalDesciptor));
+
+        wgpu::ExternalTextureBindingEntry errorExternalBindingEntry;
+        errorExternalBindingEntry.externalTexture = errorExternalTexture;
+        binding.nextInChain = &errorExternalBindingEntry;
+        ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+        binding.nextInChain = nullptr;
+    }
+
+    // Setting an external texture with another external texture chained is an error.
+    {
+        wgpu::ExternalTexture externalTexture2 = device.CreateExternalTexture(&externalDesc);
+        wgpu::ExternalTextureBindingEntry externalBindingEntry2;
+        externalBindingEntry2.externalTexture = externalTexture2;
+        externalBindingEntry.nextInChain = &externalBindingEntry2;
+
+        ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    }
+
+    // Chaining a struct that isn't an external texture binding entry is an error.
+    {
+        wgpu::ExternalTextureBindingLayout externalBindingLayout;
+        binding.nextInChain = &externalBindingLayout;
+        ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
     }
 }
 
@@ -746,7 +857,7 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
         wgpu::BindGroupLayoutEntry otherEntry;
     };
 
-    std::array<TestInfo, 7> kTestInfos = {
+    std::array<TestInfo, 8> kTestInfos = {
         TestInfo{kMaxSampledTexturesPerShaderStage, BGLEntryType(wgpu::TextureSampleType::Float),
                  BGLEntryType(wgpu::BufferBindingType::Uniform)},
         TestInfo{kMaxSamplersPerShaderStage, BGLEntryType(wgpu::SamplerBindingType::Filtering),
@@ -765,7 +876,12 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
             BGLEntryType(wgpu::BufferBindingType::Uniform)},
         TestInfo{kMaxUniformBuffersPerShaderStage, BGLEntryType(wgpu::BufferBindingType::Uniform),
                  BGLEntryType(wgpu::TextureSampleType::Float)},
-    };
+        // External textures use multiple bindings (3 sampled textures, 1 sampler, 1 uniform buffer)
+        // that count towards the per stage binding limits. The number of external textures are
+        // currently restricted by the maximum number of sampled textures.
+        TestInfo{kMaxSampledTexturesPerShaderStage / kSampledTexturesPerExternalTexture,
+                 BGLEntryType(&utils::kExternalTextureBindingLayout),
+                 BGLEntryType(wgpu::BufferBindingType::Uniform)}};
 
     for (TestInfo info : kTestInfos) {
         wgpu::BindGroupLayout bgl[2];
@@ -778,6 +894,98 @@ TEST_F(BindGroupLayoutValidationTest, PerStageLimits) {
         }
 
         // Creating with the maxes works.
+        bgl[0] = MakeBindGroupLayout(maxBindings.data(), maxBindings.size());
+
+        // Adding an extra binding of a different type works.
+        {
+            std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
+            wgpu::BindGroupLayoutEntry entry = info.otherEntry;
+            entry.binding = info.maxCount;
+            bindings.push_back(entry);
+            MakeBindGroupLayout(bindings.data(), bindings.size());
+        }
+
+        // Adding an extra binding of the maxed type in a different stage works
+        {
+            std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
+            wgpu::BindGroupLayoutEntry entry = info.entry;
+            entry.binding = info.maxCount;
+            entry.visibility = wgpu::ShaderStage::Fragment;
+            bindings.push_back(entry);
+            MakeBindGroupLayout(bindings.data(), bindings.size());
+        }
+
+        // Adding an extra binding of the maxed type and stage exceeds the per stage limit.
+        {
+            std::vector<utils::BindingLayoutEntryInitializationHelper> bindings = maxBindings;
+            wgpu::BindGroupLayoutEntry entry = info.entry;
+            entry.binding = info.maxCount;
+            bindings.push_back(entry);
+            ASSERT_DEVICE_ERROR(MakeBindGroupLayout(bindings.data(), bindings.size()));
+        }
+
+        // Creating a pipeline layout from the valid BGL works.
+        TestCreatePipelineLayout(bgl, 1, true);
+
+        // Adding an extra binding of a different type in a different BGL works
+        bgl[1] = utils::MakeBindGroupLayout(device, {info.otherEntry});
+        TestCreatePipelineLayout(bgl, 2, true);
+
+        {
+            // Adding an extra binding of the maxed type in a different stage works
+            wgpu::BindGroupLayoutEntry entry = info.entry;
+            entry.visibility = wgpu::ShaderStage::Fragment;
+            bgl[1] = utils::MakeBindGroupLayout(device, {entry});
+            TestCreatePipelineLayout(bgl, 2, true);
+        }
+
+        // Adding an extra binding of the maxed type in a different BGL exceeds the per stage limit.
+        bgl[1] = utils::MakeBindGroupLayout(device, {info.entry});
+        TestCreatePipelineLayout(bgl, 2, false);
+    }
+}
+
+// External textures require multiple binding slots (3 sampled texture, 1 uniform buffer, 1
+// sampler), so ensure that these count towards the limit when combined non-external texture
+// bindings.
+TEST_F(BindGroupLayoutValidationTest, PerStageLimitsWithExternalTexture) {
+    struct TestInfo {
+        uint32_t maxCount;
+        uint32_t bindingsPerExternalTexture;
+        wgpu::BindGroupLayoutEntry entry;
+        wgpu::BindGroupLayoutEntry otherEntry;
+    };
+
+    std::array<TestInfo, 3> kTestInfos = {
+        TestInfo{kMaxSampledTexturesPerShaderStage, kSampledTexturesPerExternalTexture,
+                 BGLEntryType(wgpu::TextureSampleType::Float),
+                 BGLEntryType(wgpu::BufferBindingType::Uniform)},
+        TestInfo{kMaxSamplersPerShaderStage, kSamplersPerExternalTexture,
+                 BGLEntryType(wgpu::SamplerBindingType::Filtering),
+                 BGLEntryType(wgpu::BufferBindingType::Uniform)},
+        TestInfo{kMaxUniformBuffersPerShaderStage, kUniformsPerExternalTexture,
+                 BGLEntryType(wgpu::BufferBindingType::Uniform),
+                 BGLEntryType(wgpu::TextureSampleType::Float)},
+    };
+
+    for (TestInfo info : kTestInfos) {
+        wgpu::BindGroupLayout bgl[2];
+        std::vector<utils::BindingLayoutEntryInitializationHelper> maxBindings;
+
+        // Create an external texture binding layout entry
+        wgpu::BindGroupLayoutEntry entry = BGLEntryType(&utils::kExternalTextureBindingLayout);
+        entry.binding = 0;
+        maxBindings.push_back(entry);
+
+        // Create the other bindings such that we reach the max bindings per stage when including
+        // the external texture.
+        for (uint32_t i = 1; i <= info.maxCount - info.bindingsPerExternalTexture; ++i) {
+            wgpu::BindGroupLayoutEntry entry = info.entry;
+            entry.binding = i;
+            maxBindings.push_back(entry);
+        }
+
+        // Ensure that creation without the external texture works.
         bgl[0] = MakeBindGroupLayout(maxBindings.data(), maxBindings.size());
 
         // Adding an extra binding of a different type works.
@@ -1845,6 +2053,28 @@ TEST_F(BindGroupLayoutCompatibilityTest, TextureViewDimension) {
         {utils::MakeBindGroupLayout(device,
                                     {{0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
                                       wgpu::TextureViewDimension::e2D}})}));
+}
+
+// TODO(dawn:728) Enable this test when Dawn no longer relies on SPIRV-Cross to extract shader info.
+TEST_F(BindGroupLayoutCompatibilityTest, DISABLED_ExternalTextureBindGroupLayoutCompatibility) {
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+
+    // Test that an external texture binding works with a texture_external in the shader.
+    CreateFSRenderPipeline(R"(
+            [[group(0), binding(0)]] var myExternalTexture: texture_external;
+            [[stage(fragment)]] fn main() {
+                textureDimensions(myExternalTexture);
+            })",
+                           {bgl});
+
+    // Test that an external texture binding doesn't work with a texture_2d<f32> in the shader.
+    ASSERT_DEVICE_ERROR(CreateFSRenderPipeline(R"(
+            [[group(0), binding(0)]] var myTexture: texture_2d<f32>;
+            [[stage(fragment)]] fn main() {
+                textureDimensions(myTexture);
+            })",
+                                               {bgl}));
 }
 
 class BindingsValidationTest : public BindGroupLayoutCompatibilityTest {

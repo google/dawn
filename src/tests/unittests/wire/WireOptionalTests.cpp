@@ -40,6 +40,7 @@ TEST_F(WireOptionalTests, OptionalObjectValue) {
     entry.sampler = nullptr;
     entry.textureView = nullptr;
     entry.buffer = nullptr;
+    entry.nextInChain = nullptr;
 
     WGPUBindGroupDescriptor bgDesc = {};
     bgDesc.layout = bgl;

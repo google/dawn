@@ -85,7 +85,7 @@ namespace dawn_native {
 
     ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
                                              const ExternalTextureDescriptor* descriptor)
-        : ObjectBase(device) {
+        : ObjectBase(device), mState(ExternalTextureState::Alive) {
         textureViews[0] = descriptor->plane0;
     }
 
@@ -93,15 +93,24 @@ namespace dawn_native {
         : ObjectBase(device, tag) {
     }
 
-    std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat> ExternalTextureBase::GetTextureViews()
-        const {
+    const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>&
+    ExternalTextureBase::GetTextureViews() const {
         return textureViews;
+    }
+
+    MaybeError ExternalTextureBase::ValidateCanUseInSubmitNow() const {
+        ASSERT(!IsError());
+        if (mState == ExternalTextureState::Destroyed) {
+            return DAWN_VALIDATION_ERROR("Destroyed external texture used in a submit");
+        }
+        return {};
     }
 
     void ExternalTextureBase::APIDestroy() {
         if (GetDevice()->ConsumedError(GetDevice()->ValidateObject(this))) {
             return;
         }
+        mState = ExternalTextureState::Destroyed;
         ASSERT(!IsError());
     }
 

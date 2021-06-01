@@ -19,6 +19,7 @@
 #include "dawn_native/BindGroupTracker.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/ExternalTexture.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/opengl/BufferGL.h"
 #include "dawn_native/opengl/ComputePipelineGL.h"
@@ -360,6 +361,29 @@ namespace dawn_native { namespace opengl {
                             gl.BindImageTexture(imageIndex, handle, view->GetBaseMipLevel(),
                                                 isLayered, view->GetBaseArrayLayer(), access,
                                                 texture->GetGLFormat().internalFormat);
+                            break;
+                        }
+
+                        case BindingInfoType::ExternalTexture: {
+                            const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>&
+                                textureViews = mBindGroups[index]
+                                                   ->GetBindingAsExternalTexture(bindingIndex)
+                                                   ->GetTextureViews();
+
+                            // Only single-plane formats are supported right now, so assert only one
+                            // view exists.
+                            ASSERT(textureViews[1].Get() == nullptr);
+                            ASSERT(textureViews[2].Get() == nullptr);
+
+                            TextureView* view = ToBackend(textureViews[0].Get());
+                            GLuint handle = view->GetHandle();
+                            GLenum target = view->GetGLTarget();
+                            GLuint viewIndex = indices[bindingIndex];
+
+                            for (auto unit : mPipeline->GetTextureUnitsForTextureView(viewIndex)) {
+                                gl.ActiveTexture(GL_TEXTURE0 + unit);
+                                gl.BindTexture(target, handle);
+                            }
                             break;
                         }
                     }

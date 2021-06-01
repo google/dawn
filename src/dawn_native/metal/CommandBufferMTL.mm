@@ -17,6 +17,7 @@
 #include "dawn_native/BindGroupTracker.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/Commands.h"
+#include "dawn_native/ExternalTexture.h"
 #include "dawn_native/RenderBundle.h"
 #include "dawn_native/metal/BindGroupMTL.h"
 #include "dawn_native/metal/BufferMTL.h"
@@ -453,6 +454,32 @@ namespace dawn_native { namespace metal {
                         case BindingInfoType::StorageTexture: {
                             auto textureView =
                                 ToBackend(group->GetBindingAsTextureView(bindingIndex));
+                            if (hasVertStage) {
+                                [render setVertexTexture:textureView->GetMTLTexture()
+                                                 atIndex:vertIndex];
+                            }
+                            if (hasFragStage) {
+                                [render setFragmentTexture:textureView->GetMTLTexture()
+                                                   atIndex:fragIndex];
+                            }
+                            if (hasComputeStage) {
+                                [compute setTexture:textureView->GetMTLTexture()
+                                            atIndex:computeIndex];
+                            }
+                            break;
+                        }
+
+                        case BindingInfoType::ExternalTexture: {
+                            const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& views =
+                                group->GetBindingAsExternalTexture(bindingIndex)->GetTextureViews();
+
+                            // Only single-plane formats are supported right now, so assert only one
+                            // view exists.
+                            ASSERT(views[1].Get() == nullptr);
+                            ASSERT(views[2].Get() == nullptr);
+
+                            TextureView* textureView = ToBackend(views[0].Get());
+
                             if (hasVertStage) {
                                 [render setVertexTexture:textureView->GetMTLTexture()
                                                  atIndex:vertIndex];

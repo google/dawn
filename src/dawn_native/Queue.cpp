@@ -23,6 +23,7 @@
 #include "dawn_native/CopyTextureForBrowserHelper.h"
 #include "dawn_native/Device.h"
 #include "dawn_native/DynamicUploader.h"
+#include "dawn_native/ExternalTexture.h"
 #include "dawn_native/QuerySet.h"
 #include "dawn_native/RenderPassEncoder.h"
 #include "dawn_native/RenderPipeline.h"
@@ -382,6 +383,10 @@ namespace dawn_native {
                 for (const TextureBase* texture : scope.textures) {
                     DAWN_TRY(texture->ValidateCanUseInSubmitNow());
                 }
+
+                for (const ExternalTextureBase* externalTexture : scope.externalTextures) {
+                    DAWN_TRY(externalTexture->ValidateCanUseInSubmitNow());
+                }
             }
 
             for (const ComputePassResourceUsage& pass : usages.computePasses) {
@@ -390,6 +395,9 @@ namespace dawn_native {
                 }
                 for (const TextureBase* texture : pass.referencedTextures) {
                     DAWN_TRY(texture->ValidateCanUseInSubmitNow());
+                }
+                for (const ExternalTextureBase* externalTexture : pass.referencedExternalTextures) {
+                    DAWN_TRY(externalTexture->ValidateCanUseInSubmitNow());
                 }
             }
 

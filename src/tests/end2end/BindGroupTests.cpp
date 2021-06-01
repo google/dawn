@@ -1183,12 +1183,12 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
     for (uint32_t i = 0; i < kMaxSampledTexturesPerShaderStage; ++i) {
         wgpu::Texture texture = CreateTextureWithRedData(
             wgpu::TextureFormat::R8Unorm, expectedValue, wgpu::TextureUsage::Sampled);
-        bgEntries.push_back({binding, nullptr, 0, 0, nullptr, texture.CreateView()});
+        bgEntries.push_back({nullptr, binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
         interface << "[[group(0), binding(" << binding++ << ")]] "
                   << "var tex" << i << " : texture_2d<f32>;\n";
 
-        bgEntries.push_back({binding, nullptr, 0, 0, device.CreateSampler(), nullptr});
+        bgEntries.push_back({nullptr, binding, nullptr, 0, 0, device.CreateSampler(), nullptr});
 
         interface << "[[group(0), binding(" << binding++ << ")]]"
                   << "var samp" << i << " : sampler;\n";
@@ -1202,7 +1202,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
     for (uint32_t i = 0; i < kMaxStorageTexturesPerShaderStage; ++i) {
         wgpu::Texture texture = CreateTextureWithRedData(
             wgpu::TextureFormat::R32Uint, expectedValue, wgpu::TextureUsage::Storage);
-        bgEntries.push_back({binding, nullptr, 0, 0, nullptr, texture.CreateView()});
+        bgEntries.push_back({nullptr, binding, nullptr, 0, 0, nullptr, texture.CreateView()});
 
         interface << "[[group(0), binding(" << binding++ << ")]] "
                   << "var image" << i << " : [[access(read)]] texture_storage_2d<r32uint>;\n";
@@ -1216,7 +1216,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
     for (uint32_t i = 0; i < kMaxUniformBuffersPerShaderStage; ++i) {
         wgpu::Buffer buffer = utils::CreateBufferFromData<uint32_t>(
             device, wgpu::BufferUsage::Uniform, {expectedValue, 0, 0, 0});
-        bgEntries.push_back({binding, buffer, 0, 4 * sizeof(uint32_t), nullptr, nullptr});
+        bgEntries.push_back({nullptr, binding, buffer, 0, 4 * sizeof(uint32_t), nullptr, nullptr});
 
         interface << "[[block]] struct UniformBuffer" << i << R"({
                 value : u32;
@@ -1233,7 +1233,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
     for (uint32_t i = 0; i < kMaxStorageBuffersPerShaderStage - 1; ++i) {
         wgpu::Buffer buffer = utils::CreateBufferFromData<uint32_t>(
             device, wgpu::BufferUsage::Storage, {expectedValue});
-        bgEntries.push_back({binding, buffer, 0, sizeof(uint32_t), nullptr, nullptr});
+        bgEntries.push_back({nullptr, binding, buffer, 0, sizeof(uint32_t), nullptr, nullptr});
 
         interface << "[[block]] struct ReadOnlyStorageBuffer" << i << R"({
                 value : u32;
@@ -1250,7 +1250,7 @@ TEST_P(BindGroupTests, ReallyLargeBindGroup) {
 
     wgpu::Buffer result = utils::CreateBufferFromData<uint32_t>(
         device, wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc, {0});
-    bgEntries.push_back({binding, result, 0, sizeof(uint32_t), nullptr, nullptr});
+    bgEntries.push_back({nullptr, binding, result, 0, sizeof(uint32_t), nullptr, nullptr});
 
     interface << R"([[block]] struct ReadWriteStorageBuffer{
             value : u32;

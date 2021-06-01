@@ -67,6 +67,7 @@ namespace dawn_native { namespace vulkan {
             case BindingInfoType::Sampler:
                 return VK_DESCRIPTOR_TYPE_SAMPLER;
             case BindingInfoType::Texture:
+            case BindingInfoType::ExternalTexture:
                 return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
             case BindingInfoType::StorageTexture:
                 return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
@@ -99,6 +100,8 @@ namespace dawn_native { namespace vulkan {
             VkDescriptorSetLayoutBinding vkBinding;
             vkBinding.binding = useBindingIndex ? static_cast<uint32_t>(bindingIndex)
                                                 : static_cast<uint32_t>(bindingNumber);
+            // TODO(dawn:728) In the future, special handling will be needed for external textures
+            // here because they encompass multiple views.
             vkBinding.descriptorType = VulkanDescriptorType(bindingInfo);
             vkBinding.descriptorCount = 1;
             vkBinding.stageFlags = VulkanShaderStageFlags(bindingInfo.visibility);
@@ -123,6 +126,8 @@ namespace dawn_native { namespace vulkan {
         std::map<VkDescriptorType, uint32_t> descriptorCountPerType;
 
         for (BindingIndex bindingIndex{0}; bindingIndex < GetBindingCount(); ++bindingIndex) {
+            // TODO(dawn:728) In the future, special handling will be needed for external textures
+            // here because they encompass multiple views.
             VkDescriptorType vulkanType = VulkanDescriptorType(GetBindingInfo(bindingIndex));
 
             // map::operator[] will return 0 if the key doesn't exist.
