@@ -22,17 +22,26 @@ namespace utils {
 
 namespace {
 
-std::string TmpFilePath() {
+std::string TmpFilePath(const std::string& ext) {
   char name[L_tmpnam];
-  if (tmpnam_s(name, L_tmpnam - 1) == 0) {
-    return name;
+  // As we're adding an extension, to ensure the file is really unique, try
+  // creating it, failing if it already exists.
+  while (tmpnam_s(name, L_tmpnam - 1) == 0) {
+    std::string name_with_ext = std::string(name) + ext;
+    FILE* f = nullptr;
+    // The "x" arg forces the function to fail if the file already exists.
+    fopen_s(&f, name_with_ext.c_str(), "wbx");
+    if (f) {
+      fclose(f);
+      return name_with_ext;
+    }
   }
-  return "";
+  return {};
 }
 
 }  // namespace
 
-TmpFile::TmpFile(std::string ext) : path_(TmpFilePath() + ext) {}
+TmpFile::TmpFile(std::string ext) : path_(TmpFilePath(ext)) {}
 
 TmpFile::~TmpFile() {
   if (!path_.empty()) {
