@@ -69,7 +69,7 @@ class Handle {
 class Pipe {
  public:
   /// Constructs the pipe
-  Pipe() {
+  explicit Pipe(bool for_read) {
     SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(SECURITY_ATTRIBUTES);
     sa.bInheritHandle = TRUE;
@@ -81,7 +81,8 @@ class Pipe {
       read = Handle(hread);
       write = Handle(hwrite);
       // Ensure the read handle to the pipe is not inherited
-      if (!SetHandleInformation(read, HANDLE_FLAG_INHERIT, 0)) {
+      if (!SetHandleInformation(for_read ? read : write, HANDLE_FLAG_INHERIT,
+                                0)) {
         read.Close();
         write.Close();
       }
@@ -147,9 +148,9 @@ bool Command::Found() const {
 
 Command::Output Command::Exec(
     std::initializer_list<std::string> arguments) const {
-  Pipe stdout_pipe;
-  Pipe stderr_pipe;
-  Pipe stdin_pipe;
+  Pipe stdout_pipe(true);
+  Pipe stderr_pipe(true);
+  Pipe stdin_pipe(false);
   if (!stdin_pipe || !stdout_pipe || !stderr_pipe) {
     Output output;
     output.err = "Command::Exec(): Failed to create pipes";
@@ -195,45 +196,51 @@ Command::Output Command::Exec(
     return out;
   }
 
+  stdin_pipe.read.Close();
   stdout_pipe.write.Close();
   stderr_pipe.write.Close();
 
+  struct StreamReadThreadArgs {
+    HANDLE stream;
+    std::string output;
+  };
+
+  auto stream_read_thread = [](LPVOID user) -> DWORD {
+    auto* thread_args = reinterpret_cast<StreamReadThreadArgs*>(user);
+    DWORD n = 0;
+    char buf[256];
+    while (ReadFile(thread_args->stream, buf, sizeof(buf), &n, NULL)) {
+      auto s = std::string(buf, buf + n);
+      thread_args->output += std::string(buf, buf + n);
+    }
+    return 0;
+  };
+
+  StreamReadThreadArgs stdout_read_args{stdout_pipe.read, {}};
+  auto* stdout_read_thread = ::CreateThread(nullptr, 0, stream_read_thread,
+                                            &stdout_read_args, 0, nullptr);
+
+  StreamReadThreadArgs stderr_read_args{stderr_pipe.read, {}};
+  auto* stderr_read_thread = ::CreateThread(nullptr, 0, stream_read_thread,
+                                            &stderr_read_args, 0, nullptr);
+
+  HANDLE handles[] = {pi.hProcess, stdout_read_thread, stderr_read_thread};
+  constexpr DWORD num_handles = sizeof(handles) / sizeof(handles[0]);
+
   Output output;
 
-  char buf[256];
-  HANDLE handles[] = {stdout_pipe.read, stderr_pipe.read};
-
-  bool stdout_open = true;
-  bool stderr_open = true;
-  while (stdout_open || stderr_open) {
-    auto res = WaitForMultipleObjects(2, handles, FALSE, INFINITE);
-    switch (res) {
-      case WAIT_FAILED:
-        output.err = "Command::Exec() WaitForMultipleObjects() returned " +
-                     std::to_string(res);
-        return output;
-      case WAIT_OBJECT_0: {  // stdout
-        DWORD n = 0;
-        if (ReadFile(stdout_pipe.read, buf, sizeof(buf), &n, NULL)) {
-          output.out += std::string(buf, buf + n);
-        } else {
-          stdout_open = false;
-        }
-        break;
-      }
-      case WAIT_OBJECT_0 + 1: {  // stderr
-        DWORD n = 0;
-        if (ReadFile(stderr_pipe.read, buf, sizeof(buf), &n, NULL)) {
-          output.err += std::string(buf, buf + n);
-        } else {
-          stderr_open = false;
-        }
-        break;
-      }
-    }
+  auto res = WaitForMultipleObjects(num_handles, handles, /* wait_all = */ TRUE,
+                                    INFINITE);
+  if (res >= WAIT_OBJECT_0 && res < WAIT_OBJECT_0 + num_handles) {
+    output.out = stdout_read_args.output;
+    output.err = stderr_read_args.output;
+    DWORD exit_code = 0;
+    GetExitCodeProcess(pi.hProcess, &exit_code);
+    output.error_code = static_cast<int>(exit_code);
+  } else {
+    output.err = "Command::Exec() WaitForMultipleObjects() returned " +
+                 std::to_string(res);
   }
-
-  WaitForSingleObject(pi.hProcess, INFINITE);
 
   return output;
 }
