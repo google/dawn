@@ -24,6 +24,7 @@
 #include "src/ast/bool_literal.h"
 #include "src/ast/call_statement.h"
 #include "src/ast/depth_texture.h"
+#include "src/ast/external_texture.h"
 #include "src/ast/f32.h"
 #include "src/ast/float_literal.h"
 #include "src/ast/i32.h"
@@ -418,6 +419,8 @@ bool GeneratorImpl::EmitType(const ast::Type* ty) {
     // The struct, as a type, is just the name. We should have already emitted
     // the declaration through a call to |EmitStructType| earlier.
     out_ << program_->Symbols().NameFor(str->name());
+  } else if (ty->Is<ast::ExternalTexture>()) {
+    out_ << "external_texture";
   } else if (auto* texture = ty->As<ast::Texture>()) {
     out_ << "texture_";
     if (texture->Is<ast::DepthTexture>()) {
