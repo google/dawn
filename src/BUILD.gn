@@ -209,6 +209,43 @@ tint_language_header("cldebuginfo100") {
 }
 
 ###############################################################################
+# Helper library for IO operations
+# Only to be used by tests and sample executable
+###############################################################################
+source_set("tint_utils_io") {
+  sources = [
+    "utils/io/command.h",
+    "utils/io/tmpfile.h",
+  ]
+
+  if (is_linux || is_mac) {
+    sources += [ "utils/io/command_posix.cc" ]
+    sources += [ "utils/io/tmpfile_posix.cc" ]
+  } else if (is_win) {
+    sources += [ "utils/io/command_windows.cc" ]
+    sources += [ "utils/io/tmpfile_windows.cc" ]
+  } else {
+    sources += [ "utils/io/command_other.cc" ]
+    sources += [ "utils/io/tmpfile_other.cc" ]
+  }
+
+  public_deps = [ ":libtint_core_all_src" ]
+}
+
+###############################################################################
+# Helper library for validating generated shaders
+# As this depends on tint_utils_io, this is only to be used by tests and sample
+# executable
+###############################################################################
+source_set("tint_val") {
+  sources = [
+    "val/val.cc",
+    "val/val.h",
+  ]
+  public_deps = [ ":tint_utils_io" ]
+}
+
+###############################################################################
 # Library - Tint core and optional modules of libtint
 ###############################################################################
 # libtint source sets are divided into a non-optional core in :libtint_core_src
@@ -464,9 +501,9 @@ libtint_source_set("libtint_core_all_src") {
     "sem/i32_type.cc",
     "sem/i32_type.h",
     "sem/info.h",
+    "sem/intrinsic.h",
     "sem/intrinsic_type.cc",
     "sem/intrinsic_type.h",
-    "sem/intrinsic.h",
     "sem/matrix_type.cc",
     "sem/matrix_type.h",
     "sem/multisampled_texture_type.cc",

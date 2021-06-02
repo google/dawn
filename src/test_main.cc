@@ -14,7 +14,7 @@
 
 #include "gmock/gmock.h"
 #include "src/reader/spirv/parser_impl_test_helper.h"
-#include "src/utils/command.h"
+#include "src/utils/io/command.h"
 #include "src/writer/hlsl/test_helper.h"
 #include "src/writer/msl/test_helper.h"
 

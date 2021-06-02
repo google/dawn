@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_UTILS_COMMAND_H_
-#define SRC_UTILS_COMMAND_H_
+#ifndef SRC_UTILS_IO_COMMAND_H_
+#define SRC_UTILS_IO_COMMAND_H_
 
 #include <string>
 #include <utility>
@@ -81,4 +81,4 @@ class Command {
 }  // namespace utils
 }  // namespace tint
 
-#endif  //  SRC_UTILS_COMMAND_H_
+#endif  //  SRC_UTILS_IO_COMMAND_H_

@@ -12,37 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/writer/msl/test_helper.h"
-
-#include "src/utils/io/command.h"
 #include "src/utils/io/tmpfile.h"
 
 namespace tint {
-namespace writer {
-namespace msl {
+namespace utils {
 
-namespace {
+TmpFile::TmpFile(std::string) {}
 
-const char* xcrun_path = nullptr;
+TmpFile::~TmpFile() = default;
 
-}  // namespace
-
-void EnableMSLValidation(const char* xcrun) {
-  xcrun_path = xcrun;
+bool TmpFile::Append(const void*, size_t) const {
+  return false;
 }
 
-val::Result Validate(Program* program) {
-  if (!xcrun_path) {
-    return val::Result{};
-  }
-
-  auto gen = std::make_unique<GeneratorImpl>(program);
-  if (!gen->Generate()) {
-    return {true, gen->error(), ""};
-  }
-  return val::Msl(xcrun_path, gen->result());
-}
-
-}  // namespace msl
-}  // namespace writer
+}  // namespace utils
 }  // namespace tint

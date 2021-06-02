@@ -68,11 +68,13 @@ optional flags:`)
 }
 
 func run() error {
-	var formatList, filter string
+	var formatList, filter, dxcPath, xcrunPath string
 	numCPU := runtime.NumCPU()
 	generateExpected := false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
+	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
+	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
 	flag.Usage = showUsage
@@ -147,6 +149,46 @@ func run() error {
 		}
 	}
 
+	default_msl_exe := "xcrun"
+	if runtime.GOOS == "windows" {
+		default_msl_exe = "metal.exe"
+	}
+
+	// If explicit verification compilers have been specified, check they exist.
+	// Otherwise, look on PATH for them, but don't error if they cannot be found.
+	for _, tool := range []struct {
+		name string
+		lang string
+		path *string
+	}{
+		{"dxc", "hlsl", &dxcPath},
+		{default_msl_exe, "msl", &xcrunPath},
+	} {
+		if *tool.path == "" {
+			p, err := exec.LookPath(tool.name)
+			if err == nil && fileutils.IsExe(p) {
+				*tool.path = p
+			}
+		} else if !fileutils.IsExe(*tool.path) {
+			return fmt.Errorf("%v not found at '%v'", tool.name, *tool.path)
+		}
+
+		color.Set(color.FgCyan)
+		fmt.Printf("%-4s", tool.lang)
+		color.Unset()
+		fmt.Printf(" validation ")
+		if *tool.path == "" {
+			color.Set(color.FgRed)
+			fmt.Printf("DISABLED")
+		} else {
+			color.Set(color.FgGreen)
+			fmt.Printf("ENABLED")
+		}
+		color.Unset()
+		fmt.Println()
+	}
+	fmt.Println()
+
 	results := make([]map[outputFormat]*status, len(files))
 	jobs := make(chan job, 256)
 
@@ -157,7 +199,7 @@ func run() error {
 		go func() {
 			defer wg.Done()
 			for job := range jobs {
-				job.run(exe, generateExpected)
+				job.run(exe, dxcPath, xcrunPath, generateExpected)
 			}
 		}()
 	}
@@ -313,7 +355,7 @@ type job struct {
 	result *status
 }
 
-func (j job) run(exe string, generateExpected bool) {
+func (j job) run(exe, dxcPath, xcrunPath string, generateExpected bool) {
 	// Is there an expected output?
 	expected := loadExpectedFile(j.file, j.format)
 	if strings.HasPrefix(expected, "SKIP") { // Special SKIP token
@@ -321,9 +363,28 @@ func (j job) run(exe string, generateExpected bool) {
 		return
 	}
 
+	expected = strings.ReplaceAll(expected, "\r\n", "\n")
+
+	args := []string{j.file, "--format", string(j.format)}
+
+	// Can we validate?
+	switch j.format {
+	case spvasm:
+		args = append(args, "--validate") // spirv-val is statically linked, always available
+	case hlsl:
+		if dxcPath != "" {
+			args = append(args, "--dxc", dxcPath)
+		}
+	case msl:
+		if xcrunPath != "" {
+			args = append(args, "--xcrun", xcrunPath)
+		}
+	}
+
 	// Invoke the compiler...
 	var err error
-	if ok, out := invoke(exe, j.file, "--format", string(j.format), "--dawn-validation"); ok {
+	if ok, out := invoke(exe, args...); ok {
+		out = strings.ReplaceAll(out, "\r\n", "\n")
 		if generateExpected {
 			// If --generate-expected was passed, write out the output
 			err = saveExpectedFile(j.file, j.format, out)

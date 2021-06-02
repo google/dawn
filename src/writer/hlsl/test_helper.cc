@@ -14,9 +14,6 @@
 
 #include "src/writer/hlsl/test_helper.h"
 
-#include "src/utils/command.h"
-#include "src/utils/tmpfile.h"
-
 namespace tint {
 namespace writer {
 namespace hlsl {
@@ -31,81 +28,16 @@ void EnableHLSLValidation(const char* dxc) {
   dxc_path = dxc;
 }
 
-CompileResult Compile(Program* program, GeneratorImpl* generator) {
-  CompileResult result;
-
+val::Result Validate(Program* program, GeneratorImpl* generator) {
   if (!dxc_path) {
-    result.status = CompileResult::Status::kVerificationNotEnabled;
-    return result;
-  }
-
-  auto dxc = utils::Command(dxc_path);
-  if (!dxc.Found()) {
-    result.output = "DXC not found at '" + std::string(dxc_path) + "'";
-    result.status = CompileResult::Status::kFailed;
-    return result;
+    return val::Result{};
   }
 
   std::ostringstream hlsl;
   if (!generator->Generate(hlsl)) {
-    result.output = generator->error();
-    result.status = CompileResult::Status::kFailed;
-    return result;
+    return {true, generator->error(), ""};
   }
-  result.hlsl = hlsl.str();
-
-  utils::TmpFile file;
-  file << result.hlsl;
-
-  bool found_an_entrypoint = false;
-  for (auto* func : program->AST().Functions()) {
-    if (func->IsEntryPoint()) {
-      found_an_entrypoint = true;
-
-      const char* profile = "";
-
-      switch (func->pipeline_stage()) {
-        case ast::PipelineStage::kNone:
-          result.output = "Invalid PipelineStage";
-          result.status = CompileResult::Status::kFailed;
-          return result;
-        case ast::PipelineStage::kVertex:
-          profile = "-T vs_6_0";
-          break;
-        case ast::PipelineStage::kFragment:
-          profile = "-T ps_6_0";
-          break;
-        case ast::PipelineStage::kCompute:
-          profile = "-T cs_6_0";
-          break;
-      }
-
-      auto name = program->Symbols().NameFor(func->symbol());
-      auto res = dxc(profile, "-E " + name, file.Path());
-      if (!res.out.empty()) {
-        if (!result.output.empty()) {
-          result.output += "\n";
-        }
-        result.output += res.out;
-      }
-      if (!res.err.empty()) {
-        if (!result.output.empty()) {
-          result.output += "\n";
-        }
-        result.output += res.err;
-      }
-      result.status = (res.error_code == 0) ? CompileResult::Status::kSuccess
-                                            : CompileResult::Status::kFailed;
-    }
-  }
-
-  if (!found_an_entrypoint) {
-    result.output = "No entrypoint found";
-    result.status = CompileResult::Status::kFailed;
-    return result;
-  }
-
-  return result;
+  return val::Hlsl(dxc_path, hlsl.str(), program);
 }
 
 }  // namespace hlsl

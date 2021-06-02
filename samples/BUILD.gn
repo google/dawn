@@ -19,6 +19,7 @@ executable("tint") {
   sources = [ "main.cc" ]
   deps = [
     "${tint_root_dir}/src:libtint",
+    "${tint_root_dir}/src:tint_val",
     "${tint_spirv_tools_dir}/:spvtools",
     "${tint_spirv_tools_dir}/:spvtools_opt",
     "${tint_spirv_tools_dir}/:spvtools_val",

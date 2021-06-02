@@ -23,6 +23,7 @@
 #include "src/transform/hlsl.h"
 #include "src/transform/manager.h"
 #include "src/transform/renamer.h"
+#include "src/val/val.h"
 #include "src/writer/hlsl/generator_impl.h"
 
 namespace tint {
@@ -34,23 +35,11 @@ namespace hlsl {
 /// @param dxc_path the path to the DXC executable
 void EnableHLSLValidation(const char* dxc_path);
 
-/// The return structure of Compile()
-struct CompileResult {
-  /// Status is an enumerator of status codes from Compile()
-  enum class Status { kSuccess, kFailed, kVerificationNotEnabled };
-  /// The resulting status of the compile
-  Status status;
-  /// Output of DXC.
-  std::string output;
-  /// The HLSL source that was compiled
-  std::string hlsl;
-};
-
-/// Compile attempts to compile the shader with DXC if found on PATH.
+/// Validate attempts to compile the shader with DXC if found on PATH.
 /// @param program the HLSL program
 /// @param generator the HLSL generator
 /// @return the result of the compile
-CompileResult Compile(Program* program, GeneratorImpl* generator);
+val::Result Validate(Program* program, GeneratorImpl* generator);
 
 /// Helper class for testing
 template <typename BODY>
@@ -122,10 +111,10 @@ class TestHelperBase : public BODY, public ProgramBuilder {
   /// If DXC finds problems the test will fail.
   /// If DXC is not on `PATH` then Validate() does nothing.
   void Validate() const {
-    auto res = Compile(program.get(), gen_.get());
-    if (res.status == CompileResult::Status::kFailed) {
+    auto res = hlsl::Validate(program.get(), gen_.get());
+    if (res.failed) {
       FAIL() << "HLSL Validation failed.\n\n"
-             << res.hlsl << "\n\n"
+             << res.source << "\n\n"
              << res.output;
     }
   }

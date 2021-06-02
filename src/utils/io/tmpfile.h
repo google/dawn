@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_UTILS_TMPFILE_H_
-#define SRC_UTILS_TMPFILE_H_
+#ifndef SRC_UTILS_IO_TMPFILE_H_
+#define SRC_UTILS_IO_TMPFILE_H_
 
 #include <sstream>
 #include <string>
@@ -73,4 +73,4 @@ class TmpFile {
 }  // namespace utils
 }  // namespace tint
 
-#endif  //  SRC_UTILS_TMPFILE_H_
+#endif  //  SRC_UTILS_IO_TMPFILE_H_

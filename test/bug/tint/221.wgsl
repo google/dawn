@@ -6,7 +6,7 @@ struct Buf{
   data : Arr;
 };
 
-[[group(0), binding (0)]] var<storage>  b : [[access(read)]] Buf;
+[[group(0), binding (0)]] var<storage>  b : [[access(read_write)]] Buf;
 
 [[stage(compute)]]
 fn main() {

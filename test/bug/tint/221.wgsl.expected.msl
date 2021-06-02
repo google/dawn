@@ -8,7 +8,7 @@ struct Buf {
   /* 0x0004 */ uint data[50];
 };
 
-kernel void tint_symbol(const device Buf& b [[buffer(0)]]) {
+kernel void tint_symbol(device Buf& b [[buffer(0)]]) {
   uint i = 0u;
   {
     bool tint_msl_is_first_1 = true;

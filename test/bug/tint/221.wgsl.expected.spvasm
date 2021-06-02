@@ -17,7 +17,6 @@
                OpMemberDecorate %Buf 0 Offset 0
                OpMemberDecorate %Buf 1 Offset 4
                OpDecorate %_arr_uint_uint_50 ArrayStride 4
-               OpDecorate %b NonWritable
                OpDecorate %b DescriptorSet 0
                OpDecorate %b Binding 0
        %uint = OpTypeInt 32 0

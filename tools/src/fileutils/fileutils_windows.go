@@ -12,18 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/utils/tmpfile.h"
+// Package fileutils contains utility functions for files
+package fileutils
 
-namespace tint {
-namespace utils {
-
-TmpFile::TmpFile(std::string) {}
-
-TmpFile::~TmpFile() = default;
-
-bool TmpFile::Append(const void*, size_t) const {
-  return false;
+// IsExe returns true if the file at path is an executable
+func IsExe(path string) bool {
+	return true
 }
-
-}  // namespace utils
-}  // namespace tint

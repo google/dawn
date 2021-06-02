@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 #include "src/program_builder.h"
 #include "src/transform/msl.h"
+#include "src/val/val.h"
 #include "src/writer/msl/generator_impl.h"
 
 namespace tint {
@@ -33,22 +34,10 @@ namespace msl {
 /// @param xcrun_path the path to the `xcrun` executable
 void EnableMSLValidation(const char* xcrun_path);
 
-/// The return structure of Compile()
-struct CompileResult {
-  /// Status is an enumerator of status codes from Compile()
-  enum class Status { kSuccess, kFailed, kVerificationNotEnabled };
-  /// The resulting status of the compilation
-  Status status;
-  /// Output of the Metal compiler
-  std::string output;
-  /// The MSL source that was compiled
-  std::string msl;
-};
-
-/// Compile attempts to compile the shader with xcrun if found on PATH.
+/// Validate attempts to compile the shader with DXC if found on PATH.
 /// @param program the MSL program
 /// @return the result of the compile
-CompileResult Compile(Program* program);
+val::Result Validate(Program* program);
 
 /// Helper class for testing
 template <typename BASE>
@@ -115,9 +104,11 @@ class TestHelperBase : public BASE, public ProgramBuilder {
   /// This function does nothing, if the Metal compiler path has not been
   /// configured by calling `EnableMSLValidation()`.
   void Validate() {
-    auto res = Compile(program.get());
-    if (res.status == CompileResult::Status::kFailed) {
-      FAIL() << "MSL Validation failed.\n\n" << res.msl << "\n\n" << res.output;
+    auto res = msl::Validate(program.get());
+    if (res.failed) {
+      FAIL() << "MSL Validation failed.\n\n"
+             << res.source << "\n\n"
+             << res.output;
     }
   }
 

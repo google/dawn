@@ -449,6 +449,23 @@ if(${TINT_BUILD_HLSL_WRITER})
   )
 endif()
 
+## Tint IO utilities. Used by tint_val.
+add_library(tint_utils_io
+  utils/io/command_${TINT_OS_CC_SUFFIX}.cc
+  utils/io/command.h
+  utils/io/tmpfile_${TINT_OS_CC_SUFFIX}.cc
+  utils/io/tmpfile.h
+)
+tint_default_compile_options(tint_utils_io)
+
+## Tint validation utilities. Used by tests and the tint executable.
+add_library(tint_val
+  val/val.cc
+  val/val.h
+)
+tint_default_compile_options(tint_val)
+target_link_libraries(tint_val tint_utils_io)
+
 ## Tint library
 add_library(libtint ${TINT_LIB_SRCS})
 tint_default_compile_options(libtint)
@@ -603,16 +620,12 @@ if(${TINT_BUILD_TESTS})
     sem/type_manager_test.cc
     sem/u32_type_test.cc
     sem/vector_type_test.cc
-    utils/command_${TINT_OS_CC_SUFFIX}.cc
-    utils/command_test.cc
-    utils/command.h
     utils/get_or_create_test.cc
     utils/hash_test.cc
+    utils/io/command_test.cc
+    utils/io/tmpfile_test.cc
     utils/math_test.cc
     utils/scoped_assignment_test.cc
-    utils/tmpfile_${TINT_OS_CC_SUFFIX}.cc
-    utils/tmpfile_test.cc
-    utils/tmpfile.h
     utils/unique_vector_test.cc
     writer/append_vector_test.cc
     writer/float_to_string_test.cc
@@ -913,7 +926,7 @@ if(${TINT_BUILD_TESTS})
   ## Test executable
   target_include_directories(
       tint_unittests PRIVATE ${gmock_SOURCE_DIR}/include)
-  target_link_libraries(tint_unittests libtint gmock)
+  target_link_libraries(tint_unittests libtint gmock tint_val)
   tint_default_compile_options(tint_unittests)
 
   if(${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})

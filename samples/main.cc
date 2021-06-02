@@ -24,6 +24,8 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER
 
+#include "src/utils/io/command.h"
+#include "src/val/val.h"
 #include "tint/tint.h"
 
 namespace {
@@ -52,7 +54,7 @@ struct Options {
 
   bool parse_only = false;
   bool dump_ast = false;
-  bool dawn_validation = false;
+  bool validate = false;
   bool demangle = false;
   bool dump_inspector_bindings = false;
 
@@ -62,6 +64,9 @@ struct Options {
   std::string ep_name;
 
   std::vector<std::string> transforms;
+
+  std::string dxc_path;
+  std::string xcrun_path;
 };
 
 const char kUsage[] = R"(Usage: tint [options] <input-file>
@@ -86,12 +91,16 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
                                 renamer
   --parse-only              -- Stop after parsing the input
   --dump-ast                -- Dump the generated AST to stdout
-  --dawn-validation         -- SPIRV outputs are validated with the same flags
-                               as Dawn does. Has no effect on non-SPIRV outputs.
   --demangle                -- Preserve original source names. Demangle them.
                                Affects AST dumping, and text-based output languages.
   --dump-inspector-bindings -- Dump reflection data about bindins to stdout.
-  -h                        -- This help text)";
+  -h                        -- This help text
+  --validate                -- Validates generated SPIR-V with spirv-val.
+                               Has no effect on non-SPIRV outputs.
+  --dxc                     -- Path to DXC executable, used to validate HLSL output.
+                               When specified, automatically enables --validate
+  --xcrun                   -- Path to xcrun executable, used to validate MSL output.
+                               When specified, automatically enables --validate)";
 
 #ifdef _MSC_VER
 #pragma warning(disable : 4068; suppress : 4100)
@@ -389,12 +398,28 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
       opts->parse_only = true;
     } else if (arg == "--dump-ast") {
       opts->dump_ast = true;
-    } else if (arg == "--dawn-validation") {
-      opts->dawn_validation = true;
     } else if (arg == "--demangle") {
       opts->demangle = true;
     } else if (arg == "--dump-inspector-bindings") {
       opts->dump_inspector_bindings = true;
+    } else if (arg == "--validate") {
+      opts->validate = true;
+    } else if (arg == "--dxc") {
+      ++i;
+      if (i >= args.size()) {
+        std::cerr << "Missing value for " << arg << std::endl;
+        return false;
+      }
+      opts->dxc_path = args[i];
+      opts->validate = true;
+    } else if (arg == "--xcrun") {
+      ++i;
+      if (i >= args.size()) {
+        std::cerr << "Missing value for " << arg << std::endl;
+        return false;
+      }
+      opts->xcrun_path = args[i];
+      opts->validate = true;
     } else if (!arg.empty()) {
       if (arg[0] == '-') {
         std::cerr << "Unrecognized option: " << arg << std::endl;
@@ -772,33 +797,47 @@ int main(int argc, const char** argv) {
 
   std::unique_ptr<tint::writer::Writer> writer;
 
+  switch (options.format) {
+    case Format::kSpirv:
+    case Format::kSpvAsm:
 #if TINT_BUILD_SPV_WRITER
-  if (options.format == Format::kSpirv || options.format == Format::kSpvAsm) {
-    writer = std::make_unique<tint::writer::spirv::Generator>(program.get());
-  }
+      writer = std::make_unique<tint::writer::spirv::Generator>(program.get());
+      break;
+#else
+      std::cerr << "SPIR-V writer not enabled in tint build" << std::endl;
+      return 1;
 #endif  // TINT_BUILD_SPV_WRITER
 
+    case Format::kWgsl:
 #if TINT_BUILD_WGSL_WRITER
-  if (options.format == Format::kWgsl) {
-    writer = std::make_unique<tint::writer::wgsl::Generator>(program.get());
-  }
+      writer = std::make_unique<tint::writer::wgsl::Generator>(program.get());
+      break;
+#else
+      std::cerr << "WGSL writer not enabled in tint build" << std::endl;
+      return 1;
 #endif  // TINT_BUILD_WGSL_WRITER
 
+    case Format::kMsl:
 #if TINT_BUILD_MSL_WRITER
-  if (options.format == Format::kMsl) {
-    writer = std::make_unique<tint::writer::msl::Generator>(program.get());
-  }
+      writer = std::make_unique<tint::writer::msl::Generator>(program.get());
+      break;
+#else
+      std::cerr << "MSL writer not enabled in tint build" << std::endl;
+      return 1;
 #endif  // TINT_BUILD_MSL_WRITER
 
+    case Format::kHlsl:
 #if TINT_BUILD_HLSL_WRITER
-  if (options.format == Format::kHlsl) {
-    writer = std::make_unique<tint::writer::hlsl::Generator>(program.get());
-  }
+      writer = std::make_unique<tint::writer::hlsl::Generator>(program.get());
+      break;
+#else
+      std::cerr << "HLSL writer not enabled in tint build" << std::endl;
+      return 1;
 #endif  // TINT_BUILD_HLSL_WRITER
 
-  if (!writer) {
-    std::cerr << "Unknown output format specified" << std::endl;
-    return 1;
+    default:
+      std::cerr << "Unknown output format specified" << std::endl;
+      return 1;
   }
 
   if (!writer->Generate()) {
@@ -807,27 +846,82 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
-#if TINT_BUILD_SPV_WRITER
-  bool dawn_validation_failed = false;
-  std::ostringstream stream;
+  bool validation_failed = false;
+  std::ostringstream validation_msgs;
 
-  if (options.dawn_validation &&
-      (options.format == Format::kSpvAsm || options.format == Format::kSpirv)) {
-    // Use Vulkan 1.1, since this is what Tint, internally, uses.
-    spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
-    tools.SetMessageConsumer([&stream](spv_message_level_t, const char*,
-                                       const spv_position_t& pos,
-                                       const char* msg) {
-      stream << (pos.line + 1) << ":" << (pos.column + 1) << ": " << msg
-             << std::endl;
-    });
-    auto* w = static_cast<tint::writer::spirv::Generator*>(writer.get());
-    if (!tools.Validate(w->result().data(), w->result().size(),
-                        spvtools::ValidatorOptions())) {
-      dawn_validation_failed = true;
+  if (options.validate) {
+    switch (options.format) {
+#if TINT_BUILD_SPV_WRITER
+      case Format::kSpirv:
+      case Format::kSpvAsm: {
+        // Use Vulkan 1.1, since this is what Tint, internally, uses.
+        spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
+        tools.SetMessageConsumer(
+            [&validation_msgs](spv_message_level_t, const char*,
+                               const spv_position_t& pos, const char* msg) {
+              validation_msgs << (pos.line + 1) << ":" << (pos.column + 1)
+                              << ": " << msg << std::endl;
+            });
+        auto* w = static_cast<tint::writer::spirv::Generator*>(writer.get());
+        if (!tools.Validate(w->result().data(), w->result().size(),
+                            spvtools::ValidatorOptions())) {
+          validation_failed = true;
+        }
+        break;
+      }
+#endif
+#if TINT_BUILD_HLSL_WRITER
+      case Format::kHlsl: {
+        auto dxc = tint::utils::Command::LookPath(
+            options.dxc_path.empty() ? "dxc" : options.dxc_path);
+        if (dxc.Found()) {
+          auto* w = static_cast<tint::writer::Text*>(writer.get());
+          auto hlsl = w->result();
+          auto res = tint::val::Hlsl(dxc.Path(), hlsl, program.get());
+          if (res.failed) {
+            validation_failed = true;
+            validation_msgs << res.source << std::endl;
+            validation_msgs << res.output;
+          }
+        } else {
+          validation_failed = true;
+          validation_msgs << "DXC executable not found. Cannot validate";
+        }
+        break;
+      }
+#endif  // TINT_BUILD_HLSL_WRITER
+#if TINT_BUILD_MSL_WRITER
+      case Format::kMsl: {
+#ifdef _WIN32
+        const char* default_xcrun_exe = "metal.exe";
+#else
+        const char* default_xcrun_exe = "xcrun";
+#endif
+        auto xcrun = tint::utils::Command::LookPath(options.xcrun_path.empty()
+                                                        ? default_xcrun_exe
+                                                        : options.xcrun_path);
+        if (xcrun.Found()) {
+          auto* w = static_cast<tint::writer::Text*>(writer.get());
+          auto msl = w->result();
+          auto res = tint::val::Msl(xcrun.Path(), msl);
+          if (res.failed) {
+            validation_failed = true;
+            validation_msgs << res.source << std::endl;
+            validation_msgs << res.output;
+          }
+        } else {
+          validation_failed = true;
+          validation_msgs << "xcrun executable not found. Cannot validate";
+        }
+        break;
+      }
+#endif  // TINT_BUILD_MSL_WRITER
+      default:
+        break;
     }
   }
 
+#if TINT_BUILD_SPV_WRITER
   if (options.format == Format::kSpvAsm) {
     auto* w = static_cast<tint::writer::spirv::Generator*>(writer.get());
     auto str = Disassemble(w->result());
@@ -841,12 +935,13 @@ int main(int argc, const char** argv) {
       return 1;
     }
   }
-  if (dawn_validation_failed) {
+#endif  // TINT_BUILD_SPV_WRITER
+
+  if (validation_failed) {
     std::cerr << std::endl << std::endl << "Validation Failure:" << std::endl;
-    std::cerr << stream.str();
+    std::cerr << validation_msgs.str();
     return 1;
   }
-#endif  // TINT_BUILD_SPV_WRITER
 
   if (options.format != Format::kSpvAsm && options.format != Format::kSpirv) {
     auto* w = static_cast<tint::writer::Text*>(writer.get());

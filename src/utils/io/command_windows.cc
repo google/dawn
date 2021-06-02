@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/utils/command.h"
+#include "src/utils/io/command.h"
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
