@@ -42,6 +42,7 @@ namespace tint {
 
 // Forward declarations
 namespace sem {
+class Array;
 class Call;
 class Intrinsic;
 }  // namespace sem
@@ -289,11 +290,17 @@ class GeneratorImpl : public TextGenerator {
   /// type.
   SizeAndAlign MslPackedTypeSizeAndAlign(const sem::Type* ty);
 
+  /// Generate a struct wrapper for an array type.
+  bool EmitArrayWrapper(const sem::Array* arr);
+
   ScopeStack<const sem::Variable*> global_variables_;
   Symbol current_ep_sym_;
   bool generating_entry_point_ = false;
   const Program* program_ = nullptr;
   uint32_t loop_emission_counter_ = 0;
+
+  // Map from an array type to the name of a struct which wraps it.
+  std::unordered_map<const sem::Type*, std::string> array_wrappers_;
 
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_in_data_;
   std::unordered_map<Symbol, EntryPointData> ep_sym_to_out_data_;

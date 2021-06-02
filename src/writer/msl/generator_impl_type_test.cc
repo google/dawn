@@ -451,20 +451,27 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 
   // ALL_FIELDS() calls the macro FIELD(ADDR, TYPE, NAME, SUFFIX)
   // for each field of the structure s.
-#define ALL_FIELDS()                       \
-  FIELD(0x0000, int, a, /*NO SUFFIX*/)     \
-  FIELD(0x0004, float, b, [7])             \
-  FIELD(0x0020, float, c, /*NO SUFFIX*/)   \
-  FIELD(0x0024, int8_t, tint_pad_0, [476]) \
-  FIELD(0x0200, inner, d, [4])             \
-  FIELD(0x1200, float, e, /*NO SUFFIX*/)   \
-  FIELD(0x1204, float, f, [1])             \
+#define ALL_FIELDS()                                    \
+  FIELD(0x0000, int, a, /*NO SUFFIX*/)                  \
+  FIELD(0x0004, tint_array_wrapper_0, b, /*NO SUFFIX*/) \
+  FIELD(0x0020, float, c, /*NO SUFFIX*/)                \
+  FIELD(0x0024, int8_t, tint_pad_0, [476])              \
+  FIELD(0x0200, tint_array_wrapper_1, d, /*NO SUFFIX*/) \
+  FIELD(0x1200, float, e, /*NO SUFFIX*/)                \
+  FIELD(0x1204, float, f, [1])                          \
   FIELD(0x1208, int8_t, tint_pad_1, [504])
 
   // Check that the generated string is as expected.
 #define FIELD(ADDR, TYPE, NAME, SUFFIX) \
   "  /* " #ADDR " */ " #TYPE " " #NAME #SUFFIX ";\n"
-  auto* expect = "struct S {\n" ALL_FIELDS() "};\n";
+  auto* expect =
+      "struct tint_array_wrapper_0 {\n"
+      "  float array[7];\n"
+      "};\n"
+      "struct tint_array_wrapper_1 {\n"
+      "  inner array[4];\n"
+      "};\n"
+      "struct S {\n" ALL_FIELDS() "};\n";
 #undef FIELD
   EXPECT_EQ(gen.result(), expect);
 
@@ -484,12 +491,12 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     CHECK_TYPE_SIZE_AND_ALIGN(inner, 1024, 512);
 
     // array_x: size(28), align(4)
-    using array_x = std::array<float, 7>;
-    CHECK_TYPE_SIZE_AND_ALIGN(array_x, 28, 4);
+    using tint_array_wrapper_0 = std::array<float, 7>;
+    CHECK_TYPE_SIZE_AND_ALIGN(tint_array_wrapper_0, 28, 4);
 
     // array_y: size(4096), align(512)
-    using array_y = std::array<inner, 4>;
-    CHECK_TYPE_SIZE_AND_ALIGN(array_y, 4096, 512);
+    using tint_array_wrapper_1 = std::array<inner, 4>;
+    CHECK_TYPE_SIZE_AND_ALIGN(tint_array_wrapper_1, 4096, 512);
 
     // array_z: size(4), align(4)
     using array_z = std::array<float, 1>;

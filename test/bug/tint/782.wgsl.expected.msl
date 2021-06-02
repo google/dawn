@@ -1,12 +1,13 @@
-SKIP: crbug.com/tint/814
-
 #include <metal_stdlib>
 
 using namespace metal;
+struct tint_array_wrapper_0 {
+  int array[2];
+};
 
 void foo() {
-  int tint_symbol[2] = {0};
-  int implict[2] = {0};
+  tint_array_wrapper_0 tint_symbol = {0};
+  tint_array_wrapper_0 implict = {0};
   implict = tint_symbol;
 }
 

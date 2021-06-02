@@ -3,6 +3,9 @@
 using namespace metal;
 struct S {
 };
+struct tint_array_wrapper_0 {
+  float array[4];
+};
 
 constant bool bool_let = bool();
 constant int i32_let = int();
@@ -12,7 +15,7 @@ constant int2 v2i32_let = int2();
 constant uint3 v3u32_let = uint3();
 constant float4 v4f32_let = float4();
 constant float3x4 m3x4_let = float3x4();
-constant float arr_let[4] = {};
+constant tint_array_wrapper_0 arr_let = {};
 constant S struct_let = {};
 kernel void tint_symbol() {
   return;

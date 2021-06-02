@@ -1,1 +1,67 @@
-SKIP: crbug.com/tint/814
+#include <metal_stdlib>
+
+using namespace metal;
+struct S1 {
+  int a;
+  int b;
+  int c;
+  int d;
+};
+struct S2 {
+  int e;
+  S1 f;
+};
+struct S3 {
+  int g;
+  S1 h;
+  S2 i;
+};
+struct tint_array_wrapper_0 {
+  int array[2];
+};
+struct T {
+  tint_array_wrapper_0 a;
+};
+struct tint_array_wrapper_1 {
+  T array[2];
+};
+
+kernel void tint_symbol() {
+  int const x = 42;
+  S1 const empty = {};
+  S1 const nonempty = {1, 2, 3, 4};
+  S1 const nonempty_with_expr = {1, x, (x + 1), nonempty.d};
+  S3 const nested_empty = {};
+  S1 const tint_symbol_1 = {2, 3, 4, 5};
+  S1 const tint_symbol_2 = {7, 8, 9, 10};
+  S2 const tint_symbol_3 = {6, tint_symbol_2};
+  S3 const nested_nonempty = {1, tint_symbol_1, tint_symbol_3};
+  S1 const tint_symbol_4 = {2, x, (x + 1), nested_nonempty.i.f.d};
+  S2 const tint_symbol_5 = {6, nonempty};
+  S3 const nested_nonempty_with_expr = {1, tint_symbol_4, tint_symbol_5};
+  S1 const tint_symbol_6 = {};
+  int const subexpr_empty = tint_symbol_6.a;
+  S1 const tint_symbol_7 = {1, 2, 3, 4};
+  int const subexpr_nonempty = tint_symbol_7.b;
+  S1 const tint_symbol_8 = {1, x, (x + 1), nonempty.d};
+  int const subexpr_nonempty_with_expr = tint_symbol_8.c;
+  S2 const tint_symbol_9 = {};
+  S1 const subexpr_nested_empty = tint_symbol_9.f;
+  S1 const tint_symbol_10 = {2, 3, 4, 5};
+  S2 const tint_symbol_11 = {1, tint_symbol_10};
+  S1 const subexpr_nested_nonempty = tint_symbol_11.f;
+  S1 const tint_symbol_12 = {2, x, (x + 1), nested_nonempty.i.f.d};
+  S2 const tint_symbol_13 = {1, tint_symbol_12};
+  S1 const subexpr_nested_nonempty_with_expr = tint_symbol_13.f;
+  tint_array_wrapper_1 const aosoa_empty = {};
+  tint_array_wrapper_0 const tint_symbol_14 = {1, 2};
+  T const tint_symbol_15 = {tint_symbol_14};
+  tint_array_wrapper_0 const tint_symbol_16 = {3, 4};
+  T const tint_symbol_17 = {tint_symbol_16};
+  tint_array_wrapper_1 const aosoa_nonempty = {tint_symbol_15, tint_symbol_17};
+  tint_array_wrapper_0 const tint_symbol_18 = {1, (aosoa_nonempty.array[0].a.array[0] + 1)};
+  T const tint_symbol_19 = {tint_symbol_18};
+  tint_array_wrapper_1 const aosoa_nonempty_with_expr = {tint_symbol_19, aosoa_nonempty.array[1]};
+  return;
+}
+

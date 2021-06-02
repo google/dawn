@@ -1,1 +1,55 @@
-SKIP: crbug.com/tint/820: arrays as function return types
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+};
+struct tint_array_wrapper_0 {
+  float array[4];
+};
+
+bool ret_bool() {
+  return bool();
+}
+
+int ret_i32() {
+  return int();
+}
+
+uint ret_u32() {
+  return uint();
+}
+
+float ret_f32() {
+  return float();
+}
+
+int2 ret_v2i32() {
+  return int2();
+}
+
+uint3 ret_v3u32() {
+  return uint3();
+}
+
+float4 ret_v4f32() {
+  return float4();
+}
+
+float2x3 ret_m2x3() {
+  return float2x3();
+}
+
+tint_array_wrapper_0 ret_arr() {
+  tint_array_wrapper_0 const tint_symbol_1 = {};
+  return tint_symbol_1;
+}
+
+S ret_struct() {
+  S const tint_symbol_2 = {};
+  return tint_symbol_2;
+}
+
+kernel void tint_symbol() {
+  return;
+}
+

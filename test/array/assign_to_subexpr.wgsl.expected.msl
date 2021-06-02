@@ -1,0 +1,28 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper_0 {
+  int array[4];
+};
+struct S {
+  tint_array_wrapper_0 arr;
+};
+struct tint_array_wrapper_1 {
+  tint_array_wrapper_0 array[2];
+};
+
+void foo() {
+  tint_array_wrapper_0 const src = {};
+  tint_array_wrapper_0 dst = {0};
+  S dst_struct = {};
+  tint_array_wrapper_1 dst_array = {{0}};
+  thread tint_array_wrapper_0* const dst_ptr = &(dst);
+  thread S* const dst_struct_ptr = &(dst_struct);
+  thread tint_array_wrapper_1* const dst_array_ptr = &(dst_array);
+  dst_struct.arr = src;
+  dst_array.array[1] = src;
+  *(dst_ptr) = src;
+  (*(dst_struct_ptr)).arr = src;
+  (*(dst_array_ptr)).array[0] = src;
+}
+

@@ -1,0 +1,35 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper_0 {
+  float array[4];
+};
+struct tint_array_wrapper_1 {
+  tint_array_wrapper_0 array[3];
+};
+struct tint_array_wrapper_2 {
+  tint_array_wrapper_1 array[2];
+};
+
+float f1(tint_array_wrapper_0 const a) {
+  return a.array[3];
+}
+
+float f2(tint_array_wrapper_1 const a) {
+  return a.array[2].array[3];
+}
+
+float f3(tint_array_wrapper_2 const a) {
+  return a.array[1].array[2].array[3];
+}
+
+kernel void tint_symbol() {
+  tint_array_wrapper_0 const a1 = {};
+  tint_array_wrapper_1 const a2 = {};
+  tint_array_wrapper_2 const a3 = {};
+  float const v1 = f1(a1);
+  float const v2 = f2(a2);
+  float const v3 = f3(a3);
+  return;
+}
+

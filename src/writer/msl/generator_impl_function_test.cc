@@ -776,7 +776,11 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
   EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-  void my_func(float const a[5]) {
+struct tint_array_wrapper_0 {
+  float array[5];
+};
+
+  void my_func(tint_array_wrapper_0 const a) {
     return;
   }
 

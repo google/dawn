@@ -1,0 +1,56 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 33
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %f1 "f1"
+               OpName %f2 "f2"
+               OpName %f3 "f3"
+               OpName %main "main"
+               OpDecorate %_arr_float_uint_4 ArrayStride 4
+               OpDecorate %_arr__arr_float_uint_4_uint_3 ArrayStride 16
+               OpDecorate %_arr__arr__arr_float_uint_4_uint_3_uint_2 ArrayStride 48
+      %float = OpTypeFloat 32
+       %uint = OpTypeInt 32 0
+     %uint_4 = OpConstant %uint 4
+%_arr_float_uint_4 = OpTypeArray %float %uint_4
+          %1 = OpTypeFunction %_arr_float_uint_4
+          %8 = OpConstantNull %_arr_float_uint_4
+     %uint_3 = OpConstant %uint 3
+%_arr__arr_float_uint_4_uint_3 = OpTypeArray %_arr_float_uint_4 %uint_3
+          %9 = OpTypeFunction %_arr__arr_float_uint_4_uint_3
+     %uint_2 = OpConstant %uint 2
+%_arr__arr__arr_float_uint_4_uint_3_uint_2 = OpTypeArray %_arr__arr_float_uint_4_uint_3 %uint_2
+         %18 = OpTypeFunction %_arr__arr__arr_float_uint_4_uint_3_uint_2
+       %void = OpTypeVoid
+         %26 = OpTypeFunction %void
+         %f1 = OpFunction %_arr_float_uint_4 None %1
+          %7 = OpLabel
+               OpReturnValue %8
+               OpFunctionEnd
+         %f2 = OpFunction %_arr__arr_float_uint_4_uint_3 None %9
+         %13 = OpLabel
+         %14 = OpFunctionCall %_arr_float_uint_4 %f1
+         %15 = OpFunctionCall %_arr_float_uint_4 %f1
+         %16 = OpFunctionCall %_arr_float_uint_4 %f1
+         %17 = OpCompositeConstruct %_arr__arr_float_uint_4_uint_3 %14 %15 %16
+               OpReturnValue %17
+               OpFunctionEnd
+         %f3 = OpFunction %_arr__arr__arr_float_uint_4_uint_3_uint_2 None %18
+         %22 = OpLabel
+         %23 = OpFunctionCall %_arr__arr_float_uint_4_uint_3 %f2
+         %24 = OpFunctionCall %_arr__arr_float_uint_4_uint_3 %f2
+         %25 = OpCompositeConstruct %_arr__arr__arr_float_uint_4_uint_3_uint_2 %23 %24
+               OpReturnValue %25
+               OpFunctionEnd
+       %main = OpFunction %void None %26
+         %29 = OpLabel
+         %30 = OpFunctionCall %_arr_float_uint_4 %f1
+         %31 = OpFunctionCall %_arr__arr_float_uint_4_uint_3 %f2
+         %32 = OpFunctionCall %_arr__arr__arr_float_uint_4_uint_3_uint_2 %f3
+               OpReturn
+               OpFunctionEnd
