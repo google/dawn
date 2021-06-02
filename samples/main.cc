@@ -802,7 +802,7 @@ int main(int argc, const char** argv) {
   }
 
   if (!writer->Generate()) {
-    PrintWGSL(std::cerr, out.program);
+    PrintWGSL(std::cerr, *program);
     std::cerr << "Failed to generate: " << writer->error() << std::endl;
     return 1;
   }
