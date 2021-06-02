@@ -184,6 +184,97 @@ TEST_F(IntrinsicBuilderTest, IsFinite_Vector) {
 )");
 }
 
+TEST_F(IntrinsicBuilderTest, IsNormal_Scalar) {
+  auto* var = Global("v", ty.f32(), ast::StorageClass::kPrivate);
+
+  auto* expr = Call("isNormal", "v");
+  WrapInFunction(expr);
+
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{}, ast::DecorationList{});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(expr), 9u) << b.error();
+  auto got = DumpBuilder(b);
+  EXPECT_EQ(got, R"(%12 = OpExtInstImport "GLSL.std.450"
+OpName %1 "v"
+OpName %7 "a_func"
+%3 = OpTypeFloat 32
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
+%10 = OpTypeBool
+%13 = OpTypeInt 32 0
+%14 = OpConstant %13 133693440
+%15 = OpConstant %13 524288
+%16 = OpConstant %13 133169152
+%7 = OpFunction %6 None %5
+%8 = OpLabel
+%11 = OpLoad %3 %1
+%17 = OpBitcast %13 %11
+%18 = OpBitwiseAnd %13 %17 %14
+%19 = OpExtInst %13 %12 UClamp %18 %15 %16
+%9 = OpIEqual %10 %18 %19
+OpReturn
+OpFunctionEnd
+)");
+}
+
+TEST_F(IntrinsicBuilderTest, IsNormal_Vector) {
+  auto* var = Global("v", ty.vec2<f32>(), ast::StorageClass::kPrivate);
+
+  auto* expr = Call("isNormal", "v");
+  WrapInFunction(expr);
+
+  auto* func = Func("a_func", ast::VariableList{}, ty.void_(),
+                    ast::StatementList{}, ast::DecorationList{});
+
+  spirv::Builder& b = Build();
+
+  ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+  ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+  EXPECT_EQ(b.GenerateCallExpression(expr), 10u) << b.error();
+  auto got = DumpBuilder(b);
+  std::cout << got << std::endl;
+  EXPECT_EQ(got, R"(%14 = OpExtInstImport "GLSL.std.450"
+OpName %1 "v"
+OpName %8 "a_func"
+%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 2
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%12 = OpTypeBool
+%11 = OpTypeVector %12 2
+%15 = OpTypeInt 32 0
+%16 = OpConstant %15 133693440
+%17 = OpConstant %15 524288
+%18 = OpConstant %15 133169152
+%19 = OpTypeVector %15 2
+%8 = OpFunction %7 None %6
+%9 = OpLabel
+%13 = OpLoad %3 %1
+%20 = OpCompositeConstruct %19 %16 %16
+%21 = OpCompositeConstruct %19 %17 %17
+%22 = OpCompositeConstruct %19 %18 %18
+%23 = OpBitcast %19 %13
+%24 = OpBitwiseAnd %19 %23 %20
+%25 = OpExtInst %19 %14 UClamp %24 %21 %22
+%10 = OpIEqual %11 %24 %25
+OpReturn
+OpFunctionEnd
+)");
+}
+
 using IntrinsicIntTest = IntrinsicBuilderTestWithParam<IntrinsicData>;
 TEST_P(IntrinsicIntTest, Call_SInt_Scalar) {
   auto param = GetParam();

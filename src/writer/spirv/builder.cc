@@ -32,6 +32,7 @@
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/struct.h"
 #include "src/sem/variable.h"
+#include "src/sem/vector_type.h"
 #include "src/utils/get_or_create.h"
 #include "src/writer/append_vector.h"
 
@@ -2247,6 +2248,83 @@ uint32_t Builder::GenerateIntrinsic(ast::CallExpression* call,
           push_function_inst(spv::Op::OpLogicalNot,
                              {Operand::Int(result_type_id), result,
                               Operand::Int(or_result.to_i())})) {
+        return result_id;
+      }
+      return 0;
+    }
+    case IntrinsicType::kIsNormal: {
+      // A normal number is finite, non-zero, and not subnormal.
+      // Its exponent is neither of the extreme possible values.
+      // Implemented as:
+      //   exponent_bits = bitcast<u32>(f);
+      //   clamped = uclamp(1,254,exponent_bits);
+      //   result = (clamped == exponent_bits);
+      //
+      auto val_id = get_param_as_value_id(0);
+      if (!val_id) {
+        return 0;
+      }
+
+      // These parameters are valid for IEEE 754 binary32
+      const uint32_t kExponentMask = 0x7f80000;
+      const uint32_t kMinNormalExponent = 0x0080000;
+      const uint32_t kMaxNormalExponent = 0x7f00000;
+
+      auto set_id = GetGLSLstd450Import();
+      sem::U32 u32;
+      auto unsigned_id = GenerateTypeIfNeeded(&u32);
+      auto exponent_mask_id =
+          GenerateConstantIfNeeded(ScalarConstant::U32(kExponentMask));
+      auto min_exponent_id =
+          GenerateConstantIfNeeded(ScalarConstant::U32(kMinNormalExponent));
+      auto max_exponent_id =
+          GenerateConstantIfNeeded(ScalarConstant::U32(kMaxNormalExponent));
+      if (auto* fvec_ty = intrinsic->ReturnType()->As<sem::Vector>()) {
+        // In the vector case, update the unsigned type to a vector type of the
+        // same size, and create vector constants by replicating the scalars.
+        // I expect backend compilers to fold these into unique constants, so
+        // there is no loss of efficiency.
+        sem::Vector uvec_ty(&u32, fvec_ty->size());
+        unsigned_id = GenerateTypeIfNeeded(&uvec_ty);
+        auto splat = [&](uint32_t scalar_id) -> uint32_t {
+          auto splat_result = result_op();
+          OperandList splat_params{Operand::Int(unsigned_id), splat_result};
+          for (size_t i = 0; i < fvec_ty->size(); i++) {
+            splat_params.emplace_back(Operand::Int(scalar_id));
+          }
+          if (!push_function_inst(spv::Op::OpCompositeConstruct,
+                                  std::move(splat_params))) {
+            return 0;
+          }
+          return splat_result.to_i();
+        };
+        exponent_mask_id = splat(exponent_mask_id);
+        min_exponent_id = splat(min_exponent_id);
+        max_exponent_id = splat(max_exponent_id);
+      }
+      auto cast_result = result_op();
+      auto exponent_bits_result = result_op();
+      auto clamp_result = result_op();
+
+      if (set_id && unsigned_id && exponent_mask_id && min_exponent_id &&
+          max_exponent_id &&
+          push_function_inst(
+              spv::Op::OpBitcast,
+              {Operand::Int(unsigned_id), cast_result, Operand::Int(val_id)}) &&
+          push_function_inst(spv::Op::OpBitwiseAnd,
+                             {Operand::Int(unsigned_id), exponent_bits_result,
+                              Operand::Int(cast_result.to_i()),
+                              Operand::Int(exponent_mask_id)}) &&
+          push_function_inst(
+              spv::Op::OpExtInst,
+              {Operand::Int(unsigned_id), clamp_result, Operand::Int(set_id),
+               Operand::Int(GLSLstd450UClamp),
+               Operand::Int(exponent_bits_result.to_i()),
+               Operand::Int(min_exponent_id), Operand::Int(max_exponent_id)}) &&
+          push_function_inst(spv::Op::OpIEqual,
+                             {Operand::Int(result_type_id), result,
+                              Operand::Int(exponent_bits_result.to_i()),
+                              Operand::Int(clamp_result.to_i())})) {
         return result_id;
       }
       return 0;
