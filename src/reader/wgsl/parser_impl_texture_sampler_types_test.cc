@@ -204,7 +204,9 @@ TEST_F(ParserImplTest,
   EXPECT_EQ(p->error(), "1:28: expected '>' for multisampled texture type");
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest,
+       TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm_DEPRECATED) {
   auto p = parser("texture_storage_1d<r8unorm>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -220,7 +222,29 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
   EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 28u}}));
 }
 
-TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Readonly1dR8Unorm) {
+  auto p = parser("texture_storage_1d<r8unorm, read>");
+  auto a = p->texture_sampler_types();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  EXPECT_TRUE(a.matched);
+  EXPECT_FALSE(a.errored);
+  ASSERT_NE(a.value, nullptr);
+
+  ASSERT_TRUE(a->Is<ast::AccessControl>());
+  EXPECT_TRUE(a->As<ast::AccessControl>()->IsReadOnly());
+
+  auto* t = a->As<ast::AccessControl>()->type();
+  ASSERT_TRUE(t->Is<ast::Texture>());
+  ASSERT_TRUE(t->Is<ast::StorageTexture>());
+  EXPECT_EQ(t->As<ast::StorageTexture>()->image_format(),
+            ast::ImageFormat::kR8Unorm);
+  EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::k1d);
+  EXPECT_EQ(t->source().range, (Source::Range{{1u, 1u}, {1u, 34u}}));
+}
+
+// TODO(crbug.com/tint/846): Remove
+TEST_F(ParserImplTest,
+       TextureSamplerTypes_StorageTexture_Writeonly2dR16Float_DEPRECATED) {
   auto p = parser("texture_storage_2d<r16float>");
   auto t = p->texture_sampler_types();
   ASSERT_FALSE(p->has_error()) << p->error();
@@ -236,13 +260,42 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
   EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 29u}}));
 }
 
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_Writeonly2dR16Float) {
+  auto p = parser("texture_storage_2d<r16float, write>");
+  auto a = p->texture_sampler_types();
+  ASSERT_FALSE(p->has_error()) << p->error();
+  EXPECT_TRUE(a.matched);
+  EXPECT_FALSE(a.errored);
+  ASSERT_NE(a.value, nullptr);
+
+  ASSERT_TRUE(a->Is<ast::AccessControl>());
+  EXPECT_TRUE(a->As<ast::AccessControl>()->IsWriteOnly());
+
+  auto* t = a->As<ast::AccessControl>()->type();
+  ASSERT_TRUE(t->Is<ast::Texture>());
+  ASSERT_TRUE(t->Is<ast::StorageTexture>());
+  EXPECT_EQ(t->As<ast::StorageTexture>()->image_format(),
+            ast::ImageFormat::kR16Float);
+  EXPECT_EQ(t->As<ast::Texture>()->dim(), ast::TextureDimension::k2d);
+  EXPECT_EQ(t->source().range, (Source::Range{{1u, 1u}, {1u, 36u}}));
+}
+
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType) {
-  auto p = parser("texture_storage_1d<abc>");
+  auto p = parser("texture_storage_1d<abc, read>");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
   EXPECT_EQ(p->error(), "1:20: invalid format for storage texture type");
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidAccess) {
+  auto p = parser("texture_storage_1d<r16float, abc>");
+  auto t = p->texture_sampler_types();
+  EXPECT_EQ(t.value, nullptr);
+  EXPECT_FALSE(t.matched);
+  EXPECT_TRUE(t.errored);
+  EXPECT_EQ(p->error(), "1:30: invalid value for access decoration");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType) {
@@ -264,13 +317,14 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan) {
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingGreaterThan) {
-  auto p = parser("texture_storage_1d<r8unorm");
+  auto p = parser("texture_storage_1d<r8unorm, read");
   auto t = p->texture_sampler_types();
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
-  EXPECT_EQ(p->error(), "1:27: expected '>' for storage texture type");
+  EXPECT_EQ(p->error(), "1:33: expected '>' for storage texture type");
 }
+
 }  // namespace
 }  // namespace wgsl
 }  // namespace reader

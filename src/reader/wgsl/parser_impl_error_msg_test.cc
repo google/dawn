@@ -555,10 +555,10 @@ TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingLessThan) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingGreaterThan) {
-  EXPECT("var x : [[access(read)]] texture_storage_2d<r8uint;",
-         "test.wgsl:1:51 error: expected '>' for storage texture type\n"
-         "var x : [[access(read)]] texture_storage_2d<r8uint;\n"
-         "                                                  ^\n");
+  EXPECT("var x : [[access(read)]] texture_storage_2d<r8uint, read;",
+         "test.wgsl:1:57 error: expected '>' for storage texture type\n"
+         "var x : [[access(read)]] texture_storage_2d<r8uint, read;\n"
+         "                                                        ^\n");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStorageTextureMissingSubtype) {

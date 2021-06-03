@@ -556,7 +556,8 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
 //  | depth_texture_type
 //  | sampled_texture_type LESS_THAN type_decl GREATER_THAN
 //  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
-//  | storage_texture_type LESS_THAN image_storage_type GREATER_THAN
+//  | storage_texture_type LESS_THAN image_storage_type
+//                         COMMA access GREATER_THAN
 Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
   auto type = sampler_type();
   if (type.matched)
@@ -598,15 +599,47 @@ Maybe<ast::Type*> ParserImpl::texture_sampler_types() {
   auto storage = storage_texture_type();
   if (storage.matched) {
     const char* use = "storage texture type";
+    using StorageTextureInfo =
+        std::pair<tint::ast::ImageFormat, tint::ast::AccessControl::Access>;
+    auto params = expect_lt_gt_block(use, [&]() -> Expect<StorageTextureInfo> {
+      auto format = expect_image_storage_type(use);
+      if (format.errored) {
+        return Failure::kErrored;
+      }
 
-    auto format =
-        expect_lt_gt_block(use, [&] { return expect_image_storage_type(use); });
+      if (!match(Token::Type::kComma)) {
+        deprecated(
+            peek().source(),
+            "access control is expected as last parameter of storage textures");
+        return std::make_pair(format.value,
+                              tint::ast::AccessControl::kReadWrite);
+      }
 
-    if (format.errored)
+      auto access = expect_access_type();
+      if (access.errored) {
+        return Failure::kErrored;
+      }
+
+      return std::make_pair(format.value, access.value);
+    });
+
+    if (params.errored) {
       return Failure::kErrored;
+    }
 
-    return builder_.ty.storage_texture(source_range, storage.value,
-                                       format.value);
+    ast::Type* ty =
+        builder_.ty.storage_texture(source_range, storage.value, params->first);
+
+    if (params->second != tint::ast::AccessControl::kReadWrite) {
+      // TODO(crbug.com/tint/846): The ast::AccessControl decoration is
+      // deprecated, but while we're migrating existing WGSL over to the new
+      // style of having the access part of the storage texture, we need to
+      // support both old and new styles. For now, have the new syntax emulate
+      // the old style AST.
+      ty = builder_.ty.access(params->second, ty);
+    }
+
+    return ty;
   }
 
   return Failure::kNoMatch;
