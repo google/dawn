@@ -102,6 +102,7 @@ func (m MatcherDecl) Format(w fmt.State, verb rune) {
 type FunctionDecl struct {
 	Source         tok.Source
 	Name           string
+	Decorations    Decorations
 	TemplateParams TemplateParams
 	Parameters     Parameters
 	ReturnType     *TemplatedName

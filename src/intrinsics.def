@@ -281,18 +281,18 @@ fn determinant<N: num>(mat<N, N, f32>) -> f32
 fn distance(f32, f32) -> f32
 fn distance<N: num>(vec<N, f32>, vec<N, f32>) -> f32
 fn dot<N: num>(vec<N, f32>, vec<N, f32>) -> f32
-fn dpdx(f32) -> f32
-fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>
-fn dpdxCoarse(f32) -> f32
-fn dpdxCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
-fn dpdxFine(f32) -> f32
-fn dpdxFine<N: num>(vec<N, f32>) -> vec<N, f32>
-fn dpdy(f32) -> f32
-fn dpdy<N: num>(vec<N, f32>) -> vec<N, f32>
-fn dpdyCoarse(f32) -> f32
-fn dpdyCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
-fn dpdyFine(f32) -> f32
-fn dpdyFine<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdx(f32) -> f32
+[[stage("fragment")]] fn dpdx<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdxCoarse(f32) -> f32
+[[stage("fragment")]] fn dpdxCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdxFine(f32) -> f32
+[[stage("fragment")]] fn dpdxFine<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdy(f32) -> f32
+[[stage("fragment")]] fn dpdy<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdyCoarse(f32) -> f32
+[[stage("fragment")]] fn dpdyCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
+[[stage("fragment")]] fn dpdyFine(f32) -> f32
+[[stage("fragment")]] fn dpdyFine<N: num>(vec<N, f32>) -> vec<N, f32>
 fn exp(f32) -> f32
 fn exp<N: num>(vec<N, f32>) -> vec<N, f32>
 fn exp2(f32) -> f32
@@ -367,7 +367,7 @@ fn sqrt(f32) -> f32
 fn sqrt<N: num>(vec<N, f32>) -> vec<N, f32>
 fn step(f32, f32) -> f32
 fn step<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-fn storageBarrier()
+[[stage("compute")]] fn storageBarrier()
 fn tan(f32) -> f32
 fn tan<N: num>(vec<N, f32>) -> vec<N, f32>
 fn tanh(f32) -> f32
@@ -379,7 +379,7 @@ fn unpack2x16snorm(u32) -> vec2<f32>
 fn unpack2x16unorm(u32) -> vec2<f32>
 fn unpack4x8snorm(u32) -> vec4<f32>
 fn unpack4x8unorm(u32) -> vec4<f32>
-fn workgroupBarrier()
+[[stage("compute")]] fn workgroupBarrier()
 fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> i32
 fn textureDimensions<T: fiu32>(texture: texture_2d<T>) -> vec2<i32>
 fn textureDimensions<T: fiu32>(texture: texture_2d<T>, level: i32) -> vec2<i32>
@@ -420,36 +420,36 @@ fn textureNumLevels(texture: texture_depth_2d_array) -> i32
 fn textureNumLevels(texture: texture_depth_cube) -> i32
 fn textureNumLevels(texture: texture_depth_cube_array) -> i32
 fn textureNumSamples<T: fiu32>(texture: texture_multisampled_2d<T>) -> i32
-fn textureSample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
-fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
-fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
-fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32) -> vec4<f32>
-fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> vec4<f32>
-fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
-fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, offset: vec3<i32>) -> vec4<f32>
-fn textureSample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
-fn textureSample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<f32>
-fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> f32
-fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> f32
-fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32) -> f32
-fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> f32
-fn textureSample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32
-fn textureSample(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32) -> f32
-fn textureSample(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
-fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32) -> vec4<f32>
-fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32, offset: vec2<i32>) -> vec4<f32>
-fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32) -> vec4<f32>
-fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32, offset: vec2<i32>) -> vec4<f32>
-fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
-fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32, offset: vec3<i32>) -> vec4<f32>
-fn textureSampleBias(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
-fn textureSampleBias(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32, bias: f32) -> vec4<f32>
-fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
-fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> f32
-fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> f32
-fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32, offset: vec2<i32>) -> f32
-fn textureSampleCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
-fn textureSampleCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, offset: vec3<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<f32>
+[[stage("fragment")]] fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_2d_array, sampler: sampler, coords: vec2<f32>, array_index: i32, offset: vec2<i32>) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32) -> f32
+[[stage("fragment")]] fn textureSample(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, bias: f32, offset: vec2<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, bias: f32, offset: vec2<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32, offset: vec3<i32>) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_cube<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleBias(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32, bias: f32) -> vec4<f32>
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, offset: vec2<i32>) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32, offset: vec2<i32>) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_cube, sampler: sampler_comparison, coords: vec3<f32>, depth_ref: f32) -> f32
+[[stage("fragment")]] fn textureSampleCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: i32, depth_ref: f32) -> f32
 fn textureSampleGrad(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32>
 fn textureSampleGrad(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, ddx: vec2<f32>, ddy: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
 fn textureSampleGrad(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, ddx: vec2<f32>, ddy: vec2<f32>) -> vec4<f32>

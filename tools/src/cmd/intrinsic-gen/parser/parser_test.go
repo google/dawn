@@ -95,6 +95,14 @@ func TestParser(t *testing.T) {
 				Name: "F",
 			}},
 		}},
+		{"[[deco]] fn F()", ast.AST{
+			Functions: []ast.FunctionDecl{{
+				Name: "F",
+				Decorations: ast.Decorations{
+					{Name: "deco"},
+				},
+			}},
+		}},
 		{"fn F(a)", ast.AST{
 			Functions: []ast.FunctionDecl{{
 				Name: "F",

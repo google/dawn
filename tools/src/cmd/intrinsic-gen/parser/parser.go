@@ -43,20 +43,31 @@ type parser struct {
 
 func (p *parser) parse() (*ast.AST, error) {
 	out := ast.AST{}
+	var decorations ast.Decorations
 	for p.err == nil {
 		t := p.peek(0)
 		if t == nil {
 			break
 		}
 		switch t.Kind {
+		case tok.Ldeco:
+			decorations = append(decorations, p.decorations()...)
 		case tok.Enum:
+			if len(decorations) > 0 {
+				p.err = fmt.Errorf("%v unexpected decoration", decorations[0].Source)
+			}
 			out.Enums = append(out.Enums, p.enumDecl())
 		case tok.Match:
+			if len(decorations) > 0 {
+				p.err = fmt.Errorf("%v unexpected decoration", decorations[0].Source)
+			}
 			out.Matchers = append(out.Matchers, p.matcherDecl())
-		case tok.Type, tok.Ldeco:
-			out.Types = append(out.Types, p.typeDecl())
+		case tok.Type:
+			out.Types = append(out.Types, p.typeDecl(decorations))
+			decorations = nil
 		case tok.Function:
-			out.Functions = append(out.Functions, p.functionDecl())
+			out.Functions = append(out.Functions, p.functionDecl(decorations))
+			decorations = nil
 		default:
 			p.err = fmt.Errorf("%v unexpected token '%v'", t.Source, t.Kind)
 		}
@@ -98,8 +109,7 @@ func (p *parser) matcherDecl() ast.MatcherDecl {
 	return m
 }
 
-func (p *parser) typeDecl() ast.TypeDecl {
-	decos := p.decorations()
+func (p *parser) typeDecl(decos ast.Decorations) ast.TypeDecl {
 	p.expect(tok.Type, "type declaration")
 	name := p.expect(tok.Identifier, "type name")
 	m := ast.TypeDecl{
@@ -143,10 +153,14 @@ func (p *parser) decorations() ast.Decorations {
 	return out
 }
 
-func (p *parser) functionDecl() ast.FunctionDecl {
+func (p *parser) functionDecl(decos ast.Decorations) ast.FunctionDecl {
 	p.expect(tok.Function, "function declaration")
 	name := p.expect(tok.Identifier, "function name")
-	f := ast.FunctionDecl{Source: name.Source, Name: string(name.Runes)}
+	f := ast.FunctionDecl{
+		Source:      name.Source,
+		Decorations: decos,
+		Name:        string(name.Runes),
+	}
 	if p.peekIs(0, tok.Lt) {
 		f.TemplateParams = p.templateParams()
 	}

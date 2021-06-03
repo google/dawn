@@ -129,13 +129,21 @@ type Function struct {
 
 // Overload describes a single overload of a function
 type Overload struct {
-	Decl           ast.FunctionDecl
-	Function       *Function
-	TemplateParams []TemplateParam
-	OpenTypes      []*TemplateTypeParam
-	OpenNumbers    []TemplateParam
-	ReturnType     *FullyQualifiedName
-	Parameters     []Parameter
+	Decl             ast.FunctionDecl
+	Function         *Function
+	TemplateParams   []TemplateParam
+	OpenTypes        []*TemplateTypeParam
+	OpenNumbers      []TemplateParam
+	ReturnType       *FullyQualifiedName
+	Parameters       []Parameter
+	CanBeUsedInStage StageUses
+}
+
+// StageUses describes the stages an overload can be used in
+type StageUses struct {
+	Vertex   bool
+	Fragment bool
+	Compute  bool
 }
 
 // Format implements the fmt.Formatter interface

@@ -243,13 +243,43 @@ func (r *resolver) function(a ast.FunctionDecl) error {
 		return err
 	}
 
-	// Construct the semantic overload and append it to the function
+	// Construct the semantic overload
 	overload := &sem.Overload{
 		Decl:           a,
 		Function:       f,
 		Parameters:     make([]sem.Parameter, len(a.Parameters)),
 		TemplateParams: templateParams,
 	}
+
+	// Process overload decorations
+	if stageDeco := a.Decorations.Take("stage"); stageDeco != nil {
+		for stageDeco != nil {
+			for _, stage := range stageDeco.Values {
+				switch stage {
+				case "vertex":
+					overload.CanBeUsedInStage.Vertex = true
+				case "fragment":
+					overload.CanBeUsedInStage.Fragment = true
+				case "compute":
+					overload.CanBeUsedInStage.Compute = true
+				default:
+					return fmt.Errorf("%v unknown stage '%v'", stageDeco.Source, stage)
+				}
+			}
+			stageDeco = a.Decorations.Take("stage")
+		}
+	} else {
+		overload.CanBeUsedInStage = sem.StageUses{
+			Vertex:   true,
+			Fragment: true,
+			Compute:  true,
+		}
+	}
+	if len(a.Decorations) != 0 {
+		return fmt.Errorf("%v unknown decoration", a.Decorations[0].Source)
+	}
+
+	// Append the overload to the function
 	f.Overloads = append(f.Overloads, overload)
 
 	// Sort the template parameters by resolved type. Append these to
