@@ -52,6 +52,7 @@ namespace dawn_native {
         FlushBeforeClientWaitSync,
         UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
         EmitHLSLDebugSymbols,
+        DisallowSpirv,
 
         EnumCount,
         InvalidEnum = EnumCount,

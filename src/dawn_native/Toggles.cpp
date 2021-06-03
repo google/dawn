@@ -182,7 +182,13 @@ namespace dawn_native {
               "Sets the D3DCOMPILE_SKIP_OPTIMIZATION and D3DCOMPILE_DEBUG compilation flags when "
               "compiling HLSL code. Enables better shader debugging with external graphics "
               "debugging tools.",
-              "https://crbug.com/dawn/776"}}
+              "https://crbug.com/dawn/776"}},
+            {Toggle::DisallowSpirv,
+             {"disallow_spirv",
+              "Disallow usage of SPIR-V completely so that only WGSL is used for shader modules."
+              "This is useful to prevent a Chromium renderer process from successfully sending"
+              "SPIR-V code to be compiled in the GPU process.",
+              "https://crbug.com/1214923"}},
             // Dummy comment to separate the }} so it is clearer what to copy-paste to add a toggle.
         }};
     }  // anonymous namespace

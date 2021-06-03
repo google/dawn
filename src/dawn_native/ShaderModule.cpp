@@ -1083,6 +1083,10 @@ namespace dawn_native {
         FindInChain(chainedDescriptor, &wgslDesc);
 
         if (spirvDesc) {
+            if (device->IsToggleEnabled(Toggle::DisallowSpirv)) {
+                return DAWN_VALIDATION_ERROR("SPIR-V is disallowed.");
+            }
+
             std::vector<uint32_t> spirv(spirvDesc->code, spirvDesc->code + spirvDesc->codeSize);
             if (device->IsToggleEnabled(Toggle::UseTintGenerator)) {
                 tint::Program program;
