@@ -722,7 +722,8 @@ TEST_P(DepthStencilSamplingTest, CompareFunctionsRender) {
 }
 
 // Test that sampling in a render pipeline with all of the compare functions works.
-TEST_P(DepthStencilSamplingTest, CompareFunctionsCompute) {
+// WGSL disallows |textureSampleCompare| in compute stages.
+TEST_P(DepthStencilSamplingTest, DISABLED_CompareFunctionsCompute) {
     // Initialization via renderPass loadOp doesn't work on Mac Intel.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
