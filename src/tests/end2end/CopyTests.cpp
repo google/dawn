@@ -863,6 +863,47 @@ TEST_P(CopyTests_T2B, StrideSpecialCases) {
     }
 }
 
+// Test copying a single slice with rowsPerImage larger than copy height and rowsPerImage will not
+// take effect. If rowsPerImage takes effect, it looks like the copy may go past the end of the
+// buffer.
+TEST_P(CopyTests_T2B, RowsPerImageShouldNotCauseBufferOOBIfDepthOrArrayLayersIsOne) {
+    // Check various offsets to cover each code path in the 2D split code in TextureCopySplitter.
+    for (uint32_t offset : {0, 4, 64}) {
+        constexpr uint32_t kWidth = 250;
+        constexpr uint32_t kHeight = 3;
+
+        TextureSpec textureSpec;
+        textureSpec.textureSize = {kWidth, kHeight, 1};
+
+        BufferSpec bufferSpec = MinimumBufferSpec(kWidth, kHeight);
+        bufferSpec.rowsPerImage = 2 * kHeight;
+        bufferSpec.offset = offset;
+        bufferSpec.size += offset;
+        DoTest(textureSpec, bufferSpec, {kWidth, kHeight, 1});
+        DoTest(textureSpec, bufferSpec, {kWidth, kHeight, 1}, wgpu::TextureDimension::e3D);
+    }
+}
+
+// Test copying a single row with bytesPerRow larger than copy width and bytesPerRow will not
+// take effect. If bytesPerRow takes effect, it looks like the copy may go past the end of the
+// buffer.
+TEST_P(CopyTests_T2B, BytesPerRowShouldNotCauseBufferOOBIfCopyHeightIsOne) {
+    // Check various offsets to cover each code path in the 2D split code in TextureCopySplitter.
+    for (uint32_t offset : {0, 4, 100}) {
+        constexpr uint32_t kWidth = 250;
+
+        TextureSpec textureSpec;
+        textureSpec.textureSize = {kWidth, 1, 1};
+
+        BufferSpec bufferSpec = MinimumBufferSpec(kWidth, 1);
+        bufferSpec.bytesPerRow = 1280;  // the default bytesPerRow is 1024.
+        bufferSpec.offset = offset;
+        bufferSpec.size += offset;
+        DoTest(textureSpec, bufferSpec, {kWidth, 1, 1});
+        DoTest(textureSpec, bufferSpec, {kWidth, 1, 1}, wgpu::TextureDimension::e3D);
+    }
+}
+
 // Test that copying whole texture 2D array layers in one texture-to-buffer-copy works.
 TEST_P(CopyTests_T2B, Texture2DArrayFull) {
     constexpr uint32_t kWidth = 256;

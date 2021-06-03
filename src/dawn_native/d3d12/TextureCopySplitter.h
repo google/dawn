@@ -59,10 +59,14 @@ namespace dawn_native { namespace d3d12 {
     // D3D12 driver may report validation errors when we call CopyTextureRegion. Some important
     // invariants are listed below. For more details
     // of these invariants, see src/tests/unittests/d3d12/CopySplitTests.cpp.
-    //   - Inside each copy region, its buffer offset plus copy size should be less than its buffer
-    //     size.
-    //   - each region has an offset (aka alignedOffset) aligned to
+    //   - Inside each copy region: 1) its buffer offset plus copy size should be less than its
+    //     buffer size, 2) its buffer offset on y-axis should be less than copy format's
+    //     blockInfo.height, 3) its buffer offset on z-axis should be 0.
+    //   - Each copy region has an offset (aka alignedOffset) aligned to
     //     D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT
+    //   - The buffer footprint of each copy region should be entirely within the copied buffer,
+    //     which means that the last "texel" of the buffer footprint doesn't go past the end of
+    //     the buffer even though the last "texel" might not be copied.
     //   - If there are multiple copy regions, each copy region should not overlap with the others.
     //   - Copy region(s) combined should exactly be equivalent to the texture region to be copied.
     //   - Every pixel accessed by every copy region should not be out of the bound of the copied
@@ -71,8 +75,7 @@ namespace dawn_native { namespace d3d12 {
                                                            Extent3D copySize,
                                                            const TexelBlockInfo& blockInfo,
                                                            uint64_t offset,
-                                                           uint32_t bytesPerRow,
-                                                           uint32_t rowsPerImage);
+                                                           uint32_t bytesPerRow);
 
     TextureCopySplits Compute2DTextureCopySplits(Origin3D origin,
                                                  Extent3D copySize,
