@@ -1508,7 +1508,7 @@ namespace {
                 })");
 
             wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
-                [[group(0), binding(0)]] var tex : [[access(read)]] texture_storage_2d<rgba8unorm>;
+                [[group(0), binding(0)]] var tex : texture_storage_2d<rgba8unorm, read>;
                 [[stage(fragment)]] fn main() {
                 })");
             utils::ComboRenderPipelineDescriptor pipelineDescriptor;

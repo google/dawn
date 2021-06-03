@@ -257,7 +257,7 @@ TEST_P(GpuMemorySyncTests, SampledAndROStorageTextureInComputePass) {
         };
         [[group(0), binding(0)]] var<storage> output : [[access(write)]] Output;
         [[group(0), binding(1)]] var sampledTex : texture_2d<u32>;
-        [[group(0), binding(2)]] var storageTex : [[access(read)]] texture_storage_2d<r32uint>;
+        [[group(0), binding(2)]] var storageTex : texture_storage_2d<r32uint, read>;
 
         [[stage(compute)]] fn main() {
             output.sampledOut = textureLoad(sampledTex, vec2<i32>(0, 0), 0).x;
