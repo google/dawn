@@ -63,8 +63,9 @@ func (e *Enum) FindEntry(name string) *EnumEntry {
 
 // EnumEntry is an entry in an enumerator
 type EnumEntry struct {
-	Enum *Enum
-	Name string
+	Enum       *Enum
+	Name       string
+	IsInternal bool // True if this entry is not part of the WGSL grammar
 }
 
 // Type declares a type

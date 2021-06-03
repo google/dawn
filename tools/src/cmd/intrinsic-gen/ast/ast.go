@@ -56,16 +56,32 @@ func (a AST) String() string {
 type EnumDecl struct {
 	Source  tok.Source
 	Name    string
-	Entries []string
+	Entries []EnumEntry
 }
 
 // Format implements the fmt.Formatter interface
 func (e EnumDecl) Format(w fmt.State, verb rune) {
 	fmt.Fprintf(w, "enum %v {\n", e.Name)
 	for _, e := range e.Entries {
-		fmt.Fprintf(w, "  %s\n", e)
+		fmt.Fprintf(w, "  %v\n", e)
 	}
 	fmt.Fprintf(w, "}\n")
+}
+
+// EnumEntry describes an entry in a enumerator
+type EnumEntry struct {
+	Source      tok.Source
+	Name        string
+	Decorations Decorations
+}
+
+// Format implements the fmt.Formatter interface
+func (e EnumEntry) Format(w fmt.State, verb rune) {
+	if len(e.Decorations) > 0 {
+		fmt.Fprintf(w, "%v %v", e.Decorations, e.Name)
+	} else {
+		fmt.Fprint(w, e.Name)
+	}
 }
 
 // MatcherDecl describes a matcher declaration

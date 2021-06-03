@@ -73,9 +73,15 @@ func (p *parser) enumDecl() ast.EnumDecl {
 	e := ast.EnumDecl{Source: name.Source, Name: string(name.Runes)}
 	p.expect(tok.Lbrace, "enum declaration")
 	for p.err == nil && p.match(tok.Rbrace) == nil {
-		e.Entries = append(e.Entries, p.ident("enumerator value"))
+		e.Entries = append(e.Entries, p.enumEntry())
 	}
 	return e
+}
+
+func (p *parser) enumEntry() ast.EnumEntry {
+	decos := p.decorations()
+	name := p.expect(tok.Identifier, "enum entry")
+	return ast.EnumEntry{Source: name.Source, Decorations: decos, Name: string(name.Runes)}
 }
 
 func (p *parser) matcherDecl() ast.MatcherDecl {

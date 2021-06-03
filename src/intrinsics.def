@@ -30,7 +30,7 @@ enum storage_class {
   workgroup
   uniform
   storage
-  handle
+  [[internal]] handle
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#memory-access-mode

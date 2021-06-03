@@ -31,10 +31,17 @@ func TestParser(t *testing.T) {
 		{"enum E {}", ast.AST{
 			Enums: []ast.EnumDecl{{Name: "E"}},
 		}},
-		{"enum E { A B C }", ast.AST{
+		{"enum E { A [[deco]] B C }", ast.AST{
 			Enums: []ast.EnumDecl{{
-				Name:    "E",
-				Entries: []string{"A", "B", "C"},
+				Name: "E",
+				Entries: []ast.EnumEntry{
+					{Name: "A"},
+					{
+						Decorations: ast.Decorations{{Name: "deco"}},
+						Name:        "B",
+					},
+					{Name: "C"},
+				},
 			}},
 		}},
 		{"type T", ast.AST{

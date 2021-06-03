@@ -90,8 +90,17 @@ func (r *resolver) enum(e ast.EnumDecl) error {
 	// Register each of the enum entries
 	for _, ast := range e.Entries {
 		entry := &sem.EnumEntry{
-			Name: ast,
+			Name: ast.Name,
 			Enum: s,
+		}
+		if internal := ast.Decorations.Take("internal"); internal != nil {
+			entry.IsInternal = true
+			if len(internal.Values) != 0 {
+				return fmt.Errorf("%v unexpected value for internal decoration", ast.Source)
+			}
+		}
+		if len(ast.Decorations) != 0 {
+			return fmt.Errorf("%v unknown decoration", ast.Decorations[0].Source)
 		}
 		if err := r.globals.declare(entry, e.Source); err != nil {
 			return err
