@@ -15,7 +15,7 @@ struct tint_symbol_2 {
 };
 
 fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  FragmentInputs const inputs = {tint_symbol_1.loc0, tint_symbol_1.loc1, tint_symbol_1.loc2, tint_symbol_1.loc3};
+  FragmentInputs const inputs = {.loc0=tint_symbol_1.loc0, .loc1=tint_symbol_1.loc1, .loc2=tint_symbol_1.loc2, .loc3=tint_symbol_1.loc3};
   int const i = inputs.loc0;
   uint const u = inputs.loc1;
   float const f = inputs.loc2;

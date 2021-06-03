@@ -165,7 +165,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
   GeneratorImpl& gen = Build();
 
   ASSERT_TRUE(gen.Generate()) << gen.error();
-  EXPECT_THAT(gen.result(), HasSubstr("{1, 2.0f, int3(3, 4, 5)}"));
+  EXPECT_THAT(gen.result(), HasSubstr("{.a=1, .b=2.0f, .c=int3(3, 4, 5)}"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct_Empty) {

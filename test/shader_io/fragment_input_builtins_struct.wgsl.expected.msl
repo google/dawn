@@ -15,7 +15,7 @@ struct tint_symbol_2 {
 };
 
 fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  FragmentInputs const inputs = {tint_symbol_1.position, tint_symbol_1.front_facing, tint_symbol_1.sample_index, tint_symbol_1.sample_mask};
+  FragmentInputs const inputs = {.position=tint_symbol_1.position, .front_facing=tint_symbol_1.front_facing, .sample_index=tint_symbol_1.sample_index, .sample_mask=tint_symbol_1.sample_mask};
   if (inputs.front_facing) {
     float4 const foo = inputs.position;
     uint const bar = (inputs.sample_index + inputs.sample_mask);

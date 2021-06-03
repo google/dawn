@@ -113,7 +113,7 @@ struct tint_symbol_2 {
 
 fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
   float const foo = tint_symbol.foo;
-  tint_symbol_2 const tint_symbol_3 = {foo};
+  tint_symbol_2 const tint_symbol_3 = {.value=foo};
   return tint_symbol_3;
 }
 
@@ -148,7 +148,7 @@ struct tint_symbol_2 {
 
 fragment tint_symbol_2 frag_main(tint_symbol_1 tint_symbol [[stage_in]]) {
   float4 const coord = tint_symbol.coord;
-  tint_symbol_2 const tint_symbol_3 = {coord.x};
+  tint_symbol_2 const tint_symbol_3 = {.value=coord.x};
   return tint_symbol_3;
 }
 
@@ -216,13 +216,13 @@ struct tint_symbol_3 {
 };
 
 vertex tint_symbol vert_main() {
-  Interface const tint_symbol_1 = {0.5f, 0.25f, float4()};
-  tint_symbol const tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
+  Interface const tint_symbol_1 = {.col1=0.5f, .col2=0.25f, .pos=float4()};
+  tint_symbol const tint_symbol_4 = {.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=tint_symbol_1.pos};
   return tint_symbol_4;
 }
 
 fragment void frag_main(tint_symbol_3 tint_symbol_2 [[stage_in]]) {
-  Interface const colors = {tint_symbol_2.col1, tint_symbol_2.col2, tint_symbol_2.pos};
+  Interface const colors = {.col1=tint_symbol_2.col1, .col2=tint_symbol_2.col2, .pos=tint_symbol_2.pos};
   float const r = colors.col1;
   float const g = colors.col2;
   return;
@@ -257,13 +257,12 @@ TEST_F(MslGeneratorImplTest,
        {});
 
   Func("vert_main1", {}, vertex_output_struct,
-       {Return(Construct(vertex_output_struct, Expr(Call("foo", Expr(0.5f)))))},
+       {Return(Expr(Call("foo", Expr(0.5f))))},
        {Stage(ast::PipelineStage::kVertex)});
 
-  Func(
-      "vert_main2", {}, vertex_output_struct,
-      {Return(Construct(vertex_output_struct, Expr(Call("foo", Expr(0.25f)))))},
-      {Stage(ast::PipelineStage::kVertex)});
+  Func("vert_main2", {}, vertex_output_struct,
+       {Return(Expr(Call("foo", Expr(0.25f))))},
+       {Stage(ast::PipelineStage::kVertex)});
 
   GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -282,19 +281,19 @@ struct tint_symbol_2 {
 };
 
 VertexOutput foo(float x) {
-  VertexOutput const tint_symbol_4 = {float4(x, x, x, 1.0f)};
+  VertexOutput const tint_symbol_4 = {.pos=float4(x, x, x, 1.0f)};
   return tint_symbol_4;
 }
 
 vertex tint_symbol vert_main1() {
-  VertexOutput const tint_symbol_1 = {foo(0.5f)};
-  tint_symbol const tint_symbol_5 = {tint_symbol_1.pos};
+  VertexOutput const tint_symbol_1 = foo(0.5f);
+  tint_symbol const tint_symbol_5 = {.pos=tint_symbol_1.pos};
   return tint_symbol_5;
 }
 
 vertex tint_symbol_2 vert_main2() {
-  VertexOutput const tint_symbol_3 = {foo(0.25f)};
-  tint_symbol_2 const tint_symbol_6 = {tint_symbol_3.pos};
+  VertexOutput const tint_symbol_3 = foo(0.25f);
+  tint_symbol_2 const tint_symbol_6 = {.pos=tint_symbol_3.pos};
   return tint_symbol_6;
 }
 

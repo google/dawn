@@ -18,13 +18,13 @@ struct tint_symbol_3 {
 };
 
 vertex tint_symbol vert_main() {
-  Interface const tint_symbol_1 = {0.400000006f, 0.600000024f, float4()};
-  tint_symbol const tint_symbol_4 = {tint_symbol_1.col1, tint_symbol_1.col2, tint_symbol_1.pos};
+  Interface const tint_symbol_1 = {.col1=0.400000006f, .col2=0.600000024f, .pos=float4()};
+  tint_symbol const tint_symbol_4 = {.col1=tint_symbol_1.col1, .col2=tint_symbol_1.col2, .pos=tint_symbol_1.pos};
   return tint_symbol_4;
 }
 
 fragment void frag_main(tint_symbol_3 tint_symbol_2 [[stage_in]]) {
-  Interface const colors = {tint_symbol_2.col1, tint_symbol_2.col2, tint_symbol_2.pos};
+  Interface const colors = {.col1=tint_symbol_2.col1, .col2=tint_symbol_2.col2, .pos=tint_symbol_2.pos};
   float const r = colors.col1;
   float const g = colors.col2;
   return;

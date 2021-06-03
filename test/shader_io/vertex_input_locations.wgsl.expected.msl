@@ -20,7 +20,7 @@ vertex tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
   uint const u = loc1;
   float const f = loc2;
   float4 const v = loc3;
-  tint_symbol_3 const tint_symbol_4 = {float4()};
+  tint_symbol_3 const tint_symbol_4 = {.value=float4()};
   return tint_symbol_4;
 }
 

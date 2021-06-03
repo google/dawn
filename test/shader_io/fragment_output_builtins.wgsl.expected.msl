@@ -9,12 +9,12 @@ struct tint_symbol_1 {
 };
 
 fragment tint_symbol main1() {
-  tint_symbol const tint_symbol_2 = {1.0f};
+  tint_symbol const tint_symbol_2 = {.value=1.0f};
   return tint_symbol_2;
 }
 
 fragment tint_symbol_1 main2() {
-  tint_symbol_1 const tint_symbol_3 = {1u};
+  tint_symbol_1 const tint_symbol_3 = {.value=1u};
   return tint_symbol_3;
 }
 

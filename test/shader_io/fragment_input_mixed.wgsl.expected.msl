@@ -21,11 +21,11 @@ struct tint_symbol_2 {
 };
 
 fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  FragmentInputs0 const inputs0 = {tint_symbol_1.position, tint_symbol_1.loc0};
+  FragmentInputs0 const inputs0 = {.position=tint_symbol_1.position, .loc0=tint_symbol_1.loc0};
   bool const front_facing = tint_symbol_1.front_facing;
   uint const loc1 = tint_symbol_1.loc1;
   uint const sample_index = tint_symbol_1.sample_index;
-  FragmentInputs1 const inputs1 = {tint_symbol_1.loc3, tint_symbol_1.sample_mask};
+  FragmentInputs1 const inputs1 = {.loc3=tint_symbol_1.loc3, .sample_mask=tint_symbol_1.sample_mask};
   float const loc2 = tint_symbol_1.loc2;
   if (front_facing) {
     float4 const foo = inputs0.position;

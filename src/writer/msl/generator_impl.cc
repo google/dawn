@@ -918,16 +918,24 @@ bool GeneratorImpl::EmitTypeConstructor(ast::TypeConstructorExpression* expr) {
     out_ << "(";
   }
 
-  bool first = true;
+  int i = 0;
   for (auto* e : expr->values()) {
-    if (!first) {
+    if (i > 0) {
       out_ << ", ";
     }
-    first = false;
+
+    if (auto* struct_ty = type->As<sem::Struct>()) {
+      // Emit field designators for structures to account for padding members.
+      auto* member = struct_ty->Members()[i]->Declaration();
+      auto name = program_->Symbols().NameFor(member->symbol());
+      out_ << "." << name << "=";
+    }
 
     if (!EmitExpression(e)) {
       return false;
     }
+
+    i++;
   }
 
   if (type->IsAnyOf<sem::Array, sem::Struct>()) {

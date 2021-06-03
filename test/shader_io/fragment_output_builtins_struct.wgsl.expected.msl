@@ -11,8 +11,8 @@ struct tint_symbol_1 {
 };
 
 fragment tint_symbol_1 tint_symbol() {
-  FragmentOutputs const tint_symbol_2 = {1.0f, 1u};
-  tint_symbol_1 const tint_symbol_3 = {tint_symbol_2.frag_depth, tint_symbol_2.sample_mask};
+  FragmentOutputs const tint_symbol_2 = {.frag_depth=1.0f, .sample_mask=1u};
+  tint_symbol_1 const tint_symbol_3 = {.frag_depth=tint_symbol_2.frag_depth, .sample_mask=tint_symbol_2.sample_mask};
   return tint_symbol_3;
 }
 
