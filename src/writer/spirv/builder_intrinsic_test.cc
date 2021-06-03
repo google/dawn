@@ -242,7 +242,6 @@ TEST_F(IntrinsicBuilderTest, IsNormal_Vector) {
 
   EXPECT_EQ(b.GenerateCallExpression(expr), 10u) << b.error();
   auto got = DumpBuilder(b);
-  std::cout << got << std::endl;
   EXPECT_EQ(got, R"(%14 = OpExtInstImport "GLSL.std.450"
 OpName %1 "v"
 OpName %8 "a_func"
