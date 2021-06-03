@@ -353,6 +353,17 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
+  auto* tex_ty = ty.sampled_texture(ast::TextureDimension::k2d, ty.f32());
+  Global("arr", ty.array(Source{{12, 34}}, tex_ty, 4),
+         ast::StorageClass::kPrivate);
+
+  EXPECT_FALSE(r()->Resolve());
+  EXPECT_EQ(r()->error(),
+            "12:34 error: texture_2d<f32> cannot be used as an element type of "
+            "an array");
+}
+
 namespace GetCanonicalTests {
 struct Params {
   create_ast_type_func_ptr create_ast_type;

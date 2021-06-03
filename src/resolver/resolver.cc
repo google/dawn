@@ -2653,6 +2653,14 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     return nullptr;
   }
 
+  if (!IsStorable(el_ty)) {  // Check must come before DefaultAlignAndSize()
+    builder_->Diagnostics().add_error(
+        el_ty->FriendlyName(builder_->Symbols()) +
+            " cannot be used as an element type of an array",
+        source);
+    return nullptr;
+  }
+
   uint32_t el_align = 0;
   uint32_t el_size = 0;
   if (!DefaultAlignAndSize(el_ty, el_align, el_size)) {
@@ -2701,14 +2709,6 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
 
 bool Resolver::ValidateArray(const sem::Array* arr, const Source& source) {
   auto* el_ty = arr->ElemType();
-
-  if (!IsStorable(el_ty)) {
-    builder_->Diagnostics().add_error(
-        el_ty->FriendlyName(builder_->Symbols()) +
-            " cannot be used as an element type of an array",
-        source);
-    return false;
-  }
 
   if (auto* el_str = el_ty->As<sem::Struct>()) {
     if (el_str->IsBlockDecorated()) {
