@@ -60,12 +60,6 @@ namespace dawn_native {
                                         const ImageCopyTexture& imageCopyTexture,
                                         const Extent3D& copySize);
 
-    MaybeError ValidateRowsPerImage(const Format& format,
-                                    uint32_t rowsPerImage,
-                                    uint32_t copyHeight);
-    MaybeError ValidateBytesPerRow(const Format& format,
-                                   const Extent3D& copySize,
-                                   uint32_t bytesPerRow);
     MaybeError ValidateCopySizeFitsInBuffer(const Ref<BufferBase>& buffer,
                                             uint64_t offset,
                                             uint64_t size);

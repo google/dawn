@@ -29,7 +29,6 @@ namespace dawn_native { namespace vulkan {
 
     // Global information - gathered before the instance is created
     struct VulkanGlobalKnobs {
-        bool HasLayer(VulkanLayer layer) const;
         VulkanLayerSet layers;
         ityp::array<VulkanLayer, InstanceExtSet, static_cast<uint32_t>(VulkanLayer::EnumCount)>
             layerExtensions;

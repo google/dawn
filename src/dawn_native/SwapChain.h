@@ -54,8 +54,6 @@ namespace dawn_native {
       public:
         OldSwapChainBase(DeviceBase* device, const SwapChainDescriptor* descriptor);
 
-        static SwapChainBase* MakeError(DeviceBase* device);
-
         // Dawn API
         void APIConfigure(wgpu::TextureFormat format,
                           wgpu::TextureUsage allowedUsage,
