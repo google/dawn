@@ -15,6 +15,8 @@
 #ifndef DAWNNATIVE_OPENGLBACKEND_H_
 #define DAWNNATIVE_OPENGLBACKEND_H_
 
+typedef void* EGLImage;
+
 #include <dawn/dawn_wsi.h>
 #include <dawn_native/DawnNative.h>
 
@@ -37,6 +39,16 @@ namespace dawn_native { namespace opengl {
     CreateNativeSwapChainImpl(WGPUDevice device, PresentCallback present, void* presentUserdata);
     DAWN_NATIVE_EXPORT WGPUTextureFormat
     GetNativeSwapChainPreferredFormat(const DawnSwapChainImplementation* swapChain);
+
+    struct DAWN_NATIVE_EXPORT ExternalImageDescriptorEGLImage : ExternalImageDescriptor {
+      public:
+        ExternalImageDescriptorEGLImage();
+
+        ::EGLImage image;
+    };
+
+    DAWN_NATIVE_EXPORT WGPUTexture
+    WrapExternalEGLImage(WGPUDevice device, const ExternalImageDescriptorEGLImage* descriptor);
 
 }}  // namespace dawn_native::opengl
 

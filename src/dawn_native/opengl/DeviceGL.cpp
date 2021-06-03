@@ -176,6 +176,65 @@ namespace dawn_native { namespace opengl {
         mFencesInFlight.emplace(sync, GetLastSubmittedCommandSerial());
     }
 
+    MaybeError Device::ValidateEGLImageCanBeWrapped(const TextureDescriptor* descriptor,
+                                                    ::EGLImage image) {
+        if (descriptor->dimension != wgpu::TextureDimension::e2D) {
+            return DAWN_VALIDATION_ERROR("EGLImage texture must be 2D");
+        }
+
+        if (descriptor->usage & (wgpu::TextureUsage::Sampled | wgpu::TextureUsage::Storage)) {
+            return DAWN_VALIDATION_ERROR("EGLImage texture cannot have sampled or storage usage");
+        }
+
+        if (descriptor->mipLevelCount != 1) {
+            return DAWN_VALIDATION_ERROR("EGLImage mip level count must be 1");
+        }
+
+        if (descriptor->size.depthOrArrayLayers != 1) {
+            return DAWN_VALIDATION_ERROR("EGLImage array layer count must be 1");
+        }
+
+        if (descriptor->sampleCount != 1) {
+            return DAWN_VALIDATION_ERROR("EGLImage sample count must be 1");
+        }
+
+        return {};
+    }
+    TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
+                                                       ::EGLImage image) {
+        const TextureDescriptor* textureDescriptor =
+            reinterpret_cast<const TextureDescriptor*>(descriptor->cTextureDescriptor);
+
+        if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
+            return nullptr;
+        }
+        if (ConsumedError(ValidateEGLImageCanBeWrapped(textureDescriptor, image))) {
+            return nullptr;
+        }
+
+        GLuint tex;
+        gl.GenTextures(1, &tex);
+        gl.BindTexture(GL_TEXTURE_2D, tex);
+        gl.EGLImageTargetTexture2DOES(GL_TEXTURE_2D, image);
+
+        GLint width, height, internalFormat;
+        gl.GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+        gl.GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+        gl.GetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFormat);
+
+        if (textureDescriptor->size.width != static_cast<uint32_t>(width) ||
+            textureDescriptor->size.height != static_cast<uint32_t>(height) ||
+            textureDescriptor->size.depthOrArrayLayers != 1) {
+            ConsumedError(DAWN_VALIDATION_ERROR("EGLImage size doesn't match descriptor"));
+            gl.DeleteTextures(1, &tex);
+            return nullptr;
+        }
+
+        // TODO(dawn:803): Validate the OpenGL texture format from the EGLImage against the format
+        // in the passed-in TextureDescriptor.
+        return new Texture(this, textureDescriptor, tex, TextureBase::TextureState::OwnedInternal);
+    }
+
     MaybeError Device::TickImpl() {
         return {};
     }

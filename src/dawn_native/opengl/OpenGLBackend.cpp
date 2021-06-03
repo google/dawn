@@ -50,4 +50,15 @@ namespace dawn_native { namespace opengl {
         return static_cast<WGPUTextureFormat>(impl->GetPreferredFormat());
     }
 
+    ExternalImageDescriptorEGLImage::ExternalImageDescriptorEGLImage()
+        : ExternalImageDescriptor(ExternalImageType::EGLImage) {
+    }
+
+    WGPUTexture WrapExternalEGLImage(WGPUDevice cDevice,
+                                     const ExternalImageDescriptorEGLImage* descriptor) {
+        Device* device = reinterpret_cast<Device*>(cDevice);
+        TextureBase* texture = device->CreateTextureWrappingEGLImage(descriptor, descriptor->image);
+        return reinterpret_cast<WGPUTexture>(texture);
+    }
+
 }}  // namespace dawn_native::opengl

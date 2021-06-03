@@ -37,6 +37,7 @@ using GLhalf = unsigned short;
 using GLint64 = khronos_int64_t;
 using GLuint64 = khronos_uint64_t;
 using GLsync = struct __GLsync*;
+using GLeglImageOES = void*;
 using GLDEBUGPROC = void(KHRONOS_APIENTRY*)(GLenum source,
                                             GLenum type,
                                             GLuint id,

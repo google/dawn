@@ -449,6 +449,11 @@ source_set("dawn_white_box_tests_sources") {
     deps += [ "${dawn_root}/src/utils:dawn_glfw" ]
   }
 
+  if (dawn_enable_opengles) {
+    sources += [ "white_box/EGLImageWrappingTests.cpp" ]
+    deps += [ "//third_party/angle:libEGL" ]
+  }
+
   libs = []
 }
 

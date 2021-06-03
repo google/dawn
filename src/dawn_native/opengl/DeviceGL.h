@@ -31,6 +31,8 @@
 #    include "common/windows_with_undefs.h"
 #endif
 
+typedef void* EGLImage;
+
 namespace dawn_native { namespace opengl {
 
     class Device : public DeviceBase {
@@ -48,6 +50,11 @@ namespace dawn_native { namespace opengl {
         const GLFormat& GetGLFormat(const Format& format);
 
         void SubmitFenceSync();
+
+        MaybeError ValidateEGLImageCanBeWrapped(const TextureDescriptor* descriptor,
+                                                ::EGLImage image);
+        TextureBase* CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
+                                                   ::EGLImage image);
 
         ResultOrError<Ref<CommandBufferBase>> CreateCommandBuffer(
             CommandEncoder* encoder,
