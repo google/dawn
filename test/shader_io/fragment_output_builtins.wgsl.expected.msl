@@ -1,0 +1,20 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
+  float value [[depth(any)]];
+};
+struct tint_symbol_1 {
+  uint value [[sample_mask]];
+};
+
+fragment tint_symbol main1() {
+  tint_symbol const tint_symbol_2 = {1.0f};
+  return tint_symbol_2;
+}
+
+fragment tint_symbol_1 main2() {
+  tint_symbol_1 const tint_symbol_3 = {1u};
+  return tint_symbol_3;
+}
+

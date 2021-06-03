@@ -1,0 +1,26 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct FragmentOutputs {
+  int loc0;
+  float frag_depth;
+  uint loc1;
+  float loc2;
+  uint sample_mask;
+  float4 loc3;
+};
+struct tint_symbol_1 {
+  int loc0 [[color(0)]];
+  uint loc1 [[color(1)]];
+  float loc2 [[color(2)]];
+  float4 loc3 [[color(3)]];
+  float frag_depth [[depth(any)]];
+  uint sample_mask [[sample_mask]];
+};
+
+fragment tint_symbol_1 tint_symbol() {
+  FragmentOutputs const tint_symbol_2 = {1, 2.0f, 1u, 1.0f, 2u, float4(1.0f, 2.0f, 3.0f, 4.0f)};
+  tint_symbol_1 const tint_symbol_3 = {tint_symbol_2.loc0, tint_symbol_2.loc1, tint_symbol_2.loc2, tint_symbol_2.loc3, tint_symbol_2.frag_depth, tint_symbol_2.sample_mask};
+  return tint_symbol_3;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_2 {
+  int loc0 [[user(locn0)]];
+  uint loc1 [[user(locn1)]];
+  float loc2 [[user(locn2)]];
+  float4 loc3 [[user(locn3)]];
+};
+
+fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  int const loc0 = tint_symbol_1.loc0;
+  uint const loc1 = tint_symbol_1.loc1;
+  float const loc2 = tint_symbol_1.loc2;
+  float4 const loc3 = tint_symbol_1.loc3;
+  int const i = loc0;
+  uint const u = loc1;
+  float const f = loc2;
+  float4 const v = loc3;
+  return;
+}
+

@@ -1,0 +1,57 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 29
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_2 %tint_symbol_3
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %main "main"
+               OpName %ComputeInputs "ComputeInputs"
+               OpMemberName %ComputeInputs 0 "local_invocation_id"
+               OpMemberName %ComputeInputs 1 "local_invocation_index"
+               OpMemberName %ComputeInputs 2 "global_invocation_id"
+               OpMemberName %ComputeInputs 3 "workgroup_id"
+               OpDecorate %tint_symbol BuiltIn LocalInvocationId
+               OpDecorate %tint_symbol_1 BuiltIn LocalInvocationIndex
+               OpDecorate %tint_symbol_2 BuiltIn GlobalInvocationId
+               OpDecorate %tint_symbol_3 BuiltIn WorkgroupId
+               OpMemberDecorate %ComputeInputs 0 Offset 0
+               OpMemberDecorate %ComputeInputs 1 Offset 12
+               OpMemberDecorate %ComputeInputs 2 Offset 16
+               OpMemberDecorate %ComputeInputs 3 Offset 32
+       %uint = OpTypeInt 32 0
+     %v3uint = OpTypeVector %uint 3
+%_ptr_Input_v3uint = OpTypePointer Input %v3uint
+%tint_symbol = OpVariable %_ptr_Input_v3uint Input
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol_1 = OpVariable %_ptr_Input_uint Input
+%tint_symbol_2 = OpVariable %_ptr_Input_v3uint Input
+%tint_symbol_3 = OpVariable %_ptr_Input_v3uint Input
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+%ComputeInputs = OpTypeStruct %v3uint %uint %v3uint %v3uint
+       %main = OpFunction %void None %9
+         %12 = OpLabel
+         %14 = OpLoad %v3uint %tint_symbol
+         %15 = OpLoad %uint %tint_symbol_1
+         %16 = OpLoad %v3uint %tint_symbol_2
+         %17 = OpLoad %v3uint %tint_symbol_3
+         %18 = OpCompositeConstruct %ComputeInputs %14 %15 %16 %17
+         %19 = OpCompositeExtract %v3uint %18 0
+         %20 = OpCompositeExtract %uint %19 0
+         %21 = OpCompositeExtract %uint %18 1
+         %22 = OpIAdd %uint %20 %21
+         %23 = OpCompositeExtract %v3uint %18 2
+         %24 = OpCompositeExtract %uint %23 0
+         %25 = OpIAdd %uint %22 %24
+         %26 = OpCompositeExtract %v3uint %18 3
+         %27 = OpCompositeExtract %uint %26 0
+         %28 = OpIAdd %uint %25 %27
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,36 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol {
+  int value [[color(0)]];
+};
+struct tint_symbol_1 {
+  uint value [[color(1)]];
+};
+struct tint_symbol_2 {
+  float value [[color(2)]];
+};
+struct tint_symbol_3 {
+  float4 value [[color(3)]];
+};
+
+fragment tint_symbol main0() {
+  tint_symbol const tint_symbol_4 = {1};
+  return tint_symbol_4;
+}
+
+fragment tint_symbol_1 main1() {
+  tint_symbol_1 const tint_symbol_5 = {1u};
+  return tint_symbol_5;
+}
+
+fragment tint_symbol_2 main2() {
+  tint_symbol_2 const tint_symbol_6 = {1.0f};
+  return tint_symbol_6;
+}
+
+fragment tint_symbol_3 main3() {
+  tint_symbol_3 const tint_symbol_7 = {float4(1.0f, 2.0f, 3.0f, 4.0f)};
+  return tint_symbol_7;
+}
+

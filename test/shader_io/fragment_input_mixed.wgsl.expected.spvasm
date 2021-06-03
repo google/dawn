@@ -1,0 +1,89 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 47
+; Schema: 0
+               OpCapability Shader
+               OpCapability SampleRateShading
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_6 %tint_symbol_7 %tint_symbol_3 %tint_symbol_5 %tint_symbol_4 %tint_symbol_9
+               OpExecutionMode %main OriginUpperLeft
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %tint_symbol_4 "tint_symbol_4"
+               OpName %tint_symbol_5 "tint_symbol_5"
+               OpName %tint_symbol_6 "tint_symbol_6"
+               OpName %tint_symbol_7 "tint_symbol_7"
+               OpName %tint_symbol_9 "tint_symbol_9"
+               OpName %main "main"
+               OpName %FragmentInputs0 "FragmentInputs0"
+               OpMemberName %FragmentInputs0 0 "position"
+               OpMemberName %FragmentInputs0 1 "loc0"
+               OpName %FragmentInputs1 "FragmentInputs1"
+               OpMemberName %FragmentInputs1 0 "loc3"
+               OpMemberName %FragmentInputs1 1 "sample_mask"
+               OpDecorate %tint_symbol BuiltIn FragCoord
+               OpDecorate %tint_symbol_1 Location 0
+               OpDecorate %tint_symbol_3 BuiltIn FrontFacing
+               OpDecorate %tint_symbol_4 Location 1
+               OpDecorate %tint_symbol_5 BuiltIn SampleId
+               OpDecorate %tint_symbol_6 Location 3
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+               OpDecorate %tint_symbol_7 BuiltIn SampleMask
+               OpDecorate %tint_symbol_9 Location 2
+               OpMemberDecorate %FragmentInputs0 0 Offset 0
+               OpMemberDecorate %FragmentInputs0 1 Offset 16
+               OpMemberDecorate %FragmentInputs1 0 Offset 0
+               OpMemberDecorate %FragmentInputs1 1 Offset 16
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%tint_symbol = OpVariable %_ptr_Input_v4float Input
+        %int = OpTypeInt 32 1
+%_ptr_Input_int = OpTypePointer Input %int
+%tint_symbol_1 = OpVariable %_ptr_Input_int Input
+       %bool = OpTypeBool
+%_ptr_Input_bool = OpTypePointer Input %bool
+%tint_symbol_3 = OpVariable %_ptr_Input_bool Input
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol_4 = OpVariable %_ptr_Input_uint Input
+%tint_symbol_5 = OpVariable %_ptr_Input_uint Input
+%tint_symbol_6 = OpVariable %_ptr_Input_v4float Input
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+%_ptr_Input__arr_uint_uint_1 = OpTypePointer Input %_arr_uint_uint_1
+%tint_symbol_7 = OpVariable %_ptr_Input__arr_uint_uint_1 Input
+%_ptr_Input_float = OpTypePointer Input %float
+%tint_symbol_9 = OpVariable %_ptr_Input_float Input
+       %void = OpTypeVoid
+         %22 = OpTypeFunction %void
+%FragmentInputs0 = OpTypeStruct %v4float %int
+%FragmentInputs1 = OpTypeStruct %v4float %uint
+      %int_0 = OpConstant %int 0
+       %main = OpFunction %void None %22
+         %25 = OpLabel
+         %27 = OpLoad %v4float %tint_symbol
+         %28 = OpLoad %int %tint_symbol_1
+         %29 = OpCompositeConstruct %FragmentInputs0 %27 %28
+         %31 = OpLoad %v4float %tint_symbol_6
+         %33 = OpAccessChain %_ptr_Input_uint %tint_symbol_7 %int_0
+         %34 = OpLoad %uint %33
+         %35 = OpCompositeConstruct %FragmentInputs1 %31 %34
+         %36 = OpLoad %bool %tint_symbol_3
+               OpSelectionMerge %37 None
+               OpBranchConditional %36 %38 %37
+         %38 = OpLabel
+         %39 = OpCompositeExtract %v4float %29 0
+         %40 = OpLoad %uint %tint_symbol_5
+         %41 = OpCompositeExtract %uint %35 1
+         %42 = OpIAdd %uint %40 %41
+         %43 = OpCompositeExtract %int %29 1
+         %44 = OpLoad %uint %tint_symbol_4
+         %45 = OpLoad %float %tint_symbol_9
+         %46 = OpCompositeExtract %v4float %35 0
+               OpBranch %37
+         %37 = OpLabel
+               OpReturn
+               OpFunctionEnd

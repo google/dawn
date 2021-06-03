@@ -1,0 +1,52 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 26
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %VertexOutput "VertexOutput"
+               OpMemberName %VertexOutput 0 "pos"
+               OpMemberName %VertexOutput 1 "loc0"
+               OpName %foo "foo"
+               OpName %x "x"
+               OpName %vert_main1 "vert_main1"
+               OpName %vert_main2 "vert_main2"
+               OpMemberDecorate %VertexOutput 0 Offset 0
+               OpMemberDecorate %VertexOutput 1 Offset 16
+       %void = OpTypeVoid
+          %1 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+        %int = OpTypeInt 32 1
+%VertexOutput = OpTypeStruct %v4float %int
+          %5 = OpTypeFunction %VertexOutput %float
+    %float_1 = OpConstant %float 1
+     %int_42 = OpConstant %int 42
+         %17 = OpTypeFunction %VertexOutput
+  %float_0_5 = OpConstant %float 0.5
+ %float_0_25 = OpConstant %float 0.25
+%unused_entry_point = OpFunction %void None %1
+          %4 = OpLabel
+               OpReturn
+               OpFunctionEnd
+        %foo = OpFunction %VertexOutput None %5
+          %x = OpFunctionParameter %float
+         %12 = OpLabel
+         %14 = OpCompositeConstruct %v4float %x %x %x %float_1
+         %16 = OpCompositeConstruct %VertexOutput %14 %int_42
+               OpReturnValue %16
+               OpFunctionEnd
+ %vert_main1 = OpFunction %VertexOutput None %17
+         %19 = OpLabel
+         %20 = OpFunctionCall %VertexOutput %foo %float_0_5
+               OpReturnValue %20
+               OpFunctionEnd
+ %vert_main2 = OpFunction %VertexOutput None %17
+         %23 = OpLabel
+         %24 = OpFunctionCall %VertexOutput %foo %float_0_25
+               OpReturnValue %24
+               OpFunctionEnd

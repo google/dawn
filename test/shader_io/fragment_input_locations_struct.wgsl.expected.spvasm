@@ -1,0 +1,55 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 27
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %main "main" %tint_symbol %tint_symbol_1 %tint_symbol_2 %tint_symbol_3
+               OpExecutionMode %main OriginUpperLeft
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol_3 "tint_symbol_3"
+               OpName %main "main"
+               OpName %FragmentInputs "FragmentInputs"
+               OpMemberName %FragmentInputs 0 "loc0"
+               OpMemberName %FragmentInputs 1 "loc1"
+               OpMemberName %FragmentInputs 2 "loc2"
+               OpMemberName %FragmentInputs 3 "loc3"
+               OpDecorate %tint_symbol Location 0
+               OpDecorate %tint_symbol_1 Location 1
+               OpDecorate %tint_symbol_2 Location 2
+               OpDecorate %tint_symbol_3 Location 3
+               OpMemberDecorate %FragmentInputs 0 Offset 0
+               OpMemberDecorate %FragmentInputs 1 Offset 4
+               OpMemberDecorate %FragmentInputs 2 Offset 8
+               OpMemberDecorate %FragmentInputs 3 Offset 16
+        %int = OpTypeInt 32 1
+%_ptr_Input_int = OpTypePointer Input %int
+%tint_symbol = OpVariable %_ptr_Input_int Input
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol_1 = OpVariable %_ptr_Input_uint Input
+      %float = OpTypeFloat 32
+%_ptr_Input_float = OpTypePointer Input %float
+%tint_symbol_2 = OpVariable %_ptr_Input_float Input
+    %v4float = OpTypeVector %float 4
+%_ptr_Input_v4float = OpTypePointer Input %v4float
+%tint_symbol_3 = OpVariable %_ptr_Input_v4float Input
+       %void = OpTypeVoid
+         %13 = OpTypeFunction %void
+%FragmentInputs = OpTypeStruct %int %uint %float %v4float
+       %main = OpFunction %void None %13
+         %16 = OpLabel
+         %18 = OpLoad %int %tint_symbol
+         %19 = OpLoad %uint %tint_symbol_1
+         %20 = OpLoad %float %tint_symbol_2
+         %21 = OpLoad %v4float %tint_symbol_3
+         %22 = OpCompositeConstruct %FragmentInputs %18 %19 %20 %21
+         %23 = OpCompositeExtract %int %22 0
+         %24 = OpCompositeExtract %uint %22 1
+         %25 = OpCompositeExtract %float %22 2
+         %26 = OpCompositeExtract %v4float %22 3
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,16 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct VertexOutputs {
+  float4 position;
+};
+struct tint_symbol_1 {
+  float4 position [[position]];
+};
+
+vertex tint_symbol_1 tint_symbol() {
+  VertexOutputs const tint_symbol_2 = {float4(1.0f, 2.0f, 3.0f, 4.0f)};
+  tint_symbol_1 const tint_symbol_3 = {tint_symbol_2.position};
+  return tint_symbol_3;
+}
+
