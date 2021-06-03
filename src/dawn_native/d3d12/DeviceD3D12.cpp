@@ -556,14 +556,9 @@ namespace dawn_native { namespace d3d12 {
         if (gpu_info::IsIntel(pciInfo.vendorId) &&
             (gpu_info::IsSkylake(pciInfo.deviceId) || gpu_info::IsKabylake(pciInfo.deviceId) ||
              gpu_info::IsCoffeelake(pciInfo.deviceId))) {
-            constexpr gpu_info::D3DDriverVersion kFirstDriverVersionWithFix = {27, 20, 100, 9466};
-            if (gpu_info::CompareD3DDriverVersion(pciInfo.vendorId,
-                                                  ToBackend(GetAdapter())->GetDriverVersion(),
-                                                  kFirstDriverVersionWithFix) < 0) {
                 SetToggle(
                     Toggle::UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
                     true);
-            }
         }
     }
 
