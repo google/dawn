@@ -1617,7 +1617,11 @@ bool Resolver::Bitcast(ast::BitcastExpression* expr) {
   if (!Expression(expr->expr())) {
     return false;
   }
-  SetType(expr, expr->type());
+  auto* ty = Type(expr->type());
+  if (!ty) {
+    return false;
+  }
+  SetType(expr, ty, expr->type()->FriendlyName(builder_->Symbols()));
   return true;
 }
 
@@ -1715,9 +1719,12 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
       }
     }
 
-    SetType(expr, type_ctor->type());
+    auto* type = Type(type_ctor->type());
+    if (!type) {
+      return false;
+    }
 
-    const sem::Type* type = TypeOf(expr);
+    SetType(expr, type, type_ctor->type()->FriendlyName(builder_->Symbols()));
 
     // Now that the argument types have been determined, make sure that they
     // obey the constructor type rules laid out in
@@ -1731,7 +1738,11 @@ bool Resolver::Constructor(ast::ConstructorExpression* expr) {
     // TODO(crbug.com/tint/634): Validate array constructor
   } else if (auto* scalar_ctor = expr->As<ast::ScalarConstructorExpression>()) {
     Mark(scalar_ctor->literal());
-    SetType(expr, TypeOf(scalar_ctor->literal()));
+    auto* type = TypeOf(scalar_ctor->literal());
+    if (!type) {
+      return false;
+    }
+    SetType(expr, type);
   } else {
     TINT_ICE(diagnostics_) << "unexpected constructor expression type";
   }
@@ -2436,10 +2447,6 @@ sem::Type* Resolver::TypeOf(const ast::Literal* lit) {
   return nullptr;
 }
 
-void Resolver::SetType(ast::Expression* expr, const ast::Type* type) {
-  SetType(expr, Type(type), type->FriendlyName(builder_->Symbols()));
-}
-
 void Resolver::SetType(ast::Expression* expr, const sem::Type* type) {
   SetType(expr, type, type->FriendlyName(builder_->Symbols()));
 }
@@ -2634,7 +2641,7 @@ bool Resolver::DefaultAlignAndSize(const sem::Type* ty,
     size = a->SizeInBytes();
     return true;
   }
-  TINT_UNREACHABLE(diagnostics_) << "Invalid type " << ty->TypeInfo().name;
+  TINT_UNREACHABLE(diagnostics_) << "invalid type " << ty->TypeInfo().name;
   return false;
 }
 

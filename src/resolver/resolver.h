@@ -318,12 +318,6 @@ class Resolver {
   /// @param lit the literal
   sem::Type* TypeOf(const ast::Literal* lit);
 
-  /// Creates a sem::Expression node with the pre-resolved AST type `type`, and
-  /// assigns this semantic node to the expression `expr`.
-  /// @param expr the expression
-  /// @param type the AST type
-  void SetType(ast::Expression* expr, const ast::Type* type);
-
   /// Creates a sem::Expression node with the resolved type `type`, and
   /// assigns this semantic node to the expression `expr`.
   /// @param expr the expression
