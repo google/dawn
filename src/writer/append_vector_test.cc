@@ -162,6 +162,46 @@ TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
   EXPECT_EQ(f32_to_i32->values()[0], scalar_3);
 }
 
+TEST_F(AppendVectorTest, Vec2boolVar_boolVar) {
+  Global("vec_12", ty.vec2<bool>(), ast::StorageClass::kInput);
+  Global("scalar_3", ty.bool_(), ast::StorageClass::kInput);
+  auto* vec_12 = Expr("vec_12");
+  auto* scalar_3 = Expr("scalar_3");
+  WrapInFunction(vec_12, scalar_3);
+
+  resolver::Resolver resolver(this);
+  ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+
+  auto* vec_123 = AppendVector(this, vec_12, scalar_3)
+                      ->As<ast::TypeConstructorExpression>();
+  ASSERT_NE(vec_123, nullptr);
+  ASSERT_EQ(vec_123->values().size(), 2u);
+  EXPECT_EQ(vec_123->values()[0], vec_12);
+  EXPECT_EQ(vec_123->values()[1], scalar_3);
+}
+
+TEST_F(AppendVectorTest, ZeroVec3i32_i32) {
+  auto* scalar = Expr(4);
+  auto* vec000 = vec3<i32>();
+  WrapInFunction(vec000, scalar);
+
+  resolver::Resolver resolver(this);
+  ASSERT_TRUE(resolver.Resolve()) << resolver.error();
+
+  auto* vec_0004 =
+      AppendVector(this, vec000, scalar)->As<ast::TypeConstructorExpression>();
+  ASSERT_NE(vec_0004, nullptr);
+  ASSERT_EQ(vec_0004->values().size(), 4u);
+  for (size_t i = 0; i < 3; i++) {
+    auto* ctor = vec_0004->values()[i]->As<ast::ScalarConstructorExpression>();
+    ASSERT_NE(ctor, nullptr);
+    auto* literal = As<ast::SintLiteral>(ctor->literal());
+    ASSERT_NE(literal, nullptr);
+    EXPECT_EQ(literal->value(), 0);
+  }
+  EXPECT_EQ(vec_0004->values()[3], scalar);
+}
+
 }  // namespace
 }  // namespace writer
 }  // namespace tint

@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 32
+; Bound: 33
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -34,38 +32,33 @@ SKIP: FAILED
     %v4float = OpTypeVector %float 4
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
+      %int_0 = OpConstant %int 0
       %int_1 = OpConstant %int 1
-         %19 = OpConstantComposite %v3int %int_1
+         %20 = OpConstantComposite %v3int %int_0 %int_0 %int_1
 %_ptr_Function_float = OpTypePointer Function %float
     %float_1 = OpConstant %float 1
 %textureLoad_9b2667 = OpFunction %void None %8
          %11 = OpLabel
         %res = OpVariable %_ptr_Function_float Function %4
          %15 = OpLoad %7 %arg_0
-         %13 = OpImageFetch %v4float %15 %19 Lod %int_1
+         %13 = OpImageFetch %v4float %15 %20 Lod %int_1
          %12 = OpCompositeExtract %float %13 0
                OpStore %res %12
                OpReturn
                OpFunctionEnd
 %vertex_main = OpFunction %void None %8
-         %23 = OpLabel
+         %24 = OpLabel
                OpStore %tint_pointsize %float_1
-         %25 = OpFunctionCall %void %textureLoad_9b2667
+         %26 = OpFunctionCall %void %textureLoad_9b2667
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %8
-         %27 = OpLabel
-         %28 = OpFunctionCall %void %textureLoad_9b2667
+         %28 = OpLabel
+         %29 = OpFunctionCall %void %textureLoad_9b2667
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %8
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %textureLoad_9b2667
+         %31 = OpLabel
+         %32 = OpFunctionCall %void %textureLoad_9b2667
                OpReturn
                OpFunctionEnd
-
-
-Validation Failure:
-1:1: OpConstantComposite Constituent <id> count does not match Result Type <id> '16[%v3int]'s vector component count.
-  %19 = OpConstantComposite %v3int %int_1
-

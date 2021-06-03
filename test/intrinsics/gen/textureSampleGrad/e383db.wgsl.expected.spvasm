@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 40
+; Bound: 41
 ; Schema: 0
                OpCapability Shader
                OpCapability SampledCubeArray
@@ -40,44 +38,39 @@ SKIP: FAILED
          %11 = OpTypeFunction %void
     %v4float = OpTypeVector %float 4
          %19 = OpTypeSampledImage %7
+    %float_0 = OpConstant %float 0
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
     %v3float = OpTypeVector %float 3
-         %26 = OpConstantNull %v3float
+         %27 = OpConstantNull %v3float
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %29 = OpConstantNull %v4float
+         %30 = OpConstantNull %v4float
     %float_1 = OpConstant %float 1
 %textureSampleGrad_e383db = OpFunction %void None %11
          %14 = OpLabel
-        %res = OpVariable %_ptr_Function_v4float Function %29
+        %res = OpVariable %_ptr_Function_v4float Function %30
          %17 = OpLoad %10 %arg_1
          %18 = OpLoad %7 %arg_0
          %20 = OpSampledImage %19 %18 %17
-         %21 = OpConvertSToF %float %int_1
-         %24 = OpCompositeConstruct %v4float %21
-         %15 = OpImageSampleExplicitLod %v4float %20 %24 Grad %26 %26
+         %22 = OpConvertSToF %float %int_1
+         %25 = OpCompositeConstruct %v4float %float_0 %float_0 %float_0 %22
+         %15 = OpImageSampleExplicitLod %v4float %20 %25 Grad %27 %27
                OpStore %res %15
                OpReturn
                OpFunctionEnd
 %vertex_main = OpFunction %void None %11
-         %31 = OpLabel
+         %32 = OpLabel
                OpStore %tint_pointsize %float_1
-         %33 = OpFunctionCall %void %textureSampleGrad_e383db
+         %34 = OpFunctionCall %void %textureSampleGrad_e383db
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %11
-         %35 = OpLabel
-         %36 = OpFunctionCall %void %textureSampleGrad_e383db
+         %36 = OpLabel
+         %37 = OpFunctionCall %void %textureSampleGrad_e383db
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %11
-         %38 = OpLabel
-         %39 = OpFunctionCall %void %textureSampleGrad_e383db
+         %39 = OpLabel
+         %40 = OpFunctionCall %void %textureSampleGrad_e383db
                OpReturn
                OpFunctionEnd
-
-
-Validation Failure:
-1:1: Expected number of constituents to be at least 2
-  %24 = OpCompositeConstruct %v4float %21
-

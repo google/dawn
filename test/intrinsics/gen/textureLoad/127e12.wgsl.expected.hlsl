@@ -1,12 +1,7 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 Texture2DArray<uint4> arg_0 : register(t0, space1);
 
 void textureLoad_127e12() {
-  uint4 res = arg_0.Load(int4(1, 0));
+  uint4 res = arg_0.Load(int4(0, 0, 1, 0));
 }
 
 void vertex_main() {
@@ -24,19 +19,4 @@ void compute_main() {
   textureLoad_127e12();
   return;
 }
-
-
-tint_E7lo1I:4:31: error: too few elements in vector initialization (expected 4 elements, have 2)
-  uint4 res = arg_0.Load(int4(1, 0));
-                              ^
-
-
-tint_E7lo1I:4:31: error: too few elements in vector initialization (expected 4 elements, have 2)
-  uint4 res = arg_0.Load(int4(1, 0));
-                              ^
-
-
-tint_E7lo1I:4:31: error: too few elements in vector initialization (expected 4 elements, have 2)
-  uint4 res = arg_0.Load(int4(1, 0));
-                              ^
 

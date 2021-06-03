@@ -57,6 +57,11 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
     packed_el_ty = b->create<ast::U32>();
   } else if (packed_el_sem_ty->Is<sem::F32>()) {
     packed_el_ty = b->create<ast::F32>();
+  } else if (packed_el_sem_ty->Is<sem::Bool>()) {
+    packed_el_ty = b->create<ast::Bool>();
+  } else {
+    TINT_UNREACHABLE(b->Diagnostics()) << "unsupported vector element type: "
+                                       << packed_el_sem_ty->TypeInfo().name;
   }
 
   auto* statement = vector_sem->Stmt();
@@ -69,6 +74,32 @@ ast::TypeConstructorExpression* AppendVector(ProgramBuilder* b,
   ast::ExpressionList packed;
   if (auto* vc = AsVectorConstructor(b, vector)) {
     packed = vc->values();
+    if (packed.size() == 0) {
+      // Zero-value vector constructor. Populate with zeros
+      auto buildZero = [&]() -> ast::ScalarConstructorExpression* {
+        if (packed_el_sem_ty->Is<sem::I32>()) {
+          return b->Expr(0);
+        } else if (packed_el_sem_ty->Is<sem::U32>()) {
+          return b->Expr(0u);
+        } else if (packed_el_sem_ty->Is<sem::F32>()) {
+          return b->Expr(0.0f);
+        } else if (packed_el_sem_ty->Is<sem::Bool>()) {
+          return b->Expr(false);
+        } else {
+          TINT_UNREACHABLE(b->Diagnostics())
+              << "unsupported vector element type: "
+              << packed_el_sem_ty->TypeInfo().name;
+        }
+        return nullptr;
+      };
+
+      for (uint32_t i = 0; i < packed_size - 1; i++) {
+        auto* zero = buildZero();
+        b->Sem().Add(zero, b->create<sem::Expression>(zero, packed_el_sem_ty,
+                                                      statement));
+        packed.emplace_back(zero);
+      }
+    }
   } else {
     packed.emplace_back(vector);
   }

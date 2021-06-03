@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 31
+; Bound: 32
 ; Schema: 0
                OpCapability Shader
                OpCapability StorageImageExtendedFormats
@@ -35,36 +33,31 @@ SKIP: FAILED
           %9 = OpTypeFunction %void
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
+      %int_0 = OpConstant %int 0
       %int_1 = OpConstant %int 1
-         %18 = OpConstantComposite %v3int %int_1
+         %19 = OpConstantComposite %v3int %int_0 %int_0 %int_1
      %v4uint = OpTypeVector %uint 4
-         %20 = OpConstantNull %v4uint
+         %21 = OpConstantNull %v4uint
     %float_1 = OpConstant %float 1
 %textureStore_dde364 = OpFunction %void None %9
          %12 = OpLabel
          %14 = OpLoad %7 %arg_0
-               OpImageWrite %14 %18 %20
+               OpImageWrite %14 %19 %21
                OpReturn
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %22 = OpLabel
+         %23 = OpLabel
                OpStore %tint_pointsize %float_1
-         %24 = OpFunctionCall %void %textureStore_dde364
+         %25 = OpFunctionCall %void %textureStore_dde364
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %26 = OpLabel
-         %27 = OpFunctionCall %void %textureStore_dde364
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %textureStore_dde364
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %29 = OpLabel
-         %30 = OpFunctionCall %void %textureStore_dde364
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %textureStore_dde364
                OpReturn
                OpFunctionEnd
-
-
-Validation Failure:
-1:1: OpConstantComposite Constituent <id> count does not match Result Type <id> '15[%v3int]'s vector component count.
-  %18 = OpConstantComposite %v3int %int_1
-

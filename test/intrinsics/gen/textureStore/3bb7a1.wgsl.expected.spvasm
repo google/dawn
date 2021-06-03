@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 30
+; Bound: 31
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -33,36 +31,31 @@ SKIP: FAILED
           %8 = OpTypeFunction %void
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
+      %int_0 = OpConstant %int 0
       %int_1 = OpConstant %int 1
-         %17 = OpConstantComposite %v3int %int_1
+         %18 = OpConstantComposite %v3int %int_0 %int_0 %int_1
     %v4float = OpTypeVector %float 4
-         %19 = OpConstantNull %v4float
+         %20 = OpConstantNull %v4float
     %float_1 = OpConstant %float 1
 %textureStore_3bb7a1 = OpFunction %void None %8
          %11 = OpLabel
          %13 = OpLoad %7 %arg_0
-               OpImageWrite %13 %17 %19
+               OpImageWrite %13 %18 %20
                OpReturn
                OpFunctionEnd
 %vertex_main = OpFunction %void None %8
-         %21 = OpLabel
+         %22 = OpLabel
                OpStore %tint_pointsize %float_1
-         %23 = OpFunctionCall %void %textureStore_3bb7a1
+         %24 = OpFunctionCall %void %textureStore_3bb7a1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %8
-         %25 = OpLabel
-         %26 = OpFunctionCall %void %textureStore_3bb7a1
+         %26 = OpLabel
+         %27 = OpFunctionCall %void %textureStore_3bb7a1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %8
-         %28 = OpLabel
-         %29 = OpFunctionCall %void %textureStore_3bb7a1
+         %29 = OpLabel
+         %30 = OpFunctionCall %void %textureStore_3bb7a1
                OpReturn
                OpFunctionEnd
-
-
-Validation Failure:
-1:1: OpConstantComposite Constituent <id> count does not match Result Type <id> '14[%v3int]'s vector component count.
-  %17 = OpConstantComposite %v3int %int_1
-

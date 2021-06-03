@@ -1,12 +1,7 @@
-SKIP: FAILED
-
-
-
-Validation Failure:
 Texture2D<float4> arg_0 : register(t0, space1);
 
 void textureLoad_078bc4() {
-  float4 res = arg_0.Load(int3(0));
+  float4 res = arg_0.Load(int3(0, 0, 0));
 }
 
 void vertex_main() {
@@ -24,19 +19,4 @@ void compute_main() {
   textureLoad_078bc4();
   return;
 }
-
-
-tint_2mt0JA:4:32: error: too few elements in vector initialization (expected 3 elements, have 1)
-  float4 res = arg_0.Load(int3(0));
-                               ^
-
-
-tint_2mt0JA:4:32: error: too few elements in vector initialization (expected 3 elements, have 1)
-  float4 res = arg_0.Load(int3(0));
-                               ^
-
-
-tint_2mt0JA:4:32: error: too few elements in vector initialization (expected 3 elements, have 1)
-  float4 res = arg_0.Load(int3(0));
-                               ^
 

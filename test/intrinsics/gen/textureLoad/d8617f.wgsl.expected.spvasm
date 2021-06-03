@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 32
+; Bound: 33
 ; Schema: 0
                OpCapability Shader
                OpCapability StorageImageExtendedFormats
@@ -36,38 +34,33 @@ SKIP: FAILED
           %9 = OpTypeFunction %void
       %v4int = OpTypeVector %int 4
       %v3int = OpTypeVector %int 3
+      %int_0 = OpConstant %int 0
       %int_1 = OpConstant %int 1
-         %18 = OpConstantComposite %v3int %int_1
+         %19 = OpConstantComposite %v3int %int_0 %int_0 %int_1
 %_ptr_Function_v4int = OpTypePointer Function %v4int
-         %21 = OpConstantNull %v4int
+         %22 = OpConstantNull %v4int
     %float_1 = OpConstant %float 1
 %textureLoad_d8617f = OpFunction %void None %9
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function_v4int Function %21
+        %res = OpVariable %_ptr_Function_v4int Function %22
          %15 = OpLoad %7 %arg_0
-         %13 = OpImageRead %v4int %15 %18
+         %13 = OpImageRead %v4int %15 %19
                OpStore %res %13
                OpReturn
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %23 = OpLabel
+         %24 = OpLabel
                OpStore %tint_pointsize %float_1
-         %25 = OpFunctionCall %void %textureLoad_d8617f
+         %26 = OpFunctionCall %void %textureLoad_d8617f
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %27 = OpLabel
-         %28 = OpFunctionCall %void %textureLoad_d8617f
+         %28 = OpLabel
+         %29 = OpFunctionCall %void %textureLoad_d8617f
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %textureLoad_d8617f
+         %31 = OpLabel
+         %32 = OpFunctionCall %void %textureLoad_d8617f
                OpReturn
                OpFunctionEnd
-
-
-Validation Failure:
-1:1: OpConstantComposite Constituent <id> count does not match Result Type <id> '16[%v3int]'s vector component count.
-  %18 = OpConstantComposite %v3int %int_1
-

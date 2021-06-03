@@ -1,9 +1,7 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 28
+; Bound: 29
 ; Schema: 0
                OpCapability Shader
                OpCapability SampledCubeArray
@@ -30,30 +28,25 @@ SKIP: FAILED
           %8 = OpTypeFunction %void
     %v4float = OpTypeVector %float 4
          %16 = OpTypeSampledImage %3
+    %float_0 = OpConstant %float 0
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %24 = OpConstantNull %v4float
+         %25 = OpConstantNull %v4float
 %textureSample_4dd1bf = OpFunction %void None %8
          %11 = OpLabel
-        %res = OpVariable %_ptr_Function_v4float Function %24
+        %res = OpVariable %_ptr_Function_v4float Function %25
          %14 = OpLoad %7 %arg_1
          %15 = OpLoad %3 %arg_0
          %17 = OpSampledImage %16 %15 %14
-         %18 = OpConvertSToF %float %int_1
-         %21 = OpCompositeConstruct %v4float %18
-         %12 = OpImageSampleImplicitLod %v4float %17 %21
+         %19 = OpConvertSToF %float %int_1
+         %22 = OpCompositeConstruct %v4float %float_0 %float_0 %float_0 %19
+         %12 = OpImageSampleImplicitLod %v4float %17 %22
                OpStore %res %12
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %8
-         %26 = OpLabel
-         %27 = OpFunctionCall %void %textureSample_4dd1bf
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %textureSample_4dd1bf
                OpReturn
                OpFunctionEnd
-
-
-Validation Failure:
-1:1: Expected number of constituents to be at least 2
-  %21 = OpCompositeConstruct %v4float %18
-
