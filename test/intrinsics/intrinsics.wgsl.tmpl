@@ -1,0 +1,179 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/intrinsic-gen to generate the wgsl files in the
+./gen/... subdirectories
+
+See:
+* tools/cmd/intrinsic-gen/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- /* For each permutation of each overload of each function... */ -}}
+{{- range .Sem.Functions -}}
+{{-   range .Overloads  -}}
+{{-     range Permute . -}}
+{{- /*    Generate a ./gen/<function>/<permuataion-hash>.wgsl file using
+          the Permutation macro defined below                             */ -}}
+{{-       $file := printf "./gen/%v/%v.wgsl" .Function.Name .Hash -}}
+{{-       $content := Eval "Permutation" . -}}
+{{-       WriteFile $file $content -}}
+{{-     end  }}
+{{-   end  }}
+{{- end  }}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                          define "Permutation"                            -}}
+{{- /* Emits the body of the intrinsic permuation .wgsl file              */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   $function    := .Function.Name -}}
+{{-   $permutation := printf "%v_%v" $function .Hash -}}
+{{-   $args        := Map -}}
+
+{{- /* Generate a storage buffer for runtime sized array parameters       */ -}}
+{{-   if (Eval "HasStorageBufferArgs" .) -}}
+[[block]]
+struct SB {
+{{-     range $i, $p := .Parameters  }}
+{{-       $class := Eval "StorageClass" $p.Type -}}
+{{-       if eq "STORAGE_BUFFER" $class }}
+  arg_{{$i}}: {{template "Type" $p.Type}};
+{{          $args.Put $i (printf "sb.arg_%v" $i) -}}
+{{-       end -}}
+{{-     end -}}
+};
+[[group(0), binding(0)]] var<storage> sb : [[access(read)]] SB;
+{{    end -}}
+
+{{- /* Generate module-scoped resource variables (textures, samplers, etc) */ -}}
+{{-   range $i, $p := .Parameters  }}
+{{-     $class := Eval "StorageClass" $p.Type -}}
+{{-     if eq "RESOURCE" $class -}}
+          [[group(1), binding({{$i}})]] var arg_{{$i}}: {{template "Type" $p.Type}};
+{{        $args.Put $i (printf "arg_%v" $i) -}}
+{{-     end -}}
+{{-   end -}}
+
+{{- /* Generate the function that calls the intrinsic */ -}}
+fn {{$permutation}}() {
+{{/* Build the parameters either as 'var' or inline values */ -}}
+{{-   range $i, $p := .Parameters -}}
+{{-     $class := Eval "StorageClass" $p.Type -}}
+{{-     if eq "PRIVATE" $class  -}}
+{{-       if eq "ptr" $p.Type.Target.Name -}}
+{{- /*indent*/}}  var arg_{{$i}}: {{template "Type" index $p.Type.TemplateArguments 1}};
+{{          $args.Put $i (printf "&arg_%v" $i) -}}
+{{-       else -}}
+{{-         $args.Put $i (Eval "ValueOf" $p.Type) -}}
+{{-       end -}}
+{{-     end -}}
+{{-   end -}}
+
+{{- /* Make the call to the intrinsic */ -}}
+{{- /*indent*/}}  {{/*indent*/ -}}
+{{-   if .ReturnType -}}
+  var res: {{template "Type" .ReturnType}} = {{/* preserve space after = */ -}}
+{{-   end -}}
+  {{$function}}(
+{{-   range $i, $p := .Parameters -}}
+{{-     if $i -}}, {{end}}{{$args.Get $i -}}
+{{-   end -}}
+  );
+}
+{{/*new line*/ -}}
+
+{{- if .CanBeUsedInStage.Vertex }}
+[[stage(vertex)]]
+fn vertex_main() {
+  {{$permutation}}();
+}
+{{ end -}}
+
+{{- if .CanBeUsedInStage.Fragment }}
+[[stage(fragment)]]
+fn fragment_main() {
+  {{$permutation}}();
+}
+{{ end -}}
+
+{{- if .CanBeUsedInStage.Compute }}
+[[stage(compute)]]
+fn compute_main() {
+  {{$permutation}}();
+}
+{{ end -}}
+
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                       define "HasStorageBufferArgs"                      -}}
+{{- /* Returns a non-empty string if the given overload has parameters    */ -}}
+{{- /* that are in the STORAGE_BUFFER storage class                       */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   range $i, $p := .Parameters  }}
+{{-     $class := Eval "StorageClass" $p.Type -}}
+{{-     if eq "STORAGE_BUFFER" $class -}}1
+{{      end -}}
+{{-   end -}}
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                           define "StorageClass"                          -}}
+{{- /* Returns the storage classs STORAGE_BUFFER, RESOURCE, or PRIVATE    */ -}}
+{{- /* for the given Fully Qualified Name                                 */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   $name := .Target.Name -}}
+{{-   if             eq $name "array"   -}}STORAGE_BUFFER
+{{-   else if HasPrefix $name "texture" -}}RESOURCE
+{{-   else if HasPrefix $name "sampler" -}}RESOURCE
+{{-   else                              -}}PRIVATE
+{{-   end -}}
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                              define "ValueOf"                            -}}
+{{- /* Returns a value of the given Fully Qualified Name argument         */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   if      eq .Target.Name "i32" -}}1
+{{-   else if eq .Target.Name "u32" -}}1u
+{{-   else if eq .Target.Name "f32" -}}1.0
+{{-   else                          -}}{{template "Type" .}}()
+{{-   end                           -}}
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                                define "Type"                             -}}
+{{- /* Emits the WGSL for the Fully Qualified Name argument               */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   if IsType .Target -}}
+{{-     if      eq .Target.Name "vec" -}}vec{{index .TemplateArguments 0}}<{{template "Type" index .TemplateArguments 1}}>
+{{-     else if eq .Target.Name "mat" -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" index .TemplateArguments 2}}>
+{{-     else                          -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}
+{{-     end                           -}}
+{{-   else if IsEnumEntry   .Target   -}}{{.Target.Name}}
+{{-   else if IsEnumMatcher .Target   -}}{{(index .Target.Options 0).Name}}
+{{-   else                            -}}<unhandled-fully-qualified-name-target={{- printf "%T" .Target -}}>
+{{-   end                             -}}
+{{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                          define "TemplateArguments"                      -}}
+{{- /* Emits the WGSL for the template argument list                      */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   if . -}}
+<
+{{-    range $i, $a := . -}}
+{{-      if $i -}}, {{  end -}}
+{{-      if IsInt $a -}}{{- . -}}
+{{-      else        -}}{{- template "Type" $a -}}
+{{-      end -}}
+{{-    end -}}
+>
+{{-   end -}}
+{{- end -}}

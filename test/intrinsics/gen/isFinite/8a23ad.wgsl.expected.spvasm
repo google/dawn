@@ -1,0 +1,58 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 30
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %tint_pointsize
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %tint_pointsize "tint_pointsize"
+               OpName %isFinite_8a23ad "isFinite_8a23ad"
+               OpName %res "res"
+               OpName %vertex_main "vertex_main"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpDecorate %tint_pointsize BuiltIn PointSize
+      %float = OpTypeFloat 32
+%_ptr_Output_float = OpTypePointer Output %float
+          %4 = OpConstantNull %float
+%tint_pointsize = OpVariable %_ptr_Output_float Output %4
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+       %bool = OpTypeBool
+     %v3bool = OpTypeVector %bool 3
+    %v3float = OpTypeVector %float 3
+         %13 = OpConstantNull %v3float
+%_ptr_Function_v3bool = OpTypePointer Function %v3bool
+         %19 = OpConstantNull %v3bool
+    %float_1 = OpConstant %float 1
+%isFinite_8a23ad = OpFunction %void None %5
+          %8 = OpLabel
+        %res = OpVariable %_ptr_Function_v3bool Function %19
+         %14 = OpIsInf %v3bool %13
+         %15 = OpIsNan %v3bool %13
+         %16 = OpLogicalOr %v3bool %14 %15
+          %9 = OpLogicalNot %v3bool %16
+               OpStore %res %9
+               OpReturn
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %5
+         %21 = OpLabel
+               OpStore %tint_pointsize %float_1
+         %23 = OpFunctionCall %void %isFinite_8a23ad
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %5
+         %25 = OpLabel
+         %26 = OpFunctionCall %void %isFinite_8a23ad
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %5
+         %28 = OpLabel
+         %29 = OpFunctionCall %void %isFinite_8a23ad
+               OpReturn
+               OpFunctionEnd

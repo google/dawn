@@ -1,0 +1,18 @@
+fn floor_5fc9ac() {
+  var res : vec2<f32> = floor(vec2<f32>());
+}
+
+[[stage(vertex)]]
+fn vertex_main() {
+  floor_5fc9ac();
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  floor_5fc9ac();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  floor_5fc9ac();
+}

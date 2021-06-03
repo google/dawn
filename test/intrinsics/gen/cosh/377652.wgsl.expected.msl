@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void cosh_377652() {
+  float3 res =   cosh(float3());
+}
+
+vertex void vertex_main() {
+  cosh_377652();
+  return;
+}
+
+fragment void fragment_main() {
+  cosh_377652();
+  return;
+}
+
+kernel void compute_main() {
+  cosh_377652();
+  return;
+}
+

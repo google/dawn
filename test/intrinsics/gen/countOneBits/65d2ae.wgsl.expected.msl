@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void countOneBits_65d2ae() {
+  int3 res =   popcount(int3());
+}
+
+vertex void vertex_main() {
+  countOneBits_65d2ae();
+  return;
+}
+
+fragment void fragment_main() {
+  countOneBits_65d2ae();
+  return;
+}
+
+kernel void compute_main() {
+  countOneBits_65d2ae();
+  return;
+}
+

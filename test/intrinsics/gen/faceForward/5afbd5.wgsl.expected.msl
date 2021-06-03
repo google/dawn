@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void faceForward_5afbd5() {
+  float3 res =   faceforward(float3(), float3(), float3());
+}
+
+vertex void vertex_main() {
+  faceForward_5afbd5();
+  return;
+}
+
+fragment void fragment_main() {
+  faceForward_5afbd5();
+  return;
+}
+
+kernel void compute_main() {
+  faceForward_5afbd5();
+  return;
+}
+

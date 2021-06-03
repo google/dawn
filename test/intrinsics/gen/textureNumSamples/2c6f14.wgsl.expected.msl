@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureNumSamples_2c6f14() {
+  int res = int(arg_0.get_num_samples());
+}
+
+vertex void vertex_main() {
+  textureNumSamples_2c6f14();
+  return;
+}
+
+fragment void fragment_main() {
+  textureNumSamples_2c6f14();
+  return;
+}
+
+kernel void compute_main() {
+  textureNumSamples_2c6f14();
+  return;
+}
+
+
+tint_TdWxzV.metal:5:17: error: use of undeclared identifier 'arg_0'
+  int res = int(arg_0.get_num_samples());
+                ^
+1 error generated.

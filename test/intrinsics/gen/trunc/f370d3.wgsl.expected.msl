@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void trunc_f370d3() {
+  float2 res =   trunc(float2());
+}
+
+vertex void vertex_main() {
+  trunc_f370d3();
+  return;
+}
+
+fragment void fragment_main() {
+  trunc_f370d3();
+  return;
+}
+
+kernel void compute_main() {
+  trunc_f370d3();
+  return;
+}
+

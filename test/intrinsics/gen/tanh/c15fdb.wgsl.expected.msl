@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void tanh_c15fdb() {
+  float res =   tanh(1.0f);
+}
+
+vertex void vertex_main() {
+  tanh_c15fdb();
+  return;
+}
+
+fragment void fragment_main() {
+  tanh_c15fdb();
+  return;
+}
+
+kernel void compute_main() {
+  tanh_c15fdb();
+  return;
+}
+

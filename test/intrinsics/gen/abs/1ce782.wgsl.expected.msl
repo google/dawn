@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void abs_1ce782() {
+  uint4 res =   abs(uint4());
+}
+
+vertex void vertex_main() {
+  abs_1ce782();
+  return;
+}
+
+fragment void fragment_main() {
+  abs_1ce782();
+  return;
+}
+
+kernel void compute_main() {
+  abs_1ce782();
+  return;
+}
+

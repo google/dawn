@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void ldexp_f54ff2() {
+  float res =   ldexp(1.0f, 1u);
+}
+
+vertex void vertex_main() {
+  ldexp_f54ff2();
+  return;
+}
+
+fragment void fragment_main() {
+  ldexp_f54ff2();
+  return;
+}
+
+kernel void compute_main() {
+  ldexp_f54ff2();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void abs_b96037() {
+  float res =   fabs(1.0f);
+}
+
+vertex void vertex_main() {
+  abs_b96037();
+  return;
+}
+
+fragment void fragment_main() {
+  abs_b96037();
+  return;
+}
+
+kernel void compute_main() {
+  abs_b96037();
+  return;
+}
+

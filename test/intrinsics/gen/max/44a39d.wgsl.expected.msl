@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void max_44a39d() {
+  float res =   fmax(1.0f, 1.0f);
+}
+
+vertex void vertex_main() {
+  max_44a39d();
+  return;
+}
+
+fragment void fragment_main() {
+  max_44a39d();
+  return;
+}
+
+kernel void compute_main() {
+  max_44a39d();
+  return;
+}
+

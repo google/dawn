@@ -1,0 +1,35 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureSampleGrad_e9a2f7() {
+  float4 res = arg_0.sample(arg_1, float3(), gradient3d(float3(), float3()), int3());
+}
+
+vertex void vertex_main() {
+  textureSampleGrad_e9a2f7();
+  return;
+}
+
+fragment void fragment_main() {
+  textureSampleGrad_e9a2f7();
+  return;
+}
+
+kernel void compute_main() {
+  textureSampleGrad_e9a2f7();
+  return;
+}
+
+
+tint_XTrY0h.metal:5:16: error: use of undeclared identifier 'arg_0'
+  float4 res = arg_0.sample(arg_1, float3(), gradient3d(float3(), float3()), int3());
+               ^
+tint_XTrY0h.metal:5:29: error: use of undeclared identifier 'arg_1'
+  float4 res = arg_0.sample(arg_1, float3(), gradient3d(float3(), float3()), int3());
+                            ^
+2 errors generated.

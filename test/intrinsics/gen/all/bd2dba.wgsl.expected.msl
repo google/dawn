@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void all_bd2dba() {
+  bool res =   all(bool3());
+}
+
+vertex void vertex_main() {
+  all_bd2dba();
+  return;
+}
+
+fragment void fragment_main() {
+  all_bd2dba();
+  return;
+}
+
+kernel void compute_main() {
+  all_bd2dba();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void inverseSqrt_8f2bd2() {
+  float2 res =   rsqrt(float2());
+}
+
+vertex void vertex_main() {
+  inverseSqrt_8f2bd2();
+  return;
+}
+
+fragment void fragment_main() {
+  inverseSqrt_8f2bd2();
+  return;
+}
+
+kernel void compute_main() {
+  inverseSqrt_8f2bd2();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void round_106c0b() {
+  float4 res =   rint(float4());
+}
+
+vertex void vertex_main() {
+  round_106c0b();
+  return;
+}
+
+fragment void fragment_main() {
+  round_106c0b();
+  return;
+}
+
+kernel void compute_main() {
+  round_106c0b();
+  return;
+}
+

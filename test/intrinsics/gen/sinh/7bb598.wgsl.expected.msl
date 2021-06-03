@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void sinh_7bb598() {
+  float res =   sinh(1.0f);
+}
+
+vertex void vertex_main() {
+  sinh_7bb598();
+  return;
+}
+
+fragment void fragment_main() {
+  sinh_7bb598();
+  return;
+}
+
+kernel void compute_main() {
+  sinh_7bb598();
+  return;
+}
+

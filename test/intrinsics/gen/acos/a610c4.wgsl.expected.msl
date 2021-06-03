@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void acos_a610c4() {
+  float3 res =   acos(float3());
+}
+
+vertex void vertex_main() {
+  acos_a610c4();
+  return;
+}
+
+fragment void fragment_main() {
+  acos_a610c4();
+  return;
+}
+
+kernel void compute_main() {
+  acos_a610c4();
+  return;
+}
+

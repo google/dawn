@@ -1,0 +1,50 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void distance_cfed73() {
+  float res =   distance(1.0f, 1.0f);
+}
+
+vertex void vertex_main() {
+  distance_cfed73();
+  return;
+}
+
+fragment void fragment_main() {
+  distance_cfed73();
+  return;
+}
+
+kernel void compute_main() {
+  distance_cfed73();
+  return;
+}
+
+
+tint_1oo4q6.metal:5:17: error: call to 'distance' is ambiguous
+  float res =   distance(1.0f, 1.0f);
+                ^~~~~~~~
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:303:17: note: candidate function
+METAL_FUNC half distance(half2 x, half2 y)
+                ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:334:17: note: candidate function
+METAL_FUNC half distance(half3 x, half3 y)
+                ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:365:17: note: candidate function
+METAL_FUNC half distance(half4 x, half4 y)
+                ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:404:18: note: candidate function
+METAL_FUNC float distance(float2 x, float2 y)
+                 ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:447:18: note: candidate function
+METAL_FUNC float distance(float3 x, float3 y)
+                 ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:490:18: note: candidate function
+METAL_FUNC float distance(float4 x, float4 y)
+                 ^
+1 error generated.

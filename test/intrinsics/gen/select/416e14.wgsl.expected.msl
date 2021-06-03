@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void select_416e14() {
+  float res =   select(1.0f, 1.0f, bool());
+}
+
+vertex void vertex_main() {
+  select_416e14();
+  return;
+}
+
+fragment void fragment_main() {
+  select_416e14();
+  return;
+}
+
+kernel void compute_main() {
+  select_416e14();
+  return;
+}
+

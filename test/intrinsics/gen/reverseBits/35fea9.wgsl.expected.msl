@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void reverseBits_35fea9() {
+  uint4 res =   reverse_bits(uint4());
+}
+
+vertex void vertex_main() {
+  reverseBits_35fea9();
+  return;
+}
+
+fragment void fragment_main() {
+  reverseBits_35fea9();
+  return;
+}
+
+kernel void compute_main() {
+  reverseBits_35fea9();
+  return;
+}
+

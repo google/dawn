@@ -30,6 +30,7 @@ type generator struct {
 	t      *template.Template
 	cached struct {
 		intrinsicTable *IntrinsicTable // lazily built by intrinsicTable()
+		permuter       *Permuter       // lazily built by permute()
 	}
 }
 
@@ -68,6 +69,7 @@ func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) erro
 		"IsFirstIn":             isFirstIn,
 		"IsLastIn":              isLastIn,
 		"IntrinsicTable":        g.intrinsicTable,
+		"Permute":               g.permute,
 		"Eval":                  g.eval,
 		"WriteFile":             func(relpath, content string) (string, error) { return "", writeFile(relpath, content) },
 	}).Option("missingkey=error").
@@ -106,6 +108,19 @@ func (g *generator) intrinsicTable() (*IntrinsicTable, error) {
 		}
 	}
 	return g.cached.intrinsicTable, nil
+}
+
+// permute lazily calls buildPermuter(), caching the result for repeated
+// calls, then passes the argument to Permutator.Permute()
+func (g *generator) permute(overload *sem.Overload) ([]Permutation, error) {
+	if g.cached.permuter == nil {
+		var err error
+		g.cached.permuter, err = buildPermuter(g.s)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return g.cached.permuter.Permute(overload)
 }
 
 // Map is a simple generic key-value map, which can be used in the template

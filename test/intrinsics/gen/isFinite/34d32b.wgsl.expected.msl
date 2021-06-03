@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void isFinite_34d32b() {
+  bool2 res =   isfinite(float2());
+}
+
+vertex void vertex_main() {
+  isFinite_34d32b();
+  return;
+}
+
+fragment void fragment_main() {
+  isFinite_34d32b();
+  return;
+}
+
+kernel void compute_main() {
+  isFinite_34d32b();
+  return;
+}
+

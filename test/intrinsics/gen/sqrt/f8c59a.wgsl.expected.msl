@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void sqrt_f8c59a() {
+  float3 res =   sqrt(float3());
+}
+
+vertex void vertex_main() {
+  sqrt_f8c59a();
+  return;
+}
+
+fragment void fragment_main() {
+  sqrt_f8c59a();
+  return;
+}
+
+kernel void compute_main() {
+  sqrt_f8c59a();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void determinant_a0a87c() {
+  float res =   determinant(float4x4());
+}
+
+vertex void vertex_main() {
+  determinant_a0a87c();
+  return;
+}
+
+fragment void fragment_main() {
+  determinant_a0a87c();
+  return;
+}
+
+kernel void compute_main() {
+  determinant_a0a87c();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void min_aa28ad() {
+  float2 res =   fmin(float2(), float2());
+}
+
+vertex void vertex_main() {
+  min_aa28ad();
+  return;
+}
+
+fragment void fragment_main() {
+  min_aa28ad();
+  return;
+}
+
+kernel void compute_main() {
+  min_aa28ad();
+  return;
+}
+

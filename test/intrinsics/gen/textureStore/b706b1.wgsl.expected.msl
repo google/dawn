@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureStore_b706b1() {
+  arg_0.write(int4(), int3());
+}
+
+vertex void vertex_main() {
+  textureStore_b706b1();
+  return;
+}
+
+fragment void fragment_main() {
+  textureStore_b706b1();
+  return;
+}
+
+kernel void compute_main() {
+  textureStore_b706b1();
+  return;
+}
+
+
+tint_3D3Uvl.metal:5:3: error: use of undeclared identifier 'arg_0'
+  arg_0.write(int4(), int3());
+  ^
+1 error generated.

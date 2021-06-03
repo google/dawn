@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void fma_6a3283() {
+  float4 res =   fma(float4(), float4(), float4());
+}
+
+vertex void vertex_main() {
+  fma_6a3283();
+  return;
+}
+
+fragment void fragment_main() {
+  fma_6a3283();
+  return;
+}
+
+kernel void compute_main() {
+  fma_6a3283();
+  return;
+}
+

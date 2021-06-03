@@ -1,0 +1,25 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureSample_667d76() {
+  float res = arg_0.sample(arg_1, float2(), int2());
+}
+
+fragment void fragment_main() {
+  textureSample_667d76();
+  return;
+}
+
+
+tint_Mx8eug.metal:5:15: error: use of undeclared identifier 'arg_0'
+  float res = arg_0.sample(arg_1, float2(), int2());
+              ^
+tint_Mx8eug.metal:5:28: error: use of undeclared identifier 'arg_1'
+  float res = arg_0.sample(arg_1, float2(), int2());
+                           ^
+2 errors generated.

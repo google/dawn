@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void asin_7b6a44() {
+  float2 res =   asin(float2());
+}
+
+vertex void vertex_main() {
+  asin_7b6a44();
+  return;
+}
+
+fragment void fragment_main() {
+  asin_7b6a44();
+  return;
+}
+
+kernel void compute_main() {
+  asin_7b6a44();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void isFinite_8a23ad() {
+  bool3 res =   isfinite(float3());
+}
+
+vertex void vertex_main() {
+  isFinite_8a23ad();
+  return;
+}
+
+fragment void fragment_main() {
+  isFinite_8a23ad();
+  return;
+}
+
+kernel void compute_main() {
+  isFinite_8a23ad();
+  return;
+}
+

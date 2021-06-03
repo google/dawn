@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void length_056071() {
+  float res =   length(float3());
+}
+
+vertex void vertex_main() {
+  length_056071();
+  return;
+}
+
+fragment void fragment_main() {
+  length_056071();
+  return;
+}
+
+kernel void compute_main() {
+  length_056071();
+  return;
+}
+

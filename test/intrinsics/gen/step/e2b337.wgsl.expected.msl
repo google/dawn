@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void step_e2b337() {
+  float4 res =   step(float4(), float4());
+}
+
+vertex void vertex_main() {
+  step_e2b337();
+  return;
+}
+
+fragment void fragment_main() {
+  step_e2b337();
+  return;
+}
+
+kernel void compute_main() {
+  step_e2b337();
+  return;
+}
+

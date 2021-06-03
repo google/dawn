@@ -1,0 +1,67 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 39
+; Schema: 0
+               OpCapability Shader
+         %14 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %tint_pointsize
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %tint_pointsize "tint_pointsize"
+               OpName %isNormal_b00ab1 "isNormal_b00ab1"
+               OpName %res "res"
+               OpName %vertex_main "vertex_main"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpDecorate %tint_pointsize BuiltIn PointSize
+      %float = OpTypeFloat 32
+%_ptr_Output_float = OpTypePointer Output %float
+          %4 = OpConstantNull %float
+%tint_pointsize = OpVariable %_ptr_Output_float Output %4
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+       %bool = OpTypeBool
+     %v2bool = OpTypeVector %bool 2
+    %v2float = OpTypeVector %float 2
+         %13 = OpConstantNull %v2float
+       %uint = OpTypeInt 32 0
+%uint_133693440 = OpConstant %uint 133693440
+%uint_524288 = OpConstant %uint 524288
+%uint_133169152 = OpConstant %uint 133169152
+     %v2uint = OpTypeVector %uint 2
+%_ptr_Function_v2bool = OpTypePointer Function %v2bool
+         %28 = OpConstantNull %v2bool
+    %float_1 = OpConstant %float 1
+%isNormal_b00ab1 = OpFunction %void None %5
+          %8 = OpLabel
+        %res = OpVariable %_ptr_Function_v2bool Function %28
+         %20 = OpCompositeConstruct %v2uint %uint_133693440 %uint_133693440
+         %21 = OpCompositeConstruct %v2uint %uint_524288 %uint_524288
+         %22 = OpCompositeConstruct %v2uint %uint_133169152 %uint_133169152
+         %23 = OpBitcast %v2uint %13
+         %24 = OpBitwiseAnd %v2uint %23 %20
+         %25 = OpExtInst %v2uint %14 UClamp %24 %21 %22
+          %9 = OpIEqual %v2bool %24 %25
+               OpStore %res %9
+               OpReturn
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %5
+         %30 = OpLabel
+               OpStore %tint_pointsize %float_1
+         %32 = OpFunctionCall %void %isNormal_b00ab1
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %5
+         %34 = OpLabel
+         %35 = OpFunctionCall %void %isNormal_b00ab1
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %5
+         %37 = OpLabel
+         %38 = OpFunctionCall %void %isNormal_b00ab1
+               OpReturn
+               OpFunctionEnd

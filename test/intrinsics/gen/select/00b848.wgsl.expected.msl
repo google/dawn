@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void select_00b848() {
+  int2 res =   select(int2(), int2(), bool2());
+}
+
+vertex void vertex_main() {
+  select_00b848();
+  return;
+}
+
+fragment void fragment_main() {
+  select_00b848();
+  return;
+}
+
+kernel void compute_main() {
+  select_00b848();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void reverseBits_e31adf() {
+  uint res =   reverse_bits(1u);
+}
+
+vertex void vertex_main() {
+  reverseBits_e31adf();
+  return;
+}
+
+fragment void fragment_main() {
+  reverseBits_e31adf();
+  return;
+}
+
+kernel void compute_main() {
+  reverseBits_e31adf();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void mix_c37ede() {
+  float4 res =   mix(float4(), float4(), float4());
+}
+
+vertex void vertex_main() {
+  mix_c37ede();
+  return;
+}
+
+fragment void fragment_main() {
+  mix_c37ede();
+  return;
+}
+
+kernel void compute_main() {
+  mix_c37ede();
+  return;
+}
+

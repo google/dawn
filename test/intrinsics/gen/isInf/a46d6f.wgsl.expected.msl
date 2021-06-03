@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void isInf_a46d6f() {
+  bool2 res =   isinf(float2());
+}
+
+vertex void vertex_main() {
+  isInf_a46d6f();
+  return;
+}
+
+fragment void fragment_main() {
+  isInf_a46d6f();
+  return;
+}
+
+kernel void compute_main() {
+  isInf_a46d6f();
+  return;
+}
+

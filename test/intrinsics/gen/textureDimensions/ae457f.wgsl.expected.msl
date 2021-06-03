@@ -1,0 +1,35 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureDimensions_ae457f() {
+  int2 res = int2(arg_0.get_width(), arg_0.get_height());
+}
+
+vertex void vertex_main() {
+  textureDimensions_ae457f();
+  return;
+}
+
+fragment void fragment_main() {
+  textureDimensions_ae457f();
+  return;
+}
+
+kernel void compute_main() {
+  textureDimensions_ae457f();
+  return;
+}
+
+
+tint_fBh8Vy.metal:5:19: error: use of undeclared identifier 'arg_0'
+  int2 res = int2(arg_0.get_width(), arg_0.get_height());
+                  ^
+tint_fBh8Vy.metal:5:38: error: use of undeclared identifier 'arg_0'
+  int2 res = int2(arg_0.get_width(), arg_0.get_height());
+                                     ^
+2 errors generated.

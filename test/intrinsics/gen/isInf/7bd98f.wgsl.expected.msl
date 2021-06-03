@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void isInf_7bd98f() {
+  bool res =   isinf(1.0f);
+}
+
+vertex void vertex_main() {
+  isInf_7bd98f();
+  return;
+}
+
+fragment void fragment_main() {
+  isInf_7bd98f();
+  return;
+}
+
+kernel void compute_main() {
+  isInf_7bd98f();
+  return;
+}
+

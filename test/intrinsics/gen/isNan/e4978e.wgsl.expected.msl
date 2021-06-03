@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void isNan_e4978e() {
+  bool res =   isnan(1.0f);
+}
+
+vertex void vertex_main() {
+  isNan_e4978e();
+  return;
+}
+
+fragment void fragment_main() {
+  isNan_e4978e();
+  return;
+}
+
+kernel void compute_main() {
+  isNan_e4978e();
+  return;
+}
+

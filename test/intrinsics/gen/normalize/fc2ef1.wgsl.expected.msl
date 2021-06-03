@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void normalize_fc2ef1() {
+  float2 res =   normalize(float2());
+}
+
+vertex void vertex_main() {
+  normalize_fc2ef1();
+  return;
+}
+
+fragment void fragment_main() {
+  normalize_fc2ef1();
+  return;
+}
+
+kernel void compute_main() {
+  normalize_fc2ef1();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void unpack2x16float_32a5cf() {
+  float2 res =   float2(as_type<half2>(1u));
+}
+
+vertex void vertex_main() {
+  unpack2x16float_32a5cf();
+  return;
+}
+
+fragment void fragment_main() {
+  unpack2x16float_32a5cf();
+  return;
+}
+
+kernel void compute_main() {
+  unpack2x16float_32a5cf();
+  return;
+}
+

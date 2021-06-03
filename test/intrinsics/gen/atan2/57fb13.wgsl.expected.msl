@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void atan2_57fb13() {
+  float2 res =   atan2(float2(), float2());
+}
+
+vertex void vertex_main() {
+  atan2_57fb13();
+  return;
+}
+
+fragment void fragment_main() {
+  atan2_57fb13();
+  return;
+}
+
+kernel void compute_main() {
+  atan2_57fb13();
+  return;
+}
+

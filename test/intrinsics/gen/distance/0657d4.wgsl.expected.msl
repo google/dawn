@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void distance_0657d4() {
+  float res =   distance(float3(), float3());
+}
+
+vertex void vertex_main() {
+  distance_0657d4();
+  return;
+}
+
+fragment void fragment_main() {
+  distance_0657d4();
+  return;
+}
+
+kernel void compute_main() {
+  distance_0657d4();
+  return;
+}
+

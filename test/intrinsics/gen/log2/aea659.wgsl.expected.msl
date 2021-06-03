@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void log2_aea659() {
+  float2 res =   log2(float2());
+}
+
+vertex void vertex_main() {
+  log2_aea659();
+  return;
+}
+
+fragment void fragment_main() {
+  log2_aea659();
+  return;
+}
+
+kernel void compute_main() {
+  log2_aea659();
+  return;
+}
+

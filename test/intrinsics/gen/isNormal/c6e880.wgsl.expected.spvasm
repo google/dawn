@@ -1,0 +1,60 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 32
+; Schema: 0
+               OpCapability Shader
+         %12 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %tint_pointsize
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %tint_pointsize "tint_pointsize"
+               OpName %isNormal_c6e880 "isNormal_c6e880"
+               OpName %res "res"
+               OpName %vertex_main "vertex_main"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpDecorate %tint_pointsize BuiltIn PointSize
+      %float = OpTypeFloat 32
+%_ptr_Output_float = OpTypePointer Output %float
+          %4 = OpConstantNull %float
+%tint_pointsize = OpVariable %_ptr_Output_float Output %4
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+       %bool = OpTypeBool
+    %float_1 = OpConstant %float 1
+       %uint = OpTypeInt 32 0
+%uint_133693440 = OpConstant %uint 133693440
+%uint_524288 = OpConstant %uint 524288
+%uint_133169152 = OpConstant %uint 133169152
+%_ptr_Function_bool = OpTypePointer Function %bool
+         %22 = OpConstantNull %bool
+%isNormal_c6e880 = OpFunction %void None %5
+          %8 = OpLabel
+        %res = OpVariable %_ptr_Function_bool Function %22
+         %17 = OpBitcast %uint %float_1
+         %18 = OpBitwiseAnd %uint %17 %uint_133693440
+         %19 = OpExtInst %uint %12 UClamp %18 %uint_524288 %uint_133169152
+          %9 = OpIEqual %bool %18 %19
+               OpStore %res %9
+               OpReturn
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %5
+         %24 = OpLabel
+               OpStore %tint_pointsize %float_1
+         %25 = OpFunctionCall %void %isNormal_c6e880
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %5
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %isNormal_c6e880
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %5
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %isNormal_c6e880
+               OpReturn
+               OpFunctionEnd

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void pack2x16snorm_6c169b() {
+  uint res =   pack_float_to_snorm2x16(float2());
+}
+
+vertex void vertex_main() {
+  pack2x16snorm_6c169b();
+  return;
+}
+
+fragment void fragment_main() {
+  pack2x16snorm_6c169b();
+  return;
+}
+
+kernel void compute_main() {
+  pack2x16snorm_6c169b();
+  return;
+}
+

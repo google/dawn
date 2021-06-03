@@ -1,0 +1,18 @@
+fn abs_005174() {
+  var res : vec3<f32> = abs(vec3<f32>());
+}
+
+[[stage(vertex)]]
+fn vertex_main() {
+  abs_005174();
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  abs_005174();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  abs_005174();
+}

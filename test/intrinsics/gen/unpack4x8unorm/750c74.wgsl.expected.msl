@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void unpack4x8unorm_750c74() {
+  float4 res =   unpack_unorm4x8_to_float(1u);
+}
+
+vertex void vertex_main() {
+  unpack4x8unorm_750c74();
+  return;
+}
+
+fragment void fragment_main() {
+  unpack4x8unorm_750c74();
+  return;
+}
+
+kernel void compute_main() {
+  unpack4x8unorm_750c74();
+  return;
+}
+

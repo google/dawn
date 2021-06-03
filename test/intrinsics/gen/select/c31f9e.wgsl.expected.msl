@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void select_c31f9e() {
+  bool res =   select(bool(), bool(), bool());
+}
+
+vertex void vertex_main() {
+  select_c31f9e();
+  return;
+}
+
+fragment void fragment_main() {
+  select_c31f9e();
+  return;
+}
+
+kernel void compute_main() {
+  select_c31f9e();
+  return;
+}
+

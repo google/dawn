@@ -1,0 +1,22 @@
+[[group(1), binding(0)]] var arg_0 : texture_depth_2d;
+
+[[group(1), binding(1)]] var arg_1 : sampler;
+
+fn textureSampleLevel_47daa4() {
+  var res : f32 = textureSampleLevel(arg_0, arg_1, vec2<f32>(), 1, vec2<i32>());
+}
+
+[[stage(vertex)]]
+fn vertex_main() {
+  textureSampleLevel_47daa4();
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  textureSampleLevel_47daa4();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  textureSampleLevel_47daa4();
+}

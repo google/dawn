@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void max_0c0aae() {
+  uint res =   max(1u, 1u);
+}
+
+vertex void vertex_main() {
+  max_0c0aae();
+  return;
+}
+
+fragment void fragment_main() {
+  max_0c0aae();
+  return;
+}
+
+kernel void compute_main() {
+  max_0c0aae();
+  return;
+}
+

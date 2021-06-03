@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void step_19accd() {
+  float2 res =   step(float2(), float2());
+}
+
+vertex void vertex_main() {
+  step_19accd();
+  return;
+}
+
+fragment void fragment_main() {
+  step_19accd();
+  return;
+}
+
+kernel void compute_main() {
+  step_19accd();
+  return;
+}
+

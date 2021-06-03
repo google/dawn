@@ -1,0 +1,18 @@
+fn ldexp_a31cdc() {
+  var res : vec3<f32> = ldexp(vec3<f32>(), vec3<i32>());
+}
+
+[[stage(vertex)]]
+fn vertex_main() {
+  ldexp_a31cdc();
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  ldexp_a31cdc();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  ldexp_a31cdc();
+}

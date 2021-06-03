@@ -1,0 +1,25 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureSampleBias_df91bb() {
+  float4 res = arg_0.sample(arg_1, float3(), bias(1.0f), int3());
+}
+
+fragment void fragment_main() {
+  textureSampleBias_df91bb();
+  return;
+}
+
+
+tint_Y31ZCA.metal:5:16: error: use of undeclared identifier 'arg_0'
+  float4 res = arg_0.sample(arg_1, float3(), bias(1.0f), int3());
+               ^
+tint_Y31ZCA.metal:5:29: error: use of undeclared identifier 'arg_1'
+  float4 res = arg_0.sample(arg_1, float3(), bias(1.0f), int3());
+                            ^
+2 errors generated.

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void select_28a27e() {
+  uint3 res =   select(uint3(), uint3(), bool3());
+}
+
+vertex void vertex_main() {
+  select_28a27e();
+  return;
+}
+
+fragment void fragment_main() {
+  select_28a27e();
+  return;
+}
+
+kernel void compute_main() {
+  select_28a27e();
+  return;
+}
+

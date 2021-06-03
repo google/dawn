@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void sin_01f241() {
+  float3 res =   sin(float3());
+}
+
+vertex void vertex_main() {
+  sin_01f241();
+  return;
+}
+
+fragment void fragment_main() {
+  sin_01f241();
+  return;
+}
+
+kernel void compute_main() {
+  sin_01f241();
+  return;
+}
+

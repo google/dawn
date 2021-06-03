@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void exp2_dea523() {
+  float res =   exp2(1.0f);
+}
+
+vertex void vertex_main() {
+  exp2_dea523();
+  return;
+}
+
+fragment void fragment_main() {
+  exp2_dea523();
+  return;
+}
+
+kernel void compute_main() {
+  exp2_dea523();
+  return;
+}
+

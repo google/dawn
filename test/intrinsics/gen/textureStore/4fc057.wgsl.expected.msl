@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureStore_4fc057() {
+  arg_0.write(float4(), int2(), 1);
+}
+
+vertex void vertex_main() {
+  textureStore_4fc057();
+  return;
+}
+
+fragment void fragment_main() {
+  textureStore_4fc057();
+  return;
+}
+
+kernel void compute_main() {
+  textureStore_4fc057();
+  return;
+}
+
+
+tint_xwVRdI.metal:5:3: error: use of undeclared identifier 'arg_0'
+  arg_0.write(float4(), int2(), 1);
+  ^
+1 error generated.

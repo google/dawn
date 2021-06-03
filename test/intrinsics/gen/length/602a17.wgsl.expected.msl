@@ -1,0 +1,50 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void length_602a17() {
+  float res =   length(1.0f);
+}
+
+vertex void vertex_main() {
+  length_602a17();
+  return;
+}
+
+fragment void fragment_main() {
+  length_602a17();
+  return;
+}
+
+kernel void compute_main() {
+  length_602a17();
+  return;
+}
+
+
+tint_bg8DxD.metal:5:17: error: call to 'length' is ambiguous
+  float res =   length(1.0f);
+                ^~~~~~
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:295:17: note: candidate function
+METAL_FUNC half length(half2 x)
+                ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:326:17: note: candidate function
+METAL_FUNC half length(half3 x)
+                ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:357:17: note: candidate function
+METAL_FUNC half length(half4 x)
+                ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:388:18: note: candidate function
+METAL_FUNC float length(float2 x)
+                 ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:431:18: note: candidate function
+METAL_FUNC float length(float3 x)
+                 ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:474:18: note: candidate function
+METAL_FUNC float length(float4 x)
+                 ^
+1 error generated.

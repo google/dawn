@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void clamp_b07c65() {
+  int res =   clamp(1, 1, 1);
+}
+
+vertex void vertex_main() {
+  clamp_b07c65();
+  return;
+}
+
+fragment void fragment_main() {
+  clamp_b07c65();
+  return;
+}
+
+kernel void compute_main() {
+  clamp_b07c65();
+  return;
+}
+

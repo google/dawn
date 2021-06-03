@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void max_e8192f() {
+  int2 res =   max(int2(), int2());
+}
+
+vertex void vertex_main() {
+  max_e8192f();
+  return;
+}
+
+fragment void fragment_main() {
+  max_e8192f();
+  return;
+}
+
+kernel void compute_main() {
+  max_e8192f();
+  return;
+}
+

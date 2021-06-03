@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void length_becebf() {
+  float res =   length(float4());
+}
+
+vertex void vertex_main() {
+  length_becebf();
+  return;
+}
+
+fragment void fragment_main() {
+  length_becebf();
+  return;
+}
+
+kernel void compute_main() {
+  length_becebf();
+  return;
+}
+

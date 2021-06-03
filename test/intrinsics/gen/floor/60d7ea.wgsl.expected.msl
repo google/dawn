@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void floor_60d7ea() {
+  float3 res =   floor(float3());
+}
+
+vertex void vertex_main() {
+  floor_60d7ea();
+  return;
+}
+
+fragment void fragment_main() {
+  floor_60d7ea();
+  return;
+}
+
+kernel void compute_main() {
+  floor_60d7ea();
+  return;
+}
+

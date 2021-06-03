@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void determinant_2b62ba() {
+  float res =   determinant(float3x3());
+}
+
+vertex void vertex_main() {
+  determinant_2b62ba();
+  return;
+}
+
+fragment void fragment_main() {
+  determinant_2b62ba();
+  return;
+}
+
+kernel void compute_main() {
+  determinant_2b62ba();
+  return;
+}
+

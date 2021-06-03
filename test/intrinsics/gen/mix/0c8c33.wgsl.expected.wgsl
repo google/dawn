@@ -1,0 +1,18 @@
+fn mix_0c8c33() {
+  var res : vec3<f32> = mix(vec3<f32>(), vec3<f32>(), vec3<f32>());
+}
+
+[[stage(vertex)]]
+fn vertex_main() {
+  mix_0c8c33();
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  mix_0c8c33();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  mix_0c8c33();
+}

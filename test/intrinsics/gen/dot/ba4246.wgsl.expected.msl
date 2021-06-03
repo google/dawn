@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void dot_ba4246() {
+  float res =   dot(float3(), float3());
+}
+
+vertex void vertex_main() {
+  dot_ba4246();
+  return;
+}
+
+fragment void fragment_main() {
+  dot_ba4246();
+  return;
+}
+
+kernel void compute_main() {
+  dot_ba4246();
+  return;
+}
+

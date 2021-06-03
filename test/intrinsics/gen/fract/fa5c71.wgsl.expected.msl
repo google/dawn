@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void fract_fa5c71() {
+  float res =   fract(1.0f);
+}
+
+vertex void vertex_main() {
+  fract_fa5c71();
+  return;
+}
+
+fragment void fragment_main() {
+  fract_fa5c71();
+  return;
+}
+
+kernel void compute_main() {
+  fract_fa5c71();
+  return;
+}
+

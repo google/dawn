@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void reflect_05357e() {
+  float4 res =   reflect(float4(), float4());
+}
+
+vertex void vertex_main() {
+  reflect_05357e();
+  return;
+}
+
+fragment void fragment_main() {
+  reflect_05357e();
+  return;
+}
+
+kernel void compute_main() {
+  reflect_05357e();
+  return;
+}
+

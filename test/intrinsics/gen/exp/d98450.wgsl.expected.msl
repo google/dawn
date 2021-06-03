@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void exp_d98450() {
+  float3 res =   exp(float3());
+}
+
+vertex void vertex_main() {
+  exp_d98450();
+  return;
+}
+
+fragment void fragment_main() {
+  exp_d98450();
+  return;
+}
+
+kernel void compute_main() {
+  exp_d98450();
+  return;
+}
+

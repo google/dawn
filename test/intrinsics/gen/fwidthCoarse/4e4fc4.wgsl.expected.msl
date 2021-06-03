@@ -1,0 +1,40 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void fwidthCoarse_4e4fc4() {
+  float4 res =   fwidth(float4());
+}
+
+vertex void vertex_main() {
+  fwidthCoarse_4e4fc4();
+  return;
+}
+
+fragment void fragment_main() {
+  fwidthCoarse_4e4fc4();
+  return;
+}
+
+kernel void compute_main() {
+  fwidthCoarse_4e4fc4();
+  return;
+}
+
+
+tint_Rs09zG.metal:5:10: warning: unused variable 'res' [-Wunused-variable]
+  float4 res =   fwidth(float4());
+         ^
+tint_Rs09zG.metal:8:13: error: vertex function 'vertex_main' uses unsupported builtin functions
+vertex void vertex_main() {
+            ^
+note: function air.fwidth.v4f32 is not allowed within a vertex function
+tint_Rs09zG.metal:18:13: error: kernel function 'compute_main' uses unsupported builtin functions
+kernel void compute_main() {
+            ^
+note: function air.fwidth.v4f32 is not allowed within a kernel function
+1 warning and 2 errors generated.

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void reverseBits_c21bc1() {
+  int3 res =   reverse_bits(int3());
+}
+
+vertex void vertex_main() {
+  reverseBits_c21bc1();
+  return;
+}
+
+fragment void fragment_main() {
+  reverseBits_c21bc1();
+  return;
+}
+
+kernel void compute_main() {
+  reverseBits_c21bc1();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void exp2_d6777c() {
+  float2 res =   exp2(float2());
+}
+
+vertex void vertex_main() {
+  exp2_d6777c();
+  return;
+}
+
+fragment void fragment_main() {
+  exp2_d6777c();
+  return;
+}
+
+kernel void compute_main() {
+  exp2_d6777c();
+  return;
+}
+

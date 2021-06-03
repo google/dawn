@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void ldexp_cc9cde() {
+  float4 res =   ldexp(float4(), int4());
+}
+
+vertex void vertex_main() {
+  ldexp_cc9cde();
+  return;
+}
+
+fragment void fragment_main() {
+  ldexp_cc9cde();
+  return;
+}
+
+kernel void compute_main() {
+  ldexp_cc9cde();
+  return;
+}
+

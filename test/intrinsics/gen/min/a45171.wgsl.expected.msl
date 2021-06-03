@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void min_a45171() {
+  int3 res =   min(int3(), int3());
+}
+
+vertex void vertex_main() {
+  min_a45171();
+  return;
+}
+
+fragment void fragment_main() {
+  min_a45171();
+  return;
+}
+
+kernel void compute_main() {
+  min_a45171();
+  return;
+}
+

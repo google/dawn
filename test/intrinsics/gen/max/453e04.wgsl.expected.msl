@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void max_453e04() {
+  uint4 res =   max(uint4(), uint4());
+}
+
+vertex void vertex_main() {
+  max_453e04();
+  return;
+}
+
+fragment void fragment_main() {
+  max_453e04();
+  return;
+}
+
+kernel void compute_main() {
+  max_453e04();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void all_986c7b() {
+  bool res =   all(bool4());
+}
+
+vertex void vertex_main() {
+  all_986c7b();
+  return;
+}
+
+fragment void fragment_main() {
+  all_986c7b();
+  return;
+}
+
+kernel void compute_main() {
+  all_986c7b();
+  return;
+}
+

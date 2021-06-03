@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void select_80a9a9() {
+  bool3 res =   select(bool3(), bool3(), bool3());
+}
+
+vertex void vertex_main() {
+  select_80a9a9();
+  return;
+}
+
+fragment void fragment_main() {
+  select_80a9a9();
+  return;
+}
+
+kernel void compute_main() {
+  select_80a9a9();
+  return;
+}
+

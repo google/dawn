@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void sign_dd790e() {
+  float res =   sign(1.0f);
+}
+
+vertex void vertex_main() {
+  sign_dd790e();
+  return;
+}
+
+fragment void fragment_main() {
+  sign_dd790e();
+  return;
+}
+
+kernel void compute_main() {
+  sign_dd790e();
+  return;
+}
+

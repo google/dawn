@@ -1,0 +1,25 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureSampleCompare_98b85c() {
+  float res = arg_0.sample_compare(arg_1, float2(), 1, 1.0f, int2());
+}
+
+fragment void fragment_main() {
+  textureSampleCompare_98b85c();
+  return;
+}
+
+
+tint_MYN6rp.metal:5:15: error: use of undeclared identifier 'arg_0'
+  float res = arg_0.sample_compare(arg_1, float2(), 1, 1.0f, int2());
+              ^
+tint_MYN6rp.metal:5:36: error: use of undeclared identifier 'arg_1'
+  float res = arg_0.sample_compare(arg_1, float2(), 1, 1.0f, int2());
+                                   ^
+2 errors generated.

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void min_46c5d3() {
+  uint res =   min(1u, 1u);
+}
+
+vertex void vertex_main() {
+  min_46c5d3();
+  return;
+}
+
+fragment void fragment_main() {
+  min_46c5d3();
+  return;
+}
+
+kernel void compute_main() {
+  min_46c5d3();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void tanh_5663c5() {
+  float4 res =   tanh(float4());
+}
+
+vertex void vertex_main() {
+  tanh_5663c5();
+  return;
+}
+
+fragment void fragment_main() {
+  tanh_5663c5();
+  return;
+}
+
+kernel void compute_main() {
+  tanh_5663c5();
+  return;
+}
+

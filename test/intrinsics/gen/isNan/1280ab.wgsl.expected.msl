@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void isNan_1280ab() {
+  bool3 res =   isnan(float3());
+}
+
+vertex void vertex_main() {
+  isNan_1280ab();
+  return;
+}
+
+fragment void fragment_main() {
+  isNan_1280ab();
+  return;
+}
+
+kernel void compute_main() {
+  isNan_1280ab();
+  return;
+}
+

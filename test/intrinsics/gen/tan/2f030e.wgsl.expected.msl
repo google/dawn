@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void tan_2f030e() {
+  float res =   tan(1.0f);
+}
+
+vertex void vertex_main() {
+  tan_2f030e();
+  return;
+}
+
+fragment void fragment_main() {
+  tan_2f030e();
+  return;
+}
+
+kernel void compute_main() {
+  tan_2f030e();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void pow_e60ea5() {
+  float2 res =   pow(float2(), float2());
+}
+
+vertex void vertex_main() {
+  pow_e60ea5();
+  return;
+}
+
+fragment void fragment_main() {
+  pow_e60ea5();
+  return;
+}
+
+kernel void compute_main() {
+  pow_e60ea5();
+  return;
+}
+

@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void isNormal_c286b7() {
+  bool3 res =   isnormal(float3());
+}
+
+vertex void vertex_main() {
+  isNormal_c286b7();
+  return;
+}
+
+fragment void fragment_main() {
+  isNormal_c286b7();
+  return;
+}
+
+kernel void compute_main() {
+  isNormal_c286b7();
+  return;
+}
+

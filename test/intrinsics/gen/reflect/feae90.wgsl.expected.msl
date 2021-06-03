@@ -1,0 +1,50 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void reflect_feae90() {
+  float res =   reflect(1.0f, 1.0f);
+}
+
+vertex void vertex_main() {
+  reflect_feae90();
+  return;
+}
+
+fragment void fragment_main() {
+  reflect_feae90();
+  return;
+}
+
+kernel void compute_main() {
+  reflect_feae90();
+  return;
+}
+
+
+tint_ib1Pi6.metal:5:17: error: call to 'reflect' is ambiguous
+  float res =   reflect(1.0f, 1.0f);
+                ^~~~~~~
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:315:18: note: candidate function
+METAL_FUNC half2 reflect(half2 i, half2 n)
+                 ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:346:18: note: candidate function
+METAL_FUNC half3 reflect(half3 i, half3 n)
+                 ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:377:18: note: candidate function
+METAL_FUNC half4 reflect(half4 i, half4 n)
+                 ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:420:19: note: candidate function
+METAL_FUNC float2 reflect(float2 i, float2 n)
+                  ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:463:19: note: candidate function
+METAL_FUNC float3 reflect(float3 i, float3 n)
+                  ^
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/metal/macos/lib/clang/902.14/include/metal/metal_geometric:506:19: note: candidate function
+METAL_FUNC float4 reflect(float4 i, float4 n)
+                  ^
+1 error generated.

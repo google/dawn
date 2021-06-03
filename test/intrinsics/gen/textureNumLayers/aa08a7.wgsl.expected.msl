@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureNumLayers_aa08a7() {
+  int res = int(arg_0.get_array_size());
+}
+
+vertex void vertex_main() {
+  textureNumLayers_aa08a7();
+  return;
+}
+
+fragment void fragment_main() {
+  textureNumLayers_aa08a7();
+  return;
+}
+
+kernel void compute_main() {
+  textureNumLayers_aa08a7();
+  return;
+}
+
+
+tint_cmcbXy.metal:5:17: error: use of undeclared identifier 'arg_0'
+  int res = int(arg_0.get_array_size());
+                ^
+1 error generated.

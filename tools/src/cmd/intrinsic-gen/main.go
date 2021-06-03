@@ -82,7 +82,8 @@ func run() error {
 	// Recursively find all the template files in the <tint>/src directory
 	files, err := glob.Scan(projectRoot, glob.MustParseConfig(`{
 		"paths": [{"include": [
-			"src/**.tmpl"
+			"src/**.tmpl",
+			"test/**.tmpl"
 		]}]
 	}`))
 	if err != nil {

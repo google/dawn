@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void max_b1b73a() {
+  uint3 res =   max(uint3(), uint3());
+}
+
+vertex void vertex_main() {
+  max_b1b73a();
+  return;
+}
+
+fragment void fragment_main() {
+  max_b1b73a();
+  return;
+}
+
+kernel void compute_main() {
+  max_b1b73a();
+  return;
+}
+

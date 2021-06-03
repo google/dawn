@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void pack2x16float_0e97b3() {
+  uint res =   as_type<uint>(half2(float2()));
+}
+
+vertex void vertex_main() {
+  pack2x16float_0e97b3();
+  return;
+}
+
+fragment void fragment_main() {
+  pack2x16float_0e97b3();
+  return;
+}
+
+kernel void compute_main() {
+  pack2x16float_0e97b3();
+  return;
+}
+

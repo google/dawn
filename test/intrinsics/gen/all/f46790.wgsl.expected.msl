@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void all_f46790() {
+  bool res =   all(bool2());
+}
+
+vertex void vertex_main() {
+  all_f46790();
+  return;
+}
+
+fragment void fragment_main() {
+  all_f46790();
+  return;
+}
+
+kernel void compute_main() {
+  all_f46790();
+  return;
+}
+

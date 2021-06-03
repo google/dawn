@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureLoad_a7a3c3() {
+  int4 res = arg_0.read(int3());
+}
+
+vertex void vertex_main() {
+  textureLoad_a7a3c3();
+  return;
+}
+
+fragment void fragment_main() {
+  textureLoad_a7a3c3();
+  return;
+}
+
+kernel void compute_main() {
+  textureLoad_a7a3c3();
+  return;
+}
+
+
+tint_rFvCL7.metal:5:14: error: use of undeclared identifier 'arg_0'
+  int4 res = arg_0.read(int3());
+             ^
+1 error generated.

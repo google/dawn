@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void smoothStep_c11eef() {
+  float2 res =   smoothstep(float2(), float2(), float2());
+}
+
+vertex void vertex_main() {
+  smoothStep_c11eef();
+  return;
+}
+
+fragment void fragment_main() {
+  smoothStep_c11eef();
+  return;
+}
+
+kernel void compute_main() {
+  smoothStep_c11eef();
+  return;
+}
+

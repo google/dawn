@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void pow_4a46c9() {
+  float3 res =   pow(float3(), float3());
+}
+
+vertex void vertex_main() {
+  pow_4a46c9();
+  return;
+}
+
+fragment void fragment_main() {
+  pow_4a46c9();
+  return;
+}
+
+kernel void compute_main() {
+  pow_4a46c9();
+  return;
+}
+

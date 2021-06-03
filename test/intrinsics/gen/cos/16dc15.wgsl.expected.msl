@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void cos_16dc15() {
+  float3 res =   cos(float3());
+}
+
+vertex void vertex_main() {
+  cos_16dc15();
+  return;
+}
+
+fragment void fragment_main() {
+  cos_16dc15();
+  return;
+}
+
+kernel void compute_main() {
+  cos_16dc15();
+  return;
+}
+

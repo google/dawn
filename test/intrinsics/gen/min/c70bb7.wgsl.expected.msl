@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void min_c70bb7() {
+  uint3 res =   min(uint3(), uint3());
+}
+
+vertex void vertex_main() {
+  min_c70bb7();
+  return;
+}
+
+fragment void fragment_main() {
+  min_c70bb7();
+  return;
+}
+
+kernel void compute_main() {
+  min_c70bb7();
+  return;
+}
+

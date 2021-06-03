@@ -1,0 +1,18 @@
+fn reverseBits_7c4269() {
+  var res : i32 = reverseBits(1);
+}
+
+[[stage(vertex)]]
+fn vertex_main() {
+  reverseBits_7c4269();
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  reverseBits_7c4269();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  reverseBits_7c4269();
+}

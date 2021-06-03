@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureLoad_c456bc() {
+  float4 res = arg_0.read(int3());
+}
+
+vertex void vertex_main() {
+  textureLoad_c456bc();
+  return;
+}
+
+fragment void fragment_main() {
+  textureLoad_c456bc();
+  return;
+}
+
+kernel void compute_main() {
+  textureLoad_c456bc();
+  return;
+}
+
+
+tint_lhWQnt.metal:5:16: error: use of undeclared identifier 'arg_0'
+  float4 res = arg_0.read(int3());
+               ^
+1 error generated.

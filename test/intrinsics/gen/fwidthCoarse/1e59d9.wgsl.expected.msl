@@ -1,0 +1,40 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void fwidthCoarse_1e59d9() {
+  float3 res =   fwidth(float3());
+}
+
+vertex void vertex_main() {
+  fwidthCoarse_1e59d9();
+  return;
+}
+
+fragment void fragment_main() {
+  fwidthCoarse_1e59d9();
+  return;
+}
+
+kernel void compute_main() {
+  fwidthCoarse_1e59d9();
+  return;
+}
+
+
+tint_nMosr7.metal:5:10: warning: unused variable 'res' [-Wunused-variable]
+  float3 res =   fwidth(float3());
+         ^
+tint_nMosr7.metal:8:13: error: vertex function 'vertex_main' uses unsupported builtin functions
+vertex void vertex_main() {
+            ^
+note: function air.fwidth.v3f32 is not allowed within a vertex function
+tint_nMosr7.metal:18:13: error: kernel function 'compute_main' uses unsupported builtin functions
+kernel void compute_main() {
+            ^
+note: function air.fwidth.v3f32 is not allowed within a kernel function
+1 warning and 2 errors generated.

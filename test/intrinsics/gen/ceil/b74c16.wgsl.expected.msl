@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void ceil_b74c16() {
+  float4 res =   ceil(float4());
+}
+
+vertex void vertex_main() {
+  ceil_b74c16();
+  return;
+}
+
+fragment void fragment_main() {
+  ceil_b74c16();
+  return;
+}
+
+kernel void compute_main() {
+  ceil_b74c16();
+  return;
+}
+

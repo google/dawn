@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void clamp_bd43ce() {
+  uint4 res =   clamp(uint4(), uint4(), uint4());
+}
+
+vertex void vertex_main() {
+  clamp_bd43ce();
+  return;
+}
+
+fragment void fragment_main() {
+  clamp_bd43ce();
+  return;
+}
+
+kernel void compute_main() {
+  clamp_bd43ce();
+  return;
+}
+

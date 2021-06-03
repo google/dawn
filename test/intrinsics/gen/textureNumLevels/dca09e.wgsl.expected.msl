@@ -1,0 +1,32 @@
+SKIP: FAILED
+
+
+
+Validation Failure:
+#include <metal_stdlib>
+
+using namespace metal;
+void textureNumLevels_dca09e() {
+  int res = int(arg_0.get_num_mip_levels());
+}
+
+vertex void vertex_main() {
+  textureNumLevels_dca09e();
+  return;
+}
+
+fragment void fragment_main() {
+  textureNumLevels_dca09e();
+  return;
+}
+
+kernel void compute_main() {
+  textureNumLevels_dca09e();
+  return;
+}
+
+
+tint_xvDrXY.metal:5:17: error: use of undeclared identifier 'arg_0'
+  int res = int(arg_0.get_num_mip_levels());
+                ^
+1 error generated.

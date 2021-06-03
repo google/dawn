@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void normalize_9a0aab() {
+  float4 res =   normalize(float4());
+}
+
+vertex void vertex_main() {
+  normalize_9a0aab();
+  return;
+}
+
+fragment void fragment_main() {
+  normalize_9a0aab();
+  return;
+}
+
+kernel void compute_main() {
+  normalize_9a0aab();
+  return;
+}
+

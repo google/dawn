@@ -1,0 +1,22 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void isNan_4d280d() {
+  bool4 res =   isnan(float4());
+}
+
+vertex void vertex_main() {
+  isNan_4d280d();
+  return;
+}
+
+fragment void fragment_main() {
+  isNan_4d280d();
+  return;
+}
+
+kernel void compute_main() {
+  isNan_4d280d();
+  return;
+}
+
