@@ -27,44 +27,72 @@ import (
 
 type generator struct {
 	s      *sem.Sem
+	t      *template.Template
 	cached struct {
 		intrinsicTable *IntrinsicTable // lazily built by intrinsicTable()
 	}
 }
 
+// WriteFile is a function that Generate() may call to emit a new file from a
+// template.
+// relpath is the relative path from the currently executing template.
+// content is the file content to write.
+type WriteFile func(relpath, content string) error
+
 // Generate executes the template tmpl using the provided semantic
 // information, writing the output to w.
 // See https://golang.org/pkg/text/template/ for documentation on the template
 // syntax.
-func Generate(s *sem.Sem, tmpl string, w io.Writer) error {
+func Generate(s *sem.Sem, tmpl string, w io.Writer, writeFile WriteFile) error {
 	g := generator{s: s}
-	return g.generate(tmpl, w)
+	return g.generate(tmpl, w, writeFile)
 }
 
-func (g *generator) generate(tmpl string, w io.Writer) error {
-	t, err := template.
-		New("<template>").
-		Funcs(map[string]interface{}{
-			"Map":                   newMap,
-			"Iterate":               iterate,
-			"Title":                 strings.Title,
-			"PascalCase":            pascalCase,
-			"SplitDisplayName":      splitDisplayName,
-			"IsTemplateTypeParam":   is(&sem.TemplateTypeParam{}),
-			"IsTemplateNumberParam": is(&sem.TemplateNumberParam{}),
-			"IsTemplateEnumParam":   is(&sem.TemplateEnumParam{}),
-			"IsFirstIn":             isFirstIn,
-			"IsLastIn":              isLastIn,
-			"IntrinsicTable":        g.intrinsicTable,
-		}).
-		Option("missingkey=error").
+func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) error {
+	t, err := template.New("<template>").Funcs(map[string]interface{}{
+		"Map":                   newMap,
+		"Iterate":               iterate,
+		"Title":                 strings.Title,
+		"PascalCase":            pascalCase,
+		"SplitDisplayName":      splitDisplayName,
+		"HasPrefix":             strings.HasPrefix,
+		"HasSuffix":             strings.HasSuffix,
+		"IsEnumEntry":           is(sem.EnumEntry{}),
+		"IsEnumMatcher":         is(sem.EnumMatcher{}),
+		"IsFQN":                 is(sem.FullyQualifiedName{}),
+		"IsInt":                 is(1),
+		"IsTemplateEnumParam":   is(sem.TemplateEnumParam{}),
+		"IsTemplateNumberParam": is(sem.TemplateNumberParam{}),
+		"IsTemplateTypeParam":   is(sem.TemplateTypeParam{}),
+		"IsType":                is(sem.Type{}),
+		"IsFirstIn":             isFirstIn,
+		"IsLastIn":              isLastIn,
+		"IntrinsicTable":        g.intrinsicTable,
+		"Eval":                  g.eval,
+		"WriteFile":             func(relpath, content string) (string, error) { return "", writeFile(relpath, content) },
+	}).Option("missingkey=error").
 		Parse(tmpl)
 	if err != nil {
 		return err
 	}
+	g.t = t
 	return t.Execute(w, map[string]interface{}{
 		"Sem": g.s,
 	})
+}
+
+// eval executes the sub-template with the given name and argument, returning
+// the generated output
+func (g *generator) eval(template string, arg interface{}) (string, error) {
+	target := g.t.Lookup(template)
+	if target == nil {
+		return "", fmt.Errorf("template '%v' not found", template)
+	}
+	sb := strings.Builder{}
+	if err := target.Execute(&sb, arg); err != nil {
+		return "", fmt.Errorf("while evaluating '%v': %v", template, err)
+	}
+	return sb.String(), nil
 }
 
 // intrinsicTable lazily calls and returns the result of buildIntrinsicTable(),
@@ -103,7 +131,8 @@ func (m Map) Get(key interface{}) interface{} {
 func is(ty interface{}) func(interface{}) bool {
 	rty := reflect.TypeOf(ty)
 	return func(v interface{}) bool {
-		return reflect.TypeOf(v) == rty
+		ty := reflect.TypeOf(v)
+		return ty == rty || ty == reflect.PtrTo(rty)
 	}
 }
 

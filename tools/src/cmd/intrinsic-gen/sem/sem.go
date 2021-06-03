@@ -15,6 +15,8 @@
 package sem
 
 import (
+	"fmt"
+
 	"dawn.googlesource.com/tint/tools/src/cmd/intrinsic-gen/ast"
 )
 
@@ -66,6 +68,14 @@ type EnumEntry struct {
 	Enum       *Enum
 	Name       string
 	IsInternal bool // True if this entry is not part of the WGSL grammar
+}
+
+// Format implements the fmt.Formatter interface
+func (e EnumEntry) Format(w fmt.State, verb rune) {
+	if e.IsInternal {
+		fmt.Fprint(w, "[[internal]] ")
+	}
+	fmt.Fprint(w, e.Name)
 }
 
 // Type declares a type
@@ -120,11 +130,38 @@ type Function struct {
 // Overload describes a single overload of a function
 type Overload struct {
 	Decl           ast.FunctionDecl
+	Function       *Function
 	TemplateParams []TemplateParam
 	OpenTypes      []*TemplateTypeParam
 	OpenNumbers    []TemplateParam
 	ReturnType     *FullyQualifiedName
 	Parameters     []Parameter
+}
+
+// Format implements the fmt.Formatter interface
+func (o Overload) Format(w fmt.State, verb rune) {
+	fmt.Fprintf(w, "fn %v", o.Function.Name)
+	if len(o.TemplateParams) > 0 {
+		fmt.Fprintf(w, "<")
+		for i, t := range o.TemplateParams {
+			if i > 0 {
+				fmt.Fprint(w, ", ")
+			}
+			fmt.Fprintf(w, "%v", t)
+		}
+		fmt.Fprintf(w, ">")
+	}
+	fmt.Fprint(w, "(")
+	for i, p := range o.Parameters {
+		if i > 0 {
+			fmt.Fprint(w, ", ")
+		}
+		fmt.Fprintf(w, "%v", p)
+	}
+	fmt.Fprint(w, ")")
+	if o.ReturnType != nil {
+		fmt.Fprintf(w, " -> %v", o.ReturnType)
+	}
 }
 
 // Parameter describes a single parameter of a function overload
@@ -133,10 +170,33 @@ type Parameter struct {
 	Type FullyQualifiedName
 }
 
+// Format implements the fmt.Formatter interface
+func (p Parameter) Format(w fmt.State, verb rune) {
+	if p.Name != "" {
+		fmt.Fprintf(w, "%v: ", p.Name)
+	}
+	fmt.Fprintf(w, "%v", p.Type)
+}
+
 // FullyQualifiedName is the usage of a Type, TypeMatcher or TemplateTypeParam
 type FullyQualifiedName struct {
 	Target            Named
-	TemplateArguments []FullyQualifiedName
+	TemplateArguments []interface{}
+}
+
+// Format implements the fmt.Formatter interface
+func (f FullyQualifiedName) Format(w fmt.State, verb rune) {
+	fmt.Fprint(w, f.Target.GetName())
+	if len(f.TemplateArguments) > 0 {
+		fmt.Fprintf(w, "<")
+		for i, t := range f.TemplateArguments {
+			if i > 0 {
+				fmt.Fprint(w, ", ")
+			}
+			fmt.Fprintf(w, "%v", t)
+		}
+		fmt.Fprintf(w, ">")
+	}
 }
 
 // TemplateParam is a TemplateEnumParam, TemplateTypeParam or TemplateNumberParam

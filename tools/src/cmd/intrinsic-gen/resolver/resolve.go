@@ -246,6 +246,7 @@ func (r *resolver) function(a ast.FunctionDecl) error {
 	// Construct the semantic overload and append it to the function
 	overload := &sem.Overload{
 		Decl:           a,
+		Function:       f,
 		Parameters:     make([]sem.Parameter, len(a.Parameters)),
 		TemplateParams: templateParams,
 	}
@@ -335,7 +336,7 @@ func (r *resolver) fullyQualifiedName(s *scope, arg ast.TemplatedName) (sem.Full
 
 	fqn := sem.FullyQualifiedName{
 		Target:            target,
-		TemplateArguments: make([]sem.FullyQualifiedName, len(arg.TemplateArgs)),
+		TemplateArguments: make([]interface{}, len(arg.TemplateArgs)),
 	}
 	for i, a := range arg.TemplateArgs {
 		arg, err := r.fullyQualifiedName(s, a)

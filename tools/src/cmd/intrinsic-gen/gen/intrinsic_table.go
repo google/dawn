@@ -327,7 +327,7 @@ func (b *overloadBuilder) collectMatcherIndices(fqn sem.FullyQualifiedName) ([]i
 	}
 	out := []int{idx}
 	for _, arg := range fqn.TemplateArguments {
-		indices, err := b.collectMatcherIndices(arg)
+		indices, err := b.collectMatcherIndices(arg.(sem.FullyQualifiedName))
 		if err != nil {
 			return nil, err
 		}
