@@ -96,6 +96,8 @@ type Overload struct {
 	// These indices are consumed by the matchers themselves.
 	// The first index is always a TypeMatcher.
 	ReturnMatcherIndicesOffset *int
+	// StageUses describes the stages an overload can be used in
+	CanBeUsedInStage sem.StageUses
 }
 
 // Function is used to create the C++ IntrinsicInfo structure
@@ -193,6 +195,7 @@ func (b *intrinsicTableBuilder) buildOverload(o *sem.Overload) (Overload, error)
 		OpenNumbersOffset:          b.lut.openNumbers.Add(ob.openNumbers),
 		ParametersOffset:           b.lut.parameters.Add(ob.parameters),
 		ReturnMatcherIndicesOffset: ob.returnTypeMatcherIndicesOffset,
+		CanBeUsedInStage:           o.CanBeUsedInStage,
 	}, nil
 }
 

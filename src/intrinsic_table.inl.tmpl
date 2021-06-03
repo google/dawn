@@ -11,64 +11,6 @@ See:
 
 // clang-format off
 
-/// ParameterInfo describes a parameter
-struct ParameterInfo {
-  /// The parameter usage (parameter name in definition file)
-  ParameterUsage const usage;
-
-  /// Pointer to a list of indices that are used to match the parameter type.
-  /// The matcher indices index on Matchers::type and / or Matchers::number.
-  /// These indices are consumed by the matchers themselves.
-  /// The first index is always a TypeMatcher.
-  MatcherIndex const* const matcher_indices;
-};
-
-/// OpenTypeInfo describes an open type
-struct OpenTypeInfo {
-  /// Name of the open type (e.g. 'T')
-  const char* name;
-  /// Optional type matcher constraint.
-  /// Either an index in Matchers::type, or kNoMatcher
-  MatcherIndex const matcher_index;
-};
-
-/// OpenNumberInfo describes an open number
-struct OpenNumberInfo {
-  /// Name of the open number (e.g. 'N')
-  const char* name;
-  /// Optional number matcher constraint.
-  /// Either an index in Matchers::number, or kNoMatcher
-  MatcherIndex const matcher_index;
-};
-
-/// OverloadInfo describes a single function overload
-struct OverloadInfo {
-  /// Total number of parameters for the overload
-  uint8_t const num_parameters;
-  /// Total number of open types for the overload
-  uint8_t const num_open_types;
-  /// Total number of open numbers for the overload
-  uint8_t const num_open_numbers;
-  /// Pointer to the first open type
-  OpenTypeInfo const* const open_types;
-  /// Pointer to the first open number
-  OpenNumberInfo const* const open_numbers;
-  /// Pointer to the first parameter
-  ParameterInfo const* const parameters;
-  /// Pointer to a list of matcher indices that index on Matchers::type and
-  /// Matchers::number, used to build the return type. If the function has no
-  /// return type then this is null.
-  MatcherIndex const* const return_matcher_indices;
-};
-
-/// IntrinsicInfo describes an intrinsic function
-struct IntrinsicInfo {
-  /// Number of overloads of the intrinsic function
-  uint8_t const num_overloads;
-  /// Pointer to the start of the overloads for the function
-  OverloadInfo const* const overloads;
-};
-
 {{  with .Sem -}}
 {{    range .Types -}}
 {{      template "Type" . }}
@@ -155,6 +97,10 @@ constexpr OverloadInfo kOverloads[] = {
 {{-   if $o.ReturnMatcherIndicesOffset }} &kMatcherIndices[{{$o.ReturnMatcherIndicesOffset}}]
 {{-   else                             }} nullptr
 {{-   end }},
+    /* supported_stages */ PipelineStageSet(
+{{-   range $i, $u := $o.CanBeUsedInStage.List -}}
+{{-     if $i -}}, {{end}}PipelineStage::k{{Title $u}}
+{{-   end }}),
   },
 {{- end }}
 };

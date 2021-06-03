@@ -89,8 +89,11 @@ bool IsBarrierIntrinsic(IntrinsicType i) {
 
 Intrinsic::Intrinsic(IntrinsicType type,
                      sem::Type* return_type,
-                     const ParameterList& parameters)
-    : Base(return_type, parameters), type_(type) {}
+                     const ParameterList& parameters,
+                     PipelineStageSet supported_stages)
+    : Base(return_type, parameters),
+      type_(type),
+      supported_stages_(supported_stages) {}
 
 Intrinsic::~Intrinsic() = default;
 

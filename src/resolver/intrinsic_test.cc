@@ -55,7 +55,8 @@ TEST_P(ResolverIntrinsicDerivativeTest, Scalar) {
   Global("ident", ty.f32(), ast::StorageClass::kInput);
 
   auto* expr = Call(name, "ident");
-  WrapInFunction(expr);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(expr)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -68,7 +69,8 @@ TEST_P(ResolverIntrinsicDerivativeTest, Vector) {
   Global("ident", ty.vec4<f32>(), ast::StorageClass::kInput);
 
   auto* expr = Call(name, "ident");
-  WrapInFunction(expr);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(expr)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1927,7 +1929,8 @@ TEST_P(ResolverIntrinsicTest_Texture, Call) {
   param.buildSamplerVariable(this);
 
   auto* call = Call(param.function, param.args(this));
-  WrapInFunction(call);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   ASSERT_TRUE(r()->Resolve()) << r()->error();
 

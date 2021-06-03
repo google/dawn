@@ -511,6 +511,7 @@ libtint_source_set("libtint_core_all_src") {
     "sem/node.h",
     "sem/parameter_usage.cc",
     "sem/parameter_usage.h",
+    "sem/pipeline_stage_set.h",
     "sem/pointer_type.cc",
     "sem/pointer_type.h",
     "sem/reference_type.cc",

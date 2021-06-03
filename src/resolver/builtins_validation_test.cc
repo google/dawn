@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/call_statement.h"
 #include "src/resolver/resolver_test_helper.h"
 
 namespace tint {
@@ -283,7 +284,8 @@ TEST_P(FloatAllMatching, Scalar) {
     params.push_back(Expr(1.0f));
   }
   auto* builtin = Call(name, params);
-  WrapInFunction(builtin);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(builtin)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->Is<sem::F32>());
@@ -298,7 +300,8 @@ TEST_P(FloatAllMatching, Vec2) {
     params.push_back(vec2<f32>(1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  WrapInFunction(builtin);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(builtin)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
@@ -313,7 +316,8 @@ TEST_P(FloatAllMatching, Vec3) {
     params.push_back(vec3<f32>(1.0f, 1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  WrapInFunction(builtin);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(builtin)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());
@@ -328,7 +332,8 @@ TEST_P(FloatAllMatching, Vec4) {
     params.push_back(vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f));
   }
   auto* builtin = Call(name, params);
-  WrapInFunction(builtin);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(builtin)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   EXPECT_TRUE(r()->Resolve()) << r()->error();
   EXPECT_TRUE(TypeOf(builtin)->is_float_vector());

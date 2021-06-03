@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/ast/call_statement.h"
 #include "src/sem/call.h"
 #include "src/writer/msl/test_helper.h"
 
@@ -176,7 +177,8 @@ TEST_P(MslIntrinsicTest, Emit) {
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
-  WrapInFunction(call);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 

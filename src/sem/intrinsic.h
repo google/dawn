@@ -19,6 +19,7 @@
 
 #include "src/sem/call_target.h"
 #include "src/sem/intrinsic_type.h"
+#include "src/sem/pipeline_stage_set.h"
 
 namespace tint {
 namespace sem {
@@ -75,15 +76,21 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
   /// @param type the intrinsic type
   /// @param return_type the return type for the intrinsic call
   /// @param parameters the parameters for the intrinsic overload
+  /// @param supported_stages the pipeline stages that this intrinsic can be
+  /// used in
   Intrinsic(IntrinsicType type,
             sem::Type* return_type,
-            const ParameterList& parameters);
+            const ParameterList& parameters,
+            PipelineStageSet supported_stages);
 
   /// Destructor
   ~Intrinsic() override;
 
   /// @return the type of the intrinsic
   IntrinsicType Type() const { return type_; }
+
+  /// @return the pipeline stages that this intrinsic can be used in
+  PipelineStageSet SupportedStages() const { return supported_stages_; }
 
   /// @returns the name of the intrinsic function type. The spelling, including
   /// case, matches the name in the WGSL spec.
@@ -118,6 +125,7 @@ class Intrinsic : public Castable<Intrinsic, CallTarget> {
 
  private:
   IntrinsicType const type_;
+  PipelineStageSet const supported_stages_;
 };
 
 /// Emits the name of the intrinsic function type. The spelling, including case,

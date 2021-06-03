@@ -51,6 +51,7 @@ class Variable;
 }  // namespace ast
 namespace sem {
 class Array;
+class Intrinsic;
 class Statement;
 }  // namespace sem
 
@@ -100,6 +101,11 @@ class Resolver {
     sem::BindingPoint binding_point;
   };
 
+  struct IntrinsicCallInfo {
+    const ast::CallExpression* call;
+    const sem::Intrinsic* intrinsic;
+  };
+
   /// Structure holding semantic information about a function.
   /// Used to build the sem::Function nodes at the end of resolving.
   struct FunctionInfo {
@@ -115,9 +121,13 @@ class Resolver {
     sem::Type* return_type = nullptr;
     std::string return_type_name;
     std::array<sem::WorkgroupDimension, 3> workgroup_size;
+    std::vector<IntrinsicCallInfo> intrinsic_calls;
 
     // List of transitive calls this function makes
     UniqueVector<FunctionInfo*> transitive_calls;
+
+    // List of entry point functions that transitively call this function
+    UniqueVector<FunctionInfo*> ancestor_entry_points;
   };
 
   /// Structure holding semantic information about an expression.
@@ -182,6 +192,8 @@ class Resolver {
   /// Resolves the program, without creating final the semantic nodes.
   /// @returns true on success, false on error
   bool ResolveInternal();
+
+  bool ValidatePipelineStages();
 
   /// Creates the nodes and adds them to the sem::Info mappings of the
   /// ProgramBuilder.
@@ -359,12 +371,18 @@ class Resolver {
   /// @param node the AST node.
   void Mark(const ast::Node* node);
 
+  template <typename CALLBACK>
+  void TraverseCallChain(FunctionInfo* from,
+                         FunctionInfo* to,
+                         CALLBACK&& callback) const;
+
   ProgramBuilder* const builder_;
   diag::List& diagnostics_;
   std::unique_ptr<IntrinsicTable> const intrinsic_table_;
   sem::BlockStatement* current_block_ = nullptr;
   ScopeStack<VariableInfo*> variable_stack_;
   std::unordered_map<Symbol, FunctionInfo*> symbol_to_function_;
+  std::vector<FunctionInfo*> entry_points_;
   std::unordered_map<const ast::Function*, FunctionInfo*> function_to_info_;
   std::unordered_map<const ast::Variable*, VariableInfo*> variable_to_info_;
   std::unordered_map<ast::CallExpression*, FunctionCallInfo> function_calls_;

@@ -414,7 +414,8 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Scalar) {
   auto* var = Global("v", ty.f32(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
-  WrapInFunction(expr);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(expr)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
 
@@ -439,7 +440,8 @@ TEST_P(IntrinsicDeriveTest, Call_Derivative_Vector) {
   auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
   auto* expr = Call(param.name, "v");
-  WrapInFunction(expr);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(expr)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
 

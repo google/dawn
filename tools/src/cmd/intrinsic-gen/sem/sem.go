@@ -146,6 +146,21 @@ type StageUses struct {
 	Compute  bool
 }
 
+// List returns the stage uses as a string list
+func (u StageUses) List() []string {
+	out := []string{}
+	if u.Vertex {
+		out = append(out, "vertex")
+	}
+	if u.Fragment {
+		out = append(out, "fragment")
+	}
+	if u.Compute {
+		out = append(out, "compute")
+	}
+	return out
+}
+
 // Format implements the fmt.Formatter interface
 func (o Overload) Format(w fmt.State, verb rune) {
 	fmt.Fprintf(w, "fn %v", o.Function.Name)

@@ -254,6 +254,7 @@ set(TINT_LIB_SRCS
   sem/member_accessor_expression.cc
   sem/parameter_usage.cc
   sem/parameter_usage.h
+  sem/pipeline_stage_set.h
   sem/node.cc
   sem/node.h
   sem/statement.cc
@@ -580,6 +581,7 @@ if(${TINT_BUILD_TESTS})
     resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
     resolver/intrinsic_test.cc
+    resolver/intrinsic_validation_test.cc
     resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc
     resolver/ptr_ref_test.cc

@@ -23,6 +23,7 @@
 #include "src/sem/depth_texture_type.h"
 #include "src/sem/external_texture_type.h"
 #include "src/sem/multisampled_texture_type.h"
+#include "src/sem/pipeline_stage_set.h"
 #include "src/sem/sampled_texture_type.h"
 #include "src/sem/storage_texture_type.h"
 #include "src/utils/scoped_assignment.h"
@@ -288,6 +289,8 @@ using TexelFormat = ast::ImageFormat;
 using AccessControl = ast::AccessControl::Access;
 using StorageClass = ast::StorageClass;
 using ParameterUsage = sem::ParameterUsage;
+using PipelineStageSet = sem::PipelineStageSet;
+using PipelineStage = ast::PipelineStage;
 
 bool match_bool(const sem::Type* ty) {
   return ty->IsAnyOf<Any, sem::Bool>();
@@ -608,6 +611,66 @@ const sem::ExternalTexture* build_texture_external(MatchState& state) {
   return state.builder.create<sem::ExternalTexture>();
 }
 
+/// ParameterInfo describes a parameter
+struct ParameterInfo {
+  /// The parameter usage (parameter name in definition file)
+  ParameterUsage const usage;
+
+  /// Pointer to a list of indices that are used to match the parameter type.
+  /// The matcher indices index on Matchers::type and / or Matchers::number.
+  /// These indices are consumed by the matchers themselves.
+  /// The first index is always a TypeMatcher.
+  MatcherIndex const* const matcher_indices;
+};
+
+/// OpenTypeInfo describes an open type
+struct OpenTypeInfo {
+  /// Name of the open type (e.g. 'T')
+  const char* name;
+  /// Optional type matcher constraint.
+  /// Either an index in Matchers::type, or kNoMatcher
+  MatcherIndex const matcher_index;
+};
+
+/// OpenNumberInfo describes an open number
+struct OpenNumberInfo {
+  /// Name of the open number (e.g. 'N')
+  const char* name;
+  /// Optional number matcher constraint.
+  /// Either an index in Matchers::number, or kNoMatcher
+  MatcherIndex const matcher_index;
+};
+
+/// OverloadInfo describes a single function overload
+struct OverloadInfo {
+  /// Total number of parameters for the overload
+  uint8_t const num_parameters;
+  /// Total number of open types for the overload
+  uint8_t const num_open_types;
+  /// Total number of open numbers for the overload
+  uint8_t const num_open_numbers;
+  /// Pointer to the first open type
+  OpenTypeInfo const* const open_types;
+  /// Pointer to the first open number
+  OpenNumberInfo const* const open_numbers;
+  /// Pointer to the first parameter
+  ParameterInfo const* const parameters;
+  /// Pointer to a list of matcher indices that index on Matchers::type and
+  /// Matchers::number, used to build the return type. If the function has no
+  /// return type then this is null.
+  MatcherIndex const* const return_matcher_indices;
+  /// The pipeline stages that this overload can be used in.
+  PipelineStageSet supported_stages;
+};
+
+/// IntrinsicInfo describes an intrinsic function
+struct IntrinsicInfo {
+  /// Number of overloads of the intrinsic function
+  uint8_t const num_overloads;
+  /// Pointer to the start of the overloads for the function
+  OverloadInfo const* const overloads;
+};
+
 #include "intrinsic_table.inl"
 
 /// Impl is the private implementation of the IntrinsicTable interface.
@@ -807,9 +870,9 @@ const sem::Intrinsic* Impl::Match(sem::IntrinsicType intrinsic_type,
     return_type = builder.create<sem::Void>();
   }
 
-  return builder.create<sem::Intrinsic>(intrinsic_type,
-                                        const_cast<sem::Type*>(return_type),
-                                        std::move(parameters));
+  return builder.create<sem::Intrinsic>(
+      intrinsic_type, const_cast<sem::Type*>(return_type),
+      std::move(parameters), overload.supported_stages);
 }
 
 MatchState Impl::Match(ClosedState& closed,

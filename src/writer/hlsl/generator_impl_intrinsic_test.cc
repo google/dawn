@@ -163,7 +163,8 @@ TEST_P(HlslIntrinsicTest, Emit) {
 
   auto* call = GenerateCall(param.intrinsic, param.type, this);
   ASSERT_NE(nullptr, call) << "Unhandled intrinsic";
-  WrapInFunction(call);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   GeneratorImpl& gen = Build();
 

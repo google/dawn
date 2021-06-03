@@ -3462,7 +3462,9 @@ TEST_P(IntrinsicTextureTest, Call) {
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
-  WrapInFunction(call);
+
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
 
@@ -3515,7 +3517,8 @@ TEST_P(IntrinsicTextureTest, OutsideFunction_IsError) {
 
   auto* call =
       create<ast::CallExpression>(Expr(param.function), param.args(this));
-  WrapInFunction(call);
+  Func("func", {}, ty.void_(), {create<ast::CallStatement>(call)},
+       {create<ast::StageDecoration>(ast::PipelineStage::kFragment)});
 
   spirv::Builder& b = Build();
 
