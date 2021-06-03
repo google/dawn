@@ -121,6 +121,8 @@ match i32_texel_format:
 match u32_texel_format:
   rgba8uint | rgba16uint | r32uint | rg32uint | rgba32uint
 
+match read_or_write: read | write
+
 ////////////////////////////////////////////////////////////////////////////////
 // Intrinsic Functions                                                        //
 //                                                                            //
@@ -378,18 +380,18 @@ fn unpack2x16unorm(u32) -> vec2<f32>
 fn unpack4x8snorm(u32) -> vec4<f32>
 fn unpack4x8unorm(u32) -> vec4<f32>
 fn workgroupBarrier()
-fn textureDimensions<T>(texture: texture_1d<T>) -> i32
-fn textureDimensions<T>(texture: texture_2d<T>) -> vec2<i32>
-fn textureDimensions<T>(texture: texture_2d<T>, level: i32) -> vec2<i32>
-fn textureDimensions<T>(texture: texture_2d_array<T>) -> vec2<i32>
-fn textureDimensions<T>(texture: texture_2d_array<T>, level: i32) -> vec2<i32>
-fn textureDimensions<T>(texture: texture_3d<T>) -> vec3<i32>
-fn textureDimensions<T>(texture: texture_3d<T>, level: i32) -> vec3<i32>
-fn textureDimensions<T>(texture: texture_cube<T>) -> vec3<i32>
-fn textureDimensions<T>(texture: texture_cube<T>, level: i32) -> vec3<i32>
-fn textureDimensions<T>(texture: texture_cube_array<T>) -> vec3<i32>
-fn textureDimensions<T>(texture: texture_cube_array<T>, level: i32) -> vec3<i32>
-fn textureDimensions<T>(texture: texture_multisampled_2d<T>) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> i32
+fn textureDimensions<T: fiu32>(texture: texture_2d<T>) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_2d<T>, level: i32) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_2d_array<T>) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_2d_array<T>, level: i32) -> vec2<i32>
+fn textureDimensions<T: fiu32>(texture: texture_3d<T>) -> vec3<i32>
+fn textureDimensions<T: fiu32>(texture: texture_3d<T>, level: i32) -> vec3<i32>
+fn textureDimensions<T: fiu32>(texture: texture_cube<T>) -> vec3<i32>
+fn textureDimensions<T: fiu32>(texture: texture_cube<T>, level: i32) -> vec3<i32>
+fn textureDimensions<T: fiu32>(texture: texture_cube_array<T>) -> vec3<i32>
+fn textureDimensions<T: fiu32>(texture: texture_cube_array<T>, level: i32) -> vec3<i32>
+fn textureDimensions<T: fiu32>(texture: texture_multisampled_2d<T>) -> vec2<i32>
 fn textureDimensions(texture: texture_depth_2d) -> vec2<i32>
 fn textureDimensions(texture: texture_depth_2d, level: i32) -> vec2<i32>
 fn textureDimensions(texture: texture_depth_2d_array) -> vec2<i32>
@@ -398,26 +400,26 @@ fn textureDimensions(texture: texture_depth_cube) -> vec3<i32>
 fn textureDimensions(texture: texture_depth_cube, level: i32) -> vec3<i32>
 fn textureDimensions(texture: texture_depth_cube_array) -> vec3<i32>
 fn textureDimensions(texture: texture_depth_cube_array, level: i32) -> vec3<i32>
-fn textureDimensions<F: texel_format, A: access_control>(texture: texture_storage_1d<F, A>) -> i32
-fn textureDimensions<F: texel_format, A: access_control>(texture: texture_storage_2d<F, A>) -> vec2<i32>
-fn textureDimensions<F: texel_format, A: access_control>(texture: texture_storage_2d_array<F, A>) -> vec2<i32>
-fn textureDimensions<F: texel_format, A: access_control>(texture: texture_storage_3d<F, A>) -> vec3<i32>
+fn textureDimensions<F: texel_format, A: read_or_write>(texture: texture_storage_1d<F, A>) -> i32
+fn textureDimensions<F: texel_format, A: read_or_write>(texture: texture_storage_2d<F, A>) -> vec2<i32>
+fn textureDimensions<F: texel_format, A: read_or_write>(texture: texture_storage_2d_array<F, A>) -> vec2<i32>
+fn textureDimensions<F: texel_format, A: read_or_write>(texture: texture_storage_3d<F, A>) -> vec3<i32>
 fn textureDimensions(texture: texture_external) -> vec2<i32>
-fn textureNumLayers<T>(texture: texture_2d_array<T>) -> i32
-fn textureNumLayers<T>(texture: texture_cube_array<T>) -> i32
+fn textureNumLayers<T: fiu32>(texture: texture_2d_array<T>) -> i32
+fn textureNumLayers<T: fiu32>(texture: texture_cube_array<T>) -> i32
 fn textureNumLayers(texture: texture_depth_2d_array) -> i32
 fn textureNumLayers(texture: texture_depth_cube_array) -> i32
-fn textureNumLayers<F: texel_format, A: access_control>(texture: texture_storage_2d_array<F, A>) -> i32
-fn textureNumLevels<T>(texture: texture_2d<T>) -> i32
-fn textureNumLevels<T>(texture: texture_2d_array<T>) -> i32
-fn textureNumLevels<T>(texture: texture_3d<T>) -> i32
-fn textureNumLevels<T>(texture: texture_cube<T>) -> i32
-fn textureNumLevels<T>(texture: texture_cube_array<T>) -> i32
+fn textureNumLayers<F: texel_format, A: read_or_write>(texture: texture_storage_2d_array<F, A>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_2d<T>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_2d_array<T>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_3d<T>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_cube<T>) -> i32
+fn textureNumLevels<T: fiu32>(texture: texture_cube_array<T>) -> i32
 fn textureNumLevels(texture: texture_depth_2d) -> i32
 fn textureNumLevels(texture: texture_depth_2d_array) -> i32
 fn textureNumLevels(texture: texture_depth_cube) -> i32
 fn textureNumLevels(texture: texture_depth_cube_array) -> i32
-fn textureNumSamples<T>(texture: texture_multisampled_2d<T>) -> i32
+fn textureNumSamples<T: fiu32>(texture: texture_multisampled_2d<T>) -> i32
 fn textureSample(texture: texture_1d<f32>, sampler: sampler, coords: f32) -> vec4<f32>
 fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
 fn textureSample(texture: texture_2d<f32>, sampler: sampler, coords: vec2<f32>, offset: vec2<i32>) -> vec4<f32>
@@ -483,11 +485,11 @@ fn textureStore(texture: texture_storage_1d<u32_texel_format, write>, coords: i3
 fn textureStore(texture: texture_storage_2d<u32_texel_format, write>, coords: vec2<i32>, value: vec4<u32>)
 fn textureStore(texture: texture_storage_2d_array<u32_texel_format, write>, coords: vec2<i32>, array_index: i32, value: vec4<u32>)
 fn textureStore(texture: texture_storage_3d<u32_texel_format, write>, coords: vec3<i32>, value: vec4<u32>)
-fn textureLoad<T>(texture: texture_1d<T>, coords: i32, level: i32) -> vec4<T>
-fn textureLoad<T>(texture: texture_2d<T>, coords: vec2<i32>, level: i32) -> vec4<T>
-fn textureLoad<T>(texture: texture_2d_array<T>, coords: vec2<i32>, array_index: i32, level: i32) -> vec4<T>
-fn textureLoad<T>(texture: texture_3d<T>, coords: vec3<i32>, level: i32) -> vec4<T>
-fn textureLoad<T>(texture: texture_multisampled_2d<T>, coords: vec2<i32>, sample_index: i32) -> vec4<T>
+fn textureLoad<T: fiu32>(texture: texture_1d<T>, coords: i32, level: i32) -> vec4<T>
+fn textureLoad<T: fiu32>(texture: texture_2d<T>, coords: vec2<i32>, level: i32) -> vec4<T>
+fn textureLoad<T: fiu32>(texture: texture_2d_array<T>, coords: vec2<i32>, array_index: i32, level: i32) -> vec4<T>
+fn textureLoad<T: fiu32>(texture: texture_3d<T>, coords: vec3<i32>, level: i32) -> vec4<T>
+fn textureLoad<T: fiu32>(texture: texture_multisampled_2d<T>, coords: vec2<i32>, sample_index: i32) -> vec4<T>
 fn textureLoad(texture: texture_depth_2d, coords: vec2<i32>, level: i32) -> f32
 fn textureLoad(texture: texture_depth_2d_array, coords: vec2<i32>, array_index: i32, level: i32) -> f32
 fn textureLoad(texture: texture_storage_1d<f32_texel_format, read>, coords: i32) -> vec4<f32>

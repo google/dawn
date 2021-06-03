@@ -268,7 +268,7 @@ std::string {{$class}}::String(MatchState&) const {
 {{-   if      IsFirstIn . $.Types }}{{.Name}}
 {{-   else if IsLastIn  . $.Types }} or {{.Name}}
 {{-   else                        }}, {{.Name}}
-{{- end -}}
+{{-   end -}}
 {{- end -}}
   ";
 }
@@ -319,7 +319,14 @@ Number {{$class}}::Match(MatchState&, Number number) const {
 {{- end }}
 
 std::string {{$class}}::String(MatchState&) const {
-  return "{{.Name}}";
+  return "
+{{- range .Options -}}
+{{-   if      IsFirstIn . $.Options }}{{.Name}}
+{{-   else if IsLastIn  . $.Options }} or {{.Name}}
+{{-   else                          }}, {{.Name}}
+{{-   end -}}
+{{- end -}}
+";
 }
 {{  end -}}
 
