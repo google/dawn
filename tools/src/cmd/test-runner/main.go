@@ -70,12 +70,13 @@ optional flags:`)
 func run() error {
 	var formatList, filter, dxcPath, xcrunPath string
 	numCPU := runtime.NumCPU()
-	generateExpected := false
+	generateExpected, generateSkip := false, false
 	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
 	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
+	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
 	flag.IntVar(&numCPU, "j", numCPU, "maximum number of concurrent threads to run tests")
 	flag.Usage = showUsage
 	flag.Parse()
@@ -199,7 +200,7 @@ func run() error {
 		go func() {
 			defer wg.Done()
 			for job := range jobs {
-				job.run(exe, dxcPath, xcrunPath, generateExpected)
+				job.run(exe, dxcPath, xcrunPath, generateExpected, generateSkip)
 			}
 		}()
 	}
@@ -355,12 +356,12 @@ type job struct {
 	result *status
 }
 
-func (j job) run(exe, dxcPath, xcrunPath string, generateExpected bool) {
+func (j job) run(exe, dxcPath, xcrunPath string, generateExpected, generateSkip bool) {
 	// Is there an expected output?
 	expected := loadExpectedFile(j.file, j.format)
+	skipped := false
 	if strings.HasPrefix(expected, "SKIP") { // Special SKIP token
-		*j.result = status{code: skip}
-		return
+		skipped = true
 	}
 
 	expected = strings.ReplaceAll(expected, "\r\n", "\n")
@@ -382,17 +383,49 @@ func (j job) run(exe, dxcPath, xcrunPath string, generateExpected bool) {
 	}
 
 	// Invoke the compiler...
-	var err error
-	if ok, out := invoke(exe, args...); ok {
-		out = strings.ReplaceAll(out, "\r\n", "\n")
-		if generateExpected {
-			// If --generate-expected was passed, write out the output
-			err = saveExpectedFile(j.file, j.format, out)
-		} else if expected != "" && expected != out {
-			// Expected output did not match
-			dmp := diffmatchpatch.New()
-			diff := dmp.DiffPrettyText(dmp.DiffMain(expected, out, true))
-			err = fmt.Errorf(`Output was not as expected
+	ok, out := invoke(exe, args...)
+	out = strings.ReplaceAll(out, "\r\n", "\n")
+	matched := expected == "" || expected == out
+
+	if ok && generateExpected {
+		saveExpectedFile(j.file, j.format, out)
+		matched = true
+	}
+
+	switch {
+	case ok && matched:
+		// Test passed
+		*j.result = status{code: pass}
+		return
+
+		//       --- Below this point the test has failed ---
+
+	case skipped:
+		if generateSkip {
+			saveExpectedFile(j.file, j.format, "SKIP: FAILED\n\n"+out)
+		}
+		*j.result = status{code: skip}
+		return
+
+	case !ok:
+		// Compiler returned non-zero exit code
+		if generateSkip {
+			saveExpectedFile(j.file, j.format, "SKIP: FAILED\n\n"+out)
+		}
+		err := fmt.Errorf("%s", out)
+		*j.result = status{code: fail, err: err}
+		return
+
+	default:
+		// Compiler returned zero exit code, or output was not as expected
+		if generateSkip {
+			saveExpectedFile(j.file, j.format, "SKIP: FAILED\n\n"+out)
+		}
+
+		// Expected output did not match
+		dmp := diffmatchpatch.New()
+		diff := dmp.DiffPrettyText(dmp.DiffMain(expected, out, true))
+		err := fmt.Errorf(`Output was not as expected
 
 --------------------------------------------------------------------------------
 -- Expected:                                                                  --
@@ -408,17 +441,9 @@ func (j job) run(exe, dxcPath, xcrunPath string, generateExpected bool) {
 -- Diff:                                                                      --
 --------------------------------------------------------------------------------
 %s`,
-				expected, out, diff)
-		}
-	} else {
-		// Compiler returned a non-zero exit code
-		err = fmt.Errorf("%s", out)
-	}
-
-	if err != nil {
+			expected, out, diff)
 		*j.result = status{code: fail, err: err}
-	} else {
-		*j.result = status{code: pass}
+		return
 	}
 }
 
