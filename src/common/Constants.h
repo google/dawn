@@ -30,8 +30,8 @@ static constexpr uint64_t kMinDynamicBufferOffsetAlignment = 256u;
 // Per stage limits
 static constexpr uint32_t kMaxSampledTexturesPerShaderStage = 16;
 static constexpr uint32_t kMaxSamplersPerShaderStage = 16;
-static constexpr uint32_t kMaxStorageBuffersPerShaderStage = 6;
-static constexpr uint32_t kMaxStorageTexturesPerShaderStage = 4;
+static constexpr uint32_t kMaxStorageBuffersPerShaderStage = 8;
+static constexpr uint32_t kMaxStorageTexturesPerShaderStage = 8;
 static constexpr uint32_t kMaxUniformBuffersPerShaderStage = 12;
 
 // Per pipeline layout limits
