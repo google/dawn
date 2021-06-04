@@ -74,7 +74,7 @@ type vec3<T>
 type vec4<T>
 [[display("vec{N}<{T}>")]]     type vec<N: num, T>
 [[display("mat{N}x{M}<{T}>")]] type mat<N: num, M: num, T>
-[[display("ptr<{T}>")]]        type ptr<S: storage_class, T> // TODO(crbug.com/tint/846): Add access control
+[[display("ptr<{T}>")]]        type ptr<S: storage_class, T, A: access>
 type array<T>
 type sampler
 type sampler_comparison
@@ -305,8 +305,8 @@ fn fma(f32, f32, f32) -> f32
 fn fma<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
 fn fract(f32) -> f32
 fn fract<N: num>(vec<N, f32>) -> vec<N, f32>
-fn frexp<T: iu32, S: storage_class>(f32, ptr<S, T>) -> f32
-fn frexp<N: num, T: iu32, S: storage_class>(vec<N, f32>, ptr<S, vec<N, T>>) -> vec<N, f32>
+fn frexp<T: iu32, S: storage_class, A: access>(f32, ptr<S, T, A>) -> f32
+fn frexp<N: num, T: iu32, S: storage_class, A: access>(vec<N, f32>, ptr<S, vec<N, T>, A>) -> vec<N, f32>
 fn fwidth(f32) -> f32
 fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
 fn fwidthCoarse(f32) -> f32
@@ -337,8 +337,8 @@ fn min<T: fiu32>(T, T) -> T
 fn min<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> vec<N, T>
 fn mix(f32, f32, f32) -> f32
 fn mix<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-fn modf<S: storage_class>(f32, ptr<S, f32>) -> f32
-fn modf<N: num, S: storage_class>(vec<N, f32>, ptr<S, vec<N, f32>>) -> vec<N, f32>
+fn modf<S: storage_class, A: access>(f32, ptr<S, f32, A>) -> f32
+fn modf<N: num, S: storage_class, A: access>(vec<N, f32>, ptr<S, vec<N, f32>, A>) -> vec<N, f32>
 fn normalize<N: num>(vec<N, f32>) -> vec<N, f32>
 fn pack2x16float(vec2<f32>) -> u32
 fn pack2x16snorm(vec2<f32>) -> u32

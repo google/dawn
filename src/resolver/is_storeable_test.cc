@@ -62,8 +62,8 @@ TEST_F(ResolverIsStorableTest, Matrix) {
 }
 
 TEST_F(ResolverIsStorableTest, Pointer) {
-  auto* ptr =
-      create<sem::Pointer>(create<sem::I32>(), ast::StorageClass::kPrivate);
+  auto* ptr = create<sem::Pointer>(
+      create<sem::I32>(), ast::StorageClass::kPrivate, ast::Access::kReadWrite);
   EXPECT_FALSE(r()->IsStorable(ptr));
 }
 
@@ -95,7 +95,7 @@ TEST_F(ResolverIsStorableTest, Struct_SomeMembersNonStorable) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(error: ptr<private, i32> cannot be used as the type of a structure member)");
+      R"(error: ptr<private, i32, read_write> cannot be used as the type of a structure member)");
 }
 
 TEST_F(ResolverIsStorableTest, Struct_NestedStorable) {
@@ -126,7 +126,7 @@ TEST_F(ResolverIsStorableTest, Struct_NestedNonStorable) {
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(
       r()->error(),
-      R"(error: ptr<private, i32> cannot be used as the type of a structure member)");
+      R"(error: ptr<private, i32, read_write> cannot be used as the type of a structure member)");
 }
 
 }  // namespace

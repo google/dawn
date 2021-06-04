@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/ast/access.h"
 #include "src/ast/storage_class.h"
 #include "src/sem/type.h"
 
@@ -29,15 +30,23 @@ class Pointer : public Castable<Pointer, Type> {
   /// Constructor
   /// @param subtype the pointee type
   /// @param storage_class the storage class of the pointer
-  Pointer(const Type* subtype, ast::StorageClass storage_class);
+  /// @param access the resolved access control of the reference
+  Pointer(const Type* subtype,
+          ast::StorageClass storage_class,
+          ast::Access access);
+
   /// Move constructor
   Pointer(Pointer&&);
   ~Pointer() override;
 
   /// @returns the pointee type
   const Type* StoreType() const { return subtype_; }
+
   /// @returns the storage class of the pointer
   ast::StorageClass StorageClass() const { return storage_class_; }
+
+  /// @returns the access control of the reference
+  ast::Access Access() const { return access_; }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -50,6 +59,7 @@ class Pointer : public Castable<Pointer, Type> {
  private:
   Type const* const subtype_;
   ast::StorageClass const storage_class_;
+  ast::AccessControl const access_;
 };
 
 }  // namespace sem

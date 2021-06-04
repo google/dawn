@@ -15,18 +15,24 @@
 #include "src/sem/pointer_type.h"
 
 #include "src/program_builder.h"
+#include "src/sem/reference_type.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Pointer);
 
 namespace tint {
 namespace sem {
 
-Pointer::Pointer(const Type* subtype, ast::StorageClass storage_class)
-    : subtype_(subtype), storage_class_(storage_class) {}
+Pointer::Pointer(const Type* subtype,
+                 ast::StorageClass storage_class,
+                 ast::Access access)
+    : subtype_(subtype), storage_class_(storage_class), access_(access) {
+  TINT_ASSERT(!subtype->Is<Reference>());
+  TINT_ASSERT(access != ast::Access::kUndefined);
+}
 
 std::string Pointer::type_name() const {
   std::ostringstream out;
-  out << "__ptr_" << storage_class_ << subtype_->type_name();
+  out << "__ptr_" << storage_class_ << subtype_->type_name() << "__" << access_;
   return out.str();
 }
 
@@ -36,7 +42,8 @@ std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
   if (storage_class_ != ast::StorageClass::kNone) {
     out << storage_class_ << ", ";
   }
-  out << subtype_->FriendlyName(symbols) << ">";
+  out << subtype_->FriendlyName(symbols) << ", " << access_;
+  out << ">";
   return out.str();
 }
 

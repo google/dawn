@@ -22,24 +22,29 @@ namespace {
 using PointerTest = TestHelper;
 
 TEST_F(PointerTest, Creation) {
-  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kStorage);
+  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kStorage,
+                            ast::Access::kReadWrite);
   EXPECT_TRUE(r->StoreType()->Is<sem::I32>());
   EXPECT_EQ(r->StorageClass(), ast::StorageClass::kStorage);
+  EXPECT_EQ(r->Access(), ast::Access::kReadWrite);
 }
 
 TEST_F(PointerTest, TypeName) {
-  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kWorkgroup);
-  EXPECT_EQ(r->type_name(), "__ptr_workgroup__i32");
+  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kWorkgroup,
+                            ast::Access::kReadWrite);
+  EXPECT_EQ(r->type_name(), "__ptr_workgroup__i32__read_write");
+}
+
+TEST_F(PointerTest, FriendlyName) {
+  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kNone,
+                            ast::Access::kRead);
+  EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<i32, read>");
 }
 
 TEST_F(PointerTest, FriendlyNameWithStorageClass) {
-  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kWorkgroup);
-  EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<workgroup, i32>");
-}
-
-TEST_F(PointerTest, FriendlyNameWithoutStorageClass) {
-  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kNone);
-  EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<i32>");
+  auto* r = create<Pointer>(create<I32>(), ast::StorageClass::kWorkgroup,
+                            ast::Access::kRead);
+  EXPECT_EQ(r->FriendlyName(Symbols()), "ptr<workgroup, i32, read>");
 }
 
 }  // namespace

@@ -162,7 +162,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Pointer) {
   auto* f32 = create<sem::F32>();
-  auto* p = create<sem::Pointer>(f32, ast::StorageClass::kWorkgroup);
+  auto* p = create<sem::Pointer>(f32, ast::StorageClass::kWorkgroup,
+                                 ast::Access::kReadWrite);
 
   GeneratorImpl& gen = Build();
 

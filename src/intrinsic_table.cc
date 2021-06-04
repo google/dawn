@@ -431,24 +431,30 @@ const sem::Array* build_array(MatchState& state, const sem::Type* el) {
                                           /* stride_implicit */ 0);
 }
 
-bool match_ptr(const sem::Type* ty, Number& S, const sem::Type*& T) {
+bool match_ptr(const sem::Type* ty, Number& S, const sem::Type*& T, Number& A) {
   if (ty->Is<Any>()) {
     S = Number::any;
     T = ty;
+    A = Number::any;
     return true;
   }
 
   if (auto* p = ty->As<sem::Pointer>()) {
     S = Number(static_cast<uint32_t>(p->StorageClass()));
     T = p->StoreType();
+    A = Number(static_cast<uint32_t>(p->Access()));
     return true;
   }
   return false;
 }
 
-const sem::Pointer* build_ptr(MatchState& state, Number S, const sem::Type* T) {
+const sem::Pointer* build_ptr(MatchState& state,
+                              Number S,
+                              const sem::Type* T,
+                              Number& A) {
   return state.builder.create<sem::Pointer>(
-      T, static_cast<ast::StorageClass>(S.Value()));
+      T, static_cast<ast::StorageClass>(S.Value()),
+      static_cast<ast::Access>(A.Value()));
 }
 
 bool match_sampler(const sem::Type* ty) {

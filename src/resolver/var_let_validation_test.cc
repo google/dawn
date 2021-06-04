@@ -52,7 +52,8 @@ TEST_F(ResolverVarLetValidationTest, VarConstructorNotStorable) {
 
   EXPECT_FALSE(r()->Resolve());
   EXPECT_EQ(r()->error(),
-            "12:34 error: 'ptr<function, i32>' is not storable for assignment");
+            "12:34 error: 'ptr<function, i32, read_write>' is not storable for "
+            "assignment");
 }
 
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {

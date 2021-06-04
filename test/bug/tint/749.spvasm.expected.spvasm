@@ -49,6 +49,7 @@
                OpDecorate %gl_FragCoord BuiltIn FragCoord
                OpDecorate %buf0 Block
                OpMemberDecorate %buf0 0 Offset 0
+               OpDecorate %x_188 NonWritable
                OpDecorate %x_188 DescriptorSet 0
                OpDecorate %x_188 Binding 0
                OpDecorate %x_GLF_color Location 0

@@ -196,7 +196,8 @@ TEST_F(IntrinsicTableTest, MismatchBool) {
 
 TEST_F(IntrinsicTableTest, MatchPointer) {
   auto* f32 = create<sem::F32>();
-  auto* ptr = create<sem::Pointer>(f32, ast::StorageClass::kNone);
+  auto* ptr = create<sem::Pointer>(f32, ast::StorageClass::kFunction,
+                                   ast::Access::kReadWrite);
   auto* result = table->Lookup(IntrinsicType::kModf, {f32, ptr}, Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
@@ -386,9 +387,11 @@ TEST_F(IntrinsicTableTest, MismatchTexture) {
 
 TEST_F(IntrinsicTableTest, ImplicitLoadOnReference) {
   auto* f32 = create<sem::F32>();
-  auto* result = table->Lookup(
-      IntrinsicType::kCos,
-      {create<sem::Reference>(f32, ast::StorageClass::kNone)}, Source{});
+  auto* result =
+      table->Lookup(IntrinsicType::kCos,
+                    {create<sem::Reference>(f32, ast::StorageClass::kFunction,
+                                            ast::Access::kReadWrite)},
+                    Source{});
   ASSERT_NE(result, nullptr) << Diagnostics().str();
   ASSERT_EQ(Diagnostics().str(), "");
   EXPECT_THAT(result->Type(), IntrinsicType::kCos);

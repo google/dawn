@@ -1730,8 +1730,8 @@ uint32_t Builder::GenerateShortCircuitBinaryExpression(
 uint32_t Builder::GenerateSplat(uint32_t scalar_id, const sem::Type* vec_type) {
   // Create a new vector to splat scalar into
   auto splat_vector = result_op();
-  auto* splat_vector_type =
-      builder_.create<sem::Pointer>(vec_type, ast::StorageClass::kFunction);
+  auto* splat_vector_type = builder_.create<sem::Pointer>(
+      vec_type, ast::StorageClass::kFunction, ast::Access::kReadWrite);
   push_function_var(
       {Operand::Int(GenerateTypeIfNeeded(splat_vector_type)), splat_vector,
        Operand::Int(ConvertStorageClass(ast::StorageClass::kFunction)),
@@ -3228,13 +3228,22 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
     return 0;
   }
 
+  // Pointers and references with differing accesses should not result in a
+  // different SPIR-V types, so we explicitly ignore the access.
   // Pointers and References both map to a SPIR-V pointer type.
   // Transform a Reference to a Pointer to prevent these having duplicated
-  // definitions in the generated SPIR-V. Note that nested references are not
-  // legal, so only considering the top-level type is fine.
+  // definitions in the generated SPIR-V. Note that nested pointers and
+  // references are not legal in WGSL, so only considering the top-level type is
+  // fine.
   std::string type_name;
-  if (auto* ref = type->As<sem::Reference>()) {
-    type_name = sem::Pointer(ref->StoreType(), ref->StorageClass()).type_name();
+  if (auto* ptr = type->As<sem::Pointer>()) {
+    type_name =
+        sem::Pointer(ptr->StoreType(), ptr->StorageClass(), ast::kReadWrite)
+            .type_name();
+  } else if (auto* ref = type->As<sem::Reference>()) {
+    type_name =
+        sem::Pointer(ref->StoreType(), ref->StorageClass(), ast::kReadWrite)
+            .type_name();
   } else {
     type_name = type->type_name();
   }

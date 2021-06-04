@@ -13,6 +13,7 @@
                OpName %main "main"
                OpDecorate %S Block
                OpMemberDecorate %S 0 Offset 0
+               OpDecorate %v NonWritable
                OpDecorate %v DescriptorSet 0
                OpDecorate %v Binding 0
         %int = OpTypeInt 32 1

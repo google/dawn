@@ -241,7 +241,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
 
 TEST_F(BuilderTest_Type, GeneratePtr) {
   auto* i32 = create<sem::I32>();
-  auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOutput);
+  auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOutput,
+                                   ast::Access::kReadWrite);
 
   spirv::Builder& b = Build();
 
@@ -256,7 +257,8 @@ TEST_F(BuilderTest_Type, GeneratePtr) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
   auto* i32 = create<sem::I32>();
-  auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOutput);
+  auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOutput,
+                                   ast::Access::kReadWrite);
 
   spirv::Builder& b = Build();
 

@@ -68,6 +68,7 @@
                OpMemberDecorate %SimParams 4 Offset 16
                OpMemberDecorate %SimParams 5 Offset 20
                OpMemberDecorate %SimParams 6 Offset 24
+               OpDecorate %params NonWritable
                OpDecorate %params Binding 0
                OpDecorate %params DescriptorSet 0
                OpDecorate %Particles Block

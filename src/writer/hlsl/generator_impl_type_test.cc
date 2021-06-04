@@ -154,7 +154,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
 // TODO(dsinclair): How to annotate as workgroup?
 TEST_F(HlslGeneratorImplTest_Type, DISABLED_EmitType_Pointer) {
   auto* f32 = create<sem::F32>();
-  auto* p = create<sem::Pointer>(f32, ast::StorageClass::kWorkgroup);
+  auto* p = create<sem::Pointer>(f32, ast::StorageClass::kWorkgroup,
+                                 ast::Access::kReadWrite);
 
   GeneratorImpl& gen = Build();
 

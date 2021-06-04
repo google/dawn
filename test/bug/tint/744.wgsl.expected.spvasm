@@ -37,6 +37,7 @@
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 1 Offset 8
                OpMemberDecorate %Uniforms 2 Offset 16
+               OpDecorate %uniforms NonWritable
                OpDecorate %uniforms DescriptorSet 0
                OpDecorate %uniforms Binding 3
                OpDecorate %tint_symbol BuiltIn GlobalInvocationId

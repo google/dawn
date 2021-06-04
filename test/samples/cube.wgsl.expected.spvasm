@@ -36,6 +36,7 @@
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 0 ColMajor
                OpMemberDecorate %Uniforms 0 MatrixStride 16
+               OpDecorate %uniforms NonWritable
                OpDecorate %uniforms Binding 0
                OpDecorate %uniforms DescriptorSet 0
                OpDecorate %tint_symbol Location 0

@@ -21,14 +21,17 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Reference);
 namespace tint {
 namespace sem {
 
-Reference::Reference(const Type* subtype, ast::StorageClass storage_class)
-    : subtype_(subtype), storage_class_(storage_class) {
+Reference::Reference(const Type* subtype,
+                     ast::StorageClass storage_class,
+                     ast::Access access)
+    : subtype_(subtype), storage_class_(storage_class), access_(access) {
   TINT_ASSERT(!subtype->Is<Reference>());
+  TINT_ASSERT(access != ast::Access::kUndefined);
 }
 
 std::string Reference::type_name() const {
   std::ostringstream out;
-  out << "__ref_" << storage_class_ << subtype_->type_name();
+  out << "__ref_" << storage_class_ << subtype_->type_name() << "__" << access_;
   return out.str();
 }
 
@@ -38,7 +41,8 @@ std::string Reference::FriendlyName(const SymbolTable& symbols) const {
   if (storage_class_ != ast::StorageClass::kNone) {
     out << storage_class_ << ", ";
   }
-  out << subtype_->FriendlyName(symbols) << ">";
+  out << subtype_->FriendlyName(symbols) << ", " << access_;
+  out << ">";
   return out.str();
 }
 

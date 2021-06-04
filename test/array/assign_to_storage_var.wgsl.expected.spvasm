@@ -27,6 +27,7 @@
                OpDecorate %_arr_int_uint_4 ArrayStride 16
                OpDecorate %S Block
                OpMemberDecorate %S 0 Offset 0
+               OpDecorate %src_uniform NonWritable
                OpDecorate %src_uniform DescriptorSet 0
                OpDecorate %src_uniform Binding 0
                OpDecorate %src_storage DescriptorSet 0

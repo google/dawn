@@ -971,7 +971,7 @@ Expect<ast::Access> ParserImpl::expect_access(const std::string& use) {
   if (ident.value == kReadWriteAccess)
     return {ast::Access::kReadWrite, ident.source};
 
-  return add_error(ident.source, "invalid value for access decoration");
+  return add_error(ident.source, "invalid value for access control");
 }
 
 // variable_qualifier
@@ -1045,7 +1045,7 @@ Maybe<ast::Alias*> ParserImpl::type_alias() {
 //   | VEC2 LESS_THAN type_decl GREATER_THAN
 //   | VEC3 LESS_THAN type_decl GREATER_THAN
 //   | VEC4 LESS_THAN type_decl GREATER_THAN
-//   | PTR LESS_THAN storage_class, type_decl GREATER_THAN
+//   | PTR LESS_THAN storage_class, type_decl (COMMA access_mode)? GREATER_THAN
 //   | array_decoration_list* ARRAY LESS_THAN type_decl COMMA
 //          INT_LITERAL GREATER_THAN
 //   | array_decoration_list* ARRAY LESS_THAN type_decl
@@ -1142,20 +1142,32 @@ Expect<ast::Type*> ParserImpl::expect_type(const std::string& use) {
 Expect<ast::Type*> ParserImpl::expect_type_decl_pointer(Token t) {
   const char* use = "ptr declaration";
 
-  ast::StorageClass storage_class = ast::StorageClass::kNone;
+  auto storage_class = ast::StorageClass::kNone;
+  auto access = ast::Access::kUndefined;
 
   auto subtype = expect_lt_gt_block(use, [&]() -> Expect<ast::Type*> {
     auto sc = expect_storage_class(use);
-    if (sc.errored)
+    if (sc.errored) {
       return Failure::kErrored;
+    }
     storage_class = sc.value;
 
-    if (!expect(use, Token::Type::kComma))
+    if (!expect(use, Token::Type::kComma)) {
       return Failure::kErrored;
+    }
 
     auto type = expect_type(use);
-    if (type.errored)
+    if (type.errored) {
       return Failure::kErrored;
+    }
+
+    if (match(Token::Type::kComma)) {
+      auto ac = expect_access("access control");
+      if (ac.errored) {
+        return Failure::kErrored;
+      }
+      access = ac.value;
+    }
 
     return type.value;
   });
@@ -1165,7 +1177,7 @@ Expect<ast::Type*> ParserImpl::expect_type_decl_pointer(Token t) {
   }
 
   return builder_.ty.pointer(make_source_range_from(t.source()), subtype.value,
-                             storage_class);
+                             storage_class, access);
 }
 
 Expect<ast::Type*> ParserImpl::expect_type_decl_vector(Token t) {

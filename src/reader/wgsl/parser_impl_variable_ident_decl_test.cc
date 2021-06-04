@@ -234,7 +234,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_AccessDecoBadValue_DEPRECATED) {
   auto decl = p->expect_variable_ident_decl("test");
   ASSERT_TRUE(p->has_error());
   ASSERT_TRUE(decl.errored);
-  ASSERT_EQ(p->error(), "1:19: invalid value for access decoration");
+  ASSERT_EQ(p->error(), "1:19: invalid value for access control");
 }
 
 // TODO(crbug.com/tint/846): Remove

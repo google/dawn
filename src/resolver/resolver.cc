@@ -307,8 +307,12 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
     }
     if (auto* t = ty->As<ast::Pointer>()) {
       if (auto* el = Type(t->type())) {
+        auto access = t->access();
+        if (access == ast::kUndefined) {
+          access = DefaultAccessForStorageClass(t->storage_class());
+        }
         return builder_->create<sem::Pointer>(const_cast<sem::Type*>(el),
-                                              t->storage_class());
+                                              t->storage_class(), access);
       }
       return nullptr;
     }
@@ -477,11 +481,17 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     }
   }
 
+  auto access = var->declared_access();
+  if (access == ast::Access::kUndefined) {
+    access = DefaultAccessForStorageClass(storage_class);
+  }
+
   auto* type = storage_type;
   if (!var->is_const()) {
     // Variable declaration. Unlike `let`, `var` has storage.
     // Variables are always of a reference type to the declared storage type.
-    type = builder_->create<sem::Reference>(storage_type, storage_class);
+    type =
+        builder_->create<sem::Reference>(storage_type, storage_class, access);
   }
 
   if (rhs_type && !ValidateVariableConstructor(var, storage_type, type_name,
@@ -489,20 +499,26 @@ Resolver::VariableInfo* Resolver::Variable(ast::Variable* var,
     return nullptr;
   }
 
-  auto access = var->declared_access();
-  if (access == ast::Access::kUndefined &&
-      storage_class == ast::StorageClass::kStorage) {
-    // https://gpuweb.github.io/gpuweb/wgsl/#access-mode-defaults
-    // For the storage storage class, the access mode is optional, and defaults
-    // to read.
-    access = ast::Access::kRead;
-  }
-
   auto* info = variable_infos_.Create(var, const_cast<sem::Type*>(type),
                                       type_name, storage_class, access);
   variable_to_info_.emplace(var, info);
 
   return info;
+}
+
+ast::AccessControl Resolver::DefaultAccessForStorageClass(
+    ast::StorageClass storage_class) {
+  // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
+  switch (storage_class) {
+    case ast::StorageClass::kStorage:
+      return ast::Access::kRead;
+    case ast::StorageClass::kUniform:
+    case ast::StorageClass::kUniformConstant:
+      return ast::Access::kRead;
+    default:
+      break;
+  }
+  return ast::Access::kReadWrite;
 }
 
 bool Resolver::ValidateVariableConstructor(const ast::Variable* var,
@@ -1603,7 +1619,8 @@ bool Resolver::ArrayAccessor(ast::ArrayAccessorExpression* expr) {
 
   // If we're extracting from a reference, we return a reference.
   if (auto* ref = res->As<sem::Reference>()) {
-    ret = builder_->create<sem::Reference>(ret, ref->StorageClass());
+    ret = builder_->create<sem::Reference>(ret, ref->StorageClass(),
+                                           ref->Access());
   }
   SetType(expr, ret);
 
@@ -1959,7 +1976,8 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
 
     // If we're extracting from a reference, we return a reference.
     if (auto* ref = structure->As<sem::Reference>()) {
-      ret = builder_->create<sem::Reference>(ret, ref->StorageClass());
+      ret = builder_->create<sem::Reference>(ret, ref->StorageClass(),
+                                             ref->Access());
     }
 
     builder_->Sem().Add(expr, builder_->create<sem::StructMemberAccess>(
@@ -2028,7 +2046,8 @@ bool Resolver::MemberAccessor(ast::MemberAccessorExpression* expr) {
       ret = vec->type();
       // If we're extracting from a reference, we return a reference.
       if (auto* ref = structure->As<sem::Reference>()) {
-        ret = builder_->create<sem::Reference>(ret, ref->StorageClass());
+        ret = builder_->create<sem::Reference>(ret, ref->StorageClass(),
+                                               ref->Access());
       }
     } else {
       // The vector will have a number of components equal to the length of
@@ -2291,8 +2310,8 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
 
     case ast::UnaryOp::kAddressOf:
       if (auto* ref = expr_type->As<sem::Reference>()) {
-        type = builder_->create<sem::Pointer>(ref->StoreType(),
-                                              ref->StorageClass());
+        type = builder_->create<sem::Pointer>(
+            ref->StoreType(), ref->StorageClass(), ref->Access());
       } else {
         diagnostics_.add_error("cannot take the address of expression",
                                unary->expr()->source());
@@ -2302,8 +2321,8 @@ bool Resolver::UnaryOp(ast::UnaryOpExpression* unary) {
 
     case ast::UnaryOp::kIndirection:
       if (auto* ptr = expr_type->As<sem::Pointer>()) {
-        type = builder_->create<sem::Reference>(ptr->StoreType(),
-                                                ptr->StorageClass());
+        type = builder_->create<sem::Reference>(
+            ptr->StoreType(), ptr->StorageClass(), ptr->Access());
       } else {
         diagnostics_.add_error("cannot dereference expression of type '" +
                                    TypeNameOf(unary->expr()) + "'",

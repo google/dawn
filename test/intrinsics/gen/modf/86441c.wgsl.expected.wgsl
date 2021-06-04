@@ -1,0 +1,20 @@
+fn modf_86441c() {
+  var arg_1 : vec2<f32>;
+  var res : vec2<f32> = modf(vec2<f32>(), &(arg_1));
+}
+
+[[stage(vertex)]]
+fn vertex_main() -> [[builtin(position)]] vec4<f32> {
+  modf_86441c();
+  return vec4<f32>();
+}
+
+[[stage(fragment)]]
+fn fragment_main() {
+  modf_86441c();
+}
+
+[[stage(compute)]]
+fn compute_main() {
+  modf_86441c();
+}

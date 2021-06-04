@@ -67,7 +67,7 @@ TEST_F(AstAliasTest, UnwrapAll_TwiceAliasPointerTwiceAlias) {
   auto* u32 = create<U32>();
   auto* a = create<Alias>(Sym("a_type"), u32);
   auto* aa = create<Alias>(Sym("aa_type"), a);
-  auto* paa = create<Pointer>(aa, StorageClass::kUniform);
+  auto* paa = create<Pointer>(aa, StorageClass::kUniform, Access::kUndefined);
   auto* apaa = create<Alias>(Sym("paa_type"), paa);
   auto* aapaa = create<Alias>(Sym("aapaa_type"), apaa);
 

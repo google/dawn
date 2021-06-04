@@ -223,6 +223,22 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
   EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
 
+TEST_F(ParserImplTest, TypeDecl_Ptr_WithAccess) {
+  auto p = parser("ptr<function, f32, read>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.matched);
+  EXPECT_FALSE(t.errored);
+  ASSERT_NE(t.value, nullptr) << p->error();
+  ASSERT_FALSE(p->has_error());
+  ASSERT_TRUE(t.value->Is<ast::Pointer>());
+
+  auto* ptr = t.value->As<ast::Pointer>();
+  ASSERT_TRUE(ptr->type()->Is<ast::F32>());
+  ASSERT_EQ(ptr->storage_class(), ast::StorageClass::kFunction);
+  ASSERT_EQ(ptr->access(), ast::Access::kRead);
+  EXPECT_EQ(t.value->source().range, (Source::Range{{1u, 1u}, {1u, 25u}}));
+}
+
 TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
   auto p = parser("ptr<function, vec2<f32>>");
   auto t = p->type_decl();
@@ -252,7 +268,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
   ASSERT_EQ(p->error(), "1:5: expected '<' for ptr declaration");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThan) {
+TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterType) {
   auto p = parser("ptr<function, f32");
   auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
@@ -262,7 +278,17 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThan) {
   ASSERT_EQ(p->error(), "1:18: expected '>' for ptr declaration");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingComma) {
+TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterAccess) {
+  auto p = parser("ptr<function, f32, read");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  ASSERT_EQ(t.value, nullptr);
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:24: expected '>' for ptr declaration");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterStorageClass) {
   auto p = parser("ptr<function f32>");
   auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
@@ -272,18 +298,18 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingComma) {
   ASSERT_EQ(p->error(), "1:14: expected ',' for ptr declaration");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingStorageClass) {
-  auto p = parser("ptr<, f32>");
+TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAccess) {
+  auto p = parser("ptr<function, f32 read>");
   auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
-  ASSERT_EQ(p->error(), "1:5: invalid storage class for ptr declaration");
+  ASSERT_EQ(p->error(), "1:19: expected '>' for ptr declaration");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
-  auto p = parser("ptr<>");
+TEST_F(ParserImplTest, TypeDecl_Ptr_MissingStorageClass) {
+  auto p = parser("ptr<, f32>");
   auto t = p->type_decl();
   EXPECT_TRUE(t.errored);
   EXPECT_FALSE(t.matched);
@@ -300,6 +326,26 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:14: invalid type for ptr declaration");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAccess) {
+  auto p = parser("ptr<function, i32, >");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  ASSERT_EQ(t.value, nullptr);
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:20: expected identifier for access control");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
+  auto p = parser("ptr<>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  ASSERT_EQ(t.value, nullptr);
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:5: invalid storage class for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadStorageClass) {
@@ -320,6 +366,16 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadType) {
   ASSERT_EQ(t.value, nullptr);
   ASSERT_TRUE(p->has_error());
   ASSERT_EQ(p->error(), "1:15: unknown constructed type 'unknown'");
+}
+
+TEST_F(ParserImplTest, TypeDecl_Ptr_BadAccess) {
+  auto p = parser("ptr<function, i32, unknown>");
+  auto t = p->type_decl();
+  EXPECT_TRUE(t.errored);
+  EXPECT_FALSE(t.matched);
+  ASSERT_EQ(t.value, nullptr);
+  ASSERT_TRUE(p->has_error());
+  ASSERT_EQ(p->error(), "1:20: invalid value for access control");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Array) {

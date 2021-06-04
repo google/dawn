@@ -314,7 +314,7 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidAccess) {
   EXPECT_EQ(t.value, nullptr);
   EXPECT_FALSE(t.matched);
   EXPECT_TRUE(t.errored);
-  EXPECT_EQ(p->error(), "1:30: invalid value for access decoration");
+  EXPECT_EQ(p->error(), "1:30: invalid value for access control");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType) {

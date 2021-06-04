@@ -712,29 +712,35 @@ class ProgramBuilder {
 
     /// @param type the type of the pointer
     /// @param storage_class the storage class of the pointer
+    /// @param access the optional access control of the pointer
     /// @return the pointer to `type` with the given ast::StorageClass
     ast::Pointer* pointer(ast::Type* type,
-                          ast::StorageClass storage_class) const {
+                          ast::StorageClass storage_class,
+                          ast::Access access = ast::Access::kUndefined) const {
       type = MaybeCreateTypename(type);
-      return builder->create<ast::Pointer>(type, storage_class);
+      return builder->create<ast::Pointer>(type, storage_class, access);
     }
 
     /// @param source the Source of the node
     /// @param type the type of the pointer
     /// @param storage_class the storage class of the pointer
+    /// @param access the optional access control of the pointer
     /// @return the pointer to `type` with the given ast::StorageClass
     ast::Pointer* pointer(const Source& source,
                           ast::Type* type,
-                          ast::StorageClass storage_class) const {
+                          ast::StorageClass storage_class,
+                          ast::Access access = ast::Access::kUndefined) const {
       type = MaybeCreateTypename(type);
-      return builder->create<ast::Pointer>(source, type, storage_class);
+      return builder->create<ast::Pointer>(source, type, storage_class, access);
     }
 
     /// @param storage_class the storage class of the pointer
+    /// @param access the optional access control of the pointer
     /// @return the pointer to type `T` with the given ast::StorageClass.
     template <typename T>
-    ast::Pointer* pointer(ast::StorageClass storage_class) const {
-      return pointer(Of<T>(), storage_class);
+    ast::Pointer* pointer(ast::StorageClass storage_class,
+                          ast::Access access = ast::Access::kUndefined) const {
+      return pointer(Of<T>(), storage_class, access);
     }
 
     /// @param kind the kind of sampler

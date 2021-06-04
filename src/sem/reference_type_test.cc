@@ -22,24 +22,29 @@ namespace {
 using ReferenceTest = TestHelper;
 
 TEST_F(ReferenceTest, Creation) {
-  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kStorage);
+  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kStorage,
+                              ast::Access::kReadWrite);
   EXPECT_TRUE(r->StoreType()->Is<sem::I32>());
   EXPECT_EQ(r->StorageClass(), ast::StorageClass::kStorage);
+  EXPECT_EQ(r->Access(), ast::Access::kReadWrite);
 }
 
 TEST_F(ReferenceTest, TypeName) {
-  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kWorkgroup);
-  EXPECT_EQ(r->type_name(), "__ref_workgroup__i32");
+  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kWorkgroup,
+                              ast::Access::kReadWrite);
+  EXPECT_EQ(r->type_name(), "__ref_workgroup__i32__read_write");
+}
+
+TEST_F(ReferenceTest, FriendlyName) {
+  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kNone,
+                              ast::Access::kRead);
+  EXPECT_EQ(r->FriendlyName(Symbols()), "ref<i32, read>");
 }
 
 TEST_F(ReferenceTest, FriendlyNameWithStorageClass) {
-  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kWorkgroup);
-  EXPECT_EQ(r->FriendlyName(Symbols()), "ref<workgroup, i32>");
-}
-
-TEST_F(ReferenceTest, FriendlyNameWithoutStorageClass) {
-  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kNone);
-  EXPECT_EQ(r->FriendlyName(Symbols()), "ref<i32>");
+  auto* r = create<Reference>(create<I32>(), ast::StorageClass::kWorkgroup,
+                              ast::Access::kRead);
+  EXPECT_EQ(r->FriendlyName(Symbols()), "ref<workgroup, i32, read>");
 }
 
 }  // namespace

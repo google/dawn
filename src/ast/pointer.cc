@@ -24,14 +24,19 @@ namespace ast {
 Pointer::Pointer(ProgramID program_id,
                  const Source& source,
                  Type* const subtype,
-                 ast::StorageClass storage_class)
+                 ast::StorageClass storage_class,
+                 ast::Access access)
     : Base(program_id, source),
       subtype_(subtype),
-      storage_class_(storage_class) {}
+      storage_class_(storage_class),
+      access_(access) {}
 
 std::string Pointer::type_name() const {
   std::ostringstream out;
   out << "__ptr_" << storage_class_ << subtype_->type_name();
+  if (access_ != ast::Access::kUndefined) {
+    out << "_" << access_;
+  }
   return out.str();
 }
 
@@ -41,7 +46,11 @@ std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
   if (storage_class_ != ast::StorageClass::kNone) {
     out << storage_class_ << ", ";
   }
-  out << subtype_->FriendlyName(symbols) << ">";
+  out << subtype_->FriendlyName(symbols);
+  if (access_ != ast::Access::kUndefined) {
+    out << ", " << access_;
+  }
+  out << ">";
   return out.str();
 }
 
@@ -53,7 +62,7 @@ Pointer* Pointer::Clone(CloneContext* ctx) const {
   // Clone arguments outside of create() call to have deterministic ordering
   auto src = ctx->Clone(source());
   auto* ty = ctx->Clone(type());
-  return ctx->dst->create<Pointer>(src, ty, storage_class_);
+  return ctx->dst->create<Pointer>(src, ty, storage_class_, access_);
 }
 
 }  // namespace ast

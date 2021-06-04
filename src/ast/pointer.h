@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/ast/access.h"
 #include "src/ast/storage_class.h"
 #include "src/ast/type.h"
 
@@ -31,18 +32,24 @@ class Pointer : public Castable<Pointer, Type> {
   /// @param source the source of this node
   /// @param subtype the pointee type
   /// @param storage_class the storage class of the pointer
+  /// @param access the access control of the pointer
   Pointer(ProgramID program_id,
           const Source& source,
           Type* const subtype,
-          ast::StorageClass storage_class);
+          ast::StorageClass storage_class,
+          ast::Access access);
   /// Move constructor
   Pointer(Pointer&&);
   ~Pointer() override;
 
   /// @returns the pointee type
   Type* type() const { return const_cast<Type*>(subtype_); }
+
   /// @returns the storage class of the pointer
   ast::StorageClass storage_class() const { return storage_class_; }
+
+  /// @returns the access control of the pointer
+  ast::Access access() const { return access_; }
 
   /// @returns the name for this type
   std::string type_name() const override;
@@ -60,6 +67,7 @@ class Pointer : public Castable<Pointer, Type> {
  private:
   Type const* const subtype_;
   ast::StorageClass const storage_class_;
+  ast::Access const access_;
 };
 
 }  // namespace ast
