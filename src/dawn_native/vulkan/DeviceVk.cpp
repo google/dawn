@@ -919,10 +919,17 @@ namespace dawn_native { namespace vulkan {
         }
         mUnusedFences.clear();
 
+        ExecutionSerial completedSerial = GetCompletedCommandSerial();
+        for (Ref<BindGroupLayout>& bgl :
+             mBindGroupLayoutsPendingDeallocation.IterateUpTo(completedSerial)) {
+            bgl->FinishDeallocation(completedSerial);
+        }
+        mBindGroupLayoutsPendingDeallocation.ClearUpTo(completedSerial);
+
         // Releasing the uploader enqueues buffers to be released.
         // Call Tick() again to clear them before releasing the deleter.
-        mResourceMemoryAllocator->Tick(GetCompletedCommandSerial());
-        mDeleter->Tick(GetCompletedCommandSerial());
+        mResourceMemoryAllocator->Tick(completedSerial);
+        mDeleter->Tick(completedSerial);
 
         // Allow recycled memory to be deleted.
         mResourceMemoryAllocator->DestroyPool();

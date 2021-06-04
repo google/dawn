@@ -464,6 +464,42 @@ TEST_P(DeviceLostTest, DeviceLostBeforeCreatePipelineAsyncCallback) {
     SetCallbackAndLoseForTesting();
 }
 
+// This is a regression test for crbug.com/1212385 where Dawn didn't clean up all
+// references to bind group layouts such that the cache was non-empty at the end
+// of shut down.
+TEST_P(DeviceLostTest, FreeBindGroupAfterDeviceLossWithPendingCommands) {
+    wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage}});
+
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = sizeof(float);
+    bufferDesc.usage = wgpu::BufferUsage::Storage;
+    wgpu::Buffer buffer = device.CreateBuffer(&bufferDesc);
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, bgl, {{0, buffer, 0, sizeof(float)}});
+
+    // Advance the pending command serial. We only a need a couple of these to repro the bug,
+    // but include extra so this does not become a change-detecting test if the specific serial
+    // value is sensitive.
+    queue.Submit(0, nullptr);
+    queue.Submit(0, nullptr);
+    queue.Submit(0, nullptr);
+    queue.Submit(0, nullptr);
+    queue.Submit(0, nullptr);
+    queue.Submit(0, nullptr);
+
+    SetCallbackAndLoseForTesting();
+
+    // Releasing the bing group places the bind group layout into a queue in the Vulkan backend
+    // for recycling of descriptor sets. So, after these release calls there is still one last
+    // reference to the BGL which wouldn't be freed until the pending serial passes.
+    // Since the device is lost, destruction will clean up immediately without waiting for the
+    // serial. The implementation needs to be sure to clear these BGL references. At the end of
+    // Device shut down, we ASSERT that the BGL cache is empty.
+    bgl = nullptr;
+    bg = nullptr;
+}
+
 DAWN_INSTANTIATE_TEST(DeviceLostTest,
                       D3D12Backend(),
                       MetalBackend(),
