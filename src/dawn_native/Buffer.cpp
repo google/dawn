@@ -138,7 +138,7 @@ namespace dawn_native {
             mUsage |= kReadOnlyStorageBuffer;
         }
 
-        // TODO(hao.x.li@intel.com): This is just a workaround to make QueryResolve buffer pass the
+        // TODO(crbug.com/dawn/434): This is just a workaround to make QueryResolve buffer pass the
         // binding group validation when used as an internal resource. Instead the buffer made with
         // QueryResolve usage would implicitly get StorageInternal usage which is only compatible
         // with StorageBufferInternal binding type in BGL, not StorageBuffer binding type.
@@ -213,8 +213,8 @@ namespace dawn_native {
         } else {
             // If any of these fail, the buffer will be deleted and replaced with an
             // error buffer.
-            // TODO(enga): Suballocate and reuse memory from a larger staging buffer so we don't
-            // create many small buffers.
+            // TODO(crbug.com/dawn/828): Suballocate and reuse memory from a larger staging buffer
+            // so we don't create many small buffers.
             DAWN_TRY_ASSIGN(mStagingBuffer, GetDevice()->CreateStagingBuffer(GetSize()));
         }
 

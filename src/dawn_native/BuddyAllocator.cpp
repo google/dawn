@@ -202,7 +202,7 @@ namespace dawn_native {
     void BuddyAllocator::Deallocate(uint64_t offset) {
         BuddyBlock* curr = mRoot;
 
-        // TODO(bryan.bernhart@intel.com): Optimize de-allocation.
+        // TODO(crbug.com/dawn/827): Optimize de-allocation.
         // Passing allocationSize directly will avoid the following level-by-level search;
         // however, it requires the size information to be stored outside the allocator.
 

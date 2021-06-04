@@ -99,7 +99,6 @@ namespace dawn_native {
 
         MaybeError ValidateDestroy() const;
         wgpu::TextureDimension mDimension;
-        // TODO(cwallez@chromium.org): This should be deduplicated in the Device
         const Format& mFormat;
         Extent3D mSize;
         uint32_t mMipLevelCount;
@@ -134,7 +133,6 @@ namespace dawn_native {
 
         Ref<TextureBase> mTexture;
 
-        // TODO(cwallez@chromium.org): This should be deduplicated in the Device
         const Format& mFormat;
         wgpu::TextureViewDimension mDimension;
         SubresourceRange mRange;

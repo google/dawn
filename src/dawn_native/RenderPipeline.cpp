@@ -458,9 +458,6 @@ namespace dawn_native {
                     NormalizeBlendFactor(mTargetBlend[i].color.dstFactor);
             }
         }
-
-        // TODO(cwallez@chromium.org): Check against the shader module that the correct color
-        // attachment are set?
     }
 
     RenderPipelineBase::RenderPipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)

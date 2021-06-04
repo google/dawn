@@ -215,7 +215,7 @@ class DepthStencilCopyTests : public DawnTest {
         uploadBufferDesc.usage = wgpu::BufferUsage::CopySrc;
         uploadBufferDesc.mappedAtCreation = true;
 
-        // TODO(enga): Use WriteTexture when implemented on OpenGL.
+        // TODO(crbug.com/dawn/822): Use WriteTexture when implemented on OpenGL.
         wgpu::Buffer uploadBuffer = device.CreateBuffer(&uploadBufferDesc);
         uint8_t* dst = static_cast<uint8_t*>(uploadBuffer.GetMappedRange());
         float* src = expected.data();
@@ -269,7 +269,7 @@ class DepthStencilCopyTests : public DawnTest {
         depthStencil->depthCompare = wgpu::CompareFunction::Equal;
         pipelineDescriptor.cTargets[0].format = colorTexDesc.format;
 
-        // TODO(jiawei.shao@intel.com): The Intel Mesa Vulkan driver can't set gl_FragDepth unless
+        // TODO(crbug.com/dawn/821): The Intel Mesa Vulkan driver can't set gl_FragDepth unless
         // depthWriteEnabled == true. This either needs to be fixed in the driver or restricted by
         // the WebGPU API.
         depthStencil->depthWriteEnabled = true;
@@ -353,8 +353,8 @@ TEST_P(DepthStencilCopyTests, FromStencilAspect) {
 
 // Test copying the non-zero mip, stencil-only aspect into a buffer.
 TEST_P(DepthStencilCopyTests, FromNonZeroMipStencilAspect) {
-    // TODO(enga): Figure out why this fails on MacOS Intel Iris.
-    // It passes on AMD Radeon Pro and Intel HD Graphics 630.
+    // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
+    // on some Intel drivers.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
@@ -396,8 +396,8 @@ TEST_P(DepthStencilCopyTests, FromNonZeroMipDepthAspect) {
 
 // Test copying both aspects in a T2T copy, then copying only stencil.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
-    // TODO(enga): Figure out why this fails on MacOS Intel Iris.
-    // It passes on AMD Radeon Pro and Intel HD Graphics 630.
+    // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
+    // on some Intel drivers.
     // Maybe has to do with the RenderAttachment usage. Notably, a later test
     // T2TBothAspectsThenCopyNonRenderableStencil does not use RenderAttachment and works correctly.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
@@ -449,8 +449,8 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableStencil) {
 // Test that part of a non-renderable, non-zero mip stencil aspect can be copied. Notably,
 // this test has different behavior on some platforms than T2TBothAspectsThenCopyStencil.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableNonZeroMipStencil) {
-    // TODO(enga): Figure out why this fails on MacOS Intel Iris.
-    // It passes on AMD Radeon Pro and Intel HD Graphics 630.
+    /// TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
+    // on some Intel drivers.
     // Maybe has to do with the non-zero mip. Notably, a previous test
     // T2TBothAspectsThenCopyNonRenderableStencil works correctly.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
@@ -539,8 +539,8 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencilThenDepth) {
 
 // Test copying both aspects in a T2T copy, then copying depth, then copying stencil
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepthThenStencil) {
-    // TODO(enga): Figure out why this fails on MacOS Intel Iris.
-    // It passes on AMD Radeon Pro and Intel HD Graphics 630.
+    // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
+    // on some Intel drivers.
     // It seems like the depth readback copy mutates the stencil because the previous
     // test T2TBothAspectsThenCopyStencil passes.
     // T2TBothAspectsThenCopyStencilThenDepth which checks stencil first also passes.
@@ -583,8 +583,8 @@ TEST_P(DepthStencilCopyTests, ToStencilAspect) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
-    // TODO(enga): Figure out why this fails on MacOS Intel Iris.
-    // It passes on AMD Radeon Pro and Intel HD Graphics 630.
+    // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
+    // on some Intel drivers.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     // Create a stencil texture

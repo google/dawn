@@ -57,7 +57,7 @@ class SlabAllocatorImpl {
   public:
     // Allocations host their current index and the index of the next free block.
     // Because this is an index, and not a byte offset, it can be much smaller than a size_t.
-    // TODO(enga): Is uint8_t sufficient?
+    // TODO(crbug.com/dawn/825): Is uint8_t sufficient?
     using Index = uint16_t;
 
     SlabAllocatorImpl(SlabAllocatorImpl&& rhs);

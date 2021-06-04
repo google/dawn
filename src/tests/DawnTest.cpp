@@ -1054,8 +1054,6 @@ std::ostringstream& DawnTestBase::AddTextureExpectationImpl(const char* file,
     uint32_t size = utils::RequiredBytesInCopy(bytesPerRow, rowsPerImage, extent.width,
                                                extent.height, extent.depthOrArrayLayers, dataSize);
 
-    // TODO(enga): We should have the map async alignment in Contants.h. Also, it should change to 8
-    // for Float64Array.
     auto readback = ReserveReadback(Align(size, 4));
 
     // We need to enqueue the copy immediately because by the time we resolve the expectation,
@@ -1176,8 +1174,6 @@ void DawnTestBase::WaitForAllOperations() {
 }
 
 DawnTestBase::ReadbackReservation DawnTestBase::ReserveReadback(uint64_t readbackSize) {
-    // For now create a new MapRead buffer for each readback
-    // TODO(cwallez@chromium.org): eventually make bigger buffers and allocate linearly?
     ReadbackSlot slot;
     slot.bufferSize = readbackSize;
 

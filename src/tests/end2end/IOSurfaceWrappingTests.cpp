@@ -159,10 +159,10 @@ TEST_P(IOSurfaceValidationTests, PlaneTooLarge) {
 }
 
 // Test an error occurs if the descriptor dimension isn't 2D
-// TODO(cwallez@chromium.org): Reenable when 1D or 3D textures are implemented
-TEST_P(IOSurfaceValidationTests, DISABLED_InvalidTextureDimension) {
+// TODO(crbug.com/dawn/814): Test 1D textures when implemented
+TEST_P(IOSurfaceValidationTests, InvalidTextureDimension) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
-    descriptor.dimension = wgpu::TextureDimension::e2D;
+    descriptor.dimension = wgpu::TextureDimension::e3D;
 
     ASSERT_DEVICE_ERROR(wgpu::Texture texture =
                             WrapIOSurface(&descriptor, defaultIOSurface.get(), 0));

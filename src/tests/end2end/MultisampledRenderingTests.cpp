@@ -418,7 +418,7 @@ TEST_P(MultisampledRenderingTest, ResolveInAnotherRenderPass) {
 
 // Test doing MSAA resolve into multiple resolve targets works correctly.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargets) {
-    // TODO(dawn:462): Investigate backend validation failure.
+    // TODO(dawn:462): Issue in the D3D12 validation layers.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsNvidia() && IsBackendValidationEnabled());
 
     wgpu::TextureView multisampledColorView2 =
@@ -496,7 +496,7 @@ TEST_P(MultisampledRenderingTest, ResolveOneMultisampledTextureTwice) {
 
 // Test using a layer of a 2D texture as resolve target works correctly.
 TEST_P(MultisampledRenderingTest, ResolveIntoOneMipmapLevelOf2DTexture) {
-    // TODO(dawn:462): Investigate backend validation failure.
+    // TODO(dawn:462): Issue in the D3D12 validation layers.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     constexpr uint32_t kBaseMipLevel = 2;
@@ -534,7 +534,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoOneMipmapLevelOf2DTexture) {
 
 // Test using a level or a layer of a 2D array texture as resolve target works correctly.
 TEST_P(MultisampledRenderingTest, ResolveInto2DArrayTexture) {
-    // TODO(dawn:462): Investigate backend validation failure.
+    // TODO(dawn:462): Issue in the D3D12 validation layers.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
 
     wgpu::TextureView multisampledColorView2 =
@@ -762,7 +762,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
     // supported on some platforms.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
 
-    // TODO(cwallez@chromium.org): Fails on Metal / D3D12 because SPIRV-Cross produces bad shaders
+    // TODO(crbug.com/dawn/571): Fails on Metal / D3D12 because SPIRV-Cross produces bad shaders
     // for the SPIR-V outputted by Tint. Reenable once we use Tint's MSL / HLSL generators.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() || IsMetal());
 
@@ -824,7 +824,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
     // supported on some platforms.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
 
-    // TODO(cwallez@chromium.org): Fails on Metal / D3D12 because SPIRV-Cross produces bad shaders
+    // TODO(crbug.com/dawn/571): Fails on Metal / D3D12 because SPIRV-Cross produces bad shaders
     // for the SPIR-V outputted by Tint. Reenable once we use Tint's MSL / HLSL generators.
     DAWN_SUPPRESS_TEST_IF(IsD3D12() || IsMetal());
 

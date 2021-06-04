@@ -744,7 +744,7 @@ namespace dawn_native { namespace d3d12 {
                         commandList->CopyResource(destination->GetD3D12Resource(),
                                                   source->GetD3D12Resource());
                     } else {
-                        // TODO(jiawei.shao@intel.com): support copying with 1D and 3D textures.
+                        // TODO(crbug.com/dawn/814): support copying with 1D.
                         ASSERT(source->GetDimension() == wgpu::TextureDimension::e2D &&
                                destination->GetDimension() == wgpu::TextureDimension::e2D);
                         const dawn_native::Extent3D copyExtentOneSlice = {

@@ -98,8 +98,8 @@ class OpArrayLengthTest : public DawnTest {
 
 // Test OpArrayLength in the compute stage
 TEST_P(OpArrayLengthTest, Compute) {
-    // TODO(cwallez@chromium.org): The computations for length() of unsized buffer is broken on
-    // Nvidia OpenGL. See https://bugs.chromium.org/p/dawn/issues/detail?id=197
+    // TODO(crbug.com/dawn/197): The computations for length() of unsized buffer is broken on
+    // Nvidia OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsNvidia() && (IsOpenGL() || IsOpenGLES()));
 
     // Create a buffer to hold the result sizes and create a bindgroup for it.
@@ -155,8 +155,8 @@ TEST_P(OpArrayLengthTest, Compute) {
 
 // Test OpArrayLength in the fragment stage
 TEST_P(OpArrayLengthTest, Fragment) {
-    // TODO(cwallez@chromium.org): The computations for length() of unsized buffer is broken on
-    // Nvidia OpenGL. See https://bugs.chromium.org/p/dawn/issues/detail?id=197
+    // TODO(crbug.com/dawn/197): The computations for length() of unsized buffer is broken on
+    // Nvidia OpenGL.
     DAWN_SUPPRESS_TEST_IF(IsNvidia() && (IsOpenGL() || IsOpenGLES()));
 
     utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
@@ -206,9 +206,8 @@ TEST_P(OpArrayLengthTest, Fragment) {
 
 // Test OpArrayLength in the vertex stage
 TEST_P(OpArrayLengthTest, Vertex) {
-    // TODO(cwallez@chromium.org): The computations for length() of unsized buffer is broken on
-    // Nvidia OpenGL. Also failing on all GLES (NV, Intel, SwANGLE). See
-    // https://bugs.chromium.org/p/dawn/issues/detail?id=197
+    // TODO(crbug.com/dawn/197): The computations for length() of unsized buffer is broken on
+    // Nvidia OpenGL. Also failing on all GLES (NV, Intel, SwANGLE).
     DAWN_SUPPRESS_TEST_IF(IsNvidia() && IsOpenGL());
     DAWN_SUPPRESS_TEST_IF(IsOpenGLES());
 

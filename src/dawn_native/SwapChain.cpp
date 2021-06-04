@@ -75,7 +75,7 @@ namespace dawn_native {
 
             DAWN_TRY(ValidatePresentMode(descriptor->presentMode));
 
-            // TODO(cwallez@chromium.org): Lift this restriction once
+            // TODO(crbug.com/dawn/160): Lift this restriction once
             // wgpu::Instance::GetPreferredSurfaceFormat is implemented.
             if (descriptor->format != wgpu::TextureFormat::BGRA8Unorm) {
                 return DAWN_VALIDATION_ERROR("Format must (currently) be BGRA8Unorm");

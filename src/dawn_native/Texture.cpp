@@ -26,7 +26,8 @@
 
 namespace dawn_native {
     namespace {
-        // TODO(jiawei.shao@intel.com): implement texture view format compatibility rule
+        // WebGPU currently does not have texture format reinterpretation. If it does, the
+        // code to check for it might go here.
         MaybeError ValidateTextureViewFormatCompatibility(const TextureBase* texture,
                                                           const TextureViewDescriptor* descriptor) {
             if (texture->GetFormat().format != descriptor->format) {
@@ -43,7 +44,7 @@ namespace dawn_native {
             return {};
         }
 
-        // TODO(jiawei.shao@intel.com): support validation on all texture view dimensions
+        // TODO(crbug.com/dawn/814): Implement for 1D texture.
         bool IsTextureViewDimensionCompatibleWithTextureDimension(
             wgpu::TextureViewDimension textureViewDimension,
             wgpu::TextureDimension textureDimension) {
@@ -63,7 +64,7 @@ namespace dawn_native {
             }
         }
 
-        // TODO(jiawei.shao@intel.com): support validation on all texture view dimensions
+        // TODO(crbug.com/dawn/814): Implement for 1D texture.
         bool IsArrayLayerValidForTextureViewDimension(
             wgpu::TextureViewDimension textureViewDimension,
             uint32_t textureViewArrayLayer) {
@@ -102,7 +103,6 @@ namespace dawn_native {
             }
         }
 
-        // TODO(jiawei.shao@intel.com): support more sample count.
         MaybeError ValidateSampleCount(const TextureDescriptor* descriptor, const Format* format) {
             if (!IsValidSampleCount(descriptor->sampleCount)) {
                 return DAWN_VALIDATION_ERROR("The sample count of the texture is not supported.");
@@ -264,7 +264,6 @@ namespace dawn_native {
         DAWN_TRY(ValidateTextureDimension(descriptor->dimension));
         DAWN_TRY(ValidateSampleCount(descriptor, format));
 
-        // TODO(jiawei.shao@intel.com): check stuff based on the dimension
         if (descriptor->size.width == 0 || descriptor->size.height == 0 ||
             descriptor->size.depthOrArrayLayers == 0 || descriptor->mipLevelCount == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture");
@@ -326,7 +325,6 @@ namespace dawn_native {
             return DAWN_VALIDATION_ERROR("Texture does not have selected aspect for texture view.");
         }
 
-        // TODO(jiawei.shao@intel.com): check stuff based on resource limits
         if (descriptor->arrayLayerCount == 0 || descriptor->mipLevelCount == 0) {
             return DAWN_VALIDATION_ERROR("Cannot create an empty texture view");
         }
@@ -392,6 +390,8 @@ namespace dawn_native {
         return desc;
     }
 
+    // WebGPU only supports sample counts of 1 and 4. We could expand to more based on
+    // platform support, but it would probably be an extension.
     bool IsValidSampleCount(uint32_t sampleCount) {
         switch (sampleCount) {
             case 1:
@@ -443,7 +443,6 @@ namespace dawn_native {
         return mDimension;
     }
 
-    // TODO(jiawei.shao@intel.com): return more information about texture format
     const Format& TextureBase::GetFormat() const {
         ASSERT(!IsError());
         return mFormat;
@@ -468,7 +467,7 @@ namespace dawn_native {
     }
     uint32_t TextureBase::GetArrayLayers() const {
         ASSERT(!IsError());
-        // TODO(cwallez@chromium.org): Update for 1D textures when they are supported.
+        // TODO(crbug.com/dawn/814): Update for 1D textures when they are supported.
         ASSERT(mDimension != wgpu::TextureDimension::e1D);
         if (mDimension == wgpu::TextureDimension::e3D) {
             return 1;
@@ -582,7 +581,7 @@ namespace dawn_native {
         // Compressed Textures will have paddings if their width or height is not a multiple of
         // 4 at non-zero mipmap levels.
         if (mFormat.isCompressed) {
-            // TODO(jiawei.shao@intel.com): check if there are any overflows.
+            // TODO(crbug.com/dawn/830): check if there are any overflows.
             const TexelBlockInfo& blockInfo = mFormat.GetAspectInfo(wgpu::TextureAspect::All).block;
             extent.width = (extent.width + blockInfo.width - 1) / blockInfo.width * blockInfo.width;
             extent.height =

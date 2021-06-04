@@ -192,8 +192,8 @@ class DepthStencilSamplingTest : public DawnTest {
                 return textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);
             })");
 
-        // TODO(dawn:367): Cannot use GetBindGroupLayout for comparison samplers without shader
-        // reflection data.
+        // TODO(crbug.com/dawn/367): Cannot use GetBindGroupLayout for comparison samplers without
+        // shader reflection data.
         wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Fragment, wgpu::SamplerBindingType::Comparison},
                      {1, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Depth},
@@ -227,7 +227,7 @@ class DepthStencilSamplingTest : public DawnTest {
                 samplerResult.value = textureSampleCompare(tex, samp, vec2<f32>(0.5, 0.5), uniforms.compareRef);
             })");
 
-        // TODO(dawn:367): Cannot use GetBindGroupLayout without shader reflection data.
+        // TODO(crbug.com/dawn/367): Cannot use GetBindGroupLayout without shader reflection data.
         wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
             device, {{0, wgpu::ShaderStage::Compute, wgpu::SamplerBindingType::Comparison},
                      {1, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Depth},

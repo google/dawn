@@ -109,8 +109,6 @@ namespace dawn_native { namespace d3d12 {
         D3D12_RESOURCE_DESC resourceDescriptor;
         resourceDescriptor.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
         resourceDescriptor.Alignment = 0;
-        // TODO(cwallez@chromium.org): Have a global "zero" buffer that can do everything instead
-        // of creating a new 4-byte buffer?
         // D3D buffers are always resource size aligned to 64KB. However, D3D12's validation forbids
         // binding a CBV to an unaligned size. To prevent, one can always safely align the buffer
         // desc size to the CBV data alignment as other buffer usages ignore it (no size check).

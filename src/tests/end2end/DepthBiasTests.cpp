@@ -312,7 +312,7 @@ TEST_P(DepthBiasTests, PositiveBiasOn24bit) {
                      0.25f * (1 << 25), 0, 0);
 
     // Only the bottom left quad has colors. 0.5 quad > 0.4 clear.
-    // TODO(enrico.galli@intel.com): Switch to depth sampling once feature has been enabled.
+    // TODO(crbug.com/dawn/820): Switch to depth sampling once feature has been enabled.
     std::vector<RGBA8> expected = {
         RGBA8::kRed, RGBA8::kRed,  //
         RGBA8::kRed, RGBA8::kRed,  //
@@ -333,7 +333,7 @@ TEST_P(DepthBiasTests, PositiveBiasOn24bitWithClamp) {
 
     // Since we cleared with a depth of 0.4 and clamped bias at 0.4, the depth test will fail. 0.25
     // + 0.125 < 0.4 clear.
-    // TODO(enrico.galli@intel.com): Switch to depth sampling once feature has been enabled.
+    // TODO(crbug.com/dawn/820): Switch to depth sampling once feature has been enabled.
     std::vector<RGBA8> zero = {
         RGBA8::kZero, RGBA8::kZero,  //
         RGBA8::kZero, RGBA8::kZero,  //
@@ -348,7 +348,7 @@ TEST_P(DepthBiasTests, PositiveSlopeBiasOn24bit) {
     RunDepthBiasTest(wgpu::TextureFormat::Depth24PlusStencil8, 0.4f, QuadAngle::TiltedX, 0, 1, 0);
 
     // Only the top half of the quad has a depth > 0.4 clear
-    // TODO(enrico.galli@intel.com): Switch to depth sampling once feature has been enabled.
+    // TODO(crbug.com/dawn/820): Switch to depth sampling once feature has been enabled.
     std::vector<RGBA8> expected = {
         RGBA8::kRed, RGBA8::kRed,    //
         RGBA8::kZero, RGBA8::kZero,  //

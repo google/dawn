@@ -161,17 +161,17 @@ namespace dawn_native { namespace d3d12 {
             return InitializeSwapChainFromScratch();
         }
 
-        // TODO(cwallez@chromium.org): figure out what should happen when surfaces are used by
+        // TODO(crbug.com/dawn/269): figure out what should happen when surfaces are used by
         // multiple backends one after the other. It probably needs to block until the backend
         // and GPU are completely finished with the previous swapchain.
         if (previousSwapChain->GetBackendType() != wgpu::BackendType::D3D12) {
             return DAWN_VALIDATION_ERROR("d3d12::SwapChain cannot switch between APIs");
         }
 
-        // TODO(cwallez@chromium.org): use ToBackend once OldSwapChainBase is removed.
+        // TODO(crbug.com/dawn/269): use ToBackend once OldSwapChainBase is removed.
         SwapChain* previousD3D12SwapChain = static_cast<SwapChain*>(previousSwapChain);
 
-        // TODO(cwallez@chromium.org): Figure out switching an HWND between devices, it might
+        // TODO(crbug.com/dawn/269): Figure out switching an HWND between devices, it might
         // require just losing the reference to the swapchain, but might also need to wait for
         // all previous operations to complete.
         if (GetDevice() != previousSwapChain->GetDevice()) {

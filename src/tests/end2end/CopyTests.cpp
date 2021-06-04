@@ -59,7 +59,7 @@ class CopyTests : public DawnTest {
         return textureData;
     }
 
-    // TODO(jiawei.shao@intel.com): remove this function when all the tests in this file support
+    // TODO(crbug.com/dawn/818): remove this function when all the tests in this file support
     // testing arbitrary formats.
     static std::vector<RGBA8> GetExpectedTextureDataRGBA8(
         const utils::TextureDataCopyLayout& layout) {
@@ -132,7 +132,7 @@ class CopyTests_T2B : public CopyTests {
                 const BufferSpec& bufferSpec,
                 const wgpu::Extent3D& copySize,
                 wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D) {
-        // TODO(jiawei.shao@intel.com): support testing arbitrary formats
+        // TODO(crbug.com/dawn/818): support testing arbitrary formats
         ASSERT_EQ(kDefaultFormat, textureSpec.format);
 
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(textureSpec.format);
@@ -244,7 +244,7 @@ class CopyTests_B2T : public CopyTests {
                 const BufferSpec& bufferSpec,
                 const wgpu::Extent3D& copySize,
                 wgpu::TextureDimension dimension = wgpu::TextureDimension::e2D) {
-        // TODO(jiawei.shao@intel.com): support testing arbitrary formats
+        // TODO(crbug.com/dawn/818): support testing arbitrary formats
         ASSERT_EQ(kDefaultFormat, textureSpec.format);
         // Create a buffer of size `size` and populate it with data
         const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(textureSpec.format);
@@ -2008,7 +2008,7 @@ TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
 // texture formats. See http://crbug.com/1161355 for more details.
 TEST_P(CopyTests_T2T, CopyFromNonZeroMipLevelWithTexelBlockSizeLessThan4Bytes) {
     // This test can pass on the Windows Intel Vulkan driver version 27.20.100.9168.
-    // TODO(jiawei.shao@intel.com): enable this test on Intel Vulkan drivers after the upgrade of
+    // TODO(crbug.com/dawn/819): enable this test on Intel Vulkan drivers after the upgrade of
     // try bots.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsWindows() && IsIntel());
 

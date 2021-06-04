@@ -32,7 +32,7 @@ namespace dawn_native {
 
     // Add an extra texture usage for textures that will be presented, for use in backends
     // that needs to transition to present usage.
-    // TODO(cwallez@chromium.org): It currently aliases wgpu::TextureUsage::Present, assign it
+    // This currently aliases wgpu::TextureUsage::Present, we would assign it
     // some bit when wgpu::TextureUsage::Present is removed.
     static constexpr wgpu::TextureUsage kPresentTextureUsage = wgpu::TextureUsage::Present;
 }  // namespace dawn_native

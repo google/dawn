@@ -78,7 +78,7 @@ namespace dawn_native {
     }
 
     uint8_t GetAspectCount(Aspect aspects) {
-        // TODO(cwallez@chromium.org): This should use popcount once Dawn has such a function.
+        // TODO(crbug.com/dawn/829): This should use popcount once Dawn has such a function.
         // Note that we can't do a switch because compilers complain that Depth | Stencil is not
         // a valid enum value.
         if (aspects == Aspect::Color || aspects == Aspect::Depth ||

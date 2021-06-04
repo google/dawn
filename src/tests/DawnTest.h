@@ -84,7 +84,6 @@
 #define EXPECT_PIXEL_RGBA8_BETWEEN(color0, color1, texture, x, y) \
     AddTextureBetweenColorsExpectation(__FILE__, __LINE__, color0, color1, texture, x, y)
 
-// TODO(enga): Migrate other texure expectation helpers to this common one.
 #define EXPECT_TEXTURE_EQ(...) AddTextureExpectation(__FILE__, __LINE__, __VA_ARGS__)
 
 // Should only be used to test validation of function that can't be tested by regular validation

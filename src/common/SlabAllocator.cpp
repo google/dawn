@@ -209,7 +209,7 @@ void SlabAllocatorImpl::Deallocate(void* ptr) {
         mRecycledSlabs.Prepend(slab);
     }
 
-    // TODO(enga): Occasionally prune slabs if |blocksInUse == 0|.
+    // TODO(crbug.com/dawn/825): Occasionally prune slabs if |blocksInUse == 0|.
     // Doing so eagerly hurts performance.
 }
 
@@ -228,7 +228,7 @@ void SlabAllocatorImpl::GetNewSlab() {
         return;
     }
 
-    // TODO(enga): Use aligned_alloc with C++17.
+    // TODO(crbug.com/dawn/824): Use aligned_alloc with C++17.
     char* allocation = new char[mTotalAllocationSize];
     char* alignedPtr = AlignPtr(allocation, mAllocationAlignment);
 

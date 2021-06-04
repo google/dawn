@@ -399,7 +399,7 @@ namespace dawn_native {
                     "set");
             }
 
-            // TODO(hao.x.li@intel.com): Validate that the queries between [firstQuery, firstQuery +
+            // TODO(crbug.com/dawn/434): Validate that the queries between [firstQuery, firstQuery +
             // queryCount - 1] must be available(written by query operations).
 
             // The destinationOffset must be a multiple of 8 bytes on D3D12 and Vulkan

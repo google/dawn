@@ -104,7 +104,7 @@ namespace dawn_native {
         return mBlocks[0].block == reinterpret_cast<const uint8_t*>(&mEndOfBlock);
     }
 
-    // Potential TODO(cwallez@chromium.org):
+    // Potential TODO(crbug.com/dawn/835):
     //  - Host the size and pointer to next block in the block itself to avoid having an allocation
     //    in the vector
     //  - Assume T's alignof is, say 64bits, static assert it, and make commandAlignment a constant

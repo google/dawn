@@ -29,7 +29,7 @@ namespace dawn_platform {
 
 namespace dawn_native {
 
-    // TODO(jiawei.shao@intel.com): we'll add additional things to AsyncTask in the future, like
+    // TODO(crbug.com/dawn/826): we'll add additional things to AsyncTask in the future, like
     // Cancel() and RunNow(). Cancelling helps avoid running the task's body when we are just
     // shutting down the device. RunNow() could be used for more advanced scenarios, for example
     // always doing ShaderModule initial compilation asynchronously, but being able to steal the

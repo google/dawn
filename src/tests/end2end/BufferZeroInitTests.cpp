@@ -1198,8 +1198,8 @@ TEST_P(BufferZeroInitTest, ResolveQuerySet) {
     // Timestamp query is not supported on OpenGL
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
 
-    // TODO(hao.x.li@intel.com): Crash occurs if we only call WriteTimestamp in a command encoder
-    // without any copy commands on Metal on AMD GPU. See https://crbug.com/dawn/545.
+    // TODO(crbug.com/dawn/545): Crash occurs if we only call WriteTimestamp in a command encoder
+    // without any copy commands on Metal on AMD GPU.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsAMD());
 
     // Skip if timestamp extension is not supported on device

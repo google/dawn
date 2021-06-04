@@ -85,8 +85,6 @@ namespace dawn_native {
             }
         }
 
-        // TODO(cwallez@chromium.org): This will eventually have validation that the device
-        // descriptor is valid and is a subset what's allowed on this adapter.
         DAWN_TRY_ASSIGN(*result, CreateDeviceImpl(descriptor));
         return {};
     }

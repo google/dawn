@@ -303,8 +303,6 @@ namespace dawn_native {
     MaybeError ValidateTextureCopyRange(DeviceBase const* device,
                                         const ImageCopyTexture& textureCopy,
                                         const Extent3D& copySize) {
-        // TODO(jiawei.shao@intel.com): add validations on the texture-to-texture copies within the
-        // same texture.
         const TextureBase* texture = textureCopy.texture;
 
         ASSERT(texture->GetDimension() != wgpu::TextureDimension::e1D);

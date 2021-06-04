@@ -635,8 +635,6 @@ namespace dawn_native {
             std::unique_ptr<EntryPointMetadata> metadata = std::make_unique<EntryPointMetadata>();
             metadata->stage = stage;
 
-            // TODO(cwallez@chromium.org): make errors here creation errors
-            // currently errors here do not prevent the shadermodule from being used
             const auto& resources = compiler.get_shader_resources();
 
             if (resources.push_constant_buffers.size() > 0) {

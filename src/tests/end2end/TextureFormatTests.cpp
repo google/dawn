@@ -786,9 +786,6 @@ TEST_P(TextureFormatTest, RGB9E5Ufloat) {
     // This format is not renderable.
 }
 
-// TODO(cwallez@chromium.org): Add tests for depth-stencil formats when we know if they are copyable
-// in WebGPU.
-
 DAWN_INSTANTIATE_TEST(TextureFormatTest,
                       D3D12Backend(),
                       MetalBackend(),

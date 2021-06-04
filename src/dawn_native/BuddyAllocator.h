@@ -100,7 +100,7 @@ namespace dawn_native {
         // Keep track the head and tail (for faster insertion/removal).
         struct BlockList {
             BuddyBlock* head = nullptr;  // First free block in level.
-            // TODO(bryan.bernhart@intel.com): Track the tail.
+            // TODO(crbug.com/dawn/827): Track the tail.
         };
 
         BuddyBlock* mRoot = nullptr;  // Used to deallocate non-free blocks.

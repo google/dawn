@@ -95,7 +95,7 @@ namespace gpu_info {
             }
         }
 
-        // TODO(jiawei.shao@intel.com): support other GPU vendors
+        // TODO(crbug.com/dawn/823): support other GPU vendors
         UNREACHABLE();
         return 0;
     }

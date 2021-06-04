@@ -264,7 +264,7 @@ namespace dawn_native {
 
             // Move away from the Alive state so that the application cannot use this device
             // anymore.
-            // TODO(cwallez@chromium.org): Do we need atomics for this to become visible to other
+            // TODO(crbug.com/dawn/831): Do we need atomics for this to become visible to other
             // threads in a multithreaded scenario?
             mState = State::BeingDisconnected;
 
@@ -896,7 +896,7 @@ namespace dawn_native {
                 AssumeCommandsComplete();
             }
 
-            // TODO(cwallez@chromium.org): decouple TickImpl from updating the serial so that we can
+            // TODO(crbug.com/dawn/833): decouple TickImpl from updating the serial so that we can
             // tick the dynamic uploader before the backend resource allocators. This would allow
             // reclaiming resources one tick earlier.
             mDynamicUploader->Deallocate(mCompletedSerial);
@@ -1126,7 +1126,7 @@ namespace dawn_native {
         return layoutRef;
     }
 
-    // TODO(jiawei.shao@intel.com): override this function with the async version on the backends
+    // This function is overwritten with the async version on the backends
     // that supports creating compute pipeline asynchronously
     void DeviceBase::CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
                                                     size_t blueprintHash,

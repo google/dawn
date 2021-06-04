@@ -586,7 +586,8 @@ TEST_P(TextureZeroInitTest, RenderingLoadingDepthStencil) {
 
 // Test that clear state is tracked independently for depth/stencil textures.
 TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
-    // TODO(enga): Figure out why this fails on Metal Intel.
+    // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
+    // on some Intel drivers.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(

@@ -17,6 +17,7 @@
 
 #include "common/Assert.h"
 #include "common/Math.h"
+#include "common/NonCopyable.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -66,8 +67,7 @@ namespace dawn_native {
 
     class CommandAllocator;
 
-    // TODO(cwallez@chromium.org): prevent copy for both iterator and allocator
-    class CommandIterator {
+    class CommandIterator : public NonCopyable {
       public:
         CommandIterator();
         ~CommandIterator();
@@ -144,7 +144,7 @@ namespace dawn_native {
         uint32_t mEndOfBlock = detail::kEndOfBlock;
     };
 
-    class CommandAllocator {
+    class CommandAllocator : public NonCopyable {
       public:
         CommandAllocator();
         ~CommandAllocator();

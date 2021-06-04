@@ -112,8 +112,7 @@ TEST_P(QueueWriteBufferTests, ManyWriteBuffer) {
     // fails the test. Since GPUs may or may not complete by then, this test must be disabled OR
     // modified to be well-below the timeout limit.
 
-    // TODO(https://bugs.chromium.org/p/dawn/issues/detail?id=228): Re-enable
-    // once the issue with Metal on 10.14.6 is fixed.
+    // TODO(crbug.com/dawn/228): Re-enable once the issue with Metal on 10.14.6 is fixed.
     DAWN_SUPPRESS_TEST_IF(IsMacOS() && IsIntel() && IsMetal());
 
     // The Vulkan Validation Layers' memory barrier validation keeps track of every range written
