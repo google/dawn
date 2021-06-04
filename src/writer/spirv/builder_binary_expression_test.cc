@@ -250,8 +250,8 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{ast::BinaryOp::kMultiply, "OpFMul"},
                     BinaryData{ast::BinaryOp::kSubtract, "OpFSub"}));
 
-using BinaryCompareBoolTest = TestParamHelper<BinaryData>;
-TEST_P(BinaryCompareBoolTest, Scalar) {
+using BinaryOperatorBoolTest = TestParamHelper<BinaryData>;
+TEST_P(BinaryOperatorBoolTest, Scalar) {
   auto param = GetParam();
 
   auto* lhs = Expr(true);
@@ -274,7 +274,7 @@ TEST_P(BinaryCompareBoolTest, Scalar) {
             "%4 = " + param.name + " %1 %2 %3\n");
 }
 
-TEST_P(BinaryCompareBoolTest, Vector) {
+TEST_P(BinaryOperatorBoolTest, Vector) {
   auto param = GetParam();
 
   auto* lhs = vec3<bool>(false, true, false);
@@ -301,9 +301,11 @@ TEST_P(BinaryCompareBoolTest, Vector) {
 }
 INSTANTIATE_TEST_SUITE_P(
     BuilderTest,
-    BinaryCompareBoolTest,
+    BinaryOperatorBoolTest,
     testing::Values(BinaryData{ast::BinaryOp::kEqual, "OpLogicalEqual"},
-                    BinaryData{ast::BinaryOp::kNotEqual, "OpLogicalNotEqual"}));
+                    BinaryData{ast::BinaryOp::kNotEqual, "OpLogicalNotEqual"},
+                    BinaryData{ast::BinaryOp::kAnd, "OpLogicalAnd"},
+                    BinaryData{ast::BinaryOp::kOr, "OpLogicalOr"}));
 
 using BinaryCompareUnsignedIntegerTest = TestParamHelper<BinaryData>;
 TEST_P(BinaryCompareUnsignedIntegerTest, Scalar) {

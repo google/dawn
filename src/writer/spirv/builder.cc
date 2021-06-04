@@ -1892,7 +1892,14 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
 
   spv::Op op = spv::Op::OpNop;
   if (expr->IsAnd()) {
-    op = spv::Op::OpBitwiseAnd;
+    if (lhs_is_integer_or_vec) {
+      op = spv::Op::OpBitwiseAnd;
+    } else if (lhs_is_bool_or_vec) {
+      op = spv::Op::OpLogicalAnd;
+    } else {
+      error_ = "invalid and expression";
+      return 0;
+    }
   } else if (expr->IsAdd()) {
     op = lhs_is_float_or_vec ? spv::Op::OpFAdd : spv::Op::OpIAdd;
   } else if (expr->IsDivide()) {
@@ -2006,7 +2013,14 @@ uint32_t Builder::GenerateBinaryExpression(ast::BinaryExpression* expr) {
       return 0;
     }
   } else if (expr->IsOr()) {
-    op = spv::Op::OpBitwiseOr;
+    if (lhs_is_integer_or_vec) {
+      op = spv::Op::OpBitwiseOr;
+    } else if (lhs_is_bool_or_vec) {
+      op = spv::Op::OpLogicalOr;
+    } else {
+      error_ = "invalid and expression";
+      return 0;
+    }
   } else if (expr->IsShiftLeft()) {
     op = spv::Op::OpShiftLeftLogical;
   } else if (expr->IsShiftRight() && lhs_type->is_signed_scalar_or_vector()) {
