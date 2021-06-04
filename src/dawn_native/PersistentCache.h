@@ -17,6 +17,7 @@
 
 #include "dawn_native/Error.h"
 
+#include <mutex>
 #include <vector>
 
 namespace dawn_platform {
@@ -36,6 +37,10 @@ namespace dawn_native {
 
     enum class PersistentKeyType { Shader };
 
+    // This class should always be thread-safe as it is used in Create*PipelineAsync() where it is
+    // called asynchronously.
+    // The thread-safety of any access to mCache (the function LoadData() and StoreData()) is
+    // protected by mMutex.
     class PersistentCache {
       public:
         PersistentCache(DeviceBase* device);
@@ -79,6 +84,7 @@ namespace dawn_native {
 
         DeviceBase* mDevice = nullptr;
 
+        std::mutex mMutex;
         dawn_platform::CachingInterface* mCache = nullptr;
     };
 }  // namespace dawn_native

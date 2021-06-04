@@ -4,11 +4,11 @@
 
 namespace dawn_native {
 
-    AsnycTaskManager::AsnycTaskManager(dawn_platform::WorkerTaskPool* workerTaskPool)
+    AsyncTaskManager::AsyncTaskManager(dawn_platform::WorkerTaskPool* workerTaskPool)
         : mWorkerTaskPool(workerTaskPool) {
     }
 
-    void AsnycTaskManager::PostTask(AsyncTask asyncTask) {
+    void AsyncTaskManager::PostTask(AsyncTask asyncTask) {
         // If these allocations becomes expensive, we can slab-allocate tasks.
         Ref<WaitableTask> waitableTask = AcquireRef(new WaitableTask());
         waitableTask->taskManager = this;
@@ -30,7 +30,7 @@ namespace dawn_native {
             mWorkerTaskPool->PostWorkerTask(DoWaitableTask, waitableTask.Get());
     }
 
-    void AsnycTaskManager::HandleTaskCompletion(WaitableTask* task) {
+    void AsyncTaskManager::HandleTaskCompletion(WaitableTask* task) {
         std::lock_guard<std::mutex> lock(mPendingTasksMutex);
         auto iter = mPendingTasks.find(task);
         if (iter != mPendingTasks.end()) {
@@ -38,7 +38,7 @@ namespace dawn_native {
         }
     }
 
-    void AsnycTaskManager::WaitAllPendingTasks() {
+    void AsyncTaskManager::WaitAllPendingTasks() {
         std::unordered_map<WaitableTask*, Ref<WaitableTask>> allPendingTasks;
 
         {
@@ -51,7 +51,12 @@ namespace dawn_native {
         }
     }
 
-    void AsnycTaskManager::DoWaitableTask(void* task) {
+    bool AsyncTaskManager::HasPendingTasks() {
+        std::lock_guard<std::mutex> lock(mPendingTasksMutex);
+        return !mPendingTasks.empty();
+    }
+
+    void AsyncTaskManager::DoWaitableTask(void* task) {
         Ref<WaitableTask> waitableTask = AcquireRef(static_cast<WaitableTask*>(task));
         waitableTask->asyncTask();
         waitableTask->taskManager->HandleTaskCompletion(waitableTask.Get());

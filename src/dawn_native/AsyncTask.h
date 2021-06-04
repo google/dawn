@@ -36,18 +36,19 @@ namespace dawn_native {
     // task if we need it for synchronous pipeline compilation.
     using AsyncTask = std::function<void()>;
 
-    class AsnycTaskManager {
+    class AsyncTaskManager {
       public:
-        explicit AsnycTaskManager(dawn_platform::WorkerTaskPool* workerTaskPool);
+        explicit AsyncTaskManager(dawn_platform::WorkerTaskPool* workerTaskPool);
 
         void PostTask(AsyncTask asyncTask);
         void WaitAllPendingTasks();
+        bool HasPendingTasks();
 
       private:
         class WaitableTask : public RefCounted {
           public:
             AsyncTask asyncTask;
-            AsnycTaskManager* taskManager;
+            AsyncTaskManager* taskManager;
             std::unique_ptr<dawn_platform::WaitableEvent> waitableEvent;
         };
 

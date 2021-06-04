@@ -26,11 +26,15 @@
 #include "dawn_native/DawnNative.h"
 #include "dawn_native/dawn_platform.h"
 
-#include <memory>
 #include <utility>
+
+namespace dawn_platform {
+    class WorkerTaskPool;
+}  // namespace dawn_platform
 
 namespace dawn_native {
     class AdapterBase;
+    class AsyncTaskManager;
     class AttachmentState;
     class AttachmentStateBlueprint;
     class BindGroupLayoutBase;
@@ -41,6 +45,7 @@ namespace dawn_native {
     class OwnedCompilationMessages;
     class PersistentCache;
     class StagingBufferBase;
+    struct CallbackTask;
     struct InternalPipelineStore;
     struct ShaderModuleParseResult;
 
@@ -278,6 +283,16 @@ namespace dawn_native {
 
         virtual float GetTimestampPeriodInNS() const = 0;
 
+        AsyncTaskManager* GetAsyncTaskManager() const;
+        CallbackTaskManager* GetCallbackTaskManager() const;
+        dawn_platform::WorkerTaskPool* GetWorkerTaskPool() const;
+
+        void AddComputePipelineAsyncCallbackTask(Ref<ComputePipelineBase> pipeline,
+                                                 std::string errorMessage,
+                                                 WGPUCreateComputePipelineAsyncCallback callback,
+                                                 void* userdata,
+                                                 size_t blueprintHash);
+
       protected:
         void SetToggle(Toggle toggle, bool isEnabled);
         void ForceSetToggle(Toggle toggle, bool isEnabled);
@@ -332,10 +347,10 @@ namespace dawn_native {
             const ComputePipelineDescriptor* descriptor);
         Ref<ComputePipelineBase> AddOrGetCachedPipeline(Ref<ComputePipelineBase> computePipeline,
                                                         size_t blueprintHash);
-        void CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
-                                            size_t blueprintHash,
-                                            WGPUCreateComputePipelineAsyncCallback callback,
-                                            void* userdata);
+        virtual void CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
+                                                    size_t blueprintHash,
+                                                    WGPUCreateComputePipelineAsyncCallback callback,
+                                                    void* userdata);
 
         void ApplyToggleOverrides(const DeviceDescriptor* deviceDescriptor);
         void ApplyExtensions(const DeviceDescriptor* deviceDescriptor);
@@ -398,7 +413,7 @@ namespace dawn_native {
         Ref<BindGroupLayoutBase> mEmptyBindGroupLayout;
 
         std::unique_ptr<DynamicUploader> mDynamicUploader;
-        std::unique_ptr<CallbackTaskManager> mCallbackTaskManager;
+        std::unique_ptr<AsyncTaskManager> mAsyncTaskManager;
         Ref<QueueBase> mQueue;
 
         struct DeprecationWarnings;
@@ -417,6 +432,9 @@ namespace dawn_native {
         std::unique_ptr<InternalPipelineStore> mInternalPipelineStore;
 
         std::unique_ptr<PersistentCache> mPersistentCache;
+
+        std::unique_ptr<CallbackTaskManager> mCallbackTaskManager;
+        std::unique_ptr<dawn_platform::WorkerTaskPool> mWorkerTaskPool;
     };
 
 }  // namespace dawn_native

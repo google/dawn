@@ -67,7 +67,7 @@ TEST_F(AsyncTaskTest, Basic) {
     dawn_platform::Platform platform;
     std::unique_ptr<dawn_platform::WorkerTaskPool> pool = platform.CreateWorkerTaskPool();
 
-    dawn_native::AsnycTaskManager taskManager(pool.get());
+    dawn_native::AsyncTaskManager taskManager(pool.get());
     ConcurrentTaskResultQueue taskResultQueue;
 
     constexpr size_t kTaskCount = 4u;

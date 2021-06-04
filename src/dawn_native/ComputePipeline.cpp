@@ -56,6 +56,10 @@ namespace dawn_native {
         }
     }
 
+    MaybeError ComputePipelineBase::Initialize(const ComputePipelineDescriptor* descriptor) {
+        return {};
+    }
+
     // static
     ComputePipelineBase* ComputePipelineBase::MakeError(DeviceBase* device) {
         return new ComputePipelineBase(device, ObjectBase::kError);

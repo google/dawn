@@ -29,6 +29,7 @@ namespace dawn_native {
         if (mCache == nullptr) {
             return blob;
         }
+        std::lock_guard<std::mutex> lock(mMutex);
         blob.bufferSize = mCache->LoadData(reinterpret_cast<WGPUDevice>(mDevice), key.data(),
                                            key.size(), nullptr, 0);
         if (blob.bufferSize > 0) {
@@ -48,6 +49,7 @@ namespace dawn_native {
         }
         ASSERT(value != nullptr);
         ASSERT(size > 0);
+        std::lock_guard<std::mutex> lock(mMutex);
         mCache->StoreData(reinterpret_cast<WGPUDevice>(mDevice), key.data(), key.size(), value,
                           size);
     }

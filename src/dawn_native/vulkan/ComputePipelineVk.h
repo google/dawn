@@ -35,7 +35,7 @@ namespace dawn_native { namespace vulkan {
       private:
         ~ComputePipeline() override;
         using ComputePipelineBase::ComputePipelineBase;
-        MaybeError Initialize(const ComputePipelineDescriptor* descriptor);
+        MaybeError Initialize(const ComputePipelineDescriptor* descriptor) override;
 
         VkPipeline mHandle = VK_NULL_HANDLE;
     };

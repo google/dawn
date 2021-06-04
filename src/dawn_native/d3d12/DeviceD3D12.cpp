@@ -363,6 +363,12 @@ namespace dawn_native { namespace d3d12 {
         const TextureViewDescriptor* descriptor) {
         return TextureView::Create(texture, descriptor);
     }
+    void Device::CreateComputePipelineAsyncImpl(const ComputePipelineDescriptor* descriptor,
+                                                size_t blueprintHash,
+                                                WGPUCreateComputePipelineAsyncCallback callback,
+                                                void* userdata) {
+        ComputePipeline::CreateAsync(this, descriptor, blueprintHash, callback, userdata);
+    }
 
     ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
         std::unique_ptr<StagingBufferBase> stagingBuffer =

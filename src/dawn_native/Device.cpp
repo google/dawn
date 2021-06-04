@@ -16,11 +16,11 @@
 
 #include "common/Log.h"
 #include "dawn_native/Adapter.h"
+#include "dawn_native/AsyncTask.h"
 #include "dawn_native/AttachmentState.h"
 #include "dawn_native/BindGroup.h"
 #include "dawn_native/BindGroupLayout.h"
 #include "dawn_native/Buffer.h"
-#include "dawn_native/CallbackTaskManager.h"
 #include "dawn_native/CommandBuffer.h"
 #include "dawn_native/CommandEncoder.h"
 #include "dawn_native/CompilationMessages.h"
@@ -44,6 +44,7 @@
 #include "dawn_native/SwapChain.h"
 #include "dawn_native/Texture.h"
 #include "dawn_native/ValidationUtils_autogen.h"
+#include "dawn_platform/DawnPlatform.h"
 
 #include <unordered_set>
 
@@ -130,6 +131,10 @@ namespace dawn_native {
         mInternalPipelineStore = std::make_unique<InternalPipelineStore>();
         mPersistentCache = std::make_unique<PersistentCache>(this);
 
+        ASSERT(GetPlatform() != nullptr);
+        mWorkerTaskPool = GetPlatform()->CreateWorkerTaskPool();
+        mAsyncTaskManager = std::make_unique<AsyncTaskManager>(mWorkerTaskPool.get());
+
         // Starting from now the backend can start doing reentrant calls so the device is marked as
         // alive.
         mState = State::Alive;
@@ -143,6 +148,8 @@ namespace dawn_native {
         // Skip handling device facilities if they haven't even been created (or failed doing so)
         if (mState != State::BeingCreated) {
             // Call all the callbacks immediately as the device is about to shut down.
+            // TODO(crbug.com/dawn/826): Cancel the tasks that are in flight if possible.
+            mAsyncTaskManager->WaitAllPendingTasks();
             auto callbackTasks = mCallbackTaskManager->AcquireCallbackTasks();
             for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
                 callbackTask->HandleShutDown();
@@ -192,6 +199,7 @@ namespace dawn_native {
 
         mDynamicUploader = nullptr;
         mCallbackTaskManager = nullptr;
+        mAsyncTaskManager = nullptr;
         mPersistentCache = nullptr;
 
         mEmptyBindGroupLayout = nullptr;
@@ -241,6 +249,9 @@ namespace dawn_native {
             }
 
             mQueue->HandleDeviceLoss();
+
+            // TODO(crbug.com/dawn/826): Cancel the tasks that are in flight if possible.
+            mAsyncTaskManager->WaitAllPendingTasks();
             auto callbackTasks = mCallbackTaskManager->AcquireCallbackTasks();
             for (std::unique_ptr<CallbackTask>& callbackTask : callbackTasks) {
                 callbackTask->HandleDeviceLoss();
@@ -393,6 +404,10 @@ namespace dawn_native {
     }
 
     bool DeviceBase::IsDeviceIdle() {
+        if (mAsyncTaskManager->HasPendingTasks()) {
+            return false;
+        }
+
         ExecutionSerial maxSerial = std::max(mLastSubmittedSerial, mFutureSerial);
         if (mCompletedSerial == maxSerial) {
             return true;
@@ -1269,6 +1284,62 @@ namespace dawn_native {
                 mOverridenToggles.Set(toggle, true);
             }
         }
+    }
+
+    AsyncTaskManager* DeviceBase::GetAsyncTaskManager() const {
+        return mAsyncTaskManager.get();
+    }
+
+    CallbackTaskManager* DeviceBase::GetCallbackTaskManager() const {
+        return mCallbackTaskManager.get();
+    }
+
+    dawn_platform::WorkerTaskPool* DeviceBase::GetWorkerTaskPool() const {
+        return mWorkerTaskPool.get();
+    }
+
+    void DeviceBase::AddComputePipelineAsyncCallbackTask(
+        Ref<ComputePipelineBase> pipeline,
+        std::string errorMessage,
+        WGPUCreateComputePipelineAsyncCallback callback,
+        void* userdata,
+        size_t blueprintHash) {
+        // CreateComputePipelineAsyncWaitableCallbackTask is declared as an internal class as it
+        // needs to call the private member function DeviceBase::AddOrGetCachedPipeline().
+        struct CreateComputePipelineAsyncWaitableCallbackTask final
+            : CreateComputePipelineAsyncCallbackTask {
+            CreateComputePipelineAsyncWaitableCallbackTask(
+                Ref<ComputePipelineBase> pipeline,
+                std::string errorMessage,
+                WGPUCreateComputePipelineAsyncCallback callback,
+                void* userdata,
+                size_t blueprintHash)
+                : CreateComputePipelineAsyncCallbackTask(std::move(pipeline),
+                                                         errorMessage,
+                                                         callback,
+                                                         userdata),
+                  mBlueprintHash(blueprintHash) {
+            }
+
+            void Finish() final {
+                // TODO(jiawei.shao@intel.com): call AddOrGetCachedPipeline() asynchronously in
+                // CreateComputePipelineAsyncTaskImpl::Run() when the front-end pipeline cache is
+                // thread-safe.
+                if (mPipeline.Get() != nullptr) {
+                    mPipeline =
+                        mPipeline->GetDevice()->AddOrGetCachedPipeline(mPipeline, mBlueprintHash);
+                }
+
+                CreateComputePipelineAsyncCallbackTask::Finish();
+            }
+
+          private:
+            size_t mBlueprintHash;
+        };
+
+        mCallbackTaskManager->AddCallbackTask(
+            std::make_unique<CreateComputePipelineAsyncWaitableCallbackTask>(
+                std::move(pipeline), errorMessage, callback, userdata, blueprintHash));
     }
 
 }  // namespace dawn_native

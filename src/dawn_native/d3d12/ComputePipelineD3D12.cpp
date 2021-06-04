@@ -14,7 +14,8 @@
 
 #include "dawn_native/d3d12/ComputePipelineD3D12.h"
 
-#include "common/Assert.h"
+#include "dawn_native/AsyncTask.h"
+#include "dawn_native/CreatePipelineAsyncTask.h"
 #include "dawn_native/d3d12/D3D12Error.h"
 #include "dawn_native/d3d12/DeviceD3D12.h"
 #include "dawn_native/d3d12/PipelineLayoutD3D12.h"
@@ -66,6 +67,18 @@ namespace dawn_native { namespace d3d12 {
 
     ID3D12PipelineState* ComputePipeline::GetPipelineState() const {
         return mPipelineState.Get();
+    }
+
+    void ComputePipeline::CreateAsync(Device* device,
+                                      const ComputePipelineDescriptor* descriptor,
+                                      size_t blueprintHash,
+                                      WGPUCreateComputePipelineAsyncCallback callback,
+                                      void* userdata) {
+        Ref<ComputePipeline> pipeline = AcquireRef(new ComputePipeline(device, descriptor));
+        std::unique_ptr<CreateComputePipelineAsyncTask> asyncTask =
+            std::make_unique<CreateComputePipelineAsyncTask>(pipeline, descriptor, blueprintHash,
+                                                             callback, userdata);
+        CreateComputePipelineAsyncTask::RunAsync(std::move(asyncTask));
     }
 
 }}  // namespace dawn_native::d3d12
